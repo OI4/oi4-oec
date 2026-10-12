@@ -27,4 +27,4 @@ The SDK is layered so that further languages can be added later without rework:
 - The C ABI must be designed for foreign use from the start: opaque handles, plain structs, UTF-8 strings/JSON buffers, explicit free functions, callbacks with user-data pointers, no async or Rust types in the ABI.
 - The async runtime of the `oec` runtime must not leak into the C API (C API = blocking calls + callbacks, background thread owned by the SDK).
 - Exact crate choices (MQTT client, TLS, JSON Schema) are decided in P3/P4 under G-3.4/G-4.4.
-- The conformance tool language (D7) is not decided by this ADR (Q-012).
+- The conformance tool (D7) is written in Go (ADR-0013).
