@@ -1,0 +1,24 @@
+# Separate git repositories (not part of this local repo, ADR-0012)
+/legacy/
+/oi4-oec-documentation/
+
+# IDE
+/.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build output / dependencies
+target/
+node_modules/
+dist/
+build/
+.docusaurus/
+*.log
+
+# Secrets / dev PKI never committed (G-4.5)
+*.key
+*.p12
+.env
