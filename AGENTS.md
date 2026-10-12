@@ -1,0 +1,20 @@
+# AGENTS.md – Entry point for humans and AI agents
+
+This workspace builds **OI4 Open Edge Computing (OEC) v2.0** artifacts from scratch:
+JSON Schema, developer SDK/library, two demo services (weather, logger), an OEC Registry, a cross-platform conformance test CLI and a Docusaurus documentation.
+
+**Before doing anything, read in this order:**
+
+1. [`project/README.md`](project/README.md) – how this project is organized and how we work (cycles, logging)
+2. [`project/GUARDRAILS.md`](project/GUARDRAILS.md) – non-negotiable rules
+3. [`project/STATUS.md`](project/STATUS.md) – where we are right now and what is next
+4. [`project/ROADMAP.md`](project/ROADMAP.md) – phases, deliverables, exit criteria
+5. [`project/OPEN-QUESTIONS.md`](project/OPEN-QUESTIONS.md) – decisions still pending with the product owner
+6. The latest file in [`project/log/`](project/log/) – what happened last and why
+
+Quick facts:
+
+- Source of truth for the protocol: `oi4-oec-documentation/docs/guideline/` (see ADR-0001).
+- All deployables live in the monorepo folder `oec/` (ADR-0012). The workspace root is a local git repo – commit every change individually, never push (ADR-0009/0012).
+- `legacy/` is history only. Do not modify, do not copy code from it (see GUARDRAILS G-1.3).
+- Communication with the product owner: German. All project artifacts (logs, plans, code, docs): English.
