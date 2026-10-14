@@ -1,16 +1,18 @@
 # Status
 
-_Last updated: 2026-10-14, cycle C-011_
+_Last updated: 2026-10-14, cycle C-012_
 
 ## Current phase
 
-**P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
+**P1 – Spec baseline (planning done, awaiting PO confirmation)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+
+Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
 C-006 re-baselined all project artifacts on guideline `5f070bb` (guideline ADRs GL-ADR-001 … 011 implemented; guideline split into MG + RIG). All project decisions remain valid; ADR-0001/0005/0006/0011 amended.
 
 C-007 decided Q-013–Q-015: second tool D8 for infrastructure compliance (ADR-0014), v2 only (ADR-0015), level targets + micro SDK D9 (ADR-0016).
 
-C-008 re-baselined on guideline `7bead4c` (PO resolved all spec findings SF-001 … 031; new GL-ADR-012 only `NewDataSetWriterId` as common service, GL-ADR-013 NodeIds as JSON strings). No project decision changed; ADR-0001/0006/0008/0014 amended. **No open spec findings.**
+C-008 re-baselined on guideline `7bead4c` (PO resolved all spec findings SF-001 … 031; new GL-ADR-012 only `NewDataSetWriterId` as common service, GL-ADR-013 NodeIds as JSON strings). No project decision changed; ADR-0001/0006/0008/0014 amended. No open spec findings at that point (new since C-012: SF-032 … 034).
 
 C-009: micro SDK D9 in C17 with ESP32/ESP-IDF as reference (ADR-0017, Q-016); D8 scope incl. platform checks confirmed (Q-017).
 
@@ -18,12 +20,15 @@ C-010: C vs Rust for the micro SDK re-assessed – C17 confirmed as recommendati
 
 C-011: M5Stack added to the micro SDK (`esp32s3` now supported, M5Stack Core2/CoreS3 as second reference device, M5Stack example firmware; ADR-0017 amendment).
 
+C-012: P1 plan written – catalog `REQ-<AREA>-NNN` as YAML in a new `oec/spec/` folder with per-level obligations, "Level 1 first" area order (C-013 … C-022), ABNF + regex topic grammar, Method × Resource matrix in YAML, curated Appendix B golden vectors. New findings SF-032 (normative keywords), SF-033 (immature chapters/specific services), SF-034 (external "Requirements for Interoperability" doc); new question Q-018 (catalog format/location). **PO was not available – nothing confirmed yet, no catalog content written.**
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **C-012 – plan P1:** write the P1 plan into the C-012 log. It covers the structure and format of the requirements catalog (`REQ-<area>-NNN` with guideline reference, MUST/SHOULD/MAY, domain, level, testability), its file location, the order of the areas, the topic-grammar approach and the Method × Resource matrix. Present the plan to the PO (in German) and get it confirmed before writing the catalog.
-2. Then execute P1 in small cycles (one or a few areas per cycle).
+1. **Get the PO's confirmation of the P1 plan** (C-012 log §6 and "Follow-ups"): ask one question at a time via `ask_user`, with options and a recommendation – (1) overall plan/order, (2) Q-018 format + location, (3) SF-032, (4) SF-033, (5) SF-034, (6) golden-example curation. **Do not write catalog content before the plan is confirmed.**
+2. After the answers: ADR-0018 (catalog format/location, `oec/spec/` as shared contract; amends ADR-0006/0012, G-4.12, `oec/README.md`, `project/README.md`), ROADMAP P1 update (areas, cycle cut), SF-032 … 034 → decided.
+3. Then **C-013**: `oec/spec/` skeleton, catalog JSON Schema, lint/render tool, normative-sentence inventory of MG + RIG, area `CMP`. Further cycles per the C-012 plan.
 
 ## Deliverables
 
@@ -53,7 +58,8 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-None. Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
+- Q-018 (catalog format/location) and SF-032 … 034 block the start of the catalog (C-013).
+- Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
 
@@ -74,3 +80,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-009 | 2026-10-14 | Micro SDK in C / ESP32 (Q-016); D8 scope confirmed (Q-017) | `log/2026-10-14_C-009_micro-sdk-c-esp32.md` |
 | C-010 | 2026-10-14 | Micro SDK C vs Rust assessment, Arduino port; Q-011 working assumption | `log/2026-10-14_C-010_micro-sdk-assessment-q011.md` |
 | C-011 | 2026-10-14 | M5Stack support in the micro SDK | `log/2026-10-14_C-011_m5stack.md` |
+| C-012 | 2026-10-14 | P1 plan (catalog format, area order, topic grammar, matrix, golden examples); SF-032 … 034, Q-018 | `log/2026-10-14_C-012_p1-plan.md` |
