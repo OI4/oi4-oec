@@ -25,3 +25,13 @@ Two copies of the OEC Development Guideline exist in the workspace:
 
 - Confluence export as source – rejected: older, lacks MS-010.
 - Both sources with case-by-case decision – rejected: unnecessary ambiguity.
+
+## Amendment C-006 (2026-10-14, guideline baseline `5f070bb`)
+
+The guideline was split (GL-ADR-011) and all guideline ADRs (GL-ADR-001 … 011, `oi4-oec-documentation/rfcs_adrs/`, formerly "MS-0xx" RFCs) were implemented. The source of truth is now:
+
+- **OEC Messaging Guideline** – `oi4-oec-documentation/docs/guideline/` (cited "MG x.y")
+- **OEC Runtime & Infrastructure Guideline** – `oi4-oec-documentation/docs/infrastructure-guideline/` (cited "RIG x.y")
+- **Guideline ADRs** – `oi4-oec-documentation/rfcs_adrs/ADR-0xx_*.md` (cited "GL-ADR-0xx"); their *Implementation Notes* are binding interpretations.
+
+To avoid confusion with our own project ADRs (`ADR-NNNN`), guideline ADRs are always prefixed `GL-`.

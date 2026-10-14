@@ -4,6 +4,7 @@
 - Date: 2026-10-12
 - Deciders: product owner (Thomas), C-002
 - Related: SF-007, Q-003
+- Confirmed upstream: GL-ADR-008 removed all these items from the guideline; GL-ADR-002 replaces license resources by an SBOM in `/opt/oi4/licenses` (C-006, baseline `5f070bb`)
 
 ## Context
 

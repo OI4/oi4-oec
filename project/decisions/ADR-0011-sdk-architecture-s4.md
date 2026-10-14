@@ -28,3 +28,11 @@ The SDK is layered so that further languages can be added later without rework:
 - The async runtime of the `oec` runtime must not leak into the C API (C API = blocking calls + callbacks, background thread owned by the SDK).
 - Exact crate choices (MQTT client, TLS, JSON Schema) are decided in P3/P4 under G-3.4/G-4.4.
 - The conformance tool (D7) is written in Go (ADR-0013).
+
+## Amendment C-006 (guideline baseline `5f070bb`)
+
+The guideline changes (GL-ADR-001 … 011) do not change the decision, they strengthen it:
+
+- **Compliance levels (GL-ADR-009):** Level 1 targets resource-constrained **smart devices** that are not containers. The C API is the natural path for them. Therefore the SDK must work **without the container storage contract** (explicit configuration of broker, credentials and identity) and must let the developer choose the compliance level (L1 = Pub MAM/Health + Birth/Will; L2/L3 enable Get/Set and the other resources). Bootstrap from `/etc/oi4` is an optional convenience for containerized apps.
+- **OPC UA 1.05.04 alignment (GL-ADR-004/005/006/007):** fixed content masks, `ReplyTo`, `DataSetWriterName`/`WriterGroupName` and Actions are pure protocol logic in `oec-core`; the public API should hide them completely.
+- Whether a `no_std`/small-footprint build of `oec-core` for microcontroller-class devices is needed is an open question (Q-015).
