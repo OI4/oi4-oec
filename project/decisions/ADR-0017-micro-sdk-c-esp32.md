@@ -75,3 +75,17 @@ Rust stays the better choice for D2 (container apps), where its strengths count 
 - Fuzzing of the topic and JSON parsers.
 
 **Arduino:** In addition to the ESP-IDF reference port, the core is also packaged as an **Arduino library** with an Arduino port of the PAL (Arduino-ESP32 core, which is based on ESP-IDF). This is planned in P4b, best effort after the ESP-IDF port. The core must therefore stay compatible with the Arduino build (no CMake-only features in the core, C17 subset supported by the Arduino ESP32 toolchain). Boards without TLS-capable hardware or memory (e.g. AVR) are out of scope, because TLS is mandatory at every level.
+
+## Amendment C-011 – M5Stack
+
+The PO asked to include **M5Stack** devices. M5Stack controllers use the ESP32 family:
+- Core/Core2: ESP32
+- CoreS3 and AtomS3: ESP32-S3
+
+They are programmed with Arduino (library `M5Unified`, MIT), ESP-IDF or UIFlow/MicroPython. The architecture therefore does not change. Changes:
+
+- **Supported targets:** ESP-IDF targets **`esp32` and `esp32s3`** are now both *supported* (CI build + host tests). Previously `esp32s3` was best effort. C3/C6 remain best effort.
+- **Reference hardware:** generic ESP32 dev board (e.g. ESP32-DevKitC) **plus an M5Stack device** as a second reference: M5Stack **Core2** (ESP32) or **CoreS3** (ESP32-S3), whichever is available to the PO.
+- **Example firmware for M5Stack** in addition to the generic example. It uses the display and buttons via `M5Unified`, e.g. to show the Identification Link, connection state and Health, or to switch Health with a button. This is part of the **example only**: the SDK core and the PALs do not depend on `M5Unified`.
+- **Ports:** the Arduino port (best effort, see C-010) covers M5Stack directly. The ESP-IDF port covers M5Stack too, since it is plain ESP32/ESP32-S3.
+- **Out of scope:** UIFlow/MicroPython bindings.

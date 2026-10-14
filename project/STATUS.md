@@ -1,6 +1,6 @@
 # Status
 
-_Last updated: 2026-10-14, cycle C-010_
+_Last updated: 2026-10-14, cycle C-011_
 
 ## Current phase
 
@@ -15,6 +15,8 @@ C-008 re-baselined on guideline `7bead4c` (PO resolved all spec findings SF-001 
 C-009: micro SDK D9 in C17 with ESP32/ESP-IDF as reference (ADR-0017, Q-016); D8 scope incl. platform checks confirmed (Q-017).
 
 C-010: C vs Rust for the micro SDK re-assessed – C17 confirmed as recommendation, Arduino library added as second port (ADR-0017 amendment). Q-011 parked with working assumption: private GitHub repos, no public availability.
+
+C-011: M5Stack added to the micro SDK (`esp32s3` now supported, M5Stack Core2/CoreS3 as second reference device, M5Stack example firmware; ADR-0017 amendment).
 
 ## Next step
 
@@ -33,7 +35,7 @@ C-010: C vs Rust for the micro SDK re-assessed – C17 confirmed as recommendati
 | D6 | Docusaurus docs | not started – new standalone site in `oec/docs` (ADR-0012) |
 | D7 | Application compliance tool (CLI) | not started – Go (ADR-0013), Messaging L1–L3 of apps/devices, shares only schemas; location `oec/conformance` |
 | D8 | Infrastructure compliance tool (CLI) | not started – Go, Service Container + platform (ADR-0014); location `oec/conformance` |
-| D9 | Micro SDK | not started – C17, reference ESP32/ESP-IDF, Messaging L1 (ADR-0016/0017); location `oec/sdk/micro` |
+| D9 | Micro SDK | not started – C17, ESP-IDF (`esp32`, `esp32s3`) + Arduino, reference ESP32 dev board + M5Stack, Messaging L1 (ADR-0016/0017); location `oec/sdk/micro` |
 
 ## Baselines
 
@@ -62,3 +64,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-008 | 2026-10-14 | Re-baseline on guideline `7bead4c` (all SF resolved, GL-ADR-012/013) | `log/2026-10-14_C-008_rebaseline-findings-resolved.md` |
 | C-009 | 2026-10-14 | Micro SDK in C / ESP32 (Q-016); D8 scope confirmed (Q-017) | `log/2026-10-14_C-009_micro-sdk-c-esp32.md` |
 | C-010 | 2026-10-14 | Micro SDK C vs Rust assessment, Arduino port; Q-011 working assumption | `log/2026-10-14_C-010_micro-sdk-assessment-q011.md` |
+| C-011 | 2026-10-14 | M5Stack support in the micro SDK | `log/2026-10-14_C-011_m5stack.md` |

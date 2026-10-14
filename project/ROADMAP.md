@@ -77,7 +77,8 @@ SDK for microcontroller-class smart devices without container (ADR-0016), writte
 - Scope: Messaging **L1** (Birth/Will, Pub MAM + Health, TLS + auth, topic and payload format); L2 (Get, Set where applicable) if the footprint allows.
 - Explicit configuration (no `/etc/oi4`), static memory where possible, documented RAM/flash footprint.
 - Example firmware for the reference board.
-- **Exit:** example firmware on the ESP32 reference board (and in QEMU, if feasible) passes D7 `--level 1` against the dev broker.
+- Targets: ESP-IDF `esp32` + `esp32s3` supported, C3/C6 best effort; reference hardware: ESP32 dev board + M5Stack Core2/CoreS3. Example firmware generic + M5Stack variant (display/buttons via `M5Unified`, example only) (ADR-0017 amendment C-011).
+- **Exit:** example firmware on the ESP32 reference board and on the M5Stack device (and in QEMU, if feasible) passes D7 `--level 1` against the dev broker.
 
 ## P5 – Conformance test tool (D7)
 
@@ -136,7 +137,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 ## P9 – Hardening & release
 
-- CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF build for `esp32`), SBOM/license report, security scan.
+- CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF builds for `esp32` + `esp32s3`), SBOM/license report, security scan.
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
 - Publication target: private GitHub repositories (working assumption, Q-011). CRA review before any *public* release (Q-011): SBOM, vulnerability handling process, security update policy, support period.
 - Guideline feedback package: all spec findings with proposed text changes for the work group.
