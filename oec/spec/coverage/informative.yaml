@@ -1,0 +1,4 @@
+# Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
+# Each entry names the reason under MG 1.2 why the statement is no requirement.
+baseline: 49b6fe2
+items: []

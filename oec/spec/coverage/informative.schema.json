@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oi4:oec:v2:spec:informative",
+  "title": "OEC v2 coverage – inventory items classified as informative",
+  "description": "Format of oec/spec/coverage/informative.yaml (ADR-0018): inventory items that do not lead to a requirement, with the reason (MG 1.2).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["baseline", "items"],
+  "properties": {
+    "baseline": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "reason"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^(MG|RIG)-[A-Za-z0-9.-]+-[0-9a-f]{8}$" },
+          "reason": { "type": "string", "minLength": 10 }
+        }
+      }
+    }
+  }
+}
