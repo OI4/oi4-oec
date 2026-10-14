@@ -25,19 +25,19 @@ P4 and P5 can run in parallel once P3 is decided; demos (P6) and registry (P7) a
 
 Turn the prose guideline into a precise, testable baseline – the foundation for schema, SDK and conformity checks.
 
-- Requirements catalog `REQ-<area>-NNN` (areas: IL, TOP, MQTT, CNT, MSG, RES-<resource>, ACT (Actions), LIFE, PAG) covering **both** guideline documents (MG + RIG) with guideline reference, normative level (MUST/SHOULD/MAY), **compliance domain (Messaging / Service Container) and level (L1/L2/L3)** and testability (`schema` = D1, `conformance` = D7 live test, `manual`).
-- Topic grammar as formal definition (ABNF + regex) per Method × Resource combination (which `Source`/`Filter` levels are required/allowed/forbidden), incl. percent-encoding of `+ # / %` within a `Filter` level (MG 8.1.7) and Status event levels `Good|Uncertain|Bad`.
+- Requirements catalog `REQ-<area>-NNN` (areas: IL, TOP, MQTT, CNT, MSG, RES-<resource>, ACT (Actions), LIFE, PAG) covering **both** guideline documents (MG + RIG) with guideline reference, normative keyword per MG 1.2 (MUST/SHOULD/MAY and negations, G-1.6), **compliance domain (Messaging / Service Container) and level (L1/L2/L3)** and testability (`schema` = D1, `D7` = messaging live test, `D8` = container check, `manual`). Plan: C-012 log, updated by C-013 (no specific services after GL-ADR-014).
+- Topic grammar as formal definition (ABNF + regex) per Method × Resource combination (which `Source`/`Filter` levels are required/allowed/forbidden), incl. percent-encoding of `+ # / %` within a `Filter` level (MG 7.1.7) and Status event levels `Good|Uncertain|Bad`.
 - Method × Resource matrix (Pub/Get/Set/Del/Call/Reply) incl. payload expectations (e.g. `Get` = empty `Messages` or only Pagination/Locale).
 - Review and extend `SPEC-FINDINGS.md`; propose interpretations; get decisions from product owner / work group.
 - Golden examples: all Appendix B examples, corrected where needed, as the first test vectors.
-- Guideline ADRs (GL-ADR-001 … 013) and their implementation notes are part of the baseline (G-1.1).
-- **Exit:** catalog + matrix reviewed; all blocking spec findings have a decided interpretation (at `7bead4c` all SF-001 … 031 are resolved – new findings from the catalog work go to SF-032 ff.).
+- Guideline ADRs (GL-ADR-001 … 016) and their implementation notes are part of the baseline (G-1.1). The OEC Process Description (GL-ADR-015) is informative and not catalogued.
+- **Exit:** catalog + matrix reviewed; all blocking spec findings have a decided interpretation (at `49b6fe2` SF-001 … 034 are resolved; SF-035 (keyword-less behavior) and SF-036 (closed resource/service set) are open – new findings go to SF-037 ff.).
 
 ## P2 – JSON Schema (D1)
 
 - Decide schema architecture (ADR): JSON Schema 2020-12; modular `$defs` (OPC UA base types, envelopes, OI4 resources, services); discriminating by `DataSetClassId`/`MessageType`; strict `unevaluatedProperties: false` for OI4-defined objects.
 - **Topic-aware validation:** payload rules depend on the topic (e.g. `Get` vs `Pub`, `Set` needs single message). Define a "message = topic + payload" validation model (schema + small rule layer, or schema per topic pattern) – decided in ADR.
-- Coverage (OPC UA 1.05.04 JSON with the fixed content masks of MG 9.1.4): NetworkMessage (`ua-data`, `ReplyTo`), DataSetMessage (`DataSetWriterName`, `WriterGroupName`, `Status` object, `MetaDataVersion` xor `MinorVersion`, `MessageType`), DataSetMetaData (`ua-metadata`, + FieldMetaData, StructureDescription, EnumDescription, ...), Actions (`ua-action-request`/`ua-action-response`, ActionRequest/ActionResponse/ActionMetaData/ActionState), all resources (MAM, Health incl. `Details[]`, Config Pub/Set, Data/Oi4Pv, Metadata, Event (Status/Syslog/Generic), Profile, PublicationList, SubscriptionList, ReferenceDesignation, Pagination, PaginationRequest, Locale), the only common-service Action `NewDataSetWriterId` (GL-ADR-012), `broker.json`. NodeIds as JSON strings (`i=`/`nsu=`, no `ns=`, GL-ADR-013); `LocaleId` regex; `DataSetWriterId` ≠ 0; helper DataSets (reserved DSWIDs 1–3) with their `WriterGroupName`.
+- Coverage (OPC UA 1.05.04 JSON with the fixed content masks of MG 8.1.4): NetworkMessage (`ua-data`, `ReplyTo`), DataSetMessage (`DataSetWriterName`, `WriterGroupName`, `Status` object, `MetaDataVersion` xor `MinorVersion`, `MessageType`), DataSetMetaData (`ua-metadata`, + FieldMetaData, StructureDescription, EnumDescription, ...), Actions (`ua-action-request`/`ua-action-response`, ActionRequest/ActionResponse/ActionMetaData/ActionState), all resources (MAM, Health incl. `Details[]`, Config Pub/Set, Data/Oi4Pv, Metadata, Event (Status/Syslog/Generic), Profile, PublicationList, SubscriptionList, ReferenceDesignation, Pagination, PaginationRequest, Locale), the only common-service Action `NewDataSetWriterId` (GL-ADR-012), `broker.json`. NodeIds as JSON strings (`i=`/`nsu=`, no `ns=`, GL-ADR-013); `LocaleId` regex; `DataSetWriterId` ≠ 0; helper DataSets (reserved DSWIDs 1–3) with their `WriterGroupName`.
 - Test suite: valid/invalid vectors per rule (language-neutral JSON files), CI-run with at least two independent 2020-12 validators.
 - First increment of D7: offline `validate` command (topic + payload from file/stdin/directory), see P5.
 - **Exit:** every REQ marked "schema-testable" is covered by a positive and negative vector; schemas published with stable `$id`s.
@@ -88,7 +88,7 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 - `monitor` – passive: connect to a broker, observe all `Oi4v2/#` traffic, validate every message live, summarize per participant.
 - `test` – active: test one application under test (by AppId/IL or discovery), e.g.
   - lifecycle: Birth (MAM), Health on start + every 60 s, Close/Will behavior;
-  - mandatory resources/methods per level (MG 8.2) answer `Get` correctly, with `ReplyTo`;
+  - mandatory resources/methods per level (MG 7.2) answer `Get` correctly, with `ReplyTo`;
   - Profile consistency (announced resources actually answer), PublicationList consistency;
   - Data ⇒ Metadata; `Set`/`Del` ⇒ Status event with `ReplyTo`; `NewDataSetWriterId` Action (`Call`/`Reply`) correlation;
   - pagination/`MaxPacketSize`, Locale;
@@ -121,7 +121,7 @@ Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance 
 Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other participants.
 
 
-- Discovery: listens to `Pub/MAM`, `Pub/Health`, `Pub/Profile`, `Pub/Event` (+ others as decided); actively queries new participants after Birth (`Get/MAM`, `Get/Profile`, `Get/PublicationList`, ...); handles Will/Close (availability: Close = offline graceful, Will = offline ungraceful, Birth = online, MG 7.3.4/7.3.5).
+- Discovery: listens to `Pub/MAM`, `Pub/Health`, `Pub/Profile`, `Pub/Event` (+ others as decided); actively queries new participants after Birth (`Get/MAM`, `Get/Profile`, `Get/PublicationList`, ...); handles Will/Close (availability: Close = offline graceful, Will = offline ungraceful, Birth = online, MG 6.3.4/6.3.5).
 - Provides own Registry services per MG A1 (`Oi4v2/Registry/<AppId>/Get/MAM[/<Source>]`, `Get/Health[/<Source>]`).
 - Model: applications vs. devices (assets) incl. "published by" relation, supported resources/methods, **observed (informative) Messaging compliance level** derived from `Profile` + `Get` answers (MG 1.3, A1), health incl. `Details[]` and history, last seen, event/audit trail; v2 only, v1 traffic ignored (ADR-0015). Target: Messaging + Service Container L3 (ADR-0016).
 - Conformity view: validation of observed traffic per participant (reuses D1 and the D7 rule engine where sensible).
