@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-14, cycle C-012_
+_Last updated: 2026-10-14, cycle C-013_
 
 ## Current phase
 
-**P1 – Spec baseline (planning done, awaiting PO confirmation)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (planning done, awaiting PO confirmation)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -22,13 +22,15 @@ C-011: M5Stack added to the micro SDK (`esp32s3` now supported, M5Stack Core2/Co
 
 C-012: P1 plan written – catalog `REQ-<AREA>-NNN` as YAML in a new `oec/spec/` folder with per-level obligations, "Level 1 first" area order (C-013 … C-022), ABNF + regex topic grammar, Method × Resource matrix in YAML, curated Appendix B golden vectors. New findings SF-032 (normative keywords), SF-033 (immature chapters/specific services), SF-034 (external "Requirements for Interoperability" doc); new question Q-018 (catalog format/location). **PO was not available – nothing confirmed yet, no catalog content written.**
 
+C-013: re-baselined on guideline `49b6fe2` – PO resolved SF-032 (MG 1.2 normative keywords, BCP 14; keyword-less statements are informative), SF-033 (GL-ADR-014 removes the specific services, GL-ADR-015 moves former MG 6 to the informative OEC Process Description and renumbers MG 7–10 → 6–9) and SF-034 (no external document); GL-ADR-016 removes the empty AAS chapter. GUARDRAILS (new G-1.6 keywords), digest, ROADMAP, ADR-0001 (amendment), AGENTS.md updated; living documents use the new MG numbers, historical ADRs/logs keep the old ones. New findings **SF-035** (protocol behavior without keyword, e.g. Health 60 s heartbeat, Status event after Set/Del) and **SF-036** (closed vs. open set of resources/services). P1 plan: decisions 3–5 settled, area `SVC` and field `maturity` dropped, `ACT` folded into the `MSG` cycle, cycle cut C-014 … C-022.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **Get the PO's confirmation of the P1 plan** (C-012 log §6 and "Follow-ups"): ask one question at a time via `ask_user`, with options and a recommendation – (1) overall plan/order, (2) Q-018 format + location, (3) SF-032, (4) SF-033, (5) SF-034, (6) golden-example curation. **Do not write catalog content before the plan is confirmed.**
-2. After the answers: ADR-0018 (catalog format/location, `oec/spec/` as shared contract; amends ADR-0006/0012, G-4.12, `oec/README.md`, `project/README.md`), ROADMAP P1 update (areas, cycle cut), SF-032 … 034 → decided.
-3. Then **C-013**: `oec/spec/` skeleton, catalog JSON Schema, lint/render tool, normative-sentence inventory of MG + RIG, area `CMP`. Further cycles per the C-012 plan.
+1. **Get the PO's confirmation of the P1 plan** (C-012 log §1–5 as updated by the C-013 log "Impact on the C-012 P1 plan"): ask one question at a time via `ask_user`, with options and a recommendation – (1) overall plan/order/cycle cut C-014 … C-022, (2) Q-018 format + location, (3) golden-example curation, (4) SF-035, (5) SF-036. **Do not write catalog content before the plan is confirmed.**
+2. After the answers: ADR-0018 (catalog format/location, `oec/spec/` as shared contract; amends ADR-0006/0012, G-4.12, `oec/README.md`, `project/README.md`), ROADMAP P1 update (areas, cycle cut), SF-035/036 → decided (or resolved in the guideline).
+3. Then **C-014**: `oec/spec/` skeleton, catalog JSON Schema, lint/render tool, normative-sentence inventory of MG + RIG, area `CMP`. Further cycles per the C-012 plan as updated in C-013.
 
 ## Deliverables
 
@@ -46,7 +48,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `7bead4c`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 013, SF-001 … 031 resolved); previous `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `49b6fe2`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 016, SF-001 … 034 resolved, SF-035/036 open; OEC Process Description informative); previous `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -58,7 +60,8 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- Q-018 (catalog format/location) and SF-032 … 034 block the start of the catalog (C-013).
+- Q-018 (catalog format/location) and the P1 plan confirmation block the start of the catalog (C-014).
+- SF-035 (keyword-less behavior) and SF-036 (closed resource set) block the affected REQ entries and the `<Resource>` production of the topic grammar; interim rule for SF-035 in G-1.6.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -81,3 +84,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-010 | 2026-10-14 | Micro SDK C vs Rust assessment, Arduino port; Q-011 working assumption | `log/2026-10-14_C-010_micro-sdk-assessment-q011.md` |
 | C-011 | 2026-10-14 | M5Stack support in the micro SDK | `log/2026-10-14_C-011_m5stack.md` |
 | C-012 | 2026-10-14 | P1 plan (catalog format, area order, topic grammar, matrix, golden examples); SF-032 … 034, Q-018 | `log/2026-10-14_C-012_p1-plan.md` |
+| C-013 | 2026-10-14 | Re-baseline on guideline `49b6fe2` (SF-032 … 034 resolved, GL-ADR-014 … 016, MG renumbering); SF-035/036; P1 plan updated | `log/2026-10-14_C-013_rebaseline-49b6fe2.md` |
