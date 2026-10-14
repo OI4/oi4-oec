@@ -46,3 +46,8 @@ SF-025 is resolved (MG 1.3):
 D7 therefore takes the declared level as the CLI option `--level 1|2|3`; this is now normative, not a workaround. `level3` includes the `level1` and `level2` tests.
 
 The active tests no longer cover FileUpload, FileDownload, FirmwareUpdate or Blink, because GL-ADR-012 removed them. The only common-service Action that D7 tests is `NewDataSetWriterId`.
+
+## Amendment C-013 (ADR-0018)
+
+- The independence rule is extended: D7 (and D8) share the D1 JSON Schemas **and the spec baseline `oec/spec/`** (REQ catalog, topic grammar, Method × Resource matrix, guideline-derived test vectors) with the SDKs. Both are derived only from the guideline, never from SDK code. Sharing code stays forbidden.
+- D7 test cases reference REQ ids from `oec/spec/requirements/`; D7 may keep additional own fixtures, but the golden vectors in `oec/spec/vectors/` are the common positive baseline.

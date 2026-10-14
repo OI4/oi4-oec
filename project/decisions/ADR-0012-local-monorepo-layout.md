@@ -26,3 +26,8 @@
 ## Amendment C-010 (Q-011 working assumption)
 
 The future publication target is **private GitHub repositories**, not public availability on the internet. Until the PO gives the go, the repository stays local (no remote, nothing pushed). The CRA review (Q-011) is only needed before a public release.
+
+## Amendment C-013 (ADR-0018)
+
+- New folder `oec/spec/` for the machine-readable spec baseline (REQ catalog in YAML, topic grammar, Method × Resource matrix, test vectors, Go tools). It is created in the first P1 execution cycle.
+- `oec/spec/` must not depend on `sdk/` or `conformance/`; `conformance/` and the SDKs may read its data files.

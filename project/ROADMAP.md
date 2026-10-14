@@ -82,7 +82,7 @@ SDK for microcontroller-class smart devices without container (ADR-0016), writte
 
 ## P5 – Conformance test tool (D7)
 
-Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of applications and smart devices against the guideline (no platform/broker/container checks – those are D8, ADR-0006/0014). Shares only the D1 JSON Schemas with the SDK, no code. Runs on **Windows and macOS** (and Linux for CI) and doubles as the **integration test harness** for SDK, demos and registry.
+Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of applications and smart devices against the guideline (no platform/broker/container checks – those are D8, ADR-0006/0014). Shares only the D1 JSON Schemas and the spec baseline `oec/spec/` (ADR-0018) with the SDK, no code. Runs on **Windows and macOS** (and Linux for CI) and doubles as the **integration test harness** for SDK, demos and registry.
 
 - `validate` – offline: topic + payload (single file, stdin, directory or recorded capture) against D1 + topic grammar + cross-field rules (e.g. topic `<Source>` = payload `DataSetWriterName`, `<Filter>` = `WriterGroupName`, namespace `Oi4v2`). Delivered with P2.
 - `monitor` – passive: connect to a broker, observe all `Oi4v2/#` traffic, validate every message live, summarize per participant.
