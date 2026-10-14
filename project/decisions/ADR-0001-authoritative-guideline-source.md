@@ -41,3 +41,14 @@ To avoid confusion with our own project ADRs (`ADR-NNNN`), guideline ADRs are al
 - The baseline is now `7bead4c` on branch `feature/spec-findings` of `oi4-oec-documentation`. It adds **GL-ADR-012** (only the common service `NewDataSetWriterId` remains) and **GL-ADR-013** (NodeIds as JSON strings, OPC UA V1.05), and resolves all spec findings SF-001 … 031.
 - The guideline repo now has its own copy of our findings register, `findings/SPEC-FINDINGS.md`, with the same SF ids. Our `project/SPEC-FINDINGS.md` remains the place where new findings are first recorded.
 - Until the branch is merged, we track the branch commit. When it is merged, the merge commit on the main branch becomes the baseline; the content is identical.
+
+## Amendment C-013 (2026-10-14, guideline baseline `49b6fe2`)
+
+- The baseline is now `49b6fe2` on branch `feature/spec-findings`. It resolves SF-032 … 034 and adds:
+  - **MG 1.2 "Normative Keywords"** (BCP 14 / RFC 2119 + RFC 8174; RIG 1.1 applies it to the RIG): requirement strength is taken from the keyword, statements without keyword are informative (see G-1.6 and SF-035).
+  - **GL-ADR-014** – the specific services (Read, Write, Subscribe, Unsubscribe, GenericMethod) are removed.
+  - **GL-ADR-015** – the former MG chapter 6 (process description) moved to the separate **OEC Process Description** (`docs/process-description/`); MG chapters 7–11 were renumbered to 6–10.
+  - **GL-ADR-016** – the empty AAS mapping chapter is removed.
+- The **OEC Process Description is informative**. It is not part of the normative baseline; no requirements are derived from it.
+- The external document "Requirements for Interoperability" is no longer referenced (SF-034). The normative baseline is MG + RIG + GL-ADRs only.
+- **Section numbers:** ADRs, logs and spec findings written before C-013 cite the old MG numbering (old MG n = new MG n−1 for n = 7…10). They are not rewritten; living documents (GUARDRAILS, STATUS, ROADMAP, digest) use the current numbering.
