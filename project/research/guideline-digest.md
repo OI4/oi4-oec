@@ -1,12 +1,12 @@
-# Guideline digest (v2.0, baseline `7bead4c`)
+# Guideline digest (v2.0, baseline `49b6fe2`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
 - **RIG**: OEC Runtime & Infrastructure Guideline, `docs/infrastructure-guideline/`
 
-It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 031 (branch `feature/spec-findings`). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`) are in the git history of this file.
+It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 034 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `49b6fe2` (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`) are in the git history of this file.
 
-## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 and the SF resolutions came with `7bead4c`)
+## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`)
 
 | GL-ADR | Change | Impact for us |
 |--------|--------|---------------|
@@ -15,7 +15,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the
 | 003 | Topic namespace **`Oi4v2`** (v1 stays `Oi4`); requests are answered in the same namespace | topic grammar, everywhere |
 | 004 | DataSetMessage `Source` → **`DataSetWriterName`**, `Filter` → **`WriterGroupName`** (both mandatory, `""` if no filter); topic elements keep their names | schema, SDK codec |
 | 005 | NetworkMessage `CorrelationId` → **`ReplyTo`** (mandatory, `""` if none); also in `ua-metadata` (only OI4-specific key) | schema, SDK correlation |
-| 006 | OPC UA **1.05.04** JSON with **fixed content masks** (MG 9.1.4); `Status` is an object; `MinorVersion` xor `MetaDataVersion`; DataSetMessage `MessageType`; `Messages` is always an array | schema, codec |
+| 006 | OPC UA **1.05.04** JSON with **fixed content masks** (MG 8.1.4); `Status` is an object; `MinorVersion` xor `MetaDataVersion`; DataSetMessage `MessageType`; `Messages` is always an array | schema, codec |
 | 007 | `MSG` → OPC UA **Actions** (`ua-action-request` / `ua-action-response`); `Call`/`Reply` remain as topic methods | schema, SDK services |
 | 008 | Removed License, LicenseText, RtLicense, Interfaces, SBoM, NE107 event; chapters renumbered | = our ADR-0005 |
 | 009 | **Compliance domains** (Messaging / Service Container) × **levels** L1/L2/L3 | REQ catalog, D7 profiles, SDK API |
@@ -23,8 +23,21 @@ It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the
 | 011 | Split into MG + RIG; chapter renumbering (IL = MG 4, MAM = MG 5, container env = RIG 4, platform = RIG 5) | citation scheme |
 | 012 | Only common service left: `NewDataSetWriterId` (FileUpload, FileDownload, FirmwareUpdate, Blink removed; DSWIDs 4–7 reserved; their DataSetClassIds reserved) | schema, SDK, D7 smaller |
 | 013 | `NodeId` = JSON string per Part 6 V1.05 (`"i=11"`, `"nsu=<uri>;i=6244"`); `ns=` and the V1.04 object form are not used | schema (FieldMetaData etc.), codec |
+| 014 | Specific services (Read, Write, Subscribe, Unsubscribe, GenericMethod; former MG 10.3, 8.1.5.3, B1.3) removed | no `SVC` area in the REQ catalog; SDK offers only `NewDataSetWriterId` (open/closed set: SF-036) |
+| 015 | Former MG 6 (process description) moved to the separate, informative **OEC Process Description**; MG chapters 7–11 renumbered to 6–10 | citation scheme (old MG n = new MG n−1); no requirements from the Process Description |
+| 016 | Empty AAS mapping chapter (former MG 11) removed | none |
 
-## 1. Compliance (MG 1.3, 8.2; RIG 1.2)
+## 0a. Normative keywords (MG 1.2, RIG 1.1)
+
+- BCP 14 (RFC 2119 + RFC 8174), written in lowercase: shall/must/required/mandatory = **MUST**; shall not/must not = **MUST NOT**; should/recommended/best practice = **SHOULD**; should not/not recommended = **SHOULD NOT**; may/optional/can (permission) = **MAY**.
+- Field attribute `Requirement`: Mandatory = MUST, Optional = MAY, Not used = MUST NOT (key absent). Type and Value Range must be met whenever the field is present.
+- Level tables: Mandatory = MUST, Recommended = SHOULD, – = not required at that level.
+- A keyword in the sentence wins over the admonition type (also in notes). Admonitions: `NOTE` (informative unless it has a keyword), `RECOMMENDED` = SHOULD, `HIGHLY RECOMMENDED` = strong SHOULD, `REQUIRED` = MUST, `ATTENTION`.
+- Statements about the operator/platform apply to the platform (RIG 5.1).
+- **Statements without keyword, examples and figures are informative.** Many protocol behaviors are written without keyword (Health timing, Birth topic, Status event after Set/Del, pagination continuation …) → SF-035; interim rule G-1.6.
+- `REQUIRED` boxes at `49b6fe2`: 9 ACL boxes (MG 9.1.x), MG 4.1 (scheme), MG 4.2 (base64url), RIG 4.1.1–4.1.4.
+
+## 1. Compliance (MG 1.3, 7.2; RIG 1.2)
 
 **Messaging domain** (applications and smart devices; a smart device with its own MQTT client counts as an application):
 
@@ -67,7 +80,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the
   - A missing serial number becomes `"nd"`; containers use the container name as serial number.
   - dnp encoding: `,` + 2 hex digits (MG A3).
 
-## 3. MAM (MG 5, 9.3.1) – DataSetClassId `360ca8f3-5e66-42a2-8f10-9cdf45f4bf58`
+## 3. MAM (MG 5, 8.3.1) – DataSetClassId `360ca8f3-5e66-42a2-8f10-9cdf45f4bf58`
 
 - **Mandatory:**
   - `Manufacturer` (LocalizedText)
@@ -102,7 +115,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the
   - Hardware: ≥ 1 GB RAM, ≥ 4 GB storage.
   - Software: Linux, container daemon, MQTT broker, OEC Registry.
 
-## 5. MQTT (MG 7)
+## 5. MQTT (MG 6)
 
 - **Connection:**
   - v3.1.1 as minimum; no MQTT 5 features required (change only by WG/TC).
@@ -116,21 +129,21 @@ It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the
   - Will = Health `FAILURE_1`/0.
   - Close and Will go to `Oi4v2/<ST>/<AppId>/Pub/Health/<AppId>`. Birth, Close and Will carry no `Timestamp`/`SequenceNumber`.
   - Subscribers: Close = offline (graceful), Will = offline (ungraceful), next Birth = online.
-- **Publishing:** on every change (MG 7.4), unless PublicationList says otherwise.
+- **Publishing:** on every change (MG 6.4), unless PublicationList says otherwise.
 - **By level:** TLS/auth and Birth/Will are mandatory from L1; the rest of the client behavior is mandatory only at L3.
 
-## 6. Topics (MG 8)
+## 6. Topics (MG 7)
 
 `Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]`
 
-- **Namespace** `Oi4v2`; v1 = `Oi4`. Both may coexist on one broker, but a request is answered in its own namespace (MG 8.1.1).
+- **Namespace** `Oi4v2`; v1 = `Oi4`. Both may coexist on one broker, but a request is answered in its own namespace (MG 7.1.1).
 - **ServiceType:** `Registry | OTConnector | Utility | Persistence | Aggregation | OOCConnector | ITConnector`.
 - **Method:** `Pub | Get | Set | Del | Call | Reply`.
   - `Get`/`Set`/`Del`/`Call` use the **target's** ServiceType/AppId.
   - `Reply` uses the same topic as `Call` with the method swapped.
 - **Resources:** `MAM, Health, Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList, ReferenceDesignation`.
 - **Common services** (Actions): only `NewDataSetWriterId` (GL-ADR-012).
-- **Specific services:** `Read, Write, Subscribe, Unsubscribe, GenericMethod`.
+- **Specific services:** removed (GL-ADR-014). Whether other resource/service names are forbidden below `Oi4v2` is open (SF-036; MG 7.1.1: all `Oi4v2` topics shall be OI4-conform).
 - **Source:** base64url IL; equals `AppId` if the information is about the app itself.
 - **Filter:** each level is a `<Topic encoded String>`; `+ # /` within a level are percent-encoded (`%2B %23 %2F`, `%` → `%25`), nothing else. `/` only separates resource-defined levels, never leading/trailing; `WriterGroupName` uses the same value.
 
@@ -147,9 +160,9 @@ It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the
   - Status: `Good|Uncertain|Bad` = severity class only (e.g. 0x80060000 → `Status/Bad`); details in the payload (`Number`, `SymbolicId`).
   - Generic: `High|Medium|Low`.
 
-## 7. Payloads (MG 9) – OPC UA Part 14/6 V1.05.04
+## 7. Payloads (MG 8) – OPC UA Part 14/6 V1.05.04
 
-**Fixed content masks (MG 9.1.4)**
+**Fixed content masks (MG 8.1.4)**
 
 | Message | Mask | Value |
 |---|---|---|
@@ -159,7 +172,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the
 | Actions | JsonNetworkMessageContentMask | `0x0B` |
 | Actions | DataSetFieldContentMask | `0` (CompactEncoding) |
 
-**NetworkMessage `ua-data` (MG 9.2.1)**
+**NetworkMessage `ua-data` (MG 8.2.1)**
 
 | Field | Req. | Content |
 |---|---|---|
@@ -172,7 +185,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 013** in `rfcs_adrs/` and the
 
 No `WriterGroupName` at network level.
 
-**DataSetMessage (MG 9.2.3)**
+**DataSetMessage (MG 8.2.3)**
 
 | Field | Req. | Content |
 |---|---|---|
@@ -189,12 +202,12 @@ No `WriterGroupName` at network level.
 
 No `PublisherId` at DataSetMessage level.
 
-**DataSetMetaData `ua-metadata` (MG 9.2.2)**
+**DataSetMetaData `ua-metadata` (MG 8.2.2)**
 - Fields: `MessageId`, `MessageType`, `PublisherId`, `DataSetWriterId`, `WriterGroupName`, `DataSetWriterName`, `Timestamp` (M), `ReplyTo` (M, OI4 extension), `MetaData`.
 - `MetaData` is a DataSetMetaDataType: `Name`, `Description`, `Fields[]`, `DataSetClassId`, `ConfigurationVersion`, `Namespaces`, `StructureDataTypes`, `EnumDataTypes`, `SimpleDataTypes`.
 - **NodeIds** (e.g. `FieldMetaData.DataType`, `StructureDefinition`, `SimpleTypeDescription`) are JSON strings: ns 0 → `"i=12"`, others → `"nsu=http://opcfoundation.org/UA/DI/;i=6244"`; never `ns=` (GL-ADR-013). `DetailObject` (Health `Details`) has no NodeId yet – validated by the Health schema only.
 
-**Actions (MG 9.1.3, 9.2.16–9.2.20, GL-ADR-007)**
+**Actions (MG 8.1.3, 8.2.16–8.2.20, GL-ADR-007)**
 - **ActionNetworkMessage:**
 
   | Field | Request | Response |
@@ -215,7 +228,7 @@ No `PublisherId` at DataSetMessage level.
 - **ActionState:** 0 Idle (not used), 1 Executing, 2 Done.
 - Not used in Action messages: `SequenceNumber`, `DataSetWriterName`, `WriterGroupName`, `MinorVersion`, `MessageType` (DataSetMessage level).
 
-**OI4 resources (MG 9.3)**
+**OI4 resources (MG 8.3)**
 
 - **Health** `d8e7b6df-42ba-448a-975a-199f59e8ffeb`
   - `Health`: `NORMAL_0 | FAILURE_1 | CHECK_FUNCTION_2 | OFF_SPEC_3 | MAINTENANCE_REQUIRED_4`; the most severe status, ordered FAILURE > OFF_SPEC > CHECK_FUNCTION/MAINTENANCE > NORMAL.
@@ -247,14 +260,14 @@ No `PublisherId` at DataSetMessage level.
   - Helpers (DSWIDs 1–3): `WriterGroupName` = `PaginationRequest`/`Pagination`/`Locale`, `DataSetWriterName` = IL of the publishing app (requester or responder).
 - **Locale** (in Get): `Locale`, `LocaleId` matching `^[a-z]{2,3}(-[A-Z]{2,3})?$` (e.g. `de-DE`, `en-GB`, `de`).
 
-**Common-service Actions (MG 9.4.1, 10.2.1, B1.2.1)**
+**Common-service Actions (MG 8.4.1, 9.2.1, B1.2.1)**
 - NewDataSetWriterId `2aca55bd-0d6f-41b1-a1c2-2d61afcc21f0`:
   - Request `{Resource}`; response `{DataSetWriterId, Ttl}`.
   - DataSetWriterId 8; topic `Call/NewDataSetWriterId` (no Source).
-- FileUpload, FileDownload, FirmwareUpdate and Blink were removed (GL-ADR-012); such functions may be offered as specific services (MG 10.3).
+- FileUpload, FileDownload, FirmwareUpdate and Blink were removed (GL-ADR-012); they are not part of the guideline until a new GL-ADR re-introduces them (the specific services were removed as well, GL-ADR-014).
 - DataSetClassIds of removed resources and Actions are reserved (MG A2).
 
-## 8. Message Bus behavior (MG 10)
+## 8. Message Bus behavior (MG 9)
 
 | Resource | Pub | Get | Set | Del | Topic levels |
 |----------|-----|-----|-----|-----|--------------|
@@ -270,12 +283,12 @@ No `PublisherId` at DataSetMessage level.
 | ReferenceDesignation | ✓ | ✓ | ✓ (Source) | ✓ (Source) | `[/<Source>]` |
 
 - **Get:** the request is a `ua-data` message with the requested resource's `DataSetClassId` and an empty `Messages`, or only PaginationRequest/Locale (helpers identified by their reserved DSWIDs). The answer goes to the matching `Pub` topic with `ReplyTo` = request `MessageId`. A Get without Source returns all assets of the app (paginated if needed).
-- **Set / Del:** answered by `Pub/Event/<Source>/Status/<Level>` with `ReplyTo`. After a successful Set, the new state is published according to the PublicationList.
+- **Set / Del:** answered by `Pub/Event/<Source>/Status/<Level>` with `ReplyTo`. After a successful Set, the new state is published according to the PublicationList. (Both stated without keyword – SF-035.)
 - **Actions:**
   - Request: `Oi4v2/<ST>/<AppId>/Call/<Service>[/<Source>]`.
   - Response: `.../Reply/<Service>[/<Source>]`.
   - Correlation via `RequestId` and `CorrelationData`.
-- **Health:** published on start, on change and every 60 s.
+- **Health:** published on start, on change and every 60 s (MG 7.1.5.1, stated without keyword – SF-035).
 
 ## 9. Registry (MG A1)
 
