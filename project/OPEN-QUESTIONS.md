@@ -6,6 +6,7 @@ New questions are added to the first table. Once decided, the row moves to the s
 
 | ID | Question | Context / options | Blocks | Status |
 |----|----------|-------------------|--------|--------|
+| Q-018 | Format and location of the requirements catalog; is the spec baseline a shared contract? | Proposal (C-012): YAML files per area in a new folder `oec/spec/` (catalog + catalog JSON Schema, topic grammar, Method × Resource matrix, test vectors incl. golden examples, Go tools), shared by schema tests, SDK, micro SDK, D7 and D8 like the D1 schemas (extends ADR-0006/0012). Alternatives: JSON instead of YAML; Markdown tables in `project/`. | P1 | open (C-012) |
 | Q-011 | Publication of (parts of) the work and EU Cyber Resilience Act (CRA) | PO: publication must be reconsidered in light of the CRA (e.g. open-source steward role, SBOM, vulnerability handling, security updates, support period). Note C-006: the guideline itself now requires an SBOM in `/opt/oi4/licenses` from Level 2 (GL-ADR-002), which we generate anyway (G-4.8). Working assumption (PO, C-010): **no public availability on the internet** – publication target are **private GitHub repositories**; CRA review only becomes relevant before any public release / placing on the market. Pushing to the private repos still needs the PO's go (ADR-0009/0012). | P9 | open – parked; working assumption: private GitHub repos (C-010) |
 
 ## Decided
