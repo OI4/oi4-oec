@@ -25,13 +25,13 @@ P4 and P5 can run in parallel once P3 is decided; demos (P6) and registry (P7) a
 
 Turn the prose guideline into a precise, testable baseline – the foundation for schema, SDK and conformity checks.
 
-- Requirements catalog `REQ-<area>-NNN` (areas: IL, TOP, MQTT, CNT, MSG, RES-<resource>, ACT (Actions), LIFE, PAG) covering **both** guideline documents (MG + RIG) with guideline reference, normative keyword per MG 1.2 (MUST/SHOULD/MAY and negations, G-1.6), **compliance domain (Messaging / Service Container) and level (L1/L2/L3)** and testability (`schema` = D1, `D7` = messaging live test, `D8` = container check, `manual`). Plan: C-012 log, updated by C-013 (no specific services after GL-ADR-014).
+- Requirements catalog `REQ-<area>-NNN` as YAML in `oec/spec/` (ADR-0018; areas: IL, TOP, MQTT, CNT, MSG, RES-<resource>, ACT (Actions), LIFE, PAG) covering **both** guideline documents (MG + RIG) with guideline reference, normative keyword per MG 1.2 (MUST/SHOULD/MAY and negations, G-1.6), **compliance domain (Messaging / Service Container) and level (L1/L2/L3)** and testability (`schema` = D1, `D7` = messaging live test, `D8` = container check, `manual`). Plan: C-012 log, updated by C-013 (no specific services after GL-ADR-014).
 - Topic grammar as formal definition (ABNF + regex) per Method × Resource combination (which `Source`/`Filter` levels are required/allowed/forbidden), incl. percent-encoding of `+ # / %` within a `Filter` level (MG 7.1.7) and Status event levels `Good|Uncertain|Bad`.
 - Method × Resource matrix (Pub/Get/Set/Del/Call/Reply) incl. payload expectations (e.g. `Get` = empty `Messages` or only Pagination/Locale).
 - Review and extend `SPEC-FINDINGS.md`; propose interpretations; get decisions from product owner / work group.
 - Golden examples: all Appendix B examples, corrected where needed, as the first test vectors.
 - Guideline ADRs (GL-ADR-001 … 016) and their implementation notes are part of the baseline (G-1.1). The OEC Process Description (GL-ADR-015) is informative and not catalogued.
-- **Exit:** catalog + matrix reviewed; all blocking spec findings have a decided interpretation (at `49b6fe2` SF-001 … 034 are resolved; SF-035 (keyword-less behavior) and SF-036 (closed resource/service set) are open – new findings go to SF-037 ff.).
+- **Exit:** catalog + matrix reviewed; all blocking spec findings have a decided interpretation (at `49b6fe2` SF-001 … 034 are resolved; SF-035 (keyword-less behavior → implicit MUST until the PO adds keywords) and SF-036 (closed resource/service set) are decided (C-013) – new findings go to SF-037 ff.).
 
 ## P2 – JSON Schema (D1)
 
