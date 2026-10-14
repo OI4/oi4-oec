@@ -22,3 +22,7 @@
 
 - `oec/conformance/` hosts both compliance tools, D7 and D8.
 - New folder `oec/sdk/micro/` for the micro SDK D9.
+
+## Amendment C-010 (Q-011 working assumption)
+
+The future publication target is **private GitHub repositories**, not public availability on the internet. Until the PO gives the go, the repository stays local (no remote, nothing pushed). The CRA review (Q-011) is only needed before a public release.

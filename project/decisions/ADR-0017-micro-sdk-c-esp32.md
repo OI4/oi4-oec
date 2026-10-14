@@ -50,3 +50,28 @@ ADR-0016 introduced a micro SDK for microcontroller-class smart devices (Messagi
   - JSON: hand-written encoder (small, deterministic), decoding with `cJSON` (bundled with ESP-IDF) or `jsmn`.
   - Unit tests: Unity (also used by ESP-IDF).
 - **Licenses:** ESP-IDF is Apache-2.0 and cJSON is MIT, both compatible with our MIT license (ADR-0004).
+
+## Amendment C-010 – considered options and Arduino
+
+The PO asked (C-010) whether C matches the agent's recommendation, given that Rust might be technically better while C has the most libraries for Arduino and ESP32.
+
+| Criterion | Rust (`no_std` / esp-rs) | C17 (chosen) |
+|-----------|--------------------------|--------------|
+| Memory safety (network-exposed device, CRA) | ✅ strong | ⚠️ needs discipline: static analysis, fuzzing of the parsers, sanitizers in host tests |
+| Reuse of the Rust `oec-core` (one protocol implementation) | ✅ possible | ❌ second implementation; mitigated by shared test vectors + D7 |
+| ESP32 toolchain | ⚠️ classic ESP32/S3 (Xtensa) need the `espup` toolchain fork; C3/C6 (RISC-V) work with upstream Rust | ✅ the ESP-IDF default |
+| Integration into existing firmware (ESP-IDF, Arduino, Zephyr, vendor SDKs) | ⚠️ only as a precompiled static library per target | ✅ plain source integration |
+| Arduino ecosystem | ❌ practically not usable as an Arduino library | ✅ can be packaged as an Arduino library |
+| Target audience (device makers) | small Rust share | C/C++ is the de-facto standard |
+
+**Assessment:** The agent's earlier Rust proposal was driven mainly by reusing `oec-core`. The micro SDK scope is small (L1, L2 if feasible: IL/base64url, topics, JSON for MAM/Health, lifecycle), so a second implementation is cheap, and the shared test vectors plus D7 keep both SDKs aligned. For a micro SDK, adoption by device makers weighs more than reuse. **C17 is the recommendation.**
+
+Rust stays the better choice for D2 (container apps), where its strengths count fully.
+
+**Mitigations for C** (part of P4b):
+- No dynamic parsing of untrusted input in L1 (L1 only publishes). L2 `Get` parsing is size-bounded.
+- Static analysis (e.g. `clang-tidy`, `cppcheck`).
+- AddressSanitizer and UndefinedBehaviorSanitizer in the host tests.
+- Fuzzing of the topic and JSON parsers.
+
+**Arduino:** In addition to the ESP-IDF reference port, the core is also packaged as an **Arduino library** with an Arduino port of the PAL (Arduino-ESP32 core, which is based on ESP-IDF). This is planned in P4b, best effort after the ESP-IDF port. The core must therefore stay compatible with the Arduino build (no CMake-only features in the core, C17 subset supported by the Arduino ESP32 toolchain). Boards without TLS-capable hardware or memory (e.g. AVR) are out of scope, because TLS is mandatory at every level.
