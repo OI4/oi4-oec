@@ -1,94 +1,284 @@
-# Guideline digest (v2.0 draft, baseline `c85ce2a`)
+# Guideline digest (v2.0, baseline `5f070bb`)
 
-Compact, implementation-oriented summary of `oi4-oec-documentation/docs/guideline/`. It is **not** normative – always check the referenced section. Known problems: see `../SPEC-FINDINGS.md`.
+This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
+- **MG**: OEC Messaging Guideline, `docs/guideline/`
+- **RIG**: OEC Runtime & Infrastructure Guideline, `docs/infrastructure-guideline/`
 
-## 1. Big picture
+It also covers the guideline ADRs **GL-ADR-001 … 011** in `rfcs_adrs/`. The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. The previous digest (baseline `c85ce2a`) is in the git history of this file.
 
-- Edge computer runs containerized apps + MQTT broker (Message Bus) + OEC Registry (11.1).
-- Every asset (device **or** application instance) has an **Identification Link (IL)** and a **Master Asset Model (MAM)** (3, 4).
-- Communication: MQTT 3.1.1 over TLS, OPC UA PubSub JSON payloads, REST-like topic namespace (7–10).
+## 0. What changed with the guideline ADRs (vs. `c85ce2a`)
 
-## 2. Identification Link (3, MS-010) – breaking change vs 1.x
+| GL-ADR | Change | Impact for us |
+|--------|--------|---------------|
+| 001 | Health gets optional `Details[]` (`DetailObject`: `Health`, `DiagnosticCode`, `Location`, `Description`); `Health` = most severe status | schema, SDK health API, registry UI |
+| 002 | No license resources; SBOM (SPDX/CycloneDX) + license texts in `/opt/oi4/licenses` inside the image (L2+) | our images generate SBOMs; D7 scope (Q-013) |
+| 003 | Topic namespace **`Oi4v2`** (v1 stays `Oi4`); requests are answered in the same namespace | topic grammar, everywhere |
+| 004 | DataSetMessage `Source` → **`DataSetWriterName`**, `Filter` → **`WriterGroupName`** (both mandatory, `""` if no filter); topic elements keep their names | schema, SDK codec |
+| 005 | NetworkMessage `CorrelationId` → **`ReplyTo`** (mandatory, `""` if none); also in `ua-metadata` (only OI4-specific key) | schema, SDK correlation |
+| 006 | OPC UA **1.05.04** JSON with **fixed content masks** (MG 9.1.4); `Status` is an object; `MinorVersion` xor `MetaDataVersion`; DataSetMessage `MessageType`; `Messages` is always an array | schema, codec |
+| 007 | `MSG` → OPC UA **Actions** (`ua-action-request` / `ua-action-response`); `Call`/`Reply` remain as topic methods | schema, SDK services |
+| 008 | Removed License, LicenseText, RtLicense, Interfaces, SBoM, NE107 event; chapters renumbered | = our ADR-0005 |
+| 009 | **Compliance domains** (Messaging / Service Container) × **levels** L1/L2/L3 | REQ catalog, D7 profiles, SDK API |
+| 010 | Identification Link (IEC 61406-1), base64url in topics (already in `c85ce2a`) | unchanged |
+| 011 | Split into MG + RIG; chapter renumbering (IL = MG 4, MAM = MG 5, container env = RIG 4, platform = RIG 5) | citation scheme |
 
-- IL = IEC 61406-1 IL string: `[<scheme>://]<authority>[/<path>][?<query>][#<fragment>]`, ≤ 255 chars, ASCII subset (letters, digits, `-._~`, reserved `:/?#[]@!$&'()*+,;=`), no `%`, space, `"<>\^`{|}`; authority lowercase; never altered/normalized; with vs without scheme = different ILs; compared char-by-char.
-- In **topics** (`AppId`, `Source`): base64url (RFC 4648 §5) of UTF-8 bytes, **no padding**, exactly one level. Node: `Buffer.from(il).toString('base64url')`.
-- In **payloads**: unencoded.
-- `Oi4Identifier` = `ManufacturerUri/dnp(Model)/dnp(ProductCode)/dnp(SerialNumber)` (no scheme); "nd" for missing parts; containers use container name as SerialNumber (6.2). dnp-encoding: `,` + 2 hex digits for reserved/prohibited chars (A3).
-- Recommended: reuse existing IL (OPC UA ProductInstanceUri, AAS globalAssetId); else generate Oi4Identifier.
+## 1. Compliance (MG 1.3, 8.2; RIG 1.2)
 
-## 3. MAM (4, 9.3.1) – DataSetClassId `360ca8f3-5e66-42a2-8f10-9cdf45f4bf58`
+**Messaging domain** (applications and smart devices; a smart device with its own MQTT client counts as an application):
 
-Mandatory: `Manufacturer` (LocalizedText), `ManufacturerUri` (domain), `Model` (LocalizedText), `ProductCode`, `HardwareRevision` (`""` for software, `"undefined"` if unknown hw), `SoftwareRevision`, `DeviceRevision`, `DeviceManual` (URL), `DeviceClass` (best practice `Oi4.<ServiceType>`), `SerialNumber`, `ProductInstanceUri` (= the IL, unencoded), `RevisionCounter` (Int32). Optional: `Description` (LocalizedText), `GlobalAssetId` (tbd).
+| Requirement | L1 | L2 | L3 |
+|---|:-:|:-:|:-:|
+| MQTT connectivity, TLS + auth, Birth + Will | M | M | M |
+| `Oi4v2` topic structure, OPC UA JSON payload | M | M | M |
+| `Pub` MAM + Health (self + subordinate assets) | M | M | M |
+| `Get` (MAM/Health also via Get); `Set` where applicable | – | M | M |
+| Full MQTT client behavior (ClientId, keep-alive, clean session, QoS, no retain, Close, publish on change) | R | R | M |
+| `Profile`, `PublicationList`, `ReferenceDesignation` | – | R | M |
+| All other resources / full guideline behavior | – | – | M |
+| `Data` ⇒ `Metadata` | – | R | M |
+| `Set`/`Del` ⇒ `Event` category `Status` (where Set/Del is supported) | – | M | M |
 
-## 4. Container environment (6)
+**Service Container domain** (containerized components only):
+
+| Requirement | L1 | L2 | L3 |
+|---|:-:|:-:|:-:|
+| OCI container | M | M | M |
+| SBOM + licenses | – | M | M |
+| Storage conventions, secrets | – | R | M |
+| Image integrity, networks, platform-related app requirements | – | R | M |
+
+- Platform and infrastructure requirements (RIG 5.1) are **not** graded by level.
+- "OI4 compliant" without a level means L3 in all applicable domains.
+- How a level is declared, discovered or validated is not specified yet (SF-025).
+
+## 2. Identification Link (MG 4, GL-ADR-010)
+
+- **IL syntax:** IEC 61406-1, `[<scheme>://]<authority>[/<path>][?<query>][#<fragment>]`, at most 255 chars.
+  - Scheme: optional, `https` recommended.
+  - Authority: lowercase.
+  - Characters: ASCII only. Allowed: unreserved characters, and reserved characters only in their URL syntax role. Not allowed: space `"` `%` `<` `>` `\` `^` `` ` `` `{` `|` `}`, control characters.
+  - Never altered or normalized; compared char by char, case-sensitive. With and without scheme are two different ILs.
+- **In topics** (`AppId`, `Source`): base64url (RFC 4648 §5) of the UTF-8 bytes, no padding, no line breaks. This gives exactly one topic level of at most 340 chars.
+- **In payloads** (`PublisherId`, `MessageId`, `ReplyTo`, `DataSetWriterName`, `RequestorId`, `ProductInstanceUri`): unencoded.
+- **Oi4Identifier** = `ManufacturerUri/dnp(Model)/dnp(ProductCode)/dnp(SerialNumber)`.
+  - `ManufacturerUri`: lowercase domain.
+  - A missing serial number becomes `"nd"`; containers use the container name as serial number.
+  - dnp encoding: `,` + 2 hex digits (MG A3).
+
+## 3. MAM (MG 5, 9.3.1) – DataSetClassId `360ca8f3-5e66-42a2-8f10-9cdf45f4bf58`
+
+- **Mandatory:**
+  - `Manufacturer` (LocalizedText)
+  - `ManufacturerUri` (domain)
+  - `Model` (LocalizedText)
+  - `ProductCode`
+  - `HardwareRevision`
+  - `SoftwareRevision`
+  - `DeviceRevision`
+  - `DeviceManual`
+  - `DeviceClass`
+  - `SerialNumber`
+  - `ProductInstanceUri` (= the IL used on the bus)
+  - `RevisionCounter` (Int32)
+- **Optional:** `Description` (LocalizedText), `GlobalAssetId`.
+
+## 4. Runtime & infrastructure (RIG 4, 5)
 
 | Path | Content |
 |------|---------|
-| `/etc/oi4/mqtt` (ro) | `broker.json` {`Address`, `SecurePort`, `MaxPacketSize`}, `broker.pem`, `broker_ca.pem` |
-| `/etc/oi4/certs` (ro) | `ca.pem`, `<containername>.pem` (client cert) |
+| `/etc/oi4/mqtt` (ro) | `broker.json` {`Address`, `SecurePort` (UInt16), `MaxPacketSize` (Int32, min 262144 – unit unclear SF-009)}, `broker.pem`, `broker_ca.pem` |
+| `/etc/oi4/certs` (ro) | `ca.pem`, `<containername>.pem` (no private keys) |
 | `/run/secrets/mqtt_credentials` | base64(`user:password`) |
 | `/run/secrets/mqtt_private_key.pem`, `/run/secrets/mqtt_passphrase` (base64) | client key + passphrase |
 | `/etc/oi4/app`, `/opt/oi4/app` | app config / app data |
+| `/opt/oi4/licenses` | SBOM (SPDX or CycloneDX) + license texts, part of the image, not overlaid by host mounts (L2+) |
 
-Container name: globally unique, ≤ 63 chars, RFC 1123, best practice `<DefaultName>_<uuid>`, set as hostname; used as MQTT ClientId, cert name, Oi4Identifier serial. Bridge network preferred.
+- **Container name:** globally unique, at most 63 chars, RFC 1123, best practice `<DefaultName>_<uuid>`. It is used as hostname, MQTT ClientId, certificate name and Oi4Identifier serial number.
+- **Image integrity:** tags are allowed; digests are recommended. **Networks:** bridge network preferred.
+- **Platform (RIG 5.1):**
+  - Architectures: ARMv7, ARMv8, amd64.
+  - Hardware: ≥ 1 GB RAM, ≥ 4 GB storage.
+  - Software: Linux, container daemon, MQTT broker, OEC Registry.
 
-## 5. MQTT (7)
+## 5. MQTT (MG 7)
 
-v3.1.1; TLS ≥ 1.2; port 8883 default (1883 not supported); auth user/pass or mTLS (mTLS preferred if both); username chars RFC 3986 unreserved + `@`; keep-alive 60 s; clean session true; QoS 0 default; **no retained**; Birth = MAM, Close = Health `NORMAL_0`/0, Will = Health `FAILURE_1`/0 (no Timestamp/SequenceNumber); publish on change (7.4).
+- **Connection:**
+  - v3.1.1 (MQTT 5 "observed", SF-013).
+  - TLS ≥ 1.2, port 8883 (1883 not supported).
+  - Auth by user/password or mTLS; mTLS wins if both are available. Username uses RFC 3986 unreserved chars plus `@`.
+  - ClientId = container name; keep-alive 60 s; clean session true.
+- **Messages:** QoS 0 default; retained messages not used.
+- **Lifecycle:**
+  - Birth = MAM DataSetMessage of the app on every connect.
+  - Close = Health `NORMAL_0`/0.
+  - Will = Health `FAILURE_1`/0.
+  - Birth, Close and Will carry no `Timestamp`/`SequenceNumber`. The exact topic is not stated (SF-010).
+- **Publishing:** on every change (MG 7.4), unless PublicationList says otherwise.
+- **By level:** TLS/auth and Birth/Will are mandatory from L1; the rest of the client behavior is mandatory only at L3.
 
-## 6. Topics (8)
+## 6. Topics (MG 8)
 
-`Oi4/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]`
+`Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]`
 
-- ServiceType: `Registry | OTConnector | Utility | Persistence | Aggregation | OOCConnector | ITConnector`. For `Get/Set/Del` use the **target's** ServiceType/AppId; for `Pub` the publisher's. `Call`/`Reply` addressing is not explicit (SF-022).
-- Method: `Pub | Get | Set | Del | Call | Reply`.
-- Resources: `MAM, Health, Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList, ReferenceDesignation` (`_ToDelete_` License, LicenseText, RtLicense, Interfaces, SBoM are dropped in 2.0 – ADR-0005).
-- Services (Call/Reply): common `FileUpload, FileDownload, FirmwareUpdate, Blink, NewDataSetWriterId`; specific `Read, Write, Subscribe, Unsubscribe, GenericMethod`.
-- Filter by resource: Data/Metadata `<Tag>`; Config `<Context.Name>`; Event `<EventCategory>/<EventLevel>` (Syslog: `Debug…Emergency`; Status: `Good|Uncertain|Bad`; Generic: `High|Medium|Low`); Publication/SubscriptionList `<ResourceType>[/<Tag>]`; no filter for MAM, Health, Profile, ReferenceDesignation.
-- Minimum compliance (8.2): `Pub`, `Get`; `MAM, Health, Profile, PublicationList, ReferenceDesignation` (License/LicenseText dropped – ADR-0005); Data ⇒ Metadata; Set/Del ⇒ Event/Status.
+- **Namespace** `Oi4v2`; v1 = `Oi4`. Both may coexist on one broker, but a request is answered in its own namespace (MG 8.1.1).
+- **ServiceType:** `Registry | OTConnector | Utility | Persistence | Aggregation | OOCConnector | ITConnector`.
+- **Method:** `Pub | Get | Set | Del | Call | Reply`.
+  - `Get`/`Set`/`Del`/`Call` use the **target's** ServiceType/AppId.
+  - `Reply` uses the same topic as `Call` with the method swapped.
+- **Resources:** `MAM, Health, Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList, ReferenceDesignation`.
+- **Common services** (Actions): `FileUpload, FileDownload, FirmwareUpdate, Blink, NewDataSetWriterId`.
+- **Specific services:** `Read, Write, Subscribe, Unsubscribe, GenericMethod`.
+- **Source:** base64url IL; equals `AppId` if the information is about the app itself.
+- **Filter** (no `+ # /`, SF-005):
 
-## 7. Payloads (9)
+  | Resource | Filter |
+  |---|---|
+  | Data / Metadata | `<Tag>` |
+  | Config | `<Context.Name>` |
+  | Event | `<EventCategory>/<EventLevel>` |
+  | PublicationList / SubscriptionList | `<ResourceType>[/<Tag>]` |
+  | MAM, Health, Profile, ReferenceDesignation | none |
 
-**NetworkMessage** (`ua-data`): `MessageId` (`<ms>-<PublisherId>`), `MessageType`, `PublisherId` (`<ServiceType>/<IL>`), `DataSetClassId` (GUID, mandatory for OI4 resources), `CorrelationId` (opt.), `Messages[]`.
-**DataSetMessage**: `DataSetWriterId` (UInt16, 0–9 reserved: 1 PaginationRequest, 2 Pagination, 3 Locale), `SequenceNumber` (UInt32, opt.), `MetaDataVersion` {`MajorVersion`,`MinorVersion`} (opt.), `Timestamp` (ISO 8601, opt.), `Status` (UInt32 StatusCode, omit if Good), `Filter` (cond.), `Source` (IL, mandatory), `Payload`.
-**DataSetMetaData** (`ua-metadata`): `MessageId`, `MessageType`, `PublisherId`, `DataSetWriterId`, `Filter`, `Source`, `CorrelationId`, `MetaData` (DataSetMetaDataType: `Name`, `Description`, `Fields[]` FieldMetaData, `DataSetClassId`, `ConfigurationVersion`, `Namespaces[]`, `StructureDataTypes[]`, `EnumDataTypes[]`, `SimpleDataTypes[]`).
-**ServiceNetworkMessage** (`MSG`): `MessageId`, `MessageType`, `PublisherId`, `DataSetClassId`, `CorrelationId`, `Message` = `ServiceParametersRequest {MethodsToCall[]: {MethodId, InputArguments[]}}` or `ServiceParametersResponse {Results[]: {StatusCode, InputArgumentResults[], OutputArguments[]}}`.
+- **Event levels:**
+  - Syslog: `Debug…Emergency` (8 levels).
+  - Status: `Good|Uncertain|Bad` (SF-006).
+  - Generic: `High|Medium|Low`.
 
-OI4 DataSets:
-- **Health** `d8e7b6df-42ba-448a-975a-199f59e8ffeb`: `Health` ∈ `NORMAL_0, FAILURE_1, CHECK_FUNCTION_2, OFF_SPEC_3, MAINTENANCE_REQUIRED_4`; `HealthScore` 0..100 (opt.).
-- **Config** `9d5983db-440d-4474-9fd7-1cd7a6c8b6c2`: `{<GroupName>: {Name, Description?, <ConfigName>: {Type (Boolean|ByteString|DateTime|Number|String), Value (string), Unit?, DefaultValue?, Mandatory?, Sensitive?, Name, Description?, Validation? {Length, Min, Max, Pattern, Values[]}}}, Context? {Name, Description?}}`; names `^[A-Za-z_][A-Za-z0-9_-]*$`; Set has fewer mandatory fields (Name optional); unset = empty string.
-- **Data**: free DataSet; optional standard `Oi4Pv` (`Pv`, `Sv1..Sv255`), filter `Oi4Pv`. DataSetClassId publisher-specific.
-- **Event** `543ae05e-b6d9-4161-a0a3-350a0fac5976`: `Number` (UInt32), `Description?`, `Category` ∈ `CAT_SYSLOG_0, CAT_STATUS_1, CAT_GENERIC_99` (`CAT_NE107_2` dropped – ADR-0005), `Details?` (Syslog: `MSG`, `HEADER`; Status: `SymbolicId`).
-- **Profile** `48017c6a-05c8-48d7-9d85-4b08bbb707f3`: `Resources[]`.
-- **PublicationList** `217434d6-6e1e-4230-b907-f52bc9ffe152`: `Resource`, `Source`, `Filter?`, `DataSetWriterId`, `Mode?` (`OFF_0` … `ON_REQUEST_APPLICATION_SOURCE_FILTER_15`, default `ON_REQUEST_1`), `Interval?` (ms, default 0 = on change), `Precisions?` {field: Real}, `Config?` (`NONE_0|MODE_1|INTERVAL_2|MODE_AND_INTERVAL_3`).
+## 7. Payloads (MG 9) – OPC UA Part 14/6 V1.05.04
+
+**Fixed content masks (MG 9.1.4)**
+
+| Message | Mask | Value |
+|---|---|---|
+| `ua-data` | JsonNetworkMessageContentMask | `0x3B` (with `DataSetClassId`) / `0x2B` (without) |
+| `ua-data` | JsonDataSetMessageContentMask | `0xA41` min / `0xA7F` (with `MetaDataVersion`) / `0xE7D` (with `MinorVersion`) |
+| `ua-data` | DataSetFieldContentMask | `0x20` (RawData, VerboseEncoding) |
+| Actions | JsonNetworkMessageContentMask | `0x0B` |
+| Actions | DataSetFieldContentMask | `0` (CompactEncoding) |
+
+**NetworkMessage `ua-data` (MG 9.2.1)**
+
+| Field | Req. | Content |
+|---|---|---|
+| `MessageId` | M | `<ms>-<PublisherId>`, globally unique |
+| `MessageType` | M | `"ua-data"` |
+| `PublisherId` | M | `<ServiceType>/<IL>` |
+| `DataSetClassId` | O | mandatory for OI4 resources |
+| `ReplyTo` | M | `""` or the causing `MessageId` |
+| `Messages[]` | M | always an array |
+
+No `WriterGroupName` at network level.
+
+**DataSetMessage (MG 9.2.3)**
+
+| Field | Req. | Content |
+|---|---|---|
+| `DataSetWriterId` | M | UInt16; reserved 1 PaginationRequest, 2 Pagination, 3 Locale, 4–8 common-service Actions; apps start at 10 |
+| `DataSetWriterName` | M | unencoded IL of the asset (= topic `<Source>`) |
+| `WriterGroupName` | M | = topic `<Filter>`, or `""` |
+| `SequenceNumber` | O | UInt32 |
+| `MetaDataVersion` | O | {`MajorVersion`,`MinorVersion`}; **xor** `MinorVersion` |
+| `MinorVersion` | O | UInt32; **xor** `MetaDataVersion` |
+| `Timestamp` | O | |
+| `Status` | O | `{Code, Symbol}`; only when not Good |
+| `MessageType` | O | `ua-keyframe` (default) / `ua-event` (for Event) |
+| `Payload` | M | DataSet: VerboseEncoding, RawData; enums as `<Name>_<Value>`; abstract types and multi-dim arrays as `{Value[, Dimensions]}` |
+
+No `PublisherId` at DataSetMessage level.
+
+**DataSetMetaData `ua-metadata` (MG 9.2.2)**
+- Fields: `MessageId`, `MessageType`, `PublisherId`, `DataSetWriterId`, `WriterGroupName`, `DataSetWriterName`, `Timestamp` (M), `ReplyTo` (M, OI4 extension), `MetaData`.
+- `MetaData` is a DataSetMetaDataType: `Name`, `Description`, `Fields[]`, `DataSetClassId`, `ConfigurationVersion`, `Namespaces`, `StructureDataTypes`, `EnumDataTypes`, `SimpleDataTypes`.
+
+**Actions (MG 9.1.3, 9.2.16–9.2.20, GL-ADR-007)**
+- **ActionNetworkMessage:**
+
+  | Field | Request | Response |
+  |---|---|---|
+  | `MessageId` | M | M |
+  | `MessageType` (`ua-action-request` / `ua-action-response`) | M | M |
+  | `PublisherId` (always the **Responder**) | M | M |
+  | `Timestamp` | M | M |
+  | `ResponseAddress` (Reply topic) | M | omitted |
+  | `CorrelationData` | O | M if it was in the request |
+  | `RequestorId` | M | M |
+  | `TimeoutHint` | M | omitted |
+  | `Messages[]` | M | M |
+
+- **ActionRequest:** `DataSetWriterId`, `ActionTargetId` (common services: 1), `RequestId` (unique per Requestor), `ActionState` = 1, `Payload` (input arguments as fields); optional `MetaDataVersion`, `Timestamp`.
+- **ActionResponse:** same fields plus `Status` (CompactEncoding: `{}` = Good, `{"Code": n}` otherwise; SF-024). `ActionState` is 1 (intermediate) or 2 (done).
+- **ActionMetaData:** `ActionTargets[]`, `Request`, `Response` (DataSetMetaDataType). Predefined for common services. The Action's `DataSetClassId` sits in the request/response metadata.
+- **ActionState:** 0 Idle (not used), 1 Executing, 2 Done.
+- Not used in Action messages: `SequenceNumber`, `DataSetWriterName`, `WriterGroupName`, `MinorVersion`, `MessageType` (DataSetMessage level).
+
+**OI4 resources (MG 9.3)**
+
+- **Health** `d8e7b6df-42ba-448a-975a-199f59e8ffeb`
+  - `Health`: `NORMAL_0 | FAILURE_1 | CHECK_FUNCTION_2 | OFF_SPEC_3 | MAINTENANCE_REQUIRED_4`; the most severe status, ordered FAILURE > OFF_SPEC > CHECK_FUNCTION/MAINTENANCE > NORMAL.
+  - `HealthScore`: Byte 0..100, optional.
+  - `Details[]`: optional, each with `Health` (M), `DiagnosticCode`, `Location`, `Description` (O).
+  - Any change of a detail requires publishing Health.
+- **Config** `9d5983db-440d-4474-9fd7-1cd7a6c8b6c2`
+  - Structure: `{<GroupName>: {Name, Description?, <ConfigName>: {...}}}`.
+  - Each config entry: `Type` (`Boolean|ByteString|DateTime|Number|String`), `Value` (string), `Unit?`, `DefaultValue?`, `Mandatory?`, `Sensitive?`, `Name`, `Description?`, `Validation? {Length, Min, Max, Pattern, Values[]}`, `Context? {Name, Description?}`.
+  - Names match `^[A-Za-z_][A-Za-z0-9_-]*$`. Set differs from Pub only in which fields are mandatory. Unset = empty string.
+- **Data**
+  - Free DataSet; optional standard set `Oi4Pv` (`Pv`, `Sv1..Sv255`, filter `Oi4Pv`).
+  - `DataSetClassId` is publisher-defined (SF-016).
+- **Metadata:** `ua-metadata` for a Data tag; needs Source + Tag.
+- **Event** `543ae05e-b6d9-4161-a0a3-350a0fac5976`
+  - Fields: `Number` (M), `Description?`, `Category` (M), `Details?`.
+  - Categories: `CAT_SYSLOG_0` (Details `MSG`, `HEADER`), `CAT_STATUS_1` (+ `SymbolicId`), `CAT_GENERIC_99`.
+- **Profile** `48017c6a-05c8-48d7-9d85-4b08bbb707f3`: `Resources[]`; mandatory resources depend on the level.
+- **PublicationList** `217434d6-6e1e-4230-b907-f52bc9ffe152`
+  - Fields: `Resource`, `Source`, `Filter?`, `DataSetWriterId`, `Mode?`, `Interval?` (ms), `Precisions?`, `Config?`.
+  - `Mode`: `OFF_0` … `ON_REQUEST_APPLICATION_SOURCE_FILTER_15`; default `ON_REQUEST_1`; typo in literal 14 (SF-015).
+  - `Config`: `NONE_0 | MODE_1 | INTERVAL_2 | MODE_AND_INTERVAL_3`.
+  - Keys `Source`/`Filter` are **not** renamed here.
 - **SubscriptionList** `e5d68c47-c276-4929-8ab9-4c1090cac785`: `TopicPath`, `Interval?`, `Config?` (`NONE_0|CONF_1`).
-- **ReferenceDesignation** `27a75019-164a-496d-a38b-90e8a55c2cfa`: `Function?`, `Product?`, `Location?` each `{Value, Local?, Parent? {Value, Local?, IdentificationLink?}}` (IEC 81346).
-- **PaginationRequest** (in Get): `PerPage` (>0), `Page` (0 = all, fragmented). **Pagination** (in Pub): `TotalCount`, `PerPage`, `Page`, `HasNext`, `PaginationId`.
+- **ReferenceDesignation** `27a75019-164a-496d-a38b-90e8a55c2cfa`: `Function?`, `Product?`, `Location?`, each `{Value, Local?, Parent? {Value, Local?, IdentificationLink?}}`.
+- **Pagination helpers:**
+  - PaginationRequest (in Get): `PerPage` > 0, `Page` (0 = all, fragmented).
+  - Pagination (in Pub): `TotalCount`, `PerPage`, `Page`, `HasNext`, `PaginationId`.
+  - The `WriterGroupName` of helpers is not normative (SF-023).
 - **Locale** (in Get): `Locale` (e.g. `de-DE`).
-- **NewDataSetWriterId** `2aca55bd-0d6f-41b1-a1c2-2d61afcc21f0`: in `Resource` → out `DataSetWriterId`, `Ttl` (s).
-- Other service class ids: FileUpload `3b4a62ba-…`, FileDownload `760abda2-…`, FirmwareUpdate `414e26f6-…`, Blink `3b423a40-…` (see A2 for full ids + reserved ids).
 
-## 8. Message Bus behavior (10)
+**Common-service Actions (MG 9.4, 10.2)**
+- NewDataSetWriterId `2aca55bd-0d6f-41b1-a1c2-2d61afcc21f0`:
+  - Request `{Resource}`; response `{DataSetWriterId, Ttl}`.
+  - DataSetWriterId 8; topic `Call/NewDataSetWriterId` (no Source).
+- FileUpload, FileDownload, FirmwareUpdate and Blink are envelope only, "not maturely specified" (SF-017). Topics `Call/<Service>/<Source>`.
+- Removed resource IDs are reserved (MG A2).
+
+## 8. Message Bus behavior (MG 10)
 
 | Resource | Pub | Get | Set | Del | Topic levels |
 |----------|-----|-----|-----|-----|--------------|
 | MAM | ✓ | ✓ | | | `[/<Source>]` |
 | Health | ✓ | ✓ | | | `[/<Source>]` |
-| Config | ✓ | ✓ | ✓ (needs Source+Filter) | | `[/<Source>[/<Context.Name>]]` |
-| Data | ✓ | ✓ | ✓ (needs Source+Tag) | | `[/<Source>[/<Tag>]]` |
-| Metadata | ✓ | ✓ (needs Source+Tag) | ✓ (needs Source+Tag) | | `/<Source>/<Tag>` |
+| Config | ✓ | ✓ | ✓ (Source+Filter) | | `[/<Source>[/<Context.Name>]]` |
+| Data | ✓ | ✓ | ✓ (Source+Tag) | | `[/<Source>[/<Tag>]]` |
+| Metadata | ✓ | ✓ (Source+Tag) | ✓ (Source+Tag) | | `/<Source>/<Tag>` |
 | Event | ✓ only | | | | `/<Source>/<Category>/<Level>` |
 | Profile | ✓ | ✓ | | | `[/<Source>]` |
-| PublicationList | ✓ | ✓ | ✓ (needs Source+Filter) | | `[/<Source>[/<ResourceType>[/<Tag>]]]` |
-| SubscriptionList | ✓ | ✓ | ✓ | ✓ (need Source+Filter) | `[/<Source>[/<ResourceType>[/<Tag>]]]` |
-| ReferenceDesignation | ✓ | ✓ | ✓ (needs Source) | ✓ (needs Source) | `[/<Source>]` |
+| PublicationList | ✓ | ✓ | ✓ (Source+Filter) | | `[/<Source>[/<ResourceType>[/<Tag>]]]` |
+| SubscriptionList | ✓ | ✓ | ✓ | ✓ (Source+Filter) | `[/<Source>[/<ResourceType>[/<Tag>]]]` |
+| ReferenceDesignation | ✓ | ✓ | ✓ (Source) | ✓ (Source) | `[/<Source>]` |
 
-- `Get` payload: NetworkMessage with empty `Messages` or only PaginationRequest/Locale; answer on matching `Pub` topic with `CorrelationId` = request `MessageId`.
-- `Get` without Source → all assets of the app in one NetworkMessage (paginate if needed).
-- `Set`/`Del` → `Pub/Event/<Source>/Status/<Level>` with `CorrelationId`; after successful Set, new state published per PublicationList.
-- Services: `Oi4/<ST>/<AppId>/Call/<Service>[/<Source>]` → `Oi4/<ST>/<AppId>/Reply/<Service>[/<Source>]`.
-- Health: on start, on change, every 60 s.
+- **Get:** the request is a `ua-data` message with the requested resource's `DataSetClassId` and an empty `Messages`, or only PaginationRequest/Locale (SF-018). The answer goes to the matching `Pub` topic with `ReplyTo` = request `MessageId`. A Get without Source returns all assets of the app (paginated if needed).
+- **Set / Del:** answered by `Pub/Event/<Source>/Status/<Level>` with `ReplyTo`. After a successful Set, the new state is published according to the PublicationList.
+- **Actions:**
+  - Request: `Oi4v2/<ST>/<AppId>/Call/<Service>[/<Source>]`.
+  - Response: `.../Reply/<Service>[/<Source>]`.
+  - Correlation via `RequestId` and `CorrelationData`.
+- **Health:** published on start, on change and every 60 s.
 
-## 9. Registry (A1)
+## 9. Registry (MG A1)
 
-Collects MAM + Health (+ Profile, Event optional) of all assets; offers `Oi4/Registry/<AppId>/Get/MAM[/<Source>]` and `Get/Health[/<Source>]`; web UI lists applications and devices with MAM, health/availability, supported resources, related publisher, audit trail; optional conformity check via schema validation; sends `Get`s after a Birth; default ports 5798 (UI) / 5799 (API); TLS; should start first.
+- Collects MAM and Health (plus Profile and Event, optionally) of all assets.
+- Answers `Oi4v2/Registry/<AppId>/Get/MAM[/<Source>]` and `Get/Health[/<Source>]`.
+- **Web UI:** lists applications and devices with MAM, health and availability, supported resources, related publisher and an audit trail.
+- **Conformity check:** optional, via schema validation.
+- Sends `Get` requests after a Birth message.
+- Default ports 5798 (UI) and 5799 (API), TLS.
+- Platform requirement (RIG 5.1).

@@ -1,5 +1,7 @@
 # SDK architecture comparison (Q-001)
 
+> **Note (C-006):** written against guideline baseline `c85ce2a`. Section numbers and terms (e.g. `CorrelationId`, `MSG`, namespace `Oi4`) predate baseline `5f070bb` (GL-ADR-001 … 011). The conclusions still hold; for current protocol facts see `guideline-digest.md`.
+
 Status: decision input for the product owner (C-003). Details and background: `sdk-options.md`.
 Focus aspects (PO, C-003):
 

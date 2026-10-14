@@ -1,6 +1,6 @@
 # Legacy analysis (history only – see GUARDRAILS G-1.3)
 
-Analyzed in C-001. Revisions: `oi4-oec-service` `2d6e6f2`, `oi4-oec-service-go` `9b96844`, `oi4-oec-demo` `d686c84`, `oi4-oec-registry` `fb77c3e`. All implement guideline **1.x** (Oi4Identifier with dnp-encoded multi-level topics) – incompatible with 2.0 (MS-010).
+Analyzed in C-001. Revisions: `oi4-oec-service` `2d6e6f2`, `oi4-oec-service-go` `9b96844`, `oi4-oec-demo` `d686c84`, `oi4-oec-registry` `fb77c3e`. All implement guideline **1.x** (Oi4Identifier with dnp-encoded multi-level topics) – incompatible with 2.0 (GL-ADR-010, formerly MS-010; additionally GL-ADR-003 … 007 change namespace, payload keys and services).
 
 ## oi4-oec-service (TypeScript, Lerna monorepo)
 

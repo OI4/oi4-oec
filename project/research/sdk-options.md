@@ -1,5 +1,7 @@
 # SDK options paper (Q-001, Q-002, Q-008) – for discussion in P3
 
+> **Note (C-006):** written against guideline baseline `c85ce2a`. Section numbers and terms (e.g. `CorrelationId`, `MSG`, namespace `Oi4`) predate baseline `5f070bb` (GL-ADR-001 … 011). The conclusions still hold; for current protocol facts see `guideline-digest.md`.
+
 Status: draft for product-owner discussion (C-003). Nothing here is decided.
 Facts were checked on 2026-10-12 and are marked as such.
 
