@@ -43,4 +43,4 @@ The first increment is offline image inspection, because it needs no running pla
 
 - New deliverable **D8**, new roadmap phase **P5b**.
 - The REQ catalog (P1) must cover the RIG with the same rigor as the MG.
-- SBOM layout is not canonical yet (SF-027). D8 accepts SPDX and CycloneDX until clarified.
+- SBOM layout is canonical since `7bead4c` (SF-027, RIG 4.1.4): D8 checks for exactly one of `/opt/oi4/licenses/sbom.spdx.json` / `sbom.cdx.json` and that every license is either embedded in the SBOM or present as `<License-ID>.txt`.

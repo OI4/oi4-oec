@@ -36,3 +36,13 @@ The guideline now defines compliance **domains** (Messaging, Service Container) 
 
 - Service Container and platform checks are done by a **separate tool D8** (ADR-0014). D7 remains limited to Messaging compliance of applications and smart devices.
 - D7 handles `Oi4v2` only and ignores v1 traffic (ADR-0015).
+
+## Amendment C-008 (guideline baseline `7bead4c`)
+
+SF-025 is resolved (MG 1.3):
+- The compliance level is **declared by the manufacturer** for each compliance domain. There is no Message Bus message that declares it.
+- Tests are grouped by level. The declared level is a parameter of the test run, and passing a level includes passing all lower levels.
+
+D7 therefore takes the declared level as the CLI option `--level 1|2|3`; this is now normative, not a workaround. `level3` includes the `level1` and `level2` tests.
+
+The active tests no longer cover FileUpload, FileDownload, FirmwareUpdate or Blink, because GL-ADR-012 removed them. The only common-service Action that D7 tests is `NewDataSetWriterId`.
