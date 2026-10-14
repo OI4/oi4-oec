@@ -10,7 +10,7 @@ P0 Onboarding ──► P1 Spec baseline ──► P2 JSON Schema ────�
                          P8 Documentation (starts with P2, grows with every phase) ───────────────────────────────────────────┘
 
 P2 already ships the offline `validate` command of the conformance tool (D7).
-P4 and P5 can run in parallel once P3 is decided; demos (P6) and registry (P7) are verified with D7 (messaging) and D8 (containers). P4b needs the `no_std` core from P4; P5b can start after P1 (RIG requirements).
+P4 and P5 can run in parallel once P3 is decided; demos (P6) and registry (P7) are verified with D7 (messaging) and D8 (containers). P4b (C, independent of the Rust SDK) needs P1/P2 (REQ catalog, schemas, test vectors) and the API sketch from P3; P5b can start after P1 (RIG requirements).
 ```
 
 ---
@@ -44,7 +44,7 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
 
 ## P3 – SDK and conformance tool design (D2, D7, D8, D9) – decision phase
 
-Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Options: `research/sdk-architecture-comparison.md`, `research/sdk-options.md`. **Decided:** S4 Rust SDK + C API (ADR-0011), local monorepo `oec/` (ADR-0012). Remaining in P3: SDK API sketch (Rust + C), crate choices. D7 + D8 in Go (ADR-0013, ADR-0014). v2 only (ADR-0015). Level targets + micro SDK (ADR-0016); open: micro SDK language/hardware (Q-016).
+Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Options: `research/sdk-architecture-comparison.md`, `research/sdk-options.md`. **Decided:** S4 Rust SDK + C API (ADR-0011), local monorepo `oec/` (ADR-0012). Remaining in P3: SDK API sketch (Rust + C), crate choices. D7 + D8 in Go (ADR-0013, ADR-0014). v2 only (ADR-0015). Level targets + micro SDK (ADR-0016); Micro SDK in C17 on ESP32/ESP-IDF (ADR-0017); its C API sketch is part of P3.
 
 - Options paper: language(s) (TypeScript/Node, Go, Python, C#, ...), "SDK vs. sidecar/runtime vs. code generation", packaging, repo layout.
 - Developer-experience sketches: "hello world" OEC app in ≤ 20 lines; how to add a device/asset source, publish data, react to `Set`, expose config.
@@ -69,13 +69,14 @@ Incremental, each increment test-covered:
 
 ## P4b – Micro SDK (D9)
 
-SDK for microcontroller-class smart devices without container (ADR-0016), reusing the `no_std` parts of `oec-core`.
+SDK for microcontroller-class smart devices without container (ADR-0016), written in **C17** with a platform abstraction layer; reference port ESP-IDF on **ESP32** (ADR-0017).
 
-- Language, MQTT/TLS stack and reference hardware decided in P3 (Q-016).
+- Portable core (IL/base64url, topics incl. percent-encoding, JSON encoding of NetworkMessage/MAM/Health, lifecycle state machine) + PAL (MQTT 3.1.1/TLS, clock, persistence); ESP-IDF port with `esp-mqtt` + `esp-tls`/mbedTLS.
+- Tests: host unit tests (CMake, Unity) against the shared D1 test vectors on macOS/Windows/Linux; integration in Espressif QEMU (`esp32`) against the dev broker with D7 (to be confirmed); final check on a real ESP32 board.
 - Scope: Messaging **L1** (Birth/Will, Pub MAM + Health, TLS + auth, topic and payload format); L2 (Get, Set where applicable) if the footprint allows.
 - Explicit configuration (no `/etc/oi4`), static memory where possible, documented RAM/flash footprint.
 - Example firmware for the reference board.
-- **Exit:** example device passes D7 `level1` against the dev broker.
+- **Exit:** example firmware on the ESP32 reference board (and in QEMU, if feasible) passes D7 `--level 1` against the dev broker.
 
 ## P5 – Conformance test tool (D7)
 
@@ -98,7 +99,7 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 
 ## P5b – Infrastructure compliance tool (D8)
 
-Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance (Level 1/2/3)** of application containers and, as far as testable, the **platform requirements** of the RIG (scope confirmation Q-017). Same conventions as D7: Windows/macOS/Linux, test cases reference REQ ids, profiles `level1..3`, console + JSON + JUnit output, exit codes.
+Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance (Level 1/2/3)** of application containers and, as far as testable, the **platform requirements** of the RIG (scope confirmed, Q-017). Same conventions as D7: Windows/macOS/Linux, test cases reference REQ ids, profiles `level1..3`, console + JSON + JUnit output, exit codes.
 
 - `inspect-image` – offline: analyze an OCI image (registry reference or archive): OCI format, exactly one canonical SBOM (`sbom.spdx.json` / `sbom.cdx.json`) + license texts (`<License-ID>.txt` or embedded) in `/opt/oi4/licenses` (RIG 4.1.4), storage paths, user, labels, digest/integrity.
 - `inspect-container` – a running app container: storage mounts (`/etc/oi4/...`, `/run/secrets/...`), hostname = container name rules, networks.
@@ -134,7 +135,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 ## P9 – Hardening & release
 
-- CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK build for the reference board), SBOM/license report, security scan.
+- CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF build for `esp32`), SBOM/license report, security scan.
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
 - CRA review before any publication (Q-011): SBOM, vulnerability handling process, security update policy, support period.
 - Guideline feedback package: all spec findings with proposed text changes for the work group.

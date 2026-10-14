@@ -7,8 +7,6 @@ New questions are added to the first table. Once decided, the row moves to the s
 | ID | Question | Context / options | Blocks | Status |
 |----|----------|-------------------|--------|--------|
 | Q-011 | Publication of (parts of) the work and EU Cyber Resilience Act (CRA) | PO: publication must be reconsidered in light of the CRA (e.g. open-source steward role, SBOM, vulnerability handling, security updates, support period). Note C-006: the guideline itself now requires an SBOM in `/opt/oi4/licenses` from Level 2 (GL-ADR-002), which we generate anyway (G-4.8). | P9 | open – deliberately parked (C-005) |
-| Q-016 | Micro SDK (D9): language and reference hardware? | Proposal: Rust `no_std` reusing `oec-core` (+ C header), embedded MQTT 3.1.1 client with TLS (e.g. `embassy` + `rust-mqtt` + `embedded-tls`); reference board ESP32-C3/S3 (Wi-Fi, enough RAM for TLS) – alternative: pure C on top of a vendor SDK (ESP-IDF, Zephyr). TLS ≥ 1.2 with certificates is the main constraint for MCUs. | P3, P4b | open (new C-007) |
-| Q-017 | D8 scope: does "infrastructure compliance" include **platform** checks (RIG 5.1: broker TLS-only, `/etc/oi4` provisioning, registry ports, resources) or only the Service Container compliance of app containers? | Assumption in ADR-0014: both – first increment offline OCI image inspection (app containers), platform checks afterwards as far as testable. | P5b | open – assumption taken (C-007) |
 
 ## Decided
 
@@ -28,3 +26,5 @@ New questions are added to the first table. Once decided, the row moves to the s
 | Q-013 | Does D7 also check Service Container Compliance? | **Two tools:** D7 = application (Messaging) compliance, new D8 = infrastructure compliance (Service Container + platform, Q-017); both Go | C-007 | ADR-0014 |
 | Q-014 | Support for v1 traffic (`Oi4`)? | **v2 only** in all deliverables; v1.x is ignored (not detected, not listed) | C-007 | ADR-0015 |
 | Q-015 | Compliance level targets; microcontroller support? | SDK supports L1–L3; additional **micro SDK** (D9) for microcontrollers; registry L3; weather demo L3, logger demo L1 (agent's choice of which demo); Service Container L3 for all containers | C-007 | ADR-0016 |
+| Q-016 | Micro SDK (D9): language and reference hardware? | **C17** portable core + platform abstraction layer; reference port **ESP-IDF** on **ESP32** (other ESP32 variants best effort); separate implementation, consistency via D1 schemas/test vectors + D7 | C-009 | ADR-0017 |
+| Q-017 | D8 scope: platform checks too? | **Yes** – Service Container compliance of app containers **and** testable platform requirements (RIG); first increment offline OCI image inspection | C-009 | ADR-0014 |

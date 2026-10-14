@@ -14,7 +14,7 @@ Deliver, step by step and traceable, a clean-room v2.0 implementation of the OI4
 | D6 | Documentation | Docusaurus docs explaining SDK, JSON Schema, conformance tool and demos, simple and understandable |
 | D7 | Conformance test tool | Command-line tool (Windows + macOS, Linux for CI) that checks messages and live OEC participants against the guideline; doubles as integration test harness |
 | D8 | Infrastructure compliance tool | Command-line tool (Windows + macOS + Linux) that checks the Service Container Compliance of app containers and testable platform requirements (ADR-0014) |
-| D9 | Micro SDK | SDK for microcontroller-class smart devices (Messaging Level 1) without container (ADR-0016) |
+| D9 | Micro SDK | SDK for microcontroller-class smart devices (Messaging Level 1) without container; C17, reference board ESP32 (ADR-0016/0017) |
 
 ## Folder layout
 
