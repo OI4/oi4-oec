@@ -13,6 +13,8 @@ Deliver, step by step and traceable, a clean-room v2.0 implementation of the OI4
 | D5 | OEC Registry | State-of-the-art registry listing all participants and what they support |
 | D6 | Documentation | Docusaurus docs explaining SDK, JSON Schema, conformance tool and demos, simple and understandable |
 | D7 | Conformance test tool | Command-line tool (Windows + macOS, Linux for CI) that checks messages and live OEC participants against the guideline; doubles as integration test harness |
+| D8 | Infrastructure compliance tool | Command-line tool (Windows + macOS + Linux) that checks the Service Container Compliance of app containers and testable platform requirements (ADR-0014) |
+| D9 | Micro SDK | SDK for microcontroller-class smart devices (Messaging Level 1) without container (ADR-0016) |
 
 ## Folder layout
 
@@ -28,7 +30,7 @@ project/
   decisions/              Architecture Decision Records (ADR-xxxx)
   log/                    one file per work cycle (chronological protocol)
   research/               digests and analyses (guideline digest, legacy analysis, ...)
-oec/                      monorepo with all deployables D1–D7 (see oec/README.md, ADR-0012)
+oec/                      monorepo with all deployables D1–D9 (see oec/README.md, ADR-0012)
 ```
 
 The workspace root is a **local git repository** (no remote). `legacy/` and `oi4-oec-documentation/` are separate repos and git-ignored.

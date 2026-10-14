@@ -5,10 +5,12 @@ The roadmap is iterative: phases are ordered by dependency, each ends with expli
 ```
 P0 Onboarding ──► P1 Spec baseline ──► P2 JSON Schema ─────────────┬─► P5 Conformance tool ──┐
                                    └─► P3 SDK + tool design ──────┴─► P4 SDK core ───────────┴─► P6 Demos ──► P7 Registry ──► P9 Release
+                                                                  ├─► P4b Micro SDK (D9)
+                                                                  └─► P5b Infrastructure compliance tool (D8)
                          P8 Documentation (starts with P2, grows with every phase) ───────────────────────────────────────────┘
 
 P2 already ships the offline `validate` command of the conformance tool (D7).
-P4 and P5 can run in parallel once P3 is decided; demos (P6) and registry (P7) are verified with D7.
+P4 and P5 can run in parallel once P3 is decided; demos (P6) and registry (P7) are verified with D7 (messaging) and D8 (containers). P4b needs the `no_std` core from P4; P5b can start after P1 (RIG requirements).
 ```
 
 ---
@@ -40,9 +42,9 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
 - First increment of D7: offline `validate` command (topic + payload from file/stdin/directory), see P5.
 - **Exit:** every REQ marked "schema-testable" is covered by a positive and negative vector; schemas published with stable `$id`s.
 
-## P3 – SDK and conformance tool design (D2, D7) – decision phase
+## P3 – SDK and conformance tool design (D2, D7, D8, D9) – decision phase
 
-Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Options: `research/sdk-architecture-comparison.md`, `research/sdk-options.md`. **Decided:** S4 Rust SDK + C API (ADR-0011), local monorepo `oec/` (ADR-0012). Remaining in P3: SDK API sketch (Rust + C), crate choices. D7 in Go (ADR-0013).
+Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Options: `research/sdk-architecture-comparison.md`, `research/sdk-options.md`. **Decided:** S4 Rust SDK + C API (ADR-0011), local monorepo `oec/` (ADR-0012). Remaining in P3: SDK API sketch (Rust + C), crate choices. D7 + D8 in Go (ADR-0013, ADR-0014). v2 only (ADR-0015). Level targets + micro SDK (ADR-0016); open: micro SDK language/hardware (Q-016).
 
 - Options paper: language(s) (TypeScript/Node, Go, Python, C#, ...), "SDK vs. sidecar/runtime vs. code generation", packaging, repo layout.
 - Developer-experience sketches: "hello world" OEC app in ≤ 20 lines; how to add a device/asset source, publish data, react to `Set`, expose config.
@@ -65,9 +67,19 @@ Incremental, each increment test-covered:
 9. Dev environment: docker compose with TLS broker (e.g. Mosquitto), generated dev PKI, sample `/etc/oi4` layout.
 - **Exit:** conformity test vectors pass; integration tests against broker pass (incl. D7 `test` against an SDK example app, as soon as available); example app documented.
 
+## P4b – Micro SDK (D9)
+
+SDK for microcontroller-class smart devices without container (ADR-0016), reusing the `no_std` parts of `oec-core`.
+
+- Language, MQTT/TLS stack and reference hardware decided in P3 (Q-016).
+- Scope: Messaging **L1** (Birth/Will, Pub MAM + Health, TLS + auth, topic and payload format); L2 (Get, Set where applicable) if the footprint allows.
+- Explicit configuration (no `/etc/oi4`), static memory where possible, documented RAM/flash footprint.
+- Example firmware for the reference board.
+- **Exit:** example device passes D7 `level1` against the dev broker.
+
 ## P5 – Conformance test tool (D7)
 
-Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of applications and smart devices against the guideline (no platform/broker checks, ADR-0006; app-container checks open, Q-013). Shares only the D1 JSON Schemas with the SDK, no code. Runs on **Windows and macOS** (and Linux for CI) and doubles as the **integration test harness** for SDK, demos and registry.
+Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of applications and smart devices against the guideline (no platform/broker/container checks – those are D8, ADR-0006/0014). Shares only the D1 JSON Schemas with the SDK, no code. Runs on **Windows and macOS** (and Linux for CI) and doubles as the **integration test harness** for SDK, demos and registry.
 
 - `validate` – offline: topic + payload (single file, stdin, directory or recorded capture) against D1 + topic grammar + cross-field rules (e.g. topic `<Source>` = payload `DataSetWriterName`, `<Filter>` = `WriterGroupName`, namespace `Oi4v2`). Delivered with P2.
 - `monitor` – passive: connect to a broker, observe all `Oi4v2/#` traffic, validate every message live, summarize per participant.
@@ -84,13 +96,22 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 - Distribution: single self-contained executable per OS/arch (Windows x64/arm64, macOS arm64/x64, Linux) and container image.
 - **Exit:** `test` passes against the SDK example app and fails on purpose-built faulty fixtures; runs in CI on Windows, macOS and Linux runners.
 
+## P5b – Infrastructure compliance tool (D8)
+
+Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance (Level 1/2/3)** of application containers and, as far as testable, the **platform requirements** of the RIG (scope confirmation Q-017). Same conventions as D7: Windows/macOS/Linux, test cases reference REQ ids, profiles `level1..3`, console + JSON + JUnit output, exit codes.
+
+- `inspect-image` – offline: analyze an OCI image (registry reference or archive): OCI format, SBOM (SPDX/CycloneDX, SF-027) + license texts in `/opt/oi4/licenses`, storage paths, user, labels, digest/integrity.
+- `inspect-container` – a running app container: storage mounts (`/etc/oi4/...`, `/run/secrets/...`), hostname = container name rules, networks.
+- `inspect-platform` – platform host/broker as far as testable (TLS-only broker, `broker.json` provisioning, registry ports 5798/5799).
+- **Exit:** our demo and registry images pass `level3`; purpose-built faulty images fail.
+
 ## P6 – Demo services (D3, D4)
 
 - **Weather service** (`OTConnector`): weather stations as assets (each with its own IL + MAM), `Data` (Oi4Pv: e.g. temperature as `Pv`, humidity/pressure/wind as `Sv<n>`) + `Metadata` with units, `Config` for locations and polling interval, `Health` reflecting API reachability. Data source via provider interface: default MET Norway (keyless, CC BY 4.0, honor User-Agent/caching/attribution rules) + offline simulation provider (ADR-0010, G-4.7).
 - **Logger service** (`Utility`): subscribes to selectable topics/resources (default: `Event`, `Health`, optionally `Data`), logs structured output (stdout/JSON, optional file), configurable via the `Config` resource, shows the consumer side of the SDK.
-- Both: Dockerfile (OCI, SBOM + license texts in `/opt/oi4/licenses`), compose integration, README. Target: Messaging + Service Container Level 3 (Q-015).
-- Optional: a minimal **smart-device example** (Messaging Level 1, C API, no container) – scope per Q-015.
-- **Exit:** both demos run in the dev environment and pass the D7 `test` suite.
+- Both: Dockerfile (OCI, SBOM + license texts in `/opt/oi4/licenses`), compose integration, README. Service Container Level 3 (ADR-0016).
+- **Compliance targets (ADR-0016):** weather = Messaging **L3** (full provider showcase); logger = Messaging **L1** (minimal participant; configured via file/environment instead of the `Config` resource).
+- **Exit:** both demos run in the dev environment and pass D7 (`level3` resp. `level1` profile) and D8 (`level3`).
 
 ## P7 – OEC Registry (D5)
 
@@ -99,21 +120,21 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 - Discovery: listens to `Pub/MAM`, `Pub/Health`, `Pub/Profile`, `Pub/Event` (+ others as decided); actively queries new participants after Birth (`Get/MAM`, `Get/Profile`, `Get/PublicationList`, ...); handles Will/Close (availability).
 - Provides own Registry services per MG A1 (`Oi4v2/Registry/<AppId>/Get/MAM[/<Source>]`, `Get/Health[/<Source>]`).
-- Model: applications vs. devices (assets) incl. "published by" relation, supported resources/methods, **observed compliance level** (SF-025), health incl. `Details[]` and history, last seen, event/audit trail; optional detection of v1 (`Oi4`) participants (Q-014).
+- Model: applications vs. devices (assets) incl. "published by" relation, supported resources/methods, **observed compliance level** (SF-025), health incl. `Details[]` and history, last seen, event/audit trail; v2 only, v1 traffic ignored (ADR-0015). Target: Messaging + Service Container L3 (ADR-0016).
 - Conformity view: validation of observed traffic per participant (reuses D1 and the D7 rule engine where sensible).
 - Web UI (modern stack, decided in an ADR) + documented API (REST/OpenAPI and/or live updates via WebSocket/SSE); default ports 5798/5799 (A1).
-- **Exit:** registry lists all dev-environment participants with capabilities, health and conformity status; registry passes the D7 `test` suite.
+- **Exit:** registry lists all dev-environment participants with capabilities, health and conformity status; registry passes D7 and D8 at `level3`.
 
 ## P8 – Documentation (D6) – continuous
 
 - New standalone Docusaurus site in `oec/docs` (ADR-0012), no links to the guideline site.
-- Sections: Getting started (dev environment in 10 minutes), Concepts (short; guideline referenced by section number, no links – G-4.11) incl. compliance levels, SDK guide + API reference, conformance tool guide, JSON Schema reference (generated where possible) + validation how-to, Demo walkthroughs, Registry guide, Migration notes 1.x → 2.0 (breaking changes GL-ADR-001 … 011: Identification Link, `Oi4v2`, `DataSetWriterName`/`WriterGroupName`, `ReplyTo`, OPC UA 1.05.04, Actions, removed resources, SBOM, compliance levels).
+- Sections: Getting started (dev environment in 10 minutes), Concepts (short; guideline referenced by section number, no links – G-4.11) incl. compliance levels, SDK guide + API reference, micro SDK guide, compliance tool guides (D7, D8), JSON Schema reference (generated where possible) + validation how-to, Demo walkthroughs, Registry guide, Migration notes 1.x → 2.0 (breaking changes GL-ADR-001 … 011: Identification Link, `Oi4v2`, `DataSetWriterName`/`WriterGroupName`, `ReplyTo`, OPC UA 1.05.04, Actions, removed resources, SBOM, compliance levels).
 - Each phase delivers its doc pages in the same phase.
 - **Exit:** docs build without broken links; a newcomer can run the demos by following the docs only.
 
 ## P9 – Hardening & release
 
-- CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7 on Windows/macOS/Linux runners), SBOM/license report, security scan.
+- CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK build for the reference board), SBOM/license report, security scan.
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
 - CRA review before any publication (Q-011): SBOM, vulnerability handling process, security update policy, support period.
 - Guideline feedback package: all spec findings with proposed text changes for the work group.
