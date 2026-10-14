@@ -34,7 +34,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 - Level tables: Mandatory = MUST, Recommended = SHOULD, – = not required at that level.
 - A keyword in the sentence wins over the admonition type (also in notes). Admonitions: `NOTE` (informative unless it has a keyword), `RECOMMENDED` = SHOULD, `HIGHLY RECOMMENDED` = strong SHOULD, `REQUIRED` = MUST, `ATTENTION`.
 - Statements about the operator/platform apply to the platform (RIG 5.1).
-- **Statements without keyword, examples and figures are informative.** Many protocol behaviors are written without keyword (Health timing, Birth topic, Status event after Set/Del, pagination continuation …) → SF-035; interim rule G-1.6.
+- **Statements without keyword, examples and figures are informative.** Many protocol behaviors are written without keyword (Health timing, Birth topic, Status event after Set/Del, pagination continuation …) → SF-035 (decided C-013: the PO adds keywords; until then such behavior counts as MUST, flagged `implicit`, G-1.6).
 - `REQUIRED` boxes at `49b6fe2`: 9 ACL boxes (MG 9.1.x), MG 4.1 (scheme), MG 4.2 (base64url), RIG 4.1.1–4.1.4.
 
 ## 1. Compliance (MG 1.3, 7.2; RIG 1.2)
@@ -143,7 +143,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
   - `Reply` uses the same topic as `Call` with the method swapped.
 - **Resources:** `MAM, Health, Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList, ReferenceDesignation`.
 - **Common services** (Actions): only `NewDataSetWriterId` (GL-ADR-012).
-- **Specific services:** removed (GL-ADR-014). Whether other resource/service names are forbidden below `Oi4v2` is open (SF-036; MG 7.1.1: all `Oi4v2` topics shall be OI4-conform).
+- **Specific services:** removed (GL-ADR-014). The resource/service set is **closed**: other names below `Oi4v2` are non-conformant (SF-036, decided C-013; MG 7.1.1: all `Oi4v2` topics shall be OI4-conform).
 - **Source:** base64url IL; equals `AppId` if the information is about the app itself.
 - **Filter:** each level is a `<Topic encoded String>`; `+ # /` within a level are percent-encoded (`%2B %23 %2F`, `%` → `%25`), nothing else. `/` only separates resource-defined levels, never leading/trailing; `WriterGroupName` uses the same value.
 
