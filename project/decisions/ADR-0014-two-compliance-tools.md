@@ -28,7 +28,7 @@ Common rules for both tools:
 - **Platforms:** Windows, macOS and Linux (G-4.13).
 - **Q-010 still holds for D7** (applications only). Infrastructure checks are D8's job.
 
-## Assumption (to be confirmed in Q-017)
+## Scope (confirmed by the PO in C-009, Q-017)
 
 "Infrastructure compliance" covers the whole RIG: Service Container compliance of app containers first, then platform checks where the RIG is testable.
 

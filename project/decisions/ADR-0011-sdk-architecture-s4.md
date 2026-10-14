@@ -40,3 +40,7 @@ The guideline changes (GL-ADR-001 … 011) do not change the decision, they stre
 ## Amendment C-007 (ADR-0016)
 
 `oec-core` must be `no_std`-compatible (`alloc` optional, no `std`-only dependencies in the codec/topic/identity code) so that the micro SDK (D9) can reuse it. The micro SDK itself is decided separately (ADR-0016, Q-016).
+
+## Amendment C-009 (ADR-0017)
+
+The C-007 requirement that `oec-core` be `no_std`-compatible is **withdrawn**. The micro SDK (D9) is a separate C17 implementation (ADR-0017). Keeping `oec-core` free of `std` is still welcome where it costs nothing, but it is not a design constraint.
