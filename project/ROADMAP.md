@@ -71,7 +71,8 @@ Incremental, each increment test-covered:
 
 SDK for microcontroller-class smart devices without container (ADR-0016), written in **C17** with a platform abstraction layer; reference port ESP-IDF on **ESP32** (ADR-0017).
 
-- Portable core (IL/base64url, topics incl. percent-encoding, JSON encoding of NetworkMessage/MAM/Health, lifecycle state machine) + PAL (MQTT 3.1.1/TLS, clock, persistence); ESP-IDF port with `esp-mqtt` + `esp-tls`/mbedTLS.
+- Portable core (IL/base64url, topics incl. percent-encoding, JSON encoding of NetworkMessage/MAM/Health, lifecycle state machine) + PAL (MQTT 3.1.1/TLS, clock, persistence); ESP-IDF port with `esp-mqtt` + `esp-tls`/mbedTLS; afterwards (best effort) **Arduino library** packaging with an Arduino-ESP32 PAL port (ADR-0017 amendment C-010).
+- C safety measures: static analysis, ASan/UBSan in host tests, fuzzing of topic/JSON parsers.
 - Tests: host unit tests (CMake, Unity) against the shared D1 test vectors on macOS/Windows/Linux; integration in Espressif QEMU (`esp32`) against the dev broker with D7 (to be confirmed); final check on a real ESP32 board.
 - Scope: Messaging **L1** (Birth/Will, Pub MAM + Health, TLS + auth, topic and payload format); L2 (Get, Set where applicable) if the footprint allows.
 - Explicit configuration (no `/etc/oi4`), static memory where possible, documented RAM/flash footprint.
@@ -137,7 +138,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 - CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF build for `esp32`), SBOM/license report, security scan.
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
-- CRA review before any publication (Q-011): SBOM, vulnerability handling process, security update policy, support period.
+- Publication target: private GitHub repositories (working assumption, Q-011). CRA review before any *public* release (Q-011): SBOM, vulnerability handling process, security update policy, support period.
 - Guideline feedback package: all spec findings with proposed text changes for the work group.
 
 ---

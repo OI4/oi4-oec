@@ -49,7 +49,7 @@ Section numbers refer to the Messaging Guideline (MG) or the Runtime & Infrastru
 | G-3.5 | Spec ambiguities are never silently resolved. Log them as `SF-xxx`, propose an interpretation, mark it in code/schema with the SF id, and keep the decision reversible. |
 | G-3.6 | Language: communication with the product owner in German; all artifacts (code, comments, docs, logs, ADRs, commit messages) in English. |
 | G-3.7 | Handover-ready at all times: another agent must be able to continue using only `AGENTS.md`, `STATUS.md` and the latest log. |
-| G-3.8 | **Version control:** the workspace is a local git repo (ADR-0012); every change is committed individually, referencing the cycle and REQ/SF/ADR ids. Nothing is pushed/published without PO approval (CRA review, Q-011). Deployables live only in `oec/`. |
+| G-3.8 | **Version control:** the workspace is a local git repo (ADR-0012); every change is committed individually, referencing the cycle and REQ/SF/ADR ids. Nothing is pushed/published without PO approval; working assumption: private GitHub repositories only, CRA review before any public release (Q-011). Deployables live only in `oec/`. |
 
 ## G-4 Engineering
 
