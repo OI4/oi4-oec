@@ -23,3 +23,7 @@ D7 is implemented in **Go** in `oec/conformance/` as its own Go module.
 ## Amendment C-007 (ADR-0014)
 
 The infrastructure compliance tool **D8** is also written in Go. It lives in the same Go module `oec/conformance/` as a separate binary and may share internal packages (reporting, test catalog) with D7.
+
+## Amendment C-013 (ADR-0018)
+
+Besides the D1 JSON Schema files, the guideline-derived spec baseline `oec/spec/` (data files: REQ catalog, topic grammar, matrix, vectors) is shared as well (ADR-0006 amendment C-013). Still no shared code.
