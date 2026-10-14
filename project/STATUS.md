@@ -20,8 +20,10 @@ C-011: M5Stack added to the micro SDK (`esp32s3` now supported, M5Stack Core2/Co
 
 ## Next step
 
-1. Product owner confirms the order of the next phases: **P1 spec baseline** (requirements catalog, topic grammar) → **P2 JSON Schema** (+ D7 `validate`), in parallel finishing P3 (Rust/C API sketch, crate choices; D7 = Go per ADR-0013).
-2. Then plan P1 in detail (first cycle of P1).
+PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
+
+1. **C-012 – plan P1:** write the P1 plan into the C-012 log. It covers the structure and format of the requirements catalog (`REQ-<area>-NNN` with guideline reference, MUST/SHOULD/MAY, domain, level, testability), its file location, the order of the areas, the topic-grammar approach and the Method × Resource matrix. Present the plan to the PO (in German) and get it confirmed before writing the catalog.
+2. Then execute P1 in small cycles (one or a few areas per cycle).
 
 ## Deliverables
 
