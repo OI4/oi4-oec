@@ -42,6 +42,13 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 ## Baselines
 
 - Guideline: `oi4-oec-documentation` @ `7bead4c`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 013, SF-001 … 031 resolved); previous `5f070bb`, `c85ce2a`
+- **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
+  - the TLS dev broker (`oec/dev`, docker compose)
+  - integration tests (SDK, D7 live tests, demos, registry)
+  - building OCI images with SBOMs
+  - D8 checks of running containers
+  
+  Any Docker-compatible engine works (Docker Desktop, OrbStack, Colima, Podman); CI uses Linux runners with Docker.
 - Toolchain seen: node 22.13, npm 11, yarn 4.13, go 1.24.2, Docker 28.4, Python 3.12.9 (macOS arm64)
 
 ## Blocking open questions
