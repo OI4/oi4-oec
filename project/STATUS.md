@@ -1,6 +1,6 @@
 # Status
 
-_Last updated: 2026-10-14, cycle C-007_
+_Last updated: 2026-10-14, cycle C-008_
 
 ## Current phase
 
@@ -9,6 +9,8 @@ _Last updated: 2026-10-14, cycle C-007_
 C-006 re-baselined all project artifacts on guideline `5f070bb` (guideline ADRs GL-ADR-001 … 011 implemented; guideline split into MG + RIG). All project decisions remain valid; ADR-0001/0005/0006/0011 amended.
 
 C-007 decided Q-013–Q-015: second tool D8 for infrastructure compliance (ADR-0014), v2 only (ADR-0015), level targets + micro SDK D9 (ADR-0016).
+
+C-008 re-baselined on guideline `7bead4c` (PO resolved all spec findings SF-001 … 031; new GL-ADR-012 only `NewDataSetWriterId` as common service, GL-ADR-013 NodeIds as JSON strings). No project decision changed; ADR-0001/0006/0008/0014 amended. **No open spec findings.**
 
 ## Next step
 
@@ -32,7 +34,7 @@ C-007 decided Q-013–Q-015: second tool D8 for infrastructure compliance (ADR-0
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `5f070bb` (MG + RIG + GL-ADR-001 … 011); previous `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `7bead4c`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 013, SF-001 … 031 resolved); previous `5f070bb`, `c85ce2a`
 - Toolchain seen: node 22.13, npm 11, yarn 4.13, go 1.24.2, Docker 28.4, Python 3.12.9 (macOS arm64)
 
 ## Blocking open questions
@@ -54,3 +56,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-005 | 2026-10-12 | D7 in Go; OPEN-QUESTIONS split into open/decided | `log/2026-10-12_C-005_d7-go-open-questions.md` |
 | C-006 | 2026-10-14 | Re-baseline on guideline `5f070bb` (GL-ADRs, MG/RIG split) | `log/2026-10-14_C-006_guideline-rebaseline.md` |
 | C-007 | 2026-10-14 | Decisions Q-013–Q-015: D8, v2 only, level targets, micro SDK | `log/2026-10-14_C-007_compliance-tools-levels.md` |
+| C-008 | 2026-10-14 | Re-baseline on guideline `7bead4c` (all SF resolved, GL-ADR-012/013) | `log/2026-10-14_C-008_rebaseline-findings-resolved.md` |
