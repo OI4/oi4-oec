@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-14, cycle C-013_
+_Last updated: 2026-10-14, cycle C-014_
 
 ## Current phase
 
-**P1 – Spec baseline (plan confirmed, execution starts with C-014)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-014 done, next C-015)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -24,18 +24,21 @@ C-012: P1 plan written – catalog `REQ-<AREA>-NNN` as YAML in a new `oec/spec/`
 
 C-013: re-baselined on guideline `49b6fe2` – PO resolved SF-032 (MG 1.2 normative keywords, BCP 14; keyword-less statements are informative), SF-033 (GL-ADR-014 removes the specific services, GL-ADR-015 moves former MG 6 to the informative OEC Process Description and renumbers MG 7–10 → 6–9) and SF-034 (no external document); GL-ADR-016 removes the empty AAS chapter. GUARDRAILS (new G-1.6 keywords), digest, ROADMAP, ADR-0001 (amendment), AGENTS.md updated; living documents use the new MG numbers, historical ADRs/logs keep the old ones. New findings **SF-035** (protocol behavior without keyword, e.g. Health 60 s heartbeat, Status event after Set/Del) and **SF-036** (closed vs. open set of resources/services). P1 plan: decisions 3–5 settled, area `SVC` and field `maturity` dropped, `ACT` folded into the `MSG` cycle, cycle cut C-014 … C-022. **PO decisions (C-013):** Q-018 → catalog as YAML in `oec/spec/`, shared guideline-derived contract (ADR-0018; ADR-0006/0012/0013 amended, G-4.12); SF-035 → PO adds keywords, until then implicit MUST (G-1.6); SF-036 → closed resource/service set (G-2.1); P1 plan confirmed (cycle cut C-014 … C-022, ROADMAP P1); golden examples are checked against the guideline and built as compliant, meaningful test data, reviewed by the PO per increment (ADR-0018 amendment, G-3.9).
 
+C-014: `oec/spec/` created (ADR-0018 amendment C-014): Go module `oec/spec/tools` with the CLI `spectool` (`lint` – strict YAML subset + JSON Schema 2020-12 + catalog rules + verbatim quote check against the guideline; `render` – Markdown views; `inventory` – normative-statement candidates of MG + RIG; `coverage` – per-area mapping report; all with `-check`), schemas, `areas.yaml` (26 areas incl. new `BUS`, `GEN`), inventory at `49b6fe2` (1232 items). **Area `CMP` drafted:** REQ-CMP-001 … 032 (`status: draft`), 88/88 CMP inventory items mapped (59 covered, 29 informative). New findings **SF-037** (Level 3 scope of methods/resources, "Where applicable") and **SF-038** (MG 1.3 Level 2 text vs. RIG 1.2 OCI at Level 1) – open, interpretations used in the drafts.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **C-014** – `oec/spec/` skeleton (ADR-0018), catalog JSON Schema, Go tools (lint, render, inventory), YAML library choice, normative-sentence inventory of MG + RIG incl. SF-035 candidates, area `CMP`. Further cycles per ROADMAP P1 (C-015 … C-022).
-2. When the PO has updated the guideline for SF-035/036 (new guideline commit), re-baseline first.
+1. **PO input (not blocking C-015):** review `oec/spec/requirements/view/cmp.md` (32 drafts) and the CMP entries of `oec/spec/coverage/informative.yaml` (G-3.9); decide **SF-037** and **SF-038** (`project/SPEC-FINDINGS.md`).
+2. **C-015** – areas `IL` (MG 4, A3) and `TOP` (MG 7, 7.1), formal topic grammar (`oec/spec/topic/topic.abnf` + `topic-patterns.json`), topic vectors (+ their lint); golden vectors for IL/TOP may start. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-016 … C-022).
+3. When the PO has updated the guideline (SF-035 … 038), re-baseline first: `spectool inventory` with the new commit, bump `baseline` in all catalog files, remap the keys `spectool lint` reports.
 
 ## Deliverables
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (area CMP drafted) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 (ADR-0016) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
@@ -47,7 +50,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `49b6fe2`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 016, SF-001 … 034 resolved, SF-035/036 decided – guideline update by the PO pending; OEC Process Description informative); previous `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `49b6fe2`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 016, SF-001 … 034 resolved, SF-035/036 decided – guideline update by the PO pending, SF-037/038 open; OEC Process Description informative); previous `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -55,11 +58,11 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
   - D8 checks of running containers
   
   Any Docker-compatible engine works (Docker Desktop, OrbStack, Colima, Podman); CI uses Linux runners with Docker.
-- Toolchain seen: node 22.13, npm 11, yarn 4.13, go 1.24.2, Docker 28.4, Python 3.12.9 (macOS arm64)
+- Toolchain seen: node 22.13, npm 11, yarn 4.13, go 1.24.2 (+ go1.27.2 via `GOTOOLCHAIN=auto` for `oec/spec/tools`), Docker 28.4, Python 3.12.9 (macOS arm64)
 
 ## Blocking open questions
 
-- None for P1.
+- None for P1. SF-037/038 are open but not blocking (drafts use the proposed interpretation, G-3.5).
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -83,3 +86,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-011 | 2026-10-14 | M5Stack support in the micro SDK | `log/2026-10-14_C-011_m5stack.md` |
 | C-012 | 2026-10-14 | P1 plan (catalog format, area order, topic grammar, matrix, golden examples); SF-032 … 034, Q-018 | `log/2026-10-14_C-012_p1-plan.md` |
 | C-013 | 2026-10-14 | Re-baseline on guideline `49b6fe2` (SF-032 … 034 resolved, GL-ADR-014 … 016, MG renumbering); SF-035/036 found and decided; Q-018 → ADR-0018; P1 plan + golden-example rules confirmed | `log/2026-10-14_C-013_rebaseline-49b6fe2.md` |
+| C-014 | 2026-10-14 | `oec/spec/` skeleton, `spectool` (lint/render/inventory/coverage), inventory of MG + RIG, area `CMP` drafted (REQ-CMP-001 … 032); SF-037/038 | `log/2026-10-14_C-014_spec-skeleton-cmp.md` |
