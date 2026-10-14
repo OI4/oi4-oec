@@ -20,6 +20,7 @@ Use the id, e.g. `REQ-CMP-003`. Ids are never reused or renumbered; a replaced e
 
 Fields of an entry (`requirements/catalog.schema.json`):
 
+- `statement` – one atomic requirement in our words, written in present tense; the obligation is carried by `keyword` and `levels`, the guideline wording by `quotes`.
 - `keyword` – MUST / MUST NOT / SHOULD / SHOULD NOT / MAY as mapped by MG 1.2; for graded domains it equals the Level 3 obligation.
 - `implicit: true` – the guideline states the behavior without keyword; treated as MUST by the interim rule of SF-035.
 - `domain` – `messaging` or `service-container` (graded, `levels` L1–L3 required) or `platform` (not graded, no `levels`).

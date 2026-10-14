@@ -1,0 +1,652 @@
+# Requirements of area CMP – compliance domains, levels and minimum sets
+# (ADR-0018, schema: catalog.schema.json). Rows of the level tables are
+# umbrella entries: their scope lists the sections whose detailed
+# requirements (other areas) they grade per level.
+area: CMP
+baseline: 49b6fe2
+requirements:
+  # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
+  - id: REQ-CMP-001
+    title: MQTT connectivity to the Message Bus
+    statement: >-
+      A component connects to the Message Bus as MQTT client with the protocol
+      version and the broker address and ports defined in MG 6.1 and MG 6.2.1.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    scope: [MG 6.1, MG 6.2.1]
+    refs: [MG 1.3]
+    quotes:
+      - ref: MG 1.3
+        text: MQTT connectivity to the Message Bus (6.1 Protocol Version, 6.2.1 Broker Address and Ports) Mandatory Mandatory Mandatory
+    verification: [d7-test]
+    inventory: [MG-1.3-3f04bfb1]
+    status: draft
+
+  - id: REQ-CMP-002
+    title: MQTT over TLS and authentication
+    statement: >-
+      A component connects to the broker via TLS and authenticates as defined
+      in MG 6.2.2.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    scope: [MG 6.2.2]
+    refs: [MG 1.3]
+    quotes:
+      - ref: MG 1.3
+        text: MQTT over TLS and authentication (6.2.2 Security Settings) Mandatory Mandatory Mandatory
+    verification: [d7-test]
+    inventory: [MG-1.3-3f95bc6f]
+    status: draft
+
+  - id: REQ-CMP-003
+    title: Birth message and will message
+    statement: >-
+      A component publishes its birth message and registers its will message
+      as defined in MG 6.3.3 and MG 6.3.5.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    scope: [MG 6.3.3, MG 6.3.5]
+    refs: [MG 1.3]
+    quotes:
+      - ref: MG 1.3
+        text: Birth message and will message (6.3.3 Birth Message, 6.3.5 Will Message) Mandatory Mandatory Mandatory
+    verification: [d7-monitor, d7-test]
+    inventory: [MG-1.3-34c7c7de]
+    status: draft
+
+  - id: REQ-CMP-004
+    title: Topic structure and namespace
+    statement: >-
+      Every topic a component publishes or subscribes to below the OI4
+      namespace conforms to the topic structure and namespace elements of
+      MG 7.1.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    scope: [MG 7.1]
+    refs: [MG 1.3]
+    quotes:
+      - ref: MG 1.3
+        text: Conformance to the topic structure and namespace (7.1 Topic Namespace Elements) Mandatory Mandatory Mandatory
+    verification: [d7-validate]
+    inventory: [MG-1.3-f76428e2, MG-1.3-a1d84b40]
+    status: draft
+
+  - id: REQ-CMP-005
+    title: Payload format
+    statement: >-
+      Every payload a component publishes is OPC UA-conform JSON and uses the
+      objects defined by the OPC Foundation and the OI4 Alliance as specified
+      in MG 8.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    scope: [MG 8]
+    refs: [MG 1.3]
+    quotes:
+      - ref: MG 1.3
+        text: Payload format based on OPC UA-conform JSON and the objects defined by the OI4 Alliance (8 Payload Format) Mandatory Mandatory Mandatory
+    verification: [schema, d7-validate]
+    inventory: [MG-1.3-b63df147, MG-1.3-a1d84b40]
+    status: draft
+
+  - id: REQ-CMP-006
+    title: Publish MAM for itself and all subordinate assets
+    statement: >-
+      An application or device publishes the resource MAM with the method Pub
+      for itself and for every subordinate asset it represents, as defined in
+      MG 9.1.1.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    scope: [MG 9.1.1]
+    refs: [MG 1.3, MG 7.2, MG 7.2.1, MG 7.2.2]
+    quotes:
+      - ref: MG 1.3
+        text: Publish MAM for itself and all subordinate assets (9.1.1 MAM (Master Asset Model)) Mandatory Mandatory Mandatory
+      - ref: MG 7.2.1
+        text: At Level 1, the resources MAM and Health must be published for the application itself and all subordinate assets.
+      - ref: MG 7.2.2
+        text: At Level 1, the resources MAM and Health must be published for the device itself and all subordinate assets.
+    verification: [d7-monitor]
+    inventory:
+      - MG-1.3-4651b89a
+      - MG-1.3-a1d84b40
+      - MG-7.2-bc168d66
+      - MG-7.2.1-82103a01
+      - MG-7.2.1-ab3e38f3
+      - MG-7.2.1-3717a6e0
+      - MG-7.2.2-4158cefa
+      - MG-7.2.2-60a01b4e
+      - MG-7.2.2-4f9f4db6
+    status: draft
+
+  - id: REQ-CMP-007
+    title: Publish Health for itself and all subordinate assets
+    statement: >-
+      An application or device publishes the resource Health with the method
+      Pub for itself and for every subordinate asset it represents, as defined
+      in MG 9.1.2.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    scope: [MG 9.1.2]
+    refs: [MG 1.3, MG 7.2, MG 7.2.1, MG 7.2.2]
+    quotes:
+      - ref: MG 1.3
+        text: Publish Health for itself and all subordinate assets (9.1.2 Health) Mandatory Mandatory Mandatory
+      - ref: MG 7.2
+        text: 'Level 1 (Minimal): The entity publishes MAM and Health for itself and all subordinate assets using the method Pub.'
+    verification: [d7-monitor]
+    inventory:
+      - MG-1.3-e977a50d
+      - MG-1.3-a1d84b40
+      - MG-7.2-bc168d66
+      - MG-7.2.1-82103a01
+      - MG-7.2.1-c6157fc7
+      - MG-7.2.1-3717a6e0
+      - MG-7.2.2-4158cefa
+      - MG-7.2.2-d37e58f4
+      - MG-7.2.2-4f9f4db6
+    status: draft
+
+  - id: REQ-CMP-008
+    title: Resource interaction patterns via the Method element
+    statement: >-
+      From Level 2 on, a component supports the resource interaction patterns
+      of the Method element: requesting resources via Get, modifying resources
+      via Set where applicable, and publishing resources via Pub (MG 7.1.4,
+      MG 9.1). The methods per entity type are detailed by REQ-CMP-014 to
+      REQ-CMP-016.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [component]
+    scope: [MG 7.1.4, MG 9.1]
+    refs: [MG 1.3, MG 7.2]
+    quotes:
+      - ref: MG 1.3
+        text: 'Resource interaction patterns via the Method element: requesting resources via Get, modifying resources via Set (where applicable) and publishing resources via Pub (7.1.4 Method Element, 9.1 Resources) - Mandatory Mandatory'
+    verification: [d7-test]
+    inventory: [MG-1.3-eccafa9f]
+    status: draft
+
+  - id: REQ-CMP-009
+    title: Complete MQTT client behavior
+    statement: >-
+      A component implements the complete MQTT client behavior of MG 6:
+      client identifier, keep alive, clean session, quality of service,
+      retained messages, close message and the general behavior on changes.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: MUST}
+    applies_to: [component]
+    scope: [MG 6.2.3, MG 6.2.4, MG 6.2.5, MG 6.3.1, MG 6.3.2, MG 6.3.4, MG 6.4]
+    refs: [MG 1.3]
+    quotes:
+      - ref: MG 1.3
+        text: Complete MQTT client behavior (6.2.3 Client Identifier, 6.2.4 Keep Alive, 6.2.5 Clean Session, 6.3.1 Quality of Service Level, 6.3.2 Retained Messages, 6.3.4 Close Message, 6.4 General Behavior of MQTT on Changes) Recommended Recommended Mandatory
+    verification: [d7-test, d7-monitor]
+    inventory: [MG-1.3-40996d3e, MG-1.3-2754fc26]
+    status: draft
+
+  - id: REQ-CMP-010
+    title: Complete Message Bus behavior
+    statement: >-
+      Every method, resource and common service a component offers conforms
+      completely to MG 9 (Message Bus communication), and the component
+      supports the methods and resources required by REQ-CMP-014 to
+      REQ-CMP-023. Methods, resources and services not listed there (e.g.
+      Del, Call/Reply, SubscriptionList, Config, Data, NewDataSetWriterId)
+      are optional; if offered, they are covered by this requirement.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [component]
+    scope: [MG 7.2, MG 9]
+    refs: [MG 1.3, MG 7.2, SF-037]
+    quotes:
+      - ref: MG 1.3
+        text: Complete Message Bus behavior, e.g. the resources Profile, PublicationList, SubscriptionList, Metadata, ReferenceDesignation and Event (7.2 Minimum Set of Topic Elements for Open Industry 4.0 Alliance Compliance, 9 Message Bus Communication) - Recommended Mandatory
+      - ref: MG 7.2
+        text: 'Level 3 (Full): The entity supports the complete set of mandatory methods and resources defined in the following sub-chapters.'
+    verification: [d7-test, d7-monitor]
+    inventory: [MG-1.3-7b6455c5, MG-1.3-2754fc26, MG-7.2-0c2efb06, MG-7.2-9e0478b4]
+    status: draft
+    notes: >-
+      Interpretation of SF-037 (a, b): the MG 1.3 "e.g." list is broader than
+      the minimum sets of MG 7.2.1/7.2.2; the minimum sets are taken as
+      authoritative until the PO decides.
+
+  # --- Declaring compliance (MG 1.3) ---------------------------------------
+  - id: REQ-CMP-011
+    title: Messaging compliance without stated level means Level 3
+    statement: >-
+      A component labeled "Open Industry 4.0 Alliance Compliant" without a
+      stated compliance level fulfills Level 3 of the OEC Messaging
+      Compliance. D7 uses Level 3 as declared level for such a component.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component, manufacturer]
+    condition: The component is labeled compliant without stating a compliance level.
+    refs: [MG 1.3]
+    quotes:
+      - ref: MG 1.3
+        text: A component that is labeled "Open Industry 4.0 Alliance Compliant" without stating a compliance level, must fulfill Level 3 in all applicable compliance domains.
+    verification: [manual, d7-test]
+    inventory: [MG-1.3-193fdc81]
+    status: draft
+
+  - id: REQ-CMP-012
+    title: Service container compliance without stated level means Level 3
+    statement: >-
+      A containerized application labeled "Open Industry 4.0 Alliance
+      Compliant" without a stated compliance level fulfills Level 3 of the
+      OEC Service Container Compliance. D8 uses Level 3 as declared level for
+      such an application.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [container-image, manufacturer]
+    condition: The application is labeled compliant without stating a compliance level.
+    refs: [MG 1.3, RIG 1.2]
+    quotes:
+      - ref: MG 1.3
+        text: must fulfill Level 3 in all applicable compliance domains
+    verification: [manual, d8]
+    inventory: [MG-1.3-193fdc81]
+    status: draft
+
+  - id: REQ-CMP-013
+    title: Registry may show an observed messaging compliance level
+    statement: >-
+      The OEC Registry may show an observed OEC Messaging Compliance level per
+      application and device, derived from the observed behavior (e.g. the
+      resources listed in Profile and the answers to Get requests). The
+      observed level is informative only and does not replace the declared and
+      validated level.
+    keyword: MAY
+    domain: platform
+    applies_to: [registry]
+    refs: [MG 1.3, MG A1]
+    quotes:
+      - ref: MG 1.3
+        text: The OEC Registry (A1 The OEC Registry) may additionally show an observed OEC Messaging Compliance level of each application and device.
+      - ref: MG 1.3
+        text: The observed level is informative only and does not replace the declared and validated compliance level.
+    verification: [manual]
+    inventory: [MG-1.3-886a2a1d, MG-1.3-200baca0]
+    status: draft
+
+  # --- Minimum set of methods (MG 7.2.1, MG 7.2.2) --------------------------
+  - id: REQ-CMP-014
+    title: Method Pub
+    statement: An application or device supports the method Pub.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    refs: [MG 7.2.1, MG 7.2.2]
+    verification: [d7-monitor]
+    inventory:
+      - MG-7.2.1-7a6b0ec0
+      - MG-7.2.1-b05a6f3b
+      - MG-7.2.1-b59aab84
+      - MG-7.2.2-92086376
+      - MG-7.2.2-9212363a
+      - MG-7.2.2-39e90186
+    status: draft
+
+  - id: REQ-CMP-015
+    title: Method Get
+    statement: >-
+      From Level 2 on, an application or device supports the method Get and
+      answers Get requests for the resources it offers.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    refs: [MG 7.2, MG 7.2.1, MG 7.2.2]
+    verification: [d7-test]
+    inventory:
+      - MG-7.2.1-7a6b0ec0
+      - MG-7.2.1-b05a6f3b
+      - MG-7.2.1-16990ca8
+      - MG-7.2.2-92086376
+      - MG-7.2.2-9212363a
+      - MG-7.2.2-53f04d8a
+    status: draft
+
+  - id: REQ-CMP-016
+    title: Method Set for resources offered for modification
+    statement: >-
+      From Level 2 on, an application or device supports the method Set for
+      every resource it offers for modification by other participants on the
+      Message Bus (e.g. Config). Level 1 entities are not required to support
+      Set.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The entity offers a resource for modification by other participants.
+    refs: [MG 7.2.1, MG 7.2.2, SF-037]
+    quotes:
+      - ref: MG 7.2.1
+        text: Set must be supported for all resources that are offered for modification by other participants on the Message Bus, such as Config.
+      - ref: MG 7.2.2
+        text: Set must be supported for all resources that are offered for modification by other participants on the Message Bus, such as Config.
+    verification: [d7-test]
+    inventory:
+      - MG-7.2.1-25c36df4
+      - MG-7.2.1-243886ee
+      - MG-7.2.2-92c039d5
+      - MG-7.2.2-93217ce0
+    status: draft
+    notes: >-
+      "Where applicable" (method tables) is read as MUST under the condition,
+      see SF-037 (c).
+
+  # --- Minimum set of resources (MG 7.2.1, MG 7.2.2) ------------------------
+  - id: REQ-CMP-017
+    title: MAM and Health available via Get
+    statement: >-
+      From Level 2 on, the resources MAM and Health of the entity itself and of
+      all its subordinate assets are additionally available on request via the
+      method Get.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    refs: [MG 7.2.1, MG 7.2.2]
+    quotes:
+      - ref: MG 7.2.1
+        text: From Level 2 on, they must additionally be available on request via the method Get.
+    verification: [d7-test]
+    inventory: [MG-7.2.1-9d5856fd, MG-7.2.2-d9962e8c]
+    status: draft
+
+  - id: REQ-CMP-018
+    title: Resource Profile
+    statement: An application or device supports the resource Profile.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, device]
+    refs: [MG 7.2.1, MG 7.2.2]
+    verification: [d7-test]
+    inventory: [MG-7.2.1-82103a01, MG-7.2.1-f52bdde1, MG-7.2.2-4158cefa, MG-7.2.2-d945d203]
+    status: draft
+
+  - id: REQ-CMP-019
+    title: Resource PublicationList (applications)
+    statement: >-
+      An application supports the resource PublicationList. Devices without
+      an own MQTT client are not required to support it.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application]
+    refs: [MG 7.2.1, MG 7.2.2]
+    verification: [d7-test]
+    inventory: [MG-7.2.1-82103a01, MG-7.2.1-04015cf3]
+    status: draft
+    notes: The resource table of MG 7.2.2 (devices) has no PublicationList row.
+
+  - id: REQ-CMP-020
+    title: Resource ReferenceDesignation
+    statement: An application or device supports the resource ReferenceDesignation.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, device]
+    refs: [MG 7.2.1, MG 7.2.2]
+    verification: [d7-test]
+    inventory: [MG-7.2.1-82103a01, MG-7.2.1-e163b5cc, MG-7.2.2-4158cefa, MG-7.2.2-80d3def5]
+    status: draft
+
+  - id: REQ-CMP-021
+    title: Required resources listed in Profile
+    statement: >-
+      If an application or device supports the resource Profile, its Profile
+      lists every resource required for its compliance level (REQ-CMP-006,
+      -007, -018 to -020).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The entity supports the resource Profile.
+    refs: [MG 7.2.1, MG 7.2.2]
+    quotes:
+      - ref: MG 7.2.1
+        text: are required depending on the compliance level and must be listed in Profile (8.3.7 Profile), if Profile is supported
+    verification: [d7-test]
+    inventory: [MG-7.2.1-82103a01, MG-7.2.2-4158cefa]
+    status: draft
+
+  - id: REQ-CMP-022
+    title: Data requires Metadata
+    statement: >-
+      An application or device that offers the resource Data supports the
+      resource Metadata.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, device]
+    condition: The entity offers the resource Data.
+    refs: [MG 7.2.1, MG 7.2.2, SF-037]
+    quotes:
+      - ref: MG 7.2.1
+        text: Including the resource Data to an application, makes support for Metadata mandatory for Level 3 and recommended for Level 2.
+      - ref: MG 7.2.2
+        text: Including the resource Data to a device representation, makes support for Metadata mandatory for Level 3 and recommended for Level 2.
+    verification: [d7-test]
+    inventory: [MG-7.2.1-b62cb7c9, MG-7.2.2-cab9bc41]
+    status: draft
+    notes: Level 1 is not stated; read as not required (Data is optional, SF-037 a).
+
+  - id: REQ-CMP-023
+    title: Set or Del requires Event with category Status
+    statement: >-
+      An application or device that offers the method Set or Del supports the
+      resource Event with the event category Status.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The entity offers the method Set or Del.
+    refs: [MG 7.2.1, MG 7.2.2, MG 7.1.4, SF-037]
+    quotes:
+      - ref: MG 7.2.1
+        text: Including the methods Set or Del to an application, makes support for the resource Event and category Status mandatory.
+      - ref: MG 7.2.2
+        text: Including the methods Set or Del to a device representation, makes support for the resource Event and category Status mandatory.
+    verification: [d7-test]
+    inventory: [MG-7.2.1-785a5133, MG-7.2.2-da5d07d7]
+    status: draft
+    notes: >-
+      Publishing an Event per Set/Del is SHOULD (MG 7.1.4) and belongs to area
+      TOP/RES-EVENT; this entry only requires support of the resource, see
+      SF-037 (d).
+
+  - id: REQ-CMP-024
+    title: Smart device with own MQTT client counts as application
+    statement: >-
+      A smart device that is connected directly to the Message Bus with its
+      own MQTT client fulfills the requirements for applications (MG 7.2.1),
+      including REQ-CMP-019.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [device]
+    condition: The device has its own MQTT client connected directly to the Message Bus.
+    refs: [MG 7.2.2, SF-035]
+    quotes:
+      - ref: MG 7.2.2
+        text: A smart device that is connected directly to the Message Bus with its own MQTT client has to fulfill the requirements of 7.2.1 For Applications.
+    verification: [d7-test]
+    inventory: [MG-7.2.2-1fe1672a]
+    status: draft
+
+  # --- Field conventions (MG 1.2) -----------------------------------------
+  - id: REQ-CMP-025
+    title: Field presence follows the Requirement attribute
+    statement: >-
+      In every payload object, a field whose attribute Requirement is
+      Mandatory is present, and a field whose Requirement is Not used is
+      absent. A field marked Optional may be present.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 1.2]
+    quotes:
+      - ref: MG 1.2
+        text: 'The attribute Requirement of a field: Mandatory means the field must be present, Optional means the field may be present and Not used means the field must not be present.'
+    verification: [schema, d7-validate]
+    inventory: [MG-1.2-5d607928]
+    status: draft
+
+  - id: REQ-CMP-026
+    title: Present fields meet Type and Value Range
+    statement: >-
+      Every field present in a payload object meets the format definitions of
+      the field (Type and Value Range), regardless of whether the field is
+      mandatory or optional.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 1.2]
+    quotes:
+      - ref: MG 1.2
+        text: The format definitions of a field (Type, Value Range) must be met, whenever the field is present.
+    verification: [schema, d7-validate]
+    inventory: [MG-1.2-4c4f95c8]
+    status: draft
+
+  # --- OEC Service Container Compliance: level table (RIG 1.2) -------------
+  - id: REQ-CMP-027
+    title: OCI-compliant container
+    statement: >-
+      An application is packaged and deployed as an OCI-compliant container
+      image (RIG 2.1).
+    keyword: MUST
+    domain: service-container
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [container-image]
+    scope: [RIG 2.1]
+    refs: [RIG 1.2, SF-038]
+    quotes:
+      - ref: RIG 1.2
+        text: Packaging and deployment as an OCI-compliant container (2.1 Introduction to Containerization) Mandatory Mandatory Mandatory
+    verification: [d8]
+    inventory: [RIG-1.2-c392f9f8, MG-1.3-2754fc26]
+    status: draft
+    notes: MG 1.3 (Level 2 bullet) suggests OCI from Level 2; RIG 1.2 is followed, see SF-038.
+
+  - id: REQ-CMP-028
+    title: Software Bill of Materials
+    statement: >-
+      From Level 2 on, a containerized application provides a Software Bill of
+      Materials including all used software packages, their licenses and the
+      license texts (RIG 4.1.4, RIG 5.3).
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [container-image]
+    scope: [RIG 4.1.4, RIG 5.3]
+    refs: [RIG 1.2, SF-038]
+    quotes:
+      - ref: RIG 1.2
+        text: Software Bill of Materials (SBOM) including all used software packages, their licenses and the license texts
+      - ref: RIG 1.2
+        text: The compliance levels only define from which level the license information has to be provided as SBOM.
+    verification: [d8]
+    inventory: [RIG-1.2-786b58bf, RIG-1.2-8ce7fdab]
+    status: draft
+    notes: >-
+      Independent of the level, the provider stays responsible for the
+      compliance with the software licenses and the applicable law (RIG 1.2
+      note, RIG 5.3).
+
+  - id: REQ-CMP-029
+    title: Container environment requirements
+    statement: >-
+      A containerized application follows the container environment
+      requirements on storage (RIG 4.1, incl. secret handling) and the
+      container name conventions (RIG 4.2).
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [container-image]
+    scope: [RIG 4.1, RIG 4.2]
+    refs: [RIG 1.2]
+    quotes:
+      - ref: RIG 1.2
+        text: Container environment requirements, such as storage conventions and secret handling (4.1 Container Storage, 4.2 Container Name Conventions) - Recommended Mandatory
+    verification: [d8]
+    inventory: [RIG-1.2-e8490432]
+    status: draft
+
+  - id: REQ-CMP-030
+    title: Container image integrity
+    statement: A containerized application meets the container image integrity requirements of RIG 4.3.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [container-image]
+    scope: [RIG 4.3]
+    refs: [RIG 1.2]
+    quotes:
+      - ref: RIG 1.2
+        text: Container image integrity (4.3 Container Image Integrity) - Recommended Mandatory
+    verification: [d8]
+    inventory: [RIG-1.2-75b7fc09]
+    status: draft
+
+  - id: REQ-CMP-031
+    title: Container networks
+    statement: A containerized application meets the container network requirements of RIG 4.4.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [container-image]
+    scope: [RIG 4.4]
+    refs: [RIG 1.2]
+    quotes:
+      - ref: RIG 1.2
+        text: Container networks (4.4 Container Networks) - Recommended Mandatory
+    verification: [d8]
+    inventory: [RIG-1.2-4e58ea2a]
+    status: draft
+
+  - id: REQ-CMP-032
+    title: Platform-related application requirements
+    statement: >-
+      A containerized application meets the platform-related application
+      requirements of RIG 5.2, such as supported platforms and hardware
+      requirements.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [container-image]
+    scope: [RIG 5.2]
+    refs: [RIG 1.2]
+    quotes:
+      - ref: RIG 1.2
+        text: Platform-related application requirements, such as supported platforms and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
+    verification: [d8, manual]
+    inventory: [RIG-1.2-ae863090, MG-1.3-2754fc26]
+    status: draft

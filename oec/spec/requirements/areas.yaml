@@ -6,7 +6,7 @@ areas:
   - code: CMP
     title: Compliance domains, levels and minimum sets
     cycle: C-014
-    status: planned
+    status: drafted
     sections: [MG index, MG preface, MG appendix-a, MG 1, MG 7.2, RIG index, RIG appendix-a, RIG 1]
     notes: >-
       Grading of the detailed requirements of the other areas per compliance level

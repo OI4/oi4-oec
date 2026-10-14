@@ -5,7 +5,7 @@ Guideline baseline: `49b6fe2`. Source of truth: the YAML files in `oec/spec/requ
 
 | Area | Title | Cycle | Status | Requirements | Sections |
 |---|---|---|---|---:|---|
-| CMP | Compliance domains, levels and minimum sets | C-014 | planned | – | MG index, MG preface, MG appendix-a, MG 1, MG 7.2, RIG index, RIG appendix-a, RIG 1 |
+| [CMP](cmp.md) | Compliance domains, levels and minimum sets | C-014 | drafted | 32 | MG index, MG preface, MG appendix-a, MG 1, MG 7.2, RIG index, RIG appendix-a, RIG 1 |
 | IL | Identification link (dnp encoding) | C-015 | planned | – | MG 4, MG A3 |
 | TOP | Topic structure and namespace elements | C-015 | planned | – | MG 7 |
 | MSG | Payload format and OPC UA PubSub objects | C-016 | planned | – | MG 8, MG A2 |

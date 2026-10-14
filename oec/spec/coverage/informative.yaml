@@ -1,4 +1,63 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
 baseline: 49b6fe2
-items: []
+items:
+  # --- CMP (C-014) ----------------------------------------------------------
+  - key: MG-preface-ffb33878
+    reason: Preface disclaimer about the document type; "may" expresses possibility, not a permission (MG 1.2).
+  - key: MG-preface-a3a548f2
+    reason: Preface overview of chapter 6; the requirements are in MG 6 (areas MQTT, LIFE).
+  - key: MG-1.1-56cba717
+    reason: Scope description of the Messaging Guideline; "required behavior" names the content, no requirement of its own.
+  - key: MG-1.2-152dde05
+    reason: Keyword mapping of MG 1.2; applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: MG-1.2-51e293ca
+    reason: Keyword mapping of MG 1.2; applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: MG-1.2-bc89f9fe
+    reason: Keyword mapping of MG 1.2; applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: MG-1.2-3731b32f
+    reason: Keyword mapping of MG 1.2; applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: MG-1.2-1d82220f
+    reason: Keyword mapping of MG 1.2; applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: MG-1.2-a7f0d815
+    reason: Keyword convention of MG 1.2 (shall equals must); applied through the keyword field (G-1.6).
+  - key: MG-1.2-162c38c5
+    reason: Convention for the level tables of MG 1.3 and MG 7.2.x; applied through the levels field of each entry (G-1.6).
+  - key: MG-1.2-0160e12c
+    reason: Defines the meaning of the tip box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
+  - key: MG-1.2-6a22350e
+    reason: Example of a tip box in the conventions chapter; the requirement itself is stated in MG 4.1 (area IL).
+  - key: MG-1.2-8a9147d2
+    reason: Defines the meaning of the warning box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
+  - key: MG-1.2-9d5b0f9a
+    reason: Explains the warning box; "can" expresses possibility, not a permission (MG 1.2).
+  - key: MG-1.2-1a146aaf
+    reason: Example of a warning box in the conventions chapter; the storage rules for keys are stated in RIG 4.1.x (area CNT).
+  - key: MG-1.2-49b984d9
+    reason: Defines the meaning of the info box (MUST); applied by the inventory (basis admonition) and the keyword field.
+  - key: MG-1.2-ca442b36
+    reason: Example of an info box in the conventions chapter; the ACL requirements are stated in MG 6.2.2 and MG 9.1.x.
+  - key: MG-1.2-46546a7c
+    reason: Defines the meaning of the danger box (immature content); no such box is left in the guideline (SF-033).
+  - key: MG-1.2-eadc3dec
+    reason: Reference to external capitalization conventions; "can" expresses possibility, not a permission (MG 1.2).
+  - key: MG-1.3-aefa2a03
+    reason: Permission that the two compliance domains are independent; reflected by the domain field (separate levels per domain), nothing to test.
+  - key: MG-1.3-d61403fe
+    reason: Example explaining domain applicability; "can" expresses possibility. Reflected by applies_to container-image of the service-container entries.
+  - key: MG-1.3-8c68e8da
+    reason: Introduces the level table; the table rows are REQ-CMP-001 to REQ-CMP-010.
+  - key: MG-1.3-06f29445
+    reason: Restates the level-table convention of MG 1.2; applied through the levels field.
+  - key: MG-7.2-acc721a5
+    reason: Defines the two entity types; "can" expresses possibility. Reflected by applies_to application/device.
+  - key: MG-7.2-b583e23f
+    reason: Restates the level-table convention of MG 1.2; applied through the levels field.
+  - key: RIG-1.1-f65b3eb9
+    reason: Scope description pointing to the Messaging Guideline; no requirement of its own.
+  - key: RIG-1.2-9e040afb
+    reason: Example explaining domain applicability; "can" expresses possibility. Reflected by applies_to container-image of the service-container entries.
+  - key: RIG-1.2-4ff9976a
+    reason: Introduces the level table; the table rows are REQ-CMP-027 to REQ-CMP-032.
+  - key: RIG-1.2-b16087c8
+    reason: Restates the level-table convention of MG 1.2; applied through the levels field.
