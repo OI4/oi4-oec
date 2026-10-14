@@ -31,3 +31,8 @@ The guideline now defines compliance **domains** (Messaging, Service Container) 
 - D7 tests the **OEC Messaging Compliance** of a component under test – applications *and* smart devices (which are treated as applications, MG 8.2) – **per level**: test profiles `level1`, `level2`, `level3` instead of `minimum`/`full`. The level is a CLI option because the guideline does not yet define how a level is declared or discovered (SF-025).
 - Whether D7 also checks the **Service Container Compliance** of an application container (OCI image, SBOM in `/opt/oi4/licenses`, storage conventions) is open: Q-013. Platform/broker checks remain out of scope (Q-010).
 - D7 supports namespace `Oi4v2` only; see Q-014 for `Oi4` (v1) traffic.
+
+## Amendment C-007 (ADR-0014, ADR-0015)
+
+- Service Container and platform checks are done by a **separate tool D8** (ADR-0014). D7 remains limited to Messaging compliance of applications and smart devices.
+- D7 handles `Oi4v2` only and ignores v1 traffic (ADR-0015).

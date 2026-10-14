@@ -17,3 +17,8 @@
 - ADR-0009 is amended: "publish on GitHub" is replaced by "local git repository; publication later after CRA review". The rule "every change is committed individually" applies **now**.
 - Later publication of parts can use `git subtree split` or a fresh export per artifact.
 - `conformance/` must not depend on `sdk/` (ADR-0006); CI/scripts enforce this once both exist.
+
+## Amendment C-007 (ADR-0014, ADR-0016)
+
+- `oec/conformance/` hosts both compliance tools, D7 and D8.
+- New folder `oec/sdk/micro/` for the micro SDK D9.

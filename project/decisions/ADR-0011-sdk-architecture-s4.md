@@ -36,3 +36,7 @@ The guideline changes (GL-ADR-001 … 011) do not change the decision, they stre
 - **Compliance levels (GL-ADR-009):** Level 1 targets resource-constrained **smart devices** that are not containers. The C API is the natural path for them. Therefore the SDK must work **without the container storage contract** (explicit configuration of broker, credentials and identity) and must let the developer choose the compliance level (L1 = Pub MAM/Health + Birth/Will; L2/L3 enable Get/Set and the other resources). Bootstrap from `/etc/oi4` is an optional convenience for containerized apps.
 - **OPC UA 1.05.04 alignment (GL-ADR-004/005/006/007):** fixed content masks, `ReplyTo`, `DataSetWriterName`/`WriterGroupName` and Actions are pure protocol logic in `oec-core`; the public API should hide them completely.
 - Whether a `no_std`/small-footprint build of `oec-core` for microcontroller-class devices is needed is an open question (Q-015).
+
+## Amendment C-007 (ADR-0016)
+
+`oec-core` must be `no_std`-compatible (`alloc` optional, no `std`-only dependencies in the codec/topic/identity code) so that the micro SDK (D9) can reuse it. The micro SDK itself is decided separately (ADR-0016, Q-016).
