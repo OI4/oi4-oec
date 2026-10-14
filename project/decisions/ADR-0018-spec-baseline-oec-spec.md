@@ -52,3 +52,19 @@ Options (Q-018): YAML files in a new `oec/spec/` folder, shared like D1 (proposa
 
 - **JSON in `oec/spec/`:** no YAML dependency, but no comments and poorer to author and review for long normative text.
 - **Markdown tables in `project/`:** easy to read, but not reliably machine-readable and outside the monorepo, so D7/D8/SDK tests could not reference it as a contract.
+
+## Amendment C-013 – golden vectors and PO review (PO decision on the C-012 §5 rules)
+
+The PO accepted the curation rules of the C-012 plan (§5) with an extension: the examples must be **checked against the guideline description** and built so that they are **compliant, meaningful and good test data**. The PO reviews the test data of every increment and confirms it or notes deviations. Binding rules for `oec/spec/vectors/golden/`:
+
+1. **Extraction:** a tool in `oec/spec/tools/` reads Appendix B at the baseline revision and records for every example its source (`doc`, section, heading, index within the section, guideline commit) and the verbatim original. Re-running it after a guideline change shows which examples changed.
+2. **Check against the description:** every example is compared with the normative text it illustrates (topic structure, MessageType, `DataSetClassId`, `DataSetWriterId`, field names/types/value ranges, filters, correlation). Each deviation is recorded in the vector and reported as a spec finding, so the guideline example can be fixed.
+3. **Compliant and meaningful:** the vector is the **corrected, complete** form of the example:
+   - illustrative non-JSON (`//` comments, ellipses, placeholder elements, trailing commas) is removed or completed;
+   - template placeholders (`<…>`) are replaced by realistic, guideline-conformant values; values are consistent across all vectors (one coherent fictitious installation: same manufacturer, apps, assets, Identification Links);
+   - deviations from the description are corrected.
+   Every change against the original is listed in `edits` (JSON Pointer or topic, kind `removed` / `completed` / `instantiated` / `corrected`, reason, SF id where applicable). Nothing is changed silently.
+4. **Validity:** golden vectors are **positive** vectors (`expected: valid`) and reference the REQ ids they illustrate. Negative vectors are derived per REQ in P2.
+5. **Review status:** every vector has `status: draft` until the PO confirms it (`reviewed`). PO remarks are fixed in the vector or become spec findings. Vectors in `draft` may be used by tests, but a P1/P2 exit requires all golden vectors to be `reviewed`.
+
+This replaces the C-012 rule "no content is invented" and the rule "a contradicting example keeps the guideline content and is marked invalid".

@@ -51,6 +51,7 @@ Section numbers refer to the Messaging Guideline (MG) or the Runtime & Infrastru
 | G-3.6 | Language: communication with the product owner in German; all artifacts (code, comments, docs, logs, ADRs, commit messages) in English. |
 | G-3.7 | Handover-ready at all times: another agent must be able to continue using only `AGENTS.md`, `STATUS.md` and the latest log. |
 | G-3.8 | **Version control:** the workspace is a local git repo (ADR-0012); every change is committed individually, referencing the cycle and REQ/SF/ADR ids. Nothing is pushed/published without PO approval; working assumption: private GitHub repositories only, CRA review before any public release (Q-011). Deployables live only in `oec/`. |
+| G-3.9 | **Test data is reviewed by the PO per increment:** test vectors in `oec/spec/vectors/` (and later the schema vectors of D1) carry `status: draft` until the PO confirms them (`reviewed`). Every vector change against its guideline source is listed in `edits`; deviations from the guideline become spec findings (ADR-0018 amendment C-013). |
 
 ## G-4 Engineering
 
