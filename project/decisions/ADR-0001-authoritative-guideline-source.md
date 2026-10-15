@@ -19,7 +19,7 @@ Two copies of the OEC Development Guideline exist in the workspace:
 
 - All requirements, schemas and code reference sections of the Docusaurus guideline.
 - The guideline revision (git commit) used is recorded in each cycle log; changes are diffed against the recorded baseline.
-- Contradictions inside the Docusaurus guideline are handled via `SPEC-FINDINGS.md`.
+- Contradictions inside the Docusaurus guideline are handled via the spec-findings register (since C-018 only `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, see amendment C-018).
 
 ## Alternatives considered
 
@@ -87,3 +87,7 @@ To avoid confusion with our own project ADRs (`ADR-NNNN`), guideline ADRs are al
   - `bc5d063` – findings register sync.
 - References to MG 7.x in project artifacts written before C-017 (logs, findings, ADRs) use the old numbers and are historical; the REQ catalog, GUARDRAILS, digest, ROADMAP and STATUS were renumbered (C-017).
 
+
+## Amendment C-018 – one findings register
+
+PO decision (2026-10-15): spec findings are kept **only** in the guideline repo, `oi4-oec-documentation/findings/SPEC-FINDINGS.md`. The project register `project/SPEC-FINDINGS.md` was merged into it (SF-040 … 043 added in guideline commit `d84c642`) and deleted; the statements of amendment C-008 ("Our `project/SPEC-FINDINGS.md` remains the place where new findings are first recorded") and the later "findings register sync" commits are superseded. Commits that only change `findings/` do not change the guideline text and therefore need no re-baseline: the spec baseline stays `bc5d063` (guideline HEAD `d84c642` differs only in `findings/SPEC-FINDINGS.md`).

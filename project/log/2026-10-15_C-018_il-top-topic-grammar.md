@@ -83,7 +83,7 @@ Commits (workspace repo, not pushed): `a8315ca` log plan · `8e798cf` SF-040 …
 
 ## Spec findings / PO input
 
-- **SF-040 … 043 are open.** Grammar, catalogs and vectors use the proposed interpretations from `SPEC-FINDINGS.md`:
+- **SF-040 … 043 are open.** Grammar, catalogs and vectors use the proposed interpretations from the findings register:
   - SF-040: filter encoding is strict (upper-case `%2B`/`%23`/`%2F`/`%25` only), and Appendix B `%20` is treated as a space.
   - SF-041: only the forms listed in MG 9 are allowed, `Call`/`Reply` take an optional `Source`, and the list-resource filter is `<ResourceType>[/<Tag>]`.
   - SF-042: `ServiceType` and `EventCategory` are closed sets, and the OTConnector rule is implicit.
@@ -96,3 +96,54 @@ Commits (workspace repo, not pushed): `a8315ca` log plan · `8e798cf` SF-040 …
 
 - PO: decide SF-040 … 043, and review `requirements/view/il.md`, `requirements/view/top.md` and the vectors (G-3.9).
 - C-019: areas `MSG` + `ACT` and the payload columns of the matrix.
+
+## Follow-up – PO input 2026-10-15
+
+PO requests (chat):
+
+1. Spec findings are kept only in `oi4-oec-documentation/findings/SPEC-FINDINGS.md`.
+2. Adopt the new entries from the project copy, fix the documents that point to it, then delete it.
+3. SF-040, SF-041, SF-042: proposed interpretations accepted.
+4. SF-043: the PO thinks the dnp-encoding is obsolete because the Identification Link is base64url-encoded as one topic field. He asked for a thorough check and, if the agent agrees, a note in GL-ADR-010.
+5. The review of `il.md`, `top.md`, the matrix and the vectors is still open on the PO side.
+
+**Register (guideline repo, commit `d84c642`, not pushed)**
+- `findings/SPEC-FINDINGS.md` now states that it is the only register.
+- SF-040 … 043 were added from the project copy:
+  - SF-040 … 042 are `decided (PO, C-018)`; the guideline text is not changed yet.
+  - SF-043 stays open, with the PO question (e) and the agent analysis.
+- The next free id is SF-044.
+- `docs/` and `rfcs_adrs/` are unchanged. The spec baseline therefore stays `bc5d063`; `inventory -rev bc5d063 -check` and `lint` still pass.
+
+**Workspace**
+- `project/SPEC-FINDINGS.md` was deleted. References were updated in:
+  - AGENTS.md (new quick fact, SF state)
+  - `project/README.md` (tree + note)
+  - GUARDRAILS G-1.4
+  - ROADMAP (P1 bullets, exit note, spec feedback)
+  - STATUS
+  - ADR-0001 (decision text + new amendment C-018 "one findings register")
+  - ADR-0007
+  - `research/legacy-analysis.md`
+  - this log
+- Closed cycle logs C-001 … C-017 keep their wording as historical record (logs are the chronological protocol, project README). Where they say `SPEC-FINDINGS.md`, the register in the guideline repo is now meant.
+- Catalog notes (REQ-TOP-001, 005, 007, 013, 016, 019, 022, 023), the `topic.abnf` header and the matrix header now cite the PO decisions SF-040 … 042 instead of "interpretation, pending PO decision". The views were re-rendered.
+- The grammar, regexes and vectors are unchanged because the decisions equal the proposals.
+
+**SF-043 – is the dnp-encoding still needed? (agent analysis)**
+
+Sources checked: MG 4, MG 4.1 (allowed characters, note on `%`), MG 4.3, MG 4.3.1, MG 4.3.2, MG A3 and GL-ADR-010 at `bc5d063`.
+
+- **Topics: obsolete.** In v1 the `Oi4Identifier` filled four topic levels, so its components must not contain `/`, `+`, `#`. Since GL-ADR-010 the whole Identification Link is one base64url-encoded level, and base64url alone keeps the topic clean.
+- **Building the `Oi4Identifier`: still needed.** GL-ADR-010 keeps the `Oi4Identifier` as the recommended Identification Link for assets without one (MG 4, MG 4.3). Three reasons:
+  1. It is an Identification Link itself. It is used **unencoded** in the payload (`PublisherId`, `DataSetWriterName`, `MessageId`, `ReplyTo`) and as `ProductInstanceUri`. So it may only contain IEC 61406-1 characters: no space, no `%`, no non-ASCII (MG 4.1). Nameplate values often contain spaces or other forbidden characters, e.g. the order number `6ES7 214-1AG40-0XB0`.
+  2. A `/` inside a component would otherwise collide. Model `A/B` + ProductCode `C` and Model `A` + ProductCode `B/C` give the same Identification Link: two assets, one identity.
+  3. The `Oi4Identifier` must be regenerable from the nameplate, which needs one fixed masking rule. Percent-encoding is excluded because `%` is not permitted. MG A3 says explicitly that base64url does not replace the dnp-encoding.
+- **Result:** the agent does not fully share the PO's conclusion, so GL-ADR-010 was **not** changed.
+- **Question to the PO** (asked with `ask_user`; the PO was not available):
+  1. **Proposal:** keep the dnp-encoding only for the `Oi4Identifier` components. GL-ADR-010 gets a note that it is obsolete for topics.
+  2. Drop the dnp-encoding. An `Oi4Identifier` is then only allowed for values without forbidden characters and without `/`.
+  3. Drop the dnp-encoding together with the `Oi4Identifier`.
+- SF-043 stays open. `internal/il`, REQ-IL-022 … 032 and the `V-DNP-`/`V-OID-` vectors stay as drafted. Option 2 or 3 would deprecate REQ-IL-032 (and for option 3 also REQ-IL-022 … 029) and remove the matching vectors.
+
+**Verification:** `spectool lint`, `render -check`, `topic -check`, `coverage -check` and `inventory -rev bc5d063 -check` all pass. The guideline repo diff `bc5d063..d84c642` is `findings/SPEC-FINDINGS.md` only.

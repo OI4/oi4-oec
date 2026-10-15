@@ -12,7 +12,7 @@ Analyzed in C-001. Revisions: `oi4-oec-service` `2d6e6f2`, `oi4-oec-service-go` 
 ## oi4-oec-service-go (Go)
 
 - Packages split by concern (api, application, broker, dnp, ...); paho.mqtt, zap logging, functional options pattern.
-- Problems: data races (shared maps without locks), pagination not implemented, Get handling incomplete, `TODO.md` lists unresolved spec questions (many of which are still open in 2.0 → cross-check with SPEC-FINDINGS).
+- Problems: data races (shared maps without locks), pagination not implemented, Get handling incomplete, `TODO.md` lists unresolved spec questions (many of which are still open in 2.0 → cross-check with the spec-findings register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`).
 - Ideas worth keeping: functional options; clean package boundaries; small static binary is attractive for edge.
 
 ## oi4-oec-demo

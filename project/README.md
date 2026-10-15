@@ -26,7 +26,6 @@ project/
   ROADMAP.md              phases, deliverables, exit criteria
   STATUS.md               current state + next step (always kept up to date)
   OPEN-QUESTIONS.md       pending decisions with the product owner
-  SPEC-FINDINGS.md        ambiguities / contradictions found in the guideline (SF-xxx)
   decisions/              Architecture Decision Records (ADR-xxxx)
   log/                    one file per work cycle (chronological protocol)
   research/               digests and analyses (guideline digest, legacy analysis, ...)
@@ -34,6 +33,8 @@ oec/                      monorepo with all deployables D1–D9 (see oec/README.
 ```
 
 The workspace root is a **local git repository** (no remote). `legacy/` and `oi4-oec-documentation/` are separate repos and git-ignored.
+
+Spec findings (ambiguities / contradictions found in the guideline, `SF-xxx`) are kept **only** in the guideline repo: `oi4-oec-documentation/findings/SPEC-FINDINGS.md` (PO decision, C-018; the former `project/SPEC-FINDINGS.md` was merged into it and deleted).
 
 ## Way of working: the cycle
 
