@@ -30,7 +30,7 @@ requirements:
     status: draft
     notes: >-
       Graded by REQ-CMP-004 (mandatory at all levels). The ABNF is the formal
-      form of MG 7 – MG 7.7 and the interpretations SF-040 … SF-042;
+      form of MG 7 – MG 7.7 and the PO decisions SF-040 … SF-042 (C-018);
       topic/topic-patterns.json contains the regular expressions derived from
       it.
 
@@ -111,7 +111,7 @@ requirements:
     verification: [d7-validate]
     inventory: [MG-7.2-709618ad]
     status: draft
-    notes: Closed set per interpretation SF-042 (a), pending PO decision.
+    notes: Closed set per PO decision SF-042 (a) (C-018).
 
   - id: REQ-TOP-006
     title: ServiceType of the destination or the publisher
@@ -152,7 +152,7 @@ requirements:
     verification: [d7-validate]
     inventory: [MG-7.2-3fdbdf5d]
     status: draft
-    notes: Interpretation SF-042 (d), pending PO decision.
+    notes: PO decision SF-042 (d) (C-018).
 
   - id: REQ-TOP-008
     title: ServiceType represents the main task
@@ -272,7 +272,7 @@ requirements:
     verification: [d7-validate]
     inventory: [MG-7.5.1-07b3b10a, MG-7.5.1-ca8822ce, MG-7.5.1-a89bdae7, MG-7.5.1-3d9669bd, MG-7.5.1-0315a6f9]
     status: draft
-    notes: Interpretation SF-041 (a)–(c), pending PO decision; the matrix rows name the grammar rule of each combination.
+    notes: PO decision SF-041 (a)–(c) (C-018); the matrix rows name the grammar rule of each combination.
 
   - id: REQ-TOP-014
     title: Set causes an Event Status
@@ -334,7 +334,7 @@ requirements:
     verification: [d7-test]
     inventory: [MG-7.4-51e4221d]
     status: draft
-    notes: Source of Call/Reply is optional (interpretation SF-041 (c), pending PO decision).
+    notes: Source of Call/Reply is optional (PO decision SF-041 (c), C-018).
 
   # --- Resource (MG 7.5.1) --------------------------------------------------
   - id: REQ-TOP-017
@@ -401,8 +401,8 @@ requirements:
     status: draft
     notes: >-
       Non-empty levels, upper-case hex digits and the exclusion of U+0000
-      (forbidden in MQTT topic names) follow interpretation SF-040 (a)–(c),
-      pending PO decision. Grammar rule filter-level.
+      (forbidden in MQTT topic names) follow PO decision SF-040 (a)–(c)
+      (C-018). Grammar rule filter-level.
 
   - id: REQ-TOP-020
     title: No white space in Filter levels
@@ -461,7 +461,7 @@ requirements:
     verification: [d7-validate]
     inventory: [MG-7.7-c7705804, MG-7.7-d07484ed, MG-7.7-3ca9fb74, MG-7.7-d966f542, MG-7.7-a1ef5067, MG-7.7-780647f7]
     status: draft
-    notes: Interpretation SF-041 (d), pending PO decision. Grammar rules list-filter, tag, context-name.
+    notes: PO decision SF-041 (d) (C-018). Grammar rules list-filter, tag, context-name.
 
   - id: REQ-TOP-023
     title: Filter structure of Event
@@ -485,7 +485,7 @@ requirements:
     verification: [d7-validate]
     inventory: [MG-7.7-21c7d613, MG-7.7-2885b14f, MG-7.7-03f6a2ee, MG-7.7-dbec8808, MG-7.7-23e55aa4, MG-7.7-7887a275]
     status: draft
-    notes: Closed category set and free GenericLevel per interpretation SF-042 (b), (c), pending PO decision. Grammar rule event-filter.
+    notes: Closed category set and free GenericLevel per PO decision SF-042 (b), (c) (C-018). Grammar rule event-filter.
 
   - id: REQ-TOP-024
     title: Syslog level Debug is not enabled by default

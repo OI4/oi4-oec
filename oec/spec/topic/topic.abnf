@@ -1,7 +1,7 @@
 ; OEC v2.0 - formal grammar of the MQTT topic names below the Namespace "Oi4v2".
 ;
 ; Source of truth: OEC Messaging Guideline ("MG") @ bc5d063 - MG 4.2, MG 7,
-; MG 9.1.x and MG 9.2.1 - plus the proposed interpretations of the spec
+; MG 9.1.x and MG 9.2.1 - plus the PO decisions (C-018) on the spec
 ; findings SF-040 (Filter encoding), SF-041 (topic forms) and SF-042 (closed
 ; value sets). Requirements: areas TOP (requirements/top.yaml) and IL
 ; (requirements/il.yaml).

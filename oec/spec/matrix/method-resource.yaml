@@ -4,7 +4,7 @@
 # allowed topic forms together with ../topic/topic.abnf; 'spectool lint' checks
 # both against each other (rule names, required/optional/forbidden Source and
 # Filter, generated samples). Payload and behaviour columns follow in C-022.
-# Interpretations: SF-041 (forms), SF-042 (closed sets).
+# PO decisions (C-018): SF-041 (forms), SF-042 (closed sets).
 
 baseline: "bc5d063"
 combinations:

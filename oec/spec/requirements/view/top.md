@@ -55,7 +55,7 @@ Every topic below the namespace Oi4v2 has the structure "Oi4v2/<ServiceType>/<Ap
 > Each element in angle brackets forms exactly one topic level
 > — MG 7
 
-Notes: Graded by REQ-CMP-004 (mandatory at all levels). The ABNF is the formal form of MG 7 – MG 7.7 and the interpretations SF-040 … SF-042; topic/topic-patterns.json contains the regular expressions derived from it.
+Notes: Graded by REQ-CMP-004 (mandatory at all levels). The ABNF is the formal form of MG 7 – MG 7.7 and the PO decisions SF-040 … SF-042 (C-018); topic/topic-patterns.json contains the regular expressions derived from it.
 
 ## REQ-TOP-002
 
@@ -129,7 +129,7 @@ The ServiceType element is one of Registry, OTConnector, Utility, Persistence, A
 > Each application that publishes or subscribes data represents a specific type of service.
 > — MG 7.2
 
-Notes: Closed set per interpretation SF-042 (a), pending PO decision.
+Notes: Closed set per PO decision SF-042 (a) (C-018).
 
 ## REQ-TOP-006
 
@@ -171,7 +171,7 @@ A device that communicates directly with the Message Bus uses the ServiceType OT
 > A device that can communicate directly with the Message Bus represents the ServiceType OTConnector.
 > — MG 7.2
 
-Notes: Interpretation SF-042 (d), pending PO decision.
+Notes: PO decision SF-042 (d) (C-018).
 
 ## REQ-TOP-008
 
@@ -284,7 +284,7 @@ A topic uses only the combinations of Method and Resource marked as allowed in m
 > The following resources do not make use of filter: MAM, Health, Profile and ReferenceDesignation.
 > — MG 7.7
 
-Notes: Interpretation SF-041 (a)–(c), pending PO decision; the matrix rows name the grammar rule of each combination.
+Notes: PO decision SF-041 (a)–(c) (C-018); the matrix rows name the grammar rule of each combination.
 
 ## REQ-TOP-014
 
@@ -347,7 +347,7 @@ The Reply topic equals the Call topic except for the Method element (same Servic
 > The Reply topic must correspond to the Call topic (same <ServiceType>, <AppId>, <Service> and <Source>) and must be given as ResponseAddress in the ua-action-request.
 > — MG 7.4
 
-Notes: Source of Call/Reply is optional (interpretation SF-041 (c), pending PO decision).
+Notes: Source of Call/Reply is optional (PO decision SF-041 (c), C-018).
 
 ## REQ-TOP-017
 
@@ -411,7 +411,7 @@ Every Filter level is a non-empty UTF-8 string without "+", "#", "/" and U+0000 
 > In this case, the character % itself shall be encoded as %25. No other characters are encoded.
 > — MG 7.7
 
-Notes: Non-empty levels, upper-case hex digits and the exclusion of U+0000 (forbidden in MQTT topic names) follow interpretation SF-040 (a)–(c), pending PO decision. Grammar rule filter-level.
+Notes: Non-empty levels, upper-case hex digits and the exclusion of U+0000 (forbidden in MQTT topic names) follow PO decision SF-040 (a)–(c) (C-018). Grammar rule filter-level.
 
 ## REQ-TOP-020
 
@@ -469,7 +469,7 @@ The Filter of Data and Metadata is the Tag (name of the data set or metadata set
 > For the resources Data and Metadata, the Filter contains the name of the desired data set or metadata set.
 > — MG 7.7
 
-Notes: Interpretation SF-041 (d), pending PO decision. Grammar rules list-filter, tag, context-name.
+Notes: PO decision SF-041 (d) (C-018). Grammar rules list-filter, tag, context-name.
 
 ## REQ-TOP-023
 
@@ -491,7 +491,7 @@ The Filter of Event is <EventCategory>/<EventLevel> with the categories Syslog (
 > For example, a status event with the status code 0x80060000 (BadEncodingError) is published with the Filter Status/Bad.
 > — MG 7.7
 
-Notes: Closed category set and free GenericLevel per interpretation SF-042 (b), (c), pending PO decision. Grammar rule event-filter.
+Notes: Closed category set and free GenericLevel per PO decision SF-042 (b), (c) (C-018). Grammar rule event-filter.
 
 ## REQ-TOP-024
 
