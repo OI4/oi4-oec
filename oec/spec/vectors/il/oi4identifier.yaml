@@ -1,0 +1,173 @@
+# Test vectors of kind oi4identifier (C-018, ADR-0018); status draft until the PO review.
+# Format: vectors/vectors.schema.json; checked by spectool lint.
+kind: oi4identifier
+baseline: "bc5d063"
+description: >-
+  Oi4Identifier vectors (MG 4.3.1, MG A3): construction from ManufacturerUri,
+  Model, ProductCode and SerialNumber with dnp-encoding, nd for missing values
+  and the checks of the ManufacturerUri.
+vectors:
+  - id: V-OID-001
+    title: "MG 4.3.1 example"
+    expected: valid
+    reqs: [REQ-IL-022, REQ-IL-032]
+    origin: {kind: guideline, ref: MG 4.3.1}
+    status: draft
+    manufacturer_uri: "provider.com"
+    model: "FieldDataService"
+    product_code: "FDS-001"
+    serial_number: "1200-0345"
+    oi4identifier: "provider.com/FieldDataService/FDS-001/1200-0345"
+
+  - id: V-OID-002
+    title: "MG A3 Table 5 row 1"
+    expected: valid
+    reqs: [REQ-IL-022, REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    manufacturer_uri: "example.com"
+    model: "MyModel"
+    product_code: "MyProductCode"
+    serial_number: "MySerial"
+    oi4identifier: "example.com/MyModel/MyProductCode/MySerial"
+
+  - id: V-OID-003
+    title: "MG A3 Table 5 row 2"
+    expected: valid
+    reqs: [REQ-IL-022, REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    manufacturer_uri: "example.com"
+    model: "ABC DEF"
+    product_code: "123.456/3&8"
+    serial_number: "123456#33"
+    oi4identifier: "example.com/ABC,20DEF/123.456,2F3,268/123456,2333"
+
+  - id: V-OID-004
+    title: "MG A3 Table 5 row 3: ManufacturerUri converted to lower case"
+    expected: valid
+    reqs: [REQ-IL-022, REQ-IL-023, REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    manufacturer_uri: "Example.com"
+    model: "ABC@home"
+    product_code: "ABC*33<4"
+    serial_number: "20123.4"
+    oi4identifier: "example.com/ABC,40home/ABC,2A33,3C4/20123.4"
+    notes: "Interpretation SF-043 (d)."
+
+  - id: V-OID-005
+    title: "Missing Model and ProductCode are nd"
+    expected: valid
+    reqs: [REQ-IL-022, REQ-IL-028]
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "provider.com"
+    model: ""
+    product_code: ""
+    serial_number: "SN-4711"
+    oi4identifier: "provider.com/nd/nd/SN-4711"
+
+  - id: V-OID-006
+    title: "Subdomain as ManufacturerUri"
+    expected: valid
+    reqs: [REQ-IL-024]
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "id.provider.com"
+    model: "M"
+    product_code: "P"
+    serial_number: "S"
+    oi4identifier: "id.provider.com/M/P/S"
+    notes: "Interpretation SF-043 (c)."
+
+  - id: V-OID-007
+    title: "Non-ASCII serial number"
+    expected: valid
+    reqs: [REQ-IL-022, REQ-IL-032]
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "provider.com"
+    model: "Gerät"
+    product_code: "P-1"
+    serial_number: "Nr. 5"
+    oi4identifier: "provider.com/Ger,C3,A4t/P-1/Nr.,205"
+    notes: "Interpretation SF-043 (a)."
+
+  - id: V-OID-101
+    title: "ManufacturerUri with www"
+    expected: invalid
+    violates: [REQ-IL-024]
+    reason: "The third-level domain www. is excluded."
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "www.provider.com"
+    model: "M"
+    product_code: "P"
+    serial_number: "S"
+    violations: [manufacturer-uri]
+
+  - id: V-OID-102
+    title: "ManufacturerUri with scheme"
+    expected: invalid
+    violates: [REQ-IL-024]
+    reason: "The scheme is excluded."
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "https://provider.com"
+    model: "M"
+    product_code: "P"
+    serial_number: "S"
+    violations: [manufacturer-uri]
+
+  - id: V-OID-103
+    title: "ManufacturerUri without top-level domain"
+    expected: invalid
+    violates: [REQ-IL-024]
+    reason: "The form is <manufacturer>.<tld>."
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "provider"
+    model: "M"
+    product_code: "P"
+    serial_number: "S"
+    violations: [manufacturer-uri]
+
+  - id: V-OID-104
+    title: "ManufacturerUri with path"
+    expected: invalid
+    violates: [REQ-IL-024]
+    reason: "The ManufacturerUri is a domain name only."
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "provider.com/x"
+    model: "M"
+    product_code: "P"
+    serial_number: "S"
+    violations: [manufacturer-uri]
+
+  - id: V-OID-105
+    title: "Oi4Identifier longer than 255 characters"
+    expected: invalid
+    violates: [REQ-IL-029]
+    reason: "The whole Oi4Identifier has at most 255 characters."
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "provider.com"
+    model: "M"
+    product_code: "P"
+    serial_number: "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"
+    violations: [too-long]
+
+  - id: V-OID-106
+    title: "Long value after dnp-encoding"
+    expected: invalid
+    violates: [REQ-IL-029]
+    reason: "Each # becomes three characters; the result exceeds 255 characters."
+    origin: {kind: constructed}
+    status: draft
+    manufacturer_uri: "provider.com"
+    model: "M"
+    product_code: "P"
+    serial_number: "#################################################################################"
+    violations: [too-long]

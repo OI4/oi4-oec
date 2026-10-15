@@ -1,0 +1,145 @@
+# Test vectors of kind dnp-encoding (C-018, ADR-0018); status draft until the PO review.
+# Format: vectors/vectors.schema.json; checked by spectool lint.
+kind: dnp-encoding
+baseline: "bc5d063"
+description: >-
+  dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example,
+  the character classes of Table 4 and the extension to all UTF-8 octets
+  (SF-043 a).
+vectors:
+  - id: V-DNP-001
+    title: "MG A3 Table 5: MyModel"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "MyModel"
+    output: "MyModel"
+
+  - id: V-DNP-002
+    title: "MG A3 Table 5: ABC DEF"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "ABC DEF"
+    output: "ABC,20DEF"
+
+  - id: V-DNP-003
+    title: "MG A3 Table 5: 123.456/3&8"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "123.456/3&8"
+    output: "123.456,2F3,268"
+
+  - id: V-DNP-004
+    title: "MG A3 Table 5: 123456#33"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "123456#33"
+    output: "123456,2333"
+
+  - id: V-DNP-005
+    title: "MG A3 Table 5: ABC@home"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "ABC@home"
+    output: "ABC,40home"
+
+  - id: V-DNP-006
+    title: "MG A3 Table 5: ABC*33<4"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "ABC*33<4"
+    output: "ABC,2A33,3C4"
+
+  - id: V-DNP-007
+    title: "MG A3 Table 5: 20123.4"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "20123.4"
+    output: "20123.4"
+
+  - id: V-DNP-008
+    title: "MG A3 example: product code with spaces"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "Edge Gateway >4GB"
+    output: "Edge,20Gateway,20,3E4GB"
+
+  - id: V-DNP-009
+    title: "MG A3 example: serial number with special characters"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: guideline, ref: MG A3}
+    status: draft
+    input: "#20815!2205+1432"
+    output: ",2320815,212205,2B1432"
+
+  - id: V-DNP-010
+    title: "Unreserved characters stay"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: constructed}
+    status: draft
+    input: "Az09-._~"
+    output: "Az09-._~"
+
+  - id: V-DNP-011
+    title: "All reserved characters (Table 4)"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: constructed}
+    status: draft
+    input: "#/:?@[]!$&'()*+,;="
+    output: ",23,2F,3A,3F,40,5B,5D,21,24,26,27,28,29,2A,2B,2C,3B,3D"
+
+  - id: V-DNP-012
+    title: "All prohibited printable characters (Table 4)"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: constructed}
+    status: draft
+    input: " \"%<>\\^`{|}"
+    output: ",20,22,25,3C,3E,5C,5E,60,7B,7C,7D"
+
+  - id: V-DNP-013
+    title: "Comma masks itself"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: constructed}
+    status: draft
+    input: "a,b"
+    output: "a,2Cb"
+
+  - id: V-DNP-014
+    title: "Non-ASCII character: every UTF-8 octet"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: constructed}
+    status: draft
+    input: "Gerät"
+    output: "Ger,C3,A4t"
+    notes: "Interpretation SF-043 (a)."
+
+  - id: V-DNP-015
+    title: "Control character"
+    expected: valid
+    reqs: [REQ-IL-032]
+    origin: {kind: constructed}
+    status: draft
+    input: "a\tb"
+    output: "a,09b"
+    notes: "Interpretation SF-043 (a)."

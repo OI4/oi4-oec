@@ -1,0 +1,529 @@
+# Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
+# Format: vectors/vectors.schema.json; checked by spectool lint.
+kind: topic
+baseline: "bc5d063"
+description: >-
+  Constructed invalid topic vectors. Each vector names the violated
+  requirement and whether the topic fails the grammar or the Identification
+  Link check of its AppId/Source.
+vectors:
+  - id: V-TOP-201
+    title: "Namespace of version 1"
+    expected: invalid
+    violates: [REQ-TOP-001]
+    reason: "The namespace element of this version is Oi4v2."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-202
+    title: "Namespace in wrong case"
+    expected: invalid
+    violates: [REQ-TOP-001]
+    reason: "Topics are case-sensitive; the namespace element is Oi4v2."
+    origin: {kind: constructed}
+    status: draft
+    topic: "oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-203
+    title: "Unknown ServiceType"
+    expected: invalid
+    violates: [REQ-TOP-005]
+    reason: "Gateway is not a ServiceType of MG 7.2."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/Gateway/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-204
+    title: "ServiceType in wrong case"
+    expected: invalid
+    violates: [REQ-TOP-005]
+    reason: "ServiceType values are case-sensitive."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/otconnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-205
+    title: "Unknown Method"
+    expected: invalid
+    violates: [REQ-TOP-011]
+    reason: "Post is not a Method of MG 7.4."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Post/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    fails: grammar
+
+  - id: V-TOP-206
+    title: "Vendor-specific Resource"
+    expected: invalid
+    violates: [REQ-TOP-012]
+    reason: "The set of resources is closed."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/VendorStatus/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-207
+    title: "Unknown service"
+    expected: invalid
+    violates: [REQ-TOP-012]
+    reason: "The set of services is closed (NewDataSetWriterId only)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/RestartDevice"
+    fails: grammar
+
+  - id: V-TOP-208
+    title: "Get Event"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "Event can only be published."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    fails: grammar
+
+  - id: V-TOP-209
+    title: "Del Config"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "Del is only defined for ReferenceDesignation and SubscriptionList."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/NetworkSettings"
+    fails: grammar
+
+  - id: V-TOP-210
+    title: "Set MAM"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "MAM cannot be written."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-211
+    title: "Del Data"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "Data cannot be deleted."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    fails: grammar
+
+  - id: V-TOP-212
+    title: "Pub Health with Filter"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "Health does not use a Filter (MG 7.7)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"
+    fails: grammar
+
+  - id: V-TOP-213
+    title: "Get ReferenceDesignation with Filter"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "ReferenceDesignation does not use a Filter (MG 7.7)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/ReferenceDesignation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"
+    fails: grammar
+
+  - id: V-TOP-214
+    title: "Set Config without Source"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "A Set addresses one asset and one context: Source and Filter are required."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config"
+    fails: grammar
+
+  - id: V-TOP-215
+    title: "Set Data without Filter"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "A Set addresses one data set: Filter is required."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-216
+    title: "Pub Metadata without Tag"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "Metadata topics always carry Source and Tag (SF-041 b)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-217
+    title: "Pub Event without Filter"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "An Event is always published with category and level."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    fails: grammar
+
+  - id: V-TOP-218
+    title: "Call with Filter"
+    expected: invalid
+    violates: [REQ-TOP-013]
+    reason: "Call and Reply never carry a Filter (SF-041 c)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"
+    fails: grammar
+
+  - id: V-TOP-219
+    title: "Event with category only"
+    expected: invalid
+    violates: [REQ-TOP-023]
+    reason: "The Event Filter is <EventCategory>/<EventLevel>."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog"
+    fails: grammar
+
+  - id: V-TOP-220
+    title: "Unknown Syslog level"
+    expected: invalid
+    violates: [REQ-TOP-023]
+    reason: "Info is not one of the eight Syslog levels."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Info"
+    fails: grammar
+
+  - id: V-TOP-221
+    title: "Unknown event category"
+    expected: invalid
+    violates: [REQ-TOP-023]
+    reason: "The event categories are Syslog, Status and Generic (SF-042 b)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Audit/High"
+    fails: grammar
+
+  - id: V-TOP-222
+    title: "Status level in wrong case"
+    expected: invalid
+    violates: [REQ-TOP-023]
+    reason: "The Status levels are Good, Uncertain and Bad."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/good"
+    fails: grammar
+
+  - id: V-TOP-223
+    title: "Status level with symbolic name"
+    expected: invalid
+    violates: [REQ-TOP-023]
+    reason: "The topic level contains only the class of the status code (MG 7.7)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/BadEncodingError"
+    fails: grammar
+
+  - id: V-TOP-224
+    title: "Event with three Filter levels"
+    expected: invalid
+    violates: [REQ-TOP-023]
+    reason: "The Event Filter has exactly two levels."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Notice/x"
+    fails: grammar
+
+  - id: V-TOP-225
+    title: "Empty Generic level"
+    expected: invalid
+    violates: [REQ-TOP-019, REQ-TOP-021]
+    reason: "A Filter level is not empty and the Filter does not end with /."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Generic/"
+    fails: grammar
+
+  - id: V-TOP-226
+    title: "Data Filter with two levels"
+    expected: invalid
+    violates: [REQ-TOP-022]
+    reason: "The Tag is one level; a / in its content is written as %2F."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/line1/oee"
+    fails: grammar
+
+  - id: V-TOP-227
+    title: "Unknown ResourceType in a list Filter"
+    expected: invalid
+    violates: [REQ-TOP-022]
+    reason: "ResourceType is a resource of MG 7.5.1."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Foo"
+    fails: grammar
+
+  - id: V-TOP-228
+    title: "Tag for a ResourceType without Filter"
+    expected: invalid
+    violates: [REQ-TOP-022]
+    reason: "MAM has no Filter, so the list Filter is <ResourceType> only."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/MAM/x"
+    fails: grammar
+
+  - id: V-TOP-229
+    title: "Space percent-encoded (guideline form)"
+    expected: invalid
+    violates: [REQ-TOP-019]
+    reason: "Only +, #, / and % are percent-encoded; %20 is not a valid sequence (SF-040 b)."
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network%20settings"
+    fails: grammar
+    notes: "Original form of the Appendix B example; the corrected form is a golden vector in guideline.yaml."
+
+  - id: V-TOP-230
+    title: "Lower-case hex digits"
+    expected: invalid
+    violates: [REQ-TOP-019]
+    reason: "The four sequences use upper-case hex digits (SF-040 a)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/a%2bb"
+    fails: grammar
+
+  - id: V-TOP-231
+    title: "Lone percent sign"
+    expected: invalid
+    violates: [REQ-TOP-019]
+    reason: "A % in the content is written as %25."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/50%"
+    fails: grammar
+
+  - id: V-TOP-232
+    title: "Raw # in a Filter level"
+    expected: invalid
+    violates: [REQ-TOP-019]
+    reason: "# is the multi-level wildcard and is written as %23."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/a#b"
+    fails: grammar
+
+  - id: V-TOP-233
+    title: "Single-level wildcard as Filter"
+    expected: invalid
+    violates: [REQ-TOP-019]
+    reason: "+ is the single-level wildcard; a topic name contains no wildcards."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/+"
+    fails: grammar
+
+  - id: V-TOP-234
+    title: "Multi-level wildcard as Filter"
+    expected: invalid
+    violates: [REQ-TOP-019]
+    reason: "# is the multi-level wildcard; a topic name contains no wildcards."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/#"
+    fails: grammar
+
+  - id: V-TOP-235
+    title: "NUL character in a Filter level"
+    expected: invalid
+    violates: [REQ-TOP-019]
+    reason: "U+0000 is not allowed in MQTT topic names."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/a\u0000b"
+    fails: grammar
+
+  - id: V-TOP-236
+    title: "Filter ends with /"
+    expected: invalid
+    violates: [REQ-TOP-021]
+    reason: "The Filter does not end with /."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee/"
+    fails: grammar
+
+  - id: V-TOP-237
+    title: "Filter starts with /"
+    expected: invalid
+    violates: [REQ-TOP-021]
+    reason: "The Filter does not start with /."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU//oee"
+    fails: grammar
+
+  - id: V-TOP-238
+    title: "Empty level inside a list Filter"
+    expected: invalid
+    violates: [REQ-TOP-019]
+    reason: "A Filter level is not empty (SF-040 c)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data//oee"
+    fails: grammar
+
+  - id: V-TOP-239
+    title: "Empty AppId"
+    expected: invalid
+    violates: [REQ-TOP-009]
+    reason: "The AppId is one non-empty topic level."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector//Pub/Health"
+    fails: grammar
+
+  - id: V-TOP-240
+    title: "Unencoded Identification Link as AppId"
+    expected: invalid
+    violates: [REQ-IL-002]
+    reason: "The Identification Link is base64url-encoded in the topic."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/provider.com/FieldDataService/FDS-001/1200-0345/Pub/Health"
+    fails: grammar
+
+  - id: V-TOP-241
+    title: "AppId with padding"
+    expected: invalid
+    violates: [REQ-IL-004]
+    reason: "Padding characters = are omitted."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU=/Pub/Health"
+    fails: grammar
+
+  - id: V-TOP-242
+    title: "Source in standard Base64"
+    expected: invalid
+    violates: [REQ-IL-003]
+    reason: "The standard Base64 alphabet contains + and /."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM/aHR0cHM6Ly9leGFtcGxlLmNvbS9+c24/Uz0xMDAw"
+    fails: grammar
+
+  - id: V-TOP-243
+    title: "Non-canonical last character"
+    expected: invalid
+    violates: [REQ-IL-004]
+    reason: "The unused bits of the last character are not zero; the canonical encoding ends with U."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDV/Pub/Health"
+    fails: grammar
+
+  - id: V-TOP-244
+    title: "Encoded length 1 modulo 4"
+    expected: invalid
+    violates: [REQ-IL-004]
+    reason: "No base64url string without padding has a length of 1 modulo 4."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/YWJjZ/Pub/Health"
+    fails: grammar
+
+  - id: V-TOP-245
+    title: "AppId longer than 340 characters"
+    expected: invalid
+    violates: [REQ-IL-019]
+    reason: "An Identification Link of 256 characters exceeds the maximum length."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/ZXhhbXBsZS5jb20vYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ/Pub/Health"
+    fails: grammar
+
+  - id: V-TOP-246
+    title: "Source with upper-case authority"
+    expected: invalid
+    violates: [REQ-IL-018]
+    reason: "The authority of an Identification Link is lower case."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM/Q29tcGFueS5pZC9BODdCQUQzNEg"
+    fails: identification-link
+
+  - id: V-TOP-247
+    title: "AppId with a space in the Identification Link"
+    expected: invalid
+    violates: [REQ-IL-016]
+    reason: "Space is not permitted in an Identification Link."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/Y29tcGFueS5pZC9BIDE/Pub/Health"
+    fails: identification-link
+
+  - id: V-TOP-248
+    title: "Source with a non-ASCII Identification Link"
+    expected: invalid
+    violates: [REQ-IL-016]
+    reason: "Non-ASCII characters are not permitted in an Identification Link."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM/Y29tcGFueS5pZC9HZXLDpHQ"
+    fails: identification-link
+
+  - id: V-TOP-249
+    title: "Source with an empty authority"
+    expected: invalid
+    violates: [REQ-IL-009]
+    reason: "The authority is mandatory."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM/aHR0cHM6Ly8vQTg3QkFEMzRI"
+    fails: identification-link
+
+  - id: V-TOP-250
+    title: "Missing Resource"
+    expected: invalid
+    violates: [REQ-TOP-001]
+    reason: "Method and Resource are mandatory."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub"
+    fails: grammar
+
+  - id: V-TOP-251
+    title: "Leading slash"
+    expected: invalid
+    violates: [REQ-TOP-001]
+    reason: "The topic starts with the namespace element."
+    origin: {kind: constructed}
+    status: draft
+    topic: "/Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health"
+    fails: grammar
+
+  - id: V-TOP-252
+    title: "Line break after the Resource"
+    expected: invalid
+    violates: [REQ-TOP-001]
+    reason: "A Resource is followed by \"/\" and a filter or by the end of the topic; a regex anchored with \"$\" accepts this topic in Python unless re.fullmatch is used."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health\n"
+    fails: grammar

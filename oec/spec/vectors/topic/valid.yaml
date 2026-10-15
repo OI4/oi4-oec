@@ -1,0 +1,626 @@
+# Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
+# Format: vectors/vectors.schema.json; checked by spectool lint.
+kind: topic
+baseline: "bc5d063"
+description: >-
+  Constructed valid topic vectors: every ServiceType, Filter encodings, Event
+  levels, list filters, Call/Reply with Source and the length limits of the
+  encoded Identification Link.
+vectors:
+  - id: V-TOP-101
+    title: "ServiceType Registry"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/Registry/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    parse:
+      rule: "pub-health"
+      service_type: "Registry"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Health"
+      source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+
+  - id: V-TOP-102
+    title: "ServiceType OTConnector"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    parse:
+      rule: "pub-health"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Health"
+      source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+
+  - id: V-TOP-103
+    title: "ServiceType Utility"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/Utility/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    parse:
+      rule: "pub-health"
+      service_type: "Utility"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Health"
+      source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+
+  - id: V-TOP-104
+    title: "ServiceType Persistence"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/Persistence/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    parse:
+      rule: "pub-health"
+      service_type: "Persistence"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Health"
+      source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+
+  - id: V-TOP-105
+    title: "ServiceType Aggregation"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/Aggregation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    parse:
+      rule: "pub-health"
+      service_type: "Aggregation"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Health"
+      source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+
+  - id: V-TOP-106
+    title: "ServiceType OOCConnector"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OOCConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    parse:
+      rule: "pub-health"
+      service_type: "OOCConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Health"
+      source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+
+  - id: V-TOP-107
+    title: "ServiceType ITConnector"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/ITConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    parse:
+      rule: "pub-health"
+      service_type: "ITConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Health"
+      source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+
+  - id: V-TOP-108
+    title: "Tag with all four percent-encoded characters"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-019]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/Y29tcGFueS5pZC9BODdCQUQzNEg/a%2Bb%23c%2Fd%25e"
+    parse:
+      rule: "pub-data"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Data"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "a%2Bb%23c%2Fd%25e"
+      filter_values: ["a+b#c/d%e"]
+
+  - id: V-TOP-109
+    title: "Tag with non-ASCII UTF-8 characters"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-019]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/Y29tcGFueS5pZC9BODdCQUQzNEg/Temperatur-Ü°"
+    parse:
+      rule: "pub-data"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Data"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Temperatur-Ü°"
+      filter_values: ["Temperatur-Ü°"]
+
+  - id: V-TOP-110
+    title: "Oi4Pv data set"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data/Y29tcGFueS5pZC9BODdCQUQzNEg/Oi4Pv"
+    parse:
+      rule: "get-data"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Get"
+      resource: "Data"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Oi4Pv"
+      filter_values: ["Oi4Pv"]
+
+  - id: V-TOP-111
+    title: "Event Syslog/Debug"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Debug"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Syslog/Debug"
+      filter_values: ["Syslog", "Debug"]
+
+  - id: V-TOP-112
+    title: "Event Syslog/Informational"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Informational"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Syslog/Informational"
+      filter_values: ["Syslog", "Informational"]
+
+  - id: V-TOP-113
+    title: "Event Syslog/Warning"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Warning"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Syslog/Warning"
+      filter_values: ["Syslog", "Warning"]
+
+  - id: V-TOP-114
+    title: "Event Syslog/Error"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Error"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Syslog/Error"
+      filter_values: ["Syslog", "Error"]
+
+  - id: V-TOP-115
+    title: "Event Syslog/Critical"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Critical"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Syslog/Critical"
+      filter_values: ["Syslog", "Critical"]
+
+  - id: V-TOP-116
+    title: "Event Syslog/Alert"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Alert"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Syslog/Alert"
+      filter_values: ["Syslog", "Alert"]
+
+  - id: V-TOP-117
+    title: "Event Syslog/Emergency"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Emergency"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Syslog/Emergency"
+      filter_values: ["Syslog", "Emergency"]
+
+  - id: V-TOP-118
+    title: "Event Status/Uncertain"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Status/Uncertain"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Status/Uncertain"
+      filter_values: ["Status", "Uncertain"]
+
+  - id: V-TOP-119
+    title: "Event Status/Bad"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Status/Bad"
+    parse:
+      rule: "pub-event"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Status/Bad"
+      filter_values: ["Status", "Bad"]
+
+  - id: V-TOP-120
+    title: "Event Generic level with percent-encoded slash"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023, REQ-TOP-019]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/Utility/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Generic/Level%2F2"
+    parse:
+      rule: "pub-event"
+      service_type: "Utility"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Event"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Generic/Level%2F2"
+      filter_values: ["Generic", "Level/2"]
+
+  - id: V-TOP-121
+    title: "PublicationList entry of an Event level (three Filter levels)"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023, REQ-TOP-022]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/PublicationList/Y29tcGFueS5pZC9BODdCQUQzNEg/Event/Syslog/Debug"
+    parse:
+      rule: "pub-publicationlist"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "PublicationList"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Event/Syslog/Debug"
+      filter_values: ["Event", "Syslog", "Debug"]
+
+  - id: V-TOP-122
+    title: "SubscriptionList filtered by ResourceType only"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList/Y29tcGFueS5pZC9BODdCQUQzNEg/MAM"
+    parse:
+      rule: "get-subscriptionlist"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Get"
+      resource: "SubscriptionList"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "MAM"
+      filter_values: ["MAM"]
+
+  - id: V-TOP-123
+    title: "PublicationList entry of a Config context"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/PublicationList/Y29tcGFueS5pZC9BODdCQUQzNEg/Config/NetworkSettings"
+    parse:
+      rule: "get-publicationlist"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Get"
+      resource: "PublicationList"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Config/NetworkSettings"
+      filter_values: ["Config", "NetworkSettings"]
+
+  - id: V-TOP-124
+    title: "Set PublicationList entry of a data set"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/Y29tcGFueS5pZC9BODdCQUQzNEg/Data/oee"
+    parse:
+      rule: "set-publicationlist"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Set"
+      resource: "PublicationList"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Data/oee"
+      filter_values: ["Data", "oee"]
+
+  - id: V-TOP-125
+    title: "Del SubscriptionList entry of an Event level"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023, REQ-TOP-022]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/SubscriptionList/Y29tcGFueS5pZC9BODdCQUQzNEg/Event/Status/Good"
+    parse:
+      rule: "del-subscriptionlist"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Del"
+      resource: "SubscriptionList"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "Event/Status/Good"
+      filter_values: ["Event", "Status", "Good"]
+
+  - id: V-TOP-126
+    title: "Call with optional Source"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-016]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId/Y29tcGFueS5pZC9BODdCQUQzNEg"
+    parse:
+      rule: "call-newdatasetwriterid"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Call"
+      resource: "NewDataSetWriterId"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+    notes: "Optional Source of Call/Reply per SF-041 (c)."
+
+  - id: V-TOP-127
+    title: "Reply with optional Source"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-016]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId/Y29tcGFueS5pZC9BODdCQUQzNEg"
+    parse:
+      rule: "reply-newdatasetwriterid"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Reply"
+      resource: "NewDataSetWriterId"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+    notes: "Optional Source of Call/Reply per SF-041 (c)."
+
+  - id: V-TOP-128
+    title: "AppId of an Identification Link with 255 characters (340 encoded characters)"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-IL-019]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/ZXhhbXBsZS5jb20vYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh/Pub/Health"
+    parse:
+      rule: "pub-health"
+      service_type: "OTConnector"
+      app_id: "ZXhhbXBsZS5jb20vYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh"
+      app_id_il: "example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      method: "Pub"
+      resource: "Health"
+
+  - id: V-TOP-129
+    title: "Shortest Identification Link (one character, two encoded characters)"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/YQ/Pub/MAM"
+    parse:
+      rule: "pub-mam"
+      service_type: "OTConnector"
+      app_id: "YQ"
+      app_id_il: "a"
+      method: "Pub"
+      resource: "MAM"
+
+  - id: V-TOP-130
+    title: "Two-character Identification Link (three encoded characters)"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/YWI/Pub/MAM"
+    parse:
+      rule: "pub-mam"
+      service_type: "OTConnector"
+      app_id: "YWI"
+      app_id_il: "ab"
+      method: "Pub"
+      resource: "MAM"
+
+  - id: V-TOP-131
+    title: "Encoded Identification Link with - and _"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-IL-003]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/ITConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/aHR0cHM6Ly9leGFtcGxlLmNvbS9-c24_Uz0xMDAw"
+    parse:
+      rule: "pub-mam"
+      service_type: "ITConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "MAM"
+      source: "aHR0cHM6Ly9leGFtcGxlLmNvbS9-c24_Uz0xMDAw"
+      source_il: "https://example.com/~sn?S=1000"
+
+  - id: V-TOP-132
+    title: "Context.Name with white space (warning)"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    parse:
+      rule: "set-config"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Set"
+      resource: "Config"
+      source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      filter: "Network settings"
+      filter_values: ["Network settings"]
+    warnings: [whitespace]
+
+  - id: V-TOP-133
+    title: "Tag with a control character (warning)"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/Y29tcGFueS5pZC9BODdCQUQzNEg/a\tb"
+    parse:
+      rule: "pub-data"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Data"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "a\tb"
+      filter_values: ["a\tb"]
+    warnings: [control-character, whitespace]
+
+  - id: V-TOP-134
+    title: "Tag that looks like a percent-encoding of another character is not decoded"
+    expected: valid
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-019]
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/Y29tcGFueS5pZC9BODdCQUQzNEg/x%25"
+    parse:
+      rule: "pub-metadata"
+      service_type: "OTConnector"
+      app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+      app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
+      method: "Pub"
+      resource: "Metadata"
+      source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
+      source_il: "company.id/A87BAD34H"
+      filter: "x%25"
+      filter_values: ["x%"]
