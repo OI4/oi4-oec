@@ -11,7 +11,10 @@ Machine-readable baseline derived **only** from the OEC guideline (Messaging Gui
 | `coverage/inventory.yaml` | all candidates of normative statements in MG + RIG (keyword, field, admonition, implicit, table) | `spectool inventory` |
 | `coverage/informative.yaml` | inventory items that are no requirement, with reason (MG 1.2) | hand |
 | `coverage/report.md` | coverage of the inventory per area | `spectool coverage` |
-| `topic/`, `matrix/`, `vectors/` | topic grammar, Method × Resource matrix, test vectors (from C-015) | hand + tools |
+| `topic/topic.abnf` | formal topic grammar (RFC 5234 + RFC 7405), one rule per allowed Method × Resource form | hand |
+| `topic/topic-patterns.json` | anchored regexes generated from `topic.abnf` (portable dialect, see below) | `spectool topic` |
+| `matrix/method-resource.yaml` (+ schema) | Method × Resource matrix: allowed, `Source`/`Filter` required/optional/forbidden, ABNF rule, guideline refs | hand |
+| `vectors/` (+ `vectors.schema.json`) | language-neutral test vectors: `topic/` (golden from the guideline, constructed valid, invalid), `il/` (Identification Link, dnp-encoding, `Oi4Identifier`) | hand, checked by `spectool lint` |
 | `tools/` | Go module with `spectool` | – |
 
 ## Citing requirements
@@ -43,10 +46,22 @@ go run ./cmd/spectool inventory -spec ..   # regenerate coverage/inventory.yaml 
 go run ./cmd/spectool lint -spec ..        # schema + rules; checks refs and quotes against the guideline
 go run ./cmd/spectool render -spec ..      # regenerate requirements/view/*.md
 go run ./cmd/spectool coverage -spec ..    # regenerate coverage/report.md
+go run ./cmd/spectool topic -spec ..       # regenerate topic/topic-patterns.json
+go run ./cmd/spectool topic -spec .. 'Oi4v2/…'   # analyze topics (grammar rule, Source/Filter, IL check, warnings)
 go test ./...
 ```
 
+`lint` also loads `topic.abnf` and the matrix and checks that every allowed matrix row has a grammar rule, that grammar, interpreter and generated regexes agree (random samples) and that every vector still yields its expected result with the reference code (`internal/topic`, `internal/il`); golden vectors must appear verbatim in the cited guideline section.
+
 Every command accepts `-check` (where it generates files) to fail instead of writing, for CI. The guideline repository defaults to `<spec>/../../oi4-oec-documentation`; override with `-guideline`.
+
+## Topic grammar and regexes
+
+`topic.abnf` is the source; the regexes are generated, never edited. They use the common subset of ECMA-262 (compile with the `u` flag), Go RE2, Python `re` and Rust `regex`: anchored with `^…$`, non-capturing groups, `\xHH` escapes, no look-around or back-references. In Python use `re.fullmatch` (`$` also matches before a final line break). The regexes check the syntax only – `AppId` and `Source` additionally need the Identification Link check (MG 4.1: decode base64url, check characters, authority, length).
+
+## Vectors
+
+One file per kind, `kind` + `baseline` + `description` + `vectors[]` (`vectors.schema.json`). Every vector has an id (`V-TOP-`, `V-IL-`, `V-DNP-`, `V-OID-`), `expected: valid|invalid`, `reqs` (illustrated) or `violates` (broken) REQ ids, `origin` (`guideline` with `ref`, or `constructed`) and `status` (`draft` until the PO confirms it, G-3.9). A golden vector whose guideline text had to be corrected keeps the original in `origin.original` and names the spec finding in `origin.sf`.
 
 ## Workflow per area
 
