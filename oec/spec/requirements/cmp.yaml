@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: 5cb109e
+baseline: edf76e1
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -465,26 +465,27 @@ requirements:
     title: Set or Del requires Event with category Status
     statement: >-
       An application or device that offers the method Set or Del supports the
-      resource Event with the event category Status, independent of its
-      compliance level.
+      resource Event with the event category Status – mandatory from Level 2
+      on, recommended at Level 1.
     keyword: MUST
     domain: messaging
-    levels: {L1: MUST, L2: MUST, L3: MUST}
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The entity offers the method Set or Del.
     refs: [MG 7.2.1, MG 7.2.2, MG 7.1.4, SF-037]
     quotes:
       - ref: MG 7.2.1
-        text: Including the methods Set or Del to an application, makes support for the resource Event and category Status mandatory, independent of the compliance level.
+        text: Including the methods Set or Del to an application, makes support for the resource Event and category Status mandatory from Level 2 on and recommended at Level 1
       - ref: MG 7.2.2
-        text: Including the methods Set or Del to a device representation, makes support for the resource Event and category Status mandatory, independent of the compliance level.
+        text: Including the methods Set or Del to a device representation, makes support for the resource Event and category Status mandatory from Level 2 on and recommended at Level 1
     verification: [d7-test]
-    inventory: [MG-7.2.1-ddfffb17, MG-7.2.2-3d539ed2]
+    inventory: [MG-7.2.1-5b270f5a, MG-7.2.2-e47061e8]
     status: draft
     notes: >-
-      Publishing an Event Status for every Set/Del is MUST since SF-037 (MG
-      7.1.4, MG 9.1) and belongs to areas TOP/BUS/RES-EVENT; the reaction to
-      Set/Del on objects without content is REQ-CMP-043.
+      Publishing an Event Status for every Set/Del (MG 7.1.4, MG 9.1; L1
+      should, L2/L3 must – PO decision C-016 amending SF-037) belongs to areas
+      TOP/BUS/RES-EVENT; the reaction to Set/Del on objects without content is
+      REQ-CMP-043.
 
 
   - id: REQ-CMP-024
@@ -754,7 +755,7 @@ requirements:
     verification: [d7-test]
     inventory: [MG-7.2.1-24dd6c3d, MG-7.2.2-b93de1b2]
     status: draft
-    notes: Replaces REQ-CMP-022. Get Metadata for Data the entity does not have is open, see SF-039.
+    notes: Replaces REQ-CMP-022. Get Metadata for Data the entity does not have, see REQ-CMP-044 (SF-039).
 
   - id: REQ-CMP-038
     title: Resource Event
@@ -850,17 +851,41 @@ requirements:
     statement: >-
       An entity answers a Set or Del addressing an object it does not have or
       does not offer for modification with an Event of the category Status and
-      the level Bad (e.g. BadNotFound or BadNotWritable, MG 8.3.6.1).
+      the level Bad (e.g. BadNotFound or BadNotWritable, MG 8.3.6.1) –
+      mandatory from Level 2 on, recommended at Level 1.
     keyword: MUST
     domain: messaging
-    levels: {L1: MUST, L2: MUST, L3: MUST}
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The entity offers the method Set or Del.
     scope: [MG 8.3.6.1]
     refs: [MG 7.2, SF-037]
     quotes:
       - ref: MG 7.2
-        text: which the entity does not have or does not offer for modification, must be answered with an Event of the category Status and the level Bad
+        text: From Level 2 on, a Set or Del addressing an object, which the entity does not have or does not offer for modification, must be answered with an Event of the category Status and the level Bad
     verification: [d7-test]
-    inventory: [MG-7.2-69a1578f]
+    inventory: [MG-7.2-8b0e8838]
     status: draft
+
+  - id: REQ-CMP-044
+    title: Get of Metadata without Data – no Metadata, optional Event Status Bad
+    statement: >-
+      An entity does not answer a Get of Metadata for a Source and Filter for
+      which it provides no Data with Metadata. It may answer such a Get with
+      an Event of the category Status and the level Bad (BadNotFound). A
+      requester (and D7) requests Metadata only for Data announced in the
+      PublicationList; silence on other Metadata requests is conformant.
+    keyword: MAY
+    domain: messaging
+    levels: {L1: MAY, L2: MAY, L3: MAY}
+    applies_to: [application, device]
+    condition: The entity supports the resource Metadata and receives a Get for a Source/Filter without Data.
+    scope: [MG 9.1.5, MG 8.3.6.1]
+    refs: [MG 7.2, SF-039]
+    quotes:
+      - ref: MG 7.2
+        text: The entity may answer such a Get with an Event of the category Status and the level Bad (BadNotFound).
+    verification: [d7-test]
+    inventory: [MG-7.2-75e4e7b6]
+    status: draft
+    notes: Decided by the PO in C-016 (SF-039, option a + may).

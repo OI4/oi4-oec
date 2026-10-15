@@ -22,7 +22,7 @@ Fields of an entry (`requirements/catalog.schema.json`):
 
 - `statement` – one atomic requirement in our words, written in present tense; the obligation is carried by `keyword` and `levels`, the guideline wording by `quotes`.
 - `keyword` – MUST / MUST NOT / SHOULD / SHOULD NOT / MAY as mapped by MG 1.2; for graded domains it equals the Level 3 obligation.
-- `implicit: true` – the guideline states the behavior without keyword; treated as MUST by the interim rule of SF-035.
+- `implicit: true` – the guideline states the behavior without keyword; treated as MUST by the interim rule of SF-035. Since C-016 the guideline carries the keywords (SF-035 resolved, `0de223c`), so new entries should not need this flag; a remaining keyword-less behavior is a new spec finding.
 - `domain` – `messaging` or `service-container` (graded, `levels` L1–L3 required) or `platform` (not graded, no `levels`).
 - `levels` – obligation per compliance level; `none` = not required at this level.
 - `scope` – for umbrella entries (e.g. the level-table rows of MG 1.3): the sections whose detailed requirements they grade.
