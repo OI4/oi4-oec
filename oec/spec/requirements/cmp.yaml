@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: 6e1b5c3
+baseline: 9489d5e
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -65,18 +65,18 @@ requirements:
     statement: >-
       Every topic a component publishes or subscribes to below the OI4
       namespace conforms to the topic structure and namespace elements of
-      MG 7.1.
+      MG 7.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [component]
-    scope: [MG 7.1]
+    scope: [MG 7]
     refs: [MG 1.3]
     quotes:
       - ref: MG 1.3
-        text: Conformance to the topic structure and namespace (7.1 Topic Namespace Elements) Mandatory Mandatory Mandatory
+        text: Conformance to the topic structure and namespace (7 Topics Definition) Mandatory Mandatory Mandatory
     verification: [d7-validate]
-    inventory: [MG-1.3-f76428e2, MG-1.3-09f509cb]
+    inventory: [MG-1.3-03edd8a8, MG-1.3-09f509cb]
     status: draft
 
   - id: REQ-CMP-005
@@ -142,19 +142,19 @@ requirements:
       From Level 2 on, a component supports the resource interaction patterns
       of the Method element: requesting resources via Get, modifying resources
       via Set and Del where applicable, and publishing resources via Pub
-      (MG 7.1.4, MG 9.1). The methods per entity type are detailed by
+      (MG 7.4, MG 9.1). The methods per entity type are detailed by
       REQ-CMP-014 to REQ-CMP-016, REQ-CMP-033 and REQ-CMP-034.
     keyword: MUST
     domain: messaging
     levels: {L1: none, L2: MUST, L3: MUST}
     applies_to: [component]
-    scope: [MG 7.1.4, MG 9.1]
+    scope: [MG 7.4, MG 9.1]
     refs: [MG 1.3]
     quotes:
       - ref: MG 1.3
-        text: 'Resource interaction patterns via the Method element: requesting resources via Get, modifying resources via Set and Del (where applicable) and publishing resources via Pub (7.1.4 Method Element, 9.1 Resources) - Mandatory Mandatory'
+        text: 'Resource interaction patterns via the Method element: requesting resources via Get, modifying resources via Set and Del (where applicable) and publishing resources via Pub (7.4 Method Element, 9.1 Resources) - Mandatory Mandatory'
     verification: [d7-test]
-    inventory: [MG-1.3-24be5cc5]
+    inventory: [MG-1.3-690c85af]
     status: draft
 
   - id: REQ-CMP-009
@@ -272,7 +272,7 @@ requirements:
     applies_to: [application, device]
     refs: [MG 1.3]
     verification: [d7-monitor]
-    inventory: [MG-1.3-4651b89a, MG-1.3-e977a50d, MG-1.3-24be5cc5, MG-1.3-88c2af43]
+    inventory: [MG-1.3-4651b89a, MG-1.3-e977a50d, MG-1.3-690c85af, MG-1.3-88c2af43]
     status: draft
 
   - id: REQ-CMP-015
@@ -287,7 +287,7 @@ requirements:
     applies_to: [application, device]
     refs: [MG 1.3]
     verification: [d7-test]
-    inventory: [MG-1.3-24be5cc5, MG-1.3-88c2af43]
+    inventory: [MG-1.3-690c85af, MG-1.3-88c2af43]
     status: draft
 
   - id: REQ-CMP-016
@@ -309,7 +309,7 @@ requirements:
       - ref: MG 1.3
         text: They are not required for other resources at Level 2.
     verification: [d7-test]
-    inventory: [MG-1.3-78fd4a47, MG-1.3-24be5cc5]
+    inventory: [MG-1.3-78fd4a47, MG-1.3-690c85af]
     status: draft
 
 
@@ -421,15 +421,15 @@ requirements:
     levels: {L1: SHOULD, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The entity offers the method Set or Del.
-    refs: [MG 1.3, MG 7.1.4, SF-037]
+    refs: [MG 1.3, MG 7.4, SF-037]
     quotes:
       - ref: MG 1.3
         text: A component that supports the methods Set or Del must support the resource Event with the category Status from Level 2 on and should support it at Level 1
     verification: [d7-test]
-    inventory: [MG-1.3-c16126ec]
+    inventory: [MG-1.3-0c7db418]
     status: draft
     notes: >-
-      Publishing an Event Status for every Set/Del (MG 7.1.4, MG 9.1; L1
+      Publishing an Event Status for every Set/Del (MG 7.4, MG 9.1; L1
       should, L2/L3 must – PO decision C-016 amending SF-037) belongs to areas
       TOP/BUS/RES-EVENT; the reaction to Set/Del on objects without content is
       REQ-CMP-043.
@@ -647,7 +647,7 @@ requirements:
     domain: messaging
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [application]
-    scope: [MG 7.1.4, MG 9.2]
+    scope: [MG 7.4, MG 9.2]
     refs: [MG 1.3, SF-037]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43, MG-1.3-c42cc91d]
@@ -847,7 +847,7 @@ requirements:
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
     condition: The application represents entities without an own MQTT client.
-    scope: [MG 7.1.6]
+    scope: [MG 7.6]
     refs: [MG 1.3]
     quotes:
       - ref: MG 1.3
@@ -855,6 +855,6 @@ requirements:
       - ref: MG 1.3
         text: The representing application must provide the resources PublicationList and SubscriptionList and the common services once for itself; they are not required per represented entity.
     verification: [d7-test, d7-monitor]
-    inventory: [MG-1.3-a477c575, MG-1.3-b6aedd9a, MG-1.3-c42cc91d]
+    inventory: [MG-1.3-bf3a41de, MG-1.3-b6aedd9a, MG-1.3-c42cc91d]
     status: draft
     notes: GL-ADR-017 (PO request, C-017) replaced the former MG 7.2.1/7.2.2 split into applications and devices.
