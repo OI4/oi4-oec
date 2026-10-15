@@ -75,11 +75,11 @@ SDK for microcontroller-class smart devices without container (ADR-0016), writte
 - Portable core (IL/base64url, topics incl. percent-encoding, JSON encoding of NetworkMessage/MAM/Health, lifecycle state machine) + PAL (MQTT 3.1.1/TLS, clock, persistence); ESP-IDF port with `esp-mqtt` + `esp-tls`/mbedTLS; afterwards (best effort) **Arduino library** packaging with an Arduino-ESP32 PAL port (ADR-0017 amendment C-010).
 - C safety measures: static analysis, ASan/UBSan in host tests, fuzzing of topic/JSON parsers.
 - Tests: host unit tests (CMake, Unity) against the shared D1 test vectors on macOS/Windows/Linux; integration in Espressif QEMU (`esp32`) against the dev broker with D7 (to be confirmed); final check on a real ESP32 board.
-- Scope: Messaging **L1** (Birth/Will, Pub MAM + Health, TLS + auth, topic and payload format); L2 (Get, Set where applicable) if the footprint allows.
+- Scope: designed for Messaging **L3** (all messages, ADR-0016 amendment C-016 / Q-019), delivered incrementally: first **L1** (Birth/Will, Pub MAM + Health, TLS + auth, topic and payload format), then L2 (Get, Set/Del where applicable) and L3 (all resources incl. `SubscriptionList`, `Call`/`Reply` + `NewDataSetWriterId`, empty-list behavior) in later increments.
 - Explicit configuration (no `/etc/oi4`), static memory where possible, documented RAM/flash footprint.
 - Example firmware for the reference board.
 - Targets: ESP-IDF `esp32` + `esp32s3` supported, C3/C6 best effort; reference hardware: ESP32 dev board + M5Stack Core2/CoreS3. Example firmware generic + M5Stack variant (display/buttons via `M5Unified`, example only) (ADR-0017 amendment C-011).
-- **Exit:** example firmware on the ESP32 reference board and on the M5Stack device (and in QEMU, if feasible) passes D7 `--level 1` against the dev broker.
+- **Exit:** example firmware on the ESP32 reference board and on the M5Stack device (and in QEMU, if feasible) passes D7 `--level 1` against the dev broker (first increment); later increments pass `--level 2` and `--level 3`.
 
 ## P5 – Conformance test tool (D7)
 
