@@ -1,10 +1,12 @@
 // Command spectool maintains the OEC v2 spec baseline in oec/spec (ADR-0018).
 //
-//	spectool lint      [-spec DIR] [-guideline DIR]   check catalog files (schema + rules)
+//	spectool lint      [-spec DIR] [-guideline DIR]   check catalog, matrix, topic grammar and vectors
 //	spectool render    [-spec DIR] [-check]           generate requirements/view/*.md
 //	spectool inventory [-spec DIR] [-guideline DIR] [-rev REV] [-check]
 //	                                                  extract normative-statement candidates
 //	spectool coverage  [-spec DIR] [-check]           generate coverage/report.md
+//	spectool topic     [-spec DIR] [-check] [TOPIC...] generate topic/topic-patterns.json;
+//	                                                  with arguments: analyse the given topics
 package main
 
 import (
@@ -22,6 +24,8 @@ import (
 	"github.com/OI4/oec/spec/tools/internal/guideline"
 	"github.com/OI4/oec/spec/tools/internal/inventory"
 	"github.com/OI4/oec/spec/tools/internal/render"
+	"github.com/OI4/oec/spec/tools/internal/topic"
+	"github.com/OI4/oec/spec/tools/internal/vectors"
 )
 
 func main() {
@@ -39,6 +43,8 @@ func main() {
 		err = cmdInventory(os.Args[2:])
 	case "coverage":
 		err = cmdCoverage(os.Args[2:])
+	case "topic":
+		err = cmdTopic(os.Args[2:])
 	case "-h", "--help", "help":
 		usage()
 		return
@@ -53,7 +59,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: spectool lint|render|inventory|coverage [flags]  (spectool <cmd> -h for flags)")
+	fmt.Fprintln(os.Stderr, "usage: spectool lint|render|inventory|coverage|topic [flags]  (spectool <cmd> -h for flags)")
 }
 
 type common struct {
@@ -95,14 +101,45 @@ func cmdLint(args []string) error {
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
+	var examples map[string]string
 	if !*noGuideline {
 		files, err := guideline.LoadFiles(c.guidelineDir())
 		if err != nil {
 			return fmt.Errorf("%w (use -guideline or -no-guideline)", err)
 		}
 		opt.Sections = guideline.SectionTexts(files)
+		all, err := guideline.LoadFilesWithExamples(c.guidelineDir())
+		if err != nil {
+			return err
+		}
+		examples = guideline.SectionTexts(all)
 	}
 	errs := s.Lint(opt)
+
+	ts, err := topic.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	if ts.Matrix.Baseline != s.Areas.Baseline {
+		errs = append(errs, fmt.Errorf("%s: baseline %s differs from %s (%s)", topic.MatrixFile, ts.Matrix.Baseline, catalog.AreasFile, s.Areas.Baseline))
+	}
+	for _, ref := range matrixRefs(ts) {
+		if opt.Sections != nil && !sectionKnown(opt.Sections, ref) {
+			errs = append(errs, fmt.Errorf("%s: ref %q does not exist in the guideline", topic.MatrixFile, ref))
+		}
+	}
+	errs = append(errs, ts.Check(topic.CheckOptions{Samples: 100, Seed: 1})...)
+
+	vfiles, err := vectors.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	reqs := map[string]bool{}
+	for _, r := range s.Requirements() {
+		reqs[r.ID] = true
+	}
+	errs = append(errs, vectors.Check(vfiles, ts, vectors.Options{Baseline: s.Areas.Baseline, Reqs: reqs, Sections: examples})...)
+
 	for _, e := range errs {
 		fmt.Fprintln(os.Stderr, e)
 	}
@@ -110,7 +147,89 @@ func cmdLint(args []string) error {
 		return fmt.Errorf("%d problem(s)", len(errs))
 	}
 	fmt.Printf("ok: %d area file(s), %d requirement(s), %d informative item(s)\n", len(s.Files), len(s.Requirements()), len(s.Informative.Items))
+	n := vectors.Count(vfiles)
+	fmt.Printf("ok: %s: %d combination(s); vectors: topic=%d identification-link=%d dnp-encoding=%d oi4identifier=%d\n",
+		topic.MatrixFile, len(ts.Matrix.Combinations), n["topic"], n["identification-link"], n["dnp-encoding"], n["oi4identifier"])
 	return nil
+}
+
+func matrixRefs(ts *topic.Spec) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, c := range ts.Matrix.Combinations {
+		for _, r := range c.Refs {
+			if !seen[r] {
+				seen[r] = true
+				out = append(out, r)
+			}
+		}
+	}
+	return out
+}
+
+func sectionKnown(sections map[string]string, ref string) bool {
+	if _, ok := sections[ref]; ok {
+		return true
+	}
+	for s := range sections {
+		if guideline.SectionWithin(s, ref) {
+			return true
+		}
+	}
+	return false
+}
+
+func cmdTopic(args []string) error {
+	fs, c := flags("topic")
+	check := fs.Bool("check", false, "fail if topic/topic-patterns.json is outdated instead of writing it")
+	_ = fs.Parse(args)
+	ts, err := topic.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	if fs.NArg() > 0 {
+		for _, t := range fs.Args() {
+			res, err := ts.Analyze(t)
+			if err != nil {
+				return err
+			}
+			if !res.Valid {
+				fmt.Printf("invalid (%s, rule %s): %s\n  %s\n", res.Failure, orNone(res.Rule), res.Detail, t)
+				continue
+			}
+			p := res.Parsed
+			fmt.Printf("valid (%s): ServiceType=%s AppId=%q Method=%s Resource=%s", res.Rule, p.ServiceType, p.AppIDIL, p.Method, p.Resource)
+			if p.Source != "" {
+				fmt.Printf(" Source=%q", p.SourceIL)
+			}
+			if p.Filter != "" {
+				fmt.Printf(" Filter=%q", p.FilterValues)
+			}
+			if len(res.Warnings) > 0 {
+				fmt.Printf(" warnings=%v", res.Warnings)
+			}
+			fmt.Println()
+		}
+		return nil
+	}
+	if errs := ts.Check(topic.CheckOptions{Samples: 100, Seed: 1}); len(errs) > 0 {
+		for _, e := range errs {
+			fmt.Fprintln(os.Stderr, e)
+		}
+		return fmt.Errorf("%d problem(s) between %s and %s", len(errs), topic.GrammarFile, topic.MatrixFile)
+	}
+	out, err := ts.PatternsFileContent()
+	if err != nil {
+		return err
+	}
+	return writeAll(c, map[string]string{topic.PatternsFile: out}, *check)
+}
+
+func orNone(s string) string {
+	if s == "" {
+		return "none"
+	}
+	return s
 }
 
 func cmdRender(args []string) error {

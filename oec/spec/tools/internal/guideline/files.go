@@ -49,7 +49,13 @@ type File struct {
 func (f File) Ref() string { return f.Doc + " " + f.Section }
 
 // LoadFiles reads all relevant Markdown files of MG and RIG below root.
-func LoadFiles(root string) ([]File, error) {
+func LoadFiles(root string) ([]File, error) { return loadFiles(root, false) }
+
+// LoadFilesWithExamples is LoadFiles plus the informative examples of MG
+// Appendix B, used to verify vectors taken from the examples.
+func LoadFilesWithExamples(root string) ([]File, error) { return loadFiles(root, true) }
+
+func loadFiles(root string, examples bool) ([]File, error) {
 	var files []File
 	for _, d := range Documents {
 		base := filepath.Join(root, filepath.FromSlash(d.Dir))
@@ -58,7 +64,7 @@ func LoadFiles(root string) ([]File, error) {
 				return err
 			}
 			if e.IsDir() {
-				if excludedDirs[e.Name()] {
+				if excludedDirs[e.Name()] && !examples {
 					return filepath.SkipDir
 				}
 				return nil
