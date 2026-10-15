@@ -1,7 +1,7 @@
 # Spec findings – guideline v2.0 draft
 
 Ambiguities, contradictions and gaps found in the guideline (`oi4-oec-documentation`).
-**Current baseline: `2d6dc59` (branch `feature/spec-findings`, 2026-10-15; guideline text unchanged since `10491df`)** – Messaging Guideline (MG, `docs/guideline/`) and Runtime & Infrastructure Guideline (RIG, `docs/infrastructure-guideline/`) with GL-ADR-001 … 017. GL-ADR-017 removed MG 7.2 (content moved to MG 1.3 and MG 9.1) and renumbered the topic elements MG 7.1.1 … 7.1.7 to MG 7.1 … 7.7 (7.1.5.1/7.1.5.2 → 7.5.1/7.5.2); chapter numbers of MG 7 in the findings below are historical. The OEC Process Description (`docs/process-description/`) is informative (GL-ADR-015).
+**Current baseline: `2452494` (branch `feature/spec-findings`, 2026-10-15; guideline text unchanged since `edf9305`)** – Messaging Guideline (MG, `docs/guideline/`) and Runtime & Infrastructure Guideline (RIG, `docs/infrastructure-guideline/`) with GL-ADR-001 … 017. GL-ADR-017 removed MG 7.2 (content moved to MG 1.3 and MG 9.1) and renumbered the topic elements MG 7.1.1 … 7.1.7 to MG 7.1 … 7.7 (7.1.5.1/7.1.5.2 → 7.5.1/7.5.2); chapter numbers of MG 7 in the findings below are historical. The OEC Process Description (`docs/process-description/`) is informative (GL-ADR-015).
 
 **Section numbers:** GL-ADR-015 renumbered MG chapters 7–10 to 6–9 (MQTT 6, Topics 7, Payload 8, Message Bus 9; former chapter 6 moved to the Process Description). Entries SF-001 … SF-034 cite the numbering valid when they were written (before `49b6fe2`); SF-035 and later use the current numbering.
 

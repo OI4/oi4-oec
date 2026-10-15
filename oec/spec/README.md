@@ -55,4 +55,4 @@ Every command accepts `-check` (where it generates files) to fail instead of wri
 3. `lint`, `render`, `coverage` pass; the area status becomes `drafted`.
 4. The PO reviews `requirements/view/<area>.md`; confirmed entries and the area become `reviewed`.
 
-After a guideline change: regenerate the inventory with the new baseline, update `baseline` in all files, and remap the keys that `lint` reports as missing.
+After a guideline change: regenerate the inventory with the new baseline, update `baseline` in all files (always quoted, e.g. `baseline: "2452494"` – an all-digit short hash is otherwise parsed as a YAML number), and remap the keys that `lint` reports as missing.
