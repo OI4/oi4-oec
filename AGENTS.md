@@ -14,7 +14,7 @@ JSON Schema, developer SDK/library, two demo services (weather, logger), an OEC 
 
 Quick facts:
 
-- Source of truth: OEC Messaging Guideline `oi4-oec-documentation/docs/guideline/` ("MG"), OEC Runtime & Infrastructure Guideline `oi4-oec-documentation/docs/infrastructure-guideline/` ("RIG") and the guideline ADRs `oi4-oec-documentation/rfcs_adrs/` ("GL-ADR-0xx") – see ADR-0001, GUARDRAILS G-1. Current baseline: `9489d5e` (branch `feature/spec-findings`, GL-ADR-001 … 017; SF-001 … 039 resolved, no open findings; keywords added to the guideline in C-016). The OEC Process Description (`docs/process-description/`) is informative. MG chapters were renumbered by GL-ADR-015 – older ADRs/logs use the old numbers (see ADR-0001 amendment C-013).
+- Source of truth: OEC Messaging Guideline `oi4-oec-documentation/docs/guideline/` ("MG"), OEC Runtime & Infrastructure Guideline `oi4-oec-documentation/docs/infrastructure-guideline/` ("RIG") and the guideline ADRs `oi4-oec-documentation/rfcs_adrs/` ("GL-ADR-0xx") – see ADR-0001, GUARDRAILS G-1. Current baseline: `4f5c548` (branch `feature/spec-findings`, GL-ADR-001 … 017; SF-001 … 039 resolved, no open findings; keywords added to the guideline in C-016). The OEC Process Description (`docs/process-description/`) is informative. MG chapters were renumbered by GL-ADR-015 – older ADRs/logs use the old numbers (see ADR-0001 amendment C-013).
 - All deployables live in the monorepo folder `oec/` (ADR-0012). The workspace root is a local git repo – commit every change individually, never push (ADR-0009/0012).
 - `legacy/` is history only. Do not modify, do not copy code from it (see GUARDRAILS G-1.3).
 - Communication with the product owner: German. All project artifacts (logs, plans, code, docs): English.

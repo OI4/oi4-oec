@@ -30,7 +30,7 @@ C-015: PO accepted the CMP view and the informative classification and decided *
 
 C-016: PO decisions implemented in the guideline – `Event` `Status` answer to `Set`/`Del` must from Level 2, should at Level 1; **SF-039** (`Get` of `Metadata` without `Data` not answered, may answer `Status` `Bad`); **Q-019** (D9 designed for Messaging L3, L1 first; ADR-0016 amendment). **SF-035** resolved by a keyword pass over the guideline (`0de223c`, `f830382`). Re-baseline on `de852d6` (REQ-CMP-023/043 updated, REQ-CMP-044 new; CMP 0 open). No open spec findings. Log: `log/2026-10-15_C-016_po-decisions-sf035-keywords.md`.
 
-C-017: PO request – guideline **GL-ADR-017** (`f5d69d8`): MG 7.2 "Minimum Set of Topic Elements" (7.2.1 applications, 7.2.2 devices) removed; requirements per level follow from MG 1.3; new MG 1.3 section "Directly Connected and Represented Entities"; "Resources Without Content" moved to MG 9.1; extended (`7677161`): MG 7 flattened, topic elements MG 7.1.1 … 7.1.7 → MG 7.1 … 7.7. Re-baseline on `9489d5e`; REQ-CMP remapped, new REQ-CMP-045. Log: `log/2026-10-15_C-017_gl-adr-017-remove-mg-7-2.md`.
+C-017: PO request – guideline **GL-ADR-017** (`f5d69d8`): MG 7.2 "Minimum Set of Topic Elements" (7.2.1 applications, 7.2.2 devices) removed; requirements per level follow from MG 1.3; new MG 1.3 section "Directly Connected and Represented Entities"; "Resources Without Content" moved to MG 9.1; extended (`7677161`): MG 7 flattened, topic elements MG 7.1.1 … 7.1.7 → MG 7.1 … 7.7; MQTT topic intro of MG 7 shortened to a link to MQTT v3.1.1 §4.7 (`4d2f919`). Re-baseline on `4f5c548`; REQ-CMP remapped, new REQ-CMP-045. Log: `log/2026-10-15_C-017_gl-adr-017-remove-mg-7-2.md`.
 
 ## Next step
 
@@ -56,7 +56,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `9489d5e`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 017, SF-001 … 039 resolved, no open findings; OEC Process Description informative); previous `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `4f5c548`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 017, SF-001 … 039 resolved, no open findings; OEC Process Description informative); previous `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -95,4 +95,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-014 | 2026-10-14 | `oec/spec/` skeleton, `spectool` (lint/render/inventory/coverage), inventory of MG + RIG, area `CMP` drafted (REQ-CMP-001 … 032); SF-037/038 | `log/2026-10-14_C-014_spec-skeleton-cmp.md` |
 | C-015 | 2026-10-15 | PO decisions SF-037/038 implemented in the guideline (+ SF-036), re-baseline on `5cb109e`, CMP reworked (REQ-CMP-033 … 043, 022 deprecated); SF-039, Q-019 | `log/2026-10-15_C-015_guideline-sf036-038.md` |
 | C-016 | 2026-10-15 | PO decisions (Status event L1 should / L2+ must, SF-039, Q-019), SF-035 keyword pass in the guideline, re-baseline on `de852d6` (REQ-CMP-044) | `log/2026-10-15_C-016_po-decisions-sf035-keywords.md` |
-| C-017 | 2026-10-15 | GL-ADR-017: MG 7.2 removed (requirements from MG 1.3, represented entities in MG 1.3, resources without content in MG 9.1); MG 7 flattened (7.1.x → 7.x); re-baseline on `9489d5e`, REQ-CMP-045 | `log/2026-10-15_C-017_gl-adr-017-remove-mg-7-2.md` |
+| C-017 | 2026-10-15 | GL-ADR-017: MG 7.2 removed (requirements from MG 1.3, represented entities in MG 1.3, resources without content in MG 9.1); MG 7 flattened (7.1.x → 7.x); MG 7 MQTT intro shortened; re-baseline on `4f5c548`, REQ-CMP-045 | `log/2026-10-15_C-017_gl-adr-017-remove-mg-7-2.md` |
