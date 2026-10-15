@@ -1,4 +1,4 @@
-# Guideline digest (v2.0, baseline `2452494`)
+# Guideline digest (v2.0, baseline `bc5d063`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
