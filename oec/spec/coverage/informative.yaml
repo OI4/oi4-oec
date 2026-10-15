@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: 49b6fe2
+baseline: 5cb109e
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -43,19 +43,25 @@ items:
     reason: Reference to external capitalization conventions; "can" expresses possibility, not a permission (MG 1.2).
   - key: MG-1.3-aefa2a03
     reason: Permission that the two compliance domains are independent; reflected by the domain field (separate levels per domain), nothing to test.
-  - key: MG-1.3-d61403fe
-    reason: Example explaining domain applicability; "can" expresses possibility. Reflected by applies_to container-image of the service-container entries.
+  - key: MG-1.3-457befea
+    reason: Independence of the compliance domains (SF-038) – defines how the two domains relate, no behavior of a component. Reflected by the domain field of every entry and the separate tools D7 (messaging) and D8 (service container, ADR-0014).
+  - key: MG-1.3-b326bb9e
+    reason: Example of the domain independence (microcontroller at Messaging Level 3, Service Container not applicable); "can" expresses possibility. Reflected by applies_to container-image of the service-container entries.
+  - key: MG-1.3-6c14f3e4
+    reason: Example of the domain independence (Service Container Level 3 with Messaging Level 1); "can" expresses possibility.
   - key: MG-1.3-8c68e8da
     reason: Introduces the level table; the table rows are REQ-CMP-001 to REQ-CMP-010.
   - key: MG-1.3-06f29445
     reason: Restates the level-table convention of MG 1.2; applied through the levels field.
   - key: MG-7.2-acc721a5
     reason: Defines the two entity types; "can" expresses possibility. Reflected by applies_to application/device.
-  - key: MG-7.2-b583e23f
-    reason: Restates the level-table convention of MG 1.2; applied through the levels field.
   - key: RIG-1.1-f65b3eb9
     reason: Scope description pointing to the Messaging Guideline; no requirement of its own.
-  - key: RIG-1.2-9e040afb
+  - key: RIG-1.2-bebb6b04
+    reason: Independence of the compliance domains (SF-038) – defines how the two domains relate, no behavior of a component. Reflected by the domain field of every entry and the separate tools D7 (messaging) and D8 (service container, ADR-0014).
+  - key: RIG-1.2-4ccffeb5
+    reason: Example of the domain independence (Service Container Level 3 with Messaging Level 1); "can" expresses possibility.
+  - key: RIG-1.2-c4a760cf
     reason: Example explaining domain applicability; "can" expresses possibility. Reflected by applies_to container-image of the service-container entries.
   - key: RIG-1.2-4ff9976a
     reason: Introduces the level table; the table rows are REQ-CMP-027 to REQ-CMP-032.

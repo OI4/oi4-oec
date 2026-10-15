@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: 49b6fe2
+baseline: 5cb109e
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -76,7 +76,7 @@ requirements:
       - ref: MG 1.3
         text: Conformance to the topic structure and namespace (7.1 Topic Namespace Elements) Mandatory Mandatory Mandatory
     verification: [d7-validate]
-    inventory: [MG-1.3-f76428e2, MG-1.3-a1d84b40]
+    inventory: [MG-1.3-f76428e2, MG-1.3-09f509cb]
     status: draft
 
   - id: REQ-CMP-005
@@ -95,7 +95,7 @@ requirements:
       - ref: MG 1.3
         text: Payload format based on OPC UA-conform JSON and the objects defined by the OI4 Alliance (8 Payload Format) Mandatory Mandatory Mandatory
     verification: [schema, d7-validate]
-    inventory: [MG-1.3-b63df147, MG-1.3-a1d84b40]
+    inventory: [MG-1.3-b63df147, MG-1.3-09f509cb]
     status: draft
 
   - id: REQ-CMP-006
@@ -120,7 +120,7 @@ requirements:
     verification: [d7-monitor]
     inventory:
       - MG-1.3-4651b89a
-      - MG-1.3-a1d84b40
+      - MG-1.3-09f509cb
       - MG-7.2-bc168d66
       - MG-7.2.1-82103a01
       - MG-7.2.1-ab3e38f3
@@ -150,7 +150,7 @@ requirements:
     verification: [d7-monitor]
     inventory:
       - MG-1.3-e977a50d
-      - MG-1.3-a1d84b40
+      - MG-1.3-09f509cb
       - MG-7.2-bc168d66
       - MG-7.2.1-82103a01
       - MG-7.2.1-c6157fc7
@@ -165,9 +165,9 @@ requirements:
     statement: >-
       From Level 2 on, a component supports the resource interaction patterns
       of the Method element: requesting resources via Get, modifying resources
-      via Set where applicable, and publishing resources via Pub (MG 7.1.4,
-      MG 9.1). The methods per entity type are detailed by REQ-CMP-014 to
-      REQ-CMP-016.
+      via Set and Del where applicable, and publishing resources via Pub
+      (MG 7.1.4, MG 9.1). The methods per entity type are detailed by
+      REQ-CMP-014 to REQ-CMP-016, REQ-CMP-033 and REQ-CMP-034.
     keyword: MUST
     domain: messaging
     levels: {L1: none, L2: MUST, L3: MUST}
@@ -176,10 +176,11 @@ requirements:
     refs: [MG 1.3, MG 7.2]
     quotes:
       - ref: MG 1.3
-        text: 'Resource interaction patterns via the Method element: requesting resources via Get, modifying resources via Set (where applicable) and publishing resources via Pub (7.1.4 Method Element, 9.1 Resources) - Mandatory Mandatory'
+        text: 'Resource interaction patterns via the Method element: requesting resources via Get, modifying resources via Set and Del (where applicable) and publishing resources via Pub (7.1.4 Method Element, 9.1 Resources) - Mandatory Mandatory'
     verification: [d7-test]
-    inventory: [MG-1.3-eccafa9f]
+    inventory: [MG-1.3-24be5cc5]
     status: draft
+
 
   - id: REQ-CMP-009
     title: Complete MQTT client behavior
@@ -197,18 +198,18 @@ requirements:
       - ref: MG 1.3
         text: Complete MQTT client behavior (6.2.3 Client Identifier, 6.2.4 Keep Alive, 6.2.5 Clean Session, 6.3.1 Quality of Service Level, 6.3.2 Retained Messages, 6.3.4 Close Message, 6.4 General Behavior of MQTT on Changes) Recommended Recommended Mandatory
     verification: [d7-test, d7-monitor]
-    inventory: [MG-1.3-40996d3e, MG-1.3-2754fc26]
+    inventory: [MG-1.3-40996d3e, MG-1.3-0745092e]
     status: draft
 
   - id: REQ-CMP-010
     title: Complete Message Bus behavior
     statement: >-
-      Every method, resource and common service a component offers conforms
-      completely to MG 9 (Message Bus communication), and the component
-      supports the methods and resources required by REQ-CMP-014 to
-      REQ-CMP-023. Methods, resources and services not listed there (e.g.
-      Del, Call/Reply, SubscriptionList, Config, Data, NewDataSetWriterId)
-      are optional; if offered, they are covered by this requirement.
+      At Level 3, a component supports all methods, resources and common
+      services required for its entity type (REQ-CMP-014 to REQ-CMP-021,
+      REQ-CMP-033 to REQ-CMP-040), each with all methods MG 9 defines for it
+      and conforming completely to MG 9, also for resources for which it has
+      no content (REQ-CMP-041 to REQ-CMP-043). At Level 2, this is
+      recommended beyond the Level 2 minimum set.
     keyword: MUST
     domain: messaging
     levels: {L1: none, L2: SHOULD, L3: MUST}
@@ -217,16 +218,14 @@ requirements:
     refs: [MG 1.3, MG 7.2, SF-037]
     quotes:
       - ref: MG 1.3
-        text: Complete Message Bus behavior, e.g. the resources Profile, PublicationList, SubscriptionList, Metadata, ReferenceDesignation and Event (7.2 Minimum Set of Topic Elements for Open Industry 4.0 Alliance Compliance, 9 Message Bus Communication) - Recommended Mandatory
+        text: 'Complete Message Bus behavior: all methods, resources and common services, i.e. in addition the methods Set and Del for all resources for which they are defined, the methods Call and Reply, the resources Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList and ReferenceDesignation and the common service NewDataSetWriterId, also if the component has no content for a resource (7.2 Minimum Set of Topic Elements for Open Industry 4.0 Alliance Compliance, 9 Message Bus Communication) - Recommended Mandatory'
       - ref: MG 7.2
-        text: 'Level 3 (Full): The entity supports the complete set of mandatory methods and resources defined in the following sub-chapters.'
+        text: 'Level 3 (Full): The entity supports all methods, resources and common services listed in the following sub-chapters, each with all methods defined for it in 9 Message Bus Communication.'
     verification: [d7-test, d7-monitor]
-    inventory: [MG-1.3-7b6455c5, MG-1.3-2754fc26, MG-7.2-0c2efb06, MG-7.2-9e0478b4]
+    inventory: [MG-1.3-2f5f05fb, MG-1.3-0745092e, MG-7.2-9e0478b4]
     status: draft
-    notes: >-
-      Interpretation of SF-037 (a, b): the MG 1.3 "e.g." list is broader than
-      the minimum sets of MG 7.2.1/7.2.2; the minimum sets are taken as
-      authoritative until the PO decides.
+    notes: SF-037 (decided by the PO in C-015, resolved in the guideline) – Level 3 requires all messages.
+
 
   # --- Declaring compliance (MG 1.3) ---------------------------------------
   - id: REQ-CMP-011
@@ -312,7 +311,8 @@ requirements:
     title: Method Get
     statement: >-
       From Level 2 on, an application or device supports the method Get and
-      answers Get requests for the resources it offers.
+      answers every Get request for a resource it supports, also if it has no
+      content for it (REQ-CMP-041).
     keyword: MUST
     domain: messaging
     levels: {L1: none, L2: MUST, L3: MUST}
@@ -328,34 +328,39 @@ requirements:
       - MG-7.2.2-53f04d8a
     status: draft
 
+
   - id: REQ-CMP-016
-    title: Method Set for resources offered for modification
+    title: Methods Set and Del for resources offered for modification
     statement: >-
-      From Level 2 on, an application or device supports the method Set for
-      every resource it offers for modification by other participants on the
-      Message Bus (e.g. Config). Level 1 entities are not required to support
-      Set.
+      From Level 2 on, an application or device supports the methods Set and
+      Del for every resource it offers for modification by other participants
+      on the Message Bus (e.g. Config) – "Where applicable" in the method
+      tables. Level 1 entities are not required to support Set or Del. At
+      Level 3, REQ-CMP-033 extends this to all resources.
     keyword: MUST
     domain: messaging
     levels: {L1: none, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The entity offers a resource for modification by other participants.
-    refs: [MG 7.2.1, MG 7.2.2, SF-037]
+    refs: [MG 7.2, MG 7.2.1, MG 7.2.2, SF-037]
     quotes:
+      - ref: MG 7.2
+        text: '"Where applicable" requirements must be fulfilled for every resource the entity offers for modification by other participants on the Message Bus and are not required otherwise'
       - ref: MG 7.2.1
-        text: Set must be supported for all resources that are offered for modification by other participants on the Message Bus, such as Config.
+        text: From Level 2 on, Set and Del must be supported for all resources that are offered for modification by other participants on the Message Bus, such as Config
       - ref: MG 7.2.2
-        text: Set must be supported for all resources that are offered for modification by other participants on the Message Bus, such as Config.
+        text: From Level 2 on, Set and Del must be supported for all resources that are offered for modification by other participants on the Message Bus, such as Config
     verification: [d7-test]
     inventory:
-      - MG-7.2.1-25c36df4
-      - MG-7.2.1-243886ee
-      - MG-7.2.2-92c039d5
-      - MG-7.2.2-93217ce0
+      - MG-7.2-c5492774
+      - MG-7.2.1-9feb5375
+      - MG-7.2.1-ab6c8f8b
+      - MG-7.2.1-aecfb3e9
+      - MG-7.2.2-a42b3293
+      - MG-7.2.2-e4b7c5ad
+      - MG-7.2.2-c1248a42
     status: draft
-    notes: >-
-      "Where applicable" (method tables) is read as MUST under the condition,
-      see SF-037 (c).
+
 
   # --- Minimum set of resources (MG 7.2.1, MG 7.2.2) ------------------------
   - id: REQ-CMP-017
@@ -416,23 +421,26 @@ requirements:
     status: draft
 
   - id: REQ-CMP-021
-    title: Required resources listed in Profile
+    title: Supported resources listed in Profile
     statement: >-
       If an application or device supports the resource Profile, its Profile
-      lists every resource required for its compliance level (REQ-CMP-006,
-      -007, -018 to -020).
+      lists every resource it supports – at least every resource required for
+      its compliance level, including resources for which it has no content.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The entity supports the resource Profile.
-    refs: [MG 7.2.1, MG 7.2.2]
+    refs: [MG 7.2, MG 7.2.1, MG 7.2.2]
     quotes:
       - ref: MG 7.2.1
         text: are required depending on the compliance level and must be listed in Profile (8.3.7 Profile), if Profile is supported
+      - ref: MG 7.2
+        text: The resource must be listed in the Profile of the entity (8.3.7 Profile), if Profile is supported.
     verification: [d7-test]
-    inventory: [MG-7.2.1-82103a01, MG-7.2.2-4158cefa]
+    inventory: [MG-7.2.1-82103a01, MG-7.2.2-4158cefa, MG-7.2-a8701c9a]
     status: draft
+
 
   - id: REQ-CMP-022
     title: Data requires Metadata
@@ -445,21 +453,20 @@ requirements:
     applies_to: [application, device]
     condition: The entity offers the resource Data.
     refs: [MG 7.2.1, MG 7.2.2, SF-037]
-    quotes:
-      - ref: MG 7.2.1
-        text: Including the resource Data to an application, makes support for Metadata mandatory for Level 3 and recommended for Level 2.
-      - ref: MG 7.2.2
-        text: Including the resource Data to a device representation, makes support for Metadata mandatory for Level 3 and recommended for Level 2.
     verification: [d7-test]
-    inventory: [MG-7.2.1-b62cb7c9, MG-7.2.2-cab9bc41]
-    status: draft
-    notes: Level 1 is not stated; read as not required (Data is optional, SF-037 a).
+    status: deprecated
+    replaced_by: REQ-CMP-037
+    notes: >-
+      The conditional note was removed from MG 7.2.1/7.2.2 with SF-037 (C-015);
+      Metadata is now a resource of the level tables (REQ-CMP-037).
+
 
   - id: REQ-CMP-023
     title: Set or Del requires Event with category Status
     statement: >-
       An application or device that offers the method Set or Del supports the
-      resource Event with the event category Status.
+      resource Event with the event category Status, independent of its
+      compliance level.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -468,36 +475,38 @@ requirements:
     refs: [MG 7.2.1, MG 7.2.2, MG 7.1.4, SF-037]
     quotes:
       - ref: MG 7.2.1
-        text: Including the methods Set or Del to an application, makes support for the resource Event and category Status mandatory.
+        text: Including the methods Set or Del to an application, makes support for the resource Event and category Status mandatory, independent of the compliance level.
       - ref: MG 7.2.2
-        text: Including the methods Set or Del to a device representation, makes support for the resource Event and category Status mandatory.
+        text: Including the methods Set or Del to a device representation, makes support for the resource Event and category Status mandatory, independent of the compliance level.
     verification: [d7-test]
-    inventory: [MG-7.2.1-785a5133, MG-7.2.2-da5d07d7]
+    inventory: [MG-7.2.1-ddfffb17, MG-7.2.2-3d539ed2]
     status: draft
     notes: >-
-      Publishing an Event per Set/Del is SHOULD (MG 7.1.4) and belongs to area
-      TOP/RES-EVENT; this entry only requires support of the resource, see
-      SF-037 (d).
+      Publishing an Event Status for every Set/Del is MUST since SF-037 (MG
+      7.1.4, MG 9.1) and belongs to areas TOP/BUS/RES-EVENT; the reaction to
+      Set/Del on objects without content is REQ-CMP-043.
+
 
   - id: REQ-CMP-024
     title: Smart device with own MQTT client counts as application
     statement: >-
       A smart device that is connected directly to the Message Bus with its
       own MQTT client fulfills the requirements for applications (MG 7.2.1),
-      including REQ-CMP-019.
+      including REQ-CMP-019, REQ-CMP-034, REQ-CMP-039 and REQ-CMP-040.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [device]
     condition: The device has its own MQTT client connected directly to the Message Bus.
-    refs: [MG 7.2.2, SF-035]
+    refs: [MG 7.2.2]
     quotes:
       - ref: MG 7.2.2
-        text: A smart device that is connected directly to the Message Bus with its own MQTT client has to fulfill the requirements of 7.2.1 For Applications.
+        text: A smart device that is connected directly to the Message Bus with its own MQTT client must fulfill the requirements of 7.2.1 For Applications.
     verification: [d7-test]
-    inventory: [MG-7.2.2-1fe1672a]
+    inventory: [MG-7.2.2-96b56eb1]
     status: draft
+    notes: The guideline used "has to" (implicit, SF-035) until C-015; now "must".
+
 
   # --- Field conventions (MG 1.2) -----------------------------------------
   - id: REQ-CMP-025
@@ -552,9 +561,11 @@ requirements:
       - ref: RIG 1.2
         text: Packaging and deployment as an OCI-compliant container (2.1 Introduction to Containerization) Mandatory Mandatory Mandatory
     verification: [d8]
-    inventory: [RIG-1.2-c392f9f8, MG-1.3-2754fc26]
+    inventory: [RIG-1.2-c392f9f8]
     status: draft
-    notes: MG 1.3 (Level 2 bullet) suggests OCI from Level 2; RIG 1.2 is followed, see SF-038.
+    notes: >-
+      RIG 1.2 defines the Service Container levels; since SF-038 (C-015) MG 1.3
+      no longer suggests OCI from Level 2 only.
 
   - id: REQ-CMP-028
     title: Software Bill of Materials
@@ -648,5 +659,208 @@ requirements:
       - ref: RIG 1.2
         text: Platform-related application requirements, such as supported platforms and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
     verification: [d8, manual]
-    inventory: [RIG-1.2-ae863090, MG-1.3-2754fc26]
+    inventory: [RIG-1.2-ae863090, MG-1.3-0745092e]
+    status: draft
+
+  # --- Level 3: all messages (MG 7.2, MG 7.2.1, MG 7.2.2; SF-037, C-015) ------
+  - id: REQ-CMP-033
+    title: Methods Set and Del for all resources at Level 3
+    statement: >-
+      At Level 3, an application supports Set for Config, Data, Metadata,
+      PublicationList, SubscriptionList and ReferenceDesignation and Del for
+      SubscriptionList and ReferenceDesignation; a device representation
+      supports Set for Config, Data, Metadata and ReferenceDesignation and Del
+      for ReferenceDesignation (all resources for which MG 9.1 defines the
+      method).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: none, L3: MUST}
+    applies_to: [application, device]
+    scope: [MG 9.1]
+    refs: [MG 7.2.1, MG 7.2.2, SF-037]
+    quotes:
+      - ref: MG 7.2.1
+        text: At Level 3, Set and Del must be supported for all resources for which they are defined
+      - ref: MG 7.2.2
+        text: At Level 3, Set and Del must be supported for all resources for which they are defined
+    verification: [d7-test]
+    inventory:
+      - MG-7.2.1-9feb5375
+      - MG-7.2.1-ab6c8f8b
+      - MG-7.2.1-36ca7255
+      - MG-7.2.2-a42b3293
+      - MG-7.2.2-e4b7c5ad
+      - MG-7.2.2-5670c67b
+    status: draft
+    notes: At Level 2, Set and Del are required only where applicable (REQ-CMP-016).
+
+  - id: REQ-CMP-034
+    title: Methods Call and Reply as responder of the common services
+    statement: >-
+      An application supports the methods Call and Reply as responder of the
+      common services it offers (REQ-CMP-040): it subscribes to the Call topic
+      and answers every Call with a Reply.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application]
+    scope: [MG 7.1.4, MG 9.2]
+    refs: [MG 7.2.1, SF-037]
+    verification: [d7-test]
+    inventory: [MG-7.2.1-58d22fbb]
+    status: draft
+    notes: >-
+      Devices are not listed (MG 7.2.2); the common services are offered by
+      the representing application. A smart device with its own MQTT client
+      is an application (REQ-CMP-024).
+
+  - id: REQ-CMP-035
+    title: Resource Config
+    statement: An application or device supports the resource Config (MG 8.3.3).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, device]
+    scope: [MG 8.3.3]
+    refs: [MG 7.2.1, MG 7.2.2, SF-037]
+    verification: [d7-test]
+    inventory: [MG-7.2.1-8204de3f, MG-7.2.2-92eb06e8]
+    status: draft
+    notes: An entity without configuration parameters answers Get with an empty list (REQ-CMP-041).
+
+  - id: REQ-CMP-036
+    title: Resource Data
+    statement: An application or device supports the resource Data (MG 8.3.4).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, device]
+    scope: [MG 8.3.4]
+    refs: [MG 7.2.1, MG 7.2.2, SF-037]
+    verification: [d7-test, d7-monitor]
+    inventory: [MG-7.2.1-8a6abb37, MG-7.2.2-2cf929bb]
+    status: draft
+    notes: An entity without process data answers Get with an empty list and publishes no Data on its own (REQ-CMP-041, REQ-CMP-042).
+
+  - id: REQ-CMP-037
+    title: Resource Metadata
+    statement: An application or device supports the resource Metadata (MG 8.3.5).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, device]
+    scope: [MG 8.3.5]
+    refs: [MG 7.2.1, MG 7.2.2, SF-037]
+    verification: [d7-test]
+    inventory: [MG-7.2.1-24dd6c3d, MG-7.2.2-b93de1b2]
+    status: draft
+    notes: Replaces REQ-CMP-022. Get Metadata for Data the entity does not have is open, see SF-039.
+
+  - id: REQ-CMP-038
+    title: Resource Event
+    statement: An application or device supports the resource Event (MG 8.3.6).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, device]
+    scope: [MG 8.3.6]
+    refs: [MG 7.2.1, MG 7.2.2, SF-037]
+    verification: [d7-test, d7-monitor]
+    inventory: [MG-7.2.1-bcb6afe2, MG-7.2.2-8fcb984d]
+    status: draft
+    notes: Independent of the level, Event Status is mandatory once Set or Del is offered (REQ-CMP-023).
+
+  - id: REQ-CMP-039
+    title: Resource SubscriptionList
+    statement: An application supports the resource SubscriptionList (MG 8.3.9).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application]
+    scope: [MG 8.3.9]
+    refs: [MG 7.2.1, SF-037]
+    verification: [d7-test]
+    inventory: [MG-7.2.1-fa22d5c0]
+    status: draft
+    notes: >-
+      Not listed for devices (MG 7.2.2). An application without subscriptions
+      answers Get with an empty list (REQ-CMP-041).
+
+  - id: REQ-CMP-040
+    title: Common service NewDataSetWriterId
+    statement: >-
+      An application offers the common service NewDataSetWriterId (MG 9.2.1)
+      as responder.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application]
+    scope: [MG 9.2.1]
+    refs: [MG 7.2.1, SF-037]
+    quotes:
+      - ref: MG 7.2.1
+        text: are required depending on the compliance level
+    verification: [d7-test]
+    inventory: [MG-7.2.1-d8f60fd2, MG-7.2.1-420aaf3b]
+    status: draft
+
+  # --- Resources without content (MG 7.2; SF-037, C-015) --------------------
+  - id: REQ-CMP-041
+    title: Get of a resource without content is answered with an empty list
+    statement: >-
+      If an entity supports a resource but has no content for it, it answers a
+      Get of the resource with a NetworkMessage on the related Pub topic that
+      contains no DataSetMessage ("Messages": []).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The entity supports Get for the resource and has no content for it.
+    scope: [MG 8.2.1]
+    refs: [MG 7.2, SF-037]
+    quotes:
+      - ref: MG 7.2
+        text: Supporting a resource does not require that the entity has content for it.
+      - ref: MG 7.2
+        text: must be answered with an empty list
+    verification: [d7-test]
+    inventory: [MG-7.2-2cf92b04, MG-7.2-6fa96daa]
+    status: draft
+
+  - id: REQ-CMP-042
+    title: No unsolicited publication of a resource without content
+    statement: >-
+      As long as an entity has no content for a resource, it does not publish
+      the resource on its own (i.e. without a preceding Get).
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [application, device]
+    condition: The entity has no content for the resource.
+    refs: [MG 7.2, SF-037]
+    quotes:
+      - ref: MG 7.2
+        text: As long as the entity has no content for a resource, it must not publish the resource on its own (without a Get).
+    verification: [d7-monitor]
+    inventory: [MG-7.2-c5d97f58]
+    status: draft
+
+  - id: REQ-CMP-043
+    title: Set or Del on an unknown or non-modifiable object is answered with Event Status Bad
+    statement: >-
+      An entity answers a Set or Del addressing an object it does not have or
+      does not offer for modification with an Event of the category Status and
+      the level Bad (e.g. BadNotFound or BadNotWritable, MG 8.3.6.1).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The entity offers the method Set or Del.
+    scope: [MG 8.3.6.1]
+    refs: [MG 7.2, SF-037]
+    quotes:
+      - ref: MG 7.2
+        text: which the entity does not have or does not offer for modification, must be answered with an Event of the category Status and the level Bad
+    verification: [d7-test]
+    inventory: [MG-7.2-69a1578f]
     status: draft
