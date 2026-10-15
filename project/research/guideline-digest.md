@@ -1,4 +1,4 @@
-# Guideline digest (v2.0, baseline `f5d69d8`)
+# Guideline digest (v2.0, baseline `9489d5e`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
@@ -6,7 +6,7 @@ This is a compact, implementation-oriented summary of the two v2.0 guidelines in
 
 It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 039 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `de852d6` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`, `5cb109e`) are in the git history of this file.
 
-## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`, 017 with `f5d69d8`)
+## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`, 017 with `f5d69d8`/`7677161`)
 
 | GL-ADR | Change | Impact for us |
 |--------|--------|---------------|
@@ -26,7 +26,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
 | 014 | Specific services (Read, Write, Subscribe, Unsubscribe, GenericMethod; former MG 10.3, 8.1.5.3, B1.3) removed | no `SVC` area in the REQ catalog; SDK offers only `NewDataSetWriterId` (closed set: SF-036, resolved C-015) |
 | 015 | Former MG 6 (process description) moved to the separate, informative **OEC Process Description**; MG chapters 7–11 renumbered to 6–10 | citation scheme (old MG n = new MG n−1); no requirements from the Process Description |
 | 016 | Empty AAS mapping chapter (former MG 11) removed | none |
-| 017 | MG 7.2 "Minimum Set of Topic Elements" (7.2.1 applications, 7.2.2 devices) removed: requirements per level follow from MG 1.3; new MG 1.3 section "Directly Connected and Represented Entities"; "Resources Without Content" moved to MG 9.1 | REQ-CMP remapped (C-017), REQ-CMP-045; no requirement change |
+| 017 | MG 7.2 "Minimum Set of Topic Elements" (7.2.1 applications, 7.2.2 devices) removed: requirements per level follow from MG 1.3; new MG 1.3 section "Directly Connected and Represented Entities"; "Resources Without Content" moved to MG 9.1; MG 7 flattened: topic elements MG 7.1.1 … 7.1.7 → **MG 7.1 … 7.7** (7.1.5.x → 7.5.x) | REQ-CMP remapped (C-017), REQ-CMP-045; citation scheme; no requirement change |
 
 ## 0a. Normative keywords (MG 1.2, RIG 1.1)
 
@@ -143,14 +143,14 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
 
 `Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]`
 
-- **Namespace** `Oi4v2`; v1 = `Oi4`. Both may coexist on one broker, but a request is answered in its own namespace (MG 7.1.1).
+- **Namespace** `Oi4v2`; v1 = `Oi4`. Both may coexist on one broker, but a request is answered in its own namespace (MG 7.1).
 - **ServiceType:** `Registry | OTConnector | Utility | Persistence | Aggregation | OOCConnector | ITConnector`.
 - **Method:** `Pub | Get | Set | Del | Call | Reply`.
   - `Get`/`Set`/`Del`/`Call` use the **target's** ServiceType/AppId.
   - `Reply` uses the same topic as `Call` with the method swapped.
 - **Resources:** `MAM, Health, Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList, ReferenceDesignation`.
 - **Common services** (Actions): only `NewDataSetWriterId` (GL-ADR-012).
-- **Specific services:** removed (GL-ADR-014). The resource/service set is **closed**: other names below `Oi4v2` are non-conformant (SF-036, resolved in the guideline C-015: MG 7.1.5 "must not be used below the Namespace element").
+- **Specific services:** removed (GL-ADR-014). The resource/service set is **closed**: other names below `Oi4v2` are non-conformant (SF-036, resolved in the guideline C-015: MG 7.5 "must not be used below the Namespace element").
 - **Source:** base64url IL; equals `AppId` if the information is about the app itself.
 - **Filter:** each level is a `<Topic encoded String>`; `+ # /` within a level are percent-encoded (`%2B %23 %2F`, `%` → `%25`), nothing else. `/` only separates resource-defined levels, never leading/trailing; `WriterGroupName` uses the same value.
 
@@ -290,12 +290,12 @@ No `PublisherId` at DataSetMessage level.
 | ReferenceDesignation | ✓ | ✓ | ✓ (Source) | ✓ (Source) | `[/<Source>]` |
 
 - **Get:** the request is a `ua-data` message with the requested resource's `DataSetClassId` and an empty `Messages`, or only PaginationRequest/Locale (helpers identified by their reserved DSWIDs). The answer goes to the matching `Pub` topic with `ReplyTo` = request `MessageId`. A Get without Source returns all assets of the app (paginated if needed).
-- **Set / Del:** answered by `Pub/Event/<Source>/Status/<Level>` – must from Level 2 on, should at Level 1 (MG 7.1.4, 9.1; SF-037 amended C-016) – with `ReplyTo` = request `MessageId` (must, MG 8.2.1). After a successful Set, the new state must be published (MG 9.1.x).
+- **Set / Del:** answered by `Pub/Event/<Source>/Status/<Level>` – must from Level 2 on, should at Level 1 (MG 7.4, 9.1; SF-037 amended C-016) – with `ReplyTo` = request `MessageId` (must, MG 8.2.1). After a successful Set, the new state must be published (MG 9.1.x).
 - **Actions:**
   - Request: `Oi4v2/<ST>/<AppId>/Call/<Service>[/<Source>]`.
   - Response: `.../Reply/<Service>[/<Source>]`.
   - Correlation via `RequestId` and `CorrelationData`.
-- **Health:** must be published on start, on change and every 60 s (MG 7.1.5.1, keyword since SF-035).
+- **Health:** must be published on start, on change and every 60 s (MG 7.5.1, keyword since SF-035).
 
 ## 9. Registry (MG A1)
 
