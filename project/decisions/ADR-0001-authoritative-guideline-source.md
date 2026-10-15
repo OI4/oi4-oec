@@ -61,3 +61,10 @@ To avoid confusion with our own project ADRs (`ADR-NNNN`), guideline ADRs are al
   - `0106c5f` – **SF-036**: the set of resources and common services is closed (MG 7.1.5, GL-ADR-014 note).
   - `5cb109e` – the guideline copy `findings/SPEC-FINDINGS.md` is synced with our register.
 - Changes the agent makes in the guideline repo on behalf of the PO are part of the baseline like any other guideline commit. Each one references its SF id; the PO reviews them before the branch is merged.
+
+## Amendment C-016 (2026-10-15, guideline baseline `de852d6`)
+
+- The baseline is now `de852d6` on branch `feature/spec-findings`. Again implemented by the agent on PO request (local commits):
+  - `a6147e7` – SF-037 amendment (`Event` `Status` answer to `Set`/`Del`: must from Level 2 on, should at Level 1) and **SF-039** (`Get` of `Metadata` without `Data`: no `Metadata`, may answer with `Event` `Status`/`Bad`).
+  - `0de223c`, `f830382` – **SF-035**: keywords added to all keyword-less protocol statements of the normative-sentence inventory (and `ReplyTo` in MG 8.2.1). The interim rule "keyword-less behavior = implicit MUST" is no longer needed for the guideline text; keyword-less behavior found later is a new spec finding.
+  - `edf76e1`, `de852d6` – findings register sync. No open findings.

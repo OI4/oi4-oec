@@ -1,10 +1,10 @@
-# Guideline digest (v2.0, baseline `5cb109e`)
+# Guideline digest (v2.0, baseline `de852d6`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
 - **RIG**: OEC Runtime & Infrastructure Guideline, `docs/infrastructure-guideline/`
 
-It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 034 and SF-036 … 038 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `5cb109e` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`) are in the git history of this file.
+It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 039 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `de852d6` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`, `5cb109e`) are in the git history of this file.
 
 ## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`)
 
@@ -34,7 +34,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 - Level tables: Mandatory = MUST, Recommended = SHOULD, – = not required at that level.
 - A keyword in the sentence wins over the admonition type (also in notes). Admonitions: `NOTE` (informative unless it has a keyword), `RECOMMENDED` = SHOULD, `HIGHLY RECOMMENDED` = strong SHOULD, `REQUIRED` = MUST, `ATTENTION`.
 - Statements about the operator/platform apply to the platform (RIG 5.1).
-- **Statements without keyword, examples and figures are informative.** Many protocol behaviors are written without keyword (Health timing, Birth topic, Status event after Set/Del, pagination continuation …) → SF-035 (decided C-013: the PO adds keywords; until then such behavior counts as MUST, flagged `implicit`, G-1.6).
+- **Statements without keyword, examples and figures are informative.** Since C-016 the protocol behavior carries keywords (SF-035 resolved: Health timing, Birth topic, Status event after Set/Del, pagination continuation, PublicationList `Mode`, `ReplyTo` …). Keyword-less behavior found later → new spec finding (G-1.6).
 - `REQUIRED` boxes at `49b6fe2`: 9 ACL boxes (MG 9.1.x), MG 4.1 (scheme), MG 4.2 (base64url), RIG 4.1.1–4.1.4.
 
 ## 1. Compliance (MG 1.3, 7.2; RIG 1.2)
@@ -51,8 +51,10 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 | `Profile`, `PublicationList`, `ReferenceDesignation`, `Config`, `Data`, `Metadata`, `Event` | – | R | M |
 | `SubscriptionList`, `Call`/`Reply` + common service `NewDataSetWriterId` (applications only) | – | R | M |
 | `Set`/`Del` for every resource they are defined for (MG 9.1) | – | – | M |
-| Resources without content: `Get` ⇒ empty list, no own `Pub`, `Set`/`Del` on unknown object ⇒ `Event` Status `Bad` | M | M | M |
-| `Set`/`Del` offered ⇒ `Event` category `Status`; every `Set`/`Del` answered by it | M | M | M |
+| Resources without content: `Get` ⇒ empty list, no own `Pub` | M | M | M |
+| `Set`/`Del` on unknown object ⇒ `Event` Status `Bad` | R | M | M |
+| `Get` of `Metadata` without `Data` ⇒ no `Metadata`; may answer `Event` Status `Bad`/`BadNotFound` (SF-039) | MAY | MAY | MAY |
+| `Set`/`Del` offered ⇒ `Event` category `Status`; every `Set`/`Del` answered by it | R | M | M |
 
 - **Domains are independent (SF-038):** a level in one domain neither requires nor implies a level in the other. A microcontroller can be Messaging L3 without any Service Container level; a container can be Service Container L3 with Messaging L1.
 - **Level 3 = all messages (SF-037):** an entity without configuration, data or subscriptions still supports these resources and simply answers `Get` with an empty list.
@@ -287,12 +289,12 @@ No `PublisherId` at DataSetMessage level.
 | ReferenceDesignation | ✓ | ✓ | ✓ (Source) | ✓ (Source) | `[/<Source>]` |
 
 - **Get:** the request is a `ua-data` message with the requested resource's `DataSetClassId` and an empty `Messages`, or only PaginationRequest/Locale (helpers identified by their reserved DSWIDs). The answer goes to the matching `Pub` topic with `ReplyTo` = request `MessageId`. A Get without Source returns all assets of the app (paginated if needed).
-- **Set / Del:** must be answered by `Pub/Event/<Source>/Status/<Level>` (MG 7.1.4, 9.1; SF-037) with `ReplyTo` (without keyword – SF-035). After a successful Set, the new state is published according to the PublicationList ("should").
+- **Set / Del:** answered by `Pub/Event/<Source>/Status/<Level>` – must from Level 2 on, should at Level 1 (MG 7.1.4, 9.1; SF-037 amended C-016) – with `ReplyTo` = request `MessageId` (must, MG 8.2.1). After a successful Set, the new state must be published (MG 9.1.x).
 - **Actions:**
   - Request: `Oi4v2/<ST>/<AppId>/Call/<Service>[/<Source>]`.
   - Response: `.../Reply/<Service>[/<Source>]`.
   - Correlation via `RequestId` and `CorrelationData`.
-- **Health:** published on start, on change and every 60 s (MG 7.1.5.1, stated without keyword – SF-035).
+- **Health:** must be published on start, on change and every 60 s (MG 7.1.5.1, keyword since SF-035).
 
 ## 9. Registry (MG A1)
 
