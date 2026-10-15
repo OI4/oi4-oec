@@ -7,6 +7,7 @@ New questions are added to the first table. Once decided, the row moves to the s
 | ID | Question | Context / options | Blocks | Status |
 |----|----------|-------------------|--------|--------|
 | Q-011 | Publication of (parts of) the work and EU Cyber Resilience Act (CRA) | PO: publication must be reconsidered in light of the CRA (e.g. open-source steward role, SBOM, vulnerability handling, security updates, support period). Note C-006: the guideline itself now requires an SBOM in `/opt/oi4/licenses` from Level 2 (GL-ADR-002), which we generate anyway (G-4.8). Working assumption (PO, C-010): **no public availability on the internet** – publication target are **private GitHub repositories**; CRA review only becomes relevant before any public release / placing on the market. Pushing to the private repos still needs the PO's go (ADR-0009/0012). | P9 | open – parked; working assumption: private GitHub repos (C-010) |
+| Q-019 | Which Messaging level should the micro SDK (D9) target? | Since SF-038 (C-015) the guideline explicitly allows Messaging Level 3 on a microcontroller, and since SF-037 Level 3 means all messages (empty lists where there is no content). ADR-0016 targets L1 (L2 if feasible). Options: (a) **recommended:** design D9 for L3, deliver L1 first, then L2/L3 in later increments of P4b; (b) keep L1 (L2 if feasible); (c) L3 from the first increment. A smart device with its own MQTT client counts as an application, so L3 includes `SubscriptionList`, `Call`/`Reply` and `NewDataSetWriterId`. | P4b (D9 scope) | open (C-015) |
 
 ## Decided
 

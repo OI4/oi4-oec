@@ -29,3 +29,11 @@ Which demo gets L1 was chosen by the agent: the PO asked for one demo at L1 and 
 ## Amendment C-009 (ADR-0017)
 
 The micro SDK is written in **C17**, with ESP-IDF on an ESP32 as the reference platform. It does **not** reuse the Rust `oec-core`, so the consequence "`oec-core` must stay `no_std`-compatible" is **dropped**. Consistency between the two SDKs comes from the shared D1 schemas, the test vectors and D7.
+
+## Amendment C-015 (SF-037, SF-038)
+
+- **Messaging Level 3 now means all messages** (SF-037, guideline `e0b1676`): all methods (incl. `Del`, `Call`/`Reply`), resources (incl. `Config`, `Data`, `Metadata`, `Event`, `SubscriptionList`) and the common service `NewDataSetWriterId`. An entity without content for a resource answers `Get` with an empty list and publishes nothing on its own (catalog REQ-CMP-033 … 043). For the L3 artifacts this means:
+  - **Weather demo (D3)** and **registry (D5)** additionally need `SubscriptionList`, `Event`, `Del`, `Call`/`Reply` with `NewDataSetWriterId` and the empty-list behavior (e.g. the registry has no `Data` of its own and answers with an empty list).
+  - The **SDK (D2)** must provide all of this for apps that select L3; the empty-list behavior is a natural SDK default.
+- **The compliance domains are independent** (SF-038, guideline `609cb4a`). The table above is unchanged: the micro SDK has no Service Container level, the logger demo stays Messaging L1 with Service Container L3.
+- The guideline now explicitly allows Messaging Level 3 on a microcontroller. Whether the micro SDK (D9) should target L3 instead of "L1 (L2 if feasible)" is open question Q-019.
