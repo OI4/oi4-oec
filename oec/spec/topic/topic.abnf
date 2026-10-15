@@ -1,0 +1,175 @@
+; OEC v2.0 - formal grammar of the MQTT topic names below the Namespace "Oi4v2".
+;
+; Source of truth: OEC Messaging Guideline ("MG") @ bc5d063 - MG 4.2, MG 7,
+; MG 9.1.x and MG 9.2.1 - plus the proposed interpretations of the spec
+; findings SF-040 (Filter encoding), SF-041 (topic forms) and SF-042 (closed
+; value sets). Requirements: areas TOP (requirements/top.yaml) and IL
+; (requirements/il.yaml).
+;
+; Notation: ABNF (RFC 5234) with case-sensitive strings %s"..." (RFC 7405).
+; Topic names are case-sensitive (MQTT v3.1.1 section 4.7.3), therefore every
+; literal that contains letters is written as %s"...". Values are Unicode
+; code points; on the wire the topic name is a UTF-8 string (MQTT v3.1.1
+; section 1.5.3).
+;
+; The regular expressions in topic-patterns.json are generated from this file
+; by 'spectool topic' - never edit them by hand.
+;
+; Beyond this grammar, AppId and Source need a reference check: the
+; base64url-decoded octets must form a valid Identification Link (MG 4.1:
+; allowed characters, no "%", authority in lower case). spectool implements
+; it in internal/il; the vectors in ../vectors record the expected result.
+
+; ---------------------------------------------------------------------------
+; Generic structure (MG 7):
+; Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]
+; Every topic that matches "topic" also matches "topic-structure"; the
+; reverse is not true (e.g. Get/Event is structurally fine but not allowed).
+
+topic-structure = prefix method "/" ( resource / service )
+                  [ "/" source [ "/" filter-level *( "/" filter-level ) ] ]
+
+; All allowed Method x Resource/service combinations (MG 9.1.x, MG 9.2.1,
+; SF-041). matrix/method-resource.yaml names these rules.
+
+topic = pub-mam / get-mam
+      / pub-health / get-health
+      / pub-config / get-config / set-config
+      / pub-data / get-data / set-data
+      / pub-metadata / get-metadata / set-metadata
+      / pub-event
+      / pub-profile / get-profile
+      / pub-publicationlist / get-publicationlist / set-publicationlist
+      / pub-subscriptionlist / get-subscriptionlist / set-subscriptionlist
+      / del-subscriptionlist
+      / pub-referencedesignation / get-referencedesignation
+      / set-referencedesignation / del-referencedesignation
+      / call-newdatasetwriterid / reply-newdatasetwriterid
+
+; ---------------------------------------------------------------------------
+; Fixed elements
+
+prefix       = namespace "/" service-type "/" app-id "/"
+
+; MG 7.1
+namespace    = %s"Oi4v2"
+
+; MG 7.2 - closed set (SF-042)
+service-type = %s"Registry" / %s"OTConnector" / %s"Utility" / %s"Persistence"
+             / %s"Aggregation" / %s"OOCConnector" / %s"ITConnector"
+
+; MG 7.3, MG 7.6 - exactly one topic level each
+app-id       = encoded-il
+source       = encoded-il
+
+; MG 7.4
+method       = %s"Pub" / %s"Get" / %s"Set" / %s"Del" / %s"Call" / %s"Reply"
+
+; MG 7.5.1, MG 7.5.2
+resource     = %s"MAM" / %s"Health" / %s"Config" / %s"Data" / %s"Metadata"
+             / %s"Event" / %s"Profile" / %s"PublicationList"
+             / %s"SubscriptionList" / %s"ReferenceDesignation"
+service      = %s"NewDataSetWriterId"
+
+; ---------------------------------------------------------------------------
+; MG 4.2 - base64url (RFC 4648 section 5) of an Identification Link of
+; 1..255 characters (MG 4.1), without padding and canonical (the unused
+; trailing bits are zero): 2..340 characters.
+
+encoded-il   = *84b64-quad ( b64-quad / b64-tail2 / b64-tail3 )
+b64-quad     = 4b64-char
+b64-tail2    = b64-char b64-last2   ; one remaining octet
+b64-tail3    = 2b64-char b64-last3  ; two remaining octets
+b64-char     = ALPHA / DIGIT / "-" / "_"
+b64-last2    = %s"A" / %s"Q" / %s"g" / %s"w"
+b64-last3    = %s"A" / %s"E" / %s"I" / %s"M" / %s"Q" / %s"U" / %s"Y"
+             / %s"c" / %s"g" / %s"k" / %s"o" / %s"s" / %s"w"
+             / "0" / "4" / "8"
+
+; ---------------------------------------------------------------------------
+; MG 7.7 - <Topic encoded String>: one non-empty topic level of characters
+; without "+", "#" and "/"; these and "%" itself are percent-encoded with
+; upper-case hex digits; no other character is encoded (SF-040). U+0000 is
+; not allowed in MQTT strings (MQTT v3.1.1 section 1.5.3). White space is
+; allowed but should not be used (area TOP; the vectors warn).
+
+filter-level = 1*( filter-char / pct-encoded )
+filter-char  = %x01-22 / %x24 / %x26-2A / %x2C-2E / %x30-D7FF / %xE000-10FFFF
+pct-encoded  = %s"%2B" / %s"%23" / %s"%2F" / %s"%25"
+
+; Data, Metadata: <Tag>; Config: <Context.Name>
+tag          = filter-level
+context-name = filter-level
+
+; Event: <EventCategory>/<EventLevel> (closed category set, SF-042)
+event-filter   = syslog-filter / status-filter / generic-filter
+syslog-filter  = %s"Syslog/" log-level
+log-level      = %s"Debug" / %s"Informational" / %s"Notice" / %s"Warning"
+               / %s"Error" / %s"Critical" / %s"Alert" / %s"Emergency"
+status-filter  = %s"Status/" status-level
+status-level   = %s"Good" / %s"Uncertain" / %s"Bad"
+generic-filter = %s"Generic/" generic-level
+generic-level  = filter-level
+
+; PublicationList, SubscriptionList: <ResourceType>[/<Tag>], where <Tag> is
+; the Filter of the addressed resource (SF-041 d).
+list-filter  = %s"MAM" / %s"Health" / %s"Profile" / %s"ReferenceDesignation"
+             / %s"PublicationList" / %s"SubscriptionList"
+             / ( %s"Data" / %s"Metadata" ) [ "/" tag ]
+             / %s"Config" [ "/" context-name ]
+             / %s"Event" [ "/" event-filter ]
+
+; ---------------------------------------------------------------------------
+; Method x Resource/service combinations: [ ... ] = optional, no brackets =
+; required, not written = forbidden.
+
+; MG 9.1.1 MAM
+pub-mam = prefix %s"Pub/MAM" [ "/" source ]
+get-mam = prefix %s"Get/MAM" [ "/" source ]
+
+; MG 9.1.2 Health
+pub-health = prefix %s"Pub/Health" [ "/" source ]
+get-health = prefix %s"Get/Health" [ "/" source ]
+
+; MG 9.1.3 Config
+pub-config = prefix %s"Pub/Config" [ "/" source [ "/" context-name ] ]
+get-config = prefix %s"Get/Config" [ "/" source [ "/" context-name ] ]
+set-config = prefix %s"Set/Config" "/" source "/" context-name
+
+; MG 9.1.4 Data
+pub-data = prefix %s"Pub/Data" [ "/" source [ "/" tag ] ]
+get-data = prefix %s"Get/Data" [ "/" source [ "/" tag ] ]
+set-data = prefix %s"Set/Data" "/" source "/" tag
+
+; MG 9.1.5 Metadata (SF-041 b: Source and Tag required)
+pub-metadata = prefix %s"Pub/Metadata" "/" source "/" tag
+get-metadata = prefix %s"Get/Metadata" "/" source "/" tag
+set-metadata = prefix %s"Set/Metadata" "/" source "/" tag
+
+; MG 9.1.6 Event
+pub-event = prefix %s"Pub/Event" "/" source "/" event-filter
+
+; MG 9.1.7 Profile
+pub-profile = prefix %s"Pub/Profile" [ "/" source ]
+get-profile = prefix %s"Get/Profile" [ "/" source ]
+
+; MG 9.1.8 PublicationList
+pub-publicationlist = prefix %s"Pub/PublicationList" [ "/" source [ "/" list-filter ] ]
+get-publicationlist = prefix %s"Get/PublicationList" [ "/" source [ "/" list-filter ] ]
+set-publicationlist = prefix %s"Set/PublicationList" "/" source "/" list-filter
+
+; MG 9.1.9 SubscriptionList
+pub-subscriptionlist = prefix %s"Pub/SubscriptionList" [ "/" source [ "/" list-filter ] ]
+get-subscriptionlist = prefix %s"Get/SubscriptionList" [ "/" source [ "/" list-filter ] ]
+set-subscriptionlist = prefix %s"Set/SubscriptionList" "/" source "/" list-filter
+del-subscriptionlist = prefix %s"Del/SubscriptionList" "/" source "/" list-filter
+
+; MG 9.1.10 ReferenceDesignation
+pub-referencedesignation = prefix %s"Pub/ReferenceDesignation" [ "/" source ]
+get-referencedesignation = prefix %s"Get/ReferenceDesignation" [ "/" source ]
+set-referencedesignation = prefix %s"Set/ReferenceDesignation" "/" source
+del-referencedesignation = prefix %s"Del/ReferenceDesignation" "/" source
+
+; MG 9.2.1 NewDataSetWriterId (SF-041 c: Source optional, no Filter)
+call-newdatasetwriterid  = prefix %s"Call/NewDataSetWriterId" [ "/" source ]
+reply-newdatasetwriterid = prefix %s"Reply/NewDataSetWriterId" [ "/" source ]

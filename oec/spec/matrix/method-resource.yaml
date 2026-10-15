@@ -1,0 +1,76 @@
+# Method x Resource matrix – topic columns (C-018).
+#
+# One row per Method x Resource/service combination. Source of truth for the
+# allowed topic forms together with ../topic/topic.abnf; 'spectool lint' checks
+# both against each other (rule names, required/optional/forbidden Source and
+# Filter, generated samples). Payload and behaviour columns follow in C-022.
+# Interpretations: SF-041 (forms), SF-042 (closed sets).
+
+baseline: "bc5d063"
+combinations:
+  - {method: Pub, resource: MAM, kind: resource, allowed: true, rule: pub-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}
+  - {method: Get, resource: MAM, kind: resource, allowed: true, rule: get-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}
+  - {method: Set, resource: MAM, kind: resource, allowed: false, refs: [MG 9.1.1], notes: "No Set topic in MG 9.1.x for this resource."}
+  - {method: Del, resource: MAM, kind: resource, allowed: false, refs: [MG 9.1.1], notes: "Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x)."}
+  - {method: Call, resource: MAM, kind: resource, allowed: false, refs: [MG 9.1.1], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: MAM, kind: resource, allowed: false, refs: [MG 9.1.1], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: Health, kind: resource, allowed: true, rule: pub-health, source: optional, filter: forbidden, refs: [MG 9.1.2]}
+  - {method: Get, resource: Health, kind: resource, allowed: true, rule: get-health, source: optional, filter: forbidden, refs: [MG 9.1.2]}
+  - {method: Set, resource: Health, kind: resource, allowed: false, refs: [MG 9.1.2], notes: "No Set topic in MG 9.1.x for this resource."}
+  - {method: Del, resource: Health, kind: resource, allowed: false, refs: [MG 9.1.2], notes: "Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x)."}
+  - {method: Call, resource: Health, kind: resource, allowed: false, refs: [MG 9.1.2], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: Health, kind: resource, allowed: false, refs: [MG 9.1.2], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: Config, kind: resource, allowed: true, rule: pub-config, source: optional, filter: optional, filter_rule: context-name, refs: [MG 9.1.3]}
+  - {method: Get, resource: Config, kind: resource, allowed: true, rule: get-config, source: optional, filter: optional, filter_rule: context-name, refs: [MG 9.1.3]}
+  - {method: Set, resource: Config, kind: resource, allowed: true, rule: set-config, source: required, filter: required, filter_rule: context-name, refs: [MG 9.1.3]}
+  - {method: Del, resource: Config, kind: resource, allowed: false, refs: [MG 9.1.3], notes: "Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x)."}
+  - {method: Call, resource: Config, kind: resource, allowed: false, refs: [MG 9.1.3], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: Config, kind: resource, allowed: false, refs: [MG 9.1.3], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: Data, kind: resource, allowed: true, rule: pub-data, source: optional, filter: optional, filter_rule: tag, refs: [MG 9.1.4]}
+  - {method: Get, resource: Data, kind: resource, allowed: true, rule: get-data, source: optional, filter: optional, filter_rule: tag, refs: [MG 9.1.4]}
+  - {method: Set, resource: Data, kind: resource, allowed: true, rule: set-data, source: required, filter: required, filter_rule: tag, refs: [MG 9.1.4]}
+  - {method: Del, resource: Data, kind: resource, allowed: false, refs: [MG 9.1.4], notes: "Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x)."}
+  - {method: Call, resource: Data, kind: resource, allowed: false, refs: [MG 9.1.4], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: Data, kind: resource, allowed: false, refs: [MG 9.1.4], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: Metadata, kind: resource, allowed: true, rule: pub-metadata, source: required, filter: required, filter_rule: tag, refs: [MG 9.1.5], notes: "SF-041 b: Source and Tag required."}
+  - {method: Get, resource: Metadata, kind: resource, allowed: true, rule: get-metadata, source: required, filter: required, filter_rule: tag, refs: [MG 9.1.5], notes: "SF-041 b: Source and Tag required."}
+  - {method: Set, resource: Metadata, kind: resource, allowed: true, rule: set-metadata, source: required, filter: required, filter_rule: tag, refs: [MG 9.1.5]}
+  - {method: Del, resource: Metadata, kind: resource, allowed: false, refs: [MG 9.1.5], notes: "Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x)."}
+  - {method: Call, resource: Metadata, kind: resource, allowed: false, refs: [MG 9.1.5], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: Metadata, kind: resource, allowed: false, refs: [MG 9.1.5], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: Event, kind: resource, allowed: true, rule: pub-event, source: required, filter: required, filter_rule: event-filter, refs: [MG 9.1.6]}
+  - {method: Get, resource: Event, kind: resource, allowed: false, refs: [MG 9.1.6], notes: "Events are only published (MG 9.1.6)."}
+  - {method: Set, resource: Event, kind: resource, allowed: false, refs: [MG 9.1.6], notes: "Events are only published (MG 9.1.6)."}
+  - {method: Del, resource: Event, kind: resource, allowed: false, refs: [MG 9.1.6], notes: "Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x)."}
+  - {method: Call, resource: Event, kind: resource, allowed: false, refs: [MG 9.1.6], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: Event, kind: resource, allowed: false, refs: [MG 9.1.6], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: Profile, kind: resource, allowed: true, rule: pub-profile, source: optional, filter: forbidden, refs: [MG 9.1.7]}
+  - {method: Get, resource: Profile, kind: resource, allowed: true, rule: get-profile, source: optional, filter: forbidden, refs: [MG 9.1.7]}
+  - {method: Set, resource: Profile, kind: resource, allowed: false, refs: [MG 9.1.7], notes: "No Set topic in MG 9.1.x for this resource."}
+  - {method: Del, resource: Profile, kind: resource, allowed: false, refs: [MG 9.1.7], notes: "Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x)."}
+  - {method: Call, resource: Profile, kind: resource, allowed: false, refs: [MG 9.1.7], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: Profile, kind: resource, allowed: false, refs: [MG 9.1.7], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: PublicationList, kind: resource, allowed: true, rule: pub-publicationlist, source: optional, filter: optional, filter_rule: list-filter, refs: [MG 9.1.8], notes: "SF-041 d: <ResourceType>[/<Tag>] with the Filter of the addressed resource."}
+  - {method: Get, resource: PublicationList, kind: resource, allowed: true, rule: get-publicationlist, source: optional, filter: optional, filter_rule: list-filter, refs: [MG 9.1.8]}
+  - {method: Set, resource: PublicationList, kind: resource, allowed: true, rule: set-publicationlist, source: required, filter: required, filter_rule: list-filter, refs: [MG 9.1.8]}
+  - {method: Del, resource: PublicationList, kind: resource, allowed: false, refs: [MG 9.1.8], notes: "Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x)."}
+  - {method: Call, resource: PublicationList, kind: resource, allowed: false, refs: [MG 9.1.8], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: PublicationList, kind: resource, allowed: false, refs: [MG 9.1.8], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: SubscriptionList, kind: resource, allowed: true, rule: pub-subscriptionlist, source: optional, filter: optional, filter_rule: list-filter, refs: [MG 9.1.9]}
+  - {method: Get, resource: SubscriptionList, kind: resource, allowed: true, rule: get-subscriptionlist, source: optional, filter: optional, filter_rule: list-filter, refs: [MG 9.1.9]}
+  - {method: Set, resource: SubscriptionList, kind: resource, allowed: true, rule: set-subscriptionlist, source: required, filter: required, filter_rule: list-filter, refs: [MG 9.1.9]}
+  - {method: Del, resource: SubscriptionList, kind: resource, allowed: true, rule: del-subscriptionlist, source: required, filter: required, filter_rule: list-filter, refs: [MG 9.1.9]}
+  - {method: Call, resource: SubscriptionList, kind: resource, allowed: false, refs: [MG 9.1.9], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: SubscriptionList, kind: resource, allowed: false, refs: [MG 9.1.9], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: ReferenceDesignation, kind: resource, allowed: true, rule: pub-referencedesignation, source: optional, filter: forbidden, refs: [MG 9.1.10]}
+  - {method: Get, resource: ReferenceDesignation, kind: resource, allowed: true, rule: get-referencedesignation, source: optional, filter: forbidden, refs: [MG 9.1.10]}
+  - {method: Set, resource: ReferenceDesignation, kind: resource, allowed: true, rule: set-referencedesignation, source: required, filter: forbidden, refs: [MG 9.1.10]}
+  - {method: Del, resource: ReferenceDesignation, kind: resource, allowed: true, rule: del-referencedesignation, source: required, filter: forbidden, refs: [MG 9.1.10]}
+  - {method: Call, resource: ReferenceDesignation, kind: resource, allowed: false, refs: [MG 9.1.10], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Reply, resource: ReferenceDesignation, kind: resource, allowed: false, refs: [MG 9.1.10], notes: "Call/Reply only address common services (MG 7.4, MG 7.5.2)."}
+  - {method: Pub, resource: NewDataSetWriterId, kind: service, allowed: false, refs: [MG 9.2.1], notes: "Common services use Call/Reply only (MG 7.4)."}
+  - {method: Get, resource: NewDataSetWriterId, kind: service, allowed: false, refs: [MG 9.2.1], notes: "Common services use Call/Reply only (MG 7.4)."}
+  - {method: Set, resource: NewDataSetWriterId, kind: service, allowed: false, refs: [MG 9.2.1], notes: "Common services use Call/Reply only (MG 7.4)."}
+  - {method: Del, resource: NewDataSetWriterId, kind: service, allowed: false, refs: [MG 9.2.1], notes: "Common services use Call/Reply only (MG 7.4)."}
+  - {method: Call, resource: NewDataSetWriterId, kind: service, allowed: true, rule: call-newdatasetwriterid, source: optional, filter: forbidden, refs: [MG 9.2.1], notes: "SF-041 c: optional Source (MG 7.4, MG 8.2.16), not shown in MG 9.2.1."}
+  - {method: Reply, resource: NewDataSetWriterId, kind: service, allowed: true, rule: reply-newdatasetwriterid, source: optional, filter: forbidden, refs: [MG 9.2.1], notes: "SF-041 c: optional Source; equals the Call topic."}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oi4:oec:v2:spec:matrix:method-resource",
+  "title": "OEC v2 Method x Resource matrix – topic columns",
+  "description": "Format of oec/spec/matrix/method-resource.yaml (ADR-0018, C-012 plan section 4): one row per Method x Resource/service combination with the allowed topic form. Cross-checked against topic/topic.abnf by 'spectool lint'.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["baseline", "combinations"],
+  "properties": {
+    "baseline": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "combinations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["method", "resource", "kind", "allowed", "refs"],
+        "properties": {
+          "method": { "enum": ["Pub", "Get", "Set", "Del", "Call", "Reply"] },
+          "resource": { "type": "string", "pattern": "^[A-Z][A-Za-z]+$" },
+          "kind": { "enum": ["resource", "service"] },
+          "allowed": { "type": "boolean" },
+          "rule": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "description": "ABNF rule of the complete topic." },
+          "source": { "$ref": "#/$defs/presence" },
+          "filter": { "$ref": "#/$defs/presence" },
+          "filter_rule": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "description": "ABNF rule of the Filter (all levels after the Source)." },
+          "refs": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^(MG|RIG) [A-Z]?[0-9]+(\\.[0-9]+)*$" } },
+          "notes": { "type": "string" }
+        },
+        "if": { "properties": { "allowed": { "const": true } } },
+        "then": { "required": ["rule", "source", "filter"] },
+        "else": { "not": { "anyOf": [ { "required": ["rule"] }, { "required": ["source"] }, { "required": ["filter"] }, { "required": ["filter_rule"] } ] } }
+      }
+    }
+  },
+  "$defs": {
+    "presence": { "enum": ["required", "optional", "forbidden"] }
+  }
+}
