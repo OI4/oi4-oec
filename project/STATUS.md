@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-15, cycle C-016_
+_Last updated: 2026-10-15, cycle C-017_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-016 done, next C-017)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-017 done, next C-018)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -30,12 +30,14 @@ C-015: PO accepted the CMP view and the informative classification and decided *
 
 C-016: PO decisions implemented in the guideline – `Event` `Status` answer to `Set`/`Del` must from Level 2, should at Level 1; **SF-039** (`Get` of `Metadata` without `Data` not answered, may answer `Status` `Bad`); **Q-019** (D9 designed for Messaging L3, L1 first; ADR-0016 amendment). **SF-035** resolved by a keyword pass over the guideline (`0de223c`, `f830382`). Re-baseline on `de852d6` (REQ-CMP-023/043 updated, REQ-CMP-044 new; CMP 0 open). No open spec findings. Log: `log/2026-10-15_C-016_po-decisions-sf035-keywords.md`.
 
+C-017: PO request – guideline **GL-ADR-017** (`f5d69d8`): MG 7.2 "Minimum Set of Topic Elements" (7.2.1 applications, 7.2.2 devices) removed; requirements per level follow from MG 1.3; new MG 1.3 section "Directly Connected and Represented Entities"; "Resources Without Content" moved to MG 9.1. Re-baseline on `6e1b5c3`; REQ-CMP remapped, new REQ-CMP-045. Log: `log/2026-10-15_C-017_gl-adr-017-remove-mg-7-2.md`.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO input (not blocking C-017):** review the guideline commits `a6147e7`, `0de223c`, `f830382` and the items flagged in the C-016 log ("Items flagged for PO review"); REQ-CMP-023/043/044 (`oec/spec/requirements/view/cmp.md`).
-2. **C-017** – areas `IL` (MG 4, A3) and `TOP` (MG 7, 7.1), formal topic grammar (`oec/spec/topic/topic.abnf` + `topic-patterns.json`), topic vectors (+ their lint); golden vectors for IL/TOP may start. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-018 … C-024).
+1. **PO input (not blocking C-018):** review the guideline commits `a6147e7`, `0de223c`, `f830382` (C-016, items flagged in the C-016 log) and `f5d69d8` (GL-ADR-017, new MG 1.3 section); REQ-CMP-023/024/043/044/045 (`oec/spec/requirements/view/cmp.md`).
+2. **C-018** – areas `IL` (MG 4, A3) and `TOP` (MG 7, 7.1), formal topic grammar (`oec/spec/topic/topic.abnf` + `topic-patterns.json`), topic vectors (+ their lint); golden vectors for IL/TOP may start. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-019 … C-025).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files, remap the keys `spectool lint` reports, keep `findings/SPEC-FINDINGS.md` in the guideline repo in sync (C-015 log).
 
 ## Deliverables
@@ -54,7 +56,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `de852d6`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 016, SF-001 … 039 resolved, no open findings; OEC Process Description informative); previous `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `6e1b5c3`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 017, SF-001 … 039 resolved, no open findings; OEC Process Description informative); previous `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -93,3 +95,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-014 | 2026-10-14 | `oec/spec/` skeleton, `spectool` (lint/render/inventory/coverage), inventory of MG + RIG, area `CMP` drafted (REQ-CMP-001 … 032); SF-037/038 | `log/2026-10-14_C-014_spec-skeleton-cmp.md` |
 | C-015 | 2026-10-15 | PO decisions SF-037/038 implemented in the guideline (+ SF-036), re-baseline on `5cb109e`, CMP reworked (REQ-CMP-033 … 043, 022 deprecated); SF-039, Q-019 | `log/2026-10-15_C-015_guideline-sf036-038.md` |
 | C-016 | 2026-10-15 | PO decisions (Status event L1 should / L2+ must, SF-039, Q-019), SF-035 keyword pass in the guideline, re-baseline on `de852d6` (REQ-CMP-044) | `log/2026-10-15_C-016_po-decisions-sf035-keywords.md` |
+| C-017 | 2026-10-15 | GL-ADR-017: MG 7.2 removed (requirements from MG 1.3, represented entities in MG 1.3, resources without content in MG 9.1); re-baseline on `6e1b5c3`, REQ-CMP-045 | `log/2026-10-15_C-017_gl-adr-017-remove-mg-7-2.md` |
