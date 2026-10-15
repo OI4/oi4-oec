@@ -52,3 +52,12 @@ To avoid confusion with our own project ADRs (`ADR-NNNN`), guideline ADRs are al
 - The **OEC Process Description is informative**. It is not part of the normative baseline; no requirements are derived from it.
 - The external document "Requirements for Interoperability" is no longer referenced (SF-034). The normative baseline is MG + RIG + GL-ADRs only.
 - **Section numbers:** ADRs, logs and spec findings written before C-013 cite the old MG numbering (old MG n = new MG n−1 for n = 7…10). They are not rewritten; living documents (GUARDRAILS, STATUS, ROADMAP, digest) use the current numbering.
+
+## Amendment C-015 (2026-10-15, guideline baseline `5cb109e`)
+
+- The baseline is now `5cb109e` on branch `feature/spec-findings`. The PO had the agent implement the decided findings directly in the guideline repo (local commits, never pushed):
+  - `609cb4a` – **SF-038**: the OEC Messaging Compliance and the OEC Service Container Compliance are **independent** domains (MG 1.3, RIG 1.2, RIG 5.2, glossaries, GL-ADR-009 note). A microcontroller can reach Messaging Level 3 without any Service Container level; a container can reach Service Container Level 3 with Messaging Level 1.
+  - `e0b1676` – **SF-037**: Messaging **Level 3 = all methods, resources and common services**; "Resources Without Content" (empty list on `Get`, no unsolicited `Pub`, `Event` Status `Bad` on `Set`/`Del` of unknown objects); every `Set`/`Del` is answered by `Event` Status (MG 7.1.4, 7.2.x, 9.1, GL-ADR-009 note).
+  - `0106c5f` – **SF-036**: the set of resources and common services is closed (MG 7.1.5, GL-ADR-014 note).
+  - `5cb109e` – the guideline copy `findings/SPEC-FINDINGS.md` is synced with our register.
+- Changes the agent makes in the guideline repo on behalf of the PO are part of the baseline like any other guideline commit. Each one references its SF id; the PO reviews them before the branch is merged.
