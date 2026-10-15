@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "2452494"
+baseline: "bc5d063"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -22,7 +22,7 @@ requirements:
         text: MQTT connectivity to the Message Bus (6.1 Protocol Version, 6.2.1 Broker Address and Ports) Mandatory Mandatory Mandatory
     verification: [d7-test]
     inventory: [MG-1.3-3f04bfb1]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-002
     title: MQTT over TLS and authentication
@@ -40,7 +40,7 @@ requirements:
         text: MQTT over TLS and authentication (6.2.2 Security Settings) Mandatory Mandatory Mandatory
     verification: [d7-test]
     inventory: [MG-1.3-3f95bc6f]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-003
     title: Birth message and will message
@@ -58,7 +58,7 @@ requirements:
         text: Birth message and will message (6.3.3 Birth Message, 6.3.5 Will Message) Mandatory Mandatory Mandatory
     verification: [d7-monitor, d7-test]
     inventory: [MG-1.3-34c7c7de]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-004
     title: Topic structure and namespace
@@ -77,7 +77,7 @@ requirements:
         text: Conformance to the topic structure and namespace (7 Topics Definition) Mandatory Mandatory Mandatory
     verification: [d7-validate]
     inventory: [MG-1.3-03edd8a8, MG-1.3-09f509cb]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-005
     title: Payload format
@@ -96,7 +96,7 @@ requirements:
         text: Payload format based on OPC UA-conform JSON and the objects defined by the OI4 Alliance (8 Payload Format) Mandatory Mandatory Mandatory
     verification: [schema, d7-validate]
     inventory: [MG-1.3-b63df147, MG-1.3-09f509cb]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-006
     title: Publish MAM for itself and all subordinate assets
@@ -115,7 +115,7 @@ requirements:
         text: Publish MAM for itself and all subordinate assets (9.1.1 MAM (Master Asset Model)) Mandatory Mandatory Mandatory
     verification: [d7-monitor]
     inventory: [MG-1.3-4651b89a, MG-1.3-09f509cb, MG-1.3-b6aedd9a]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-007
     title: Publish Health for itself and all subordinate assets
@@ -134,7 +134,7 @@ requirements:
         text: Publish Health for itself and all subordinate assets (9.1.2 Health) Mandatory Mandatory Mandatory
     verification: [d7-monitor]
     inventory: [MG-1.3-e977a50d, MG-1.3-09f509cb, MG-1.3-b6aedd9a]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-008
     title: Resource interaction patterns via the Method element
@@ -155,7 +155,7 @@ requirements:
         text: 'Resource interaction patterns via the Method element: requesting resources via Get, modifying resources via Set and Del (where applicable) and publishing resources via Pub (7.4 Method Element, 9.1 Resources) - Mandatory Mandatory'
     verification: [d7-test]
     inventory: [MG-1.3-690c85af]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-009
     title: Complete MQTT client behavior
@@ -174,7 +174,7 @@ requirements:
         text: Complete MQTT client behavior (6.2.3 Client Identifier, 6.2.4 Keep Alive, 6.2.5 Clean Session, 6.3.1 Quality of Service Level, 6.3.2 Retained Messages, 6.3.4 Close Message, 6.4 General Behavior of MQTT on Changes) Recommended Recommended Mandatory
     verification: [d7-test, d7-monitor]
     inventory: [MG-1.3-40996d3e, MG-1.3-0745092e]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-010
     title: Complete Message Bus behavior
@@ -195,7 +195,7 @@ requirements:
         text: 'Complete Message Bus behavior: all methods, resources and common services, i.e. in addition the methods Set and Del for all resources for which they are defined, the methods Call and Reply, the resources Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList and ReferenceDesignation and the common service NewDataSetWriterId, also if the component has no content for a resource (9 Message Bus Communication, 9.1 Resources) - Recommended Mandatory'
     verification: [d7-test, d7-monitor]
     inventory: [MG-1.3-0fc2e320, MG-1.3-0745092e, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
     notes: SF-037 (decided by the PO in C-015, resolved in the guideline) – Level 3 requires all messages.
 
 
@@ -218,7 +218,7 @@ requirements:
         text: A component that is labeled "Open Industry 4.0 Alliance Compliant" without stating a compliance level, must fulfill Level 3 in all applicable compliance domains.
     verification: [manual, d7-test]
     inventory: [MG-1.3-193fdc81]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-012
     title: Service container compliance without stated level means Level 3
@@ -238,7 +238,7 @@ requirements:
         text: must fulfill Level 3 in all applicable compliance domains
     verification: [manual, d8]
     inventory: [MG-1.3-193fdc81]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-013
     title: Registry may show an observed messaging compliance level
@@ -259,7 +259,7 @@ requirements:
         text: The observed level is informative only and does not replace the declared and validated compliance level.
     verification: [manual]
     inventory: [MG-1.3-886a2a1d, MG-1.3-200baca0]
-    status: draft
+    status: reviewed
 
   # --- Methods per level (MG 1.3) ------------------------------------------
 
@@ -273,7 +273,7 @@ requirements:
     refs: [MG 1.3]
     verification: [d7-monitor]
     inventory: [MG-1.3-4651b89a, MG-1.3-e977a50d, MG-1.3-690c85af, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-015
     title: Method Get
@@ -288,7 +288,7 @@ requirements:
     refs: [MG 1.3]
     verification: [d7-test]
     inventory: [MG-1.3-690c85af, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-016
     title: Methods Set and Del for resources offered for modification
@@ -310,7 +310,7 @@ requirements:
         text: They are not required for other resources at Level 2.
     verification: [d7-test]
     inventory: [MG-1.3-78fd4a47, MG-1.3-690c85af]
-    status: draft
+    status: reviewed
 
 
   # --- Resources per level (MG 1.3) ----------------------------------------
@@ -331,7 +331,7 @@ requirements:
         text: From Level 2 on, the resources MAM and Health must additionally be available on request via the method Get.
     verification: [d7-test]
     inventory: [MG-1.3-12d8910c]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-018
     title: Resource Profile
@@ -343,7 +343,7 @@ requirements:
     refs: [MG 1.3]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-019
     title: Resource PublicationList (applications)
@@ -357,7 +357,7 @@ requirements:
     refs: [MG 1.3]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43, MG-1.3-c42cc91d]
-    status: draft
+    status: reviewed
     notes: Since GL-ADR-017, the rule for represented entities is MG 1.3 (REQ-CMP-045).
 
   - id: REQ-CMP-020
@@ -370,7 +370,7 @@ requirements:
     refs: [MG 1.3]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-021
     title: Supported resources listed in Profile
@@ -389,7 +389,7 @@ requirements:
         text: The resource must be listed in the Profile of the entity (8.3.7 Profile), if Profile is supported.
     verification: [d7-test]
     inventory: [MG-9.1-f1ccb0c9]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-022
     title: Data requires Metadata
@@ -427,7 +427,7 @@ requirements:
         text: A component that supports the methods Set or Del must support the resource Event with the category Status from Level 2 on and should support it at Level 1
     verification: [d7-test]
     inventory: [MG-1.3-0c7db418]
-    status: draft
+    status: reviewed
     notes: >-
       Publishing an Event Status for every Set/Del (MG 7.4, MG 9.1; L1
       should, L2/L3 must – PO decision C-016 amending SF-037) belongs to areas
@@ -453,7 +453,7 @@ requirements:
         text: It must fulfill the requirements of the compliance level of the OEC Messaging Compliance it claims itself.
     verification: [d7-test]
     inventory: [MG-1.3-257ae111]
-    status: draft
+    status: reviewed
     notes: >-
       Former MG 7.2.2 rule "smart device counts as application"; MG 7.2 was
       removed by GL-ADR-017 (C-017).
@@ -474,7 +474,7 @@ requirements:
         text: 'The attribute Requirement of a field: Mandatory means the field must be present, Optional means the field may be present and Not used means the field must not be present.'
     verification: [schema, d7-validate]
     inventory: [MG-1.2-5d607928]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-026
     title: Present fields meet Type and Value Range
@@ -492,7 +492,7 @@ requirements:
         text: The format definitions of a field (Type, Value Range) must be met, whenever the field is present.
     verification: [schema, d7-validate]
     inventory: [MG-1.2-4c4f95c8]
-    status: draft
+    status: reviewed
 
   # --- OEC Service Container Compliance: level table (RIG 1.2) -------------
 
@@ -512,7 +512,7 @@ requirements:
         text: Packaging and deployment as an OCI-compliant container (2.1 Introduction to Containerization) Mandatory Mandatory Mandatory
     verification: [d8]
     inventory: [RIG-1.2-c392f9f8]
-    status: draft
+    status: reviewed
     notes: >-
       RIG 1.2 defines the Service Container levels; since SF-038 (C-015) MG 1.3
       no longer suggests OCI from Level 2 only.
@@ -536,7 +536,7 @@ requirements:
         text: The compliance levels only define from which level the license information has to be provided as SBOM.
     verification: [d8]
     inventory: [RIG-1.2-786b58bf, RIG-1.2-8ce7fdab]
-    status: draft
+    status: reviewed
     notes: >-
       Independent of the level, the provider stays responsible for the
       compliance with the software licenses and the applicable law (RIG 1.2
@@ -559,7 +559,7 @@ requirements:
         text: Container environment requirements, such as storage conventions and secret handling (4.1 Container Storage, 4.2 Container Name Conventions) - Recommended Mandatory
     verification: [d8]
     inventory: [RIG-1.2-e8490432]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-030
     title: Container image integrity
@@ -575,7 +575,7 @@ requirements:
         text: Container image integrity (4.3 Container Image Integrity) - Recommended Mandatory
     verification: [d8]
     inventory: [RIG-1.2-75b7fc09]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-031
     title: Container networks
@@ -591,7 +591,7 @@ requirements:
         text: Container networks (4.4 Container Networks) - Recommended Mandatory
     verification: [d8]
     inventory: [RIG-1.2-4e58ea2a]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-032
     title: Platform-related application requirements
@@ -610,7 +610,7 @@ requirements:
         text: Platform-related application requirements, such as supported platforms and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
     verification: [d8, manual]
     inventory: [RIG-1.2-ae863090, MG-1.3-0745092e]
-    status: draft
+    status: reviewed
 
   # --- Level 3: all messages (MG 1.3; SF-037, C-015) -----------------------
 
@@ -634,7 +634,7 @@ requirements:
         text: At Level 3, Set and Del must be supported for all resources for which they are defined (9.1 Resources).
     verification: [d7-test]
     inventory: [MG-1.3-78fd4a47, MG-1.3-0fc2e320]
-    status: draft
+    status: reviewed
     notes: At Level 2, Set and Del are required only where applicable (REQ-CMP-016).
 
   - id: REQ-CMP-034
@@ -651,7 +651,7 @@ requirements:
     refs: [MG 1.3, SF-037]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43, MG-1.3-c42cc91d]
-    status: draft
+    status: reviewed
     notes: >-
       Represented entities do not offer common services; the representing
       application offers them once (REQ-CMP-045). A directly connected smart
@@ -668,7 +668,7 @@ requirements:
     refs: [MG 1.3, SF-037]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
     notes: An entity without configuration parameters answers Get with an empty list (REQ-CMP-041).
 
   - id: REQ-CMP-036
@@ -682,7 +682,7 @@ requirements:
     refs: [MG 1.3, SF-037]
     verification: [d7-test, d7-monitor]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
     notes: An entity without process data answers Get with an empty list and publishes no Data on its own (REQ-CMP-041, REQ-CMP-042).
 
   - id: REQ-CMP-037
@@ -696,7 +696,7 @@ requirements:
     refs: [MG 1.3, SF-037]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
     notes: Replaces REQ-CMP-022. Get Metadata for Data the entity does not have, see REQ-CMP-044 (SF-039).
 
   - id: REQ-CMP-038
@@ -710,7 +710,7 @@ requirements:
     refs: [MG 1.3, SF-037]
     verification: [d7-test, d7-monitor]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43]
-    status: draft
+    status: reviewed
     notes: Independent of the level, Event Status is mandatory once Set or Del is offered (REQ-CMP-023).
 
   - id: REQ-CMP-039
@@ -724,7 +724,7 @@ requirements:
     refs: [MG 1.3, SF-037]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43, MG-1.3-c42cc91d]
-    status: draft
+    status: reviewed
     notes: >-
       Provided once by a representing application, not per represented
       entity (REQ-CMP-045). An application without subscriptions
@@ -743,7 +743,7 @@ requirements:
     refs: [MG 1.3, SF-037]
     verification: [d7-test]
     inventory: [MG-1.3-0fc2e320, MG-1.3-88c2af43, MG-1.3-c42cc91d]
-    status: draft
+    status: reviewed
 
   # --- Resources without content (MG 9.1; SF-037, C-015) --------------------
 
@@ -767,7 +767,7 @@ requirements:
         text: must be answered with an empty list
     verification: [d7-test]
     inventory: [MG-9.1-434d2112, MG-9.1-09ff70c0]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-042
     title: No unsolicited publication of a resource without content
@@ -785,7 +785,7 @@ requirements:
         text: As long as the entity has no content for a resource, it must not publish the resource on its own (without a Get).
     verification: [d7-monitor]
     inventory: [MG-9.1-6757358a]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-043
     title: Set or Del on an unknown or non-modifiable object is answered with Event Status Bad
@@ -806,7 +806,7 @@ requirements:
         text: From Level 2 on, a Set or Del addressing an object, which the entity does not have or does not offer for modification, must be answered with an Event of the category Status and the level Bad
     verification: [d7-test]
     inventory: [MG-9.1-ebe69434]
-    status: draft
+    status: reviewed
 
   - id: REQ-CMP-044
     title: Get of Metadata without Data – no Metadata, optional Event Status Bad
@@ -828,7 +828,7 @@ requirements:
         text: The entity may answer such a Get with an Event of the category Status and the level Bad (BadNotFound).
     verification: [d7-test]
     inventory: [MG-9.1-379b5763]
-    status: draft
+    status: reviewed
     notes: Decided by the PO in C-016 (SF-039, option a + may).
 
   - id: REQ-CMP-045
@@ -836,8 +836,10 @@ requirements:
     statement: >-
       An application that represents entities without an own MQTT client on
       the Message Bus (e.g. field devices behind a connector or gateway) and
-      provides information for them fulfills the requirements of its own
-      compliance level for each represented entity: the resources and methods
+      provides information for them publishes and answers on their behalf; a
+      represented entity does not communicate on the Message Bus itself. The
+      application fulfills the requirements of its own compliance level for
+      each represented entity: the resources and methods
       it offers for a represented entity (Source = the entity's identifier)
       match its own level. PublicationList, SubscriptionList and the common
       services are provided once by the representing application, not per
@@ -851,10 +853,12 @@ requirements:
     refs: [MG 1.3]
     quotes:
       - ref: MG 1.3
+        text: The representing application publishes and answers on behalf of the represented entity.
+      - ref: MG 1.3
         text: An application that provides information for individual represented entities must fulfill the requirements of its compliance level for each of these entities, i.e. the resources and methods it offers for a represented entity must match its own compliance level.
       - ref: MG 1.3
         text: The representing application must provide the resources PublicationList and SubscriptionList and the common services once for itself; they are not required per represented entity.
     verification: [d7-test, d7-monitor]
     inventory: [MG-1.3-bf3a41de, MG-1.3-b6aedd9a, MG-1.3-c42cc91d]
-    status: draft
-    notes: GL-ADR-017 (PO request, C-017) replaced the former MG 7.2.1/7.2.2 split into applications and devices.
+    status: reviewed
+    notes: GL-ADR-017 (PO request, C-017) replaced the former MG 7.2.1/7.2.2 split into applications and devices. PO review (C-017) – confirmed; a represented entity never acts itself, the representing service always answers on its behalf.
