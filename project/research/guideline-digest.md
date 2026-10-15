@@ -1,10 +1,10 @@
-# Guideline digest (v2.0, baseline `49b6fe2`)
+# Guideline digest (v2.0, baseline `5cb109e`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
 - **RIG**: OEC Runtime & Infrastructure Guideline, `docs/infrastructure-guideline/`
 
-It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 034 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `49b6fe2` (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`) are in the git history of this file.
+It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 034 and SF-036 … 038 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `5cb109e` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`) are in the git history of this file.
 
 ## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`)
 
@@ -23,7 +23,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 | 011 | Split into MG + RIG; chapter renumbering (IL = MG 4, MAM = MG 5, container env = RIG 4, platform = RIG 5) | citation scheme |
 | 012 | Only common service left: `NewDataSetWriterId` (FileUpload, FileDownload, FirmwareUpdate, Blink removed; DSWIDs 4–7 reserved; their DataSetClassIds reserved) | schema, SDK, D7 smaller |
 | 013 | `NodeId` = JSON string per Part 6 V1.05 (`"i=11"`, `"nsu=<uri>;i=6244"`); `ns=` and the V1.04 object form are not used | schema (FieldMetaData etc.), codec |
-| 014 | Specific services (Read, Write, Subscribe, Unsubscribe, GenericMethod; former MG 10.3, 8.1.5.3, B1.3) removed | no `SVC` area in the REQ catalog; SDK offers only `NewDataSetWriterId` (open/closed set: SF-036) |
+| 014 | Specific services (Read, Write, Subscribe, Unsubscribe, GenericMethod; former MG 10.3, 8.1.5.3, B1.3) removed | no `SVC` area in the REQ catalog; SDK offers only `NewDataSetWriterId` (closed set: SF-036, resolved C-015) |
 | 015 | Former MG 6 (process description) moved to the separate, informative **OEC Process Description**; MG chapters 7–11 renumbered to 6–10 | citation scheme (old MG n = new MG n−1); no requirements from the Process Description |
 | 016 | Empty AAS mapping chapter (former MG 11) removed | none |
 
@@ -46,12 +46,16 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 | MQTT connectivity, TLS + auth, Birth + Will | M | M | M |
 | `Oi4v2` topic structure, OPC UA JSON payload | M | M | M |
 | `Pub` MAM + Health (self + subordinate assets) | M | M | M |
-| `Get` (MAM/Health also via Get); `Set` where applicable | – | M | M |
+| `Get` (MAM/Health also via Get); `Set`/`Del` where applicable (resources offered for modification) | – | M | M |
 | Full MQTT client behavior (ClientId, keep-alive, clean session, QoS, no retain, Close, publish on change) | R | R | M |
-| `Profile`, `PublicationList`, `ReferenceDesignation` | – | R | M |
-| All other resources / full guideline behavior | – | – | M |
-| `Data` ⇒ `Metadata` | – | R | M |
-| `Set`/`Del` ⇒ `Event` category `Status` (where Set/Del is supported) | – | M | M |
+| `Profile`, `PublicationList`, `ReferenceDesignation`, `Config`, `Data`, `Metadata`, `Event` | – | R | M |
+| `SubscriptionList`, `Call`/`Reply` + common service `NewDataSetWriterId` (applications only) | – | R | M |
+| `Set`/`Del` for every resource they are defined for (MG 9.1) | – | – | M |
+| Resources without content: `Get` ⇒ empty list, no own `Pub`, `Set`/`Del` on unknown object ⇒ `Event` Status `Bad` | M | M | M |
+| `Set`/`Del` offered ⇒ `Event` category `Status`; every `Set`/`Del` answered by it | M | M | M |
+
+- **Domains are independent (SF-038):** a level in one domain neither requires nor implies a level in the other. A microcontroller can be Messaging L3 without any Service Container level; a container can be Service Container L3 with Messaging L1.
+- **Level 3 = all messages (SF-037):** an entity without configuration, data or subscriptions still supports these resources and simply answers `Get` with an empty list.
 
 **Service Container domain** (containerized components only):
 
@@ -63,7 +67,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 | Image integrity, networks, platform-related app requirements | – | R | M |
 
 - Platform and infrastructure requirements (RIG 5.1) are **not** graded by level.
-- "OI4 compliant" without a level means L3 in all applicable domains.
+- "OI4 compliant" without a level means L3 in all applicable domains (Service Container only for containerized components).
 - **Declaration/validation (MG 1.3):** the manufacturer declares the level per domain (e.g. product documentation, no bus message). Tests are grouped per level; the declared level is a parameter of the test run and includes all lower levels. The registry may show an informative *observed* Messaging level (from `Profile` + `Get` answers).
 
 ## 2. Identification Link (MG 4, GL-ADR-010)
@@ -143,7 +147,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
   - `Reply` uses the same topic as `Call` with the method swapped.
 - **Resources:** `MAM, Health, Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList, ReferenceDesignation`.
 - **Common services** (Actions): only `NewDataSetWriterId` (GL-ADR-012).
-- **Specific services:** removed (GL-ADR-014). The resource/service set is **closed**: other names below `Oi4v2` are non-conformant (SF-036, decided C-013; MG 7.1.1: all `Oi4v2` topics shall be OI4-conform).
+- **Specific services:** removed (GL-ADR-014). The resource/service set is **closed**: other names below `Oi4v2` are non-conformant (SF-036, resolved in the guideline C-015: MG 7.1.5 "must not be used below the Namespace element").
 - **Source:** base64url IL; equals `AppId` if the information is about the app itself.
 - **Filter:** each level is a `<Topic encoded String>`; `+ # /` within a level are percent-encoded (`%2B %23 %2F`, `%` → `%25`), nothing else. `/` only separates resource-defined levels, never leading/trailing; `WriterGroupName` uses the same value.
 
@@ -283,7 +287,7 @@ No `PublisherId` at DataSetMessage level.
 | ReferenceDesignation | ✓ | ✓ | ✓ (Source) | ✓ (Source) | `[/<Source>]` |
 
 - **Get:** the request is a `ua-data` message with the requested resource's `DataSetClassId` and an empty `Messages`, or only PaginationRequest/Locale (helpers identified by their reserved DSWIDs). The answer goes to the matching `Pub` topic with `ReplyTo` = request `MessageId`. A Get without Source returns all assets of the app (paginated if needed).
-- **Set / Del:** answered by `Pub/Event/<Source>/Status/<Level>` with `ReplyTo`. After a successful Set, the new state is published according to the PublicationList. (Both stated without keyword – SF-035.)
+- **Set / Del:** must be answered by `Pub/Event/<Source>/Status/<Level>` (MG 7.1.4, 9.1; SF-037) with `ReplyTo` (without keyword – SF-035). After a successful Set, the new state is published according to the PublicationList ("should").
 - **Actions:**
   - Request: `Oi4v2/<ST>/<AppId>/Call/<Service>[/<Source>]`.
   - Response: `.../Reply/<Service>[/<Source>]`.
