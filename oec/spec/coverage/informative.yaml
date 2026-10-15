@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: de852d6
+baseline: 6e1b5c3
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -21,8 +21,8 @@ items:
     reason: Keyword mapping of MG 1.2; applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
   - key: MG-1.2-a7f0d815
     reason: Keyword convention of MG 1.2 (shall equals must); applied through the keyword field (G-1.6).
-  - key: MG-1.2-162c38c5
-    reason: Convention for the level tables of MG 1.3 and MG 7.2.x; applied through the levels field of each entry (G-1.6).
+  - key: MG-1.2-690454b8
+    reason: Convention for the level tables of MG 1.3; applied through the levels field of each entry (G-1.6).
   - key: MG-1.2-0160e12c
     reason: Defines the meaning of the tip box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
   - key: MG-1.2-6a22350e
@@ -53,8 +53,6 @@ items:
     reason: Introduces the level table; the table rows are REQ-CMP-001 to REQ-CMP-010.
   - key: MG-1.3-06f29445
     reason: Restates the level-table convention of MG 1.2; applied through the levels field.
-  - key: MG-7.2-acc721a5
-    reason: Defines the two entity types; "can" expresses possibility. Reflected by applies_to application/device.
   - key: RIG-1.1-f65b3eb9
     reason: Scope description pointing to the Messaging Guideline; no requirement of its own.
   - key: RIG-1.2-bebb6b04

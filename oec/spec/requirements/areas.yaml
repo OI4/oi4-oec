@@ -1,17 +1,17 @@
 # Area registry of the requirements catalog (ADR-0018, schema: areas.schema.json).
 # Every guideline section belongs to exactly one area; the longest listed prefix
 # wins ("MG 8.2.16" beats "MG 8"). Order = catalog order, cycles per ROADMAP P1.
-baseline: de852d6
+baseline: 6e1b5c3
 areas:
   - code: CMP
-    title: Compliance domains, levels and minimum sets
+    title: Compliance domains and levels
     cycle: C-014
     status: drafted
-    sections: [MG index, MG preface, MG appendix-a, MG 1, MG 7.2, RIG index, RIG appendix-a, RIG 1]
+    sections: [MG index, MG preface, MG appendix-a, MG 1, RIG index, RIG appendix-a, RIG 1]
     notes: >-
       Grading of the detailed requirements of the other areas per compliance level
-      (umbrella requirements with scope), compliance declaration rules and the
-      minimum sets of methods and resources.
+      (umbrella requirements with scope), compliance declaration rules, the
+      methods and resources per level and the rule for represented entities.
   - code: IL
     title: Identification link (dnp encoding)
     cycle: C-015
