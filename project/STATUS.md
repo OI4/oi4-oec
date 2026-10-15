@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-14, cycle C-014_
+_Last updated: 2026-10-15, cycle C-015_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-014 done, next C-015)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-015 done, next C-016)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -26,13 +26,15 @@ C-013: re-baselined on guideline `49b6fe2` – PO resolved SF-032 (MG 1.2 normat
 
 C-014: `oec/spec/` created (ADR-0018 amendment C-014): Go module `oec/spec/tools` with the CLI `spectool` (`lint` – strict YAML subset + JSON Schema 2020-12 + catalog rules + verbatim quote check against the guideline; `render` – Markdown views; `inventory` – normative-statement candidates of MG + RIG; `coverage` – per-area mapping report; all with `-check`), schemas, `areas.yaml` (26 areas incl. new `BUS`, `GEN`), inventory at `49b6fe2` (1232 items). **Area `CMP` drafted:** REQ-CMP-001 … 032 (`status: draft`), 88/88 CMP inventory items mapped (59 covered, 29 informative). New findings **SF-037** (Level 3 scope of methods/resources, "Where applicable") and **SF-038** (MG 1.3 Level 2 text vs. RIG 1.2 OCI at Level 1) – open, interpretations used in the drafts.
 
+C-015: PO accepted the CMP view and the informative classification and decided **SF-037** (Level 3 = all messages; a service without Config/Data/subscriptions answers `Get` with an empty list and publishes nothing on its own) and **SF-038** (Messaging and Service Container compliance are independent: microcontroller can be Messaging L3 without any RIG level, a container RIG L3 with Messaging L1). On the PO's request the agent edited the guideline directly (local commits `609cb4a` SF-038, `e0b1676` SF-037, `0106c5f` SF-036, `5cb109e` register sync; Docusaurus build ok). New baseline **`5cb109e`**; `oec/spec/` re-baselined (1255 inventory items): CMP keys/quotes remapped, REQ-CMP-022 deprecated → REQ-CMP-037, new drafts **REQ-CMP-033 … 043**, CMP 110/110 mapped. ADR-0001/0016 amended, GUARDRAILS G-2.13/14, digest, ROADMAP (cycles +1), AGENTS.md updated. New **SF-039** (Get Metadata without Data) and **Q-019** (micro SDK target level) – both open, not blocking.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO input (not blocking C-015):** review `oec/spec/requirements/view/cmp.md` (32 drafts) and the CMP entries of `oec/spec/coverage/informative.yaml` (G-3.9); decide **SF-037** and **SF-038** (`project/SPEC-FINDINGS.md`).
-2. **C-015** – areas `IL` (MG 4, A3) and `TOP` (MG 7, 7.1), formal topic grammar (`oec/spec/topic/topic.abnf` + `topic-patterns.json`), topic vectors (+ their lint); golden vectors for IL/TOP may start. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-016 … C-022).
-3. When the PO has updated the guideline (SF-035 … 038), re-baseline first: `spectool inventory` with the new commit, bump `baseline` in all catalog files, remap the keys `spectool lint` reports.
+1. **PO input (not blocking C-016):** review the guideline commits `609cb4a`, `e0b1676`, `0106c5f`, `5cb109e` and the new drafts REQ-CMP-033 … 043 (`oec/spec/requirements/view/cmp.md`); confirm the agent decisions in the C-015 log ("Decisions"); decide **SF-039** (`project/SPEC-FINDINGS.md`) and **Q-019** (`project/OPEN-QUESTIONS.md`).
+2. **C-016** – areas `IL` (MG 4, A3) and `TOP` (MG 7, 7.1), formal topic grammar (`oec/spec/topic/topic.abnf` + `topic-patterns.json`), topic vectors (+ their lint); golden vectors for IL/TOP may start. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-017 … C-023).
+3. Whenever the guideline commit changes (PO keyword fixes for SF-035, SF-039 decision), re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files, remap the keys `spectool lint` reports, keep `findings/SPEC-FINDINGS.md` in the guideline repo in sync (C-015 log).
 
 ## Deliverables
 
@@ -40,17 +42,17 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 |----|-------------|-------|
 | D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (area CMP drafted) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
-| D3 | Weather demo | not started – target Messaging L3 (ADR-0016) |
+| D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
 | D5 | Registry | not started – target L3, v2 only |
 | D6 | Docusaurus docs | not started – new standalone site in `oec/docs` (ADR-0012) |
 | D7 | Application compliance tool (CLI) | not started – Go (ADR-0013), Messaging L1–L3 of apps/devices, shares only schemas; location `oec/conformance` |
 | D8 | Infrastructure compliance tool (CLI) | not started – Go, Service Container + platform (ADR-0014); location `oec/conformance` |
-| D9 | Micro SDK | not started – C17, ESP-IDF (`esp32`, `esp32s3`) + Arduino, reference ESP32 dev board + M5Stack, Messaging L1 (ADR-0016/0017); location `oec/sdk/micro` |
+| D9 | Micro SDK | not started – C17, ESP-IDF (`esp32`, `esp32s3`) + Arduino, reference ESP32 dev board + M5Stack, Messaging L1, L3 possible per guideline – Q-019 (ADR-0016/0017); location `oec/sdk/micro` |
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `49b6fe2`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 016, SF-001 … 034 resolved, SF-035/036 decided – guideline update by the PO pending, SF-037/038 open; OEC Process Description informative); previous `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `5cb109e`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 016, SF-001 … 034 and SF-036 … 038 resolved, SF-035 decided – keyword fixes by the PO step by step, SF-039 open; OEC Process Description informative); previous `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -62,7 +64,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None for P1. SF-037/038 are open but not blocking (drafts use the proposed interpretation, G-3.5).
+- None for P1. SF-039 is open but not blocking (REQ-CMP-037 points to it, G-3.5). Q-019 blocks only the D9 scope (P4b).
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -87,3 +89,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-012 | 2026-10-14 | P1 plan (catalog format, area order, topic grammar, matrix, golden examples); SF-032 … 034, Q-018 | `log/2026-10-14_C-012_p1-plan.md` |
 | C-013 | 2026-10-14 | Re-baseline on guideline `49b6fe2` (SF-032 … 034 resolved, GL-ADR-014 … 016, MG renumbering); SF-035/036 found and decided; Q-018 → ADR-0018; P1 plan + golden-example rules confirmed | `log/2026-10-14_C-013_rebaseline-49b6fe2.md` |
 | C-014 | 2026-10-14 | `oec/spec/` skeleton, `spectool` (lint/render/inventory/coverage), inventory of MG + RIG, area `CMP` drafted (REQ-CMP-001 … 032); SF-037/038 | `log/2026-10-14_C-014_spec-skeleton-cmp.md` |
+| C-015 | 2026-10-15 | PO decisions SF-037/038 implemented in the guideline (+ SF-036), re-baseline on `5cb109e`, CMP reworked (REQ-CMP-033 … 043, 022 deprecated); SF-039, Q-019 | `log/2026-10-15_C-015_guideline-sf036-038.md` |
