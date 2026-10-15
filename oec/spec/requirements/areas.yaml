@@ -1,6 +1,6 @@
 # Area registry of the requirements catalog (ADR-0018, schema: areas.schema.json).
 # Every guideline section belongs to exactly one area; the longest listed prefix
-# wins ("MG 8.2.16" beats "MG 8"). Order = catalog order, cycles per ROADMAP P1.
+# wins ("MG 8.2.16" beats "MG 8"). Order = catalog order, cycles per ROADMAP P1 (updated C-018).
 baseline: "bc5d063"
 areas:
   - code: CMP
@@ -14,126 +14,126 @@ areas:
       methods and resources per level and the rule for represented entities.
   - code: IL
     title: Identification link (dnp encoding)
-    cycle: C-015
-    status: planned
+    cycle: C-018
+    status: drafted
     sections: [MG 4, MG A3]
   - code: TOP
     title: Topic structure and namespace elements
-    cycle: C-015
-    status: planned
+    cycle: C-018
+    status: drafted
     sections: [MG 7]
   - code: MSG
     title: Payload format and OPC UA PubSub objects
-    cycle: C-016
+    cycle: C-019
     status: planned
     sections: [MG 8, MG A2]
   - code: ACT
     title: Actions (Call/Reply) and DataSetWriterId allocation
-    cycle: C-016
+    cycle: C-019
     status: planned
     sections: [MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2]
   - code: MQTT
     title: General requirements on MQTT
-    cycle: C-017
+    cycle: C-020
     status: planned
     sections: [MG 6]
   - code: LIFE
     title: Birth, life and will messages
-    cycle: C-017
+    cycle: C-020
     status: planned
     sections: [MG 6.3.3, MG 6.3.4, MG 6.3.5]
   - code: RES-MAM
     title: Resource MAM (Master Asset Model)
-    cycle: C-018
+    cycle: C-021
     status: planned
     sections: [MG 5, MG 8.3.1, MG 9.1.1]
   - code: RES-HEALTH
     title: Resource Health
-    cycle: C-018
+    cycle: C-021
     status: planned
     sections: [MG 8.3.2, MG 9.1.2]
   - code: RES-PROFILE
     title: Resource Profile
-    cycle: C-018
+    cycle: C-021
     status: planned
     sections: [MG 8.3.7, MG 9.1.7]
   - code: RES-PUBLIST
     title: Resource PublicationList
-    cycle: C-018
+    cycle: C-021
     status: planned
     sections: [MG 8.3.8, MG 9.1.8]
   - code: RES-REFDES
     title: Resource ReferenceDesignation
-    cycle: C-018
+    cycle: C-021
     status: planned
     sections: [MG 8.3.10, MG 9.1.10]
   - code: PAG
     title: Pagination
-    cycle: C-018
+    cycle: C-021
     status: planned
     sections: [MG 8.3.11]
   - code: LOC
     title: Locale
-    cycle: C-018
+    cycle: C-021
     status: planned
     sections: [MG 8.3.12]
   - code: RES-CONFIG
     title: Resource Config
-    cycle: C-019
+    cycle: C-022
     status: planned
     sections: [MG 8.3.3, MG 9.1.3]
   - code: RES-DATA
     title: Resource Data
-    cycle: C-019
+    cycle: C-022
     status: planned
     sections: [MG 8.3.4, MG 9.1.4]
   - code: RES-META
     title: Resource Metadata
-    cycle: C-019
+    cycle: C-022
     status: planned
     sections: [MG 8.3.5, MG 9.1.5]
   - code: RES-EVENT
     title: Resource Event
-    cycle: C-019
+    cycle: C-022
     status: planned
     sections: [MG 8.3.6, MG 9.1.6]
   - code: RES-SUBLIST
     title: Resource SubscriptionList
-    cycle: C-019
+    cycle: C-022
     status: planned
     sections: [MG 8.3.9, MG 9.1.9]
   - code: BUS
     title: General Message Bus communication
-    cycle: C-019
+    cycle: C-022
     status: planned
     sections: [MG 9]
   - code: CNT
     title: Container environment
-    cycle: C-020
+    cycle: C-023
     status: planned
     sections: [RIG 2, RIG 4]
   - code: PLT
     title: OEC platform requirements
-    cycle: C-020
+    cycle: C-023
     status: planned
     sections: [RIG 5]
   - code: APP
     title: Requirements on an application (runtime)
-    cycle: C-020
+    cycle: C-023
     status: planned
     sections: [RIG 5.2]
   - code: LIC
     title: Legal requirements and software licenses
-    cycle: C-020
+    cycle: C-023
     status: planned
     sections: [RIG 5.3]
   - code: REG
     title: OEC Registry
-    cycle: C-020
+    cycle: C-023
     status: planned
     sections: [MG A1]
   - code: GEN
     title: Introductory and general chapters, cyber security, glossaries
-    cycle: C-020
+    cycle: C-023
     status: planned
     sections: [MG 2, MG 3, MG A4, RIG 3, RIG A1]

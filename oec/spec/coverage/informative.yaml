@@ -65,3 +65,79 @@ items:
     reason: Introduces the level table; the table rows are REQ-CMP-027 to REQ-CMP-032.
   - key: RIG-1.2-b16087c8
     reason: Restates the level-table convention of MG 1.2; applied through the levels field.
+  # --- IL (C-018) -----------------------------------------------------------
+  - key: MG-4-25e837df
+    reason: History note on earlier guideline versions (Oi4Identifier mandatory, four topic levels); describes the past, no requirement.
+  - key: MG-4.1-4f84d457
+    reason: Relation to the AAS globalAssetId; "may" describes what the AAS specification permits, no requirement of this guideline.
+  - key: MG-4.1-5908543e
+    reason: Summary that every IEC 61406-1 compliant identifier is an Identification Link; "can" expresses possibility. The constraints are REQ-IL-008 … REQ-IL-020.
+  - key: MG-4.1-7d683723
+    reason: States that prohibited character combinations cannot be checked; the IEC 61406-1 requirement itself is REQ-IL-008 (issuer responsibility).
+  - key: MG-4.2-fe6182b4
+    reason: Rationale for the encoding ("may contain" describes possible content); the encoding rule is REQ-IL-002.
+  - key: MG-4.2-bdbe721b
+    reason: Rationale for the encoding; the encoding rule is REQ-IL-002.
+  - key: MG-4.2-635cd0e1
+    reason: Implementation hint for decoders (re-append padding); the decoded result is constrained by REQ-IL-004.
+  - key: MG-4.2-00cebf9f
+    reason: Introduces an example topic; the topic is golden vector V-TOP-001 (vectors/topic/guideline.yaml).
+  - key: MG-4.3-3f491cfe
+    reason: Describes the origin of the Oi4Identifier data (nameplate); "can" expresses possibility. The creation rules are REQ-IL-022 … REQ-IL-029.
+  - key: MG-4.3-e1b14605
+    reason: Describes the reproducibility of the Oi4Identifier; "can" expresses possibility. The creation rules are REQ-IL-022 … REQ-IL-029.
+  - key: MG-4.3.1-1aeed8b4
+    reason: Cross-reference to RIG 4.2 Container Name Conventions; the container name requirement is stated there (area CNT, C-023).
+  - key: MG-4.3.1-63bbb644
+    reason: Consequence of using "nd" as SerialNumber ("can" expresses possibility); no requirement on a component.
+  - key: MG-4.3.1-3c017310
+    reason: States that tracking of assets without serial number is an application concern; no testable requirement.
+  - key: MG-4.3.1-ed38521d
+    reason: States that prohibited character combinations cannot be checked; the IEC 61406-1 requirement itself is REQ-IL-008.
+  - key: MG-4.3.2-faac6c3c
+    reason: Motivation for the announced ManufacturerUri table; no requirement until the table exists (see REQ-IL-026).
+  - key: MG-4.3.2-4770159d
+    reason: Motivation for the announced ManufacturerUri table (the generating instance must know the pattern per manufacturer); the table does not exist yet, so the statement is not testable – see REQ-IL-026.
+  - key: MG-4.3.2-e2f9b58f
+    reason: Announces a future table of the OI4 Alliance ("will be provided"); an obligation of the alliance, not of a component.
+  - key: MG-4.3.2-6f22974a
+    reason: Announces a future vendor-ID translation table ("has to be provided"); an obligation of the alliance, not of a component.
+  - key: MG-A3-88d5c51f
+    reason: Scope statement of the dnp-encoding ("can be used"); the encoding rule is REQ-IL-032.
+  - key: MG-A3-7f2e7915
+    reason: Refers to IEC 61406-1 Annex A for the character set; the character set is REQ-IL-016.
+  - key: MG-A3-63ee55c2
+    reason: Design rationale of the dnp-encoding ("we have to define an algorithm"); the algorithm is REQ-IL-032.
+  - key: MG-A3-11d63d3f
+    reason: Scope statement – the dnp-encoding is not restricted to the Oi4Identifier; no requirement on a component.
+  - key: MG-A3-1e0e476e
+    reason: General description of URI components ("can exist of"); the masking requirement is REQ-IL-017.
+  # --- TOP (C-018) ----------------------------------------------------------
+  - key: MG-7.1-660c039f
+    reason: Consequence of the versioning concept (a client only subscribes to its version); no requirement.
+  - key: MG-7.1-ca8dc9f5
+    reason: Describes that versions can coexist on one Message Bus ("can" expresses possibility); the rules for several versions are REQ-TOP-004.
+  - key: MG-7.1-d3a3b551
+    reason: States that the versioning needs no MQTT 5 feature; the MQTT version requirements are area MQTT (C-020).
+  - key: MG-7.2-90e1d54a
+    reason: Typical behavior of an OTConnector ("typically", "can be listed"); describes the ServiceType, no requirement.
+  - key: MG-7.2-9459e8f7
+    reason: Description of the ServiceType Aggregation; the ServiceType values are REQ-TOP-005.
+  - key: MG-7.4-52dc90f3
+    reason: Introduces OPC UA PubSub Actions as motivation for Call/Reply; the methods are REQ-TOP-011, the actions area ACT (C-019).
+  - key: MG-7.4-7abd4cfd
+    reason: Motivation for the methods Call and Reply; the methods are REQ-TOP-011.
+  - key: MG-7.4-91b8fcab
+    reason: Records a design decision of the technical committee (single technology stack MQTT); no requirement on a component.
+  - key: MG-7.5-5e8bf8b2
+    reason: Definition of the Resource element; the closed set is REQ-TOP-012.
+  - key: MG-7.5-c74e6b55
+    reason: Definition of a service (OPC UA PubSub Action); the actions are area ACT (C-019).
+  - key: MG-7.5-814f7a3b
+    reason: Records a design decision of the technical committee (single technology stack MQTT); no requirement on a component.
+  - key: MG-7.5.1-4be49d7f
+    reason: Describes the resources as schema-validatable submodels ("can be"); the schemas are areas RES-* (C-021, C-022).
+  - key: MG-7.5.2-669d3e1a
+    reason: Permission for broker operators to use the service name for access control; no requirement on a component (ACLs are area MQTT/RES-*).
+  - key: MG-7.7-513c03ce
+    reason: Purpose of the Filter element ("can be used"); the Filter rules are REQ-TOP-019 … REQ-TOP-023.

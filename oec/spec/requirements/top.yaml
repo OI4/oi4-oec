@@ -1,0 +1,566 @@
+# Requirements of area TOP – topic structure and namespace elements (MG 7;
+# ADR-0018, schema: catalog.schema.json). The normative topic grammar is
+# topic/topic.abnf, the allowed forms per Method × Resource are listed in
+# matrix/method-resource.yaml; vectors in vectors/topic/.
+area: TOP
+baseline: "bc5d063"
+requirements:
+  # --- Topic structure (MG 7) -----------------------------------------------
+  - id: REQ-TOP-001
+    title: Topic structure
+    statement: >-
+      Every topic below the namespace Oi4v2 has the structure
+      "Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]".
+      Each element forms exactly one topic level, except Filter, which may
+      consist of several levels depending on the Resource. The topic matches
+      the rule topic of topic/topic.abnf.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7, SF-035]
+    quotes:
+      - ref: MG 7
+        text: All applications, working according to the OEC Messaging Guideline, use the following schema
+      - ref: MG 7
+        text: Each element in angle brackets forms exactly one topic level
+    verification: [d7-validate]
+    inventory: [MG-7-ddf5f8f2]
+    status: draft
+    notes: >-
+      Graded by REQ-CMP-004 (mandatory at all levels). The ABNF is the formal
+      form of MG 7 – MG 7.7 and the interpretations SF-040 … SF-042;
+      topic/topic-patterns.json contains the regular expressions derived from
+      it.
+
+  # --- Namespace (MG 7.1) ---------------------------------------------------
+  - id: REQ-TOP-002
+    title: Topics with namespace Oi4v2 conform to the guideline
+    statement: >-
+      Every message published on a topic starting with the namespace element
+      Oi4v2 conforms to this guideline (topic and payload).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7.1]
+    quotes:
+      - ref: MG 7.1
+        text: All topics starting with the Namespace element shall be OI4 Alliance-conform.
+    verification: [d7-validate, d7-monitor]
+    inventory: [MG-7.1-37801eed]
+    status: draft
+
+  - id: REQ-TOP-003
+    title: Other MQTT traffic does not use the namespace
+    statement: >-
+      MQTT traffic that does not conform to this guideline does not use topics
+      starting with the namespace elements Oi4v2 (or Oi4 for version 1).
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [component]
+    refs: [MG 7.1]
+    quotes:
+      - ref: MG 7.1
+        text: Any other MQTT traffic shall not use this Namespace.
+    verification: [d7-monitor]
+    inventory: [MG-7.1-c51ac67c]
+    status: draft
+
+  - id: REQ-TOP-004
+    title: Versions are not mixed
+    statement: >-
+      An application that supports several namespace versions publishes and
+      subscribes the messages of each version separately under the related
+      namespace element and does not mix them: a request received under Oi4 is
+      answered under Oi4, a request received under Oi4v2 is answered under
+      Oi4v2.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component supports several namespace versions.
+    refs: [MG 7.1]
+    quotes:
+      - ref: MG 7.1
+        text: In this case, it shall publish and subscribe the messages of each supported version separately under the related Namespace element.
+      - ref: MG 7.1
+        text: Messages of different versions shall not be mixed, i.e. a request received under Oi4 is answered under Oi4 and a request received under Oi4v2 is answered under Oi4v2.
+    verification: [d7-test]
+    inventory: [MG-7.1-1d42af54, MG-7.1-a9c4c6ad, MG-7.1-d026309b]
+    status: draft
+
+  # --- ServiceType (MG 7.2) -------------------------------------------------
+  - id: REQ-TOP-005
+    title: ServiceType is one of the defined values
+    statement: >-
+      The ServiceType element is one of Registry, OTConnector, Utility,
+      Persistence, Aggregation, OOCConnector and ITConnector; a component uses
+      one ServiceType for all its topics.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7.2, SF-035, SF-042]
+    quotes:
+      - ref: MG 7.2
+        text: Each application that publishes or subscribes data represents a specific type of service.
+    verification: [d7-validate]
+    inventory: [MG-7.2-709618ad]
+    status: draft
+    notes: Closed set per interpretation SF-042 (a), pending PO decision.
+
+  - id: REQ-TOP-006
+    title: ServiceType of the destination or the publisher
+    statement: >-
+      For the methods Get, Set, Del and Call, the topic carries the
+      ServiceType of the destination that has to react; for the method Pub,
+      the ServiceType of the publisher of the data.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, requester]
+    refs: [MG 7.2]
+    quotes:
+      - ref: MG 7.2
+        text: For the methods Get, Set, and Del, the ServiceType of the destination that has to react to these methods must be chosen.
+      - ref: MG 7.2
+        text: For the Pub method, the ServiceType of the publisher of the data itself must be chosen.
+    verification: [d7-monitor, d7-test]
+    inventory: [MG-7.2-c2d6be07, MG-7.2-8106cf43]
+    status: draft
+    notes: Call follows from MG 7.4 (the AppId of a Call is the Responder).
+
+  - id: REQ-TOP-007
+    title: Directly connected device uses OTConnector
+    statement: >-
+      A device that communicates directly with the Message Bus uses the
+      ServiceType OTConnector.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [device]
+    condition: The device has its own MQTT client connected to the Message Bus.
+    refs: [MG 7.2, SF-035, SF-042]
+    quotes:
+      - ref: MG 7.2
+        text: A device that can communicate directly with the Message Bus represents the ServiceType OTConnector.
+    verification: [d7-validate]
+    inventory: [MG-7.2-3fdbdf5d]
+    status: draft
+    notes: Interpretation SF-042 (d), pending PO decision.
+
+  - id: REQ-TOP-008
+    title: ServiceType represents the main task
+    statement: >-
+      An application that fulfills several aspects of the ServiceType
+      classification chooses the ServiceType of its main task.
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application]
+    refs: [MG 7.2]
+    quotes:
+      - ref: MG 7.2
+        text: The chosen ServiceType should represent the main task of the application.
+    verification: [manual]
+    inventory: [MG-7.2-ee3426ab]
+    status: draft
+
+  # --- AppId (MG 7.3) -------------------------------------------------------
+  - id: REQ-TOP-009
+    title: AppId is the encoded Identification Link of the application
+    statement: >-
+      The AppId element is the encoded Identification Link (REQ-IL-002) of the
+      application and forms exactly one topic level.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7.3]
+    quotes:
+      - ref: MG 7.3
+        text: The AppId must always be exactly one topic level.
+    verification: [d7-validate]
+    inventory: [MG-7.3-103d7028, MG-7.3-8549e733]
+    status: draft
+
+  - id: REQ-TOP-010
+    title: AppId of the destination or the publisher
+    statement: >-
+      For the methods Get, Set, Del and Call, the topic carries the AppId of
+      the destination that has to react (for Call: the Responder); for the
+      method Pub, the AppId of the publisher of the data.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, requester]
+    refs: [MG 7.3, MG 7.4]
+    quotes:
+      - ref: MG 7.3
+        text: For the methods Get, Set, and Del, the AppId of the destination that has to react to these methods must be chosen.
+      - ref: MG 7.3
+        text: For the Pub method, the AppId of the publisher of the data itself must be chosen.
+    verification: [d7-monitor, d7-test]
+    inventory: [MG-7.3-f9f8809f, MG-7.3-080eef83]
+    status: draft
+
+  # --- Method (MG 7.4) ------------------------------------------------------
+  - id: REQ-TOP-011
+    title: Method is one of the defined values
+    statement: >-
+      The Method element is one of Pub, Get, Set, Del, Call and Reply, used
+      with the meaning defined in MG 7.4.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7.4, SF-035, SF-041]
+    quotes:
+      - ref: MG 7.4
+        text: The Method defines what is to be done.
+    verification: [d7-validate]
+    inventory: [MG-7.4-a341aa99, MG-7.4-56b04bbe, MG-7.4-78a33bfa, MG-7.4-a90dfd2b]
+    status: draft
+
+  - id: REQ-TOP-012
+    title: Resources and services are a closed set
+    statement: >-
+      Below the namespace element, the Resource element is one of the
+      resources of MG 7.5.1 (MAM, Health, Config, Data, Metadata, Event,
+      Profile, PublicationList, SubscriptionList, ReferenceDesignation) or one
+      of the services of MG 7.5.2 (NewDataSetWriterId); no other resource or
+      service name (e.g. vendor-specific) is used.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7.5, MG 7.5.1, MG 7.5.2]
+    quotes:
+      - ref: MG 7.5
+        text: 'The set of resources and services is closed: below the Namespace element (7.1 Namespace Element), only the resources listed in 7.5.1 Resources and the services listed in 7.5.2 Common Services must be used.'
+      - ref: MG 7.5
+        text: Any other resource or service name (e.g. a vendor-specific resource or Action) is not Open Industry 4.0 Alliance-conform and must not be used below the Namespace element.
+    verification: [d7-validate]
+    inventory: [MG-7.5-00e295d8, MG-7.5-49f4e58a]
+    status: draft
+
+  - id: REQ-TOP-013
+    title: Allowed forms per Method and Resource
+    statement: >-
+      A topic uses only the combinations of Method and Resource marked as
+      allowed in matrix/method-resource.yaml, with Source and Filter present,
+      optional or absent as listed there (e.g. Event only with Pub and always
+      with Source and Filter; MAM, Health, Profile and ReferenceDesignation
+      never with Filter; Call and Reply never with Filter).
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7, MG 7.5.1, MG 7.7, MG 9.1, MG 9.2.1, SF-035, SF-041]
+    quotes:
+      - ref: MG 7.5.1
+        text: Depending on the Resource, some submodels can only be published, others can also be requested or even written or deleted.
+      - ref: MG 7.7
+        text: 'The following resources do not make use of filter: MAM, Health, Profile and ReferenceDesignation.'
+    verification: [d7-validate]
+    inventory: [MG-7.5.1-07b3b10a, MG-7.5.1-ca8822ce, MG-7.5.1-a89bdae7, MG-7.5.1-3d9669bd, MG-7.5.1-0315a6f9]
+    status: draft
+    notes: Interpretation SF-041 (a)–(c), pending PO decision; the matrix rows name the grammar rule of each combination.
+
+  - id: REQ-TOP-014
+    title: Set causes an Event Status
+    statement: >-
+      Every Set causes an Event with the event category Status and the event
+      level Good, Uncertain or Bad – mandatory from Level 2 on, recommended at
+      Level 1.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The entity offers the method Set.
+    refs: [MG 7.4, MG 1.3]
+    quotes:
+      - ref: MG 7.4
+        text: From compliance Level 2 on, a Set must cause an Event with the <EventCategory> Status and the <EventLevel> Good, Uncertain or Bad.
+      - ref: MG 7.4
+        text: At Level 1, a Set should cause such an Event (1.3 Compliance Domains and Levels).
+    verification: [d7-test]
+    inventory: [MG-7.4-bd6a1c58, MG-7.4-92f7945e]
+    status: draft
+    notes: Support of the resource Event with category Status is REQ-CMP-023; the event content belongs to RES-EVENT/BUS.
+
+  - id: REQ-TOP-015
+    title: Del causes an Event Status
+    statement: >-
+      Every Del causes an Event with the event category Status and the event
+      level Good, Uncertain or Bad – mandatory from Level 2 on, recommended at
+      Level 1.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The entity offers the method Del.
+    refs: [MG 7.4, MG 1.3]
+    quotes:
+      - ref: MG 7.4
+        text: From compliance Level 2 on, a Del must cause an Event with the <EventCategory> Status and the <EventLevel> Good, Uncertain or Bad.
+      - ref: MG 7.4
+        text: At Level 1, a Del should cause such an Event (1.3 Compliance Domains and Levels).
+    verification: [d7-test]
+    inventory: [MG-7.4-3c1c21d5, MG-7.4-c24422e2]
+    status: draft
+
+  - id: REQ-TOP-016
+    title: Reply topic corresponds to the Call topic
+    statement: >-
+      The Reply topic equals the Call topic except for the Method element
+      (same ServiceType, AppId, Service and Source) and is given as
+      ResponseAddress in the ua-action-request.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    refs: [MG 7.4, SF-041]
+    quotes:
+      - ref: MG 7.4
+        text: The Reply topic must correspond to the Call topic (same <ServiceType>, <AppId>, <Service> and <Source>) and must be given as ResponseAddress in the ua-action-request.
+    verification: [d7-test]
+    inventory: [MG-7.4-51e4221d]
+    status: draft
+    notes: Source of Call/Reply is optional (interpretation SF-041 (c), pending PO decision).
+
+  # --- Resource (MG 7.5.1) --------------------------------------------------
+  - id: REQ-TOP-017
+    title: Health is published at start, on change and every 60 seconds
+    statement: >-
+      Health is published once when the application is initialized, whenever
+      the value of Health changes, and every 60 seconds as heartbeat.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    refs: [MG 7.5.1]
+    quotes:
+      - ref: MG 7.5.1
+        text: Health must be published once when the application is initialized, when the value of Health changes, and every 60 seconds as a kind of heartbeat.
+    verification: [d7-monitor]
+    inventory: [MG-7.5.1-40b7ae71]
+    status: draft
+    notes: Health content and tolerances belong to RES-HEALTH (C-021).
+
+  # --- Source (MG 7.6) ------------------------------------------------------
+  - id: REQ-TOP-018
+    title: Source is the encoded Identification Link of the described asset
+    statement: >-
+      The Source element is the encoded Identification Link (REQ-IL-002) of
+      the asset the information is about and forms exactly one topic level;
+      for information about the application itself, Source equals AppId.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7.6]
+    quotes:
+      - ref: MG 7.6
+        text: The Source must always describe the asset providing the information.
+      - ref: MG 7.6
+        text: The Source must always be exactly one topic level.
+    verification: [d7-validate, d7-test]
+    inventory: [MG-7.6-256439e8, MG-7.6-4eafb027]
+    status: draft
+
+  # --- Filter (MG 7.7) ------------------------------------------------------
+  - id: REQ-TOP-019
+    title: Filter levels are Topic encoded Strings
+    statement: >-
+      Every Filter level is a non-empty UTF-8 string without "+", "#", "/" and
+      U+0000 (<Topic encoded String>). These characters are written as "%2B",
+      "%23" and "%2F" and "%" itself as "%25" (upper-case hex digits); no
+      other character is encoded, so "%" occurs only in these four sequences.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7.7, SF-040]
+    quotes:
+      - ref: MG 7.7
+        text: The Filter shall not include characters, which are used as special characters in MQTT topics.
+      - ref: MG 7.7
+        text: If one of those characters shall be used within a level, it shall be percent-encoded according to RFC 3986, 2.1 (+ as %2B, # as %23, / as %2F).
+      - ref: MG 7.7
+        text: In this case, the character % itself shall be encoded as %25. No other characters are encoded.
+    verification: [d7-validate]
+    inventory: [MG-7.7-de11d585, MG-7.7-0302ebd1, MG-7.7-14d47137]
+    status: draft
+    notes: >-
+      Non-empty levels, upper-case hex digits and the exclusion of U+0000
+      (forbidden in MQTT topic names) follow interpretation SF-040 (a)–(c),
+      pending PO decision. Grammar rule filter-level.
+
+  - id: REQ-TOP-020
+    title: No white space in Filter levels
+    statement: >-
+      A Filter level contains no white space.
+    keyword: SHOULD NOT
+    domain: messaging
+    levels: {L1: SHOULD NOT, L2: SHOULD NOT, L3: SHOULD NOT}
+    applies_to: [component]
+    refs: [MG 7.7]
+    quotes:
+      - ref: MG 7.7
+        text: White space is allowed, but should not be used.
+    verification: [d7-validate]
+    inventory: [MG-7.7-78e3ff72]
+    status: draft
+    notes: D7 reports a warning (vectors with warnings [whitespace]).
+
+  - id: REQ-TOP-021
+    title: Filter does not start or end with a slash
+    statement: >-
+      The Filter does not start or end with "/"; "/" only separates the
+      levels defined by the Resource.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [component]
+    refs: [MG 7.7]
+    quotes:
+      - ref: MG 7.7
+        text: The Filter must not start or end with a /.
+    verification: [d7-validate]
+    inventory: [MG-7.7-0d87b528]
+    status: draft
+
+  - id: REQ-TOP-022
+    title: Filter structure of Data, Metadata, Config and the lists
+    statement: >-
+      The Filter of Data and Metadata is the Tag (name of the data set or
+      metadata set), the Filter of Config is the Context.Name, each one
+      level. The Filter of PublicationList and SubscriptionList is
+      <ResourceType>[/<Tag>], where ResourceType is a resource of MG 7.5.1 and
+      Tag is the complete Filter of that resource; resources without Filter
+      take <ResourceType> only.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [component]
+    refs: [MG 7.7, SF-035, SF-041]
+    quotes:
+      - ref: MG 7.7
+        text: Depending on the resource to filter for, the Filter can be <ResourceType> or <ResourceType>/<Tag>.
+      - ref: MG 7.7
+        text: For the resources Data and Metadata, the Filter contains the name of the desired data set or metadata set.
+    verification: [d7-validate]
+    inventory: [MG-7.7-c7705804, MG-7.7-d07484ed, MG-7.7-3ca9fb74, MG-7.7-d966f542, MG-7.7-a1ef5067, MG-7.7-780647f7]
+    status: draft
+    notes: Interpretation SF-041 (d), pending PO decision. Grammar rules list-filter, tag, context-name.
+
+  - id: REQ-TOP-023
+    title: Filter structure of Event
+    statement: >-
+      The Filter of Event is <EventCategory>/<EventLevel> with the categories
+      Syslog (levels Debug, Informational, Notice, Warning, Error, Critical,
+      Alert, Emergency), Status (levels Good, Uncertain, Bad – the class of
+      the OPC UA status code: 0x00 Good, 0x40 Uncertain, 0x80 Bad) and
+      Generic (any Topic encoded String as level).
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 7.7, SF-035, SF-042]
+    quotes:
+      - ref: MG 7.7
+        text: The LogLevel filter can be used to filter messages for a particular logging level.
+      - ref: MG 7.7
+        text: For example, a status event with the status code 0x80060000 (BadEncodingError) is published with the Filter Status/Bad.
+    verification: [d7-validate]
+    inventory: [MG-7.7-21c7d613, MG-7.7-2885b14f, MG-7.7-03f6a2ee, MG-7.7-dbec8808, MG-7.7-23e55aa4, MG-7.7-7887a275]
+    status: draft
+    notes: Closed category set and free GenericLevel per interpretation SF-042 (b), (c), pending PO decision. Grammar rule event-filter.
+
+  - id: REQ-TOP-024
+    title: Syslog level Debug is not enabled by default
+    statement: >-
+      An application does not publish Syslog events of level Debug by
+      default.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [application, device]
+    refs: [MG 7.7]
+    quotes:
+      - ref: MG 7.7
+        text: This level shall not be used as default by any application, because logging over the Message Bus requires a lot of resources.
+    verification: [d7-monitor]
+    inventory: [MG-7.7-3b38cf3c]
+    status: draft
+
+  - id: REQ-TOP-025
+    title: Syslog level Informational is used carefully
+    statement: >-
+      An application uses Syslog events of level Informational carefully
+      (e.g. disabled by default).
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application, device]
+    refs: [MG 7.7]
+    quotes:
+      - ref: MG 7.7
+        text: Any application should use this feature carefully.
+    verification: [manual]
+    inventory: [MG-7.7-248e2177, MG-7.7-fe4ff6d5]
+    status: draft
+
+  - id: REQ-TOP-026
+    title: Syslog levels are chosen by their meaning
+    statement: >-
+      An application chooses the Syslog level by the meaning given in MG 7.7:
+      Notice for normal but significant events from outside the system,
+      Critical for unexpected states inside the system, Alert for serviceable
+      internal errors; Emergency, Alert and Critical signal that the
+      component must be exchanged or serviced, Error and Warning that a
+      troubleshooting activity might be necessary, Notice and Informational
+      normal but important events.
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application, device]
+    refs: [MG 7.7]
+    quotes:
+      - ref: MG 7.7
+        text: 'The severity levels should be interpreted as follows: Internal Error and Warning: The component has detected an error in its hardware or software which is not allowed during normal operation.'
+    verification: [manual]
+    inventory: [MG-7.7-28ac72d4, MG-7.7-973d7539, MG-7.7-cafe1d09, MG-7.7-b614dc52, MG-7.7-977162ba, MG-7.7-cb1206c6, MG-7.7-1375acac]
+    status: draft
+    notes: >-
+      "must be exchanged or serviced" and "must be indicated to the user"
+      describe the meaning of the levels inside a note that "should be
+      interpreted as follows"; they are no separate obligations of the
+      publisher.
+
+  - id: REQ-TOP-027
+    title: Log level is configurable
+    statement: >-
+      The published Syslog levels are configurable (e.g. one PublicationList
+      entry per level, Debug and Informational disabled by default).
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application, device]
+    refs: [MG 7.7]
+    quotes:
+      - ref: MG 7.7
+        text: It is best practice to make the log level configurable.
+    verification: [d7-test]
+    inventory: [MG-7.7-6ada19f8]
+    status: draft
