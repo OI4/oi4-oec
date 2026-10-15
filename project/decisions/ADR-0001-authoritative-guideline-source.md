@@ -68,3 +68,11 @@ To avoid confusion with our own project ADRs (`ADR-NNNN`), guideline ADRs are al
   - `a6147e7` – SF-037 amendment (`Event` `Status` answer to `Set`/`Del`: must from Level 2 on, should at Level 1) and **SF-039** (`Get` of `Metadata` without `Data`: no `Metadata`, may answer with `Event` `Status`/`Bad`).
   - `0de223c`, `f830382` – **SF-035**: keywords added to all keyword-less protocol statements of the normative-sentence inventory (and `ReplyTo` in MG 8.2.1). The interim rule "keyword-less behavior = implicit MUST" is no longer needed for the guideline text; keyword-less behavior found later is a new spec finding.
   - `edf76e1`, `de852d6` – findings register sync. No open findings.
+
+## Amendment C-017 (2026-10-15, guideline baseline `6e1b5c3`)
+
+- The baseline is now `6e1b5c3` on branch `feature/spec-findings`. Implemented by the agent on PO request (local commits):
+  - `f5d69d8` – **GL-ADR-017** "Adapt minimum set of topic elements to compliance levels": MG 7.2 (7.2.1 For Applications, 7.2.2 For Devices) removed. The requirements per level follow from MG 1.3; the rule for directly connected and represented entities is a new section of MG 1.3; "Resources Without Content" moved unchanged to MG 9.1. No requirement of a level changed.
+  - `6e1b5c3` – findings register sync.
+- References to MG 7.2.x in project artifacts written before C-017 (logs, findings, ADRs) are historical; the REQ catalog was remapped to MG 1.3 / MG 9.1.
+

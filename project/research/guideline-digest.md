@@ -1,12 +1,12 @@
-# Guideline digest (v2.0, baseline `de852d6`)
+# Guideline digest (v2.0, baseline `f5d69d8`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
 - **RIG**: OEC Runtime & Infrastructure Guideline, `docs/infrastructure-guideline/`
 
-It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 039 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `de852d6` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`, `5cb109e`) are in the git history of this file.
+It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 039 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `de852d6` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`, `5cb109e`) are in the git history of this file.
 
-## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`)
+## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`, 017 with `f5d69d8`)
 
 | GL-ADR | Change | Impact for us |
 |--------|--------|---------------|
@@ -26,6 +26,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 | 014 | Specific services (Read, Write, Subscribe, Unsubscribe, GenericMethod; former MG 10.3, 8.1.5.3, B1.3) removed | no `SVC` area in the REQ catalog; SDK offers only `NewDataSetWriterId` (closed set: SF-036, resolved C-015) |
 | 015 | Former MG 6 (process description) moved to the separate, informative **OEC Process Description**; MG chapters 7–11 renumbered to 6–10 | citation scheme (old MG n = new MG n−1); no requirements from the Process Description |
 | 016 | Empty AAS mapping chapter (former MG 11) removed | none |
+| 017 | MG 7.2 "Minimum Set of Topic Elements" (7.2.1 applications, 7.2.2 devices) removed: requirements per level follow from MG 1.3; new MG 1.3 section "Directly Connected and Represented Entities"; "Resources Without Content" moved to MG 9.1 | REQ-CMP remapped (C-017), REQ-CMP-045; no requirement change |
 
 ## 0a. Normative keywords (MG 1.2, RIG 1.1)
 
@@ -37,9 +38,9 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 - **Statements without keyword, examples and figures are informative.** Since C-016 the protocol behavior carries keywords (SF-035 resolved: Health timing, Birth topic, Status event after Set/Del, pagination continuation, PublicationList `Mode`, `ReplyTo` …). Keyword-less behavior found later → new spec finding (G-1.6).
 - `REQUIRED` boxes at `49b6fe2`: 9 ACL boxes (MG 9.1.x), MG 4.1 (scheme), MG 4.2 (base64url), RIG 4.1.1–4.1.4.
 
-## 1. Compliance (MG 1.3, 7.2; RIG 1.2)
+## 1. Compliance (MG 1.3, 9.1; RIG 1.2)
 
-**Messaging domain** (applications and smart devices; a smart device with its own MQTT client counts as an application):
+**Messaging domain** (entities = applications and devices; GL-ADR-017): a **directly connected** entity (own MQTT client, e.g. app or smart device) fulfills its claimed level itself; a **represented** entity (no own MQTT client, e.g. field device behind a connector) is covered by the level of the representing application, which must fulfill its level for each represented entity (`Source` = the entity's identifier) and provides `PublicationList`, `SubscriptionList` and the common services once for itself.
 
 | Requirement | L1 | L2 | L3 |
 |---|:-:|:-:|:-:|
@@ -49,9 +50,9 @@ It also covers the guideline ADRs **GL-ADR-001 … 016** in `rfcs_adrs/` and the
 | `Get` (MAM/Health also via Get); `Set`/`Del` where applicable (resources offered for modification) | – | M | M |
 | Full MQTT client behavior (ClientId, keep-alive, clean session, QoS, no retain, Close, publish on change) | R | R | M |
 | `Profile`, `PublicationList`, `ReferenceDesignation`, `Config`, `Data`, `Metadata`, `Event` | – | R | M |
-| `SubscriptionList`, `Call`/`Reply` + common service `NewDataSetWriterId` (applications only) | – | R | M |
+| `SubscriptionList`, `Call`/`Reply` + common service `NewDataSetWriterId` (once per application, not per represented entity) | – | R | M |
 | `Set`/`Del` for every resource they are defined for (MG 9.1) | – | – | M |
-| Resources without content: `Get` ⇒ empty list, no own `Pub` | M | M | M |
+| Resources without content (MG 9.1): `Get` ⇒ empty list, no own `Pub` | M | M | M |
 | `Set`/`Del` on unknown object ⇒ `Event` Status `Bad` | R | M | M |
 | `Get` of `Metadata` without `Data` ⇒ no `Metadata`; may answer `Event` Status `Bad`/`BadNotFound` (SF-039) | MAY | MAY | MAY |
 | `Set`/`Del` offered ⇒ `Event` category `Status`; every `Set`/`Del` answered by it | R | M | M |

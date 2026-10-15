@@ -30,9 +30,9 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
 - Method × Resource matrix (Pub/Get/Set/Del/Call/Reply) incl. payload expectations (e.g. `Get` = empty `Messages` or only Pagination/Locale).
 - Review and extend `SPEC-FINDINGS.md`; propose interpretations; get decisions from product owner / work group.
 - Golden examples: all Appendix B examples, checked against the guideline description and built as compliant, meaningful test data (ADR-0018 amendment C-013); deviations become spec findings; the PO reviews the test data per increment (G-3.9).
-- **Cycle cut (PO-confirmed, C-013), "Level 1 first":** C-014 `oec/spec/` skeleton + catalog schema + tools + normative-sentence inventory + `CMP` · C-015 guideline update SF-036 … 038 (PO request) + re-baseline `5cb109e` · C-016 PO decisions (Status event levels, SF-039, Q-019) + SF-035 keyword pass + re-baseline `de852d6` · C-017 `IL`, `TOP`, topic grammar + topic vectors · C-018 `MSG` + `ACT` · C-019 `MQTT` + `LIFE` · C-020 core resources (MAM, Health, Profile, PublicationList, ReferenceDesignation) + `PAG` + `LOC` · C-021 remaining resources + `BUS` + Method × Resource matrix · C-022 RIG areas `CNT`, `LIC`, `APP`, `PLT` + `REG` + `GEN` · C-023 golden vectors + coverage report · C-024 PO review → P1 exit. Golden vectors of an area may be built in its area cycle already.
+- **Cycle cut (PO-confirmed, C-013), "Level 1 first":** C-014 `oec/spec/` skeleton + catalog schema + tools + normative-sentence inventory + `CMP` · C-015 guideline update SF-036 … 038 (PO request) + re-baseline `5cb109e` · C-016 PO decisions (Status event levels, SF-039, Q-019) + SF-035 keyword pass + re-baseline `de852d6` · C-017 GL-ADR-017 (MG 7.2 removed, PO request) + re-baseline `6e1b5c3` · C-018 `IL`, `TOP`, topic grammar + topic vectors · C-019 `MSG` + `ACT` · C-020 `MQTT` + `LIFE` · C-021 core resources (MAM, Health, Profile, PublicationList, ReferenceDesignation) + `PAG` + `LOC` · C-022 remaining resources + `BUS` + Method × Resource matrix · C-023 RIG areas `CNT`, `LIC`, `APP`, `PLT` + `REG` + `GEN` · C-024 golden vectors + coverage report · C-025 PO review → P1 exit. Golden vectors of an area may be built in its area cycle already.
 - Guideline ADRs (GL-ADR-001 … 016) and their implementation notes are part of the baseline (G-1.1). The OEC Process Description (GL-ADR-015) is informative and not catalogued.
-- **Exit:** catalog + matrix + golden vectors reviewed by the PO; all blocking spec findings have a decided interpretation (at `de852d6` SF-001 … 039 are resolved and the guideline carries keywords for protocol behavior (SF-035); no open findings – new findings go to SF-040 ff.).
+- **Exit:** catalog + matrix + golden vectors reviewed by the PO; all blocking spec findings have a decided interpretation (at `6e1b5c3` SF-001 … 039 are resolved and the guideline carries keywords for protocol behavior (SF-035); no open findings – new findings go to SF-040 ff.).
 
 ## P2 – JSON Schema (D1)
 
@@ -89,7 +89,7 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 - `monitor` – passive: connect to a broker, observe all `Oi4v2/#` traffic, validate every message live, summarize per participant.
 - `test` – active: test one application under test (by AppId/IL or discovery), e.g.
   - lifecycle: Birth (MAM), Health on start + every 60 s, Close/Will behavior;
-  - mandatory resources/methods per level (MG 7.2) answer `Get` correctly, with `ReplyTo`;
+  - mandatory resources/methods per level (MG 1.3) answer `Get` correctly, with `ReplyTo`;
   - Profile consistency (announced resources actually answer), PublicationList consistency;
   - Data ⇒ Metadata; `Set`/`Del` ⇒ Status event with `ReplyTo`; `NewDataSetWriterId` Action (`Call`/`Reply`) correlation;
   - pagination/`MaxPacketSize`, Locale;
