@@ -1,4 +1,4 @@
-# Guideline digest (v2.0, baseline `bc5d063`)
+# Guideline digest (v2.0, baseline `ea80271`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
@@ -82,10 +82,10 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
   - Never altered or normalized; compared char by char, case-sensitive. With and without scheme are two different ILs.
 - **In topics** (`AppId`, `Source`): base64url (RFC 4648 §5) of the UTF-8 bytes, no padding, no line breaks. This gives exactly one topic level of at most 340 chars.
 - **In payloads** (`PublisherId`, `MessageId`, `ReplyTo`, `DataSetWriterName`, `RequestorId`, `ProductInstanceUri`): unencoded.
-- **Oi4Identifier** = `ManufacturerUri/dnp(Model)/dnp(ProductCode)/dnp(SerialNumber)`.
+- **Oi4Identifier** = `ManufacturerUri/Model/ProductCode/SerialNumber` (MG 4.3.1); all IL rules apply, max. 255 chars including the three `/`.
   - `ManufacturerUri`: lowercase domain.
   - A missing serial number becomes `"nd"`; containers use the container name as serial number.
-  - dnp encoding: `,` + 2 hex digits (MG A3).
+  - The elements may be dnp-encoded (`,` + 2 hex digits, MG A3) to mask characters not permitted in an IL or a `/` (SF-043 e, C-019). The dnp-encoding is not used anywhere else (not in topics).
 
 ## 3. MAM (MG 5, 8.3.1) – DataSetClassId `360ca8f3-5e66-42a2-8f10-9cdf45f4bf58`
 

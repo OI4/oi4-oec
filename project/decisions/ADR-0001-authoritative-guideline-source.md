@@ -91,3 +91,10 @@ To avoid confusion with our own project ADRs (`ADR-NNNN`), guideline ADRs are al
 ## Amendment C-018 – one findings register
 
 PO decision (2026-10-15): spec findings are kept **only** in the guideline repo, `oi4-oec-documentation/findings/SPEC-FINDINGS.md`. The project register `project/SPEC-FINDINGS.md` was merged into it (SF-040 … 043 added in guideline commit `d84c642`) and deleted; the statements of amendment C-008 ("Our `project/SPEC-FINDINGS.md` remains the place where new findings are first recorded") and the later "findings register sync" commits are superseded. Commits that only change `findings/` do not change the guideline text and therefore need no re-baseline: the spec baseline stays `bc5d063` (guideline HEAD `d84c642` differs only in `findings/SPEC-FINDINGS.md`).
+
+## Amendment C-019 (2026-10-16, guideline baseline `ea80271`)
+
+- The baseline is now `ea80271` on branch `feature/spec-findings`. Implemented by the agent on PO request (local commits):
+  - `7de6cb8` – SF-043 (e): the dnp-encoding stays only as an optional hint at the `Oi4Identifier` (MG 4.3.1 "may be used" for characters not permitted in an Identification Link or a `/`; explained in MG A3) and is removed from MG 4.1 and the structure/field types of MG 4.3.1; MG A3 and the glossary MG A4 aligned; GL-ADR-010 implementation note.
+  - `ea80271` – findings register: SF-043 (e) resolved; (a)–(d) stay open.
+- Unlike `d84c642`, `7de6cb8` changes guideline text, so the spec was re-baselined (inventory keys remapped, REQ-IL-033 added).
