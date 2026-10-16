@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-15, cycle C-018_
+_Last updated: 2026-10-16, cycle C-019_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-018 done, next C-019)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-019 done, next C-020)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -34,15 +34,17 @@ C-017: PO request – guideline **GL-ADR-017** (`f5d69d8`): MG 7.2 "Minimum Set 
 
 C-018: areas **`IL`** (REQ-IL-001 … 032) and **`TOP`** (REQ-TOP-001 … 027) `drafted` (IL 91, TOP 76 inventory items, 0 open). Formal topic grammar `oec/spec/topic/topic.abnf` (59 rules) with generated portable regexes `topic-patterns.json`; Method × Resource matrix (topic columns, 66 combinations, 29 allowed) `oec/spec/matrix/method-resource.yaml`; 203 vectors in `oec/spec/vectors/` (146 topic incl. 60 golden, 29 IL, 15 dnp-encoding, 13 `Oi4Identifier`), all recomputed by `spectool lint`; new `spectool topic`; cross-checked with Node.js, Python `re`, Rust `regex` and the Python `abnf` package (0 mismatches). ADR-0018 amendment C-018, GUARDRAILS G-1.2 baseline fixed. New findings **SF-040 … 043** (filter encoding, allowed topic forms, closed value sets, dnp-encoding/`ManufacturerUri`) – proposed interpretations in use. **Follow-up (PO, 2026-10-15):** spec findings are kept only in `oi4-oec-documentation/findings/SPEC-FINDINGS.md` (project copy merged and deleted, guideline commit `d84c642`, ADR-0001 amendment C-018); **SF-040, SF-041, SF-042 decided** (proposed interpretations accepted; guideline text not changed yet); **SF-043** – PO asked whether the dnp-encoding is obsolete; agent analysis: obsolete for topics, still needed to build the `Oi4Identifier` (IEC 61406-1 character set, `/` collisions, regenerability) → stays open, GL-ADR-010 not changed. Log: `log/2026-10-15_C-018_il-top-topic-grammar.md`.
 
+C-019: PO decision on **SF-043 (e)** (2026-10-16): the `Oi4Identifier` is one way to build an IEC 61406-1 Identification Link, so all IEC 61406-1 rules apply to it; the dnp-encoding stays only as an optional hint at the `Oi4Identifier` (explained in MG A3) and is removed everywhere else. Guideline commit `7de6cb8`: MG 4.3.1 (elements are plain strings, note "the dnp-encoding (A3) may be used" for non-permitted characters or `/`, structure line `ManufacturerUri/Model/ProductCode/SerialNumber`), MG 4.1 (dnp sentence removed), MG A3 (may instead of must, topic sentence removed), MG A4 (glossary aligned to IEC 61406-1), GL-ADR-010 implementation note; register commit `ea80271` (SF-043 (e) resolved, (a)–(d) open). Link check 714/0, Docusaurus build ok. `oec/spec` re-baselined on **`ea80271`**: REQ-IL-022/029/032 updated, new **REQ-IL-033** (MAY), vectors and reference comments aligned; P1 area cycles shifted by one. Log: `log/2026-10-16_C-019_sf043-dnp-encoding.md`.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO input (C-018):**
-   - decide **SF-043** (dnp-encoding, see (e) in the register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`): keep it only for building the `Oi4Identifier` and add a note to GL-ADR-010 that it is no longer needed for topics (agent proposal), or drop it (then an `Oi4Identifier` only for values without forbidden characters and `/`, or drop the `Oi4Identifier` too); a decision other than the proposal deprecates REQ-IL-032 (and possibly REQ-IL-022 … 029) and the `V-DNP-`/`V-OID-` vectors;
+1. **PO input (C-018/C-019):**
+   - decide **SF-043 (a)–(d)** (register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`): dnp-encoding of non-ASCII/control characters, typographic characters and "apostrophe" vs. comma in MG A3 Table 4, form of the `ManufacturerUri` (subdomains), lowercasing vs. rejecting an upper-case `ManufacturerUri` – the proposed interpretations are used until then;
    - review `oec/spec/requirements/view/il.md` and `top.md`, the matrix and the vectors (`status: draft`, G-3.9) – still open;
    - say whether the agent should implement the decided SF-040 … 042 in the guideline text (Appendix B examples B1.1.3/B1.1.8/B1.1.9 and typos, explicit wording in MG 7/9).
-2. **C-019** – areas `MSG` (MG 8, A2) and `ACT` (MG 8.2.16 … 8.2.20, 8.4, 9.2), payload columns of the Method × Resource matrix; golden payload vectors may start (`edits` per ADR-0018 amendment C-013). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-020 … C-025).
+2. **C-020** – areas `MSG` (MG 8, A2) and `ACT` (MG 8.2.16 … 8.2.20, 8.4, 9.2), payload columns of the Method × Resource matrix; golden payload vectors may start (`edits` per ADR-0018 amendment C-013). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-021 … C-026).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
@@ -61,7 +63,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `bc5d063`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 017, SF-001 … 039 resolved; SF-040 … 042 decided (C-018, guideline text not changed yet), SF-043 open; OEC Process Description informative; HEAD `d84c642` differs from `bc5d063` only in `findings/SPEC-FINDINGS.md`); previous `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `ea80271`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 017, SF-001 … 039 resolved; SF-040 … 042 decided (C-018, guideline text not changed yet); SF-043 (e) resolved (C-019), (a)–(d) open; OEC Process Description informative); previous `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -73,7 +75,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None blocking. SF-043 (C-018, dnp-encoding) is open but not blocking – the proposed interpretation is used in `internal/il` and the IL vectors until the PO decides.
+- None blocking. SF-043 (a)–(d) (C-018, dnp-encoding details, `ManufacturerUri`) are open but not blocking – the proposed interpretations are used in `internal/il` and the IL vectors until the PO decides.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -102,3 +104,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-016 | 2026-10-15 | PO decisions (Status event L1 should / L2+ must, SF-039, Q-019), SF-035 keyword pass in the guideline, re-baseline on `de852d6` (REQ-CMP-044) | `log/2026-10-15_C-016_po-decisions-sf035-keywords.md` |
 | C-017 | 2026-10-15 | GL-ADR-017: MG 7.2 removed (requirements from MG 1.3, represented entities in MG 1.3, resources without content in MG 9.1); MG 7 flattened (7.1.x → 7.x); MG 7 MQTT intro removed; re-baseline on `bc5d063`, REQ-CMP-045, CMP reviewed | `log/2026-10-15_C-017_gl-adr-017-remove-mg-7-2.md` |
 | C-018 | 2026-10-15 | Areas `IL` + `TOP` drafted (REQ-IL-001 … 032, REQ-TOP-001 … 027); topic grammar (ABNF + generated regexes), Method × Resource matrix (topic columns), 203 topic/IL vectors, `spectool topic`; SF-040 … 043 (040 … 042 decided); findings register moved to the guideline repo | `log/2026-10-15_C-018_il-top-topic-grammar.md` |
+| C-019 | 2026-10-16 | SF-043 (e): dnp-encoding only as optional hint at the `Oi4Identifier` (MG 4.1, 4.3.1, A3, A4, GL-ADR-010); re-baseline on `ea80271`, REQ-IL-033; P1 cycles shifted by one | `log/2026-10-16_C-019_sf043-dnp-encoding.md` |
