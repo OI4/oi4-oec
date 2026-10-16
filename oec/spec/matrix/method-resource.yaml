@@ -3,7 +3,7 @@
 # One row per Method x Resource/service combination. Source of truth for the
 # allowed topic forms together with ../topic/topic.abnf; 'spectool lint' checks
 # both against each other (rule names, required/optional/forbidden Source and
-# Filter, generated samples). Payload and behaviour columns follow in C-022.
+# Filter, generated samples). Payload and behaviour columns follow in C-023.
 # PO decisions (C-018): SF-041 (forms), SF-042 (closed sets).
 
 baseline: "ea80271"

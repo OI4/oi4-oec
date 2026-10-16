@@ -353,7 +353,7 @@ requirements:
     verification: [d7-monitor]
     inventory: [MG-7.5.1-40b7ae71]
     status: draft
-    notes: Health content and tolerances belong to RES-HEALTH (C-021).
+    notes: Health content and tolerances belong to RES-HEALTH (C-022).
 
   # --- Source (MG 7.6) ------------------------------------------------------
   - id: REQ-TOP-018
