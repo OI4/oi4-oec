@@ -3,7 +3,7 @@
 # catalog.schema.json). Reference checks: spectool package internal/il,
 # vectors in vectors/il/ and vectors/topic/.
 area: IL
-baseline: "bc5d063"
+baseline: "ea80271"
 requirements:
   # --- Identification Link in general (MG 4) -------------------------------
   - id: REQ-IL-001
@@ -446,20 +446,22 @@ requirements:
     title: Structure of the Oi4Identifier
     statement: >-
       An Oi4Identifier has the form
-      "<ManufacturerUri>/<Model>/<ProductCode>/<SerialNumber>" without scheme,
-      where Model, ProductCode and SerialNumber are dnp-encoded (REQ-IL-032);
-      all four elements are mandatory.
+      "<ManufacturerUri>/<Model>/<ProductCode>/<SerialNumber>" without scheme;
+      all four elements are mandatory strings. The result is an Identification
+      Link, so all its rules apply (REQ-IL-008, REQ-IL-016); characters that
+      are not permitted or a "/" inside an element may be masked with the
+      dnp-encoding (REQ-IL-033).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
     condition: The application generates an Oi4Identifier.
-    refs: [MG 4.3.1, MG A3]
+    refs: [MG 4.3.1]
     quotes:
-      - ref: MG A3
-        text: The components of the path may contain reserved or prohibited characters, so these three components must be dnp-encoded.
+      - ref: MG 4.3.1
+        text: The Oi4Identifier in the form of <ManufacturerUri/Model/ProductCode/SerialNumber> represents an IEC 61406-1 compliant Identification Link (4.1 IEC 61406-1 Identification Link) without scheme.
     verification: [manual]
-    inventory: [MG-4.3.1-40b4e9db, MG-4.3.1-cf149026, MG-4.3.1-28185d65, MG-A3-6414a2be]
+    inventory: [MG-4.3.1-a05c80e5, MG-4.3.1-19b2a4a1, MG-4.3.1-4183c5ed]
     status: draft
     notes: Reference implementation il.Oi4Identifier; vectors V-OID-….
 
@@ -587,8 +589,8 @@ requirements:
   - id: REQ-IL-029
     title: Oi4Identifier has at most 255 characters
     statement: >-
-      The whole Oi4Identifier, including the three "/" and the dnp-encoded
-      elements, has at most 255 characters.
+      The whole Oi4Identifier, including the three "/" (and the masking
+      characters if the dnp-encoding is used), has at most 255 characters.
     keyword: MUST NOT
     domain: messaging
     levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
@@ -597,9 +599,9 @@ requirements:
     refs: [MG 4.3.1]
     quotes:
       - ref: MG 4.3.1
-        text: The whole Oi4Identifier, including the three forward slashes and the dnp-encoded components ManufacturerUri, Model, ProductCode and SerialNumber must not exceed 255 characters.
+        text: The whole Oi4Identifier, including the three forward slashes, must not exceed 255 characters.
     verification: [manual]
-    inventory: [MG-4.3.1-96afc9c7]
+    inventory: [MG-4.3.1-9a1fb926]
     status: draft
 
   - id: REQ-IL-030
@@ -653,7 +655,7 @@ requirements:
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
-    condition: The application dnp-encodes a value (e.g. an Oi4Identifier element).
+    condition: The application dnp-encodes a value (an Oi4Identifier element, REQ-IL-033).
     refs: [MG A3, SF-043]
     quotes:
       - ref: MG A3
@@ -662,6 +664,37 @@ requirements:
     inventory: [MG-A3-ffe5198a]
     status: draft
     notes: >-
-      Table 4 of MG A3 is the ASCII excerpt of this rule; control and
-      non-ASCII characters per interpretation SF-043 (a), pending PO decision.
-      Reference implementation il.DnpEncode; vectors V-DNP-….
+      Defines how the encoding works when it is used; whether it is used is
+      REQ-IL-033 (MAY, SF-043 (e), C-019). Table 4 of MG A3 is the ASCII
+      excerpt of this rule; control and non-ASCII characters per
+      interpretation SF-043 (a), pending PO decision. Reference implementation
+      il.DnpEncode; vectors V-DNP-….
+
+  - id: REQ-IL-033
+    title: dnp-encoding of Oi4Identifier elements is optional
+    statement: >-
+      If a value of Model, ProductCode or SerialNumber contains characters
+      that are not permitted in an Identification Link or a "/", the generator
+      of the Oi4Identifier may mask these characters with the dnp-encoding
+      (REQ-IL-032). Without masking, such a value cannot be used in an
+      Oi4Identifier, because the Oi4Identifier has to fulfill all rules of an
+      Identification Link (REQ-IL-008, REQ-IL-016). The dnp-encoding is not
+      used anywhere else; in topics the Identification Link is base64url-encoded
+      (REQ-IL-002).
+    keyword: MAY
+    domain: messaging
+    levels: {L1: MAY, L2: MAY, L3: MAY}
+    applies_to: [application]
+    condition: The application generates an Oi4Identifier.
+    refs: [MG 4.3.1, MG A3, SF-043]
+    quotes:
+      - ref: MG 4.3.1
+        text: All requirements of IEC 61406-1 and 4.1 IEC 61406-1 Identification Link also apply to the Oi4Identifier.
+      - ref: MG 4.3.1
+        text: If a value of Model, ProductCode or SerialNumber contains characters that are not permitted in an Identification Link, or a forward slash, which separates the elements, the dnp-encoding (A3 The dnp-Encoding) may be used to mask these characters.
+      - ref: MG A3
+        text: In this case, these components may be dnp-encoded (see 4.3.1 Structure of the Oi4Identifier).
+    verification: [manual]
+    inventory: [MG-4.3.1-dd8a2dac, MG-A3-fc6806cf, MG-A3-b8922139]
+    status: draft
+    notes: PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference implementation il.Oi4Identifier applies the dnp-encoding (identity for values without such characters); vectors V-OID-….

@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "bc5d063"
+baseline: "ea80271"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -112,6 +112,8 @@ items:
     reason: Scope statement – the dnp-encoding is not restricted to the Oi4Identifier; no requirement on a component.
   - key: MG-A3-1e0e476e
     reason: General description of URI components ("can exist of"); the masking requirement is REQ-IL-017.
+  - key: MG-A3-bd540553
+    reason: Describes that Oi4Identifier elements can contain reserved or prohibited characters ("may" expresses possibility, not permission); the permission to mask them is REQ-IL-033.
   # --- TOP (C-018) ----------------------------------------------------------
   - key: MG-7.1-660c039f
     reason: Consequence of the versioning concept (a client only subscribes to its version); no requirement.

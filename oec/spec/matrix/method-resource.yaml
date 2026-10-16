@@ -6,7 +6,7 @@
 # Filter, generated samples). Payload and behaviour columns follow in C-022.
 # PO decisions (C-018): SF-041 (forms), SF-042 (closed sets).
 
-baseline: "bc5d063"
+baseline: "ea80271"
 combinations:
   - {method: Pub, resource: MAM, kind: resource, allowed: true, rule: pub-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}
   - {method: Get, resource: MAM, kind: resource, allowed: true, rule: get-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}

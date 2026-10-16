@@ -1,11 +1,12 @@
 # Test vectors of kind dnp-encoding (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: dnp-encoding
-baseline: "bc5d063"
+baseline: "ea80271"
 description: >-
   dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example,
   the character classes of Table 4 and the extension to all UTF-8 octets
-  (SF-043 a).
+  (SF-043 a). They define the encoding when it is used; its use is optional
+  and limited to the Oi4Identifier elements (REQ-IL-033, SF-043 e).
 vectors:
   - id: V-DNP-001
     title: "MG A3 Table 5: MyModel"

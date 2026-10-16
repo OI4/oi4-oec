@@ -1,7 +1,7 @@
 # Test vectors of kind identification-link (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: identification-link
-baseline: "bc5d063"
+baseline: "ea80271"
 description: >-
   Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with
   their base64url encoding, and invalid strings and encoded topic elements

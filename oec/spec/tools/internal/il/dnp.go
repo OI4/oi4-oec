@@ -52,9 +52,12 @@ func CheckManufacturerURI(s string) []Violation {
 	return nil
 }
 
-// Oi4Identifier builds ManufacturerUri/dnp(Model)/dnp(ProductCode)/
-// dnp(SerialNumber) (MG 4.3.1, MG A3). The ManufacturerUri is converted to
-// lower case (MG A3 Table 5); empty elements become "nd". The result is
+// Oi4Identifier builds ManufacturerUri/Model/ProductCode/SerialNumber
+// (MG 4.3.1) and masks the elements with the dnp-encoding (MG A3). The
+// guideline only permits the masking (SF-043 e); it is applied here so that
+// every nameplate value yields a valid Identification Link, and it leaves
+// values without such characters unchanged. The ManufacturerUri is converted
+// to lower case (MG A3 Table 5); empty elements become "nd". The result is
 // validated as an Identification Link.
 func Oi4Identifier(manufacturerURI, model, productCode, serialNumber string) (string, []Violation) {
 	m := strings.ToLower(manufacturerURI)

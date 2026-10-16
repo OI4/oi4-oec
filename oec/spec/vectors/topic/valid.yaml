@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "bc5d063"
+baseline: "ea80271"
 description: >-
   Constructed valid topic vectors: every ServiceType, Filter encodings, Event
   levels, list filters, Call/Reply with Source and the length limits of the
