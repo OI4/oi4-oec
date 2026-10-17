@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-17, cycle C-020_
+_Last updated: 2026-10-17, cycle C-021_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-020 done, next C-021)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-021 done, next C-022)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -38,21 +38,23 @@ C-019: PO decision on **SF-043 (e)** (2026-10-16): the `Oi4Identifier` is one wa
 
 C-020: PO input (2026-10-17): SF-043 (a)–(d) proposals accepted plus the addition that the `ManufacturerUri` (MAM) should correspond to the Identification Link of the asset, `<manufacturer>.<tld>` in case of doubt; `il.md` reviewed ("passt"); **REQ-TOP-007 withdrawn** (no such rule for the other ServiceTypes); implement SF-040, SF-042 and SF-043 in the guideline. Guideline commits `6476bd3` (SF-043 a–d: A3 general UTF-8 rule, ASCII Table 4, MG 4.3.1/MG 5 `ManufacturerUri`), `d00cce7` (SF-040: MG 7.7 hex/`%`/empty levels, Appendix B and MG 8.3.3.x without `%20`, `Status/Good`), `a992f9a` (SF-042: closed ServiceType/EventCategory sets, free GenericLevel, OTConnector-device sentence removed), `39be075` (MUST of the `ManufacturerUri` form kept), register `4c27c37`/`5dedfd5`. Link check 716/0, Docusaurus build ok. `oec/spec` re-baselined on **`5dedfd5`**: REQ-TOP-005/019/021/023 and REQ-IL-023/024/032 quote the new text, REQ-TOP-007 `deprecated`, new **REQ-IL-034** (SHOULD, `ManufacturerUri` ↔ IL); B1.1.3 golden vectors without edits; area **IL reviewed** (REQ-IL-001 … 033; 034 draft). SF-041 not requested → decided, guideline text unchanged. P1 cycles shifted by one. Log: `log/2026-10-17_C-020_sf040-042-043-guideline.md`.
 
+C-021: PO input (2026-10-17): implement **SF-041** as proposed; `top.md` reviewed ("passt"); REQ-IL-034 fine ("in case of doubt" = Identification Link host with third-level domain; the scheme is always dropped). Guideline commits `61a3182` (SF-041 a–c: only the topic forms of MG 9.1.x/9.2.x, `Pub` `Metadata` with `Source`/`Filter`, `Call`/`Reply` with optional `Source` and no `Filter`) and `d4a7560` (SF-041 d–g: MG 7.7 `<ResourceType>/<Tag>` definition, MG 8.3.8/9.1.8/9.1.9 notes, B1.1.8 Set example `…/Data/oee` and valid `Mode`, templates, typo), register `2cf0d70` (SF-041 resolved, new **SF-044** open: `WriterGroupName` of `PublicationList`/`SubscriptionList` entries). Link check 724/0, Docusaurus build ok. `oec/spec` re-baselined on **`2cf0d70`**: REQ-TOP-013/016/018/022 quote the new text; golden vector V-TOP-044 without edit; area **TOP reviewed** (REQ-TOP-001 … 027, 007 deprecated), **REQ-IL-034 reviewed**. P1 cycles shifted by one. Log: `log/2026-10-17_C-021_sf041-guideline.md`.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO input (C-020):**
-   - review `oec/spec/requirements/view/top.md`, the matrix and the vectors (`status: draft`, G-3.9) and the new REQ-IL-034 – still open;
-   - say whether the agent should implement the decided **SF-041** in the guideline text (allowed topic forms in MG 7/9, PublicationList Filter, B1.1.8/B1.1.9 example, typo `RreferenceDesignation`) – not part of the C-020 request.
-2. **C-021** – areas `MSG` (MG 8, A2) and `ACT` (MG 8.2.16 … 8.2.20, 8.4, 9.2), payload columns of the Method × Resource matrix; golden payload vectors may start (`edits` per ADR-0018 amendment C-013). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-022 … C-027).
+1. **PO input (C-021):**
+   - review the Method × Resource matrix (`oec/spec/matrix/method-resource.yaml`) and the vectors (`oec/spec/vectors/`, `status: draft`, G-3.9) – still open;
+   - decide **SF-044** (`WriterGroupName` of `PublicationList`/`SubscriptionList` entries; proposed `<ResourceType>[/<Tag>]`) – needed for the payload work of C-022/C-024.
+2. **C-022** – areas `MSG` (MG 8, A2) and `ACT` (MG 8.2.16 … 8.2.20, 8.4, 9.2), payload columns of the Method × Resource matrix; golden payload vectors may start (`edits` per ADR-0018 amendment C-013). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-023 … C-028).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (area CMP reviewed; IL, TOP drafted; topic grammar + vectors) |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP reviewed; topic grammar, matrix + vectors drafted) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
@@ -64,7 +66,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `5dedfd5`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 017, SF-001 … 040, SF-042 and SF-043 resolved; SF-041 decided (C-018, guideline text not changed yet); OEC Process Description informative); previous `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `2cf0d70`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 017, SF-001 … 043 resolved, SF-044 open; OEC Process Description informative); previous `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -76,7 +78,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None blocking. No spec finding is open (SF-041 decided, guideline text pending).
+- None blocking. SF-044 (`WriterGroupName` of list entries) is open with a proposed interpretation; it matters for the payload areas (C-022 ff.).
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -107,3 +109,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-018 | 2026-10-15 | Areas `IL` + `TOP` drafted (REQ-IL-001 … 032, REQ-TOP-001 … 027); topic grammar (ABNF + generated regexes), Method × Resource matrix (topic columns), 203 topic/IL vectors, `spectool topic`; SF-040 … 043 (040 … 042 decided); findings register moved to the guideline repo | `log/2026-10-15_C-018_il-top-topic-grammar.md` |
 | C-019 | 2026-10-16 | SF-043 (e): dnp-encoding only as optional hint at the `Oi4Identifier` (MG 4.1, 4.3.1, A3, A4, GL-ADR-010); re-baseline on `ea80271`, REQ-IL-033; P1 cycles shifted by one | `log/2026-10-16_C-019_sf043-dnp-encoding.md` |
 | C-020 | 2026-10-17 | SF-040, SF-042, SF-043 (a)–(d) in the guideline (+ `ManufacturerUri` ↔ IL), REQ-TOP-007 withdrawn, IL reviewed; re-baseline on `5dedfd5`, REQ-IL-034; P1 cycles shifted by one | `log/2026-10-17_C-020_sf040-042-043-guideline.md` |
+| C-021 | 2026-10-17 | SF-041 in the guideline (allowed topic forms, Metadata Source/Tag, Call/Reply Source, PublicationList Filter, B1.1.8 example); TOP + REQ-IL-034 reviewed; SF-044; re-baseline on `2cf0d70`; P1 cycles shifted by one | `log/2026-10-17_C-021_sf041-guideline.md` |
