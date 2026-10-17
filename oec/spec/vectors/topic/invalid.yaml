@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "2cf0d70"
+baseline: "fd9da6e"
 description: >-
   Constructed invalid topic vectors. Each vector names the violated
   requirement and whether the topic fails the grammar or the Identification
