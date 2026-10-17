@@ -1,0 +1,1017 @@
+# Requirements of area MSG – payload format and OPC UA PubSub objects
+# (MG 8, MG A2; ADR-0018, schema: catalog.schema.json). The Action messages
+# (MG 8.2.16 … 8.2.20, MG 8.4) are area ACT. Open spec findings of this area:
+# SF-045 … SF-050 (C-023) – the statements follow their proposed
+# interpretations where the guideline is ambiguous and say so in the notes.
+area: MSG
+baseline: "fd9da6e"
+requirements:
+  # --- General (MG 8, MG 8.1) ------------------------------------------------
+  - id: REQ-MSG-001
+    title: Payload objects are not extended by user-defined keys
+    statement: >-
+      The payload objects of MG 8 (NetworkMessage, DataSetMessage,
+      DataSetMetaData and their sub-objects, Action messages) contain no keys
+      other than the fields defined for them. The DataSet in the Payload of a
+      DataSetMessage is the only place for publisher-defined names.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [publisher, requester, responder]
+    refs: [MG 8, SF-050]
+    quotes:
+      - ref: MG 8
+        text: These objects must not be extended by user defined keys.
+    verification: [schema, d7-validate]
+    inventory: [MG-8-57b64e78]
+    status: draft
+    notes: >-
+      SF-050 (open): OPC UA-defined fields that MG 8.2 does not list (e.g.
+      DataTypeId and Name of StructureDescription/EnumDescription, Value of
+      EnumField) are proposed to be allowed – they are no user-defined keys.
+
+  - id: REQ-MSG-002
+    title: MessageType per Method and Resource
+    statement: >-
+      The payload of a message with the Method Pub, Get, Set or Del is a
+      NetworkMessage with MessageType "ua-data", except for the Resource
+      Metadata, whose payload is a DataSetMetaData with MessageType
+      "ua-metadata". Call and Reply use the Action message types (REQ-ACT-001).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, requester, responder]
+    refs: [MG 8.1, MG 8.2.1, MG 8.2.2, MG 9.1]
+    quotes:
+      - ref: MG 8.2.1
+        text: The MQTT payload for Data is an object of type NetworkMessage
+      - ref: MG 8.2.1
+        text: Only ua-data is valid here.
+      - ref: MG 8.2.2
+        text: The MQTT payload for Metadata is an object of type DataSetMetaData
+      - ref: MG 8.2.2
+        text: Only ua-metadata is valid here.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.1-c829a1a5, MG-8.2.2-623d087a]
+    status: draft
+    notes: >-
+      The MessageType per Method × Resource follows the templates of MG 9.1
+      (payload columns of matrix/method-resource.yaml follow in C-026).
+
+  # --- NetworkMessage (MG 8.2.1, MG 8.1.4) -----------------------------------
+  - id: REQ-MSG-003
+    title: Fields of the NetworkMessage
+    statement: >-
+      A NetworkMessage (ua-data) contains MessageId, MessageType, PublisherId,
+      ReplyTo and Messages; it contains the DataSetClassId as required by
+      REQ-MSG-011 and never contains a WriterGroupName. DataSetClassId, if
+      present, is a GUID string with separators (Part 6 5.4.2.7).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.1]
+    quotes:
+      - ref: MG 8.2.1
+        text: It is not used in the NetworkMessage in Open Industry 4.0 Alliance context and shall be omitted.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.1-f4e10384, MG-8.2.1-b8c1ed00, MG-8.2.1-00cfed6e, MG-8.2.1-824316e6]
+    status: draft
+
+  - id: REQ-MSG-004
+    title: Fixed JsonNetworkMessageContentMask
+    statement: >-
+      Every NetworkMessage (ua-data) is built with the fixed
+      JsonNetworkMessageContentMask of MG 8.1.4: NetworkMessage header,
+      DataSetMessage header, PublisherId and ReplyTo are always sent,
+      SingleDataSetMessage and WriterGroupName are not set, DataSetClassId as
+      required by REQ-MSG-011 (mask 0x3B with, 0x2B without DataSetClassId).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.1.4]
+    quotes:
+      - ref: MG 8.1.4
+        text: Therefore, the Open Industry 4.0 Alliance defines fixed content masks, which shall be used by all OI4 Alliance-compliant applications.
+      - ref: MG 8.1.4
+        text: The NetworkMessage header must always be sent.
+      - ref: MG 8.1.4
+        text: The DataSetMessage header must always be sent.
+      - ref: MG 8.1.4
+        text: The PublisherId must always be sent.
+      - ref: MG 8.1.4
+        text: This results in the value 0x3B (59) for NetworkMessages with DataSetClassId and 0x2B (43) for NetworkMessages without DataSetClassId.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.1.4-137fb8f0, MG-8.1.4-de4c90cd, MG-8.1.4-9f335012, MG-8.1.4-cadab2e2, MG-8.1.4-6b8106c4, MG-8.1.4-21f73147]
+    status: draft
+    notes: >-
+      Content masks are not visible on the wire; a receiver checks the
+      resulting field presence. A subscriber relies on these settings
+      (MG-8.1.4-229ec879, informative).
+
+  - id: REQ-MSG-005
+    title: Messages is always a JSON array
+    statement: >-
+      The field Messages of a NetworkMessage is always a JSON array of
+      DataSetMessage objects, also if it contains only one DataSetMessage
+      (SingleDataSetMessage is not used).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.1, MG 8.1.4]
+    quotes:
+      - ref: MG 8.2.1
+        text: 'In Open Industry 4.0 Alliance context, this option is not used: Messages must always be a JSON array, even if it contains only a single DataSetMessage.'
+      - ref: MG 8.1.4
+        text: Messages must always be a JSON array.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.1-b0064a43, MG-8.1.4-1c67b11b]
+    status: draft
+
+  - id: REQ-MSG-006
+    title: PublisherId is ServiceType and unencoded Identification Link
+    statement: >-
+      The PublisherId of a NetworkMessage and of a DataSetMetaData is
+      "<ServiceType>/<IdentificationLink>" of the publishing application,
+      i.e. the ServiceType and the decoded AppId of the topic the message is
+      published on, with the Identification Link unencoded (REQ-IL-005).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.1, MG 8.2.2, MG 7.3]
+    quotes:
+      - ref: MG 8.2.1
+        text: String consisting of ServiceType (see 7.2 ServiceType Element) and the unencoded Identification Link of the application (see 4 The Identification Link and 7.3 AppId Element) - separated by a “/”.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.1-99fe6ffc, MG-8.2.2-009e2d99]
+    status: draft
+
+  # --- MessageId (MG 8.2.1, MG 8.2.2) ----------------------------------------
+  - id: REQ-MSG-007
+    title: Format of the MessageId
+    statement: >-
+      The MessageId of a NetworkMessage and of a DataSetMetaData is
+      "<unixTimestampInMs>-<PublisherId>" (current Unix time in milliseconds,
+      "-", PublisherId of the message); if needed for uniqueness, a counter
+      is appended to the timestamp ("<unixTimestampInMs><counter>-<PublisherId>").
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.1, MG 8.2.2, SF-049]
+    quotes:
+      - ref: MG 8.2.1
+        text: The Open Industry 4.0 Alliance defines the type as a combination of the current timestamp in ms precision with the PublisherId.
+      - ref: MG 8.2.1
+        text: In these cases, the application must guarantee the uniqueness by providing an additional parameter (e.g. MessageId = <unixTimestampInMs><counter>-<PublisherId>).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.1-4a8ac924, MG-8.2.1-81ca33dc, MG-8.2.2-2ed17728, MG-8.2.2-6fd35797]
+    status: draft
+    notes: >-
+      SF-049 (c) (open): the MG 8.2.2 example has no ServiceType – the
+      PublisherId (REQ-MSG-006) applies.
+
+  - id: REQ-MSG-008
+    title: MessageId is globally unique
+    statement: >-
+      Every MessageId is globally unique: a publisher never sends two messages
+      (ua-data or ua-metadata) with the same MessageId.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.1, MG 8.2.2, SF-049]
+    quotes:
+      - ref: MG 8.2.1
+        text: The MessageId must be globally unique.
+      - ref: MG 8.2.2
+        text: The MessageId must be unique.
+    verification: [d7-monitor]
+    inventory: [MG-8.2.1-83f60096, MG-8.2.2-a5590dec, MG-8.2.2-39ef94f6]
+    status: draft
+    notes: >-
+      SF-049 (c) (open): MG 8.2.2 says "unique for any single package of this
+      PublisherId"; with the PublisherId as part of the MessageId both
+      readings are equivalent.
+
+  - id: REQ-MSG-009
+    title: Consumers treat the MessageId as opaque
+    statement: >-
+      A consumer does not derive information (e.g. time or sender) from the
+      content of a MessageId; it only compares MessageIds as a whole, e.g. a
+      ReplyTo with the MessageId of its request.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [subscriber]
+    refs: [MG 8.2.1]
+    quotes:
+      - ref: MG 8.2.1
+        text: Consumers shall treat the MessageId as an opaque, unique string and shall not derive any information from its content.
+    verification: [manual]
+    inventory: [MG-8.2.1-35341d9b]
+    status: draft
+
+  # --- DataSetClassId (MG 8.2.1, MG 8.2.4, MG A2) ----------------------------
+  - id: REQ-MSG-010
+    title: Predefined DataSetClassIds of MG A2
+    statement: >-
+      The resources and Actions defined by the OI4 Alliance use exactly the
+      DataSetClassIds of MG A2: MAM 360ca8f3-5e66-42a2-8f10-9cdf45f4bf58,
+      Health d8e7b6df-42ba-448a-975a-199f59e8ffeb, Config
+      9d5983db-440d-4474-9fd7-1cd7a6c8b6c2, Event
+      543ae05e-b6d9-4161-a0a3-350a0fac5976, Profile
+      48017c6a-05c8-48d7-9d85-4b08bbb707f3, PublicationList
+      217434d6-6e1e-4230-b907-f52bc9ffe152, SubscriptionList
+      e5d68c47-c276-4929-8ab9-4c1090cac785, ReferenceDesignation
+      27a75019-164a-496d-a38b-90e8a55c2cfa and the Action NewDataSetWriterId
+      2aca55bd-0d6f-41b1-a1c2-2d61afcc21f0 (ActionMetaData only). The
+      DataSetClassId is a lower-case GUID string with separators.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, responder]
+    refs: [MG A2, MG 8.2.1, MG 8.2.4, SF-049]
+    quotes:
+      - ref: MG 8.2.1
+        text: For some recurring use cases, such as MAM, fixed GUIDs are specified from the OI4 Alliance and must be used (A2 Predefined DataSetClassIds for Resources of the Alliance).
+      - ref: MG 8.2.4
+        text: For some recurring use cases, such as MAM, fixed GUIDs are specified from the OI4 Alliance and must be used (A2 Predefined DataSetClassIds for Resources of the Alliance).
+      - ref: MG A2
+        text: All standardized Open Industry 4.0 Alliance resources (7.5 Resource Element) have a defined DataSet and therefore a globally unique DataSetClassId, which are listed here.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.1-680f4501, MG-8.2.4-0d986fba, MG-A2-699da0d8]
+    status: draft
+    notes: >-
+      Lower case: MG A2 lists all ids in lower case and Part 6 5.1.3 writes
+      GUIDs in lower case; receivers compare case-insensitively
+      (to be confirmed in the review). SF-049 (g): the key is in the MetaData
+      (DataSetMetaDataType) of a DataSetMetaData.
+
+  - id: REQ-MSG-011
+    title: DataSetClassId in the NetworkMessage
+    statement: >-
+      A NetworkMessage for a resource with a predefined DataSetClassId
+      (REQ-MSG-010) carries that DataSetClassId, for every Method (Pub, Get,
+      Set, Del) and also if its Messages contain only helper DataSets
+      (PaginationRequest, Pagination, Locale). A NetworkMessage for Data
+      carries the publisher-defined DataSetClassId if all its DataSetMessages
+      belong to the same DataSet class and it is known to the sender, and
+      omits it otherwise.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, requester, responder]
+    refs: [MG 8.2.1, MG 8.1.4, MG A2, SF-048]
+    quotes:
+      - ref: MG 8.2.1
+        text: A NetworkMessage must always carry the DataSetClassId of the resource addressed by the topic.
+      - ref: MG 8.2.1
+        text: The DataSetClassId shall be present for all resources defined by the Open Industry 4.0 Alliance which have DataSetClassId.
+      - ref: MG 8.1.4
+        text: Set, if the DataSetClassId is known (mandatory for resources defined by the Open Industry 4.0 Alliance, see A2 Predefined DataSetClassIds for Resources of the Alliance).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.1-82e7a14c, MG-8.2.1-2650bc1d, MG-8.1.4-9af6086d]
+    status: draft
+    notes: >-
+      The Data part follows the proposed interpretation of SF-048 (open):
+      MG 8.2.1 literally requires a DataSetClassId for every topic, which a
+      requester of Get/Data usually does not know and which a Get/Data answer
+      with DataSets of several classes cannot carry.
+
+  - id: REQ-MSG-012
+    title: DataSetClassId in the DataSetMetaData
+    statement: >-
+      The MetaData (DataSetMetaDataType) of a DataSetMetaData contains the
+      DataSetClassId if the described DataSet belongs to a resource with a
+      predefined DataSetClassId (REQ-MSG-010); for publisher-defined DataSets
+      it may contain the publisher-defined DataSetClassId.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.4, MG A2]
+    quotes:
+      - ref: MG 8.2.4
+        text: The DataSetClassId must be present for all resources defined by the Open Industry 4.0 Alliance, which have a DataSetClassId.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.4-2968a18f, MG-8.2.4-1a8f6c5b]
+    status: draft
+
+  - id: REQ-MSG-013
+    title: Publisher-defined DataSetClassId is stable per structure
+    statement: >-
+      A publisher-defined DataSetClassId identifies one DataSet structure: it
+      stays the same as long as the structure does not change, also across
+      restarts of the publisher, and a new DataSetClassId is used when the
+      structure changes.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.1]
+    quotes:
+      - ref: MG 8.2.1
+        text: It identifies the structure of the DataSet and shall be stable as long as this structure does not change, also across restarts of the publisher.
+      - ref: MG 8.2.1
+        text: If the structure changes, a new DataSetClassId shall be used.
+    verification: [d7-monitor, manual]
+    inventory: [MG-8.2.1-c96f020d, MG-8.2.1-512cf9a0]
+    status: draft
+
+  - id: REQ-MSG-014
+    title: Reserved DataSetClassIds are not used
+    statement: >-
+      No message uses one of the reserved DataSetClassIds of MG A2 (ids of
+      removed resources and Actions), neither for a resource nor as
+      publisher-defined DataSetClassId.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [publisher, responder]
+    refs: [MG A2]
+    quotes:
+      - ref: MG A2
+        text: The following DataSetClassIds are reserved. This includes the IDs of removed resources and Actions, which shall not be reused.
+    verification: [schema, d7-validate]
+    inventory: [MG-A2-c09dfc52]
+    status: draft
+
+  # --- ReplyTo (MG 8.2.1, MG 8.2.2) ------------------------------------------
+  - id: REQ-MSG-015
+    title: ReplyTo links a reaction to its trigger
+    statement: >-
+      Every NetworkMessage and every DataSetMetaData contains ReplyTo. If the
+      message is a reaction to another message (e.g. the answer to a Get, an
+      Event caused by a Set), ReplyTo is the MessageId of the triggering
+      message; otherwise ReplyTo is the empty string.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.1, MG 8.2.2, MG 8.1.4]
+    quotes:
+      - ref: MG 8.2.1
+        text: If the NetworkMessage is a reaction to another message (e.g. a publication requested via Get, or an Event caused by a Set), the ReplyTo must contain the MessageId of the message which triggered it.
+      - ref: MG 8.2.1
+        text: Otherwise, the ReplyTo must be an empty string.
+      - ref: MG 8.2.2
+        text: If the DataSetMetaData is a reaction to another message (e.g. a publication requested via Get/Metadata), the ReplyTo contains the MessageId of the message which triggered it.
+    verification: [schema, d7-test]
+    inventory: [MG-8.2.1-1643990f, MG-8.2.1-a22f2f73, MG-8.2.1-0831035f, MG-8.2.1-e52d765b, MG-8.2.2-a9360e31]
+    status: draft
+    notes: The ReplyTo does not address a receiver; every subscriber of the topic may consume the reaction (MG-8.2.1-f58de567, informative).
+
+  # --- DataSetMessage (MG 8.2.3, MG 8.1.4) -----------------------------------
+  - id: REQ-MSG-016
+    title: Fields of the DataSetMessage
+    statement: >-
+      A DataSetMessage contains DataSetWriterId, DataSetWriterName,
+      WriterGroupName and Payload; it may contain SequenceNumber,
+      MetaDataVersion or MinorVersion (REQ-MSG-018), Timestamp, Status
+      (REQ-MSG-026) and MessageType (REQ-MSG-029); it never contains a
+      PublisherId. SequenceNumber is a UInt32 that strictly increases per
+      DataSetWriter, Timestamp a DateTime string (ISO 8601, Part 6 5.4.2.6).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3]
+    quotes:
+      - ref: MG 8.2.3
+        text: It is not used in Open Industry 4.0 Alliance context and shall be omitted, because the PublisherId is always contained in the NetworkMessage (8.2.1 NetworkMessage).
+      - ref: MG 8.2.3
+        text: A number which is strictly increasing in sequence and assigned to the DataSetMessage by the DataSetWriter.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-e119b433, MG-8.2.3-41a1d503, MG-8.2.3-563fb32b, MG-8.2.3-23de9f9f, MG-8.2.3-8e6fbc4d, MG-8.2.3-8eedf843, MG-8.2.3-56563a65, MG-8.2.3-4c0a9d23, MG-8.2.3-513766b3, MG-8.2.3-951457a2, MG-8.2.3-63e4a763, MG-8.2.3-d3037df3, MG-8.2.3-e6e7d616]
+    status: draft
+
+  - id: REQ-MSG-017
+    title: Fixed JsonDataSetMessageContentMask
+    statement: >-
+      Every DataSetMessage is built with the fixed
+      JsonDataSetMessageContentMask of MG 8.1.4: DataSetWriterId,
+      DataSetWriterName and WriterGroupName (empty string if the resource
+      uses no Filter) are always sent, PublisherId never, SequenceNumber,
+      Timestamp, Status, MessageType and MetaDataVersion or MinorVersion are
+      optional, FieldEncoding1 = 0 and FieldEncoding2 = 1 (VerboseEncoding);
+      the resulting mask is between 0xA41 and 0xA7F (with MetaDataVersion) or
+      0xE7D (with MinorVersion).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.1.4]
+    quotes:
+      - ref: MG 8.1.4
+        text: The DataSetWriterId must always be sent.
+      - ref: MG 8.1.4
+        text: The DataSetWriterName (Identification Link of the source) must always be sent.
+      - ref: MG 8.1.4
+        text: The WriterGroupName (filter) must always be sent. It is an empty string, if the resource does not use a filter.
+      - ref: MG 8.1.4
+        text: This results in the minimum value 0xA41 (2625).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.1.4-2654c541, MG-8.1.4-fba666c7, MG-8.1.4-aff9f376, MG-8.1.4-bfc5ab19, MG-8.1.4-88eb1688, MG-8.1.4-2c579004, MG-8.1.4-2dfe8097, MG-8.1.4-f3f23e3a, MG-8.1.4-e7f06835, MG-8.1.4-0b4787d3]
+    status: draft
+
+  - id: REQ-MSG-018
+    title: MetaDataVersion and MinorVersion are not combined
+    statement: >-
+      A DataSetMessage contains at most one of MetaDataVersion and
+      MinorVersion. If present, MetaDataVersion equals the
+      ConfigurationVersion of the related DataSetMetaData and MinorVersion
+      equals its MinorVersion.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [publisher]
+    refs: [MG 8.2.3, MG 8.1.4]
+    quotes:
+      - ref: MG 8.2.3
+        text: MinorVersion and MetaDataVersion shall not be used together. If the MetaDataVersion is present, the MinorVersion shall be omitted.
+      - ref: MG 8.2.3
+        text: The MetaDataVersion corresponds with the ConfigurationVersion of a DataSetMetaData Message
+      - ref: MG 8.1.4
+        text: Optional. Must not be combined with MinorVersion.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-33dc20a3, MG-8.2.3-d3799ee9, MG-8.1.4-a76d3e5b, MG-8.1.4-1443bf12]
+    status: draft
+
+  - id: REQ-MSG-019
+    title: Reserved DataSetWriterIds of the helper DataSets
+    statement: >-
+      A PaginationRequest uses DataSetWriterId 1, a Pagination 2 and a Locale
+      3. In these DataSetMessages, WriterGroupName is the name of the helper
+      DataSet ("PaginationRequest", "Pagination", "Locale") and
+      DataSetWriterName is the Identification Link of the application that
+      publishes the NetworkMessage.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, requester, responder]
+    refs: [MG 8.2.3]
+    quotes:
+      - ref: MG 8.2.3
+        text: A PaginationRequest (8.3.11.1 PaginationRequest) must always use DataSetWriterId 1, a Pagination (8.3.11.2 Pagination) must use the 2 and a Locale (8.3.12 Locale) must use the 3.
+      - ref: MG 8.2.3
+        text: For the DataSetMessages with reserved DataSetWriterIds 1 to 3, the WriterGroupName must contain the name of the helper DataSet (PaginationRequest, Pagination or Locale) and the DataSetWriterName must contain the Identification Link of the application, which publishes the NetworkMessage
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-7b5d34fc, MG-8.2.3-29b25bd8]
+    status: draft
+
+  - id: REQ-MSG-020
+    title: Application DataSetWriterIds start at 10
+    statement: >-
+      DataSetWriterId 0 is never used. The DataSetWriterIds 1 to 9 are
+      reserved (1 to 3 helper DataSets, 4 to 8 Actions of the common
+      services); an application assigns its own DataSetWriterIds from 10.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [publisher]
+    refs: [MG 8.2.3, MG 8.4]
+    quotes:
+      - ref: MG 8.2.3
+        text: The application starts with DataSetWriterIds from 10, because the DataSetWriterIds up to 9 are reserved for special use cases. The DataSetWriterId 0 is invalid and shall not be used.
+      - ref: MG 8.2.3
+        text: The DataSetWriterIds 4 to 8 are reserved for the Actions of the common services
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-5a768594]
+    status: draft
+    notes: DataSetWriterId 9 is reserved without a defined use; MG 8.4 reserves 4 to 7 for future common services.
+
+  - id: REQ-MSG-021
+    title: One DataSetWriterId per resource, DataSetWriterName and WriterGroupName
+    statement: >-
+      A publisher assigns its own DataSetWriterId to each combination of
+      resource, DataSetWriterName and WriterGroupName it publishes; the
+      DataSetWriterId is unique within the publisher, and the
+      DataSetMetaData of a DataSetMessage carries the same DataSetWriterId.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3, MG 8.2.2]
+    quotes:
+      - ref: MG 8.2.3
+        text: Each combination of resource, DataSetWriterName and WriterGroupName published by an application must get its own DataSetWriterId.
+      - ref: MG 8.2.3
+        text: It is unique within the scope of a publisher. The related DataSetMetaData (8.2.2 DataSetMetaData) to this DataSetMessage contains the same DataSetWriterId.
+    verification: [d7-monitor]
+    inventory: [MG-8.2.3-a6a859ac]
+    status: draft
+
+  - id: REQ-MSG-022
+    title: Consumers do not store DataSetWriterIds permanently
+    statement: >-
+      A consumer does not rely on a DataSetWriterId across restarts of the
+      publisher; after a restart it resolves the DataSetWriterId again, e.g.
+      via PublicationList or via DataSetWriterName and WriterGroupName.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [subscriber]
+    refs: [MG 8.2.2]
+    quotes:
+      - ref: MG 8.2.2
+        text: The DataSetWriterId is not persistent and can change on every power cycle (restart) of the publisher.
+      - ref: MG 8.2.2
+        text: Consumers shall not store a DataSetWriterId permanently, but resolve it again after a restart of the publisher, e.g. via PublicationList (8.3.8 PublicationList) or via DataSetWriterName and WriterGroupName.
+    verification: [manual]
+    inventory: [MG-8.2.2-56dd18f2, MG-8.2.2-e46100a8]
+    status: draft
+
+  - id: REQ-MSG-023
+    title: DataSetWriterName is the unencoded Identification Link of the asset
+    statement: >-
+      The DataSetWriterName of a DataSetMessage and of a DataSetMetaData is
+      the unencoded Identification Link of the asset providing the
+      information; if the topic contains a Source, the DataSetWriterName is
+      the decoded Source.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3, MG 8.2.2, MG 7.6]
+    quotes:
+      - ref: MG 8.2.3
+        text: In Open Industry 4.0 Alliance context, the DataSetWriterName must always describe the asset providing the information.
+      - ref: MG 8.2.3
+        text: In contrast to the topic, the DataSetWriterName contains the unencoded Identification Link.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-b8ab5b57]
+    status: draft
+    notes: Exception for the helper DataSets with DataSetWriterIds 1 to 3 (REQ-MSG-019).
+
+  - id: REQ-MSG-024
+    title: WriterGroupName is the topic Filter
+    statement: >-
+      The WriterGroupName of a DataSetMessage and of a DataSetMetaData is the
+      Filter of the topic in its topic-encoded form (MG 7.7), and the empty
+      string for resources without Filter (e.g. MAM, Health); for a
+      DataSetMessage published on a topic without Filter it is the Filter
+      that addresses this DataSet.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3, MG 8.2.2, MG 7.7]
+    quotes:
+      - ref: MG 8.2.3
+        text: The WriterGroupName shall be a topic encoded string as explained in 7.7 Filter Element.
+      - ref: MG 8.2.2
+        text: The WriterGroupName shall be a topic encoded string as explained in 7.7 Filter Element.
+      - ref: MG 8.2.3
+        text: Resources which do not make use of a <Filter> in the topic, such as MAM or Health, use an empty string.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-ccd2bdd2, MG-8.2.2-19f853c8]
+    status: draft
+    notes: >-
+      Exceptions: helper DataSets (REQ-MSG-019) and the entries of
+      PublicationList/SubscriptionList (REQ-MSG-025).
+
+  - id: REQ-MSG-025
+    title: WriterGroupName of PublicationList and SubscriptionList entries
+    statement: >-
+      Each DataSetMessage of PublicationList and SubscriptionList has the
+      WriterGroupName "<ResourceType>[/<Tag>]", i.e. the topic Filter that
+      addresses this entry (e.g. "Data/oee", "Event/Syslog/Notice", "MAM"),
+      also if it is published on a topic without Filter.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3, MG 7.7, GL-ADR-018, SF-044]
+    quotes:
+      - ref: MG 8.2.3
+        text: For the resources PublicationList and SubscriptionList, the WriterGroupName of each DataSetMessage must be <ResourceType>[/<Tag>], i.e. the Filter which addresses this entry in the topic (7.7 Filter Element), e.g. Data/oee, Event/Syslog/Notice or MAM.
+      - ref: MG 8.2.3
+        text: This also applies, if the entry is published on a topic without Filter (e.g. Pub/PublicationList).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-1f34caa9, MG-8.2.3-f4f917b9]
+    status: draft
+    notes: PO decision SF-044 (C-021), GL-ADR-018.
+
+  - id: REQ-MSG-026
+    title: Status is only sent if not Good
+    statement: >-
+      A DataSetMessage contains a Status only if the status is not Good; a
+      missing Status means Good.
+    keyword: SHOULD NOT
+    domain: messaging
+    levels: {L1: SHOULD NOT, L2: SHOULD NOT, L3: SHOULD NOT}
+    applies_to: [publisher]
+    refs: [MG 8.2.3, MG 8.1.4]
+    quotes:
+      - ref: MG 8.2.3
+        text: The Status is not required and should not be sent when the status is OK.
+      - ref: MG 8.1.4
+        text: Optional. The Status should only be sent, if it is not Good.
+    verification: [d7-validate]
+    inventory: [MG-8.2.3-101d62fb, MG-8.1.4-4452f786]
+    status: draft
+
+  - id: REQ-MSG-027
+    title: Status of a DataSetMessage contains Code and Symbol
+    statement: >-
+      A Status of a DataSetMessage is a StatusCode object (Part 6 5.4.2.12)
+      that always contains the numeric Code (UInt32 of Part 4) and should
+      contain the Symbol (symbolic name of the code).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3]
+    quotes:
+      - ref: MG 8.2.3
+        text: Because the Status of a DataSetMessage is only sent if it is not Good (see note below), the Code must always be present in this context.
+      - ref: MG 8.2.3
+        text: The Symbol is optional, but should be provided.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-23d08e44, MG-8.2.3-39ee9823]
+    status: draft
+    notes: The Status of an ActionResponse differs (REQ-ACT-014).
+
+  - id: REQ-MSG-028
+    title: Receivers evaluate only the Code of a Status
+    statement: >-
+      A receiver evaluates only the Code of a Status (not the Symbol) and
+      treats a DataSetMessage without Status as Good.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [subscriber]
+    refs: [MG 8.2.3]
+    quotes:
+      - ref: MG 8.2.3
+        text: Receivers shall only evaluate the Code.
+      - ref: MG 8.2.3
+        text: A missing Status means Good.
+    verification: [manual]
+    inventory: [MG-8.2.3-39ee9823]
+    status: draft
+
+  - id: REQ-MSG-029
+    title: MessageType of the DataSetMessage
+    statement: >-
+      If a DataSetMessage contains a MessageType, it is "ua-event" for the
+      resource Event and "ua-keyframe" for all other resources; without
+      MessageType, "ua-keyframe" is assumed.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3]
+    quotes:
+      - ref: MG 8.2.3
+        text: If present, ua-event shall be used for the resource Event (8.3.6 Event) and ua-keyframe for all other resources. If omitted, ua-keyframe is assumed.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-0fda2860]
+    status: draft
+
+  - id: REQ-MSG-030
+    title: DataSetMessages are complete key frames
+    statement: >-
+      A DataSetMessage always contains all fields of its DataSet; the OPC UA
+      message types ua-deltaframe and ua-keepalive are not used.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3]
+    quotes:
+      - ref: MG 8.2.3
+        text: The OPC UA message types ua-deltaframe and ua-keepalive are not used in Open Industry 4.0 Alliance context. A DataSetMessage must always contain all fields of the DataSet.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-61d61851]
+    status: draft
+
+  - id: REQ-MSG-031
+    title: Payload fields use VerboseEncoding with RawData
+    statement: >-
+      The fields of the DataSet in the Payload of a DataSetMessage are
+      encoded with the JSON VerboseEncoding and the RawData option
+      (DataSetFieldContentMask 0x20): each field is its plain JSON value
+      without status, timestamps or type information; fields of the abstract
+      DataType BaseDataType are an object with a Value field,
+      multi-dimensional arrays an object with Value and Dimensions, and
+      enumerations a string "<EnumName>_<EnumValue>". The encodings of
+      FieldEncoding2 = 0 (Part 14 V1.04) are not used.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.3, MG 8.1.4, SF-035]
+    quotes:
+      - ref: MG 8.2.3
+        text: In Open Industry 4.0 Alliance context, the fields of the DataSet are encoded with the JSON VerboseEncoding and the RawData option (Part 14-7.2.5.4.2 and Part 14-6.2.4.2).
+      - ref: MG 8.1.4
+        text: In Open Industry 4.0 Alliance context, only the bit RawData (bit 5) is set, which results in the value 0x20 (32).
+      - ref: MG 8.1.4
+        text: The encodings selected by FieldEncoding2 = 0 (the encodings of OPC UA Part 14 V1.04) are deprecated with V1.05 and shall not be used.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.1.4-c10618ec]
+    status: draft
+    notes: The DataSets of the OI4 resources and their schemas are areas RES-* (MG 8.3).
+
+  # --- DataSetMetaData (MG 8.2.2, MG 8.1.2) ----------------------------------
+  - id: REQ-MSG-032
+    title: Fields of the DataSetMetaData
+    statement: >-
+      A DataSetMetaData (ua-metadata) contains MessageId, MessageType,
+      PublisherId, DataSetWriterId, WriterGroupName, DataSetWriterName,
+      Timestamp (DateTime string, time of the first sending), ReplyTo and
+      MetaData (DataSetMetaDataType).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.2]
+    quotes:
+      - ref: MG 8.2.2
+        text: In contrast to OPC UA Part 14 V1.04, the fields WriterGroupName, DataSetWriterName and Timestamp are mandatory in V1.05.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.2-ff02c191, MG-8.2.2-4bc9755e, MG-8.2.2-e923159c, MG-8.2.2-3b6edd00, MG-8.2.2-6ca7b79e, MG-8.2.2-2bb4752d, MG-8.2.2-ca4f4b23, MG-8.2.2-96fe4c60]
+    status: draft
+
+  - id: REQ-MSG-033
+    title: DataSetMetaData matches its DataSetMessage
+    statement: >-
+      DataSetWriterId, WriterGroupName and DataSetWriterName of a
+      DataSetMetaData carry the same values as those of the related
+      DataSetMessage.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.1.2, MG 8.2.2]
+    quotes:
+      - ref: MG 8.1.2
+        text: In Open Industry 4.0 Alliance context, the mandatory fields WriterGroupName and DataSetWriterName carry the same values as the WriterGroupName and DataSetWriterName of the related DataSetMessage
+      - ref: MG 8.2.2
+        text: The related DataSetMessage (8.2.3 DataSetMessage) to this DataSetMetaData contains the same DataSetWriterId.
+    verification: [d7-monitor]
+    inventory: [MG-8.1.2-4a454706]
+    status: draft
+
+  - id: REQ-MSG-034
+    title: Encoding of the DataSetMetaDataType
+    statement: >-
+      The MetaData of a DataSetMetaData (DataSetMetaDataType and all its
+      sub-objects of MG 8.2.4 … 8.2.15) contains every field whose
+      Requirement is Mandatory, also if it has its default value (e.g. empty
+      array), and writes enumerations as "<Name>_<Value>" strings
+      (VerboseEncoding).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.4, MG 8.2.10, SF-045]
+    quotes:
+      - ref: MG 8.2.10
+        text: 'Structure_0: Structure without optional fields.'
+    verification: [schema, d7-validate]
+    status: draft
+    notes: >-
+      Follows the recommended option (b') of SF-045 (open). OPC UA Part 14
+      7.2.5.5.2 prescribes the CompactEncoding (defaults omitted, enumerations
+      as numbers) – the PO decides; until then validators accept both forms
+      for omitted default values (lenient) and report them as warnings.
+
+  - id: REQ-MSG-035
+    title: Fields of the DataSetMetaDataType
+    statement: >-
+      A DataSetMetaDataType contains Name (name of the DataSet), Namespaces,
+      StructureDataTypes, EnumDataTypes and SimpleDataTypes (arrays,
+      possibly empty) and may contain Description (LocalizedText), Fields
+      (array of FieldMetaData), DataSetClassId (REQ-MSG-012) and
+      ConfigurationVersion.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.4, SF-045]
+    quotes:
+      - ref: MG 8.2.4
+        text: 'Value Range: <array of Namespaces names> Type: String Requirement: Mandatory'
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.4-72828f5c, MG-8.2.4-b6952e79, MG-8.2.4-f47ef8e9, MG-8.2.4-61d2eff6, MG-8.2.4-7a597189, MG-8.2.4-8309e508, MG-8.2.4-17fa68d1, MG-8.2.4-b899b2c3]
+    status: draft
+    notes: SF-045 (open) – MG 8.1.2 Figure 5 omits the four mandatory arrays.
+
+  - id: REQ-MSG-036
+    title: ConfigurationVersionDataType
+    statement: >-
+      A ConfigurationVersionDataType (ConfigurationVersion of the
+      DataSetMetaDataType, MetaDataVersion of the DataSetMessage and of
+      Action messages) contains MajorVersion and MinorVersion, each a
+      VersionTime (UInt32, seconds since 2000-01-01T00:00:00Z); MajorVersion
+      changes with every major change of the DataSet content, MinorVersion
+      with every change.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, requester, responder]
+    refs: [MG 8.2.5, SF-049]
+    quotes:
+      - ref: MG 8.2.5
+        text: The MajorVersion reflects the time of the last major change of the DataSet content.
+      - ref: MG 8.2.5
+        text: The MinorVersion reflects the time of the last change.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.5-18a87fd1, MG-8.2.5-42796301]
+    status: draft
+    notes: SF-049 (a, b) (open) – the MG 8.2.5 intro swaps the two names, VersionTime is Part 4 7.43.
+
+  - id: REQ-MSG-037
+    title: Fields of the FieldMetaData
+    statement: >-
+      A FieldMetaData contains Name, Description (LocalizedText), FieldFlags
+      (UInt16), BuiltInType (Byte, Part 6 Table 1), DataType (NodeId,
+      REQ-MSG-039), ValueRank (Int32), ArrayDimensions (array of UInt32),
+      MaxStringLength (UInt32), DataSetFieldId (GUID string) and Properties
+      (array of KeyValuePair).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.6, SF-045, SF-046]
+    quotes:
+      - ref: MG 8.2.6
+        text: The default value shall be a null or empty LocalizedText.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.6-738bcbed, MG-8.2.6-3ea7a0dd, MG-8.2.6-6d1cdadf, MG-8.2.6-63e260a5, MG-8.2.6-43a5ddda, MG-8.2.6-5e40a1e2, MG-8.2.6-1e0bdd94, MG-8.2.6-d59108fa, MG-8.2.6-d0a4eaac, MG-8.2.6-067e4c57, MG-8.2.6-5a05cb43]
+    status: draft
+    notes: >-
+      SF-045 (open): Figure 5 omits ArrayDimensions. SF-046 (open): an empty
+      Description is proposed as {"Locale": "en-US", "Text": ""}.
+
+  - id: REQ-MSG-038
+    title: Field names are unique in the DataSet
+    statement: >-
+      The Name of every FieldMetaData is unique within its DataSet.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.6]
+    quotes:
+      - ref: MG 8.2.6
+        text: The Name shall be unique in the DataSet.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.6-231acec2]
+    status: draft
+
+  - id: REQ-MSG-039
+    title: NodeIds are JSON strings without namespace index
+    statement: >-
+      Every NodeId in a payload object (e.g. DataType, DefaultEncodingId,
+      BaseDataType, DataTypeId) is a JSON string in the format of Part 6
+      5.1.12: "i=…" (or s=, g=, b=) for namespace 0 and "nsu=<uri>;…" for all
+      other namespaces; neither the namespace index form "ns=<index>;…" nor
+      the V1.04 JSON object form is used.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [publisher]
+    refs: [MG 8.2.6, GL-ADR-013]
+    quotes:
+      - ref: MG 8.2.6
+        text: The namespace index form ("ns=<index>;...") shall not be used, because namespace indices are not stable across publishers.
+      - ref: MG 8.2.6
+        text: The JSON object form of a NodeId (IdType, Id, Namespace) of OPC UA V1.04 is not used anymore.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.6-cadb42b5]
+    status: draft
+
+  - id: REQ-MSG-040
+    title: LocalizedText contains Locale and Text
+    statement: >-
+      A LocalizedText defined by MG 8.2 or MG 8.3 contains Locale (a LocaleId
+      matching ^[a-z]{2,3}(-[A-Z]{2,3})?$) and Text.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.7, SF-046]
+    quotes:
+      - ref: MG 8.2.7
+        text: (regular expression ^[a-z]{2,3}(-[A-Z]{2,3})?$; see OPC UA Part 3-8.4).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.7-816dd69d, MG-8.2.7-7c769ce4]
+    status: draft
+    notes: >-
+      SF-046 (open): LocalizedTexts inside OPC UA structures the guideline
+      does not describe (e.g. EUInformation.DisplayName) are proposed to
+      follow Part 6 (Locale optional). MG 8.2.7 recommends English.
+
+  - id: REQ-MSG-041
+    title: KeyValuePair
+    statement: >-
+      A KeyValuePair contains Key (QualifiedName as JSON string per Part 6
+      5.1.12) and Value (Variant of any DataType, Part 6 5.4.2.17).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.8, SF-047]
+    quotes:
+      - ref: MG 8.2.8
+        text: This abstract DataType defines a value that can have any valid DataType (see Part 3-8.7).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.8-8732feb0, MG-8.2.8-af99e2d6, MG-8.2.8-be05b06c]
+    status: draft
+    notes: >-
+      Encoding of Key and Value per the proposed interpretation of SF-047
+      (open); MG 8.2.8 describes the QualifiedName as NamespaceIndex and Name
+      and Figure 5 uses the object form {"Name": …}.
+
+  - id: REQ-MSG-042
+    title: StructureDescription and StructureDefinition
+    statement: >-
+      A StructureDescription contains a StructureDefinition; a
+      StructureDefinition contains DefaultEncodingId and BaseDataType
+      (NodeIds), StructureType ("Structure_0", "StructureWithOptionalFields_1"
+      or "Union_2") and Fields (array of StructureField).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.9, MG 8.2.10, SF-045, SF-050]
+    quotes:
+      - ref: MG 8.2.10
+        text: 'StructureWithOptionalFields_1: Structure with optional fields.'
+      - ref: MG 8.2.10
+        text: 'Union_2: Only one of the fields defined for the data type is encoded into a value.'
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.9-a1b6625a, MG-8.2.10-d33e836a, MG-8.2.10-356ef3dc, MG-8.2.10-d0857e34, MG-8.2.10-4e6c6ba4, MG-8.2.10-e4619715, MG-8.2.10-2c0fe157]
+    status: draft
+    notes: >-
+      SF-050 (open): DataTypeId and Name of the StructureDescription and the
+      StructureTypes 3/4 of OPC UA are not listed in MG 8.2.9/8.2.10.
+
+  - id: REQ-MSG-043
+    title: StructureField
+    statement: >-
+      A StructureField contains Name (unique in the StructureDefinition),
+      Description (LocalizedText), DataType (NodeId), ValueRank (-1 for
+      scalars, >= 1 for fixed rank arrays), ArrayDimensions (array of
+      UInt32), MaxStringLength (UInt32) and IsOptional (Boolean).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.11, SF-045]
+    quotes:
+      - ref: MG 8.2.11
+        text: Scalar (-1) or fixed rank array (>=1).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.11-69ad4326, MG-8.2.11-16691f6f, MG-8.2.11-cb8fd3bb, MG-8.2.11-95ba1be6, MG-8.2.11-107c4e27, MG-8.2.11-e53fc2aa, MG-8.2.11-6fefa62c]
+    status: draft
+    notes: MG 8.2.11 spells the field "Datatype"; OPC UA Part 3 8.51 and the JSON key are "DataType".
+
+  - id: REQ-MSG-044
+    title: EnumDescription, EnumDefinition and EnumField
+    statement: >-
+      An EnumDescription contains EnumDefinition and BuiltInType (6 = Int32
+      for enumerations, the unsigned integer type or ExtensionObject for
+      OptionSets); an EnumDefinition contains Fields (array of EnumField); an
+      EnumField contains Name (unique in the EnumDefinition).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.12, MG 8.2.13, MG 8.2.14, SF-049, SF-050]
+    quotes:
+      - ref: MG 8.2.12
+        text: Indicates whether the DataType is an Enumeration or an OptionSet
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.12-13e4ceae, MG-8.2.12-e21c6793, MG-8.2.13-078e66b8, MG-8.2.14-6e103525]
+    status: draft
+    notes: >-
+      SF-049 (d) (open): "28 = Uinteger" is no BuiltInType. SF-050 (open):
+      DataTypeId/Name of the EnumDescription and Value of the EnumField are
+      not listed.
+
+  - id: REQ-MSG-045
+    title: SimpleTypeDescription
+    statement: >-
+      A SimpleTypeDescription contains DataTypeId and BaseDataType (NodeIds),
+      Name (QualifiedName) and BuiltInType (Byte).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 8.2.15, SF-047]
+    quotes:
+      - ref: MG 8.2.15
+        text: 'Value Range: <QualifiedName> Type: QualifiedName Requirement: Mandatory'
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.15-ea3d1d14, MG-8.2.15-df8d398e, MG-8.2.15-d231c21e, MG-8.2.15-09f33ee8]
+    status: draft
+    notes: Name is encoded as QualifiedName string per SF-047 (a) (open).

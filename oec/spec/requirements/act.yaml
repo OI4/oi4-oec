@@ -1,0 +1,543 @@
+# Requirements of area ACT – Actions (Call/Reply) and DataSetWriterId
+# allocation (MG 8.2.16 … 8.2.20, MG 8.4, MG 9.2; ADR-0018, schema:
+# catalog.schema.json). The topics of Call/Reply are area TOP (REQ-TOP-016),
+# the grading of Call/Reply and NewDataSetWriterId per level is area CMP
+# (REQ-CMP-034, REQ-CMP-040). Open spec findings of this area: SF-049 (f),
+# SF-051 (C-023).
+area: ACT
+baseline: "fd9da6e"
+requirements:
+  # --- Call/Reply with OPC UA PubSub Actions (MG 8.1, 8.1.3, 8.2.16) --------
+  - id: REQ-ACT-001
+    title: Call and Reply use OPC UA PubSub Actions
+    statement: >-
+      The call/reply pattern (Methods Call and Reply) is implemented with OPC
+      UA PubSub Actions: a message published with Call is an
+      ActionNetworkMessage with MessageType "ua-action-request", a message
+      published with Reply one with MessageType "ua-action-response"; the
+      Responder answers every ua-action-request it can decode and address
+      with ua-action-response messages.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.1, MG 8.1.3, MG 8.2.16, MG 9.2]
+    quotes:
+      - ref: MG 8.1
+        text: ua-action-request and ua-action-response must be used for the call/reply pattern over the Message Bus.
+      - ref: MG 8.1.3
+        text: A Requestor must publish a ua-action-request to request the execution of one or more Actions, and the Responder must answer with a ua-action-response.
+      - ref: MG 8.2.16
+        text: ua-action-request must be used for messages published with the method Call, ua-action-response for messages published with the method Reply.
+    verification: [schema, d7-validate, d7-test]
+    inventory: [MG-8.1-0e566ba4, MG-8.1-f7f7330c, MG-8.1.3-aa30f206, MG-8.1.3-2f07634f, MG-8.2.16-2cd64af0, MG-8.2.16-25164d36, MG-8.2.16-e118d52d, MG-9.2-15fe1339]
+    status: draft
+    notes: Graded by REQ-CMP-034 (Call/Reply) and REQ-CMP-040 (NewDataSetWriterId).
+
+  - id: REQ-ACT-002
+    title: Fields of the ActionNetworkMessage
+    statement: >-
+      An ActionNetworkMessage contains MessageId, MessageType, PublisherId,
+      Timestamp (DateTime string, time of the first sending), RequestorId and
+      Messages (JSON array of ActionRequest or ActionResponse objects). A
+      ua-action-request additionally contains ResponseAddress and
+      TimeoutHint (Duration in milliseconds) and may contain CorrelationData
+      (Base64 ByteString); a ua-action-response contains neither
+      ResponseAddress nor TimeoutHint.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.16]
+    quotes:
+      - ref: MG 8.2.16
+        text: 'Value Range: <Reply topic> Type: String Requirement: Mandatory for ua-action-request, omitted for ua-action-response'
+      - ref: MG 8.2.16
+        text: 'Value Range: <Duration in ms> Type: Duration (Double) Requirement: Mandatory for ua-action-request, omitted for ua-action-response'
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.16-9cfbdf96, MG-8.2.16-3f9165a4, MG-8.2.16-8f87b9eb]
+    status: draft
+
+  - id: REQ-ACT-003
+    title: Action messages use the CompactEncoding and fixed content masks
+    statement: >-
+      All fields of Action messages are encoded with the JSON CompactEncoding
+      (fields with default values omitted, enumerations such as ActionState
+      as numbers, StatusCode without Symbol). The ActionNetworkMessage
+      contains neither DataSetClassId nor ReplyTo (JsonNetworkMessageContentMask
+      0x0B), the ActionRequest and ActionResponse no SequenceNumber,
+      MessageType, PublisherId, DataSetWriterName, WriterGroupName or
+      MinorVersion, and the RawData bit is not set (DataSetFieldContentMask 0).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.1.4, MG 8.2.16, MG 8.2.20]
+    quotes:
+      - ref: MG 8.1.4
+        text: 'JsonNetworkMessageContentMask: NetworkMessageHeader, DataSetMessageHeader and PublisherId are set, all other bits are not set. This results in the value 0x0B (11).'
+      - ref: MG 8.1.4
+        text: 'DataSetFieldContentMask: 0. The RawData bit shall not be set for Actions.'
+      - ref: MG 8.1.4
+        text: All fields of Action messages are encoded with the JSON CompactEncoding (Part 14-7.2.5.6).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.1.4-92ade777]
+    status: draft
+    notes: The DataSetClassId of an Action is only part of its ActionMetaData (MG 8.2.19).
+
+  - id: REQ-ACT-004
+    title: MessageId of Action messages
+    statement: >-
+      The MessageId of an Action message is
+      "<unixTimestampInMs>-<PublisherId of the sender>", i.e. the RequestorId
+      for a ua-action-request and the PublisherId of the Responder for a
+      ua-action-response, and is globally unique.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.16, SF-049]
+    quotes:
+      - ref: MG 8.2.16
+        text: A globally unique identifier for the message.
+      - ref: MG 8.2.16
+        text: For a ua-action-request, this is the RequestorId, for a ua-action-response the PublisherId of the Responder.
+    verification: [schema, d7-validate, d7-monitor]
+    inventory: [MG-8.2.16-9717abbc]
+    status: draft
+    notes: SF-049 (f) (open) – the Value Range of MG 8.2.16 says PublisherId; the note and MG 9.2.1 use the RequestorId for requests.
+
+  - id: REQ-ACT-005
+    title: PublisherId is the Responder, RequestorId the Requestor
+    statement: >-
+      In request and response, PublisherId is "<ServiceType>/<IdentificationLink>"
+      of the Responder – the ServiceType and the decoded AppId of the Call
+      and Reply topic – and RequestorId is "<ServiceType>/<IdentificationLink>"
+      of the Requestor; both contain the unencoded Identification Link.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.16, MG 7.4]
+    quotes:
+      - ref: MG 8.2.16
+        text: The PublisherId of the Responder, in the request as well as in the response. It must correspond to the <ServiceType>/<AppId> of the Call and Reply topic, but contain the unencoded Identification Link.
+      - ref: MG 8.2.16
+        text: The PublisherId of the Requestor, in the request as well as in the response.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.16-5aaf6988, MG-8.2.16-2a955fbc, MG-8.2.16-67c0af7c]
+    status: draft
+
+  - id: REQ-ACT-006
+    title: ResponseAddress is the Reply topic
+    statement: >-
+      The ResponseAddress of a ua-action-request is the Reply topic that
+      corresponds to the Call topic of the request
+      ("Oi4v2/<ServiceType>/<AppId>/Reply/<Service>[/<Source>]"), and the
+      Responder publishes its responses to this ResponseAddress.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.16, MG 9.2, MG 7.4]
+    quotes:
+      - ref: MG 8.2.16
+        text: The MQTT topic, the Responder shall use to publish the response.
+      - ref: MG 8.2.16
+        text: In Open Industry 4.0 Alliance context, this must always be the Reply topic corresponding to the Call topic of the request (7.4 Method Element)
+      - ref: MG 9.2
+        text: The Responder must publish the ua-action-response to the ResponseAddress given in the request, which is the corresponding Reply topic.
+    verification: [schema, d7-validate, d7-test]
+    inventory: [MG-8.2.16-dd642483, MG-8.2.16-c7e6b480, MG-8.2.16-ec40bbe4, MG-9.2-1aace699]
+    status: draft
+    notes: Same rule from the topic side in REQ-TOP-016.
+
+  - id: REQ-ACT-007
+    title: CorrelationData is returned unchanged
+    statement: >-
+      If a ua-action-request contains CorrelationData, every
+      ua-action-response to it contains the same CorrelationData unchanged;
+      otherwise the response contains no CorrelationData.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.16]
+    quotes:
+      - ref: MG 8.2.16
+        text: Data provided by the Requestor, which is returned unchanged in the response.
+      - ref: MG 8.2.16
+        text: 'Value Range: <Base64 encoded ByteString> Type: ByteString Requirement: Optional for ua-action-request, mandatory for ua-action-response if contained in the request'
+    verification: [d7-test]
+    inventory: [MG-8.2.16-1090b47e, MG-8.2.16-488ee77f]
+    status: draft
+
+  - id: REQ-ACT-008
+    title: Responder stops processing after the TimeoutHint
+    statement: >-
+      The Responder stops processing a request when its TimeoutHint has
+      expired, counted from the reception of the request.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.16, SF-051]
+    quotes:
+      - ref: MG 8.2.16
+        text: The Responder shall stop processing the request after this time.
+    verification: [manual]
+    inventory: [MG-8.2.16-3c2aa779, MG-8.2.16-6245d553]
+    status: draft
+    notes: The start of the period follows the proposed interpretation of SF-051 (b) (open).
+
+  - id: REQ-ACT-009
+    title: Requestor treats an expired TimeoutHint as failure
+    statement: >-
+      A Requestor does not wait longer than the TimeoutHint for the final
+      response; if none arrives within the TimeoutHint, it considers the
+      request as failed.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.16, MG 9.2, MG 8.2.20]
+    quotes:
+      - ref: MG 8.2.16
+        text: Because erroneous requests (e.g. decoding errors or unknown DataSetWriterIds) are not answered, the Requestor must not wait longer than the TimeoutHint for a response.
+      - ref: MG 9.2
+        text: If the Responder does not respond within the TimeoutHint, the Requestor shall consider the request as failed (8.2.20 ActionState).
+    verification: [manual]
+    inventory: [MG-8.2.16-3d9be90a, MG-9.2-2c2c99da]
+    status: draft
+
+  # --- ActionRequest, ActionResponse (MG 8.2.17, MG 8.2.18) ------------------
+  - id: REQ-ACT-010
+    title: Fields of the ActionRequest
+    statement: >-
+      An ActionRequest contains DataSetWriterId and ActionTargetId (UInt16,
+      addressing the Action of the Responder), RequestId (UInt16), ActionState
+      1 (Executing) and Payload (JSON object with the request fields, empty
+      if the Action has none); it may contain MetaDataVersion and Timestamp
+      and never contains DataSetWriterName, WriterGroupName, MinorVersion or
+      MessageType.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.17]
+    quotes:
+      - ref: MG 8.2.17
+        text: To request the execution of an Action, the value 1 (Executing) is used.
+      - ref: MG 8.2.17
+        text: The fields DataSetWriterName, WriterGroupName, MinorVersion and MessageType defined by OPC UA for the ActionRequest are not used in Open Industry 4.0 Alliance context and shall be omitted.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.17-baa88fb7, MG-8.2.17-1b676dc5, MG-8.2.17-0864f4ab, MG-8.2.17-a63d6d67, MG-8.2.17-8a273fd7, MG-8.2.17-9431783b, MG-8.2.17-9698a69e, MG-8.2.17-283d3a94]
+    status: draft
+
+  - id: REQ-ACT-011
+    title: RequestId is unique among pending requests
+    statement: >-
+      A Requestor assigns each ActionRequest a RequestId that is unique among
+      all its pending requests (per RequestorId); each ActionRequest of a
+      ua-action-request has its own RequestId.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.17, SF-051]
+    quotes:
+      - ref: MG 8.2.17
+        text: The RequestId shall be unique for all pending requests of a Requestor (RequestorId and CorrelationData).
+      - ref: MG 8.2.17
+        text: If a ua-action-request contains several ActionRequests, each of them has its own RequestId.
+    verification: [d7-monitor]
+    inventory: [MG-8.2.17-cd4f3358]
+    status: draft
+    notes: Uniqueness per RequestorId follows the proposed interpretation of SF-051 (a) (open).
+
+  - id: REQ-ACT-012
+    title: Fields of the ActionResponse
+    statement: >-
+      An ActionResponse contains DataSetWriterId, ActionTargetId and RequestId
+      of the related ActionRequest, Status, ActionState (1 Executing for an
+      intermediate, 2 Done for the final response) and Payload (JSON object
+      with the response fields; empty if the Status is Bad or the Action has
+      none); it may contain MetaDataVersion and Timestamp and never contains
+      DataSetWriterName, WriterGroupName, MinorVersion or MessageType.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.18, MG 8.2.20]
+    quotes:
+      - ref: MG 8.2.18
+        text: If the Status is Bad or the Action has no response fields, the Payload is an empty object.
+      - ref: MG 8.2.18
+        text: The fields DataSetWriterName, WriterGroupName, MinorVersion and MessageType defined by OPC UA for the ActionResponse are not used in Open Industry 4.0 Alliance context and shall be omitted.
+    verification: [schema, d7-validate, d7-test]
+    inventory: [MG-8.2.18-2429d9a4, MG-8.2.18-9ec81017, MG-8.2.18-c89c8bfd, MG-8.2.18-7acf7eab, MG-8.2.18-c90cc13a, MG-8.2.18-ef569e4a, MG-8.2.18-1cbe23a0, MG-8.2.18-e1a40bfa, MG-8.2.18-ae8057a2]
+    status: draft
+
+  - id: REQ-ACT-013
+    title: Payload of ActionRequest and ActionResponse
+    statement: >-
+      The Payload of an ActionRequest or ActionResponse contains the request
+      or response fields of the Action as name-value pairs, each encoded with
+      its plain JSON value according to the data type of the ActionMetaData.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.17, MG 8.2.18, SF-035]
+    quotes:
+      - ref: MG 8.2.17
+        text: In Open Industry 4.0 Alliance context, each field is encoded with its plain JSON value according to the data type defined in the ActionMetaData, as known from the Payload of a DataSetMessage (8.2.3 DataSetMessage).
+    verification: [schema, d7-validate]
+    status: draft
+
+  - id: REQ-ACT-014
+    title: Status of the ActionResponse
+    statement: >-
+      Every ActionResponse contains a Status in CompactEncoding: {} for Good,
+      otherwise {"Code": <UInt32>}, never a Symbol; a request field that
+      breaks a constraint (e.g. wrong data type, value out of range) results
+      in BadInvalidArgument (0x80AB0000).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.3, MG 8.2.18]
+    quotes:
+      - ref: MG 8.2.3
+        text: The Status of an ActionResponse uses the CompactEncoding and therefore must never contain the Symbol. It must always be sent, with {} for Good (8.2.18 ActionResponse).
+      - ref: MG 8.2.18
+        text: If at least one request field broke a constraint (e.g. wrong data type, value out of range), the Status is set to BadInvalidArgument.
+    verification: [schema, d7-validate, d7-test]
+    inventory: [MG-8.2.3-8f9384e4, MG-8.2.3-d7fec634]
+    status: draft
+
+  # --- Sequence of an Action (MG 8.2.20, MG 9.2) -----------------------------
+  - id: REQ-ACT-015
+    title: Sequence of an Action
+    statement: >-
+      The Requestor publishes a ua-action-request with ActionState 1 to the
+      Call topic of the Responder; the Responder publishes for every
+      ActionRequest it can decode and address exactly one final
+      ActionResponse with ActionState 2, the Status and the result Payload to
+      the ResponseAddress. Request and response are related by RequestorId,
+      RequestId and, if present, CorrelationData.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.20, MG 9.2, SF-051]
+    quotes:
+      - ref: MG 8.2.20
+        text: The Requestor must publish a ua-action-request with ActionState 1 (Executing) to the Call topic of the Responder (7.4 Method Element).
+      - ref: MG 8.2.20
+        text: The Responder must publish a ua-action-response with ActionState 2 (Done), the Status and the Payload with the result to the ResponseAddress.
+      - ref: MG 9.2
+        text: Request and response are related to each other by the RequestorId, the RequestId and the optional CorrelationData.
+    verification: [d7-test]
+    inventory: [MG-8.2.20-56ea1e8b, MG-8.2.20-c779a1d4, MG-9.2-9997933b, MG-9.2-1ac0be49]
+    status: draft
+    notes: >-
+      "Exactly one final ActionResponse per ActionRequest" and their
+      distribution over one or several ua-action-response messages follow the
+      proposed interpretation of SF-051 (c) (open). The execution order of
+      several ActionRequests is up to the Responder (MG 8.2.16).
+
+  - id: REQ-ACT-016
+    title: Intermediate responses for long-running Actions
+    statement: >-
+      Before the final response, the Responder may publish one or more
+      ua-action-response messages with ActionState 1 (Executing) to the
+      ResponseAddress to indicate the progress of a long-running Action.
+    keyword: MAY
+    domain: messaging
+    levels: {L1: MAY, L2: MAY, L3: MAY}
+    applies_to: [responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.18, MG 8.2.20]
+    quotes:
+      - ref: MG 8.2.18
+        text: For long-running Actions, the Responder may send intermediate responses with 1 (Executing) before the final response.
+    verification: [d7-test]
+    inventory: [MG-8.2.18-c5d9afd6, MG-8.2.20-1217e3b3]
+    status: draft
+    notes: A Requestor therefore accepts intermediate responses and waits for ActionState 2.
+
+  - id: REQ-ACT-017
+    title: No response to undecodable, unaddressable or rejected requests
+    statement: >-
+      The Responder sends no response to a request that it cannot decode or
+      address (e.g. unknown DataSetWriterId or ActionTargetId) or that it
+      rejects for security reasons.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.20]
+    quotes:
+      - ref: MG 8.2.20
+        text: If a request cannot be decoded or addressed (e.g. unknown DataSetWriterId or ActionTargetId), or is rejected for security reasons, the Responder must not send a response (Part 14-6.2.11.2).
+    verification: [d7-test]
+    inventory: [MG-8.2.20-0b675c28]
+    status: draft
+
+  - id: REQ-ACT-018
+    title: ActionMetaData of the common services need not be published
+    statement: >-
+      The ActionMetaData of the common services is defined by MG 8.4 and need
+      not be published as ua-action-metadata; it consists of ActionTargets
+      (ActionTargetId and Name), Request and Response (DataSetMetaDataType,
+      Name = name of the Action, DataSetClassId of MG A2).
+    keyword: MAY
+    domain: messaging
+    levels: {L1: MAY, L2: MAY, L3: MAY}
+    applies_to: [responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.2.19, MG A2]
+    quotes:
+      - ref: MG 8.2.19
+        text: Therefore, it is not required to publish the ActionMetaData (message type ua-action-metadata) over the Message Bus.
+      - ref: MG 8.2.19
+        text: The list of Action targets, each with its ActionTargetId and Name, which can be addressed with the ActionTargetId in an ActionRequest.
+    verification: [manual]
+    inventory: [MG-8.2.19-74e9318d, MG-8.2.19-a7800607, MG-8.2.19-a96b3fb1, MG-8.2.19-eb8380a9, MG-8.2.19-5f690b92]
+    status: draft
+    notes: >-
+      Neither the topic of ua-action-metadata nor its fields beyond MG 8.2.19
+      are defined in OEC v2.0; a publication would be outside the guideline.
+
+  # --- Common services (MG 8.4, MG 9.2) --------------------------------------
+  - id: REQ-ACT-019
+    title: Reserved DataSetWriterId and ActionTargetId 1 for common services
+    statement: >-
+      An ActionRequest for a common service uses the DataSetWriterId reserved
+      for its Action in MG 8.4 (NewDataSetWriterId: 8) and ActionTargetId 1;
+      the asset the Action is executed for is addressed by the Source of the
+      Call topic. DataSetWriterIds 4 to 7 are reserved for future common
+      services.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component uses the Methods Call and Reply.
+    refs: [MG 8.4, MG 8.2.17]
+    quotes:
+      - ref: MG 8.4
+        text: To allow a Requestor to call these Actions without further knowledge about the Responder, the DataSetWriterId used in the ActionRequest (8.2.17 ActionRequest) is reserved for each Action, and the ActionTargetId must always be 1
+      - ref: MG 8.2.17
+        text: For the common services defined by the Open Industry 4.0 Alliance, the ActionTargetId must always be 1.
+      - ref: MG 8.4
+        text: The DataSetWriterIds 4 to 7 are reserved for future common services.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.4-e80d99dd, MG-8.2.17-14489172, MG-8.2.17-814f1d2e, MG-9.2-5b97120e]
+    status: draft
+
+  - id: REQ-ACT-020
+    title: Topics of NewDataSetWriterId
+    statement: >-
+      NewDataSetWriterId is requested with
+      "Oi4v2/<ServiceType>/<AppId>/Call/NewDataSetWriterId[/<Source>]" and
+      answered with "Oi4v2/<ServiceType>/<AppId>/Reply/NewDataSetWriterId[/<Source>]";
+      the optional Source is the asset for which the DataSetWriterId is
+      requested, a Filter is not used.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component requests or provides the common service NewDataSetWriterId.
+    refs: [MG 9.2.1, MG 7.4]
+    quotes:
+      - ref: MG 9.2.1
+        text: The information must be provided via the <Method>/<Services>[/<Source>] combination Call/NewDataSetWriterId[/<Source>] to request and Reply/NewDataSetWriterId[/<Source>] to reply the new DataSetWriterId.
+      - ref: MG 9.2.1
+        text: The optional <Source> contains the asset, for which the DataSetWriterId is requested; the Reply topic equals the Call topic with the Method Reply (7.4 Method Element). A Filter is not used.
+    verification: [d7-validate, d7-test]
+    inventory: [MG-9.2.1-8720ce6d, MG-9.2.1-538d81a2, MG-9.2.1-33e0e9a1]
+    status: draft
+    notes: Topic grammar in topic/topic.abnf (REQ-TOP-016); support is graded by REQ-CMP-040.
+
+  - id: REQ-ACT-021
+    title: NewDataSetWriterId request field Resource
+    statement: >-
+      The Payload of a NewDataSetWriterId ActionRequest contains the field
+      Resource (String, a ResourceType of MG 7.5.1): the resource the
+      requested DataSetWriterId shall be used for.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    condition: The component requests the common service NewDataSetWriterId.
+    refs: [MG 8.4.1]
+    quotes:
+      - ref: MG 8.4.1
+        text: Resource (7.5.1 Resources) contains the resource the requested DataSetWriterId shall be used for.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.4.1-453ad9b2, MG-8.4.1-efeae52f]
+    status: draft
+
+  - id: REQ-ACT-022
+    title: NewDataSetWriterId response fields DataSetWriterId and Ttl
+    statement: >-
+      The Payload of a successful NewDataSetWriterId ActionResponse contains
+      DataSetWriterId (UInt16, a new, so far unused DataSetWriterId of the
+      Responder, i.e. >= 10 per REQ-MSG-020) and Ttl (UInt32, seconds). This
+      DataSetWriterId is not the DataSetWriterId of the ActionResponse
+      itself, which is always 8.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The component provides the common service NewDataSetWriterId.
+    refs: [MG 8.4.1, MG 9.2.1]
+    quotes:
+      - ref: MG 8.4.1
+        text: The service NewDataSetWriterId requests a new, so far unused, DataSetWriterId from the publisher, which executes this Action.
+      - ref: MG 8.4.1
+        text: This response field must not be confused with the DataSetWriterId of the ActionResponse itself, which always contains the reserved DataSetWriterId 8 of the Action NewDataSetWriterId.
+    verification: [schema, d7-validate, d7-test]
+    inventory: [MG-8.4.1-c57f4602, MG-8.4.1-bba9d024, MG-8.4.1-fbc43f91]
+    status: draft
+
+  - id: REQ-ACT-023
+    title: Provided DataSetWriterId is valid for Ttl seconds
+    statement: >-
+      The DataSetWriterId provided by NewDataSetWriterId can be used for the
+      first time only within Ttl seconds after the response; the Responder
+      keeps it reserved during this period and accepts its initial use (e.g.
+      in a Set) only within it.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The component requests or provides the common service NewDataSetWriterId.
+    refs: [MG 8.4.1, SF-035]
+    quotes:
+      - ref: MG 8.4.1
+        text: Ttl contains a value, which describes the time to live of the provided DataSetWriterId in seconds. Initial usage of the provided DataSetWriterId is only possible during this period of time.
+    verification: [d7-test]
+    status: draft
+    notes: >-
+      Whether the Responder rejects a later initial use is not stated
+      explicitly; "only possible" is read as such (implicit, SF-035).

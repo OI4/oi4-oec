@@ -145,3 +145,35 @@ items:
     reason: Purpose of the Filter element ("can be used"); the Filter rules are REQ-TOP-019 … REQ-TOP-023.
   - key: MG-7.7-466159d5
     reason: Rationale of the unique percent-encoding (MQTT compares topics character by character); the rule is REQ-TOP-019.
+  # --- MSG (C-023) ----------------------------------------------------------
+  - key: MG-8-ed7d9170
+    reason: History – former guideline versions were based on OPC UA V1.04; "not compatible" describes the change, no requirement on a component (the V1.05 rules are REQ-MSG-*).
+  - key: MG-8-1bac3dc2
+    reason: History – Actions replace the former message type MSG; the rule is REQ-ACT-001.
+  - key: MG-8.1.3-03402684
+    reason: Introduction of the non-exhaustive example Figure 6 (ua-action-request); the example is a golden payload vector (V-PAY-*).
+  - key: MG-8.1.3-adfb22f6
+    reason: Introduction of the non-exhaustive example Figure 7 (ua-action-response); the example is a golden payload vector (V-PAY-*).
+  - key: MG-8.1.4-229ec879
+    reason: Consequence of the fixed content masks for a subscriber ("can rely"); the masks are REQ-MSG-004, REQ-MSG-017 and REQ-ACT-003.
+  - key: MG-8.2-cd7f9f5e
+    reason: Reading advice to consult the linked OPC UA specifications; no requirement on a component.
+  - key: MG-8.2.1-f58de567
+    reason: Explains that ReplyTo does not address a receiver ("may consume" expresses possibility); the ReplyTo rule is REQ-MSG-015.
+  - key: MG-8.2.3-972ff869
+    reason: Editorial warning not to confuse the MessageType of DataSetMessage and NetworkMessage; the values are REQ-MSG-002 and REQ-MSG-029.
+  # --- ACT (C-023) ----------------------------------------------------------
+  - key: MG-8.4-f933a04f
+    reason: Introduction of chapter 8.4; the reserved DataSetWriterIds are REQ-ACT-019.
+  - key: MG-8.4.1-726a12a3
+    reason: Use case narrative of NewDataSetWriterId ("it is required" describes the need, not a component); the service is REQ-ACT-020 … REQ-ACT-023.
+  - key: MG-8.4.1-a22f45b7
+    reason: Example of the use case (reference designation of an MES set into an OT connector); no requirement on a component.
+  - key: MG-8.4.1-9b4a99a8
+    reason: Example of the use case (IT connector sets the ReferenceDesignation); Set of ReferenceDesignation is area RES-* (C-025, C-026).
+  - key: MG-9.2.1-d64f4f6e
+    reason: Use case narrative of NewDataSetWriterId, repeated from MG 8.4.1; no requirement on a component.
+  - key: MG-9.2.1-1fe979dc
+    reason: Example of the use case, repeated from MG 8.4.1; no requirement on a component.
+  - key: MG-9.2.1-734e1ec6
+    reason: Label of the Reply template; the template fields are REQ-ACT-012 and REQ-ACT-022.

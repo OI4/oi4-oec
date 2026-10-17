@@ -8,8 +8,8 @@ Guideline baseline: `fd9da6e`. Source of truth: the YAML files in `oec/spec/requ
 | [CMP](cmp.md) | Compliance domains and levels | C-014 | reviewed | 45 | MG index, MG preface, MG appendix-a, MG 1, RIG index, RIG appendix-a, RIG 1 |
 | [IL](il.md) | Identification link (dnp encoding) | C-018 | reviewed | 34 | MG 4, MG A3 |
 | [TOP](top.md) | Topic structure and namespace elements | C-018 | reviewed | 27 | MG 7 |
-| MSG | Payload format and OPC UA PubSub objects | C-023 | planned | – | MG 8, MG A2 |
-| ACT | Actions (Call/Reply) and DataSetWriterId allocation | C-023 | planned | – | MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2 |
+| [MSG](msg.md) | Payload format and OPC UA PubSub objects | C-023 | drafted | 45 | MG 8, MG A2 |
+| [ACT](act.md) | Actions (Call/Reply) and DataSetWriterId allocation | C-023 | drafted | 23 | MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2 |
 | MQTT | General requirements on MQTT | C-024 | planned | – | MG 6 |
 | LIFE | Birth, life and will messages | C-024 | planned | – | MG 6.3.3, MG 6.3.4, MG 6.3.5 |
 | RES-MAM | Resource MAM (Master Asset Model) | C-025 | planned | – | MG 5, MG 8.3.1, MG 9.1.1 |
