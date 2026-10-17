@@ -1,0 +1,399 @@
+# Golden payload vectors (C-023, ADR-0018 amendments C-013 and C-023); status draft until the PO review.
+# Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
+kind: payload
+baseline: "fd9da6e"
+description: >-
+  Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.11, B1.1.12,
+  B1.2.1): topic and message of the Message Bus. The reference checks cover the
+  envelope of MG 8 (areas MSG and ACT); the DataSet content of the resources
+  is checked from C-025/C-026 on. A vector that differs from its example keeps
+  the verbatim example in original and lists every change in edits.
+vectors:
+  - id: V-PAY-001
+    title: "B1.1.2: Get Health of an explicit asset"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-005, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-011, REQ-MSG-015]
+    origin: {kind: guideline, ref: MG B1.1.2}
+    status: draft
+    notes: >-
+      A request addresses the application in the topic (MG 7.3); the PublisherId
+      and the MessageId are those of the requesting IT connector. The Source of
+      the topic is the application itself. A Get without helper DataSets has an
+      empty Messages array and an empty ReplyTo.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-002
+    title: "B1.1.2: Get Health of all assets related to this application"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-005, REQ-MSG-006, REQ-MSG-011, REQ-MSG-015]
+    origin: {kind: guideline, ref: MG B1.1.2}
+    status: draft
+    notes: >-
+      Same payload as V-PAY-001 on the topic without Source. The note of the
+      example ("this publication was self-initialized") belongs to the Pub example
+      – SF-049 (h).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-003
+    title: "B1.1.2: Pub Health of an explicit asset, reply to a Get"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-015, REQ-MSG-016, REQ-MSG-023, REQ-MSG-024]
+    origin: {kind: guideline, ref: MG B1.1.2}
+    status: draft
+    notes: >-
+      ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health
+      has no Filter; DataSetWriterName is the decoded Source. The DataSet content
+      (MG 8.3.2) is checked with the Health schema in C-025/C-026.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-004
+    title: "B1.1.2: Pub Health of all assets, self-initialized"
+    expected: valid
+    reqs: [REQ-MSG-005, REQ-MSG-006, REQ-MSG-015, REQ-MSG-016, REQ-MSG-024, REQ-MSG-031]
+    origin: {kind: guideline, ref: MG B1.1.2}
+    status: draft
+    notes: >-
+      Topic without Source: one DataSetMessage per asset; here only the
+      application itself. Self-initialized publication, so ReplyTo is empty.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 58,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "MAINTENANCE_REQUIRED_4",
+              "HealthScore": 55,
+              "Details": [
+                {
+                  "Health": "MAINTENANCE_REQUIRED_4",
+                  "DiagnosticCode": "M-102",
+                  "Location": "Filter unit",
+                  "Description": "Filter cartridge nearly exhausted"
+                },
+                {
+                  "Health": "MAINTENANCE_REQUIRED_4",
+                  "DiagnosticCode": "M-215",
+                  "Location": "Pump 2",
+                  "Description": "Recommended operating hours for service nearly reached"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    original: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 58,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "MAINTENANCE_REQUIRED_4",
+              "HealthScore": 55,
+              "Details": [
+                {
+                  "Health": "MAINTENANCE_REQUIRED_4",
+                  "DiagnosticCode": "M-102",
+                  "Location": "Filter unit",
+                  "Description": "Filter cartridge nearly exhausted"
+                },
+                {
+                  "Health": "MAINTENANCE_REQUIRED_4",
+                  "DiagnosticCode": "M-215",
+                  "Location": "Pump 2",
+                  "Description": "Recommended operating hours for service nearly reached"
+                }
+              ]
+            }
+          },
+          {
+            //additional Health objects would be listed here if existing
+          },
+          {
+            //in case too many Health objacts are existing, a pagination object would point that out
+            //and further NetworkMessages with Health objects would be published under the same topic
+          }
+        ]
+      }
+    edits:
+      - target: "/Messages/2"
+        kind: removed
+        reason: "Placeholder object that only holds // comments (pagination hint), no JSON; pagination is shown by V-PAY-006."
+      - target: "/Messages/1"
+        kind: removed
+        reason: "Placeholder object that only holds a // comment (further Health objects), no JSON."
+
+  - id: V-PAY-005
+    title: "B1.1.11: Get MAM of all assets with PaginationRequest"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-MSG-019]
+    origin: {kind: guideline, ref: MG B1.1.11}
+    status: draft
+    notes: >-
+      The helper DataSet PaginationRequest uses DataSetWriterId 1, WriterGroupName
+      "PaginationRequest" and the Identification Link of the sender as
+      DataSetWriterName. The NetworkMessage keeps the DataSetClassId of MAM (REQ-
+      MSG-011).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 1,
+            "WriterGroupName": "PaginationRequest",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "PerPage": 25,
+              "Page": 1
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-006
+    title: "B1.1.11: Pub MAM of all assets with Pagination"
+    expected: valid
+    reqs: [REQ-MSG-005, REQ-MSG-015, REQ-MSG-019, REQ-MSG-020, REQ-MSG-024]
+    origin: {kind: guideline, ref: MG B1.1.11}
+    status: draft
+    notes: >-
+      Two MAM DataSetMessages (application and one device, WriterGroupName "" as
+      MAM has no Filter) and the helper DataSet Pagination (DataSetWriterId 2).
+      The MAM content (MG 8.3.1) is checked with the MAM schema in C-025/C-026.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          },
+          {
+            "DataSetWriterId": 4798,
+            "WriterGroupName": "",
+            "DataSetWriterName": "groe.mca/DeviceModelB/AC33.447/20443",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "GROE"
+              },
+              "ManufacturerUri": "groe.mca",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "DeviceModelB"
+              },
+              "ProductCode": "AC33.447",
+              "HardwareRevision": "1.1",
+              "SoftwareRevision": "2.4.1",
+              "DeviceRevision": "4",
+              "DeviceManual": "",
+              "DeviceClass": "",
+              "SerialNumber": "20443",
+              "ProductInstanceUri": "groe.mca/DeviceModelB/AC33.447/20443",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Device Model B measurement unit"
+              }
+            }
+          },
+          {
+            "DataSetWriterId": 2,
+            "WriterGroupName": "Pagination",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TotalCount": 2,
+              "PerPage": 25,
+              "Page": 1,
+              "HasNext": false,
+              "PaginationId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-007
+    title: "B1.1.12: Get MAM of all assets with Locale"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-MSG-019]
+    origin: {kind: guideline, ref: MG B1.1.12}
+    status: draft
+    notes: >-
+      The helper DataSet Locale uses DataSetWriterId 3 and WriterGroupName
+      "Locale".
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 3,
+            "WriterGroupName": "Locale",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "Locale": "de-DE"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-008
+    title: "B1.2.1: Call NewDataSetWriterId"
+    expected: valid
+    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-006, REQ-ACT-010, REQ-ACT-019, REQ-ACT-020, REQ-ACT-021]
+    origin: {kind: guideline, ref: MG B1.2.1}
+    status: draft
+    notes: >-
+      PublisherId is the Responder (topic), RequestorId and MessageId are those of
+      the IT connector; ResponseAddress is the Reply topic of the Call topic.
+      Without CorrelationData.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-009
+    title: "B1.2.1: Reply NewDataSetWriterId"
+    expected: valid
+    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-012, REQ-ACT-014, REQ-ACT-015, REQ-ACT-019, REQ-ACT-020, REQ-ACT-022]
+    origin: {kind: guideline, ref: MG B1.2.1}
+    status: draft
+    notes: >-
+      Final response (ActionState 2) to V-PAY-008 with Status {} (Good,
+      CompactEncoding) and the new DataSetWriterId 57211, valid for 10 s.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }

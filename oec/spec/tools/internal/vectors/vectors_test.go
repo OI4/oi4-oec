@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/OI4/oec/spec/tools/internal/guideline"
 	"github.com/OI4/oec/spec/tools/internal/topic"
 )
 
@@ -25,7 +26,7 @@ func TestSpecVectors(t *testing.T) {
 		t.Fatal(errs)
 	}
 	n := Count(files)
-	for _, k := range []string{"topic", "identification-link", "dnp-encoding", "oi4identifier"} {
+	for _, k := range []string{"topic", "identification-link", "dnp-encoding", "oi4identifier", "payload"} {
 		if n[k] == 0 {
 			t.Errorf("no vectors of kind %s", k)
 		}
@@ -117,3 +118,89 @@ func TestCheckDetectsMismatches(t *testing.T) {
 		t.Errorf("expected duplicate id and baseline errors, got %v", errs)
 	}
 }
+
+func TestCheckPayload(t *testing.T) {
+	ts, err := topic.Load(specDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const (
+		appID = "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+		pub   = "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345"
+	)
+	tp := "Oi4v2/OTConnector/" + appID + "/Pub/Health"
+	msg := `{"MessageId": "1-` + pub + `", "MessageType": "ua-data", "PublisherId": "` + pub + `",
+  "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb", "ReplyTo": "",
+  "Messages": [{"DataSetWriterId": 10, "WriterGroupName": "", "DataSetWriterName": "x.com/a", "Payload": {}}]}`
+	orig := strings.Replace(msg, `"Payload": {}}]`, `"Payload": {}}, {
+    // more
+  }]`, 1)
+	good := Vector{
+		ID: "V-PAY-001", Title: "t", Expected: "valid", Reqs: []string{"REQ-MSG-002"},
+		Origin: Origin{Kind: "guideline", Ref: "MG B1"}, Status: "draft", Topic: tp, Payload: msg,
+	}
+	sections := map[string]string{"MG B1": "Topic " + tp + " Example " + guidelineText(msg) + " Other " + guidelineText(orig)}
+	opt := Options{Baseline: "abc1234", Reqs: map[string]bool{"REQ-MSG-002": true, "REQ-MSG-020": true}, Sections: sections}
+	run := func(v Vector) []error {
+		return Check([]File{{Kind: "payload", Baseline: "abc1234", Path: "x.yaml", Vectors: []Vector{v}}}, ts, opt)
+	}
+	if errs := run(good); len(errs) > 0 {
+		t.Fatalf("good vector rejected: %v", errs)
+	}
+	edited := good
+	edited.Payload, edited.Original = msg, orig
+	edited.Edits = []Edit{{Target: "/Messages/1", Kind: "removed", Reason: "comment only"}}
+	if errs := run(edited); len(errs) > 0 {
+		t.Fatalf("edited vector rejected: %v", errs)
+	}
+	cases := []struct {
+		name, want string
+		mutate     func(v *Vector)
+	}{
+		{"payload not verbatim", "payload not found verbatim", func(v *Vector) { v.Payload = strings.Replace(v.Payload, `"ReplyTo": ""`, `"ReplyTo": "1-x"`, 1) }},
+		{"topic not verbatim", "topic \"Oi4v2/OTConnector/", func(v *Vector) { v.Topic = "Oi4v2/OTConnector/" + appID + "/Get/Health" }},
+		{"invalid topic", "payload vectors need a valid topic", func(v *Vector) { v.Topic = "Oi4v2/Bogus" }},
+		{"no json", "no strict JSON", func(v *Vector) { v.Payload = `{"a": 1,}` }},
+		{"problems", "payload violates [REQ-MSG-020]", func(v *Vector) {
+			v.Payload = strings.Replace(v.Payload, `"DataSetWriterId": 10`, `"DataSetWriterId": 5`, 1)
+		}},
+		{"violates", "vector says [REQ-MSG-002]", func(v *Vector) {
+			v.Expected, v.Reqs, v.Violates, v.Reason = "invalid", nil, []string{"REQ-MSG-002"}, "wrong"
+			v.Origin = Origin{Kind: "constructed"}
+			v.Payload = strings.Replace(v.Payload, `"DataSetWriterId": 10`, `"DataSetWriterId": 5`, 1)
+		}},
+		{"original without pointer edit", "original is required exactly", func(v *Vector) {
+			v.Original = orig
+			v.Edits = []Edit{{Target: "topic", Kind: "completed", Reason: "no topic"}}
+		}},
+		{"pointer edit without original", "original is required exactly", func(v *Vector) {
+			v.Edits = []Edit{{Target: "/Messages/0", Kind: "corrected", Reason: "x"}}
+		}},
+		{"removed target", "does not exist in the original", func(v *Vector) {
+			v.Original = orig
+			v.Edits = []Edit{{Target: "/Messages/2", Kind: "removed", Reason: "x"}}
+		}},
+		{"corrected target", "does not exist in the payload", func(v *Vector) {
+			v.Original = orig
+			v.Edits = []Edit{{Target: "/Messages/1", Kind: "corrected", Reason: "x"}}
+		}},
+		{"original equals payload", "payload equals the original", func(v *Vector) {
+			v.Original = msg
+			v.Edits = []Edit{{Target: "/Messages/0", Kind: "corrected", Reason: "x"}}
+		}},
+	}
+	for _, c := range cases {
+		v := good
+		c.mutate(&v)
+		found := false
+		errs := run(v)
+		for _, e := range errs {
+			found = found || strings.Contains(e.Error(), c.want)
+		}
+		if !found {
+			t.Errorf("%s: expected an error containing %q, got %v", c.name, c.want, errs)
+		}
+	}
+}
+
+func guidelineText(s string) string { return guideline.NormalizeForCompare(s) }

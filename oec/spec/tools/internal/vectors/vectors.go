@@ -1,7 +1,7 @@
 // Package vectors loads the language-neutral test vectors in oec/spec/vectors
 // and recomputes every expected result with the reference checks: the topic
 // grammar (ABNF interpreter + generated regex), the Identification Link rules,
-// the dnp-encoding and the Oi4Identifier construction.
+// the dnp-encoding, the Oi4Identifier construction and the payload envelope.
 package vectors
 
 import (
@@ -76,6 +76,19 @@ type Vector struct {
 	ProductCode     string `json:"product_code,omitempty"`
 	SerialNumber    string `json:"serial_number,omitempty"`
 	Oi4Identifier   string `json:"oi4identifier,omitempty"`
+
+	Payload  string `json:"payload,omitempty"`
+	Original string `json:"original,omitempty"`
+	Edits    []Edit `json:"edits,omitempty"`
+}
+
+// Edit records one change of a payload vector against its guideline
+// example (ADR-0018 amendments C-013 and C-023).
+type Edit struct {
+	Target string   `json:"target"` // "topic" or a JSON Pointer
+	Kind   string   `json:"kind"`
+	Reason string   `json:"reason"`
+	SF     []string `json:"sf,omitempty"`
 }
 
 // File is one vector file.
@@ -159,6 +172,12 @@ func Check(files []File, ts *topic.Spec, opt Options) []error {
 						add("requirement %s does not exist", r)
 					}
 				}
+			}
+			if f.Kind == "payload" {
+				if err := checkPayload(ts, v, opt.Sections, add); err != nil {
+					return append(errs, fmt.Errorf("%s: %w", at, err))
+				}
+				continue
 			}
 			checkOrigin(f.Kind, v, opt.Sections, add)
 			switch f.Kind {

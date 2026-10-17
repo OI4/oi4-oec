@@ -150,8 +150,8 @@ func cmdLint(args []string) error {
 	}
 	fmt.Printf("ok: %d area file(s), %d requirement(s), %d informative item(s)\n", len(s.Files), len(s.Requirements()), len(s.Informative.Items))
 	n := vectors.Count(vfiles)
-	fmt.Printf("ok: %s: %d combination(s); vectors: topic=%d identification-link=%d dnp-encoding=%d oi4identifier=%d\n",
-		topic.MatrixFile, len(ts.Matrix.Combinations), n["topic"], n["identification-link"], n["dnp-encoding"], n["oi4identifier"])
+	fmt.Printf("ok: %s: %d combination(s); vectors: topic=%d identification-link=%d dnp-encoding=%d oi4identifier=%d payload=%d\n",
+		topic.MatrixFile, len(ts.Matrix.Combinations), n["topic"], n["identification-link"], n["dnp-encoding"], n["oi4identifier"], n["payload"])
 	return nil
 }
 
