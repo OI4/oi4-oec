@@ -1,7 +1,8 @@
 // Command spectool maintains the OEC v2 spec baseline in oec/spec (ADR-0018).
 //
 //	spectool lint      [-spec DIR] [-guideline DIR]   check catalog, matrix, topic grammar and vectors
-//	spectool render    [-spec DIR] [-check]           generate requirements/view/*.md
+//	spectool render    [-spec DIR] [-check]           generate requirements/view/*.md,
+//	                                                  matrix/view/*.md and vectors/view/*.md
 //	spectool inventory [-spec DIR] [-guideline DIR] [-rev REV] [-check]
 //	                                                  extract normative-statement candidates
 //	spectool coverage  [-spec DIR] [-check]           generate coverage/report.md
@@ -15,6 +16,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -241,15 +243,28 @@ func cmdRender(args []string) error {
 		return err
 	}
 	views := render.Views(s)
-	existing, _ := filepath.Glob(c.path(catalog.ViewDir + "/*.md"))
-	for _, p := range existing {
-		rel := catalog.ViewDir + "/" + filepath.Base(p)
-		if _, ok := views[rel]; !ok {
-			if *check {
-				return fmt.Errorf("%s is stale (no catalog file)", rel)
-			}
-			if err := os.Remove(p); err != nil {
-				return err
+	ts, err := topic.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	vfiles, err := vectors.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	for rel, content := range render.ReviewViews(s, ts, vfiles) {
+		views[rel] = content
+	}
+	for _, dir := range []string{catalog.ViewDir, path.Dir(render.MatrixView), render.VectorViewDir} {
+		existing, _ := filepath.Glob(c.path(dir + "/*.md"))
+		for _, p := range existing {
+			rel := dir + "/" + filepath.Base(p)
+			if _, ok := views[rel]; !ok {
+				if *check {
+					return fmt.Errorf("%s is stale (no source file)", rel)
+				}
+				if err := os.Remove(p); err != nil {
+					return err
+				}
 			}
 		}
 	}

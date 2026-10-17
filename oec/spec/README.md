@@ -14,7 +14,9 @@ Machine-readable baseline derived **only** from the OEC guideline (Messaging Gui
 | `topic/topic.abnf` | formal topic grammar (RFC 5234 + RFC 7405), one rule per allowed Method × Resource form | hand |
 | `topic/topic-patterns.json` | anchored regexes generated from `topic.abnf` (portable dialect, see below) | `spectool topic` |
 | `matrix/method-resource.yaml` (+ schema) | Method × Resource matrix: allowed, `Source`/`Filter` required/optional/forbidden, ABNF rule, guideline refs | hand |
+| `matrix/view/method-resource.md` | Markdown view of the matrix: overview grid, topic form per combination, linked vectors – PO review artifact | `spectool render` |
 | `vectors/` (+ `vectors.schema.json`) | language-neutral test vectors: `topic/` (golden from the guideline, constructed valid, invalid), `il/` (Identification Link, dnp-encoding, `Oi4Identifier`) | hand, checked by `spectool lint` |
+| `vectors/view/*.md` | Markdown view per vector file (overview table + one section per vector with decoded Identification Links and linked REQs) – PO review artifact | `spectool render` |
 | `tools/` | Go module with `spectool` | – |
 
 ## Citing requirements
@@ -44,7 +46,7 @@ Requires Go (the module pins its toolchain; `GOTOOLCHAIN=auto` downloads it). Ru
 ```sh
 go run ./cmd/spectool inventory -spec ..   # regenerate coverage/inventory.yaml from the guideline HEAD (-rev to set the baseline)
 go run ./cmd/spectool lint -spec ..        # schema + rules; checks refs and quotes against the guideline
-go run ./cmd/spectool render -spec ..      # regenerate requirements/view/*.md
+go run ./cmd/spectool render -spec ..      # regenerate requirements/view/*.md, matrix/view/*.md, vectors/view/*.md
 go run ./cmd/spectool coverage -spec ..    # regenerate coverage/report.md
 go run ./cmd/spectool topic -spec ..       # regenerate topic/topic-patterns.json
 go run ./cmd/spectool topic -spec .. 'Oi4v2/…'   # analyze topics (grammar rule, Source/Filter, IL check, warnings)
@@ -68,6 +70,6 @@ One file per kind, `kind` + `baseline` + `description` + `vectors[]` (`vectors.s
 1. `areas.yaml` assigns guideline sections to the area (longest prefix wins).
 2. Every inventory item of these sections is either mapped by a requirement (`inventory`) or listed in `coverage/informative.yaml` with a reason.
 3. `lint`, `render`, `coverage` pass; the area status becomes `drafted`.
-4. The PO reviews `requirements/view/<area>.md`; confirmed entries and the area become `reviewed`.
+4. The PO reviews `requirements/view/<area>.md` (and, for areas with a grammar or vectors, `matrix/view/method-resource.md` and `vectors/view/*.md`); confirmed entries and the area become `reviewed`.
 
 After a guideline change: regenerate the inventory with the new baseline, update `baseline` in all files (always quoted, e.g. `baseline: "2452494"` – an all-digit short hash is otherwise parsed as a YAML number), and remap the keys that `lint` reports as missing.
