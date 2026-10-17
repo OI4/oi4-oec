@@ -109,3 +109,12 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `39be075` – MG 4.3.1: the `ManufacturerUri` form keeps its "must".
   - `5dedfd5` – findings register sync.
 - SF-041 is decided but its guideline text is not changed yet (not requested in C-020).
+
+## Amendment C-021 (2026-10-17, guideline baseline `2cf0d70`)
+
+- The baseline is now `2cf0d70` on branch `feature/spec-findings`. Implemented by the agent on PO request (local commits):
+  - `61a3182` – SF-041 (a)–(c): MG 7 and MG 9 (only the topic forms of MG 9.1.x/9.2.x are allowed), MG 9.1.5 (`Pub` `Metadata` with `Source` and `Filter`), MG 7.4, MG 8.2.16, MG 9.2.1 (`Call`/`Reply` with optional `Source`, no `Filter`).
+  - `d4a7560` – SF-041 (d)–(g): MG 7.7 (`<ResourceType>`/`<Tag>` of `PublicationList`/`SubscriptionList`), notes in MG 8.3.8, 9.1.8, 9.1.9, MG B1.1.8 (Set example `…/Data/oee`, valid `Mode`), B1.1.8/B1.1.9 templates, typo in MG 9.1.10.
+  - `2cf0d70` – findings register: SF-041 resolved, new SF-044 (open).
+- All spec findings SF-001 … 043 are resolved; SF-044 is open with a proposed interpretation.
+

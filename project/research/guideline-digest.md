@@ -1,10 +1,10 @@
-# Guideline digest (v2.0, baseline `5dedfd5`)
+# Guideline digest (v2.0, baseline `2cf0d70`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
 - **RIG**: OEC Runtime & Infrastructure Guideline, `docs/infrastructure-guideline/`
 
-It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 039 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `de852d6` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`, `5cb109e`) are in the git history of this file.
+It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 043 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `de852d6` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../../oi4-oec-documentation/findings/SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`, `5cb109e`) are in the git history of this file.
 
 ## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`, 017 with `f5d69d8`/`7677161`)
 
@@ -159,7 +159,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
   | Data / Metadata | `<Tag>` |
   | Config | `<Context.Name>` |
   | Event | `<EventCategory>/<EventLevel>` |
-  | PublicationList / SubscriptionList | `<ResourceType>[/<Tag>]` |
+  | PublicationList / SubscriptionList | `<ResourceType>[/<Tag>]`; `<Tag>` = complete Filter of that resource, only for Data, Metadata, Config, Event (e.g. `Data/oee`, `Event/Syslog/Notice`) |
   | MAM, Health, Profile, ReferenceDesignation | none |
 
 - **Event levels:**
@@ -283,18 +283,20 @@ No `PublisherId` at DataSetMessage level.
 | Health | ✓ | ✓ | | | `[/<Source>]` |
 | Config | ✓ | ✓ | ✓ (Source+Filter) | | `[/<Source>[/<Context.Name>]]` |
 | Data | ✓ | ✓ | ✓ (Source+Tag) | | `[/<Source>[/<Tag>]]` |
-| Metadata | ✓ | ✓ (Source+Tag) | ✓ (Source+Tag) | | `/<Source>/<Tag>` |
+| Metadata | ✓ (Source+Tag) | ✓ (Source+Tag) | ✓ (Source+Tag) | | `/<Source>/<Tag>` |
 | Event | ✓ only | | | | `/<Source>/<Category>/<Level>` |
 | Profile | ✓ | ✓ | | | `[/<Source>]` |
 | PublicationList | ✓ | ✓ | ✓ (Source+Filter) | | `[/<Source>[/<ResourceType>[/<Tag>]]]` |
 | SubscriptionList | ✓ | ✓ | ✓ | ✓ (Source+Filter) | `[/<Source>[/<ResourceType>[/<Tag>]]]` |
 | ReferenceDesignation | ✓ | ✓ | ✓ (Source) | ✓ (Source) | `[/<Source>]` |
 
+Only these forms (and the Action forms below) are allowed; any other topic form is invalid (MG 7, MG 9; SF-041).
+
 - **Get:** the request is a `ua-data` message with the requested resource's `DataSetClassId` and an empty `Messages`, or only PaginationRequest/Locale (helpers identified by their reserved DSWIDs). The answer goes to the matching `Pub` topic with `ReplyTo` = request `MessageId`. A Get without Source returns all assets of the app (paginated if needed).
 - **Set / Del:** answered by `Pub/Event/<Source>/Status/<Level>` – must from Level 2 on, should at Level 1 (MG 7.4, 9.1; SF-037 amended C-016) – with `ReplyTo` = request `MessageId` (must, MG 8.2.1). After a successful Set, the new state must be published (MG 9.1.x).
 - **Actions:**
   - Request: `Oi4v2/<ST>/<AppId>/Call/<Service>[/<Source>]`.
-  - Response: `.../Reply/<Service>[/<Source>]`.
+  - Response: `.../Reply/<Service>[/<Source>]` (= the `Call` topic with the Method swapped; no `Filter`; the optional `Source` is the asset the Action refers to).
   - Correlation via `RequestId` and `CorrelationData`.
 - **Health:** must be published on start, on change and every 60 s (MG 7.5.1, keyword since SF-035).
 
