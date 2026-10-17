@@ -8,26 +8,26 @@ Guideline baseline: `2cf0d70`. Source of truth: the YAML files in `oec/spec/requ
 | [CMP](cmp.md) | Compliance domains and levels | C-014 | reviewed | 45 | MG index, MG preface, MG appendix-a, MG 1, RIG index, RIG appendix-a, RIG 1 |
 | [IL](il.md) | Identification link (dnp encoding) | C-018 | reviewed | 34 | MG 4, MG A3 |
 | [TOP](top.md) | Topic structure and namespace elements | C-018 | reviewed | 27 | MG 7 |
-| MSG | Payload format and OPC UA PubSub objects | C-021 | planned | – | MG 8, MG A2 |
-| ACT | Actions (Call/Reply) and DataSetWriterId allocation | C-021 | planned | – | MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2 |
-| MQTT | General requirements on MQTT | C-022 | planned | – | MG 6 |
-| LIFE | Birth, life and will messages | C-022 | planned | – | MG 6.3.3, MG 6.3.4, MG 6.3.5 |
-| RES-MAM | Resource MAM (Master Asset Model) | C-023 | planned | – | MG 5, MG 8.3.1, MG 9.1.1 |
-| RES-HEALTH | Resource Health | C-023 | planned | – | MG 8.3.2, MG 9.1.2 |
-| RES-PROFILE | Resource Profile | C-023 | planned | – | MG 8.3.7, MG 9.1.7 |
-| RES-PUBLIST | Resource PublicationList | C-023 | planned | – | MG 8.3.8, MG 9.1.8 |
-| RES-REFDES | Resource ReferenceDesignation | C-023 | planned | – | MG 8.3.10, MG 9.1.10 |
-| PAG | Pagination | C-023 | planned | – | MG 8.3.11 |
-| LOC | Locale | C-023 | planned | – | MG 8.3.12 |
-| RES-CONFIG | Resource Config | C-024 | planned | – | MG 8.3.3, MG 9.1.3 |
-| RES-DATA | Resource Data | C-024 | planned | – | MG 8.3.4, MG 9.1.4 |
-| RES-META | Resource Metadata | C-024 | planned | – | MG 8.3.5, MG 9.1.5 |
-| RES-EVENT | Resource Event | C-024 | planned | – | MG 8.3.6, MG 9.1.6 |
-| RES-SUBLIST | Resource SubscriptionList | C-024 | planned | – | MG 8.3.9, MG 9.1.9 |
-| BUS | General Message Bus communication | C-024 | planned | – | MG 9 |
-| CNT | Container environment | C-025 | planned | – | RIG 2, RIG 4 |
-| PLT | OEC platform requirements | C-025 | planned | – | RIG 5 |
-| APP | Requirements on an application (runtime) | C-025 | planned | – | RIG 5.2 |
-| LIC | Legal requirements and software licenses | C-025 | planned | – | RIG 5.3 |
-| REG | OEC Registry | C-025 | planned | – | MG A1 |
-| GEN | Introductory and general chapters, cyber security, glossaries | C-025 | planned | – | MG 2, MG 3, MG A4, RIG 3, RIG A1 |
+| MSG | Payload format and OPC UA PubSub objects | C-022 | planned | – | MG 8, MG A2 |
+| ACT | Actions (Call/Reply) and DataSetWriterId allocation | C-022 | planned | – | MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2 |
+| MQTT | General requirements on MQTT | C-023 | planned | – | MG 6 |
+| LIFE | Birth, life and will messages | C-023 | planned | – | MG 6.3.3, MG 6.3.4, MG 6.3.5 |
+| RES-MAM | Resource MAM (Master Asset Model) | C-024 | planned | – | MG 5, MG 8.3.1, MG 9.1.1 |
+| RES-HEALTH | Resource Health | C-024 | planned | – | MG 8.3.2, MG 9.1.2 |
+| RES-PROFILE | Resource Profile | C-024 | planned | – | MG 8.3.7, MG 9.1.7 |
+| RES-PUBLIST | Resource PublicationList | C-024 | planned | – | MG 8.3.8, MG 9.1.8 |
+| RES-REFDES | Resource ReferenceDesignation | C-024 | planned | – | MG 8.3.10, MG 9.1.10 |
+| PAG | Pagination | C-024 | planned | – | MG 8.3.11 |
+| LOC | Locale | C-024 | planned | – | MG 8.3.12 |
+| RES-CONFIG | Resource Config | C-025 | planned | – | MG 8.3.3, MG 9.1.3 |
+| RES-DATA | Resource Data | C-025 | planned | – | MG 8.3.4, MG 9.1.4 |
+| RES-META | Resource Metadata | C-025 | planned | – | MG 8.3.5, MG 9.1.5 |
+| RES-EVENT | Resource Event | C-025 | planned | – | MG 8.3.6, MG 9.1.6 |
+| RES-SUBLIST | Resource SubscriptionList | C-025 | planned | – | MG 8.3.9, MG 9.1.9 |
+| BUS | General Message Bus communication | C-025 | planned | – | MG 9 |
+| CNT | Container environment | C-026 | planned | – | RIG 2, RIG 4 |
+| PLT | OEC platform requirements | C-026 | planned | – | RIG 5 |
+| APP | Requirements on an application (runtime) | C-026 | planned | – | RIG 5.2 |
+| LIC | Legal requirements and software licenses | C-026 | planned | – | RIG 5.3 |
+| REG | OEC Registry | C-026 | planned | – | MG A1 |
+| GEN | Introductory and general chapters, cyber security, glossaries | C-026 | planned | – | MG 2, MG 3, MG A4, RIG 3, RIG A1 |
