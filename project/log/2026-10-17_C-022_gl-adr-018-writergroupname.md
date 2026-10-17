@@ -67,6 +67,14 @@ The PO accepted the offer to render the matrix and the vectors like `requirement
 - Code: `oec/spec/tools/internal/render/review.go` (+ tests), `cmd/spectool/main.go` (render loads matrix and vectors, prunes stale views). README and ADR-0018 (amendment C-022) updated.
 - Checks: `go vet`, `go test -count=1 ./...`, `lint`, `render`/`coverage`/`topic`/`inventory -check` ok; 1014 relative links/anchors in all views, 0 broken.
 
+## PO review of the matrix and the vectors (2026-10-17)
+
+The PO confirmed the views ("passt für mich") and, asked whether this is the review release, answered "Ja, gebe ich so frei".
+
+- All 203 vectors `status: draft` → `reviewed` (G-3.9; generator and header comment updated), views re-rendered (draft 0, reviewed 203).
+- `matrix/method-resource.yaml`: header records the review of the topic columns; the payload columns (C-026) get their own review.
+- `lint`, `render`/`coverage`/`topic -check`, `go test` ok.
+
 ## Decisions / assumptions
 
 - SF-044 recorded as guideline ADR GL-ADR-018 (not as a project ADR), implemented in the same cycle (agent assumption, reported to the PO).
@@ -74,4 +82,4 @@ The PO accepted the offer to render the matrix and the vectors like `requirement
 
 ## Next
 
-C-023 – areas `MSG` + `ACT`, payload columns of the matrix. PO review of the matrix and the vectors is still open (views: `oec/spec/matrix/view/method-resource.md`, `oec/spec/vectors/view/README.md`).
+C-023 – areas `MSG` + `ACT`. No PO input open.
