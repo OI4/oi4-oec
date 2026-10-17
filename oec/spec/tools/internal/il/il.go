@@ -1,8 +1,8 @@
 // Package il is the reference implementation of the Identification Link
 // rules used to check the vectors: MG 4.1 (validity), MG 4.2 (base64url
 // encoding in topics), MG A3 (dnp-encoding) and MG 4.3.1 (Oi4Identifier).
-// It encodes the proposed interpretations of SF-043 where the guideline is
-// not total. It is test tooling: SDK and D7 implement their own checks.
+// It follows the PO decisions on SF-043 (guideline text since C-020). It is
+// test tooling: SDK and D7 implement their own checks.
 package il
 
 import (

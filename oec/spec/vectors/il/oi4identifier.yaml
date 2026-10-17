@@ -1,7 +1,7 @@
 # Test vectors of kind oi4identifier (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: oi4identifier
-baseline: "ea80271"
+baseline: "5dedfd5"
 description: >-
   Oi4Identifier vectors (MG 4.3.1, MG A3): construction from ManufacturerUri,
   Model, ProductCode and SerialNumber, nd for missing values and the checks of
@@ -57,7 +57,7 @@ vectors:
     product_code: "ABC*33<4"
     serial_number: "20123.4"
     oi4identifier: "example.com/ABC,40home/ABC,2A33,3C4/20123.4"
-    notes: "Interpretation SF-043 (d)."
+    notes: "PO decision SF-043 (d) (C-020)."
 
   - id: V-OID-005
     title: "Missing Model and ProductCode are nd"
@@ -82,7 +82,7 @@ vectors:
     product_code: "P"
     serial_number: "S"
     oi4identifier: "id.provider.com/M/P/S"
-    notes: "Interpretation SF-043 (c)."
+    notes: "PO decision SF-043 (c) (C-020)."
 
   - id: V-OID-007
     title: "Non-ASCII serial number"
@@ -95,7 +95,7 @@ vectors:
     product_code: "P-1"
     serial_number: "Nr. 5"
     oi4identifier: "provider.com/Ger,C3,A4t/P-1/Nr.,205"
-    notes: "Interpretation SF-043 (a)."
+    notes: "PO decision SF-043 (a) (C-020)."
 
   - id: V-OID-101
     title: "ManufacturerUri with www"

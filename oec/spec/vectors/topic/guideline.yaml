@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "ea80271"
+baseline: "5dedfd5"
 description: >-
   Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1).
   Vectors that differ from the guideline text record the original and the spec
@@ -173,7 +173,7 @@ vectors:
     title: "MG B1.1.3: Get Config with Source and Filter Network settings"
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
-    origin: {kind: guideline, ref: MG B1.1.3, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network%20settings", sf: [SF-040]}
+    origin: {kind: guideline, ref: MG B1.1.3}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
     parse:
@@ -188,7 +188,6 @@ vectors:
       filter: "Network settings"
       filter_values: ["Network settings"]
     warnings: [whitespace]
-    notes: "SF-040 (d): the guideline example percent-encodes the space; only +, #, / and % are encoded. The original form is an invalid vector in invalid.yaml."
 
   - id: V-TOP-012
     title: "MG B1.1.3: Get Config with Source"
@@ -226,7 +225,7 @@ vectors:
     title: "MG B1.1.3: Pub Config with Source and Filter Network settings"
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
-    origin: {kind: guideline, ref: MG B1.1.3, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network%20settings", sf: [SF-040]}
+    origin: {kind: guideline, ref: MG B1.1.3}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
     parse:
@@ -241,7 +240,6 @@ vectors:
       filter: "Network settings"
       filter_values: ["Network settings"]
     warnings: [whitespace]
-    notes: "SF-040 (d): the guideline example percent-encodes the space; only +, #, / and % are encoded. The original form is an invalid vector in invalid.yaml."
 
   - id: V-TOP-015
     title: "MG B1.1.3: Pub Config with Source"
@@ -279,7 +277,7 @@ vectors:
     title: "MG B1.1.3: Set Config with Source and Filter Network settings"
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
-    origin: {kind: guideline, ref: MG B1.1.3, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network%20settings", sf: [SF-040]}
+    origin: {kind: guideline, ref: MG B1.1.3}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
     parse:
@@ -294,7 +292,6 @@ vectors:
       filter: "Network settings"
       filter_values: ["Network settings"]
     warnings: [whitespace]
-    notes: "SF-040 (d): the guideline example percent-encodes the space; only +, #, / and % are encoded. The original form is an invalid vector in invalid.yaml."
 
   - id: V-TOP-018
     title: "MG B1.1.3: Pub Event with Source and Filter Status/Good"
@@ -319,7 +316,7 @@ vectors:
     title: "MG B1.1.3: Get Config with Source and Filter Overall device settings"
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
-    origin: {kind: guideline, ref: MG B1.1.3, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall%20device%20settings", sf: [SF-040]}
+    origin: {kind: guideline, ref: MG B1.1.3}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
     parse:
@@ -334,13 +331,12 @@ vectors:
       filter: "Overall device settings"
       filter_values: ["Overall device settings"]
     warnings: [whitespace]
-    notes: "SF-040 (d): the guideline example percent-encodes the space; only +, #, / and % are encoded. The original form is an invalid vector in invalid.yaml."
 
   - id: V-TOP-020
     title: "MG B1.1.3: Pub Config with Source and Filter Overall device settings"
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
-    origin: {kind: guideline, ref: MG B1.1.3, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall%20device%20settings", sf: [SF-040]}
+    origin: {kind: guideline, ref: MG B1.1.3}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
     parse:
@@ -355,13 +351,12 @@ vectors:
       filter: "Overall device settings"
       filter_values: ["Overall device settings"]
     warnings: [whitespace]
-    notes: "SF-040 (d): the guideline example percent-encodes the space; only +, #, / and % are encoded. The original form is an invalid vector in invalid.yaml."
 
   - id: V-TOP-021
     title: "MG B1.1.3: Set Config with Source and Filter Overall device settings"
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
-    origin: {kind: guideline, ref: MG B1.1.3, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall%20device%20settings", sf: [SF-040]}
+    origin: {kind: guideline, ref: MG B1.1.3}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
     parse:
@@ -376,7 +371,6 @@ vectors:
       filter: "Overall device settings"
       filter_values: ["Overall device settings"]
     warnings: [whitespace]
-    notes: "SF-040 (d): the guideline example percent-encodes the space; only +, #, / and % are encoded. The original form is an invalid vector in invalid.yaml."
 
   - id: V-TOP-022
     title: "MG B1.1.4: Get Data with Source and Filter oee"
@@ -764,7 +758,7 @@ vectors:
     title: "MG B1.1.8: Set PublicationList with Source and Filter Data/Network settings"
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
-    origin: {kind: guideline, ref: MG B1.1.8, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network%20settings", sf: [SF-040, SF-041]}
+    origin: {kind: guideline, ref: MG B1.1.8, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings", sf: [SF-041]}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/Network settings"
     parse:
@@ -779,7 +773,7 @@ vectors:
       filter: "Data/Network settings"
       filter_values: ["Data", "Network settings"]
     warnings: [whitespace]
-    notes: "SF-041 (e): the Filter of a PublicationList entry is <ResourceType>/<Tag>; SF-040 (d): no percent-encoding of the space."
+    notes: "SF-041 (e): the Filter of a PublicationList entry is <ResourceType>/<Tag> (decided, not yet changed in the guideline)."
 
   - id: V-TOP-045
     title: "MG B1.1.9: Get SubscriptionList with Source and Filter Data/oee"

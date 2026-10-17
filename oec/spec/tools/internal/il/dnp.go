@@ -8,9 +8,8 @@ import (
 
 // DnpEncode applies the dnp-encoding (MG A3): the unreserved characters
 // A-Z a-z 0-9 - . _ ~ are kept, every other octet of the UTF-8 encoding is
-// written as "," followed by two upper-case hex digits. Table 4 lists the
-// printable ASCII characters; extending the rule to all other octets is the
-// proposed interpretation of SF-043.
+// written as "," followed by two upper-case hex digits. Table 4 is the ASCII
+// excerpt of this rule (SF-043 a).
 func DnpEncode(s string) string {
 	var b strings.Builder
 	for _, c := range []byte(s) {
@@ -39,7 +38,7 @@ var domainRE = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-
 
 // CheckManufacturerURI checks a ManufacturerUri (MG 4.3.1): lower case,
 // a domain name without scheme, path and "www." (subdomains are allowed,
-// SF-043).
+// SF-043 c).
 func CheckManufacturerURI(s string) []Violation {
 	switch {
 	case s != strings.ToLower(s):

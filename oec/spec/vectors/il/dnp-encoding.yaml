@@ -1,7 +1,7 @@
 # Test vectors of kind dnp-encoding (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: dnp-encoding
-baseline: "ea80271"
+baseline: "5dedfd5"
 description: >-
   dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example,
   the character classes of Table 4 and the extension to all UTF-8 octets
@@ -133,7 +133,7 @@ vectors:
     status: draft
     input: "Gerät"
     output: "Ger,C3,A4t"
-    notes: "Interpretation SF-043 (a)."
+    notes: "PO decision SF-043 (a) (C-020)."
 
   - id: V-DNP-015
     title: "Control character"
@@ -143,4 +143,4 @@ vectors:
     status: draft
     input: "a\tb"
     output: "a,09b"
-    notes: "Interpretation SF-043 (a)."
+    notes: "PO decision SF-043 (a) (C-020)."

@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "ea80271"
+baseline: "5dedfd5"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -143,3 +143,5 @@ items:
     reason: Permission for broker operators to use the service name for access control; no requirement on a component (ACLs are area MQTT/RES-*).
   - key: MG-7.7-513c03ce
     reason: Purpose of the Filter element ("can be used"); the Filter rules are REQ-TOP-019 … REQ-TOP-023.
+  - key: MG-7.7-466159d5
+    reason: Rationale of the unique percent-encoding (MQTT compares topics character by character); the rule is REQ-TOP-019.

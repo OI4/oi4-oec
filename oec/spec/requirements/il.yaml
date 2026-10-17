@@ -3,7 +3,7 @@
 # catalog.schema.json). Reference checks: spectool package internal/il,
 # vectors in vectors/il/ and vectors/topic/.
 area: IL
-baseline: "ea80271"
+baseline: "5dedfd5"
 requirements:
   # --- Identification Link in general (MG 4) -------------------------------
   - id: REQ-IL-001
@@ -483,17 +483,17 @@ requirements:
       - ref: MG 4.3.1
         text: Uppercase characters must not be used.
     verification: [manual]
-    inventory: [MG-4.3.1-53d343d5, MG-4.3.1-cd8a517d, MG-4.3.1-fa2cffdc, MG-A3-db245536]
+    inventory: [MG-4.3.1-53d343d5, MG-4.3.1-cd8a517d, MG-4.3.1-fa2cffdc, MG-A3-4116b7ab]
     status: draft
-    notes: Conversion by the generator follows A3 Table 5 (Example.com → example.com); interpretation SF-043 (d), pending PO decision.
+    notes: Conversion by the generator per PO decision SF-043 (d) (C-020) – MG 4.3.1 note and A3 Table 5 (Example.com → example.com).
 
   - id: REQ-IL-024
     title: Form of the ManufacturerUri
     statement: >-
-      The ManufacturerUri is a lowercase internet domain name of the form
-      "<manufacturer>.<tld>" without scheme, port, path and without a leading
-      "www."; a subdomain of the manufacturer's domain (e.g. id.provider.com)
-      may be used.
+      The ManufacturerUri is a lowercase internet domain name without scheme,
+      port, path and without a leading "www.", typically of the form
+      "<manufacturer>.<tld>"; a subdomain of the manufacturer's domain (e.g.
+      id.provider.com) may be used.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -502,13 +502,15 @@ requirements:
     refs: [MG 4.3.1, SF-043]
     quotes:
       - ref: MG 4.3.1
-        text: Consequently, it must be of the form <manufacturer>.<tld>.
+        text: The ManufacturerUri must be the domain part of the manufacturer URL in lower case, where the scheme (e. g. https://), port and path as well as the third level domain <www.> are excluded.
+      - ref: MG 4.3.1
+        text: Typically, it is of the form <manufacturer>.<tld>; other subdomains may be used (see note below).
       - ref: MG 4.3.1
         text: A manufacturer may use subdomains of its internet domain for use as ManufacturerUri if it is considered necessary.
     verification: [manual]
-    inventory: [MG-4.3.1-d7220f09, MG-4.3.1-2a7cd5d3]
+    inventory: [MG-4.3.1-a4894201, MG-4.3.1-91913cd6, MG-4.3.1-2a7cd5d3]
     status: draft
-    notes: Interpretation SF-043 (c), pending PO decision; reference check il.CheckManufacturerURI.
+    notes: PO decision SF-043 (c) (C-020); reference check il.CheckManufacturerURI.
 
   - id: REQ-IL-025
     title: ManufacturerUri is a domain of the manufacturer
@@ -660,15 +662,17 @@ requirements:
     quotes:
       - ref: MG A3
         text: A comma-encoding mechanism is used to represent a data octet in a component when that octet's corresponding character is outside the allowed set or is being used as a delimiter of, or within, the component.
+      - ref: MG A3
+        text: This also applies to control characters and to all characters outside US-ASCII, which must not be used in an Identification Link either (e.g. the tabulator becomes ,09, the character ä with the UTF-8 octets C3 A4 becomes ,C3,A4).
     verification: [manual]
-    inventory: [MG-A3-ffe5198a]
+    inventory: [MG-A3-ffe5198a, MG-A3-d9344f53]
     status: draft
     notes: >-
       Defines how the encoding works when it is used; whether it is used is
       REQ-IL-033 (MAY, SF-043 (e), C-019). Table 4 of MG A3 is the ASCII
-      excerpt of this rule; control and non-ASCII characters per
-      interpretation SF-043 (a), pending PO decision. Reference implementation
-      il.DnpEncode; vectors V-DNP-….
+      excerpt of the general rule for all UTF-8 octets (PO decision SF-043
+      (a), (b), C-020). Reference implementation il.DnpEncode; vectors
+      V-DNP-….
 
   - id: REQ-IL-033
     title: dnp-encoding of Oi4Identifier elements is optional
@@ -698,3 +702,28 @@ requirements:
     inventory: [MG-4.3.1-dd8a2dac, MG-A3-fc6806cf, MG-A3-b8922139]
     status: draft
     notes: PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference implementation il.Oi4Identifier applies the dnp-encoding (identity for values without such characters); vectors V-OID-….
+
+  # --- ManufacturerUri and Identification Link (MG 4.3.1, C-020) -------------
+  - id: REQ-IL-034
+    title: ManufacturerUri corresponds to the Identification Link
+    statement: >-
+      The ManufacturerUri corresponds to the domain of the Identification Link
+      of the asset. In case of doubt, it is given without scheme and without
+      third level domain ("<manufacturer>.<tld>").
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application]
+    condition: The application generates an Oi4Identifier or provides a ManufacturerUri (e.g. in the MAM).
+    refs: [MG 4.3.1, MG 5, SF-043]
+    quotes:
+      - ref: MG 4.3.1
+        text: The ManufacturerUri should correspond to the domain of the Identification Link of the asset.
+    verification: [manual]
+    inventory: [MG-4.3.1-06757604]
+    status: draft
+    notes: >-
+      PO addition to SF-043 (C-020, 2026-10-17). The same rule for the MAM
+      property (MG 5 rule 3) is catalogued with area RES-MAM. Cannot be
+      checked mechanically: whether a domain belongs to the manufacturer is
+      not observable.
