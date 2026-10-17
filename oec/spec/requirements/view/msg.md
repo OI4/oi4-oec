@@ -172,7 +172,7 @@ The field Messages of a NetworkMessage is always a JSON array of DataSetMessage 
 
 **PublisherId is ServiceType and unencoded Identification Link**
 
-The PublisherId of a NetworkMessage and of a DataSetMetaData is "<ServiceType>/<IdentificationLink>" of the publishing application, i.e. the ServiceType and the decoded AppId of the topic the message is published on, with the Identification Link unencoded (REQ-IL-005).
+The PublisherId of a NetworkMessage and of a DataSetMetaData is "<ServiceType>/<IdentificationLink>" of the sending application, with the Identification Link unencoded (REQ-IL-005). For Pub it equals the ServiceType and the decoded AppId of the topic; for Get, Set and Del the topic contains the AppId of the addressed application (MG 7.3), so the PublisherId is that of the requesting application.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -184,6 +184,9 @@ The PublisherId of a NetworkMessage and of a DataSetMetaData is "<ServiceType>/<
 
 > String consisting of ServiceType (see 7.2 ServiceType Element) and the unencoded Identification Link of the application (see 4 The Identification Link and 7.3 AppId Element) - separated by a “/”.
 > — MG 8.2.1
+
+> For the methods Get, Set, and Del, the AppId of the destination that has to react to these methods must be chosen. For the Pub method, the AppId of the publisher of the data itself must be chosen.
+> — MG 7.3
 
 ## REQ-MSG-007
 
