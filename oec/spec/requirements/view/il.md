@@ -38,7 +38,7 @@ Guideline baseline: `2cf0d70` · Area status: reviewed · Sections: MG 4, MG A3
 | [REQ-IL-031](#req-il-031) | Existing Identification Link is not overwritten | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | manual | reviewed |
 | [REQ-IL-032](#req-il-032) | dnp-encoding | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-IL-033](#req-il-033) | dnp-encoding of Oi4Identifier elements is optional | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
-| [REQ-IL-034](#req-il-034) | ManufacturerUri corresponds to the Identification Link | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | draft |
+| [REQ-IL-034](#req-il-034) | ManufacturerUri corresponds to the Identification Link | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -716,7 +716,7 @@ The ManufacturerUri corresponds to the domain of the Identification Link of the 
 - Condition: The application generates an Oi4Identifier or provides a ManufacturerUri (e.g. in the MAM).
 - Refs: MG 4.3.1, MG 5, SF-043
 - Verification: manual
-- Status: draft
+- Status: reviewed
 - Inventory: MG-4.3.1-06757604
 
 > The ManufacturerUri should correspond to the domain of the Identification Link of the asset.

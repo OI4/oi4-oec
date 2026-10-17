@@ -721,7 +721,7 @@ requirements:
         text: The ManufacturerUri should correspond to the domain of the Identification Link of the asset.
     verification: [manual]
     inventory: [MG-4.3.1-06757604]
-    status: draft
+    status: reviewed
     notes: >-
       PO addition to SF-043 (C-020, 2026-10-17). The same rule for the MAM
       property (MG 5 rule 3) is catalogued with area RES-MAM. Cannot be

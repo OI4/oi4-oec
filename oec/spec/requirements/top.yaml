@@ -27,7 +27,7 @@ requirements:
         text: Each element in angle brackets forms exactly one topic level
     verification: [d7-validate]
     inventory: [MG-7-ddf5f8f2]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-004 (mandatory at all levels). The ABNF is the formal
       form of MG 7 – MG 7.7 and the PO decisions SF-040 … SF-042 (C-018);
@@ -50,7 +50,7 @@ requirements:
         text: All topics starting with the Namespace element shall be OI4 Alliance-conform.
     verification: [d7-validate, d7-monitor]
     inventory: [MG-7.1-37801eed]
-    status: draft
+    status: reviewed
 
   - id: REQ-TOP-003
     title: Other MQTT traffic does not use the namespace
@@ -67,7 +67,7 @@ requirements:
         text: Any other MQTT traffic shall not use this Namespace.
     verification: [d7-monitor]
     inventory: [MG-7.1-c51ac67c]
-    status: draft
+    status: reviewed
 
   - id: REQ-TOP-004
     title: Versions are not mixed
@@ -90,7 +90,7 @@ requirements:
         text: Messages of different versions shall not be mixed, i.e. a request received under Oi4 is answered under Oi4 and a request received under Oi4v2 is answered under Oi4v2.
     verification: [d7-test]
     inventory: [MG-7.1-1d42af54, MG-7.1-a9c4c6ad, MG-7.1-d026309b]
-    status: draft
+    status: reviewed
 
   # --- ServiceType (MG 7.2) -------------------------------------------------
   - id: REQ-TOP-005
@@ -113,7 +113,7 @@ requirements:
         text: Other values must not be used; a new ServiceType requires a new version of this guideline.
     verification: [d7-validate]
     inventory: [MG-7.2-709618ad, MG-7.2-75c0743e, MG-7.2-dcabe6af]
-    status: draft
+    status: reviewed
     notes: Closed set per PO decision SF-042 (a) (C-018), stated in the guideline since C-020.
 
   - id: REQ-TOP-006
@@ -134,7 +134,7 @@ requirements:
         text: For the Pub method, the ServiceType of the publisher of the data itself must be chosen.
     verification: [d7-monitor, d7-test]
     inventory: [MG-7.2-c2d6be07, MG-7.2-8106cf43]
-    status: draft
+    status: reviewed
     notes: Call follows from MG 7.4 (the AppId of a Call is the Responder).
 
   - id: REQ-TOP-007
@@ -173,7 +173,7 @@ requirements:
         text: The chosen ServiceType should represent the main task of the application.
     verification: [manual]
     inventory: [MG-7.2-ee3426ab]
-    status: draft
+    status: reviewed
 
   # --- AppId (MG 7.3) -------------------------------------------------------
   - id: REQ-TOP-009
@@ -191,7 +191,7 @@ requirements:
         text: The AppId must always be exactly one topic level.
     verification: [d7-validate]
     inventory: [MG-7.3-103d7028, MG-7.3-8549e733]
-    status: draft
+    status: reviewed
 
   - id: REQ-TOP-010
     title: AppId of the destination or the publisher
@@ -211,7 +211,7 @@ requirements:
         text: For the Pub method, the AppId of the publisher of the data itself must be chosen.
     verification: [d7-monitor, d7-test]
     inventory: [MG-7.3-f9f8809f, MG-7.3-080eef83]
-    status: draft
+    status: reviewed
 
   # --- Method (MG 7.4) ------------------------------------------------------
   - id: REQ-TOP-011
@@ -230,7 +230,7 @@ requirements:
         text: The Method defines what is to be done.
     verification: [d7-validate]
     inventory: [MG-7.4-a341aa99, MG-7.4-56b04bbe, MG-7.4-78a33bfa, MG-7.4-a90dfd2b]
-    status: draft
+    status: reviewed
 
   - id: REQ-TOP-012
     title: Resources and services are a closed set
@@ -252,7 +252,7 @@ requirements:
         text: Any other resource or service name (e.g. a vendor-specific resource or Action) is not Open Industry 4.0 Alliance-conform and must not be used below the Namespace element.
     verification: [d7-validate]
     inventory: [MG-7.5-00e295d8, MG-7.5-49f4e58a]
-    status: draft
+    status: reviewed
 
   - id: REQ-TOP-013
     title: Allowed forms per Method and Resource
@@ -281,7 +281,7 @@ requirements:
         text: 'The following resources do not make use of filter: MAM, Health, Profile and ReferenceDesignation.'
     verification: [d7-validate]
     inventory: [MG-7-3d90df46, MG-7-db7ddd80, MG-7.4-0f22d9e7, MG-7.5.1-07b3b10a, MG-7.5.1-ca8822ce, MG-7.5.1-a89bdae7, MG-7.5.1-3d9669bd, MG-7.5.1-0315a6f9]
-    status: draft
+    status: reviewed
     notes: >-
       PO decision SF-041 (a)–(c) (C-018), stated in the guideline since C-021
       (MG 7, MG 7.4, MG 9, MG 9.1.5, MG 9.2.1); the matrix rows name the
@@ -306,7 +306,7 @@ requirements:
         text: At Level 1, a Set should cause such an Event (1.3 Compliance Domains and Levels).
     verification: [d7-test]
     inventory: [MG-7.4-bd6a1c58, MG-7.4-92f7945e]
-    status: draft
+    status: reviewed
     notes: Support of the resource Event with category Status is REQ-CMP-023; the event content belongs to RES-EVENT/BUS.
 
   - id: REQ-TOP-015
@@ -328,7 +328,7 @@ requirements:
         text: At Level 1, a Del should cause such an Event (1.3 Compliance Domains and Levels).
     verification: [d7-test]
     inventory: [MG-7.4-3c1c21d5, MG-7.4-c24422e2]
-    status: draft
+    status: reviewed
 
   - id: REQ-TOP-016
     title: Reply topic corresponds to the Call topic
@@ -348,7 +348,7 @@ requirements:
         text: 'It equals the Call topic with the Method Reply: Oi4v2/<ServiceType>/<AppId>/Reply/<Service>[/<Source>].'
     verification: [d7-test]
     inventory: [MG-7.4-51e4221d, MG-7.4-d2add756]
-    status: draft
+    status: reviewed
     notes: Source of Call/Reply is optional (PO decision SF-041 (c), C-018; MG 7.4 and MG 9.2.1 since C-021).
 
   # --- Resource (MG 7.5.1) --------------------------------------------------
@@ -367,7 +367,7 @@ requirements:
         text: Health must be published once when the application is initialized, when the value of Health changes, and every 60 seconds as a kind of heartbeat.
     verification: [d7-monitor]
     inventory: [MG-7.5.1-40b7ae71]
-    status: draft
+    status: reviewed
     notes: Health content and tolerances belong to RES-HEALTH (C-023).
 
   # --- Source (MG 7.6) ------------------------------------------------------
@@ -393,7 +393,7 @@ requirements:
         text: The optional <Source> contains the Identification Link of the asset the Action refers to.
     verification: [d7-validate, d7-test]
     inventory: [MG-7.6-256439e8, MG-7.6-4eafb027, MG-7.4-8875bc60]
-    status: draft
+    status: reviewed
 
   # --- Filter (MG 7.7) ------------------------------------------------------
   - id: REQ-TOP-019
@@ -421,7 +421,7 @@ requirements:
         text: The character % must only occur in the four sequences %2B, %23, %2F and %25; any other use (e.g. %2b, %20 or a single %) makes the topic invalid.
     verification: [d7-validate]
     inventory: [MG-7.7-de11d585, MG-7.7-0302ebd1, MG-7.7-14d47137, MG-7.7-e91796a5, MG-7.7-4008d4db]
-    status: draft
+    status: reviewed
     notes: >-
       PO decision SF-040 (a)–(c) (C-018), stated in the guideline since C-020
       (non-empty levels: REQ-TOP-021). The exclusion of U+0000 follows from
@@ -441,7 +441,7 @@ requirements:
         text: White space is allowed, but should not be used.
     verification: [d7-validate]
     inventory: [MG-7.7-78e3ff72]
-    status: draft
+    status: reviewed
     notes: D7 reports a warning (vectors with warnings [whitespace]).
 
   - id: REQ-TOP-021
@@ -459,7 +459,7 @@ requirements:
         text: The Filter must not start or end with a /, and a level of the Filter must not be empty (e.g. Data//Oee).
     verification: [d7-validate]
     inventory: [MG-7.7-2447b66f]
-    status: draft
+    status: reviewed
     notes: Empty levels per PO decision SF-040 (c) (C-018), stated in the guideline since C-020.
 
   - id: REQ-TOP-022
@@ -490,7 +490,7 @@ requirements:
         text: For the resources Data and Metadata, the Filter contains the name of the desired data set or metadata set.
     verification: [d7-validate]
     inventory: [MG-7.7-c7705804, MG-7.7-d07484ed, MG-7.7-3ca9fb74, MG-7.7-d966f542, MG-7.7-a1ef5067, MG-7.7-780647f7]
-    status: draft
+    status: reviewed
     notes: PO decision SF-041 (d) (C-018), stated in MG 7.7 since C-021. Grammar rules list-filter, tag, context-name.
 
   - id: REQ-TOP-023
@@ -516,7 +516,7 @@ requirements:
         text: The <EventCategory> describes the category and must be one of Syslog, Status or Generic; other categories must not be used.
     verification: [d7-validate]
     inventory: [MG-7.7-21c7d613, MG-7.7-2885b14f, MG-7.7-03f6a2ee, MG-7.7-dbec8808, MG-7.7-23e55aa4, MG-7.7-7887a275, MG-7.7-a114e1be]
-    status: draft
+    status: reviewed
     notes: Closed category set and free GenericLevel per PO decision SF-042 (b), (c) (C-018), stated in the guideline since C-020. Grammar rule event-filter.
 
   - id: REQ-TOP-024
@@ -534,7 +534,7 @@ requirements:
         text: This level shall not be used as default by any application, because logging over the Message Bus requires a lot of resources.
     verification: [d7-monitor]
     inventory: [MG-7.7-3b38cf3c]
-    status: draft
+    status: reviewed
 
   - id: REQ-TOP-025
     title: Syslog level Informational is used carefully
@@ -551,7 +551,7 @@ requirements:
         text: Any application should use this feature carefully.
     verification: [manual]
     inventory: [MG-7.7-248e2177, MG-7.7-fe4ff6d5]
-    status: draft
+    status: reviewed
 
   - id: REQ-TOP-026
     title: Syslog levels are chosen by their meaning
@@ -573,7 +573,7 @@ requirements:
         text: 'The severity levels should be interpreted as follows: Internal Error and Warning: The component has detected an error in its hardware or software which is not allowed during normal operation.'
     verification: [manual]
     inventory: [MG-7.7-28ac72d4, MG-7.7-973d7539, MG-7.7-cafe1d09, MG-7.7-b614dc52, MG-7.7-977162ba, MG-7.7-cb1206c6, MG-7.7-1375acac]
-    status: draft
+    status: reviewed
     notes: >-
       "must be exchanged or serviced" and "must be indicated to the user"
       describe the meaning of the levels inside a note that "should be
@@ -595,4 +595,4 @@ requirements:
         text: It is best practice to make the log level configurable.
     verification: [d7-test]
     inventory: [MG-7.7-6ada19f8]
-    status: draft
+    status: reviewed

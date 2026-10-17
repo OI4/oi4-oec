@@ -7,7 +7,7 @@ Guideline baseline: `2cf0d70`. An inventory item is a candidate of a normative s
 |---|---|---|---:|---:|---:|---:|
 | CMP | C-014 | reviewed | 63 | 32 | 31 | 0 |
 | IL | C-018 | reviewed | 97 | 73 | 24 | 0 |
-| TOP | C-018 | drafted | 86 | 71 | 15 | 0 |
+| TOP | C-018 | reviewed | 86 | 71 | 15 | 0 |
 | MSG | C-021 | planned | 158 | 0 | 0 | 158 |
 | ACT | C-021 | planned | 70 | 0 | 0 | 70 |
 | MQTT | C-022 | planned | 33 | 0 | 0 | 33 |

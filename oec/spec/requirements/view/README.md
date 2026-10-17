@@ -7,7 +7,7 @@ Guideline baseline: `2cf0d70`. Source of truth: the YAML files in `oec/spec/requ
 |---|---|---|---|---:|---|
 | [CMP](cmp.md) | Compliance domains and levels | C-014 | reviewed | 45 | MG index, MG preface, MG appendix-a, MG 1, RIG index, RIG appendix-a, RIG 1 |
 | [IL](il.md) | Identification link (dnp encoding) | C-018 | reviewed | 34 | MG 4, MG A3 |
-| [TOP](top.md) | Topic structure and namespace elements | C-018 | drafted | 27 | MG 7 |
+| [TOP](top.md) | Topic structure and namespace elements | C-018 | reviewed | 27 | MG 7 |
 | MSG | Payload format and OPC UA PubSub objects | C-021 | planned | – | MG 8, MG A2 |
 | ACT | Actions (Call/Reply) and DataSetWriterId allocation | C-021 | planned | – | MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2 |
 | MQTT | General requirements on MQTT | C-022 | planned | – | MG 6 |

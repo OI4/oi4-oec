@@ -20,7 +20,7 @@ areas:
   - code: TOP
     title: Topic structure and namespace elements
     cycle: C-018
-    status: drafted
+    status: reviewed
     sections: [MG 7]
   - code: MSG
     title: Payload format and OPC UA PubSub objects
