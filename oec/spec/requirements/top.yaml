@@ -3,7 +3,7 @@
 # topic/topic.abnf, the allowed forms per Method × Resource are listed in
 # matrix/method-resource.yaml; vectors in vectors/topic/.
 area: TOP
-baseline: "5dedfd5"
+baseline: "2cf0d70"
 requirements:
   # --- Topic structure (MG 7) -----------------------------------------------
   - id: REQ-TOP-001
@@ -261,22 +261,31 @@ requirements:
       allowed in matrix/method-resource.yaml, with Source and Filter present,
       optional or absent as listed there (e.g. Event only with Pub and always
       with Source and Filter; MAM, Health, Profile and ReferenceDesignation
-      never with Filter; Call and Reply never with Filter).
+      never with Filter; Call and Reply never with Filter). A topic in any
+      other form is invalid.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [component]
-    refs: [MG 7, MG 7.5.1, MG 7.7, MG 9.1, MG 9.2.1, SF-035, SF-041]
+    refs: [MG 7, MG 7.4, MG 7.5.1, MG 7.7, MG 9, MG 9.1, MG 9.1.5, MG 9.2.1, SF-041]
     quotes:
+      - ref: MG 7
+        text: A topic must have one of the forms, which are described for the combination of Method and Resource in 9.1 Resources and for the combination of Method and common service in 9.2 Common Services.
+      - ref: MG 7
+        text: These forms define, for which combinations a Source and a Filter are required, optional or not allowed.
+      - ref: MG 7.4
+        text: A Filter must not be used with Call and Reply.
       - ref: MG 7.5.1
         text: Depending on the Resource, some submodels can only be published, others can also be requested or even written or deleted.
       - ref: MG 7.7
         text: 'The following resources do not make use of filter: MAM, Health, Profile and ReferenceDesignation.'
     verification: [d7-validate]
-    inventory: [MG-7.5.1-07b3b10a, MG-7.5.1-ca8822ce, MG-7.5.1-a89bdae7, MG-7.5.1-3d9669bd, MG-7.5.1-0315a6f9]
+    inventory: [MG-7-3d90df46, MG-7-db7ddd80, MG-7.4-0f22d9e7, MG-7.5.1-07b3b10a, MG-7.5.1-ca8822ce, MG-7.5.1-a89bdae7, MG-7.5.1-3d9669bd, MG-7.5.1-0315a6f9]
     status: draft
-    notes: PO decision SF-041 (a)–(c) (C-018); the matrix rows name the grammar rule of each combination.
+    notes: >-
+      PO decision SF-041 (a)–(c) (C-018), stated in the guideline since C-021
+      (MG 7, MG 7.4, MG 9, MG 9.1.5, MG 9.2.1); the matrix rows name the
+      grammar rule of each combination.
 
   - id: REQ-TOP-014
     title: Set causes an Event Status
@@ -325,7 +334,7 @@ requirements:
     title: Reply topic corresponds to the Call topic
     statement: >-
       The Reply topic equals the Call topic except for the Method element
-      (same ServiceType, AppId, Service and Source) and is given as
+      (same ServiceType, AppId, Service and optional Source) and is given as
       ResponseAddress in the ua-action-request.
     keyword: MUST
     domain: messaging
@@ -335,10 +344,12 @@ requirements:
     quotes:
       - ref: MG 7.4
         text: The Reply topic must correspond to the Call topic (same <ServiceType>, <AppId>, <Service> and <Source>) and must be given as ResponseAddress in the ua-action-request.
+      - ref: MG 7.4
+        text: 'It equals the Call topic with the Method Reply: Oi4v2/<ServiceType>/<AppId>/Reply/<Service>[/<Source>].'
     verification: [d7-test]
-    inventory: [MG-7.4-51e4221d]
+    inventory: [MG-7.4-51e4221d, MG-7.4-d2add756]
     status: draft
-    notes: Source of Call/Reply is optional (PO decision SF-041 (c), C-018).
+    notes: Source of Call/Reply is optional (PO decision SF-041 (c), C-018; MG 7.4 and MG 9.2.1 since C-021).
 
   # --- Resource (MG 7.5.1) --------------------------------------------------
   - id: REQ-TOP-017
@@ -365,19 +376,23 @@ requirements:
     statement: >-
       The Source element is the encoded Identification Link (REQ-IL-002) of
       the asset the information is about and forms exactly one topic level;
-      for information about the application itself, Source equals AppId.
+      for information about the application itself, Source equals AppId. In
+      Call and Reply topics, the optional Source is the asset the Action
+      refers to.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [component]
-    refs: [MG 7.6]
+    refs: [MG 7.6, MG 7.4, SF-041]
     quotes:
       - ref: MG 7.6
         text: The Source must always describe the asset providing the information.
       - ref: MG 7.6
         text: The Source must always be exactly one topic level.
+      - ref: MG 7.4
+        text: The optional <Source> contains the Identification Link of the asset the Action refers to.
     verification: [d7-validate, d7-test]
-    inventory: [MG-7.6-256439e8, MG-7.6-4eafb027]
+    inventory: [MG-7.6-256439e8, MG-7.6-4eafb027, MG-7.4-8875bc60]
     status: draft
 
   # --- Filter (MG 7.7) ------------------------------------------------------
@@ -454,8 +469,10 @@ requirements:
       metadata set), the Filter of Config is the Context.Name, each one
       level. The Filter of PublicationList and SubscriptionList is
       <ResourceType>[/<Tag>], where ResourceType is a resource of MG 7.5.1 and
-      Tag is the complete Filter of that resource; resources without Filter
-      take <ResourceType> only.
+      Tag is the complete Filter of that resource (Tag, Context.Name or
+      <EventCategory>/<EventLevel>); <ResourceType>/<Tag> is only used for
+      Data, Metadata, Config and Event, all other resources take
+      <ResourceType> only.
     keyword: MUST
     implicit: true
     domain: messaging
@@ -466,11 +483,15 @@ requirements:
       - ref: MG 7.7
         text: Depending on the resource to filter for, the Filter can be <ResourceType> or <ResourceType>/<Tag>.
       - ref: MG 7.7
+        text: <Tag> is the complete Filter of this resource, as defined in the following sections
+      - ref: MG 7.7
+        text: <ResourceType>/<Tag> filters are only used for the resources Data, Metadata, Config and Event.
+      - ref: MG 7.7
         text: For the resources Data and Metadata, the Filter contains the name of the desired data set or metadata set.
     verification: [d7-validate]
     inventory: [MG-7.7-c7705804, MG-7.7-d07484ed, MG-7.7-3ca9fb74, MG-7.7-d966f542, MG-7.7-a1ef5067, MG-7.7-780647f7]
     status: draft
-    notes: PO decision SF-041 (d) (C-018). Grammar rules list-filter, tag, context-name.
+    notes: PO decision SF-041 (d) (C-018), stated in MG 7.7 since C-021. Grammar rules list-filter, tag, context-name.
 
   - id: REQ-TOP-023
     title: Filter structure of Event

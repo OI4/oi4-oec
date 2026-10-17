@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "5dedfd5"
+baseline: "2cf0d70"
 description: >-
   Constructed valid topic vectors: every ServiceType, Filter encodings, Event
   levels, list filters, Call/Reply with Source and the length limits of the
@@ -484,7 +484,7 @@ vectors:
       resource: "NewDataSetWriterId"
       source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
       source_il: "company.id/A87BAD34H"
-    notes: "Optional Source of Call/Reply per SF-041 (c)."
+    notes: "Optional Source of Call/Reply (MG 7.4, SF-041 c)."
 
   - id: V-TOP-127
     title: "Reply with optional Source"
@@ -502,7 +502,7 @@ vectors:
       resource: "NewDataSetWriterId"
       source: "Y29tcGFueS5pZC9BODdCQUQzNEg"
       source_il: "company.id/A87BAD34H"
-    notes: "Optional Source of Call/Reply per SF-041 (c)."
+    notes: "Optional Source of Call/Reply (MG 7.4, SF-041 c)."
 
   - id: V-TOP-128
     title: "AppId of an Identification Link with 255 characters (340 encoded characters)"

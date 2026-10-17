@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "5dedfd5"
+baseline: "2cf0d70"
 description: >-
   Constructed invalid topic vectors. Each vector names the violated
   requirement and whether the topic fails the grammar or the Identification
@@ -161,7 +161,7 @@ vectors:
     title: "Pub Metadata without Tag"
     expected: invalid
     violates: [REQ-TOP-013]
-    reason: "Metadata topics always carry Source and Tag (SF-041 b)."
+    reason: "Metadata topics always carry Source and Tag (MG 9.1.5, SF-041 b)."
     origin: {kind: constructed}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
@@ -181,7 +181,7 @@ vectors:
     title: "Call with Filter"
     expected: invalid
     violates: [REQ-TOP-013]
-    reason: "Call and Reply never carry a Filter (SF-041 c)."
+    reason: "Call and Reply never carry a Filter (MG 7.4, SF-041 c)."
     origin: {kind: constructed}
     status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"

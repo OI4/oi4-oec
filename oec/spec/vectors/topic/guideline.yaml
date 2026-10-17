@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "5dedfd5"
+baseline: "2cf0d70"
 description: >-
   Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1).
   Vectors that differ from the guideline text record the original and the spec
@@ -755,12 +755,12 @@ vectors:
       resource: "PublicationList"
 
   - id: V-TOP-044
-    title: "MG B1.1.8: Set PublicationList with Source and Filter Data/Network settings"
+    title: "MG B1.1.8: Set PublicationList with Source and Filter Data/oee"
     expected: valid
-    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
-    origin: {kind: guideline, ref: MG B1.1.8, original: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings", sf: [SF-041]}
+    reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
+    origin: {kind: guideline, ref: MG B1.1.8}
     status: draft
-    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/Network settings"
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
     parse:
       rule: "set-publicationlist"
       service_type: "OTConnector"
@@ -770,10 +770,8 @@ vectors:
       resource: "PublicationList"
       source: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
       source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
-      filter: "Data/Network settings"
-      filter_values: ["Data", "Network settings"]
-    warnings: [whitespace]
-    notes: "SF-041 (e): the Filter of a PublicationList entry is <ResourceType>/<Tag> (decided, not yet changed in the guideline)."
+      filter: "Data/oee"
+      filter_values: ["Data", "oee"]
 
   - id: V-TOP-045
     title: "MG B1.1.9: Get SubscriptionList with Source and Filter Data/oee"

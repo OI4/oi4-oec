@@ -6,7 +6,7 @@
 # Filter, generated samples). Payload and behaviour columns follow in C-024.
 # PO decisions (C-018): SF-041 (forms), SF-042 (closed sets).
 
-baseline: "5dedfd5"
+baseline: "2cf0d70"
 combinations:
   - {method: Pub, resource: MAM, kind: resource, allowed: true, rule: pub-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}
   - {method: Get, resource: MAM, kind: resource, allowed: true, rule: get-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}
@@ -72,5 +72,5 @@ combinations:
   - {method: Get, resource: NewDataSetWriterId, kind: service, allowed: false, refs: [MG 9.2.1], notes: "Common services use Call/Reply only (MG 7.4)."}
   - {method: Set, resource: NewDataSetWriterId, kind: service, allowed: false, refs: [MG 9.2.1], notes: "Common services use Call/Reply only (MG 7.4)."}
   - {method: Del, resource: NewDataSetWriterId, kind: service, allowed: false, refs: [MG 9.2.1], notes: "Common services use Call/Reply only (MG 7.4)."}
-  - {method: Call, resource: NewDataSetWriterId, kind: service, allowed: true, rule: call-newdatasetwriterid, source: optional, filter: forbidden, refs: [MG 9.2.1], notes: "SF-041 c: optional Source (MG 7.4, MG 8.2.16), not shown in MG 9.2.1."}
+  - {method: Call, resource: NewDataSetWriterId, kind: service, allowed: true, rule: call-newdatasetwriterid, source: optional, filter: forbidden, refs: [MG 9.2.1], notes: "SF-041 c: optional Source, no Filter (MG 7.4, MG 9.2.1)."}
   - {method: Reply, resource: NewDataSetWriterId, kind: service, allowed: true, rule: reply-newdatasetwriterid, source: optional, filter: forbidden, refs: [MG 9.2.1], notes: "SF-041 c: optional Source; equals the Call topic."}
