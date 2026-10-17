@@ -46,7 +46,7 @@ C-022: PO input (2026-10-17): **SF-044** decided as proposed and to be recorded 
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **C-023** – areas `MSG` (MG 8, A2) and `ACT` (MG 8.2.16 … 8.2.20, 8.4, 9.2), payload columns of the Method × Resource matrix; golden payload vectors may start (`edits` per ADR-0018 amendment C-013; `WriterGroupName` of list entries per GL-ADR-018). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-024 … C-029).
+1. **C-023** – areas `MSG` (MG 8, A2) and `ACT` (MG 8.2.16 … 8.2.20, 8.4, 9.2); golden payload vectors may start (payload columns of the Method × Resource matrix follow in C-026) (`edits` per ADR-0018 amendment C-013; `WriterGroupName` of list entries per GL-ADR-018). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-024 … C-029).
 2. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
