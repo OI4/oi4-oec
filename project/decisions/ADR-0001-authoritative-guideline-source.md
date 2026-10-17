@@ -98,3 +98,14 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `7de6cb8` – SF-043 (e): the dnp-encoding stays only as an optional hint at the `Oi4Identifier` (MG 4.3.1 "may be used" for characters not permitted in an Identification Link or a `/`; explained in MG A3) and is removed from MG 4.1 and the structure/field types of MG 4.3.1; MG A3 and the glossary MG A4 aligned; GL-ADR-010 implementation note.
   - `ea80271` – findings register: SF-043 (e) resolved; (a)–(d) stay open.
 - Unlike `d84c642`, `7de6cb8` changes guideline text, so the spec was re-baselined (inventory keys remapped, REQ-IL-033 added).
+
+## Amendment C-020 (2026-10-17, guideline baseline `5dedfd5`)
+
+- The baseline is now `5dedfd5` on branch `feature/spec-findings`. Implemented by the agent on PO request (local commits):
+  - `6476bd3` – SF-043 (a)–(d): MG A3 (general UTF-8 rule, ASCII characters in Table 4, "comma character", lower-case conversion), MG 4.3.1 and MG 5 (`ManufacturerUri` form; it should correspond to the domain of the asset's Identification Link, `<manufacturer>.<tld>` in case of doubt – PO addition).
+  - `d00cce7` – SF-040: MG 7.7 (upper-case hex digits, `%` only in four sequences, no empty Filter level), Appendix B and MG 8.3.3.x without `%20`, `Status/Good`.
+  - `a992f9a` – SF-042: closed `ServiceType` and `EventCategory` sets, free `GenericLevel`; the OTConnector-device sentence removed from MG 7.2 (PO: REQ-TOP-007 withdrawn).
+  - `4c27c37` – findings register: SF-040, SF-042, SF-043 resolved.
+  - `39be075` – MG 4.3.1: the `ManufacturerUri` form keeps its "must".
+  - `5dedfd5` – findings register sync.
+- SF-041 is decided but its guideline text is not changed yet (not requested in C-020).

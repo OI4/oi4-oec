@@ -1,4 +1,4 @@
-# Guideline digest (v2.0, baseline `ea80271`)
+# Guideline digest (v2.0, baseline `5dedfd5`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
@@ -83,9 +83,9 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
 - **In topics** (`AppId`, `Source`): base64url (RFC 4648 §5) of the UTF-8 bytes, no padding, no line breaks. This gives exactly one topic level of at most 340 chars.
 - **In payloads** (`PublisherId`, `MessageId`, `ReplyTo`, `DataSetWriterName`, `RequestorId`, `ProductInstanceUri`): unencoded.
 - **Oi4Identifier** = `ManufacturerUri/Model/ProductCode/SerialNumber` (MG 4.3.1); all IL rules apply, max. 255 chars including the three `/`.
-  - `ManufacturerUri`: lowercase domain.
+  - `ManufacturerUri`: lowercase domain without scheme, port, path and `www.`, typically `<manufacturer>.<tld>`, subdomains allowed; should correspond to the domain of the asset's IL (in doubt `<manufacturer>.<tld>`); an upper-case value is converted to lower case when the Oi4Identifier is generated (SF-043, C-020).
   - A missing serial number becomes `"nd"`; containers use the container name as serial number.
-  - The elements may be dnp-encoded (`,` + 2 hex digits, MG A3) to mask characters not permitted in an IL or a `/` (SF-043 e, C-019). The dnp-encoding is not used anywhere else (not in topics).
+  - The elements may be dnp-encoded (`,` + 2 upper-case hex digits per UTF-8 octet outside `A–Z a–z 0–9 - . _ ~`, MG A3) to mask characters not permitted in an IL or a `/` (SF-043, C-019/C-020). The dnp-encoding is not used anywhere else (not in topics).
 
 ## 3. MAM (MG 5, 8.3.1) – DataSetClassId `360ca8f3-5e66-42a2-8f10-9cdf45f4bf58`
 
@@ -144,7 +144,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
 `Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]`
 
 - **Namespace** `Oi4v2`; v1 = `Oi4`. Both may coexist on one broker, but a request is answered in its own namespace (MG 7.1).
-- **ServiceType:** `Registry | OTConnector | Utility | Persistence | Aggregation | OOCConnector | ITConnector`.
+- **ServiceType (closed set):** `Registry | OTConnector | Utility | Persistence | Aggregation | OOCConnector | ITConnector`.
 - **Method:** `Pub | Get | Set | Del | Call | Reply`.
   - `Get`/`Set`/`Del`/`Call` use the **target's** ServiceType/AppId.
   - `Reply` uses the same topic as `Call` with the method swapped.
@@ -152,7 +152,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
 - **Common services** (Actions): only `NewDataSetWriterId` (GL-ADR-012).
 - **Specific services:** removed (GL-ADR-014). The resource/service set is **closed**: other names below `Oi4v2` are non-conformant (SF-036, resolved in the guideline C-015: MG 7.5 "must not be used below the Namespace element").
 - **Source:** base64url IL; equals `AppId` if the information is about the app itself.
-- **Filter:** each level is a `<Topic encoded String>`; `+ # /` within a level are percent-encoded (`%2B %23 %2F`, `%` → `%25`), nothing else. `/` only separates resource-defined levels, never leading/trailing; `WriterGroupName` uses the same value.
+- **Filter:** each level is a `<Topic encoded String>`; `+ # /` within a level are percent-encoded (`%2B %23 %2F`, `%` → `%25`, upper-case hex), nothing else – `%` only in these four sequences. `/` only separates resource-defined levels, never leading/trailing, no empty level; `WriterGroupName` uses the same value.
 
   | Resource | Filter |
   |---|---|
@@ -165,7 +165,8 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
 - **Event levels:**
   - Syslog: `Debug…Emergency` (8 levels).
   - Status: `Good|Uncertain|Bad` = severity class only (e.g. 0x80060000 → `Status/Bad`); details in the payload (`Number`, `SymbolicId`).
-  - Generic: `High|Medium|Low`.
+  - Generic: any `<Topic encoded String>` defined by the publisher (`High|Medium|Low` are examples).
+  - Categories are a closed set: `Syslog`, `Status`, `Generic`.
 
 ## 7. Payloads (MG 8) – OPC UA Part 14/6 V1.05.04
 
