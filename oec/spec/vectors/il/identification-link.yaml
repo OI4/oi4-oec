@@ -1,4 +1,4 @@
-# Test vectors of kind identification-link (C-018, ADR-0018); status draft until the PO review.
+# Test vectors of kind identification-link (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: identification-link
 baseline: "fd9da6e"
@@ -12,7 +12,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-002, REQ-IL-009, REQ-IL-016]
     origin: {kind: guideline, ref: MG 4.2}
-    status: draft
+    status: reviewed
     il: "provider.com/FieldDataService/FDS-001/1200-0345"
     encoded: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
 
@@ -21,7 +21,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-002, REQ-IL-009, REQ-IL-016]
     origin: {kind: guideline, ref: MG 4.2}
-    status: draft
+    status: reviewed
     il: "https://id.consumer.com/MEService/Inst07322"
     encoded: "aHR0cHM6Ly9pZC5jb25zdW1lci5jb20vTUVTZXJ2aWNlL0luc3QwNzMyMg"
 
@@ -30,7 +30,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-002, REQ-IL-009, REQ-IL-016]
     origin: {kind: guideline, ref: MG 4.2}
-    status: draft
+    status: reviewed
     il: "company.id/A87BAD34H"
     encoded: "Y29tcGFueS5pZC9BODdCQUQzNEg"
 
@@ -39,7 +39,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-002, REQ-IL-009, REQ-IL-016]
     origin: {kind: guideline, ref: MG 4.2}
-    status: draft
+    status: reviewed
     il: "https://company.id/A87BAD34H"
     encoded: "aHR0cHM6Ly9jb21wYW55LmlkL0E4N0JBRDM0SA"
 
@@ -48,7 +48,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-002, REQ-IL-009, REQ-IL-016]
     origin: {kind: guideline, ref: MG 4.2}
-    status: draft
+    status: reviewed
     il: "https://example.com/~sn?S=1000"
     encoded: "aHR0cHM6Ly9leGFtcGxlLmNvbS9-c24_Uz0xMDAw"
 
@@ -57,7 +57,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-002, REQ-IL-009, REQ-IL-016]
     origin: {kind: guideline, ref: MG 4.1}
-    status: draft
+    status: reviewed
     il: "https://www.domain-abc.com/sd09fqw4?1P=productcode&S=serialnumber"
     encoded: "aHR0cHM6Ly93d3cuZG9tYWluLWFiYy5jb20vc2QwOWZxdzQ_MVA9cHJvZHVjdGNvZGUmUz1zZXJpYWxudW1iZXI"
 
@@ -66,7 +66,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-016, REQ-IL-017]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     il: "https://example.com/myproducts?myquery=Edge,20Gateway,20,3E4GB#,2320815,212205,2B1432"
     encoded: "aHR0cHM6Ly9leGFtcGxlLmNvbS9teXByb2R1Y3RzP215cXVlcnk9RWRnZSwyMEdhdGV3YXksMjAsM0U0R0IjLDIzMjA4MTUsMjEyMjA1LDJCMTQzMg"
 
@@ -75,7 +75,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-002, REQ-IL-009, REQ-IL-016]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "a"
     encoded: "YQ"
 
@@ -84,7 +84,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-019]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     encoded: "ZXhhbXBsZS5jb20vYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh"
 
@@ -93,7 +93,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-002, REQ-IL-009, REQ-IL-016]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "http://provider.com/a:b@c!$&'()*+,;=/x?y=[1]#z"
     encoded: "aHR0cDovL3Byb3ZpZGVyLmNvbS9hOmJAYyEkJicoKSorLDs9L3g_eT1bMV0jeg"
 
@@ -102,7 +102,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-018]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "provider.com/ABC?Q=X#F"
     encoded: "cHJvdmlkZXIuY29tL0FCQz9RPVgjRg"
 
@@ -111,7 +111,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-013, REQ-IL-018]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "HTTPS://provider.com/x"
     encoded: "SFRUUFM6Ly9wcm92aWRlci5jb20veA"
     notes: "The authority is lower case; the scheme is kept as assigned (REQ-IL-013) and makes a different Identification Link than https://provider.com/x (REQ-IL-015)."
@@ -122,7 +122,7 @@ vectors:
     violates: [REQ-IL-019]
     reason: "An Identification Link has at least one character."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: ""
     violations: [empty]
 
@@ -132,7 +132,7 @@ vectors:
     violates: [REQ-IL-019]
     reason: "An Identification Link has at most 255 characters."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     violations: [too-long]
 
@@ -142,7 +142,7 @@ vectors:
     violates: [REQ-IL-016]
     reason: "Space is not permitted."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "company.id/A 1"
     violations: [forbidden-character]
 
@@ -152,7 +152,7 @@ vectors:
     violates: [REQ-IL-016]
     reason: "% is not permitted (no percent-encoding)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "company.id/A%201"
     violations: [forbidden-character]
 
@@ -162,7 +162,7 @@ vectors:
     violates: [REQ-IL-016]
     reason: "Non-ASCII characters are not permitted."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "company.id/Gerät"
     violations: [forbidden-character]
 
@@ -172,7 +172,7 @@ vectors:
     violates: [REQ-IL-016]
     reason: "The characters \" { } are not permitted."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "company.id/{\"a\"}"
     violations: [forbidden-character]
 
@@ -182,7 +182,7 @@ vectors:
     violates: [REQ-IL-009]
     reason: "The authority is mandatory."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "https:///A87BAD34H"
     violations: [empty-authority]
 
@@ -192,7 +192,7 @@ vectors:
     violates: [REQ-IL-009]
     reason: "The authority is mandatory."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "/A87BAD34H"
     violations: [empty-authority]
 
@@ -202,7 +202,7 @@ vectors:
     violates: [REQ-IL-018]
     reason: "The authority is lower case."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "Company.id/A87BAD34H"
     violations: [uppercase-authority]
 
@@ -212,7 +212,7 @@ vectors:
     violates: [REQ-IL-018]
     reason: "The authority is lower case."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     il: "https://ID.consumer.com/MEService/Inst07322"
     violations: [uppercase-authority]
 
@@ -222,7 +222,7 @@ vectors:
     violates: [REQ-IL-004]
     reason: "Padding characters = are omitted."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     encoded: "Y29tcGFueS5pZC9BODdCQUQzNEg="
     violations: [encoding]
 
@@ -232,7 +232,7 @@ vectors:
     violates: [REQ-IL-003]
     reason: "The standard Base64 alphabet contains + and /."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     encoded: "aHR0cHM6Ly9leGFtcGxlLmNvbS9+c24/Uz0xMDAw"
     violations: [encoding]
 
@@ -242,7 +242,7 @@ vectors:
     violates: [REQ-IL-004]
     reason: "The unused bits of the last character are not zero."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     encoded: "Y29tcGFueS5pZC9BODdCQUQzNEh"
     violations: [encoding]
 
@@ -252,7 +252,7 @@ vectors:
     violates: [REQ-IL-004]
     reason: "No base64url string without padding has this length."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     encoded: "YWJjZ"
     violations: [encoding]
 
@@ -262,7 +262,7 @@ vectors:
     violates: [REQ-IL-002]
     reason: "No line breaks are added."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     encoded: "Y29tcGFu\neS5pZC9BODdCQUQzNEg"
     violations: [encoding]
 
@@ -272,7 +272,7 @@ vectors:
     violates: [REQ-IL-002]
     reason: "An empty topic level is no encoded Identification Link."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     encoded: ""
     violations: [encoding]
 
@@ -282,6 +282,6 @@ vectors:
     violates: [REQ-IL-018]
     reason: "The decoded Identification Link has an upper-case authority."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     encoded: "Q29tcGFueS5pZC9BODdCQUQzNEg"
     violations: [uppercase-authority]

@@ -5,6 +5,8 @@
 # both against each other (rule names, required/optional/forbidden Source and
 # Filter, generated samples). Payload and behaviour columns follow in C-026.
 # PO decisions (C-018): SF-041 (forms), SF-042 (closed sets).
+# PO review (C-022, 2026-10-17): topic columns reviewed; the payload columns
+# get their own review.
 
 baseline: "fd9da6e"
 combinations:

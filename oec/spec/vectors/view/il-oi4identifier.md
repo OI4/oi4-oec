@@ -7,19 +7,19 @@ Oi4Identifier vectors (MG 4.3.1, MG A3): construction from ManufacturerUri, Mode
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-OID-001](#v-oid-001) | MG 4.3.1 example | valid | → provider.com/FieldDataService/FDS-001/1200-0345 | guideline MG 4.3.1 | draft |
-| [V-OID-002](#v-oid-002) | MG A3 Table 5 row 1 | valid | → example.com/MyModel/MyProductCode/MySerial | guideline MG A3 | draft |
-| [V-OID-003](#v-oid-003) | MG A3 Table 5 row 2 | valid | → example.com/ABC,20DEF/123.456,2F3,268/123456,2333 | guideline MG A3 | draft |
-| [V-OID-004](#v-oid-004) | MG A3 Table 5 row 3: ManufacturerUri converted to lower case | valid | → example.com/ABC,40home/ABC,2A33,3C4/20123.4 | guideline MG A3 | draft |
-| [V-OID-005](#v-oid-005) | Missing Model and ProductCode are nd | valid | → provider.com/nd/nd/SN-4711 | constructed | draft |
-| [V-OID-006](#v-oid-006) | Subdomain as ManufacturerUri | valid | → id.provider.com/M/P/S | constructed | draft |
-| [V-OID-007](#v-oid-007) | Non-ASCII serial number | valid | → provider.com/Ger,C3,A4t/P-1/Nr.,205 | constructed | draft |
-| [V-OID-101](#v-oid-101) | ManufacturerUri with www | invalid | violations: manufacturer-uri | constructed | draft |
-| [V-OID-102](#v-oid-102) | ManufacturerUri with scheme | invalid | violations: manufacturer-uri | constructed | draft |
-| [V-OID-103](#v-oid-103) | ManufacturerUri without top-level domain | invalid | violations: manufacturer-uri | constructed | draft |
-| [V-OID-104](#v-oid-104) | ManufacturerUri with path | invalid | violations: manufacturer-uri | constructed | draft |
-| [V-OID-105](#v-oid-105) | Oi4Identifier longer than 255 characters | invalid | violations: too-long | constructed | draft |
-| [V-OID-106](#v-oid-106) | Long value after dnp-encoding | invalid | violations: too-long | constructed | draft |
+| [V-OID-001](#v-oid-001) | MG 4.3.1 example | valid | → provider.com/FieldDataService/FDS-001/1200-0345 | guideline MG 4.3.1 | reviewed |
+| [V-OID-002](#v-oid-002) | MG A3 Table 5 row 1 | valid | → example.com/MyModel/MyProductCode/MySerial | guideline MG A3 | reviewed |
+| [V-OID-003](#v-oid-003) | MG A3 Table 5 row 2 | valid | → example.com/ABC,20DEF/123.456,2F3,268/123456,2333 | guideline MG A3 | reviewed |
+| [V-OID-004](#v-oid-004) | MG A3 Table 5 row 3: ManufacturerUri converted to lower case | valid | → example.com/ABC,40home/ABC,2A33,3C4/20123.4 | guideline MG A3 | reviewed |
+| [V-OID-005](#v-oid-005) | Missing Model and ProductCode are nd | valid | → provider.com/nd/nd/SN-4711 | constructed | reviewed |
+| [V-OID-006](#v-oid-006) | Subdomain as ManufacturerUri | valid | → id.provider.com/M/P/S | constructed | reviewed |
+| [V-OID-007](#v-oid-007) | Non-ASCII serial number | valid | → provider.com/Ger,C3,A4t/P-1/Nr.,205 | constructed | reviewed |
+| [V-OID-101](#v-oid-101) | ManufacturerUri with www | invalid | violations: manufacturer-uri | constructed | reviewed |
+| [V-OID-102](#v-oid-102) | ManufacturerUri with scheme | invalid | violations: manufacturer-uri | constructed | reviewed |
+| [V-OID-103](#v-oid-103) | ManufacturerUri without top-level domain | invalid | violations: manufacturer-uri | constructed | reviewed |
+| [V-OID-104](#v-oid-104) | ManufacturerUri with path | invalid | violations: manufacturer-uri | constructed | reviewed |
+| [V-OID-105](#v-oid-105) | Oi4Identifier longer than 255 characters | invalid | violations: too-long | constructed | reviewed |
+| [V-OID-106](#v-oid-106) | Long value after dnp-encoding | invalid | violations: too-long | constructed | reviewed |
 
 ## V-OID-001
 
@@ -33,7 +33,7 @@ Oi4Identifier vectors (MG 4.3.1, MG A3): construction from ManufacturerUri, Mode
 - Expected: valid
 - Illustrates: [REQ-IL-022](../../requirements/view/il.md#req-il-022)
 - Origin: guideline MG 4.3.1
-- Status: draft
+- Status: reviewed
 
 ## V-OID-002
 
@@ -47,7 +47,7 @@ Oi4Identifier vectors (MG 4.3.1, MG A3): construction from ManufacturerUri, Mode
 - Expected: valid
 - Illustrates: [REQ-IL-022](../../requirements/view/il.md#req-il-022)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 Notes: No element needs masking; the dnp-encoding leaves the values unchanged.
 
@@ -63,7 +63,7 @@ Notes: No element needs masking; the dnp-encoding leaves the values unchanged.
 - Expected: valid
 - Illustrates: [REQ-IL-022](../../requirements/view/il.md#req-il-022), [REQ-IL-032](../../requirements/view/il.md#req-il-032), [REQ-IL-033](../../requirements/view/il.md#req-il-033)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-OID-004
 
@@ -77,7 +77,7 @@ Notes: No element needs masking; the dnp-encoding leaves the values unchanged.
 - Expected: valid
 - Illustrates: [REQ-IL-022](../../requirements/view/il.md#req-il-022), [REQ-IL-023](../../requirements/view/il.md#req-il-023), [REQ-IL-032](../../requirements/view/il.md#req-il-032), [REQ-IL-033](../../requirements/view/il.md#req-il-033)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 Notes: PO decision SF-043 (d) (C-020).
 
@@ -93,7 +93,7 @@ Notes: PO decision SF-043 (d) (C-020).
 - Expected: valid
 - Illustrates: [REQ-IL-022](../../requirements/view/il.md#req-il-022), [REQ-IL-028](../../requirements/view/il.md#req-il-028)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-OID-006
 
@@ -107,7 +107,7 @@ Notes: PO decision SF-043 (d) (C-020).
 - Expected: valid
 - Illustrates: [REQ-IL-024](../../requirements/view/il.md#req-il-024)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: PO decision SF-043 (c) (C-020).
 
@@ -123,7 +123,7 @@ Notes: PO decision SF-043 (c) (C-020).
 - Expected: valid
 - Illustrates: [REQ-IL-022](../../requirements/view/il.md#req-il-022), [REQ-IL-032](../../requirements/view/il.md#req-il-032), [REQ-IL-033](../../requirements/view/il.md#req-il-033)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: PO decision SF-043 (a) (C-020).
 
@@ -139,7 +139,7 @@ Notes: PO decision SF-043 (a) (C-020).
 - Expected: invalid – The third-level domain www. is excluded.
 - Violates: [REQ-IL-024](../../requirements/view/il.md#req-il-024)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-OID-102
 
@@ -153,7 +153,7 @@ Notes: PO decision SF-043 (a) (C-020).
 - Expected: invalid – The scheme is excluded.
 - Violates: [REQ-IL-024](../../requirements/view/il.md#req-il-024)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-OID-103
 
@@ -167,7 +167,7 @@ Notes: PO decision SF-043 (a) (C-020).
 - Expected: invalid – The form is <manufacturer>.<tld>.
 - Violates: [REQ-IL-024](../../requirements/view/il.md#req-il-024)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-OID-104
 
@@ -181,7 +181,7 @@ Notes: PO decision SF-043 (a) (C-020).
 - Expected: invalid – The ManufacturerUri is a domain name only.
 - Violates: [REQ-IL-024](../../requirements/view/il.md#req-il-024)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-OID-105
 
@@ -195,7 +195,7 @@ Notes: PO decision SF-043 (a) (C-020).
 - Expected: invalid – The whole Oi4Identifier has at most 255 characters.
 - Violates: [REQ-IL-029](../../requirements/view/il.md#req-il-029)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-OID-106
 
@@ -209,4 +209,4 @@ Notes: PO decision SF-043 (a) (C-020).
 - Expected: invalid – Each # becomes three characters; the result exceeds 255 characters.
 - Violates: [REQ-IL-029](../../requirements/view/il.md#req-il-029)
 - Origin: constructed
-- Status: draft
+- Status: reviewed

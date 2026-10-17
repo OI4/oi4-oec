@@ -1,4 +1,4 @@
-# Test vectors of kind dnp-encoding (C-018, ADR-0018); status draft until the PO review.
+# Test vectors of kind dnp-encoding (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: dnp-encoding
 baseline: "fd9da6e"
@@ -13,7 +13,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "MyModel"
     output: "MyModel"
 
@@ -22,7 +22,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "ABC DEF"
     output: "ABC,20DEF"
 
@@ -31,7 +31,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "123.456/3&8"
     output: "123.456,2F3,268"
 
@@ -40,7 +40,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "123456#33"
     output: "123456,2333"
 
@@ -49,7 +49,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "ABC@home"
     output: "ABC,40home"
 
@@ -58,7 +58,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "ABC*33<4"
     output: "ABC,2A33,3C4"
 
@@ -67,7 +67,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "20123.4"
     output: "20123.4"
 
@@ -76,7 +76,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "Edge Gateway >4GB"
     output: "Edge,20Gateway,20,3E4GB"
 
@@ -85,7 +85,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     input: "#20815!2205+1432"
     output: ",2320815,212205,2B1432"
 
@@ -94,7 +94,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     input: "Az09-._~"
     output: "Az09-._~"
 
@@ -103,7 +103,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     input: "#/:?@[]!$&'()*+,;="
     output: ",23,2F,3A,3F,40,5B,5D,21,24,26,27,28,29,2A,2B,2C,3B,3D"
 
@@ -112,7 +112,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     input: " \"%<>\\^`{|}"
     output: ",20,22,25,3C,3E,5C,5E,60,7B,7C,7D"
 
@@ -121,7 +121,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     input: "a,b"
     output: "a,2Cb"
 
@@ -130,7 +130,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     input: "Gerät"
     output: "Ger,C3,A4t"
     notes: "PO decision SF-043 (a) (C-020)."
@@ -140,7 +140,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     input: "a\tb"
     output: "a,09b"
     notes: "PO decision SF-043 (a) (C-020)."

@@ -1,4 +1,4 @@
-# Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
+# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
 baseline: "fd9da6e"
@@ -13,7 +13,7 @@ vectors:
     violates: [REQ-TOP-001]
     reason: "The namespace element of this version is Oi4v2."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -23,7 +23,7 @@ vectors:
     violates: [REQ-TOP-001]
     reason: "Topics are case-sensitive; the namespace element is Oi4v2."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -33,7 +33,7 @@ vectors:
     violates: [REQ-TOP-005]
     reason: "Gateway is not a ServiceType of MG 7.2."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/Gateway/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -43,7 +43,7 @@ vectors:
     violates: [REQ-TOP-005]
     reason: "ServiceType values are case-sensitive."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/otconnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -53,7 +53,7 @@ vectors:
     violates: [REQ-TOP-011]
     reason: "Post is not a Method of MG 7.4."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Post/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
     fails: grammar
 
@@ -63,7 +63,7 @@ vectors:
     violates: [REQ-TOP-012]
     reason: "The set of resources is closed."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/VendorStatus/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -73,7 +73,7 @@ vectors:
     violates: [REQ-TOP-012]
     reason: "The set of services is closed (NewDataSetWriterId only)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/RestartDevice"
     fails: grammar
 
@@ -83,7 +83,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "Event can only be published."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
     fails: grammar
 
@@ -93,7 +93,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "Del is only defined for ReferenceDesignation and SubscriptionList."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/NetworkSettings"
     fails: grammar
 
@@ -103,7 +103,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "MAM cannot be written."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -113,7 +113,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "Data cannot be deleted."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
     fails: grammar
 
@@ -123,7 +123,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "Health does not use a Filter (MG 7.7)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"
     fails: grammar
 
@@ -133,7 +133,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "ReferenceDesignation does not use a Filter (MG 7.7)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/ReferenceDesignation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"
     fails: grammar
 
@@ -143,7 +143,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "A Set addresses one asset and one context: Source and Filter are required."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config"
     fails: grammar
 
@@ -153,7 +153,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "A Set addresses one data set: Filter is required."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -163,7 +163,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "Metadata topics always carry Source and Tag (MG 9.1.5, SF-041 b)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -173,7 +173,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "An Event is always published with category and level."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar
 
@@ -183,7 +183,7 @@ vectors:
     violates: [REQ-TOP-013]
     reason: "Call and Reply never carry a Filter (MG 7.4, SF-041 c)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"
     fails: grammar
 
@@ -193,7 +193,7 @@ vectors:
     violates: [REQ-TOP-023]
     reason: "The Event Filter is <EventCategory>/<EventLevel>."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog"
     fails: grammar
 
@@ -203,7 +203,7 @@ vectors:
     violates: [REQ-TOP-023]
     reason: "Info is not one of the eight Syslog levels."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Info"
     fails: grammar
 
@@ -213,7 +213,7 @@ vectors:
     violates: [REQ-TOP-023]
     reason: "The event categories are Syslog, Status and Generic (SF-042 b)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Audit/High"
     fails: grammar
 
@@ -223,7 +223,7 @@ vectors:
     violates: [REQ-TOP-023]
     reason: "The Status levels are Good, Uncertain and Bad."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/good"
     fails: grammar
 
@@ -233,7 +233,7 @@ vectors:
     violates: [REQ-TOP-023]
     reason: "The topic level contains only the class of the status code (MG 7.7)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/BadEncodingError"
     fails: grammar
 
@@ -243,7 +243,7 @@ vectors:
     violates: [REQ-TOP-023]
     reason: "The Event Filter has exactly two levels."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Notice/x"
     fails: grammar
 
@@ -253,7 +253,7 @@ vectors:
     violates: [REQ-TOP-019, REQ-TOP-021]
     reason: "A Filter level is not empty and the Filter does not end with /."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Generic/"
     fails: grammar
 
@@ -263,7 +263,7 @@ vectors:
     violates: [REQ-TOP-022]
     reason: "The Tag is one level; a / in its content is written as %2F."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/line1/oee"
     fails: grammar
 
@@ -273,7 +273,7 @@ vectors:
     violates: [REQ-TOP-022]
     reason: "ResourceType is a resource of MG 7.5.1."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Foo"
     fails: grammar
 
@@ -283,7 +283,7 @@ vectors:
     violates: [REQ-TOP-022]
     reason: "MAM has no Filter, so the list Filter is <ResourceType> only."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/MAM/x"
     fails: grammar
 
@@ -293,7 +293,7 @@ vectors:
     violates: [REQ-TOP-019]
     reason: "Only +, #, / and % are percent-encoded; %20 is not a valid sequence (MG 7.7, SF-040 b)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network%20settings"
     fails: grammar
     notes: "Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 d, C-020); the corrected form is a golden vector in guideline.yaml."
@@ -304,7 +304,7 @@ vectors:
     violates: [REQ-TOP-019]
     reason: "The four sequences use upper-case hex digits (SF-040 a)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/a%2bb"
     fails: grammar
 
@@ -314,7 +314,7 @@ vectors:
     violates: [REQ-TOP-019]
     reason: "A % in the content is written as %25."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/50%"
     fails: grammar
 
@@ -324,7 +324,7 @@ vectors:
     violates: [REQ-TOP-019]
     reason: "# is the multi-level wildcard and is written as %23."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/a#b"
     fails: grammar
 
@@ -334,7 +334,7 @@ vectors:
     violates: [REQ-TOP-019]
     reason: "+ is the single-level wildcard; a topic name contains no wildcards."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/+"
     fails: grammar
 
@@ -344,7 +344,7 @@ vectors:
     violates: [REQ-TOP-019]
     reason: "# is the multi-level wildcard; a topic name contains no wildcards."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/#"
     fails: grammar
 
@@ -354,7 +354,7 @@ vectors:
     violates: [REQ-TOP-019]
     reason: "U+0000 is not allowed in MQTT topic names."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/a\u0000b"
     fails: grammar
 
@@ -364,7 +364,7 @@ vectors:
     violates: [REQ-TOP-021]
     reason: "The Filter does not end with /."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee/"
     fails: grammar
 
@@ -374,7 +374,7 @@ vectors:
     violates: [REQ-TOP-021]
     reason: "The Filter does not start with /."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU//oee"
     fails: grammar
 
@@ -384,7 +384,7 @@ vectors:
     violates: [REQ-TOP-021]
     reason: "A Filter level is not empty (MG 7.7, SF-040 c)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data//oee"
     fails: grammar
 
@@ -394,7 +394,7 @@ vectors:
     violates: [REQ-TOP-009]
     reason: "The AppId is one non-empty topic level."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector//Pub/Health"
     fails: grammar
 
@@ -404,7 +404,7 @@ vectors:
     violates: [REQ-IL-002]
     reason: "The Identification Link is base64url-encoded in the topic."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/provider.com/FieldDataService/FDS-001/1200-0345/Pub/Health"
     fails: grammar
 
@@ -414,7 +414,7 @@ vectors:
     violates: [REQ-IL-004]
     reason: "Padding characters = are omitted."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU=/Pub/Health"
     fails: grammar
 
@@ -424,7 +424,7 @@ vectors:
     violates: [REQ-IL-003]
     reason: "The standard Base64 alphabet contains + and /."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM/aHR0cHM6Ly9leGFtcGxlLmNvbS9+c24/Uz0xMDAw"
     fails: grammar
 
@@ -434,7 +434,7 @@ vectors:
     violates: [REQ-IL-004]
     reason: "The unused bits of the last character are not zero; the canonical encoding ends with U."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDV/Pub/Health"
     fails: grammar
 
@@ -444,7 +444,7 @@ vectors:
     violates: [REQ-IL-004]
     reason: "No base64url string without padding has a length of 1 modulo 4."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/YWJjZ/Pub/Health"
     fails: grammar
 
@@ -454,7 +454,7 @@ vectors:
     violates: [REQ-IL-019]
     reason: "An Identification Link of 256 characters exceeds the maximum length."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/ZXhhbXBsZS5jb20vYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ/Pub/Health"
     fails: grammar
 
@@ -464,7 +464,7 @@ vectors:
     violates: [REQ-IL-018]
     reason: "The authority of an Identification Link is lower case."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM/Q29tcGFueS5pZC9BODdCQUQzNEg"
     fails: identification-link
 
@@ -474,7 +474,7 @@ vectors:
     violates: [REQ-IL-016]
     reason: "Space is not permitted in an Identification Link."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/Y29tcGFueS5pZC9BIDE/Pub/Health"
     fails: identification-link
 
@@ -484,7 +484,7 @@ vectors:
     violates: [REQ-IL-016]
     reason: "Non-ASCII characters are not permitted in an Identification Link."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM/Y29tcGFueS5pZC9HZXLDpHQ"
     fails: identification-link
 
@@ -494,7 +494,7 @@ vectors:
     violates: [REQ-IL-009]
     reason: "The authority is mandatory."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM/aHR0cHM6Ly8vQTg3QkFEMzRI"
     fails: identification-link
 
@@ -504,7 +504,7 @@ vectors:
     violates: [REQ-TOP-001]
     reason: "Method and Resource are mandatory."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub"
     fails: grammar
 
@@ -514,7 +514,7 @@ vectors:
     violates: [REQ-TOP-001]
     reason: "The topic starts with the namespace element."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "/Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health"
     fails: grammar
 
@@ -524,6 +524,6 @@ vectors:
     violates: [REQ-TOP-001]
     reason: "A Resource is followed by \"/\" and a filter or by the end of the topic; a regex anchored with \"$\" accepts this topic in Python unless re.fullmatch is used."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health\n"
     fails: grammar

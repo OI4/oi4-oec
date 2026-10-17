@@ -7,66 +7,66 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-TOP-001](#v-top-001) | MG 4.2 example: Get MAM of a device sent to an application | valid | rule get-mam | guideline MG 4.2 | draft |
-| [V-TOP-002](#v-top-002) | MG 7 example: Pub Health of a device | valid | rule pub-health | guideline MG 7 | draft |
-| [V-TOP-003](#v-top-003) | MG B1.1.1: Get MAM with Source | valid | rule get-mam | guideline MG B1.1.1 | draft |
-| [V-TOP-004](#v-top-004) | MG B1.1.1: Get MAM | valid | rule get-mam | guideline MG B1.1.1 | draft |
-| [V-TOP-005](#v-top-005) | MG B1.1.1: Pub MAM with Source | valid | rule pub-mam | guideline MG B1.1.1 | draft |
-| [V-TOP-006](#v-top-006) | MG B1.1.1: Pub MAM | valid | rule pub-mam | guideline MG B1.1.1 | draft |
-| [V-TOP-007](#v-top-007) | MG B1.1.2: Get Health with Source | valid | rule get-health | guideline MG B1.1.2 | draft |
-| [V-TOP-008](#v-top-008) | MG B1.1.2: Get Health | valid | rule get-health | guideline MG B1.1.2 | draft |
-| [V-TOP-009](#v-top-009) | MG B1.1.2: Pub Health with Source | valid | rule pub-health | guideline MG B1.1.2 | draft |
-| [V-TOP-010](#v-top-010) | MG B1.1.2: Pub Health | valid | rule pub-health | guideline MG B1.1.2 | draft |
-| [V-TOP-011](#v-top-011) | MG B1.1.3: Get Config with Source and Filter Network settings | valid | rule get-config, warnings: whitespace | guideline MG B1.1.3 | draft |
-| [V-TOP-012](#v-top-012) | MG B1.1.3: Get Config with Source | valid | rule get-config | guideline MG B1.1.3 | draft |
-| [V-TOP-013](#v-top-013) | MG B1.1.3: Get Config | valid | rule get-config | guideline MG B1.1.3 | draft |
-| [V-TOP-014](#v-top-014) | MG B1.1.3: Pub Config with Source and Filter Network settings | valid | rule pub-config, warnings: whitespace | guideline MG B1.1.3 | draft |
-| [V-TOP-015](#v-top-015) | MG B1.1.3: Pub Config with Source | valid | rule pub-config | guideline MG B1.1.3 | draft |
-| [V-TOP-016](#v-top-016) | MG B1.1.3: Pub Config | valid | rule pub-config | guideline MG B1.1.3 | draft |
-| [V-TOP-017](#v-top-017) | MG B1.1.3: Set Config with Source and Filter Network settings | valid | rule set-config, warnings: whitespace | guideline MG B1.1.3 | draft |
-| [V-TOP-018](#v-top-018) | MG B1.1.3: Pub Event with Source and Filter Status/Good | valid | rule pub-event | guideline MG B1.1.3 | draft |
-| [V-TOP-019](#v-top-019) | MG B1.1.3: Get Config with Source and Filter Overall device settings | valid | rule get-config, warnings: whitespace | guideline MG B1.1.3 | draft |
-| [V-TOP-020](#v-top-020) | MG B1.1.3: Pub Config with Source and Filter Overall device settings | valid | rule pub-config, warnings: whitespace | guideline MG B1.1.3 | draft |
-| [V-TOP-021](#v-top-021) | MG B1.1.3: Set Config with Source and Filter Overall device settings | valid | rule set-config, warnings: whitespace | guideline MG B1.1.3 | draft |
-| [V-TOP-022](#v-top-022) | MG B1.1.4: Get Data with Source and Filter oee | valid | rule get-data | guideline MG B1.1.4 | draft |
-| [V-TOP-023](#v-top-023) | MG B1.1.4: Get Data with Source | valid | rule get-data | guideline MG B1.1.4 | draft |
-| [V-TOP-024](#v-top-024) | MG B1.1.4: Get Data | valid | rule get-data | guideline MG B1.1.4 | draft |
-| [V-TOP-025](#v-top-025) | MG B1.1.4: Pub Data with Source and Filter oee | valid | rule pub-data | guideline MG B1.1.4 | draft |
-| [V-TOP-026](#v-top-026) | MG B1.1.4: Pub Data with Source | valid | rule pub-data | guideline MG B1.1.4 | draft |
-| [V-TOP-027](#v-top-027) | MG B1.1.4: Pub Data | valid | rule pub-data | guideline MG B1.1.4 | draft |
-| [V-TOP-028](#v-top-028) | MG B1.1.4: Set Data with Source and Filter oee | valid | rule set-data | guideline MG B1.1.4 | draft |
-| [V-TOP-029](#v-top-029) | MG B1.1.5: Get Metadata with Source and Filter oee | valid | rule get-metadata | guideline MG B1.1.5 | draft |
-| [V-TOP-030](#v-top-030) | MG B1.1.5: Pub Metadata with Source and Filter oee | valid | rule pub-metadata | guideline MG B1.1.5 | draft |
-| [V-TOP-031](#v-top-031) | MG B1.1.5: Set Metadata with Source and Filter oee | valid | rule set-metadata | guideline MG B1.1.5 | draft |
-| [V-TOP-032](#v-top-032) | MG B1.1.6: Pub Event with Source and Filter Syslog/Notice | valid | rule pub-event | guideline MG B1.1.6 | draft |
-| [V-TOP-033](#v-top-033) | MG B1.1.6: Pub Event with Source and Filter Generic/High | valid | rule pub-event | guideline MG B1.1.6 | draft |
-| [V-TOP-034](#v-top-034) | MG B1.1.7: Get Profile with Source | valid | rule get-profile | guideline MG B1.1.7 | draft |
-| [V-TOP-035](#v-top-035) | MG B1.1.7: Get Profile | valid | rule get-profile | guideline MG B1.1.7 | draft |
-| [V-TOP-036](#v-top-036) | MG B1.1.7: Pub Profile with Source | valid | rule pub-profile | guideline MG B1.1.7 | draft |
-| [V-TOP-037](#v-top-037) | MG B1.1.7: Pub Profile | valid | rule pub-profile | guideline MG B1.1.7 | draft |
-| [V-TOP-038](#v-top-038) | MG B1.1.8: Get PublicationList with Source and Filter Data/oee | valid | rule get-publicationlist | guideline MG B1.1.8 | draft |
-| [V-TOP-039](#v-top-039) | MG B1.1.8: Get PublicationList with Source | valid | rule get-publicationlist | guideline MG B1.1.8 | draft |
-| [V-TOP-040](#v-top-040) | MG B1.1.8: Get PublicationList | valid | rule get-publicationlist | guideline MG B1.1.8 | draft |
-| [V-TOP-041](#v-top-041) | MG B1.1.8: Pub PublicationList with Source and Filter Data/oee | valid | rule pub-publicationlist | guideline MG B1.1.8 | draft |
-| [V-TOP-042](#v-top-042) | MG B1.1.8: Pub PublicationList with Source | valid | rule pub-publicationlist | guideline MG B1.1.8 | draft |
-| [V-TOP-043](#v-top-043) | MG B1.1.8: Pub PublicationList | valid | rule pub-publicationlist | guideline MG B1.1.8 | draft |
-| [V-TOP-044](#v-top-044) | MG B1.1.8: Set PublicationList with Source and Filter Data/oee | valid | rule set-publicationlist | guideline MG B1.1.8 | draft |
-| [V-TOP-045](#v-top-045) | MG B1.1.9: Get SubscriptionList with Source and Filter Data/oee | valid | rule get-subscriptionlist | guideline MG B1.1.9 | draft |
-| [V-TOP-046](#v-top-046) | MG B1.1.9: Get SubscriptionList with Source | valid | rule get-subscriptionlist | guideline MG B1.1.9 | draft |
-| [V-TOP-047](#v-top-047) | MG B1.1.9: Get SubscriptionList | valid | rule get-subscriptionlist | guideline MG B1.1.9 | draft |
-| [V-TOP-048](#v-top-048) | MG B1.1.9: Pub SubscriptionList with Source and Filter Data/oee | valid | rule pub-subscriptionlist | guideline MG B1.1.9 | draft |
-| [V-TOP-049](#v-top-049) | MG B1.1.9: Pub SubscriptionList with Source | valid | rule pub-subscriptionlist | guideline MG B1.1.9 | draft |
-| [V-TOP-050](#v-top-050) | MG B1.1.9: Pub SubscriptionList | valid | rule pub-subscriptionlist | guideline MG B1.1.9 | draft |
-| [V-TOP-051](#v-top-051) | MG B1.1.9: Set SubscriptionList with Source and Filter Data/oee | valid | rule set-subscriptionlist | guideline MG B1.1.9 | draft |
-| [V-TOP-052](#v-top-052) | MG B1.1.9: Del SubscriptionList with Source and Filter Data/oee | valid | rule del-subscriptionlist | guideline MG B1.1.9 | draft |
-| [V-TOP-053](#v-top-053) | MG B1.1.10: Get ReferenceDesignation with Source | valid | rule get-referencedesignation | guideline MG B1.1.10 | draft |
-| [V-TOP-054](#v-top-054) | MG B1.1.10: Get ReferenceDesignation | valid | rule get-referencedesignation | guideline MG B1.1.10 | draft |
-| [V-TOP-055](#v-top-055) | MG B1.1.10: Pub ReferenceDesignation with Source | valid | rule pub-referencedesignation | guideline MG B1.1.10 | draft |
-| [V-TOP-056](#v-top-056) | MG B1.1.10: Pub ReferenceDesignation | valid | rule pub-referencedesignation | guideline MG B1.1.10 | draft |
-| [V-TOP-057](#v-top-057) | MG B1.1.10: Set ReferenceDesignation with Source | valid | rule set-referencedesignation | guideline MG B1.1.10 | draft |
-| [V-TOP-058](#v-top-058) | MG B1.1.10: Del ReferenceDesignation with Source | valid | rule del-referencedesignation | guideline MG B1.1.10 | draft |
-| [V-TOP-059](#v-top-059) | MG B1.2.1: Call NewDataSetWriterId | valid | rule call-newdatasetwriterid | guideline MG B1.2.1 | draft |
-| [V-TOP-060](#v-top-060) | MG B1.2.1: Reply NewDataSetWriterId | valid | rule reply-newdatasetwriterid | guideline MG B1.2.1 | draft |
+| [V-TOP-001](#v-top-001) | MG 4.2 example: Get MAM of a device sent to an application | valid | rule get-mam | guideline MG 4.2 | reviewed |
+| [V-TOP-002](#v-top-002) | MG 7 example: Pub Health of a device | valid | rule pub-health | guideline MG 7 | reviewed |
+| [V-TOP-003](#v-top-003) | MG B1.1.1: Get MAM with Source | valid | rule get-mam | guideline MG B1.1.1 | reviewed |
+| [V-TOP-004](#v-top-004) | MG B1.1.1: Get MAM | valid | rule get-mam | guideline MG B1.1.1 | reviewed |
+| [V-TOP-005](#v-top-005) | MG B1.1.1: Pub MAM with Source | valid | rule pub-mam | guideline MG B1.1.1 | reviewed |
+| [V-TOP-006](#v-top-006) | MG B1.1.1: Pub MAM | valid | rule pub-mam | guideline MG B1.1.1 | reviewed |
+| [V-TOP-007](#v-top-007) | MG B1.1.2: Get Health with Source | valid | rule get-health | guideline MG B1.1.2 | reviewed |
+| [V-TOP-008](#v-top-008) | MG B1.1.2: Get Health | valid | rule get-health | guideline MG B1.1.2 | reviewed |
+| [V-TOP-009](#v-top-009) | MG B1.1.2: Pub Health with Source | valid | rule pub-health | guideline MG B1.1.2 | reviewed |
+| [V-TOP-010](#v-top-010) | MG B1.1.2: Pub Health | valid | rule pub-health | guideline MG B1.1.2 | reviewed |
+| [V-TOP-011](#v-top-011) | MG B1.1.3: Get Config with Source and Filter Network settings | valid | rule get-config, warnings: whitespace | guideline MG B1.1.3 | reviewed |
+| [V-TOP-012](#v-top-012) | MG B1.1.3: Get Config with Source | valid | rule get-config | guideline MG B1.1.3 | reviewed |
+| [V-TOP-013](#v-top-013) | MG B1.1.3: Get Config | valid | rule get-config | guideline MG B1.1.3 | reviewed |
+| [V-TOP-014](#v-top-014) | MG B1.1.3: Pub Config with Source and Filter Network settings | valid | rule pub-config, warnings: whitespace | guideline MG B1.1.3 | reviewed |
+| [V-TOP-015](#v-top-015) | MG B1.1.3: Pub Config with Source | valid | rule pub-config | guideline MG B1.1.3 | reviewed |
+| [V-TOP-016](#v-top-016) | MG B1.1.3: Pub Config | valid | rule pub-config | guideline MG B1.1.3 | reviewed |
+| [V-TOP-017](#v-top-017) | MG B1.1.3: Set Config with Source and Filter Network settings | valid | rule set-config, warnings: whitespace | guideline MG B1.1.3 | reviewed |
+| [V-TOP-018](#v-top-018) | MG B1.1.3: Pub Event with Source and Filter Status/Good | valid | rule pub-event | guideline MG B1.1.3 | reviewed |
+| [V-TOP-019](#v-top-019) | MG B1.1.3: Get Config with Source and Filter Overall device settings | valid | rule get-config, warnings: whitespace | guideline MG B1.1.3 | reviewed |
+| [V-TOP-020](#v-top-020) | MG B1.1.3: Pub Config with Source and Filter Overall device settings | valid | rule pub-config, warnings: whitespace | guideline MG B1.1.3 | reviewed |
+| [V-TOP-021](#v-top-021) | MG B1.1.3: Set Config with Source and Filter Overall device settings | valid | rule set-config, warnings: whitespace | guideline MG B1.1.3 | reviewed |
+| [V-TOP-022](#v-top-022) | MG B1.1.4: Get Data with Source and Filter oee | valid | rule get-data | guideline MG B1.1.4 | reviewed |
+| [V-TOP-023](#v-top-023) | MG B1.1.4: Get Data with Source | valid | rule get-data | guideline MG B1.1.4 | reviewed |
+| [V-TOP-024](#v-top-024) | MG B1.1.4: Get Data | valid | rule get-data | guideline MG B1.1.4 | reviewed |
+| [V-TOP-025](#v-top-025) | MG B1.1.4: Pub Data with Source and Filter oee | valid | rule pub-data | guideline MG B1.1.4 | reviewed |
+| [V-TOP-026](#v-top-026) | MG B1.1.4: Pub Data with Source | valid | rule pub-data | guideline MG B1.1.4 | reviewed |
+| [V-TOP-027](#v-top-027) | MG B1.1.4: Pub Data | valid | rule pub-data | guideline MG B1.1.4 | reviewed |
+| [V-TOP-028](#v-top-028) | MG B1.1.4: Set Data with Source and Filter oee | valid | rule set-data | guideline MG B1.1.4 | reviewed |
+| [V-TOP-029](#v-top-029) | MG B1.1.5: Get Metadata with Source and Filter oee | valid | rule get-metadata | guideline MG B1.1.5 | reviewed |
+| [V-TOP-030](#v-top-030) | MG B1.1.5: Pub Metadata with Source and Filter oee | valid | rule pub-metadata | guideline MG B1.1.5 | reviewed |
+| [V-TOP-031](#v-top-031) | MG B1.1.5: Set Metadata with Source and Filter oee | valid | rule set-metadata | guideline MG B1.1.5 | reviewed |
+| [V-TOP-032](#v-top-032) | MG B1.1.6: Pub Event with Source and Filter Syslog/Notice | valid | rule pub-event | guideline MG B1.1.6 | reviewed |
+| [V-TOP-033](#v-top-033) | MG B1.1.6: Pub Event with Source and Filter Generic/High | valid | rule pub-event | guideline MG B1.1.6 | reviewed |
+| [V-TOP-034](#v-top-034) | MG B1.1.7: Get Profile with Source | valid | rule get-profile | guideline MG B1.1.7 | reviewed |
+| [V-TOP-035](#v-top-035) | MG B1.1.7: Get Profile | valid | rule get-profile | guideline MG B1.1.7 | reviewed |
+| [V-TOP-036](#v-top-036) | MG B1.1.7: Pub Profile with Source | valid | rule pub-profile | guideline MG B1.1.7 | reviewed |
+| [V-TOP-037](#v-top-037) | MG B1.1.7: Pub Profile | valid | rule pub-profile | guideline MG B1.1.7 | reviewed |
+| [V-TOP-038](#v-top-038) | MG B1.1.8: Get PublicationList with Source and Filter Data/oee | valid | rule get-publicationlist | guideline MG B1.1.8 | reviewed |
+| [V-TOP-039](#v-top-039) | MG B1.1.8: Get PublicationList with Source | valid | rule get-publicationlist | guideline MG B1.1.8 | reviewed |
+| [V-TOP-040](#v-top-040) | MG B1.1.8: Get PublicationList | valid | rule get-publicationlist | guideline MG B1.1.8 | reviewed |
+| [V-TOP-041](#v-top-041) | MG B1.1.8: Pub PublicationList with Source and Filter Data/oee | valid | rule pub-publicationlist | guideline MG B1.1.8 | reviewed |
+| [V-TOP-042](#v-top-042) | MG B1.1.8: Pub PublicationList with Source | valid | rule pub-publicationlist | guideline MG B1.1.8 | reviewed |
+| [V-TOP-043](#v-top-043) | MG B1.1.8: Pub PublicationList | valid | rule pub-publicationlist | guideline MG B1.1.8 | reviewed |
+| [V-TOP-044](#v-top-044) | MG B1.1.8: Set PublicationList with Source and Filter Data/oee | valid | rule set-publicationlist | guideline MG B1.1.8 | reviewed |
+| [V-TOP-045](#v-top-045) | MG B1.1.9: Get SubscriptionList with Source and Filter Data/oee | valid | rule get-subscriptionlist | guideline MG B1.1.9 | reviewed |
+| [V-TOP-046](#v-top-046) | MG B1.1.9: Get SubscriptionList with Source | valid | rule get-subscriptionlist | guideline MG B1.1.9 | reviewed |
+| [V-TOP-047](#v-top-047) | MG B1.1.9: Get SubscriptionList | valid | rule get-subscriptionlist | guideline MG B1.1.9 | reviewed |
+| [V-TOP-048](#v-top-048) | MG B1.1.9: Pub SubscriptionList with Source and Filter Data/oee | valid | rule pub-subscriptionlist | guideline MG B1.1.9 | reviewed |
+| [V-TOP-049](#v-top-049) | MG B1.1.9: Pub SubscriptionList with Source | valid | rule pub-subscriptionlist | guideline MG B1.1.9 | reviewed |
+| [V-TOP-050](#v-top-050) | MG B1.1.9: Pub SubscriptionList | valid | rule pub-subscriptionlist | guideline MG B1.1.9 | reviewed |
+| [V-TOP-051](#v-top-051) | MG B1.1.9: Set SubscriptionList with Source and Filter Data/oee | valid | rule set-subscriptionlist | guideline MG B1.1.9 | reviewed |
+| [V-TOP-052](#v-top-052) | MG B1.1.9: Del SubscriptionList with Source and Filter Data/oee | valid | rule del-subscriptionlist | guideline MG B1.1.9 | reviewed |
+| [V-TOP-053](#v-top-053) | MG B1.1.10: Get ReferenceDesignation with Source | valid | rule get-referencedesignation | guideline MG B1.1.10 | reviewed |
+| [V-TOP-054](#v-top-054) | MG B1.1.10: Get ReferenceDesignation | valid | rule get-referencedesignation | guideline MG B1.1.10 | reviewed |
+| [V-TOP-055](#v-top-055) | MG B1.1.10: Pub ReferenceDesignation with Source | valid | rule pub-referencedesignation | guideline MG B1.1.10 | reviewed |
+| [V-TOP-056](#v-top-056) | MG B1.1.10: Pub ReferenceDesignation | valid | rule pub-referencedesignation | guideline MG B1.1.10 | reviewed |
+| [V-TOP-057](#v-top-057) | MG B1.1.10: Set ReferenceDesignation with Source | valid | rule set-referencedesignation | guideline MG B1.1.10 | reviewed |
+| [V-TOP-058](#v-top-058) | MG B1.1.10: Del ReferenceDesignation with Source | valid | rule del-referencedesignation | guideline MG B1.1.10 | reviewed |
+| [V-TOP-059](#v-top-059) | MG B1.2.1: Call NewDataSetWriterId | valid | rule call-newdatasetwriterid | guideline MG B1.2.1 | reviewed |
+| [V-TOP-060](#v-top-060) | MG B1.2.1: Reply NewDataSetWriterId | valid | rule reply-newdatasetwriterid | guideline MG B1.2.1 | reviewed |
 
 ## V-TOP-001
 
@@ -80,7 +80,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG 4.2
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-002
 
@@ -94,7 +94,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG 7
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-003
 
@@ -108,7 +108,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-004
 
@@ -121,7 +121,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-005
 
@@ -135,7 +135,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-006
 
@@ -148,7 +148,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-007
 
@@ -162,7 +162,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-008
 
@@ -175,7 +175,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-009
 
@@ -189,7 +189,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-010
 
@@ -202,7 +202,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-011
 
@@ -218,7 +218,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022), [REQ-TOP-020](../../requirements/view/top.md#req-top-020)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-012
 
@@ -232,7 +232,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-013
 
@@ -245,7 +245,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-014
 
@@ -261,7 +261,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022), [REQ-TOP-020](../../requirements/view/top.md#req-top-020)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-015
 
@@ -275,7 +275,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-016
 
@@ -288,7 +288,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-017
 
@@ -304,7 +304,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022), [REQ-TOP-020](../../requirements/view/top.md#req-top-020)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-018
 
@@ -319,7 +319,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-019
 
@@ -335,7 +335,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022), [REQ-TOP-020](../../requirements/view/top.md#req-top-020)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-020
 
@@ -351,7 +351,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022), [REQ-TOP-020](../../requirements/view/top.md#req-top-020)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-021
 
@@ -367,7 +367,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022), [REQ-TOP-020](../../requirements/view/top.md#req-top-020)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-022
 
@@ -382,7 +382,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-023
 
@@ -396,7 +396,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-024
 
@@ -409,7 +409,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-025
 
@@ -424,7 +424,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-026
 
@@ -438,7 +438,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-027
 
@@ -451,7 +451,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-028
 
@@ -466,7 +466,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-029
 
@@ -481,7 +481,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.5
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-030
 
@@ -496,7 +496,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.5
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-031
 
@@ -511,7 +511,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.5
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-032
 
@@ -526,7 +526,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: guideline MG B1.1.6
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-033
 
@@ -541,7 +541,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: guideline MG B1.1.6
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-034
 
@@ -555,7 +555,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.7
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-035
 
@@ -568,7 +568,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.7
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-036
 
@@ -582,7 +582,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.7
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-037
 
@@ -595,7 +595,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.7
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-038
 
@@ -610,7 +610,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-039
 
@@ -624,7 +624,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-040
 
@@ -637,7 +637,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-041
 
@@ -652,7 +652,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-042
 
@@ -666,7 +666,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-043
 
@@ -679,7 +679,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-044
 
@@ -694,7 +694,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-045
 
@@ -709,7 +709,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-046
 
@@ -723,7 +723,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-047
 
@@ -736,7 +736,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-048
 
@@ -751,7 +751,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-049
 
@@ -765,7 +765,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-050
 
@@ -778,7 +778,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-051
 
@@ -793,7 +793,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-052
 
@@ -808,7 +808,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-053
 
@@ -822,7 +822,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-054
 
@@ -835,7 +835,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-055
 
@@ -849,7 +849,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-056
 
@@ -862,7 +862,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-057
 
@@ -876,7 +876,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-058
 
@@ -890,7 +890,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-059
 
@@ -903,7 +903,7 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-016](../../requirements/view/top.md#req-top-016)
 - Origin: guideline MG B1.2.1
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-060
 
@@ -916,4 +916,4 @@ Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1). Vecto
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-016](../../requirements/view/top.md#req-top-016)
 - Origin: guideline MG B1.2.1
-- Status: draft
+- Status: reviewed

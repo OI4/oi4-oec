@@ -1,4 +1,4 @@
-# Test vectors of kind oi4identifier (C-018, ADR-0018); status draft until the PO review.
+# Test vectors of kind oi4identifier (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: oi4identifier
 baseline: "fd9da6e"
@@ -14,7 +14,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-022]
     origin: {kind: guideline, ref: MG 4.3.1}
-    status: draft
+    status: reviewed
     manufacturer_uri: "provider.com"
     model: "FieldDataService"
     product_code: "FDS-001"
@@ -26,7 +26,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-022]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     manufacturer_uri: "example.com"
     model: "MyModel"
     product_code: "MyProductCode"
@@ -39,7 +39,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-022, REQ-IL-032, REQ-IL-033]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     manufacturer_uri: "example.com"
     model: "ABC DEF"
     product_code: "123.456/3&8"
@@ -51,7 +51,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-022, REQ-IL-023, REQ-IL-032, REQ-IL-033]
     origin: {kind: guideline, ref: MG A3}
-    status: draft
+    status: reviewed
     manufacturer_uri: "Example.com"
     model: "ABC@home"
     product_code: "ABC*33<4"
@@ -64,7 +64,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-022, REQ-IL-028]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "provider.com"
     model: ""
     product_code: ""
@@ -76,7 +76,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-024]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "id.provider.com"
     model: "M"
     product_code: "P"
@@ -89,7 +89,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-022, REQ-IL-032, REQ-IL-033]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "provider.com"
     model: "Gerät"
     product_code: "P-1"
@@ -103,7 +103,7 @@ vectors:
     violates: [REQ-IL-024]
     reason: "The third-level domain www. is excluded."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "www.provider.com"
     model: "M"
     product_code: "P"
@@ -116,7 +116,7 @@ vectors:
     violates: [REQ-IL-024]
     reason: "The scheme is excluded."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "https://provider.com"
     model: "M"
     product_code: "P"
@@ -129,7 +129,7 @@ vectors:
     violates: [REQ-IL-024]
     reason: "The form is <manufacturer>.<tld>."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "provider"
     model: "M"
     product_code: "P"
@@ -142,7 +142,7 @@ vectors:
     violates: [REQ-IL-024]
     reason: "The ManufacturerUri is a domain name only."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "provider.com/x"
     model: "M"
     product_code: "P"
@@ -155,7 +155,7 @@ vectors:
     violates: [REQ-IL-029]
     reason: "The whole Oi4Identifier has at most 255 characters."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "provider.com"
     model: "M"
     product_code: "P"
@@ -168,7 +168,7 @@ vectors:
     violates: [REQ-IL-029]
     reason: "Each # becomes three characters; the result exceeds 255 characters."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     manufacturer_uri: "provider.com"
     model: "M"
     product_code: "P"

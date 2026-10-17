@@ -1,4 +1,4 @@
-# Test vectors of kind topic (C-018, ADR-0018); status draft until the PO review.
+# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
 baseline: "fd9da6e"
@@ -12,7 +12,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/Registry/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"
@@ -29,7 +29,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"
@@ -46,7 +46,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/Utility/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"
@@ -63,7 +63,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/Persistence/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"
@@ -80,7 +80,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/Aggregation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"
@@ -97,7 +97,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OOCConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"
@@ -114,7 +114,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/ITConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"
@@ -131,7 +131,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-019]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/Y29tcGFueS5pZC9BODdCQUQzNEg/a%2Bb%23c%2Fd%25e"
     parse:
       rule: "pub-data"
@@ -150,7 +150,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-019]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/Y29tcGFueS5pZC9BODdCQUQzNEg/Temperatur-Ü°"
     parse:
       rule: "pub-data"
@@ -169,7 +169,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data/Y29tcGFueS5pZC9BODdCQUQzNEg/Oi4Pv"
     parse:
       rule: "get-data"
@@ -188,7 +188,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Debug"
     parse:
       rule: "pub-event"
@@ -207,7 +207,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Informational"
     parse:
       rule: "pub-event"
@@ -226,7 +226,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Warning"
     parse:
       rule: "pub-event"
@@ -245,7 +245,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Error"
     parse:
       rule: "pub-event"
@@ -264,7 +264,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Critical"
     parse:
       rule: "pub-event"
@@ -283,7 +283,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Alert"
     parse:
       rule: "pub-event"
@@ -302,7 +302,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Syslog/Emergency"
     parse:
       rule: "pub-event"
@@ -321,7 +321,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Status/Uncertain"
     parse:
       rule: "pub-event"
@@ -340,7 +340,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Status/Bad"
     parse:
       rule: "pub-event"
@@ -359,7 +359,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023, REQ-TOP-019]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/Utility/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/Y29tcGFueS5pZC9BODdCQUQzNEg/Generic/Level%2F2"
     parse:
       rule: "pub-event"
@@ -378,7 +378,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023, REQ-TOP-022]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/PublicationList/Y29tcGFueS5pZC9BODdCQUQzNEg/Event/Syslog/Debug"
     parse:
       rule: "pub-publicationlist"
@@ -397,7 +397,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList/Y29tcGFueS5pZC9BODdCQUQzNEg/MAM"
     parse:
       rule: "get-subscriptionlist"
@@ -416,7 +416,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/PublicationList/Y29tcGFueS5pZC9BODdCQUQzNEg/Config/NetworkSettings"
     parse:
       rule: "get-publicationlist"
@@ -435,7 +435,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/Y29tcGFueS5pZC9BODdCQUQzNEg/Data/oee"
     parse:
       rule: "set-publicationlist"
@@ -454,7 +454,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-023, REQ-TOP-022]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/SubscriptionList/Y29tcGFueS5pZC9BODdCQUQzNEg/Event/Status/Good"
     parse:
       rule: "del-subscriptionlist"
@@ -473,7 +473,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-016]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId/Y29tcGFueS5pZC9BODdCQUQzNEg"
     parse:
       rule: "call-newdatasetwriterid"
@@ -491,7 +491,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-016]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId/Y29tcGFueS5pZC9BODdCQUQzNEg"
     parse:
       rule: "reply-newdatasetwriterid"
@@ -509,7 +509,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-IL-019]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/ZXhhbXBsZS5jb20vYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFh/Pub/Health"
     parse:
       rule: "pub-health"
@@ -524,7 +524,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/YQ/Pub/MAM"
     parse:
       rule: "pub-mam"
@@ -539,7 +539,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/YWI/Pub/MAM"
     parse:
       rule: "pub-mam"
@@ -554,7 +554,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-IL-003]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/ITConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/aHR0cHM6Ly9leGFtcGxlLmNvbS9-c24_Uz0xMDAw"
     parse:
       rule: "pub-mam"
@@ -571,7 +571,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
     parse:
       rule: "set-config"
@@ -591,7 +591,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-020]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/Y29tcGFueS5pZC9BODdCQUQzNEg/a\tb"
     parse:
       rule: "pub-data"
@@ -611,7 +611,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-022, REQ-TOP-019]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/Y29tcGFueS5pZC9BODdCQUQzNEg/x%25"
     parse:
       rule: "pub-metadata"

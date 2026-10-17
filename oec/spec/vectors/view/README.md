@@ -5,11 +5,11 @@ Guideline baseline: `fd9da6e`. Source of truth: the YAML files in `oec/spec/vect
 
 | View | Source | Kind | Vectors | Valid | Invalid | Golden | Draft | Reviewed |
 |---|---|---|---:|---:|---:|---:|---:|---:|
-| [il-dnp-encoding](il-dnp-encoding.md) | `vectors/il/dnp-encoding.yaml` | dnp-encoding | 15 | 15 | 0 | 9 | 15 | 0 |
-| [il-identification-link](il-identification-link.md) | `vectors/il/identification-link.yaml` | identification-link | 29 | 12 | 17 | 7 | 29 | 0 |
-| [il-oi4identifier](il-oi4identifier.md) | `vectors/il/oi4identifier.yaml` | oi4identifier | 13 | 7 | 6 | 4 | 13 | 0 |
-| [topic-guideline](topic-guideline.md) | `vectors/topic/guideline.yaml` | topic | 60 | 60 | 0 | 60 | 60 | 0 |
-| [topic-invalid](topic-invalid.md) | `vectors/topic/invalid.yaml` | topic | 52 | 0 | 52 | 0 | 52 | 0 |
-| [topic-valid](topic-valid.md) | `vectors/topic/valid.yaml` | topic | 34 | 34 | 0 | 0 | 34 | 0 |
+| [il-dnp-encoding](il-dnp-encoding.md) | `vectors/il/dnp-encoding.yaml` | dnp-encoding | 15 | 15 | 0 | 9 | 0 | 15 |
+| [il-identification-link](il-identification-link.md) | `vectors/il/identification-link.yaml` | identification-link | 29 | 12 | 17 | 7 | 0 | 29 |
+| [il-oi4identifier](il-oi4identifier.md) | `vectors/il/oi4identifier.yaml` | oi4identifier | 13 | 7 | 6 | 4 | 0 | 13 |
+| [topic-guideline](topic-guideline.md) | `vectors/topic/guideline.yaml` | topic | 60 | 60 | 0 | 60 | 0 | 60 |
+| [topic-invalid](topic-invalid.md) | `vectors/topic/invalid.yaml` | topic | 52 | 0 | 52 | 0 | 0 | 52 |
+| [topic-valid](topic-valid.md) | `vectors/topic/valid.yaml` | topic | 34 | 34 | 0 | 0 | 0 | 34 |
 
 Golden = taken from the guideline (`origin.kind: guideline`); all others are constructed. Vectors stay `draft` until the PO confirms them (G-3.9).

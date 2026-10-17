@@ -7,21 +7,21 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-DNP-001](#v-dnp-001) | MG A3 Table 5: MyModel | valid | → MyModel | guideline MG A3 | draft |
-| [V-DNP-002](#v-dnp-002) | MG A3 Table 5: ABC DEF | valid | → ABC,20DEF | guideline MG A3 | draft |
-| [V-DNP-003](#v-dnp-003) | MG A3 Table 5: 123.456/3&8 | valid | → 123.456,2F3,268 | guideline MG A3 | draft |
-| [V-DNP-004](#v-dnp-004) | MG A3 Table 5: 123456#33 | valid | → 123456,2333 | guideline MG A3 | draft |
-| [V-DNP-005](#v-dnp-005) | MG A3 Table 5: ABC@home | valid | → ABC,40home | guideline MG A3 | draft |
-| [V-DNP-006](#v-dnp-006) | MG A3 Table 5: ABC*33<4 | valid | → ABC,2A33,3C4 | guideline MG A3 | draft |
-| [V-DNP-007](#v-dnp-007) | MG A3 Table 5: 20123.4 | valid | → 20123.4 | guideline MG A3 | draft |
-| [V-DNP-008](#v-dnp-008) | MG A3 example: product code with spaces | valid | → Edge,20Gateway,20,3E4GB | guideline MG A3 | draft |
-| [V-DNP-009](#v-dnp-009) | MG A3 example: serial number with special characters | valid | → ,2320815,212205,2B1432 | guideline MG A3 | draft |
-| [V-DNP-010](#v-dnp-010) | Unreserved characters stay | valid | → Az09-._~ | constructed | draft |
-| [V-DNP-011](#v-dnp-011) | All reserved characters (Table 4) | valid | → ,23,2F,3A,3F,40,5B,5D,21,24,26,27,28,29,2A,2B,2C,3B,3D | constructed | draft |
-| [V-DNP-012](#v-dnp-012) | All prohibited printable characters (Table 4) | valid | → ,20,22,25,3C,3E,5C,5E,60,7B,7C,7D | constructed | draft |
-| [V-DNP-013](#v-dnp-013) | Comma masks itself | valid | → a,2Cb | constructed | draft |
-| [V-DNP-014](#v-dnp-014) | Non-ASCII character: every UTF-8 octet | valid | → Ger,C3,A4t | constructed | draft |
-| [V-DNP-015](#v-dnp-015) | Control character | valid | → a,09b | constructed | draft |
+| [V-DNP-001](#v-dnp-001) | MG A3 Table 5: MyModel | valid | → MyModel | guideline MG A3 | reviewed |
+| [V-DNP-002](#v-dnp-002) | MG A3 Table 5: ABC DEF | valid | → ABC,20DEF | guideline MG A3 | reviewed |
+| [V-DNP-003](#v-dnp-003) | MG A3 Table 5: 123.456/3&8 | valid | → 123.456,2F3,268 | guideline MG A3 | reviewed |
+| [V-DNP-004](#v-dnp-004) | MG A3 Table 5: 123456#33 | valid | → 123456,2333 | guideline MG A3 | reviewed |
+| [V-DNP-005](#v-dnp-005) | MG A3 Table 5: ABC@home | valid | → ABC,40home | guideline MG A3 | reviewed |
+| [V-DNP-006](#v-dnp-006) | MG A3 Table 5: ABC*33<4 | valid | → ABC,2A33,3C4 | guideline MG A3 | reviewed |
+| [V-DNP-007](#v-dnp-007) | MG A3 Table 5: 20123.4 | valid | → 20123.4 | guideline MG A3 | reviewed |
+| [V-DNP-008](#v-dnp-008) | MG A3 example: product code with spaces | valid | → Edge,20Gateway,20,3E4GB | guideline MG A3 | reviewed |
+| [V-DNP-009](#v-dnp-009) | MG A3 example: serial number with special characters | valid | → ,2320815,212205,2B1432 | guideline MG A3 | reviewed |
+| [V-DNP-010](#v-dnp-010) | Unreserved characters stay | valid | → Az09-._~ | constructed | reviewed |
+| [V-DNP-011](#v-dnp-011) | All reserved characters (Table 4) | valid | → ,23,2F,3A,3F,40,5B,5D,21,24,26,27,28,29,2A,2B,2C,3B,3D | constructed | reviewed |
+| [V-DNP-012](#v-dnp-012) | All prohibited printable characters (Table 4) | valid | → ,20,22,25,3C,3E,5C,5E,60,7B,7C,7D | constructed | reviewed |
+| [V-DNP-013](#v-dnp-013) | Comma masks itself | valid | → a,2Cb | constructed | reviewed |
+| [V-DNP-014](#v-dnp-014) | Non-ASCII character: every UTF-8 octet | valid | → Ger,C3,A4t | constructed | reviewed |
+| [V-DNP-015](#v-dnp-015) | Control character | valid | → a,09b | constructed | reviewed |
 
 ## V-DNP-001
 
@@ -32,7 +32,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-002
 
@@ -43,7 +43,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-003
 
@@ -54,7 +54,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-004
 
@@ -65,7 +65,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-005
 
@@ -76,7 +76,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-006
 
@@ -87,7 +87,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-007
 
@@ -98,7 +98,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-008
 
@@ -109,7 +109,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-009
 
@@ -120,7 +120,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-010
 
@@ -131,7 +131,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-011
 
@@ -142,7 +142,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-012
 
@@ -153,7 +153,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-013
 
@@ -164,7 +164,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-DNP-014
 
@@ -175,7 +175,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: PO decision SF-043 (a) (C-020).
 
@@ -188,6 +188,6 @@ Notes: PO decision SF-043 (a) (C-020).
 - Expected: valid
 - Illustrates: [REQ-IL-032](../../requirements/view/il.md#req-il-032)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: PO decision SF-043 (a) (C-020).

@@ -7,58 +7,58 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-TOP-201](#v-top-201) | Namespace of version 1 | invalid | fails: grammar | constructed | draft |
-| [V-TOP-202](#v-top-202) | Namespace in wrong case | invalid | fails: grammar | constructed | draft |
-| [V-TOP-203](#v-top-203) | Unknown ServiceType | invalid | fails: grammar | constructed | draft |
-| [V-TOP-204](#v-top-204) | ServiceType in wrong case | invalid | fails: grammar | constructed | draft |
-| [V-TOP-205](#v-top-205) | Unknown Method | invalid | fails: grammar | constructed | draft |
-| [V-TOP-206](#v-top-206) | Vendor-specific Resource | invalid | fails: grammar | constructed | draft |
-| [V-TOP-207](#v-top-207) | Unknown service | invalid | fails: grammar | constructed | draft |
-| [V-TOP-208](#v-top-208) | Get Event | invalid | fails: grammar | constructed | draft |
-| [V-TOP-209](#v-top-209) | Del Config | invalid | fails: grammar | constructed | draft |
-| [V-TOP-210](#v-top-210) | Set MAM | invalid | fails: grammar | constructed | draft |
-| [V-TOP-211](#v-top-211) | Del Data | invalid | fails: grammar | constructed | draft |
-| [V-TOP-212](#v-top-212) | Pub Health with Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-213](#v-top-213) | Get ReferenceDesignation with Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-214](#v-top-214) | Set Config without Source | invalid | fails: grammar | constructed | draft |
-| [V-TOP-215](#v-top-215) | Set Data without Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-216](#v-top-216) | Pub Metadata without Tag | invalid | fails: grammar | constructed | draft |
-| [V-TOP-217](#v-top-217) | Pub Event without Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-218](#v-top-218) | Call with Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-219](#v-top-219) | Event with category only | invalid | fails: grammar | constructed | draft |
-| [V-TOP-220](#v-top-220) | Unknown Syslog level | invalid | fails: grammar | constructed | draft |
-| [V-TOP-221](#v-top-221) | Unknown event category | invalid | fails: grammar | constructed | draft |
-| [V-TOP-222](#v-top-222) | Status level in wrong case | invalid | fails: grammar | constructed | draft |
-| [V-TOP-223](#v-top-223) | Status level with symbolic name | invalid | fails: grammar | constructed | draft |
-| [V-TOP-224](#v-top-224) | Event with three Filter levels | invalid | fails: grammar | constructed | draft |
-| [V-TOP-225](#v-top-225) | Empty Generic level | invalid | fails: grammar | constructed | draft |
-| [V-TOP-226](#v-top-226) | Data Filter with two levels | invalid | fails: grammar | constructed | draft |
-| [V-TOP-227](#v-top-227) | Unknown ResourceType in a list Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-228](#v-top-228) | Tag for a ResourceType without Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-229](#v-top-229) | Space percent-encoded | invalid | fails: grammar | constructed | draft |
-| [V-TOP-230](#v-top-230) | Lower-case hex digits | invalid | fails: grammar | constructed | draft |
-| [V-TOP-231](#v-top-231) | Lone percent sign | invalid | fails: grammar | constructed | draft |
-| [V-TOP-232](#v-top-232) | Raw # in a Filter level | invalid | fails: grammar | constructed | draft |
-| [V-TOP-233](#v-top-233) | Single-level wildcard as Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-234](#v-top-234) | Multi-level wildcard as Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-235](#v-top-235) | NUL character in a Filter level | invalid | fails: grammar | constructed | draft |
-| [V-TOP-236](#v-top-236) | Filter ends with / | invalid | fails: grammar | constructed | draft |
-| [V-TOP-237](#v-top-237) | Filter starts with / | invalid | fails: grammar | constructed | draft |
-| [V-TOP-238](#v-top-238) | Empty level inside a list Filter | invalid | fails: grammar | constructed | draft |
-| [V-TOP-239](#v-top-239) | Empty AppId | invalid | fails: grammar | constructed | draft |
-| [V-TOP-240](#v-top-240) | Unencoded Identification Link as AppId | invalid | fails: grammar | constructed | draft |
-| [V-TOP-241](#v-top-241) | AppId with padding | invalid | fails: grammar | constructed | draft |
-| [V-TOP-242](#v-top-242) | Source in standard Base64 | invalid | fails: grammar | constructed | draft |
-| [V-TOP-243](#v-top-243) | Non-canonical last character | invalid | fails: grammar | constructed | draft |
-| [V-TOP-244](#v-top-244) | Encoded length 1 modulo 4 | invalid | fails: grammar | constructed | draft |
-| [V-TOP-245](#v-top-245) | AppId longer than 340 characters | invalid | fails: grammar | constructed | draft |
-| [V-TOP-246](#v-top-246) | Source with upper-case authority | invalid | fails: identification-link | constructed | draft |
-| [V-TOP-247](#v-top-247) | AppId with a space in the Identification Link | invalid | fails: identification-link | constructed | draft |
-| [V-TOP-248](#v-top-248) | Source with a non-ASCII Identification Link | invalid | fails: identification-link | constructed | draft |
-| [V-TOP-249](#v-top-249) | Source with an empty authority | invalid | fails: identification-link | constructed | draft |
-| [V-TOP-250](#v-top-250) | Missing Resource | invalid | fails: grammar | constructed | draft |
-| [V-TOP-251](#v-top-251) | Leading slash | invalid | fails: grammar | constructed | draft |
-| [V-TOP-252](#v-top-252) | Line break after the Resource | invalid | fails: grammar | constructed | draft |
+| [V-TOP-201](#v-top-201) | Namespace of version 1 | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-202](#v-top-202) | Namespace in wrong case | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-203](#v-top-203) | Unknown ServiceType | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-204](#v-top-204) | ServiceType in wrong case | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-205](#v-top-205) | Unknown Method | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-206](#v-top-206) | Vendor-specific Resource | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-207](#v-top-207) | Unknown service | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-208](#v-top-208) | Get Event | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-209](#v-top-209) | Del Config | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-210](#v-top-210) | Set MAM | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-211](#v-top-211) | Del Data | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-212](#v-top-212) | Pub Health with Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-213](#v-top-213) | Get ReferenceDesignation with Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-214](#v-top-214) | Set Config without Source | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-215](#v-top-215) | Set Data without Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-216](#v-top-216) | Pub Metadata without Tag | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-217](#v-top-217) | Pub Event without Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-218](#v-top-218) | Call with Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-219](#v-top-219) | Event with category only | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-220](#v-top-220) | Unknown Syslog level | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-221](#v-top-221) | Unknown event category | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-222](#v-top-222) | Status level in wrong case | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-223](#v-top-223) | Status level with symbolic name | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-224](#v-top-224) | Event with three Filter levels | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-225](#v-top-225) | Empty Generic level | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-226](#v-top-226) | Data Filter with two levels | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-227](#v-top-227) | Unknown ResourceType in a list Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-228](#v-top-228) | Tag for a ResourceType without Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-229](#v-top-229) | Space percent-encoded | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-230](#v-top-230) | Lower-case hex digits | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-231](#v-top-231) | Lone percent sign | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-232](#v-top-232) | Raw # in a Filter level | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-233](#v-top-233) | Single-level wildcard as Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-234](#v-top-234) | Multi-level wildcard as Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-235](#v-top-235) | NUL character in a Filter level | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-236](#v-top-236) | Filter ends with / | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-237](#v-top-237) | Filter starts with / | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-238](#v-top-238) | Empty level inside a list Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-239](#v-top-239) | Empty AppId | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-240](#v-top-240) | Unencoded Identification Link as AppId | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-241](#v-top-241) | AppId with padding | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-242](#v-top-242) | Source in standard Base64 | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-243](#v-top-243) | Non-canonical last character | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-244](#v-top-244) | Encoded length 1 modulo 4 | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-245](#v-top-245) | AppId longer than 340 characters | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-246](#v-top-246) | Source with upper-case authority | invalid | fails: identification-link | constructed | reviewed |
+| [V-TOP-247](#v-top-247) | AppId with a space in the Identification Link | invalid | fails: identification-link | constructed | reviewed |
+| [V-TOP-248](#v-top-248) | Source with a non-ASCII Identification Link | invalid | fails: identification-link | constructed | reviewed |
+| [V-TOP-249](#v-top-249) | Source with an empty authority | invalid | fails: identification-link | constructed | reviewed |
+| [V-TOP-250](#v-top-250) | Missing Resource | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-251](#v-top-251) | Leading slash | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-252](#v-top-252) | Line break after the Resource | invalid | fails: grammar | constructed | reviewed |
 
 ## V-TOP-201
 
@@ -69,7 +69,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The namespace element of this version is Oi4v2.
 - Violates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-202
 
@@ -80,7 +80,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Topics are case-sensitive; the namespace element is Oi4v2.
 - Violates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-203
 
@@ -91,7 +91,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Gateway is not a ServiceType of MG 7.2.
 - Violates: [REQ-TOP-005](../../requirements/view/top.md#req-top-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-204
 
@@ -102,7 +102,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – ServiceType values are case-sensitive.
 - Violates: [REQ-TOP-005](../../requirements/view/top.md#req-top-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-205
 
@@ -113,7 +113,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Post is not a Method of MG 7.4.
 - Violates: [REQ-TOP-011](../../requirements/view/top.md#req-top-011)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-206
 
@@ -124,7 +124,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The set of resources is closed.
 - Violates: [REQ-TOP-012](../../requirements/view/top.md#req-top-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-207
 
@@ -135,7 +135,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The set of services is closed (NewDataSetWriterId only).
 - Violates: [REQ-TOP-012](../../requirements/view/top.md#req-top-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-208
 
@@ -146,7 +146,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Event can only be published.
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-209
 
@@ -157,7 +157,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Del is only defined for ReferenceDesignation and SubscriptionList.
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-210
 
@@ -168,7 +168,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – MAM cannot be written.
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-211
 
@@ -179,7 +179,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Data cannot be deleted.
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-212
 
@@ -190,7 +190,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Health does not use a Filter (MG 7.7).
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-213
 
@@ -201,7 +201,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – ReferenceDesignation does not use a Filter (MG 7.7).
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-214
 
@@ -212,7 +212,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – A Set addresses one asset and one context: Source and Filter are required.
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-215
 
@@ -223,7 +223,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – A Set addresses one data set: Filter is required.
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-216
 
@@ -234,7 +234,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Metadata topics always carry Source and Tag (MG 9.1.5, SF-041 b).
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-217
 
@@ -245,7 +245,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – An Event is always published with category and level.
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-218
 
@@ -256,7 +256,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Call and Reply never carry a Filter (MG 7.4, SF-041 c).
 - Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-219
 
@@ -267,7 +267,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The Event Filter is <EventCategory>/<EventLevel>.
 - Violates: [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-220
 
@@ -278,7 +278,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Info is not one of the eight Syslog levels.
 - Violates: [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-221
 
@@ -289,7 +289,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The event categories are Syslog, Status and Generic (SF-042 b).
 - Violates: [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-222
 
@@ -300,7 +300,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The Status levels are Good, Uncertain and Bad.
 - Violates: [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-223
 
@@ -311,7 +311,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The topic level contains only the class of the status code (MG 7.7).
 - Violates: [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-224
 
@@ -322,7 +322,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The Event Filter has exactly two levels.
 - Violates: [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-225
 
@@ -333,7 +333,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – A Filter level is not empty and the Filter does not end with /.
 - Violates: [REQ-TOP-019](../../requirements/view/top.md#req-top-019), [REQ-TOP-021](../../requirements/view/top.md#req-top-021)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-226
 
@@ -344,7 +344,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – The Tag is one level; a / in its content is written as %2F.
 - Violates: [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-227
 
@@ -355,7 +355,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – ResourceType is a resource of MG 7.5.1.
 - Violates: [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-228
 
@@ -366,7 +366,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – MAM has no Filter, so the list Filter is <ResourceType> only.
 - Violates: [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-229
 
@@ -377,7 +377,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Only +, #, / and % are percent-encoded; %20 is not a valid sequence (MG 7.7, SF-040 b).
 - Violates: [REQ-TOP-019](../../requirements/view/top.md#req-top-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 d, C-020); the corrected form is a golden vector in guideline.yaml.
 
@@ -390,7 +390,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The four sequences use upper-case hex digits (SF-040 a).
 - Violates: [REQ-TOP-019](../../requirements/view/top.md#req-top-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-231
 
@@ -401,7 +401,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – A % in the content is written as %25.
 - Violates: [REQ-TOP-019](../../requirements/view/top.md#req-top-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-232
 
@@ -412,7 +412,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – # is the multi-level wildcard and is written as %23.
 - Violates: [REQ-TOP-019](../../requirements/view/top.md#req-top-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-233
 
@@ -423,7 +423,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – + is the single-level wildcard; a topic name contains no wildcards.
 - Violates: [REQ-TOP-019](../../requirements/view/top.md#req-top-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-234
 
@@ -434,7 +434,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – # is the multi-level wildcard; a topic name contains no wildcards.
 - Violates: [REQ-TOP-019](../../requirements/view/top.md#req-top-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-235
 
@@ -445,7 +445,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – U+0000 is not allowed in MQTT topic names.
 - Violates: [REQ-TOP-019](../../requirements/view/top.md#req-top-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-236
 
@@ -456,7 +456,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The Filter does not end with /.
 - Violates: [REQ-TOP-021](../../requirements/view/top.md#req-top-021)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-237
 
@@ -467,7 +467,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The Filter does not start with /.
 - Violates: [REQ-TOP-021](../../requirements/view/top.md#req-top-021)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-238
 
@@ -478,7 +478,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – A Filter level is not empty (MG 7.7, SF-040 c).
 - Violates: [REQ-TOP-021](../../requirements/view/top.md#req-top-021)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-239
 
@@ -489,7 +489,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The AppId is one non-empty topic level.
 - Violates: [REQ-TOP-009](../../requirements/view/top.md#req-top-009)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-240
 
@@ -500,7 +500,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The Identification Link is base64url-encoded in the topic.
 - Violates: [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-241
 
@@ -511,7 +511,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – Padding characters = are omitted.
 - Violates: [REQ-IL-004](../../requirements/view/il.md#req-il-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-242
 
@@ -522,7 +522,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The standard Base64 alphabet contains + and /.
 - Violates: [REQ-IL-003](../../requirements/view/il.md#req-il-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-243
 
@@ -533,7 +533,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The unused bits of the last character are not zero; the canonical encoding ends with U.
 - Violates: [REQ-IL-004](../../requirements/view/il.md#req-il-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-244
 
@@ -544,7 +544,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – No base64url string without padding has a length of 1 modulo 4.
 - Violates: [REQ-IL-004](../../requirements/view/il.md#req-il-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-245
 
@@ -555,7 +555,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – An Identification Link of 256 characters exceeds the maximum length.
 - Violates: [REQ-IL-019](../../requirements/view/il.md#req-il-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-246
 
@@ -566,7 +566,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The authority of an Identification Link is lower case.
 - Violates: [REQ-IL-018](../../requirements/view/il.md#req-il-018)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-247
 
@@ -577,7 +577,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – Space is not permitted in an Identification Link.
 - Violates: [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-248
 
@@ -588,7 +588,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – Non-ASCII characters are not permitted in an Identification Link.
 - Violates: [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-249
 
@@ -599,7 +599,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The authority is mandatory.
 - Violates: [REQ-IL-009](../../requirements/view/il.md#req-il-009)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-250
 
@@ -610,7 +610,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – Method and Resource are mandatory.
 - Violates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-251
 
@@ -621,7 +621,7 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The topic starts with the namespace element.
 - Violates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-252
 
@@ -632,4 +632,4 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – A Resource is followed by "/" and a filter or by the end of the topic; a regex anchored with "$" accepts this topic in Python unless re.fullmatch is used.
 - Violates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed

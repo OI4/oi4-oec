@@ -7,35 +7,35 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-IL-001](#v-il-001) | MG 4.2 example provider.com/FieldDataService/FDS-001/1200-0345 | valid | ok | guideline MG 4.2 | draft |
-| [V-IL-002](#v-il-002) | MG 4.2 example https://id.consumer.com/MEService/Inst07322 | valid | ok | guideline MG 4.2 | draft |
-| [V-IL-003](#v-il-003) | MG 4.2 example company.id/A87BAD34H | valid | ok | guideline MG 4.2 | draft |
-| [V-IL-004](#v-il-004) | MG 4.2 example https://company.id/A87BAD34H | valid | ok | guideline MG 4.2 | draft |
-| [V-IL-005](#v-il-005) | MG 4.2 example https://example.com/~sn?S=1000 | valid | ok | guideline MG 4.2 | draft |
-| [V-IL-006](#v-il-006) | MG 4.1 example with query (IEC 61406-1) | valid | ok | guideline MG 4.1 | draft |
-| [V-IL-007](#v-il-007) | MG A3 example with dnp-encoded query and fragment | valid | ok | guideline MG A3 | draft |
-| [V-IL-008](#v-il-008) | One character | valid | ok | constructed | draft |
-| [V-IL-009](#v-il-009) | 255 characters | valid | ok | constructed | draft |
-| [V-IL-010](#v-il-010) | All reserved characters in path, query and fragment | valid | ok | constructed | draft |
-| [V-IL-011](#v-il-011) | Upper case in path, query and fragment | valid | ok | constructed | draft |
-| [V-IL-012](#v-il-012) | Upper-case scheme is not normalized | valid | ok | constructed | draft |
-| [V-IL-101](#v-il-101) | Empty string | invalid | violations: empty | constructed | draft |
-| [V-IL-102](#v-il-102) | 256 characters | invalid | violations: too-long | constructed | draft |
-| [V-IL-103](#v-il-103) | Space | invalid | violations: forbidden-character | constructed | draft |
-| [V-IL-104](#v-il-104) | Percent-encoding | invalid | violations: forbidden-character | constructed | draft |
-| [V-IL-105](#v-il-105) | Non-ASCII character | invalid | violations: forbidden-character | constructed | draft |
-| [V-IL-106](#v-il-106) | Quotation mark and braces | invalid | violations: forbidden-character | constructed | draft |
-| [V-IL-107](#v-il-107) | Empty authority after scheme | invalid | violations: empty-authority | constructed | draft |
-| [V-IL-108](#v-il-108) | Path only | invalid | violations: empty-authority | constructed | draft |
-| [V-IL-109](#v-il-109) | Upper-case authority | invalid | violations: uppercase-authority | constructed | draft |
-| [V-IL-110](#v-il-110) | Upper-case authority after scheme | invalid | violations: uppercase-authority | constructed | draft |
-| [V-IL-111](#v-il-111) | Encoded with padding | invalid | violations: encoding | constructed | draft |
-| [V-IL-112](#v-il-112) | Encoded with the standard Base64 alphabet | invalid | violations: encoding | constructed | draft |
-| [V-IL-113](#v-il-113) | Non-canonical last character | invalid | violations: encoding | constructed | draft |
-| [V-IL-114](#v-il-114) | Length 1 modulo 4 | invalid | violations: encoding | constructed | draft |
-| [V-IL-115](#v-il-115) | Line break inside | invalid | violations: encoding | constructed | draft |
-| [V-IL-116](#v-il-116) | Empty encoded element | invalid | violations: encoding | constructed | draft |
-| [V-IL-117](#v-il-117) | Decodes to an upper-case authority | invalid | violations: uppercase-authority | constructed | draft |
+| [V-IL-001](#v-il-001) | MG 4.2 example provider.com/FieldDataService/FDS-001/1200-0345 | valid | ok | guideline MG 4.2 | reviewed |
+| [V-IL-002](#v-il-002) | MG 4.2 example https://id.consumer.com/MEService/Inst07322 | valid | ok | guideline MG 4.2 | reviewed |
+| [V-IL-003](#v-il-003) | MG 4.2 example company.id/A87BAD34H | valid | ok | guideline MG 4.2 | reviewed |
+| [V-IL-004](#v-il-004) | MG 4.2 example https://company.id/A87BAD34H | valid | ok | guideline MG 4.2 | reviewed |
+| [V-IL-005](#v-il-005) | MG 4.2 example https://example.com/~sn?S=1000 | valid | ok | guideline MG 4.2 | reviewed |
+| [V-IL-006](#v-il-006) | MG 4.1 example with query (IEC 61406-1) | valid | ok | guideline MG 4.1 | reviewed |
+| [V-IL-007](#v-il-007) | MG A3 example with dnp-encoded query and fragment | valid | ok | guideline MG A3 | reviewed |
+| [V-IL-008](#v-il-008) | One character | valid | ok | constructed | reviewed |
+| [V-IL-009](#v-il-009) | 255 characters | valid | ok | constructed | reviewed |
+| [V-IL-010](#v-il-010) | All reserved characters in path, query and fragment | valid | ok | constructed | reviewed |
+| [V-IL-011](#v-il-011) | Upper case in path, query and fragment | valid | ok | constructed | reviewed |
+| [V-IL-012](#v-il-012) | Upper-case scheme is not normalized | valid | ok | constructed | reviewed |
+| [V-IL-101](#v-il-101) | Empty string | invalid | violations: empty | constructed | reviewed |
+| [V-IL-102](#v-il-102) | 256 characters | invalid | violations: too-long | constructed | reviewed |
+| [V-IL-103](#v-il-103) | Space | invalid | violations: forbidden-character | constructed | reviewed |
+| [V-IL-104](#v-il-104) | Percent-encoding | invalid | violations: forbidden-character | constructed | reviewed |
+| [V-IL-105](#v-il-105) | Non-ASCII character | invalid | violations: forbidden-character | constructed | reviewed |
+| [V-IL-106](#v-il-106) | Quotation mark and braces | invalid | violations: forbidden-character | constructed | reviewed |
+| [V-IL-107](#v-il-107) | Empty authority after scheme | invalid | violations: empty-authority | constructed | reviewed |
+| [V-IL-108](#v-il-108) | Path only | invalid | violations: empty-authority | constructed | reviewed |
+| [V-IL-109](#v-il-109) | Upper-case authority | invalid | violations: uppercase-authority | constructed | reviewed |
+| [V-IL-110](#v-il-110) | Upper-case authority after scheme | invalid | violations: uppercase-authority | constructed | reviewed |
+| [V-IL-111](#v-il-111) | Encoded with padding | invalid | violations: encoding | constructed | reviewed |
+| [V-IL-112](#v-il-112) | Encoded with the standard Base64 alphabet | invalid | violations: encoding | constructed | reviewed |
+| [V-IL-113](#v-il-113) | Non-canonical last character | invalid | violations: encoding | constructed | reviewed |
+| [V-IL-114](#v-il-114) | Length 1 modulo 4 | invalid | violations: encoding | constructed | reviewed |
+| [V-IL-115](#v-il-115) | Line break inside | invalid | violations: encoding | constructed | reviewed |
+| [V-IL-116](#v-il-116) | Empty encoded element | invalid | violations: encoding | constructed | reviewed |
+| [V-IL-117](#v-il-117) | Decodes to an upper-case authority | invalid | violations: uppercase-authority | constructed | reviewed |
 
 ## V-IL-001
 
@@ -46,7 +46,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-009](../../requirements/view/il.md#req-il-009), [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: guideline MG 4.2
-- Status: draft
+- Status: reviewed
 
 ## V-IL-002
 
@@ -57,7 +57,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-009](../../requirements/view/il.md#req-il-009), [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: guideline MG 4.2
-- Status: draft
+- Status: reviewed
 
 ## V-IL-003
 
@@ -68,7 +68,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-009](../../requirements/view/il.md#req-il-009), [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: guideline MG 4.2
-- Status: draft
+- Status: reviewed
 
 ## V-IL-004
 
@@ -79,7 +79,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-009](../../requirements/view/il.md#req-il-009), [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: guideline MG 4.2
-- Status: draft
+- Status: reviewed
 
 ## V-IL-005
 
@@ -90,7 +90,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-009](../../requirements/view/il.md#req-il-009), [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: guideline MG 4.2
-- Status: draft
+- Status: reviewed
 
 ## V-IL-006
 
@@ -101,7 +101,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-009](../../requirements/view/il.md#req-il-009), [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: guideline MG 4.1
-- Status: draft
+- Status: reviewed
 
 ## V-IL-007
 
@@ -112,7 +112,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-016](../../requirements/view/il.md#req-il-016), [REQ-IL-017](../../requirements/view/il.md#req-il-017)
 - Origin: guideline MG A3
-- Status: draft
+- Status: reviewed
 
 ## V-IL-008
 
@@ -123,7 +123,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-009](../../requirements/view/il.md#req-il-009), [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-009
 
@@ -134,7 +134,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-019](../../requirements/view/il.md#req-il-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-010
 
@@ -145,7 +145,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-009](../../requirements/view/il.md#req-il-009), [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-011
 
@@ -156,7 +156,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-018](../../requirements/view/il.md#req-il-018)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-012
 
@@ -167,7 +167,7 @@ Identification Link vectors: valid examples of MG 4.1, MG 4.2 and MG A3 with the
 - Expected: valid
 - Illustrates: [REQ-IL-013](../../requirements/view/il.md#req-il-013), [REQ-IL-018](../../requirements/view/il.md#req-il-018)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) and makes a different Identification Link than https://provider.com/x (REQ-IL-015).
 
@@ -180,7 +180,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – An Identification Link has at least one character.
 - Violates: [REQ-IL-019](../../requirements/view/il.md#req-il-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-102
 
@@ -191,7 +191,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – An Identification Link has at most 255 characters.
 - Violates: [REQ-IL-019](../../requirements/view/il.md#req-il-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-103
 
@@ -202,7 +202,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – Space is not permitted.
 - Violates: [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-104
 
@@ -213,7 +213,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – % is not permitted (no percent-encoding).
 - Violates: [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-105
 
@@ -224,7 +224,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – Non-ASCII characters are not permitted.
 - Violates: [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-106
 
@@ -235,7 +235,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – The characters " { } are not permitted.
 - Violates: [REQ-IL-016](../../requirements/view/il.md#req-il-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-107
 
@@ -246,7 +246,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – The authority is mandatory.
 - Violates: [REQ-IL-009](../../requirements/view/il.md#req-il-009)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-108
 
@@ -257,7 +257,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – The authority is mandatory.
 - Violates: [REQ-IL-009](../../requirements/view/il.md#req-il-009)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-109
 
@@ -268,7 +268,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – The authority is lower case.
 - Violates: [REQ-IL-018](../../requirements/view/il.md#req-il-018)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-110
 
@@ -279,7 +279,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – The authority is lower case.
 - Violates: [REQ-IL-018](../../requirements/view/il.md#req-il-018)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-111
 
@@ -290,7 +290,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – Padding characters = are omitted.
 - Violates: [REQ-IL-004](../../requirements/view/il.md#req-il-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-112
 
@@ -301,7 +301,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – The standard Base64 alphabet contains + and /.
 - Violates: [REQ-IL-003](../../requirements/view/il.md#req-il-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-113
 
@@ -312,7 +312,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – The unused bits of the last character are not zero.
 - Violates: [REQ-IL-004](../../requirements/view/il.md#req-il-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-114
 
@@ -323,7 +323,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – No base64url string without padding has this length.
 - Violates: [REQ-IL-004](../../requirements/view/il.md#req-il-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-115
 
@@ -334,7 +334,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – No line breaks are added.
 - Violates: [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-116
 
@@ -344,7 +344,7 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – An empty topic level is no encoded Identification Link.
 - Violates: [REQ-IL-002](../../requirements/view/il.md#req-il-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-IL-117
 
@@ -355,4 +355,4 @@ Notes: The authority is lower case; the scheme is kept as assigned (REQ-IL-013) 
 - Expected: invalid – The decoded Identification Link has an upper-case authority.
 - Violates: [REQ-IL-018](../../requirements/view/il.md#req-il-018)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
