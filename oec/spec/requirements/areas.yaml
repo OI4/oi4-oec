@@ -15,7 +15,7 @@ areas:
   - code: IL
     title: Identification link (dnp encoding)
     cycle: C-018
-    status: drafted
+    status: reviewed
     sections: [MG 4, MG A3]
   - code: TOP
     title: Topic structure and namespace elements

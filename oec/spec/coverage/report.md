@@ -6,7 +6,7 @@ Guideline baseline: `5dedfd5`. An inventory item is a candidate of a normative s
 | Area | Cycle | Status | Items | Covered | Informative | Open |
 |---|---|---|---:|---:|---:|---:|
 | CMP | C-014 | reviewed | 63 | 32 | 31 | 0 |
-| IL | C-018 | drafted | 97 | 73 | 24 | 0 |
+| IL | C-018 | reviewed | 97 | 73 | 24 | 0 |
 | TOP | C-018 | drafted | 81 | 66 | 15 | 0 |
 | MSG | C-020 | planned | 158 | 0 | 0 | 158 |
 | ACT | C-020 | planned | 69 | 0 | 0 | 69 |
