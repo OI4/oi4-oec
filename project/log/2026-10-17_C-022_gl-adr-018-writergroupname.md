@@ -57,6 +57,16 @@ There is no rendered view of the matrix and the vectors; the YAML files are the 
 - Matrix: `oec/spec/matrix/method-resource.yaml` (66 Method × Resource/service rows; `allowed`, ABNF rule, `source`/`filter` required/optional/forbidden, refs, notes); grammar `oec/spec/topic/topic.abnf`, generated regexes `oec/spec/topic/topic-patterns.json`.
 - Vectors: `oec/spec/vectors/topic/guideline.yaml` (60 golden), `valid.yaml` (34), `invalid.yaml` (52); `oec/spec/vectors/il/identification-link.yaml` (29), `dnp-encoding.yaml` (15), `oi4identifier.yaml` (13).
 
+## Follow-up – review views (PO, 2026-10-17)
+
+The PO accepted the offer to render the matrix and the vectors like `requirements/view/` ("Ja das würde helfen").
+
+- `spectool render` now also writes:
+  - `oec/spec/matrix/view/method-resource.md` – overview grid (✓/✗, `S`/`F` with `!` required, `?` optional, vector count per rule), one table per resource/service with the topic form in guideline template notation (derived from the ABNF rule, e.g. `Oi4v2/<ServiceType>/<AppId>/Set/PublicationList/<Source>/<ResourceType>[/<Tag>]`), rule, `Source`/`Filter`, refs, linked vectors, notes;
+  - `oec/spec/vectors/view/README.md` (index with counts per file) and one view per vector file (overview table; per vector: topic or value, decoded AppId/Source Identification Links and `Filter` levels, result, reason, linked REQs, origin, status). Values with control characters, back-ticks or leading/trailing white space are shown as escaped Go string literals.
+- Code: `oec/spec/tools/internal/render/review.go` (+ tests), `cmd/spectool/main.go` (render loads matrix and vectors, prunes stale views). README and ADR-0018 (amendment C-022) updated.
+- Checks: `go vet`, `go test -count=1 ./...`, `lint`, `render`/`coverage`/`topic`/`inventory -check` ok; 1014 relative links/anchors in all views, 0 broken.
+
 ## Decisions / assumptions
 
 - SF-044 recorded as guideline ADR GL-ADR-018 (not as a project ADR), implemented in the same cycle (agent assumption, reported to the PO).
@@ -64,4 +74,4 @@ There is no rendered view of the matrix and the vectors; the YAML files are the 
 
 ## Next
 
-C-023 – areas `MSG` + `ACT`, payload columns of the matrix. PO review of the matrix and the vectors is still open.
+C-023 – areas `MSG` + `ACT`, payload columns of the matrix. PO review of the matrix and the vectors is still open (views: `oec/spec/matrix/view/method-resource.md`, `oec/spec/vectors/view/README.md`).
