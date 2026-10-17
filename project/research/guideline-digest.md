@@ -1,12 +1,12 @@
-# Guideline digest (v2.0, baseline `2cf0d70`)
+# Guideline digest (v2.0, baseline `fd9da6e`)
 
 This is a compact, implementation-oriented summary of the two v2.0 guidelines in `oi4-oec-documentation`:
 - **MG**: OEC Messaging Guideline, `docs/guideline/`
 - **RIG**: OEC Runtime & Infrastructure Guideline, `docs/infrastructure-guideline/`
 
-It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 043 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `de852d6` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../../oi4-oec-documentation/findings/SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`, `5cb109e`) are in the git history of this file.
+It also covers the guideline ADRs **GL-ADR-001 … 018** in `rfcs_adrs/` and the spec-finding resolutions SF-001 … 044 (branch `feature/spec-findings`). The **OEC Process Description** (`docs/process-description/`, former MG 6) is informative and not summarized here. All section numbers use the numbering of `de852d6` (unchanged since `49b6fe2`) (MQTT 6, Topics 7, Payload 8, Message Bus 9). The digest is **not** normative; always check the referenced section. Known problems are listed in `../../oi4-oec-documentation/findings/SPEC-FINDINGS.md`. Previous digests (baselines `c85ce2a`, `5f070bb`, `7bead4c`, `49b6fe2`, `5cb109e`) are in the git history of this file.
 
-## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`, 017 with `f5d69d8`/`7677161`)
+## 0. What changed with the guideline ADRs (vs. `c85ce2a`; 012/013 came with `7bead4c`, 014–016 with `49b6fe2`, 017 with `f5d69d8`/`7677161`, 018 with `d198e6b`)
 
 | GL-ADR | Change | Impact for us |
 |--------|--------|---------------|
@@ -27,6 +27,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 017** in `rfcs_adrs/` and the
 | 015 | Former MG 6 (process description) moved to the separate, informative **OEC Process Description**; MG chapters 7–11 renumbered to 6–10 | citation scheme (old MG n = new MG n−1); no requirements from the Process Description |
 | 016 | Empty AAS mapping chapter (former MG 11) removed | none |
 | 017 | MG 7.2 "Minimum Set of Topic Elements" (7.2.1 applications, 7.2.2 devices) removed: requirements per level follow from MG 1.3; new MG 1.3 section "Directly Connected and Represented Entities"; "Resources Without Content" moved to MG 9.1; MG 7 flattened: topic elements MG 7.1.1 … 7.1.7 → **MG 7.1 … 7.7** (7.1.5.x → 7.5.x) | REQ-CMP remapped (C-017), REQ-CMP-045; citation scheme; no requirement change |
+| 018 | `WriterGroupName` of `PublicationList`/`SubscriptionList` `DataSetMessages` = `<ResourceType>[/<Tag>]`, the `Filter` addressing the entry (SF-044); MG 8.2.3 rule, MG 9.1.8/9.1.9 templates, B1.1.8, B2.6/B2.7 aligned | schema (list payloads), SDK codec (WriterGroupName of list entries), compliance checks |
 
 ## 0a. Normative keywords (MG 1.2, RIG 1.1)
 
@@ -199,7 +200,7 @@ No `WriterGroupName` at network level.
 |---|---|---|
 | `DataSetWriterId` | M | UInt16, 0 invalid; reserved 1 PaginationRequest, 2 Pagination, 3 Locale, 4–7 future common services, 8 NewDataSetWriterId; apps start at 10; one per resource + writer name + group name; may change on restart |
 | `DataSetWriterName` | M | unencoded IL of the asset (= topic `<Source>`) |
-| `WriterGroupName` | M | = topic `<Filter>`, or `""` |
+| `WriterGroupName` | M | = topic `<Filter>`, or `""`; `PublicationList`/`SubscriptionList` entries: always `<ResourceType>[/<Tag>]` of the entry (e.g. `Data/oee`, `Event/Syslog/Notice`, `MAM`), also on a topic without `Filter` (GL-ADR-018) |
 | `SequenceNumber` | O | UInt32 |
 | `MetaDataVersion` | O | {`MajorVersion`,`MinorVersion`}; **xor** `MinorVersion` |
 | `MinorVersion` | O | UInt32; **xor** `MetaDataVersion` |

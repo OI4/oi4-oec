@@ -118,3 +118,9 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `2cf0d70` – findings register: SF-041 resolved, new SF-044 (open).
 - All spec findings SF-001 … 043 are resolved; SF-044 is open with a proposed interpretation.
 
+## Amendment C-022 (2026-10-17, guideline baseline `fd9da6e`)
+
+- The baseline is now `fd9da6e` on branch `feature/spec-findings`. Implemented by the agent on PO request (local commits):
+  - `d198e6b` – GL-ADR-018 "Use complete Filter as WriterGroupName of list entries" (SF-044, PO decision C-022: the proposal is accepted and recorded in a guideline ADR): MG 8.2.3 (new rule), MG 9.1.8 and 9.1.9 (templates, examples), MG B1.1.8, B2.6, B2.7.
+  - `fd9da6e` – findings register: SF-044 resolved.
+- GL-ADR-018 is part of the baseline (G-1.1). All spec findings SF-001 … 044 are resolved; no finding is open.
