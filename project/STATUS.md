@@ -54,11 +54,13 @@ C-025: areas **MQTT** (MG 6) and **LIFE** (MG 6.3.3 … 6.3.5) drafted (`eb78376
 
 C-026: PO review of C-025 (2026-10-19): **SF-057** keywords as proposed (no GL-ADR), **SF-058 (a)–(c)** as proposed with real timestamps (the Will message carries the timestamp of its creation), **SF-059 (a)** `NORMAL_0`/0 reserved for the Close message, but `FAILURE_1`/0 **not** reserved for the Will message (a connected, completely broken device may publish it; subscribers treat it like a Will, the device publishes its Birth again after recovery), **SF-059 (b)/(c)** and **SF-060 (a)–(d)** as proposed. Guideline commits `d88a86c` SF-057 (MG 6.2.1 … 6.3.5 keywords), `2dd0e56` SF-058 (MG 6.3.5 Will `MessageId`, B1.1.1/B1.1.2 real timestamps, "Close message"), `9cd7ca0` SF-059 (MG 6.3.3 … 6.3.5), `1d80d20` SF-060 (MG 6.1 protocol versions, MG 6.2.2 certificate verification/usernames, MG 6.2.3 ClientId without container), register `720d862` (SF-057 … 060 resolved, only SF-056 open, next SF-061). Link check 802/0, Docusaurus build ok. `oec/spec` re-baselined on **`720d862`** (`d3000b1`, 1277 items): MQTT/LIFE quote the new text, `implicit` dropped, REQ-MQTT-013 also for components without container, REQ-LIFE-014 limited to `NORMAL_0`/0 (now graded per MG 6.3.4), new **REQ-LIFE-015 … 017** (Birth first, Will `MessageId` creation time, Birth again after recovery); V-PAY-023 … 025 verbatim (edits obsolete); MQTT 42 items (29/13/0 open), LIFE 23 (21/2/0). Reviewed areas/vectors: only baseline and forward cycle references changed. P1 cycles shifted by one. Log: `log/2026-10-19_C-026_sf057-060-guideline.md`.
 
+C-026 (PO review, 2026-10-19): REQ-MQTT-001 … 019 accepted → **area MQTT reviewed**; REQ-LIFE accepted except: topics of REQ-LIFE-002/006/008 looked wrong in the view (rendering bug: `<…>` placeholders swallowed as HTML – fixed in `4ced500`, all views escape `<`), REQ-LIFE-004 (Birth may carry `Timestamp`), REQ-LIFE-005 (Close MUST from Level 2), REQ-LIFE-011/012 (SHOULD, application logic). Implemented as **SF-061** (guideline `2c38cf8`, `02a35ac` incl. new MG 1.3 row "Close message", `47762da`, register `c6453c7`, next SF-062). Re-baseline on **`c6453c7`** (`eac664b`): REQ-CMP-009 without close message, new **REQ-CMP-046** (draft), REQ-LIFE-004 deprecated, REQ-LIFE-005/006/007/014 {SHOULD, MUST, MUST}, REQ-LIFE-011/012 SHOULD; LIFE stays `drafted` (002/006/008 draft until the fixed view is confirmed). Log: addendum in `log/2026-10-19_C-026_sf057-060-guideline.md`.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review of C-026:** review the guideline commits `d88a86c` … `720d862` (MG 6, B1.1.1, B1.1.2), `oec/spec/requirements/view/mqtt.md`, `life.md` (esp. REQ-LIFE-014 graded, REQ-LIFE-015 … 017, REQ-MQTT-013) and V-PAY-023 … 025 in `oec/spec/vectors/view/payload-guideline.md` (now verbatim). Then MQTT/LIFE and V-PAY-023 … 025 → `reviewed`. (`prompt.md` is the executed C-025 hand-over; the C-027 prompt follows after the review.)
+1. **PO review (rest of C-026):** confirm REQ-LIFE-002/006/008 in the fixed view `oec/spec/requirements/view/life.md` (→ LIFE `reviewed`), review REQ-CMP-046 (`cmp.md`), the guideline commits `2c38cf8` … `c6453c7` and V-PAY-023 … 025 in `oec/spec/vectors/view/payload-guideline.md`. (`prompt.md` is the executed C-025 hand-over; the C-027 prompt follows after the review.)
 2. **C-027** – core resources (`RES-MAM`, `RES-HEALTH`, `RES-PROFILE`, `RES-PUBLIST`, `RES-REFDES`) + `PAG` + `LOC`. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-028 … C-031); C-027/C-028 also fix the B1 examples per SF-056 (PO order needed for the guideline edits).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
@@ -66,7 +68,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, MSG and ACT reviewed, MQTT and LIFE drafted (re-baselined in C-026); topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 25 payload vectors, V-PAY-001 … 022 reviewed, 023 … 025 draft) |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, MSG, ACT and MQTT reviewed, LIFE drafted; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 25 payload vectors, V-PAY-001 … 022 reviewed, 023 … 025 draft) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
@@ -78,7 +80,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `720d862`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 018, SF-001 … 055 and SF-057 … 060 resolved, SF-056 open (B1 examples, C-027/C-028, not blocking), next SF-061; OEC Process Description informative); previous `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `c6453c7`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 018, SF-001 … 055 and SF-057 … 061 resolved, SF-056 open (B1 examples, C-027/C-028, not blocking), next SF-062; OEC Process Description informative); previous `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -90,7 +92,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. SF-056 (defects of the B1 examples) is the only open finding, scheduled for C-027/C-028, not blocking; next free id SF-061.
+- None. SF-056 (defects of the B1 examples) is the only open finding, scheduled for C-027/C-028, not blocking; next free id SF-062.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -126,4 +128,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-023 | 2026-10-17 | Areas `MSG` + `ACT` drafted (REQ-MSG-001 … 045, REQ-ACT-001 … 023); golden payload vectors started (kind `payload`, reference envelope checks, V-PAY-001 … 009 draft); SF-045 … 051 | `log/2026-10-17_C-023_msg-act.md` |
 | C-024 | 2026-10-19 | PO review of C-023: SF-045 … 051 implemented in the guideline, new SF-052 (tolerant reader) and SF-053 (A2 reserved ids with former use), Docusaurus config fix; re-baseline on `a7d18f9`, REQ-MSG-046, payload checks aligned; P1 cycles shifted by one. Second PO review: SF-052 SHOULD + strict/tolerant validation, SF-054 (B2 rebuilt), SF-055 open, register sorted; re-baseline on `4af61f3`, payload vectors V-PAY-010 … 019; MSG and ACT reviewed. Third PO review: complete B1.1.5 Metadata example, SF-055 resolved, SF-056 (B1 defects) for C-026/C-027, re-baseline on `2f00e9f`, V-PAY-001 … 019 reviewed | `log/2026-10-19_C-024_sf045-051-guideline.md` |
 | C-025 | 2026-10-19 | Areas `MQTT` + `LIFE` drafted (REQ-MQTT-001 … 019, REQ-LIFE-001 … 014, 14 informative items); golden vectors V-PAY-023 … 025 (Birth/Close/Will, `MessageId` edit per SF-058); new SF-057 … SF-060 (register `d20d8ff`, no re-baseline) | `log/2026-10-19_C-025_mqtt-life.md` |
-| C-026 | 2026-10-19 | PO review of C-025: SF-057 … 060 implemented in the guideline (MG 6 keywords, real Birth/Close/Will timestamps, `NORMAL_0`/0 reserved, `FAILURE_1`/0 while connected + Birth after recovery, MQTT versions/certificate verification/ClientId without container); re-baseline on `720d862`, REQ-LIFE-015 … 017, V-PAY-023 … 025 verbatim; P1 cycles shifted by one | `log/2026-10-19_C-026_sf057-060-guideline.md` |
+| C-026 | 2026-10-19 | PO review of C-025: SF-057 … 060 implemented in the guideline (MG 6 keywords, real Birth/Close/Will timestamps, `NORMAL_0`/0 reserved, `FAILURE_1`/0 while connected + Birth after recovery, MQTT versions/certificate verification/ClientId without container); re-baseline on `720d862`, REQ-LIFE-015 … 017, V-PAY-023 … 025 verbatim; P1 cycles shifted by one. PO review: MQTT reviewed, SF-061 (Birth `Timestamp` allowed, Close MUST from L2, subscriber interpretation SHOULD), view fix for `<…>` placeholders, re-baseline on `c6453c7`, REQ-CMP-046 | `log/2026-10-19_C-026_sf057-060-guideline.md` |
