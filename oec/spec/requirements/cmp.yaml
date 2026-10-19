@@ -176,9 +176,17 @@ requirements:
     inventory: [MG-1.3-7f72acf8, MG-1.3-0745092e]
     status: reviewed
     notes: >-
+      Origin: GL-ADR-009 (compliance levels). This requirement is the grading
+      rule of the listed sections; the effective level of each rule is given
+      by the single requirements REQ-MQTT-013 … REQ-MQTT-019: at Levels 1 and
+      2 all of them are SHOULD; at Level 3 a "must" of the guideline becomes
+      MUST and a "should" stays SHOULD (e.g. ClientId, keep alive, clean
+      session, QoS 0). Other rows can make a behavior mandatory at all levels,
+      e.g. publishing Health on change (MG 9.1.2, REQ-TOP-017, REQ-CMP-007).
       PO review of C-026 (SF-061 (b)): the close message (MG 6.3.4) moved to
       its own row of MG 1.3, see REQ-CMP-046; the remaining rows of this
-      requirement are unchanged.
+      requirement are unchanged. PO decision (C-026): keep this grading, the
+      note only explains it.
 
   - id: REQ-CMP-010
     title: Complete Message Bus behavior

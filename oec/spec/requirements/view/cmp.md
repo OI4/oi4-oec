@@ -218,7 +218,7 @@ A component implements the complete MQTT client behavior of MG 6: client identif
 > Complete MQTT client behavior (6.2.3 Client Identifier, 6.2.4 Keep Alive, 6.2.5 Clean Session, 6.3.1 Quality of Service Level, 6.3.2 Retained Messages, 6.4 General Behavior of MQTT on Changes) Recommended Recommended Mandatory
 > — MG 1.3
 
-Notes: PO review of C-026 (SF-061 (b)): the close message (MG 6.3.4) moved to its own row of MG 1.3, see REQ-CMP-046; the remaining rows of this requirement are unchanged.
+Notes: Origin: GL-ADR-009 (compliance levels). This requirement is the grading rule of the listed sections; the effective level of each rule is given by the single requirements REQ-MQTT-013 … REQ-MQTT-019: at Levels 1 and 2 all of them are SHOULD; at Level 3 a "must" of the guideline becomes MUST and a "should" stays SHOULD (e.g. ClientId, keep alive, clean session, QoS 0). Other rows can make a behavior mandatory at all levels, e.g. publishing Health on change (MG 9.1.2, REQ-TOP-017, REQ-CMP-007). PO review of C-026 (SF-061 (b)): the close message (MG 6.3.4) moved to its own row of MG 1.3, see REQ-CMP-046; the remaining rows of this requirement are unchanged. PO decision (C-026): keep this grading, the note only explains it.
 
 ## REQ-CMP-010
 
