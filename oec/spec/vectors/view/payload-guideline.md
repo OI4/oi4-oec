@@ -24,9 +24,9 @@ Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.5, B1.1.11, B1.1.1
 | [V-PAY-015](#v-pay-015) | B2.6: predefined MetaData of PublicationList | valid | ok | guideline MG B2.6 | reviewed |
 | [V-PAY-016](#v-pay-016) | B2.7: predefined MetaData of SubscriptionList | valid | ok | guideline MG B2.7 | reviewed |
 | [V-PAY-017](#v-pay-017) | B2.8: predefined MetaData of ReferenceDesignation | valid | ok | guideline MG B2.8 | reviewed |
-| [V-PAY-020](#v-pay-020) | B1.1.5: Get Metadata of an explicit data tag | valid | ok | guideline MG B1.1.5 | draft |
-| [V-PAY-021](#v-pay-021) | B1.1.5: Pub Metadata of an explicit data tag, reply to a Get | valid | ok | guideline MG B1.1.5 | draft |
-| [V-PAY-022](#v-pay-022) | B1.1.5: Set Metadata of an explicit data tag | valid | ok | guideline MG B1.1.5 | draft |
+| [V-PAY-020](#v-pay-020) | B1.1.5: Get Metadata of an explicit data tag | valid | ok | guideline MG B1.1.5 | reviewed |
+| [V-PAY-021](#v-pay-021) | B1.1.5: Pub Metadata of an explicit data tag, reply to a Get | valid | ok | guideline MG B1.1.5 | reviewed |
+| [V-PAY-022](#v-pay-022) | B1.1.5: Set Metadata of an explicit data tag | valid | ok | guideline MG B1.1.5 | reviewed |
 
 ## V-PAY-001
 
@@ -1401,7 +1401,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032)
 - Origin: guideline MG B1.1.5
-- Status: draft
+- Status: reviewed
 
 Notes: A Get carries an empty MetaData (MG 9.1.5); DataSetWriterId, WriterGroupName and DataSetWriterName address the Data tag oee of B1.1.4.
 
@@ -1433,7 +1433,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-MSG-033](../../requirements/view/msg.md#req-msg-033), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-MSG-041](../../requirements/view/msg.md#req-msg-041)
 - Origin: guideline MG B1.1.5
-- Status: draft
+- Status: reviewed
 
 Notes: Complete ua-metadata of the publisher-defined DataSet oee (no DataSetClassId); same DataSetWriterId (93), WriterGroupName and DataSetWriterName as the DataSetMessage of B1.1.4 (REQ-MSG-033). Double fields with EURange and EngineeringUnits.
 
@@ -1657,7 +1657,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035)
 - Origin: guideline MG B1.1.5
-- Status: draft
+- Status: reviewed
 
 Notes: The requester sends the complete MetaData with a changed Description; the PublisherId is the requester's (MG 7.3).
 

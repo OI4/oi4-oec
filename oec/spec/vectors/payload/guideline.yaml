@@ -1,4 +1,4 @@
-# Golden payload vectors (C-023/C-024, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 017 reviewed by the PO (C-024), later ones draft until the PO review.
+# Golden payload vectors (C-023/C-024, ADR-0018 amendments C-013, C-023 and C-024); reviewed by the PO (C-024).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "2f00e9f"
@@ -1282,7 +1282,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-015, REQ-MSG-032]
     origin: {kind: guideline, ref: MG B1.1.5}
-    status: draft
+    status: reviewed
     notes: >-
       A Get carries an empty MetaData (MG 9.1.5); DataSetWriterId, WriterGroupName and DataSetWriterName address the Data tag oee of B1.1.4.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
@@ -1304,7 +1304,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-033, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041]
     origin: {kind: guideline, ref: MG B1.1.5}
-    status: draft
+    status: reviewed
     notes: >-
       Complete ua-metadata of the publisher-defined DataSet oee (no DataSetClassId); same DataSetWriterId (93), WriterGroupName and DataSetWriterName as the DataSetMessage of B1.1.4 (REQ-MSG-033). Double fields with EURange and EngineeringUnits.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
@@ -1518,7 +1518,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035]
     origin: {kind: guideline, ref: MG B1.1.5}
-    status: draft
+    status: reviewed
     notes: >-
       The requester sends the complete MetaData with a changed Description; the PublisherId is the requester's (MG 7.3).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
