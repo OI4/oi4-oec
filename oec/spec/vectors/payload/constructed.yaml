@@ -1,0 +1,81 @@
+# Constructed payload vectors (C-024): validation modes of SF-052 (strict/tolerant).
+# Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
+kind: payload
+baseline: "4af61f3"
+description: >-
+  Constructed payload vectors for the two validation modes of MG 8 (SF-052):
+  strict validation reports every key that is not defined for the object
+  (REQ-MSG-001, conformance of the sender), tolerant validation ignores such
+  keys (REQ-MSG-046, view of a tolerant receiver). Without mode a vector is
+  checked strictly.
+vectors:
+  - id: V-PAY-018
+    title: "Pub Health with user-defined keys, strict validation"
+    expected: invalid
+    violates: [REQ-MSG-001]
+    reason: The NetworkMessage and the DataSetMessage contain the user-defined key VendorTag.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 with the user-defined keys VendorTag in the NetworkMessage and
+      in the DataSetMessage: a sender must not add them (REQ-MSG-001).
+    mode: strict
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "VendorTag": "line-7",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "VendorTag": "line-7",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-019
+    title: "Pub Health with user-defined keys, tolerant validation"
+    expected: valid
+    reqs: [REQ-MSG-046]
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      The message of V-PAY-018 seen by a tolerant receiver: the unknown keys
+      are ignored and the defined keys are valid (REQ-MSG-046).
+    mode: tolerant
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "VendorTag": "line-7",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "VendorTag": "line-7",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
