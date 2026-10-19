@@ -9,7 +9,7 @@ Guideline baseline: `2f00e9f`. Source of truth: the YAML files in `oec/spec/vect
 | [il-identification-link](il-identification-link.md) | `vectors/il/identification-link.yaml` | identification-link | 29 | 12 | 17 | 7 | 0 | 29 |
 | [il-oi4identifier](il-oi4identifier.md) | `vectors/il/oi4identifier.yaml` | oi4identifier | 13 | 7 | 6 | 4 | 0 | 13 |
 | [payload-constructed](payload-constructed.md) | `vectors/payload/constructed.yaml` | payload | 2 | 1 | 1 | 0 | 0 | 2 |
-| [payload-guideline](payload-guideline.md) | `vectors/payload/guideline.yaml` | payload | 20 | 20 | 0 | 20 | 0 | 20 |
+| [payload-guideline](payload-guideline.md) | `vectors/payload/guideline.yaml` | payload | 23 | 23 | 0 | 23 | 3 | 20 |
 | [topic-guideline](topic-guideline.md) | `vectors/topic/guideline.yaml` | topic | 60 | 60 | 0 | 60 | 0 | 60 |
 | [topic-invalid](topic-invalid.md) | `vectors/topic/invalid.yaml` | topic | 52 | 0 | 52 | 0 | 0 | 52 |
 | [topic-valid](topic-valid.md) | `vectors/topic/valid.yaml` | topic | 34 | 34 | 0 | 0 | 0 | 34 |
