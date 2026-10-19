@@ -48,13 +48,13 @@ C-024: PO review of C-023 (2026-10-19): **SF-045** (b') and **SF-046 … 051** a
 
 C-024 (second PO review, 2026-10-19): REQ-MSG-046 **SHOULD** instead of MUST; messages shall be checkable **strict** (no additional fields) and **tolerant** (additional fields ignored); resolved findings sorted ascending; **no GL-ADRs** for SF-045/SF-052; lower-case GUIDs confirmed; B2 examples to be rebuilt sensibly with recurring values; `requirements/view/msg.md` and `act.md` accepted. Guideline commits `4b97a92` (SF-052 amendment: SHOULD + validation-modes note in MG 8), `7fccd53` (**SF-054**: B2 index and B2.1 … B2.8 rebuilt – example DataSet + bare `DataSetMetaDataType`, recurring values, valid JSON; MG 8.3.2 note), register `4af61f3` (sorted, SF-054 resolved, new **SF-055** open: OI4-defined DataTypes have no `NodeId`, next SF-056). Link check 793/0, Docusaurus build ok. `oec/spec`: validation modes `Strict`/`Tolerant` and `CheckMetaDataType` in `internal/payload`, vector fields `mode`/`object` (`4d9b6ed`); vectors V-PAY-010 … 017 (B2 MetaData) and V-PAY-018/019 (`vectors/payload/constructed.yaml`, strict/tolerant) (`08350ce`); re-baseline on **`4af61f3`**, REQ-MSG-046 SHOULD (`5ea04d7`); **areas MSG and ACT reviewed** (`21b2afd`); payload vectors stay `draft`. MSG 180 items (171/9/0 open), ACT 72 (65/7/0). Log: addendum in `log/2026-10-19_C-024_sf045-051-guideline.md`.
 
-C-024 (third PO review, 2026-10-19): SF-054 accepted with a complete `Metadata` example, SF-055 accepted, payload vector views checked. Guideline `db2e5d3` (MG B1.1.5 `Pub`/`Set` `Metadata` with a complete `DataSetMetaDataType` of `Data`/`oee`, `DataSetWriterId` 93) and register `2f00e9f` (SF-055 resolved, new **SF-056** open for C-026/C-027: defects of the B1 examples, next SF-057). `oec/spec`: empty `MetaData` of a `Get` accepted (`0c6d9ff`), re-baseline on **`2f00e9f`** and V-PAY-020 … 022 (`85def9e`, draft), **V-PAY-001 … 019 reviewed** (`d9e256c`). Log: second addendum.
+C-024 (third PO review, 2026-10-19): SF-054 accepted with a complete `Metadata` example, SF-055 accepted, payload vector views checked. Guideline `db2e5d3` (MG B1.1.5 `Pub`/`Set` `Metadata` with a complete `DataSetMetaDataType` of `Data`/`oee`, `DataSetWriterId` 93) and register `2f00e9f` (SF-055 resolved, new **SF-056** open for C-026/C-027: defects of the B1 examples, next SF-057). `oec/spec`: empty `MetaData` of a `Get` accepted (`0c6d9ff`), re-baseline on **`2f00e9f`** and V-PAY-020 … 022 (`85def9e`, draft), **V-PAY-001 … 019 reviewed** (`d9e256c`); V-PAY-020 … 022 reviewed by the PO afterwards (`c13eed9`) – all 22 payload vectors reviewed. Log: second addendum.
 
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review (non-blocking, may run in parallel to C-025):** V-PAY-020 … 022 (B1.1.5 Metadata, `oec/spec/vectors/view/payload-guideline.md`, `draft`).
+1. No PO review pending (C-024 complete; hand-over prompt for C-025 in `prompt.md`).
 2. **C-025** – areas `MQTT` and `LIFE` (golden vectors for Birth/Close/Will may be built in the cycle). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-026 … C-030); C-026/C-027 also fix the B1 examples per SF-056 (PO order needed for the guideline edits).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
@@ -62,7 +62,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, MSG and ACT reviewed; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 22 payload vectors (V-PAY-001 … 019 reviewed, 020 … 022 draft)) |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, MSG and ACT reviewed; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 22 payload vectors reviewed) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
