@@ -124,3 +124,13 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `d198e6b` – GL-ADR-018 "Use complete Filter as WriterGroupName of list entries" (SF-044, PO decision C-022: the proposal is accepted and recorded in a guideline ADR): MG 8.2.3 (new rule), MG 9.1.8 and 9.1.9 (templates, examples), MG B1.1.8, B2.6, B2.7.
   - `fd9da6e` – findings register: SF-044 resolved.
 - GL-ADR-018 is part of the baseline (G-1.1). All spec findings SF-001 … 044 are resolved; no finding is open.
+
+## Amendment C-024 (2026-10-19, guideline baseline `a7d18f9`)
+
+- The baseline is now `a7d18f9` on branch `feature/spec-findings`. Implemented by the agent on PO request (PO review of C-023: SF-045 (b') and SF-046 … 051 accepted, tolerant reader, A2 reserved ids; local commits):
+  - `7943098` – Docusaurus config: `markdown.hooks.onBrokenMarkdownLinks` instead of the deprecated `siteConfig.onBrokenMarkdownLinks` (no guideline text change).
+  - `590d2be` SF-045, `8e3939f` SF-046, `6950e74` SF-047, `dd43a7a` SF-048, `4a20b99` SF-049, `4d250a2` SF-050, `65e20e6` SF-051 – MG 8, 8.1.2, 8.2.x, 9.2, A2, B1.1.x, B2.x.
+  - `6f39017` – SF-052 (new, PO decision): MG 8 – a sender must not extend the objects by user defined keys, a receiver must ignore keys it does not know or use (tolerant reader).
+  - `8eddc0d` – SF-053 (new, PO request): MG A2 lists the former use of the reserved `DataSetClassIds`.
+  - `a7d18f9` – findings register: SF-045 … SF-053 resolved.
+- No new GL-ADR (SF-045 and SF-052 are candidates if the PO wants them recorded). All spec findings SF-001 … 053 are resolved; no finding is open; next free id SF-054.
