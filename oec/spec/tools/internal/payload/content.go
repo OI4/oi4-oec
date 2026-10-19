@@ -44,8 +44,9 @@ var resourceRules = map[string]resourceRule{
 var commonServices = map[string]bool{"NewDataSetWriterId": true}
 
 var (
-	domainPattern  = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$`)
-	healthRank     = map[string]int{"NORMAL_0": 0, "MAINTENANCE_REQUIRED_4": 1, "CHECK_FUNCTION_2": 2, "OFF_SPEC_3": 3, "FAILURE_1": 4} // SF-065 (a)
+	domainPattern = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$`)
+	// Severity of Table 3 (MG 8.3.2): the two low-severity states share one rank, as their order is open (SF-065 (a)).
+	healthRank     = map[string]int{"NORMAL_0": 0, "MAINTENANCE_REQUIRED_4": 1, "CHECK_FUNCTION_2": 1, "OFF_SPEC_3": 2, "FAILURE_1": 3}
 	configValues   = map[string]bool{"NONE_0": true, "MODE_1": true, "INTERVAL_2": true, "MODE_AND_INTERVAL_3": true}
 	filteredLists  = map[string]bool{"Data": true, "Metadata": true, "Config": true, "Event": true}
 	publishingMode = map[string]modeFlags{
@@ -303,7 +304,7 @@ func (c *checker) health(d dsm) {
 			c.str(dm, ep, k, req)
 		}
 	}
-	if healthOK && allOK && worst != "" && health != worst {
+	if healthOK && allOK && worst != "" && healthRank[health] != healthRank[worst] {
 		c.add(join(p, "Health"), "REQ-RES-HEALTH-002", "Health %s is not the most severe Health of the Details (%s at %s)", health, worst, worstPtr)
 	}
 }
