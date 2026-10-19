@@ -99,6 +99,7 @@ var (
 	guidPattern      = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 	messageIDPattern = regexp.MustCompile(`^[0-9]+-(.+)$`)
 	localePattern    = regexp.MustCompile(`^[a-z]{2,3}(-[A-Z]{2,3})?$`)
+	indexFormPattern = regexp.MustCompile(`^[0-9]+:`) // QualifiedName "<index>:<name>" (Part 6 5.1.12)
 )
 
 const maxUint32 = 1<<32 - 1
@@ -649,10 +650,21 @@ func (c *checker) keyValuePair(ptr string, v any) {
 	if kv == nil {
 		return
 	}
-	c.str(kv, ptr, "Key", req)
-	if val, ok := kv["Value"]; ok {
-		if vm, isObj := val.(map[string]any); !isObj || vm["UaType"] == nil {
-			c.add(join(ptr, "Value"), req, "Value must be a Variant object with UaType")
+	if k, ok := c.str(kv, ptr, "Key", req); ok && (k == "" || indexFormPattern.MatchString(k)) {
+		c.add(join(ptr, "Key"), req, "Key %q is no QualifiedName string (plain name or nsu=<uri>;<name>)", k)
+	}
+	val, ok := kv["Value"]
+	if !ok {
+		return
+	}
+	vm, isObj := val.(map[string]any)
+	if !isObj || vm["UaType"] == nil {
+		c.add(join(ptr, "Value"), req, "Value must be a Variant object with UaType")
+		return
+	}
+	if t, ok := vm["UaType"].(json.Number); ok && t.String() == "22" {
+		if eo, ok := vm["Value"].(map[string]any); !ok || eo["UaTypeId"] == nil {
+			c.add(join(ptr, "Value"), req, "an ExtensionObject Value must contain UaTypeId")
 		}
 	}
 }

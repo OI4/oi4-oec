@@ -64,7 +64,10 @@ var metadataPub = `{
       "Name": "Oee", "Description": {"Locale": "en-US", "Text": "OEE"}, "FieldFlags": 0, "BuiltInType": 11,
       "DataType": "i=11", "ValueRank": -1, "ArrayDimensions": [], "MaxStringLength": 0,
       "DataSetFieldId": "0b8e2a3c-55c1-4d5e-9f00-3d6c1d7a2b11",
-      "Properties": [{"Key": "Unit", "Value": {"UaType": 12, "Value": "%"}}]
+      "Properties": [{"Key": "Unit", "Value": {"UaType": 12, "Value": "%"}},
+        {"Key": "EngineeringUnits", "Value": {"UaType": 22, "Value": {"UaTypeId": "i=887",
+          "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact", "UnitId": 5066068,
+          "DisplayName": {"Text": "%"}, "Description": {"Text": "percent"}}}}]
     }]
   }
 }`
@@ -173,12 +176,17 @@ func TestViolations(t *testing.T) {
 		{"metadata missing timestamp", tMetadata, metadataPub, `"Timestamp": "2021-12-16T22:25:10.094Z", `, ``, []string{"REQ-MSG-032"}},
 		{"configuration version", tMetadata, metadataPub, `"ConfigurationVersion": {"MajorVersion": 1, "MinorVersion": 2}`, `"ConfigurationVersion": {"MajorVersion": -1, "MinorVersion": 2}`, []string{"REQ-MSG-036"}},
 		{"field missing properties", tMetadata, metadataPub, `,
-      "Properties": [{"Key": "Unit", "Value": {"UaType": 12, "Value": "%"}}]`, ``, []string{"REQ-MSG-037"}},
+      "Properties": [{"Key": "Unit", "Value": {"UaType": 12, "Value": "%"}},`, `, "x": [`, []string{"REQ-MSG-001", "REQ-MSG-037"}},
 		{"node id with index", tMetadata, metadataPub, `"DataType": "i=11"`, `"DataType": "ns=1;i=11"`, []string{"REQ-MSG-039"}},
 		{"localized text locale", tMetadata, metadataPub, `"Description": {"Locale": "en-US", "Text": "OEE"},
     "Configuration`, `"Description": {"Locale": "english", "Text": "OEE"},
     "Configuration`, []string{"REQ-MSG-040"}},
 		{"key value pair", tMetadata, metadataPub, `{"UaType": 12, "Value": "%"}`, `"%"`, []string{"REQ-MSG-041"}},
+		{"qualified name index form", tMetadata, metadataPub, `"Key": "Unit"`, `"Key": "1:Unit"`, []string{"REQ-MSG-041"}},
+		{"qualified name object form", tMetadata, metadataPub, `"Key": "Unit"`, `"Key": {"Name": "Unit"}`, []string{"REQ-MSG-041"}},
+		{"extension object without type id", tMetadata, metadataPub, `"UaTypeId": "i=887",`, ``, []string{"REQ-MSG-041"}},
+		{"description without locale", tMetadata, metadataPub, `"Description": {"Locale": "en-US", "Text": "OEE"}, "FieldFlags"`, `"Description": {"Text": "OEE"}, "FieldFlags"`, []string{"REQ-MSG-040"}},
+		{"null description", tMetadata, metadataPub, `"Description": {"Locale": "en-US", "Text": "OEE"}, "FieldFlags"`, `"Description": null, "FieldFlags"`, []string{"REQ-MSG-040"}},
 		{"action message type", tCall, call, `"ua-action-request"`, `"ua-data"`, []string{"REQ-ACT-001"}},
 		{"call without timeout", tCall, call, `"TimeoutHint": 10000,`, ``, []string{"REQ-ACT-002"}},
 		{"reply with response address", tReply, reply, `"RequestorId"`, `"TimeoutHint": 5, "RequestorId"`, []string{"REQ-ACT-002"}},
