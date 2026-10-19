@@ -1,7 +1,7 @@
 # Area registry of the requirements catalog (ADR-0018, schema: areas.schema.json).
 # Every guideline section belongs to exactly one area; the longest listed prefix
 # wins ("MG 8.2.16" beats "MG 8"). Order = catalog order, cycles per ROADMAP P1 (updated C-024).
-baseline: "4af61f3"
+baseline: "2f00e9f"
 areas:
   - code: CMP
     title: Compliance domains and levels

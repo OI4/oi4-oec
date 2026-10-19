@@ -1,10 +1,10 @@
 # Golden payload vectors (C-023/C-024, ADR-0018 amendments C-013, C-023 and C-024); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "4af61f3"
+baseline: "2f00e9f"
 description: >-
-  Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.11, B1.1.12,
-  B1.2.1): topic and message of the Message Bus; and the predefined MetaData
+  Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.5, B1.1.11,
+  B1.1.12, B1.2.1): topic and message of the Message Bus; and the predefined MetaData
   of the Alliance resources (MG B2.1 … B2.8) as bare DataSetMetaDataType
   objects. The reference checks cover the
   envelope of MG 8 (areas MSG and ACT); the DataSet content of the resources
@@ -1275,4 +1275,454 @@ vectors:
         "StructureDataTypes": [],
         "EnumDataTypes": [],
         "SimpleDataTypes": []
+      }
+
+  - id: V-PAY-020
+    title: "B1.1.5: Get Metadata of an explicit data tag"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-015, REQ-MSG-032]
+    origin: {kind: guideline, ref: MG B1.1.5}
+    status: draft
+    notes: >-
+      A Get carries an empty MetaData (MG 9.1.5); DataSetWriterId, WriterGroupName and DataSetWriterName address the Data tag oee of B1.1.4.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-metadata",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetWriterId": 93,
+        "WriterGroupName": "oee",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ReplyTo": "",
+        "MetaData": {}
+      }
+
+  - id: V-PAY-021
+    title: "B1.1.5: Pub Metadata of an explicit data tag, reply to a Get"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-033, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041]
+    origin: {kind: guideline, ref: MG B1.1.5}
+    status: draft
+    notes: >-
+      Complete ua-metadata of the publisher-defined DataSet oee (no DataSetClassId); same DataSetWriterId (93), WriterGroupName and DataSetWriterName as the DataSetMessage of B1.1.4 (REQ-MSG-033). Double fields with EURange and EngineeringUnits.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 93,
+        "WriterGroupName": "oee",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MetaData": {
+          "Name": "oee",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Overall equipment effectiveness (OEE) of the asset."
+          },
+          "Fields": [
+            {
+              "Name": "Availability",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Ratio of the run time to the planned production time."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "3cd47e8b-e246-5a00-a657-68fdb442acfb",
+              "Properties": [
+                {
+                  "Key": "EURange",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=884",
+                      "Low": 0,
+                      "High": 100
+                    }
+                  }
+                },
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 20529,
+                      "DisplayName": {
+                        "Text": "%"
+                      },
+                      "Description": {
+                        "Text": "percent"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "PerformanceRate",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Ratio of the actual to the ideal output in the run time."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "d9ec206c-3690-5cd7-99ab-a7059127a5da",
+              "Properties": [
+                {
+                  "Key": "EURange",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=884",
+                      "Low": 0,
+                      "High": 100
+                    }
+                  }
+                },
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 20529,
+                      "DisplayName": {
+                        "Text": "%"
+                      },
+                      "Description": {
+                        "Text": "percent"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "QualityRate",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Ratio of the good parts to all produced parts."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "641c1cd7-3517-5e12-857f-c5ba5518087a",
+              "Properties": [
+                {
+                  "Key": "EURange",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=884",
+                      "Low": 0,
+                      "High": 100
+                    }
+                  }
+                },
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 20529,
+                      "DisplayName": {
+                        "Text": "%"
+                      },
+                      "Description": {
+                        "Text": "percent"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "Product",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Overall equipment effectiveness: product of Availability, PerformanceRate and QualityRate."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "92d1a1c2-6bf4-5ca0-b7aa-b659e734ef43",
+              "Properties": [
+                {
+                  "Key": "EURange",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=884",
+                      "Low": 0,
+                      "High": 100
+                    }
+                  }
+                },
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 20529,
+                      "DisplayName": {
+                        "Text": "%"
+                      },
+                      "Description": {
+                        "Text": "percent"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693008710,
+            "MinorVersion": 693008710
+          },
+          "Namespaces": [],
+          "StructureDataTypes": [],
+          "EnumDataTypes": [],
+          "SimpleDataTypes": []
+        }
+      }
+
+  - id: V-PAY-022
+    title: "B1.1.5: Set Metadata of an explicit data tag"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035]
+    origin: {kind: guideline, ref: MG B1.1.5}
+    status: draft
+    notes: >-
+      The requester sends the complete MetaData with a changed Description; the PublisherId is the requester's (MG 7.3).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-metadata",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetWriterId": 93,
+        "WriterGroupName": "oee",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "oee",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Overall equipment effectiveness (OEE) of the filling line."
+          },
+          "Fields": [
+            {
+              "Name": "Availability",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Ratio of the run time to the planned production time."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "3cd47e8b-e246-5a00-a657-68fdb442acfb",
+              "Properties": [
+                {
+                  "Key": "EURange",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=884",
+                      "Low": 0,
+                      "High": 100
+                    }
+                  }
+                },
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 20529,
+                      "DisplayName": {
+                        "Text": "%"
+                      },
+                      "Description": {
+                        "Text": "percent"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "PerformanceRate",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Ratio of the actual to the ideal output in the run time."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "d9ec206c-3690-5cd7-99ab-a7059127a5da",
+              "Properties": [
+                {
+                  "Key": "EURange",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=884",
+                      "Low": 0,
+                      "High": 100
+                    }
+                  }
+                },
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 20529,
+                      "DisplayName": {
+                        "Text": "%"
+                      },
+                      "Description": {
+                        "Text": "percent"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "QualityRate",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Ratio of the good parts to all produced parts."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "641c1cd7-3517-5e12-857f-c5ba5518087a",
+              "Properties": [
+                {
+                  "Key": "EURange",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=884",
+                      "Low": 0,
+                      "High": 100
+                    }
+                  }
+                },
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 20529,
+                      "DisplayName": {
+                        "Text": "%"
+                      },
+                      "Description": {
+                        "Text": "percent"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "Product",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Overall equipment effectiveness: product of Availability, PerformanceRate and QualityRate."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "92d1a1c2-6bf4-5ca0-b7aa-b659e734ef43",
+              "Properties": [
+                {
+                  "Key": "EURange",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=884",
+                      "Low": 0,
+                      "High": 100
+                    }
+                  }
+                },
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 20529,
+                      "DisplayName": {
+                        "Text": "%"
+                      },
+                      "Description": {
+                        "Text": "percent"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693008710,
+            "MinorVersion": 693008710
+          },
+          "Namespaces": [],
+          "StructureDataTypes": [],
+          "EnumDataTypes": [],
+          "SimpleDataTypes": []
+        }
       }
