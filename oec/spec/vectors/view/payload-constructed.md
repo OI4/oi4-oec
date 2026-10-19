@@ -7,8 +7,8 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-PAY-018](#v-pay-018) | Pub Health with user-defined keys, strict validation | invalid | violates: REQ-MSG-001 | constructed | draft |
-| [V-PAY-019](#v-pay-019) | Pub Health with user-defined keys, tolerant validation | valid | ok | constructed | draft |
+| [V-PAY-018](#v-pay-018) | Pub Health with user-defined keys, strict validation | invalid | violates: REQ-MSG-001 | constructed | reviewed |
+| [V-PAY-019](#v-pay-019) | Pub Health with user-defined keys, tolerant validation | valid | ok | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -22,7 +22,7 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 - Expected: invalid – The NetworkMessage and the DataSetMessage contain the user-defined key VendorTag.
 - Violates: [REQ-MSG-001](../../requirements/view/msg.md#req-msg-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 with the user-defined keys VendorTag in the NetworkMessage and in the DataSetMessage: a sender must not add them (REQ-MSG-001).
 
@@ -65,7 +65,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-046](../../requirements/view/msg.md#req-msg-046)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: The message of V-PAY-018 seen by a tolerant receiver: the unknown keys are ignored and the defined keys are valid (REQ-MSG-046).
 

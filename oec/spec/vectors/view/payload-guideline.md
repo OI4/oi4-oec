@@ -7,23 +7,23 @@ Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.5, B1.1.11, B1.1.1
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-PAY-001](#v-pay-001) | B1.1.2: Get Health of an explicit asset | valid | ok | guideline MG B1.1.2 | draft |
-| [V-PAY-002](#v-pay-002) | B1.1.2: Get Health of all assets related to this application | valid | ok | guideline MG B1.1.2 | draft |
-| [V-PAY-003](#v-pay-003) | B1.1.2: Pub Health of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.2 | draft |
-| [V-PAY-004](#v-pay-004) | B1.1.2: Pub Health of all assets, self-initialized | valid | ok | guideline MG B1.1.2 (edited: 2 change(s)) | draft |
-| [V-PAY-005](#v-pay-005) | B1.1.11: Get MAM of all assets with PaginationRequest | valid | ok | guideline MG B1.1.11 | draft |
-| [V-PAY-006](#v-pay-006) | B1.1.11: Pub MAM of all assets with Pagination | valid | ok | guideline MG B1.1.11 | draft |
-| [V-PAY-007](#v-pay-007) | B1.1.12: Get MAM of all assets with Locale | valid | ok | guideline MG B1.1.12 | draft |
-| [V-PAY-008](#v-pay-008) | B1.2.1: Call NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | draft |
-| [V-PAY-009](#v-pay-009) | B1.2.1: Reply NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | draft |
-| [V-PAY-010](#v-pay-010) | B2.1: predefined MetaData of MAM | valid | ok | guideline MG B2.1 | draft |
-| [V-PAY-011](#v-pay-011) | B2.2: predefined MetaData of Health | valid | ok | guideline MG B2.2 | draft |
-| [V-PAY-012](#v-pay-012) | B2.3: predefined MetaData of Config | valid | ok | guideline MG B2.3 | draft |
-| [V-PAY-013](#v-pay-013) | B2.4: predefined MetaData of Event | valid | ok | guideline MG B2.4 | draft |
-| [V-PAY-014](#v-pay-014) | B2.5: predefined MetaData of Profile | valid | ok | guideline MG B2.5 | draft |
-| [V-PAY-015](#v-pay-015) | B2.6: predefined MetaData of PublicationList | valid | ok | guideline MG B2.6 | draft |
-| [V-PAY-016](#v-pay-016) | B2.7: predefined MetaData of SubscriptionList | valid | ok | guideline MG B2.7 | draft |
-| [V-PAY-017](#v-pay-017) | B2.8: predefined MetaData of ReferenceDesignation | valid | ok | guideline MG B2.8 | draft |
+| [V-PAY-001](#v-pay-001) | B1.1.2: Get Health of an explicit asset | valid | ok | guideline MG B1.1.2 | reviewed |
+| [V-PAY-002](#v-pay-002) | B1.1.2: Get Health of all assets related to this application | valid | ok | guideline MG B1.1.2 | reviewed |
+| [V-PAY-003](#v-pay-003) | B1.1.2: Pub Health of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.2 | reviewed |
+| [V-PAY-004](#v-pay-004) | B1.1.2: Pub Health of all assets, self-initialized | valid | ok | guideline MG B1.1.2 (edited: 2 change(s)) | reviewed |
+| [V-PAY-005](#v-pay-005) | B1.1.11: Get MAM of all assets with PaginationRequest | valid | ok | guideline MG B1.1.11 | reviewed |
+| [V-PAY-006](#v-pay-006) | B1.1.11: Pub MAM of all assets with Pagination | valid | ok | guideline MG B1.1.11 | reviewed |
+| [V-PAY-007](#v-pay-007) | B1.1.12: Get MAM of all assets with Locale | valid | ok | guideline MG B1.1.12 | reviewed |
+| [V-PAY-008](#v-pay-008) | B1.2.1: Call NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | reviewed |
+| [V-PAY-009](#v-pay-009) | B1.2.1: Reply NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | reviewed |
+| [V-PAY-010](#v-pay-010) | B2.1: predefined MetaData of MAM | valid | ok | guideline MG B2.1 | reviewed |
+| [V-PAY-011](#v-pay-011) | B2.2: predefined MetaData of Health | valid | ok | guideline MG B2.2 | reviewed |
+| [V-PAY-012](#v-pay-012) | B2.3: predefined MetaData of Config | valid | ok | guideline MG B2.3 | reviewed |
+| [V-PAY-013](#v-pay-013) | B2.4: predefined MetaData of Event | valid | ok | guideline MG B2.4 | reviewed |
+| [V-PAY-014](#v-pay-014) | B2.5: predefined MetaData of Profile | valid | ok | guideline MG B2.5 | reviewed |
+| [V-PAY-015](#v-pay-015) | B2.6: predefined MetaData of PublicationList | valid | ok | guideline MG B2.6 | reviewed |
+| [V-PAY-016](#v-pay-016) | B2.7: predefined MetaData of SubscriptionList | valid | ok | guideline MG B2.7 | reviewed |
+| [V-PAY-017](#v-pay-017) | B2.8: predefined MetaData of ReferenceDesignation | valid | ok | guideline MG B2.8 | reviewed |
 | [V-PAY-020](#v-pay-020) | B1.1.5: Get Metadata of an explicit data tag | valid | ok | guideline MG B1.1.5 | draft |
 | [V-PAY-021](#v-pay-021) | B1.1.5: Pub Metadata of an explicit data tag, reply to a Get | valid | ok | guideline MG B1.1.5 | draft |
 | [V-PAY-022](#v-pay-022) | B1.1.5: Set Metadata of an explicit data tag | valid | ok | guideline MG B1.1.5 | draft |
@@ -39,7 +39,7 @@ Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.5, B1.1.11, B1.1.1
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 Notes: A request addresses the application in the topic (MG 7.3); the PublisherId and the MessageId are those of the requesting IT connector. The Source of the topic is the application itself. A Get without helper DataSets has an empty Messages array and an empty ReplyTo.
 
@@ -66,7 +66,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 Notes: Same payload as V-PAY-001 on the topic without Source. A request has an empty ReplyTo (the former "self-initialized" note of the Get examples was removed in C-024, SF-049 (h)).
 
@@ -94,7 +94,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 Notes: ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health has no Filter; DataSetWriterName is the decoded Source. The DataSet content (MG 8.3.2) is checked with the Health schema in C-026/C-027.
 
@@ -133,7 +133,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-031](../../requirements/view/msg.md#req-msg-031)
 - Origin: guideline MG B1.1.2 (edited: 2 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Topic without Source: one DataSetMessage per asset; here only the application itself. Self-initialized publication, so ReplyTo is empty.
 
@@ -241,7 +241,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019)
 - Origin: guideline MG B1.1.11
-- Status: draft
+- Status: reviewed
 
 Notes: The helper DataSet PaginationRequest uses DataSetWriterId 1, WriterGroupName "PaginationRequest" and the Identification Link of the sender as DataSetWriterName. The NetworkMessage keeps the DataSetClassId of MAM (REQ- MSG-011).
 
@@ -278,7 +278,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019), [REQ-MSG-020](../../requirements/view/msg.md#req-msg-020), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
 - Origin: guideline MG B1.1.11
-- Status: draft
+- Status: reviewed
 
 Notes: Two MAM DataSetMessages (application and one device, WriterGroupName "" as MAM has no Filter) and the helper DataSet Pagination (DataSetWriterId 2). The MAM content (MG 8.3.1) is checked with the MAM schema in C-026/C-027.
 
@@ -376,7 +376,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019)
 - Origin: guideline MG B1.1.12
-- Status: draft
+- Status: reviewed
 
 Notes: The helper DataSet Locale uses DataSetWriterId 3 and WriterGroupName "Locale".
 
@@ -412,7 +412,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-006](../../requirements/view/act.md#req-act-006), [REQ-ACT-010](../../requirements/view/act.md#req-act-010), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-021](../../requirements/view/act.md#req-act-021)
 - Origin: guideline MG B1.2.1
-- Status: draft
+- Status: reviewed
 
 Notes: PublisherId is the Responder (topic), RequestorId and MessageId are those of the IT connector; ResponseAddress is the Reply topic of the Call topic. Without CorrelationData.
 
@@ -451,7 +451,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-012](../../requirements/view/act.md#req-act-012), [REQ-ACT-014](../../requirements/view/act.md#req-act-014), [REQ-ACT-015](../../requirements/view/act.md#req-act-015), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-022](../../requirements/view/act.md#req-act-022)
 - Origin: guideline MG B1.2.1
-- Status: draft
+- Status: reviewed
 
 Notes: Final response (ActionState 2) to V-PAY-008 with Status {} (Good, CompactEncoding) and the new DataSetWriterId 57211, valid for 10 s.
 
@@ -488,7 +488,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040)
 - Origin: guideline MG B2.1
-- Status: draft
+- Status: reviewed
 
 Notes: Bare DataSetMetaDataType (no message): the predefined MetaData of the resource is not published via Metadata (MG 9.1.5, B2, SF-054). All fields of MG 5 including the optional GlobalAssetId; LocalizedText fields use BuiltInType 21.
 
@@ -733,7 +733,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-MSG-041](../../requirements/view/msg.md#req-msg-041), [REQ-MSG-044](../../requirements/view/msg.md#req-msg-044)
 - Origin: guideline MG B2.2
-- Status: draft
+- Status: reviewed
 
 Notes: Bare DataSetMetaDataType (no message): the predefined MetaData of the resource is not published via Metadata (MG 9.1.5, B2, SF-054). Health uses DeviceHealthEnumeration of OPC UA Part 100 (EnumDataTypes, namespace in Namespaces); HealthScore carries the properties EURange and EngineeringUnits (ExtensionObjects); Details is an array of the abstract DataType Structure (SF-055).
 
@@ -872,7 +872,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040)
 - Origin: guideline MG B2.3
-- Status: draft
+- Status: reviewed
 
 Notes: Bare DataSetMetaDataType (no message): the predefined MetaData of the resource is not published via Metadata (MG 9.1.5, B2, SF-054). The fields are the groups of the publisher (here the group network of MG B1.1.3) and Context, both of the abstract DataType Structure (SF-055).
 
@@ -937,7 +937,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040)
 - Origin: guideline MG B2.4
-- Status: draft
+- Status: reviewed
 
 Notes: Bare DataSetMetaDataType (no message): the predefined MetaData of the resource is not published via Metadata (MG 9.1.5, B2, SF-054). Category (abstract Enumeration) and Details (abstract Structure) have no NodeId (SF-055).
 
@@ -1032,7 +1032,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040)
 - Origin: guideline MG B2.5
-- Status: draft
+- Status: reviewed
 
 Notes: Bare DataSetMetaDataType (no message): the predefined MetaData of the resource is not published via Metadata (MG 9.1.5, B2, SF-054). Resources is a one-dimensional String array of unknown maximum length (ArrayDimensions [0]).
 
@@ -1082,7 +1082,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040)
 - Origin: guideline MG B2.6
-- Status: draft
+- Status: reviewed
 
 Notes: Bare DataSetMetaDataType (no message): the predefined MetaData of the resource is not published via Metadata (MG 9.1.5, B2, SF-054). Mode and Config (abstract Enumeration) and Precisions (abstract Structure) have no NodeId (SF-055).
 
@@ -1237,7 +1237,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040)
 - Origin: guideline MG B2.7
-- Status: draft
+- Status: reviewed
 
 Notes: Bare DataSetMetaDataType (no message): the predefined MetaData of the resource is not published via Metadata (MG 9.1.5, B2, SF-054). Config (abstract Enumeration) has no NodeId (SF-055).
 
@@ -1317,7 +1317,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040)
 - Origin: guideline MG B2.8
-- Status: draft
+- Status: reviewed
 
 Notes: Bare DataSetMetaDataType (no message): the predefined MetaData of the resource is not published via Metadata (MG 9.1.5, B2, SF-054). Function, Product and Location (abstract Structure) have no NodeId (SF-055).
 

@@ -1,4 +1,4 @@
-# Golden payload vectors (C-023/C-024, ADR-0018 amendments C-013, C-023 and C-024); status draft until the PO review.
+# Golden payload vectors (C-023/C-024, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 017 reviewed by the PO (C-024), later ones draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "2f00e9f"
@@ -16,7 +16,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-005, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-011, REQ-MSG-015]
     origin: {kind: guideline, ref: MG B1.1.2}
-    status: draft
+    status: reviewed
     notes: >-
       A request addresses the application in the topic (MG 7.3); the PublisherId
       and the MessageId are those of the requesting IT connector. The Source of
@@ -38,7 +38,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-005, REQ-MSG-006, REQ-MSG-011, REQ-MSG-015]
     origin: {kind: guideline, ref: MG B1.1.2}
-    status: draft
+    status: reviewed
     notes: >-
       Same payload as V-PAY-001 on the topic without Source. A request has an
       empty ReplyTo (the former "self-initialized" note of the Get examples was
@@ -59,7 +59,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-015, REQ-MSG-016, REQ-MSG-023, REQ-MSG-024]
     origin: {kind: guideline, ref: MG B1.1.2}
-    status: draft
+    status: reviewed
     notes: >-
       ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health
       has no Filter; DataSetWriterName is the decoded Source. The DataSet content
@@ -92,7 +92,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-005, REQ-MSG-006, REQ-MSG-015, REQ-MSG-016, REQ-MSG-024, REQ-MSG-031]
     origin: {kind: guideline, ref: MG B1.1.2}
-    status: draft
+    status: reviewed
     notes: >-
       Topic without Source: one DataSetMessage per asset; here only the
       application itself. Self-initialized publication, so ReplyTo is empty.
@@ -187,7 +187,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-011, REQ-MSG-019]
     origin: {kind: guideline, ref: MG B1.1.11}
-    status: draft
+    status: reviewed
     notes: >-
       The helper DataSet PaginationRequest uses DataSetWriterId 1, WriterGroupName
       "PaginationRequest" and the Identification Link of the sender as
@@ -219,7 +219,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-005, REQ-MSG-015, REQ-MSG-019, REQ-MSG-020, REQ-MSG-024]
     origin: {kind: guideline, ref: MG B1.1.11}
-    status: draft
+    status: reviewed
     notes: >-
       Two MAM DataSetMessages (application and one device, WriterGroupName "" as
       MAM has no Filter) and the helper DataSet Pagination (DataSetWriterId 2).
@@ -311,7 +311,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-011, REQ-MSG-019]
     origin: {kind: guideline, ref: MG B1.1.12}
-    status: draft
+    status: reviewed
     notes: >-
       The helper DataSet Locale uses DataSetWriterId 3 and WriterGroupName
       "Locale".
@@ -340,7 +340,7 @@ vectors:
     expected: valid
     reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-006, REQ-ACT-010, REQ-ACT-019, REQ-ACT-020, REQ-ACT-021]
     origin: {kind: guideline, ref: MG B1.2.1}
-    status: draft
+    status: reviewed
     notes: >-
       PublisherId is the Responder (topic), RequestorId and MessageId are those of
       the IT connector; ResponseAddress is the Reply topic of the Call topic.
@@ -373,7 +373,7 @@ vectors:
     expected: valid
     reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-012, REQ-ACT-014, REQ-ACT-015, REQ-ACT-019, REQ-ACT-020, REQ-ACT-022]
     origin: {kind: guideline, ref: MG B1.2.1}
-    status: draft
+    status: reviewed
     notes: >-
       Final response (ActionState 2) to V-PAY-008 with Status {} (Good,
       CompactEncoding) and the new DataSetWriterId 57211, valid for 10 s.
@@ -405,7 +405,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-010, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040]
     origin: {kind: guideline, ref: MG B2.1}
-    status: draft
+    status: reviewed
     notes: >-
       Bare DataSetMetaDataType (no message): the predefined MetaData of the
       resource is not published via Metadata (MG 9.1.5, B2, SF-054).
@@ -646,7 +646,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-010, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041, REQ-MSG-044]
     origin: {kind: guideline, ref: MG B2.2}
-    status: draft
+    status: reviewed
     notes: >-
       Bare DataSetMetaDataType (no message): the predefined MetaData of the
       resource is not published via Metadata (MG 9.1.5, B2, SF-054).
@@ -781,7 +781,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-010, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040]
     origin: {kind: guideline, ref: MG B2.3}
-    status: draft
+    status: reviewed
     notes: >-
       Bare DataSetMetaDataType (no message): the predefined MetaData of the
       resource is not published via Metadata (MG 9.1.5, B2, SF-054).
@@ -842,7 +842,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-010, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040]
     origin: {kind: guideline, ref: MG B2.4}
-    status: draft
+    status: reviewed
     notes: >-
       Bare DataSetMetaDataType (no message): the predefined MetaData of the
       resource is not published via Metadata (MG 9.1.5, B2, SF-054).
@@ -933,7 +933,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-010, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040]
     origin: {kind: guideline, ref: MG B2.5}
-    status: draft
+    status: reviewed
     notes: >-
       Bare DataSetMetaDataType (no message): the predefined MetaData of the
       resource is not published via Metadata (MG 9.1.5, B2, SF-054).
@@ -979,7 +979,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-010, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040]
     origin: {kind: guideline, ref: MG B2.6}
-    status: draft
+    status: reviewed
     notes: >-
       Bare DataSetMetaDataType (no message): the predefined MetaData of the
       resource is not published via Metadata (MG 9.1.5, B2, SF-054).
@@ -1130,7 +1130,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-010, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040]
     origin: {kind: guideline, ref: MG B2.7}
-    status: draft
+    status: reviewed
     notes: >-
       Bare DataSetMetaDataType (no message): the predefined MetaData of the
       resource is not published via Metadata (MG 9.1.5, B2, SF-054).
@@ -1206,7 +1206,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-010, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040]
     origin: {kind: guideline, ref: MG B2.8}
-    status: draft
+    status: reviewed
     notes: >-
       Bare DataSetMetaDataType (no message): the predefined MetaData of the
       resource is not published via Metadata (MG 9.1.5, B2, SF-054).

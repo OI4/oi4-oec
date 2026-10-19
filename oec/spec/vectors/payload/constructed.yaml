@@ -15,7 +15,7 @@ vectors:
     violates: [REQ-MSG-001]
     reason: The NetworkMessage and the DataSetMessage contain the user-defined key VendorTag.
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-003 with the user-defined keys VendorTag in the NetworkMessage and
       in the DataSetMessage: a sender must not add them (REQ-MSG-001).
@@ -50,7 +50,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-046]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       The message of V-PAY-018 seen by a tolerant receiver: the unknown keys
       are ignored and the defined keys are valid (REQ-MSG-046).
