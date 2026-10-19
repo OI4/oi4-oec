@@ -1,0 +1,540 @@
+# Requirements of area RES-PUBLIST – resource PublicationList
+# (MG 8.3.8, 9.1.8; ADR-0018, schema: catalog.schema.json).
+# Support: REQ-CMP-019 (applications, L2 SHOULD, L3 MUST). WriterGroupName of
+# the entries: REQ-MSG-025 (GL-ADR-018), Filter structure: REQ-TOP-022. The
+# Status event after a Set belongs to RES-EVENT (C-028). Checked by
+# tools/internal/payload (C-027).
+area: RES-PUBLIST
+baseline: "c6453c7"
+requirements:
+  # --- DataSet content (MG 8.3.8) ---------------------------------------------
+  - id: REQ-RES-PUBLIST-001
+    title: Fields of a PublicationList entry
+    statement: >-
+      The Payload of a PublicationList DataSetMessage (one entry) contains the
+      mandatory fields Resource (name of a resource of MG 7.5.1), Source
+      (unencoded Identification Link of the asset) and DataSetWriterId
+      (UInt16), and optionally Filter (topic-encoded String, MG 7.7), Mode
+      (enumeration OFF_0 … ON_REQUEST_APPLICATION_SOURCE_FILTER_15, default
+      ON_REQUEST_1), Interval (UInt32 in ms, default 0), Precisions (object
+      mapping DataSet field names to a Real ≥ 0, default 0) and Config
+      (enumeration NONE_0, MODE_1, INTERVAL_2, MODE_AND_INTERVAL_3, default
+      NONE_0); no other field.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource PublicationList (REQ-CMP-019).
+    scope: [MG 7.5.1, MG 7.7]
+    refs: [MG 8.3.8, SF-067]
+    quotes:
+      - ref: MG 8.3.8
+        text: The Filter shall be a topic encoded string as explained in 7.7 Filter Element.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.8-b9d2374e, MG-8.3.8-86fbe141, MG-8.3.8-c2821b10, MG-8.3.8-5ef901d0, MG-8.3.8-25e2c8ca, MG-8.3.8-f7d6d15a, MG-8.3.8-6ca0c9bc, MG-8.3.8-1f4ea694, MG-8.3.8-7d9aee6c, MG-8.3.8-2237c2eb]
+    status: draft
+    notes: >-
+      The Value Range "0.0 … 3.4·1038" of a Precisions entry is read as
+      0.0 … 3.4·10^38 (SF-067 (d)). Precisions are only used for numeric
+      DataSet fields (excursion in MG B1.1.8).
+
+  - id: REQ-RES-PUBLIST-002
+    title: Entry matches its DataSetMessage and its topic
+    statement: >-
+      The Filter of an entry is present exactly for the resources Data,
+      Metadata, Config and Event and is the Tag of that resource; the
+      WriterGroupName of the DataSetMessage is Resource or Resource/Filter
+      and the DataSetWriterName is the Source of the entry (proposal SF-067
+      (b)).
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource PublicationList (REQ-CMP-019).
+    scope: [MG 7.7, MG 8.2.3]
+    refs: [MG 9.1.8, SF-035, SF-067]
+    quotes:
+      - ref: MG 9.1.8
+        text: In addition to the ResourceType a Tag can be added, e.g. to address a defined DataSetMessage of the resource Data.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.8-50d5be83, MG-9.1.8-7e7fda6f]
+    status: draft
+    notes: >-
+      Combines REQ-TOP-022 (Filter structure), REQ-MSG-023 (DataSetWriterName)
+      and REQ-MSG-025 (WriterGroupName) for the fields of the entry; the
+      templates of MG 9.1.8 name "<IdentificationLink of the application>" as
+      DataSetWriterName (SF-067 (b)).
+
+  - id: REQ-RES-PUBLIST-003
+    title: Resource, Source and Filter identify an entry
+    statement: >-
+      The combination of Resource, Source and Filter of an entry is unique
+      within the scope of the publisher.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource PublicationList (REQ-CMP-019).
+    refs: [MG 8.3.8]
+    quotes:
+      - ref: MG 8.3.8
+        text: The Filter, in combination with the Resource and Source must be unique within the scope of a publisher.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.8-f43474c4]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-004
+    title: Speaking Filter names
+    statement: The Filter (Tag) of a publication has a speaking name.
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application]
+    refs: [MG 8.3.8]
+    verification: [manual]
+    inventory: [MG-8.3.8-d5fbd2f0]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-005
+    title: DataSetWriterId of an entry is the one of the publication
+    statement: >-
+      The DataSetWriterId of an entry is the DataSetWriterId with which the
+      publisher publishes the described DataSetMessages and their
+      DataSetMetaData.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource PublicationList (REQ-CMP-019).
+    scope: [MG 8.2.3]
+    refs: [MG 8.3.8, SF-035, SF-067]
+    quotes:
+      - ref: MG 8.3.8
+        text: An identifier for DataSetWriter which published the DataSetMessage and DataSetMetaData.
+    verification: [d7-monitor]
+    inventory: [MG-8.3.8-6d49f195]
+    status: draft
+    notes: >-
+      The DataSetWriterId of the PublicationList DataSetMessages themselves is
+      shared by all entries according to the note of MG 9.1.8, which
+      contradicts REQ-MSG-021 (SF-067 (a)).
+
+  - id: REQ-RES-PUBLIST-006
+    title: The publisher assigns the DataSetWriterIds
+    statement: >-
+      The DataSetWriterIds of the entries are assigned by the publisher
+      (unique within its scope, REQ-MSG-021).
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application]
+    refs: [MG 8.3.8]
+    quotes:
+      - ref: MG 8.3.8
+        text: The DataSetWriterId (8.2.3 DataSetMessage) is unique within the scope of a publisher, therefore the publisher should assign it.
+    verification: [manual]
+    inventory: [MG-8.3.8-1abe2846]
+    status: draft
+
+  # --- Mode, Interval, Precisions, Config (MG 8.3.8) --------------------------
+  - id: REQ-RES-PUBLIST-007
+    title: Mode OFF_0
+    statement: >-
+      A DataSetMessage whose entry has the Mode OFF_0 is neither published nor
+      accessible via the Message Bus (also not via Get).
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [application]
+    condition: The entry has the Mode OFF_0.
+    refs: [MG 8.3.8]
+    quotes:
+      - ref: MG 8.3.8
+        text: With OFF_0 the DataSetMessage must not be accessible via the Message Bus and must not be published at all.
+    verification: [d7-test]
+    inventory: [MG-8.3.8-36c1539d]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-008
+    title: Mode ON_REQUEST_1
+    statement: >-
+      A DataSetMessage whose entry has the Mode ON_REQUEST_1 (or no Mode) is
+      published only as answer to a Get.
+    keyword: MUST NOT
+    domain: messaging
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [application]
+    condition: The entry has the Mode ON_REQUEST_1 or no Mode.
+    refs: [MG 8.3.8]
+    quotes:
+      - ref: MG 8.3.8
+        text: The DataSetMessage must not be published in any way other than by a request.
+    verification: [d7-monitor]
+    inventory: [MG-8.3.8-3465ed10, MG-8.3.8-83da2432]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-009
+    title: Mode APPLICATION_2
+    statement: >-
+      With a Mode that enables APPLICATION_2, the DataSetMessage is published
+      together with all DataSetMessages of the same resource and application
+      in one NetworkMessage on Pub/<Resource> (e.g. all MAM on Pub/MAM); it
+      can additionally be requested via Get.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The Mode of the entry enables APPLICATION_2 (values 2, 5, 6, 8, 11, 13, 14, 15).
+    refs: [MG 8.3.8]
+    quotes:
+      - ref: MG 8.3.8
+        text: With APPLICATION_2 the DataSetMessage must be published with other DataSetMessages of the same resource (7.5 Resource Element) and same application (7.3 AppId Element).
+    verification: [d7-monitor]
+    inventory: [MG-8.3.8-30c0cddd, MG-8.3.8-0260e61c, MG-8.3.8-242c977b]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-010
+    title: Mode SOURCE_3
+    statement: >-
+      With a Mode that enables SOURCE_3, the DataSetMessage is published
+      together with all DataSetMessages of the same resource, Source and
+      application in one NetworkMessage on Pub/<Resource>/<Source>; it can
+      additionally be requested via Get.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The Mode of the entry enables SOURCE_3 (values 3, 5, 7, 8, 10, 12, 14, 15).
+    refs: [MG 8.3.8]
+    quotes:
+      - ref: MG 8.3.8
+        text: With SOURCE_3 the DataSetMessage must be published with other DataSetMessages of the same resource (7.5 Resource Element), same source (7.6 Source Element) and same application (7.3 AppId Element).
+    verification: [d7-monitor]
+    inventory: [MG-8.3.8-2f684216, MG-8.3.8-d2000452, MG-8.3.8-1b645328]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-011
+    title: Mode FILTER_4
+    statement: >-
+      With a Mode that enables FILTER_4, the DataSetMessage is published
+      separately in its own NetworkMessage on
+      Pub/<Resource>/<Source>/<Filter>; it can additionally be requested via
+      Get.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The Mode of the entry enables FILTER_4 (values 4, 6, 7, 8, 9, 12, 13, 15).
+    refs: [MG 8.3.8, SF-067]
+    quotes:
+      - ref: MG 8.3.8
+        text: With FILTER_4 the DataSetMessage must be published separately in an own NetworkMessage.
+    verification: [d7-monitor]
+    inventory: [MG-8.3.8-fad93b18, MG-8.3.8-b8f0cde9, MG-8.3.8-3e5224b8]
+    status: draft
+    notes: >-
+      For resources without Filter (MAM, Health, Profile, ReferenceDesignation)
+      FILTER_4 coincides with SOURCE_3 (proposal SF-067 (c)).
+
+  - id: REQ-RES-PUBLIST-012
+    title: Mode fits the publication forms of the resource
+    statement: >-
+      The Mode of an entry enables only publication forms that exist for its
+      resource (matrix of MG 9.1): an Event entry has the Mode OFF_0 or
+      FILTER_4 (Event has no Get and is published only with Source and
+      Filter), a Metadata entry has the Mode ON_REQUEST_FILTER_9; the entries
+      of the mandatory publications MAM and Health have a Mode that enables
+      APPLICATION_2, SOURCE_3 or FILTER_4 (proposal SF-067 (c)).
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource PublicationList (REQ-CMP-019).
+    scope: [MG 9.1, MG 7.5.1]
+    refs: [MG 8.3.8, SF-035, SF-067]
+    verification: [schema, d7-validate]
+    status: draft
+    notes: >-
+      Derived from the note on Metadata in MG 8.3.8, the allowed topic forms
+      (REQ-TOP-013) and the mandatory publications of MAM and Health
+      (REQ-CMP-006/007, REQ-TOP-017); pending PO decision SF-067 (c). MG B1.1.8
+      uses APPLICATION_2 for an Event entry (corrected in the vectors).
+
+  - id: REQ-RES-PUBLIST-013
+    title: Interval
+    statement: >-
+      With Interval 0 (default) a DataSet is published on change; with an
+      Interval > 0 ms it is published whenever the interval has expired,
+      regardless of a change in the meantime.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The Mode of the entry enables a publication (APPLICATION_2, SOURCE_3 or FILTER_4).
+    refs: [MG 8.3.8, SF-067]
+    quotes:
+      - ref: MG 8.3.8
+        text: By default, any DataSet must be published on change => interval = 0.
+      - ref: MG 8.3.8
+        text: If set to > 0 ms it must be published after the interval has expired, regardless of whether a change in value has occurred in the meantime.
+    verification: [d7-monitor]
+    inventory: [MG-8.3.8-26f5e655, MG-8.3.8-320c9e9a]
+    status: draft
+    notes: >-
+      The interval applies only to entries whose Mode publishes (SF-067 (e));
+      the Health heartbeat of 60 s (REQ-TOP-017) applies in addition.
+
+  - id: REQ-RES-PUBLIST-014
+    title: Interval overrides Precisions
+    statement: >-
+      With an Interval > 0 ms the Precisions are ignored: the value is
+      published when the Interval has expired, regardless of the minimum
+      deviation.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The entry has an Interval > 0 ms.
+    refs: [MG 8.3.8]
+    quotes:
+      - ref: MG 8.3.8
+        text: Therefore Precisions must be ignored, when Interval > 0 ms.
+    verification: [d7-monitor]
+    inventory: [MG-8.3.8-fe56725e, MG-8.3.8-45fd34bf]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-015
+    title: Precisions
+    statement: >-
+      With Interval 0, a numeric DataSet field with a Precision > 0 is
+      published again only when its value deviates by at least the Precision
+      (+/-) from the last published value; a Precision of 0 (default)
+      publishes every change.
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application]
+    condition: The entry has Precisions and Interval 0.
+    refs: [MG 8.3.8]
+    quotes:
+      - ref: MG 8.3.8
+        text: Each entry of the Precisions object defines the minimum deviation (+/-), a specific value of a given DataSet should have, before it gets published again.
+      - ref: MG 8.3.8
+        text: When republishing, it should occur only after a minimum defined change.
+    verification: [d7-monitor]
+    inventory: [MG-8.3.8-ac7f1fff, MG-8.3.8-42cb238d, MG-8.3.8-01cce89c]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-016
+    title: Config defines what can be set
+    statement: >-
+      Config defines which settings of an entry can be changed via Set: NONE_0
+      (default) none, MODE_1 the Mode, INTERVAL_2 Interval and Precisions,
+      MODE_AND_INTERVAL_3 Mode, Interval and Precisions; Resource, Source,
+      Filter, DataSetWriterId and Config are read only. A Set that changes a
+      setting not enabled by Config is rejected with an Event Status Bad
+      (REQ-CMP-043).
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application offers Set for PublicationList.
+    refs: [MG 8.3.8, SF-035, SF-067]
+    quotes:
+      - ref: MG 8.3.8
+        text: The publishing behavior can be configured between different modes.
+      - ref: MG 8.3.8
+        text: Publishing behavior can be set by manipulating Mode, Interval and Precisions.
+    verification: [d7-test]
+    inventory: [MG-8.3.8-a4583beb, MG-8.3.8-498c4139, MG-8.3.8-3b66b545]
+    status: draft
+    notes: Keyword-less definition of the Config values; read-only fields in a Set per SF-067 (f).
+
+  # --- Message Bus (MG 9.1.8) ------------------------------------------------
+  - id: REQ-RES-PUBLIST-017
+    title: PublicationList is republished on every change
+    statement: >-
+      Each time a DataSetMessage or a list of DataSetMessages of the
+      application is added, deleted or reconfigured, the application
+      publishes the PublicationList again.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource PublicationList (REQ-CMP-019).
+    refs: [MG 9.1.8]
+    quotes:
+      - ref: MG 9.1.8
+        text: Each time a DataSetMessage or a list of DataSetMessages is added/deleted/reconfigured, the PublicationList must be (re)published.
+    verification: [d7-monitor]
+    inventory: [MG-9.1.8-a9ecce12]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-018
+    title: Republication after a reconfiguration may be partial
+    statement: >-
+      A republication that answers a reconfiguration may contain only the
+      changed entries, with the ReplyTo of the request that triggered the
+      reconfiguration.
+    keyword: MAY
+    domain: messaging
+    levels: {L1: MAY, L2: MAY, L3: MAY}
+    applies_to: [application]
+    condition: The publication answers a reconfiguration.
+    refs: [MG 9.1.8]
+    quotes:
+      - ref: MG 9.1.8
+        text: If the publication is a response to a reconfiguration, only the changes along with the ReplyTo from the call that triggered the reconfiguration may be published.
+    verification: [d7-monitor]
+    inventory: [MG-9.1.8-63629bcd]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-019
+    title: Get PublicationList carries no PublicationList object
+    statement: >-
+      A Get PublicationList NetworkMessage contains no PublicationList
+      DataSetMessage; its Messages are empty or contain only the helper
+      DataSets PaginationRequest and Locale.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    scope: [MG 8.3.11, MG 8.3.12]
+    refs: [MG 9.1.8, SF-062]
+    quotes:
+      - ref: MG 9.1.8
+        text: In combination with the method Get, the payload requires an empty NetworkMessage.
+      - ref: MG 9.1.8
+        text: A PublicationList object is not included.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.8-dcc29bda]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-020
+    title: Get PublicationList is answered with all addressed entries
+    statement: >-
+      A Get PublicationList is answered with all entries addressed by the
+      topic – without Source all entries of the application, with Source all
+      entries of that asset, with Source and Filter the entry
+      <ResourceType>[/<Tag>] – each in its own DataSetMessage of a single
+      NetworkMessage published to the corresponding Pub topic.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The application supports the resource PublicationList (REQ-CMP-019).
+    refs: [MG 9.1.8, SF-062]
+    quotes:
+      - ref: MG 9.1.8
+        text: Via the <Method>/<Resource>[/<Source>[/<Filter>]] combination Get/PublicationList[/<Source>[/<ResourceType>[/<Tag>]]], the publication of this information to the Pub/PublicationList[/<Source>[/<ResourceType>[/<Tag>]]] topic can be triggered.
+      - ref: MG 9.1.8
+        text: A topic, such as Oi4v2/<ServiceType>/<AppId>/Get/PublicationList, must trigger a publication of all available PublicationList information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/PublicationList.
+    verification: [d7-test]
+    inventory: [MG-9.1.8-8718c13f, MG-9.1.8-c44bfa5d]
+    status: draft
+    notes: Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015.
+
+  - id: REQ-RES-PUBLIST-021
+    title: Pub PublicationList carries entries and optionally Pagination
+    statement: >-
+      A Pub PublicationList NetworkMessage contains PublicationList
+      DataSetMessages and optionally the helper DataSet Pagination; it
+      contains no PaginationRequest and no DataSetMessage of another resource.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 9.1.8, SF-062]
+    quotes:
+      - ref: MG 9.1.8
+        text: In combination with the method Pub, the payload contains DataSetMessages of type PublicationList and optional Pagination (8.3.11 Pagination).
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.8-4a83e370]
+    status: draft
+    notes: A Locale DataSet may be added to every method (MG 8.3.12, REQ-LOC-002, SF-062 (c)).
+
+  - id: REQ-RES-PUBLIST-022
+    title: Set PublicationList addresses exactly one entry
+    statement: >-
+      A Set PublicationList is sent to Set/PublicationList/<Source>/<Filter>
+      and its NetworkMessage contains exactly one PublicationList
+      DataSetMessage – the entry addressed by the topic; several entries
+      cannot be set at once.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    refs: [MG 9.1.8, SF-067]
+    quotes:
+      - ref: MG 9.1.8
+        text: In combination with the method Set, the payload contains a single DataSetMessages of type PublicationList. A topic with method Set must contain Resource, Source and Filter to be valid.
+      - ref: MG 9.1.8
+        text: Each publication, using the method Set, must be done explicitly.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.8-e3389079, MG-9.1.8-51f206af, MG-9.1.8-9bfab9ad]
+    status: draft
+    notes: The topic form is REQ-TOP-013 (matrix); read-only fields of the entry per SF-067 (f).
+
+  - id: REQ-RES-PUBLIST-023
+    title: Set PublicationList is protected by ACL
+    statement: >-
+      The operator of the Message Bus prevents Set PublicationList by
+      unauthorized communication participants via the ACL of the broker.
+    keyword: MUST
+    domain: platform
+    applies_to: [broker, platform]
+    refs: [MG 9.1.8]
+    quotes:
+      - ref: MG 9.1.8
+        text: To prevent write access by unauthorized communication participants, the operator must prevent this via ACL.
+    verification: [d8]
+    inventory: [MG-9.1.8-b3a52cb1]
+    status: draft
+
+  - id: REQ-RES-PUBLIST-024
+    title: Status event after Set PublicationList
+    statement: >-
+      After a Set PublicationList, the application publishes an Event of the
+      category Status about the Set on Pub/Event/<Source>/Status/<EventLevel>
+      with the Source of the Set topic – mandatory from Level 2 on,
+      recommended at Level 1.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application offers Set for PublicationList.
+    refs: [MG 9.1.8, SF-067]
+    quotes:
+      - ref: MG 9.1.8
+        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<StatusCode> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
+    verification: [d7-test]
+    inventory: [MG-9.1.8-2afa547a]
+    status: draft
+    notes: >-
+      Same obligation as REQ-TOP-014; the last topic level is the EventLevel
+      (Good, Uncertain, Bad), not a StatusCode (SF-067 (g)). Event content:
+      RES-EVENT (C-028).
+
+  - id: REQ-RES-PUBLIST-025
+    title: Changed entry is published after a successful Set
+    statement: >-
+      After a successful Set PublicationList, the application publishes the
+      changed entry to Pub/PublicationList/<Source>/<ResourceType>[/<Tag>]
+      with the ReplyTo of the Set.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application offers Set for PublicationList and the Set was successful.
+    refs: [MG 9.1.8, SF-067]
+    quotes:
+      - ref: MG 9.1.8
+        text: If setting PublicationList was successful, the new PublicationList must be published to the Pub/PublicationList/<Source>/<ResourceType>[/<Tag>] topic, according to the settings in PublicationList (8.3.8 PublicationList).
+    verification: [d7-test]
+    inventory: [MG-9.1.8-9178c95b]
+    status: draft
+    notes: ReplyTo per REQ-MSG-015 and REQ-RES-PUBLIST-018 (SF-067 (h)).

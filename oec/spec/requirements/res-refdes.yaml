@@ -1,0 +1,234 @@
+# Requirements of area RES-REFDES – resource ReferenceDesignation
+# (MG 8.3.10, 9.1.10; ADR-0018, schema: catalog.schema.json).
+# Support: REQ-CMP-020 (L2 SHOULD, L3 MUST). The Status event after Set/Del
+# belongs to RES-EVENT (C-028). Checked by tools/internal/payload (C-027).
+area: RES-REFDES
+baseline: "c6453c7"
+requirements:
+  # --- DataSet content (MG 8.3.10) --------------------------------------------
+  - id: REQ-RES-REFDES-001
+    title: Fields of the ReferenceDesignation DataSet
+    statement: >-
+      The Payload of a ReferenceDesignation DataSetMessage contains the
+      optional objects Function, Product and Location (reference designation
+      of the asset according to IEC 81346-1); each object contains the
+      mandatory String Value (designation value), the optional String Local
+      (local designation value) and the optional object Parent, which
+      contains the mandatory String Value, the optional String Local and the
+      optional String IdentificationLink (unencoded Identification Link of the
+      parent asset); no other field.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component supports the resource ReferenceDesignation (REQ-CMP-020).
+    scope: [MG 4]
+    refs: [MG 8.3.10, SF-068]
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.10-d84c70c5, MG-8.3.10-2594d1f8, MG-8.3.10-c7d632f5, MG-8.3.10-f15972dd, MG-8.3.10-3d78517a, MG-8.3.10-255b94f8, MG-8.3.10-362f96db, MG-8.3.10-39f50e4b, MG-8.3.10-87d2c21a, MG-8.3.10-dab61376, MG-8.3.10-913074aa, MG-8.3.10-2684af4b, MG-8.3.10-1f7e4106, MG-8.3.10-b9996a06, MG-8.3.10-26a4343a, MG-8.3.10-2d2571c9, MG-8.3.10-e66a9003, MG-8.3.10-c3882e61, MG-8.3.10-3e41890a, MG-8.3.10-86bc7b35, MG-8.3.10-02f627f3]
+    status: draft
+    notes: >-
+      The descriptions of the Location object partly repeat those of the
+      Product object ("product oriented", "<ProductParent>", "parent
+      function"); the structure is identical for all three objects (SF-068
+      (d)).
+
+  - id: REQ-RES-REFDES-002
+    title: ReferenceDesignation is persisted
+    statement: >-
+      A component that accepts the ReferenceDesignation from outside persists
+      it (application specific), so that it survives a restart.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component offers Set for ReferenceDesignation.
+    refs: [MG 8.3.10]
+    quotes:
+      - ref: MG 8.3.10
+        text: Therefore, it must be persisted on an application-specific basis.
+    verification: [d7-test]
+    inventory: [MG-8.3.10-1b81e498]
+    status: draft
+
+  # --- Message Bus (MG 9.1.10) -----------------------------------------------
+  - id: REQ-RES-REFDES-003
+    title: Get ReferenceDesignation carries no ReferenceDesignation object
+    statement: >-
+      A Get ReferenceDesignation NetworkMessage contains no
+      ReferenceDesignation DataSetMessage; its Messages are empty or contain
+      only the helper DataSets PaginationRequest and Locale.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    scope: [MG 8.3.11, MG 8.3.12]
+    refs: [MG 9.1.10, SF-062]
+    quotes:
+      - ref: MG 9.1.10
+        text: In combination with the method Get, the payload requires an empty NetworkMessage.
+      - ref: MG 9.1.10
+        text: A ReferenceDesignation object is not included.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.10-02a6f4ed]
+    status: draft
+
+  - id: REQ-RES-REFDES-004
+    title: Get ReferenceDesignation is answered with all addressed objects
+    statement: >-
+      A Get ReferenceDesignation is answered with the ReferenceDesignation of
+      every asset addressed by the topic – without Source all assets of the
+      component, with Source only that asset – each in its own DataSetMessage
+      of a single NetworkMessage published to the corresponding Pub topic.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The component supports the resource ReferenceDesignation (REQ-CMP-020).
+    refs: [MG 9.1.10, SF-062]
+    quotes:
+      - ref: MG 9.1.10
+        text: Via the <Method>/<Resource>[/<Source>] combination Get/ReferenceDesignation[/<Source>], the publication of this information to the Pub/ReferenceDesignation[/<Source>] topic can be triggered.
+      - ref: MG 9.1.10
+        text: A topic, such as Oi4v2/<ServiceType>/<AppId>/Get/ReferenceDesignation, must trigger a publication of all available ReferenceDesignation information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/ReferenceDesignation.
+    verification: [d7-test]
+    inventory: [MG-9.1.10-963a219d, MG-9.1.10-a4676341]
+    status: draft
+    notes: Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015.
+
+  - id: REQ-RES-REFDES-005
+    title: Pub ReferenceDesignation carries objects and optionally Pagination
+    statement: >-
+      A Pub ReferenceDesignation NetworkMessage contains ReferenceDesignation
+      DataSetMessages and optionally the helper DataSet Pagination; it
+      contains no PaginationRequest and no DataSetMessage of another resource.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 9.1.10, SF-062]
+    quotes:
+      - ref: MG 9.1.10
+        text: In combination with the method Pub, the payload contains DataSetMessages of type ReferenceDesignation and optional Pagination (8.3.11 Pagination).
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.10-a6245da1]
+    status: draft
+    notes: A Locale DataSet may be added to every method (MG 8.3.12, REQ-LOC-002, SF-062 (c)).
+
+  - id: REQ-RES-REFDES-006
+    title: Set ReferenceDesignation addresses exactly one asset
+    statement: >-
+      A Set ReferenceDesignation is sent to Set/ReferenceDesignation/<Source>
+      and its NetworkMessage contains exactly one ReferenceDesignation
+      DataSetMessage – the object of the asset addressed by the topic, which
+      replaces its complete ReferenceDesignation (proposal SF-068 (f)).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    refs: [MG 9.1.10, SF-068]
+    quotes:
+      - ref: MG 9.1.10
+        text: A topic with method Set must contain Resource and Source to be valid.
+      - ref: MG 9.1.10
+        text: Each publication, using the method Set must be done explicitly.
+      - ref: MG 9.1.10
+        text: Setting multiple reference designations at once via Oi4v2/<ServiceType>/<AppId>/Set/ReferenceDesignation is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.10-a884b8c0, MG-9.1.10-e3d3cf86, MG-9.1.10-c7b9efea]
+    status: draft
+    notes: >-
+      The Set sentence of MG 9.1.10 links "(8.3.11 Pagination)" instead of
+      8.3.10 (SF-068 (c)). Topic form: REQ-TOP-013 (matrix).
+
+  - id: REQ-RES-REFDES-007
+    title: Del ReferenceDesignation addresses exactly one asset
+    statement: >-
+      A Del ReferenceDesignation is sent to Del/ReferenceDesignation/<Source>
+      and its NetworkMessage contains no ReferenceDesignation DataSetMessage;
+      it deletes the complete ReferenceDesignation of the asset identified by
+      the Source (proposal SF-068 (e)).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    refs: [MG 9.1.10, SF-068]
+    quotes:
+      - ref: MG 9.1.10
+        text: In combination with the method Del, a ReferenceDesignation object is not included.
+      - ref: MG 9.1.10
+        text: A topic with method Del must contain Resource and Source to be valid.
+      - ref: MG 9.1.10
+        text: Each publication, using the method Del must be done explicitly.
+      - ref: MG 9.1.10
+        text: Deleting multiple reference designations at once via Oi4v2/<ServiceType>/<AppId>/Del/ReferenceDesignation is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.10-d66d233a, MG-9.1.10-b6c074a3, MG-9.1.10-dfcc5dea]
+    status: draft
+
+  - id: REQ-RES-REFDES-008
+    title: Set and Del ReferenceDesignation are protected by ACL
+    statement: >-
+      The operator of the Message Bus prevents Set and Del
+      ReferenceDesignation by unauthorized communication participants via the
+      ACL of the broker.
+    keyword: MUST
+    domain: platform
+    applies_to: [broker, platform]
+    refs: [MG 9.1.10]
+    quotes:
+      - ref: MG 9.1.10
+        text: To prevent write access by unauthorized communication participants, the operator must prevent this via ACL.
+    verification: [d8]
+    inventory: [MG-9.1.10-65150700, MG-9.1.10-0787e338]
+    status: draft
+
+  - id: REQ-RES-REFDES-009
+    title: Status event after Set and Del ReferenceDesignation
+    statement: >-
+      After a Set or Del ReferenceDesignation, the component publishes an
+      Event of the category Status about the command on
+      Pub/Event/<Source>/Status/<EventLevel> with the Source of the request
+      topic – mandatory from Level 2 on, recommended at Level 1.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component offers Set or Del for ReferenceDesignation.
+    refs: [MG 9.1.10, SF-067]
+    quotes:
+      - ref: MG 9.1.10
+        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<StatusCode> (9.1.4 Data) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
+      - ref: MG 9.1.10
+        text: After a Del message arrived, the application must publish an Event message with status information about the Del command to the topic Pub/Event/<Source>/Status/<StatusCode> (9.1.4 Data) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
+    verification: [d7-test]
+    inventory: [MG-9.1.10-0a59405b, MG-9.1.10-0eebc4db]
+    status: draft
+    notes: >-
+      Same obligation as REQ-TOP-014/015; the last topic level is the
+      EventLevel, and the link should point to 8.3.6.1 Status (SF-067 (g)).
+      Event content: RES-EVENT (C-028).
+
+  - id: REQ-RES-REFDES-010
+    title: Changed ReferenceDesignation is published after a successful Set
+    statement: >-
+      After a successful Set ReferenceDesignation, the component publishes
+      the new ReferenceDesignation of the asset to
+      Pub/ReferenceDesignation/<Source> with the ReplyTo of the Set (proposal
+      SF-068 (b)).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component offers Set for ReferenceDesignation and the Set was successful.
+    refs: [MG 9.1.10, SF-068]
+    quotes:
+      - ref: MG 9.1.10
+        text: If setting ReferenceDesignation was successful, the new ReferenceDesignation must be published to the Pub/ReferenceDesignation/<Source>/<ResourceType>[/<Tag>] topic, according to the settings in PublicationList (8.3.8 PublicationList).
+    verification: [d7-test]
+    inventory: [MG-9.1.10-eef7eb57]
+    status: draft
+    notes: >-
+      The topic of MG 9.1.10 is copied from PublicationList; ReferenceDesignation
+      has no Filter (REQ-TOP-013), therefore Pub/ReferenceDesignation/<Source>
+      (SF-068 (b)).
