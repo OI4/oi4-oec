@@ -52,7 +52,7 @@ Grading of the detailed requirements of the other areas per compliance level (um
 | [REQ-CMP-043](#req-cmp-043) | Set or Del on an unknown or non-modifiable object is answered with Event Status Bad | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-CMP-044](#req-cmp-044) | Get of Metadata without Data – no Metadata, optional Event Status Bad | MAY | MAY | MAY | MAY | messaging | d7-test | reviewed |
 | [REQ-CMP-045](#req-cmp-045) | Represented entities match the level of the representing application | MUST | MUST | MUST | MUST | messaging | d7-test, d7-monitor | reviewed |
-| [REQ-CMP-046](#req-cmp-046) | Close message | MUST | SHOULD | MUST | MUST | messaging | d7-test | draft |
+| [REQ-CMP-046](#req-cmp-046) | Close message | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -884,7 +884,7 @@ A component publishes its close message as defined in MG 6.3.4: it is recommende
 - Scope: MG 6.3.4
 - Refs: MG 1.3, MG 6, SF-061
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-1.3-eca45af7, MG-6-eafd1d73
 
 > Close message (6.3.4 Close Message) Recommended Mandatory Mandatory
