@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-19, cycle C-024_
+_Last updated: 2026-10-19, cycle C-025_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-024 done, next C-025)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-025 done, PO review pending, next C-026)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -50,19 +50,21 @@ C-024 (second PO review, 2026-10-19): REQ-MSG-046 **SHOULD** instead of MUST; me
 
 C-024 (third PO review, 2026-10-19): SF-054 accepted with a complete `Metadata` example, SF-055 accepted, payload vector views checked. Guideline `db2e5d3` (MG B1.1.5 `Pub`/`Set` `Metadata` with a complete `DataSetMetaDataType` of `Data`/`oee`, `DataSetWriterId` 93) and register `2f00e9f` (SF-055 resolved, new **SF-056** open for C-026/C-027: defects of the B1 examples, next SF-057). `oec/spec`: empty `MetaData` of a `Get` accepted (`0c6d9ff`), re-baseline on **`2f00e9f`** and V-PAY-020 … 022 (`85def9e`, draft), **V-PAY-001 … 019 reviewed** (`d9e256c`); V-PAY-020 … 022 reviewed by the PO afterwards (`c13eed9`) – all 22 payload vectors reviewed. Log: second addendum.
 
+C-025: areas **MQTT** (MG 6) and **LIFE** (MG 6.3.3 … 6.3.5) drafted (`eb78376`): **REQ-MQTT-001 … 019** (protocol version, broker address/port, TLS only, broker certificate and its verification, authentication, ClientId, keep alive, clean session, QoS 0, no retained messages, publish on change; broker/platform rules with `domain: platform`) and **REQ-LIFE-001 … 014** (Birth on every connection = own Pub `MAM`, Close `NORMAL_0`/0 before a graceful disconnect, Will `FAILURE_1`/0 registered in every CONNECT, Timestamp/SequenceNumber omitted, interpretation by state-tracking subscribers, online again after the next Birth, reserved Health values), graded per the MG 6 note; 14 informative items. MQTT 33 items (21/12/0 open), LIFE 10 (8/2/0). Golden vectors **V-PAY-023 … 025** (B1.1.1 Birth, B1.1.2 Close/Will, `draft`, `113c90f`) with one edit each: real `MessageId` timestamp instead of `0` (SF-058). New findings **SF-057 … SF-060** (register `d20d8ff`, findings-only, no re-baseline; next SF-061), none blocking. No reviewed area or vector changed. Log: `log/2026-10-19_C-025_mqtt-life.md`.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. No PO review pending (C-024 complete; hand-over prompt for C-025 in `prompt.md`).
-2. **C-025** – areas `MQTT` and `LIFE` (golden vectors for Birth/Close/Will may be built in the cycle). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-026 … C-030); C-026/C-027 also fix the B1 examples per SF-056 (PO order needed for the guideline edits).
+1. **PO review of C-025:** decide SF-057 … SF-060 (esp. SF-058 (a) `MessageId` timestamp `0` of Birth/Close/Will, SF-059 (a) reserved Health values); review `oec/spec/requirements/view/mqtt.md`, `life.md` (+ informative items) and V-PAY-023 … 025 in `oec/spec/vectors/view/payload-guideline.md`. Then MQTT/LIFE → `reviewed`. (`prompt.md` is the executed C-025 hand-over; the C-026 prompt follows after the review.)
+2. **C-026** – core resources (`RES-MAM`, `RES-HEALTH`, `RES-PROFILE`, `RES-PUBLIST`, `RES-REFDES`) + `PAG` + `LOC`. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-027 … C-030); C-026/C-027 also fix the B1 examples per SF-056 (PO order needed for the guideline edits).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, MSG and ACT reviewed; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 22 payload vectors reviewed) |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, MSG and ACT reviewed, MQTT and LIFE drafted; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 25 payload vectors, V-PAY-001 … 022 reviewed, 023 … 025 draft) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
@@ -74,7 +76,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `2f00e9f`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 018, SF-001 … 055 resolved, SF-056 open (B1 examples, C-026/C-027, not blocking), next SF-057; OEC Process Description informative); previous `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `2f00e9f`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 018, SF-001 … 055 resolved, SF-056 open (B1 examples, C-026/C-027, not blocking); register head `d20d8ff` (findings-only: SF-057 … 060 open, C-025), next SF-061; OEC Process Description informative); previous `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -86,7 +88,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. SF-056 (defects of the B1 examples) is open and scheduled for C-026/C-027, not blocking; next free id SF-057.
+- None. SF-056 (defects of the B1 examples) is open and scheduled for C-026/C-027; SF-057 … SF-060 (MQTT/LIFE, C-025) are open for the PO decision with proposed interpretations – none blocking; next free id SF-061.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -121,3 +123,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-022 | 2026-10-17 | SF-044 decided and recorded in GL-ADR-018 (`WriterGroupName` of `PublicationList`/`SubscriptionList` entries = `<ResourceType>[/<Tag>]`), implemented in MG 8.2.3, 9.1.8, 9.1.9, B1.1.8, B2.6, B2.7; re-baseline on `fd9da6e`; P1 cycles shifted by one; review views of matrix and vectors; matrix (topic columns) + 203 vectors reviewed | `log/2026-10-17_C-022_gl-adr-018-writergroupname.md` |
 | C-023 | 2026-10-17 | Areas `MSG` + `ACT` drafted (REQ-MSG-001 … 045, REQ-ACT-001 … 023); golden payload vectors started (kind `payload`, reference envelope checks, V-PAY-001 … 009 draft); SF-045 … 051 | `log/2026-10-17_C-023_msg-act.md` |
 | C-024 | 2026-10-19 | PO review of C-023: SF-045 … 051 implemented in the guideline, new SF-052 (tolerant reader) and SF-053 (A2 reserved ids with former use), Docusaurus config fix; re-baseline on `a7d18f9`, REQ-MSG-046, payload checks aligned; P1 cycles shifted by one. Second PO review: SF-052 SHOULD + strict/tolerant validation, SF-054 (B2 rebuilt), SF-055 open, register sorted; re-baseline on `4af61f3`, payload vectors V-PAY-010 … 019; MSG and ACT reviewed. Third PO review: complete B1.1.5 Metadata example, SF-055 resolved, SF-056 (B1 defects) for C-026/C-027, re-baseline on `2f00e9f`, V-PAY-001 … 019 reviewed | `log/2026-10-19_C-024_sf045-051-guideline.md` |
+| C-025 | 2026-10-19 | Areas `MQTT` + `LIFE` drafted (REQ-MQTT-001 … 019, REQ-LIFE-001 … 014, 14 informative items); golden vectors V-PAY-023 … 025 (Birth/Close/Will, `MessageId` edit per SF-058); new SF-057 … SF-060 (register `d20d8ff`, no re-baseline) | `log/2026-10-19_C-025_mqtt-life.md` |
