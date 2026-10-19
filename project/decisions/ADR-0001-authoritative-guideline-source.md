@@ -136,3 +136,13 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - Second PO review (2026-10-19): `4b97a92` – SF-052 amendment (MG 8: a receiver *should* ignore unknown keys; note on strict and tolerant validation); `7fccd53` – SF-054 (MG B2 metadata examples rebuilt with recurring values, MG 8.3.2 note); `4af61f3` – findings register sorted ascending, SF-054 resolved, SF-055 open.
   - Third PO review (2026-10-19): `db2e5d3` – MG B1.1.5 with a complete `Metadata` example (SF-054 amendment); `2f00e9f` – findings register: SF-055 resolved as proposed, SF-056 (B1 example defects) open for C-026/C-027.
 - No new GL-ADR (PO decision in the second review: SF-045 and SF-052 are not recorded as GL-ADRs). SF-001 … 055 are resolved; SF-056 (defects of the B1 examples) is open for C-026/C-027 and not blocking; next free id SF-057.
+
+## Amendment C-026 (2026-10-19, guideline baseline `720d862`)
+
+- The baseline is now `720d862` on branch `feature/spec-findings`. Implemented by the agent on PO request (PO review of C-025: SF-057 … 060 accepted as proposed, SF-058 (a) with the creation timestamp in the Will message, SF-059 (a) without reserving `FAILURE_1`/0; local commits):
+  - `d88a86c` – SF-057: normative keywords in MG 6.2.1, 6.2.2, 6.3.1, 6.3.3, 6.3.4, 6.3.5.
+  - `2dd0e56` – SF-058: MG 6.3.5 (the `MessageId` of the Will message carries the timestamp of its creation), MG B1.1.1/B1.1.2 (real timestamps, notes, "Close message").
+  - `9cd7ca0` – SF-059: MG 6.3.3 … 6.3.5 (`NORMAL_0`/0 only as Close message, `FAILURE_1`/0 also while connected with a new Birth message after recovery, subscriber scope, Birth message first).
+  - `1d80d20` – SF-060: MG 6.1 (protocol versions), MG 6.2.2 (broker certificate verification, usernames assigned by the platform), MG 6.2.3 (ClientId without container).
+  - `720d862` – findings register: SF-057 … SF-060 resolved.
+- No new GL-ADR (PO decision: SF-057 needs no ADR). SF-001 … 055 and SF-057 … 060 are resolved; SF-056 (defects of the B1 examples) is open for C-027/C-028 and not blocking; next free id SF-061.
