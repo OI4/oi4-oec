@@ -12,7 +12,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 | [V-DNP-003](#v-dnp-003) | MG A3 Table 5: 123.456/3&8 | valid | → 123.456,2F3,268 | guideline MG A3 | reviewed |
 | [V-DNP-004](#v-dnp-004) | MG A3 Table 5: 123456#33 | valid | → 123456,2333 | guideline MG A3 | reviewed |
 | [V-DNP-005](#v-dnp-005) | MG A3 Table 5: ABC@home | valid | → ABC,40home | guideline MG A3 | reviewed |
-| [V-DNP-006](#v-dnp-006) | MG A3 Table 5: ABC*33<4 | valid | → ABC,2A33,3C4 | guideline MG A3 | reviewed |
+| [V-DNP-006](#v-dnp-006) | MG A3 Table 5: ABC*33&lt;4 | valid | → ABC,2A33,3C4 | guideline MG A3 | reviewed |
 | [V-DNP-007](#v-dnp-007) | MG A3 Table 5: 20123.4 | valid | → 20123.4 | guideline MG A3 | reviewed |
 | [V-DNP-008](#v-dnp-008) | MG A3 example: product code with spaces | valid | → Edge,20Gateway,20,3E4GB | guideline MG A3 | reviewed |
 | [V-DNP-009](#v-dnp-009) | MG A3 example: serial number with special characters | valid | → ,2320815,212205,2B1432 | guideline MG A3 | reviewed |
@@ -80,7 +80,7 @@ dnp-encoding vectors (MG A3): examples of Table 5 and of the URI example, the ch
 
 ## V-DNP-006
 
-**MG A3 Table 5: ABC*33<4**
+**MG A3 Table 5: ABC*33&lt;4**
 
 - Input: `ABC*33<4`
 - Output: `ABC,2A33,3C4`

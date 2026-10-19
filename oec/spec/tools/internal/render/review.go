@@ -404,7 +404,7 @@ func payloadBlocks(b *strings.Builder, v vectors.Vector) {
 	}
 	b.WriteString("\nEdits against the guideline example:\n\n| Target | Kind | Reason | SF |\n|---|---|---|---|\n")
 	for _, e := range v.Edits {
-		fmt.Fprintf(b, "| `%s` | %s | %s | %s |\n", esc(e.Target), e.Kind, esc(oneLine(e.Reason)), strings.Join(e.SF, ", "))
+		fmt.Fprintf(b, "| `%s` | %s | %s | %s |\n", strings.ReplaceAll(e.Target, "|", "\\|"), e.Kind, esc(oneLine(e.Reason)), strings.Join(e.SF, ", "))
 	}
 	if v.Original != "" {
 		fmt.Fprintf(b, "\n<details><summary>Guideline original (%s)</summary>\n\n```json\n%s\n```\n\n</details>\n", v.Origin.Ref, strings.TrimRight(v.Original, "\n"))

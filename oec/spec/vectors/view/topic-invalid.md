@@ -264,7 +264,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 
 - Topic: `Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog`
 - Fails: grammar
-- Expected: invalid – The Event Filter is <EventCategory>/<EventLevel>.
+- Expected: invalid – The Event Filter is &lt;EventCategory>/&lt;EventLevel>.
 - Violates: [REQ-TOP-023](../../requirements/view/top.md#req-top-023)
 - Origin: constructed
 - Status: reviewed
@@ -363,7 +363,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 
 - Topic: `Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/MAM/x`
 - Fails: grammar
-- Expected: invalid – MAM has no Filter, so the list Filter is <ResourceType> only.
+- Expected: invalid – MAM has no Filter, so the list Filter is &lt;ResourceType> only.
 - Violates: [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: constructed
 - Status: reviewed

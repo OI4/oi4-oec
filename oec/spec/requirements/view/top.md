@@ -39,7 +39,7 @@ Guideline baseline: `720d862` · Area status: reviewed · Sections: MG 7
 
 **Topic structure**
 
-Every topic below the namespace Oi4v2 has the structure "Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]". Each element forms exactly one topic level, except Filter, which may consist of several levels depending on the Resource. The topic matches the rule topic of topic/topic.abnf.
+Every topic below the namespace Oi4v2 has the structure "Oi4v2/&lt;ServiceType>/&lt;AppId>/&lt;Method>/&lt;Resource>[/&lt;Source>[/&lt;Filter>]]". Each element forms exactly one topic level, except Filter, which may consist of several levels depending on the Resource. The topic matches the rule topic of topic/topic.abnf.
 
 - Keyword: MUST (implicit, SF-035)
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -312,7 +312,7 @@ Every Set causes an Event with the event category Status and the event level Goo
 - Status: reviewed
 - Inventory: MG-7.4-92f7945e, MG-7.4-bd6a1c58
 
-> From compliance Level 2 on, a Set must cause an Event with the <EventCategory> Status and the <EventLevel> Good, Uncertain or Bad.
+> From compliance Level 2 on, a Set must cause an Event with the &lt;EventCategory> Status and the &lt;EventLevel> Good, Uncertain or Bad.
 > — MG 7.4
 
 > At Level 1, a Set should cause such an Event (1.3 Compliance Domains and Levels).
@@ -335,7 +335,7 @@ Every Del causes an Event with the event category Status and the event level Goo
 - Status: reviewed
 - Inventory: MG-7.4-3c1c21d5, MG-7.4-c24422e2
 
-> From compliance Level 2 on, a Del must cause an Event with the <EventCategory> Status and the <EventLevel> Good, Uncertain or Bad.
+> From compliance Level 2 on, a Del must cause an Event with the &lt;EventCategory> Status and the &lt;EventLevel> Good, Uncertain or Bad.
 > — MG 7.4
 
 > At Level 1, a Del should cause such an Event (1.3 Compliance Domains and Levels).
@@ -355,10 +355,10 @@ The Reply topic equals the Call topic except for the Method element (same Servic
 - Status: reviewed
 - Inventory: MG-7.4-51e4221d, MG-7.4-d2add756
 
-> The Reply topic must correspond to the Call topic (same <ServiceType>, <AppId>, <Service> and <Source>) and must be given as ResponseAddress in the ua-action-request.
+> The Reply topic must correspond to the Call topic (same &lt;ServiceType>, &lt;AppId>, &lt;Service> and &lt;Source>) and must be given as ResponseAddress in the ua-action-request.
 > — MG 7.4
 
-> It equals the Call topic with the Method Reply: Oi4v2/<ServiceType>/<AppId>/Reply/<Service>[/<Source>].
+> It equals the Call topic with the Method Reply: Oi4v2/&lt;ServiceType>/&lt;AppId>/Reply/&lt;Service>[/&lt;Source>].
 > — MG 7.4
 
 Notes: Source of Call/Reply is optional (PO decision SF-041 (c), C-018; MG 7.4 and MG 9.2.1 since C-021).
@@ -402,14 +402,14 @@ The Source element is the encoded Identification Link (REQ-IL-002) of the asset 
 > The Source must always be exactly one topic level.
 > — MG 7.6
 
-> The optional <Source> contains the Identification Link of the asset the Action refers to.
+> The optional &lt;Source> contains the Identification Link of the asset the Action refers to.
 > — MG 7.4
 
 ## REQ-TOP-019
 
 **Filter levels are Topic encoded Strings**
 
-Every Filter level is a non-empty UTF-8 string without "+", "#", "/" and U+0000 (<Topic encoded String>). These characters are written as "%2B", "%23" and "%2F" and "%" itself as "%25" (upper-case hex digits); no other character is encoded, so "%" occurs only in these four sequences.
+Every Filter level is a non-empty UTF-8 string without "+", "#", "/" and U+0000 (&lt;Topic encoded String>). These characters are written as "%2B", "%23" and "%2F" and "%" itself as "%25" (upper-case hex digits); no other character is encoded, so "%" occurs only in these four sequences.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -478,7 +478,7 @@ Notes: Empty levels per PO decision SF-040 (c) (C-018), stated in the guideline 
 
 **Filter structure of Data, Metadata, Config and the lists**
 
-The Filter of Data and Metadata is the Tag (name of the data set or metadata set), the Filter of Config is the Context.Name, each one level. The Filter of PublicationList and SubscriptionList is <ResourceType>[/<Tag>], where ResourceType is a resource of MG 7.5.1 and Tag is the complete Filter of that resource (Tag, Context.Name or <EventCategory>/<EventLevel>); <ResourceType>/<Tag> is only used for Data, Metadata, Config and Event, all other resources take <ResourceType> only.
+The Filter of Data and Metadata is the Tag (name of the data set or metadata set), the Filter of Config is the Context.Name, each one level. The Filter of PublicationList and SubscriptionList is &lt;ResourceType>[/&lt;Tag>], where ResourceType is a resource of MG 7.5.1 and Tag is the complete Filter of that resource (Tag, Context.Name or &lt;EventCategory>/&lt;EventLevel>); &lt;ResourceType>/&lt;Tag> is only used for Data, Metadata, Config and Event, all other resources take &lt;ResourceType> only.
 
 - Keyword: MUST (implicit, SF-035)
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -488,13 +488,13 @@ The Filter of Data and Metadata is the Tag (name of the data set or metadata set
 - Status: reviewed
 - Inventory: MG-7.7-3ca9fb74, MG-7.7-780647f7, MG-7.7-a1ef5067, MG-7.7-c7705804, MG-7.7-d07484ed, MG-7.7-d966f542
 
-> Depending on the resource to filter for, the Filter can be <ResourceType> or <ResourceType>/<Tag>.
+> Depending on the resource to filter for, the Filter can be &lt;ResourceType> or &lt;ResourceType>/&lt;Tag>.
 > — MG 7.7
 
-> <Tag> is the complete Filter of this resource, as defined in the following sections
+> &lt;Tag> is the complete Filter of this resource, as defined in the following sections
 > — MG 7.7
 
-> <ResourceType>/<Tag> filters are only used for the resources Data, Metadata, Config and Event.
+> &lt;ResourceType>/&lt;Tag> filters are only used for the resources Data, Metadata, Config and Event.
 > — MG 7.7
 
 > For the resources Data and Metadata, the Filter contains the name of the desired data set or metadata set.
@@ -506,7 +506,7 @@ Notes: PO decision SF-041 (d) (C-018), stated in MG 7.7 since C-021. Grammar rul
 
 **Filter structure of Event**
 
-The Filter of Event is <EventCategory>/<EventLevel> with the categories Syslog (levels Debug, Informational, Notice, Warning, Error, Critical, Alert, Emergency), Status (levels Good, Uncertain, Bad – the class of the OPC UA status code: 0x00 Good, 0x40 Uncertain, 0x80 Bad) and Generic (any Topic encoded String as level).
+The Filter of Event is &lt;EventCategory>/&lt;EventLevel> with the categories Syslog (levels Debug, Informational, Notice, Warning, Error, Critical, Alert, Emergency), Status (levels Good, Uncertain, Bad – the class of the OPC UA status code: 0x00 Good, 0x40 Uncertain, 0x80 Bad) and Generic (any Topic encoded String as level).
 
 - Keyword: MUST (implicit, SF-035)
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -522,7 +522,7 @@ The Filter of Event is <EventCategory>/<EventLevel> with the categories Syslog (
 > For example, a status event with the status code 0x80060000 (BadEncodingError) is published with the Filter Status/Bad.
 > — MG 7.7
 
-> The <EventCategory> describes the category and must be one of Syslog, Status or Generic; other categories must not be used.
+> The &lt;EventCategory> describes the category and must be one of Syslog, Status or Generic; other categories must not be used.
 > — MG 7.7
 
 Notes: Closed category set and free GenericLevel per PO decision SF-042 (b), (c) (C-018), stated in the guideline since C-020. Grammar rule event-filter.

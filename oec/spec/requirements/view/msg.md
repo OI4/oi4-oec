@@ -179,7 +179,7 @@ The field Messages of a NetworkMessage is always a JSON array of DataSetMessage 
 
 **PublisherId is ServiceType and unencoded Identification Link**
 
-The PublisherId of a NetworkMessage and of a DataSetMetaData is "<ServiceType>/<IdentificationLink>" of the sending application, with the Identification Link unencoded (REQ-IL-005). For Pub it equals the ServiceType and the decoded AppId of the topic; for Get, Set and Del the topic contains the AppId of the addressed application (MG 7.3), so the PublisherId is that of the requesting application.
+The PublisherId of a NetworkMessage and of a DataSetMetaData is "&lt;ServiceType>/&lt;IdentificationLink>" of the sending application, with the Identification Link unencoded (REQ-IL-005). For Pub it equals the ServiceType and the decoded AppId of the topic; for Get, Set and Del the topic contains the AppId of the addressed application (MG 7.3), so the PublisherId is that of the requesting application.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -199,7 +199,7 @@ The PublisherId of a NetworkMessage and of a DataSetMetaData is "<ServiceType>/<
 
 **Format of the MessageId**
 
-The MessageId of a NetworkMessage and of a DataSetMetaData is "<unixTimestampInMs>-<PublisherId>" (current Unix time in milliseconds, "-", PublisherId of the message); if needed for uniqueness, a counter is appended to the timestamp ("<unixTimestampInMs><counter>-<PublisherId>").
+The MessageId of a NetworkMessage and of a DataSetMetaData is "&lt;unixTimestampInMs>-&lt;PublisherId>" (current Unix time in milliseconds, "-", PublisherId of the message); if needed for uniqueness, a counter is appended to the timestamp ("&lt;unixTimestampInMs>&lt;counter>-&lt;PublisherId>").
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -212,7 +212,7 @@ The MessageId of a NetworkMessage and of a DataSetMetaData is "<unixTimestampInM
 > The Open Industry 4.0 Alliance defines the type as a combination of the current timestamp in ms precision with the PublisherId.
 > — MG 8.2.1
 
-> In these cases, the application must guarantee the uniqueness by providing an additional parameter (e.g. MessageId = <unixTimestampInMs><counter>-<PublisherId>).
+> In these cases, the application must guarantee the uniqueness by providing an additional parameter (e.g. MessageId = &lt;unixTimestampInMs>&lt;counter>-&lt;PublisherId>).
 > — MG 8.2.1
 
 ## REQ-MSG-008
@@ -294,7 +294,7 @@ A NetworkMessage for a resource with a predefined DataSetClassId (REQ-MSG-010) c
 > A NetworkMessage must always carry the DataSetClassId of the resource addressed by the topic, if the resource has a predefined DataSetClassId (A2 Predefined DataSetClassIds for Resources of the Alliance).
 > — MG 8.2.1
 
-> For Data, a NetworkMessage must carry the publisher-defined DataSetClassId, if all its DataSetMessages belong to the same DataSet class (e.g. Pub/Data/<Source>/<Tag>), and must omit it otherwise
+> For Data, a NetworkMessage must carry the publisher-defined DataSetClassId, if all its DataSetMessages belong to the same DataSet class (e.g. Pub/Data/&lt;Source>/&lt;Tag>), and must omit it otherwise
 > — MG 8.2.1
 
 > The DataSetClassId shall be present for all resources defined by the Open Industry 4.0 Alliance which have DataSetClassId.
@@ -579,7 +579,7 @@ The WriterGroupName of a DataSetMessage and of a DataSetMetaData is the Filter o
 > The WriterGroupName shall be a topic encoded string as explained in 7.7 Filter Element.
 > — MG 8.2.2
 
-> Resources which do not make use of a <Filter> in the topic, such as MAM or Health, use an empty string.
+> Resources which do not make use of a &lt;Filter> in the topic, such as MAM or Health, use an empty string.
 > — MG 8.2.3
 
 Notes: Exceptions: helper DataSets (REQ-MSG-019) and the entries of PublicationList/SubscriptionList (REQ-MSG-025).
@@ -588,7 +588,7 @@ Notes: Exceptions: helper DataSets (REQ-MSG-019) and the entries of PublicationL
 
 **WriterGroupName of PublicationList and SubscriptionList entries**
 
-Each DataSetMessage of PublicationList and SubscriptionList has the WriterGroupName "<ResourceType>[/<Tag>]", i.e. the topic Filter that addresses this entry (e.g. "Data/oee", "Event/Syslog/Notice", "MAM"), also if it is published on a topic without Filter.
+Each DataSetMessage of PublicationList and SubscriptionList has the WriterGroupName "&lt;ResourceType>[/&lt;Tag>]", i.e. the topic Filter that addresses this entry (e.g. "Data/oee", "Event/Syslog/Notice", "MAM"), also if it is published on a topic without Filter.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -598,7 +598,7 @@ Each DataSetMessage of PublicationList and SubscriptionList has the WriterGroupN
 - Status: reviewed
 - Inventory: MG-8.2.3-1f34caa9, MG-8.2.3-f4f917b9
 
-> For the resources PublicationList and SubscriptionList, the WriterGroupName of each DataSetMessage must be <ResourceType>[/<Tag>], i.e. the Filter which addresses this entry in the topic (7.7 Filter Element), e.g. Data/oee, Event/Syslog/Notice or MAM.
+> For the resources PublicationList and SubscriptionList, the WriterGroupName of each DataSetMessage must be &lt;ResourceType>[/&lt;Tag>], i.e. the Filter which addresses this entry in the topic (7.7 Filter Element), e.g. Data/oee, Event/Syslog/Notice or MAM.
 > — MG 8.2.3
 
 > This also applies, if the entry is published on a topic without Filter (e.g. Pub/PublicationList).
@@ -706,7 +706,7 @@ A DataSetMessage always contains all fields of its DataSet; the OPC UA message t
 
 **Payload fields use VerboseEncoding with RawData**
 
-The fields of the DataSet in the Payload of a DataSetMessage are encoded with the JSON VerboseEncoding and the RawData option (DataSetFieldContentMask 0x20): each field is its plain JSON value without status, timestamps or type information; fields of the abstract DataType BaseDataType are an object with a Value field, multi-dimensional arrays an object with Value and Dimensions, and enumerations a string "<EnumName>_<EnumValue>". The encodings of FieldEncoding2 = 0 (Part 14 V1.04) are not used.
+The fields of the DataSet in the Payload of a DataSetMessage are encoded with the JSON VerboseEncoding and the RawData option (DataSetFieldContentMask 0x20): each field is its plain JSON value without status, timestamps or type information; fields of the abstract DataType BaseDataType are an object with a Value field, multi-dimensional arrays an object with Value and Dimensions, and enumerations a string "&lt;EnumName>_&lt;EnumValue>". The encodings of FieldEncoding2 = 0 (Part 14 V1.04) are not used.
 
 - Keyword: MUST (implicit, SF-035)
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -768,7 +768,7 @@ DataSetWriterId, WriterGroupName and DataSetWriterName of a DataSetMetaData carr
 
 **Encoding of the DataSetMetaDataType**
 
-The MetaData of a DataSetMetaData (DataSetMetaDataType and all its sub-objects of MG 8.2.4 … 8.2.15) contains every field whose Requirement is Mandatory, also if it has its default value (e.g. empty array), and writes enumerations as "<Name>_<Value>" strings (VerboseEncoding); Optional fields may be omitted.
+The MetaData of a DataSetMetaData (DataSetMetaDataType and all its sub-objects of MG 8.2.4 … 8.2.15) contains every field whose Requirement is Mandatory, also if it has its default value (e.g. empty array), and writes enumerations as "&lt;Name>_&lt;Value>" strings (VerboseEncoding); Optional fields may be omitted.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -778,7 +778,7 @@ The MetaData of a DataSetMetaData (DataSetMetaDataType and all its sub-objects o
 - Status: reviewed
 - Inventory: MG-8.2.2-0b11013e, MG-8.2.2-67928344
 
-> every field marked as Mandatory must be present, also if it has its default value (e.g. an empty array [], 0 or false), and enumerations must be encoded as <Name>_<Value> strings
+> every field marked as Mandatory must be present, also if it has its default value (e.g. an empty array [], 0 or false), and enumerations must be encoded as &lt;Name>_&lt;Value> strings
 > — MG 8.2.2
 
 > Fields marked as Optional may be omitted.
@@ -803,7 +803,7 @@ A DataSetMetaDataType contains Name (name of the DataSet), Namespaces, Structure
 - Status: reviewed
 - Inventory: MG-8.2.4-61d2eff6, MG-8.2.4-72828f5c, MG-8.2.4-7a597189, MG-8.2.4-7d27c0ec, MG-8.2.4-8309e508, MG-8.2.4-b6952e79, MG-8.2.4-b899b2c3, MG-8.2.4-f47ef8e9
 
-> Value Range: <array of Namespaces names> Type: String Requirement: Mandatory
+> Value Range: &lt;array of Namespaces names> Type: String Requirement: Mandatory
 > — MG 8.2.4
 
 ## REQ-MSG-036
@@ -864,7 +864,7 @@ The Name of every FieldMetaData is unique within its DataSet.
 
 **NodeIds are JSON strings without namespace index**
 
-Every NodeId in a payload object (e.g. DataType, DefaultEncodingId, BaseDataType, DataTypeId) is a JSON string in the format of Part 6 5.1.12: "i=…" (or s=, g=, b=) for namespace 0 and "nsu=<uri>;…" for all other namespaces; neither the namespace index form "ns=<index>;…" nor the V1.04 JSON object form is used.
+Every NodeId in a payload object (e.g. DataType, DefaultEncodingId, BaseDataType, DataTypeId) is a JSON string in the format of Part 6 5.1.12: "i=…" (or s=, g=, b=) for namespace 0 and "nsu=&lt;uri>;…" for all other namespaces; neither the namespace index form "ns=&lt;index>;…" nor the V1.04 JSON object form is used.
 
 - Keyword: MUST NOT
 - Levels: L1 MUST NOT · L2 MUST NOT · L3 MUST NOT
@@ -874,7 +874,7 @@ Every NodeId in a payload object (e.g. DataType, DefaultEncodingId, BaseDataType
 - Status: reviewed
 - Inventory: MG-8.2.6-cadb42b5
 
-> The namespace index form ("ns=<index>;...") shall not be used, because namespace indices are not stable across publishers.
+> The namespace index form ("ns=&lt;index>;...") shall not be used, because namespace indices are not stable across publishers.
 > — MG 8.2.6
 
 > The JSON object form of a NodeId (IdType, Id, Namespace) of OPC UA V1.04 is not used anymore.
@@ -916,7 +916,7 @@ A KeyValuePair contains Key (QualifiedName as JSON string per Part 6 5.1.12) and
 - Status: reviewed
 - Inventory: MG-8.2.8-412cad72, MG-8.2.8-8732feb0, MG-8.2.8-af99e2d6, MG-8.2.8-be05b06c
 
-> The namespace index form ("<index>:<Name>") shall not be used, because namespace indices are not stable across publishers.
+> The namespace index form ("&lt;index>:&lt;Name>") shall not be used, because namespace indices are not stable across publishers.
 > — MG 8.2.8
 
 > This abstract DataType defines a value that can have any valid DataType (see Part 3-8.7).
@@ -925,7 +925,7 @@ A KeyValuePair contains Key (QualifiedName as JSON string per Part 6 5.1.12) and
 > The Value is a Variant and is encoded as JSON object with the fields UaType
 > — MG 8.2.8
 
-Notes: A QualifiedName is the plain name in namespace 0 or "nsu=<uri>;<name>"; neither the index form nor the V1.04 object form is used. A structure as Value is an ExtensionObject (UaType 22) with UaTypeId (SF-047, resolved C-024).
+Notes: A QualifiedName is the plain name in namespace 0 or "nsu=&lt;uri>;&lt;name>"; neither the index form nor the V1.04 object form is used. A structure as Value is an ExtensionObject (UaType 22) with UaTypeId (SF-047, resolved C-024).
 
 ## REQ-MSG-042
 
@@ -999,7 +999,7 @@ A SimpleTypeDescription contains DataTypeId and BaseDataType (NodeIds), Name (Qu
 - Status: reviewed
 - Inventory: MG-8.2.15-cba8d643, MG-8.2.15-d231c21e, MG-8.2.15-df8d398e, MG-8.2.15-ea3d1d14
 
-> Value Range: <QualifiedName> Type: QualifiedName (JSON string) Requirement: Mandatory
+> Value Range: &lt;QualifiedName> Type: QualifiedName (JSON string) Requirement: Mandatory
 > — MG 8.2.15
 
 ## REQ-MSG-046

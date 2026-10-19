@@ -76,3 +76,17 @@ func TestReviewViews(t *testing.T) {
 		}
 	}
 }
+
+func TestMdText(t *testing.T) {
+	for in, want := range map[string]string{
+		"Oi4v2/<ServiceType>/<AppId>/Pub/MAM/<AppId>": "Oi4v2/&lt;ServiceType>/&lt;AppId>/Pub/MAM/&lt;AppId>",
+		"topic `Oi4v2/<ServiceType>` and <Source>":    "topic `Oi4v2/<ServiceType>` and &lt;Source>",
+		"a ` b <X>":      "a ` b &lt;X>",
+		"no placeholder": "no placeholder",
+		"`<A>` `<B>`":    "`<A>` `<B>`",
+	} {
+		if got := mdText(in); got != want {
+			t.Errorf("mdText(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

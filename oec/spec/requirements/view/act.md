@@ -72,10 +72,10 @@ An ActionNetworkMessage contains MessageId, MessageType, PublisherId, Timestamp 
 - Status: reviewed
 - Inventory: MG-8.2.16-3f9165a4, MG-8.2.16-8f87b9eb, MG-8.2.16-9cfbdf96
 
-> Value Range: <Reply topic> Type: String Requirement: Mandatory for ua-action-request, omitted for ua-action-response
+> Value Range: &lt;Reply topic> Type: String Requirement: Mandatory for ua-action-request, omitted for ua-action-response
 > — MG 8.2.16
 
-> Value Range: <Duration in ms> Type: Duration (Double) Requirement: Mandatory for ua-action-request, omitted for ua-action-response
+> Value Range: &lt;Duration in ms> Type: Duration (Double) Requirement: Mandatory for ua-action-request, omitted for ua-action-response
 > — MG 8.2.16
 
 ## REQ-ACT-003
@@ -108,7 +108,7 @@ Notes: The DataSetClassId of an Action is only part of its ActionMetaData (MG 8.
 
 **MessageId of Action messages**
 
-The MessageId of an Action message is "<unixTimestampInMs>-<PublisherId of the sender>", i.e. the RequestorId for a ua-action-request and the PublisherId of the Responder for a ua-action-response, and is globally unique.
+The MessageId of an Action message is "&lt;unixTimestampInMs>-&lt;PublisherId of the sender>", i.e. the RequestorId for a ua-action-request and the PublisherId of the Responder for a ua-action-response, and is globally unique.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -119,7 +119,7 @@ The MessageId of an Action message is "<unixTimestampInMs>-<PublisherId of the s
 - Status: reviewed
 - Inventory: MG-8.2.16-8ab944d7
 
-> Value Range: <unixTimestampInMs-PublisherId of the sender> Type: String Requirement: Mandatory
+> Value Range: &lt;unixTimestampInMs-PublisherId of the sender> Type: String Requirement: Mandatory
 > — MG 8.2.16
 
 > A globally unique identifier for the message.
@@ -132,7 +132,7 @@ The MessageId of an Action message is "<unixTimestampInMs>-<PublisherId of the s
 
 **PublisherId is the Responder, RequestorId the Requestor**
 
-In request and response, PublisherId is "<ServiceType>/<IdentificationLink>" of the Responder – the ServiceType and the decoded AppId of the Call and Reply topic – and RequestorId is "<ServiceType>/<IdentificationLink>" of the Requestor; both contain the unencoded Identification Link.
+In request and response, PublisherId is "&lt;ServiceType>/&lt;IdentificationLink>" of the Responder – the ServiceType and the decoded AppId of the Call and Reply topic – and RequestorId is "&lt;ServiceType>/&lt;IdentificationLink>" of the Requestor; both contain the unencoded Identification Link.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -143,7 +143,7 @@ In request and response, PublisherId is "<ServiceType>/<IdentificationLink>" of 
 - Status: reviewed
 - Inventory: MG-8.2.16-2a955fbc, MG-8.2.16-5aaf6988, MG-8.2.16-67c0af7c
 
-> The PublisherId of the Responder, in the request as well as in the response. It must correspond to the <ServiceType>/<AppId> of the Call and Reply topic, but contain the unencoded Identification Link.
+> The PublisherId of the Responder, in the request as well as in the response. It must correspond to the &lt;ServiceType>/&lt;AppId> of the Call and Reply topic, but contain the unencoded Identification Link.
 > — MG 8.2.16
 
 > The PublisherId of the Requestor, in the request as well as in the response.
@@ -153,7 +153,7 @@ In request and response, PublisherId is "<ServiceType>/<IdentificationLink>" of 
 
 **ResponseAddress is the Reply topic**
 
-The ResponseAddress of a ua-action-request is the Reply topic that corresponds to the Call topic of the request ("Oi4v2/<ServiceType>/<AppId>/Reply/<Service>[/<Source>]"), and the Responder publishes its responses to this ResponseAddress.
+The ResponseAddress of a ua-action-request is the Reply topic that corresponds to the Call topic of the request ("Oi4v2/&lt;ServiceType>/&lt;AppId>/Reply/&lt;Service>[/&lt;Source>]"), and the Responder publishes its responses to this ResponseAddress.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -193,7 +193,7 @@ If a ua-action-request contains CorrelationData, every ua-action-response to it 
 > Data provided by the Requestor, which is returned unchanged in the response.
 > — MG 8.2.16
 
-> Value Range: <Base64 encoded ByteString> Type: ByteString Requirement: Optional for ua-action-request, mandatory for ua-action-response if contained in the request
+> Value Range: &lt;Base64 encoded ByteString> Type: ByteString Requirement: Optional for ua-action-request, mandatory for ua-action-response if contained in the request
 > — MG 8.2.16
 
 ## REQ-ACT-008
@@ -319,7 +319,7 @@ The Payload of an ActionRequest or ActionResponse contains the request or respon
 
 **Status of the ActionResponse**
 
-Every ActionResponse contains a Status in CompactEncoding: {} for Good, otherwise {"Code": <UInt32>}, never a Symbol; a request field that breaks a constraint (e.g. wrong data type, value out of range) results in BadInvalidArgument (0x80AB0000).
+Every ActionResponse contains a Status in CompactEncoding: {} for Good, otherwise {"Code": &lt;UInt32>}, never a Symbol; a request field that breaks a constraint (e.g. wrong data type, value out of range) results in BadInvalidArgument (0x80AB0000).
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -457,7 +457,7 @@ An ActionRequest for a common service uses the DataSetWriterId reserved for its 
 
 **Topics of NewDataSetWriterId**
 
-NewDataSetWriterId is requested with "Oi4v2/<ServiceType>/<AppId>/Call/NewDataSetWriterId[/<Source>]" and answered with "Oi4v2/<ServiceType>/<AppId>/Reply/NewDataSetWriterId[/<Source>]"; the optional Source is the asset for which the DataSetWriterId is requested, a Filter is not used.
+NewDataSetWriterId is requested with "Oi4v2/&lt;ServiceType>/&lt;AppId>/Call/NewDataSetWriterId[/&lt;Source>]" and answered with "Oi4v2/&lt;ServiceType>/&lt;AppId>/Reply/NewDataSetWriterId[/&lt;Source>]"; the optional Source is the asset for which the DataSetWriterId is requested, a Filter is not used.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -468,10 +468,10 @@ NewDataSetWriterId is requested with "Oi4v2/<ServiceType>/<AppId>/Call/NewDataSe
 - Status: reviewed
 - Inventory: MG-9.2.1-33e0e9a1, MG-9.2.1-538d81a2, MG-9.2.1-8720ce6d
 
-> The information must be provided via the <Method>/<Services>[/<Source>] combination Call/NewDataSetWriterId[/<Source>] to request and Reply/NewDataSetWriterId[/<Source>] to reply the new DataSetWriterId.
+> The information must be provided via the &lt;Method>/&lt;Services>[/&lt;Source>] combination Call/NewDataSetWriterId[/&lt;Source>] to request and Reply/NewDataSetWriterId[/&lt;Source>] to reply the new DataSetWriterId.
 > — MG 9.2.1
 
-> The optional <Source> contains the asset, for which the DataSetWriterId is requested; the Reply topic equals the Call topic with the Method Reply (7.4 Method Element). A Filter is not used.
+> The optional &lt;Source> contains the asset, for which the DataSetWriterId is requested; the Reply topic equals the Call topic with the Method Reply (7.4 Method Element). A Filter is not used.
 > — MG 9.2.1
 
 Notes: Topic grammar in topic/topic.abnf (REQ-TOP-016); support is graded by REQ-CMP-040.

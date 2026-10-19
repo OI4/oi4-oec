@@ -61,7 +61,7 @@ func area(a catalog.Area, f catalog.AreaFile) string {
 	}
 	b.WriteString("\n\\* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).\n")
 	for _, r := range f.Requirements {
-		fmt.Fprintf(&b, "\n## %s\n\n**%s**\n\n%s\n\n", r.ID, esc(r.Title), strings.TrimSpace(r.Statement))
+		fmt.Fprintf(&b, "\n## %s\n\n**%s**\n\n%s\n\n", r.ID, esc(r.Title), oneLine(r.Statement))
 		kw := r.Keyword
 		if r.Implicit {
 			kw += " (implicit, SF-035)"
@@ -99,6 +99,21 @@ func area(a catalog.Area, f catalog.AreaFile) string {
 	return b.String()
 }
 
-func oneLine(s string) string { return strings.Join(strings.Fields(s), " ") }
+// oneLine joins the words of s into one line of Markdown prose; see mdText.
+func oneLine(s string) string { return mdText(strings.Join(strings.Fields(s), " ")) }
+
+// mdText escapes "<" outside code spans, so that placeholders such as
+// <ServiceType> are shown and not swallowed as HTML tags by Markdown viewers.
+func mdText(s string) string {
+	parts := strings.Split(s, "`")
+	for i := range parts {
+		// Even parts are outside code spans; after an unmatched backtick the
+		// last part is prose as well.
+		if i%2 == 0 || (i == len(parts)-1 && len(parts)%2 == 0) {
+			parts[i] = strings.ReplaceAll(parts[i], "<", "&lt;")
+		}
+	}
+	return strings.Join(parts, "`")
+}
 
 func esc(s string) string { return strings.ReplaceAll(oneLine(s), "|", "\\|") }

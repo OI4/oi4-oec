@@ -51,7 +51,7 @@ Notes: Graded by REQ-CMP-003. The Birth message should be the first message afte
 
 **Birth message topic**
 
-The Birth message is published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/MAM/<AppId>, i.e. the Source is the AppId of the component itself.
+The Birth message is published to the topic Oi4v2/&lt;ServiceType>/&lt;AppId>/Pub/MAM/&lt;AppId>, i.e. the Source is the AppId of the component itself.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -61,7 +61,7 @@ The Birth message is published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/MAM/
 - Status: draft
 - Inventory: MG-6-31ee6521, MG-6.3.3-55175294
 
-> It must be published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/MAM/<AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
+> It must be published to the topic Oi4v2/&lt;ServiceType>/&lt;AppId>/Pub/MAM/&lt;AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
 > — MG 6.3.3
 
 Notes: Graded by REQ-CMP-003. The topic syntax is area TOP.
@@ -130,7 +130,7 @@ Notes: Graded by REQ-CMP-009. A graceful disconnect discards the Will message at
 
 **Close message topic**
 
-The Close message is published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Health/<AppId>, i.e. the Source is the AppId of the component itself.
+The Close message is published to the topic Oi4v2/&lt;ServiceType>/&lt;AppId>/Pub/Health/&lt;AppId>, i.e. the Source is the AppId of the component itself.
 
 - Keyword: MUST
 - Levels: L1 SHOULD · L2 SHOULD · L3 MUST
@@ -141,7 +141,7 @@ The Close message is published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Heal
 - Status: draft
 - Inventory: MG-6-4c5014ad, MG-6.3.4-5ab84130
 
-> It must be published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Health/<AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
+> It must be published to the topic Oi4v2/&lt;ServiceType>/&lt;AppId>/Pub/Health/&lt;AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
 > — MG 6.3.4
 
 Notes: Graded by REQ-CMP-009.
@@ -173,7 +173,7 @@ Notes: Keywords added in C-026 (SF-057 (g)); the payload values are given by the
 
 **Will message registered on every connection**
 
-A component registers a Will message in every MQTT CONNECT, with the topic Oi4v2/<ServiceType>/<AppId>/Pub/Health/<AppId> (the Source is the AppId of the component itself) and the Will Retain flag false.
+A component registers a Will message in every MQTT CONNECT, with the topic Oi4v2/&lt;ServiceType>/&lt;AppId>/Pub/Health/&lt;AppId> (the Source is the AppId of the component itself) and the Will Retain flag false.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -183,7 +183,7 @@ A component registers a Will message in every MQTT CONNECT, with the topic Oi4v2
 - Status: draft
 - Inventory: MG-6-31ee6521, MG-6.3.5-ab380d71
 
-> The Will message must be registered at the broker whenever the connection is established, with the topic Oi4v2/<ServiceType>/<AppId>/Pub/Health/<AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
+> The Will message must be registered at the broker whenever the connection is established, with the topic Oi4v2/&lt;ServiceType>/&lt;AppId>/Pub/Health/&lt;AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
 > — MG 6.3.5
 
 > The protocol version, the broker address and ports, the security settings as well as the birth message and the will message are mandatory for all levels.

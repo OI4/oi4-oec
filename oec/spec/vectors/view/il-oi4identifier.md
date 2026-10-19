@@ -164,7 +164,7 @@ Notes: PO decision SF-043 (a) (C-020).
 - ProductCode: `P`
 - SerialNumber: `S`
 - Violations: manufacturer-uri
-- Expected: invalid – The form is <manufacturer>.<tld>.
+- Expected: invalid – The form is &lt;manufacturer>.&lt;tld>.
 - Violates: [REQ-IL-024](../../requirements/view/il.md#req-il-024)
 - Origin: constructed
 - Status: reviewed

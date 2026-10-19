@@ -211,7 +211,7 @@ Notes: D7 checks the testable constraints (REQ-IL-009, REQ-IL-016, REQ-IL-018, R
 
 **Components of an Identification Link**
 
-An Identification Link has the form "[<scheme>://]<authority>[/<path>][?<query>][#<fragment>]" (URL syntax according to RFC 3986). The authority is mandatory and non-empty; it is the internet domain of the issuer, which is under the control of the issuer. Scheme, path, query and fragment are optional.
+An Identification Link has the form "[&lt;scheme>://]&lt;authority>[/&lt;path>][?&lt;query>][#&lt;fragment>]" (URL syntax according to RFC 3986). The authority is mandatory and non-empty; it is the internet domain of the issuer, which is under the control of the issuer. Scheme, path, query and fragment are optional.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -224,7 +224,7 @@ An Identification Link has the form "[<scheme>://]<authority>[/<path>][?<query>]
 > The domain must be under the control of the issuer of the Identification Link (typically the manufacturer).
 > — MG 4.1
 
-Notes: D7 checks a non-empty authority (the part after an optional "<scheme>://" up to the first "/", "?" or "#"); the control of the domain is checked manually.
+Notes: D7 checks a non-empty authority (the part after an optional "&lt;scheme>://" up to the first "/", "?" or "#"); the control of the domain is checked manually.
 
 ## REQ-IL-010
 
@@ -346,7 +346,7 @@ Two Identification Links are equal if and only if they are equal character by ch
 
 **Allowed characters of an Identification Link**
 
-An Identification Link contains only the ASCII characters permitted by IEC 61406-1 (Annex A): letters, digits, "-", ".", "_", "~" and the reserved characters ":", "/", "?", "#", "[", "]", "@", "!", "$", "&", "'", "(", ")", "*", "+", ",", ";", "=" (according to their function in the URL syntax). Space, '"', "%", "<", ">", "\", "^", "`", "{", "|", "}", control characters and non-ASCII characters are not permitted.
+An Identification Link contains only the ASCII characters permitted by IEC 61406-1 (Annex A): letters, digits, "-", ".", "_", "~" and the reserved characters ":", "/", "?", "#", "[", "]", "@", "!", "$", "&", "'", "(", ")", "*", "+", ",", ";", "=" (according to their function in the URL syntax). Space, '"', "%", "&lt;", ">", "\", "^", "`", "{", "|", "}", control characters and non-ASCII characters are not permitted.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -359,7 +359,7 @@ An Identification Link contains only the ASCII characters permitted by IEC 61406
 > Only the ASCII characters permitted by IEC 61406-1 (Annex A) may be used.
 > — MG 4.1
 
-> The following characters are not permitted: space, ", %, <, >, \, ^, , {, |, }, control characters and all non-ASCII characters.
+> The following characters are not permitted: space, ", %, &lt;, >, \, ^, , {, |, }, control characters and all non-ASCII characters.
 > — MG 4.1
 
 Notes: "Only … may be used" restricts the character set; recorded as MUST. Whether a reserved character is used according to its URL function cannot be checked in general (IEC 61406-1); D7 checks the character set.
@@ -459,7 +459,7 @@ A subscriber that needs assets of a specific manufacturer, model, product code o
 
 **Structure of the Oi4Identifier**
 
-An Oi4Identifier has the form "<ManufacturerUri>/<Model>/<ProductCode>/<SerialNumber>" without scheme; all four elements are mandatory strings. The result is an Identification Link, so all its rules apply (REQ-IL-008, REQ-IL-016); characters that are not permitted or a "/" inside an element may be masked with the dnp-encoding (REQ-IL-033).
+An Oi4Identifier has the form "&lt;ManufacturerUri>/&lt;Model>/&lt;ProductCode>/&lt;SerialNumber>" without scheme; all four elements are mandatory strings. The result is an Identification Link, so all its rules apply (REQ-IL-008, REQ-IL-016); characters that are not permitted or a "/" inside an element may be masked with the dnp-encoding (REQ-IL-033).
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -470,7 +470,7 @@ An Oi4Identifier has the form "<ManufacturerUri>/<Model>/<ProductCode>/<SerialNu
 - Status: reviewed
 - Inventory: MG-4.3.1-19b2a4a1, MG-4.3.1-4183c5ed, MG-4.3.1-a05c80e5
 
-> The Oi4Identifier in the form of <ManufacturerUri/Model/ProductCode/SerialNumber> represents an IEC 61406-1 compliant Identification Link (4.1 IEC 61406-1 Identification Link) without scheme.
+> The Oi4Identifier in the form of &lt;ManufacturerUri/Model/ProductCode/SerialNumber> represents an IEC 61406-1 compliant Identification Link (4.1 IEC 61406-1 Identification Link) without scheme.
 > — MG 4.3.1
 
 Notes: Reference implementation il.Oi4Identifier; vectors V-OID-….
@@ -502,7 +502,7 @@ Notes: Conversion by the generator per PO decision SF-043 (d) (C-020) – MG 4.3
 
 **Form of the ManufacturerUri**
 
-The ManufacturerUri is a lowercase internet domain name without scheme, port, path and without a leading "www.", typically of the form "<manufacturer>.<tld>"; a subdomain of the manufacturer's domain (e.g. id.provider.com) may be used.
+The ManufacturerUri is a lowercase internet domain name without scheme, port, path and without a leading "www.", typically of the form "&lt;manufacturer>.&lt;tld>"; a subdomain of the manufacturer's domain (e.g. id.provider.com) may be used.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -513,10 +513,10 @@ The ManufacturerUri is a lowercase internet domain name without scheme, port, pa
 - Status: reviewed
 - Inventory: MG-4.3.1-2a7cd5d3, MG-4.3.1-91913cd6, MG-4.3.1-a4894201
 
-> The ManufacturerUri must be the domain part of the manufacturer URL in lower case, where the scheme (e. g. https://), port and path as well as the third level domain <www.> are excluded.
+> The ManufacturerUri must be the domain part of the manufacturer URL in lower case, where the scheme (e. g. https://), port and path as well as the third level domain &lt;www.> are excluded.
 > — MG 4.3.1
 
-> Typically, it is of the form <manufacturer>.<tld>; other subdomains may be used (see note below).
+> Typically, it is of the form &lt;manufacturer>.&lt;tld>; other subdomains may be used (see note below).
 > — MG 4.3.1
 
 > A manufacturer may use subdomains of its internet domain for use as ManufacturerUri if it is considered necessary.
@@ -708,7 +708,7 @@ Notes: PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference implementati
 
 **ManufacturerUri corresponds to the Identification Link**
 
-The ManufacturerUri corresponds to the domain of the Identification Link of the asset. In case of doubt, it is given without scheme and without third level domain ("<manufacturer>.<tld>").
+The ManufacturerUri corresponds to the domain of the Identification Link of the asset. In case of doubt, it is given without scheme and without third level domain ("&lt;manufacturer>.&lt;tld>").
 
 - Keyword: SHOULD
 - Levels: L1 SHOULD · L2 SHOULD · L3 SHOULD
