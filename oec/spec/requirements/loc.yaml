@@ -1,0 +1,52 @@
+# Requirements of area LOC – helper DataSet Locale (MG 8.3.12; ADR-0018).
+# Reserved DataSetWriterId and names: REQ-MSG-019; LocalizedText: MG 8.2.7.
+# Checked by tools/internal/payload (C-027).
+area: LOC
+baseline: "c6453c7"
+requirements:
+  - id: REQ-LOC-001
+    title: Field of the Locale DataSet
+    statement: >-
+      The Payload of a Locale DataSetMessage contains the field Locale, a
+      String with an OPC UA LocaleId (e.g. "en-US", "de-DE"); no other field.
+      The field is present although its Requirement is Optional, as it is the
+      only content of the DataSet (proposal SF-062 (d)).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    condition: The NetworkMessage carries a Locale.
+    scope: [MG 8.2.7]
+    refs: [MG 8.3.12, SF-062]
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.12-e0f896b3]
+    status: draft
+
+  - id: REQ-LOC-002
+    title: A Get with Locale is answered in the requested language
+    statement: >-
+      A Get may carry a Locale. If the responder supports localization and
+      the requested locale, it publishes all LocalizedText elements of the
+      answer (with the ReplyTo of the Get) in the requested locale, otherwise
+      in its default locale English (proposal SF-062 (e)). A Locale in another
+      method is ignored by the receiver (proposal SF-062 (c)).
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The Get carries a Locale.
+    scope: [MG 8.2.7]
+    refs: [MG 8.3.12, SF-035, SF-062]
+    quotes:
+      - ref: MG 8.3.12
+        text: The DataSetMessage with Locale information can be added to all methods but its obvious meaning is related to Get.
+      - ref: MG 8.3.12
+        text: The information is provided via the method Get and can be combined with any Resource, which might have LocalizedText elements in it.
+    verification: [d7-test]
+    inventory: [MG-8.3.12-f857d6fc, MG-8.3.12-2d12b693]
+    status: draft
+    notes: >-
+      Keyword-less "will provide all LocalizedText elements in the requested
+      language" (MG 8.3.12) read as MUST for a supported locale; the Get
+      sentence names a "Local payload" (SF-062 (f)).
