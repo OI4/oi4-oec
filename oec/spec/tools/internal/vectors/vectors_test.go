@@ -131,8 +131,8 @@ func TestCheckPayload(t *testing.T) {
 	tp := "Oi4v2/OTConnector/" + appID + "/Pub/Health"
 	msg := `{"MessageId": "1-` + pub + `", "MessageType": "ua-data", "PublisherId": "` + pub + `",
   "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb", "ReplyTo": "",
-  "Messages": [{"DataSetWriterId": 10, "WriterGroupName": "", "DataSetWriterName": "x.com/a", "Payload": {}}]}`
-	orig := strings.Replace(msg, `"Payload": {}}]`, `"Payload": {}}, {
+  "Messages": [{"DataSetWriterId": 10, "WriterGroupName": "", "DataSetWriterName": "x.com/a", "Payload": {"Health": "NORMAL_0"}}]}`
+	orig := strings.Replace(msg, `"Payload": {"Health": "NORMAL_0"}}]`, `"Payload": {"Health": "NORMAL_0"}}, {
     // more
   }]`, 1)
 	good := Vector{

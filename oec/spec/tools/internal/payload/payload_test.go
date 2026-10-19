@@ -45,8 +45,15 @@ var pubList = `{
   "DataSetClassId": "217434d6-6e1e-4230-b907-f52bc9ffe152",
   "ReplyTo": "",
   "Messages": [
-    {"DataSetWriterId": 11, "WriterGroupName": "Data/oee", "DataSetWriterName": "` + app + `", "Payload": {}},
-    {"DataSetWriterId": 12, "WriterGroupName": "MAM", "DataSetWriterName": "` + app + `", "Payload": {}}
+    {"DataSetWriterId": 11, "WriterGroupName": "Data/oee", "DataSetWriterName": "` + app + `",
+     "Payload": {"Resource": "Data", "Source": "` + app + `", "Filter": "oee", "DataSetWriterId": 93,
+       "Mode": "APPLICATION_SOURCE_FILTER_8", "Interval": 0, "Precisions": {"Oee": 0.5}, "Config": "MODE_AND_INTERVAL_3"}},
+    {"DataSetWriterId": 11, "WriterGroupName": "MAM", "DataSetWriterName": "` + app + `",
+     "Payload": {"Resource": "MAM", "Source": "` + app + `", "DataSetWriterId": 55, "Mode": "SOURCE_3", "Config": "NONE_0"}},
+    {"DataSetWriterId": 11, "WriterGroupName": "Event/Syslog/Notice", "DataSetWriterName": "` + app + `",
+     "Payload": {"Resource": "Event", "Source": "` + app + `", "Filter": "Syslog/Notice", "DataSetWriterId": 625, "Mode": "FILTER_4"}},
+    {"DataSetWriterId": 2, "WriterGroupName": "Pagination", "DataSetWriterName": "` + app + `",
+     "Payload": {"TotalCount": 3, "PerPage": 3, "Page": 1, "HasNext": false, "PaginationId": "1-OTConnector/` + app + `"}}
   ]
 }`
 
@@ -161,13 +168,13 @@ func TestViolations(t *testing.T) {
     "Payload": {"Health": "NORMAL_0"}`, ``, []string{"REQ-MSG-016"}},
 		{"timestamp", tHealth, healthPub, `2021-12-16T22:25:10.094Z`, `16.12.2021`, []string{"REQ-MSG-016"}},
 		{"metadata and minor version", tData, dataPub, `"MessageType": "ua-keyframe"`, `"MinorVersion": 2`, []string{"REQ-MSG-018"}},
-		{"helper writer group name", tHealth, healthPub, `"DataSetWriterId": 3456`, `"DataSetWriterId": 2`, []string{"REQ-MSG-019"}},
+		{"helper writer group name", tHealth, healthPub, `"DataSetWriterId": 3456, "WriterGroupName": ""`, `"DataSetWriterId": 3, "WriterGroupName": "Pagination"`, []string{"REQ-LOC-001", "REQ-MSG-001", "REQ-MSG-019"}},
 		{"reserved writer id", tHealth, healthPub, `"DataSetWriterId": 3456`, `"DataSetWriterId": 8`, []string{"REQ-MSG-020"}},
 		{"writer id zero", tHealth, healthPub, `"DataSetWriterId": 3456`, `"DataSetWriterId": 0`, []string{"REQ-MSG-020"}},
 		{"writer name differs from source", tHealth, healthPub, `"DataSetWriterName": "provider.com`, `"DataSetWriterName": "x.com`, []string{"REQ-MSG-023"}},
 		{"health writer group name", tHealth, healthPub, `"WriterGroupName": ""`, `"WriterGroupName": "x"`, []string{"REQ-MSG-024"}},
 		{"data writer group name", tData, dataPub, `"WriterGroupName": "oee"`, `"WriterGroupName": "x"`, []string{"REQ-MSG-024"}},
-		{"list writer group name", tPubList, pubList, `"WriterGroupName": "Data/oee"`, `"WriterGroupName": "oee"`, []string{"REQ-MSG-025"}},
+		{"list writer group name", tPubList, pubList, `"WriterGroupName": "Data/oee"`, `"WriterGroupName": "oee"`, []string{"REQ-MSG-025", "REQ-RES-PUBLIST-002"}},
 		{"good status", tHealth, healthPub, `"Code": 1083310080`, `"Code": 0`, []string{"REQ-MSG-026"}},
 		{"status without code", tHealth, healthPub, `"Code": 1083310080, `, ``, []string{"REQ-MSG-027"}},
 		{"dsm message type", tData, dataPub, `"ua-keyframe"`, `"ua-event"`, []string{"REQ-MSG-029"}},
@@ -318,5 +325,162 @@ func TestGetMetadata(t *testing.T) {
 	}
 	if got := reqs(t, top, strings.Replace(get, `"MetaData": {}`, `"MetaData": []`, 1)); !reflect.DeepEqual(got, []string{"REQ-MSG-032"}) {
 		t.Errorf("Get with MetaData array: got %v", got)
+	}
+}
+
+var mamPub = `{
+  "MessageId": "7-OTConnector/` + app + `",
+  "MessageType": "ua-data",
+  "PublisherId": "OTConnector/` + app + `",
+  "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+  "ReplyTo": "",
+  "Messages": [{
+    "DataSetWriterId": 55, "WriterGroupName": "", "DataSetWriterName": "` + app + `",
+    "Payload": {
+      "Manufacturer": {"Locale": "en-US", "Text": "Provider"}, "ManufacturerUri": "provider.com",
+      "Model": {"Locale": "en-US", "Text": "FieldDataService"}, "ProductCode": "FDS-001",
+      "HardwareRevision": "", "SoftwareRevision": "1.0.0.0", "DeviceRevision": "",
+      "DeviceManual": "https://provider.com/fds.pdf", "DeviceClass": "Oi4.OTConnector",
+      "SerialNumber": "1200-0345", "ProductInstanceUri": "` + app + `", "RevisionCounter": 1,
+      "Description": {"Locale": "en-US", "Text": "Field data"}
+    }
+  }, {
+    "DataSetWriterId": 3, "WriterGroupName": "Locale", "DataSetWriterName": "` + app + `", "Payload": {"Locale": "de-DE"}
+  }, {
+    "DataSetWriterId": 2, "WriterGroupName": "Pagination", "DataSetWriterName": "` + app + `",
+    "Payload": {"TotalCount": 3, "PerPage": 1, "Page": 1, "HasNext": true, "PaginationId": "7-OTConnector/` + app + `"}
+  }]
+}`
+
+var mamGet = `{
+  "MessageId": "1-` + requestor + `",
+  "MessageType": "ua-data",
+  "PublisherId": "` + requestor + `",
+  "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+  "ReplyTo": "",
+  "Messages": [{
+    "DataSetWriterId": 1, "WriterGroupName": "PaginationRequest", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+    "Payload": {"PerPage": 25, "Page": 0}
+  }]
+}`
+
+var healthDetails = strings.Replace(healthPub, `"Payload": {"Health": "NORMAL_0"}`, `"Payload": {"Health": "FAILURE_1", "HealthScore": 40,
+      "Details": [{"Health": "MAINTENANCE_REQUIRED_4", "DiagnosticCode": "M1"}, {"Health": "FAILURE_1", "Location": "fan", "Description": "stopped"}]}`, 1)
+
+var profilePub = `{
+  "MessageId": "1-OTConnector/` + app + `", "MessageType": "ua-data", "PublisherId": "OTConnector/` + app + `",
+  "DataSetClassId": "48017c6a-05c8-48d7-9d85-4b08bbb707f3", "ReplyTo": "",
+  "Messages": [{"DataSetWriterId": 74, "WriterGroupName": "", "DataSetWriterName": "` + app + `",
+    "Payload": {"Resources": ["MAM", "Health", "Profile", "PublicationList", "NewDataSetWriterId"]}}]
+}`
+
+var refDesSet = `{
+  "MessageId": "1-` + requestor + `", "MessageType": "ua-data", "PublisherId": "` + requestor + `",
+  "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa", "ReplyTo": "",
+  "Messages": [{"DataSetWriterId": 94, "WriterGroupName": "", "DataSetWriterName": "` + app + `",
+    "Payload": {"Function": {"Value": "=P1.L2.FDS1", "Local": "=FDS1", "Parent": {"Value": "=P1.L2", "IdentificationLink": "consumer.com/LC/4711"}},
+      "Location": {"Value": "+P1.H3.R2"}}}]
+}`
+
+var (
+	tMAM     = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "MAM"}
+	tMAMGet  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Get", Resource: "MAM"}
+	tProfile = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Profile", SourceIL: app}
+	tRefSet  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Set", Resource: "ReferenceDesignation", SourceIL: app}
+	tRefDel  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Del", Resource: "ReferenceDesignation", SourceIL: app}
+	tListSet = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Set", Resource: "PublicationList", SourceIL: app, Filter: "Data/oee"}
+)
+
+func TestContent(t *testing.T) {
+	listSet := strings.Replace(pubList, `"MessageId": "1-OTConnector/`+app+`"`, `"MessageId": "1-`+requestor+`"`, 1)
+	listSet = strings.Replace(listSet, `"PublisherId": "OTConnector/`+app+`"`, `"PublisherId": "`+requestor+`"`, 1)
+	listSet = listSet[:strings.Index(listSet, `,
+    {"DataSetWriterId": 11, "WriterGroupName": "MAM"`)] + "]}"
+	for name, c := range map[string]struct {
+		top Topic
+		msg string
+	}{
+		"mam": {tMAM, mamPub}, "mam get": {tMAMGet, mamGet}, "health details": {tHealth, healthDetails},
+		"profile": {tProfile, profilePub}, "refdes set": {tRefSet, refDesSet}, "publist set": {tListSet, listSet},
+	} {
+		if got := reqs(t, c.top, c.msg); len(got) > 0 {
+			v, _ := Parse([]byte(c.msg))
+			t.Errorf("%s: unexpected problems %v", name, Check(c.top, v))
+		}
+	}
+	refDel := strings.Replace(refDesSet, `"Messages": [{`, `"Messages": [], "x": [{`, 1)
+	if got := reqs(t, tRefDel, refDel); !reflect.DeepEqual(got, []string{"REQ-MSG-001"}) {
+		t.Errorf("refdes del: got %v", got)
+	}
+	cases := []struct {
+		name     string
+		top      Topic
+		msg      string
+		old, new string
+		want     []string
+	}{
+		{"pagination request in pub", tMAM, mamPub, `"DataSetWriterId": 2, "WriterGroupName": "Pagination"`, `"DataSetWriterId": 1, "WriterGroupName": "PaginationRequest"`, []string{"REQ-MSG-001", "REQ-PAG-008"}},
+		{"pagination in get", tMAMGet, mamGet, `"DataSetWriterId": 1, "WriterGroupName": "PaginationRequest"`, `"DataSetWriterId": 2, "WriterGroupName": "Pagination"`, []string{"REQ-PAG-008"}},
+		{"per page zero", tMAMGet, mamGet, `"PerPage": 25`, `"PerPage": 0`, []string{"REQ-PAG-001"}},
+		{"pagination missing field", tMAM, mamPub, `"HasNext": true, `, ``, []string{"REQ-PAG-003"}},
+		{"pagination id of other sender", tMAM, mamPub, `"PaginationId": "7-OTConnector/`, `"PaginationId": "7-Utility/`, []string{"REQ-PAG-003", "REQ-PAG-004"}},
+		{"pagination id of page 1", tMAM, mamPub, `"PaginationId": "7-OTConnector/`, `"PaginationId": "6-OTConnector/`, []string{"REQ-PAG-004"}},
+		{"pagination has next", tMAM, mamPub, `"HasNext": true`, `"HasNext": false`, []string{"REQ-PAG-004"}},
+		{"pagination count", tMAM, mamPub, `"TotalCount": 3, "PerPage": 1`, `"TotalCount": 3, "PerPage": 2`, []string{"REQ-PAG-004"}},
+		{"pagination page zero", tMAM, mamPub, `"Page": 1`, `"Page": 0`, []string{"REQ-PAG-004"}},
+		{"locale", tMAM, mamPub, `"Locale": "de-DE"`, `"Locale": "german"`, []string{"REQ-LOC-001"}},
+		{"get with mam", tMAMGet, mamGet, `"Messages": [{`, `"Messages": [{"DataSetWriterId": 55, "WriterGroupName": "", "DataSetWriterName": "x.com/a", "Payload": {}}, {`, []string{"REQ-RES-MAM-020"}},
+		{"mam missing field", tMAM, mamPub, `"ProductCode": "FDS-001",`, ``, []string{"REQ-RES-MAM-001"}},
+		{"mam unknown field", tMAM, mamPub, `"ProductCode": "FDS-001",`, `"ProductCode": "FDS-001", "Foo": 1,`, []string{"REQ-MSG-001"}},
+		{"mam localized text", tMAM, mamPub, `"Text": "Provider"}`, `"Text": "Provider", "x": 1}`, []string{"REQ-MSG-001"}},
+		{"mam revision counter", tMAM, mamPub, `"RevisionCounter": 1`, `"RevisionCounter": 2147483648`, []string{"REQ-RES-MAM-001"}},
+		{"manufacturer uri scheme", tMAM, mamPub, `"ManufacturerUri": "provider.com"`, `"ManufacturerUri": "https://provider.com"`, []string{"REQ-RES-MAM-004"}},
+		{"manufacturer uri case", tMAM, mamPub, `"ManufacturerUri": "provider.com"`, `"ManufacturerUri": "Provider.com"`, []string{"REQ-RES-MAM-004"}},
+		{"device manual", tMAM, mamPub, `"DeviceManual": "https://provider.com/fds.pdf"`, `"DeviceManual": "fds.pdf"`, []string{"REQ-RES-MAM-012"}},
+		{"device manual empty", tMAM, mamPub, `"DeviceManual": "https://provider.com/fds.pdf"`, `"DeviceManual": ""`, nil},
+		{"product instance uri", tMAM, mamPub, `"ProductInstanceUri": "provider.com`, `"ProductInstanceUri": "x.com`, []string{"REQ-RES-MAM-016"}},
+		{"product instance uri length", tMAM, mamPub, `"ProductInstanceUri": "` + app + `"`, `"ProductInstanceUri": "` + strings.Repeat("a", 256) + `"`, []string{"REQ-RES-MAM-016", "REQ-RES-MAM-017"}},
+		{"health enum", tHealth, healthPub, `"Health": "NORMAL_0"`, `"Health": "NORMAL"`, []string{"REQ-RES-HEALTH-001"}},
+		{"health score", tHealth, healthDetails, `"HealthScore": 40`, `"HealthScore": 101`, []string{"REQ-RES-HEALTH-001"}},
+		{"health detail field", tHealth, healthDetails, `"DiagnosticCode": "M1"`, `"DiagnosticCode": 1`, []string{"REQ-RES-HEALTH-001"}},
+		{"health not most severe", tHealth, healthDetails, `"Payload": {"Health": "FAILURE_1"`, `"Payload": {"Health": "OFF_SPEC_3"`, []string{"REQ-RES-HEALTH-002"}},
+		{"health order", tHealth, healthDetails, `{"Health": "FAILURE_1", "Location"`, `{"Health": "CHECK_FUNCTION_2", "Location"`, []string{"REQ-RES-HEALTH-002"}},
+		{"profile unknown resource", tProfile, profilePub, `"NewDataSetWriterId"]`, `"Foo"]`, []string{"REQ-RES-PROFILE-001"}},
+		{"profile duplicate", tProfile, profilePub, `"NewDataSetWriterId"]`, `"MAM"]`, []string{"REQ-RES-PROFILE-001"}},
+		{"profile without health", tProfile, profilePub, `"Health", `, ``, []string{"REQ-RES-PROFILE-002"}},
+		{"entry missing source", tPubList, pubList, `"Resource": "MAM", "Source": "` + app + `", `, `"Resource": "MAM", `, []string{"REQ-RES-PUBLIST-001"}},
+		{"entry resource", tPubList, pubList, `"Resource": "MAM"`, `"Resource": "Foo"`, []string{"REQ-RES-PUBLIST-001"}},
+		{"entry mode", tPubList, pubList, `"Mode": "SOURCE_3"`, `"Mode": "SOURCE"`, []string{"REQ-RES-PUBLIST-001"}},
+		{"entry config", tPubList, pubList, `"Config": "NONE_0"`, `"Config": "NONE"`, []string{"REQ-RES-PUBLIST-001"}},
+		{"entry precision", tPubList, pubList, `"Oee": 0.5`, `"Oee": -1`, []string{"REQ-RES-PUBLIST-001"}},
+		{"entry reserved id", tPubList, pubList, `"DataSetWriterId": 55`, `"DataSetWriterId": 3`, []string{"REQ-MSG-020"}},
+		{"entry filter of mam", tPubList, pubList, `"Resource": "MAM",`, `"Resource": "MAM", "Filter": "x",`, []string{"REQ-RES-PUBLIST-002"}},
+		{"entry without filter", tPubList, pubList, `"Filter": "oee", `, ``, []string{"REQ-RES-PUBLIST-002"}},
+		{"entry writer name", tPubList, pubList, `"Resource": "MAM", "Source": "provider.com`, `"Resource": "MAM", "Source": "x.com`, []string{"REQ-RES-PUBLIST-002"}},
+		{"entry duplicate", tPubList, pubList, `"Resource": "MAM", "Source": "` + app + `", "DataSetWriterId": 55`, `"Resource": "Data", "Source": "` + app + `", "Filter": "oee", "DataSetWriterId": 55`, []string{"REQ-RES-PUBLIST-002", "REQ-RES-PUBLIST-003"}},
+		{"event mode", tPubList, pubList, `"Mode": "FILTER_4"`, `"Mode": "APPLICATION_2"`, []string{"REQ-RES-PUBLIST-012"}},
+		{"mam mode", tPubList, pubList, `"Mode": "SOURCE_3"`, `"Mode": "ON_REQUEST_1"`, []string{"REQ-RES-PUBLIST-012"}},
+		{"mam default mode", tPubList, pubList, `"Mode": "SOURCE_3", `, ``, []string{"REQ-RES-PUBLIST-012"}},
+		{"set two entries", tListSet, pubList, `"MessageId": "1-OTConnector/` + app + `"`, `"MessageId": "1-OTConnector/` + app + `"`, []string{"REQ-MSG-025", "REQ-PAG-008", "REQ-RES-PUBLIST-022"}},
+		{"refdes missing value", tRefSet, refDesSet, `"Location": {"Value": "+P1.H3.R2"}`, `"Location": {"Local": "+R2"}`, []string{"REQ-RES-REFDES-001"}},
+		{"refdes parent", tRefSet, refDesSet, `"IdentificationLink": "consumer.com/LC/4711"`, `"IdentificationLink": 1`, []string{"REQ-RES-REFDES-001"}},
+		{"refdes set none", tRefSet, refDesSet, `"Messages": [{`, `"Messages": [], "x": [{`, []string{"REQ-MSG-001", "REQ-RES-REFDES-006"}},
+		{"refdes del with object", tRefDel, refDesSet, `"ReplyTo": ""`, `"ReplyTo": ""`, []string{"REQ-RES-REFDES-007"}},
+	}
+	for _, c := range cases {
+		if !strings.Contains(c.msg, c.old) {
+			t.Fatalf("%s: %q not in message", c.name, c.old)
+		}
+		msg := strings.Replace(c.msg, c.old, c.new, 1)
+		if got := reqs(t, c.top, msg); !reflect.DeepEqual(got, c.want) {
+			v, _ := Parse([]byte(msg))
+			t.Errorf("%s: got %v, want %v: %v", c.name, got, c.want, Check(c.top, v))
+		}
+	}
+	// Tolerant mode ignores undefined keys of the DataSets, too.
+	msg := strings.Replace(mamPub, `"ProductCode": "FDS-001",`, `"ProductCode": "FDS-001", "Foo": 1,`, 1)
+	v, _ := Parse([]byte(msg))
+	if ps := CheckMode(tMAM, v, Tolerant); len(ps) > 0 {
+		t.Errorf("tolerant MAM: unexpected problems %v", ps)
 	}
 }

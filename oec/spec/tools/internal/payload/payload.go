@@ -8,9 +8,12 @@
 // Action messages; conformance of the sender), Tolerant ignores such keys and
 // checks only the defined keys (REQ-MSG-046, view of a tolerant receiver).
 // CheckMetaDataType checks a bare DataSetMetaDataType, e.g. the predefined
-// MetaData of MG B2. The content of the DataSets of the OI4 resources (MG 8.3) and
-// the deep structure of the data type descriptions (MG 8.2.10 … 8.2.15) are
-// not checked here.
+// MetaData of MG B2. The content of the DataSets (MG 8.3, content.go) is
+// checked for the helper DataSets PaginationRequest, Pagination and Locale
+// (areas PAG, LOC) and the resources MAM, Health, Profile, PublicationList and
+// ReferenceDesignation (areas RES-*, C-027); Config, Data, Metadata, Event and
+// SubscriptionList follow in C-028. The deep structure of the data type
+// descriptions (MG 8.2.10 … 8.2.15) is not checked here.
 package payload
 
 import (
@@ -260,9 +263,11 @@ func CheckMode(t Topic, msg any, mode Mode) []Problem {
 }
 
 type checker struct {
-	t    Topic
-	mode Mode
-	out  []Problem
+	t     Topic
+	mode  Mode
+	out   []Problem
+	pub   string // PublisherId of the NetworkMessage, "" if malformed
+	msgID string // MessageId of the NetworkMessage, "" if malformed
 }
 
 func (c *checker) sorted() []Problem {
@@ -447,6 +452,8 @@ func (c *checker) data(msg any) {
 	pub, pubIL := c.publisherID(m, "PublisherId", "REQ-MSG-006")
 	c.topicPublisher(pub)
 	c.messageID(m, pub, "REQ-MSG-007")
+	c.pub = pub
+	c.msgID, _ = m["MessageId"].(string)
 	c.replyTo(m)
 	want, predefined := ClassIDs[c.t.Resource]
 	if id, ok := c.classID(m, "", "DataSetClassId", "REQ-MSG-003"); ok {
@@ -460,19 +467,25 @@ func (c *checker) data(msg any) {
 	if _, present := m["Messages"]; present && !ok {
 		c.add("/Messages", "REQ-MSG-005", "Messages must be a JSON array")
 	}
-	for i, dsm := range arr {
-		c.dataSetMessage(fmt.Sprintf("/Messages/%d", i), dsm, pubIL)
+	var dsms []dsm
+	for i, v := range arr {
+		if d, ok := c.dataSetMessage(fmt.Sprintf("/Messages/%d", i), v, pubIL); ok {
+			dsms = append(dsms, d)
+		}
 	}
+	c.contents(dsms)
 }
 
-func (c *checker) dataSetMessage(ptr string, v any, pubIL string) {
+// dataSetMessage checks the envelope of a DataSetMessage and returns it for
+// the content checks if its DataSetWriterId is valid.
+func (c *checker) dataSetMessage(ptr string, v any, pubIL string) (dsm, bool) {
 	m := c.object(ptr, v, shape{
 		required: []string{"DataSetWriterId", "DataSetWriterName", "WriterGroupName", "Payload"},
 		optional: []string{"SequenceNumber", "MetaDataVersion", "MinorVersion", "Timestamp", "Status", "MessageType", "PublisherId"},
 		missing:  "REQ-MSG-016",
 	})
 	if m == nil {
-		return
+		return dsm{}, false
 	}
 	if _, ok := m["PublisherId"]; ok {
 		c.add(join(ptr, "PublisherId"), "REQ-MSG-016", "the DataSetMessage has no PublisherId")
@@ -499,10 +512,9 @@ func (c *checker) dataSetMessage(ptr string, v any, pubIL string) {
 			c.writerGroupName(join(ptr, "WriterGroupName"), group)
 		}
 	}
-	if p, ok := m["Payload"]; ok {
-		if _, ok := p.(map[string]any); !ok {
-			c.add(join(ptr, "Payload"), "REQ-MSG-016", "Payload must be a JSON object")
-		}
+	payload, isObj := m["Payload"].(map[string]any)
+	if _, ok := m["Payload"]; ok && !isObj {
+		c.add(join(ptr, "Payload"), "REQ-MSG-016", "Payload must be a JSON object")
 	}
 	c.uint(m, ptr, "SequenceNumber", "REQ-MSG-016", maxUint32)
 	c.dateTime(m, ptr, "Timestamp", "REQ-MSG-016")
@@ -533,6 +545,10 @@ func (c *checker) dataSetMessage(ptr string, v any, pubIL string) {
 			c.add(join(ptr, "MessageType"), "REQ-MSG-029", "MessageType of %s must be %s, got %q", c.t.Resource, want, s)
 		}
 	}
+	if !idOK || id == 0 || (id >= 4 && id <= 9) {
+		return dsm{}, false
+	}
+	return dsm{ptr: ptr, id: id, name: name, group: group, payload: payload}, true
 }
 
 func (c *checker) writerGroupName(ptr, group string) {
