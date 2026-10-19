@@ -11,7 +11,7 @@ Guideline baseline: `c6453c7`. Source of truth: the YAML files in `oec/spec/requ
 | [MSG](msg.md) | Payload format and OPC UA PubSub objects | C-023 | reviewed | 46 | MG 8, MG A2 |
 | [ACT](act.md) | Actions (Call/Reply) and DataSetWriterId allocation | C-023 | reviewed | 23 | MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2 |
 | [MQTT](mqtt.md) | General requirements on MQTT | C-025 | reviewed | 19 | MG 6 |
-| [LIFE](life.md) | Birth, Close and Will messages | C-025 | drafted | 17 | MG 6.3.3, MG 6.3.4, MG 6.3.5 |
+| [LIFE](life.md) | Birth, Close and Will messages | C-025 | reviewed | 17 | MG 6.3.3, MG 6.3.4, MG 6.3.5 |
 | RES-MAM | Resource MAM (Master Asset Model) | C-027 | planned | – | MG 5, MG 8.3.1, MG 9.1.1 |
 | RES-HEALTH | Resource Health | C-027 | planned | – | MG 8.3.2, MG 9.1.2 |
 | RES-PROFILE | Resource Profile | C-027 | planned | – | MG 8.3.7, MG 9.1.7 |

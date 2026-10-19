@@ -52,7 +52,7 @@ requirements:
         text: It must be published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/MAM/<AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
     verification: [d7-monitor]
     inventory: [MG-6.3.3-55175294, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: Graded by REQ-CMP-003. The topic syntax is area TOP.
 
   - id: REQ-LIFE-003
@@ -145,7 +145,7 @@ requirements:
         text: It must be published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Health/<AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
     verification: [d7-test]
     inventory: [MG-6.3.4-5ab84130, MG-6-eafd1d73]
-    status: draft
+    status: reviewed
     notes: Graded by REQ-CMP-046 (SF-061 (b), C-026).
 
   - id: REQ-LIFE-007
@@ -194,7 +194,7 @@ requirements:
         text: The protocol version, the broker address and ports, the security settings as well as the birth message and the will message are mandatory for all levels.
     verification: [d7-test]
     inventory: [MG-6.3.5-ab380d71, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Keyword added in C-026 (SF-057 (h)); the Will message is mandatory per
       the MG 6 note (REQ-CMP-003). Retain false follows from REQ-MQTT-018. D7 checks it by cutting the connection of

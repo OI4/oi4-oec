@@ -11,7 +11,7 @@ Guideline baseline: `c6453c7`. An inventory item is a candidate of a normative s
 | MSG | C-023 | reviewed | 180 | 171 | 9 | 0 |
 | ACT | C-023 | reviewed | 72 | 65 | 7 | 0 |
 | MQTT | C-025 | reviewed | 43 | 30 | 13 | 0 |
-| LIFE | C-025 | drafted | 23 | 20 | 3 | 0 |
+| LIFE | C-025 | reviewed | 23 | 20 | 3 | 0 |
 | RES-MAM | C-027 | planned | 64 | 0 | 0 | 64 |
 | RES-HEALTH | C-027 | planned | 27 | 0 | 0 | 27 |
 | RES-PROFILE | C-027 | planned | 18 | 0 | 0 | 18 |

@@ -40,7 +40,7 @@ areas:
   - code: LIFE
     title: Birth, Close and Will messages
     cycle: C-025
-    status: drafted
+    status: reviewed
     sections: [MG 6.3.3, MG 6.3.4, MG 6.3.5]
   - code: RES-MAM
     title: Resource MAM (Master Asset Model)

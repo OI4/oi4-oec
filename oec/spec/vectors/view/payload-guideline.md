@@ -27,9 +27,9 @@ Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5, B1.1.11
 | [V-PAY-020](#v-pay-020) | B1.1.5: Get Metadata of an explicit data tag | valid | ok | guideline MG B1.1.5 | reviewed |
 | [V-PAY-021](#v-pay-021) | B1.1.5: Pub Metadata of an explicit data tag, reply to a Get | valid | ok | guideline MG B1.1.5 | reviewed |
 | [V-PAY-022](#v-pay-022) | B1.1.5: Set Metadata of an explicit data tag | valid | ok | guideline MG B1.1.5 | reviewed |
-| [V-PAY-023](#v-pay-023) | B1.1.1: Birth message of an application | valid | ok | guideline MG B1.1.1 | draft |
-| [V-PAY-024](#v-pay-024) | B1.1.2: Close message of an application | valid | ok | guideline MG B1.1.2 | draft |
-| [V-PAY-025](#v-pay-025) | B1.1.2: Will message of an application | valid | ok | guideline MG B1.1.2 | draft |
+| [V-PAY-023](#v-pay-023) | B1.1.1: Birth message of an application | valid | ok | guideline MG B1.1.1 | reviewed |
+| [V-PAY-024](#v-pay-024) | B1.1.2: Close message of an application | valid | ok | guideline MG B1.1.2 | reviewed |
+| [V-PAY-025](#v-pay-025) | B1.1.2: Will message of an application | valid | ok | guideline MG B1.1.2 | reviewed |
 
 ## V-PAY-001
 
@@ -1883,7 +1883,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-LIFE-001](../../requirements/view/life.md#req-life-001), [REQ-LIFE-002](../../requirements/view/life.md#req-life-002), [REQ-LIFE-003](../../requirements/view/life.md#req-life-003), [REQ-LIFE-015](../../requirements/view/life.md#req-life-015), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-008](../../requirements/view/msg.md#req-msg-008), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: The Birth message is the Pub MAM of the application about itself (MG 6.3.3): the Source of the topic is the AppId of the publisher, the DataSetWriterId 55 is the one of its regular Pub MAM (B1.1.1), ReplyTo is empty and the optional Timestamp/SequenceNumber are omitted like in B1.1.1 (allowed since C-026, SF-061 (a)). Published as the first message after the connect at 2021-12-16T22:25:00.000Z; the MessageId carries the time of the publication (MG 8.2.1, SF-058).
 
@@ -1941,7 +1941,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-LIFE-006](../../requirements/view/life.md#req-life-006), [REQ-LIFE-007](../../requirements/view/life.md#req-life-007), [REQ-LIFE-014](../../requirements/view/life.md#req-life-014), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-008](../../requirements/view/msg.md#req-msg-008), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 Notes: The Close message is a Pub Health of the application about itself with NORMAL_0 and HealthScore 0 (MG 6.3.4), DataSetWriterId 3456 of its regular Pub Health (B1.1.2), published before the graceful disconnect at 2021-12-16T22:26:10.000Z. Timestamp/SequenceNumber are omitted as in the example; they may be used like in any Health message (SF-058 (b)).
 
@@ -1979,7 +1979,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-LIFE-008](../../requirements/view/life.md#req-life-008), [REQ-LIFE-009](../../requirements/view/life.md#req-life-009), [REQ-LIFE-010](../../requirements/view/life.md#req-life-010), [REQ-LIFE-016](../../requirements/view/life.md#req-life-016), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-008](../../requirements/view/msg.md#req-msg-008), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
 - Origin: guideline MG B1.1.2
-- Status: draft
+- Status: reviewed
 
 Notes: The Will message is registered in the MQTT CONNECT (Will Retain false) and published by the broker after an ungraceful disconnect (MG 6.3.5): a Pub Health of the application about itself with FAILURE_1 and HealthScore 0, DataSetWriterId 3456 of its regular Pub Health (B1.1.2), without Timestamp/SequenceNumber. Its MessageId carries the time of its creation at connect, 2021-12-16T22:24:59.990Z, just before the Birth message of V-PAY-023 (MG 6.3.5, SF-058).
 
