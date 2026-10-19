@@ -35,12 +35,12 @@ areas:
   - code: MQTT
     title: General requirements on MQTT
     cycle: C-025
-    status: planned
+    status: drafted
     sections: [MG 6]
   - code: LIFE
-    title: Birth, life and will messages
+    title: Birth, Close and Will messages
     cycle: C-025
-    status: planned
+    status: drafted
     sections: [MG 6.3.3, MG 6.3.4, MG 6.3.5]
   - code: RES-MAM
     title: Resource MAM (Master Asset Model)

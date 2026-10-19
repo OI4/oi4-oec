@@ -10,8 +10,8 @@ Guideline baseline: `2f00e9f`. An inventory item is a candidate of a normative s
 | TOP | C-018 | reviewed | 86 | 71 | 15 | 0 |
 | MSG | C-023 | reviewed | 180 | 171 | 9 | 0 |
 | ACT | C-023 | reviewed | 72 | 65 | 7 | 0 |
-| MQTT | C-025 | planned | 33 | 0 | 0 | 33 |
-| LIFE | C-025 | planned | 10 | 0 | 0 | 10 |
+| MQTT | C-025 | drafted | 33 | 21 | 12 | 0 |
+| LIFE | C-025 | drafted | 10 | 8 | 2 | 0 |
 | RES-MAM | C-026 | planned | 64 | 0 | 0 | 64 |
 | RES-HEALTH | C-026 | planned | 27 | 0 | 0 | 27 |
 | RES-PROFILE | C-026 | planned | 18 | 0 | 0 | 18 |
@@ -31,4 +31,4 @@ Guideline baseline: `2f00e9f`. An inventory item is a candidate of a normative s
 | LIC | C-028 | planned | 5 | 0 | 0 | 5 |
 | REG | C-028 | planned | 13 | 0 | 0 | 13 |
 | GEN | C-028 | planned | 79 | 0 | 0 | 79 |
-| **Total** | | | 1255 | 418 | 86 | 751 |
+| **Total** | | | 1255 | 447 | 100 | 708 |

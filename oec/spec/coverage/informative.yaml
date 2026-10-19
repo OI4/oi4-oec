@@ -179,3 +179,33 @@ items:
     reason: Example of the use case, repeated from MG 8.4.1; no requirement on a component.
   - key: MG-9.2.1-734e1ec6
     reason: Label of the Reply template; the template fields are REQ-ACT-012 and REQ-ACT-022.
+  # --- MQTT (C-025) ---------------------------------------------------------
+  - key: MG-6-0040aac5
+    reason: Describes deployment options of the broker ("can" expresses possibility); no requirement on a component. Platform requirements are area PLT (C-028).
+  - key: MG-6-2d114aae
+    reason: Lead-in to the grading note of MG 6; the grading is REQ-CMP-001, REQ-CMP-002, REQ-CMP-003 and REQ-CMP-009.
+  - key: MG-6.1-4e50a9ff
+    reason: Historical rationale for the choice of MQTT v3.1.1; the version rule is REQ-MQTT-001 and REQ-MQTT-002.
+  - key: MG-6.1-e0ba3cf6
+    reason: List item naming an optional broker feature (access control list) without a requirement; platform features are area PLT (C-028).
+  - key: MG-6.2-51ff65d2
+    reason: Introduction of chapter 6.2; the rules are REQ-MQTT-003 … REQ-MQTT-016.
+  - key: MG-6.2.3-f8e5a29a
+    reason: Describes common client SDK behavior ("may" expresses possibility); the ClientId rule is REQ-MQTT-013.
+  - key: MG-6.2.4-f2736dd8
+    reason: Explains the MQTT keep alive function; the keep alive rule is REQ-MQTT-014, the Will message REQ-LIFE-008.
+  - key: MG-6.2.5-e89c65f1
+    reason: Explains MQTT persistent sessions (MQTT v3.1.1); the session rules are REQ-MQTT-015 and REQ-MQTT-016.
+  - key: MG-6.2.5-39287b98
+    reason: Rationale for Clean Session true ("should" describes an expectation on the network, not a component); the rule is REQ-MQTT-015.
+  - key: MG-6.3-4de0f388
+    reason: Introduction of chapter 6.3; the rules are REQ-MQTT-017 … REQ-MQTT-018 and REQ-LIFE-001 … REQ-LIFE-014.
+  - key: MG-6.3.2-2b75c1d6
+    reason: Explains the MQTT retained message function; the rule is REQ-MQTT-018.
+  - key: MG-6.3.2-ec329c7e
+    reason: Hint to request missed messages with Get ("can" expresses possibility); the Get method is area ACT (REQ-ACT-*) and the resources RES-* (C-026, C-027).
+  # --- LIFE (C-025) ---------------------------------------------------------
+  - key: MG-6.3.4-ae44c183
+    reason: States that MQTT defines no close message; motivation for the Close message (REQ-LIFE-005 … REQ-LIFE-007).
+  - key: MG-6.3.4-6cead004
+    reason: Purpose of the Close message ("can" expresses possibility); the Close message is REQ-LIFE-005 … REQ-LIFE-007, its interpretation REQ-LIFE-011.
