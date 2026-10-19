@@ -306,3 +306,17 @@ func TestCheckMetaDataType(t *testing.T) {
 		t.Errorf("tolerant: got %v", ps)
 	}
 }
+
+func TestGetMetadata(t *testing.T) {
+	top := tMetadata
+	top.Method = "Get"
+	get := `{"MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322", "MessageType": "ua-metadata",
+"PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322", "DataSetWriterId": 93, "WriterGroupName": "oee",
+"DataSetWriterName": "` + app + `", "Timestamp": "2021-12-16T22:25:10.000Z", "ReplyTo": "", "MetaData": {}}`
+	if got := reqs(t, top, get); len(got) > 0 {
+		t.Errorf("Get with empty MetaData: unexpected %v", got)
+	}
+	if got := reqs(t, top, strings.Replace(get, `"MetaData": {}`, `"MetaData": []`, 1)); !reflect.DeepEqual(got, []string{"REQ-MSG-032"}) {
+		t.Errorf("Get with MetaData array: got %v", got)
+	}
+}

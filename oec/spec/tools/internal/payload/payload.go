@@ -581,7 +581,16 @@ func (c *checker) metadata(msg any) {
 		c.add("/WriterGroupName", "REQ-MSG-024", "WriterGroupName %q differs from the topic Filter %q", group, c.t.Filter)
 	}
 	if md, ok := m["MetaData"]; ok {
-		c.metaDataType("/MetaData", md)
+		if c.t.Method == "Get" {
+			// A Get carries an empty DataSetMetaData (MG 9.1.5); the
+			// request rules of the resource Metadata follow with area
+			// RES-META, here only the JSON type is checked.
+			if _, isObj := md.(map[string]any); !isObj {
+				c.add("/MetaData", "REQ-MSG-032", "must be a JSON object")
+			}
+		} else {
+			c.metaDataType("/MetaData", md)
+		}
 	}
 }
 
