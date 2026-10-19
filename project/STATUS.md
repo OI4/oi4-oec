@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-17, cycle C-023_
+_Last updated: 2026-10-19, cycle C-024_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-023 done, next C-024)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-024 done, next C-025)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -44,12 +44,14 @@ C-022: PO input (2026-10-17): **SF-044** decided as proposed and to be recorded 
 
 C-023: areas **`MSG`** (REQ-MSG-001 … 045; MG 8, A2) and **`ACT`** (REQ-ACT-001 … 023; MG 8.2.16 … 8.2.20, 8.4, 9.2) `drafted` (MSG 160 inventory items: 152 covered, 8 informative; ACT 70: 63 covered, 7 informative; 0 open). REQ-MSG-006 corrected during the cycle: for `Get`/`Set`/`Del` the topic `AppId` is the destination (MG 7.3), so the `PublisherId` is the requester's. **Golden payload vectors started** (ADR-0018 amendment C-023): new vector kind `payload` (`topic` + JSON `payload`, `original` + JSON-Pointer `edits`), reference envelope checks in `oec/spec/tools/internal/payload` (each problem names the violated REQ), 9 `draft` vectors V-PAY-001 … 009 from B1.1.2, B1.1.11, B1.1.12 and B1.2.1 (`vectors/payload/guideline.yaml`, view `vectors/view/payload-guideline.md`); B2.x metadata examples and Disconnect/Will messages not curated yet. New findings **SF-045 … 051** (register commits `367a2e0`, `06eea55`; proposed interpretations used in the drafts, none blocking): `ua-metadata` encoding, `LocalizedText` `Locale`, `KeyValuePair`/`EngineeringUnits`, `DataSetClassId` of `Get`/`Data`, editorial items (a)–(i), unlisted OPC UA fields, Action correlation/`TimeoutHint`. Baseline unchanged (`fd9da6e`, guideline text not changed). Log: `log/2026-10-17_C-023_msg-act.md`.
 
+C-024: PO review of C-023 (2026-10-19): **SF-045** (b') and **SF-046 … 051** accepted as proposed, guideline to be corrected where necessary; services shall be **tolerant readers** (strict in what they send, ignore additional fields); the list of removed resources/Actions behind the reserved A2 ids (REQ-MSG-014) could not be found; Docusaurus deprecation warning to be fixed. Guideline commits (local, `feature/spec-findings`): `7943098` (`markdown.hooks.onBrokenMarkdownLinks`), `590d2be` SF-045 (`VerboseEncoding` for `ua-metadata`, Figure 5, B2.x mechanical), `8e3939f` SF-046, `6950e74` SF-047, `dd43a7a` SF-048, `4a20b99` SF-049, `4d250a2` SF-050, `65e20e6` SF-051, `6f39017` new **SF-052** (MG 8: receivers must ignore unknown keys), `8eddc0d` new **SF-053** (A2 reserved ids with former use: 8 removed resources/Actions, 18 never assigned), register `a7d18f9` (SF-045 … 053 resolved, **no finding open**, next SF-054). Link check 751/0, Docusaurus build ok without warnings. `oec/spec` re-baselined on **`a7d18f9`** (1255 items): MSG/ACT quotes and statements follow the new text, "(open)" notes removed, new **REQ-MSG-046** (tolerant reader, MUST); reference payload checks for `QualifiedName` strings and `ExtensionObject` `UaTypeId`; payload vectors unchanged; MSG 179 items (170/9/0 open), ACT 72 (65/7/0). P1 cycles shifted by one. Log: `log/2026-10-19_C-024_sf045-051-guideline.md`.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review of C-023:** `oec/spec/requirements/view/msg.md`, `act.md`, `oec/spec/vectors/view/payload-guideline.md`; decide SF-045 … 051 (register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`); confirm the assumptions listed in the C-023 log (lower-case GUIDs, lenient `ua-metadata` validation until SF-045, OPC UA version of the links).
-2. **C-024** – areas `MQTT` and `LIFE` (golden vectors for Birth/Close/Will may be built in the cycle). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-025 … C-029).
+1. **PO review of C-023/C-024:** guideline commits `7943098` … `a7d18f9`; `oec/spec/requirements/view/msg.md`, `act.md`, `oec/spec/vectors/view/payload-guideline.md` (MSG/ACT and V-PAY still `draft`); confirm the keyword **must** of the tolerant-reader rule (SF-052, REQ-MSG-046) and lower-case GUIDs (REQ-MSG-010); decide whether SF-045/SF-052 get a GL-ADR.
+2. **C-025** – areas `MQTT` and `LIFE` (golden vectors for Birth/Close/Will may be built in the cycle). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-026 … C-030).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
@@ -68,7 +70,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `fd9da6e`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 018, SF-001 … 044 resolved, SF-045 … 051 open (C-023); OEC Process Description informative); previous `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `a7d18f9`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 018, SF-001 … 053 resolved, no finding open, next SF-054; OEC Process Description informative); previous `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -80,7 +82,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None blocking. SF-045 … 051 are open (C-023, proposed interpretations used in the MSG/ACT drafts, not blocking); next free id SF-052.
+- None. No open spec finding (SF-045 … 053 resolved in C-024); next free id SF-054.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -114,3 +116,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-021 | 2026-10-17 | SF-041 in the guideline (allowed topic forms, Metadata Source/Tag, Call/Reply Source, PublicationList Filter, B1.1.8 example); TOP + REQ-IL-034 reviewed; SF-044; re-baseline on `2cf0d70`; P1 cycles shifted by one | `log/2026-10-17_C-021_sf041-guideline.md` |
 | C-022 | 2026-10-17 | SF-044 decided and recorded in GL-ADR-018 (`WriterGroupName` of `PublicationList`/`SubscriptionList` entries = `<ResourceType>[/<Tag>]`), implemented in MG 8.2.3, 9.1.8, 9.1.9, B1.1.8, B2.6, B2.7; re-baseline on `fd9da6e`; P1 cycles shifted by one; review views of matrix and vectors; matrix (topic columns) + 203 vectors reviewed | `log/2026-10-17_C-022_gl-adr-018-writergroupname.md` |
 | C-023 | 2026-10-17 | Areas `MSG` + `ACT` drafted (REQ-MSG-001 … 045, REQ-ACT-001 … 023); golden payload vectors started (kind `payload`, reference envelope checks, V-PAY-001 … 009 draft); SF-045 … 051 | `log/2026-10-17_C-023_msg-act.md` |
+| C-024 | 2026-10-19 | PO review of C-023: SF-045 … 051 implemented in the guideline, new SF-052 (tolerant reader) and SF-053 (A2 reserved ids with former use), Docusaurus config fix; re-baseline on `a7d18f9`, REQ-MSG-046, payload checks aligned; P1 cycles shifted by one | `log/2026-10-19_C-024_sf045-051-guideline.md` |
