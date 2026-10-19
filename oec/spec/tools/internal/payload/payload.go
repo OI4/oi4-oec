@@ -3,7 +3,12 @@
 // ua-action-request and ua-action-response against the topic it is published
 // on. It is spec tooling (ADR-0018), not an SDK: it recomputes the expected
 // result of payload test vectors and reports every finding with the REQ id
-// it violates. The content of the DataSets of the OI4 resources (MG 8.3) and
+// it violates. Two validation modes exist (MG 8, SF-052): Strict reports
+// every key that is not defined for an object (REQ-MSG-001, REQ-ACT-003 for
+// Action messages; conformance of the sender), Tolerant ignores such keys and
+// checks only the defined keys (REQ-MSG-046, view of a tolerant receiver).
+// CheckMetaDataType checks a bare DataSetMetaDataType, e.g. the predefined
+// MetaData of MG B2. The content of the DataSets of the OI4 resources (MG 8.3) and
 // the deep structure of the data type descriptions (MG 8.2.10 … 8.2.15) are
 // not checked here.
 package payload
@@ -195,9 +200,48 @@ func Resolve(doc any, pointer string) (any, bool) {
 	return cur, true
 }
 
-// Check validates a parsed message against the topic it is published on.
+// Mode selects how keys that are not defined for an object are treated
+// (MG 8, SF-052).
+type Mode int
+
+const (
+	// Strict reports every undefined key (conformance of the sender,
+	// REQ-MSG-001).
+	Strict Mode = iota
+	// Tolerant ignores undefined keys and checks only the defined keys (view
+	// of a tolerant receiver, REQ-MSG-046).
+	Tolerant
+)
+
+// ParseMode maps "strict" (or "") and "tolerant" to a Mode.
+func ParseMode(s string) (Mode, error) {
+	switch s {
+	case "", "strict":
+		return Strict, nil
+	case "tolerant":
+		return Tolerant, nil
+	}
+	return Strict, fmt.Errorf("unknown validation mode %q", s)
+}
+
+// Check validates a parsed message against the topic it is published on
+// (strict mode).
 func Check(t Topic, msg any) []Problem {
-	c := &checker{t: t}
+	return CheckMode(t, msg, Strict)
+}
+
+// CheckMetaDataType validates a bare DataSetMetaDataType (MG 8.2.4), e.g. the
+// predefined MetaData of a resource (MG B2).
+func CheckMetaDataType(v any, mode Mode) []Problem {
+	c := &checker{mode: mode}
+	c.metaDataType("", v)
+	return c.sorted()
+}
+
+// CheckMode validates a parsed message against the topic it is published on
+// in the given mode.
+func CheckMode(t Topic, msg any, mode Mode) []Problem {
+	c := &checker{t: t, mode: mode}
 	switch t.Method {
 	case "Pub", "Get", "Set", "Del":
 		if t.Resource == "Metadata" {
@@ -212,13 +256,18 @@ func Check(t Topic, msg any) []Problem {
 	default:
 		c.add("", "REQ-MSG-002", "no payload rules for Method %q", t.Method)
 	}
-	sort.SliceStable(c.out, func(i, j int) bool { return c.out[i].Pointer < c.out[j].Pointer })
-	return c.out
+	return c.sorted()
 }
 
 type checker struct {
-	t   Topic
-	out []Problem
+	t    Topic
+	mode Mode
+	out  []Problem
+}
+
+func (c *checker) sorted() []Problem {
+	sort.SliceStable(c.out, func(i, j int) bool { return c.out[i].Pointer < c.out[j].Pointer })
+	return c.out
 }
 
 func (c *checker) add(ptr, req, format string, a ...any) {
@@ -251,6 +300,9 @@ func (c *checker) object(ptr string, v any, s shape) map[string]any {
 	}
 	for _, k := range s.optional {
 		allowed[k] = true
+	}
+	if c.mode == Tolerant {
+		return m
 	}
 	unknown := s.unknown
 	if unknown == "" {

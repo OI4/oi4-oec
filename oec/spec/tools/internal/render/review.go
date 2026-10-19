@@ -369,7 +369,17 @@ func fields(kind string, v vectors.Vector, ts *topic.Spec) []string {
 			add("Violations", strings.Join(v.Violations, ", "))
 		}
 	case "payload":
-		add("Topic", code(v.Topic))
+		if v.Object != "" {
+			add("Object", code(v.Object)+" (bare object, no message)")
+		} else {
+			add("Topic", code(v.Topic))
+		}
+		if v.Mode != "" {
+			add("Validation mode", v.Mode)
+		}
+		if v.Object != "" {
+			break
+		}
 		if res, err := ts.Analyze(v.Topic); err == nil && res.Valid {
 			p := res.Parsed
 			add("ServiceType · Method · Resource", fmt.Sprintf("%s · %s · %s ([matrix](%s#%s))", p.ServiceType, p.Method, p.Resource, vectorToMatrix, strings.ToLower(p.Resource)))

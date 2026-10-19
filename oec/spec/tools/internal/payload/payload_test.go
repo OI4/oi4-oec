@@ -245,3 +245,64 @@ func TestResolve(t *testing.T) {
 		}
 	}
 }
+
+func TestModes(t *testing.T) {
+	for _, c := range []struct {
+		name     string
+		top      Topic
+		msg      string
+		old, new string
+		strict   []string
+	}{
+		{"network message", tHealth, healthPub, `"ReplyTo": ""`, `"ReplyTo": "", "Foo": 1`, []string{"REQ-MSG-001"}},
+		{"dataset message", tHealth, healthPub, `"SequenceNumber": 58`, `"SequenceNumber": 58, "Foo": 1`, []string{"REQ-MSG-001"}},
+		{"field metadata", tMetadata, metadataPub, `"FieldFlags": 0`, `"FieldFlags": 0, "Foo": 1`, []string{"REQ-MSG-001"}},
+		{"action", tCall, call, `"TimeoutHint": 10000`, `"TimeoutHint": 10000, "Foo": 1`, []string{"REQ-ACT-003"}},
+	} {
+		msg := strings.Replace(c.msg, c.old, c.new, 1)
+		v, err := Parse([]byte(msg))
+		if err != nil {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+		if got := reqs(t, c.top, msg); !reflect.DeepEqual(got, c.strict) {
+			t.Errorf("%s strict: got %v, want %v", c.name, got, c.strict)
+		}
+		if ps := CheckMode(c.top, v, Tolerant); len(ps) > 0 {
+			t.Errorf("%s tolerant: unexpected problems %v", c.name, ps)
+		}
+	}
+	// Tolerant mode still reports missing and malformed defined keys.
+	msg := strings.Replace(healthPub, `"ReplyTo": "",`, `"Foo": 1,`, 1)
+	v, _ := Parse([]byte(msg))
+	if ps := CheckMode(tHealth, v, Tolerant); len(ps) != 1 || ps[0].Req != "REQ-MSG-003" {
+		t.Errorf("tolerant missing ReplyTo: got %v", ps)
+	}
+	for in, want := range map[string]Mode{"": Strict, "strict": Strict, "tolerant": Tolerant} {
+		if got, err := ParseMode(in); err != nil || got != want {
+			t.Errorf("ParseMode(%q) = %v, %v", in, got, err)
+		}
+	}
+	if _, err := ParseMode("lenient"); err == nil {
+		t.Error("ParseMode(lenient) must fail")
+	}
+}
+
+func TestCheckMetaDataType(t *testing.T) {
+	v, _ := Parse([]byte(metadataPub))
+	md, _ := Resolve(v, "/MetaData")
+	if ps := CheckMetaDataType(md, Strict); len(ps) > 0 {
+		t.Errorf("unexpected problems %v", ps)
+	}
+	md.(map[string]any)["Foo"] = 1
+	delete(md.(map[string]any), "Namespaces")
+	got := map[string]bool{}
+	for _, p := range CheckMetaDataType(md, Strict) {
+		got[p.Pointer+" "+p.Req] = true
+	}
+	if !got["/Foo REQ-MSG-001"] || !got[" REQ-MSG-035"] || len(got) != 2 {
+		t.Errorf("got %v", got)
+	}
+	if ps := CheckMetaDataType(md, Tolerant); len(ps) != 1 || ps[0].Req != "REQ-MSG-035" {
+		t.Errorf("tolerant: got %v", ps)
+	}
+}

@@ -11,29 +11,45 @@ import (
 	"github.com/OI4/oec/spec/tools/internal/topic"
 )
 
-// checkPayload recomputes a payload vector: the topic must be valid, the
-// payload strict JSON, and the reference checks must report no problem
-// (valid) or exactly the requirements in violates (invalid). A guideline
-// vector must match its example verbatim or document every change in edits.
+// checkPayload recomputes a payload vector: the topic must be valid (a
+// vector of a bare object has no topic), the payload strict JSON, and the
+// reference checks in the vector's mode must report no problem (valid) or
+// exactly the requirements in violates (invalid). A guideline vector must
+// match its example verbatim or document every change in edits.
 func checkPayload(ts *topic.Spec, v Vector, sections map[string]string, add func(string, ...any)) error {
-	res, err := ts.Analyze(v.Topic)
+	mode, err := payload.ParseMode(v.Mode)
 	if err != nil {
-		return err
-	}
-	if !res.Valid {
-		add("topic is invalid (%s %s); payload vectors need a valid topic", res.Failure, res.Detail)
+		add("%v", err)
 		return nil
 	}
+	var problems []payload.Problem
 	msg, err := payload.Parse([]byte(v.Payload))
-	if err != nil {
-		add("payload is no strict JSON: %v", err)
-		return nil
+	switch {
+	case v.Object != "":
+		if err != nil {
+			add("payload is no strict JSON: %v", err)
+			return nil
+		}
+		problems = payload.CheckMetaDataType(msg, mode)
+	default:
+		res, terr := ts.Analyze(v.Topic)
+		if terr != nil {
+			return terr
+		}
+		if !res.Valid {
+			add("topic is invalid (%s %s); payload vectors need a valid topic", res.Failure, res.Detail)
+			return nil
+		}
+		if err != nil {
+			add("payload is no strict JSON: %v", err)
+			return nil
+		}
+		p := res.Parsed
+		problems = payload.CheckMode(payload.Topic{
+			ServiceType: p.ServiceType, AppIL: p.AppIDIL, Method: p.Method,
+			Resource: p.Resource, SourceIL: p.SourceIL, Filter: p.Filter,
+		}, msg, mode)
 	}
-	p := res.Parsed
-	problems := payload.Check(payload.Topic{
-		ServiceType: p.ServiceType, AppIL: p.AppIDIL, Method: p.Method,
-		Resource: p.Resource, SourceIL: p.SourceIL, Filter: p.Filter,
-	}, msg)
 	var got []string
 	seen := map[string]bool{}
 	for _, pr := range problems {
@@ -111,7 +127,7 @@ func checkPayloadOrigin(v Vector, msg any, sections map[string]string, add func(
 		add("origin %s has no guideline file", v.Origin.Ref)
 		return
 	}
-	if !topicEdited && !strings.Contains(sec, guideline.NormalizeForCompare(v.Topic)) {
+	if v.Topic != "" && !topicEdited && !strings.Contains(sec, guideline.NormalizeForCompare(v.Topic)) {
 		add("topic %q not found verbatim in %s", v.Topic, v.Origin.Ref)
 	}
 	text, what := v.Payload, "payload"
