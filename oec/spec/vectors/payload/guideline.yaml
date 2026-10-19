@@ -1,7 +1,7 @@
-# Golden payload vectors (C-023/C-024/C-025, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 draft (C-025).
+# Golden payload vectors (C-023/C-024/C-025, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 draft (C-025, verbatim since C-026).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "2f00e9f"
+baseline: "720d862"
 description: >-
   Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5,
   B1.1.11, B1.1.12, B1.2.1): topic and message of the Message Bus, including
@@ -9,7 +9,7 @@ description: >-
   of the Alliance resources (MG B2.1 … B2.8) as bare DataSetMetaDataType
   objects. The reference checks cover the
   envelope of MG 8 (areas MSG and ACT); the DataSet content of the resources
-  is checked from C-026/C-027 on. A vector that differs from its example keeps
+  is checked from C-027/C-028 on. A vector that differs from its example keeps
   the verbatim example in original and lists every change in edits.
 vectors:
   - id: V-PAY-001
@@ -64,7 +64,7 @@ vectors:
     notes: >-
       ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health
       has no Filter; DataSetWriterName is the decoded Source. The DataSet content
-      (MG 8.3.2) is checked with the Health schema in C-026/C-027.
+      (MG 8.3.2) is checked with the Health schema in C-027/C-028.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -224,7 +224,7 @@ vectors:
     notes: >-
       Two MAM DataSetMessages (application and one device, WriterGroupName "" as
       MAM has no Filter) and the helper DataSet Pagination (DataSetWriterId 2).
-      The MAM content (MG 8.3.1) is checked with the MAM schema in C-026/C-027.
+      The MAM content (MG 8.3.1) is checked with the MAM schema in C-027/C-028.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM"
     payload: |-
       {
@@ -1731,11 +1731,11 @@ vectors:
   - id: V-PAY-023
     title: "B1.1.1: Birth message of an application"
     expected: valid
-    reqs: [REQ-LIFE-001, REQ-LIFE-002, REQ-LIFE-003, REQ-LIFE-004, REQ-MSG-006, REQ-MSG-007, REQ-MSG-008, REQ-MSG-011, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024]
+    reqs: [REQ-LIFE-001, REQ-LIFE-002, REQ-LIFE-003, REQ-LIFE-004, REQ-LIFE-015, REQ-MSG-006, REQ-MSG-007, REQ-MSG-008, REQ-MSG-011, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024]
     origin: {kind: guideline, ref: MG B1.1.1}
     status: draft
     notes: >-
-      The Birth message is the Pub MAM of the application about itself (MG 6.3.3): the Source of the topic is the AppId of the publisher, the DataSetWriterId 55 is the one of its regular Pub MAM (B1.1.1), ReplyTo is empty and Timestamp/SequenceNumber are omitted. Published at connect time 2021-12-16T22:25:00.000Z.
+      The Birth message is the Pub MAM of the application about itself (MG 6.3.3): the Source of the topic is the AppId of the publisher, the DataSetWriterId 55 is the one of its regular Pub MAM (B1.1.1), ReplyTo is empty and Timestamp/SequenceNumber are omitted. Published as the first message after the connect at 2021-12-16T22:25:00.000Z; the MessageId carries the time of the publication (MG 8.2.1, SF-058).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -1776,59 +1776,15 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "0000000000000-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 55,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Manufacturer": {
-                "Locale": "en-US",
-                "Text": "Provider Ltd."
-              },
-              "ManufacturerUri": "provider.com",
-              "Model": {
-                "Locale": "en-US",
-                "Text": "FieldDataService"
-              },
-              "ProductCode": "FDS-001",
-              "HardwareRevision": "",
-              "SoftwareRevision": "1.0.1",
-              "DeviceRevision": "",
-              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
-              "DeviceClass": "Oi4.OTConnector",
-              "SerialNumber": "1200-0345",
-              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
-              "RevisionCounter": 1,
-              "Description": {
-                "Locale": "en-US",
-                "Text": "This OT connector provides field data"
-              }
-            }
-          }
-        ]
-      }
-    edits:
-      - target: "/MessageId"
-        kind: corrected
-        reason: "The example sets the timestamp of the MessageId to 0 (B1.1.1 note); MG 8.2.1 requires the current timestamp and a globally unique MessageId (REQ-MSG-007, REQ-MSG-008), so every Birth message carries the time of its publication (SF-058 (a), proposed interpretation)."
-        sf: [SF-058]
 
   - id: V-PAY-024
     title: "B1.1.2: Close message of an application"
     expected: valid
-    reqs: [REQ-LIFE-006, REQ-LIFE-007, REQ-MSG-006, REQ-MSG-007, REQ-MSG-008, REQ-MSG-011, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024]
+    reqs: [REQ-LIFE-006, REQ-LIFE-007, REQ-LIFE-014, REQ-MSG-006, REQ-MSG-007, REQ-MSG-008, REQ-MSG-011, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024]
     origin: {kind: guideline, ref: MG B1.1.2}
     status: draft
     notes: >-
-      B1.1.2 calls it "Disconnect message of an application" (SF-058 (c)). The Close message is a Pub Health of the application about itself with NORMAL_0 and HealthScore 0 (MG 6.3.4), DataSetWriterId 3456 of its regular Pub Health (B1.1.2), published before the graceful disconnect at 2021-12-16T22:26:10.000Z. Timestamp/SequenceNumber are omitted as in the example; MG 6.3.4 does not forbid them (SF-058 (b)).
+      The Close message is a Pub Health of the application about itself with NORMAL_0 and HealthScore 0 (MG 6.3.4), DataSetWriterId 3456 of its regular Pub Health (B1.1.2), published before the graceful disconnect at 2021-12-16T22:26:10.000Z. Timestamp/SequenceNumber are omitted as in the example; they may be used like in any Health message (SF-058 (b)).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -1849,39 +1805,15 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "0000000000000-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 3456,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Health": "NORMAL_0",
-              "HealthScore": 0
-            }
-          }
-        ]
-      }
-    edits:
-      - target: "/MessageId"
-        kind: corrected
-        reason: "The example sets the timestamp of the MessageId to 0 (B1.1.2 note); the Close message is application-driven and carries the time of its publication like every message (MG 8.2.1, REQ-MSG-007, REQ-MSG-008; SF-058 (a), proposed interpretation)."
-        sf: [SF-058]
 
   - id: V-PAY-025
     title: "B1.1.2: Will message of an application"
     expected: valid
-    reqs: [REQ-LIFE-008, REQ-LIFE-009, REQ-LIFE-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-008, REQ-MSG-011, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024]
+    reqs: [REQ-LIFE-008, REQ-LIFE-009, REQ-LIFE-010, REQ-LIFE-016, REQ-MSG-006, REQ-MSG-007, REQ-MSG-008, REQ-MSG-011, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024]
     origin: {kind: guideline, ref: MG B1.1.2}
     status: draft
     notes: >-
-      The Will message is registered in the MQTT CONNECT (Will Retain false) and published by the broker after an ungraceful disconnect (MG 6.3.5): a Pub Health of the application about itself with FAILURE_1 and HealthScore 0, DataSetWriterId 3456 of its regular Pub Health (B1.1.2), without Timestamp/SequenceNumber. Its MessageId carries the registration time 2021-12-16T22:24:59.990Z, just before the Birth message of V-PAY-023.
+      The Will message is registered in the MQTT CONNECT (Will Retain false) and published by the broker after an ungraceful disconnect (MG 6.3.5): a Pub Health of the application about itself with FAILURE_1 and HealthScore 0, DataSetWriterId 3456 of its regular Pub Health (B1.1.2), without Timestamp/SequenceNumber. Its MessageId carries the time of its creation at connect, 2021-12-16T22:24:59.990Z, just before the Birth message of V-PAY-023 (MG 6.3.5, SF-058).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -1902,27 +1834,3 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "0000000000000-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 3456,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Health": "FAILURE_1",
-              "HealthScore": 0
-            }
-          }
-        ]
-      }
-    edits:
-      - target: "/MessageId"
-        kind: corrected
-        reason: "The example sets the timestamp of the MessageId to 0 (B1.1.2 note); the Will message is built anew for every connection and carries the time of its registration, so its MessageId stays unique (MG 8.2.1, REQ-MSG-007, REQ-MSG-008; SF-058 (a), proposed interpretation; if the PO prefers the alternative of SF-058 (a), this edit is dropped)."
-        sf: [SF-058]

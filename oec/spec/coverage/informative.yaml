@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "2f00e9f"
+baseline: "720d862"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -87,7 +87,7 @@ items:
   - key: MG-4.3-e1b14605
     reason: Describes the reproducibility of the Oi4Identifier; "can" expresses possibility. The creation rules are REQ-IL-022 … REQ-IL-029.
   - key: MG-4.3.1-1aeed8b4
-    reason: Cross-reference to RIG 4.2 Container Name Conventions; the container name requirement is stated there (area CNT, C-028).
+    reason: Cross-reference to RIG 4.2 Container Name Conventions; the container name requirement is stated there (area CNT, C-029).
   - key: MG-4.3.1-63bbb644
     reason: Consequence of using "nd" as SerialNumber ("can" expresses possibility); no requirement on a component.
   - key: MG-4.3.1-3c017310
@@ -138,7 +138,7 @@ items:
   - key: MG-7.5-814f7a3b
     reason: Records a design decision of the technical committee (single technology stack MQTT); no requirement on a component.
   - key: MG-7.5.1-4be49d7f
-    reason: Describes the resources as schema-validatable submodels ("can be"); the schemas are areas RES-* (C-026, C-027).
+    reason: Describes the resources as schema-validatable submodels ("can be"); the schemas are areas RES-* (C-027, C-028).
   - key: MG-7.5.2-669d3e1a
     reason: Permission for broker operators to use the service name for access control; no requirement on a component (ACLs are area MQTT/RES-*).
   - key: MG-7.7-513c03ce
@@ -172,7 +172,7 @@ items:
   - key: MG-8.4.1-a22f45b7
     reason: Example of the use case (reference designation of an MES set into an OT connector); no requirement on a component.
   - key: MG-8.4.1-9b4a99a8
-    reason: Example of the use case (IT connector sets the ReferenceDesignation); Set of ReferenceDesignation is area RES-* (C-026, C-027).
+    reason: Example of the use case (IT connector sets the ReferenceDesignation); Set of ReferenceDesignation is area RES-* (C-027, C-028).
   - key: MG-9.2.1-d64f4f6e
     reason: Use case narrative of NewDataSetWriterId, repeated from MG 8.4.1; no requirement on a component.
   - key: MG-9.2.1-1fe979dc
@@ -181,17 +181,19 @@ items:
     reason: Label of the Reply template; the template fields are REQ-ACT-012 and REQ-ACT-022.
   # --- MQTT (C-025) ---------------------------------------------------------
   - key: MG-6-0040aac5
-    reason: Describes deployment options of the broker ("can" expresses possibility); no requirement on a component. Platform requirements are area PLT (C-028).
+    reason: Describes deployment options of the broker ("can" expresses possibility); no requirement on a component. Platform requirements are area PLT (C-029).
   - key: MG-6-2d114aae
     reason: Lead-in to the grading note of MG 6; the grading is REQ-CMP-001, REQ-CMP-002, REQ-CMP-003 and REQ-CMP-009.
   - key: MG-6.1-4e50a9ff
     reason: Historical rationale for the choice of MQTT v3.1.1; the version rule is REQ-MQTT-001 and REQ-MQTT-002.
   - key: MG-6.1-e0ba3cf6
-    reason: List item naming an optional broker feature (access control list) without a requirement; platform features are area PLT (C-028).
+    reason: List item naming an optional broker feature (access control list) without a requirement; platform features are area PLT (C-029).
   - key: MG-6.2-51ff65d2
     reason: Introduction of chapter 6.2; the rules are REQ-MQTT-003 … REQ-MQTT-016.
   - key: MG-6.2.3-f8e5a29a
     reason: Describes common client SDK behavior ("may" expresses possibility); the ClientId rule is REQ-MQTT-013.
+  - key: MG-6.2.3-53c0f9ca
+    reason: Note explaining the ClientId uniqueness of MQTT v3.1.1 (C-026, SF-060 (c)); the ClientId rule is REQ-MQTT-013.
   - key: MG-6.2.4-f2736dd8
     reason: Explains the MQTT keep alive function; the keep alive rule is REQ-MQTT-014, the Will message REQ-LIFE-008.
   - key: MG-6.2.5-e89c65f1
@@ -199,11 +201,11 @@ items:
   - key: MG-6.2.5-39287b98
     reason: Rationale for Clean Session true ("should" describes an expectation on the network, not a component); the rule is REQ-MQTT-015.
   - key: MG-6.3-4de0f388
-    reason: Introduction of chapter 6.3; the rules are REQ-MQTT-017 … REQ-MQTT-018 and REQ-LIFE-001 … REQ-LIFE-014.
+    reason: Introduction of chapter 6.3; the rules are REQ-MQTT-017 … REQ-MQTT-018 and REQ-LIFE-001 … REQ-LIFE-017.
   - key: MG-6.3.2-2b75c1d6
     reason: Explains the MQTT retained message function; the rule is REQ-MQTT-018.
   - key: MG-6.3.2-ec329c7e
-    reason: Hint to request missed messages with Get ("can" expresses possibility); the Get method is area ACT (REQ-ACT-*) and the resources RES-* (C-026, C-027).
+    reason: Hint to request missed messages with Get ("can" expresses possibility); the Get method is area ACT (REQ-ACT-*) and the resources RES-* (C-027, C-028).
   # --- LIFE (C-025) ---------------------------------------------------------
   - key: MG-6.3.4-ae44c183
     reason: States that MQTT defines no close message; motivation for the Close message (REQ-LIFE-005 … REQ-LIFE-007).

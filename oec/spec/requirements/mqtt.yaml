@@ -6,9 +6,10 @@
 # at Levels 1 and 2 and mandatory at Level 3 (REQ-CMP-009): a MUST of these
 # sections is SHOULD at Levels 1 and 2, a SHOULD stays SHOULD. Requirements on
 # the broker and the platform have domain platform (MG 1.2). Drafted in C-025;
-# keyword-less statements: SF-057, open questions: SF-060.
+# keywords and connection details added to the guideline in C-026 (SF-057,
+# SF-060).
 area: MQTT
-baseline: "2f00e9f"
+baseline: "720d862"
 requirements:
   # --- Protocol version (MG 6.1) --------------------------------------------
   - id: REQ-MQTT-001
@@ -33,14 +34,15 @@ requirements:
         text: All mechanisms defined in this guideline (e.g. Birth, Close and Will message, versioning of the topic namespace) work with MQTT v3.1.1 and do not require any MQTT v5.0 features.
       - ref: MG 6.1
         text: MQTT v3.1.1 remains the required minimum version as long as it is sufficient for the requirements of this guideline.
+      - ref: MG 6.1
+        text: A client may connect with a later MQTT version supported by the broker, but it must not depend on features of later versions (e.g. MQTT v5.0 user properties, response topic, correlation data, message expiry) for the mechanisms of this guideline and must not put information that other participants need into such features.
     verification: [manual, d7-test]
-    inventory: [MG-6.1-460b8388, MG-6.1-5152cb4d, MG-6.1-6ba93300, MG-6-31ee6521]
+    inventory: [MG-6.1-460b8388, MG-6.1-5152cb4d, MG-6.1-6ba93300, MG-6.1-76c661f1, MG-6-31ee6521]
     status: draft
     notes: >-
-      Graded by REQ-CMP-001 (mandatory at all levels). Whether a client may use
-      MQTT v5.0 and its features is not stated (SF-060 (a), proposed
-      interpretation used here). D7 sees the protocol version of the
-      application under test only with a test broker it controls.
+      Graded by REQ-CMP-001 (mandatory at all levels). Use of later versions:
+      SF-060 (a), C-026. D7 sees the protocol version of the application under
+      test only with a test broker it controls.
 
   - id: REQ-MQTT-002
     title: Broker supports MQTT v3.1.1
@@ -53,11 +55,11 @@ requirements:
     refs: [MG 6.1, SF-060]
     quotes:
       - ref: MG 6.1
-        text: Open Industry 4.0 Alliance-compliant communication must use MQTT v3.1.1 as minimum protocol version.
+        text: The broker must support MQTT v3.1.1.
     verification: [d8]
-    inventory: [MG-6.1-460b8388, MG-6.1-6ba93300]
+    inventory: [MG-6.1-f1242c63, MG-6.1-460b8388, MG-6.1-6ba93300]
     status: draft
-    notes: SF-060 (a). The platform requirements of the RIG are area PLT (C-028).
+    notes: SF-060 (a), C-026. The platform requirements of the RIG are area PLT.
 
   # --- Broker address and ports (MG 6.2.1) ----------------------------------
   - id: REQ-MQTT-003
@@ -78,7 +80,7 @@ requirements:
     status: draft
     notes: >-
       The content of broker.json and the use of the Message Bus storage by a
-      containerized application are area CNT (RIG 4.1.1, C-028). A component
+      containerized application are area CNT (RIG 4.1.1, C-029). A component
       without container (device with its own MQTT client) gets the broker
       address by its own configuration.
 
@@ -89,22 +91,21 @@ requirements:
       storage (SecurePort of broker.json, RIG 4.1.1) or, for a component
       without container, its configuration sets another port.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [component]
-    refs: [MG 6, MG 6.2.1, RIG 4.1.1, SF-035, SF-057]
+    refs: [MG 6, MG 6.2.1, RIG 4.1.1, SF-057]
     quotes:
       - ref: MG 6.2.1
-        text: As default setting, the port 8883 for secure communication is used.
+        text: As default setting, the port 8883 for secure communication must be used.
       - ref: MG 6.2.1
         text: Through the Message Bus storage, the default might be set to a system-dependent value (OEC Runtime & Infrastructure Guideline, 4.1.1 Message Bus Storage).
       - ref: MG 6
         text: The protocol version, the broker address and ports, the security settings as well as the birth message and the will message are mandatory for all levels.
     verification: [manual]
-    inventory: [MG-6-31ee6521]
+    inventory: [MG-6.2.1-b440c05c, MG-6-31ee6521]
     status: draft
-    notes: Keyword-less in MG 6.2.1 (SF-057 (a)); graded by REQ-CMP-001.
+    notes: Keyword added in C-026 (SF-057 (a)); graded by REQ-CMP-001.
 
   # --- Security settings (MG 6.2.2) -----------------------------------------
   - id: REQ-MQTT-005
@@ -122,15 +123,14 @@ requirements:
       - ref: MG 6.2.2
         text: The MQTT connection to the broker is always encrypted (TLS version 1.2 or higher is mandatory).
       - ref: MG 6.2.1
-        text: Non-secure connections through port 1883 is not supported.
+        text: Non-secure connections (e.g. through port 1883) must not be used by clients and must not be supported by the broker.
     verification: [d7-test, manual]
-    inventory: [MG-6.2.2-5c7608e4, MG-6-31ee6521]
+    inventory: [MG-6.2.2-5c7608e4, MG-6.2.1-be806906, MG-6-31ee6521]
     status: draft
     notes: >-
-      Graded by REQ-CMP-002. The sentence on port 1883 has no keyword
-      (SF-057 (a)); it follows from the mandatory encryption. In a D7 test
-      environment the broker accepts TLS only (REQ-MQTT-006), so an
-      application that connects uses TLS.
+      Graded by REQ-CMP-002. Keyword of the port 1883 sentence added in C-026
+      (SF-057 (a)). In a D7 test environment the broker accepts TLS only
+      (REQ-MQTT-006), so an application that connects uses TLS.
 
   - id: REQ-MQTT-006
     title: Broker accepts TLS connections only
@@ -146,9 +146,9 @@ requirements:
       - ref: MG 6.2.2
         text: The MQTT connection to the broker is always encrypted (TLS version 1.2 or higher is mandatory).
       - ref: MG 6.2.1
-        text: Non-secure connections through port 1883 is not supported.
+        text: Non-secure connections (e.g. through port 1883) must not be used by clients and must not be supported by the broker.
     verification: [d8]
-    inventory: [MG-6.2.2-5c7608e4]
+    inventory: [MG-6.2.2-5c7608e4, MG-6.2.1-be806906]
     status: draft
 
   - id: REQ-MQTT-007
@@ -164,11 +164,11 @@ requirements:
     refs: [MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-057]
     quotes:
       - ref: MG 6.2.2
-        text: The broker preferably shall use a certificate which is signed by a well-known or user specific certificate authority (CA).
+        text: The broker should use a certificate which is signed by a well-known or user specific certificate authority (CA).
     verification: [d8, manual]
-    inventory: [MG-6.2.2-1b12faa1]
+    inventory: [MG-6.2.2-e60fcb10]
     status: draft
-    notes: '"preferably shall" read as SHOULD (SF-057 (d)).'
+    notes: '"preferably shall" replaced by "should" in C-026 (SF-057 (d)).'
 
   - id: REQ-MQTT-008
     title: Client verifies the broker certificate
@@ -181,25 +181,22 @@ requirements:
       whose certificate cannot be verified is not used; an insecure mode is
       never the default.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [component]
-    refs: [MG 6, MG 6.1, MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-035, SF-060]
+    refs: [MG 6, MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-060]
     quotes:
-      - ref: MG 6.1
-        text: TLS with CA certification - for secure communication (6.2.2 Security Settings)
       - ref: MG 6.2.2
-        text: The broker certificate is provided via Message Bus storage as explained in OEC Runtime & Infrastructure Guideline, 4.1.1 Message Bus Storage.
+        text: 'The client must verify the broker certificate when it establishes the TLS connection: the certificate chain against the CA certificate (broker_ca.pem of the Message Bus storage or, if no local CA is present, the CA of the OI4 certificate storage; for a client without container, its configured CA) and the broker address.'
       - ref: MG 6.2.2
-        text: The CA certificate is available via OI4 certificate storage as explained in OEC Runtime & Infrastructure Guideline, 4.1.2 OI4 Certificate Storage.
+        text: The client must not use a connection to a broker whose certificate cannot be verified; a mode without this verification must not be the default.
     verification: [manual, d7-test]
+    inventory: [MG-6.2.2-1c096322, MG-6.2.2-e044b5e3, MG-6-31ee6521]
     status: draft
     notes: >-
-      The guideline names the certificates but does not state the
-      verification (SF-060 (b), proposed interpretation; GUARDRAILS G-4.5).
-      Graded by REQ-CMP-002 (security settings). D7 can check it only with a
-      test broker that presents an untrusted certificate.
+      Added to the guideline in C-026 (SF-060 (b)). Graded by REQ-CMP-002
+      (security settings). D7 can check it only with a test broker that
+      presents an untrusted certificate.
 
   - id: REQ-MQTT-009
     title: Client authenticates to the broker
@@ -229,18 +226,18 @@ requirements:
       password are available, a component authenticates with the client
       certificate.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [component]
     condition: Both a client certificate with private key and username/password are available.
-    refs: [MG 6, MG 6.2.2, SF-035, SF-057]
+    refs: [MG 6, MG 6.2.2, SF-057]
     quotes:
       - ref: MG 6.2.2
-        text: In case a private key for an existing client certificate and username/password is available, the client certificate based authentication is used.
+        text: In case a private key for an existing client certificate and username/password is available, the client certificate based authentication must be used.
     verification: [manual]
+    inventory: [MG-6.2.2-c84650d9, MG-6-31ee6521]
     status: draft
-    notes: Keyword-less (SF-057 (c)); graded by REQ-CMP-002.
+    notes: Keyword added in C-026 (SF-057 (c)); graded by REQ-CMP-002.
 
   - id: REQ-MQTT-011
     title: MQTT usernames use unreserved characters only
@@ -254,15 +251,13 @@ requirements:
     refs: [MG 1.2, MG 6.2.2, RIG 4.1.3, SF-060]
     quotes:
       - ref: MG 6.2.2
-        text: The username must only contain unreserved characters according to the RFC3986.
+        text: The platform must assign usernames that only contain unreserved characters according to the RFC3986.
       - ref: MG 6.2.2
         text: In addition it is also allowed to use the @ symbol.
     verification: [d8, manual]
-    inventory: [MG-6.2.2-1eebbb9f]
+    inventory: [MG-6.2.2-fc14e862]
     status: draft
-    notes: >-
-      Addressed to the platform/operator that assigns the credentials (MG 1.2,
-      SF-060 (d), proposed interpretation).
+    notes: Addressed to the platform that assigns the credentials (SF-060 (d), C-026).
 
   - id: REQ-MQTT-012
     title: The Message Bus is the communication channel of the OEC layer
@@ -273,47 +268,50 @@ requirements:
       exchange. Field protocols between a connector and its assets are not
       affected.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [component]
-    refs: [MG 6, MG 6.1, MG 6.2.1, SF-035, SF-057]
+    refs: [MG 6, MG 6.1, MG 6.2.1, SF-057]
     quotes:
       - ref: MG 6.2.1
-        text: All data transmissions between assets and the Open Edge Computing layer (and possibly some going beyond that, if security can be provided) have to use the MQTT broker.
+        text: All data transmissions between the participants of the Open Edge Computing layer (applications, devices with their own MQTT client and platform services) must use the MQTT broker; no other channel is used for this exchange.
+      - ref: MG 6.2.1
+        text: Field protocols between a connector and its assets are not affected.
       - ref: MG 6.1
         text: Edge indicated communication - no open ports, beside MQTT (6.2.1 Broker Address and Ports)
     verification: [manual]
-    inventory: [MG-6.2.1-d996f8b1]
+    inventory: [MG-6.2.1-da4b7997, MG-6-31ee6521]
     status: draft
     notes: >-
-      "have to" is no keyword of MG 1.2 and the scope is unclear (SF-057 (b),
-      proposed interpretation). Additional user interfaces or web services of
-      an application (RIG 5.2) are not part of this exchange.
+      Keyword and scope added in C-026 (SF-057 (b)). Additional user
+      interfaces or web services of an application (RIG 5.2) are not part of
+      this exchange.
 
   # --- Client identifier (MG 6.2.3) ----------------------------------------
   - id: REQ-MQTT-013
-    title: Container name as MQTT ClientId
+    title: MQTT ClientId – container name or unique and stable id
     statement: >-
       A containerized application uses its container name (RIG 4.2) as MQTT
-      ClientId.
+      ClientId. A component without container (e.g. a device with its own
+      MQTT client) uses a ClientId that is unique on the broker and stable
+      across reconnects, e.g. derived from its Identification Link within the
+      length and character limits of the broker.
     keyword: SHOULD
     domain: messaging
     levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
-    applies_to: [application]
-    condition: The application runs in a container.
+    applies_to: [component]
     refs: [MG 6, MG 6.2.3, RIG 4.2, SF-060]
     quotes:
       - ref: MG 6.2.3
         text: To avoid problems with length and character restrictions in some MQTT implementations, a name of the container should be used which is unique, present and accessible in any OI4 Alliance-compliant container (OEC Runtime & Infrastructure Guideline, 4.2 Container Name Conventions).
+      - ref: MG 6.2.3
+        text: A client without container (e.g. a device with its own MQTT client) should use a ClientId that is unique on the broker and stable across reconnects, e.g. derived from its Identification Link within the length and character limits of the broker.
     verification: [manual, d8]
-    inventory: [MG-6.2.3-845bb406, MG-6-4c5014ad]
+    inventory: [MG-6.2.3-845bb406, MG-6.2.3-e61860a9, MG-6-4c5014ad]
     status: draft
     notes: >-
-      Graded by REQ-CMP-009. A component without container is not covered by
-      the guideline (SF-060 (c)); proposed: a ClientId that is unique on the
-      broker and stable across reconnects (MQTT v3.1.1 requires unique
-      ClientIds per broker), e.g. derived from the Identification Link.
+      Graded by REQ-CMP-009. Component without container: SF-060 (c), C-026.
+      MQTT v3.1.1 itself requires unique ClientIds per broker.
 
   # --- Keep alive (MG 6.2.4) -------------------------------------------------
   - id: REQ-MQTT-014
@@ -388,15 +386,15 @@ requirements:
     refs: [MG 6, MG 6.3.1, SF-057]
     quotes:
       - ref: MG 6.3.1
-        text: When it comes to Open Edge Computing, where there is always a strong connection on local networks, using QoS 0 as the default level should be sufficient.
+        text: 'When it comes to Open Edge Computing, where there is always a strong connection on local networks, QoS 0 is sufficient: clients should use QoS 0 as the default level.'
       - ref: MG 6.3.1
         text: Therefore, different QoS levels can be used.
     verification: [d7-monitor]
-    inventory: [MG-6.3.1-19854001, MG-6.3.1-be1bf49a, MG-6-4c5014ad]
+    inventory: [MG-6.3.1-f257276c, MG-6.3.1-be1bf49a, MG-6-4c5014ad]
     status: draft
     notes: >-
-      "should be sufficient" read as recommendation (SF-057 (e)). Graded by
-      REQ-CMP-009. A subscriber with QoS 2 sees the QoS of the publisher.
+      Keyword added in C-026 (SF-057 (e)). Graded by REQ-CMP-009. A
+      subscriber with QoS 2 sees the QoS of the publisher.
 
   # --- Retained messages (MG 6.3.2) -----------------------------------------
   - id: REQ-MQTT-018
@@ -447,4 +445,4 @@ requirements:
     notes: >-
       Graded by REQ-CMP-009. Health must be published on every change at all
       levels (REQ-TOP-017). The publication rules of the PublicationList are
-      area RES-PUBLIST (C-026).
+      area RES-PUBLIST (C-027).

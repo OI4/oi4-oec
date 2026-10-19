@@ -3,12 +3,12 @@
 # One row per Method x Resource/service combination. Source of truth for the
 # allowed topic forms together with ../topic/topic.abnf; 'spectool lint' checks
 # both against each other (rule names, required/optional/forbidden Source and
-# Filter, generated samples). Payload and behaviour columns follow in C-027.
+# Filter, generated samples). Payload and behaviour columns follow in C-028.
 # PO decisions (C-018): SF-041 (forms), SF-042 (closed sets).
 # PO review (C-022, 2026-10-17): topic columns reviewed; the payload columns
 # get their own review.
 
-baseline: "2f00e9f"
+baseline: "720d862"
 combinations:
   - {method: Pub, resource: MAM, kind: resource, allowed: true, rule: pub-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}
   - {method: Get, resource: MAM, kind: resource, allowed: true, rule: get-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}

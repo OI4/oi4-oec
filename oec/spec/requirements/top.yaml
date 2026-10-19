@@ -3,7 +3,7 @@
 # topic/topic.abnf, the allowed forms per Method × Resource are listed in
 # matrix/method-resource.yaml; vectors in vectors/topic/.
 area: TOP
-baseline: "2f00e9f"
+baseline: "720d862"
 requirements:
   # --- Topic structure (MG 7) -----------------------------------------------
   - id: REQ-TOP-001
@@ -368,7 +368,7 @@ requirements:
     verification: [d7-monitor]
     inventory: [MG-7.5.1-40b7ae71]
     status: reviewed
-    notes: Health content and tolerances belong to RES-HEALTH (C-026).
+    notes: Health content and tolerances belong to RES-HEALTH (C-027).
 
   # --- Source (MG 7.6) ------------------------------------------------------
   - id: REQ-TOP-018
