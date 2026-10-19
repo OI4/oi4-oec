@@ -45,37 +45,37 @@ areas:
   - code: RES-MAM
     title: Resource MAM (Master Asset Model)
     cycle: C-027
-    status: planned
+    status: drafted
     sections: [MG 5, MG 8.3.1, MG 9.1.1]
   - code: RES-HEALTH
     title: Resource Health
     cycle: C-027
-    status: planned
+    status: drafted
     sections: [MG 8.3.2, MG 9.1.2]
   - code: RES-PROFILE
     title: Resource Profile
     cycle: C-027
-    status: planned
+    status: drafted
     sections: [MG 8.3.7, MG 9.1.7]
   - code: RES-PUBLIST
     title: Resource PublicationList
     cycle: C-027
-    status: planned
+    status: drafted
     sections: [MG 8.3.8, MG 9.1.8]
   - code: RES-REFDES
     title: Resource ReferenceDesignation
     cycle: C-027
-    status: planned
+    status: drafted
     sections: [MG 8.3.10, MG 9.1.10]
   - code: PAG
     title: Pagination
     cycle: C-027
-    status: planned
+    status: drafted
     sections: [MG 8.3.11]
   - code: LOC
     title: Locale
     cycle: C-027
-    status: planned
+    status: drafted
     sections: [MG 8.3.12]
   - code: RES-CONFIG
     title: Resource Config

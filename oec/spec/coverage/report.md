@@ -12,13 +12,13 @@ Guideline baseline: `c6453c7`. An inventory item is a candidate of a normative s
 | ACT | C-023 | reviewed | 72 | 65 | 7 | 0 |
 | MQTT | C-025 | reviewed | 43 | 30 | 13 | 0 |
 | LIFE | C-025 | reviewed | 23 | 20 | 3 | 0 |
-| RES-MAM | C-027 | planned | 64 | 0 | 0 | 64 |
-| RES-HEALTH | C-027 | planned | 27 | 0 | 0 | 27 |
-| RES-PROFILE | C-027 | planned | 18 | 0 | 0 | 18 |
-| RES-PUBLIST | C-027 | planned | 61 | 0 | 0 | 61 |
-| RES-REFDES | C-027 | planned | 43 | 0 | 0 | 43 |
-| PAG | C-027 | planned | 28 | 0 | 0 | 28 |
-| LOC | C-027 | planned | 3 | 0 | 0 | 3 |
+| RES-MAM | C-027 | drafted | 64 | 56 | 8 | 0 |
+| RES-HEALTH | C-027 | drafted | 27 | 21 | 6 | 0 |
+| RES-PROFILE | C-027 | drafted | 18 | 13 | 5 | 0 |
+| RES-PUBLIST | C-027 | drafted | 61 | 52 | 9 | 0 |
+| RES-REFDES | C-027 | drafted | 43 | 39 | 4 | 0 |
+| PAG | C-027 | drafted | 28 | 24 | 4 | 0 |
+| LOC | C-027 | drafted | 3 | 3 | 0 | 0 |
 | RES-CONFIG | C-028 | planned | 144 | 0 | 0 | 144 |
 | RES-DATA | C-028 | planned | 30 | 0 | 0 | 30 |
 | RES-META | C-028 | planned | 12 | 0 | 0 | 12 |
@@ -31,4 +31,4 @@ Guideline baseline: `c6453c7`. An inventory item is a candidate of a normative s
 | LIC | C-029 | planned | 5 | 0 | 0 | 5 |
 | REG | C-029 | planned | 13 | 0 | 0 | 13 |
 | GEN | C-029 | planned | 79 | 0 | 0 | 79 |
-| **Total** | | | 1279 | 469 | 102 | 708 |
+| **Total** | | | 1279 | 677 | 138 | 464 |

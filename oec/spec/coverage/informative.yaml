@@ -213,3 +213,81 @@ items:
     reason: States that MQTT defines no close message; motivation for the Close message (REQ-LIFE-005 … REQ-LIFE-007).
   - key: MG-6.3.4-6cead004
     reason: Purpose of the Close message ("can" expresses possibility); the Close message is REQ-LIFE-005 … REQ-LIFE-007, its interpretation REQ-LIFE-011.
+  # --- RES-MAM (C-027) ------------------------------------------------------
+  - key: MG-5-e6c13051
+    reason: Describes the purpose of a DeviceRevision ("may" expresses possibility); the MAM has no field DeviceRevision, its revisions are HardwareRevision and SoftwareRevision (REQ-RES-MAM-008 … REQ-RES-MAM-011).
+  - key: MG-5-8529492c
+    reason: Describes the typical content of a device revision ("may change" expresses possibility); no requirement of its own (REQ-RES-MAM-008 … REQ-RES-MAM-011).
+  - key: MG-5-1fe670f0
+    reason: Describes the alternative of a semantic referencing framework for the purpose of an asset ("can" expresses possibility); the DeviceClass rule is REQ-RES-MAM-014.
+  - key: MG-5-49c6c10c
+    reason: Description of the optional MAM field Description ("can be added" expresses possibility); the field is REQ-RES-MAM-001.
+  - key: MG-9.1.1-3092daa5
+    reason: Hint how any application can listen to MAM ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.1-6d5181fb
+    reason: Lists the topic form Pub/MAM/<Source>; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-MAM-022.
+  - key: MG-9.1.1-74ab3287
+    reason: Lists the topic form Pub/MAM; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-MAM-022.
+  - key: MG-9.1.1-36f041cb
+    reason: Reference to the examples of MG B1.1.1 (golden payload vectors V-PAY-026 ff.).
+  # --- RES-HEALTH (C-027) ---------------------------------------------------
+  - key: MG-8.3.2-9ffc3c06
+    reason: Explains that HealthScore and Health are independent ("can coexist" expresses possibility); no requirement of its own (REQ-RES-HEALTH-001).
+  - key: MG-8.3.2-e992ce79
+    reason: States that all diagnostic information can be retrieved via Get/Health ("can" expresses possibility); the Get is REQ-RES-HEALTH-005/006 and REQ-CMP-017.
+  - key: MG-9.1.2-3ca62884
+    reason: Hint how any application can listen to Health ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.2-a4576a99
+    reason: Lists the topic form Pub/Health/<Source>; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-HEALTH-007.
+  - key: MG-9.1.2-064f193c
+    reason: Lists the topic form Pub/Health; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-HEALTH-007.
+  - key: MG-9.1.2-fa314a20
+    reason: Reference to the examples of MG B1.1.2 (golden payload vectors).
+  # --- RES-PROFILE (C-027) --------------------------------------------------
+  - key: MG-9.1.7-b30b9cc5
+    reason: Consequence of the mandatory resources MAM and Health ("can rely" expresses possibility); the rules are REQ-CMP-006/007.
+  - key: MG-9.1.7-8d173e17
+    reason: Hint how any application can listen to Profile ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.7-2e819fad
+    reason: Lists the topic form Pub/Profile/<Source>; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-PROFILE-005.
+  - key: MG-9.1.7-b87d2825
+    reason: Lists the topic form Pub/Profile; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-PROFILE-005.
+  - key: MG-9.1.7-2afb1a52
+    reason: Reference to the examples of MG B1.1.7 (golden payload vectors V-PAY-026 ff.).
+  # --- RES-PUBLIST (C-027) --------------------------------------------------
+  - key: MG-8.3.8-1ac7726d
+    reason: Motivation of the PublicationList ("may" expresses possibility); the publishing behavior is REQ-RES-PUBLIST-007 … REQ-RES-PUBLIST-016.
+  - key: MG-8.3.8-51ee5db7
+    reason: Use case of the Mode OFF_0 ("can be used" expresses possibility); the Mode is REQ-RES-PUBLIST-007.
+  - key: MG-8.3.8-dacdadfd
+    reason: Use case of the Mode ON_REQUEST_1 ("may be used" expresses possibility); the Mode is REQ-RES-PUBLIST-008.
+  - key: MG-8.3.8-abb77071
+    reason: Use case of Precisions ("can be used" expresses possibility); the rule is REQ-RES-PUBLIST-015.
+  - key: MG-9.1.8-fdb7fdf3
+    reason: Hint how any application can listen to PublicationList ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.8-be7aabfe
+    reason: Lists the topic form Pub/PublicationList/<Source>/<ResourceType>[/<Tag>]; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-PUBLIST-021.
+  - key: MG-9.1.8-204397a0
+    reason: Lists the topic form Pub/PublicationList/<Source>; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-PUBLIST-021.
+  - key: MG-9.1.8-a9831132
+    reason: Lists the topic form Pub/PublicationList; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-PUBLIST-021.
+  - key: MG-9.1.8-39cbd3e1
+    reason: Reference to the examples of MG B1.1.8 (golden payload vectors V-PAY-026 ff.).
+  # --- RES-REFDES (C-027) ---------------------------------------------------
+  - key: MG-9.1.10-a43578f1
+    reason: Hint how any application can listen to ReferenceDesignation ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.10-d663ba51
+    reason: Lists the topic form Pub/ReferenceDesignation/<Source>; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-REFDES-005.
+  - key: MG-9.1.10-b3214b46
+    reason: Lists the topic form Pub/ReferenceDesignation; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-REFDES-005.
+  - key: MG-9.1.10-880719a5
+    reason: Reference to the examples of MG B1.1.10 (golden payload vectors V-PAY-026 ff.).
+  # --- PAG (C-027) ----------------------------------------------------------
+  - key: MG-8.3.11-41c125f9
+    reason: Restates that several DataSetMessages can be packed into one NetworkMessage ("can" expresses possibility); the rule is area MSG (MG 8.2.1).
+  - key: MG-8.3.11-8700e38d
+    reason: Motivation of the pagination ("may become" expresses possibility); the rule is REQ-PAG-005.
+  - key: MG-8.3.11-e37f5999
+    reason: Example of the risk of unpaginated answers; the rule is REQ-PAG-005.
+  - key: MG-8.3.11-1d50c8a1
+    reason: Introduction of the pagination mechanism ("can" expresses possibility); the rules are REQ-PAG-002, REQ-PAG-005 and REQ-PAG-006.
