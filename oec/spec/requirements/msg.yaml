@@ -4,7 +4,7 @@
 # (SF-045 … SF-050, SF-052, SF-053) were decided by the PO and resolved in
 # the guideline in C-024.
 area: MSG
-baseline: "a7d18f9"
+baseline: "4af61f3"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
@@ -34,7 +34,8 @@ requirements:
     notes: >-
       OPC UA fields that MG 8.2 does not list are no user-defined keys
       (SF-050, resolved C-024); validators report a key that is defined
-      neither by the guideline nor by OPC UA as an error of the sender. The
+      neither by the guideline nor by OPC UA as an error of the sender in the
+      strict validation mode; the tolerant mode ignores it (SF-052). The
       receiver side (tolerant reader) is REQ-MSG-046.
 
   - id: REQ-MSG-002
@@ -252,7 +253,7 @@ requirements:
     notes: >-
       Lower case: MG A2 lists all ids in lower case and Part 6 5.1.3 writes
       GUIDs in lower case; receivers compare case-insensitively
-      (to be confirmed in the review). The key is in the MetaData
+      (confirmed by the PO in the C-024 review). The key is in the MetaData
       (DataSetMetaDataType) of a DataSetMetaData (MG A2, SF-049 (g)).
 
   - id: REQ-MSG-011
@@ -1046,20 +1047,27 @@ requirements:
       or does not use and processes the message as if the key were absent;
       an unknown key is no reason to reject the message, to answer with an
       error or to treat the message as erroneous.
-    keyword: MUST
+    keyword: SHOULD
     domain: messaging
-    levels: {L1: MUST, L2: MUST, L3: MUST}
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
     applies_to: [subscriber, requester, responder]
     refs: [MG 8, SF-052]
     quotes:
       - ref: MG 8
-        text: 'A receiver is tolerant in what it accepts: it must ignore all keys of a received message that it does not know or does not use, and process the message as if these keys were absent.'
+        text: 'A receiver should be tolerant in what it accepts: it should ignore all keys of a received message that it does not know or does not use, and process the message as if these keys were absent.'
       - ref: MG 8
-        text: An unknown key is no reason to reject a message or to treat it as erroneous.
+        text: An unknown key should not be a reason to reject a message or to treat it as erroneous.
+      - ref: MG 8
+        text: 'A message can therefore be validated in two modes: strict validation reports every key that is not defined for the object (conformance of the sender), tolerant validation ignores such keys and checks only the defined keys (view of a tolerant receiver).'
     verification: [d7-test]
-    inventory: [MG-8-850d253a, MG-8-4dbec0d6]
+    inventory: [MG-8-0a821168, MG-8-1749b10b, MG-8-5503034d]
     status: draft
     notes: >-
-      PO decision of the C-023 review (SF-052, resolved C-024): strict in
+      PO decisions of the C-023 review (SF-052, resolved C-024) and of the
+      C-024 review (SHOULD instead of MUST, two validation modes): strict in
       what is sent (REQ-MSG-001), tolerant in what is accepted. D7 injects
-      messages with additional keys and expects the normal reaction.
+      messages with additional keys and expects the normal reaction. The
+      validators offer both modes (D7 option, reference checks
+      payload.Strict/payload.Tolerant, vector field mode): strict reports
+      undefined keys as REQ-MSG-001 (REQ-ACT-003 for Action messages),
+      tolerant checks only the defined keys.
