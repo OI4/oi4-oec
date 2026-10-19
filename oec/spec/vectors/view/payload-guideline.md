@@ -3,7 +3,7 @@
 
 Guideline baseline: `a7d18f9` · Kind: payload · 9 vectors · [All vector files](README.md)
 
-Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.11, B1.1.12, B1.2.1): topic and message of the Message Bus. The reference checks cover the envelope of MG 8 (areas MSG and ACT); the DataSet content of the resources is checked from C-025/C-026 on. A vector that differs from its example keeps the verbatim example in original and lists every change in edits.
+Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.11, B1.1.12, B1.2.1): topic and message of the Message Bus. The reference checks cover the envelope of MG 8 (areas MSG and ACT); the DataSet content of the resources is checked from C-026/C-027 on. A vector that differs from its example keeps the verbatim example in original and lists every change in edits.
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
@@ -85,7 +85,7 @@ Payload:
 - Origin: guideline MG B1.1.2
 - Status: draft
 
-Notes: ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health has no Filter; DataSetWriterName is the decoded Source. The DataSet content (MG 8.3.2) is checked with the Health schema in C-025/C-026.
+Notes: ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health has no Filter; DataSetWriterName is the decoded Source. The DataSet content (MG 8.3.2) is checked with the Health schema in C-026/C-027.
 
 Payload:
 
@@ -269,7 +269,7 @@ Payload:
 - Origin: guideline MG B1.1.11
 - Status: draft
 
-Notes: Two MAM DataSetMessages (application and one device, WriterGroupName "" as MAM has no Filter) and the helper DataSet Pagination (DataSetWriterId 2). The MAM content (MG 8.3.1) is checked with the MAM schema in C-025/C-026.
+Notes: Two MAM DataSetMessages (application and one device, WriterGroupName "" as MAM has no Filter) and the helper DataSet Pagination (DataSetWriterId 2). The MAM content (MG 8.3.1) is checked with the MAM schema in C-026/C-027.
 
 Payload:
 

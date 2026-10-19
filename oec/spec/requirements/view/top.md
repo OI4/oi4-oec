@@ -380,7 +380,7 @@ Health is published once when the application is initialized, whenever the value
 > Health must be published once when the application is initialized, when the value of Health changes, and every 60 seconds as a kind of heartbeat.
 > — MG 7.5.1
 
-Notes: Health content and tolerances belong to RES-HEALTH (C-025).
+Notes: Health content and tolerances belong to RES-HEALTH (C-026).
 
 ## REQ-TOP-018
 

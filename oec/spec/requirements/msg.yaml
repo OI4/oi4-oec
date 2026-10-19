@@ -63,7 +63,7 @@ requirements:
     status: draft
     notes: >-
       The MessageType per Method × Resource follows the templates of MG 9.1
-      (payload columns of matrix/method-resource.yaml follow in C-026).
+      (payload columns of matrix/method-resource.yaml follow in C-027).
 
   # --- NetworkMessage (MG 8.2.1, MG 8.1.4) -----------------------------------
   - id: REQ-MSG-003

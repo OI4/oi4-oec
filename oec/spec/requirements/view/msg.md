@@ -105,7 +105,7 @@ The payload of a message with the Method Pub, Get, Set or Del is a NetworkMessag
 > Only ua-metadata is valid here.
 > — MG 8.2.2
 
-Notes: The MessageType per Method × Resource follows the templates of MG 9.1 (payload columns of matrix/method-resource.yaml follow in C-026).
+Notes: The MessageType per Method × Resource follows the templates of MG 9.1 (payload columns of matrix/method-resource.yaml follow in C-027).
 
 ## REQ-MSG-003
 
