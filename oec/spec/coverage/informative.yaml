@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "720d862"
+baseline: "c6453c7"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -183,7 +183,7 @@ items:
   - key: MG-6-0040aac5
     reason: Describes deployment options of the broker ("can" expresses possibility); no requirement on a component. Platform requirements are area PLT (C-029).
   - key: MG-6-2d114aae
-    reason: Lead-in to the grading note of MG 6; the grading is REQ-CMP-001, REQ-CMP-002, REQ-CMP-003 and REQ-CMP-009.
+    reason: Lead-in to the grading note of MG 6; the grading is REQ-CMP-001, REQ-CMP-002, REQ-CMP-003, REQ-CMP-009 and REQ-CMP-046.
   - key: MG-6.1-4e50a9ff
     reason: Historical rationale for the choice of MQTT v3.1.1; the version rule is REQ-MQTT-001 and REQ-MQTT-002.
   - key: MG-6.1-e0ba3cf6
@@ -207,6 +207,8 @@ items:
   - key: MG-6.3.2-ec329c7e
     reason: Hint to request missed messages with Get ("can" expresses possibility); the Get method is area ACT (REQ-ACT-*) and the resources RES-* (C-027, C-028).
   # --- LIFE (C-025) ---------------------------------------------------------
+  - key: MG-6.3.3-61f18ab8
+    reason: Permission ("may") that restates the general rule of MG 8.2.3 for the Birth message (C-026, SF-061 (a)); Timestamp and SequenceNumber are optional keys of every DataSetMessage (area MSG), no additional requirement. REQ-LIFE-004 was withdrawn.
   - key: MG-6.3.4-ae44c183
     reason: States that MQTT defines no close message; motivation for the Close message (REQ-LIFE-005 … REQ-LIFE-007).
   - key: MG-6.3.4-6cead004

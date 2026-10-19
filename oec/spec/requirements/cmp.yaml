@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "720d862"
+baseline: "c6453c7"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -162,19 +162,23 @@ requirements:
     statement: >-
       A component implements the complete MQTT client behavior of MG 6:
       client identifier, keep alive, clean session, quality of service,
-      retained messages, close message and the general behavior on changes.
+      retained messages and the general behavior on changes.
     keyword: MUST
     domain: messaging
     levels: {L1: SHOULD, L2: SHOULD, L3: MUST}
     applies_to: [component]
-    scope: [MG 6.2.3, MG 6.2.4, MG 6.2.5, MG 6.3.1, MG 6.3.2, MG 6.3.4, MG 6.4]
+    scope: [MG 6.2.3, MG 6.2.4, MG 6.2.5, MG 6.3.1, MG 6.3.2, MG 6.4]
     refs: [MG 1.3]
     quotes:
       - ref: MG 1.3
-        text: Complete MQTT client behavior (6.2.3 Client Identifier, 6.2.4 Keep Alive, 6.2.5 Clean Session, 6.3.1 Quality of Service Level, 6.3.2 Retained Messages, 6.3.4 Close Message, 6.4 General Behavior of MQTT on Changes) Recommended Recommended Mandatory
+        text: Complete MQTT client behavior (6.2.3 Client Identifier, 6.2.4 Keep Alive, 6.2.5 Clean Session, 6.3.1 Quality of Service Level, 6.3.2 Retained Messages, 6.4 General Behavior of MQTT on Changes) Recommended Recommended Mandatory
     verification: [d7-test, d7-monitor]
-    inventory: [MG-1.3-40996d3e, MG-1.3-0745092e]
+    inventory: [MG-1.3-7f72acf8, MG-1.3-0745092e]
     status: reviewed
+    notes: >-
+      PO review of C-026 (SF-061 (b)): the close message (MG 6.3.4) moved to
+      its own row of MG 1.3, see REQ-CMP-046; the remaining rows of this
+      requirement are unchanged.
 
   - id: REQ-CMP-010
     title: Complete Message Bus behavior
@@ -862,3 +866,27 @@ requirements:
     inventory: [MG-1.3-bf3a41de, MG-1.3-b6aedd9a, MG-1.3-c42cc91d]
     status: reviewed
     notes: GL-ADR-017 (PO request, C-017) replaced the former MG 7.2.1/7.2.2 split into applications and devices. PO review (C-017) – confirmed; a represented entity never acts itself, the representing service always answers on its behalf.
+
+  # --- Added in C-026 (SF-061) ------------------------------------------------
+  - id: REQ-CMP-046
+    title: Close message
+    statement: >-
+      A component publishes its close message as defined in MG 6.3.4: it is
+      recommended at Level 1 and mandatory from Level 2 on.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
+    applies_to: [component]
+    scope: [MG 6.3.4]
+    refs: [MG 1.3, MG 6, SF-061]
+    quotes:
+      - ref: MG 1.3
+        text: Close message (6.3.4 Close Message) Recommended Mandatory Mandatory
+      - ref: MG 6
+        text: The close message is recommended for Level 1 and mandatory from Level 2 on.
+    verification: [d7-test]
+    inventory: [MG-1.3-eca45af7, MG-6-eafd1d73]
+    status: draft
+    notes: >-
+      PO review of C-026 (SF-061 (b)): the Close message is mandatory from
+      Level 2 on (before: part of REQ-CMP-009, mandatory only at Level 3).

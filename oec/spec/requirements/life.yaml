@@ -2,15 +2,15 @@
 # (MG 6.3.3, 6.3.4, 6.3.5; ADR-0018, schema: catalog.schema.json).
 # Grading (MG 6 note, MG 1.3): Birth and Will message (MG 6.3.3, 6.3.5) are
 # mandatory at all levels (REQ-CMP-003); the Close message (MG 6.3.4) is
-# recommended at Levels 1 and 2 and mandatory at Level 3 (REQ-CMP-009): a MUST
-# of MG 6.3.4 is SHOULD at Levels 1 and 2, a SHOULD stays SHOULD. The payloads
+# recommended at Level 1 and mandatory from Level 2 on (REQ-CMP-046, SF-061):
+# a MUST of MG 6.3.4 is SHOULD at Level 1, a SHOULD stays SHOULD. The payloads
 # are a Pub MAM (Birth) and a Pub Health (Close, Will) of the application about
 # itself; their envelopes follow area MSG, their DataSet content areas
 # RES-MAM/RES-HEALTH (C-027). Golden payload vectors: V-PAY-023 … 025.
 # Drafted in C-025; keywords, envelope and semantics added to the guideline in
-# C-026 (SF-057, SF-058, SF-059).
+# C-026 (SF-057, SF-058, SF-059); PO review of C-026: SF-061.
 area: LIFE
-baseline: "720d862"
+baseline: "c6453c7"
 requirements:
   # --- Birth message (MG 6.3.3) ---------------------------------------------
   - id: REQ-LIFE-001
@@ -30,7 +30,7 @@ requirements:
         text: The protocol version, the broker address and ports, the security settings as well as the birth message and the will message are mandatory for all levels.
     verification: [d7-monitor, d7-test]
     inventory: [MG-6.3.3-7027f33a, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-003. The Birth message should be the first message
       after the connection is established (REQ-LIFE-015). D7 checks it by
@@ -75,7 +75,7 @@ requirements:
         text: It must refer to the topic resource MAM (7.5.1 Resources) and share its payload.
     verification: [d7-monitor, schema]
     inventory: [MG-6.3.3-3ac518a8, MG-6.3.3-bee211aa, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Keywords added in C-026 (SF-057 (f)). The envelope rules
       of a Pub message apply (area MSG); the Birth message is a regular Pub
@@ -91,17 +91,17 @@ requirements:
     domain: messaging
     levels: {L1: SHOULD NOT, L2: SHOULD NOT, L3: SHOULD NOT}
     applies_to: [component]
-    refs: [MG 6.3.3, MG 8.2.3, SF-058]
-    quotes:
-      - ref: MG 6.3.3
-        text: The Birth message, which follows the format of a MAM message, should not contain the optional keys for Timestamp and SequenceNumber, because the content of this keys can not be pre-set.
+    refs: [MG 6.3.3, MG 8.2.3, SF-058, SF-061]
     verification: [d7-monitor]
-    inventory: [MG-6.3.3-46e9d8ac]
-    status: draft
+    status: deprecated
     notes: >-
-      B1.1.1 aligned to "should not" in C-026 (SF-058 (b)). Both are regular
-      optional keys of the DataSetMessage (MG 8.2.3), so a receiver accepts
-      them.
+      Withdrawn by the PO (review of C-026, SF-061 (a)): "the content of this
+      keys can not be pre-set" holds for the Will message registered at the
+      broker, not for the Birth message the application publishes itself.
+      The Birth message is a regular MAM message; Timestamp and
+      SequenceNumber may be used like in any other MAM message (MG 6.3.3
+      note, MG-6.3.3-61f18ab8 in coverage/informative.yaml). The id is not
+      reused.
 
   # --- Close message (MG 6.3.4) ---------------------------------------------
   - id: REQ-LIFE-005
@@ -109,19 +109,22 @@ requirements:
     statement: >-
       A component publishes a Close message before it closes its connection
       to the broker gracefully.
-    keyword: SHOULD
+    keyword: MUST
     domain: messaging
-    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
     applies_to: [component]
-    refs: [MG 6, MG 6.3.4]
+    refs: [MG 6, MG 6.3.4, SF-061]
     quotes:
       - ref: MG 6.3.4
-        text: An application-driven message should be published in OI4 Alliance context before the connection is closed gracefully.
+        text: An application-driven message must be published in OI4 Alliance context before the connection is closed gracefully.
+      - ref: MG 6
+        text: The close message is recommended for Level 1 and mandatory from Level 2 on.
     verification: [d7-test]
-    inventory: [MG-6.3.4-4e696b67, MG-6-4c5014ad]
-    status: draft
+    inventory: [MG-6.3.4-1e141d2f, MG-6-eafd1d73]
+    status: reviewed
     notes: >-
-      Graded by REQ-CMP-009. A graceful disconnect discards the Will message
+      PO review of C-026 (SF-061 (b)): must from Level 2 on (was should at
+      all levels). Graded by REQ-CMP-046. A graceful disconnect discards the Will message
       at the broker; without a Close message other participants are not
       informed. D7 needs the application under test to be stopped gracefully.
 
@@ -133,7 +136,7 @@ requirements:
       AppId of the component itself.
     keyword: MUST
     domain: messaging
-    levels: {L1: SHOULD, L2: SHOULD, L3: MUST}
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
     applies_to: [component]
     condition: The component publishes a Close message (REQ-LIFE-005).
     refs: [MG 6, MG 6.3.4, MG 7.6]
@@ -141,9 +144,9 @@ requirements:
       - ref: MG 6.3.4
         text: It must be published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Health/<AppId>, i.e. the Source is the AppId of the application itself (7.6 Source Element).
     verification: [d7-test]
-    inventory: [MG-6.3.4-5ab84130, MG-6-4c5014ad]
+    inventory: [MG-6.3.4-5ab84130, MG-6-eafd1d73]
     status: draft
-    notes: Graded by REQ-CMP-009.
+    notes: Graded by REQ-CMP-046 (SF-061 (b), C-026).
 
   - id: REQ-LIFE-007
     title: Close message content
@@ -154,7 +157,7 @@ requirements:
       about itself.
     keyword: MUST
     domain: messaging
-    levels: {L1: SHOULD, L2: SHOULD, L3: MUST}
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
     applies_to: [component]
     condition: The component publishes a Close message (REQ-LIFE-005).
     refs: [MG 6, MG 6.3.4, MG 8.3.2, SF-057, SF-058]
@@ -164,11 +167,11 @@ requirements:
       - ref: MG 6.3.4
         text: It must refer to the topic resource Health (7.5.1 Resources) and share its payload.
     verification: [d7-test, schema]
-    inventory: [MG-6.3.4-58771e2c, MG-6.3.4-3ff69c8d, MG-6-4c5014ad]
-    status: draft
+    inventory: [MG-6.3.4-58771e2c, MG-6.3.4-3ff69c8d, MG-6-eafd1d73]
+    status: reviewed
     notes: >-
       Keywords added in C-026 (SF-057 (g)); the payload values are given by
-      the code block of MG 6.3.4. Graded by REQ-CMP-009. The MessageId carries
+      the code block of MG 6.3.4. Graded by REQ-CMP-046 (SF-061 (b), C-026). The MessageId carries
       the time of the publication; Timestamp and SequenceNumber may be used
       like in any Health message (SF-058, B1.1.2). Example: V-PAY-024.
 
@@ -216,7 +219,7 @@ requirements:
         text: It must refer to topic resource Health (7.5.1 Resources) and share its payload.
     verification: [d7-test, schema]
     inventory: [MG-6.3.5-572831c0, MG-6.3.5-38d4d8c4, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Keywords added in C-026 (SF-057 (h)). The MessageId of the Will message
       is REQ-LIFE-016. Example: V-PAY-025.
@@ -236,7 +239,7 @@ requirements:
         text: The Last Will and Testament message, which has the format of a Health message, should not contain the optional keys for Timestamp and SequenceNumber, because the content of this keys can not be pre-set.
     verification: [d7-test]
     inventory: [MG-6.3.5-1dce21f4]
-    status: draft
+    status: reviewed
     notes: B1.1.2 aligned to "should not" in C-026 (SF-058 (b)).
 
   # --- Interpretation by subscribers (MG 6.3.4, 6.3.5) ----------------------
@@ -247,20 +250,21 @@ requirements:
       Registry) interprets a Health message of an application about itself
       with Health NORMAL_0 and HealthScore 0 as Close message: the
       application went offline gracefully.
-    keyword: MUST
+    keyword: SHOULD
     domain: messaging
-    levels: {L1: SHOULD, L2: SHOULD, L3: MUST}
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
     applies_to: [subscriber, registry]
     condition: The subscriber tracks the online state of other applications.
-    refs: [MG 6, MG 6.3.4, SF-059]
+    refs: [MG 6, MG 6.3.4, SF-059, SF-061]
     quotes:
       - ref: MG 6.3.4
-        text: 'Subscribers that keep track of the online state of applications, such as the Registry, shall interpret a Health message of an application about itself with Health NORMAL_0 and HealthScore 0 as Close message: the application went offline gracefully.'
+        text: 'Subscribers that keep track of the online state of applications, such as the Registry, should interpret a Health message of an application about itself with Health NORMAL_0 and HealthScore 0 as Close message: the application went offline gracefully.'
     verification: [manual, d7-test]
-    inventory: [MG-6.3.4-78fe79ac, MG-6-4c5014ad]
-    status: draft
+    inventory: [MG-6.3.4-4de9c16e, MG-6-eafd1d73]
+    status: reviewed
     notes: >-
-      Subscriber scope added in C-026 (SF-059 (b)). Graded by REQ-CMP-009. A
+      Subscriber scope added in C-026 (SF-059 (b)); should at all levels
+      (PO review of C-026, SF-061 (c): application logic). A
       message "about itself" is one with Source equal to the AppId of the
       publisher.
 
@@ -273,24 +277,24 @@ requirements:
       the application is offline and not available anymore. This also holds
       if the application is still connected and published the message itself
       (e.g. a completely broken device).
-    keyword: MUST
+    keyword: SHOULD
     domain: messaging
-    levels: {L1: MUST, L2: MUST, L3: MUST}
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
     applies_to: [subscriber, registry]
     condition: The subscriber tracks the online state of other applications.
-    refs: [MG 6, MG 6.3.5, SF-059]
+    refs: [MG 6, MG 6.3.5, SF-059, SF-061]
     quotes:
       - ref: MG 6.3.5
-        text: 'Subscribers that keep track of the online state of applications, such as the Registry, shall interpret a Health message of an application about itself with Health FAILURE_1 and HealthScore 0 as an ungraceful disconnect: the application is offline and not available anymore.'
+        text: 'Subscribers that keep track of the online state of applications, such as the Registry, should interpret a Health message of an application about itself with Health FAILURE_1 and HealthScore 0 as an ungraceful disconnect: the application is offline and not available anymore.'
       - ref: MG 6.3.5
         text: An application that is still connected may also publish a Health message about itself with Health FAILURE_1 and HealthScore 0, e.g. a device that is completely broken; subscribers then consider it not available as well.
     verification: [manual, d7-test]
-    inventory: [MG-6.3.5-e42a4baf, MG-6.3.5-22c19cbf, MG-6-31ee6521]
-    status: draft
+    inventory: [MG-6.3.5-820ce30c, MG-6.3.5-22c19cbf, MG-6-31ee6521]
+    status: reviewed
     notes: >-
       Subscriber scope and the still connected case added in C-026
-      (SF-059 (a), (b)). Graded by REQ-CMP-003 (Will message mandatory at all
-      levels).
+      (SF-059 (a), (b)); should at all levels (PO review of C-026,
+      SF-061 (c): application logic).
 
   - id: REQ-LIFE-013
     title: Online again after the next Birth message
@@ -310,7 +314,7 @@ requirements:
         text: These subscribers must consider the application online again only after its next Birth message (6.3.3 Birth Message).
     verification: [manual, d7-test]
     inventory: [MG-6.3.5-63c2640b, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: Keyword added in C-026 (SF-057 (i)).
 
   - id: REQ-LIFE-014
@@ -321,17 +325,17 @@ requirements:
       (REQ-LIFE-007).
     keyword: MUST NOT
     domain: messaging
-    levels: {L1: SHOULD NOT, L2: SHOULD NOT, L3: MUST NOT}
+    levels: {L1: SHOULD NOT, L2: MUST NOT, L3: MUST NOT}
     applies_to: [component]
     refs: [MG 6, MG 6.3.4, MG 8.3.2, SF-059]
     quotes:
       - ref: MG 6.3.4
         text: An application must not publish a Health message about itself with Health NORMAL_0 and HealthScore 0 other than as its Close message.
     verification: [d7-monitor]
-    inventory: [MG-6.3.4-9e2665bf, MG-6-4c5014ad]
-    status: draft
+    inventory: [MG-6.3.4-9e2665bf, MG-6-eafd1d73]
+    status: reviewed
     notes: >-
-      Added in C-026 (SF-059 (a)); graded by REQ-CMP-009 (MG 6.3.4). A Health
+      Added in C-026 (SF-059 (a)); graded by REQ-CMP-046 (MG 6.3.4, SF-061 (b)). A Health
       about an asset (Source other than the AppId) is not affected. FAILURE_1
       with HealthScore 0 is not reserved (REQ-LIFE-012, REQ-LIFE-017).
 
@@ -351,7 +355,7 @@ requirements:
         text: The Birth message should be the first message the application publishes after the connection is established.
     verification: [d7-test]
     inventory: [MG-6.3.3-f402b3b9, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: Added in C-026 (SF-059 (c)). D7 checks it after a forced reconnect.
 
   - id: REQ-LIFE-016
@@ -370,7 +374,7 @@ requirements:
         text: 'The Will message is created anew for every connection: like in any other message, its MessageId must carry the timestamp of its creation (8.2.1 NetworkMessage).'
     verification: [d7-test]
     inventory: [MG-6.3.5-8738574b, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Added in C-026 (SF-058 (a), variant "current timestamp"). A client
       library that re-sends a registered Will unchanged on automatic
@@ -393,7 +397,7 @@ requirements:
         text: When such an application is available again, it must publish its Birth message again (6.3.3 Birth Message).
     verification: [d7-test, manual]
     inventory: [MG-6.3.5-b8b20f8f, MG-6.3.5-22c19cbf, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Added in C-026 (SF-059 (a)): FAILURE_1/0 is not reserved for the Will
       message; publishing it while connected is allowed (MAY, e.g. a

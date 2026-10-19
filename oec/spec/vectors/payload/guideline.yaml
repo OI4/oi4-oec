@@ -1,7 +1,7 @@
 # Golden payload vectors (C-023/C-024/C-025, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 draft (C-025, verbatim since C-026).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "720d862"
+baseline: "c6453c7"
 description: >-
   Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5,
   B1.1.11, B1.1.12, B1.2.1): topic and message of the Message Bus, including
@@ -1731,11 +1731,11 @@ vectors:
   - id: V-PAY-023
     title: "B1.1.1: Birth message of an application"
     expected: valid
-    reqs: [REQ-LIFE-001, REQ-LIFE-002, REQ-LIFE-003, REQ-LIFE-004, REQ-LIFE-015, REQ-MSG-006, REQ-MSG-007, REQ-MSG-008, REQ-MSG-011, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024]
+    reqs: [REQ-LIFE-001, REQ-LIFE-002, REQ-LIFE-003, REQ-LIFE-015, REQ-MSG-006, REQ-MSG-007, REQ-MSG-008, REQ-MSG-011, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024]
     origin: {kind: guideline, ref: MG B1.1.1}
     status: draft
     notes: >-
-      The Birth message is the Pub MAM of the application about itself (MG 6.3.3): the Source of the topic is the AppId of the publisher, the DataSetWriterId 55 is the one of its regular Pub MAM (B1.1.1), ReplyTo is empty and Timestamp/SequenceNumber are omitted. Published as the first message after the connect at 2021-12-16T22:25:00.000Z; the MessageId carries the time of the publication (MG 8.2.1, SF-058).
+      The Birth message is the Pub MAM of the application about itself (MG 6.3.3): the Source of the topic is the AppId of the publisher, the DataSetWriterId 55 is the one of its regular Pub MAM (B1.1.1), ReplyTo is empty and the optional Timestamp/SequenceNumber are omitted like in B1.1.1 (allowed since C-026, SF-061 (a)). Published as the first message after the connect at 2021-12-16T22:25:00.000Z; the MessageId carries the time of the publication (MG 8.2.1, SF-058).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {

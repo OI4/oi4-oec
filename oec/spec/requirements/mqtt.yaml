@@ -9,7 +9,7 @@
 # keywords and connection details added to the guideline in C-026 (SF-057,
 # SF-060).
 area: MQTT
-baseline: "720d862"
+baseline: "c6453c7"
 requirements:
   # --- Protocol version (MG 6.1) --------------------------------------------
   - id: REQ-MQTT-001
@@ -38,7 +38,7 @@ requirements:
         text: A client may connect with a later MQTT version supported by the broker, but it must not depend on features of later versions (e.g. MQTT v5.0 user properties, response topic, correlation data, message expiry) for the mechanisms of this guideline and must not put information that other participants need into such features.
     verification: [manual, d7-test]
     inventory: [MG-6.1-460b8388, MG-6.1-5152cb4d, MG-6.1-6ba93300, MG-6.1-76c661f1, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-001 (mandatory at all levels). Use of later versions:
       SF-060 (a), C-026. D7 sees the protocol version of the application under
@@ -58,7 +58,7 @@ requirements:
         text: The broker must support MQTT v3.1.1.
     verification: [d8]
     inventory: [MG-6.1-f1242c63, MG-6.1-460b8388, MG-6.1-6ba93300]
-    status: draft
+    status: reviewed
     notes: SF-060 (a), C-026. The platform requirements of the RIG are area PLT.
 
   # --- Broker address and ports (MG 6.2.1) ----------------------------------
@@ -77,7 +77,7 @@ requirements:
         text: The IP address or host name of the MQTT broker is system-dependent and must be made available to any container by using the Message Bus storage (OEC Runtime & Infrastructure Guideline, 4.1.1 Message Bus Storage).
     verification: [d8]
     inventory: [MG-6.2.1-7407c437]
-    status: draft
+    status: reviewed
     notes: >-
       The content of broker.json and the use of the Message Bus storage by a
       containerized application are area CNT (RIG 4.1.1, C-029). A component
@@ -104,7 +104,7 @@ requirements:
         text: The protocol version, the broker address and ports, the security settings as well as the birth message and the will message are mandatory for all levels.
     verification: [manual]
     inventory: [MG-6.2.1-b440c05c, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: Keyword added in C-026 (SF-057 (a)); graded by REQ-CMP-001.
 
   # --- Security settings (MG 6.2.2) -----------------------------------------
@@ -126,7 +126,7 @@ requirements:
         text: Non-secure connections (e.g. through port 1883) must not be used by clients and must not be supported by the broker.
     verification: [d7-test, manual]
     inventory: [MG-6.2.2-5c7608e4, MG-6.2.1-be806906, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-002. Keyword of the port 1883 sentence added in C-026
       (SF-057 (a)). In a D7 test environment the broker accepts TLS only
@@ -149,7 +149,7 @@ requirements:
         text: Non-secure connections (e.g. through port 1883) must not be used by clients and must not be supported by the broker.
     verification: [d8]
     inventory: [MG-6.2.2-5c7608e4, MG-6.2.1-be806906]
-    status: draft
+    status: reviewed
 
   - id: REQ-MQTT-007
     title: Broker certificate signed by a CA
@@ -167,7 +167,7 @@ requirements:
         text: The broker should use a certificate which is signed by a well-known or user specific certificate authority (CA).
     verification: [d8, manual]
     inventory: [MG-6.2.2-e60fcb10]
-    status: draft
+    status: reviewed
     notes: '"preferably shall" replaced by "should" in C-026 (SF-057 (d)).'
 
   - id: REQ-MQTT-008
@@ -192,7 +192,7 @@ requirements:
         text: The client must not use a connection to a broker whose certificate cannot be verified; a mode without this verification must not be the default.
     verification: [manual, d7-test]
     inventory: [MG-6.2.2-1c096322, MG-6.2.2-e044b5e3, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Added to the guideline in C-026 (SF-060 (b)). Graded by REQ-CMP-002
       (security settings). D7 can check it only with a test broker that
@@ -213,7 +213,7 @@ requirements:
         text: The client must authenticate itself to the Message Bus either by username and password or with a client certificate (mTLS).
     verification: [d7-test, manual]
     inventory: [MG-6.2.2-418ccec1, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-002. The secrets and the client certificate are
       provided via the secret storage and the OI4 certificate storage
@@ -236,7 +236,7 @@ requirements:
         text: In case a private key for an existing client certificate and username/password is available, the client certificate based authentication must be used.
     verification: [manual]
     inventory: [MG-6.2.2-c84650d9, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: Keyword added in C-026 (SF-057 (c)); graded by REQ-CMP-002.
 
   - id: REQ-MQTT-011
@@ -256,7 +256,7 @@ requirements:
         text: In addition it is also allowed to use the @ symbol.
     verification: [d8, manual]
     inventory: [MG-6.2.2-fc14e862]
-    status: draft
+    status: reviewed
     notes: Addressed to the platform that assigns the credentials (SF-060 (d), C-026).
 
   - id: REQ-MQTT-012
@@ -281,7 +281,7 @@ requirements:
         text: Edge indicated communication - no open ports, beside MQTT (6.2.1 Broker Address and Ports)
     verification: [manual]
     inventory: [MG-6.2.1-da4b7997, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Keyword and scope added in C-026 (SF-057 (b)). Additional user
       interfaces or web services of an application (RIG 5.2) are not part of
@@ -308,7 +308,7 @@ requirements:
         text: A client without container (e.g. a device with its own MQTT client) should use a ClientId that is unique on the broker and stable across reconnects, e.g. derived from its Identification Link within the length and character limits of the broker.
     verification: [manual, d8]
     inventory: [MG-6.2.3-845bb406, MG-6.2.3-e61860a9, MG-6-4c5014ad]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-009. Component without container: SF-060 (c), C-026.
       MQTT v3.1.1 itself requires unique ClientIds per broker.
@@ -329,7 +329,7 @@ requirements:
         text: The keep alive interval, counted in seconds, is configurable and should be set up to a default value of 60 seconds.
     verification: [manual]
     inventory: [MG-6.2.4-122db787, MG-6-4c5014ad]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-009. The broker publishes the Will message
       (REQ-LIFE-008) when the keep alive of a client expires (MQTT v3.1.1).
@@ -350,7 +350,7 @@ requirements:
         text: In the context of the Open Industry 4.0 Alliance, it is highly recommended to set the Clean Session flag to TRUE by default.
     verification: [manual]
     inventory: [MG-6.2.5-f17dc4e0, MG-6-4c5014ad]
-    status: draft
+    status: reviewed
     notes: Graded by REQ-CMP-009.
 
   - id: REQ-MQTT-016
@@ -369,7 +369,7 @@ requirements:
         text: To use this feature, a client identifier (6.2.3 Client Identifier) must be set.
     verification: [manual]
     inventory: [MG-6.2.5-07ffa981, MG-6-4c5014ad]
-    status: draft
+    status: reviewed
     notes: Graded by REQ-CMP-009; MQTT v3.1.1 itself rejects an empty ClientId with Clean Session false.
 
   # --- Quality of service (MG 6.3.1) ----------------------------------------
@@ -391,7 +391,7 @@ requirements:
         text: Therefore, different QoS levels can be used.
     verification: [d7-monitor]
     inventory: [MG-6.3.1-f257276c, MG-6.3.1-be1bf49a, MG-6-4c5014ad]
-    status: draft
+    status: reviewed
     notes: >-
       Keyword added in C-026 (SF-057 (e)). Graded by REQ-CMP-009. A
       subscriber with QoS 2 sees the QoS of the publisher.
@@ -412,7 +412,7 @@ requirements:
         text: In context of the OI4 Alliance, the Retained message functionality is switched off by default and shall not be used.
     verification: [d7-test]
     inventory: [MG-6.3.2-e02730a2, MG-6-4c5014ad]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-009. Missed messages are requested with Get. D7
       detects retained messages by subscribing after the application under
@@ -441,7 +441,7 @@ requirements:
         text: Therefore, different publication rules are applicable, which can be configured through PublicationList (7.5.1 Resources).
     verification: [d7-monitor, d7-test]
     inventory: [MG-6.4-31603ce3, MG-6.4-06b856de, MG-6.4-15d4253f, MG-6-4c5014ad]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-009. Health must be published on every change at all
       levels (REQ-TOP-017). The publication rules of the PublicationList are
