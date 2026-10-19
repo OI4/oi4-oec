@@ -1,0 +1,161 @@
+# Requirements of area RES-HEALTH – resource Health
+# (MG 8.3.2, 9.1.2; ADR-0018, schema: catalog.schema.json).
+# Health is mandatory at all levels (REQ-CMP-007), Get from Level 2 on
+# (REQ-CMP-017); publication at start, on change and every 60 s is
+# REQ-TOP-017, the Close/Will content is area LIFE. Checked by
+# tools/internal/payload (C-027).
+area: RES-HEALTH
+baseline: "c6453c7"
+requirements:
+  # --- DataSet content (MG 8.3.2) ---------------------------------------------
+  - id: REQ-RES-HEALTH-001
+    title: Fields of the Health DataSet
+    statement: >-
+      The Payload of a Health DataSetMessage contains the mandatory field
+      Health (DeviceHealthEnumeration as "<name>_<value>": NORMAL_0,
+      FAILURE_1, CHECK_FUNCTION_2, OFF_SPEC_3, MAINTENANCE_REQUIRED_4) and
+      optionally HealthScore (Byte, 0 … 100) and Details (array of
+      DetailObject); a DetailObject contains the mandatory Health (same
+      enumeration) and optionally DiagnosticCode, Location and Description
+      (String each); no other field.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    refs: [MG 8.3.2]
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.2-4017a916, MG-8.3.2-8f5d5ddc, MG-8.3.2-c6d90f6d, MG-8.3.2-619204cc, MG-8.3.2-8e123ade, MG-8.3.2-729cc64d, MG-8.3.2-ed805854, MG-8.3.2-d2f6bc0e, MG-8.3.2-1f9968e2, MG-8.3.2-3ccbe376, MG-8.3.2-24c98eb7]
+    status: draft
+    notes: >-
+      Field presence and types per REQ-CMP-025/026; the rows of Table 3 define
+      the enumeration values. HealthScore is independent of Health (MG 8.3.2,
+      e.g. 30 % with NORMAL_0).
+
+  - id: REQ-RES-HEALTH-002
+    title: Health is the most severe status of the Details
+    statement: >-
+      If Details is present, Health equals the most severe Health of all
+      DetailObjects, using the severity of Table 3 (FAILURE_1 high, OFF_SPEC_3
+      medium, CHECK_FUNCTION_2 and MAINTENANCE_REQUIRED_4 low; proposal SF-065
+      (a): FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 >
+      NORMAL_0); statuses of lower severity stay listed in Details.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The Health DataSet contains Details.
+    refs: [MG 8.3.2, SF-035, SF-065]
+    quotes:
+      - ref: MG 8.3.2
+        text: The Health of the asset reflects the most severe status of all Details, according to the severity defined in Table 3.
+      - ref: MG 8.3.2
+        text: Statuses with lower severity remain visible in Details, even if they are superimposed by a more severe status.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.2-2d1ee307, MG-8.3.2-2a0f2648]
+    status: draft
+    notes: >-
+      Keyword-less statement of MG 8.3.2 (G-1.6, SF-065 (b)). The order of the
+      two low-severity states is not defined by Table 3 (SF-065 (a)); the
+      checks accept either of them as the most severe one.
+
+  - id: REQ-RES-HEALTH-003
+    title: NE107 symbols and colors for the Health states
+    statement: >-
+      An application that displays Health states uses the symbol and color
+      definitions of NAMUR NE107 (Table 3: green, red, orange, yellow, blue).
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application]
+    condition: The application displays Health states.
+    refs: [MG 8.3.2]
+    quotes:
+      - ref: MG 8.3.2
+        text: The best practice is to combine the five states NORMAL_0, FAILURE_1, CHECK_FUNCTION_2, OFF_SPEC_3 and MAINTENANCE_REQUIRED_4 with the symbol/color definitions made by NAMUR NE107 (Table 3).
+    verification: [manual]
+    inventory: [MG-8.3.2-2a55d93d]
+    status: draft
+
+  - id: REQ-RES-HEALTH-004
+    title: A change of Details triggers a Health publication
+    statement: >-
+      A change of any DetailObject of an asset triggers a publication of the
+      Health of that asset.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    refs: [MG 8.3.2]
+    quotes:
+      - ref: MG 8.3.2
+        text: A change of any DetailObject must trigger publication of the resource Health.
+    verification: [d7-monitor]
+    inventory: [MG-8.3.2-b2b93a1e]
+    status: draft
+    notes: Publication on a change of Health and the 60 s heartbeat are REQ-TOP-017.
+
+  # --- Message Bus (MG 9.1.2) ------------------------------------------------
+  - id: REQ-RES-HEALTH-005
+    title: Get Health carries no Health object
+    statement: >-
+      A Get Health NetworkMessage contains no Health DataSetMessage; its
+      Messages are empty or contain only the helper DataSets
+      PaginationRequest and Locale.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    scope: [MG 8.3.11, MG 8.3.12]
+    refs: [MG 9.1.2, SF-062]
+    quotes:
+      - ref: MG 9.1.2
+        text: In combination with the method Get, the payload requires an empty NetworkMessage.
+      - ref: MG 9.1.2
+        text: A Health object is not included.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.2-8054d119]
+    status: draft
+
+  - id: REQ-RES-HEALTH-006
+    title: Get Health is answered with all addressed Health objects
+    statement: >-
+      A Get Health without Source is answered with all available Health
+      information of the application (itself and all subordinate assets), each
+      in its own DataSetMessage of a single NetworkMessage published to
+      Pub/Health; a Get Health with Source is answered with the Health of that
+      asset on Pub/Health/<Source>.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The entity supports Get for Health (REQ-CMP-017).
+    refs: [MG 9.1.2, SF-062]
+    quotes:
+      - ref: MG 9.1.2
+        text: Via the <Method>/<Resource>[/<Source>] combination Get/Health[/<Source>], the publication of this information to the Pub/Health[/<Source>] topic can be triggered.
+      - ref: MG 9.1.2
+        text: A topic such as Oi4v2/<ServiceType>/<AppId>/Get/Health must trigger a publication of all available Health information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Health.
+    verification: [d7-test]
+    inventory: [MG-9.1.2-83c997a9, MG-9.1.2-6895efd3]
+    status: draft
+    notes: Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015.
+
+  - id: REQ-RES-HEALTH-007
+    title: Pub Health carries Health objects and optionally Pagination
+    statement: >-
+      A Pub Health NetworkMessage contains Health DataSetMessages and
+      optionally the helper DataSet Pagination; it contains no
+      PaginationRequest and no DataSetMessage of another resource.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 9.1.2, SF-062]
+    quotes:
+      - ref: MG 9.1.2
+        text: In combination with the method Pub, the payload contains DataSetMessages of type Health and optional Pagination (8.3.11 Pagination).
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.2-8e8c331e]
+    status: draft
+    notes: A Locale DataSet may be added to every method (MG 8.3.12, REQ-LOC-002, SF-062 (c)).
