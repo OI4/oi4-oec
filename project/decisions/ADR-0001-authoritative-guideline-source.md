@@ -125,13 +125,14 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `fd9da6e` – findings register: SF-044 resolved.
 - GL-ADR-018 is part of the baseline (G-1.1). All spec findings SF-001 … 044 are resolved; no finding is open.
 
-## Amendment C-024 (2026-10-19, guideline baseline `4af61f3`)
+## Amendment C-024 (2026-10-19, guideline baseline `2f00e9f`)
 
-- The baseline is now `4af61f3` on branch `feature/spec-findings` (first `a7d18f9`, then the second PO review below). Implemented by the agent on PO request (PO review of C-023: SF-045 (b') and SF-046 … 051 accepted, tolerant reader, A2 reserved ids; local commits):
+- The baseline is now `2f00e9f` on branch `feature/spec-findings` (first `a7d18f9`, then `4af61f3` after the second and `2f00e9f` after the third PO review below). Implemented by the agent on PO request (PO review of C-023: SF-045 (b') and SF-046 … 051 accepted, tolerant reader, A2 reserved ids; local commits):
   - `7943098` – Docusaurus config: `markdown.hooks.onBrokenMarkdownLinks` instead of the deprecated `siteConfig.onBrokenMarkdownLinks` (no guideline text change).
   - `590d2be` SF-045, `8e3939f` SF-046, `6950e74` SF-047, `dd43a7a` SF-048, `4a20b99` SF-049, `4d250a2` SF-050, `65e20e6` SF-051 – MG 8, 8.1.2, 8.2.x, 9.2, A2, B1.1.x, B2.x.
   - `6f39017` – SF-052 (new, PO decision): MG 8 – a sender must not extend the objects by user defined keys, a receiver must ignore keys it does not know or use (tolerant reader).
   - `8eddc0d` – SF-053 (new, PO request): MG A2 lists the former use of the reserved `DataSetClassIds`.
   - `a7d18f9` – findings register: SF-045 … SF-053 resolved.
   - Second PO review (2026-10-19): `4b97a92` – SF-052 amendment (MG 8: a receiver *should* ignore unknown keys; note on strict and tolerant validation); `7fccd53` – SF-054 (MG B2 metadata examples rebuilt with recurring values, MG 8.3.2 note); `4af61f3` – findings register sorted ascending, SF-054 resolved, SF-055 open.
-- No new GL-ADR (PO decision in the second review: SF-045 and SF-052 are not recorded as GL-ADRs). SF-001 … 054 are resolved; SF-055 (OI4-defined DataTypes without `NodeId`) is open and not blocking; next free id SF-056.
+  - Third PO review (2026-10-19): `db2e5d3` – MG B1.1.5 with a complete `Metadata` example (SF-054 amendment); `2f00e9f` – findings register: SF-055 resolved as proposed, SF-056 (B1 example defects) open for C-026/C-027.
+- No new GL-ADR (PO decision in the second review: SF-045 and SF-052 are not recorded as GL-ADRs). SF-001 … 055 are resolved; SF-056 (defects of the B1 examples) is open for C-026/C-027 and not blocking; next free id SF-057.
