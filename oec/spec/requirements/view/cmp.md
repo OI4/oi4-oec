@@ -373,7 +373,7 @@ An application or device supports the resource Profile.
 - Refs: MG 1.3
 - Verification: d7-test
 - Status: reviewed
-- Inventory: MG-1.3-0fc2e320, MG-1.3-88c2af43
+- Inventory: MG-1.3-0fc2e320, MG-1.3-88c2af43, MG-9.1.7-6f3f54c3
 
 ## REQ-CMP-019
 
