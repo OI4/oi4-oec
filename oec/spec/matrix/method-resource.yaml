@@ -8,7 +8,7 @@
 # PO review (C-022, 2026-10-17): topic columns reviewed; the payload columns
 # get their own review.
 
-baseline: "fd9da6e"
+baseline: "a7d18f9"
 combinations:
   - {method: Pub, resource: MAM, kind: resource, allowed: true, rule: pub-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}
   - {method: Get, resource: MAM, kind: resource, allowed: true, rule: get-mam, source: optional, filter: forbidden, refs: [MG 9.1.1]}

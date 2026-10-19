@@ -1,7 +1,7 @@
 # Golden payload vectors (C-023, ADR-0018 amendments C-013 and C-023); status draft until the PO review.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "fd9da6e"
+baseline: "a7d18f9"
 description: >-
   Golden payload vectors taken from Appendix B (MG B1.1.2, B1.1.11, B1.1.12,
   B1.2.1): topic and message of the Message Bus. The reference checks cover the
@@ -38,9 +38,9 @@ vectors:
     origin: {kind: guideline, ref: MG B1.1.2}
     status: draft
     notes: >-
-      Same payload as V-PAY-001 on the topic without Source. The note of the
-      example ("this publication was self-initialized") belongs to the Pub example
-      – SF-049 (h).
+      Same payload as V-PAY-001 on the topic without Source. A request has an
+      empty ReplyTo (the former "self-initialized" note of the Get examples was
+      removed in C-024, SF-049 (h)).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health"
     payload: |-
       {

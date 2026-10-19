@@ -1,34 +1,41 @@
 # Requirements of area MSG – payload format and OPC UA PubSub objects
 # (MG 8, MG A2; ADR-0018, schema: catalog.schema.json). The Action messages
-# (MG 8.2.16 … 8.2.20, MG 8.4) are area ACT. Open spec findings of this area:
-# SF-045 … SF-050 (C-023) – the statements follow their proposed
-# interpretations where the guideline is ambiguous and say so in the notes.
+# (MG 8.2.16 … 8.2.20, MG 8.4) are area ACT. The spec findings of this area
+# (SF-045 … SF-050, SF-052, SF-053) were decided by the PO and resolved in
+# the guideline in C-024.
 area: MSG
-baseline: "fd9da6e"
+baseline: "a7d18f9"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
     title: Payload objects are not extended by user-defined keys
     statement: >-
-      The payload objects of MG 8 (NetworkMessage, DataSetMessage,
-      DataSetMetaData and their sub-objects, Action messages) contain no keys
-      other than the fields defined for them. The DataSet in the Payload of a
-      DataSetMessage is the only place for publisher-defined names.
+      A sender is strict: the payload objects of MG 8 (NetworkMessage,
+      DataSetMessage, DataSetMetaData and their sub-objects, Action messages,
+      OI4 resources) contain only keys defined for them by the guideline or by
+      OPC UA for the respective structure; fields marked "Not used" are
+      omitted. The DataSet in the Payload of a DataSetMessage is the only
+      place for publisher-defined names.
     keyword: MUST NOT
     domain: messaging
     levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
     applies_to: [publisher, requester, responder]
-    refs: [MG 8, SF-050]
+    refs: [MG 8, MG 8.2, SF-050, SF-052]
     quotes:
       - ref: MG 8
-        text: These objects must not be extended by user defined keys.
+        text: 'The objects defined in this chapter must not be extended by user defined keys, i.e. keys that are defined neither by OPC UA nor by this guideline (8.2 OPC UA Objects - Defined by OPC Foundation): a sender is strict in what it sends.'
+      - ref: MG 8.2
+        text: Fields that OPC UA defines for these structures, but that are not listed in this chapter, are allowed and follow the OPC UA specifications; they are no user defined keys (8 Payload Format).
+      - ref: MG 8.2
+        text: Fields marked as "Not used" must be omitted.
     verification: [schema, d7-validate]
-    inventory: [MG-8-57b64e78]
+    inventory: [MG-8-ea83c386, MG-8.2-490014d6, MG-8.2-20499c7b, MG-8.2-750159ed]
     status: draft
     notes: >-
-      SF-050 (open): OPC UA-defined fields that MG 8.2 does not list (e.g.
-      DataTypeId and Name of StructureDescription/EnumDescription, Value of
-      EnumField) are proposed to be allowed – they are no user-defined keys.
+      OPC UA fields that MG 8.2 does not list are no user-defined keys
+      (SF-050, resolved C-024); validators report a key that is defined
+      neither by the guideline nor by OPC UA as an error of the sender. The
+      receiver side (tolerant reader) is REQ-MSG-046.
 
   - id: REQ-MSG-002
     title: MessageType per Method and Resource
@@ -165,7 +172,7 @@ requirements:
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher]
-    refs: [MG 8.2.1, MG 8.2.2, SF-049]
+    refs: [MG 8.2.1, MG 8.2.2]
     quotes:
       - ref: MG 8.2.1
         text: The Open Industry 4.0 Alliance defines the type as a combination of the current timestamp in ms precision with the PublisherId.
@@ -174,9 +181,6 @@ requirements:
     verification: [schema, d7-validate]
     inventory: [MG-8.2.1-4a8ac924, MG-8.2.1-81ca33dc, MG-8.2.2-2ed17728, MG-8.2.2-6fd35797]
     status: draft
-    notes: >-
-      SF-049 (c) (open): the MG 8.2.2 example has no ServiceType – the
-      PublisherId (REQ-MSG-006) applies.
 
   - id: REQ-MSG-008
     title: MessageId is globally unique
@@ -192,14 +196,10 @@ requirements:
       - ref: MG 8.2.1
         text: The MessageId must be globally unique.
       - ref: MG 8.2.2
-        text: The MessageId must be unique.
+        text: The MessageId must be globally unique.
     verification: [d7-monitor]
-    inventory: [MG-8.2.1-83f60096, MG-8.2.2-a5590dec, MG-8.2.2-39ef94f6]
+    inventory: [MG-8.2.1-83f60096, MG-8.2.2-50564cbd]
     status: draft
-    notes: >-
-      SF-049 (c) (open): MG 8.2.2 says "unique for any single package of this
-      PublisherId"; with the PublisherId as part of the MessageId both
-      readings are equivalent.
 
   - id: REQ-MSG-009
     title: Consumers treat the MessageId as opaque
@@ -247,13 +247,13 @@ requirements:
       - ref: MG A2
         text: All standardized Open Industry 4.0 Alliance resources (7.5 Resource Element) have a defined DataSet and therefore a globally unique DataSetClassId, which are listed here.
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.1-680f4501, MG-8.2.4-0d986fba, MG-A2-699da0d8]
+    inventory: [MG-8.2.1-680f4501, MG-8.2.4-0d986fba, MG-A2-9e1b048d]
     status: draft
     notes: >-
       Lower case: MG A2 lists all ids in lower case and Part 6 5.1.3 writes
       GUIDs in lower case; receivers compare case-insensitively
-      (to be confirmed in the review). SF-049 (g): the key is in the MetaData
-      (DataSetMetaDataType) of a DataSetMetaData.
+      (to be confirmed in the review). The key is in the MetaData
+      (DataSetMetaDataType) of a DataSetMetaData (MG A2, SF-049 (g)).
 
   - id: REQ-MSG-011
     title: DataSetClassId in the NetworkMessage
@@ -264,7 +264,8 @@ requirements:
       (PaginationRequest, Pagination, Locale). A NetworkMessage for Data
       carries the publisher-defined DataSetClassId if all its DataSetMessages
       belong to the same DataSet class and it is known to the sender, and
-      omits it otherwise.
+      omits it otherwise; a Get or Set on Data or Metadata carries it only
+      if the requester knows it (e.g. from the Metadata).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -272,19 +273,20 @@ requirements:
     refs: [MG 8.2.1, MG 8.1.4, MG A2, SF-048]
     quotes:
       - ref: MG 8.2.1
-        text: A NetworkMessage must always carry the DataSetClassId of the resource addressed by the topic.
+        text: A NetworkMessage must always carry the DataSetClassId of the resource addressed by the topic, if the resource has a predefined DataSetClassId (A2 Predefined DataSetClassIds for Resources of the Alliance).
+      - ref: MG 8.2.1
+        text: For Data, a NetworkMessage must carry the publisher-defined DataSetClassId, if all its DataSetMessages belong to the same DataSet class (e.g. Pub/Data/<Source>/<Tag>), and must omit it otherwise
       - ref: MG 8.2.1
         text: The DataSetClassId shall be present for all resources defined by the Open Industry 4.0 Alliance which have DataSetClassId.
       - ref: MG 8.1.4
         text: Set, if the DataSetClassId is known (mandatory for resources defined by the Open Industry 4.0 Alliance, see A2 Predefined DataSetClassIds for Resources of the Alliance).
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.1-82e7a14c, MG-8.2.1-2650bc1d, MG-8.1.4-9af6086d]
+    inventory: [MG-8.2.1-d28a278c, MG-8.2.1-89331a41, MG-8.2.1-2650bc1d, MG-8.1.4-9af6086d]
     status: draft
     notes: >-
-      The Data part follows the proposed interpretation of SF-048 (open):
-      MG 8.2.1 literally requires a DataSetClassId for every topic, which a
-      requester of Get/Data usually does not know and which a Get/Data answer
-      with DataSets of several classes cannot carry.
+      SF-048 (resolved C-024). The Data rule can only be checked per message
+      when the sender's Metadata is known (DataSetClassId of each
+      DataSetWriterId); the reference check verifies the predefined ids.
 
   - id: REQ-MSG-012
     title: DataSetClassId in the DataSetMetaData
@@ -329,20 +331,25 @@ requirements:
   - id: REQ-MSG-014
     title: Reserved DataSetClassIds are not used
     statement: >-
-      No message uses one of the reserved DataSetClassIds of MG A2 (ids of
-      removed resources and Actions), neither for a resource nor as
-      publisher-defined DataSetClassId.
+      No message uses one of the 26 reserved DataSetClassIds of the MG A2
+      table "Reserved IDs" (ids of the removed resources License,
+      LicenseText, RtLicense, Interfaces and Actions FileUpload, FileDownload,
+      FirmwareUpdate, Blink, and ids reserved without assignment), neither for
+      a resource nor as publisher-defined DataSetClassId.
     keyword: MUST NOT
     domain: messaging
     levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
     applies_to: [publisher, responder]
-    refs: [MG A2]
+    refs: [MG A2, SF-053]
     quotes:
       - ref: MG A2
         text: The following DataSetClassIds are reserved. This includes the IDs of removed resources and Actions, which shall not be reused.
     verification: [schema, d7-validate]
     inventory: [MG-A2-c09dfc52]
     status: draft
+    notes: >-
+      The former use of each reserved id is listed in MG A2 since C-024
+      (SF-053, raised in the PO review of this requirement).
 
   # --- ReplyTo (MG 8.2.1, MG 8.2.2) ------------------------------------------
   - id: REQ-MSG-015
@@ -770,22 +777,27 @@ requirements:
       sub-objects of MG 8.2.4 … 8.2.15) contains every field whose
       Requirement is Mandatory, also if it has its default value (e.g. empty
       array), and writes enumerations as "<Name>_<Value>" strings
-      (VerboseEncoding).
+      (VerboseEncoding); Optional fields may be omitted.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher]
-    refs: [MG 8.2.4, MG 8.2.10, SF-045]
+    refs: [MG 8.2.2, MG 8.2.4, MG 8.2.10, SF-045]
     quotes:
+      - ref: MG 8.2.2
+        text: 'every field marked as Mandatory must be present, also if it has its default value (e.g. an empty array [], 0 or false), and enumerations must be encoded as <Name>_<Value> strings'
+      - ref: MG 8.2.2
+        text: Fields marked as Optional may be omitted.
       - ref: MG 8.2.10
         text: 'Structure_0: Structure without optional fields.'
     verification: [schema, d7-validate]
+    inventory: [MG-8.2.2-67928344, MG-8.2.2-0b11013e]
     status: draft
     notes: >-
-      Follows the recommended option (b') of SF-045 (open). OPC UA Part 14
-      7.2.5.5.2 prescribes the CompactEncoding (defaults omitted, enumerations
-      as numbers) – the PO decides; until then validators accept both forms
-      for omitted default values (lenient) and report them as warnings.
+      SF-045 (b'), decided by the PO and resolved in C-024: the guideline
+      deliberately deviates from OPC UA Part 14 7.2.5.5.2 (CompactEncoding,
+      MG 8.2.2 note), so a missing Mandatory field or a numeric enumeration
+      is an error of the sender.
 
   - id: REQ-MSG-035
     title: Fields of the DataSetMetaDataType
@@ -804,9 +816,8 @@ requirements:
       - ref: MG 8.2.4
         text: 'Value Range: <array of Namespaces names> Type: String Requirement: Mandatory'
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.4-72828f5c, MG-8.2.4-b6952e79, MG-8.2.4-f47ef8e9, MG-8.2.4-61d2eff6, MG-8.2.4-7a597189, MG-8.2.4-8309e508, MG-8.2.4-17fa68d1, MG-8.2.4-b899b2c3]
+    inventory: [MG-8.2.4-72828f5c, MG-8.2.4-b6952e79, MG-8.2.4-f47ef8e9, MG-8.2.4-61d2eff6, MG-8.2.4-7a597189, MG-8.2.4-8309e508, MG-8.2.4-7d27c0ec, MG-8.2.4-b899b2c3]
     status: draft
-    notes: SF-045 (open) – MG 8.1.2 Figure 5 omits the four mandatory arrays.
 
   - id: REQ-MSG-036
     title: ConfigurationVersionDataType
@@ -821,7 +832,7 @@ requirements:
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher, requester, responder]
-    refs: [MG 8.2.5, SF-049]
+    refs: [MG 8.2.5]
     quotes:
       - ref: MG 8.2.5
         text: The MajorVersion reflects the time of the last major change of the DataSet content.
@@ -830,7 +841,6 @@ requirements:
     verification: [schema, d7-validate]
     inventory: [MG-8.2.5-18a87fd1, MG-8.2.5-42796301]
     status: draft
-    notes: SF-049 (a, b) (open) – the MG 8.2.5 intro swaps the two names, VersionTime is Part 4 7.43.
 
   - id: REQ-MSG-037
     title: Fields of the FieldMetaData
@@ -839,7 +849,8 @@ requirements:
       (UInt16), BuiltInType (Byte, Part 6 Table 1), DataType (NodeId,
       REQ-MSG-039), ValueRank (Int32), ArrayDimensions (array of UInt32),
       MaxStringLength (UInt32), DataSetFieldId (GUID string) and Properties
-      (array of KeyValuePair).
+      (array of KeyValuePair). A field without description has a Description
+      with Locale and an empty Text, e.g. {"Locale": "en-US", "Text": ""}.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -847,13 +858,10 @@ requirements:
     refs: [MG 8.2.6, SF-045, SF-046]
     quotes:
       - ref: MG 8.2.6
-        text: The default value shall be a null or empty LocalizedText.
+        text: 'If the field has no description, the Description must be a LocalizedText with an empty Text, e.g. {"Locale": "en-US", "Text": ""} (8.2.7 LocalizedText).'
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.6-738bcbed, MG-8.2.6-3ea7a0dd, MG-8.2.6-6d1cdadf, MG-8.2.6-63e260a5, MG-8.2.6-43a5ddda, MG-8.2.6-5e40a1e2, MG-8.2.6-1e0bdd94, MG-8.2.6-d59108fa, MG-8.2.6-d0a4eaac, MG-8.2.6-067e4c57, MG-8.2.6-5a05cb43]
+    inventory: [MG-8.2.6-738bcbed, MG-8.2.6-3ea7a0dd, MG-8.2.6-d019bb1b, MG-8.2.6-63e260a5, MG-8.2.6-43a5ddda, MG-8.2.6-5e40a1e2, MG-8.2.6-1e0bdd94, MG-8.2.6-d59108fa, MG-8.2.6-d4b79c59, MG-8.2.6-067e4c57, MG-8.2.6-5a05cb43]
     status: draft
-    notes: >-
-      SF-045 (open): Figure 5 omits ArrayDimensions. SF-046 (open): an empty
-      Description is proposed as {"Locale": "en-US", "Text": ""}.
 
   - id: REQ-MSG-038
     title: Field names are unique in the DataSet
@@ -896,8 +904,9 @@ requirements:
   - id: REQ-MSG-040
     title: LocalizedText contains Locale and Text
     statement: >-
-      A LocalizedText defined by MG 8.2 or MG 8.3 contains Locale (a LocaleId
-      matching ^[a-z]{2,3}(-[A-Z]{2,3})?$) and Text.
+      Every LocalizedText of an object described in MG 8.2 or MG 8.3
+      contains Locale (a LocaleId matching ^[a-z]{2,3}(-[A-Z]{2,3})?$) and
+      Text; the Text may be empty, a null LocalizedText is not used.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -905,20 +914,24 @@ requirements:
     refs: [MG 8.2.7, SF-046]
     quotes:
       - ref: MG 8.2.7
+        text: In Open Industry 4.0 Alliance context, every LocalizedText of an object described in 8.2 OPC UA Objects - Defined by OPC Foundation and 8.3 OPC UA Objects, Defined by the OI4 Alliance must contain both Locale and Text; the Text may be an empty string.
+      - ref: MG 8.2.7
         text: (regular expression ^[a-z]{2,3}(-[A-Z]{2,3})?$; see OPC UA Part 3-8.4).
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.7-816dd69d, MG-8.2.7-7c769ce4]
+    inventory: [MG-8.2.7-c9e8db7c, MG-8.2.7-ba63a1d3, MG-8.2.7-7c769ce4]
     status: draft
     notes: >-
-      SF-046 (open): LocalizedTexts inside OPC UA structures the guideline
-      does not describe (e.g. EUInformation.DisplayName) are proposed to
-      follow Part 6 (Locale optional). MG 8.2.7 recommends English.
+      LocalizedTexts inside OPC UA structures the guideline does not describe
+      (e.g. EUInformation.DisplayName in Properties) follow Part 6 5.4.2.15
+      (Locale optional; SF-046, resolved C-024). MG 8.2.7 recommends
+      English.
 
   - id: REQ-MSG-041
     title: KeyValuePair
     statement: >-
       A KeyValuePair contains Key (QualifiedName as JSON string per Part 6
-      5.1.12) and Value (Variant of any DataType, Part 6 5.4.2.17).
+      5.1.12) and Value (Variant of any DataType, encoded as JSON object with
+      UaType and Value, Part 6 5.4.2.17).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -926,22 +939,29 @@ requirements:
     refs: [MG 8.2.8, SF-047]
     quotes:
       - ref: MG 8.2.8
+        text: The namespace index form ("<index>:<Name>") shall not be used, because namespace indices are not stable across publishers.
+      - ref: MG 8.2.8
         text: This abstract DataType defines a value that can have any valid DataType (see Part 3-8.7).
+      - ref: MG 8.2.8
+        text: The Value is a Variant and is encoded as JSON object with the fields UaType
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.8-8732feb0, MG-8.2.8-af99e2d6, MG-8.2.8-be05b06c]
+    inventory: [MG-8.2.8-8732feb0, MG-8.2.8-412cad72, MG-8.2.8-af99e2d6, MG-8.2.8-be05b06c]
     status: draft
     notes: >-
-      Encoding of Key and Value per the proposed interpretation of SF-047
-      (open); MG 8.2.8 describes the QualifiedName as NamespaceIndex and Name
-      and Figure 5 uses the object form {"Name": …}.
+      A QualifiedName is the plain name in namespace 0 or "nsu=<uri>;<name>";
+      neither the index form nor the V1.04 object form is used. A structure
+      as Value is an ExtensionObject (UaType 22) with UaTypeId (SF-047,
+      resolved C-024).
 
   - id: REQ-MSG-042
     title: StructureDescription and StructureDefinition
     statement: >-
-      A StructureDescription contains a StructureDefinition; a
-      StructureDefinition contains DefaultEncodingId and BaseDataType
-      (NodeIds), StructureType ("Structure_0", "StructureWithOptionalFields_1"
-      or "Union_2") and Fields (array of StructureField).
+      A StructureDescription contains DataTypeId (NodeId), Name
+      (QualifiedName) and a StructureDefinition; a StructureDefinition
+      contains DefaultEncodingId and BaseDataType (NodeIds), StructureType
+      ("Structure_0", "StructureWithOptionalFields_1", "Union_2",
+      "StructureWithSubtypedValues_3" or "UnionWithSubtypedValues_4") and
+      Fields (array of StructureField).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -953,11 +973,9 @@ requirements:
       - ref: MG 8.2.10
         text: 'Union_2: Only one of the fields defined for the data type is encoded into a value.'
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.9-a1b6625a, MG-8.2.10-d33e836a, MG-8.2.10-356ef3dc, MG-8.2.10-d0857e34, MG-8.2.10-4e6c6ba4, MG-8.2.10-e4619715, MG-8.2.10-2c0fe157]
+    inventory: [MG-8.2.9-fe9cbe12, MG-8.2.9-d41c66f9, MG-8.2.9-a1b6625a, MG-8.2.10-d33e836a, MG-8.2.10-356ef3dc, MG-8.2.10-d0857e34, MG-8.2.10-4e6c6ba4, MG-8.2.10-e4619715, MG-8.2.10-252d21af, MG-8.2.10-c847c1ee, MG-8.2.10-2c0fe157]
     status: draft
-    notes: >-
-      SF-050 (open): DataTypeId and Name of the StructureDescription and the
-      StructureTypes 3/4 of OPC UA are not listed in MG 8.2.9/8.2.10.
+    notes: DataTypeId, Name and the StructureTypes 3/4 were added to MG 8.2.9/8.2.10 in C-024 (SF-050).
 
   - id: REQ-MSG-043
     title: StructureField
@@ -970,22 +988,24 @@ requirements:
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher]
-    refs: [MG 8.2.11, SF-045]
+    refs: [MG 8.2.11, SF-045, SF-050]
     quotes:
       - ref: MG 8.2.11
         text: Scalar (-1) or fixed rank array (>=1).
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.11-69ad4326, MG-8.2.11-16691f6f, MG-8.2.11-cb8fd3bb, MG-8.2.11-95ba1be6, MG-8.2.11-107c4e27, MG-8.2.11-e53fc2aa, MG-8.2.11-6fefa62c]
+    inventory: [MG-8.2.11-69ad4326, MG-8.2.11-16691f6f, MG-8.2.11-ac14514b, MG-8.2.11-95ba1be6, MG-8.2.11-107c4e27, MG-8.2.11-e53fc2aa, MG-8.2.11-6fefa62c]
     status: draft
-    notes: MG 8.2.11 spells the field "Datatype"; OPC UA Part 3 8.51 and the JSON key are "DataType".
 
   - id: REQ-MSG-044
     title: EnumDescription, EnumDefinition and EnumField
     statement: >-
-      An EnumDescription contains EnumDefinition and BuiltInType (6 = Int32
-      for enumerations, the unsigned integer type or ExtensionObject for
+      An EnumDescription contains DataTypeId (NodeId), Name (QualifiedName),
+      EnumDefinition and BuiltInType (6 = Int32 for enumerations; 3, 5, 7, 9
+      (unsigned integer), 15 (ByteString) or 22 (ExtensionObject) for
       OptionSets); an EnumDefinition contains Fields (array of EnumField); an
-      EnumField contains Name (unique in the EnumDefinition).
+      EnumField contains Value (Int64 as JSON string) and Name (unique in the
+      EnumDefinition) and may contain DisplayName and Description
+      (LocalizedText).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -995,18 +1015,16 @@ requirements:
       - ref: MG 8.2.12
         text: Indicates whether the DataType is an Enumeration or an OptionSet
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.12-13e4ceae, MG-8.2.12-e21c6793, MG-8.2.13-078e66b8, MG-8.2.14-6e103525]
+    inventory: [MG-8.2.12-abe78447, MG-8.2.12-6dc2640c, MG-8.2.12-13e4ceae, MG-8.2.12-e21c6793, MG-8.2.13-078e66b8, MG-8.2.14-0c886798, MG-8.2.14-0e075a95, MG-8.2.14-9a1b4dbe, MG-8.2.14-6e103525]
     status: draft
-    notes: >-
-      SF-049 (d) (open): "28 = Uinteger" is no BuiltInType. SF-050 (open):
-      DataTypeId/Name of the EnumDescription and Value of the EnumField are
-      not listed.
+    notes: BuiltInType list and the OPC UA fields DataTypeId, Name and Value were corrected/added in C-024 (SF-049 (d), SF-050).
 
   - id: REQ-MSG-045
     title: SimpleTypeDescription
     statement: >-
       A SimpleTypeDescription contains DataTypeId and BaseDataType (NodeIds),
-      Name (QualifiedName) and BuiltInType (Byte).
+      Name (QualifiedName as JSON string, REQ-MSG-041) and BuiltInType
+      (Byte).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -1014,8 +1032,34 @@ requirements:
     refs: [MG 8.2.15, SF-047]
     quotes:
       - ref: MG 8.2.15
-        text: 'Value Range: <QualifiedName> Type: QualifiedName Requirement: Mandatory'
+        text: 'Value Range: <QualifiedName> Type: QualifiedName (JSON string) Requirement: Mandatory'
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.15-ea3d1d14, MG-8.2.15-df8d398e, MG-8.2.15-d231c21e, MG-8.2.15-09f33ee8]
+    inventory: [MG-8.2.15-ea3d1d14, MG-8.2.15-df8d398e, MG-8.2.15-d231c21e, MG-8.2.15-cba8d643]
     status: draft
-    notes: Name is encoded as QualifiedName string per SF-047 (a) (open).
+
+  # --- Tolerant reader (MG 8) ----------------------------------------------
+  - id: REQ-MSG-046
+    title: Receivers ignore unknown keys (tolerant reader)
+    statement: >-
+      A receiver of a message (subscriber, Responder, Requestor receiving a
+      response) ignores every key of a payload object that it does not know
+      or does not use and processes the message as if the key were absent;
+      an unknown key is no reason to reject the message, to answer with an
+      error or to treat the message as erroneous.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [subscriber, requester, responder]
+    refs: [MG 8, SF-052]
+    quotes:
+      - ref: MG 8
+        text: 'A receiver is tolerant in what it accepts: it must ignore all keys of a received message that it does not know or does not use, and process the message as if these keys were absent.'
+      - ref: MG 8
+        text: An unknown key is no reason to reject a message or to treat it as erroneous.
+    verification: [d7-test]
+    inventory: [MG-8-850d253a, MG-8-4dbec0d6]
+    status: draft
+    notes: >-
+      PO decision of the C-023 review (SF-052, resolved C-024): strict in
+      what is sent (REQ-MSG-001), tolerant in what is accepted. D7 injects
+      messages with additional keys and expects the normal reaction.

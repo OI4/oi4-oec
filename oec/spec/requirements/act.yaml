@@ -2,10 +2,10 @@
 # allocation (MG 8.2.16 … 8.2.20, MG 8.4, MG 9.2; ADR-0018, schema:
 # catalog.schema.json). The topics of Call/Reply are area TOP (REQ-TOP-016),
 # the grading of Call/Reply and NewDataSetWriterId per level is area CMP
-# (REQ-CMP-034, REQ-CMP-040). Open spec findings of this area: SF-049 (f),
-# SF-051 (C-023).
+# (REQ-CMP-034, REQ-CMP-040). The spec findings of this area (SF-049 (f),
+# SF-051) were decided by the PO and resolved in the guideline in C-024.
 area: ACT
-baseline: "fd9da6e"
+baseline: "a7d18f9"
 requirements:
   # --- Call/Reply with OPC UA PubSub Actions (MG 8.1, 8.1.3, 8.2.16) --------
   - id: REQ-ACT-001
@@ -103,13 +103,14 @@ requirements:
     refs: [MG 8.2.16, SF-049]
     quotes:
       - ref: MG 8.2.16
+        text: 'Value Range: <unixTimestampInMs-PublisherId of the sender> Type: String Requirement: Mandatory'
+      - ref: MG 8.2.16
         text: A globally unique identifier for the message.
       - ref: MG 8.2.16
         text: For a ua-action-request, this is the RequestorId, for a ua-action-response the PublisherId of the Responder.
     verification: [schema, d7-validate, d7-monitor]
-    inventory: [MG-8.2.16-9717abbc]
+    inventory: [MG-8.2.16-8ab944d7]
     status: draft
-    notes: SF-049 (f) (open) – the Value Range of MG 8.2.16 says PublisherId; the note and MG 9.2.1 use the RequestorId for requests.
 
   - id: REQ-ACT-005
     title: PublisherId is the Responder, RequestorId the Requestor
@@ -183,7 +184,8 @@ requirements:
     title: Responder stops processing after the TimeoutHint
     statement: >-
       The Responder stops processing a request when its TimeoutHint has
-      expired, counted from the reception of the request.
+      expired, counted from the reception of the request (the Requestor
+      counts from the publication of the request, REQ-ACT-009).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -192,11 +194,10 @@ requirements:
     refs: [MG 8.2.16, SF-051]
     quotes:
       - ref: MG 8.2.16
-        text: The Responder shall stop processing the request after this time.
+        text: For the Responder, the TimeoutHint starts with the reception of the request; the Responder shall stop processing the request after this time.
     verification: [manual]
-    inventory: [MG-8.2.16-3c2aa779, MG-8.2.16-6245d553]
+    inventory: [MG-8.2.16-3c2aa779, MG-8.2.16-693c2b30]
     status: draft
-    notes: The start of the period follows the proposed interpretation of SF-051 (b) (open).
 
   - id: REQ-ACT-009
     title: Requestor treats an expired TimeoutHint as failure
@@ -249,7 +250,8 @@ requirements:
     statement: >-
       A Requestor assigns each ActionRequest a RequestId that is unique among
       all its pending requests (per RequestorId); each ActionRequest of a
-      ua-action-request has its own RequestId.
+      ua-action-request has its own RequestId. Uniqueness does not depend on
+      the CorrelationData.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -258,13 +260,12 @@ requirements:
     refs: [MG 8.2.17, SF-051]
     quotes:
       - ref: MG 8.2.17
-        text: The RequestId shall be unique for all pending requests of a Requestor (RequestorId and CorrelationData).
+        text: The Requestor shall keep the RequestId unique among all its pending requests (per RequestorId), independent of the CorrelationData.
       - ref: MG 8.2.17
         text: If a ua-action-request contains several ActionRequests, each of them has its own RequestId.
     verification: [d7-monitor]
-    inventory: [MG-8.2.17-cd4f3358]
+    inventory: [MG-8.2.17-0a95672e]
     status: draft
-    notes: Uniqueness per RequestorId follows the proposed interpretation of SF-051 (a) (open).
 
   - id: REQ-ACT-012
     title: Fields of the ActionResponse
@@ -339,8 +340,11 @@ requirements:
       Call topic of the Responder; the Responder publishes for every
       ActionRequest it can decode and address exactly one final
       ActionResponse with ActionState 2, the Status and the result Payload to
-      the ResponseAddress. Request and response are related by RequestorId,
-      RequestId and, if present, CorrelationData.
+      the ResponseAddress, with the same DataSetWriterId, ActionTargetId and
+      RequestId; the ActionResponses of one ua-action-request may be sent in
+      one or in several ua-action-response messages. Request and response
+      are related by RequestorId, RequestId and, if present,
+      CorrelationData.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -352,16 +356,18 @@ requirements:
         text: The Requestor must publish a ua-action-request with ActionState 1 (Executing) to the Call topic of the Responder (7.4 Method Element).
       - ref: MG 8.2.20
         text: The Responder must publish a ua-action-response with ActionState 2 (Done), the Status and the Payload with the result to the ResponseAddress.
+      - ref: MG 8.2.20
+        text: If a ua-action-request contains several ActionRequests, every ActionRequest that can be decoded and addressed must get exactly one final ActionResponse (ActionState 2) with the same DataSetWriterId, ActionTargetId and RequestId.
+      - ref: MG 8.2.20
+        text: The Responder may send the ActionResponses of one ua-action-request in one or in several ua-action-response messages.
       - ref: MG 9.2
-        text: Request and response are related to each other by the RequestorId, the RequestId and the optional CorrelationData.
+        text: Request and response are related to each other by the RequestorId, the RequestId and the optional CorrelationData (8.2.17 ActionRequest)
     verification: [d7-test]
-    inventory: [MG-8.2.20-56ea1e8b, MG-8.2.20-c779a1d4, MG-9.2-9997933b, MG-9.2-1ac0be49]
+    inventory: [MG-8.2.20-56ea1e8b, MG-8.2.20-c779a1d4, MG-8.2.20-3b95c2e3, MG-8.2.20-464e2555, MG-9.2-9997933b, MG-9.2-4c18c5e8]
     status: draft
     notes: >-
-      "Exactly one final ActionResponse per ActionRequest" and their
-      distribution over one or several ua-action-response messages follow the
-      proposed interpretation of SF-051 (c) (open). The execution order of
-      several ActionRequests is up to the Responder (MG 8.2.16).
+      SF-051 (c), resolved C-024. The execution order of several
+      ActionRequests is up to the Responder (MG 8.2.16).
 
   - id: REQ-ACT-016
     title: Intermediate responses for long-running Actions

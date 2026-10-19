@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "fd9da6e"
+baseline: "a7d18f9"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -160,6 +160,8 @@ items:
     reason: Reading advice to consult the linked OPC UA specifications; no requirement on a component.
   - key: MG-8.2.1-f58de567
     reason: Explains that ReplyTo does not address a receiver ("may consume" expresses possibility); the ReplyTo rule is REQ-MSG-015.
+  - key: MG-8.2.2-236584d2
+    reason: Rationale of the deviation from the OPC UA CompactEncoding (C-024, SF-045); the encoding rule is REQ-MSG-034.
   - key: MG-8.2.3-972ff869
     reason: Editorial warning not to confuse the MessageType of DataSetMessage and NetworkMessage; the values are REQ-MSG-002 and REQ-MSG-029.
   # --- ACT (C-023) ----------------------------------------------------------
