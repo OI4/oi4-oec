@@ -58,11 +58,13 @@ C-026 (PO review, 2026-10-19): REQ-MQTT-001 … 019 accepted → **area MQTT rev
 
 C-027: areas **RES-MAM**, **RES-HEALTH**, **RES-PROFILE**, **RES-PUBLIST**, **RES-REFDES**, **PAG** and **LOC** `drafted` (`8a96356`, `d64fb31`, `fedf077`, `b062c17`): **REQ-RES-MAM-001 … 022**, **REQ-RES-HEALTH-001 … 007**, **REQ-RES-PROFILE-001 … 005**, **REQ-RES-PUBLIST-001 … 025**, **REQ-RES-REFDES-001 … 010**, **REQ-PAG-001 … 008**, **REQ-LOC-001/002** (79, all `draft`), 36 informative items; 244 inventory items, 0 open. REQ-CMP-018 (reviewed) got the inventory key of the 9.1.7 Profile-level sentence only (`356cdd8`, reason in the log). Reference checks extended by the DataSet content of these resources and the helper DataSets (`7c1f6bf`, `251fa8a`); golden payload vectors **V-PAY-026 … 047** (B1.1.1, B1.1.7, B1.1.8, B1.1.10, B1.1.12; SF-056/067/068 defects as `edits`, `296c4c0`) and constructed invalid vectors **V-PAY-048 … 052** (`04300bc`), all `draft`; views `b8c9da0`. New findings **SF-062 … SF-068** (register `5ada306`, open, not blocking; next SF-069). No re-baseline. Log: `log/2026-10-19_C-027_core-resources-pag-loc.md`.
 
+C-027 (PO review of the findings, 2026-10-19): **SF-056, SF-065 … SF-068 decided** (accepted as proposed; guideline text not changed yet); **SF-062 … SF-064** revised and still open (no pagination for `Set`/`Del`, `MaxPacketSize` of RIG 4.1.1 as trigger; REST-like paging; MAM checked against OPC 10000-100) – register `c170b05`, log addendum 1. Views and vectors not reviewed yet.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review of C-027** – decide SF-062 … SF-068 (register; points in the C-027 log), review the views `res-mam.md`, `res-health.md`, `res-profile.md`, `res-publist.md`, `res-refdes.md`, `pag.md`, `loc.md` and the vectors V-PAY-026 … 052; optionally order the guideline correction of SF-056 (B1.1.1/1.1.7/1.1.8/1.1.10) and SF-062 … 068 (then re-baseline). Implement the decisions, move the areas/vectors to `reviewed`.
+1. **PO review of C-027** – decide the revised SF-062 … SF-064 (register; addendum 1 of the C-027 log; SF-056, SF-065 … 068 decided), review the views `res-mam.md`, `res-health.md`, `res-profile.md`, `res-publist.md`, `res-refdes.md`, `pag.md`, `loc.md` and the vectors V-PAY-026 … 052; optionally order the guideline correction of SF-056 (B1.1.1/1.1.7/1.1.8/1.1.10) and SF-062 … 068 (then re-baseline). Implement the decisions, move the areas/vectors to `reviewed`.
 2. **C-028** – remaining resources (`RES-DATA`, `RES-META`, `RES-EVENT`, `RES-CONFIG`, `RES-SUBLIST`) + `BUS` + payload columns of the Method × Resource matrix; golden vectors for B1.1.3 … B1.1.6, B1.1.9 and the Status events of B1.1.3 … B1.1.10 (SF-056). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-029 … C-031).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
@@ -82,7 +84,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `c6453c7`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 018, SF-001 … 055 and SF-057 … 061 resolved, SF-056 open (B1 examples, C-027/C-028, not blocking), SF-062 … 068 open (C-027, register `5ada306`, not blocking), next SF-069; OEC Process Description informative); previous `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `c6453c7`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 018, SF-001 … 055 and SF-057 … 061 resolved, SF-056 open (B1 examples, C-027/C-028, not blocking), SF-062 … 068 found in C-027 (SF-065 … 068 decided, SF-062 … 064 open, register `c170b05`, not blocking), SF-056 decided, next SF-069; OEC Process Description informative); previous `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -94,7 +96,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. Open findings: SF-056 (defects of the B1 examples, C-027/C-028) and SF-062 … SF-068 (found in C-027, PO decision pending) – none blocking; next free id SF-069.
+- None. SF-062 … SF-064 (found in C-027, revised proposals) await the PO decision; SF-056 and SF-065 … 068 are decided, guideline text not changed yet – none blocking; next free id SF-069.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
