@@ -3,7 +3,8 @@
 # catalog.schema.json). The topics of Call/Reply are area TOP (REQ-TOP-016),
 # the grading of Call/Reply and NewDataSetWriterId per level is area CMP
 # (REQ-CMP-034, REQ-CMP-040). The spec findings of this area (SF-049 (f),
-# SF-051) were decided by the PO and resolved in the guideline in C-024.
+# SF-051) were decided by the PO and resolved in the guideline in C-024; the
+# PO reviewed the area in the C-024 review (2026-10-19).
 area: ACT
 baseline: "4af61f3"
 requirements:
@@ -32,7 +33,7 @@ requirements:
         text: ua-action-request must be used for messages published with the method Call, ua-action-response for messages published with the method Reply.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-8.1-0e566ba4, MG-8.1-f7f7330c, MG-8.1.3-aa30f206, MG-8.1.3-2f07634f, MG-8.2.16-2cd64af0, MG-8.2.16-25164d36, MG-8.2.16-e118d52d, MG-9.2-15fe1339]
-    status: draft
+    status: reviewed
     notes: Graded by REQ-CMP-034 (Call/Reply) and REQ-CMP-040 (NewDataSetWriterId).
 
   - id: REQ-ACT-002
@@ -58,7 +59,7 @@ requirements:
         text: 'Value Range: <Duration in ms> Type: Duration (Double) Requirement: Mandatory for ua-action-request, omitted for ua-action-response'
     verification: [schema, d7-validate]
     inventory: [MG-8.2.16-9cfbdf96, MG-8.2.16-3f9165a4, MG-8.2.16-8f87b9eb]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-003
     title: Action messages use the CompactEncoding and fixed content masks
@@ -85,7 +86,7 @@ requirements:
         text: All fields of Action messages are encoded with the JSON CompactEncoding (Part 14-7.2.5.6).
     verification: [schema, d7-validate]
     inventory: [MG-8.1.4-92ade777]
-    status: draft
+    status: reviewed
     notes: The DataSetClassId of an Action is only part of its ActionMetaData (MG 8.2.19).
 
   - id: REQ-ACT-004
@@ -110,7 +111,7 @@ requirements:
         text: For a ua-action-request, this is the RequestorId, for a ua-action-response the PublisherId of the Responder.
     verification: [schema, d7-validate, d7-monitor]
     inventory: [MG-8.2.16-8ab944d7]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-005
     title: PublisherId is the Responder, RequestorId the Requestor
@@ -132,7 +133,7 @@ requirements:
         text: The PublisherId of the Requestor, in the request as well as in the response.
     verification: [schema, d7-validate]
     inventory: [MG-8.2.16-5aaf6988, MG-8.2.16-2a955fbc, MG-8.2.16-67c0af7c]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-006
     title: ResponseAddress is the Reply topic
@@ -156,7 +157,7 @@ requirements:
         text: The Responder must publish the ua-action-response to the ResponseAddress given in the request, which is the corresponding Reply topic.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-8.2.16-dd642483, MG-8.2.16-c7e6b480, MG-8.2.16-ec40bbe4, MG-9.2-1aace699]
-    status: draft
+    status: reviewed
     notes: Same rule from the topic side in REQ-TOP-016.
 
   - id: REQ-ACT-007
@@ -178,7 +179,7 @@ requirements:
         text: 'Value Range: <Base64 encoded ByteString> Type: ByteString Requirement: Optional for ua-action-request, mandatory for ua-action-response if contained in the request'
     verification: [d7-test]
     inventory: [MG-8.2.16-1090b47e, MG-8.2.16-488ee77f]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-008
     title: Responder stops processing after the TimeoutHint
@@ -197,7 +198,7 @@ requirements:
         text: For the Responder, the TimeoutHint starts with the reception of the request; the Responder shall stop processing the request after this time.
     verification: [manual]
     inventory: [MG-8.2.16-3c2aa779, MG-8.2.16-693c2b30]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-009
     title: Requestor treats an expired TimeoutHint as failure
@@ -218,7 +219,7 @@ requirements:
         text: If the Responder does not respond within the TimeoutHint, the Requestor shall consider the request as failed (8.2.20 ActionState).
     verification: [manual]
     inventory: [MG-8.2.16-3d9be90a, MG-9.2-2c2c99da]
-    status: draft
+    status: reviewed
 
   # --- ActionRequest, ActionResponse (MG 8.2.17, MG 8.2.18) ------------------
   - id: REQ-ACT-010
@@ -243,7 +244,7 @@ requirements:
         text: The fields DataSetWriterName, WriterGroupName, MinorVersion and MessageType defined by OPC UA for the ActionRequest are not used in Open Industry 4.0 Alliance context and shall be omitted.
     verification: [schema, d7-validate]
     inventory: [MG-8.2.17-baa88fb7, MG-8.2.17-1b676dc5, MG-8.2.17-0864f4ab, MG-8.2.17-a63d6d67, MG-8.2.17-8a273fd7, MG-8.2.17-9431783b, MG-8.2.17-9698a69e, MG-8.2.17-283d3a94]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-011
     title: RequestId is unique among pending requests
@@ -265,7 +266,7 @@ requirements:
         text: If a ua-action-request contains several ActionRequests, each of them has its own RequestId.
     verification: [d7-monitor]
     inventory: [MG-8.2.17-0a95672e]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-012
     title: Fields of the ActionResponse
@@ -289,7 +290,7 @@ requirements:
         text: The fields DataSetWriterName, WriterGroupName, MinorVersion and MessageType defined by OPC UA for the ActionResponse are not used in Open Industry 4.0 Alliance context and shall be omitted.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-8.2.18-2429d9a4, MG-8.2.18-9ec81017, MG-8.2.18-c89c8bfd, MG-8.2.18-7acf7eab, MG-8.2.18-c90cc13a, MG-8.2.18-ef569e4a, MG-8.2.18-1cbe23a0, MG-8.2.18-e1a40bfa, MG-8.2.18-ae8057a2]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-013
     title: Payload of ActionRequest and ActionResponse
@@ -308,7 +309,7 @@ requirements:
       - ref: MG 8.2.17
         text: In Open Industry 4.0 Alliance context, each field is encoded with its plain JSON value according to the data type defined in the ActionMetaData, as known from the Payload of a DataSetMessage (8.2.3 DataSetMessage).
     verification: [schema, d7-validate]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-014
     title: Status of the ActionResponse
@@ -330,7 +331,7 @@ requirements:
         text: If at least one request field broke a constraint (e.g. wrong data type, value out of range), the Status is set to BadInvalidArgument.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-8.2.3-8f9384e4, MG-8.2.3-d7fec634]
-    status: draft
+    status: reviewed
 
   # --- Sequence of an Action (MG 8.2.20, MG 9.2) -----------------------------
   - id: REQ-ACT-015
@@ -364,7 +365,7 @@ requirements:
         text: Request and response are related to each other by the RequestorId, the RequestId and the optional CorrelationData (8.2.17 ActionRequest)
     verification: [d7-test]
     inventory: [MG-8.2.20-56ea1e8b, MG-8.2.20-c779a1d4, MG-8.2.20-3b95c2e3, MG-8.2.20-464e2555, MG-9.2-9997933b, MG-9.2-4c18c5e8]
-    status: draft
+    status: reviewed
     notes: >-
       SF-051 (c), resolved C-024. The execution order of several
       ActionRequests is up to the Responder (MG 8.2.16).
@@ -386,7 +387,7 @@ requirements:
         text: For long-running Actions, the Responder may send intermediate responses with 1 (Executing) before the final response.
     verification: [d7-test]
     inventory: [MG-8.2.18-c5d9afd6, MG-8.2.20-1217e3b3]
-    status: draft
+    status: reviewed
     notes: A Requestor therefore accepts intermediate responses and waits for ActionState 2.
 
   - id: REQ-ACT-017
@@ -406,7 +407,7 @@ requirements:
         text: If a request cannot be decoded or addressed (e.g. unknown DataSetWriterId or ActionTargetId), or is rejected for security reasons, the Responder must not send a response (Part 14-6.2.11.2).
     verification: [d7-test]
     inventory: [MG-8.2.20-0b675c28]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-018
     title: ActionMetaData of the common services need not be published
@@ -428,7 +429,7 @@ requirements:
         text: The list of Action targets, each with its ActionTargetId and Name, which can be addressed with the ActionTargetId in an ActionRequest.
     verification: [manual]
     inventory: [MG-8.2.19-74e9318d, MG-8.2.19-a7800607, MG-8.2.19-a96b3fb1, MG-8.2.19-eb8380a9, MG-8.2.19-5f690b92]
-    status: draft
+    status: reviewed
     notes: >-
       Neither the topic of ua-action-metadata nor its fields beyond MG 8.2.19
       are defined in OEC v2.0; a publication would be outside the guideline.
@@ -457,7 +458,7 @@ requirements:
         text: The DataSetWriterIds 4 to 7 are reserved for future common services.
     verification: [schema, d7-validate]
     inventory: [MG-8.4-e80d99dd, MG-8.2.17-14489172, MG-8.2.17-814f1d2e, MG-9.2-5b97120e]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-020
     title: Topics of NewDataSetWriterId
@@ -480,7 +481,7 @@ requirements:
         text: The optional <Source> contains the asset, for which the DataSetWriterId is requested; the Reply topic equals the Call topic with the Method Reply (7.4 Method Element). A Filter is not used.
     verification: [d7-validate, d7-test]
     inventory: [MG-9.2.1-8720ce6d, MG-9.2.1-538d81a2, MG-9.2.1-33e0e9a1]
-    status: draft
+    status: reviewed
     notes: Topic grammar in topic/topic.abnf (REQ-TOP-016); support is graded by REQ-CMP-040.
 
   - id: REQ-ACT-021
@@ -500,7 +501,7 @@ requirements:
         text: Resource (7.5.1 Resources) contains the resource the requested DataSetWriterId shall be used for.
     verification: [schema, d7-validate]
     inventory: [MG-8.4.1-453ad9b2, MG-8.4.1-efeae52f]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-022
     title: NewDataSetWriterId response fields DataSetWriterId and Ttl
@@ -523,7 +524,7 @@ requirements:
         text: This response field must not be confused with the DataSetWriterId of the ActionResponse itself, which always contains the reserved DataSetWriterId 8 of the Action NewDataSetWriterId.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-8.4.1-c57f4602, MG-8.4.1-bba9d024, MG-8.4.1-fbc43f91]
-    status: draft
+    status: reviewed
 
   - id: REQ-ACT-023
     title: Provided DataSetWriterId is valid for Ttl seconds
@@ -543,7 +544,7 @@ requirements:
       - ref: MG 8.4.1
         text: Ttl contains a value, which describes the time to live of the provided DataSetWriterId in seconds. Initial usage of the provided DataSetWriterId is only possible during this period of time.
     verification: [d7-test]
-    status: draft
+    status: reviewed
     notes: >-
       Whether the Responder rejects a later initial use is not stated
       explicitly; "only possible" is read as such (implicit, SF-035).
