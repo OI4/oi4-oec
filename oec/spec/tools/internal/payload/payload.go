@@ -9,8 +9,8 @@
 // checks only the defined keys (REQ-MSG-046, view of a tolerant receiver).
 // CheckMetaDataType checks a bare DataSetMetaDataType, e.g. the predefined
 // MetaData of MG B2. The content of the DataSets (MG 8.3, content.go) is
-// checked for the helper DataSets PaginationRequest, Pagination and Locale
-// (areas PAG, LOC) and the resources MAM, Health, Profile, PublicationList and
+// checked for the helper DataSets PaginationRequest, Pagination, Locale and
+// ChildrenRequest (areas PAG, LOC, RES-REFDES) and the resources MAM, Health, Profile, PublicationList and
 // ReferenceDesignation (areas RES-*, C-027); Config, Data, Metadata, Event and
 // SubscriptionList follow in C-028. The deep structure of the data type
 // descriptions (MG 8.2.10 … 8.2.15) is not checked here.
@@ -101,7 +101,7 @@ var serviceTypes = map[string]bool{
 	"Aggregation": true, "OOCConnector": true, "ITConnector": true,
 }
 
-var helperNames = map[int64]string{1: "PaginationRequest", 2: "Pagination", 3: "Locale"}
+var helperNames = map[int64]string{1: "PaginationRequest", 2: "Pagination", 3: "Locale", 9: "ChildrenRequest"}
 
 var (
 	guidPattern      = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
@@ -495,9 +495,9 @@ func (c *checker) dataSetMessage(ptr string, v any, pubIL string) (dsm, bool) {
 	group, groupOK := c.str(m, ptr, "WriterGroupName", "REQ-MSG-016")
 	switch {
 	case !idOK:
-	case id == 0 || (id >= 4 && id <= 9):
+	case id == 0 || (id >= 4 && id <= 8):
 		c.add(join(ptr, "DataSetWriterId"), "REQ-MSG-020", "DataSetWriterId %d is invalid or reserved", id)
-	case id <= 3:
+	case id <= 3 || id == 9:
 		if groupOK && group != helperNames[id] {
 			c.add(join(ptr, "WriterGroupName"), "REQ-MSG-019", "WriterGroupName of DataSetWriterId %d must be %s, got %q", id, helperNames[id], group)
 		}
@@ -545,7 +545,7 @@ func (c *checker) dataSetMessage(ptr string, v any, pubIL string) (dsm, bool) {
 			c.add(join(ptr, "MessageType"), "REQ-MSG-029", "MessageType of %s must be %s, got %q", c.t.Resource, want, s)
 		}
 	}
-	if !idOK || id == 0 || (id >= 4 && id <= 9) {
+	if !idOK || id == 0 || (id >= 4 && id <= 8) {
 		return dsm{}, false
 	}
 	return dsm{ptr: ptr, id: id, name: name, group: group, payload: payload}, true

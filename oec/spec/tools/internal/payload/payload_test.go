@@ -382,12 +382,21 @@ var refDesSet = `{
       "Location": {"Value": "+P1.H3.R2"}}}]
 }`
 
+var refDesChildren = `{
+  "MessageId": "2-` + requestor + `", "MessageType": "ua-data", "PublisherId": "` + requestor + `",
+  "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa", "ReplyTo": "",
+  "Messages": [{"DataSetWriterId": 9, "WriterGroupName": "ChildrenRequest", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+    "Payload": {"Parent": "consumer.com/LC/4711", "Aspect": "Function"}}]
+}`
+
 var (
 	tMAM     = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "MAM"}
 	tMAMGet  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Get", Resource: "MAM"}
 	tProfile = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Profile", SourceIL: app}
 	tRefSet  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Set", Resource: "ReferenceDesignation", SourceIL: app}
 	tRefDel  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Del", Resource: "ReferenceDesignation", SourceIL: app}
+	tRefGet  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Get", Resource: "ReferenceDesignation"}
+	tRefGetS = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Get", Resource: "ReferenceDesignation", SourceIL: app}
 	tListSet = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Set", Resource: "PublicationList", SourceIL: app, Filter: "Data/oee"}
 )
 
@@ -402,6 +411,7 @@ func TestContent(t *testing.T) {
 	}{
 		"mam": {tMAM, mamPub}, "mam get": {tMAMGet, mamGet}, "health details": {tHealth, healthDetails},
 		"profile": {tProfile, profilePub}, "refdes set": {tRefSet, refDesSet}, "publist set": {tListSet, listSet},
+		"refdes children": {tRefGet, refDesChildren},
 	} {
 		if got := reqs(t, c.top, c.msg); len(got) > 0 {
 			v, _ := Parse([]byte(c.msg))
@@ -475,6 +485,16 @@ func TestContent(t *testing.T) {
 		{"refdes parent", tRefSet, refDesSet, `"IdentificationLink": "consumer.com/LC/4711"`, `"IdentificationLink": 1`, []string{"REQ-RES-REFDES-001"}},
 		{"refdes set none", tRefSet, refDesSet, `"Messages": [{`, `"Messages": [], "x": [{`, []string{"REQ-MSG-001", "REQ-RES-REFDES-006"}},
 		{"refdes del with object", tRefDel, refDesSet, `"ReplyTo": ""`, `"ReplyTo": ""`, []string{"REQ-RES-REFDES-007"}},
+		{"children without aspect", tRefGet, refDesChildren, `, "Aspect": "Function"`, ``, nil},
+		{"children aspect", tRefGet, refDesChildren, `"Aspect": "Function"`, `"Aspect": "function"`, []string{"REQ-RES-REFDES-012"}},
+		{"children missing parent", tRefGet, refDesChildren, `"Parent": "consumer.com/LC/4711", `, ``, []string{"REQ-RES-REFDES-012"}},
+		{"children empty parent", tRefGet, refDesChildren, `"Parent": "consumer.com/LC/4711"`, `"Parent": ""`, []string{"REQ-RES-REFDES-012"}},
+		{"children unknown field", tRefGet, refDesChildren, `"Aspect": "Function"`, `"Aspect": "Function", "Depth": 2`, []string{"REQ-MSG-001"}},
+		{"children group name", tRefGet, refDesChildren, `"WriterGroupName": "ChildrenRequest"`, `"WriterGroupName": "Children"`, []string{"REQ-MSG-019"}},
+		{"children writer name", tRefGet, refDesChildren, `"DataSetWriterName": "https://id.consumer.com/MEService/Inst07322"`, `"DataSetWriterName": "consumer.com/LC/4711"`, []string{"REQ-MSG-019"}},
+		{"children twice", tRefGet, refDesChildren, `}}]`, `}}, {"DataSetWriterId": 9, "WriterGroupName": "ChildrenRequest", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": {"Parent": "x.com/a"}}]`, []string{"REQ-RES-REFDES-013"}},
+		{"children with source", tRefGetS, refDesChildren, `"ReplyTo": ""`, `"ReplyTo": ""`, []string{"REQ-RES-REFDES-013"}},
+		{"children in mam get", tMAMGet, mamGet, `"Payload": {"PerPage": 25, "Page": 0}`, `"Payload": {"PerPage": 25, "Page": 0}}, {"DataSetWriterId": 9, "WriterGroupName": "ChildrenRequest", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": {"Parent": "x.com/a"}`, []string{"REQ-RES-REFDES-013"}},
 	}
 	for _, c := range cases {
 		if !strings.Contains(c.msg, c.old) {

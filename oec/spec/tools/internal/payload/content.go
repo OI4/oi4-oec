@@ -10,7 +10,8 @@ import (
 )
 
 // Content of the DataSets (MG 8.3): the helper DataSets PaginationRequest,
-// Pagination and Locale (areas PAG, LOC) for every resource and the DataSets
+// Pagination, Locale and ChildrenRequest (areas PAG, LOC, RES-REFDES) for
+// every resource and the DataSets
 // of MAM, Health, Profile, PublicationList and ReferenceDesignation (areas
 // RES-*, C-027). Only MUST rules are reported; recommendations (SHOULD) are
 // not checked.
@@ -94,6 +95,17 @@ func (c *checker) contents(dsms []dsm) {
 			if d.payload != nil {
 				c.locale(d)
 			}
+		case 9:
+			if c.t.Method != "Get" || c.t.Resource != "ReferenceDesignation" || c.t.SourceIL != "" {
+				c.add(d.ptr, "REQ-RES-REFDES-013", "a ChildrenRequest is only sent with Get/ReferenceDesignation without Source")
+			}
+			if prev, dup := seen[d.id]; dup {
+				c.add(d.ptr, "REQ-RES-REFDES-013", "a second ChildrenRequest (first at %s)", prev)
+			}
+			seen[d.id] = d.ptr
+			if d.payload != nil {
+				c.childrenRequest(d)
+			}
 		default:
 			res = append(res, d)
 		}
@@ -161,7 +173,7 @@ func (c *checker) enum(m map[string]any, ptr, key, req string, values map[string
 	return s, ok
 }
 
-// --- helper DataSets (MG 8.3.11, 8.3.12) ------------------------------------
+// --- helper DataSets (MG 8.3.11, 8.3.12, 8.3.13) ----------------------------
 
 func (c *checker) paginationRequest(d dsm) {
 	const req = "REQ-PAG-001"
@@ -224,6 +236,19 @@ func (c *checker) locale(d dsm) {
 	if s, ok := c.str(m, p, "Locale", req); ok && !localePattern.MatchString(s) {
 		c.add(join(p, "Locale"), req, "Locale %q is no LocaleId", s)
 	}
+}
+
+// childrenAspects are the values of ChildrenRequest.Aspect (MG 8.3.13).
+var childrenAspects = map[string]bool{"Function": true, "Product": true, "Location": true}
+
+func (c *checker) childrenRequest(d dsm) {
+	const req = "REQ-RES-REFDES-012"
+	p := join(d.ptr, "Payload")
+	m := c.object(p, d.payload, shape{required: []string{"Parent"}, optional: []string{"Aspect"}, missing: req})
+	if s, ok := c.str(m, p, "Parent", req); ok && s == "" {
+		c.add(join(p, "Parent"), req, "Parent must contain an Identification Link")
+	}
+	c.enum(m, p, "Aspect", req, childrenAspects)
 }
 
 // --- MAM (MG 8.3.1) ----------------------------------------------------------
