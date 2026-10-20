@@ -72,15 +72,14 @@ C-027 (PO decisions, 2026-10-20, addendum 7): **SF-073 option (c)** directly in 
 
 C-027 (PO review, 2026-10-20, addendum 8): guideline text `30fa928` (incl. structure), the amended GL-ADR-020 and the SF-072 extension accepted; REQ-QRY-001 … 004, REQ-MSG-019/020, REQ-RES-REFDES-003, 011 … 016 and V-PAY-053/054 **reviewed** (`c310b94`, views `87cc900`) – areas MSG, RES-REFDES and QRY `reviewed`; nothing is `draft` any more. **C-027 complete.**
 
-C-027 (PO decision, 2026-10-20, addendum 9): **SF-074** accepted as proposed. Guideline `b45c497` (B1.1.5: publisher-defined `DataSetClassId` `1badfd0b-…` of B1.1.4 in the `MetaData` of the `Pub`/`Set` examples, sentence rewritten), `ff1562f` (register: SF-074 resolved, no open findings). Workspace re-baselined on `ff1562f` (`f480717`, inventory unchanged; V-PAY-021/022 synced verbatim, REQ-MSG-012 added, kept `reviewed`), views `596a6f6`.
+C-027 (PO decision, 2026-10-20, addendum 9): **SF-074** accepted as proposed. Guideline `b45c497` (B1.1.5: publisher-defined `DataSetClassId` `1badfd0b-…` of B1.1.4 in the `MetaData` of the `Pub`/`Set` examples, sentence rewritten), `ff1562f` (register: SF-074 resolved, no open findings). Workspace re-baselined on `ff1562f` (`f480717`, inventory unchanged; V-PAY-021/022 synced verbatim, REQ-MSG-012 added, kept `reviewed` – confirmed by the PO), views `596a6f6`. **Nothing of C-027 is open.**
 
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review (C-027 addendum 9)** – V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (kept `reviewed`, see log).
-2. **C-028** – remaining resources (`RES-DATA`, `RES-META`, `RES-EVENT`, `RES-CONFIG`, `RES-SUBLIST`) + `BUS` + payload columns of the Method × Resource matrix; golden vectors for B1.1.3 … B1.1.6, B1.1.9 and the Status events of B1.1.3 … B1.1.10 (SF-056). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-029 … C-031).
-3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
+1. **C-028** – remaining resources (`RES-DATA`, `RES-META`, `RES-EVENT`, `RES-CONFIG`, `RES-SUBLIST`) + `BUS` + payload columns of the Method × Resource matrix; golden vectors for B1.1.3 … B1.1.6, B1.1.9 and the Status events of B1.1.3 … B1.1.10 (SF-056). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-029 … C-031).
+2. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
 
