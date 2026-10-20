@@ -88,7 +88,7 @@ areas:
       the area of the resource (MG 8.3.13.1 → RES-REFDES).
   - code: RES-CONFIG
     title: Resource Config
-    cycle: C-028
+    cycle: C-029
     status: planned
     sections: [MG 8.3.3, MG 9.1.3]
   - code: RES-DATA
@@ -118,31 +118,31 @@ areas:
     sections: [MG 9]
   - code: CNT
     title: Container environment
-    cycle: C-029
+    cycle: C-030
     status: planned
     sections: [RIG 2, RIG 4]
   - code: PLT
     title: OEC platform requirements
-    cycle: C-029
+    cycle: C-030
     status: planned
     sections: [RIG 5]
   - code: APP
     title: Requirements on an application (runtime)
-    cycle: C-029
+    cycle: C-030
     status: planned
     sections: [RIG 5.2]
   - code: LIC
     title: Legal requirements and software licenses
-    cycle: C-029
+    cycle: C-030
     status: planned
     sections: [RIG 5.3]
   - code: REG
     title: OEC Registry
-    cycle: C-029
+    cycle: C-030
     status: planned
     sections: [MG A1]
   - code: GEN
     title: Introductory and general chapters, cyber security, glossaries
-    cycle: C-029
+    cycle: C-030
     status: planned
     sections: [MG 2, MG 3, MG A4, RIG 3, RIG A1]

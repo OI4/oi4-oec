@@ -87,7 +87,7 @@ items:
   - key: MG-4.3-e1b14605
     reason: Describes the reproducibility of the Oi4Identifier; "can" expresses possibility. The creation rules are REQ-IL-022 … REQ-IL-029.
   - key: MG-4.3.1-1aeed8b4
-    reason: Cross-reference to RIG 4.2 Container Name Conventions; the container name requirement is stated there (area CNT, C-029).
+    reason: Cross-reference to RIG 4.2 Container Name Conventions; the container name requirement is stated there (area CNT, C-030).
   - key: MG-4.3.1-63bbb644
     reason: Consequence of using "nd" as SerialNumber ("can" expresses possibility); no requirement on a component.
   - key: MG-4.3.1-3c017310
@@ -181,13 +181,13 @@ items:
     reason: Label of the Reply template; the template fields are REQ-ACT-012 and REQ-ACT-022.
   # --- MQTT (C-025) ---------------------------------------------------------
   - key: MG-6-0040aac5
-    reason: Describes deployment options of the broker ("can" expresses possibility); no requirement on a component. Platform requirements are area PLT (C-029).
+    reason: Describes deployment options of the broker ("can" expresses possibility); no requirement on a component. Platform requirements are area PLT (C-030).
   - key: MG-6-2d114aae
     reason: Lead-in to the grading note of MG 6; the grading is REQ-CMP-001, REQ-CMP-002, REQ-CMP-003, REQ-CMP-009 and REQ-CMP-046.
   - key: MG-6.1-4e50a9ff
     reason: Historical rationale for the choice of MQTT v3.1.1; the version rule is REQ-MQTT-001 and REQ-MQTT-002.
   - key: MG-6.1-e0ba3cf6
-    reason: List item naming an optional broker feature (access control list) without a requirement; platform features are area PLT (C-029).
+    reason: List item naming an optional broker feature (access control list) without a requirement; platform features are area PLT (C-030).
   - key: MG-6.2-51ff65d2
     reason: Introduction of chapter 6.2; the rules are REQ-MQTT-003 … REQ-MQTT-016.
   - key: MG-6.2.3-f8e5a29a

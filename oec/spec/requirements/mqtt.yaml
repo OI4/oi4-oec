@@ -80,7 +80,7 @@ requirements:
     status: reviewed
     notes: >-
       The content of broker.json and the use of the Message Bus storage by a
-      containerized application are area CNT (RIG 4.1.1, C-029). A component
+      containerized application are area CNT (RIG 4.1.1, C-030). A component
       without container (device with its own MQTT client) gets the broker
       address by its own configuration.
 

@@ -89,7 +89,7 @@ The platform makes the IP address or host name of the MQTT broker available to e
 > The IP address or host name of the MQTT broker is system-dependent and must be made available to any container by using the Message Bus storage (OEC Runtime & Infrastructure Guideline, 4.1.1 Message Bus Storage).
 > — MG 6.2.1
 
-Notes: The content of broker.json and the use of the Message Bus storage by a containerized application are area CNT (RIG 4.1.1, C-029). A component without container (device with its own MQTT client) gets the broker address by its own configuration.
+Notes: The content of broker.json and the use of the Message Bus storage by a containerized application are area CNT (RIG 4.1.1, C-030). A component without container (device with its own MQTT client) gets the broker address by its own configuration.
 
 ## REQ-MQTT-004
 

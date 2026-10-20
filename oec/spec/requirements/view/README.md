@@ -20,15 +20,15 @@ Guideline baseline: `ff1562f`. Source of truth: the YAML files in `oec/spec/requ
 | [PAG](pag.md) | Pagination | C-027 | reviewed | 9 | MG 8.3.11 |
 | [LOC](loc.md) | Locale | C-027 | reviewed | 2 | MG 8.3.12 |
 | [QRY](qry.md) | Query (generic helper DataSet of a Get) | C-027 | reviewed | 4 | MG 8.3.13 |
-| RES-CONFIG | Resource Config | C-028 | planned | – | MG 8.3.3, MG 9.1.3 |
+| RES-CONFIG | Resource Config | C-029 | planned | – | MG 8.3.3, MG 9.1.3 |
 | [RES-DATA](res-data.md) | Resource Data | C-028 | drafted | 12 | MG 8.3.4, MG 9.1.4 |
 | [RES-META](res-meta.md) | Resource Metadata | C-028 | drafted | 7 | MG 8.3.5, MG 9.1.5 |
 | [RES-EVENT](res-event.md) | Resource Event | C-028 | drafted | 11 | MG 8.3.6, MG 9.1.6 |
 | [RES-SUBLIST](res-sublist.md) | Resource SubscriptionList | C-028 | drafted | 15 | MG 8.3.9, MG 9.1.9 |
 | [BUS](bus.md) | General Message Bus communication | C-028 | drafted | 10 | MG 9 |
-| CNT | Container environment | C-029 | planned | – | RIG 2, RIG 4 |
-| PLT | OEC platform requirements | C-029 | planned | – | RIG 5 |
-| APP | Requirements on an application (runtime) | C-029 | planned | – | RIG 5.2 |
-| LIC | Legal requirements and software licenses | C-029 | planned | – | RIG 5.3 |
-| REG | OEC Registry | C-029 | planned | – | MG A1 |
-| GEN | Introductory and general chapters, cyber security, glossaries | C-029 | planned | – | MG 2, MG 3, MG A4, RIG 3, RIG A1 |
+| CNT | Container environment | C-030 | planned | – | RIG 2, RIG 4 |
+| PLT | OEC platform requirements | C-030 | planned | – | RIG 5 |
+| APP | Requirements on an application (runtime) | C-030 | planned | – | RIG 5.2 |
+| LIC | Legal requirements and software licenses | C-030 | planned | – | RIG 5.3 |
+| REG | OEC Registry | C-030 | planned | – | MG A1 |
+| GEN | Introductory and general chapters, cyber security, glossaries | C-030 | planned | – | MG 2, MG 3, MG A4, RIG 3, RIG A1 |
