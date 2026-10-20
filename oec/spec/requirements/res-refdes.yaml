@@ -4,7 +4,7 @@
 # belongs to RES-EVENT (C-028). Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 # Children of a ReferenceDesignation ("OneDown"): Query of ReferenceDesignation
-# (MG 8.3.13.1, GL-ADR-020, SF-069, SF-073) – REQ-RES-REFDES-011 … 016 (draft);
+# (MG 8.3.13.1, GL-ADR-020, SF-069, SF-073) – REQ-RES-REFDES-011 … 016 (reviewed 2026-10-20);
 # the generic Query rules are area QRY.
 area: RES-REFDES
 baseline: "15eaa8a"
@@ -76,7 +76,7 @@ requirements:
         text: A ReferenceDesignation object is not included.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.10-d0686981]
-    status: draft
+    status: reviewed
     notes: Query added by GL-ADR-020 (SF-069, SF-073, C-027 review); its placement rules are REQ-QRY-001 and REQ-RES-REFDES-013.
 
   - id: REQ-RES-REFDES-004
@@ -257,7 +257,7 @@ requirements:
         text: The support of the Query of ReferenceDesignation is optional at compliance Level 1 and 2 and mandatory at Level 3 for every component that supports the resource ReferenceDesignation (1.3 Compliance Domains and Levels).
     verification: [d7-test]
     inventory: [MG-1.3-fc5dfccb, MG-8.3.13.1-18dcbb80]
-    status: draft
+    status: reviewed
     notes: >-
       PO decision in the C-027 review (2026-10-20): option (b) "OneDown" of
       SF-069, optional at L1/L2, mandatory at L3; carrier: generic Query
@@ -280,7 +280,7 @@ requirements:
     refs: [MG 8.3.13.1, GL-ADR-020]
     verification: [schema, d7-validate]
     inventory: [MG-8.3.13.1-33176e50, MG-8.3.13.1-417aaa0a]
-    status: draft
+    status: reviewed
     notes: Reserved DataSetWriterId 9, WriterGroupName "Query", DataSetWriterName = requester (REQ-MSG-019). A receiver ignores undefined query parameters (REQ-QRY-002).
 
   - id: REQ-RES-REFDES-013
@@ -301,7 +301,7 @@ requirements:
         text: The Query of ReferenceDesignation is only meaningful in combination with the topic …/Get/ReferenceDesignation without Source; with Source it is ignored by the receiver.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-8.3.13.1-3feaca7a]
-    status: draft
+    status: reviewed
     notes: >-
       The generic placement (method Get, at most once) is REQ-QRY-001. A
       receiver tolerates the misplaced helper (REQ-MSG-046); the strict
@@ -345,7 +345,7 @@ requirements:
         text: The application answers with the matching objects as described in 8.3.13.1 Query of ReferenceDesignation, published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/ReferenceDesignation.
     verification: [d7-test]
     inventory: [MG-8.3.13.1-14367aab, MG-8.3.13.1-bd151745, MG-8.3.13.1-2856ce44, MG-9.1.10-912abe06]
-    status: draft
+    status: reviewed
     notes: >-
       Children represented by other applications are requested from those
       applications (informative note of MG 8.3.13.1). Pagination: REQ-PAG-005;
@@ -368,7 +368,7 @@ requirements:
         text: An application that does not support it ignores the Query and answers with all ReferenceDesignation objects; therefore, a requester should check the Parent of the received objects.
     verification: [manual]
     inventory: [MG-8.3.13.1-2c0f88d0]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-REFDES-016
     title: IdentificationLink of the Parent is provided
@@ -387,5 +387,5 @@ requirements:
         text: Therefore, the IdentificationLink of a Parent should be provided whenever the parent asset has an Identification Link.
     verification: [manual]
     inventory: [MG-8.3.10-ed42bea0]
-    status: draft
+    status: reviewed
     notes: The Query of ReferenceDesignation finds children only by Parent.IdentificationLink (REQ-RES-REFDES-014).

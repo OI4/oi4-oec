@@ -4,7 +4,7 @@
 # Reserved DataSetWriterId 9 and names: REQ-MSG-019. The query parameters are
 # defined per resource: ReferenceDesignation (MG 8.3.13.1) → REQ-RES-REFDES-011 …
 # 015. Checked by tools/internal/payload (REQ-QRY-001; REQ-QRY-002 in the
-# tolerant mode).
+# tolerant mode). Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: QRY
 baseline: "15eaa8a"
 requirements:
@@ -28,7 +28,7 @@ requirements:
         text: The DataSetMessage with Query information is only meaningful in combination with the method Get and a resource for which a Query is defined, under the conditions defined there, at most once per NetworkMessage; in any other NetworkMessage it is ignored by the receiver.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-8.3.13-d238ce3d]
-    status: draft
+    status: reviewed
     notes: >-
       Same pattern as PaginationRequest and Locale (REQ-PAG-008, REQ-LOC-002).
       The resource-specific conditions are in the area of the resource (for
@@ -54,7 +54,7 @@ requirements:
         text: Fields of the Payload that are not defined as query parameters of the resource are ignored by the receiver.
     verification: [d7-test]
     inventory: [MG-8.3.13-96aa75e3]
-    status: draft
+    status: reviewed
     notes: >-
       Receiver side of SF-052 (tolerant, REQ-MSG-046). The sender sends only
       the defined query parameters (REQ-MSG-001; for ReferenceDesignation
@@ -77,7 +77,7 @@ requirements:
         text: An application that does not support the Query of a resource ignores it and answers the Get as without Query; therefore, a requester should check the received information against its query parameters.
     verification: [d7-test]
     inventory: [MG-8.3.13-31a1bfa3]
-    status: draft
+    status: reviewed
     notes: The support of the Query is graded per resource (ReferenceDesignation REQ-RES-REFDES-011).
 
   - id: REQ-QRY-004
@@ -97,5 +97,5 @@ requirements:
         text: An application that does not support the Query of a resource ignores it and answers the Get as without Query; therefore, a requester should check the received information against its query parameters.
     verification: [manual]
     inventory: [MG-8.3.13-31a1bfa3]
-    status: draft
+    status: reviewed
     notes: For ReferenceDesignation the check of the Parent (REQ-RES-REFDES-015).

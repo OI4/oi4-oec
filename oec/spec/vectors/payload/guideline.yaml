@@ -1,4 +1,4 @@
-# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (ChildrenRequest, GL-ADR-020) drafted in the C-027 review.
+# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "15eaa8a"
@@ -2711,7 +2711,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-MSG-019, REQ-QRY-001, REQ-RES-REFDES-003, REQ-RES-REFDES-012, REQ-RES-REFDES-013]
     origin: {kind: guideline, ref: MG B1.1.10}
-    status: draft
+    status: reviewed
     notes: >-
       Get without Source with the generic helper Query (DataSetWriterId 9,
       WriterGroupName "Query", DataSetWriterName = requester; GL-ADR-020
@@ -2744,7 +2744,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-015, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-RES-REFDES-001, REQ-RES-REFDES-005, REQ-RES-REFDES-014]
     origin: {kind: guideline, ref: MG B1.1.10}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to V-PAY-053: the two objects whose Function.Parent.IdentificationLink
       equals the requested Parent (the application itself and the subordinate

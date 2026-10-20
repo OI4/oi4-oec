@@ -3,7 +3,8 @@
 # (MG 8.2.16 … 8.2.20, MG 8.4) are area ACT. The spec findings of this area
 # (SF-045 … SF-050, SF-052, SF-053) were decided by the PO and resolved in
 # the guideline in C-024; the PO reviewed the area in the C-024 review
-# (2026-10-19, REQ-MSG-046 changed to SHOULD).
+# (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
+# = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 area: MSG
 baseline: "15eaa8a"
 requirements:
@@ -475,7 +476,7 @@ requirements:
         text: For the DataSetMessages with reserved DataSetWriterIds 1 to 3 and 9, the WriterGroupName must contain the name of the helper DataSet (PaginationRequest, Pagination, Locale or Query) and the DataSetWriterName must contain the Identification Link of the application, which publishes the NetworkMessage
     verification: [schema, d7-validate]
     inventory: [MG-8.2.3-6baa8abb, MG-8.2.3-f5d1c265]
-    status: draft
+    status: reviewed
     notes: >-
       DataSetWriterId 9 added by GL-ADR-020 (SF-069, C-027 review), first as
       ChildrenRequest, then as the generic Query (SF-073, GL-ADR-020 amended);
@@ -499,7 +500,7 @@ requirements:
         text: The DataSetWriterIds 4 to 8 are reserved for the Actions of the common services
     verification: [schema, d7-validate]
     inventory: [MG-8.2.3-5a768594]
-    status: draft
+    status: reviewed
     notes: DataSetWriterId 9 is used by the generic helper DataSet Query since GL-ADR-020 (SF-069, SF-073, C-027 review; before it was reserved without a defined use); MG 8.4 reserves 4 to 7 for future common services.
 
   - id: REQ-MSG-021

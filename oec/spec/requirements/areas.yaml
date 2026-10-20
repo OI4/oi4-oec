@@ -25,7 +25,7 @@ areas:
   - code: MSG
     title: Payload format and OPC UA PubSub objects
     cycle: C-023
-    status: drafted
+    status: reviewed
     sections: [MG 8, MG A2]
   - code: ACT
     title: Actions (Call/Reply) and DataSetWriterId allocation
@@ -65,7 +65,7 @@ areas:
   - code: RES-REFDES
     title: Resource ReferenceDesignation
     cycle: C-027
-    status: drafted
+    status: reviewed
     sections: [MG 8.3.10, MG 8.3.13.1, MG 9.1.10]
   - code: PAG
     title: Pagination
@@ -80,7 +80,7 @@ areas:
   - code: QRY
     title: Query (generic helper DataSet of a Get)
     cycle: C-027
-    status: drafted
+    status: reviewed
     sections: [MG 8.3.13]
     notes: >-
       Generic rules of the helper DataSet Query (GL-ADR-020 amended by SF-073);
