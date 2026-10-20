@@ -1,7 +1,7 @@
-# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20).
+# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20); V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (ff1562f).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "15eaa8a"
+baseline: "ff1562f"
 description: >-
   Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5,
   B1.1.7, B1.1.8, B1.1.10, B1.1.11, B1.1.12, B1.2.1): topic and message of the
@@ -1256,11 +1256,11 @@ vectors:
   - id: V-PAY-021
     title: "B1.1.5: Pub Metadata of an explicit data tag, reply to a Get"
     expected: valid
-    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-033, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041]
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-012, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-033, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041]
     origin: {kind: guideline, ref: MG B1.1.5}
     status: reviewed
     notes: >-
-      Complete ua-metadata of the publisher-defined DataSet oee (no DataSetClassId); same DataSetWriterId (93), WriterGroupName and DataSetWriterName as the DataSetMessage of B1.1.4 (REQ-MSG-033). Double fields with EURange and EngineeringUnits.
+      Complete ua-metadata of the publisher-defined DataSet oee with its publisher-defined DataSetClassId of B1.1.4 (REQ-MSG-012, SF-074); same DataSetWriterId (93), WriterGroupName and DataSetWriterName as the DataSetMessage of B1.1.4 (REQ-MSG-033). Double fields with EURange and EngineeringUnits.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
     payload: |-
       {
@@ -1456,6 +1456,7 @@ vectors:
               ]
             }
           ],
+          "DataSetClassId": "1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67",
           "ConfigurationVersion": {
             "MajorVersion": 693008710,
             "MinorVersion": 693008710
@@ -1470,11 +1471,11 @@ vectors:
   - id: V-PAY-022
     title: "B1.1.5: Set Metadata of an explicit data tag"
     expected: valid
-    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035]
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-012, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035]
     origin: {kind: guideline, ref: MG B1.1.5}
     status: reviewed
     notes: >-
-      The requester sends the complete MetaData with a changed Description; the PublisherId is the requester's (MG 7.3).
+      The requester sends the complete MetaData (incl. the publisher-defined DataSetClassId, SF-074) with a changed Description; the PublisherId is the requester's (MG 7.3).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
     payload: |-
       {
@@ -1670,6 +1671,7 @@ vectors:
               ]
             }
           ],
+          "DataSetClassId": "1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67",
           "ConfigurationVersion": {
             "MajorVersion": 693008710,
             "MinorVersion": 693008710
