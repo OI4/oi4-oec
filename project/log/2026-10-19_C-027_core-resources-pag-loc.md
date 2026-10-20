@@ -292,3 +292,19 @@ Points for the PO:
 1. Review `30fa928` (8.3.13 Query, 8.3.13.1, 8.2.3, 8.3.10, 1.3, 9.1.10, B1.1.10), the amended GL-ADR-020 (`c2619e6`) and SF-072 in B1.1.4 (`264fc2c`), in particular the agent decisions above.
 2. Review the draft entries: REQ-QRY-001 … 004 (view `qry.md`), REQ-MSG-019/020 (`msg.md`), REQ-RES-REFDES-003, 011 … 016 (`res-refdes.md`), V-PAY-053/054 (`payload-guideline.md`) – then MSG, RES-REFDES and QRY become `reviewed`.
 3. Decide SF-074 (B1.1.5 `DataSetClassId`; not blocking, otherwise a vector edit in C-028).
+
+## Addendum 8 – PO review of the `Query` changes (2026-10-20)
+
+PO input (chat):
+
+- Guideline text of `30fa928` accepted, including the structure (folder `8-3.13 Query`, 8.3.13.1 "Query of ReferenceDesignation") and the other agent decisions of addendum 7; the amended GL-ADR-020 (`c2619e6`) with it.
+- SF-072: the extension beyond the proposal (`DataSetClassId` also in the two "Pub all" examples of B1.1.4) accepted.
+- REQ-QRY-001 … 004, REQ-MSG-019/020, REQ-RES-REFDES-003, 011 … 016 and V-PAY-053/054 accepted.
+
+Workspace:
+
+- `c310b94` statuses → `reviewed`; areas MSG, RES-REFDES and QRY → `reviewed`.
+- `87cc900` views and coverage report re-rendered.
+- Verification at `15eaa8a`: `spectool lint` ok (303 requirements, 141 informative, 54 payload vectors), `render -check` ok, `coverage` (MSG, RES-REFDES, QRY reviewed, 0 open), `inventory -check -rev 15eaa8a` ok.
+
+State: nothing in the catalog or the vectors is `draft` any more. Open: SF-074 (B1.1.5 `DataSetClassId`, not blocking; otherwise a vector edit in C-028). C-027 is complete; next is C-028.
