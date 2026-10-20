@@ -66,11 +66,13 @@ C-027 (PO review of views, 2026-10-20): REQ-MSG-021 confirmed; views `res-*.md`,
 
 C-027 (PO decisions, 2026-10-20): MAM, **GL-ADR-019** and V-PAY-004 accepted; **SF-069 → option (b) "OneDown"** with a separate GL-ADR (L1/L2 optional, L3 mandatory); **SF-071** as proposed. Guideline `ec76e41` (new **MG 8.3.13 `ChildrenRequest`**, `DataSetWriterId` 9 in 8.2.3, SHOULD `Parent.IdentificationLink` in 8.3.10, 9.1.10 section, 1.3 grading, B1.1.10 examples), **GL-ADR-020** `8fb837e`, figures `655e97f` (`Oi4v2/`, `<EventLevel>`, typos, Figure 9 redrawn as v2 example), register `70b4c01` (SF-069/071 resolved, **SF-072 open** – B1.1.4 `DataSetClassId`, not blocking; next SF-073). Re-baseline on **`70b4c01`**: checker `dc1d40e`, REQs `bbb3a51` – REQ-MSG-019/020 and REQ-RES-REFDES-003 changed (→ `draft`), **new REQ-RES-REFDES-011 … 016** (`draft`), areas **MSG** and **RES-REFDES** `drafted`; vectors **V-PAY-053/054** `draft` (`108b8c1`); views `87f8ff8`. Log addendum 5.
 
+C-027 (PO review, 2026-10-20, addendum 6): **SF-072, GL-ADR-020 and Figure 9 accepted.** PO question: one general resource-specific `Get` helper instead of one reserved `DataSetWriterId` per helper (all reserved ids 1 … 9 are used now). Register `dd2628c`: SF-072 `decided`, **new SF-073 (open)** – proposal: generic helper `Query` (`DataSetWriterId` 9, query parameters per resource like a REST query string; `ChildrenRequest` becomes the `Query` of `ReferenceDesignation`). No re-baseline (register only), catalog unchanged; the `ChildrenRequest` drafts stay `draft` until SF-073 is decided.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review (C-027 addendum 5)** – GL-ADR-020 and `ec76e41` (agent decisions: `DataSetWriterId` 9, `Aspect` optional, SHOULD on `Parent.IdentificationLink`, requester SHOULD check `Parent`, B1.1.10 values), the redrawn Figure 9 and the figure fixes `655e97f`; the draft entries REQ-MSG-019/020, REQ-RES-REFDES-003, REQ-RES-REFDES-011 … 016 and V-PAY-053/054 (then MSG and RES-REFDES back to `reviewed`); decide SF-072 (not blocking).
+1. **PO decision (C-027 addendum 6)** – decide **SF-073** (generic `Query` helper with `DataSetWriterId` 9 instead of `ChildrenRequest`; recommendation option (c), as GL-ADR-021 amending GL-ADR-020) and give the implementation order; order for SF-072 (B1.1.4 `DataSetClassId`, decided) in the guideline. Then review the draft entries REQ-MSG-019/020, REQ-RES-REFDES-003, REQ-RES-REFDES-011 … 016 and V-PAY-053/054 (then MSG and RES-REFDES back to `reviewed`). GL-ADR-020, Figure 9 and the figure fixes `655e97f` are accepted.
 2. **C-028** – remaining resources (`RES-DATA`, `RES-META`, `RES-EVENT`, `RES-CONFIG`, `RES-SUBLIST`) + `BUS` + payload columns of the Method × Resource matrix; golden vectors for B1.1.3 … B1.1.6, B1.1.9 and the Status events of B1.1.3 … B1.1.10 (SF-056). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-029 … C-031).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
@@ -90,7 +92,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `70b4c01`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 020, SF-001 … 071 resolved, SF-072 open (not blocking), next SF-073; OEC Process Description informative); previous `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `70b4c01`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 020, SF-001 … 071 resolved; register `dd2628c`: SF-072 decided, SF-073 open (not blocking), next SF-074; OEC Process Description informative); previous `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -102,7 +104,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. Open spec finding SF-072 (B1.1.4 `DataSetClassId`) is not blocking; next free id SF-073.
+- None. SF-072 (B1.1.4 `DataSetClassId`) is decided, SF-073 (generic `Query` helper) is open – both not blocking; next free id SF-074.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
