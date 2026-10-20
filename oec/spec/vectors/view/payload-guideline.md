@@ -1397,7 +1397,7 @@ Payload:
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `oee`
 - Expected: valid
-- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032)
+- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-RES-META-001](../../requirements/view/res-meta.md#req-res-meta-001)
 - Origin: guideline MG B1.1.5
 - Status: reviewed
 
@@ -1429,7 +1429,7 @@ Payload:
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `oee`
 - Expected: valid
-- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-012](../../requirements/view/msg.md#req-msg-012), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-MSG-033](../../requirements/view/msg.md#req-msg-033), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-MSG-041](../../requirements/view/msg.md#req-msg-041)
+- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-012](../../requirements/view/msg.md#req-msg-012), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-MSG-033](../../requirements/view/msg.md#req-msg-033), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-MSG-041](../../requirements/view/msg.md#req-msg-041), [REQ-RES-META-002](../../requirements/view/res-meta.md#req-res-meta-002), [REQ-RES-META-003](../../requirements/view/res-meta.md#req-res-meta-003)
 - Origin: guideline MG B1.1.5
 - Status: reviewed
 
@@ -1654,7 +1654,7 @@ Payload:
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `oee`
 - Expected: valid
-- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-012](../../requirements/view/msg.md#req-msg-012), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035)
+- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-012](../../requirements/view/msg.md#req-msg-012), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-RES-META-004](../../requirements/view/res-meta.md#req-res-meta-004)
 - Origin: guideline MG B1.1.5
 - Status: reviewed
 

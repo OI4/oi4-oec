@@ -1235,7 +1235,7 @@ vectors:
   - id: V-PAY-020
     title: "B1.1.5: Get Metadata of an explicit data tag"
     expected: valid
-    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-015, REQ-MSG-032]
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-015, REQ-MSG-032, REQ-RES-META-001]
     origin: {kind: guideline, ref: MG B1.1.5}
     status: reviewed
     notes: >-
@@ -1257,7 +1257,7 @@ vectors:
   - id: V-PAY-021
     title: "B1.1.5: Pub Metadata of an explicit data tag, reply to a Get"
     expected: valid
-    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-012, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-033, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041]
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-012, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-033, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041, REQ-RES-META-002, REQ-RES-META-003]
     origin: {kind: guideline, ref: MG B1.1.5}
     status: reviewed
     notes: >-
@@ -1472,7 +1472,7 @@ vectors:
   - id: V-PAY-022
     title: "B1.1.5: Set Metadata of an explicit data tag"
     expected: valid
-    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-012, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035]
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-012, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035, REQ-BUS-010, REQ-RES-META-004]
     origin: {kind: guideline, ref: MG B1.1.5}
     status: reviewed
     notes: >-
