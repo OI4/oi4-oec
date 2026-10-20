@@ -3,7 +3,7 @@
 # ADR-0018). Reserved DataSetWriterIds and names: REQ-MSG-019. Checked by
 # tools/internal/payload (C-027).
 area: PAG
-baseline: "c6453c7"
+baseline: "ca8d1c5"
 requirements:
   - id: REQ-PAG-001
     title: Fields of the PaginationRequest DataSet
@@ -20,19 +20,25 @@ requirements:
     refs: [MG 8.3.11.1, SF-063]
     quotes:
       - ref: MG 8.3.11.1
+        text: A published message to the topic method Get may use a PaginationRequest; if it does, the PaginationRequest must contain PerPage.
+      - ref: MG 8.3.11.1
         text: The value of PerPage must be > 0.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.11.1-83b892c6, MG-8.3.11.1-8cb5f159, MG-8.3.11.1-79ee4a24]
+    inventory: [MG-8.3.11.1-b256a266, MG-8.3.11.1-83b892c6, MG-8.3.11.1-8cb5f159, MG-8.3.11.1-79ee4a24]
     status: draft
 
   - id: REQ-PAG-002
     title: A PaginationRequest is answered page by page
     statement: >-
       A Get with a PaginationRequest is answered with NetworkMessages that
-      contain at most PerPage resource DataSetMessages each: with Page > 0
-      only the requested page is published, with Page 0 all pages are
-      published one after the other. A requested page beyond the last page is
-      answered with a page without resource DataSetMessages (proposal SF-063).
+      contain at most PerPage resource DataSetMessages each (helper DataSets
+      not counted). Pages are numbered from 1; page n contains the resource
+      DataSetMessages (n-1)·PerPage+1 … n·PerPage of the result. With
+      Page > 0 only the requested page is published (the requester gets the
+      next page with Page + 1 while HasNext is true); with Page 0 all pages
+      are published one after the other, numbered from 1. A requested page
+      beyond the last page is answered with a page without resource
+      DataSetMessages and HasNext false.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -41,17 +47,24 @@ requirements:
     refs: [MG 8.3.11.1, SF-063]
     quotes:
       - ref: MG 8.3.11.1
-        text: A published message to the topic method Get may use PerPage to announce, how many DataSetMessages it expects maximum in the related publication.
+        text: PerPage is the requested page size, i.e. the maximum number of resource DataSetMessages (without helper DataSets such as Pagination or Locale) a NetworkMessage of the related publication may contain.
       - ref: MG 8.3.11.1
         text: If several NetworkMessages must be published to transport the relevant DataSetMessages, the value of Page shows which page is requested.
       - ref: MG 8.3.11.1
+        text: A requested page beyond the last page must be answered with a page without resource DataSetMessages and HasNext false.
+      - ref: MG 8.3.11.1
         text: The value of Page must be > 0 to get a defined page with related information.
+      - ref: MG 8.3.11.1
+        text: The value of Page must be 0 to request all information in a fragmented way with a maximal count of PerPage DataSetMessages for each fragment.
     verification: [d7-test]
-    inventory: [MG-8.3.11.1-c4df177f, MG-8.3.11.1-cd18f8ad, MG-8.3.11.1-35d839fd, MG-8.3.11.1-6175a9d6]
+    inventory: [MG-8.3.11.1-ce9aec11, MG-8.3.11.1-cd18f8ad, MG-8.3.11.1-b66d8c5d, MG-8.3.11.1-35d839fd, MG-8.3.11.1-a9803b99, MG-8.3.11.1-4d823c40]
     status: draft
     notes: >-
-      "may use PerPage" refers to the use of the PaginationRequest as a whole;
-      PerPage itself is Mandatory (SF-063).
+      Page 0 is no paging through the result but a transmission of the
+      complete result in parts of PerPage DataSetMessages (MG 8.3.11.1).
+      Pages requested with separate Gets are not guaranteed to be consistent
+      (REQ-PAG-007 applies to one series). The publisher may use a smaller
+      page size than requested (REQ-PAG-004).
 
   - id: REQ-PAG-003
     title: Fields of the Pagination DataSet
@@ -73,65 +86,83 @@ requirements:
     title: Pagination values are consistent
     statement: >-
       In a Pagination, TotalCount is the number of resource DataSetMessages
-      of the whole series (helper DataSets not counted), PerPage the maximum
-      number of resource DataSetMessages per NetworkMessage (the requested
-      PerPage when answering a PaginationRequest), Page the number of the
-      published page starting at 1, HasNext true exactly if Page · PerPage <
-      TotalCount, and PaginationId the MessageId of the first NetworkMessage
-      of the series; a NetworkMessage contains at most PerPage resource
-      DataSetMessages (proposal SF-063).
+      of the complete result (helper DataSets not counted), PerPage the page
+      size (when answering a PaginationRequest the requested PerPage or a
+      smaller value, e.g. because of the MaxPacketSize), Page the number of
+      the published page starting at 1, HasNext true exactly if Page ·
+      PerPage < TotalCount, and PaginationId the MessageId of the first
+      NetworkMessage of the series (the NetworkMessages published for one Get
+      or for one publication not triggered by a Get; an answer for a single
+      page carries its own MessageId). All pages except the last one contain
+      exactly PerPage resource DataSetMessages, the last page may contain
+      fewer.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher]
     condition: The publication carries a Pagination.
-    refs: [MG 8.3.11.2, SF-035, SF-063]
+    refs: [MG 8.3.11.2, SF-063]
     quotes:
       - ref: MG 8.3.11.2
-        text: A published message to the topic methods Pub might use TotalCount to announce, how many of the actual processed resources can be expected.
+        text: TotalCount is the number of resource DataSetMessages of the complete result (all pages); helper DataSets such as Pagination or Locale are not counted.
       - ref: MG 8.3.11.2
-        text: A published message to the topic methods Pub may use PerPage to announce, how many of the TotalCount DataSetMessages will be included in this publication.
+        text: All pages except the last one must contain exactly PerPage resource DataSetMessages; the last page may contain fewer.
       - ref: MG 8.3.11.2
-        text: HasNext shows if an additional NetworkMessage can be expected.
+        text: When answering a PaginationRequest, PerPage is the requested PerPage or a smaller value, if the publisher has to limit the page size (e.g. because of the MaxPacketSize, 8.3.11 Pagination).
+      - ref: MG 8.3.11.2
+        text: HasNext must be true exactly if Page · PerPage < TotalCount.
       - ref: MG 8.3.11.2
         text: The PaginationId contains the <MessageId> of the first/initial paginated NetworkMessage in this series.
+      - ref: MG 8.3.11.2
+        text: Therefore, the answer to a Get for a single page contains its own MessageId as PaginationId (B1.1.11 Pagination).
     verification: [d7-validate, d7-monitor]
-    inventory: [MG-8.3.11.2-f0bcbef0, MG-8.3.11.2-35875bdf, MG-8.3.11.2-1b7ec9ae, MG-8.3.11.2-2d5655ce, MG-8.3.11.2-e61bb795, MG-8.3.11.2-42fdc31a]
+    inventory: [MG-8.3.11.2-4b6b231f, MG-8.3.11.2-e698e9f8, MG-8.3.11.2-3a789a14, MG-8.3.11.2-d6ec42cf, MG-8.3.11.2-6fc2b607, MG-8.3.11.2-2d5655ce, MG-8.3.11.2-1a94fea9, MG-8.3.11.2-e54d779d, MG-8.3.11.2-42fdc31a, MG-8.3.11.2-0e7a1e60, MG-8.3.11.2-4eccd43a]
     status: draft
     notes: >-
       Within one NetworkMessage the payload checker verifies the field types,
-      Page ≥ 1, the number of resource DataSetMessages ≤ PerPage, HasNext and
-      – on Page 1 – PaginationId = MessageId; the order of a series is
-      checked by D7 (monitor).
+      Page ≥ 1, the number of resource DataSetMessages (exactly PerPage, or
+      the rest on the last page, 0 beyond the end), HasNext and – on Page 1 –
+      PaginationId = MessageId; the series (incl. the PaginationId of a
+      single requested page > 1 and a PerPage not above the requested one)
+      is checked by D7 (monitor, test).
 
   - id: REQ-PAG-005
     title: Too many DataSetMessages are paginated
     statement: >-
-      A publisher that has more resource DataSetMessages than fit into one
-      NetworkMessage (by its own limit or by the PerPage of a
-      PaginationRequest) publishes them in several NetworkMessages to the same
-      topic, each with a Pagination, until all DataSetMessages are published.
-      This applies to every resource with a list of DataSetMessages (e.g. MAM,
+      A NetworkMessage does not exceed the MaxPacketSize of the Message Bus
+      (RIG 4.1.1). A publisher that has more resource DataSetMessages than fit
+      into one NetworkMessage (the NetworkMessage would exceed the
+      MaxPacketSize, its own limit for publications not triggered by a Get,
+      or the PerPage of a PaginationRequest) publishes them in several
+      NetworkMessages to the same topic, each with a Pagination, until all
+      DataSetMessages are published. A Get without PaginationRequest is
+      answered with the complete result, paginated if necessary. This applies
+      to every resource published as a list of DataSetMessages (e.g. MAM,
       Health, Profile, PublicationList, ReferenceDesignation).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher]
-    refs: [MG 8.3.11, MG 9.1.1, MG 9.1.2, MG 9.1.7, MG 9.1.8, MG 9.1.10, SF-063]
+    refs: [MG 8.3.11, MG 8.3.11.1, MG 9.1.1, MG 9.1.2, MG 9.1.7, MG 9.1.8, MG 9.1.10, RIG 4.1.1, SF-062, SF-063]
     quotes:
       - ref: MG 8.3.11
-        text: To prevent this, an optional DataSetMessage with Pagination information is available to indicate that there are other NetworkMessages with associated DataSetMessages.
+        text: A NetworkMessage must not exceed the MaxPacketSize of the Message Bus (OEC Runtime & Infrastructure Guideline, 4.1.1 Message Bus Storage, at least 262144 bytes).
+      - ref: MG 8.3.11
+        text: In this case, it must use the Pagination mechanism.
+      - ref: MG 8.3.11
+        text: Pagination information can be used in combination with every Resource that is published as a list of DataSetMessages.
       - ref: MG 9.1.1
         text: Once too many DataSetMessages are available to add to a single NetworkMessage, pagination mechanism must be used (8.3.11 Pagination).
       - ref: MG 9.1.1
         text: The publisher must publish as many NetworkMessages to the same topic, using pagination object for telling so, till all DataSetMessages are published.
     verification: [d7-monitor, d7-test]
-    inventory: [MG-8.3.11-0a2549a0, MG-8.3.11-135129ca, MG-9.1.1-a242a498, MG-9.1.1-5f90ef30, MG-9.1.2-262fa218, MG-9.1.2-0af27f74, MG-9.1.7-fe765cc6, MG-9.1.7-a9a20bff, MG-9.1.8-ea9cd5b6, MG-9.1.8-03c98043, MG-9.1.10-e685d6ba, MG-9.1.10-23d0ef72]
+    inventory: [MG-8.3.11-0a2549a0, MG-8.3.11-135129ca, MG-8.3.11-2316f9db, MG-8.3.11-d1b705f1, MG-8.3.11-1d3f1c80, MG-8.3.11.1-6db49b65, MG-9.1.1-a242a498, MG-9.1.1-5f90ef30, MG-9.1.2-262fa218, MG-9.1.2-0af27f74, MG-9.1.7-fe765cc6, MG-9.1.7-a9a20bff, MG-9.1.8-ea9cd5b6, MG-9.1.8-03c98043, MG-9.1.10-e685d6ba, MG-9.1.10-23d0ef72]
     status: draft
     notes: >-
       For publications not triggered by a Get the publisher defines the
-      maximum size on its own (MG 8.3.11). The pagination sentences of the
+      maximum size on its own (MG 8.3.11), within the MaxPacketSize. The
+      MaxPacketSize of the broker itself is a requirement of the
+      infrastructure (RIG 4.1.1). The pagination sentences of the
       other resources (Data, Event, SubscriptionList, …) are mapped in C-028.
 
   - id: REQ-PAG-006
@@ -172,23 +203,51 @@ requirements:
     title: PaginationRequest only in Get, Pagination only in Pub
     statement: >-
       A NetworkMessage contains a PaginationRequest only with the method Get
-      and a Pagination only with the method Pub, each at most once (proposal
-      SF-062 (b)).
+      and a Pagination only with the method Pub, each at most once. A
+      receiver ignores a PaginationRequest or Pagination in a NetworkMessage
+      of another method.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher, requester, responder]
-    refs: [MG 8.3.11, MG 8.3.11.1, MG 8.3.11.2, SF-035, SF-062]
+    refs: [MG 8.3.11, MG 8.3.11.1, MG 8.3.11.2, SF-062]
     quotes:
+      - ref: MG 8.3.11
+        text: A PaginationRequest must only be used with the method Get and a Pagination only with the method Pub, each at most once per NetworkMessage.
+      - ref: MG 8.3.11
+        text: A PaginationRequest or Pagination in a NetworkMessage of another method is ignored by the receiver.
       - ref: MG 8.3.11
         text: The Pagination object and PaginationRequest object differ for the methods Pub and Get.
       - ref: MG 8.3.11
         text: A subscriber that wants to request information via …/Get/<Resource> can add a PaginationRequest object to its payload to define the maximum number of DataSetMessages the NetworkMessage may contain so that the subscriber is able to handle it.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.11-1bd35c16, MG-8.3.11-083cc809]
+    inventory: [MG-8.3.11-f112da9b, MG-8.3.11-f1ca1333, MG-8.3.11-083cc809]
     status: draft
     notes: >-
-      "Pagination information can be used … for every Method" (MG 8.3.11)
-      contradicts the method-specific definitions of 8.3.11.1 (Get) and
-      8.3.11.2 (Pub); a receiver ignores a misplaced helper (REQ-MSG-046).
+      The payload checker reports a misplaced or repeated helper (sender
+      view, strict); a tolerant receiver ignores it (REQ-MSG-046).
+
+  - id: REQ-PAG-009
+    title: Set and Del are not paginated
+    statement: >-
+      Set and Del messages are not paginated: a Set carries a single
+      DataSetMessage addressed by Source and Filter of the topic, a Del none.
+      A single DataSetMessage fits into one NetworkMessage (within the
+      MaxPacketSize).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, requester]
+    refs: [MG 8.3.11, SF-062]
+    quotes:
+      - ref: MG 8.3.11
+        text: A single DataSetMessage must fit into one NetworkMessage; a provider should keep large DataSets well below the MaxPacketSize, e.g. by splitting a large Config into several contexts.
+    verification: [d7-validate]
+    inventory: [MG-8.3.11-0cb431c2]
+    status: draft
+    notes: >-
+      The same sentence recommends (SHOULD) to keep large DataSets well
+      below the MaxPacketSize, e.g. by splitting a large Config into several
+      contexts; the recommendation is covered by this key and not tested
+      separately. Page numbers are no stable addresses (MG 8.3.11), so a Set
+      can not address "page 5" of a large Config (PO review of C-027).

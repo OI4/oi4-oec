@@ -5,7 +5,7 @@
 # REQ-TOP-017, the Close/Will content is area LIFE. Checked by
 # tools/internal/payload (C-027).
 area: RES-HEALTH
-baseline: "c6453c7"
+baseline: "ca8d1c5"
 requirements:
   # --- DataSet content (MG 8.3.2) ---------------------------------------------
   - id: REQ-RES-HEALTH-001
@@ -35,29 +35,28 @@ requirements:
     title: Health is the most severe status of the Details
     statement: >-
       If Details is present, Health equals the most severe Health of all
-      DetailObjects, using the severity of Table 3 (FAILURE_1 high, OFF_SPEC_3
-      medium, CHECK_FUNCTION_2 and MAINTENANCE_REQUIRED_4 low; proposal SF-065
-      (a): FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 >
-      NORMAL_0); statuses of lower severity stay listed in Details.
+      DetailObjects, using the order of severity FAILURE_1 > OFF_SPEC_3 >
+      CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0; statuses of lower
+      severity stay listed in Details.
     keyword: MUST
-    implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The Health DataSet contains Details.
-    refs: [MG 8.3.2, SF-035, SF-065]
+    refs: [MG 8.3.2, SF-065]
     quotes:
       - ref: MG 8.3.2
-        text: The Health of the asset reflects the most severe status of all Details, according to the severity defined in Table 3.
+        text: The Health of the asset must reflect the most severe status of all Details, according to the severity defined in Table 3.
+      - ref: MG 8.3.2
+        text: The order of severity is FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0
       - ref: MG 8.3.2
         text: Statuses with lower severity remain visible in Details, even if they are superimposed by a more severe status.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.2-2d1ee307, MG-8.3.2-2a0f2648]
+    inventory: [MG-8.3.2-58eaca8c, MG-8.3.2-2a0f2648]
     status: draft
     notes: >-
-      Keyword-less statement of MG 8.3.2 (G-1.6, SF-065 (b)). The order of the
-      two low-severity states is not defined by Table 3 (SF-065 (a)); the
-      checks accept either of them as the most severe one.
+      Order of the two low-severity states (CHECK_FUNCTION_2 before
+      MAINTENANCE_REQUIRED_4) per SF-065 (a), GL-ADR-019.
 
   - id: REQ-RES-HEALTH-003
     title: NE107 symbols and colors for the Health states
@@ -114,7 +113,7 @@ requirements:
       - ref: MG 9.1.2
         text: A Health object is not included.
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.2-8054d119]
+    inventory: [MG-9.1.2-7e8e4f18]
     status: draft
 
   - id: REQ-RES-HEALTH-006
@@ -154,8 +153,8 @@ requirements:
     refs: [MG 9.1.2, SF-062]
     quotes:
       - ref: MG 9.1.2
-        text: In combination with the method Pub, the payload contains DataSetMessages of type Health and optional Pagination (8.3.11 Pagination).
+        text: In combination with the method Pub, the payload contains DataSetMessages of type Health and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.2-8e8c331e]
+    inventory: [MG-9.1.2-470623ec]
     status: draft
-    notes: A Locale DataSet may be added to every method (MG 8.3.12, REQ-LOC-002, SF-062 (c)).
+    notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).

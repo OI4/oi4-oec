@@ -1,7 +1,7 @@
 # Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "c6453c7"
+baseline: "ca8d1c5"
 description: >-
   Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5,
   B1.1.7, B1.1.8, B1.1.10, B1.1.11, B1.1.12, B1.2.1): topic and message of the
@@ -135,55 +135,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 3456,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "SequenceNumber": 58,
-            "Timestamp": "2021-12-16T22:25:10.094Z",
-            "Payload": {
-              "Health": "MAINTENANCE_REQUIRED_4",
-              "HealthScore": 55,
-              "Details": [
-                {
-                  "Health": "MAINTENANCE_REQUIRED_4",
-                  "DiagnosticCode": "M-102",
-                  "Location": "Filter unit",
-                  "Description": "Filter cartridge nearly exhausted"
-                },
-                {
-                  "Health": "MAINTENANCE_REQUIRED_4",
-                  "DiagnosticCode": "M-215",
-                  "Location": "Pump 2",
-                  "Description": "Recommended operating hours for service nearly reached"
-                }
-              ]
-            }
-          },
-          {
-            //additional Health objects would be listed here if existing
-          },
-          {
-            //in case too many Health objacts are existing, a pagination object would point that out
-            //and further NetworkMessages with Health objects would be published under the same topic
-          }
-        ]
-      }
-    edits:
-      - target: "/Messages/2"
-        kind: removed
-        reason: "Placeholder object that only holds // comments (pagination hint), no JSON; pagination is shown by V-PAY-006."
-      - target: "/Messages/1"
-        kind: removed
-        reason: "Placeholder object that only holds a // comment (further Health objects), no JSON."
 
   - id: V-PAY-005
     title: "B1.1.11: Get MAM of all assets with PaginationRequest"
@@ -1982,61 +1933,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 55,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Manufacturer": {
-                "Locale": "en-US",
-                "Text": "Provider Ltd."
-              },
-              "ManufacturerUri": "provider.com",
-              "Model": {
-                "Locale": "en-US",
-                "Text": "FieldDataService"
-              },
-              "ProductCode": "FDS-001",
-              "HardwareRevision": "",
-              "SoftwareRevision": "1.0.1",
-              "DeviceRevision": "",
-              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
-              "DeviceClass": "Oi4.OTConnector",
-              "SerialNumber": "1200-0345",
-              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
-              "RevisionCounter": 1,
-              "Description": {
-                "Locale": "en-US",
-                "Text": "This OT connector provides field data"
-              }
-            }
-          },
-          {
-            //additional MAM objects would be listed here if existing
-          },
-          {
-            //in case too many MAM objacts are existing, a pagination object would point that out
-            //and further NetworkMessages with MAM objects would be published under the same topic
-          }
-        ]
-      }
-    edits:
-      - target: "/Messages/2"
-        kind: removed
-        reason: "Placeholder object that only holds // comments (pagination hint, typo \"objacts\"), no JSON; pagination is shown by V-PAY-006."
-        sf: [SF-056]
-      - target: "/Messages/1"
-        kind: removed
-        reason: "Placeholder object that only holds a // comment (further MAM objects), no JSON."
-        sf: [SF-056]
 
   - id: V-PAY-030
     title: "B1.1.7: Get Profile of an explicit asset"
@@ -2085,10 +1981,10 @@ vectors:
     origin: {kind: guideline, ref: MG B1.1.7}
     status: draft
     notes: >-
-      Answer to V-PAY-030. Resources lists distinct resource names including MAM,
-      Health and Profile. The application of the B1 examples also offers Data,
-      Event, Config and ReferenceDesignation (B1.1.3 … B1.1.10), which this
-      Profile does not list (SF-066 (b)); the vector keeps the example as it is.
+      Answer to V-PAY-030. Resources lists distinct names of the resources and
+      the common service NewDataSetWriterId the application of the B1 examples
+      serves (B1.1.1 … B1.1.10, MG 9.2.1), including MAM, Health and Profile
+      (example corrected by SF-066 (b), GL-ADR-019).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Profile/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -2108,9 +2004,15 @@ vectors:
               "Resources": [
                 "MAM",
                 "Health",
+                "Config",
+                "Data",
+                "Metadata",
+                "Event",
                 "Profile",
                 "PublicationList",
-                "SubscriptionList"
+                "SubscriptionList",
+                "ReferenceDesignation",
+                "NewDataSetWriterId"
               ]
             }
           }
@@ -2126,7 +2028,7 @@ vectors:
     notes: >-
       Topic without Source: one DataSetMessage per asset; here only the
       application itself. Self-initialized, so ReplyTo is empty. Same Resources as
-      V-PAY-032 (SF-066 (b)).
+      V-PAY-032.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Profile"
     payload: |-
       {
@@ -2144,54 +2046,20 @@ vectors:
               "Resources": [
                 "MAM",
                 "Health",
+                "Config",
+                "Data",
+                "Metadata",
+                "Event",
                 "Profile",
                 "PublicationList",
-                "SubscriptionList"
+                "SubscriptionList",
+                "ReferenceDesignation",
+                "NewDataSetWriterId"
               ]
             }
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "48017c6a-05c8-48d7-9d85-4b08bbb707f3",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 74,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Resources": [
-                "MAM",
-                "Health",
-                "Profile",
-                "PublicationList",
-                "SubscriptionList"
-              ]
-            }
-          },
-          {
-            //additional Profile objects would be listed here if existing
-          },
-          {
-            //in case too many Profile objacts are existing, a pagination object would point that out
-            //and further NetworkMessages with Profile objects would be published under the same topic
-          }
-        ]
-      }
-    edits:
-      - target: "/Messages/2"
-        kind: removed
-        reason: "Placeholder object that only holds // comments (pagination hint, typo \"objacts\"), no JSON; pagination is shown by V-PAY-006."
-        sf: [SF-056]
-      - target: "/Messages/1"
-        kind: removed
-        reason: "Placeholder object that only holds a // comment (further Profile objects), no JSON."
-        sf: [SF-056]
 
   - id: V-PAY-034
     title: "B1.1.8: Get an explicit PublicationList entry"
@@ -2298,11 +2166,11 @@ vectors:
     origin: {kind: guideline, ref: MG B1.1.8}
     status: draft
     notes: >-
-      Entries for MAM (55), Health (3456), Profile (74), Event Syslog/Notice (625)
-      and Data/oee (93) of the application itself; MAM, Health and Profile have no
-      Filter. All entries use the DataSetWriterId 161 of the PublicationList, as
-      the note of MG 9.1.8 demands, although MG 8.2.3 requires an own id per
-      DataSetMessage (SF-067 (a)).
+      Entries for MAM (55), Health (3456), Profile (74), Event Syslog/Notice (625,
+      FILTER_4), Data/oee (93) and ReferenceDesignation (94) of the application
+      itself; MAM, Health, Profile and ReferenceDesignation have no Filter. All
+      entries use the common DataSetWriterId 161 of the PublicationList
+      (exception of MG 8.2.3, REQ-MSG-021).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -2376,104 +2244,21 @@ vectors:
               "Mode": "APPLICATION_SOURCE_FILTER_8",
               "Config": "MODE_AND_INTERVAL_3"
             }
-          }
-        ]
-      }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "217434d6-6e1e-4230-b907-f52bc9ffe152",
-        "ReplyTo": "",
-        "Messages": [
+          },
           {
             "DataSetWriterId": 161,
-            "WriterGroupName": "MAM",
+            "WriterGroupName": "ReferenceDesignation",
             "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
             "Payload": {
-              "Resource": "MAM",
+              "Resource": "ReferenceDesignation",
               "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-              "DataSetWriterId": 55,
+              "DataSetWriterId": 94,
               "Mode": "APPLICATION_SOURCE_FILTER_8",
               "Config": "NONE_0"
             }
-          },
-          {
-            "DataSetWriterId": 161,
-            "WriterGroupName": "Health",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Resource": "Health",
-              "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-              "DataSetWriterId": 3456,
-              "Mode": "APPLICATION_SOURCE_FILTER_8",
-              "Interval": 0,
-              "Config": "NONE_0"
-            }
-          },
-          {
-            "DataSetWriterId": 161,
-            "WriterGroupName": "Profile",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-                "Resource": "Profile",
-                "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-                "DataSetWriterId": 74,
-                "Mode": "APPLICATION_SOURCE_FILTER_8",
-                "Interval": 0,
-                "Config": "NONE_0"
-            }
-          },
-          {
-            "DataSetWriterId": 161,
-            "WriterGroupName": "Event/Syslog/Notice",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-                "Resource": "Event",
-                "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-                "Filter": "Syslog/Notice",
-                "DataSetWriterId": 625,
-                "Mode": "APPLICATION_2",
-                "Interval": 0,
-                "Config": "NONE_0"
-            }
-          },
-          {
-            "DataSetWriterId": 161,
-            "WriterGroupName": "Data/oee",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Resource": "Data",
-              "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-              "Filter": "oee",
-              "DataSetWriterId": 93,
-              "Mode": "APPLICATION_SOURCE_FILTER_8",
-              "Config": "MODE_AND_INTERVAL_3"
-            }
-          },
-          {
-            //additional PublicationList objects would be listed here if existing
-          },
-          {
-            //in case too many PublicationList objacts are existing, a pagination object would point that out
-            //and further NetworkMessages with PublicationList objects would be published under the same topic
           }
         ]
       }
-    edits:
-      - target: "/Messages/3/Payload/Mode"
-        kind: corrected
-        reason: "APPLICATION_2 → FILTER_4: an Event is only published on Pub/Event/<Source>/<Filter> (MG 9.1 matrix), so APPLICATION_2 enables no existing topic (REQ-RES-PUBLIST-012)."
-        sf: [SF-067]
-      - target: "/Messages/2"
-        kind: removed
-        reason: "Placeholder object that only holds // comments (pagination hint, typo \"objacts\"), no JSON; pagination is shown by V-PAY-006."
-        sf: [SF-056]
-      - target: "/Messages/1"
-        kind: removed
-        reason: "Placeholder object that only holds a // comment (further PublicationList objects), no JSON."
-        sf: [SF-056]
 
   - id: V-PAY-039
     title: "B1.1.8: Pub full PublicationList of all assets, self-initialized"
@@ -2484,9 +2269,8 @@ vectors:
     notes: >-
       Topic without Source: all entries of the application; here only those of the
       application itself, as in V-PAY-038. Self-initialized, so ReplyTo is empty.
-      All entries use the DataSetWriterId 161 of the PublicationList, as the note
-      of MG 9.1.8 demands, although MG 8.2.3 requires an own id per DataSetMessage
-      (SF-067 (a)).
+      All entries use the common DataSetWriterId 161 of the PublicationList
+      (exception of MG 8.2.3, REQ-MSG-021).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/PublicationList"
     payload: |-
       {
@@ -2558,102 +2342,21 @@ vectors:
               "Mode": "APPLICATION_SOURCE_FILTER_8",
               "Config": "MODE_AND_INTERVAL_3"
             }
-          }
-        ]
-      }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "217434d6-6e1e-4230-b907-f52bc9ffe152",
-        "ReplyTo": "",
-        "Messages": [
-           {
+          },
+          {
             "DataSetWriterId": 161,
-            "WriterGroupName": "MAM",
+            "WriterGroupName": "ReferenceDesignation",
             "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
             "Payload": {
-              "Resource": "MAM",
+              "Resource": "ReferenceDesignation",
               "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-              "DataSetWriterId": 55,
+              "DataSetWriterId": 94,
               "Mode": "APPLICATION_SOURCE_FILTER_8",
               "Config": "NONE_0"
             }
-          },
-          {
-            "DataSetWriterId": 161,
-            "WriterGroupName": "Health",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Resource": "Health",
-              "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-              "DataSetWriterId": 3456,
-              "Mode": "APPLICATION_SOURCE_FILTER_8",
-              "Interval": 0,
-              "Config": "NONE_0"
-            }
-          },
-          {
-            "DataSetWriterId": 161,
-            "WriterGroupName": "Profile",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-                "Resource": "Profile",
-                "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-                "DataSetWriterId": 74,
-                "Mode": "APPLICATION_SOURCE_FILTER_8",
-                "Config": "NONE_0"
-            }
-          },
-          {
-            "DataSetWriterId": 161,
-            "WriterGroupName": "Event/Syslog/Notice",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-                "Resource": "Event",
-                "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-                "Filter": "Syslog/Notice",
-                "DataSetWriterId": 625,
-                "Mode": "APPLICATION_2",
-                "Config": "NONE_0"
-            }
-          },
-          {
-            "DataSetWriterId": 161,
-            "WriterGroupName": "Data/oee",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Resource": "Data",
-              "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
-              "Filter": "oee",
-              "DataSetWriterId": 93,
-              "Mode": "APPLICATION_SOURCE_FILTER_8",
-              "Config": "MODE_AND_INTERVAL_3"
-            }
-          },
-          {
-            //additional PublicationList objects would be listed here if existing
-          },
-          {
-            //in case too many PublicationList objacts are existing, a pagination object would point that out
-            //and further NetworkMessages with PublicationList objects would be published under the same topic
           }
         ]
       }
-    edits:
-      - target: "/Messages/3/Payload/Mode"
-        kind: corrected
-        reason: "APPLICATION_2 → FILTER_4: an Event is only published on Pub/Event/<Source>/<Filter> (MG 9.1 matrix), so APPLICATION_2 enables no existing topic (REQ-RES-PUBLIST-012)."
-        sf: [SF-067]
-      - target: "/Messages/2"
-        kind: removed
-        reason: "Placeholder object that only holds // comments (pagination hint, typo \"objacts\"), no JSON; pagination is shown by V-PAY-006."
-        sf: [SF-056]
-      - target: "/Messages/1"
-        kind: removed
-        reason: "Placeholder object that only holds a // comment (further PublicationList objects), no JSON."
-        sf: [SF-056]
 
   - id: V-PAY-040
     title: "B1.1.8: Set an explicit PublicationList entry"
@@ -2788,61 +2491,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa",
-        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "Messages": [
-          {
-            "DataSetWriterId": 93,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "SequenceNumber": 4,
-            "Timestamp": "2021-12-16T22:25:10.094Z",
-            "Payload": {
-              "Location": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value>",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              },
-              "Function": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              },
-              "Product": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value>",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              }
-            }
-          }
-        ]
-      }
-    edits:
-      - target: "/Messages/0/Payload"
-        kind: instantiated
-        reason: "Placeholders <designation Value>, <Local designation Value> and <IdentificationLink> replaced by recurring example values of IEC 81346 (Function =P1.L2.FDS1/=FDS1 with parent =P1.L2/=L2, Product -P1.L2.FDS1/-FDS1 with parent -P1.L2/-L2, Location +P1.H3.R2/+R2 with parent +P1.H3/+H3; parent Identification Links consumer.com/LineController/LC-200/4711 and consumer.com/HallController/HC-300/815); the Function Local \"<Local designation Value\" also lacks its closing \">\"."
-        sf: [SF-056]
-      - target: "/Messages/0/DataSetWriterId"
-        kind: corrected
-        reason: "93 → 94: DataSetWriterId 93 is already used by Data/oee of the same publisher (B1.1.4, B1.1.8); a DataSetWriterId is unique per publisher (REQ-MSG-021)."
-        sf: [SF-056]
 
   - id: V-PAY-044
     title: "B1.1.10: Pub ReferenceDesignation of all assets, self-initialized"
@@ -2898,74 +2546,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 93,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Location": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value>",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              },
-              "Function": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              },
-              "Product": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value>",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              }
-            }
-          },
-          {
-            //additional mam objects would be listed here if existing
-          },
-          {
-            //in case too many mam objacts are existing, a pagination object would point that out
-            //and further NetworkMessages with mam objects would be published under the same topic
-          }
-        ]
-      }
-    edits:
-      - target: "/Messages/0/Payload"
-        kind: instantiated
-        reason: "Placeholders <designation Value>, <Local designation Value> and <IdentificationLink> replaced by recurring example values of IEC 81346 (Function =P1.L2.FDS1/=FDS1 with parent =P1.L2/=L2, Product -P1.L2.FDS1/-FDS1 with parent -P1.L2/-L2, Location +P1.H3.R2/+R2 with parent +P1.H3/+H3; parent Identification Links consumer.com/LineController/LC-200/4711 and consumer.com/HallController/HC-300/815); the Function Local \"<Local designation Value\" also lacks its closing \">\"."
-        sf: [SF-056]
-      - target: "/Messages/0/DataSetWriterId"
-        kind: corrected
-        reason: "93 → 94: DataSetWriterId 93 is already used by Data/oee of the same publisher (B1.1.4, B1.1.8); a DataSetWriterId is unique per publisher (REQ-MSG-021)."
-        sf: [SF-056]
-      - target: "/Messages/2"
-        kind: removed
-        reason: "Placeholder object that only holds // comments (pagination hint, \"mam objacts\" instead of ReferenceDesignation objects), no JSON; pagination is shown by V-PAY-006."
-        sf: [SF-056]
-      - target: "/Messages/1"
-        kind: removed
-        reason: "Placeholder object that only holds a // comment (further objects, \"mam objects\"), no JSON."
-        sf: [SF-056]
 
   - id: V-PAY-045
     title: "B1.1.10: Set ReferenceDesignation of an explicit asset"
@@ -3022,59 +2602,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "MessageType": "ua-data",
-        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 93,
-            "WriterGroupName": "",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "Location": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value>",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              },
-              "Function": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              },
-              "Product": {
-                "Value": "<designation Value>",
-                "Local": "<Local designation Value>",
-                "Parent": {
-                  "Value": "<designation Value>",
-                  "Local": "<Local designation Value>",
-                  "IdentificationLink": "<IdentificationLink>"
-                }
-              }
-            }
-          }
-        ]
-      }
-    edits:
-      - target: "/Messages/0/Payload"
-        kind: instantiated
-        reason: "Placeholders <designation Value>, <Local designation Value> and <IdentificationLink> replaced by recurring example values of IEC 81346 (Function =P1.L2.FDS1/=FDS1 with parent =P1.L2/=L2, Product -P1.L2.FDS1/-FDS1 with parent -P1.L2/-L2, Location +P1.H3.R2/+R2 with parent +P1.H3/+H3; parent Identification Links consumer.com/LineController/LC-200/4711 and consumer.com/HallController/HC-300/815); the Function Local \"<Local designation Value\" also lacks its closing \">\"."
-        sf: [SF-056]
-      - target: "/Messages/0/DataSetWriterId"
-        kind: corrected
-        reason: "93 → 94: DataSetWriterId 93 is already used by Data/oee of the same publisher (B1.1.4, B1.1.8); a DataSetWriterId is unique per publisher (REQ-MSG-021)."
-        sf: [SF-056]
 
   - id: V-PAY-046
     title: "B1.1.10: Del ReferenceDesignation of an explicit asset"
@@ -3084,42 +2611,19 @@ vectors:
     status: draft
     notes: >-
       The IT connector deletes the ReferenceDesignation of the application: no
-      ReferenceDesignation object, topic with Source. The example shows the
-      envelope of an answer of the OT connector (its MessageId and PublisherId,
-      ReplyTo of a request); the vector uses the requester like the Set (SF-068
-      (a)). The Status event that follows belongs to RES-EVENT (C-028).
+      ReferenceDesignation object, topic with Source; sent by the requesting IT
+      connector with empty ReplyTo (example corrected by SF-068 (a),
+      GL-ADR-019). The Status event that follows belongs to RES-EVENT (C-028).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/ReferenceDesignation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
-        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageId": "1639693520000-ITConnector/https://id.consumer.com/MEService/Inst07322",
         "MessageType": "ua-data",
         "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
         "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa",
         "ReplyTo": "",
         "Messages": []
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa",
-        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "Messages": []
-      }
-    edits:
-      - target: "/MessageId"
-        kind: corrected
-        reason: "MessageId of the OT connector → MessageId of the requesting IT connector (sender of the Del, as in the Set example)."
-        sf: [SF-068]
-      - target: "/PublisherId"
-        kind: corrected
-        reason: "PublisherId of the OT connector → the requesting IT connector (sender of the Del)."
-        sf: [SF-068]
-      - target: "/ReplyTo"
-        kind: corrected
-        reason: "A request answers no message: ReplyTo is empty (the example repeats the MessageId of the IT connector)."
-        sf: [SF-068]
 
   - id: V-PAY-047
     title: "B1.1.12: Pub MAM of all assets in the requested Locale, reply to a Get"
@@ -3130,8 +2634,8 @@ vectors:
     notes: >-
       Answer to V-PAY-007 (Get MAM with Locale de-DE): the application has a
       German localization, the subordinate device only English, so its
-      LocalizedText stay en-US (fallback, REQ-LOC-002, SF-062 (e)). The device has
-      no manual and no DeviceClass: DeviceManual "" (REQ-RES-MAM-012, SF-064 (a)).
+      LocalizedText stay en-US (fallback, REQ-LOC-002). The device has no manual
+      and no DeviceClass: DeviceManual "" (REQ-RES-MAM-012).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM"
     payload: |-
       {

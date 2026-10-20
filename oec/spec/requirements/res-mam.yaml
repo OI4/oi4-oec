@@ -5,7 +5,7 @@
 # and LOC; this file holds the DataSet content (MG 5) and the Message Bus
 # behavior of MG 9.1.1. Checked by tools/internal/payload (C-027).
 area: RES-MAM
-baseline: "c6453c7"
+baseline: "ca8d1c5"
 requirements:
   # --- DataSet content (MG 5, MG 8.3.1) ---------------------------------------
   - id: REQ-RES-MAM-001
@@ -23,31 +23,35 @@ requirements:
     applies_to: [application, device]
     refs: [MG 5, MG 8.3.1, MG 8.2.7]
     verification: [schema, d7-validate]
-    inventory: [MG-5-13b8e44e, MG-5-aabb4907, MG-5-371b4112, MG-5-58415521, MG-5-daf2a20f, MG-5-a20f7ee2, MG-5-8e3fdbf3, MG-5-23d862c1, MG-5-905d12f9, MG-5-b6837d2e, MG-5-5cddea30, MG-5-acac9e54, MG-5-11cc48ac, MG-5-411ec13c]
+    inventory: [MG-5-13b8e44e, MG-5-aabb4907, MG-5-371b4112, MG-5-58415521, MG-5-daf2a20f, MG-5-a20f7ee2, MG-5-8e3fdbf3, MG-5-23d862c1, MG-5-905d12f9, MG-5-b6837d2e, MG-5-5cddea30, MG-5-acac9e54, MG-5-11cc48ac, MG-5-fb1de158]
     status: draft
     notes: >-
       Field presence and types per REQ-CMP-025/026; LocalizedText per
       REQ-MSG-040; undefined keys per REQ-MSG-001 (strict) and REQ-MSG-046
-      (tolerant). GlobalAssetId is read only (the "'fused' write once?" of
-      MG 5 is an open question of the text, SF-064 (c)).
+      (tolerant). GlobalAssetId is read only and optional (MG 5, SF-064 (c),
+      GL-ADR-019); its SHOULD-provide rule is REQ-RES-MAM-023.
 
   - id: REQ-RES-MAM-002
     title: MAM content equals the OPC UA VendorNameplate
     statement: >-
       If the vendor implements the optional VendorNameplate Interface of OPC
       UA Part 100 for the asset, the MAM carries the same data content as
-      that interface.
+      that interface, as far as the values satisfy the rules of MG 5 (in
+      particular the ManufacturerUri is a domain name even if the
+      VendorNameplate uses a GUID).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The vendor implements the VendorNameplate Interface of OPC UA Part 100 for the asset.
-    refs: [MG 5]
+    refs: [MG 5, SF-064]
     quotes:
       - ref: MG 5
-        text: If a vendor has implemented the optional VendorNameplate Interface from OPC UA Part 100, they shall use the same data content for implementing the Master Asset Model information.
+        text: If a vendor has implemented the optional VendorNameplate Interface from OPC UA Part 100, they shall use the same data content for implementing the Master Asset Model information, as far as the values satisfy the rules of this chapter.
+      - ref: MG 5
+        text: In particular, the ManufacturerUri must be a domain name (see below), even if the VendorNameplate uses a GUID.
     verification: [manual]
-    inventory: [MG-5-997934e3, MG-5-84fb43b5]
+    inventory: [MG-5-411314b4, MG-5-84fb43b5, MG-5-5a8a5249]
     status: draft
 
   - id: REQ-RES-MAM-003
@@ -117,7 +121,9 @@ requirements:
     statement: >-
       If an OEC application generates an Oi4Identifier as Identification Link
       of the asset, it uses the ManufacturerUri, Model, ProductCode and
-      SerialNumber of the MAM for its elements, so that both stay consistent.
+      SerialNumber of the MAM for its elements, so that both stay consistent;
+      for the LocalizedText Model it uses the Text in the default locale
+      en-US, independent of a requested Locale.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -134,12 +140,12 @@ requirements:
         text: The ProductCode given for this property shall also be used for the Oi4Identifier of the asset, if an Oi4Identifier is generated as Identification Link (4.3 The Oi4Identifier).
       - ref: MG 5
         text: The SerialNumber given for this property shall also be used for the Oi4Identifier of the asset, if an Oi4Identifier is generated as Identification Link (4.3 The Oi4Identifier).
+      - ref: MG 5
+        text: For the Oi4Identifier, the Text of Model in the default locale English (en-US) must be used, so that the Oi4Identifier does not depend on a requested Locale (8.3.12 Locale).
     verification: [d7-validate]
-    inventory: [MG-5-6730acaf, MG-5-5694182f, MG-5-e0eafc63, MG-5-1318c738]
+    inventory: [MG-5-6730acaf, MG-5-5694182f, MG-5-e0eafc63, MG-5-1318c738, MG-5-815df636]
     status: draft
-    notes: >-
-      Counterpart of REQ-IL-027 (dnp-encoding per REQ-IL-033 allowed). For the
-      LocalizedText Model the Text is used (SF-064 (d)).
+    notes: Counterpart of REQ-IL-027 (dnp-encoding per REQ-IL-033 allowed); Model in en-US per SF-064 (d).
 
   - id: REQ-RES-MAM-007
     title: Model is the product name
@@ -162,8 +168,9 @@ requirements:
       The HardwareRevision is the manufacturer-internal revision of the
       hardware and is incremented for subsequent hardware revisions; a
       physical asset without formalized or with unknown hardware revision uses
-      "undefined"; a software-only asset (e.g. an application) uses the empty
-      string.
+      "undefined" (also instead of the OPC UA default empty string taken
+      from a VendorNameplate); a software-only asset (e.g. an application)
+      uses the empty string.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -176,18 +183,21 @@ requirements:
         text: In this case, the HardwareRevision shall be set to an empty string to detect the differences between hardware- and software-only assets!
       - ref: MG 5
         text: A hardware with undefined or unknown hardware revision shall set HardwareRevision to undefined.
+      - ref: MG 5
+        text: If such a value is taken from the VendorNameplate of a physical asset, the Master Asset Model must use "undefined" instead (for HardwareRevision and SoftwareRevision), except for the cases with an empty string described in the notes of this chapter.
     verification: [manual]
-    inventory: [MG-5-2c23667a, MG-5-6e1704bb, MG-5-ac686720, MG-5-7c26ea6d, MG-5-3c6ca755]
+    inventory: [MG-5-2c23667a, MG-5-6e1704bb, MG-5-ac686720, MG-5-7c26ea6d, MG-5-3c6ca755, MG-5-d357784d]
     status: draft
     notes: >-
       Not checked by the payload checks: whether an asset is software-only is
       not visible in the message (SF-064 (b)).
 
   - id: REQ-RES-MAM-009
-    title: Revisions as dot-separated four numbers
+    title: Revisions as Semantic Versioning or dot-separated four numbers
     statement: >-
-      HardwareRevision and SoftwareRevision use a dot-separated schema of four
-      numbers (e.g. 1.0.1.0).
+      HardwareRevision and SoftwareRevision use Semantic Versioning (e.g.
+      1.0.1, SemanticVersionString of OPC UA Part 100) or a dot-separated
+      schema of four numbers (e.g. 1.0.1.0).
     keyword: SHOULD
     domain: messaging
     levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
@@ -195,9 +205,9 @@ requirements:
     refs: [MG 5]
     quotes:
       - ref: MG 5
-        text: A recommended best practice is to use a dot-separated four numbers schema.
+        text: A recommended best practice is to use Semantic Versioning (e.g. 1.0.1, SemanticVersionString of OPC UA Part 100) or a dot-separated four numbers schema.
     verification: [manual]
-    inventory: [MG-5-c238e6a8, MG-5-6724144e]
+    inventory: [MG-5-62283509, MG-5-a0df566f]
     status: draft
 
   - id: REQ-RES-MAM-010
@@ -206,12 +216,13 @@ requirements:
       The SoftwareRevision is the manufacturer-internal revision of the
       software installed on the asset and is incremented for subsequent
       software revisions; an asset without formalized software revision uses
-      "undefined".
+      "undefined" (also instead of the OPC UA default empty string taken from
+      a VendorNameplate, see REQ-RES-MAM-008).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
-    refs: [MG 5]
+    refs: [MG 5, SF-064]
     quotes:
       - ref: MG 5
         text: If for any asset a manufacturer does not have a formalized software revision, it shall be set by default to "undefined".
@@ -241,9 +252,10 @@ requirements:
   - id: REQ-RES-MAM-012
     title: DeviceManual points to a human-readable manual
     statement: >-
-      The DeviceManual contains a URL (with scheme) that points to a
-      human-readable manual document of the asset; if no manual is available
-      for the asset, it is the empty string (proposal SF-064 (a)).
+      The DeviceManual contains a URL (with scheme, e.g. https://) that
+      points to a human-readable manual document of the asset; if no manual is
+      available, it is the empty string; a path in a local file system is not
+      used.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -251,13 +263,15 @@ requirements:
     refs: [MG 5, SF-064]
     quotes:
       - ref: MG 5
-        text: A DeviceManual property shall contain a URL that points to a human-readable manual document for the asset.
+        text: A DeviceManual property shall contain a URL (with scheme, e.g. https://) that points to a human-readable manual document for the asset.
+      - ref: MG 5
+        text: If no manual is available, the DeviceManual shall be set to an empty string.
+      - ref: MG 5
+        text: A path in a local file system (allowed by OPC UA Part 100) must not be used, since it can not be resolved by other participants of the Message Bus.
     verification: [schema, d7-validate]
-    inventory: [MG-5-2d1f7ba3]
+    inventory: [MG-5-2b4002f3, MG-5-93e03870, MG-5-32a672e8]
     status: draft
-    notes: >-
-      The empty string is used by the device examples of MG B1.1.11 and
-      B1.1.12 (V-PAY-006); pending PO decision SF-064 (a).
+    notes: The empty string is used by the device examples of MG B1.1.11 and B1.1.12 (V-PAY-006).
 
   - id: REQ-RES-MAM-013
     title: DeviceManual as PDF document
@@ -353,20 +367,26 @@ requirements:
     status: draft
 
   - id: REQ-RES-MAM-018
-    title: RevisionCounter counts changes of the MAM
+    title: RevisionCounter counts configuration changes of the asset
     statement: >-
-      Every change of the MAM information of an asset increments its
-      RevisionCounter by one.
+      Every change of the configuration of the asset, including changes of
+      the master asset information, increments its RevisionCounter by one; a
+      value taken from the VendorNameplate of the asset is used unchanged; an
+      asset without revision counter uses -1.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
-    refs: [MG 5]
+    refs: [MG 5, SF-064]
     quotes:
       - ref: MG 5
-        text: Changes to the configuration of the master asset information shall lead to an increment of the revision counter by one.
+        text: Each change of the configuration of the asset, including changes of the master asset information, shall lead to an increment of the revision counter by one.
+      - ref: MG 5
+        text: A value taken from the VendorNameplate of the asset shall be used unchanged.
+      - ref: MG 5
+        text: If the asset does not support a revision counter, it shall be set to -1 (default of OPC UA Part 100).
     verification: [d7-monitor]
-    inventory: [MG-5-2d08dc18]
+    inventory: [MG-5-1cd0e95c, MG-5-f80a56c7, MG-5-3e6c1a1b]
     status: draft
 
   - id: REQ-RES-MAM-019
@@ -407,7 +427,7 @@ requirements:
       - ref: MG 9.1.1
         text: A MAM object is not included.
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.1-d1fe5f86]
+    inventory: [MG-9.1.1-8bfafc5a]
     status: draft
 
   - id: REQ-RES-MAM-021
@@ -432,7 +452,7 @@ requirements:
     status: draft
     notes: >-
       Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015. The
-      Source case follows from the Get list item of MG 9.1.1 (SF-062 (e)).
+      Source case follows from the Get list item of MG 9.1.1.
 
   - id: REQ-RES-MAM-022
     title: Pub MAM carries MAM objects and optionally Pagination
@@ -447,8 +467,27 @@ requirements:
     refs: [MG 9.1.1, SF-062]
     quotes:
       - ref: MG 9.1.1
-        text: In combination with the method Pub, the payload contains DataSetMessages of type MAM and optional Pagination (8.3.11 Pagination).
+        text: In combination with the method Pub, the payload contains DataSetMessages of type MAM and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.1-7aaac193]
+    inventory: [MG-9.1.1-4d028d73]
     status: draft
-    notes: A Locale DataSet may be added to every method (MG 8.3.12, REQ-LOC-002, SF-062 (c)).
+    notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).
+
+  - id: REQ-RES-MAM-023
+    title: GlobalAssetId is provided for assets with an AAS
+    statement: >-
+      If the asset has an Asset Administration Shell, the MAM provides its
+      globalAssetId (IDTA-01001) as GlobalAssetId; otherwise the field is
+      omitted.
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application, device]
+    condition: The asset has an Asset Administration Shell.
+    refs: [MG 5, SF-064]
+    quotes:
+      - ref: MG 5
+        text: It should be provided if the asset has an AAS; otherwise it is omitted.
+    verification: [manual]
+    inventory: [MG-5-afa522ee]
+    status: draft

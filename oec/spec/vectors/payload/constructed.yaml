@@ -1,7 +1,7 @@
 # Constructed payload vectors (C-024, C-027): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, draft).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "c6453c7"
+baseline: "ca8d1c5"
 description: >-
   Constructed payload vectors for the two validation modes of MG 8 (SF-052):
   strict validation reports every key that is not defined for the object
@@ -123,8 +123,8 @@ vectors:
     status: draft
     notes: >-
       V-PAY-003 with two Details, one of them FAILURE_1: the overall Health
-      reflects the most severe state of the Details (MG 8.3.2). FAILURE_1 is the
-      most severe state under every order discussed in SF-065 (a).
+      reflects the most severe state of the Details (MG 8.3.2, order FAILURE_1 >
+      OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -316,9 +316,9 @@ vectors:
     origin: {kind: constructed}
     status: draft
     notes: >-
-      The Event entry of V-PAY-039 with the Mode of the B1.1.8 example: an Event
-      is only published on Pub/Event/<Source>/<Filter>, so its Mode is OFF_0 or
-      FILTER_4 (MG 9.1 matrix, SF-067 (c)).
+      The Event entry of V-PAY-039 with the Mode of the former B1.1.8 example:
+      an Event is only published on Pub/Event/<Source>/<Filter>, so its Mode is
+      OFF_0 or FILTER_4 (MG 8.3.8, SF-067 (c)).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/PublicationList"
     payload: |-
       {

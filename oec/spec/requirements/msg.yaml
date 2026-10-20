@@ -5,7 +5,7 @@
 # the guideline in C-024; the PO reviewed the area in the C-024 review
 # (2026-10-19, REQ-MSG-046 changed to SHOULD).
 area: MSG
-baseline: "c6453c7"
+baseline: "ca8d1c5"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
@@ -504,19 +504,26 @@ requirements:
       resource, DataSetWriterName and WriterGroupName it publishes; the
       DataSetWriterId is unique within the publisher, and the
       DataSetMetaData of a DataSetMessage carries the same DataSetWriterId.
+      Exception: all PublicationList DataSetMessages of a publisher share one
+      common DataSetWriterId and all SubscriptionList DataSetMessages another
+      one.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher]
-    refs: [MG 8.2.3, MG 8.2.2]
+    refs: [MG 8.2.3, MG 8.2.2, MG 9.1.8, MG 9.1.9, SF-067]
     quotes:
       - ref: MG 8.2.3
         text: Each combination of resource, DataSetWriterName and WriterGroupName published by an application must get its own DataSetWriterId.
+      - ref: MG 8.2.3
+        text: >-
+          Exception: all DataSetMessages of the resource PublicationList of a publisher use one common DataSetWriterId, and all DataSetMessages of the resource SubscriptionList use another common DataSetWriterId, because each entry has the same DataSet (9.1.8 PublicationList, 9.1.9 SubscriptionList); the DataSetWriterId of the described publication is given in the payload of the entry.
       - ref: MG 8.2.3
         text: It is unique within the scope of a publisher. The related DataSetMetaData (8.2.2 DataSetMetaData) to this DataSetMessage contains the same DataSetWriterId.
     verification: [d7-monitor]
     inventory: [MG-8.2.3-a6a859ac]
     status: reviewed
+    notes: The PublicationList/SubscriptionList exception was added in C-027 after GL-ADR-019 (SF-067 (a)).
 
   - id: REQ-MSG-022
     title: Consumers do not store DataSetWriterIds permanently

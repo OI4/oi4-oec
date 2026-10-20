@@ -3,14 +3,14 @@
 # Support of Profile: REQ-CMP-018 (L2 SHOULD, L3 MUST); every supported
 # resource is listed: REQ-CMP-021. Checked by tools/internal/payload (C-027).
 area: RES-PROFILE
-baseline: "c6453c7"
+baseline: "ca8d1c5"
 requirements:
   - id: REQ-RES-PROFILE-001
     title: Fields of the Profile DataSet
     statement: >-
       The Payload of a Profile DataSetMessage contains the mandatory field
       Resources, an array of distinct strings, each the name of a resource of
-      MG 7.5.1 or of a common service of MG 7.5.2 (proposal SF-066 (a)); no
+      MG 7.5.1 or of a common service of MG 7.5.2, each listed only once; no
       other field.
     keyword: MUST
     domain: messaging
@@ -19,8 +19,11 @@ requirements:
     condition: The entity supports the resource Profile (REQ-CMP-018).
     scope: [MG 7.5.1, MG 7.5.2]
     refs: [MG 8.3.7, SF-066]
+    quotes:
+      - ref: MG 8.3.7
+        text: Each name must be listed only once.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.7-cf84476b]
+    inventory: [MG-8.3.7-cf84476b, MG-8.3.7-f5251ea7]
     status: draft
     notes: >-
       MG 8.3.7 gives Type String with Value Range "<array of resources>"; B2.5
@@ -31,8 +34,9 @@ requirements:
     title: Profile lists exactly the supported resources
     statement: >-
       The Profile of an asset lists every resource the entity serves for that
-      asset – the mandatory resources of its compliance level and the
-      optional ones it supports – and no resource it does not support.
+      asset – the mandatory resources of its compliance level, the optional
+      ones and the common services it supports – and no resource or common
+      service it does not support.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -42,16 +46,16 @@ requirements:
     refs: [MG 8.3.7, MG 9.1.7, SF-066]
     quotes:
       - ref: MG 8.3.7
-        text: It contains an array of all mandatory and optional resources (7.5 Resource Element) which are supported.
+        text: It contains an array of all mandatory and optional resources (7.5.1 Resources) and common services (7.5.2 Common Services) which are supported, so that a consumer can discover e.g. the service NewDataSetWriterId.
       - ref: MG 9.1.7
         text: Which resources are mandatory depends on the compliance level of the application or device (1.3 Compliance Domains and Levels).
     verification: [d7-test]
-    inventory: [MG-8.3.7-70f9d600, MG-8.3.7-954d25a2, MG-8.3.7-075358de, MG-9.1.7-dbeea681, MG-9.1.7-1694ed5f]
+    inventory: [MG-8.3.7-516da9f2, MG-8.3.7-954d25a2, MG-9.1.7-71073f4c, MG-9.1.7-1694ed5f]
     status: draft
     notes: >-
       Same rule as REQ-CMP-021 from the view of the DataSet; the Profile of a
       subordinate asset lists what the representing application serves for
-      it (SF-066 (c)).
+      it (SF-066 (c), GL-ADR-019).
 
   - id: REQ-RES-PROFILE-003
     title: Get Profile carries no Profile object
@@ -71,7 +75,7 @@ requirements:
       - ref: MG 9.1.7
         text: A Profile object is not included.
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.7-688a121b]
+    inventory: [MG-9.1.7-8f595df4]
     status: draft
 
   - id: REQ-RES-PROFILE-004
@@ -111,8 +115,8 @@ requirements:
     refs: [MG 9.1.7, SF-062]
     quotes:
       - ref: MG 9.1.7
-        text: In combination with the method Pub, the payload contains DataSetMessages of type Profile and optional Pagination (8.3.11 Pagination).
+        text: In combination with the method Pub, the payload contains DataSetMessages of type Profile and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.7-0df1dde4]
+    inventory: [MG-9.1.7-09291906]
     status: draft
-    notes: A Locale DataSet may be added to every method (MG 8.3.12, REQ-LOC-002, SF-062 (c)).
+    notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).
