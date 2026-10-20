@@ -114,7 +114,7 @@ areas:
   - code: BUS
     title: General Message Bus communication
     cycle: C-028
-    status: planned
+    status: drafted
     sections: [MG 9]
   - code: CNT
     title: Container environment

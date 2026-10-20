@@ -25,7 +25,7 @@ Guideline baseline: `ff1562f`. Source of truth: the YAML files in `oec/spec/requ
 | [RES-META](res-meta.md) | Resource Metadata | C-028 | drafted | 7 | MG 8.3.5, MG 9.1.5 |
 | [RES-EVENT](res-event.md) | Resource Event | C-028 | drafted | 11 | MG 8.3.6, MG 9.1.6 |
 | [RES-SUBLIST](res-sublist.md) | Resource SubscriptionList | C-028 | drafted | 15 | MG 8.3.9, MG 9.1.9 |
-| BUS | General Message Bus communication | C-028 | planned | – | MG 9 |
+| [BUS](bus.md) | General Message Bus communication | C-028 | drafted | 10 | MG 9 |
 | CNT | Container environment | C-029 | planned | – | RIG 2, RIG 4 |
 | PLT | OEC platform requirements | C-029 | planned | – | RIG 5 |
 | APP | Requirements on an application (runtime) | C-029 | planned | – | RIG 5.2 |

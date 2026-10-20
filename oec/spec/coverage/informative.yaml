@@ -352,3 +352,14 @@ items:
     reason: Template of the Pub topic without Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-SUBLIST-009.
   - key: MG-9.1.9-c5a04c25
     reason: Reference to the examples of MG B1.1.9 (golden payload vectors V-PAY-055 ff.).
+  # --- BUS (C-028) ----------------------------------------------------------
+  - key: MG-9-b7008e8c
+    reason: Structure of chapter 9 (pub/sub pattern in 9.1, call/reply in 9.2); no obligation.
+  - key: MG-9.1-a26fbb46
+    reason: Explanation of the pub/sub pattern (messages without subscriber end on the Message Bus); no retained messages is REQ-MQTT-018.
+  - key: MG-9.1-7d286bd3
+    reason: Hint ("likely requires") that a requester reads the object before changing it; no obligation.
+  - key: MG-9.1-9bbb3b98
+    reason: Obligation of the OI4 Alliance, not of a component; fulfilled by MG 8.3 and the predefined DataSetClassIds of MG A2 (REQ-MSG-010).
+  - key: MG-9.1-13c6a834
+    reason: Obligation of the OI4 Alliance, not of a component; fulfilled by MG 8.3 and MG A2 (REQ-MSG-010).
