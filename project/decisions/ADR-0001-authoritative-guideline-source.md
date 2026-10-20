@@ -170,3 +170,12 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `2bfc0d9` – findings register: SF-069 (ReferenceDesignation children) and SF-071 (remaining topic-label deviations of the figures) open, SF-070 resolved, next free id SF-072.
 - Figure-only commits change the baseline like text commits (the figures are part of the guideline) but need no requirement remapping; `spectool inventory -check -rev <commit>` confirms it.
 - GL-ADR-001 … 019; SF-001 … 068 and SF-070 resolved, SF-069 and SF-071 open (not blocking); next free id SF-072.
+
+## Amendment C-027 review, part 2 (2026-10-20, guideline baseline `70b4c01`)
+
+- The baseline is now `70b4c01` on branch `feature/spec-findings` (PO decisions SF-069 option (b) with a separate GL-ADR and SF-071 as proposed; local commits):
+  - `ec76e41` – new MG 8.3.13 `ChildrenRequest` (helper `DataSet`, reserved `DataSetWriterId` 9 in 8.2.3), note in 8.3.10, section in 9.1.10, grading in 1.3 (L1/L2 optional, L3 mandatory), examples in B1.1.10 (SF-069).
+  - `8fb837e` – GL-ADR-020 "Request the children of a ReferenceDesignation".
+  - `655e97f` – figures: `Oi4v2/` prefix, `Status/<EventLevel>`, typos, Figure 9 of MG 9.1 redrawn as a v2 example; 15 PNGs re-exported (SF-071).
+  - `70b4c01` – findings register: SF-069 and SF-071 resolved, SF-072 (B1.1.4 `DataSetClassId`) open, next free id SF-073.
+- GL-ADR-001 … 020; SF-001 … 071 resolved, SF-072 open (not blocking); next free id SF-073.
