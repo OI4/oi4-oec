@@ -1,6 +1,6 @@
 # Status
 
-_Last updated: 2026-10-19, cycle C-027 (addendum 2)_
+_Last updated: 2026-10-20, cycle C-027 (addendum 3)_
 
 ## Current phase
 
@@ -66,7 +66,7 @@ C-027 (PO decision, 2026-10-19): **SF-062 … SF-064 accepted** (revised proposa
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review of C-027 (rest)** – review GL-ADR-019 and the guideline commits (consistency extras: Status topic in all `Set`/`Del` sections, `PaginationRequest` links in 9.1.3/4/9, B1 example values), confirm the change of the reviewed REQ-MSG-021 and V-PAY-004, review the views `res-mam.md`, `res-health.md`, `res-profile.md`, `res-publist.md`, `res-refdes.md`, `pag.md`, `loc.md` and the vectors V-PAY-026 … 052 (addendum 2 of the C-027 log). Then move the areas/vectors to `reviewed`.
+1. **PO review of C-027 (rest)** – review GL-ADR-019 and the guideline commits (consistency extras: Status topic in all `Set`/`Del` sections, `PaginationRequest` links in 9.1.3/4/9, B1 example values), confirm the change of the reviewed REQ-MSG-021 (origin explained in addendum 3) and V-PAY-004, review the views `res-mam.md`, `res-health.md`, `res-profile.md`, `res-publist.md`, `res-refdes.md`, `pag.md`, `loc.md` (addenda 2/3 of the C-027 log; vectors V-PAY-026 … 052 reviewed 2026-10-20). Then move the areas to `reviewed`.
 2. **C-028** – remaining resources (`RES-DATA`, `RES-META`, `RES-EVENT`, `RES-CONFIG`, `RES-SUBLIST`) + `BUS` + payload columns of the Method × Resource matrix; golden vectors for B1.1.3 … B1.1.6, B1.1.9 and the Status events of B1.1.3 … B1.1.10 (SF-056). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-029 … C-031).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
@@ -74,7 +74,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, MSG, ACT, MQTT and LIFE reviewed; RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG and LOC drafted; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 25 payload vectors reviewed, 27 draft) |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, MSG, ACT, MQTT and LIFE reviewed; RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG and LOC drafted; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 52 payload vectors reviewed) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
