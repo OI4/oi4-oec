@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-20, cycle C-027 (addendum 5)_
+_Last updated: 2026-10-20, cycle C-028_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-027 done, `ChildrenRequest` (GL-ADR-020) added in the review – its REQs/vectors await PO review; next C-028)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-028 done – RES-DATA, RES-META, RES-EVENT, RES-SUBLIST, BUS, matrix payload columns and V-PAY-055 … 087 await PO review; SF-075 … 081 open; next C-029 RES-CONFIG)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -74,18 +74,21 @@ C-027 (PO review, 2026-10-20, addendum 8): guideline text `30fa928` (incl. struc
 
 C-027 (PO decision, 2026-10-20, addendum 9): **SF-074** accepted as proposed. Guideline `b45c497` (B1.1.5: publisher-defined `DataSetClassId` `1badfd0b-…` of B1.1.4 in the `MetaData` of the `Pub`/`Set` examples, sentence rewritten), `ff1562f` (register: SF-074 resolved, no open findings). Workspace re-baselined on `ff1562f` (`f480717`, inventory unchanged; V-PAY-021/022 synced verbatim, REQ-MSG-012 added, kept `reviewed` – confirmed by the PO), views `596a6f6`. **Nothing of C-027 is open.**
 
+C-028 (2026-10-20, `log/2026-10-20_C-028_data-meta-event-sublist-bus.md`): **RES-CONFIG split off into C-029** (agent decision under the PO mandate; RIG areas → C-030, vectors/coverage → C-031, P1 exit review → C-032). Areas **RES-EVENT** (REQ-RES-EVENT-001 … 011), **RES-DATA** (001 … 012), **RES-META** (001 … 007), **RES-SUBLIST** (001 … 015) and **BUS** (REQ-BUS-001 … 010) `drafted` – 55 REQs, 30 informative items, 0 open inventory items. **Payload columns** of the Method × Resource matrix (26 allowed rows; `Config` in C-029) with schema, lint checks, vector cross-check and view (`draft`). Payload checker extended (Data/`Oi4Pv`, `Get Metadata` `{}`, Event Status/Syslog/Generic vs. topic level, SubscriptionList incl. `Del` with exactly one entry). Golden vectors **V-PAY-055 … 080** (B1.1.4, B1.1.6, B1.1.9, Status events of B1.1.3/1.1.5/1.1.8/1.1.10; B1.1.9 entries with `TopicPath` edit per SF-080 (b)) and constructed **V-PAY-081 … 087** (`draft`). New findings **SF-075 … SF-081** (open, not blocking; register `594aaa9`, no re-baseline). Reviewed items touched (logged): REQ-PAG-005 inventory, V-PAY-020 … 022 reqs, cycle pointers.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **C-028** – remaining resources (`RES-DATA`, `RES-META`, `RES-EVENT`, `RES-CONFIG`, `RES-SUBLIST`) + `BUS` + payload columns of the Method × Resource matrix; golden vectors for B1.1.3 … B1.1.6, B1.1.9 and the Status events of B1.1.3 … B1.1.10 (SF-056). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-029 … C-031).
-2. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
+1. **PO review of C-028** – views `requirements/view/res-event.md`, `res-data.md`, `res-meta.md`, `res-sublist.md`, `bus.md`; payload tables in `matrix/view/method-resource.md`; vectors V-PAY-055 … 087; decisions on SF-075 … SF-081 (list in the C-028 log, "For the PO").
+2. **C-029** – area `RES-CONFIG` (MG 8.3.3 incl. 8.3.3.1/8.3.3.2, 9.1.3; 144 inventory items) + payload columns of the three `Config` rows + golden vectors of the B1.1.3 Config examples + Config content checks. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-030 … C-032).
+3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, ACT, MQTT, LIFE, RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG, LOC, QRY and MSG reviewed; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; 54 payload vectors reviewed) |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, ACT, MQTT, LIFE, RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG, LOC, QRY and MSG reviewed; RES-DATA, RES-META, RES-EVENT, RES-SUBLIST, BUS drafted (C-028); RES-CONFIG and RIG areas planned; topic grammar, topic columns of the matrix and 203 topic/IL vectors reviewed; payload columns of the matrix draft; 54 payload vectors reviewed, V-PAY-055 … 087 draft) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
@@ -97,7 +100,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `ff1562f`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 020, SF-001 … 074 resolved, none open, next SF-075; OEC Process Description informative); previous `15eaa8a`, `70b4c01`, `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `ff1562f`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 020, SF-001 … 074 resolved; SF-075 … 081 open in the register `594aaa9` (findings-only, no re-baseline), next SF-082; OEC Process Description informative); previous `15eaa8a`, `70b4c01`, `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -109,7 +112,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. No open spec findings; next free id SF-075.
+- None. SF-075 … SF-081 are open but not blocking (proposed interpretations used by the C-028 drafts); next free id SF-082.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -147,3 +150,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-025 | 2026-10-19 | Areas `MQTT` + `LIFE` drafted (REQ-MQTT-001 … 019, REQ-LIFE-001 … 014, 14 informative items); golden vectors V-PAY-023 … 025 (Birth/Close/Will, `MessageId` edit per SF-058); new SF-057 … SF-060 (register `d20d8ff`, no re-baseline) | `log/2026-10-19_C-025_mqtt-life.md` |
 | C-026 | 2026-10-19 | PO review of C-025: SF-057 … 060 implemented in the guideline (MG 6 keywords, real Birth/Close/Will timestamps, `NORMAL_0`/0 reserved, `FAILURE_1`/0 while connected + Birth after recovery, MQTT versions/certificate verification/ClientId without container); re-baseline on `720d862`, REQ-LIFE-015 … 017, V-PAY-023 … 025 verbatim; P1 cycles shifted by one. PO review: MQTT reviewed, SF-061 (Birth `Timestamp` allowed, Close MUST from L2, subscriber interpretation SHOULD), view fix for `<…>` placeholders, re-baseline on `c6453c7`, REQ-CMP-046 | `log/2026-10-19_C-026_sf057-060-guideline.md` |
 | C-027 | 2026-10-19 | Areas `RES-MAM`, `RES-HEALTH`, `RES-PROFILE`, `RES-PUBLIST`, `RES-REFDES`, `PAG`, `LOC` drafted (79 REQs, 36 informative items); DataSet content checks; golden vectors V-PAY-026 … 047 (B1.1.1/1.1.7/1.1.8/1.1.10/1.1.12) and constructed V-PAY-048 … 052; SF-062 … 068. PO review: all findings accepted, guideline corrected (SF-056, SF-062 … 068) + GL-ADR-019, re-baseline on `ca8d1c5` (REQ-PAG-009, REQ-RES-MAM-023 new); views accepted, areas reviewed; figures fixed (SF-070, SF-071); SF-069 → `ChildrenRequest` (GL-ADR-020), then generic `Query` (SF-073, GL-ADR-020 amended; area QRY, REQ-QRY-001 … 004, REQ-RES-REFDES-011 … 016, V-PAY-053/054), SF-072 implemented; all reviewed by the PO 2026-10-20; SF-074 accepted and implemented (B1.1.5), re-baseline on `ff1562f` | `log/2026-10-19_C-027_core-resources-pag-loc.md` |
+| C-028 | 2026-10-20 | RES-CONFIG split off to C-029; areas `RES-EVENT`, `RES-DATA`, `RES-META`, `RES-SUBLIST`, `BUS` drafted (55 REQs, 30 informative items); payload columns of the Method × Resource matrix (schema, lint, view); payload checker for Data/`Oi4Pv`, Metadata `Get`, Event, SubscriptionList; vectors V-PAY-055 … 087 (draft); SF-075 … 081 (open) | `log/2026-10-20_C-028_data-meta-event-sublist-bus.md` |
