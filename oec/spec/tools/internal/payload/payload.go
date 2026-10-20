@@ -10,10 +10,11 @@
 // CheckMetaDataType checks a bare DataSetMetaDataType, e.g. the predefined
 // MetaData of MG B2. The content of the DataSets (MG 8.3, content.go) is
 // checked for the helper DataSets PaginationRequest, Pagination, Locale and
-// Query (areas PAG, LOC, QRY, RES-REFDES) and the resources MAM, Health, Profile, PublicationList and
-// ReferenceDesignation (areas RES-*, C-027); Config, Data, Metadata, Event and
-// SubscriptionList follow in C-028. The deep structure of the data type
-// descriptions (MG 8.2.10 … 8.2.15) is not checked here.
+// Query (areas PAG, LOC, QRY, RES-REFDES), the resources MAM, Health,
+// Profile, PublicationList and ReferenceDesignation (areas RES-*, C-027) and
+// Data (Oi4Pv), Metadata (empty Get), Event and SubscriptionList (C-028);
+// Config follows in C-029. The deep structure of the data type descriptions
+// (MG 8.2.10 … 8.2.15) is not checked here.
 package payload
 
 import (
@@ -598,11 +599,9 @@ func (c *checker) metadata(msg any) {
 	}
 	if md, ok := m["MetaData"]; ok {
 		if c.t.Method == "Get" {
-			// A Get carries an empty DataSetMetaData (MG 9.1.5); the
-			// request rules of the resource Metadata follow with area
-			// RES-META, here only the JSON type is checked.
-			if _, isObj := md.(map[string]any); !isObj {
-				c.add("/MetaData", "REQ-MSG-032", "must be a JSON object")
+			// A Get carries an empty DataSetMetaData (MG 9.1.5).
+			if obj, isObj := md.(map[string]any); !isObj || len(obj) > 0 {
+				c.add("/MetaData", "REQ-RES-META-001", "MetaData of a Get must be the empty object {}")
 			}
 		} else {
 			c.metaDataType("/MetaData", md)

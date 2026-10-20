@@ -6,15 +6,17 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 )
 
 // Content of the DataSets (MG 8.3): the helper DataSets PaginationRequest,
 // Pagination, Locale and Query (areas PAG, LOC, QRY, RES-REFDES) for
-// every resource and the DataSets
-// of MAM, Health, Profile, PublicationList and ReferenceDesignation (areas
-// RES-*, C-027). Only MUST rules are reported; recommendations (SHOULD) are
-// not checked.
+// every resource and the DataSets of MAM, Health, Profile, PublicationList
+// and ReferenceDesignation (areas RES-*, C-027) and of Data (Oi4Pv), Event
+// and SubscriptionList (C-028). The application-defined Data DataSets
+// themselves are not checked; Config follows in C-029. Only MUST rules are
+// reported; recommendations (SHOULD) are not checked.
 
 // dsm is a DataSetMessage of a ua-data NetworkMessage with a valid
 // DataSetWriterId.
@@ -27,9 +29,11 @@ type dsm struct {
 }
 
 // resourceRule names the requirements of the method payloads of a resource
-// ("" = no rule in this area).
+// ("" = no rule in this area). A Del carries no resource DataSetMessage
+// unless delOne is set (exactly one, the entry to delete).
 type resourceRule struct {
 	get, set, del string
+	delOne        bool
 	content       func(c *checker, d dsm)
 }
 
@@ -39,6 +43,9 @@ var resourceRules = map[string]resourceRule{
 	"Profile":              {get: "REQ-RES-PROFILE-003", content: (*checker).profile},
 	"PublicationList":      {get: "REQ-RES-PUBLIST-019", set: "REQ-RES-PUBLIST-022", content: (*checker).publicationEntry},
 	"ReferenceDesignation": {get: "REQ-RES-REFDES-003", set: "REQ-RES-REFDES-006", del: "REQ-RES-REFDES-007", content: (*checker).referenceDesignation},
+	"Data":                 {get: "REQ-RES-DATA-006", set: "REQ-RES-DATA-009", content: (*checker).dataSet},
+	"Event":                {content: (*checker).event},
+	"SubscriptionList":     {get: "REQ-RES-SUBLIST-007", set: "REQ-RES-SUBLIST-010", del: "REQ-RES-SUBLIST-011", delOne: true, content: (*checker).subscriptionEntry},
 }
 
 // commonServices are the services of MG 7.5.2 a Profile may list (MG 8.3.7).
@@ -131,7 +138,11 @@ func (c *checker) contents(dsms []dsm) {
 			c.add("/Messages", rule.set, "a Set %s carries exactly one %s DataSetMessage, got %d", c.t.Resource, c.t.Resource, len(res))
 		}
 	case "Del":
-		if rule.del != "" {
+		if rule.del != "" && rule.delOne {
+			if len(res) != 1 {
+				c.add("/Messages", rule.del, "a Del %s carries exactly one %s DataSetMessage, got %d", c.t.Resource, c.t.Resource, len(res))
+			}
+		} else if rule.del != "" {
 			for _, d := range res {
 				c.add(d.ptr, rule.del, "a Del %s carries no %s DataSetMessage", c.t.Resource, c.t.Resource)
 			}
@@ -497,4 +508,147 @@ func (c *checker) referenceDesignation(d dsm) {
 func HasQuery(resource string) bool {
 	_, ok := queries[resource]
 	return ok
+}
+
+// --- Data (MG 8.3.4) ---------------------------------------------------------
+
+// svPattern matches the secondary values Sv1 … Sv255 of Oi4Pv.
+var svPattern = regexp.MustCompile(`^Sv([1-9][0-9]?|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$`)
+
+// dataSet checks a Data DataSet; only the predefined DataSet Oi4Pv has a
+// defined structure (REQ-RES-DATA-004).
+func (c *checker) dataSet(d dsm) {
+	if d.group != "Oi4Pv" {
+		return
+	}
+	const req = "REQ-RES-DATA-004"
+	p := join(d.ptr, "Payload")
+	if _, ok := d.payload["Pv"]; !ok {
+		c.add(p, req, "missing Pv")
+	}
+	for k := range d.payload {
+		if k != "Pv" && !svPattern.MatchString(k) {
+			c.add(join(p, k), req, "%s is no field of Oi4Pv (Pv, Sv1 … Sv255)", k)
+		}
+	}
+}
+
+// --- Event (MG 8.3.6) --------------------------------------------------------
+
+var (
+	eventCategories = map[string]string{"Syslog": "CAT_SYSLOG_0", "Status": "CAT_STATUS_1", "Generic": "CAT_GENERIC_99"}
+	categoryValues  = map[string]bool{"CAT_SYSLOG_0": true, "CAT_STATUS_1": true, "CAT_GENERIC_99": true}
+	// Severity names of RFC 5424 6.2.1 by PRI modulo 8 (SF-076).
+	syslogLevels = []string{"Emergency", "Alert", "Critical", "Error", "Warning", "Notice", "Informational", "Debug"}
+	// Severity classes of a StatusCode by bits 30–31 (OPC UA Part 4 7.39).
+	statusClasses = []string{"Good", "Uncertain", "Bad", ""}
+)
+
+func (c *checker) event(d dsm) {
+	p := join(d.ptr, "Payload")
+	m := c.object(p, d.payload, shape{required: []string{"Number", "Category"}, optional: []string{"Description", "Details"}, missing: "REQ-RES-EVENT-001"})
+	if m == nil {
+		return
+	}
+	number, numberOK := c.uint(m, p, "Number", "REQ-RES-EVENT-001", maxUint32)
+	category, categoryOK := c.enum(m, p, "Category", "REQ-RES-EVENT-001", categoryValues)
+	c.str(m, p, "Description", "REQ-RES-EVENT-001")
+	var details map[string]any
+	if v, ok := m["Details"]; ok {
+		if details, ok = v.(map[string]any); !ok {
+			c.add(join(p, "Details"), "REQ-RES-EVENT-001", "Details must be a JSON object")
+		}
+	}
+	groupCat, level, _ := strings.Cut(d.group, "/")
+	if want, known := eventCategories[groupCat]; known && categoryOK && category != want {
+		c.add(join(p, "Category"), "REQ-RES-EVENT-002", "Category %s does not correspond to the EventCategory %s of the WriterGroupName", category, groupCat)
+	}
+	dp := join(p, "Details")
+	switch category {
+	case "CAT_STATUS_1":
+		const req = "REQ-RES-EVENT-003"
+		for k := range details {
+			if k != "SymbolicId" {
+				c.add(join(dp, k), req, "%s is no Details key of a Status Event (SymbolicId)", k)
+			}
+		}
+		symbol, symbolOK := c.str(details, dp, "SymbolicId", req)
+		if !numberOK || groupCat != "Status" {
+			return
+		}
+		class := statusClasses[number>>30]
+		if class == "" {
+			c.add(join(p, "Number"), req, "Number %d is no StatusCode (reserved severity bits 11)", number)
+			return
+		}
+		if level != class {
+			c.add(join(d.ptr, "WriterGroupName"), "REQ-RES-EVENT-004", "EventLevel %q is not the severity class %s of the StatusCode %d", level, class, number)
+		}
+		if symbolOK && !strings.HasPrefix(symbol, class) {
+			c.add(join(dp, "SymbolicId"), "REQ-RES-EVENT-004", "SymbolicId %q does not start with the severity class %s of the StatusCode", symbol, class)
+		}
+	case "CAT_SYSLOG_0":
+		const req = "REQ-RES-EVENT-007"
+		if _, ok := m["Description"]; ok {
+			c.add(join(p, "Description"), req, "a Syslog Event has no Description")
+		}
+		for k := range details {
+			if k != "MSG" && k != "HEADER" {
+				c.add(join(dp, k), req, "%s is no Details key of a Syslog Event (MSG, HEADER)", k)
+			}
+		}
+		c.str(details, dp, "MSG", req)
+		c.str(details, dp, "HEADER", req)
+		if !numberOK {
+			return
+		}
+		if number > 191 {
+			c.add(join(p, "Number"), req, "Number %d is no syslog PRI (0 … 191)", number)
+			return
+		}
+		if want := syslogLevels[number%8]; groupCat == "Syslog" && level != want {
+			c.add(join(d.ptr, "WriterGroupName"), "REQ-RES-EVENT-008", "EventLevel %q is not the severity %s of the PRI %d", level, want, number)
+		}
+	}
+}
+
+// --- SubscriptionList (MG 8.3.9) ---------------------------------------------
+
+var subscriptionConfigs = map[string]bool{"NONE_0": true, "CONF_1": true}
+
+// subscriptionEntry checks an entry of the SubscriptionList: fields
+// (REQ-RES-SUBLIST-001) and the WriterGroupName derived from the TopicPath
+// (REQ-RES-SUBLIST-002) if the TopicPath is an OEC topic filter with a
+// concrete resource level.
+func (c *checker) subscriptionEntry(d dsm) {
+	const req = "REQ-RES-SUBLIST-001"
+	p := join(d.ptr, "Payload")
+	m := c.object(p, d.payload, shape{required: []string{"TopicPath"}, optional: []string{"Interval", "Config"}, missing: req})
+	c.uint(m, p, "Interval", req, maxUint32)
+	c.enum(m, p, "Config", req, subscriptionConfigs)
+	path, ok := c.str(m, p, "TopicPath", req)
+	if !ok || d.group == "" {
+		return
+	}
+	levels := strings.Split(path, "/")
+	if len(levels) < 5 || levels[0] != "Oi4v2" || strings.ContainsAny(levels[4], "+#") {
+		return
+	}
+	want, filter := levels[4], levels[min(len(levels), 6):]
+	wild := len(levels) > 5 && levels[5] == "#"
+	for _, l := range filter {
+		wild = wild || strings.ContainsAny(l, "+#")
+	}
+	if wild {
+		if rt, _, _ := strings.Cut(d.group, "/"); rt != want {
+			c.add(join(d.ptr, "WriterGroupName"), "REQ-RES-SUBLIST-002", "WriterGroupName %q does not start with the resource %s of the TopicPath", d.group, want)
+		}
+		return
+	}
+	if len(filter) > 0 {
+		want += "/" + strings.Join(filter, "/")
+	}
+	if d.group != want {
+		c.add(join(d.ptr, "WriterGroupName"), "REQ-RES-SUBLIST-002", "WriterGroupName %q is not %q derived from the TopicPath", d.group, want)
+	}
 }

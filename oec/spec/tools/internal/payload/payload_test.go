@@ -3,6 +3,7 @@ package payload
 import (
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -323,8 +324,98 @@ func TestGetMetadata(t *testing.T) {
 	if got := reqs(t, top, get); len(got) > 0 {
 		t.Errorf("Get with empty MetaData: unexpected %v", got)
 	}
-	if got := reqs(t, top, strings.Replace(get, `"MetaData": {}`, `"MetaData": []`, 1)); !reflect.DeepEqual(got, []string{"REQ-MSG-032"}) {
+	if got := reqs(t, top, strings.Replace(get, `"MetaData": {}`, `"MetaData": []`, 1)); !reflect.DeepEqual(got, []string{"REQ-RES-META-001"}) {
 		t.Errorf("Get with MetaData array: got %v", got)
+	}
+	if got := reqs(t, top, strings.Replace(get, `"MetaData": {}`, `"MetaData": {"Name": "oee"}`, 1)); !reflect.DeepEqual(got, []string{"REQ-RES-META-001"}) {
+		t.Errorf("Get with filled MetaData: got %v", got)
+	}
+}
+
+var oi4PvPub = strings.Replace(strings.Replace(dataPub, `"WriterGroupName": "oee"`, `"WriterGroupName": "Oi4Pv"`, 1),
+	`"Payload": {"Oee": 0.83}`, `"Payload": {"Pv": 21.5, "Sv1": [1, 2], "Sv255": {"a": 1}}`, 1)
+
+func statusEvent(group, category string, number uint64, details string) string {
+	return `{"MessageId": "5-OTConnector/` + app + `", "MessageType": "ua-data", "PublisherId": "OTConnector/` + app + `",
+"DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976", "ReplyTo": "",
+"Messages": [{"DataSetWriterId": 623, "WriterGroupName": "` + group + `", "DataSetWriterName": "` + app + `",
+  "MessageType": "ua-event", "Payload": {"Number": ` + strconv.FormatUint(number, 10) + `, "Category": "` + category + `"` + details + `}}]}`
+}
+
+var subList = `{
+  "MessageId": "3-OTConnector/` + app + `", "MessageType": "ua-data", "PublisherId": "OTConnector/` + app + `",
+  "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785", "ReplyTo": "",
+  "Messages": [{"DataSetWriterId": 227, "WriterGroupName": "Data/oee", "DataSetWriterName": "` + app + `",
+    "Payload": {"TopicPath": "Oi4v2/OTConnector/x/Pub/Data/y/oee", "Interval": 0, "Config": "CONF_1"}}]
+}`
+
+func TestContentC028(t *testing.T) {
+	tOi4Pv := tData
+	tOi4Pv.Filter = "Oi4Pv"
+	tDataGet, tDataSet := tData, tData
+	tDataGet.Method, tDataSet.Method = "Get", "Set"
+	ev := func(cat, level string) Topic {
+		return Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Event", SourceIL: app, Filter: cat + "/" + level}
+	}
+	sub := func(method, filter string) Topic {
+		return Topic{ServiceType: "OTConnector", AppIL: app, Method: method, Resource: "SubscriptionList", SourceIL: app, Filter: filter}
+	}
+	sub2 := strings.Replace(subList, `}}]`, `}}, {"DataSetWriterId": 227, "WriterGroupName": "Data/oee", "DataSetWriterName": "`+app+`",
+    "Payload": {"TopicPath": "Oi4v2/OTConnector/x/Pub/Data/y/oee"}}]`, 1)
+	cases := []struct {
+		name string
+		top  Topic
+		msg  string
+		want []string
+	}{
+		{"oi4pv", tOi4Pv, oi4PvPub, nil},
+		{"oi4pv without pv", tOi4Pv, strings.Replace(oi4PvPub, `"Pv": 21.5, `, ``, 1), []string{"REQ-RES-DATA-004"}},
+		{"oi4pv sv0", tOi4Pv, strings.Replace(oi4PvPub, `"Sv1"`, `"Sv0"`, 1), []string{"REQ-RES-DATA-004"}},
+		{"oi4pv sv256", tOi4Pv, strings.Replace(oi4PvPub, `"Sv255"`, `"Sv256"`, 1), []string{"REQ-RES-DATA-004"}},
+		{"application data", tData, dataPub, nil},
+		{"get data with data", tDataGet, dataPub, []string{"REQ-RES-DATA-006"}},
+		{"set data two", tDataSet, strings.Replace(dataPub, `}
+  }]`, `}
+  }, {"DataSetWriterId": 21, "WriterGroupName": "oee", "DataSetWriterName": "`+app+`", "Payload": {}}]`, 1), []string{"REQ-RES-DATA-009"}},
+		{"status good", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 0, `, "Description": "ok", "Details": {"SymbolicId": "Good"}`), nil},
+		{"status bad", ev("Status", "Bad"), statusEvent("Status/Bad", "CAT_STATUS_1", 2147876864, `, "Details": {"SymbolicId": "BadEncodingError"}`), nil},
+		{"status uncertain", ev("Status", "Uncertain"), statusEvent("Status/Uncertain", "CAT_STATUS_1", 1083310080, ``), nil},
+		{"status level", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 2147876864, ``), []string{"REQ-RES-EVENT-004"}},
+		{"status symbol", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 0, `, "Details": {"SymbolicId": "BadFoo"}`), []string{"REQ-RES-EVENT-004"}},
+		{"status reserved class", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 3221225472, ``), []string{"REQ-RES-EVENT-003"}},
+		{"status details key", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 0, `, "Details": {"MSG": "x"}`), []string{"REQ-RES-EVENT-003"}},
+		{"category mismatch", ev("Status", "Good"), statusEvent("Status/Good", "CAT_GENERIC_99", 0, ``), []string{"REQ-RES-EVENT-002"}},
+		{"category unknown", ev("Status", "Good"), statusEvent("Status/Good", "STATUS", 0, ``), []string{"REQ-RES-EVENT-001"}},
+		{"event unknown field", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 0, `, "Foo": 1`), []string{"REQ-MSG-001"}},
+		{"event number", ev("Generic", "x"), statusEvent("Generic/x", "CAT_GENERIC_99", 4294967296, ``), []string{"REQ-RES-EVENT-001"}},
+		{"syslog", ev("Syslog", "Warning"), statusEvent("Syslog/Warning", "CAT_SYSLOG_0", 12, `, "Details": {"MSG": "m", "HEADER": "h"}`), nil},
+		{"syslog level", ev("Syslog", "Error"), statusEvent("Syslog/Error", "CAT_SYSLOG_0", 12, ``), []string{"REQ-RES-EVENT-008"}},
+		{"syslog pri", ev("Syslog", "Debug"), statusEvent("Syslog/Debug", "CAT_SYSLOG_0", 192, ``), []string{"REQ-RES-EVENT-007"}},
+		{"syslog description", ev("Syslog", "Warning"), statusEvent("Syslog/Warning", "CAT_SYSLOG_0", 12, `, "Description": "x"`), []string{"REQ-RES-EVENT-007"}},
+		{"syslog details", ev("Syslog", "Warning"), statusEvent("Syslog/Warning", "CAT_SYSLOG_0", 12, `, "Details": {"Foo": "x"}`), []string{"REQ-RES-EVENT-007"}},
+		{"generic", ev("Generic", "Hint"), statusEvent("Generic/Hint", "CAT_GENERIC_99", 7, `, "Description": "x", "Details": {"Foo": [1]}`), nil},
+		{"generic details type", ev("Generic", "Hint"), statusEvent("Generic/Hint", "CAT_GENERIC_99", 7, `, "Details": []`), []string{"REQ-RES-EVENT-001"}},
+		{"sublist", sub("Pub", ""), subList, nil},
+		{"sublist set", sub("Set", "Data/oee"), subList, nil},
+		{"sublist del", sub("Del", "Data/oee"), subList, nil},
+		{"sublist del none", sub("Del", "Data/oee"), strings.Replace(subList[:strings.Index(subList, `[{`)], "", "", 0) + "[]}", []string{"REQ-RES-SUBLIST-011"}},
+		{"sublist del two", sub("Del", "Data/oee"), sub2, []string{"REQ-RES-SUBLIST-011"}},
+		{"sublist set two", sub("Set", "Data/oee"), sub2, []string{"REQ-RES-SUBLIST-010"}},
+		{"sublist get with entry", sub("Get", ""), subList, []string{"REQ-RES-SUBLIST-007"}},
+		{"sublist missing topic path", sub("Pub", ""), strings.Replace(subList, `"TopicPath": "Oi4v2/OTConnector/x/Pub/Data/y/oee", `, ``, 1), []string{"REQ-RES-SUBLIST-001"}},
+		{"sublist config", sub("Pub", ""), strings.Replace(subList, `"CONF_1"`, `"MODE_1"`, 1), []string{"REQ-RES-SUBLIST-001"}},
+		{"sublist interval", sub("Pub", ""), strings.Replace(subList, `"Interval": 0`, `"Interval": -1`, 1), []string{"REQ-RES-SUBLIST-001"}},
+		{"sublist group", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/Data/y/other"`, 1), []string{"REQ-RES-SUBLIST-002"}},
+		{"sublist wildcard filter", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/Data/+/#"`, 1), nil},
+		{"sublist wildcard resource", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/Event/+/#"`, 1), []string{"REQ-RES-SUBLIST-002"}},
+		{"sublist no filter", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/Data/y"`, 1), []string{"REQ-RES-SUBLIST-002"}},
+	}
+	for _, c := range cases {
+		got := reqs(t, c.top, c.msg)
+		if !reflect.DeepEqual(got, c.want) && !(len(got) == 0 && len(c.want) == 0) {
+			v, _ := Parse([]byte(c.msg))
+			t.Errorf("%s: got %v, want %v: %v", c.name, got, c.want, Check(c.top, v))
+		}
 	}
 }
 
