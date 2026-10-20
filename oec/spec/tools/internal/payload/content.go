@@ -10,7 +10,7 @@ import (
 )
 
 // Content of the DataSets (MG 8.3): the helper DataSets PaginationRequest,
-// Pagination, Locale and ChildrenRequest (areas PAG, LOC, RES-REFDES) for
+// Pagination, Locale and Query (areas PAG, LOC, QRY, RES-REFDES) for
 // every resource and the DataSets
 // of MAM, Health, Profile, PublicationList and ReferenceDesignation (areas
 // RES-*, C-027). Only MUST rules are reported; recommendations (SHOULD) are
@@ -96,15 +96,16 @@ func (c *checker) contents(dsms []dsm) {
 				c.locale(d)
 			}
 		case 9:
-			if c.t.Method != "Get" || c.t.Resource != "ReferenceDesignation" || c.t.SourceIL != "" {
-				c.add(d.ptr, "REQ-RES-REFDES-013", "a ChildrenRequest is only sent with Get/ReferenceDesignation without Source")
+			query, defined := queries[c.t.Resource]
+			if c.t.Method != "Get" || !defined {
+				c.add(d.ptr, "REQ-QRY-001", "a Query is only sent with the method Get of a resource with a defined Query, not with %s/%s", c.t.Method, c.t.Resource)
 			}
 			if prev, dup := seen[d.id]; dup {
-				c.add(d.ptr, "REQ-RES-REFDES-013", "a second ChildrenRequest (first at %s)", prev)
+				c.add(d.ptr, "REQ-QRY-001", "a second Query (first at %s)", prev)
 			}
 			seen[d.id] = d.ptr
-			if d.payload != nil {
-				c.childrenRequest(d)
+			if defined && c.t.Method == "Get" {
+				query(c, d)
 			}
 		default:
 			res = append(res, d)
@@ -238,17 +239,32 @@ func (c *checker) locale(d dsm) {
 	}
 }
 
-// childrenAspects are the values of ChildrenRequest.Aspect (MG 8.3.13).
-var childrenAspects = map[string]bool{"Function": true, "Product": true, "Location": true}
+// queries are the resources with a defined Query (MG 8.3.13) and the check of
+// their query parameters.
+var queries = map[string]func(*checker, dsm){
+	"ReferenceDesignation": (*checker).refDesQuery,
+}
 
-func (c *checker) childrenRequest(d dsm) {
+// refDesAspects are the values of the query parameter Aspect of
+// ReferenceDesignation (MG 8.3.13.1).
+var refDesAspects = map[string]bool{"Function": true, "Product": true, "Location": true}
+
+// refDesQuery checks the Query of ReferenceDesignation (MG 8.3.13.1): only
+// without Source, query parameters Parent and Aspect.
+func (c *checker) refDesQuery(d dsm) {
+	if c.t.SourceIL != "" {
+		c.add(d.ptr, "REQ-RES-REFDES-013", "a Query of ReferenceDesignation is only sent with Get/ReferenceDesignation without Source")
+	}
+	if d.payload == nil {
+		return
+	}
 	const req = "REQ-RES-REFDES-012"
 	p := join(d.ptr, "Payload")
 	m := c.object(p, d.payload, shape{required: []string{"Parent"}, optional: []string{"Aspect"}, missing: req})
 	if s, ok := c.str(m, p, "Parent", req); ok && s == "" {
 		c.add(join(p, "Parent"), req, "Parent must contain an Identification Link")
 	}
-	c.enum(m, p, "Aspect", req, childrenAspects)
+	c.enum(m, p, "Aspect", req, refDesAspects)
 }
 
 // --- MAM (MG 8.3.1) ----------------------------------------------------------

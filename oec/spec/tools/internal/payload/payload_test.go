@@ -385,7 +385,7 @@ var refDesSet = `{
 var refDesChildren = `{
   "MessageId": "2-` + requestor + `", "MessageType": "ua-data", "PublisherId": "` + requestor + `",
   "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa", "ReplyTo": "",
-  "Messages": [{"DataSetWriterId": 9, "WriterGroupName": "ChildrenRequest", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+  "Messages": [{"DataSetWriterId": 9, "WriterGroupName": "Query", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
     "Payload": {"Parent": "consumer.com/LC/4711", "Aspect": "Function"}}]
 }`
 
@@ -397,6 +397,7 @@ var (
 	tRefDel  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Del", Resource: "ReferenceDesignation", SourceIL: app}
 	tRefGet  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Get", Resource: "ReferenceDesignation"}
 	tRefGetS = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Get", Resource: "ReferenceDesignation", SourceIL: app}
+	tRefPub  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "ReferenceDesignation"}
 	tListSet = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Set", Resource: "PublicationList", SourceIL: app, Filter: "Data/oee"}
 )
 
@@ -490,11 +491,12 @@ func TestContent(t *testing.T) {
 		{"children missing parent", tRefGet, refDesChildren, `"Parent": "consumer.com/LC/4711", `, ``, []string{"REQ-RES-REFDES-012"}},
 		{"children empty parent", tRefGet, refDesChildren, `"Parent": "consumer.com/LC/4711"`, `"Parent": ""`, []string{"REQ-RES-REFDES-012"}},
 		{"children unknown field", tRefGet, refDesChildren, `"Aspect": "Function"`, `"Aspect": "Function", "Depth": 2`, []string{"REQ-MSG-001"}},
-		{"children group name", tRefGet, refDesChildren, `"WriterGroupName": "ChildrenRequest"`, `"WriterGroupName": "Children"`, []string{"REQ-MSG-019"}},
+		{"children group name", tRefGet, refDesChildren, `"WriterGroupName": "Query"`, `"WriterGroupName": "ChildrenRequest"`, []string{"REQ-MSG-019"}},
 		{"children writer name", tRefGet, refDesChildren, `"DataSetWriterName": "https://id.consumer.com/MEService/Inst07322"`, `"DataSetWriterName": "consumer.com/LC/4711"`, []string{"REQ-MSG-019"}},
-		{"children twice", tRefGet, refDesChildren, `}}]`, `}}, {"DataSetWriterId": 9, "WriterGroupName": "ChildrenRequest", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": {"Parent": "x.com/a"}}]`, []string{"REQ-RES-REFDES-013"}},
+		{"children twice", tRefGet, refDesChildren, `}}]`, `}}, {"DataSetWriterId": 9, "WriterGroupName": "Query", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": {"Parent": "x.com/a"}}]`, []string{"REQ-QRY-001"}},
 		{"children with source", tRefGetS, refDesChildren, `"ReplyTo": ""`, `"ReplyTo": ""`, []string{"REQ-RES-REFDES-013"}},
-		{"children in mam get", tMAMGet, mamGet, `"Payload": {"PerPage": 25, "Page": 0}`, `"Payload": {"PerPage": 25, "Page": 0}}, {"DataSetWriterId": 9, "WriterGroupName": "ChildrenRequest", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": {"Parent": "x.com/a"}`, []string{"REQ-RES-REFDES-013"}},
+		{"children in mam get", tMAMGet, mamGet, `"Payload": {"PerPage": 25, "Page": 0}`, `"Payload": {"PerPage": 25, "Page": 0}}, {"DataSetWriterId": 9, "WriterGroupName": "Query", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": {"Parent": "x.com/a"}`, []string{"REQ-QRY-001"}},
+		{"query in pub", tRefPub, refDesChildren, `"ReplyTo": ""`, `"ReplyTo": ""`, []string{"REQ-MSG-006", "REQ-QRY-001"}},
 	}
 	for _, c := range cases {
 		if !strings.Contains(c.msg, c.old) {
@@ -506,9 +508,15 @@ func TestContent(t *testing.T) {
 			t.Errorf("%s: got %v, want %v: %v", c.name, got, c.want, Check(c.top, v))
 		}
 	}
-	// Tolerant mode ignores undefined keys of the DataSets, too.
-	msg := strings.Replace(mamPub, `"ProductCode": "FDS-001",`, `"ProductCode": "FDS-001", "Foo": 1,`, 1)
+	// Tolerant mode ignores undefined query parameters (REQ-QRY-002).
+	msg := strings.Replace(refDesChildren, `"Aspect": "Function"`, `"Aspect": "Function", "Depth": 2`, 1)
 	v, _ := Parse([]byte(msg))
+	if ps := CheckMode(tRefGet, v, Tolerant); len(ps) > 0 {
+		t.Errorf("tolerant Query: unexpected problems %v", ps)
+	}
+	// Tolerant mode ignores undefined keys of the DataSets, too.
+	msg = strings.Replace(mamPub, `"ProductCode": "FDS-001",`, `"ProductCode": "FDS-001", "Foo": 1,`, 1)
+	v, _ = Parse([]byte(msg))
 	if ps := CheckMode(tMAM, v, Tolerant); len(ps) > 0 {
 		t.Errorf("tolerant MAM: unexpected problems %v", ps)
 	}

@@ -10,7 +10,7 @@
 // CheckMetaDataType checks a bare DataSetMetaDataType, e.g. the predefined
 // MetaData of MG B2. The content of the DataSets (MG 8.3, content.go) is
 // checked for the helper DataSets PaginationRequest, Pagination, Locale and
-// ChildrenRequest (areas PAG, LOC, RES-REFDES) and the resources MAM, Health, Profile, PublicationList and
+// Query (areas PAG, LOC, QRY, RES-REFDES) and the resources MAM, Health, Profile, PublicationList and
 // ReferenceDesignation (areas RES-*, C-027); Config, Data, Metadata, Event and
 // SubscriptionList follow in C-028. The deep structure of the data type
 // descriptions (MG 8.2.10 … 8.2.15) is not checked here.
@@ -101,7 +101,7 @@ var serviceTypes = map[string]bool{
 	"Aggregation": true, "OOCConnector": true, "ITConnector": true,
 }
 
-var helperNames = map[int64]string{1: "PaginationRequest", 2: "Pagination", 3: "Locale", 9: "ChildrenRequest"}
+var helperNames = map[int64]string{1: "PaginationRequest", 2: "Pagination", 3: "Locale", 9: "Query"}
 
 var (
 	guidPattern      = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
