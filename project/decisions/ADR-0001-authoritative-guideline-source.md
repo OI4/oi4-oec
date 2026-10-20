@@ -147,3 +147,18 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `720d862` – findings register: SF-057 … SF-060 resolved.
 - No new GL-ADR (PO decision: SF-057 needs no ADR). SF-001 … 055 and SF-057 … 060 are resolved; SF-056 (defects of the B1 examples) is open for C-027/C-028 and not blocking; next free id SF-061.
 - PO review of C-026 (2026-10-19): `2c38cf8` – SF-061 (a) (MG 6.3.3, B1.1.1: the Birth message may carry `Timestamp`/`SequenceNumber`); `02a35ac` – SF-061 (b) (MG 6.3.4 Close message "must", MG 6 note and new MG 1.3 row: recommended for Level 1, mandatory from Level 2 on); `47762da` – SF-061 (c) (MG 6.3.4, 6.3.5: subscribers "should" interpret the Close/Will values); `c6453c7` – findings register: SF-061 resolved, next free id SF-062. No GL-ADR.
+
+## Amendment C-027 (2026-10-19, guideline baseline `ca8d1c5`)
+
+- The baseline is now `ca8d1c5` on branch `feature/spec-findings`. Implemented by the agent on PO request (PO review of C-027: SF-056, SF-065 … 068 accepted as proposed; SF-062 … 064 accepted after revision – REST-like paging, no pagination for `Set`/`Del`, MaxPacketSize, OPC UA check of the MAM rules; the PO ordered the implementation and a new GL-ADR; local commits):
+  - `2fbde83`, `9d1b00e` – SF-064: MG 5 (VendorNameplate "as far as the rules are satisfied", `ManufacturerUri` domain even for GUIDs, `Model` en-US for the `Oi4Identifier`, revisions SemVer or four numbers, OPC UA "" → "undefined" for `HardwareRevision`/`SoftwareRevision`, `DeviceManual` URL with scheme / "" / no local path, `RevisionCounter` on configuration changes or -1, `GlobalAssetId` should for assets with an AAS); the follow-up withdraws a `DeviceRevision` rule beyond the finding.
+  - `a79e32a` – SF-065: MG 8.3.2 ("must reflect", explicit severity order).
+  - `acf8b3a` – SF-066: MG 8.3.7, 9.1.7, B1.1.7 (resources and common services, each name once).
+  - `1e53e71` – SF-067: MG 8.2.3 (PublicationList/SubscriptionList share one `DataSetWriterId`), 8.3.8, 9.1.8, Status topic `Status/<EventLevel>` in 9.1.3/4/5/8/9/10, B1.1.8.
+  - `8ee0fdd` – SF-068: MG 8.3.10, 9.1.10, B1.1.10.
+  - `fbc0ce8` – SF-062: MG 8.3.11 (MaxPacketSize RIG 4.1.1, `PaginationRequest` only in `Get`, `Pagination` only in `Pub`, no pagination for `Set`/`Del`), 8.3.12 (Locale only with `Get`), `Get`/`Pub` list items of 9.1.1/2/3/4/7/8/9/10.
+  - `8ac06fc` – SF-063: MG 8.3.11.1/8.3.11.2, B1.1.11 (page size, pages from 1, `Page` 0 = all pages, `HasNext`, series).
+  - `f94916e` – SF-056: B1 examples (valid JSON, notes instead of comment-only objects, instantiated values).
+  - `26c899d` – new GL-ADR-019 "Clarify core resources, pagination and locale" (PO order), describing all changes above.
+  - `ca8d1c5` – findings register: SF-056 and SF-062 … 068 resolved, no open finding, next free id SF-069.
+- GL-ADR-001 … 019; SF-001 … 068 resolved, no open spec finding; next free id SF-069.
