@@ -1,7 +1,7 @@
 # Area registry of the requirements catalog (ADR-0018, schema: areas.schema.json).
 # Every guideline section belongs to exactly one area; the longest listed prefix
 # wins ("MG 8.2.16" beats "MG 8"). Order = catalog order, cycles per ROADMAP P1 (updated C-024).
-baseline: "70b4c01"
+baseline: "15eaa8a"
 areas:
   - code: CMP
     title: Compliance domains and levels
@@ -66,7 +66,7 @@ areas:
     title: Resource ReferenceDesignation
     cycle: C-027
     status: drafted
-    sections: [MG 8.3.10, MG 8.3.13, MG 9.1.10]
+    sections: [MG 8.3.10, MG 8.3.13.1, MG 9.1.10]
   - code: PAG
     title: Pagination
     cycle: C-027
@@ -77,6 +77,15 @@ areas:
     cycle: C-027
     status: reviewed
     sections: [MG 8.3.12]
+  - code: QRY
+    title: Query (generic helper DataSet of a Get)
+    cycle: C-027
+    status: drafted
+    sections: [MG 8.3.13]
+    notes: >-
+      Generic rules of the helper DataSet Query (GL-ADR-020 amended by SF-073);
+      the query parameters are defined per resource (MG 8.3.13.x) and belong to
+      the area of the resource (MG 8.3.13.1 → RES-REFDES).
   - code: RES-CONFIG
     title: Resource Config
     cycle: C-028

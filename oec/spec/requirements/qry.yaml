@@ -1,0 +1,101 @@
+# Requirements of area QRY – generic helper DataSet Query (MG 8.3.13; ADR-0018,
+# schema: catalog.schema.json). Created in the C-027 review: the PO decided
+# SF-073 option (c) and amended GL-ADR-020 (ChildrenRequest → generic Query).
+# Reserved DataSetWriterId 9 and names: REQ-MSG-019. The query parameters are
+# defined per resource: ReferenceDesignation (MG 8.3.13.1) → REQ-RES-REFDES-011 …
+# 015. Checked by tools/internal/payload (REQ-QRY-001; REQ-QRY-002 in the
+# tolerant mode).
+area: QRY
+baseline: "15eaa8a"
+requirements:
+  - id: REQ-QRY-001
+    title: A Query only in a Get of a resource with a defined Query
+    statement: >-
+      A Query DataSetMessage is only sent in a NetworkMessage with the method
+      Get on a resource for which MG 8.3.13 defines a Query (so far
+      ReferenceDesignation), under the conditions defined there, and at most
+      once per NetworkMessage; a receiver ignores a Query in any other
+      NetworkMessage.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester, responder]
+    condition: The NetworkMessage carries a Query.
+    refs: [MG 8.3.13, GL-ADR-020, SF-073, SF-035]
+    quotes:
+      - ref: MG 8.3.13
+        text: The DataSetMessage with Query information is only meaningful in combination with the method Get and a resource for which a Query is defined, under the conditions defined there, at most once per NetworkMessage; in any other NetworkMessage it is ignored by the receiver.
+    verification: [schema, d7-validate, d7-test]
+    inventory: [MG-8.3.13-d238ce3d]
+    status: draft
+    notes: >-
+      Same pattern as PaginationRequest and Locale (REQ-PAG-008, REQ-LOC-002).
+      The resource-specific conditions are in the area of the resource (for
+      ReferenceDesignation: only without Source, REQ-RES-REFDES-013). A
+      receiver tolerates the misplaced helper (REQ-MSG-046); the strict
+      checker flags it at the sender (REQ-MSG-001).
+
+  - id: REQ-QRY-002
+    title: Undefined query parameters are ignored
+    statement: >-
+      A receiver ignores the fields of the Payload of a Query that are not
+      defined as query parameters of the addressed resource and evaluates
+      the defined ones.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The responder supports the Query of the resource.
+    refs: [MG 8.3.13, GL-ADR-020, SF-073, SF-035]
+    quotes:
+      - ref: MG 8.3.13
+        text: Fields of the Payload that are not defined as query parameters of the resource are ignored by the receiver.
+    verification: [d7-test]
+    inventory: [MG-8.3.13-96aa75e3]
+    status: draft
+    notes: >-
+      Receiver side of SF-052 (tolerant, REQ-MSG-046). The sender sends only
+      the defined query parameters (REQ-MSG-001; for ReferenceDesignation
+      REQ-RES-REFDES-012).
+
+  - id: REQ-QRY-003
+    title: An unsupported Query is ignored
+    statement: >-
+      A responder that does not support the Query of a resource ignores it
+      and answers the Get as without Query.
+    keyword: MUST
+    implicit: true
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The responder does not support the Query of the resource.
+    refs: [MG 8.3.13, GL-ADR-020, SF-073, SF-035]
+    quotes:
+      - ref: MG 8.3.13
+        text: An application that does not support the Query of a resource ignores it and answers the Get as without Query; therefore, a requester should check the received information against its query parameters.
+    verification: [d7-test]
+    inventory: [MG-8.3.13-31a1bfa3]
+    status: draft
+    notes: The support of the Query is graded per resource (ReferenceDesignation REQ-RES-REFDES-011).
+
+  - id: REQ-QRY-004
+    title: Requester checks the answer against its query parameters
+    statement: >-
+      A requester that sent a Query checks the received information against
+      its query parameters, because a responder without support for the
+      Query answers as without it.
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [requester]
+    condition: The requester sent a Query.
+    refs: [MG 8.3.13, GL-ADR-020, SF-073]
+    quotes:
+      - ref: MG 8.3.13
+        text: An application that does not support the Query of a resource ignores it and answers the Get as without Query; therefore, a requester should check the received information against its query parameters.
+    verification: [manual]
+    inventory: [MG-8.3.13-31a1bfa3]
+    status: draft
+    notes: For ReferenceDesignation the check of the Parent (REQ-RES-REFDES-015).

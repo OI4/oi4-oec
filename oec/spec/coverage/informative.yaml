@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "70b4c01"
+baseline: "15eaa8a"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -284,8 +284,8 @@ items:
     reason: Lists the topic form Pub/ReferenceDesignation; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-REFDES-005.
   - key: MG-9.1.10-880719a5
     reason: Reference to the examples of MG B1.1.10 (golden payload vectors V-PAY-026 ff.).
-  - key: MG-8.3.13-a8781b7e
-    reason: Example of MG 8.3.13 (children of a production line); the answer is specified by the following sentences (REQ-RES-REFDES-014).
+  - key: MG-8.3.13.1-7f41b4c4
+    reason: Example of MG 8.3.13.1 (children of a production line); the answer is specified by the following sentences (REQ-RES-REFDES-014).
   # --- PAG (C-027) ----------------------------------------------------------
   - key: MG-8.3.11-41c125f9
     reason: Restates that several DataSetMessages can be packed into one NetworkMessage ("can" expresses possibility); the rule is area MSG (MG 8.2.1).
@@ -295,3 +295,6 @@ items:
     reason: Example of the risk of unpaginated answers; the rule is REQ-PAG-005.
   - key: MG-8.3.11-1d50c8a1
     reason: Introduction of the pagination mechanism ("can" expresses possibility); the rules are REQ-PAG-002, REQ-PAG-005 and REQ-PAG-006.
+  # --- QRY (C-027 review, SF-073) -------------------------------------------
+  - key: MG-8.3.13-5c648644
+    reason: Purpose of the Query and REST analogy ("can" expresses possibility); the rules are REQ-QRY-001 … 004, the query parameters per resource REQ-RES-REFDES-012.

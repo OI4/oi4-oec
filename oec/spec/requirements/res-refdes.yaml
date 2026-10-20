@@ -3,10 +3,11 @@
 # Support: REQ-CMP-020 (L2 SHOULD, L3 MUST). The Status event after Set/Del
 # belongs to RES-EVENT (C-028). Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
-# Children of a ReferenceDesignation ("OneDown"): helper DataSet ChildrenRequest
-# (MG 8.3.13, GL-ADR-020, SF-069) – REQ-RES-REFDES-011 … 016 (draft).
+# Children of a ReferenceDesignation ("OneDown"): Query of ReferenceDesignation
+# (MG 8.3.13.1, GL-ADR-020, SF-069, SF-073) – REQ-RES-REFDES-011 … 016 (draft);
+# the generic Query rules are area QRY.
 area: RES-REFDES
-baseline: "70b4c01"
+baseline: "15eaa8a"
 requirements:
   # --- DataSet content (MG 8.3.10) --------------------------------------------
   - id: REQ-RES-REFDES-001
@@ -59,24 +60,24 @@ requirements:
       A Get ReferenceDesignation NetworkMessage contains no
       ReferenceDesignation DataSetMessage; its Messages are empty or contain
       only the helper DataSets PaginationRequest and Locale and – only
-      without Source – ChildrenRequest.
+      without Source – Query.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [requester]
     scope: [MG 8.3.11, MG 8.3.12, MG 8.3.13]
-    refs: [MG 9.1.10, SF-062, SF-069]
+    refs: [MG 9.1.10, SF-062, SF-069, SF-073]
     quotes:
       - ref: MG 9.1.10
         text: In combination with the method Get, the payload requires an empty NetworkMessage.
       - ref: MG 9.1.10
-        text: The NetworkMessage can alternatively contain DataSetMessages for PaginationRequest (8.3.11.1 PaginationRequest) and Locale (8.3.12 Locale) and, without Source, a DataSetMessage for ChildrenRequest (8.3.13 ChildrenRequest).
+        text: The NetworkMessage can alternatively contain DataSetMessages for PaginationRequest (8.3.11.1 PaginationRequest) and Locale (8.3.12 Locale) and, without Source, a DataSetMessage for Query (8.3.13.1 Query of ReferenceDesignation).
       - ref: MG 9.1.10
         text: A ReferenceDesignation object is not included.
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.10-260f39ac]
+    inventory: [MG-9.1.10-d0686981]
     status: draft
-    notes: ChildrenRequest added by GL-ADR-020 (SF-069, C-027 review); its placement rules are REQ-RES-REFDES-013.
+    notes: Query added by GL-ADR-020 (SF-069, SF-073, C-027 review); its placement rules are REQ-QRY-001 and REQ-RES-REFDES-013.
 
   - id: REQ-RES-REFDES-004
     title: Get ReferenceDesignation is answered with all addressed objects
@@ -236,36 +237,37 @@ requirements:
     status: reviewed
     notes: Topic per SF-068 (b), GL-ADR-019; ReplyTo per REQ-MSG-015.
 
-  # --- Children of an asset: ChildrenRequest (MG 8.3.13, 8.3.10, 1.3) -------
+  # --- Children of an asset: Query of ReferenceDesignation (MG 8.3.13.1, 8.3.10, 1.3)
   - id: REQ-RES-REFDES-011
-    title: Support of the ChildrenRequest
+    title: Support of the Query of ReferenceDesignation
     statement: >-
       A component that supports the resource ReferenceDesignation supports
-      the request of the children of an asset via ChildrenRequest – optional
-      at Level 1 and 2, mandatory at Level 3.
+      the request of the children of an asset via the Query of
+      ReferenceDesignation – optional at Level 1 and 2, mandatory at Level 3.
     keyword: MUST
     domain: messaging
     levels: {L1: MAY, L2: MAY, L3: MUST}
     applies_to: [application, device]
     condition: The component supports the resource ReferenceDesignation (REQ-CMP-020).
-    refs: [MG 1.3, MG 8.3.13, GL-ADR-020, SF-069]
+    refs: [MG 1.3, MG 8.3.13.1, GL-ADR-020, SF-069, SF-073]
     quotes:
       - ref: MG 1.3
-        text: A component that supports the resource ReferenceDesignation may support the request of the children of an asset via ChildrenRequest at Level 1 and 2 and must support it at Level 3 (8.3.13 ChildrenRequest).
-      - ref: MG 8.3.13
-        text: The support of the ChildrenRequest is optional at compliance Level 1 and 2 and mandatory at Level 3 for every component that supports the resource ReferenceDesignation (1.3 Compliance Domains and Levels).
+        text: A component that supports the resource ReferenceDesignation may support the request of the children of an asset via Query at Level 1 and 2 and must support it at Level 3 (8.3.13.1 Query of ReferenceDesignation).
+      - ref: MG 8.3.13.1
+        text: The support of the Query of ReferenceDesignation is optional at compliance Level 1 and 2 and mandatory at Level 3 for every component that supports the resource ReferenceDesignation (1.3 Compliance Domains and Levels).
     verification: [d7-test]
-    inventory: [MG-1.3-cc18023f, MG-8.3.13-36cb48d1]
+    inventory: [MG-1.3-fc5dfccb, MG-8.3.13.1-18dcbb80]
     status: draft
     notes: >-
       PO decision in the C-027 review (2026-10-20): option (b) "OneDown" of
-      SF-069, optional at L1/L2, mandatory at L3. REQ-CMP-020 makes the
-      resource itself L2 SHOULD, L3 MUST.
+      SF-069, optional at L1/L2, mandatory at L3; carrier: generic Query
+      (SF-073). REQ-CMP-020 makes the resource itself L2 SHOULD, L3 MUST.
 
   - id: REQ-RES-REFDES-012
-    title: Fields of the ChildrenRequest DataSet
+    title: Query parameters of ReferenceDesignation
     statement: >-
-      The Payload of a ChildrenRequest DataSetMessage contains the mandatory
+      The Payload of a Query DataSetMessage on Get/ReferenceDesignation
+      contains the query parameters: the mandatory
       String Parent (unencoded Identification Link of the asset whose
       children are requested) and the optional String Aspect with one of the
       values "Function", "Product" or "Location"; no other field.
@@ -273,41 +275,43 @@ requirements:
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [requester]
-    condition: The NetworkMessage carries a ChildrenRequest.
+    condition: The Get/ReferenceDesignation carries a Query.
     scope: [MG 4]
-    refs: [MG 8.3.13, GL-ADR-020]
+    refs: [MG 8.3.13.1, GL-ADR-020]
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.13-4c5bdc57, MG-8.3.13-d2738128]
+    inventory: [MG-8.3.13.1-33176e50, MG-8.3.13.1-417aaa0a]
     status: draft
-    notes: Reserved DataSetWriterId 9, WriterGroupName "ChildrenRequest", DataSetWriterName = requester (REQ-MSG-019).
+    notes: Reserved DataSetWriterId 9, WriterGroupName "Query", DataSetWriterName = requester (REQ-MSG-019). A receiver ignores undefined query parameters (REQ-QRY-002).
 
   - id: REQ-RES-REFDES-013
-    title: ChildrenRequest only in a Get ReferenceDesignation without Source
+    title: Query of ReferenceDesignation only without Source
     statement: >-
-      A ChildrenRequest is only sent in a NetworkMessage on
-      Get/ReferenceDesignation without Source and at most once per
-      NetworkMessage; a receiver ignores a ChildrenRequest in any other
-      NetworkMessage.
+      A Query is only sent on Get/ReferenceDesignation without Source; a
+      receiver ignores a Query on Get/ReferenceDesignation with Source.
     keyword: MUST
     implicit: true
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [requester, responder]
-    condition: The NetworkMessage carries a ChildrenRequest.
-    refs: [MG 8.3.13, GL-ADR-020, SF-035]
+    condition: The Get/ReferenceDesignation carries a Query.
+    scope: [MG 8.3.13]
+    refs: [MG 8.3.13.1, GL-ADR-020, SF-035]
     quotes:
-      - ref: MG 8.3.13
-        text: The DataSetMessage with ChildrenRequest information is only meaningful in combination with the topic …/Get/ReferenceDesignation without Source, at most once per NetworkMessage; in any other NetworkMessage it is ignored by the receiver.
+      - ref: MG 8.3.13.1
+        text: The Query of ReferenceDesignation is only meaningful in combination with the topic …/Get/ReferenceDesignation without Source; with Source it is ignored by the receiver.
     verification: [schema, d7-validate, d7-test]
-    inventory: [MG-8.3.13-90f7e1ea]
+    inventory: [MG-8.3.13.1-3feaca7a]
     status: draft
-    notes: Same pattern as the Locale (REQ-LOC-002). A receiver tolerates the misplaced helper (REQ-MSG-046); the strict checker flags it at the sender (REQ-MSG-001).
+    notes: >-
+      The generic placement (method Get, at most once) is REQ-QRY-001. A
+      receiver tolerates the misplaced helper (REQ-MSG-046); the strict
+      checker flags it at the sender (REQ-MSG-001).
 
   - id: REQ-RES-REFDES-014
-    title: A ChildrenRequest is answered with the direct children
+    title: A Query of ReferenceDesignation is answered with the direct children
     statement: >-
-      A component that supports the ChildrenRequest answers a
-      Get/ReferenceDesignation with ChildrenRequest with the
+      A component that supports the Query of ReferenceDesignation answers a
+      Get/ReferenceDesignation with Query with the
       ReferenceDesignation objects of exactly those assets it provides
       ReferenceDesignation information for, whose Parent of the requested
       Aspect – without Aspect: of at least one aspect – has an
@@ -321,49 +325,49 @@ requirements:
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [responder]
-    condition: The component supports the ChildrenRequest (REQ-RES-REFDES-011).
+    condition: The component supports the Query of ReferenceDesignation (REQ-RES-REFDES-011).
     scope: [MG 4.1, MG 8.3.11]
-    refs: [MG 8.3.13, MG 9.1.10, GL-ADR-020]
+    refs: [MG 8.3.13.1, MG 9.1.10, GL-ADR-020]
     quotes:
-      - ref: MG 8.3.13
-        text: An application that supports the ChildrenRequest must answer such a Get with the ReferenceDesignation objects of exactly those assets it provides ReferenceDesignation information for, whose Parent of the requested Aspect contains an IdentificationLink equal to the requested Parent (4.1 IEC 61406-1 Identification Link).
-      - ref: MG 8.3.13
+      - ref: MG 8.3.13.1
+        text: An application that supports the Query of ReferenceDesignation must answer such a Get with the ReferenceDesignation objects of exactly those assets it provides ReferenceDesignation information for, whose Parent of the requested Aspect contains an IdentificationLink equal to the requested Parent (4.1 IEC 61406-1 Identification Link).
+      - ref: MG 8.3.13.1
         text: Without Aspect, an object matches if the Parent of at least one of its aspects matches.
-      - ref: MG 8.3.13
+      - ref: MG 8.3.13.1
         text: >-
           The answer is published like the answer to a Get without Source (9.1.10 ReferenceDesignation): each object in its own DataSetMessage, published to the topic …/Pub/ReferenceDesignation, with the MessageId of the Get as ReplyTo and paginated if necessary (8.3.11 Pagination).
-      - ref: MG 8.3.13
+      - ref: MG 8.3.13.1
         text: >-
           If no asset matches, the answer contains no ReferenceDesignation DataSetMessage ("Messages": []).
-      - ref: MG 8.3.13
+      - ref: MG 8.3.13.1
         text: Only the direct children are requested.
       - ref: MG 9.1.10
-        text: The application answers with the matching objects as described in 8.3.13 ChildrenRequest, published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/ReferenceDesignation.
+        text: The application answers with the matching objects as described in 8.3.13.1 Query of ReferenceDesignation, published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/ReferenceDesignation.
     verification: [d7-test]
-    inventory: [MG-8.3.13-d8af4295, MG-8.3.13-72ec9fe8, MG-8.3.13-079546e4, MG-9.1.10-efeae1bc]
+    inventory: [MG-8.3.13.1-14367aab, MG-8.3.13.1-bd151745, MG-8.3.13.1-2856ce44, MG-9.1.10-912abe06]
     status: draft
     notes: >-
       Children represented by other applications are requested from those
-      applications (informative note of MG 8.3.13). Pagination: REQ-PAG-005;
+      applications (informative note of MG 8.3.13.1). Pagination: REQ-PAG-005;
       ReplyTo: REQ-MSG-015.
 
   - id: REQ-RES-REFDES-015
     title: Requester checks the Parent of the answer
     statement: >-
-      A requester of a ChildrenRequest checks the Parent of the received
-      ReferenceDesignation objects, because a component without support for
-      the ChildrenRequest ignores it and answers with all objects.
+      A requester of a Query of ReferenceDesignation checks the Parent of the
+      received ReferenceDesignation objects, because a component without
+      support for it ignores the Query and answers with all objects.
     keyword: SHOULD
     domain: messaging
     levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
     applies_to: [requester]
-    condition: The requester sent a ChildrenRequest.
-    refs: [MG 8.3.13, GL-ADR-020]
+    condition: The requester sent a Query of ReferenceDesignation.
+    refs: [MG 8.3.13.1, GL-ADR-020]
     quotes:
-      - ref: MG 8.3.13
-        text: An application that does not support the ChildrenRequest ignores it and answers with all ReferenceDesignation objects; therefore, a requester should check the Parent of the received objects.
+      - ref: MG 8.3.13.1
+        text: An application that does not support it ignores the Query and answers with all ReferenceDesignation objects; therefore, a requester should check the Parent of the received objects.
     verification: [manual]
-    inventory: [MG-8.3.13-ad33fd1a]
+    inventory: [MG-8.3.13.1-2c0f88d0]
     status: draft
 
   - id: REQ-RES-REFDES-016
@@ -384,4 +388,4 @@ requirements:
     verification: [manual]
     inventory: [MG-8.3.10-ed42bea0]
     status: draft
-    notes: The ChildrenRequest finds children only by Parent.IdentificationLink (REQ-RES-REFDES-014).
+    notes: The Query of ReferenceDesignation finds children only by Parent.IdentificationLink (REQ-RES-REFDES-014).
