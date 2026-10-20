@@ -104,7 +104,7 @@ areas:
   - code: RES-EVENT
     title: Resource Event
     cycle: C-028
-    status: planned
+    status: drafted
     sections: [MG 8.3.6, MG 9.1.6]
   - code: RES-SUBLIST
     title: Resource SubscriptionList

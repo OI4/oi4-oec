@@ -1,0 +1,294 @@
+# Requirements of area RES-EVENT – resource Event
+# (MG 8.3.6, 8.3.6.1 … 8.3.6.3, 9.1.6; ADR-0018, schema: catalog.schema.json).
+# Support: REQ-CMP-038 (resource Event), REQ-CMP-023 (Status events for Set/
+# Del). Topic form: REQ-TOP-013 (matrix), Filter <EventCategory>/<EventLevel>:
+# REQ-TOP-023; DataSetMessage MessageType ua-event: REQ-MSG-029. The Status
+# events that answer a Set or Del of a resource are REQ-RES-EVENT-005 (general)
+# plus the per-resource requirements (e.g. REQ-RES-PUBLIST-024,
+# REQ-RES-REFDES-009). Checked by tools/internal/payload (C-028).
+# Drafted in C-028; open findings: SF-075 (category-specific keys in Details),
+# SF-076 (Number, Category and topic Filter).
+area: RES-EVENT
+baseline: "ff1562f"
+requirements:
+  # --- DataSet content (MG 8.3.6) ---------------------------------------------
+  - id: REQ-RES-EVENT-001
+    title: Fields of the Event DataSet
+    statement: >-
+      The Payload of an Event DataSetMessage contains the mandatory UInt32
+      Number (reason of the event), the mandatory enumeration Category
+      (CAT_SYSLOG_0, CAT_STATUS_1 or CAT_GENERIC_99, written as
+      "<Name>_<Value>" string), the optional String Description (human
+      readable description of the Number) and the optional object Details,
+      whose keys are defined by the Category (REQ-RES-EVENT-003,
+      REQ-RES-EVENT-007, REQ-RES-EVENT-009); no other field.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component publishes Events (REQ-CMP-038).
+    refs: [MG 8.3.6, SF-075]
+    quotes:
+      - ref: MG 8.3.6
+        text: >-
+          This object depends on the category and its defined schema. In case of usage of CAT_GENERIC_99, no common schema validation is possible.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.6-6c6f8e17, MG-8.3.6-f78f6741, MG-8.3.6-9181a931, MG-8.3.6-af98a12d]
+    status: draft
+    notes: >-
+      The category-specific keys SymbolicId (Status) and MSG/HEADER (Syslog)
+      are keys of Details, as in the examples of MG B1.1.6, not fields of
+      the Payload (SF-075 (a), proposed interpretation).
+
+  - id: REQ-RES-EVENT-002
+    title: Category matches the EventCategory of the topic
+    statement: >-
+      The Category of an Event DataSetMessage corresponds to the
+      EventCategory of its topic Filter and WriterGroupName: CAT_SYSLOG_0 for
+      Syslog, CAT_STATUS_1 for Status and CAT_GENERIC_99 for Generic.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component publishes Events (REQ-CMP-038).
+    refs: [MG 8.3.6.1, MG 8.3.6.2, MG 8.3.6.3, MG 9.1.6, SF-076]
+    quotes:
+      - ref: MG 8.3.6.1
+        text: The used category must always be CAT_STATUS_1.
+      - ref: MG 8.3.6.2
+        text: The used category must always be CAT_SYSLOG_0.
+      - ref: MG 8.3.6.3
+        text: The used category must always be CAT_GENERIC_99.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.6.1-10a94abf, MG-8.3.6.1-349a3648, MG-8.3.6.2-1d59b183, MG-8.3.6.2-95c405fe, MG-8.3.6.3-fbb5933d, MG-8.3.6.3-2b797dea]
+    status: draft
+    notes: The mapping EventCategory ↔ Category is listed in MG 9.1.6 (SF-076 (c)).
+
+  # --- Status (MG 8.3.6.1) ----------------------------------------------------
+  - id: REQ-RES-EVENT-003
+    title: Content of a Status event
+    statement: >-
+      In an Event of the category Status, Number is an OPC UA StatusCode
+      (UInt32 of OPC UA Part 6 A.2, e.g. 0x80060000 = 2147876864 for
+      BadEncodingError), Description is optional and describes this
+      StatusCode, and the optional Details contain only the optional String
+      SymbolicId – the symbolic name of the StatusCode defined by the OPC
+      Foundation (e.g. "BadEncodingError").
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component publishes Events of the category Status.
+    refs: [MG 8.3.6.1, SF-075]
+    quotes:
+      - ref: MG 8.3.6.1
+        text: A number which contains the Part 6-A.2 to hint to the reason and the status of the event (e.g., 0x80060000 for “BadEncodingError“).
+      - ref: MG 8.3.6.1
+        text: A symbolic ID, defined by the OPC Foundation, as short form of the description (e.g., “BadEncodingError” for 0x80060000).
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.6.1-108129a6, MG-8.3.6.1-d778a37f, MG-8.3.6.1-15d7b6b4, MG-8.3.6.1-1ae735cf]
+    status: draft
+    notes: >-
+      SymbolicId is a key of Details (MG B1.1.6, B1.1.4 … B1.1.10; SF-075 (a)).
+      JSON numbers are decimal; the hexadecimal notation is only used in the
+      text.
+
+  - id: REQ-RES-EVENT-004
+    title: EventLevel of a Status event is the severity class of its Number
+    statement: >-
+      The EventLevel (topic Filter and WriterGroupName) of an Event of the
+      category Status is the severity class of its Number (bits 30–31 of the
+      StatusCode): Good for 0x00, Uncertain for 0x40 and Bad for 0x80 as
+      leading byte; a SymbolicId, if present, starts with the same class
+      name.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component publishes Events of the category Status.
+    refs: [MG 7.7, MG 8.3.6.1, SF-006, SF-076]
+    quotes:
+      - ref: MG 7.7
+        text: The class is based on the leading part of the symbol name or the starting 0x00 (Good), 0x40 (Uncertain) or 0x80 (Bad) hex code of the OPC UA Status Code (see OPC UA Part 6-A.2).
+    verification: [schema, d7-validate]
+    status: draft
+    notes: >-
+      The Filter values are REQ-TOP-023; this entry adds the consistency
+      between topic and payload (SF-076 (b)). The severity 0b11 is reserved
+      by OPC UA (Part 4 7.39) and not used.
+
+  - id: REQ-RES-EVENT-005
+    title: Set and Del are answered with a Status event
+    statement: >-
+      A component answers every Set and Del it receives with an Event of the
+      category Status about the result of the request: published to
+      Pub/Event/<Source>/Status/<EventLevel> with the Source of the request
+      topic, ReplyTo = MessageId of the request, Number = StatusCode of the
+      result (Good = 0 if the request was executed, otherwise e.g.
+      BadNotFound or BadNotWritable) – mandatory from Level 2 on, recommended
+      at Level 1. Its PublisherId is the component that received the request.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component offers Set or Del for a resource (REQ-CMP-023).
+    refs: [MG 8.3.6.1, MG 9.1, MG 7.4, SF-067]
+    quotes:
+      - ref: MG 8.3.6.1
+        text: >-
+          Status events must use Part 6-A.2 information to publish the status of modification requests (and of a Get of Metadata that cannot be answered, see 9.1 Resources) over the Message Bus as following:
+      - ref: MG 8.3.6.1
+        text: The event category Status must be used to respond to modification requests, done over the Message Bus.
+      - ref: MG 9.1
+        text: From compliance Level 2 on, each Set and Del must be answered with an Event of the category Status; at Level 1, it should be answered this way (7.4 Method Element).
+    verification: [d7-test]
+    inventory: [MG-8.3.6.1-41b095ec, MG-8.3.6.1-381a4fc6, MG-9.1-153191a2, MG-9.1-351e197e, MG-9.1-99138e23]
+    status: draft
+    notes: >-
+      Same obligation as REQ-TOP-014/015 and the per-resource requirements
+      (REQ-RES-DATA-011, REQ-RES-META-006, REQ-RES-SUBLIST-013,
+      REQ-RES-PUBLIST-024, REQ-RES-REFDES-009; Config in C-029); this entry
+      fixes topic, ReplyTo and Number for all of them. A request that
+      addresses an object the component does not have is answered with Bad
+      (REQ-CMP-043); the optional answer to a Get of Metadata without Data is
+      REQ-CMP-044. Examples: MG B1.1.4, B1.1.5, B1.1.6, B1.1.8 … B1.1.10.
+
+  - id: REQ-RES-EVENT-006
+    title: Status events for application-specific states
+    statement: >-
+      Besides answering requests, a component may publish Events of the
+      category Status on its own (empty ReplyTo), e.g. about an internal
+      state.
+    keyword: MAY
+    domain: messaging
+    levels: {L1: MAY, L2: MAY, L3: MAY}
+    applies_to: [application, device]
+    refs: [MG 8.3.6.1]
+    quotes:
+      - ref: MG 8.3.6.1
+        text: The event category Status can be used to publish application specific information such as internal state.
+    verification: [manual]
+    inventory: [MG-8.3.6.1-61ce38ec]
+    status: draft
+
+  # --- Syslog (MG 8.3.6.2) ----------------------------------------------------
+  - id: REQ-RES-EVENT-007
+    title: Content of a Syslog event
+    statement: >-
+      In an Event of the category Syslog, Number is the PRI of the syslog
+      message according to RFC 3164 4.1.1 (Facility × 8 + Severity, 0 … 191),
+      the optional Details contain only the optional Strings MSG (MSG part of
+      the syslog message, RFC 3164 4.1.3) and HEADER (HEADER part with
+      timestamp and host name or IP address of the sender, RFC 3164 4.1.2),
+      and Description is not present.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component publishes Events of the category Syslog.
+    refs: [MG 8.3.6.2, SF-075, SF-076]
+    quotes:
+      - ref: MG 8.3.6.2
+        text: A number which represents the PRI of a syslog message.
+      - ref: MG 8.3.6.2
+        text: The PRI is an 8-bit integer. It consists of Severity and Facility. Three bits are used for the coding of Severity, 5 bits are used for coding Facility.
+      - ref: MG 8.3.6.2
+        text: The optional key Description is not used in context of this Category.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.6.2-5eb88824, MG-8.3.6.2-a95141f7, MG-8.3.6.2-99f931ec, MG-8.3.6.2-245da261, MG-8.3.6.2-f14e34ce]
+    status: draft
+    notes: >-
+      MSG and HEADER are keys of Details (MG B1.1.6; SF-075 (a)); "is not
+      used" read as "is not present" (SF-075 (b)). RFC 3164 defines the
+      Facilities 0 … 23, hence PRI ≤ 191 (SF-076 (a)).
+
+  - id: REQ-RES-EVENT-008
+    title: EventLevel of a Syslog event is the severity of its PRI
+    statement: >-
+      The EventLevel (topic Filter and WriterGroupName) of an Event of the
+      category Syslog is the name of the severity of its Number (PRI modulo
+      8, RFC 5424 6.2.1): 0 Emergency, 1 Alert, 2 Critical, 3 Error, 4
+      Warning, 5 Notice, 6 Informational, 7 Debug.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component publishes Events of the category Syslog.
+    refs: [MG 7.7, MG 8.3.6.2, SF-076]
+    verification: [schema, d7-validate]
+    status: draft
+    notes: >-
+      MG 8.3.6.2 only notes "The EventLevel depends on severity level of
+      PRI"; the mapping follows the RFC 5424 names used for the LogLevels of
+      MG 7.7 (SF-076 (a)). Example MG B1.1.6: PRI 13 (user, Notice) →
+      Syslog/Notice.
+
+  # --- Generic (MG 8.3.6.3) ---------------------------------------------------
+  - id: REQ-RES-EVENT-009
+    title: Content of a Generic event
+    statement: >-
+      In an Event of the category Generic, Number is an application-defined
+      UInt32, Description optionally describes it and the optional Details
+      is an application-defined object (any keys).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The component publishes Events of the category Generic.
+    refs: [MG 8.3.6.3]
+    quotes:
+      - ref: MG 8.3.6.3
+        text: An application defined object which represents something in scope of the application.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.6.3-3366460b, MG-8.3.6.3-ff7d5f6f, MG-8.3.6.3-8b474e52]
+    status: draft
+
+  - id: REQ-RES-EVENT-010
+    title: Generic event numbers and details are documented
+    statement: >-
+      An application that publishes Events of the category Generic defines
+      and documents the meaning of their Numbers and the structure of their
+      Details.
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application, device, manufacturer]
+    condition: The component publishes Events of the category Generic.
+    refs: [MG 8.3.6.3]
+    quotes:
+      - ref: MG 8.3.6.3
+        text: A number which represents something and which the application should have defined and documented.
+      - ref: MG 8.3.6.3
+        text: It should be well documented on application side.
+    verification: [manual]
+    inventory: [MG-8.3.6.3-cd223e3d, MG-8.3.6.3-0d7dfbe4]
+    status: draft
+
+  # --- Message Bus (MG 9.1.6) -------------------------------------------------
+  - id: REQ-RES-EVENT-011
+    title: Events are only published with a complete Filter
+    statement: >-
+      Events are only published (method Pub, no Get, Set or Del) to
+      Pub/Event/<Source>/<EventCategory>/<EventLevel>; all Event
+      DataSetMessages of a NetworkMessage belong to this Source, EventCategory
+      and EventLevel.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 9.1.6, SF-076]
+    quotes:
+      - ref: MG 9.1.6
+        text: A topic without both of this information must not be used.
+      - ref: MG 9.1.6
+        text: Events are only notifications and not persisted. Therefore, exclusively the method Pub is available.
+      - ref: MG 9.1.6
+        text: Only DataSetMessages of type Event with same EventCategory and EventLevel can be combined in a single NetworkMessage.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.6-c02fef31, MG-9.1.6-ddada5a3]
+    status: draft
+    notes: >-
+      Topic form per REQ-TOP-013 (matrix) and REQ-TOP-023; Source and
+      Filter of each DataSetMessage per REQ-MSG-023/024. Event has no Get,
+      hence no PaginationRequest, Locale or Query (REQ-PAG-008, REQ-QRY-001). The note in
+      MG B1.1.6 says "EventFilter" instead of EventLevel (SF-075 (c)).

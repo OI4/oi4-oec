@@ -23,13 +23,13 @@ Guideline baseline: `ff1562f`. An inventory item is a candidate of a normative s
 | RES-CONFIG | C-028 | planned | 144 | 0 | 0 | 144 |
 | RES-DATA | C-028 | planned | 30 | 0 | 0 | 30 |
 | RES-META | C-028 | planned | 12 | 0 | 0 | 12 |
-| RES-EVENT | C-028 | planned | 35 | 0 | 0 | 35 |
+| RES-EVENT | C-028 | drafted | 35 | 29 | 6 | 0 |
 | RES-SUBLIST | C-028 | planned | 34 | 0 | 0 | 34 |
-| BUS | C-028 | planned | 25 | 6 | 0 | 19 |
+| BUS | C-028 | planned | 25 | 9 | 0 | 16 |
 | CNT | C-029 | planned | 73 | 0 | 0 | 73 |
 | PLT | C-029 | planned | 11 | 0 | 0 | 11 |
 | APP | C-029 | planned | 9 | 0 | 0 | 9 |
 | LIC | C-029 | planned | 5 | 0 | 0 | 5 |
 | REG | C-029 | planned | 13 | 0 | 0 | 13 |
 | GEN | C-029 | planned | 79 | 0 | 0 | 79 |
-| **Total** | | | 1329 | 724 | 141 | 464 |
+| **Total** | | | 1329 | 756 | 147 | 426 |

@@ -298,3 +298,16 @@ items:
   # --- QRY (C-027 review, SF-073) -------------------------------------------
   - key: MG-8.3.13-5c648644
     reason: Purpose of the Query and REST analogy ("can" expresses possibility); the rules are REQ-QRY-001 … 004, the query parameters per resource REQ-RES-REFDES-012.
+  # --- RES-EVENT (C-028) ----------------------------------------------------
+  - key: MG-9.1.6-78c01ef0
+    reason: Purpose of the Event Filter ("can be used" expresses possibility); the Filter is REQ-TOP-023, the publication REQ-RES-EVENT-011.
+  - key: MG-9.1.6-faaeeb4f
+    reason: Hint how any application can listen to Events ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.6-be06ec35
+    reason: Hint how to subscribe to the Events of one asset ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.6-bbe3e480
+    reason: Hint how to subscribe to the Events of one category ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.6-5b67cb5d
+    reason: Hint how to subscribe to the Events of one category and level ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.6-da2b4dd1
+    reason: Reference to the examples of MG B1.1.6 (golden payload vectors V-PAY-055 ff.).
