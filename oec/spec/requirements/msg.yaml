@@ -5,7 +5,7 @@
 # the guideline in C-024; the PO reviewed the area in the C-024 review
 # (2026-10-19, REQ-MSG-046 changed to SHOULD).
 area: MSG
-baseline: "2bfc0d9"
+baseline: "70b4c01"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
@@ -457,36 +457,38 @@ requirements:
   - id: REQ-MSG-019
     title: Reserved DataSetWriterIds of the helper DataSets
     statement: >-
-      A PaginationRequest uses DataSetWriterId 1, a Pagination 2 and a Locale
-      3. In these DataSetMessages, WriterGroupName is the name of the helper
-      DataSet ("PaginationRequest", "Pagination", "Locale") and
-      DataSetWriterName is the Identification Link of the application that
-      publishes the NetworkMessage.
+      A PaginationRequest uses DataSetWriterId 1, a Pagination 2, a Locale 3
+      and a ChildrenRequest 9. In these DataSetMessages, WriterGroupName is
+      the name of the helper DataSet ("PaginationRequest", "Pagination",
+      "Locale", "ChildrenRequest") and DataSetWriterName is the
+      Identification Link of the application that publishes the
+      NetworkMessage.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher, requester, responder]
-    refs: [MG 8.2.3]
+    refs: [MG 8.2.3, SF-069]
     quotes:
       - ref: MG 8.2.3
-        text: A PaginationRequest (8.3.11.1 PaginationRequest) must always use DataSetWriterId 1, a Pagination (8.3.11.2 Pagination) must use the 2 and a Locale (8.3.12 Locale) must use the 3.
+        text: A PaginationRequest (8.3.11.1 PaginationRequest) must always use DataSetWriterId 1, a Pagination (8.3.11.2 Pagination) must use the 2, a Locale (8.3.12 Locale) must use the 3 and a ChildrenRequest (8.3.13 ChildrenRequest) must use the 9.
       - ref: MG 8.2.3
-        text: For the DataSetMessages with reserved DataSetWriterIds 1 to 3, the WriterGroupName must contain the name of the helper DataSet (PaginationRequest, Pagination or Locale) and the DataSetWriterName must contain the Identification Link of the application, which publishes the NetworkMessage
+        text: For the DataSetMessages with reserved DataSetWriterIds 1 to 3 and 9, the WriterGroupName must contain the name of the helper DataSet (PaginationRequest, Pagination, Locale or ChildrenRequest) and the DataSetWriterName must contain the Identification Link of the application, which publishes the NetworkMessage
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.3-7b5d34fc, MG-8.2.3-29b25bd8]
-    status: reviewed
+    inventory: [MG-8.2.3-cb6d4e8b, MG-8.2.3-e8f8a4d8]
+    status: draft
+    notes: ChildrenRequest (DataSetWriterId 9) added by GL-ADR-020 (SF-069, C-027 review).
 
   - id: REQ-MSG-020
     title: Application DataSetWriterIds start at 10
     statement: >-
       DataSetWriterId 0 is never used. The DataSetWriterIds 1 to 9 are
-      reserved (1 to 3 helper DataSets, 4 to 8 Actions of the common
+      reserved (1 to 3 and 9 helper DataSets, 4 to 8 Actions of the common
       services); an application assigns its own DataSetWriterIds from 10.
     keyword: MUST NOT
     domain: messaging
     levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
     applies_to: [publisher]
-    refs: [MG 8.2.3, MG 8.4]
+    refs: [MG 8.2.3, MG 8.4, SF-069]
     quotes:
       - ref: MG 8.2.3
         text: The application starts with DataSetWriterIds from 10, because the DataSetWriterIds up to 9 are reserved for special use cases. The DataSetWriterId 0 is invalid and shall not be used.
@@ -494,8 +496,8 @@ requirements:
         text: The DataSetWriterIds 4 to 8 are reserved for the Actions of the common services
     verification: [schema, d7-validate]
     inventory: [MG-8.2.3-5a768594]
-    status: reviewed
-    notes: DataSetWriterId 9 is reserved without a defined use; MG 8.4 reserves 4 to 7 for future common services.
+    status: draft
+    notes: DataSetWriterId 9 is used by the helper DataSet ChildrenRequest since GL-ADR-020 (SF-069, C-027 review; before it was reserved without a defined use); MG 8.4 reserves 4 to 7 for future common services.
 
   - id: REQ-MSG-021
     title: One DataSetWriterId per resource, DataSetWriterName and WriterGroupName
@@ -565,7 +567,7 @@ requirements:
     verification: [schema, d7-validate]
     inventory: [MG-8.2.3-b8ab5b57]
     status: reviewed
-    notes: Exception for the helper DataSets with DataSetWriterIds 1 to 3 (REQ-MSG-019).
+    notes: Exception for the helper DataSets with DataSetWriterIds 1 to 3 and 9 (REQ-MSG-019).
 
   - id: REQ-MSG-024
     title: WriterGroupName is the topic Filter

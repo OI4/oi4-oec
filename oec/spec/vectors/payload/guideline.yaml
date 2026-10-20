@@ -1,7 +1,7 @@
 # Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "2bfc0d9"
+baseline: "70b4c01"
 description: >-
   Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5,
   B1.1.7, B1.1.8, B1.1.10, B1.1.11, B1.1.12, B1.2.1): topic and message of the

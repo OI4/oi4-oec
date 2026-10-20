@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "2bfc0d9"
+baseline: "70b4c01"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -284,6 +284,8 @@ items:
     reason: Lists the topic form Pub/ReferenceDesignation; the allowed topic forms are REQ-TOP-013 (matrix), the payload REQ-RES-REFDES-005.
   - key: MG-9.1.10-880719a5
     reason: Reference to the examples of MG B1.1.10 (golden payload vectors V-PAY-026 ff.).
+  - key: MG-8.3.13-a8781b7e
+    reason: Example of MG 8.3.13 (children of a production line); the answer is specified by the following sentences (REQ-RES-REFDES-014).
   # --- PAG (C-027) ----------------------------------------------------------
   - key: MG-8.3.11-41c125f9
     reason: Restates that several DataSetMessages can be packed into one NetworkMessage ("can" expresses possibility); the rule is area MSG (MG 8.2.1).
