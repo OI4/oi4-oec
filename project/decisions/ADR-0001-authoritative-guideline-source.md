@@ -189,3 +189,10 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `264fc2c` – B1.1.4: publisher-defined `DataSetClassId` in the `Pub` examples, note rewritten (SF-072).
   - `15eaa8a` – findings register: SF-072 and SF-073 resolved, SF-074 (B1.1.5 `DataSetClassId`) open, next free id SF-075.
 - GL-ADR-001 … 020; SF-001 … 073 resolved, SF-074 open (not blocking); next free id SF-075.
+
+## Amendment C-027 review, part 4 (2026-10-20, guideline baseline `ff1562f`)
+
+- The baseline is now `ff1562f` on branch `feature/spec-findings` (PO decision SF-074 as proposed; local commits):
+  - `b45c497` – B1.1.5: publisher-defined `DataSetClassId` in the `MetaData` of the `Pub`/`Set` examples, sentence rewritten (SF-074).
+  - `ff1562f` – findings register: SF-074 resolved, no open findings, next free id SF-075.
+- GL-ADR-001 … 020; SF-001 … 074 resolved, none open; next free id SF-075.
