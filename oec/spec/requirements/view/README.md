@@ -12,13 +12,13 @@ Guideline baseline: `2bfc0d9`. Source of truth: the YAML files in `oec/spec/requ
 | [ACT](act.md) | Actions (Call/Reply) and DataSetWriterId allocation | C-023 | reviewed | 23 | MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2 |
 | [MQTT](mqtt.md) | General requirements on MQTT | C-025 | reviewed | 19 | MG 6 |
 | [LIFE](life.md) | Birth, Close and Will messages | C-025 | reviewed | 17 | MG 6.3.3, MG 6.3.4, MG 6.3.5 |
-| [RES-MAM](res-mam.md) | Resource MAM (Master Asset Model) | C-027 | drafted | 23 | MG 5, MG 8.3.1, MG 9.1.1 |
-| [RES-HEALTH](res-health.md) | Resource Health | C-027 | drafted | 7 | MG 8.3.2, MG 9.1.2 |
-| [RES-PROFILE](res-profile.md) | Resource Profile | C-027 | drafted | 5 | MG 8.3.7, MG 9.1.7 |
-| [RES-PUBLIST](res-publist.md) | Resource PublicationList | C-027 | drafted | 25 | MG 8.3.8, MG 9.1.8 |
-| [RES-REFDES](res-refdes.md) | Resource ReferenceDesignation | C-027 | drafted | 10 | MG 8.3.10, MG 9.1.10 |
-| [PAG](pag.md) | Pagination | C-027 | drafted | 9 | MG 8.3.11 |
-| [LOC](loc.md) | Locale | C-027 | drafted | 2 | MG 8.3.12 |
+| [RES-MAM](res-mam.md) | Resource MAM (Master Asset Model) | C-027 | reviewed | 23 | MG 5, MG 8.3.1, MG 9.1.1 |
+| [RES-HEALTH](res-health.md) | Resource Health | C-027 | reviewed | 7 | MG 8.3.2, MG 9.1.2 |
+| [RES-PROFILE](res-profile.md) | Resource Profile | C-027 | reviewed | 5 | MG 8.3.7, MG 9.1.7 |
+| [RES-PUBLIST](res-publist.md) | Resource PublicationList | C-027 | reviewed | 25 | MG 8.3.8, MG 9.1.8 |
+| [RES-REFDES](res-refdes.md) | Resource ReferenceDesignation | C-027 | reviewed | 10 | MG 8.3.10, MG 9.1.10 |
+| [PAG](pag.md) | Pagination | C-027 | reviewed | 9 | MG 8.3.11 |
+| [LOC](loc.md) | Locale | C-027 | reviewed | 2 | MG 8.3.12 |
 | RES-CONFIG | Resource Config | C-028 | planned | – | MG 8.3.3, MG 9.1.3 |
 | RES-DATA | Resource Data | C-028 | planned | – | MG 8.3.4, MG 9.1.4 |
 | RES-META | Resource Metadata | C-028 | planned | – | MG 8.3.5, MG 9.1.5 |
