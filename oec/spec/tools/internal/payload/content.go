@@ -492,3 +492,9 @@ func (c *checker) referenceDesignation(d dsm) {
 		}
 	}
 }
+
+// HasQuery reports whether a Query (MG 8.3.13) is defined for the resource.
+func HasQuery(resource string) bool {
+	_, ok := queries[resource]
+	return ok
+}

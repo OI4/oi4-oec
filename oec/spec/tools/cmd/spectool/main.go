@@ -140,6 +140,11 @@ func cmdLint(args []string) error {
 	for _, r := range s.Requirements() {
 		reqs[r.ID] = true
 	}
+	areaStatus := map[string]string{}
+	for _, a := range s.Areas.Areas {
+		areaStatus[a.Code] = a.Status
+	}
+	errs = append(errs, ts.CheckPayload(topic.PayloadOptions{Reqs: reqs, AreaStatus: areaStatus})...)
 	errs = append(errs, vectors.Check(vfiles, ts, vectors.Options{Baseline: s.Areas.Baseline, Reqs: reqs, Sections: examples})...)
 
 	for _, e := range errs {

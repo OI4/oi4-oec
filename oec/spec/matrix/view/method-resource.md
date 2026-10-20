@@ -5,6 +5,8 @@ Guideline baseline: `ff1562f` · 66 combinations, 29 allowed · Grammar: [`topic
 
 Legend: ✓ allowed, ✗ not allowed. `S` = `<Source>`, `F` = `Filter`; `!` required, `?` optional, no letter = forbidden. The number in brackets counts the topic vectors that parse with this rule.
 
+Payload columns (C-028, per resource below the topic table; values defined in [`method-resource.schema.json`](../method-resource.schema.json)): DataSetClassId `predefined` (MG A2), `publisher-defined`, `if-known` (only if the requester knows it), `in-metadata`, `none`; DataSetWriterId `publisher` (one per resource, Source and Filter), `list` (one common id for all entries), `addressed` (the id of the addressed DataSet), `action` (reserved id of the service), `none` (no resource DataSetMessage); answer `pub` (Pub with ReplyTo), `status-and-pub` (Status event, then Pub of the changed object), `status` (Status event only), `status-and-rest` (Status event, then Pub of the remaining entries), `reply` (ActionResponse). The vectors column lists the valid and invalid payload vectors with a topic of this combination.
+
 ## Overview
 
 | Resource / service | Pub | Get | Set | Del | Call | Reply |
@@ -34,6 +36,13 @@ Kind: resource
 | Call | ✗ | – | – | – | – | MG 9.1.1 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.1 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-data` | predefined | publisher | datasets | Pagination | none | [REQ-RES-MAM-022](../../requirements/view/res-mam.md#req-res-mam-022), [REQ-RES-MAM-001](../../requirements/view/res-mam.md#req-res-mam-001), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021) | 6: [050](../../vectors/view/payload-constructed.md#v-pay-050), [006](../../vectors/view/payload-guideline.md#v-pay-006), [023](../../vectors/view/payload-guideline.md#v-pay-023), [028](../../vectors/view/payload-guideline.md#v-pay-028), [029](../../vectors/view/payload-guideline.md#v-pay-029), [047](../../vectors/view/payload-guideline.md#v-pay-047) |  |
+| Get | draft | `ua-data` | predefined | none | none | PaginationRequest, Locale | pub | [REQ-RES-MAM-020](../../requirements/view/res-mam.md#req-res-mam-020), [REQ-RES-MAM-021](../../requirements/view/res-mam.md#req-res-mam-021), [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011) | 5: [051](../../vectors/view/payload-constructed.md#v-pay-051), [005](../../vectors/view/payload-guideline.md#v-pay-005), [007](../../vectors/view/payload-guideline.md#v-pay-007), [026](../../vectors/view/payload-guideline.md#v-pay-026), [027](../../vectors/view/payload-guideline.md#v-pay-027) |  |
+
 ## Health
 
 Kind: resource
@@ -46,6 +55,13 @@ Kind: resource
 | Del | ✗ | – | – | – | – | MG 9.1.2 | – | Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x). |
 | Call | ✗ | – | – | – | – | MG 9.1.2 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.2 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
+
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-data` | predefined | publisher | datasets | Pagination | none | [REQ-RES-HEALTH-007](../../requirements/view/res-health.md#req-res-health-007), [REQ-RES-HEALTH-001](../../requirements/view/res-health.md#req-res-health-001), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021) | 8: [018](../../vectors/view/payload-constructed.md#v-pay-018), [019](../../vectors/view/payload-constructed.md#v-pay-019), [048](../../vectors/view/payload-constructed.md#v-pay-048), [049](../../vectors/view/payload-constructed.md#v-pay-049), [003](../../vectors/view/payload-guideline.md#v-pay-003), [004](../../vectors/view/payload-guideline.md#v-pay-004), [024](../../vectors/view/payload-guideline.md#v-pay-024), [025](../../vectors/view/payload-guideline.md#v-pay-025) |  |
+| Get | draft | `ua-data` | predefined | none | none | PaginationRequest, Locale | pub | [REQ-RES-HEALTH-005](../../requirements/view/res-health.md#req-res-health-005), [REQ-RES-HEALTH-006](../../requirements/view/res-health.md#req-res-health-006), [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011) | 2: [001](../../vectors/view/payload-guideline.md#v-pay-001), [002](../../vectors/view/payload-guideline.md#v-pay-002) |  |
 
 ## Config
 
@@ -60,6 +76,14 @@ Kind: resource
 | Call | ✗ | – | – | – | – | MG 9.1.3 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.3 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | – | – | – | – | – | – | – | – | – | payload columns follow with area RES-CONFIG |
+| Get | – | – | – | – | – | – | – | – | – | payload columns follow with area RES-CONFIG |
+| Set | – | – | – | – | – | – | – | – | – | payload columns follow with area RES-CONFIG |
+
 ## Data
 
 Kind: resource
@@ -72,6 +96,14 @@ Kind: resource
 | Del | ✗ | – | – | – | – | MG 9.1.4 | – | Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x). |
 | Call | ✗ | – | – | – | – | MG 9.1.4 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.4 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
+
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-data` | publisher-defined | publisher | datasets | Pagination | none | [REQ-RES-DATA-008](../../requirements/view/res-data.md#req-res-data-008), [REQ-RES-DATA-001](../../requirements/view/res-data.md#req-res-data-001), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021) | 0 | Oi4Pv: REQ-RES-DATA-003/004. |
+| Get | draft | `ua-data` | if-known | none | none | PaginationRequest, Locale | pub | [REQ-RES-DATA-006](../../requirements/view/res-data.md#req-res-data-006), [REQ-RES-DATA-007](../../requirements/view/res-data.md#req-res-data-007), [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011) | 0 |  |
+| Set | draft | `ua-data` | if-known | addressed | single | – | status-and-pub | [REQ-RES-DATA-009](../../requirements/view/res-data.md#req-res-data-009), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-RES-DATA-011](../../requirements/view/res-data.md#req-res-data-011), [REQ-RES-DATA-012](../../requirements/view/res-data.md#req-res-data-012) | 0 |  |
 
 ## Metadata
 
@@ -86,6 +118,14 @@ Kind: resource
 | Call | ✗ | – | – | – | – | MG 9.1.5 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.5 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-metadata` | in-metadata | publisher | metadata-filled | – | none | [REQ-RES-META-003](../../requirements/view/res-meta.md#req-res-meta-003), [REQ-MSG-012](../../requirements/view/msg.md#req-msg-012), [REQ-MSG-033](../../requirements/view/msg.md#req-msg-033) | 1: [021](../../vectors/view/payload-guideline.md#v-pay-021) | Header equals the one of the described Data DataSetMessage (REQ-MSG-033). |
+| Get | draft | `ua-metadata` | none | addressed | metadata-empty | – | pub | [REQ-RES-META-001](../../requirements/view/res-meta.md#req-res-meta-001), [REQ-RES-META-002](../../requirements/view/res-meta.md#req-res-meta-002), [REQ-CMP-044](../../requirements/view/cmp.md#req-cmp-044) | 1: [020](../../vectors/view/payload-guideline.md#v-pay-020) | Not answered with Metadata for a Source/Tag without Data; optional Status Bad (REQ-CMP-044). |
+| Set | draft | `ua-metadata` | in-metadata | addressed | metadata-filled | – | status-and-pub | [REQ-RES-META-004](../../requirements/view/res-meta.md#req-res-meta-004), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-RES-META-006](../../requirements/view/res-meta.md#req-res-meta-006), [REQ-RES-META-007](../../requirements/view/res-meta.md#req-res-meta-007) | 1: [022](../../vectors/view/payload-guideline.md#v-pay-022) |  |
+
 ## Event
 
 Kind: resource
@@ -98,6 +138,12 @@ Kind: resource
 | Del | ✗ | – | – | – | – | MG 9.1.6 | – | Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x). |
 | Call | ✗ | – | – | – | – | MG 9.1.6 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.6 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
+
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-data` | predefined | publisher | datasets | – | none | [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011) | 0 | Status events answer Set/Del with the ReplyTo of the request (REQ-RES-EVENT-005). |
 
 ## Profile
 
@@ -112,6 +158,13 @@ Kind: resource
 | Call | ✗ | – | – | – | – | MG 9.1.7 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.7 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-data` | predefined | publisher | datasets | Pagination | none | [REQ-RES-PROFILE-005](../../requirements/view/res-profile.md#req-res-profile-005), [REQ-RES-PROFILE-001](../../requirements/view/res-profile.md#req-res-profile-001), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021) | 2: [032](../../vectors/view/payload-guideline.md#v-pay-032), [033](../../vectors/view/payload-guideline.md#v-pay-033) |  |
+| Get | draft | `ua-data` | predefined | none | none | PaginationRequest, Locale | pub | [REQ-RES-PROFILE-003](../../requirements/view/res-profile.md#req-res-profile-003), [REQ-RES-PROFILE-004](../../requirements/view/res-profile.md#req-res-profile-004), [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011) | 2: [030](../../vectors/view/payload-guideline.md#v-pay-030), [031](../../vectors/view/payload-guideline.md#v-pay-031) |  |
+
 ## PublicationList
 
 Kind: resource
@@ -124,6 +177,14 @@ Kind: resource
 | Del | ✗ | – | – | – | – | MG 9.1.8 | – | Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x). |
 | Call | ✗ | – | – | – | – | MG 9.1.8 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.8 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
+
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-data` | predefined | list | datasets | Pagination | none | [REQ-RES-PUBLIST-021](../../requirements/view/res-publist.md#req-res-publist-021), [REQ-RES-PUBLIST-001](../../requirements/view/res-publist.md#req-res-publist-001), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021) | 4: [052](../../vectors/view/payload-constructed.md#v-pay-052), [037](../../vectors/view/payload-guideline.md#v-pay-037), [038](../../vectors/view/payload-guideline.md#v-pay-038), [039](../../vectors/view/payload-guideline.md#v-pay-039) |  |
+| Get | draft | `ua-data` | predefined | none | none | PaginationRequest, Locale | pub | [REQ-RES-PUBLIST-019](../../requirements/view/res-publist.md#req-res-publist-019), [REQ-RES-PUBLIST-020](../../requirements/view/res-publist.md#req-res-publist-020), [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011) | 3: [034](../../vectors/view/payload-guideline.md#v-pay-034), [035](../../vectors/view/payload-guideline.md#v-pay-035), [036](../../vectors/view/payload-guideline.md#v-pay-036) |  |
+| Set | draft | `ua-data` | predefined | list | single | – | status-and-pub | [REQ-RES-PUBLIST-022](../../requirements/view/res-publist.md#req-res-publist-022), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-RES-PUBLIST-024](../../requirements/view/res-publist.md#req-res-publist-024), [REQ-RES-PUBLIST-025](../../requirements/view/res-publist.md#req-res-publist-025) | 1: [040](../../vectors/view/payload-guideline.md#v-pay-040) |  |
 
 ## SubscriptionList
 
@@ -138,6 +199,15 @@ Kind: resource
 | Call | ✗ | – | – | – | – | MG 9.1.9 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.9 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-data` | predefined | list | datasets | Pagination | none | [REQ-RES-SUBLIST-009](../../requirements/view/res-sublist.md#req-res-sublist-009), [REQ-RES-SUBLIST-001](../../requirements/view/res-sublist.md#req-res-sublist-001), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021) | 0 |  |
+| Get | draft | `ua-data` | predefined | none | none | PaginationRequest, Locale | pub | [REQ-RES-SUBLIST-007](../../requirements/view/res-sublist.md#req-res-sublist-007), [REQ-RES-SUBLIST-008](../../requirements/view/res-sublist.md#req-res-sublist-008), [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011) | 0 |  |
+| Set | draft | `ua-data` | predefined | list | single | – | status-and-pub | [REQ-RES-SUBLIST-010](../../requirements/view/res-sublist.md#req-res-sublist-010), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-RES-SUBLIST-013](../../requirements/view/res-sublist.md#req-res-sublist-013), [REQ-RES-SUBLIST-014](../../requirements/view/res-sublist.md#req-res-sublist-014) | 0 | A new TopicPath creates an entry (SF-080 (a)). |
+| Del | draft | `ua-data` | predefined | list | single | – | status-and-rest | [REQ-RES-SUBLIST-011](../../requirements/view/res-sublist.md#req-res-sublist-011), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-RES-SUBLIST-013](../../requirements/view/res-sublist.md#req-res-sublist-013), [REQ-RES-SUBLIST-015](../../requirements/view/res-sublist.md#req-res-sublist-015) | 0 | The entry carries the TopicPath to delete (SF-080 (a), (d)). |
+
 ## ReferenceDesignation
 
 Kind: resource
@@ -151,6 +221,15 @@ Kind: resource
 | Call | ✗ | – | – | – | – | MG 9.1.10 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 | Reply | ✗ | – | – | – | – | MG 9.1.10 | – | Call/Reply only address common services (MG 7.4, MG 7.5.2). |
 
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pub | draft | `ua-data` | predefined | publisher | datasets | Pagination | none | [REQ-RES-REFDES-005](../../requirements/view/res-refdes.md#req-res-refdes-005), [REQ-RES-REFDES-001](../../requirements/view/res-refdes.md#req-res-refdes-001), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021) | 3: [043](../../vectors/view/payload-guideline.md#v-pay-043), [044](../../vectors/view/payload-guideline.md#v-pay-044), [054](../../vectors/view/payload-guideline.md#v-pay-054) |  |
+| Get | draft | `ua-data` | predefined | none | none | PaginationRequest, Locale, Query | pub | [REQ-RES-REFDES-003](../../requirements/view/res-refdes.md#req-res-refdes-003), [REQ-RES-REFDES-004](../../requirements/view/res-refdes.md#req-res-refdes-004), [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-QRY-001](../../requirements/view/qry.md#req-qry-001) | 3: [041](../../vectors/view/payload-guideline.md#v-pay-041), [042](../../vectors/view/payload-guideline.md#v-pay-042), [053](../../vectors/view/payload-guideline.md#v-pay-053) | Query only without Source (REQ-RES-REFDES-013). |
+| Set | draft | `ua-data` | predefined | addressed | single | – | status-and-pub | [REQ-RES-REFDES-006](../../requirements/view/res-refdes.md#req-res-refdes-006), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-RES-REFDES-009](../../requirements/view/res-refdes.md#req-res-refdes-009), [REQ-RES-REFDES-010](../../requirements/view/res-refdes.md#req-res-refdes-010) | 1: [045](../../vectors/view/payload-guideline.md#v-pay-045) |  |
+| Del | draft | `ua-data` | predefined | none | none | – | status | [REQ-RES-REFDES-007](../../requirements/view/res-refdes.md#req-res-refdes-007), [REQ-RES-REFDES-009](../../requirements/view/res-refdes.md#req-res-refdes-009), [REQ-BUS-007](../../requirements/view/bus.md#req-bus-007) | 1: [046](../../vectors/view/payload-guideline.md#v-pay-046) |  |
+
 ## NewDataSetWriterId
 
 Kind: service
@@ -163,3 +242,10 @@ Kind: service
 | Del | ✗ | – | – | – | – | MG 9.2.1 | – | Common services use Call/Reply only (MG 7.4). |
 | Call | ✓ | `Oi4v2/<ServiceType>/<AppId>/Call/NewDataSetWriterId[/<Source>]` | `call-newdatasetwriterid` | optional | forbidden | MG 9.2.1 | 2: [059](../../vectors/view/topic-guideline.md#v-top-059), [126](../../vectors/view/topic-valid.md#v-top-126) | SF-041 c: optional Source, no Filter (MG 7.4, MG 9.2.1). |
 | Reply | ✓ | `Oi4v2/<ServiceType>/<AppId>/Reply/NewDataSetWriterId[/<Source>]` | `reply-newdatasetwriterid` | optional | forbidden | MG 9.2.1 | 2: [060](../../vectors/view/topic-guideline.md#v-top-060), [127](../../vectors/view/topic-valid.md#v-top-127) | SF-041 c: optional Source; equals the Call topic. |
+
+Payload:
+
+| Method | Status | MessageType | DataSetClassId | DataSetWriterId | Content | Helpers | Answer | Requirements | Vectors (V-PAY-nnn) | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Call | draft | `ua-action-request` | none | action | action-request | – | reply | [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-010](../../requirements/view/act.md#req-act-010), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-021](../../requirements/view/act.md#req-act-021), [REQ-ACT-006](../../requirements/view/act.md#req-act-006) | 1: [008](../../vectors/view/payload-guideline.md#v-pay-008) |  |
+| Reply | draft | `ua-action-response` | none | action | action-response | – | none | [REQ-ACT-012](../../requirements/view/act.md#req-act-012), [REQ-ACT-014](../../requirements/view/act.md#req-act-014), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-022](../../requirements/view/act.md#req-act-022) | 1: [009](../../vectors/view/payload-guideline.md#v-pay-009) |  |

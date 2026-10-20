@@ -53,6 +53,22 @@ type Combination struct {
 	FilterRule string   `json:"filter_rule,omitempty"`
 	Refs       []string `json:"refs"`
 	Notes      string   `json:"notes,omitempty"`
+	Payload    *Payload `json:"payload,omitempty"`
+}
+
+// Payload holds the payload columns of an allowed combination (C-028): the
+// message type, the DataSetClassId and DataSetWriterId rules, the content of
+// the message, the helper DataSets it may carry and how it is answered.
+type Payload struct {
+	Status      string   `json:"status"`
+	MessageType string   `json:"message_type"`
+	ClassID     string   `json:"class_id"`
+	WriterID    string   `json:"writer_id"`
+	Content     string   `json:"content"`
+	Helpers     []string `json:"helpers,omitempty"`
+	Answer      string   `json:"answer"`
+	Reqs        []string `json:"reqs"`
+	Notes       string   `json:"notes,omitempty"`
 }
 
 // Matrix is matrix/method-resource.yaml.

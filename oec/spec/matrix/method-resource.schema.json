@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:oi4:oec:v2:spec:matrix:method-resource",
-  "title": "OEC v2 Method x Resource matrix – topic columns",
-  "description": "Format of oec/spec/matrix/method-resource.yaml (ADR-0018, C-012 plan section 4): one row per Method x Resource/service combination with the allowed topic form. Cross-checked against topic/topic.abnf by 'spectool lint'.",
+  "title": "OEC v2 Method x Resource matrix – topic and payload columns",
+  "description": "Format of oec/spec/matrix/method-resource.yaml (ADR-0018, C-012 plan section 4): one row per Method x Resource/service combination with the allowed topic form (C-018) and, for allowed rows, the payload columns (C-028). Cross-checked against topic/topic.abnf, the requirements and the payload vectors by 'spectool lint'.",
   "type": "object",
   "additionalProperties": false,
   "required": ["baseline", "combinations"],
@@ -25,15 +25,33 @@
           "filter": { "$ref": "#/$defs/presence" },
           "filter_rule": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "description": "ABNF rule of the Filter (all levels after the Source)." },
           "refs": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^(MG|RIG) [A-Z]?[0-9]+(\\.[0-9]+)*$" } },
-          "notes": { "type": "string" }
+          "notes": { "type": "string" },
+          "payload": { "$ref": "#/$defs/payload" }
         },
         "if": { "properties": { "allowed": { "const": true } } },
         "then": { "required": ["rule", "source", "filter"] },
-        "else": { "not": { "anyOf": [ { "required": ["rule"] }, { "required": ["source"] }, { "required": ["filter"] }, { "required": ["filter_rule"] } ] } }
+        "else": { "not": { "anyOf": [ { "required": ["rule"] }, { "required": ["source"] }, { "required": ["filter"] }, { "required": ["filter_rule"] }, { "required": ["payload"] } ] } }
       }
     }
   },
   "$defs": {
-    "presence": { "enum": ["required", "optional", "forbidden"] }
+    "presence": { "enum": ["required", "optional", "forbidden"] },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Payload columns of an allowed combination (C-028); rows of a resource whose area is still planned may omit them (checked by 'spectool lint').",
+      "required": ["status", "message_type", "class_id", "writer_id", "content", "answer", "reqs"],
+      "properties": {
+        "status": { "enum": ["draft", "reviewed"] },
+        "message_type": { "enum": ["ua-data", "ua-metadata", "ua-action-request", "ua-action-response"] },
+        "class_id": { "enum": ["predefined", "publisher-defined", "if-known", "in-metadata", "none"], "description": "predefined: DataSetClassId of MG A2 in the NetworkMessage (REQ-MSG-010/011); publisher-defined: the publisher's own if all DataSetMessages belong to one class (REQ-MSG-011); if-known: only if the requester knows it (REQ-MSG-011); in-metadata: in the MetaData (REQ-MSG-012); none: no DataSetClassId." },
+        "writer_id": { "enum": ["publisher", "list", "addressed", "none", "action"], "description": "publisher: one DataSetWriterId per resource, Source and Filter, assigned by the publisher (REQ-MSG-021); list: one common DataSetWriterId for all entries of the list (REQ-MSG-021); addressed: the DataSetWriterId of the addressed DataSet (REQ-BUS-010); none: no resource DataSetMessage; action: reserved DataSetWriterId of the common service (REQ-ACT-019)." },
+        "content": { "enum": ["none", "datasets", "single", "metadata-empty", "metadata-filled", "action-request", "action-response"], "description": "none: no resource DataSetMessage; datasets: any number of resource DataSetMessages; single: exactly one; metadata-empty: MetaData {}; metadata-filled: complete DataSetMetaDataType; action-request/action-response: Action message (area ACT)." },
+        "helpers": { "type": "array", "uniqueItems": true, "items": { "enum": ["PaginationRequest", "Pagination", "Locale", "Query"] } },
+        "answer": { "enum": ["none", "pub", "status-and-pub", "status", "status-and-rest", "reply"], "description": "none: not answered; pub: Pub on the corresponding topic with ReplyTo (REQ-BUS-003); status-and-pub: Status event and, if successful, Pub of the changed object (REQ-RES-EVENT-005, REQ-BUS-006); status: Status event only, nothing published (REQ-BUS-007); status-and-rest: Status event and Pub of the remaining entries (REQ-RES-SUBLIST-015); reply: Reply with an ActionResponse (area ACT)." },
+        "reqs": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^REQ-[A-Z]+(-[A-Z]+)*-[0-9]{3}$" } },
+        "notes": { "type": "string" }
+      }
+    }
   }
 }

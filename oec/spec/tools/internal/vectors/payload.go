@@ -1,6 +1,7 @@
 package vectors
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"sort"
@@ -49,6 +50,9 @@ func checkPayload(ts *topic.Spec, v Vector, sections map[string]string, add func
 			ServiceType: p.ServiceType, AppIL: p.AppIDIL, Method: p.Method,
 			Resource: p.Resource, SourceIL: p.SourceIL, Filter: p.Filter,
 		}, msg, mode)
+		if v.Expected == "valid" {
+			checkPayloadColumns(ts, p.Method, p.Resource, msg, add)
+		}
 	}
 	var got []string
 	seen := map[string]bool{}
@@ -172,4 +176,65 @@ func relaxJSON(s string) string {
 		}
 	}
 	return trailingComma.ReplaceAllString(b.String(), "$1")
+}
+
+// helperIDs are the DataSetWriterIds of the helper DataSets (MG A3).
+var helperIDs = map[string]string{"1": "PaginationRequest", "2": "Pagination", "3": "Locale", "9": "Query"}
+
+// checkPayloadColumns cross-checks a valid payload vector against the
+// payload columns of its matrix row (C-028): MessageType, number of resource
+// DataSetMessages and the helper DataSets.
+func checkPayloadColumns(ts *topic.Spec, method, resource string, msg any, add func(string, ...any)) {
+	var cols *topic.Payload
+	for _, c := range ts.Matrix.Combinations {
+		if c.Method == method && c.Resource == resource && c.Allowed {
+			cols = c.Payload
+		}
+	}
+	m, ok := msg.(map[string]any)
+	if cols == nil || !ok {
+		return
+	}
+	if mt, _ := m["MessageType"].(string); mt != cols.MessageType {
+		add("matrix %s %s: MessageType %q, payload column says %s", method, resource, mt, cols.MessageType)
+	}
+	if cols.MessageType == "ua-metadata" {
+		md, _ := m["MetaData"].(map[string]any)
+		if empty := md != nil && len(md) == 0; empty != (cols.Content == "metadata-empty") {
+			add("matrix %s %s: MetaData empty=%v, payload column content is %s", method, resource, empty, cols.Content)
+		}
+		return
+	}
+	if cols.MessageType != "ua-data" {
+		return
+	}
+	msgs, _ := m["Messages"].([]any)
+	n := 0
+	for _, e := range msgs {
+		d, _ := e.(map[string]any)
+		id := fmt.Sprint(d["DataSetWriterId"])
+		h, isHelper := helperIDs[id]
+		if !isHelper {
+			n++
+			continue
+		}
+		if !contains(cols.Helpers, h) {
+			add("matrix %s %s: helper %s not in the payload column helpers %v", method, resource, h, cols.Helpers)
+		}
+	}
+	switch {
+	case cols.Content == "none" && n != 0:
+		add("matrix %s %s: %d resource DataSetMessage(s), payload column content is none", method, resource, n)
+	case cols.Content == "single" && n != 1:
+		add("matrix %s %s: %d resource DataSetMessage(s), payload column content is single", method, resource, n)
+	}
+}
+
+func contains(l []string, s string) bool {
+	for _, e := range l {
+		if e == s {
+			return true
+		}
+	}
+	return false
 }

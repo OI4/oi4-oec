@@ -13,8 +13,8 @@ Machine-readable baseline derived **only** from the OEC guideline (Messaging Gui
 | `coverage/report.md` | coverage of the inventory per area | `spectool coverage` |
 | `topic/topic.abnf` | formal topic grammar (RFC 5234 + RFC 7405), one rule per allowed Method × Resource form | hand |
 | `topic/topic-patterns.json` | anchored regexes generated from `topic.abnf` (portable dialect, see below) | `spectool topic` |
-| `matrix/method-resource.yaml` (+ schema) | Method × Resource matrix: allowed, `Source`/`Filter` required/optional/forbidden, ABNF rule, guideline refs | hand |
-| `matrix/view/method-resource.md` | Markdown view of the matrix: overview grid, topic form per combination, linked vectors – PO review artifact | `spectool render` |
+| `matrix/method-resource.yaml` (+ schema) | Method × Resource matrix: allowed, `Source`/`Filter` required/optional/forbidden, ABNF rule, guideline refs; payload columns of the allowed rows (MessageType, DataSetClassId/DataSetWriterId rule, content, helpers, answer, requirements; C-028) | hand |
+| `matrix/view/method-resource.md` | Markdown view of the matrix: overview grid, topic form and payload columns per combination, linked topic and payload vectors – PO review artifact | `spectool render` |
 | `vectors/` (+ `vectors.schema.json`) | language-neutral test vectors: `topic/` (golden from the guideline, constructed valid, invalid), `il/` (Identification Link, dnp-encoding, `Oi4Identifier`), `payload/` (topic + JSON message, golden from Appendix B) | hand, checked by `spectool lint` |
 | `vectors/view/*.md` | Markdown view per vector file (overview table + one section per vector with decoded Identification Links and linked REQs) – PO review artifact | `spectool render` |
 | `tools/` | Go module with `spectool` | – |
@@ -53,7 +53,7 @@ go run ./cmd/spectool topic -spec .. 'Oi4v2/…'   # analyze topics (grammar rul
 go test ./...
 ```
 
-`lint` also loads `topic.abnf` and the matrix and checks that every allowed matrix row has a grammar rule, that grammar, interpreter and generated regexes agree (random samples) and that every vector still yields its expected result with the reference code (`internal/topic`, `internal/il`, `internal/payload`); golden vectors must appear verbatim in the cited guideline section.
+`lint` also loads `topic.abnf` and the matrix and checks that every allowed matrix row has a grammar rule and – unless the area of its resource is still `planned` – consistent payload columns with known requirements (valid payload vectors must match them), that grammar, interpreter and generated regexes agree (random samples) and that every vector still yields its expected result with the reference code (`internal/topic`, `internal/il`, `internal/payload`); golden vectors must appear verbatim in the cited guideline section.
 
 Every command accepts `-check` (where it generates files) to fail instead of writing, for CI. The guideline repository defaults to `<spec>/../../oi4-oec-documentation`; override with `-guideline`.
 
