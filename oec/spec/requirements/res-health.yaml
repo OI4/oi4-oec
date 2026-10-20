@@ -4,6 +4,7 @@
 # (REQ-CMP-017); publication at start, on change and every 60 s is
 # REQ-TOP-017, the Close/Will content is area LIFE. Checked by
 # tools/internal/payload (C-027).
+# Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-HEALTH
 baseline: "2bfc0d9"
 requirements:
@@ -25,7 +26,7 @@ requirements:
     refs: [MG 8.3.2]
     verification: [schema, d7-validate]
     inventory: [MG-8.3.2-4017a916, MG-8.3.2-8f5d5ddc, MG-8.3.2-c6d90f6d, MG-8.3.2-619204cc, MG-8.3.2-8e123ade, MG-8.3.2-729cc64d, MG-8.3.2-ed805854, MG-8.3.2-d2f6bc0e, MG-8.3.2-1f9968e2, MG-8.3.2-3ccbe376, MG-8.3.2-24c98eb7]
-    status: draft
+    status: reviewed
     notes: >-
       Field presence and types per REQ-CMP-025/026; the rows of Table 3 define
       the enumeration values. HealthScore is independent of Health (MG 8.3.2,
@@ -53,7 +54,7 @@ requirements:
         text: Statuses with lower severity remain visible in Details, even if they are superimposed by a more severe status.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.2-58eaca8c, MG-8.3.2-2a0f2648]
-    status: draft
+    status: reviewed
     notes: >-
       Order of the two low-severity states (CHECK_FUNCTION_2 before
       MAINTENANCE_REQUIRED_4) per SF-065 (a), GL-ADR-019.
@@ -74,7 +75,7 @@ requirements:
         text: The best practice is to combine the five states NORMAL_0, FAILURE_1, CHECK_FUNCTION_2, OFF_SPEC_3 and MAINTENANCE_REQUIRED_4 with the symbol/color definitions made by NAMUR NE107 (Table 3).
     verification: [manual]
     inventory: [MG-8.3.2-2a55d93d]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-HEALTH-004
     title: A change of Details triggers a Health publication
@@ -91,7 +92,7 @@ requirements:
         text: A change of any DetailObject must trigger publication of the resource Health.
     verification: [d7-monitor]
     inventory: [MG-8.3.2-b2b93a1e]
-    status: draft
+    status: reviewed
     notes: Publication on a change of Health and the 60 s heartbeat are REQ-TOP-017.
 
   # --- Message Bus (MG 9.1.2) ------------------------------------------------
@@ -114,7 +115,7 @@ requirements:
         text: A Health object is not included.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.2-7e8e4f18]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-HEALTH-006
     title: Get Health is answered with all addressed Health objects
@@ -137,7 +138,7 @@ requirements:
         text: A topic such as Oi4v2/<ServiceType>/<AppId>/Get/Health must trigger a publication of all available Health information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Health.
     verification: [d7-test]
     inventory: [MG-9.1.2-83c997a9, MG-9.1.2-6895efd3]
-    status: draft
+    status: reviewed
     notes: Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015.
 
   - id: REQ-RES-HEALTH-007
@@ -156,5 +157,5 @@ requirements:
         text: In combination with the method Pub, the payload contains DataSetMessages of type Health and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.2-470623ec]
-    status: draft
+    status: reviewed
     notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).

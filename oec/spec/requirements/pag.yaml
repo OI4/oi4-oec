@@ -2,6 +2,7 @@
 # (MG 8.3.11, 8.3.11.1, 8.3.11.2 and the pagination sentences of MG 9.1.x;
 # ADR-0018). Reserved DataSetWriterIds and names: REQ-MSG-019. Checked by
 # tools/internal/payload (C-027).
+# Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: PAG
 baseline: "2bfc0d9"
 requirements:
@@ -25,7 +26,7 @@ requirements:
         text: The value of PerPage must be > 0.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.11.1-b256a266, MG-8.3.11.1-83b892c6, MG-8.3.11.1-8cb5f159, MG-8.3.11.1-79ee4a24]
-    status: draft
+    status: reviewed
 
   - id: REQ-PAG-002
     title: A PaginationRequest is answered page by page
@@ -58,7 +59,7 @@ requirements:
         text: The value of Page must be 0 to request all information in a fragmented way with a maximal count of PerPage DataSetMessages for each fragment.
     verification: [d7-test]
     inventory: [MG-8.3.11.1-ce9aec11, MG-8.3.11.1-cd18f8ad, MG-8.3.11.1-b66d8c5d, MG-8.3.11.1-35d839fd, MG-8.3.11.1-a9803b99, MG-8.3.11.1-4d823c40]
-    status: draft
+    status: reviewed
     notes: >-
       Page 0 is no paging through the result but a transmission of the
       complete result in parts of PerPage DataSetMessages (MG 8.3.11.1).
@@ -80,7 +81,7 @@ requirements:
     refs: [MG 8.3.11.2, SF-063]
     verification: [schema, d7-validate]
     inventory: [MG-8.3.11.2-4e072fbd, MG-8.3.11.2-97e960a0, MG-8.3.11.2-01941170, MG-8.3.11.2-bceb2d3b, MG-8.3.11.2-8e50e6a3]
-    status: draft
+    status: reviewed
 
   - id: REQ-PAG-004
     title: Pagination values are consistent
@@ -117,7 +118,7 @@ requirements:
         text: Therefore, the answer to a Get for a single page contains its own MessageId as PaginationId (B1.1.11 Pagination).
     verification: [d7-validate, d7-monitor]
     inventory: [MG-8.3.11.2-4b6b231f, MG-8.3.11.2-e698e9f8, MG-8.3.11.2-3a789a14, MG-8.3.11.2-d6ec42cf, MG-8.3.11.2-6fc2b607, MG-8.3.11.2-2d5655ce, MG-8.3.11.2-1a94fea9, MG-8.3.11.2-e54d779d, MG-8.3.11.2-42fdc31a, MG-8.3.11.2-0e7a1e60, MG-8.3.11.2-4eccd43a]
-    status: draft
+    status: reviewed
     notes: >-
       Within one NetworkMessage the payload checker verifies the field types,
       Page ≥ 1, the number of resource DataSetMessages (exactly PerPage, or
@@ -157,7 +158,7 @@ requirements:
         text: The publisher must publish as many NetworkMessages to the same topic, using pagination object for telling so, till all DataSetMessages are published.
     verification: [d7-monitor, d7-test]
     inventory: [MG-8.3.11-0a2549a0, MG-8.3.11-135129ca, MG-8.3.11-2316f9db, MG-8.3.11-d1b705f1, MG-8.3.11-1d3f1c80, MG-8.3.11.1-6db49b65, MG-9.1.1-a242a498, MG-9.1.1-5f90ef30, MG-9.1.2-262fa218, MG-9.1.2-0af27f74, MG-9.1.7-fe765cc6, MG-9.1.7-a9a20bff, MG-9.1.8-ea9cd5b6, MG-9.1.8-03c98043, MG-9.1.10-e685d6ba, MG-9.1.10-23d0ef72]
-    status: draft
+    status: reviewed
     notes: >-
       For publications not triggered by a Get the publisher defines the
       maximum size on its own (MG 8.3.11), within the MaxPacketSize. The
@@ -181,7 +182,7 @@ requirements:
         text: If these messages are too long for a specific application, that application must re-trigger publication of the information by using PaginationRequest.
     verification: [manual]
     inventory: [MG-8.3.11-7898fea4]
-    status: draft
+    status: reviewed
 
   - id: REQ-PAG-007
     title: Paginated DataSetMessages are consistent
@@ -197,7 +198,7 @@ requirements:
     refs: [MG 8.3.11]
     verification: [manual]
     inventory: [MG-8.3.11-19ff609c]
-    status: draft
+    status: reviewed
 
   - id: REQ-PAG-008
     title: PaginationRequest only in Get, Pagination only in Pub
@@ -222,7 +223,7 @@ requirements:
         text: A subscriber that wants to request information via …/Get/<Resource> can add a PaginationRequest object to its payload to define the maximum number of DataSetMessages the NetworkMessage may contain so that the subscriber is able to handle it.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.11-f112da9b, MG-8.3.11-f1ca1333, MG-8.3.11-083cc809]
-    status: draft
+    status: reviewed
     notes: >-
       The payload checker reports a misplaced or repeated helper (sender
       view, strict); a tolerant receiver ignores it (REQ-MSG-046).
@@ -244,7 +245,7 @@ requirements:
         text: A single DataSetMessage must fit into one NetworkMessage; a provider should keep large DataSets well below the MaxPacketSize, e.g. by splitting a large Config into several contexts.
     verification: [d7-validate]
     inventory: [MG-8.3.11-0cb431c2]
-    status: draft
+    status: reviewed
     notes: >-
       The same sentence recommends (SHOULD) to keep large DataSets well
       below the MaxPacketSize, e.g. by splitting a large Config into several

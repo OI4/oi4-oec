@@ -2,6 +2,8 @@
 # (MG 8.3.10, 9.1.10; ADR-0018, schema: catalog.schema.json).
 # Support: REQ-CMP-020 (L2 SHOULD, L3 MUST). The Status event after Set/Del
 # belongs to RES-EVENT (C-028). Checked by tools/internal/payload (C-027).
+# Reviewed and accepted by the PO in the C-027 review (2026-10-20).
+# Children of a ReferenceDesignation ("OneDown"): SF-069 (open).
 area: RES-REFDES
 baseline: "2bfc0d9"
 requirements:
@@ -26,7 +28,7 @@ requirements:
     refs: [MG 8.3.10, SF-068]
     verification: [schema, d7-validate]
     inventory: [MG-8.3.10-d84c70c5, MG-8.3.10-2594d1f8, MG-8.3.10-c7d632f5, MG-8.3.10-f15972dd, MG-8.3.10-3d78517a, MG-8.3.10-255b94f8, MG-8.3.10-362f96db, MG-8.3.10-39f50e4b, MG-8.3.10-87d2c21a, MG-8.3.10-dab61376, MG-8.3.10-913074aa, MG-8.3.10-2684af4b, MG-8.3.10-1f7e4106, MG-8.3.10-b9996a06, MG-8.3.10-26a4343a, MG-8.3.10-2d2571c9, MG-8.3.10-e66a9003, MG-8.3.10-dc755ab4, MG-8.3.10-3e41890a, MG-8.3.10-86bc7b35, MG-8.3.10-02f627f3]
-    status: draft
+    status: reviewed
     notes: >-
       The structure is identical for all three objects (SF-068 (d),
       GL-ADR-019).
@@ -47,7 +49,7 @@ requirements:
         text: Therefore, it must be persisted on an application-specific basis.
     verification: [d7-test]
     inventory: [MG-8.3.10-1b81e498]
-    status: draft
+    status: reviewed
 
   # --- Message Bus (MG 9.1.10) -----------------------------------------------
   - id: REQ-RES-REFDES-003
@@ -69,7 +71,7 @@ requirements:
         text: A ReferenceDesignation object is not included.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.10-43119edc]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-REFDES-004
     title: Get ReferenceDesignation is answered with all addressed objects
@@ -91,7 +93,7 @@ requirements:
         text: A topic, such as Oi4v2/<ServiceType>/<AppId>/Get/ReferenceDesignation, must trigger a publication of all available ReferenceDesignation information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/ReferenceDesignation.
     verification: [d7-test]
     inventory: [MG-9.1.10-963a219d, MG-9.1.10-a4676341]
-    status: draft
+    status: reviewed
     notes: Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015.
 
   - id: REQ-RES-REFDES-005
@@ -110,7 +112,7 @@ requirements:
         text: In combination with the method Pub, the payload contains DataSetMessages of type ReferenceDesignation and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.10-7175ba83]
-    status: draft
+    status: reviewed
     notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).
 
   - id: REQ-RES-REFDES-006
@@ -138,7 +140,7 @@ requirements:
         text: Setting multiple reference designations at once via Oi4v2/<ServiceType>/<AppId>/Set/ReferenceDesignation is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.10-90a987bb, MG-9.1.10-e3d3cf86, MG-9.1.10-c7b9efea, MG-8.3.10-0bec1aee]
-    status: draft
+    status: reviewed
     notes: Whole-object semantics per SF-068 (f), GL-ADR-019; topic form per REQ-TOP-013 (matrix).
 
   - id: REQ-RES-REFDES-007
@@ -164,7 +166,7 @@ requirements:
         text: Deleting multiple reference designations at once via Oi4v2/<ServiceType>/<AppId>/Del/ReferenceDesignation is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.10-f55cfe37, MG-9.1.10-b6c074a3, MG-9.1.10-dfcc5dea]
-    status: draft
+    status: reviewed
     notes: Whole-object semantics per MG 8.3.10 (REQ-RES-REFDES-006), SF-068 (e), GL-ADR-019.
 
   - id: REQ-RES-REFDES-008
@@ -182,7 +184,7 @@ requirements:
         text: To prevent write access by unauthorized communication participants, the operator must prevent this via ACL.
     verification: [d8]
     inventory: [MG-9.1.10-65150700, MG-9.1.10-0787e338]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-REFDES-009
     title: Status event after Set and Del ReferenceDesignation
@@ -204,7 +206,7 @@ requirements:
         text: After a Del message arrived, the application must publish an Event message with status information about the Del command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
     verification: [d7-test]
     inventory: [MG-9.1.10-afc50173, MG-9.1.10-d9b53ba2]
-    status: draft
+    status: reviewed
     notes: >-
       Same obligation as REQ-TOP-014/015; the last topic level is the
       EventLevel (SF-067 (g), GL-ADR-019). Event content: RES-EVENT (C-028).
@@ -226,5 +228,5 @@ requirements:
         text: If setting ReferenceDesignation was successful, the new ReferenceDesignation must be published to the Pub/ReferenceDesignation/<Source> topic, according to the settings in PublicationList (8.3.8 PublicationList).
     verification: [d7-test]
     inventory: [MG-9.1.10-51f2cf7c]
-    status: draft
+    status: reviewed
     notes: Topic per SF-068 (b), GL-ADR-019; ReplyTo per REQ-MSG-015.

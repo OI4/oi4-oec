@@ -2,6 +2,7 @@
 # (MG 8.3.7, 9.1.7; ADR-0018, schema: catalog.schema.json).
 # Support of Profile: REQ-CMP-018 (L2 SHOULD, L3 MUST); every supported
 # resource is listed: REQ-CMP-021. Checked by tools/internal/payload (C-027).
+# Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PROFILE
 baseline: "2bfc0d9"
 requirements:
@@ -24,7 +25,7 @@ requirements:
         text: Each name must be listed only once.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.7-cf84476b, MG-8.3.7-f5251ea7]
-    status: draft
+    status: reviewed
     notes: >-
       MG 8.3.7 gives Type String with Value Range "<array of resources>"; B2.5
       describes an array of String (V-PAY-014). The closed set of names is
@@ -51,7 +52,7 @@ requirements:
         text: Which resources are mandatory depends on the compliance level of the application or device (1.3 Compliance Domains and Levels).
     verification: [d7-test]
     inventory: [MG-8.3.7-516da9f2, MG-8.3.7-954d25a2, MG-9.1.7-71073f4c, MG-9.1.7-1694ed5f]
-    status: draft
+    status: reviewed
     notes: >-
       Same rule as REQ-CMP-021 from the view of the DataSet; the Profile of a
       subordinate asset lists what the representing application serves for
@@ -76,7 +77,7 @@ requirements:
         text: A Profile object is not included.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.7-8f595df4]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-PROFILE-004
     title: Get Profile is answered with all addressed Profile objects
@@ -99,7 +100,7 @@ requirements:
         text: A topic, such as Oi4v2/<ServiceType>/<AppId>/Get/Profile, must trigger a publication of all available Profile information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Profile.
     verification: [d7-test]
     inventory: [MG-9.1.7-1883d668, MG-9.1.7-96f1ecd8]
-    status: draft
+    status: reviewed
     notes: Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015.
 
   - id: REQ-RES-PROFILE-005
@@ -118,5 +119,5 @@ requirements:
         text: In combination with the method Pub, the payload contains DataSetMessages of type Profile and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.7-09291906]
-    status: draft
+    status: reviewed
     notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).

@@ -4,6 +4,7 @@
 # (REQ-CMP-017). The envelope follows area MSG, the helper DataSets areas PAG
 # and LOC; this file holds the DataSet content (MG 5) and the Message Bus
 # behavior of MG 9.1.1. Checked by tools/internal/payload (C-027).
+# Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-MAM
 baseline: "2bfc0d9"
 requirements:
@@ -24,7 +25,7 @@ requirements:
     refs: [MG 5, MG 8.3.1, MG 8.2.7]
     verification: [schema, d7-validate]
     inventory: [MG-5-13b8e44e, MG-5-aabb4907, MG-5-371b4112, MG-5-58415521, MG-5-daf2a20f, MG-5-a20f7ee2, MG-5-8e3fdbf3, MG-5-23d862c1, MG-5-905d12f9, MG-5-b6837d2e, MG-5-5cddea30, MG-5-acac9e54, MG-5-11cc48ac, MG-5-fb1de158]
-    status: draft
+    status: reviewed
     notes: >-
       Field presence and types per REQ-CMP-025/026; LocalizedText per
       REQ-MSG-040; undefined keys per REQ-MSG-001 (strict) and REQ-MSG-046
@@ -52,7 +53,7 @@ requirements:
         text: In particular, the ManufacturerUri must be a domain name (see below), even if the VendorNameplate uses a GUID.
     verification: [manual]
     inventory: [MG-5-411314b4, MG-5-84fb43b5, MG-5-5a8a5249]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-003
     title: Uniform manufacturer name
@@ -69,7 +70,7 @@ requirements:
         text: It should be noted that uniformity in the name representation should be a goal
     verification: [manual]
     inventory: [MG-5-4af2deb0]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-004
     title: ManufacturerUri is a domain name without scheme
@@ -94,7 +95,7 @@ requirements:
         text: ManufacturerUri may contain subdomains.
     verification: [schema, d7-validate]
     inventory: [MG-5-76f030c4, MG-5-fe7b758d, MG-5-8af6d9de, MG-5-e64e556a]
-    status: draft
+    status: reviewed
     notes: Counterpart of REQ-IL-023/024 (ManufacturerUri of the Oi4Identifier).
 
   - id: REQ-RES-MAM-005
@@ -113,7 +114,7 @@ requirements:
         text: ManufacturerUri should correspond to the domain of the Identification Link of the asset.
     verification: [manual]
     inventory: [MG-5-31daaba6]
-    status: draft
+    status: reviewed
     notes: Same rule as REQ-IL-034 from the view of the MAM.
 
   - id: REQ-RES-MAM-006
@@ -144,7 +145,7 @@ requirements:
         text: For the Oi4Identifier, the Text of Model in the default locale English (en-US) must be used, so that the Oi4Identifier does not depend on a requested Locale (8.3.12 Locale).
     verification: [d7-validate]
     inventory: [MG-5-6730acaf, MG-5-5694182f, MG-5-e0eafc63, MG-5-1318c738, MG-5-815df636]
-    status: draft
+    status: reviewed
     notes: Counterpart of REQ-IL-027 (dnp-encoding per REQ-IL-033 allowed); Model in en-US per SF-064 (d).
 
   - id: REQ-RES-MAM-007
@@ -160,7 +161,7 @@ requirements:
         text: The property Model shall provide the name of the product that the Master Asset Model belongs to.
     verification: [manual]
     inventory: [MG-5-7928f4e0]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-008
     title: HardwareRevision
@@ -187,7 +188,7 @@ requirements:
         text: If such a value is taken from the VendorNameplate of a physical asset, the Master Asset Model must use "undefined" instead (for HardwareRevision and SoftwareRevision), except for the cases with an empty string described in the notes of this chapter.
     verification: [manual]
     inventory: [MG-5-2c23667a, MG-5-6e1704bb, MG-5-ac686720, MG-5-7c26ea6d, MG-5-3c6ca755, MG-5-d357784d]
-    status: draft
+    status: reviewed
     notes: >-
       Not checked by the payload checks: whether an asset is software-only is
       not visible in the message (SF-064 (b)).
@@ -208,7 +209,7 @@ requirements:
         text: A recommended best practice is to use Semantic Versioning (e.g. 1.0.1, SemanticVersionString of OPC UA Part 100) or a dot-separated four numbers schema.
     verification: [manual]
     inventory: [MG-5-62283509, MG-5-a0df566f]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-010
     title: SoftwareRevision
@@ -228,7 +229,7 @@ requirements:
         text: If for any asset a manufacturer does not have a formalized software revision, it shall be set by default to "undefined".
     verification: [manual]
     inventory: [MG-5-26013cbc, MG-5-71c21f2d, MG-5-a782e54a]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-011
     title: SoftwareRevision of assets without software
@@ -246,7 +247,7 @@ requirements:
         text: In this case, the SoftwareRevision should be set to an empty string!
     verification: [manual]
     inventory: [MG-5-efcf82bf]
-    status: draft
+    status: reviewed
     notes: '"undefined" (REQ-RES-MAM-010) applies to software without formalized revision (SF-064 (b)).'
 
   - id: REQ-RES-MAM-012
@@ -270,7 +271,7 @@ requirements:
         text: A path in a local file system (allowed by OPC UA Part 100) must not be used, since it can not be resolved by other participants of the Message Bus.
     verification: [schema, d7-validate]
     inventory: [MG-5-2b4002f3, MG-5-93e03870, MG-5-32a672e8]
-    status: draft
+    status: reviewed
     notes: The empty string is used by the device examples of MG B1.1.11 and B1.1.12 (V-PAY-006).
 
   - id: REQ-RES-MAM-013
@@ -286,7 +287,7 @@ requirements:
         text: The format of the document is currently unspecified, but a best practice would be a PDF document at the time of the writing of this document.
     verification: [manual]
     inventory: [MG-5-65c4af8e]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-014
     title: DeviceClass of OEC applications
@@ -303,7 +304,7 @@ requirements:
         text: However, best practice for OI4 Alliance-compliant applications is to name the ServiceType (7.2 ServiceType Element) here in the form of Oi4.<ServiceType>.
     verification: [d7-validate]
     inventory: [MG-5-fbc6b429]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-015
     title: SerialNumber identifies the instance
@@ -324,7 +325,7 @@ requirements:
         text: If the assets do not have a unique serial number, it shall be generated in an appropriate way to be able to have instances of equal types.
     verification: [manual]
     inventory: [MG-5-022d69c2, MG-5-7e2f3f25, MG-5-a8ce2b38]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-016
     title: ProductInstanceUri is the Identification Link of the asset
@@ -348,7 +349,7 @@ requirements:
         text: An Identification Link provided by the manufacturer must not be overwritten by a generated Identification Link such as the Oi4Identifier.
     verification: [schema, d7-validate]
     inventory: [MG-5-7b92aa74, MG-5-8895ae9f, MG-5-8d0992fd, MG-5-f63a5307]
-    status: draft
+    status: reviewed
     notes: Counterpart of REQ-IL-031 and REQ-MSG-023; "should be used" of MG 5 is read together with "must be provided here unchanged".
 
   - id: REQ-RES-MAM-017
@@ -364,7 +365,7 @@ requirements:
         text: According to the OPC UA specification and 4.1 IEC 61406-1 Identification Link, the ProductInstanceUri must not exceed 255 characters.
     verification: [schema, d7-validate]
     inventory: [MG-5-3380ef85]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-018
     title: RevisionCounter counts configuration changes of the asset
@@ -387,7 +388,7 @@ requirements:
         text: If the asset does not support a revision counter, it shall be set to -1 (default of OPC UA Part 100).
     verification: [d7-monitor]
     inventory: [MG-5-1cd0e95c, MG-5-f80a56c7, MG-5-3e6c1a1b]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-019
     title: Detected components get an Identification Link and a MAM
@@ -405,7 +406,7 @@ requirements:
         text: Each component, regardless if it is a physical thing or an application, which was detected by the OI4 Alliance framework, should get an Identification Link and a Master Asset Model.
     verification: [manual]
     inventory: [MG-5-3b427aa8]
-    status: draft
+    status: reviewed
     notes: Publishing MAM for all subordinate assets is REQ-CMP-006.
 
   # --- Message Bus (MG 9.1.1) ------------------------------------------------
@@ -428,7 +429,7 @@ requirements:
         text: A MAM object is not included.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.1-8bfafc5a]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-MAM-021
     title: Get MAM is answered with all addressed MAM objects
@@ -449,7 +450,7 @@ requirements:
         text: A topic such as Oi4v2/<ServiceType>/<AppId>/Get/MAM must trigger a publication of all available MAM information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/MAM.
     verification: [d7-test]
     inventory: [MG-9.1.1-5cf81496]
-    status: draft
+    status: reviewed
     notes: >-
       Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015. The
       Source case follows from the Get list item of MG 9.1.1.
@@ -470,7 +471,7 @@ requirements:
         text: In combination with the method Pub, the payload contains DataSetMessages of type MAM and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.1-4d028d73]
-    status: draft
+    status: reviewed
     notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).
 
   - id: REQ-RES-MAM-023
@@ -490,4 +491,4 @@ requirements:
         text: It should be provided if the asset has an AAS; otherwise it is omitted.
     verification: [manual]
     inventory: [MG-5-afa522ee]
-    status: draft
+    status: reviewed

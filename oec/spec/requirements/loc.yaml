@@ -1,6 +1,7 @@
 # Requirements of area LOC – helper DataSet Locale (MG 8.3.12; ADR-0018).
 # Reserved DataSetWriterId and names: REQ-MSG-019; LocalizedText: MG 8.2.7.
 # Checked by tools/internal/payload (C-027).
+# Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: LOC
 baseline: "2bfc0d9"
 requirements:
@@ -19,7 +20,7 @@ requirements:
     refs: [MG 8.3.12, SF-062]
     verification: [schema, d7-validate]
     inventory: [MG-8.3.12-df40f20c]
-    status: draft
+    status: reviewed
 
   - id: REQ-LOC-002
     title: A Get with Locale is answered in the requested language
@@ -48,4 +49,4 @@ requirements:
         text: The information is provided via the method Get and can be combined with any Resource, which might have LocalizedText elements in it.
     verification: [d7-test]
     inventory: [MG-8.3.12-5a01c78c, MG-8.3.12-af922472, MG-8.3.12-af07feb7, MG-8.3.12-f857d6fc]
-    status: draft
+    status: reviewed
