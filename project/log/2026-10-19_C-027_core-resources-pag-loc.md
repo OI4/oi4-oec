@@ -327,3 +327,5 @@ Workspace:
 - Verification at `ff1562f`: `lint` ok (303 requirements, 141 informative, 54 payload vectors), `render -check` ok, `topic -check` ok, `inventory -check -rev ff1562f` ok, coverage unchanged.
 
 State: GL-ADR-001 … 020; SF-001 … 074 resolved, no open findings, next free id SF-075. C-027 is complete; next is C-028.
+
+PO confirmation (chat, 2026-10-20 14:31): "V-PAY-021 und V-PAY-022 sind in Ordnung" – the sync of the two reviewed vectors is accepted; they stay `reviewed`. Nothing of C-027 is open; next is C-028.
