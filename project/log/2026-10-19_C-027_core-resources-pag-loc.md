@@ -171,3 +171,7 @@ Points for the PO:
 1. Review GL-ADR-019 and the guideline commits (in particular the consistency extras above).
 2. Confirm the change of the reviewed REQ-MSG-021 and of the metadata of V-PAY-004.
 3. Review the views (`res-*.md`, `pag.md`, `loc.md`) and the vectors V-PAY-026 … 052 – then the C-027 areas can move to `reviewed`.
+
+## Addendum 3 – PO review of the vectors (2026-10-20)
+
+PO input (chat): **V-PAY-026 … 052 reviewed and accepted** → status `reviewed` (`2cb145f`). Question on REQ-MSG-021: whose idea was the shared DataSetWriterId? Answer: the rule itself was already in the guideline before C-027 – the notes of MG 9.1.8 and 9.1.9 (baseline `c6453c7`, line 16 each) said "All DataSetMessages of resource PublicationList/SubscriptionList are reusing the same DataSetWriterId, because each … entry has the same DataSet". It contradicted the general rule of MG 8.2.3 ("Each combination … must get its own DataSetWriterId"); the agent reported this in SF-067 (a) and proposed to keep the existing practice and state it as an explicit exception in MG 8.2.3 (alternative: own ids per entry, changing 9.1.8/9.1.9 and B1.1.8). The PO accepted SF-067; `1e53e71` added the exception to MG 8.2.3. Including SubscriptionList in that exception is an agent extension of the finding (9.1.9 had the same note; area RES-SUBLIST is C-028). REQ-MSG-021 only mirrors the new MG 8.2.3 text. The confirmation of REQ-MSG-021 and the review of the views remain open.
