@@ -311,3 +311,18 @@ items:
     reason: Hint how to subscribe to the Events of one category and level ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
   - key: MG-9.1.6-da2b4dd1
     reason: Reference to the examples of MG B1.1.6 (golden payload vectors V-PAY-055 ff.).
+  # --- RES-DATA (C-028) -----------------------------------------------------
+  - key: MG-8.3.4-3d652da0
+    reason: Description of the concept ("can offer" expresses possibility); the DataSet rules are REQ-RES-DATA-001, the publication REQ-MSG-024 and REQ-RES-DATA-007/008.
+  - key: MG-9.1.4-991ad672
+    reason: Description of the concept ("can offer" expresses possibility); same sentence as MG-8.3.4-3d652da0.
+  - key: MG-9.1.4-0fd7f8f3
+    reason: Hint how any application can listen to Data ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.4-9f03f884
+    reason: Template of the Pub topic with Source and Tag; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-DATA-008.
+  - key: MG-9.1.4-4b933372
+    reason: Template of the Pub topic with Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-DATA-008.
+  - key: MG-9.1.4-9f6b3980
+    reason: Template of the Pub topic without Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-DATA-008.
+  - key: MG-9.1.4-9e1f7cee
+    reason: Reference to the examples of MG B1.1.4 (golden payload vectors V-PAY-055 ff.).

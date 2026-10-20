@@ -94,7 +94,7 @@ areas:
   - code: RES-DATA
     title: Resource Data
     cycle: C-028
-    status: planned
+    status: drafted
     sections: [MG 8.3.4, MG 9.1.4]
   - code: RES-META
     title: Resource Metadata
