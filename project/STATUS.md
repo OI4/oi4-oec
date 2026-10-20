@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-20, cycle C-027 (addendum 3)_
+_Last updated: 2026-10-20, cycle C-027 (addendum 4)_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-027 done, guideline corrected (GL-ADR-019), views/vectors waiting for PO review; next C-028)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-027 done and reviewed, guideline corrected (GL-ADR-019) and figures fixed; next C-028)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -62,11 +62,13 @@ C-027 (PO review of the findings, 2026-10-19): **SF-056, SF-065 … SF-068 decid
 
 C-027 (PO decision, 2026-10-19): **SF-062 … SF-064 accepted** (revised proposals); PO ordered the guideline correction and a new GL-ADR. Guideline commits `2fbde83`, `9d1b00e` (SF-064), `a79e32a` (SF-065), `acf8b3a` (SF-066), `1e53e71` (SF-067), `8ee0fdd` (SF-068), `fbc0ce8` (SF-062), `8ac06fc` (SF-063), `f94916e` (SF-056), **GL-ADR-019** `26c899d` (Clarify core resources, pagination and locale), register `ca8d1c5` (SF-001 … 068 resolved, none open, next SF-069). Re-baseline on `ca8d1c5` (`17002e5` strict Health order in the checker, `2f55340` inventory/REQs/vectors, `6c7cabd` views): new REQ-PAG-009 (no pagination for `Set`/`Del`) and REQ-RES-MAM-023 (`GlobalAssetId`), keyword-based REQ-RES-HEALTH-002 and REQ-RES-PUBLIST-002/012/016, reviewed REQ-MSG-021 gains the PublicationList/SubscriptionList exception (to confirm); V-PAY-004, 029, 032, 033, 038, 039, 043 … 046 verbatim. Log addendum 2.
 
+C-027 (PO review of views, 2026-10-20): REQ-MSG-021 confirmed; views `res-*.md`, `pag.md`, `loc.md` accepted → 81 REQs and the areas RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG, LOC **`reviewed`** (`04bd5b9`, views `511a636`). MAM origin answered (OPC 10000-100 vs OI4 text, log addendum 4). PO raised **ReferenceDesignation children** → **SF-069** (open, proposal: derive from `Parent.IdentificationLink` + OEC Registry tree, query on `Get` only on demand). PO ordered the **figure fix**: guideline `f8d79f4` (`<Oi4Identifier>` → `<Source>` in 12 sequence diagrams, onboarding labels, PNGs re-exported; SF-070 resolved); remaining topic-label deviations of the figures → **SF-071** (open); register `2bfc0d9`, next SF-072. Re-baseline on `2bfc0d9` (`6e69743`, inventory unchanged). Log addendum 4.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review of C-027 (rest)** – review GL-ADR-019 and the guideline commits (consistency extras: Status topic in all `Set`/`Del` sections, `PaginationRequest` links in 9.1.3/4/9, B1 example values), confirm the change of the reviewed REQ-MSG-021 (origin explained in addendum 3) and V-PAY-004, review the views `res-mam.md`, `res-health.md`, `res-profile.md`, `res-publist.md`, `res-refdes.md`, `pag.md`, `loc.md` (addenda 2/3 of the C-027 log; vectors V-PAY-026 … 052 reviewed 2026-10-20). Then move the areas to `reviewed`.
+1. **PO decisions (not blocking)** – SF-069 (ReferenceDesignation children) and SF-071 (figure topic labels; proposal: fix with the next guideline correction). Still unconfirmed from the C-027 review: GL-ADR-019 and its guideline commits (consistency extras: Status topic in all `Set`/`Del` sections, `PaginationRequest` links in 9.1.3/4/9, B1 example values) and the verbatim update of the reviewed V-PAY-004.
 2. **C-028** – remaining resources (`RES-DATA`, `RES-META`, `RES-EVENT`, `RES-CONFIG`, `RES-SUBLIST`) + `BUS` + payload columns of the Method × Resource matrix; golden vectors for B1.1.3 … B1.1.6, B1.1.9 and the Status events of B1.1.3 … B1.1.10 (SF-056). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-029 … C-031).
 3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
@@ -86,7 +88,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `ca8d1c5`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 019, SF-001 … 068 resolved, no open finding, next SF-069; OEC Process Description informative); previous `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `2bfc0d9`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 019, SF-001 … 068 and SF-070 resolved, SF-069 and SF-071 open (not blocking), next SF-072; OEC Process Description informative); previous `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -98,7 +100,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. No open spec finding (SF-001 … 068 resolved, GL-ADR-019); next free id SF-069.
+- None. Open spec findings SF-069 (ReferenceDesignation children) and SF-071 (figure topic labels) are not blocking; next free id SF-072.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -135,4 +137,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-024 | 2026-10-19 | PO review of C-023: SF-045 … 051 implemented in the guideline, new SF-052 (tolerant reader) and SF-053 (A2 reserved ids with former use), Docusaurus config fix; re-baseline on `a7d18f9`, REQ-MSG-046, payload checks aligned; P1 cycles shifted by one. Second PO review: SF-052 SHOULD + strict/tolerant validation, SF-054 (B2 rebuilt), SF-055 open, register sorted; re-baseline on `4af61f3`, payload vectors V-PAY-010 … 019; MSG and ACT reviewed. Third PO review: complete B1.1.5 Metadata example, SF-055 resolved, SF-056 (B1 defects) for C-026/C-027, re-baseline on `2f00e9f`, V-PAY-001 … 019 reviewed | `log/2026-10-19_C-024_sf045-051-guideline.md` |
 | C-025 | 2026-10-19 | Areas `MQTT` + `LIFE` drafted (REQ-MQTT-001 … 019, REQ-LIFE-001 … 014, 14 informative items); golden vectors V-PAY-023 … 025 (Birth/Close/Will, `MessageId` edit per SF-058); new SF-057 … SF-060 (register `d20d8ff`, no re-baseline) | `log/2026-10-19_C-025_mqtt-life.md` |
 | C-026 | 2026-10-19 | PO review of C-025: SF-057 … 060 implemented in the guideline (MG 6 keywords, real Birth/Close/Will timestamps, `NORMAL_0`/0 reserved, `FAILURE_1`/0 while connected + Birth after recovery, MQTT versions/certificate verification/ClientId without container); re-baseline on `720d862`, REQ-LIFE-015 … 017, V-PAY-023 … 025 verbatim; P1 cycles shifted by one. PO review: MQTT reviewed, SF-061 (Birth `Timestamp` allowed, Close MUST from L2, subscriber interpretation SHOULD), view fix for `<…>` placeholders, re-baseline on `c6453c7`, REQ-CMP-046 | `log/2026-10-19_C-026_sf057-060-guideline.md` |
-| C-027 | 2026-10-19 | Areas `RES-MAM`, `RES-HEALTH`, `RES-PROFILE`, `RES-PUBLIST`, `RES-REFDES`, `PAG`, `LOC` drafted (79 REQs, 36 informative items); DataSet content checks; golden vectors V-PAY-026 … 047 (B1.1.1/1.1.7/1.1.8/1.1.10/1.1.12) and constructed V-PAY-048 … 052; SF-062 … 068. PO review: all findings accepted, guideline corrected (SF-056, SF-062 … 068) + GL-ADR-019, re-baseline on `ca8d1c5` (REQ-PAG-009, REQ-RES-MAM-023 new) | `log/2026-10-19_C-027_core-resources-pag-loc.md` |
+| C-027 | 2026-10-19 | Areas `RES-MAM`, `RES-HEALTH`, `RES-PROFILE`, `RES-PUBLIST`, `RES-REFDES`, `PAG`, `LOC` drafted (79 REQs, 36 informative items); DataSet content checks; golden vectors V-PAY-026 … 047 (B1.1.1/1.1.7/1.1.8/1.1.10/1.1.12) and constructed V-PAY-048 … 052; SF-062 … 068. PO review: all findings accepted, guideline corrected (SF-056, SF-062 … 068) + GL-ADR-019, re-baseline on `ca8d1c5` (REQ-PAG-009, REQ-RES-MAM-023 new); views accepted, areas reviewed; figures fixed (SF-070), SF-069/071 open, baseline `2bfc0d9` | `log/2026-10-19_C-027_core-resources-pag-loc.md` |
