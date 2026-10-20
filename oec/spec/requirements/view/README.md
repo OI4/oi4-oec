@@ -8,7 +8,7 @@ Guideline baseline: `15eaa8a`. Source of truth: the YAML files in `oec/spec/requ
 | [CMP](cmp.md) | Compliance domains and levels | C-014 | reviewed | 46 | MG index, MG preface, MG appendix-a, MG 1, RIG index, RIG appendix-a, RIG 1 |
 | [IL](il.md) | Identification link (dnp encoding) | C-018 | reviewed | 34 | MG 4, MG A3 |
 | [TOP](top.md) | Topic structure and namespace elements | C-018 | reviewed | 27 | MG 7 |
-| [MSG](msg.md) | Payload format and OPC UA PubSub objects | C-023 | drafted | 46 | MG 8, MG A2 |
+| [MSG](msg.md) | Payload format and OPC UA PubSub objects | C-023 | reviewed | 46 | MG 8, MG A2 |
 | [ACT](act.md) | Actions (Call/Reply) and DataSetWriterId allocation | C-023 | reviewed | 23 | MG 8.2.16, MG 8.2.17, MG 8.2.18, MG 8.2.19, MG 8.2.20, MG 8.4, MG 9.2 |
 | [MQTT](mqtt.md) | General requirements on MQTT | C-025 | reviewed | 19 | MG 6 |
 | [LIFE](life.md) | Birth, Close and Will messages | C-025 | reviewed | 17 | MG 6.3.3, MG 6.3.4, MG 6.3.5 |
@@ -16,10 +16,10 @@ Guideline baseline: `15eaa8a`. Source of truth: the YAML files in `oec/spec/requ
 | [RES-HEALTH](res-health.md) | Resource Health | C-027 | reviewed | 7 | MG 8.3.2, MG 9.1.2 |
 | [RES-PROFILE](res-profile.md) | Resource Profile | C-027 | reviewed | 5 | MG 8.3.7, MG 9.1.7 |
 | [RES-PUBLIST](res-publist.md) | Resource PublicationList | C-027 | reviewed | 25 | MG 8.3.8, MG 9.1.8 |
-| [RES-REFDES](res-refdes.md) | Resource ReferenceDesignation | C-027 | drafted | 16 | MG 8.3.10, MG 8.3.13.1, MG 9.1.10 |
+| [RES-REFDES](res-refdes.md) | Resource ReferenceDesignation | C-027 | reviewed | 16 | MG 8.3.10, MG 8.3.13.1, MG 9.1.10 |
 | [PAG](pag.md) | Pagination | C-027 | reviewed | 9 | MG 8.3.11 |
 | [LOC](loc.md) | Locale | C-027 | reviewed | 2 | MG 8.3.12 |
-| [QRY](qry.md) | Query (generic helper DataSet of a Get) | C-027 | drafted | 4 | MG 8.3.13 |
+| [QRY](qry.md) | Query (generic helper DataSet of a Get) | C-027 | reviewed | 4 | MG 8.3.13 |
 | RES-CONFIG | Resource Config | C-028 | planned | – | MG 8.3.3, MG 9.1.3 |
 | RES-DATA | Resource Data | C-028 | planned | – | MG 8.3.4, MG 9.1.4 |
 | RES-META | Resource Metadata | C-028 | planned | – | MG 8.3.5, MG 9.1.5 |

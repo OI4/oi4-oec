@@ -52,8 +52,8 @@ Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5, B1.1.7,
 | [V-PAY-045](#v-pay-045) | B1.1.10: Set ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | reviewed |
 | [V-PAY-046](#v-pay-046) | B1.1.10: Del ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | reviewed |
 | [V-PAY-047](#v-pay-047) | B1.1.12: Pub MAM of all assets in the requested Locale, reply to a Get | valid | ok | guideline MG B1.1.12 | reviewed |
-| [V-PAY-053](#v-pay-053) | B1.1.10: Get ReferenceDesignation of the children of an asset | valid | ok | guideline MG B1.1.10 | draft |
-| [V-PAY-054](#v-pay-054) | B1.1.10: Pub ReferenceDesignation of the children of an asset, reply to a Get | valid | ok | guideline MG B1.1.10 | draft |
+| [V-PAY-053](#v-pay-053) | B1.1.10: Get ReferenceDesignation of the children of an asset | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-054](#v-pay-054) | B1.1.10: Pub ReferenceDesignation of the children of an asset, reply to a Get | valid | ok | guideline MG B1.1.10 | reviewed |
 
 ## V-PAY-001
 
@@ -3050,7 +3050,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019), [REQ-QRY-001](../../requirements/view/qry.md#req-qry-001), [REQ-RES-REFDES-003](../../requirements/view/res-refdes.md#req-res-refdes-003), [REQ-RES-REFDES-012](../../requirements/view/res-refdes.md#req-res-refdes-012), [REQ-RES-REFDES-013](../../requirements/view/res-refdes.md#req-res-refdes-013)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: Get without Source with the generic helper Query (DataSetWriterId 9, WriterGroupName "Query", DataSetWriterName = requester; GL-ADR-020 amended by SF-073) and the query parameters of ReferenceDesignation: Parent is the unencoded Identification Link of the line controller, Aspect Function. The answer is V-PAY-054.
 
@@ -3087,7 +3087,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-REFDES-001](../../requirements/view/res-refdes.md#req-res-refdes-001), [REQ-RES-REFDES-005](../../requirements/view/res-refdes.md#req-res-refdes-005), [REQ-RES-REFDES-014](../../requirements/view/res-refdes.md#req-res-refdes-014)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-053: the two objects whose Function.Parent.IdentificationLink equals the requested Parent (the application itself and the subordinate asset groe.mca/DeviceModelB/AC33.447/20443), each in its own DataSetMessage, ReplyTo = MessageId of the Get. The second object has only the aspect Function. Whether the selection matches the request is a behaviour test (d7-test), not a payload check.
 

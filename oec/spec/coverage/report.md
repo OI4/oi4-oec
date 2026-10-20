@@ -8,7 +8,7 @@ Guideline baseline: `15eaa8a`. An inventory item is a candidate of a normative s
 | CMP | C-014 | reviewed | 65 | 34 | 31 | 0 |
 | IL | C-018 | reviewed | 97 | 73 | 24 | 0 |
 | TOP | C-018 | reviewed | 86 | 71 | 15 | 0 |
-| MSG | C-023 | drafted | 180 | 171 | 9 | 0 |
+| MSG | C-023 | reviewed | 180 | 171 | 9 | 0 |
 | ACT | C-023 | reviewed | 72 | 65 | 7 | 0 |
 | MQTT | C-025 | reviewed | 43 | 30 | 13 | 0 |
 | LIFE | C-025 | reviewed | 23 | 20 | 3 | 0 |
@@ -16,10 +16,10 @@ Guideline baseline: `15eaa8a`. An inventory item is a candidate of a normative s
 | RES-HEALTH | C-027 | reviewed | 28 | 21 | 7 | 0 |
 | RES-PROFILE | C-027 | reviewed | 18 | 13 | 5 | 0 |
 | RES-PUBLIST | C-027 | reviewed | 69 | 60 | 9 | 0 |
-| RES-REFDES | C-027 | drafted | 55 | 50 | 5 | 0 |
+| RES-REFDES | C-027 | reviewed | 55 | 50 | 5 | 0 |
 | PAG | C-027 | reviewed | 42 | 38 | 4 | 0 |
 | LOC | C-027 | reviewed | 5 | 5 | 0 | 0 |
-| QRY | C-027 | drafted | 4 | 3 | 1 | 0 |
+| QRY | C-027 | reviewed | 4 | 3 | 1 | 0 |
 | RES-CONFIG | C-028 | planned | 144 | 0 | 0 | 144 |
 | RES-DATA | C-028 | planned | 30 | 0 | 0 | 30 |
 | RES-META | C-028 | planned | 12 | 0 | 0 | 12 |
