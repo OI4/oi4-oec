@@ -109,7 +109,7 @@ areas:
   - code: RES-SUBLIST
     title: Resource SubscriptionList
     cycle: C-028
-    status: planned
+    status: drafted
     sections: [MG 8.3.9, MG 9.1.9]
   - code: BUS
     title: General Message Bus communication

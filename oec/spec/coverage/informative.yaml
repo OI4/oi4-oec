@@ -335,3 +335,20 @@ items:
     reason: Template of the Pub topic with Source and Tag; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-META-003.
   - key: MG-9.1.5-f1506f12
     reason: Reference to the examples of MG B1.1.5 (golden payload vectors V-PAY-020 … 022 and the Status event vectors of C-028).
+  # --- RES-SUBLIST (C-028) --------------------------------------------------
+  - key: MG-8.3.9-7ff9dd73
+    reason: Example of the Interval note (cloud connector); the rule is REQ-RES-SUBLIST-003.
+  - key: MG-8.3.9-9b50affb
+    reason: Explanation of the Interval example; the rule is REQ-RES-SUBLIST-003.
+  - key: MG-9.1.9-f02057fa
+    reason: Note on the Filter structure <ResourceType>[/<Tag>]; normative in REQ-TOP-022 (reviewed).
+  - key: MG-9.1.9-ddb5a16d
+    reason: Hint how any application can listen to SubscriptionList ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.9-80f180eb
+    reason: Template of the Pub topic with Source and Filter; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-SUBLIST-009.
+  - key: MG-9.1.9-91e9164d
+    reason: Template of the Pub topic with Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-SUBLIST-009.
+  - key: MG-9.1.9-6a186408
+    reason: Template of the Pub topic without Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-SUBLIST-009.
+  - key: MG-9.1.9-c5a04c25
+    reason: Reference to the examples of MG B1.1.9 (golden payload vectors V-PAY-055 ff.).

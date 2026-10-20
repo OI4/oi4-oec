@@ -1,0 +1,365 @@
+# Requirements of area RES-SUBLIST – resource SubscriptionList
+# (MG 8.3.9, 9.1.9; ADR-0018, schema: catalog.schema.json).
+# Support: REQ-CMP-039 (applications, L2 SHOULD, L3 MUST). DataSetClassId:
+# predefined (MG A2, REQ-MSG-010); one common DataSetWriterId for all
+# entries (REQ-MSG-021 exception, SF-067 (a)); WriterGroupName of the
+# entries: REQ-MSG-025 (GL-ADR-018), Filter structure: REQ-TOP-022. The
+# Status event after a Set/Del is REQ-RES-SUBLIST-013 (content: RES-EVENT).
+# Checked by tools/internal/payload (C-028).
+# Drafted in C-028; open finding: SF-080 (entry identity, TopicPath of the
+# B1.1.9 example, Interval wording, publication after Del, Config).
+area: RES-SUBLIST
+baseline: "ff1562f"
+requirements:
+  # --- DataSet content (MG 8.3.9) ---------------------------------------------
+  - id: REQ-RES-SUBLIST-001
+    title: Fields of a SubscriptionList entry
+    statement: >-
+      The Payload of a SubscriptionList DataSetMessage (one subscription)
+      contains the mandatory field TopicPath (String, the subscribed MQTT
+      topic filter) and optionally Interval (UInt32 in ms, default 0) and
+      Config (enumeration NONE_0 or CONF_1, default NONE_0); no other field.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource SubscriptionList (REQ-CMP-039).
+    refs: [MG 8.3.9, SF-080]
+    quotes:
+      - ref: MG 8.3.9
+        text: The SubscriptionList contains an array of DataSetMessage objects, each representing a subscription. Included are a topic path, an interval for application internal usage, and a configurability statement.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.9-625af7da, MG-8.3.9-c59d2078, MG-8.3.9-5827b466]
+    status: draft
+    notes: >-
+      The TopicPath is a topic filter as subscribed at the broker, wildcards
+      + and # allowed (MG 9.1.9 note on wildcards; SF-080 (a)). Enumeration
+      encoding <name>_<value> per REQ-MSG-031 (OPC UA Part 6 5.4.4).
+
+  - id: REQ-RES-SUBLIST-002
+    title: An entry matches its DataSetMessage and its TopicPath
+    statement: >-
+      The DataSetWriterName of an entry is the Source (the asset that holds
+      the subscription) and its WriterGroupName is <ResourceType>[/<Tag>]
+      derived from the TopicPath – the resource level and, if the TopicPath
+      contains no wildcard in the Filter levels, the Filter levels of the
+      subscribed topic; Source and TopicPath identify the entry.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource SubscriptionList (REQ-CMP-039).
+    scope: [MG 7.7, MG 8.2.3]
+    refs: [MG 8.3.9, MG 9.1.9, SF-080]
+    quotes:
+      - ref: MG 9.1.9
+        text: In combination with a ResourceType (7.7 Filter Element) it is possible to get a SubscriptionList filtered for a defined resource. In addition to the ResourceType a Tag can be added, e.g., to address a defined DataSetMessage of the resource Data.
+    verification: [d7-validate]
+    inventory: [MG-9.1.9-55c5621a]
+    status: draft
+    notes: >-
+      Combines REQ-TOP-022 (Filter structure), REQ-MSG-023 (DataSetWriterName)
+      and REQ-MSG-025 (WriterGroupName) for the entries. The guideline does
+      not define how ResourceType and Tag of an entry relate to its
+      TopicPath, nor what identifies an entry; interpretation SF-080 (a)
+      (a TopicPath with a wildcard in the resource level cannot be filtered
+      by ResourceType – open with the PO).
+
+  - id: REQ-RES-SUBLIST-003
+    title: Interval is a processing interval of the subscriber
+    statement: >-
+      Interval is the minimum time in ms between two computations of
+      received publications by the subscribing application (0 = every
+      publication is processed on arrival); it does not change the
+      publications of the publisher.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource SubscriptionList (REQ-CMP-039).
+    refs: [MG 8.3.9, SF-080]
+    quotes:
+      - ref: MG 8.3.9
+        text: By default, any DataSetMessage must be published on change => interval = 0.
+      - ref: MG 8.3.9
+        text: The subscribing client uses the key Interval to decide if every publication needs to be computed or not.
+    verification: [manual]
+    inventory: [MG-8.3.9-efa775fa, MG-8.3.9-a5461507]
+    status: draft
+    notes: >-
+      "published on change" read as "processed on arrival" because Interval
+      is a subscriber setting (SF-080 (c)). Maximum 0xFFFFFFFF ≈ 50 days.
+
+  - id: REQ-RES-SUBLIST-004
+    title: Config defines whether an entry can be changed or deleted
+    statement: >-
+      Config NONE_0 (default) marks a subscription that can neither be
+      changed nor deleted via Set or Del; CONF_1 marks a freely
+      configurable subscription. A Set or Del of an entry with NONE_0 is
+      rejected with a status Event with EventLevel Bad; Config itself is
+      read only.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application offers Set or Del for SubscriptionList.
+    refs: [MG 8.3.9, SF-080]
+    verification: [d7-test]
+    inventory: []
+    status: draft
+    notes: >-
+      MG 8.3.9 defines the values without keyword: "NONE_0: No configuration
+      possible (delete is not possible). CONF_1: Freely configurable (delete
+      is possible)." Rejection and read-only Config follow REQ-RES-PUBLIST-016
+      and REQ-CMP-043 (SF-080 (e)).
+
+  # --- Message Bus (MG 9.1.9) -------------------------------------------------
+  - id: REQ-RES-SUBLIST-005
+    title: SubscriptionList is republished on every change
+    statement: >-
+      Each time a subscription of the application is added, deleted or
+      reconfigured, the application publishes the SubscriptionList again.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports the resource SubscriptionList (REQ-CMP-039).
+    refs: [MG 9.1.9]
+    quotes:
+      - ref: MG 9.1.9
+        text: Each time a DataSetMessage or a list of DataSetMessages is added/deleted/reconfigured, the SubscriptionList must be (re)published.
+    verification: [d7-monitor]
+    inventory: [MG-9.1.9-a4d38b53]
+    status: draft
+    notes: After a Del see REQ-RES-SUBLIST-015 (SF-080 (d)).
+
+  - id: REQ-RES-SUBLIST-006
+    title: Republication after a reconfiguration may be partial
+    statement: >-
+      A republication that answers a reconfiguration may contain only the
+      changed entries, with the ReplyTo of the request that triggered the
+      reconfiguration.
+    keyword: MAY
+    domain: messaging
+    levels: {L1: MAY, L2: MAY, L3: MAY}
+    applies_to: [application]
+    condition: The publication answers a reconfiguration.
+    refs: [MG 9.1.9]
+    quotes:
+      - ref: MG 9.1.9
+        text: If the publication is a response to a reconfiguration, only the changes along with the ReplyTo from the call that triggered the reconfiguration may be published.
+    verification: [d7-monitor]
+    inventory: [MG-9.1.9-14a2c4e5]
+    status: draft
+
+  - id: REQ-RES-SUBLIST-007
+    title: Get SubscriptionList carries no SubscriptionList object
+    statement: >-
+      A Get SubscriptionList NetworkMessage contains no SubscriptionList
+      DataSetMessage; its Messages are empty or contain only the helper
+      DataSets PaginationRequest and Locale.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    scope: [MG 8.3.11, MG 8.3.12]
+    refs: [MG 9.1.9, SF-062]
+    quotes:
+      - ref: MG 9.1.9
+        text: In combination with the method Get, the payload requires an empty NetworkMessage.
+      - ref: MG 9.1.9
+        text: A SubscriptionList object is not included.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.9-2b8924b1]
+    status: draft
+    notes: SubscriptionList has no Query (GL-ADR-020, REQ-QRY-001).
+
+  - id: REQ-RES-SUBLIST-008
+    title: Get SubscriptionList is answered with all addressed entries
+    statement: >-
+      A Get SubscriptionList is answered with all entries addressed by the
+      topic – without Source all entries of the application, with Source all
+      entries of that asset, with Source and Filter the entries
+      <ResourceType>[/<Tag>] – each in its own DataSetMessage of a single
+      NetworkMessage published to the corresponding Pub topic; for entries
+      with wildcards in the TopicPath, the application evaluates which of
+      them match the request.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The application supports the resource SubscriptionList (REQ-CMP-039).
+    refs: [MG 9.1.9, SF-080]
+    quotes:
+      - ref: MG 9.1.9
+        text: Via the <Method>/<Resource>[/<Source>[/<Filter>]] combination Get/SubscriptionList[/<Source>[/<ResourceType>[/<Tag>]]], the publication of this information to the Pub/SubscriptionList[/<Source>[/<ResourceType>[/<Tag>]]] topic can be triggered.
+      - ref: MG 9.1.9
+        text: A topic, such as Oi4v2/<ServiceType>/<AppId>/Get/SubscriptionList, must trigger a publication of all available SubscriptionList information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/SubscriptionList.
+      - ref: MG 9.1.9
+        text: In case a SubscriptionList objects contains wildcards in the TopicPath, it is in the responsibility of the application to evaluate which SubscriptionList entries matches the request and must be published.
+    verification: [d7-test]
+    inventory: [MG-9.1.9-6f17c63d, MG-9.1.9-50f9f0a0, MG-9.1.9-07e667ac]
+    status: draft
+    notes: >-
+      Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015. A
+      Filter <ResourceType> also addresses the entries <ResourceType>/<Tag>
+      of that resource (MG 9.1.9: "The Filter can be used to request
+      SubscriptionList objects of a specific ResourceType").
+
+  - id: REQ-RES-SUBLIST-009
+    title: Pub SubscriptionList carries entries and optionally Pagination
+    statement: >-
+      A Pub SubscriptionList NetworkMessage contains SubscriptionList
+      DataSetMessages and optionally the helper DataSet Pagination; it
+      contains no PaginationRequest and no DataSetMessage of another
+      resource.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher]
+    refs: [MG 9.1.9, SF-062]
+    quotes:
+      - ref: MG 9.1.9
+        text: In combination with the method Pub, the payload contains DataSetMessages of type SubscriptionList and optional Pagination (8.3.11.2 Pagination).
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.9-9318b6dc]
+    status: draft
+    notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).
+
+  - id: REQ-RES-SUBLIST-010
+    title: Set SubscriptionList addresses exactly one entry
+    statement: >-
+      A Set SubscriptionList is sent to
+      Set/SubscriptionList/<Source>/<ResourceType>[/<Tag>] and its
+      NetworkMessage contains exactly one SubscriptionList DataSetMessage –
+      the complete entry; a TopicPath not yet subscribed by the Source
+      creates a new entry, a known TopicPath reconfigures the entry; several
+      entries cannot be set at once.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    refs: [MG 9.1.9, SF-079, SF-080]
+    quotes:
+      - ref: MG 9.1.9
+        text: In combination with the method Set, the payload contains a single DataSetMessages of type SubscriptionList. A topic with method Set must contain Resource, Source and Filter to be valid.
+      - ref: MG 9.1.9
+        text: Each publication, using the method Set, must be done explicitly.
+      - ref: MG 9.1.9
+        text: Setting multiple DataSetMessages at once via Oi4v2/<ServiceType>/<AppId>/Set/SubscriptionList is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.9-c60d1703, MG-9.1.9-a1f2a02e, MG-9.1.9-2c8de6d9]
+    status: draft
+    notes: >-
+      "create new entry or set new behavior" (heading of MG 9.1.9); entry
+      identity per SF-080 (a). Header per REQ-BUS-010 (SF-079).
+
+  - id: REQ-RES-SUBLIST-011
+    title: Del SubscriptionList addresses exactly one entry
+    statement: >-
+      A Del SubscriptionList is sent to
+      Del/SubscriptionList/<Source>/<ResourceType>[/<Tag>] and its
+      NetworkMessage contains exactly one SubscriptionList DataSetMessage
+      whose TopicPath identifies the entry to delete; several entries cannot
+      be deleted at once.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [requester]
+    refs: [MG 9.1.9, SF-079, SF-080]
+    quotes:
+      - ref: MG 9.1.9
+        text: In combination with the method Del, the payload contains a single DataSetMessages of type SubscriptionList. A topic with method Del must contain Resource, Source and Filter to be valid.
+      - ref: MG 9.1.9
+        text: Each publication, using the method Del must be done explicitly.
+      - ref: MG 9.1.9
+        text: Deleting multiple DataSetMessages at once via Oi4v2/<ServiceType>/<AppId>/Del/SubscriptionList is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.9-4f0f8bcc, MG-9.1.9-d3f9c5c4, MG-9.1.9-8b34854d]
+    status: draft
+    notes: >-
+      Unlike the Del of ReferenceDesignation, the Del of SubscriptionList
+      carries the entry, because several subscriptions can share one
+      Filter (SF-080 (a)). Header per REQ-BUS-010 (SF-079).
+
+  - id: REQ-RES-SUBLIST-012
+    title: Set and Del SubscriptionList are protected by ACL
+    statement: >-
+      The operator of the Message Bus prevents Set and Del SubscriptionList
+      by unauthorized communication participants via the ACL of the broker.
+    keyword: MUST
+    domain: platform
+    applies_to: [broker, platform]
+    refs: [MG 9.1.9]
+    quotes:
+      - ref: MG 9.1.9
+        text: To prevent write access by unauthorized communication participants, the operator must prevent this via ACL.
+    verification: [d8]
+    inventory: [MG-9.1.9-dec52a37, MG-9.1.9-6f5adce0]
+    status: draft
+
+  - id: REQ-RES-SUBLIST-013
+    title: Status event after Set and Del SubscriptionList
+    statement: >-
+      After a Set or Del SubscriptionList, the application publishes an Event
+      of the category Status about the command on
+      Pub/Event/<Source>/Status/<EventLevel> with the Source of the request
+      topic and the MessageId of the request as ReplyTo – mandatory from
+      Level 2 on, recommended at Level 1.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: SHOULD, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application offers Set or Del for SubscriptionList.
+    refs: [MG 9.1.9, MG 7.4]
+    quotes:
+      - ref: MG 9.1.9
+        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller. The caller finds the related Event through the ReplyTo, which is equal to the MessageId of its Set request.
+      - ref: MG 9.1.9
+        text: After a Del message arrived, the application must publish an Event message with status information about the Del command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller. The caller finds the related Event through the ReplyTo, which is equal to the MessageId of its Del request.
+    verification: [d7-test]
+    inventory: [MG-9.1.9-adbe848e, MG-9.1.9-406fa1d1]
+    status: draft
+    notes: Same obligation as REQ-TOP-014; content per REQ-RES-EVENT-005. Example MG B1.1.9.
+
+  - id: REQ-RES-SUBLIST-014
+    title: Changed entry is published after a successful Set
+    statement: >-
+      After a successful Set SubscriptionList, the application publishes the
+      new or changed entry to Pub/SubscriptionList/<Source>/<ResourceType>[/<Tag>]
+      with the ReplyTo of the Set.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application offers Set for SubscriptionList and the Set was successful.
+    refs: [MG 9.1.9]
+    quotes:
+      - ref: MG 9.1.9
+        text: If setting SubscriptionList was successful, the new SubscriptionList must be published to the Pub/SubscriptionList/<Source>/<ResourceType>[/<Tag>] topic, according to the settings in PublicationList (8.3.8 PublicationList).
+    verification: [d7-test]
+    inventory: [MG-9.1.9-3ae522d1]
+    status: draft
+    notes: Read like REQ-RES-PUBLIST-025 (reviewed in C-027). General rule REQ-BUS-006.
+
+  - id: REQ-RES-SUBLIST-015
+    title: Remaining entries are published after a successful Del
+    statement: >-
+      After a successful Del SubscriptionList, the application publishes the
+      remaining entries of the Source and Filter of the Del to
+      Pub/SubscriptionList/<Source>/<ResourceType>[/<Tag>] with the ReplyTo
+      of the Del; if no entry remains, it publishes nothing.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application offers Del for SubscriptionList and the Del was successful.
+    refs: [MG 9.1.9, MG 9.1, SF-080]
+    verification: [d7-test]
+    inventory: []
+    status: draft
+    notes: >-
+      Reconciles REQ-RES-SUBLIST-005 ("(re)published" on delete) with
+      REQ-BUS-007 (nothing is published after the deletion of a whole
+      object) and REQ-BUS-008 (the changed resource is published after a
+      partial deletion): interpretation SF-080 (d).
