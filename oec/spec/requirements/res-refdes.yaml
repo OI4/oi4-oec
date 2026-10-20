@@ -3,7 +3,7 @@
 # Support: REQ-CMP-020 (L2 SHOULD, L3 MUST). The Status event after Set/Del
 # belongs to RES-EVENT (C-028). Checked by tools/internal/payload (C-027).
 area: RES-REFDES
-baseline: "ca8d1c5"
+baseline: "2bfc0d9"
 requirements:
   # --- DataSet content (MG 8.3.10) --------------------------------------------
   - id: REQ-RES-REFDES-001

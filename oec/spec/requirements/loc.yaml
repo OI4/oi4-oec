@@ -2,7 +2,7 @@
 # Reserved DataSetWriterId and names: REQ-MSG-019; LocalizedText: MG 8.2.7.
 # Checked by tools/internal/payload (C-027).
 area: LOC
-baseline: "ca8d1c5"
+baseline: "2bfc0d9"
 requirements:
   - id: REQ-LOC-001
     title: Field of the Locale DataSet

@@ -3,7 +3,7 @@
 # ADR-0018). Reserved DataSetWriterIds and names: REQ-MSG-019. Checked by
 # tools/internal/payload (C-027).
 area: PAG
-baseline: "ca8d1c5"
+baseline: "2bfc0d9"
 requirements:
   - id: REQ-PAG-001
     title: Fields of the PaginationRequest DataSet

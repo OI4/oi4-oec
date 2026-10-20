@@ -5,7 +5,7 @@
 # REQ-TOP-017, the Close/Will content is area LIFE. Checked by
 # tools/internal/payload (C-027).
 area: RES-HEALTH
-baseline: "ca8d1c5"
+baseline: "2bfc0d9"
 requirements:
   # --- DataSet content (MG 8.3.2) ---------------------------------------------
   - id: REQ-RES-HEALTH-001

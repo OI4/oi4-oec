@@ -5,7 +5,7 @@
 # Status event after a Set belongs to RES-EVENT (C-028). Checked by
 # tools/internal/payload (C-027).
 area: RES-PUBLIST
-baseline: "ca8d1c5"
+baseline: "2bfc0d9"
 requirements:
   # --- DataSet content (MG 8.3.8) ---------------------------------------------
   - id: REQ-RES-PUBLIST-001

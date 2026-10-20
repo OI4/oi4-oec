@@ -5,7 +5,7 @@
 # and LOC; this file holds the DataSet content (MG 5) and the Message Bus
 # behavior of MG 9.1.1. Checked by tools/internal/payload (C-027).
 area: RES-MAM
-baseline: "ca8d1c5"
+baseline: "2bfc0d9"
 requirements:
   # --- DataSet content (MG 5, MG 8.3.1) ---------------------------------------
   - id: REQ-RES-MAM-001

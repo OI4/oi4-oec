@@ -3,7 +3,7 @@
 # Support of Profile: REQ-CMP-018 (L2 SHOULD, L3 MUST); every supported
 # resource is listed: REQ-CMP-021. Checked by tools/internal/payload (C-027).
 area: RES-PROFILE
-baseline: "ca8d1c5"
+baseline: "2bfc0d9"
 requirements:
   - id: REQ-RES-PROFILE-001
     title: Fields of the Profile DataSet

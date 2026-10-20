@@ -5,7 +5,7 @@
 # the guideline in C-024; the PO reviewed the area in the C-024 review
 # (2026-10-19, REQ-MSG-046 changed to SHOULD).
 area: MSG
-baseline: "ca8d1c5"
+baseline: "2bfc0d9"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
