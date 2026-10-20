@@ -162,3 +162,11 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `26c899d` – new GL-ADR-019 "Clarify core resources, pagination and locale" (PO order), describing all changes above.
   - `ca8d1c5` – findings register: SF-056 and SF-062 … 068 resolved, no open finding, next free id SF-069.
 - GL-ADR-001 … 019; SF-001 … 068 resolved, no open spec finding; next free id SF-069.
+
+## Amendment C-027 review (2026-10-20, guideline baseline `2bfc0d9`)
+
+- The baseline is now `2bfc0d9` on branch `feature/spec-findings` (PO order in the review of the C-027 views: replace `Oi4Identifier` in the figures by the Identification Link; local commits):
+  - `f8d79f4` – figures only: 54 topic placeholders `<Oi4Identifier>` → `<Source>` in the sequence diagrams of MG 1.2 and 9.1.1 … 9.1.10, "generate Oi4Identifier" → "determine Identification Link" in the onboarding diagrams of the Process Description; 12 PNGs re-exported (SF-070). No markdown changed – the inventory only changes its baseline line.
+  - `2bfc0d9` – findings register: SF-069 (ReferenceDesignation children) and SF-071 (remaining topic-label deviations of the figures) open, SF-070 resolved, next free id SF-072.
+- Figure-only commits change the baseline like text commits (the figures are part of the guideline) but need no requirement remapping; `spectool inventory -check -rev <commit>` confirms it.
+- GL-ADR-001 … 019; SF-001 … 068 and SF-070 resolved, SF-069 and SF-071 open (not blocking); next free id SF-072.
