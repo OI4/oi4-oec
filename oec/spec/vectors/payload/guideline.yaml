@@ -1,4 +1,4 @@
-# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027.
+# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "ca8d1c5"
@@ -1793,7 +1793,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-MAM-020, REQ-RES-MAM-021]
     origin: {kind: guideline, ref: MG B1.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       A Get MAM carries no MAM object (REQ-RES-MAM-020); the Source addresses the
       application itself, so the answer is its MAM on Pub/MAM/<Source>
@@ -1814,7 +1814,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-MAM-020, REQ-RES-MAM-021]
     origin: {kind: guideline, ref: MG B1.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       Without Source the Get addresses the MAM of the application and all its
       subordinate assets; the answer is published on Pub/MAM (V-PAY-029).
@@ -1834,7 +1834,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-MAM-001, REQ-RES-MAM-004, REQ-RES-MAM-012, REQ-RES-MAM-016, REQ-RES-MAM-017, REQ-RES-MAM-022]
     origin: {kind: guideline, ref: MG B1.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to V-PAY-026 (ReplyTo = its MessageId). All mandatory MAM fields are
       present, ManufacturerUri is a domain without scheme, DeviceManual a URL and
@@ -1889,7 +1889,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-005, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-MAM-001, REQ-RES-MAM-004, REQ-RES-MAM-012, REQ-RES-MAM-016, REQ-RES-MAM-017, REQ-RES-MAM-022]
     origin: {kind: guideline, ref: MG B1.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       Topic without Source: one DataSetMessage per asset; here only the
       application itself. Self-initialized, so ReplyTo is empty.
@@ -1939,7 +1939,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-PROFILE-003, REQ-RES-PROFILE-004]
     origin: {kind: guideline, ref: MG B1.1.7}
-    status: draft
+    status: reviewed
     notes: >-
       A Get Profile carries no Profile object (REQ-RES-PROFILE-003); the answer is
       V-PAY-032.
@@ -1959,7 +1959,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-PROFILE-003, REQ-RES-PROFILE-004]
     origin: {kind: guideline, ref: MG B1.1.7}
-    status: draft
+    status: reviewed
     notes: >-
       Without Source the Get addresses the Profiles of the application and all its
       subordinate assets; the answer is published on Pub/Profile (V-PAY-033).
@@ -1979,7 +1979,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-RES-PROFILE-001, REQ-RES-PROFILE-002, REQ-RES-PROFILE-005]
     origin: {kind: guideline, ref: MG B1.1.7}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to V-PAY-030. Resources lists distinct names of the resources and
       the common service NewDataSetWriterId the application of the B1 examples
@@ -2024,7 +2024,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-005, REQ-MSG-023, REQ-MSG-024, REQ-RES-PROFILE-001, REQ-RES-PROFILE-002, REQ-RES-PROFILE-005]
     origin: {kind: guideline, ref: MG B1.1.7}
-    status: draft
+    status: reviewed
     notes: >-
       Topic without Source: one DataSetMessage per asset; here only the
       application itself. Self-initialized, so ReplyTo is empty. Same Resources as
@@ -2066,7 +2066,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-PUBLIST-019, REQ-RES-PUBLIST-020]
     origin: {kind: guideline, ref: MG B1.1.8}
-    status: draft
+    status: reviewed
     notes: >-
       The Filter of the topic is <ResourceType>/<Tag> of the entry (Data/oee,
       REQ-TOP-022); the Get carries no PublicationList object. The answer is
@@ -2087,7 +2087,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-PUBLIST-019, REQ-RES-PUBLIST-020]
     origin: {kind: guideline, ref: MG B1.1.8}
-    status: draft
+    status: reviewed
     notes: >-
       With Source and without Filter the Get addresses all entries of that asset;
       the answer is V-PAY-038.
@@ -2107,7 +2107,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-PUBLIST-019, REQ-RES-PUBLIST-020]
     origin: {kind: guideline, ref: MG B1.1.8}
-    status: draft
+    status: reviewed
     notes: >-
       Without Source the Get addresses all entries of the application; the answer
       is V-PAY-039.
@@ -2127,7 +2127,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-015, REQ-MSG-023, REQ-MSG-025, REQ-RES-PUBLIST-001, REQ-RES-PUBLIST-002, REQ-RES-PUBLIST-003, REQ-RES-PUBLIST-012, REQ-RES-PUBLIST-021]
     origin: {kind: guideline, ref: MG B1.1.8}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to V-PAY-034. WriterGroupName Data/oee is <ResourceType>/<Tag> of the
       entry (GL-ADR-018), DataSetWriterName its Source; the entry describes the
@@ -2164,7 +2164,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-005, REQ-MSG-023, REQ-MSG-025, REQ-RES-PUBLIST-001, REQ-RES-PUBLIST-002, REQ-RES-PUBLIST-003, REQ-RES-PUBLIST-012, REQ-RES-PUBLIST-021]
     origin: {kind: guideline, ref: MG B1.1.8}
-    status: draft
+    status: reviewed
     notes: >-
       Entries for MAM (55), Health (3456), Profile (74), Event Syslog/Notice (625,
       FILTER_4), Data/oee (93) and ReferenceDesignation (94) of the application
@@ -2265,7 +2265,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-005, REQ-MSG-023, REQ-MSG-025, REQ-RES-PUBLIST-001, REQ-RES-PUBLIST-002, REQ-RES-PUBLIST-003, REQ-RES-PUBLIST-012, REQ-RES-PUBLIST-021]
     origin: {kind: guideline, ref: MG B1.1.8}
-    status: draft
+    status: reviewed
     notes: >-
       Topic without Source: all entries of the application; here only those of the
       application itself, as in V-PAY-038. Self-initialized, so ReplyTo is empty.
@@ -2363,7 +2363,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-PUBLIST-001, REQ-RES-PUBLIST-002, REQ-RES-PUBLIST-016, REQ-RES-PUBLIST-022]
     origin: {kind: guideline, ref: MG B1.1.8}
-    status: draft
+    status: reviewed
     notes: >-
       The IT connector sets the Interval of the Data/oee entry to 1000 ms; Config
       MODE_AND_INTERVAL_3 allows it. The Set carries exactly one entry and
@@ -2400,7 +2400,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-REFDES-003, REQ-RES-REFDES-004]
     origin: {kind: guideline, ref: MG B1.1.10}
-    status: draft
+    status: reviewed
     notes: >-
       A Get ReferenceDesignation carries no ReferenceDesignation object
       (REQ-RES-REFDES-003); the answer is V-PAY-043.
@@ -2420,7 +2420,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-REFDES-003, REQ-RES-REFDES-004]
     origin: {kind: guideline, ref: MG B1.1.10}
-    status: draft
+    status: reviewed
     notes: >-
       Without Source the Get addresses the ReferenceDesignation of all assets of
       the application; the answer is V-PAY-044.
@@ -2440,7 +2440,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-015, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-RES-REFDES-001, REQ-RES-REFDES-005]
     origin: {kind: guideline, ref: MG B1.1.10}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to V-PAY-041 with Function, Product and Location, each with a Parent.
       WriterGroupName is empty because ReferenceDesignation has no Filter.
@@ -2497,7 +2497,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-005, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-RES-REFDES-001, REQ-RES-REFDES-005]
     origin: {kind: guideline, ref: MG B1.1.10}
-    status: draft
+    status: reviewed
     notes: >-
       Topic without Source: one DataSetMessage per asset; here only the
       application itself. Self-initialized, so ReplyTo is empty.
@@ -2552,7 +2552,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-RES-REFDES-001, REQ-RES-REFDES-006]
     origin: {kind: guideline, ref: MG B1.1.10}
-    status: draft
+    status: reviewed
     notes: >-
       The IT connector sets the complete ReferenceDesignation of the application
       (exactly one DataSetMessage, topic with Source). The Status event that
@@ -2608,7 +2608,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-REFDES-007]
     origin: {kind: guideline, ref: MG B1.1.10}
-    status: draft
+    status: reviewed
     notes: >-
       The IT connector deletes the ReferenceDesignation of the application: no
       ReferenceDesignation object, topic with Source; sent by the requesting IT
@@ -2630,7 +2630,7 @@ vectors:
     expected: valid
     reqs: [REQ-LOC-002, REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-MAM-001, REQ-RES-MAM-004, REQ-RES-MAM-012, REQ-RES-MAM-016, REQ-RES-MAM-017, REQ-RES-MAM-022]
     origin: {kind: guideline, ref: MG B1.1.12}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to V-PAY-007 (Get MAM with Locale de-DE): the application has a
       German localization, the subordinate device only English, so its

@@ -9,11 +9,11 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 |---|---|---|---|---|---|
 | [V-PAY-018](#v-pay-018) | Pub Health with user-defined keys, strict validation | invalid | violates: REQ-MSG-001 | constructed | reviewed |
 | [V-PAY-019](#v-pay-019) | Pub Health with user-defined keys, tolerant validation | valid | ok | constructed | reviewed |
-| [V-PAY-048](#v-pay-048) | Pub Health with a HealthScore above 100 | invalid | violates: REQ-RES-HEALTH-001 | constructed | draft |
-| [V-PAY-049](#v-pay-049) | Pub Health whose Health does not reflect the most severe Detail | invalid | violates: REQ-RES-HEALTH-002 | constructed | draft |
-| [V-PAY-050](#v-pay-050) | Pub MAM with an inconsistent Pagination | invalid | violates: REQ-PAG-004 | constructed | draft |
-| [V-PAY-051](#v-pay-051) | Get MAM that carries a MAM DataSetMessage | invalid | violates: REQ-RES-MAM-020 | constructed | draft |
-| [V-PAY-052](#v-pay-052) | Pub PublicationList with an Event entry in Mode APPLICATION_2 | invalid | violates: REQ-RES-PUBLIST-012 | constructed | draft |
+| [V-PAY-048](#v-pay-048) | Pub Health with a HealthScore above 100 | invalid | violates: REQ-RES-HEALTH-001 | constructed | reviewed |
+| [V-PAY-049](#v-pay-049) | Pub Health whose Health does not reflect the most severe Detail | invalid | violates: REQ-RES-HEALTH-002 | constructed | reviewed |
+| [V-PAY-050](#v-pay-050) | Pub MAM with an inconsistent Pagination | invalid | violates: REQ-PAG-004 | constructed | reviewed |
+| [V-PAY-051](#v-pay-051) | Get MAM that carries a MAM DataSetMessage | invalid | violates: REQ-RES-MAM-020 | constructed | reviewed |
+| [V-PAY-052](#v-pay-052) | Pub PublicationList with an Event entry in Mode APPLICATION_2 | invalid | violates: REQ-RES-PUBLIST-012 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -112,7 +112,7 @@ Payload:
 - Expected: invalid – HealthScore is 101; it ranges from 0 to 100.
 - Violates: [REQ-RES-HEALTH-001](../../requirements/view/res-health.md#req-res-health-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 with HealthScore 101 (MG 8.3.2: 0 … 100).
 
@@ -152,7 +152,7 @@ Payload:
 - Expected: invalid – Health is NORMAL_0 although a Detail reports FAILURE_1.
 - Violates: [REQ-RES-HEALTH-002](../../requirements/view/res-health.md#req-res-health-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 with two Details, one of them FAILURE_1: the overall Health reflects the most severe state of the Details (MG 8.3.2, order FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0).
 
@@ -205,7 +205,7 @@ Payload:
 - Expected: invalid – HasNext is true although page 1 with PerPage 25 already contains all 2 DataSetMessages.
 - Violates: [REQ-PAG-004](../../requirements/view/pag.md#req-pag-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-006 with HasNext true: TotalCount 2 and PerPage 25 leave no further page (MG 8.3.11, SF-063).
 
@@ -304,7 +304,7 @@ Payload:
 - Expected: invalid – A Get MAM carries a MAM DataSetMessage.
 - Violates: [REQ-RES-MAM-020](../../requirements/view/res-mam.md#req-res-mam-020)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-026 with the MAM DataSetMessage of V-PAY-028: a Get carries no resource DataSetMessage, only the helper DataSets PaginationRequest and Locale (MG 9.1.1).
 
@@ -363,7 +363,7 @@ Payload:
 - Expected: invalid – The Event entry has the Mode APPLICATION_2, which enables no existing Event topic.
 - Violates: [REQ-RES-PUBLIST-012](../../requirements/view/res-publist.md#req-res-publist-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: The Event entry of V-PAY-039 with the Mode of the former B1.1.8 example: an Event is only published on Pub/Event/&lt;Source>/&lt;Filter>, so its Mode is OFF_0 or FILTER_4 (MG 8.3.8, SF-067 (c)).
 

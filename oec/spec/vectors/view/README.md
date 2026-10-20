@@ -8,8 +8,8 @@ Guideline baseline: `ca8d1c5`. Source of truth: the YAML files in `oec/spec/vect
 | [il-dnp-encoding](il-dnp-encoding.md) | `vectors/il/dnp-encoding.yaml` | dnp-encoding | 15 | 15 | 0 | 9 | 0 | 15 |
 | [il-identification-link](il-identification-link.md) | `vectors/il/identification-link.yaml` | identification-link | 29 | 12 | 17 | 7 | 0 | 29 |
 | [il-oi4identifier](il-oi4identifier.md) | `vectors/il/oi4identifier.yaml` | oi4identifier | 13 | 7 | 6 | 4 | 0 | 13 |
-| [payload-constructed](payload-constructed.md) | `vectors/payload/constructed.yaml` | payload | 7 | 1 | 6 | 0 | 5 | 2 |
-| [payload-guideline](payload-guideline.md) | `vectors/payload/guideline.yaml` | payload | 45 | 45 | 0 | 45 | 22 | 23 |
+| [payload-constructed](payload-constructed.md) | `vectors/payload/constructed.yaml` | payload | 7 | 1 | 6 | 0 | 0 | 7 |
+| [payload-guideline](payload-guideline.md) | `vectors/payload/guideline.yaml` | payload | 45 | 45 | 0 | 45 | 0 | 45 |
 | [topic-guideline](topic-guideline.md) | `vectors/topic/guideline.yaml` | topic | 60 | 60 | 0 | 60 | 0 | 60 |
 | [topic-invalid](topic-invalid.md) | `vectors/topic/invalid.yaml` | topic | 52 | 0 | 52 | 0 | 0 | 52 |
 | [topic-valid](topic-valid.md) | `vectors/topic/valid.yaml` | topic | 34 | 34 | 0 | 0 | 0 | 34 |

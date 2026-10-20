@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, draft).
+# Constructed payload vectors (C-024, C-027): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "ca8d1c5"
@@ -88,7 +88,7 @@ vectors:
     violates: [REQ-RES-HEALTH-001]
     reason: "HealthScore is 101; it ranges from 0 to 100."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-003 with HealthScore 101 (MG 8.3.2: 0 … 100).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
@@ -120,7 +120,7 @@ vectors:
     violates: [REQ-RES-HEALTH-002]
     reason: "Health is NORMAL_0 although a Detail reports FAILURE_1."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-003 with two Details, one of them FAILURE_1: the overall Health
       reflects the most severe state of the Details (MG 8.3.2, order FAILURE_1 >
@@ -168,7 +168,7 @@ vectors:
     violates: [REQ-PAG-004]
     reason: "HasNext is true although page 1 with PerPage 25 already contains all 2 DataSetMessages."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-006 with HasNext true: TotalCount 2 and PerPage 25 leave no further
       page (MG 8.3.11, SF-063).
@@ -260,7 +260,7 @@ vectors:
     violates: [REQ-RES-MAM-020]
     reason: "A Get MAM carries a MAM DataSetMessage."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-026 with the MAM DataSetMessage of V-PAY-028: a Get carries no
       resource DataSetMessage, only the helper DataSets PaginationRequest and
@@ -314,7 +314,7 @@ vectors:
     violates: [REQ-RES-PUBLIST-012]
     reason: "The Event entry has the Mode APPLICATION_2, which enables no existing Event topic."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       The Event entry of V-PAY-039 with the Mode of the former B1.1.8 example:
       an Event is only published on Pub/Event/<Source>/<Filter>, so its Mode is

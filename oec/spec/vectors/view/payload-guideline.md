@@ -30,28 +30,28 @@ Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5, B1.1.7,
 | [V-PAY-023](#v-pay-023) | B1.1.1: Birth message of an application | valid | ok | guideline MG B1.1.1 | reviewed |
 | [V-PAY-024](#v-pay-024) | B1.1.2: Close message of an application | valid | ok | guideline MG B1.1.2 | reviewed |
 | [V-PAY-025](#v-pay-025) | B1.1.2: Will message of an application | valid | ok | guideline MG B1.1.2 | reviewed |
-| [V-PAY-026](#v-pay-026) | B1.1.1: Get MAM of an explicit asset | valid | ok | guideline MG B1.1.1 | draft |
-| [V-PAY-027](#v-pay-027) | B1.1.1: Get MAM of all assets related to this application | valid | ok | guideline MG B1.1.1 | draft |
-| [V-PAY-028](#v-pay-028) | B1.1.1: Pub MAM of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.1 | draft |
-| [V-PAY-029](#v-pay-029) | B1.1.1: Pub MAM of all assets, self-initialized | valid | ok | guideline MG B1.1.1 | draft |
-| [V-PAY-030](#v-pay-030) | B1.1.7: Get Profile of an explicit asset | valid | ok | guideline MG B1.1.7 | draft |
-| [V-PAY-031](#v-pay-031) | B1.1.7: Get Profiles of all assets related to this application | valid | ok | guideline MG B1.1.7 | draft |
-| [V-PAY-032](#v-pay-032) | B1.1.7: Pub Profile of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.7 | draft |
-| [V-PAY-033](#v-pay-033) | B1.1.7: Pub Profiles of all assets, self-initialized | valid | ok | guideline MG B1.1.7 | draft |
-| [V-PAY-034](#v-pay-034) | B1.1.8: Get an explicit PublicationList entry | valid | ok | guideline MG B1.1.8 | draft |
-| [V-PAY-035](#v-pay-035) | B1.1.8: Get all PublicationList entries of an explicit asset | valid | ok | guideline MG B1.1.8 | draft |
-| [V-PAY-036](#v-pay-036) | B1.1.8: Get full PublicationList of all assets related to this application | valid | ok | guideline MG B1.1.8 | draft |
-| [V-PAY-037](#v-pay-037) | B1.1.8: Pub an explicit PublicationList entry, reply to a Get | valid | ok | guideline MG B1.1.8 | draft |
-| [V-PAY-038](#v-pay-038) | B1.1.8: Pub all PublicationList entries of an explicit asset | valid | ok | guideline MG B1.1.8 | draft |
-| [V-PAY-039](#v-pay-039) | B1.1.8: Pub full PublicationList of all assets, self-initialized | valid | ok | guideline MG B1.1.8 | draft |
-| [V-PAY-040](#v-pay-040) | B1.1.8: Set an explicit PublicationList entry | valid | ok | guideline MG B1.1.8 | draft |
-| [V-PAY-041](#v-pay-041) | B1.1.10: Get ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | draft |
-| [V-PAY-042](#v-pay-042) | B1.1.10: Get ReferenceDesignation of all assets related to this application | valid | ok | guideline MG B1.1.10 | draft |
-| [V-PAY-043](#v-pay-043) | B1.1.10: Pub ReferenceDesignation of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.10 | draft |
-| [V-PAY-044](#v-pay-044) | B1.1.10: Pub ReferenceDesignation of all assets, self-initialized | valid | ok | guideline MG B1.1.10 | draft |
-| [V-PAY-045](#v-pay-045) | B1.1.10: Set ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | draft |
-| [V-PAY-046](#v-pay-046) | B1.1.10: Del ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | draft |
-| [V-PAY-047](#v-pay-047) | B1.1.12: Pub MAM of all assets in the requested Locale, reply to a Get | valid | ok | guideline MG B1.1.12 | draft |
+| [V-PAY-026](#v-pay-026) | B1.1.1: Get MAM of an explicit asset | valid | ok | guideline MG B1.1.1 | reviewed |
+| [V-PAY-027](#v-pay-027) | B1.1.1: Get MAM of all assets related to this application | valid | ok | guideline MG B1.1.1 | reviewed |
+| [V-PAY-028](#v-pay-028) | B1.1.1: Pub MAM of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.1 | reviewed |
+| [V-PAY-029](#v-pay-029) | B1.1.1: Pub MAM of all assets, self-initialized | valid | ok | guideline MG B1.1.1 | reviewed |
+| [V-PAY-030](#v-pay-030) | B1.1.7: Get Profile of an explicit asset | valid | ok | guideline MG B1.1.7 | reviewed |
+| [V-PAY-031](#v-pay-031) | B1.1.7: Get Profiles of all assets related to this application | valid | ok | guideline MG B1.1.7 | reviewed |
+| [V-PAY-032](#v-pay-032) | B1.1.7: Pub Profile of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.7 | reviewed |
+| [V-PAY-033](#v-pay-033) | B1.1.7: Pub Profiles of all assets, self-initialized | valid | ok | guideline MG B1.1.7 | reviewed |
+| [V-PAY-034](#v-pay-034) | B1.1.8: Get an explicit PublicationList entry | valid | ok | guideline MG B1.1.8 | reviewed |
+| [V-PAY-035](#v-pay-035) | B1.1.8: Get all PublicationList entries of an explicit asset | valid | ok | guideline MG B1.1.8 | reviewed |
+| [V-PAY-036](#v-pay-036) | B1.1.8: Get full PublicationList of all assets related to this application | valid | ok | guideline MG B1.1.8 | reviewed |
+| [V-PAY-037](#v-pay-037) | B1.1.8: Pub an explicit PublicationList entry, reply to a Get | valid | ok | guideline MG B1.1.8 | reviewed |
+| [V-PAY-038](#v-pay-038) | B1.1.8: Pub all PublicationList entries of an explicit asset | valid | ok | guideline MG B1.1.8 | reviewed |
+| [V-PAY-039](#v-pay-039) | B1.1.8: Pub full PublicationList of all assets, self-initialized | valid | ok | guideline MG B1.1.8 | reviewed |
+| [V-PAY-040](#v-pay-040) | B1.1.8: Set an explicit PublicationList entry | valid | ok | guideline MG B1.1.8 | reviewed |
+| [V-PAY-041](#v-pay-041) | B1.1.10: Get ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-042](#v-pay-042) | B1.1.10: Get ReferenceDesignation of all assets related to this application | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-043](#v-pay-043) | B1.1.10: Pub ReferenceDesignation of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-044](#v-pay-044) | B1.1.10: Pub ReferenceDesignation of all assets, self-initialized | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-045](#v-pay-045) | B1.1.10: Set ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-046](#v-pay-046) | B1.1.10: Del ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-047](#v-pay-047) | B1.1.12: Pub MAM of all assets in the requested Locale, reply to a Get | valid | ok | guideline MG B1.1.12 | reviewed |
 
 ## V-PAY-001
 
@@ -1984,7 +1984,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-MAM-020](../../requirements/view/res-mam.md#req-res-mam-020), [REQ-RES-MAM-021](../../requirements/view/res-mam.md#req-res-mam-021)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: A Get MAM carries no MAM object (REQ-RES-MAM-020); the Source addresses the application itself, so the answer is its MAM on Pub/MAM/&lt;Source> (V-PAY-028).
 
@@ -2011,7 +2011,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-MAM-020](../../requirements/view/res-mam.md#req-res-mam-020), [REQ-RES-MAM-021](../../requirements/view/res-mam.md#req-res-mam-021)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: Without Source the Get addresses the MAM of the application and all its subordinate assets; the answer is published on Pub/MAM (V-PAY-029).
 
@@ -2039,7 +2039,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-MAM-001](../../requirements/view/res-mam.md#req-res-mam-001), [REQ-RES-MAM-004](../../requirements/view/res-mam.md#req-res-mam-004), [REQ-RES-MAM-012](../../requirements/view/res-mam.md#req-res-mam-012), [REQ-RES-MAM-016](../../requirements/view/res-mam.md#req-res-mam-016), [REQ-RES-MAM-017](../../requirements/view/res-mam.md#req-res-mam-017), [REQ-RES-MAM-022](../../requirements/view/res-mam.md#req-res-mam-022)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-026 (ReplyTo = its MessageId). All mandatory MAM fields are present, ManufacturerUri is a domain without scheme, DeviceManual a URL and ProductInstanceUri equals the DataSetWriterName. SoftwareRevision "1.0.1" has three numbers instead of the recommended four (REQ-RES-MAM-009, SHOULD, not checked).
 
@@ -2098,7 +2098,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-MAM-001](../../requirements/view/res-mam.md#req-res-mam-001), [REQ-RES-MAM-004](../../requirements/view/res-mam.md#req-res-mam-004), [REQ-RES-MAM-012](../../requirements/view/res-mam.md#req-res-mam-012), [REQ-RES-MAM-016](../../requirements/view/res-mam.md#req-res-mam-016), [REQ-RES-MAM-017](../../requirements/view/res-mam.md#req-res-mam-017), [REQ-RES-MAM-022](../../requirements/view/res-mam.md#req-res-mam-022)
 - Origin: guideline MG B1.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: Topic without Source: one DataSetMessage per asset; here only the application itself. Self-initialized, so ReplyTo is empty.
 
@@ -2156,7 +2156,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-PROFILE-003](../../requirements/view/res-profile.md#req-res-profile-003), [REQ-RES-PROFILE-004](../../requirements/view/res-profile.md#req-res-profile-004)
 - Origin: guideline MG B1.1.7
-- Status: draft
+- Status: reviewed
 
 Notes: A Get Profile carries no Profile object (REQ-RES-PROFILE-003); the answer is V-PAY-032.
 
@@ -2183,7 +2183,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-PROFILE-003](../../requirements/view/res-profile.md#req-res-profile-003), [REQ-RES-PROFILE-004](../../requirements/view/res-profile.md#req-res-profile-004)
 - Origin: guideline MG B1.1.7
-- Status: draft
+- Status: reviewed
 
 Notes: Without Source the Get addresses the Profiles of the application and all its subordinate assets; the answer is published on Pub/Profile (V-PAY-033).
 
@@ -2211,7 +2211,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-PROFILE-001](../../requirements/view/res-profile.md#req-res-profile-001), [REQ-RES-PROFILE-002](../../requirements/view/res-profile.md#req-res-profile-002), [REQ-RES-PROFILE-005](../../requirements/view/res-profile.md#req-res-profile-005)
 - Origin: guideline MG B1.1.7
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-030. Resources lists distinct names of the resources and the common service NewDataSetWriterId the application of the B1 examples serves (B1.1.1 … B1.1.10, MG 9.2.1), including MAM, Health and Profile (example corrected by SF-066 (b), GL-ADR-019).
 
@@ -2261,7 +2261,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-PROFILE-001](../../requirements/view/res-profile.md#req-res-profile-001), [REQ-RES-PROFILE-002](../../requirements/view/res-profile.md#req-res-profile-002), [REQ-RES-PROFILE-005](../../requirements/view/res-profile.md#req-res-profile-005)
 - Origin: guideline MG B1.1.7
-- Status: draft
+- Status: reviewed
 
 Notes: Topic without Source: one DataSetMessage per asset; here only the application itself. Self-initialized, so ReplyTo is empty. Same Resources as V-PAY-032.
 
@@ -2311,7 +2311,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-PUBLIST-019](../../requirements/view/res-publist.md#req-res-publist-019), [REQ-RES-PUBLIST-020](../../requirements/view/res-publist.md#req-res-publist-020)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 Notes: The Filter of the topic is &lt;ResourceType>/&lt;Tag> of the entry (Data/oee, REQ-TOP-022); the Get carries no PublicationList object. The answer is V-PAY-037.
 
@@ -2339,7 +2339,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-PUBLIST-019](../../requirements/view/res-publist.md#req-res-publist-019), [REQ-RES-PUBLIST-020](../../requirements/view/res-publist.md#req-res-publist-020)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 Notes: With Source and without Filter the Get addresses all entries of that asset; the answer is V-PAY-038.
 
@@ -2366,7 +2366,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-PUBLIST-019](../../requirements/view/res-publist.md#req-res-publist-019), [REQ-RES-PUBLIST-020](../../requirements/view/res-publist.md#req-res-publist-020)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 Notes: Without Source the Get addresses all entries of the application; the answer is V-PAY-039.
 
@@ -2395,7 +2395,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-025](../../requirements/view/msg.md#req-msg-025), [REQ-RES-PUBLIST-001](../../requirements/view/res-publist.md#req-res-publist-001), [REQ-RES-PUBLIST-002](../../requirements/view/res-publist.md#req-res-publist-002), [REQ-RES-PUBLIST-003](../../requirements/view/res-publist.md#req-res-publist-003), [REQ-RES-PUBLIST-012](../../requirements/view/res-publist.md#req-res-publist-012), [REQ-RES-PUBLIST-021](../../requirements/view/res-publist.md#req-res-publist-021)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-034. WriterGroupName Data/oee is &lt;ResourceType>/&lt;Tag> of the entry (GL-ADR-018), DataSetWriterName its Source; the entry describes the Data publication with DataSetWriterId 93 (B1.1.4). All entries use the DataSetWriterId 161 of the PublicationList, as the note of MG 9.1.8 demands, although MG 8.2.3 requires an own id per DataSetMessage (SF-067 (a)).
 
@@ -2437,7 +2437,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-025](../../requirements/view/msg.md#req-msg-025), [REQ-RES-PUBLIST-001](../../requirements/view/res-publist.md#req-res-publist-001), [REQ-RES-PUBLIST-002](../../requirements/view/res-publist.md#req-res-publist-002), [REQ-RES-PUBLIST-003](../../requirements/view/res-publist.md#req-res-publist-003), [REQ-RES-PUBLIST-012](../../requirements/view/res-publist.md#req-res-publist-012), [REQ-RES-PUBLIST-021](../../requirements/view/res-publist.md#req-res-publist-021)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 Notes: Entries for MAM (55), Health (3456), Profile (74), Event Syslog/Notice (625, FILTER_4), Data/oee (93) and ReferenceDesignation (94) of the application itself; MAM, Health, Profile and ReferenceDesignation have no Filter. All entries use the common DataSetWriterId 161 of the PublicationList (exception of MG 8.2.3, REQ-MSG-021).
 
@@ -2542,7 +2542,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-025](../../requirements/view/msg.md#req-msg-025), [REQ-RES-PUBLIST-001](../../requirements/view/res-publist.md#req-res-publist-001), [REQ-RES-PUBLIST-002](../../requirements/view/res-publist.md#req-res-publist-002), [REQ-RES-PUBLIST-003](../../requirements/view/res-publist.md#req-res-publist-003), [REQ-RES-PUBLIST-012](../../requirements/view/res-publist.md#req-res-publist-012), [REQ-RES-PUBLIST-021](../../requirements/view/res-publist.md#req-res-publist-021)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 Notes: Topic without Source: all entries of the application; here only those of the application itself, as in V-PAY-038. Self-initialized, so ReplyTo is empty. All entries use the common DataSetWriterId 161 of the PublicationList (exception of MG 8.2.3, REQ-MSG-021).
 
@@ -2647,7 +2647,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-PUBLIST-001](../../requirements/view/res-publist.md#req-res-publist-001), [REQ-RES-PUBLIST-002](../../requirements/view/res-publist.md#req-res-publist-002), [REQ-RES-PUBLIST-016](../../requirements/view/res-publist.md#req-res-publist-016), [REQ-RES-PUBLIST-022](../../requirements/view/res-publist.md#req-res-publist-022)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 Notes: The IT connector sets the Interval of the Data/oee entry to 1000 ms; Config MODE_AND_INTERVAL_3 allows it. The Set carries exactly one entry and addresses it with Source and Filter. The Status event that follows belongs to RES-EVENT (C-028).
 
@@ -2690,7 +2690,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-REFDES-003](../../requirements/view/res-refdes.md#req-res-refdes-003), [REQ-RES-REFDES-004](../../requirements/view/res-refdes.md#req-res-refdes-004)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: A Get ReferenceDesignation carries no ReferenceDesignation object (REQ-RES-REFDES-003); the answer is V-PAY-043.
 
@@ -2717,7 +2717,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-REFDES-003](../../requirements/view/res-refdes.md#req-res-refdes-003), [REQ-RES-REFDES-004](../../requirements/view/res-refdes.md#req-res-refdes-004)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: Without Source the Get addresses the ReferenceDesignation of all assets of the application; the answer is V-PAY-044.
 
@@ -2745,7 +2745,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-REFDES-001](../../requirements/view/res-refdes.md#req-res-refdes-001), [REQ-RES-REFDES-005](../../requirements/view/res-refdes.md#req-res-refdes-005)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-041 with Function, Product and Location, each with a Parent. WriterGroupName is empty because ReferenceDesignation has no Filter.
 
@@ -2809,7 +2809,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-REFDES-001](../../requirements/view/res-refdes.md#req-res-refdes-001), [REQ-RES-REFDES-005](../../requirements/view/res-refdes.md#req-res-refdes-005)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: Topic without Source: one DataSetMessage per asset; here only the application itself. Self-initialized, so ReplyTo is empty.
 
@@ -2872,7 +2872,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-REFDES-001](../../requirements/view/res-refdes.md#req-res-refdes-001), [REQ-RES-REFDES-006](../../requirements/view/res-refdes.md#req-res-refdes-006)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: The IT connector sets the complete ReferenceDesignation of the application (exactly one DataSetMessage, topic with Source). The Status event that follows belongs to RES-EVENT (C-028).
 
@@ -2935,7 +2935,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-REFDES-007](../../requirements/view/res-refdes.md#req-res-refdes-007)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: The IT connector deletes the ReferenceDesignation of the application: no ReferenceDesignation object, topic with Source; sent by the requesting IT connector with empty ReplyTo (example corrected by SF-068 (a), GL-ADR-019). The Status event that follows belongs to RES-EVENT (C-028).
 
@@ -2962,7 +2962,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-LOC-002](../../requirements/view/loc.md#req-loc-002), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-MAM-001](../../requirements/view/res-mam.md#req-res-mam-001), [REQ-RES-MAM-004](../../requirements/view/res-mam.md#req-res-mam-004), [REQ-RES-MAM-012](../../requirements/view/res-mam.md#req-res-mam-012), [REQ-RES-MAM-016](../../requirements/view/res-mam.md#req-res-mam-016), [REQ-RES-MAM-017](../../requirements/view/res-mam.md#req-res-mam-017), [REQ-RES-MAM-022](../../requirements/view/res-mam.md#req-res-mam-022)
 - Origin: guideline MG B1.1.12
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-007 (Get MAM with Locale de-DE): the application has a German localization, the subordinate device only English, so its LocalizedText stay en-US (fallback, REQ-LOC-002). The device has no manual and no DeviceClass: DeviceManual "" (REQ-RES-MAM-012).
 
