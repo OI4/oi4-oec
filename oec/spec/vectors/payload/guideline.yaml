@@ -1,4 +1,4 @@
-# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20).
+# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (ChildrenRequest, GL-ADR-020) drafted in the C-027 review.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "70b4c01"
@@ -10,8 +10,8 @@ description: >-
   B2.8) as bare DataSetMetaDataType objects. The reference checks cover the
   envelope of MG 8 (areas MSG and ACT) and, since C-027, the DataSet content of
   MAM, Health, Profile, PublicationList, ReferenceDesignation and the helper
-  DataSets Pagination, PaginationRequest and Locale (areas RES-MAM … LOC); the
-  remaining resources follow in C-028. A vector that differs from its example
+  DataSets Pagination, PaginationRequest, Locale and ChildrenRequest (areas
+  RES-MAM … LOC); the remaining resources follow in C-028. A vector that differs from its example
   keeps the verbatim example in original and lists every change in edits.
 vectors:
   - id: V-PAY-001
@@ -2700,6 +2700,113 @@ vectors:
               "Description": {
                 "Locale": "en-US",
                 "Text": "Device Model B measurement unit"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-053
+    title: "B1.1.10: Get ReferenceDesignation of the children of an asset"
+    expected: valid
+    reqs: [REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-MSG-019, REQ-RES-REFDES-003, REQ-RES-REFDES-012, REQ-RES-REFDES-013]
+    origin: {kind: guideline, ref: MG B1.1.10}
+    status: draft
+    notes: >-
+      Get without Source with the helper ChildrenRequest (DataSetWriterId 9,
+      WriterGroupName "ChildrenRequest", DataSetWriterName = requester;
+      GL-ADR-020): Parent is the unencoded Identification Link of the line
+      controller, Aspect Function. The answer is V-PAY-054.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/ReferenceDesignation"
+    payload: |-
+      {
+        "MessageId": "1639693530000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 9,
+            "WriterGroupName": "ChildrenRequest",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "Parent": "consumer.com/LineController/LC-200/4711",
+              "Aspect": "Function"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-054
+    title: "B1.1.10: Pub ReferenceDesignation of the children of an asset, reply to a Get"
+    expected: valid
+    reqs: [REQ-MSG-015, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-RES-REFDES-001, REQ-RES-REFDES-005, REQ-RES-REFDES-014]
+    origin: {kind: guideline, ref: MG B1.1.10}
+    status: draft
+    notes: >-
+      Answer to V-PAY-053: the two objects whose Function.Parent.IdentificationLink
+      equals the requested Parent (the application itself and the subordinate
+      asset groe.mca/DeviceModelB/AC33.447/20443), each in its own
+      DataSetMessage, ReplyTo = MessageId of the Get. The second object has only
+      the aspect Function. Whether the selection matches the request is a
+      behaviour test (d7-test), not a payload check.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/ReferenceDesignation"
+    payload: |-
+      {
+        "MessageId": "1639693530094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "27a75019-164a-496d-a38b-90e8a55c2cfa",
+        "ReplyTo": "1639693530000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 94,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Location": {
+                "Value": "+P1.H3.R2",
+                "Local": "+R2",
+                "Parent": {
+                  "Value": "+P1.H3",
+                  "Local": "+H3",
+                  "IdentificationLink": "consumer.com/HallController/HC-300/815"
+                }
+              },
+              "Function": {
+                "Value": "=P1.L2.FDS1",
+                "Local": "=FDS1",
+                "Parent": {
+                  "Value": "=P1.L2",
+                  "Local": "=L2",
+                  "IdentificationLink": "consumer.com/LineController/LC-200/4711"
+                }
+              },
+              "Product": {
+                "Value": "-P1.L2.FDS1",
+                "Local": "-FDS1",
+                "Parent": {
+                  "Value": "-P1.L2",
+                  "Local": "-L2",
+                  "IdentificationLink": "consumer.com/LineController/LC-200/4711"
+                }
+              }
+            }
+          },
+          {
+            "DataSetWriterId": 4799,
+            "WriterGroupName": "",
+            "DataSetWriterName": "groe.mca/DeviceModelB/AC33.447/20443",
+            "Payload": {
+              "Function": {
+                "Value": "=P1.L2.MU1",
+                "Local": "=MU1",
+                "Parent": {
+                  "Value": "=P1.L2",
+                  "Local": "=L2",
+                  "IdentificationLink": "consumer.com/LineController/LC-200/4711"
+                }
               }
             }
           }
