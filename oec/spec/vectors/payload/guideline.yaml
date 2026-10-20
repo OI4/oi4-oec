@@ -1,17 +1,18 @@
-# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20); V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (ff1562f).
+# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20); V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (ff1562f); V-PAY-055 … 080 (Data, Event, SubscriptionList and the Status events of B1.1.3 … B1.1.10) drafted in C-028.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "ff1562f"
 description: >-
-  Golden payload vectors taken from Appendix B (MG B1.1.1, B1.1.2, B1.1.5,
-  B1.1.7, B1.1.8, B1.1.10, B1.1.11, B1.1.12, B1.2.1): topic and message of the
+  Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12 except the
+  Config examples of B1.1.3, which follow in C-029; B1.2.1): topic and message of the
   Message Bus, including the Birth, Close and Will messages (MG 6.3.3 … 6.3.5,
   C-025); and the predefined MetaData of the Alliance resources (MG B2.1 …
   B2.8) as bare DataSetMetaDataType objects. The reference checks cover the
   envelope of MG 8 (areas MSG and ACT) and, since C-027, the DataSet content of
   MAM, Health, Profile, PublicationList, ReferenceDesignation and the helper
   DataSets Pagination, PaginationRequest, Locale and Query (areas
-  RES-MAM … QRY); the remaining resources follow in C-028. A vector that differs from its example
+  RES-MAM … QRY), since C-028 also of Data (Oi4Pv), Metadata (Get), Event and
+  SubscriptionList; Config follows in C-029. A vector that differs from its example
   keeps the verbatim example in original and lists every change in edits.
 vectors:
   - id: V-PAY-001
@@ -2810,6 +2811,1013 @@ vectors:
                   "Local": "=L2",
                   "IdentificationLink": "consumer.com/LineController/LC-200/4711"
                 }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-055
+    title: "B1.1.4: Get explicit data tag of an explicit asset"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-DATA-006, REQ-RES-DATA-007]
+    origin: {kind: guideline, ref: MG B1.1.4}
+    status: draft
+    notes: >-
+      A Get Data carries no Data DataSetMessage (REQ-RES-DATA-006). Data has no
+      predefined DataSetClassId; the requester does not know the publisher-defined
+      one and omits it (REQ-MSG-011, SF-048/SF-072). The answer is V-PAY-058.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-056
+    title: "B1.1.4: Get all Data tags of an explicit asset"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-DATA-006, REQ-RES-DATA-007]
+    origin: {kind: guideline, ref: MG B1.1.4}
+    status: draft
+    notes: >-
+      Without Tag the Get addresses all Data DataSets of the asset (REQ-RES-
+      DATA-007); no DataSetClassId (see the note of the example).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-057
+    title: "B1.1.4: Get Data tags of all assets related to this application"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-DATA-006, REQ-RES-DATA-007]
+    origin: {kind: guideline, ref: MG B1.1.4}
+    status: draft
+    notes: >-
+      Without Source the Get addresses all Data DataSets of all assets of the
+      application (REQ-RES-DATA-007).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-058
+    title: "B1.1.4: Pub explicit Data tag of an explicit asset"
+    expected: valid
+    reqs: [REQ-BUS-003, REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-RES-DATA-001, REQ-RES-DATA-008]
+    origin: {kind: guideline, ref: MG B1.1.4}
+    status: draft
+    notes: >-
+      Answer to V-PAY-055 (ReplyTo = MessageId of the Get). All DataSetMessages
+      belong to the class oee, so the NetworkMessage carries the publisher-defined
+      DataSetClassId (REQ-MSG-011, SF-072). The content of an application-defined
+      Data DataSet is not checked (REQ-RES-DATA-001 refers to its Metadata).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 3985,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Availability": 90,
+              "PerformanceRate": 95,
+              "QualityRate": 98,
+              "Product": 84
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-059
+    title: "B1.1.4: Pub all Data tags of an explicit asset"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-RES-DATA-001, REQ-RES-DATA-008]
+    origin: {kind: guideline, ref: MG B1.1.4}
+    status: draft
+    notes: >-
+      Self-initiated publication (empty ReplyTo) of all Data DataSets of the
+      asset; more DataSetMessages or a Pagination DataSet would follow in the same
+      NetworkMessage (REQ-RES-DATA-008, REQ-PAG-005).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 3985,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Availability": 90,
+              "PerformanceRate": 95,
+              "QualityRate": 98,
+              "Product": 84
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-060
+    title: "B1.1.4: Pub Data tags of all assets related to this application"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-RES-DATA-001, REQ-RES-DATA-008]
+    origin: {kind: guideline, ref: MG B1.1.4}
+    status: draft
+    notes: >-
+      Publication of the Data DataSets of all assets of the application (REQ-RES-
+      DATA-008).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 3985,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Availability": 90,
+              "PerformanceRate": 95,
+              "QualityRate": 98,
+              "Product": 84
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-061
+    title: "B1.1.4: Set explicit Data tag of an explicit asset"
+    expected: valid
+    reqs: [REQ-BUS-004, REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-DATA-009]
+    origin: {kind: guideline, ref: MG B1.1.4}
+    status: draft
+    notes: >-
+      The Set carries exactly one Data DataSetMessage – the complete DataSet oee –
+      with the DataSetWriterId, DataSetWriterName and WriterGroupName of the
+      addressed DataSet (REQ-BUS-010); the requester omits the publisher-defined
+      DataSetClassId (REQ-MSG-011). The SequenceNumber 3985 is a counter of the
+      responder's DataSetWriter; SF-079 proposes to remove it, the vector stays
+      verbatim and valid (SequenceNumber is optional in a DataSetMessage). The
+      answers are the Status event V-PAY-062 and a Pub Data with the ReplyTo of
+      the Set (REQ-RES-DATA-012).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "ReplyTo": "",
+        "Messages": [
+           {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 3985,
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "Availability": 99,
+              "PerformanceRate": 99,
+              "QualityRate": 99,
+              "Product": 97
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-062
+    title: "B1.1.4: Status Event follows a set request"
+    expected: valid
+    reqs: [REQ-MSG-015, REQ-RES-DATA-011, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011]
+    origin: {kind: guideline, ref: MG B1.1.4}
+    status: draft
+    notes: >-
+      Status event about the Set Data V-PAY-061: published by the addressed
+      application to Pub/Event/<Source>/Status/Good with the Source of the
+      request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId
+      Good in Details (SF-075 (a)); EventLevel Good is the severity class of the
+      StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 37,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-063
+    title: "B1.1.6: Pub Event of EventCategory Status (OPC UA Statuscode)"
+    expected: valid
+    reqs: [REQ-MSG-010, REQ-MSG-011, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011]
+    origin: {kind: guideline, ref: MG B1.1.6}
+    status: draft
+    notes: >-
+      Event of the category Status: Number is the StatusCode 0 (Good), Description
+      describes it, Details carry SymbolicId (SF-075 (a)); Category CAT_STATUS_1
+      corresponds to the EventCategory Status of the topic (REQ-RES-EVENT-002,
+      SF-076 (c)) and EventLevel Good to the severity class of the StatusCode
+      (REQ-RES-EVENT-004, SF-076 (b)). The ReplyTo shows that it answers a request
+      (REQ-RES-EVENT-005). The DataSetMessage MessageType ua-event is optional and
+      omitted.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 14,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-064
+    title: "B1.1.6: Pub Event of EventCategory Syslog"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-007, REQ-RES-EVENT-008, REQ-RES-EVENT-011]
+    origin: {kind: guideline, ref: MG B1.1.6}
+    status: draft
+    notes: >-
+      Event of the category Syslog: Number is the PRI 13 (Facility 1 user-level ×
+      8 + Severity 5), so the EventLevel is Notice (PRI % 8 = 5, RFC 5424 6.2.1;
+      REQ-RES-EVENT-008, SF-076 (a)); MSG and HEADER are keys of Details and there
+      is no Description (REQ-RES-EVENT-007, SF-075 (a)/(b)). Self-initiated (empty
+      ReplyTo).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Notice"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 625,
+            "WriterGroupName": "Syslog/Notice",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 15,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 13,
+              "Category": "CAT_SYSLOG_0",
+              "Details": {
+                "MSG": "FieldDataService[1]: publication interval of Data tag oee set to 1000 ms",
+                "HEADER": "Dec 16 22:25:10 FDS-001-1200-0345"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-065
+    title: "B1.1.6: Pub Event of EventCategory Generic"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-009, REQ-RES-EVENT-010, REQ-RES-EVENT-011]
+    origin: {kind: guideline, ref: MG B1.1.6}
+    status: draft
+    notes: >-
+      Event of the category Generic: application-defined Number 4711, Description
+      and Details (REQ-RES-EVENT-009); the EventLevel High is application-defined.
+      Each EventCategory/EventLevel has its own DataSetWriterId (623, 625, 626;
+      REQ-MSG-021).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Generic/High"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 626,
+            "WriterGroupName": "Generic/High",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 17,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 4711,
+              "Description": "Buffer of the field data acquisition nearly full",
+              "Category": "CAT_GENERIC_99",
+              "Details": {
+                "BufferUsage": 92,
+                "BufferSize": 1000
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-066
+    title: "B1.1.9: Get explicit SubscriptionList entry"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-SUBLIST-007, REQ-RES-SUBLIST-008]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      A Get SubscriptionList carries no entry (REQ-RES-SUBLIST-007) and the
+      predefined DataSetClassId (REQ-MSG-011). The answer is V-PAY-069.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-067
+    title: "B1.1.9: Get all SubscriptionList entries of an explicit asset"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-SUBLIST-007, REQ-RES-SUBLIST-008]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      Without Filter the Get addresses all entries of the asset (REQ-RES-
+      SUBLIST-008).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-068
+    title: "B1.1.9: Get full SubscriptionList of all assets related to this application"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-SUBLIST-007, REQ-RES-SUBLIST-008]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      Without Source the Get addresses the whole SubscriptionList of the
+      application (REQ-RES-SUBLIST-008).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-069
+    title: "B1.1.9: Pub an explicit SubscriptionList entry"
+    expected: valid
+    reqs: [REQ-BUS-003, REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-025, REQ-RES-SUBLIST-001, REQ-RES-SUBLIST-002, REQ-RES-SUBLIST-009]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      Answer to V-PAY-066 (ReplyTo = MessageId of the Get). The entry has the
+      common DataSetWriterId 227 of the list, the Source as DataSetWriterName and
+      <ResourceType>/<Tag> = Data/oee as WriterGroupName, derived from the
+      TopicPath (REQ-RES-SUBLIST-002, SF-080 (a)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee",
+              "Interval": 0,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    original: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
+              "Interval": 0,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    edits:
+      - target: /Messages/0/Payload/TopicPath
+        kind: corrected
+        reason: >-
+          TopicPath of the example subscribes to the application's own
+          SubscriptionList while the entry is filed under Data/oee; minimal
+          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
+          may choose another topic).
+        sf: [SF-080]
+
+  - id: V-PAY-070
+    title: "B1.1.9: Pub all SubscriptionList entries of an explicit asset"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-025, REQ-RES-SUBLIST-001, REQ-RES-SUBLIST-002, REQ-RES-SUBLIST-009]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      Self-initiated publication of all entries of the asset (REQ-RES-
+      SUBLIST-009).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee",
+              "Interval": 0,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    original: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
+              "Interval": 0,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    edits:
+      - target: /Messages/0/Payload/TopicPath
+        kind: corrected
+        reason: >-
+          TopicPath of the example subscribes to the application's own
+          SubscriptionList while the entry is filed under Data/oee; minimal
+          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
+          may choose another topic).
+        sf: [SF-080]
+
+  - id: V-PAY-071
+    title: "B1.1.9: Pub full SubscriptionList of all assets related to this application"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-025, REQ-RES-SUBLIST-001, REQ-RES-SUBLIST-002, REQ-RES-SUBLIST-009]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      Publication of the whole SubscriptionList of the application (REQ-RES-
+      SUBLIST-009).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee",
+              "Interval": 0,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    original: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
+              "Interval": 0,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    edits:
+      - target: /Messages/0/Payload/TopicPath
+        kind: corrected
+        reason: >-
+          TopicPath of the example subscribes to the application's own
+          SubscriptionList while the entry is filed under Data/oee; minimal
+          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
+          may choose another topic).
+        sf: [SF-080]
+
+  - id: V-PAY-072
+    title: "B1.1.9: Set an explicit SubscriptionList entry"
+    expected: valid
+    reqs: [REQ-BUS-004, REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-SUBLIST-001, REQ-RES-SUBLIST-002, REQ-RES-SUBLIST-010]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      The Set carries exactly one entry (REQ-RES-SUBLIST-010) and sets its
+      Interval to 1000 ms; Config CONF_1 allows it (REQ-RES-SUBLIST-004). The
+      answers are the Status event V-PAY-073 and the publication of the changed
+      entry (REQ-RES-SUBLIST-014).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee",
+              "Interval": 1000,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    original: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
+              "Interval": 1000,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    edits:
+      - target: /Messages/0/Payload/TopicPath
+        kind: corrected
+        reason: >-
+          TopicPath of the example subscribes to the application's own
+          SubscriptionList while the entry is filed under Data/oee; minimal
+          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
+          may choose another topic).
+        sf: [SF-080]
+
+  - id: V-PAY-073
+    title: "B1.1.9: Status event follows a set request"
+    expected: valid
+    reqs: [REQ-MSG-015, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011, REQ-RES-SUBLIST-013]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      Status event about the Set SubscriptionList V-PAY-072: published by the
+      addressed application to Pub/Event/<Source>/Status/Good with the Source of
+      the request, ReplyTo = MessageId of the request, Number 0 (Good) with
+      SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity
+      class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 37,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-074
+    title: "B1.1.9: Del an explicit SubscriptionList entry"
+    expected: valid
+    reqs: [REQ-BUS-005, REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-SUBLIST-001, REQ-RES-SUBLIST-002, REQ-RES-SUBLIST-011]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      Unlike ReferenceDesignation, the Del carries exactly one entry whose
+      TopicPath identifies the subscription to delete (REQ-RES-SUBLIST-011, SF-080
+      (a)). The answers are the Status event V-PAY-075 and the publication of the
+      remaining entries, or nothing if none remains (REQ-RES-SUBLIST-015, SF-080
+      (d)). Like all B1 examples it is a standalone illustration (MessageId as in
+      the Set example).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee",
+              "Interval": 1000,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    original: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
+              "Interval": 1000,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+    edits:
+      - target: /Messages/0/Payload/TopicPath
+        kind: corrected
+        reason: >-
+          TopicPath of the example subscribes to the application's own
+          SubscriptionList while the entry is filed under Data/oee; minimal
+          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
+          may choose another topic).
+        sf: [SF-080]
+
+  - id: V-PAY-075
+    title: "B1.1.9: Status event follows a delete request"
+    expected: valid
+    reqs: [REQ-MSG-015, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011, REQ-RES-SUBLIST-013]
+    origin: {kind: guideline, ref: MG B1.1.9}
+    status: draft
+    notes: >-
+      Status event about the Del SubscriptionList V-PAY-074: published by the
+      addressed application to Pub/Event/<Source>/Status/Good with the Source of
+      the request, ReplyTo = MessageId of the request, Number 0 (Good) with
+      SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity
+      class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)). Its text equals the
+      Status event after the Set (V-PAY-073); each B1 example is a standalone
+      illustration.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 37,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-076
+    title: "B1.1.3: Status event follows a set request"
+    expected: valid
+    reqs: [REQ-MSG-015, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Status event about the Set Config of B1.1.3: published by the addressed
+      application to Pub/Event/<Source>/Status/Good with the Source of the
+      request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId
+      Good in Details (SF-075 (a)); EventLevel Good is the severity class of the
+      StatusCode (REQ-RES-EVENT-004, SF-076 (b)). B1.1.3 shows this Status event
+      twice (after the Set of Network settings and of Overall device settings)
+      with identical text; one vector covers both. The Config examples themselves
+      follow with RES-CONFIG in C-029.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 37,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-077
+    title: "B1.1.5: Status event follows a set request"
+    expected: valid
+    reqs: [REQ-MSG-015, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011, REQ-RES-META-006]
+    origin: {kind: guideline, ref: MG B1.1.5}
+    status: draft
+    notes: >-
+      Status event about the Set Metadata V-PAY-022: published by the addressed
+      application to Pub/Event/<Source>/Status/Good with the Source of the
+      request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId
+      Good in Details (SF-075 (a)); EventLevel Good is the severity class of the
+      StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 38,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-078
+    title: "B1.1.8: Status Event follows a set request"
+    expected: valid
+    reqs: [REQ-MSG-015, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011, REQ-RES-PUBLIST-024]
+    origin: {kind: guideline, ref: MG B1.1.8}
+    status: draft
+    notes: >-
+      Status event about the Set PublicationList V-PAY-040: published by the
+      addressed application to Pub/Event/<Source>/Status/Good with the Source of
+      the request, ReplyTo = MessageId of the request, Number 0 (Good) with
+      SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity
+      class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 39,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-079
+    title: "B1.1.10: Status Event follows a set request"
+    expected: valid
+    reqs: [REQ-MSG-015, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011, REQ-RES-REFDES-009]
+    origin: {kind: guideline, ref: MG B1.1.10}
+    status: draft
+    notes: >-
+      Status event about the Set ReferenceDesignation V-PAY-045: published by the
+      addressed application to Pub/Event/<Source>/Status/Good with the Source of
+      the request, ReplyTo = MessageId of the request, Number 0 (Good) with
+      SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity
+      class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 37,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-080
+    title: "B1.1.10: Status Event follows a delete request"
+    expected: valid
+    reqs: [REQ-BUS-007, REQ-MSG-015, REQ-RES-EVENT-001, REQ-RES-EVENT-002, REQ-RES-EVENT-003, REQ-RES-EVENT-004, REQ-RES-EVENT-005, REQ-RES-EVENT-011, REQ-RES-REFDES-009]
+    origin: {kind: guideline, ref: MG B1.1.10}
+    status: draft
+    notes: >-
+      Status event about the Del ReferenceDesignation V-PAY-046: published by the
+      addressed application to Pub/Event/<Source>/Status/Good with the Source of
+      the request, ReplyTo = MessageId of the request, Number 0 (Good) with
+      SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity
+      class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)). After the deletion
+      of the whole object nothing else is published (REQ-BUS-007).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693520094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693520000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 38,
+            "Timestamp": "2021-12-16T22:25:20.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
               }
             }
           }

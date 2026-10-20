@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed).
+# Constructed payload vectors (C-024, C-027, C-028): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "ff1562f"
@@ -9,7 +9,8 @@ description: >-
   keys (REQ-MSG-046, view of a tolerant receiver). Without mode a vector is
   checked strictly. Since C-027 also invalid variants of golden vectors that
   each violate one rule of the resource content checks (Health, Pagination,
-  MAM, PublicationList).
+  MAM, PublicationList; since C-028 Event, Oi4Pv, SubscriptionList and Get
+  Metadata).
 vectors:
   - id: V-PAY-018
     title: "Pub Health with user-defined keys, strict validation"
@@ -342,4 +343,223 @@ vectors:
             }
           }
         ]
+      }
+
+  - id: V-PAY-081
+    title: "Pub Event of category Status whose EventLevel does not match the StatusCode"
+    expected: invalid
+    violates: [REQ-RES-EVENT-004]
+    reason: "Number is 2147876864 (0x80060000, BadEncodingError, class Bad) on Status/Good with SymbolicId Good."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-063 with Number 0x80060000 (Bad); the EventLevel Good and the
+      SymbolicId Good contradict its severity class (SF-076 (b)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 14,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 2147876864,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-082
+    title: "Pub Event of category Syslog whose EventLevel does not match the PRI"
+    expected: invalid
+    violates: [REQ-RES-EVENT-008]
+    reason: "PRI 13 has the severity Notice (13 % 8 = 5), but the EventLevel is Error."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-064 on Syslog/Error instead of Syslog/Notice (SF-076 (a)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Error"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 625,
+            "WriterGroupName": "Syslog/Error",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 15,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 13,
+              "Category": "CAT_SYSLOG_0",
+              "Details": {
+                "MSG": "FieldDataService[1]: publication interval of Data tag oee set to 1000 ms",
+                "HEADER": "Dec 16 22:25:10 FDS-001-1200-0345"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-083
+    title: "Pub Event whose Category does not match the EventCategory of the topic"
+    expected: invalid
+    violates: [REQ-RES-EVENT-002]
+    reason: "Category CAT_GENERIC_99 on Status/Good."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-063 with Category CAT_GENERIC_99 (SF-076 (c)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 14,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_GENERIC_99",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-084
+    title: "Pub Oi4Pv without the primary value Pv"
+    expected: invalid
+    violates: [REQ-RES-DATA-004]
+    reason: "The Oi4Pv DataSet carries only Sv1; Pv is mandatory."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      Derived from V-PAY-058: Tag/WriterGroupName Oi4Pv, own DataSetWriterId 95,
+      no DataSetClassId (REQ-MSG-011 allows to omit it), Payload with Sv1 only
+      (SF-077 (b)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Oi4Pv"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 95,
+            "WriterGroupName": "Oi4Pv",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 3985,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Sv1": 21.5
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-085
+    title: "Del SubscriptionList without the entry to delete"
+    expected: invalid
+    violates: [REQ-RES-SUBLIST-011]
+    reason: "A Del SubscriptionList carries exactly one entry whose TopicPath identifies the subscription; this one carries none."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-074 with empty Messages (as a Del ReferenceDesignation would be,
+      SF-080 (a)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-086
+    title: "Pub SubscriptionList entry with the unedited TopicPath of B1.1.9"
+    expected: invalid
+    violates: [REQ-RES-SUBLIST-002]
+    reason: "The TopicPath subscribes to Pub/SubscriptionList/<Source>/Data/oee; the WriterGroupName derived from it would be SubscriptionList/Data/oee, not Data/oee."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      The verbatim example of V-PAY-069 (B1.1.9) – the reason for the corrected
+      edit of SF-080 (b).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
+              "Interval": 0,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-087
+    title: "Get Metadata with a filled MetaData"
+    expected: invalid
+    violates: [REQ-RES-META-001]
+    reason: "The MetaData of a Get Metadata is the empty object {}."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-020 with a MetaData that carries a Name.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-metadata",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetWriterId": 93,
+        "WriterGroupName": "oee",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "oee"
+        }
       }
