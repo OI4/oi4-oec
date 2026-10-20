@@ -132,3 +132,42 @@ Points for the PO:
 
 1. Decide the revised **SF-062** (no pagination for `Set`/`Del`; `MaxPacketSize` as trigger), **SF-063** (REST mapping; smaller page size allowed) and **SF-064** (in particular (b) keep "undefined", (e) SemVer allowed, (f) OPC UA semantics and -1 for `RevisionCounter`).
 2. Order (or not) the guideline correction of SF-056 and SF-062 … 068.
+
+## Addendum 2 – Guideline correction, GL-ADR-019 and re-baseline `ca8d1c5` (2026-10-19)
+
+PO input (chat): after the explanation of `Page` 0 (all pages streamed as a series, no browsing; browsing = `Page` n+1) **SF-062, SF-063 and SF-064 reviewed and accepted** (revised proposals of Addendum 1). Order: implement the corrections in the guideline, create a new GL-ADR and describe all changes in it briefly.
+
+Guideline repo `oi4-oec-documentation`, branch `feature/spec-findings` (local commits, not pushed):
+
+- `2fbde83` SF-064 (MG 5) and `9d1b00e` follow-up: the agent had added a `DeviceRevision` "undefined" rule that no finding asked for; withdrawn – the OPC UA ""→"undefined" note covers only `HardwareRevision`/`SoftwareRevision`.
+- `a79e32a` SF-065 (MG 8.3.2), `acf8b3a` SF-066 (MG 8.3.7, 9.1.7, B1.1.7), `1e53e71` SF-067 (MG 8.2.3, 8.3.8, 9.1.8, B1.1.8), `8ee0fdd` SF-068 (MG 8.3.10, 9.1.10, B1.1.10), `fbc0ce8` SF-062 (MG 8.3.11, 8.3.12, 9.1.x list items), `8ac06fc` SF-063 (MG 8.3.11.1/.2, B1.1.11), `f94916e` SF-056 (B1 examples: valid JSON, notes instead of comment-only objects, B1.1.3 Locale helper, B1.1.6 Syslog/Generic values, B1.1.10 IEC 81346 values, B1.1.8 ReferenceDesignation entry).
+- `26c899d` **GL-ADR-019** "Clarify core resources, pagination and locale" (`rfcs_adrs/ADR-019_Clarify_core_resources_pagination_and_locale.md`) – one short section per finding.
+- `ca8d1c5` findings register: SF-056, SF-062 … 068 resolved (commits + GL-ADR-019), no open finding, next free SF-069.
+- Checks: all 73 B1 JSON blocks parse; relative link check 835 links, 0 missing; `yarn build` successful without warnings.
+
+Consistency extras beyond the literal finding scope (agent, G-4.4 – for PO review):
+
+- The Status topic `Status/<EventLevel>` with the link to 8.3.6.1 (SF-067 (g)) is applied in all `Set`/`Del` sections (9.1.3, 9.1.4, 9.1.5, 9.1.8, 9.1.9, 9.1.10), not only in 9.1.8/9.1.10.
+- The `Get`/`Pub` list items of 9.1.3, 9.1.4 and 9.1.9 got the same `PaginationRequest`/`Pagination` wording and links as 9.1.1/2/7/8/10 (SF-062), and `<SubRecource>` → `<Source>`.
+- B1 example values chosen by the agent (SF-056): Syslog `Number` 13 with a real `MSG`/`HEADER`, Generic `Number` 4711 with `Details` `{BufferUsage: 92, BufferSize: 1000}`, IEC 81346 designations from V-PAY-043, ReferenceDesignation `DataSetWriterId` 94.
+
+Workspace re-baseline `c6453c7` → `ca8d1c5` (the guideline text changed):
+
+- `17002e5` checker: Health severity strict (FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0); unit test adjusted.
+- `2f55340` inventory regenerated (1313 items; 48 keys gone, 82 new); all baselines `ca8d1c5`; requirements remapped:
+  - PAG: REQ-PAG-002/004/005/008 on the new 8.3.11 text, **new REQ-PAG-009** "Set and Del are not paginated"; LOC: REQ-LOC-001/002 (field Mandatory, fallback en-US, Locale only with `Get`).
+  - RES-MAM: REQ-002, 006, 008, 009 (retitled "Semantic Versioning or dot-separated four numbers"), 010, 012, 018 (retitled "counts configuration changes of the asset", -1) on the new MG 5; **new REQ-RES-MAM-023** `GlobalAssetId` SHOULD for assets with an AAS.
+  - RES-HEALTH-002 MUST with explicit order (no longer implicit); RES-PROFILE-001/002 (common services, each name once); RES-PUBLIST-002/012/016 now keyword-based (DataSetWriterName = Source, Mode per resource, Set rejected with `Bad`), 011, 025 (ReplyTo); RES-REFDES-006/007/010 (whole object, `Pub/ReferenceDesignation/<Source>`).
+  - All "proposal SF-0xx"/"pending PO decision" wording removed; Locale notes say "only meaningful in a Get".
+  - **Reviewed area MSG touched:** REQ-MSG-021 gains the PublicationList/SubscriptionList exception that GL-ADR-019 added to MG 8.2.3 (SF-067 (a)); without it REQ-MSG-021 would contradict the guideline and V-PAY-038/039. Status stays `reviewed`; please confirm.
+  - `coverage/informative.yaml`: MG-8.3.2-2d1ee307 (new "Details allows … can be retrieved" sentence) informative.
+  - Vectors: V-PAY-004 (**reviewed**, payload unchanged – only `original`/`edits` dropped because B1.1.2 is now valid JSON), 029, 033, 043, 044, 045 verbatim; V-PAY-032/033 with the corrected Profile list, V-PAY-038/039 with the ReferenceDesignation entry and the `FILTER_4` Event entry, V-PAY-046 with the corrected `Del` envelope; notes of V-PAY-047, 049, 052 updated.
+- `6c7cabd` views and coverage report re-rendered.
+- Verification at `ca8d1c5`: `spectool lint` ok (293 requirements, 139 informative, 52 payload vectors), `render -check` ok, `coverage` (C-027 areas: 0 open), `topic -check` ok, `inventory -check -rev ca8d1c5` ok, `go vet`/`go test -count=1 ./...` ok, `gofmt -l` clean.
+- ADR-0001 amendment C-027 (`e2fcb82`), GUARDRAILS G-1.2 (`87b0e9c`).
+
+Points for the PO:
+
+1. Review GL-ADR-019 and the guideline commits (in particular the consistency extras above).
+2. Confirm the change of the reviewed REQ-MSG-021 and of the metadata of V-PAY-004.
+3. Review the views (`res-*.md`, `pag.md`, `loc.md`) and the vectors V-PAY-026 … 052 – then the C-027 areas can move to `reviewed`.
