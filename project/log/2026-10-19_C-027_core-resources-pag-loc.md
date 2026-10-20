@@ -308,3 +308,22 @@ Workspace:
 - Verification at `15eaa8a`: `spectool lint` ok (303 requirements, 141 informative, 54 payload vectors), `render -check` ok, `coverage` (MSG, RES-REFDES, QRY reviewed, 0 open), `inventory -check -rev 15eaa8a` ok.
 
 State: nothing in the catalog or the vectors is `draft` any more. Open: SF-074 (B1.1.5 `DataSetClassId`, not blocking; otherwise a vector edit in C-028). C-027 is complete; next is C-028.
+
+## Addendum 9 – SF-074 decided and implemented (2026-10-20)
+
+PO input (chat): "SF-074 ich akzeptiere deinen Vorschlag (umformulieren)" – the proposal of SF-074 is accepted (guideline correction, not only a vector edit).
+
+Guideline (`oi4-oec-documentation`, branch `feature/spec-findings`, local commits):
+
+- `b45c497` B1.1.5 Metadata: `"DataSetClassId": "1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67"` added to the `MetaData` of "Pub Metadata of an explicit data tag" and "Set Metadata of an explicit data tag" (before `ConfigurationVersion`, as in B2); the sentence "The `DataSet` is defined by the publisher and therefore has no `DataSetClassId`." replaced by "The `DataSet` is defined by the publisher, which also defines its `DataSetClassId` (8.2.1 NetworkMessage); it is the one of B1.1.4 Data." The link points to 8.2.1 NetworkMessage, where the rule for publisher-defined ids lives (SF-048). The `Get` example (empty `MetaData`) is unchanged; the `ua-metadata` envelope has no `DataSetClassId` field (8.2.2), so nothing else changes.
+- `ff1562f` register: SF-074 resolved, open table empty ("No open findings"), next free id stays SF-075.
+- `yarn build` ok.
+
+Workspace:
+
+- `f480717` re-baseline on `ff1562f`: inventory regenerated (1329 items, unchanged – the corrected sentence is not inventoried), `baseline` bumped in all catalog files, ABNF and `topic-patterns.json`.
+- **Change to reviewed vectors (justification):** `lint` reported V-PAY-021/022 as "payload not found verbatim in MG B1.1.5", because the golden source changed. Both payloads were synced verbatim with the corrected guideline (DataSetClassId added), REQ-MSG-012 (DataSetClassId in the DataSetMetaData) added to `reqs`, notes updated. The status stays `reviewed`: the change is exactly the correction the PO accepted with SF-074; no other content changed.
+- `596a6f6` views and coverage report re-rendered.
+- Verification at `ff1562f`: `lint` ok (303 requirements, 141 informative, 54 payload vectors), `render -check` ok, `topic -check` ok, `inventory -check -rev ff1562f` ok, coverage unchanged.
+
+State: GL-ADR-001 … 020; SF-001 … 074 resolved, no open findings, next free id SF-075. C-027 is complete; next is C-028.
