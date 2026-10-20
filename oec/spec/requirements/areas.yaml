@@ -99,7 +99,7 @@ areas:
   - code: RES-META
     title: Resource Metadata
     cycle: C-028
-    status: planned
+    status: drafted
     sections: [MG 8.3.5, MG 9.1.5]
   - code: RES-EVENT
     title: Resource Event

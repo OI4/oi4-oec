@@ -22,7 +22,7 @@ Guideline baseline: `ff1562f`. Source of truth: the YAML files in `oec/spec/requ
 | [QRY](qry.md) | Query (generic helper DataSet of a Get) | C-027 | reviewed | 4 | MG 8.3.13 |
 | RES-CONFIG | Resource Config | C-028 | planned | – | MG 8.3.3, MG 9.1.3 |
 | [RES-DATA](res-data.md) | Resource Data | C-028 | drafted | 12 | MG 8.3.4, MG 9.1.4 |
-| RES-META | Resource Metadata | C-028 | planned | – | MG 8.3.5, MG 9.1.5 |
+| [RES-META](res-meta.md) | Resource Metadata | C-028 | drafted | 7 | MG 8.3.5, MG 9.1.5 |
 | [RES-EVENT](res-event.md) | Resource Event | C-028 | drafted | 11 | MG 8.3.6, MG 9.1.6 |
 | RES-SUBLIST | Resource SubscriptionList | C-028 | planned | – | MG 8.3.9, MG 9.1.9 |
 | BUS | General Message Bus communication | C-028 | planned | – | MG 9 |

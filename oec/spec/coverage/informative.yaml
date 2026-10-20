@@ -326,3 +326,12 @@ items:
     reason: Template of the Pub topic without Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-DATA-008.
   - key: MG-9.1.4-9e1f7cee
     reason: Reference to the examples of MG B1.1.4 (golden payload vectors V-PAY-055 ff.).
+  # --- RES-META (C-028) -----------------------------------------------------
+  - key: MG-9.1.5-95c7bb0b
+    reason: Introduction ("can offer" expresses possibility); the need for Metadata is REQ-CMP-022.
+  - key: MG-9.1.5-175088bf
+    reason: Hint how any application can listen to Metadata ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.5-9f0032c9
+    reason: Template of the Pub topic with Source and Tag; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-META-003.
+  - key: MG-9.1.5-f1506f12
+    reason: Reference to the examples of MG B1.1.5 (golden payload vectors V-PAY-020 … 022 and the Status event vectors of C-028).
