@@ -194,3 +194,40 @@ Guideline commits (branch `feature/spec-findings`):
 Workspace: re-baseline `ca8d1c5` → `2bfc0d9` (`6e69743`) – inventory unchanged except the baseline line (no markdown changed); lint ok (293 requirements, 139 informative, 52 payload vectors), `render -check`, `topic -check`, `inventory -check` ok; coverage of the C-027 areas 0 open. Correction: addendum 3 named `2cb145f` for the vector review – the commit on `main` is `87714d0` (fixed above).
 
 Open for the PO: decide SF-069 (ReferenceDesignation children) and SF-071 (figure topic labels; proposal: fix together with the next guideline correction). Both are not blocking for C-028.
+
+## Addendum 5 – PO decisions SF-069/SF-071, GL-ADR-020 (`ChildrenRequest`) and re-baseline `70b4c01` (2026-10-20)
+
+PO input (chat):
+
+- **MAM checked and accepted** (answer of addendum 4 on the OPC UA origin).
+- **GL-ADR-019 reviewed and accepted** (incl. the consistency extras of addendum 2). **V-PAY-004 reviewed and accepted** (status was already `reviewed`; only the metadata had changed).
+- **SF-069 → option (b) "OneDown"** as a separate GL-ADR; support optional at Level 1 and 2, mandatory at Level 3.
+- **SF-071 → proposed interpretation accepted.**
+
+Guideline repo `oi4-oec-documentation`, branch `feature/spec-findings` (local commits, not pushed):
+
+- `ec76e41` SF-069: new **MG 8.3.13 `ChildrenRequest`** – helper `DataSet` with `Parent` (mandatory, unencoded Identification Link) and `Aspect` (optional, `Function`/`Product`/`Location`; without `Aspect` any aspect matches); only in `Get/ReferenceDesignation` without `Source`, at most once, otherwise ignored; answer = the direct children the application represents (`<Aspect>.Parent.IdentificationLink` equal to `Parent`, comparison per MG 4.1), each in its own `DataSetMessage` on `Pub/ReferenceDesignation` with `ReplyTo`, paginated if needed, `"Messages": []` if none; applications without support ignore it, the requester should check `Parent`. MG 8.2.3: reserved **`DataSetWriterId` 9** (`WriterGroupName` "ChildrenRequest", `DataSetWriterName` = requester). MG 8.3.10: note with the new SHOULD "`Parent.IdentificationLink` should be provided whenever the parent asset has an Identification Link". MG 9.1.10: `Get` list item and section "Get the children of an asset" with payload template. MG 1.3: grading bullet (L1/L2 may, L3 must). B1.1.10: two examples (Get with `ChildrenRequest`, Pub with two matching children).
+- `8fb837e` **GL-ADR-020** "Request the children of a ReferenceDesignation" (`rfcs_adrs/ADR-020_Request_the_children_of_a_ReferenceDesignation.md`).
+- `655e97f` SF-071 figures: 79 labels `Oi4/` → `Oi4v2/` (14 diagrams), 10 × `Status/<StatusCode>` → `Status/<EventLevel>`, typos `<AppIdA>`, `Health/[/…` and `<Tag]]]` fixed; **Figure 9 (MG 9.1, `7158cbf5`) redrawn** as a complete v2 example (topic with encoded Identification Links of `AppId` `provider.com/FieldDataService/FDS-001/1200-0345` and `Source` `groe.mca/DeviceModelB/AC33.447/20443`, tag `Measurement`; v2 `NetworkMessage` with `PublisherId`, publisher-defined `DataSetClassId`, `ReplyTo`, `WriterGroupName`/`DataSetWriterName`) – the proposal only named the topics, but the v1 payload of the figure (`CorrelationId`, `Filter`/`Source` in the `DataSetMessage`) would have contradicted the arrows. 15 PNGs re-exported (draw.io 32.4.1), checked visually.
+- `70b4c01` findings register: SF-069 and SF-071 resolved; **new SF-072 (open)**: B1.1.4 was not adapted to SF-048 – the note says `Data` omits the `DataSetClassId` and "Pub explicit Data tag" has none, although MG 8.2.1 requires the publisher-defined id for `Pub/Data/<Source>/<Tag>` (found while redrawing Figure 9; proposal: add the id, rewrite the note; until then an edit in the B1.1.4 vectors of C-028). Next free id SF-073.
+- Checks: all B1.1.10 JSON blocks parse; `yarn build` successful without broken links or warnings.
+
+Agent decisions (G-4.4, for PO review): `DataSetWriterId` 9 for the helper (the last reserved id without use; 4 to 8 are Actions); `Aspect` optional (default: all aspects); exact `Parent` comparison per MG 4.1; only direct children; the SHOULD on `Parent.IdentificationLink` in MG 8.3.10; the requester SHOULD check `Parent` (fallback for applications without support); grading in MG 1.3 and 8.3.13 only (removed from 9.1.10 to avoid duplicates); B1.1.10 example values (child `groe.mca/DeviceModelB/AC33.447/20443`, `DataSetWriterId` 4799, `=P1.L2.MU1`).
+
+Workspace (re-baseline `2bfc0d9` → `70b4c01`, the guideline text changed):
+
+- `dc1d40e` checker: `DataSetWriterId` 9 = helper `ChildrenRequest` (REQ-MSG-019 instead of "reserved", REQ-MSG-020); content (REQ-RES-REFDES-012: `Parent` non-empty String, `Aspect` enum) and placement (REQ-RES-REFDES-013: only `Get/ReferenceDesignation` without `Source`, at most once); ten new unit-test cases; spec README.
+- `bbb3a51` inventory regenerated (1325 items; MG 8.3.13 new; 8.2.3, 8.3.10, 9.1.10, 1.3 changed); all baselines `70b4c01`; RES-REFDES covers MG 8.3.13.
+  - **Reviewed area MSG touched (justification):** REQ-MSG-019 gains `ChildrenRequest`/9 (its two MG 8.2.3 quotes changed verbatim, old keys gone); REQ-MSG-020 says "1 to 3 and 9 helper DataSets" and its note no longer calls 9 unused; REQ-MSG-023 note "1 to 3 and 9". Without the change REQ-MSG-019/020 would contradict MG 8.2.3 and V-PAY-053. REQ-MSG-019/020 → `draft`, area MSG → `drafted`.
+  - **Reviewed area RES-REFDES touched:** REQ-RES-REFDES-003 allows the `ChildrenRequest` in a `Get` without `Source` (new 9.1.10 list item, key remapped) → `draft`. **New draft REQ-RES-REFDES-011 … 016:** 011 support (L1 MAY, L2 MAY, L3 MUST; MG 1.3 + 8.3.13), 012 fields, 013 placement (implicit, SF-035), 014 answer (matching, direct children, format, empty answer), 015 requester checks `Parent` (SHOULD), 016 `Parent.IdentificationLink` (SHOULD, MG 8.3.10). Area RES-REFDES → `drafted`. The grading REQ stays in RES-REFDES (not CMP), so the reviewed area CMP is not touched.
+  - `coverage/informative.yaml`: MG-8.3.13-a8781b7e (example sentence) informative.
+- `108b8c1` golden vectors **V-PAY-053** (Get with `ChildrenRequest`) and **V-PAY-054** (Pub of the two children) from B1.1.10, verbatim, `draft`.
+- `87f8ff8` views and coverage report re-rendered.
+- Verification at `70b4c01`: `spectool lint` ok (299 requirements, 140 informative, 54 payload vectors), `render -check` ok, `coverage` (MSG and RES-REFDES 0 open), `topic -check` ok, `inventory -check -rev 70b4c01` ok, `go vet`/`go test -count=1 ./...` ok, `gofmt -l` clean.
+
+Points for the PO:
+
+1. Review GL-ADR-020 and `ec76e41` (8.3.13, 8.2.3, 8.3.10, 9.1.10, 1.3, B1.1.10) – in particular the agent decisions above.
+2. Review the redrawn Figure 9 (MG 9.1) and the other figure fixes of `655e97f`.
+3. Review the draft entries: REQ-MSG-019/020, REQ-RES-REFDES-003, REQ-RES-REFDES-011 … 016 (views `msg.md`, `res-refdes.md`) and V-PAY-053/054 (`payload-guideline.md`) – then MSG and RES-REFDES go back to `reviewed`.
+4. Decide SF-072 (B1.1.4 `DataSetClassId`; not blocking, otherwise handled as a vector edit in C-028).
