@@ -254,3 +254,41 @@ Points for the PO:
 1. Decide SF-073 (recommendation (c) generic `Query`; GL-ADR-021 amending GL-ADR-020 or amending GL-ADR-020 in place) and give the order to implement it.
 2. Order for SF-072 in the guideline (B1.1.4) – now together with SF-073, or later.
 3. After that: review the remaining draft entries (REQ-MSG-019/020, REQ-RES-REFDES-003, 011 … 016, V-PAY-053/054).
+
+## Addendum 7 – SF-073 generic `Query` (GL-ADR-020 amended), SF-072 implemented, re-baseline `15eaa8a` (2026-10-20)
+
+PO input (chat): **SF-073 option (c) reviewed and accepted**, recorded **directly in GL-ADR-020** (no new GL-ADR); **SF-072 proposal accepted** (implement it).
+
+Guideline repo `oi4-oec-documentation`, branch `feature/spec-findings` (local commits, not pushed):
+
+- `30fa928` SF-073: new folder `8-3.13 Query` – **MG 8.3.13 Query** (generic: query parameters of a `Get` like a REST query string, defined per resource; only with `Get` of a resource with a defined `Query`, under its conditions, at most once per `NetworkMessage`, otherwise ignored; reserved `DataSetWriterId` 9, `WriterGroupName` `Query`; undefined fields ignored; an unsupported `Query` is ignored and the `Get` answered as without it, the requester should check; support defined per resource) and **MG 8.3.13.1 Query of ReferenceDesignation** (former 8.3.13 `ChildrenRequest`, same OneDown semantics: `Parent`, `Aspect`, only without `Source` – with `Source` ignored, answer, L1/L2 may, L3 must). 8.2.3 (id 9 = `Query`), 8.3.10 note, 1.3 grading, 9.1.10 and B1.1.10 (`WriterGroupName` "Query") updated.
+- `c2619e6` GL-ADR-020 amended in place: title "… with a generic Query", context (reserved ids exhausted), decision driver, carrier options a/b/c, decision outcome, consequences (one id for all resource queries; OPC UA caveat), implementation notes with an amendment note.
+- `264fc2c` SF-072: B1.1.4 note rewritten (no predefined id, the publisher defines one per `DataSet` class, a `Get` omits it if unknown); publisher-defined `DataSetClassId` `1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67` added to the three `Pub` examples.
+- `15eaa8a` findings register: SF-072 and SF-073 resolved; **new SF-074 (open)**: B1.1.5 `Metadata` of the same `oee` tag says "has no `DataSetClassId`" and its `MetaData` lack it (found while implementing SF-072; proposal: add the id of B1.1.4 to the `MetaData` as in B2, rewrite the sentence; until then an edit in the B1.1.5 vectors of C-028). Next free id SF-075.
+- Checks: JSON blocks of B1.1.4/B1.1.10 parse; `yarn build` successful without broken links or warnings.
+
+Agent decisions (G-4.4, for PO review):
+
+- Structure like Pagination: folder `8-3.13 Query` with `index.md` (generic) and one file per resource (8.3.13.1); name "Query of ReferenceDesignation".
+- The resource-specific condition of ReferenceDesignation reads "with `Source` it is ignored by the receiver" (before: covered by "in any other `NetworkMessage`").
+- SF-072 beyond the proposal: the `DataSetClassId` was also added to "Pub all Data tags of an explicit asset" and "Pub Data tags of all assets related to this application", because their shown `DataSetMessages` are all of the class `oee` and 8.2.1 then requires it; their notes explain that it is omitted for mixed classes.
+- GUID `1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67` for the class `oee` (random v4).
+- 8.2.1 still names "helper `DataSets` such as `PaginationRequest`, `Pagination` or `Locale`" (non-exhaustive) – left unchanged to keep the reviewed area MSG stable.
+
+Workspace (re-baseline `70b4c01` → `15eaa8a`, the guideline text changed):
+
+- `5160fbc` checker: id 9 = `Query` (REQ-MSG-019); generic placement → **REQ-QRY-001** (only `Get` of a resource with a defined `Query`, at most once); per-resource query table, ReferenceDesignation only without `Source` (REQ-RES-REFDES-013) with `Parent`/`Aspect` (REQ-RES-REFDES-012); tests (new Pub case, tolerant mode ignores undefined query parameters); spec README.
+- `08c9744` inventory regenerated (1329 items); all baselines `15eaa8a`.
+  - **New area QRY** (MG 8.3.13, `drafted`) with draft **REQ-QRY-001 … 004** (placement; undefined query parameters ignored – implicit; unsupported `Query` ignored and answered as without it – implicit; requester checks the answer – SHOULD). The generic rules get their own area like PAG/LOC, so that later resource queries (e.g. `Event`) do not land in RES-REFDES; the query parameters stay in the area of the resource (RES-REFDES now covers MG 8.3.13.1 instead of 8.3.13).
+  - **Reviewed area MSG touched again (justification):** REQ-MSG-019 names `Query` (MG 8.2.3 quotes changed verbatim, keys remapped); REQ-MSG-020 note. Both stay `draft`.
+  - RES-REFDES: REQ-RES-REFDES-003, 011 … 016 remapped to the `Query` of ReferenceDesignation (013 now only "without `Source`", the generic part moved to REQ-QRY-001); still `draft`.
+  - `coverage/informative.yaml`: the example key moved to MG 8.3.13.1; MG-8.3.13-5c648644 (purpose / REST analogy, "can") informative.
+  - **V-PAY-053** verbatim again with `WriterGroupName` "Query" (reqs + REQ-QRY-001); V-PAY-054 unchanged.
+- `3ff64ac` views (new `qry.md`) and coverage report re-rendered.
+- Verification at `15eaa8a`: `spectool lint` ok (15 areas, 303 requirements, 141 informative, 54 payload vectors), `render -check` ok, `coverage` (MSG, RES-REFDES, QRY 0 open), `topic -check` ok, `inventory -check -rev 15eaa8a` ok, `go vet`/`go test -count=1 ./...` ok, `gofmt -l` clean.
+
+Points for the PO:
+
+1. Review `30fa928` (8.3.13 Query, 8.3.13.1, 8.2.3, 8.3.10, 1.3, 9.1.10, B1.1.10), the amended GL-ADR-020 (`c2619e6`) and SF-072 in B1.1.4 (`264fc2c`), in particular the agent decisions above.
+2. Review the draft entries: REQ-QRY-001 … 004 (view `qry.md`), REQ-MSG-019/020 (`msg.md`), REQ-RES-REFDES-003, 011 … 016 (`res-refdes.md`), V-PAY-053/054 (`payload-guideline.md`) – then MSG, RES-REFDES and QRY become `reviewed`.
+3. Decide SF-074 (B1.1.5 `DataSetClassId`; not blocking, otherwise a vector edit in C-028).
