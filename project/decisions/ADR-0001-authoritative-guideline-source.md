@@ -179,3 +179,13 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `655e97f` – figures: `Oi4v2/` prefix, `Status/<EventLevel>`, typos, Figure 9 of MG 9.1 redrawn as a v2 example; 15 PNGs re-exported (SF-071).
   - `70b4c01` – findings register: SF-069 and SF-071 resolved, SF-072 (B1.1.4 `DataSetClassId`) open, next free id SF-073.
 - GL-ADR-001 … 020; SF-001 … 071 resolved, SF-072 open (not blocking); next free id SF-073.
+
+## Amendment C-027 review, part 3 (2026-10-20, guideline baseline `15eaa8a`)
+
+- The baseline is now `15eaa8a` on branch `feature/spec-findings` (PO decisions SF-073 option (c) directly in GL-ADR-020 and SF-072 as proposed; local commits):
+  - `dd2628c` – findings register: SF-072 decided, SF-073 open (register only).
+  - `30fa928` – new MG 8.3.13 `Query` (generic helper `DataSet`, reserved `DataSetWriterId` 9) and 8.3.13.1 Query of ReferenceDesignation (replaces `ChildrenRequest`); 8.2.3, 8.3.10, 1.3, 9.1.10 and B1.1.10 updated (SF-073).
+  - `c2619e6` – GL-ADR-020 amended in place ("Request the children of a ReferenceDesignation with a generic Query").
+  - `264fc2c` – B1.1.4: publisher-defined `DataSetClassId` in the `Pub` examples, note rewritten (SF-072).
+  - `15eaa8a` – findings register: SF-072 and SF-073 resolved, SF-074 (B1.1.5 `DataSetClassId`) open, next free id SF-075.
+- GL-ADR-001 … 020; SF-001 … 073 resolved, SF-074 open (not blocking); next free id SF-075.
