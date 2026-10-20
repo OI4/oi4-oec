@@ -40,13 +40,13 @@ var resourceRules = map[string]resourceRule{
 	"ReferenceDesignation": {get: "REQ-RES-REFDES-003", set: "REQ-RES-REFDES-006", del: "REQ-RES-REFDES-007", content: (*checker).referenceDesignation},
 }
 
-// commonServices are the services of MG 7.5.2 a Profile may list (SF-066 (a)).
+// commonServices are the services of MG 7.5.2 a Profile may list (MG 8.3.7).
 var commonServices = map[string]bool{"NewDataSetWriterId": true}
 
 var (
 	domainPattern = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$`)
-	// Severity of Table 3 (MG 8.3.2): the two low-severity states share one rank, as their order is open (SF-065 (a)).
-	healthRank     = map[string]int{"NORMAL_0": 0, "MAINTENANCE_REQUIRED_4": 1, "CHECK_FUNCTION_2": 1, "OFF_SPEC_3": 2, "FAILURE_1": 3}
+	// Severity order of MG 8.3.2: FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0.
+	healthRank     = map[string]int{"NORMAL_0": 0, "MAINTENANCE_REQUIRED_4": 1, "CHECK_FUNCTION_2": 2, "OFF_SPEC_3": 3, "FAILURE_1": 4}
 	configValues   = map[string]bool{"NONE_0": true, "MODE_1": true, "INTERVAL_2": true, "MODE_AND_INTERVAL_3": true}
 	filteredLists  = map[string]bool{"Data": true, "Metadata": true, "Config": true, "Event": true}
 	publishingMode = map[string]modeFlags{
