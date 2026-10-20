@@ -231,3 +231,26 @@ Points for the PO:
 2. Review the redrawn Figure 9 (MG 9.1) and the other figure fixes of `655e97f`.
 3. Review the draft entries: REQ-MSG-019/020, REQ-RES-REFDES-003, REQ-RES-REFDES-011 … 016 (views `msg.md`, `res-refdes.md`) and V-PAY-053/054 (`payload-guideline.md`) – then MSG and RES-REFDES go back to `reviewed`.
 4. Decide SF-072 (B1.1.4 `DataSetClassId`; not blocking, otherwise handled as a vector edit in C-028).
+
+## Addendum 6 – PO review of GL-ADR-020 and Figure 9, SF-072 decided, SF-073 generic `Query` helper (2026-10-20)
+
+PO input (chat):
+
+- **SF-072 reviewed and accepted** (B1.1.4: add the publisher-defined `DataSetClassId`, rewrite the note).
+- **GL-ADR-020 reviewed and accepted.**
+- **Figure 9 reviewed and accepted.**
+- Question: since a `DataSetWriterId` is reserved anyway – could there be **one general `Get` helper with one `DataSetWriterId` whose content is resource-specific**? Otherwise the reserved ids could become scarce. REQ-MSG-019 depends on it.
+
+Analysis (agent): after GL-ADR-020 every reserved id is in use (MG 8.2.3/8.4: 0 invalid, 1 `PaginationRequest`, 2 `Pagination`, 3 `Locale`, 4 … 7 reserved for future common services, 8 `NewDataSetWriterId`, 9 `ChildrenRequest`). Widening the range is breaking (applications start at 10; B1 uses 55, 74, 93, 94). A generic helper is possible: `DataSetWriterId` 9 with `WriterGroupName` "Query" whose `Payload` carries the query parameters of the addressed resource (like the query string of a REST `GET`), `ChildrenRequest` becomes the `Query` of `ReferenceDesignation` (`Parent`, `Aspect`). Caveat: OPC UA expects one `DataSetMetaData` per `DataSetWriterId`; acceptable because helpers have no `DataSetMetaData` and ids 1 … 3 are already shared by all resources. `PaginationRequest`, `Pagination` and `Locale` stay (resource-independent).
+
+Guideline repo `oi4-oec-documentation`, branch `feature/spec-findings` (local, not pushed):
+
+- `dd2628c` findings register: SF-072 → `decided` (implementation in the guideline on PO order, until then a vector edit in C-028); **new SF-073 (open)** with options (a) widen the range – rejected, (b) id 9 for a family of named helpers, (c) generic `Query` – proposed, as GL-ADR-021 amending GL-ADR-020. Next free id SF-074. Register-only commit: no re-baseline (ADR-0001 amendment C-018), workspace baseline stays `70b4c01`.
+
+Workspace: no catalog change. REQ-MSG-019/020, REQ-RES-REFDES-003, 011 … 016 and V-PAY-053/054 stay `draft` until SF-073 is decided (under (c) REQ-MSG-019, REQ-RES-REFDES-003/011 … 014, the checker (`helperNames`, `content.go` case 9) and V-PAY-053 change; the OneDown semantics of GL-ADR-020 stay).
+
+Points for the PO:
+
+1. Decide SF-073 (recommendation (c) generic `Query`; GL-ADR-021 amending GL-ADR-020 or amending GL-ADR-020 in place) and give the order to implement it.
+2. Order for SF-072 in the guideline (B1.1.4) – now together with SF-073, or later.
+3. After that: review the remaining draft entries (REQ-MSG-019/020, REQ-RES-REFDES-003, 011 … 016, V-PAY-053/054).
