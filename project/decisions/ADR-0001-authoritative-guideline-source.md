@@ -196,3 +196,11 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `b45c497` – B1.1.5: publisher-defined `DataSetClassId` in the `MetaData` of the `Pub`/`Set` examples, sentence rewritten (SF-074).
   - `ff1562f` – findings register: SF-074 resolved, no open findings, next free id SF-075.
 - GL-ADR-001 … 020; SF-001 … 074 resolved, none open; next free id SF-075.
+
+## Amendment C-028 review (2026-10-21, guideline baseline `b2f0fe7`)
+
+- The baseline is now `b2f0fe7` on branch `feature/spec-findings` (PO decisions SF-075 … SF-081 as proposed; local commits):
+  - `dd064fe` SF-075 (Event payload structure), `60d20f8` SF-076 (Event level mappings), `491a028` SF-077 (`Data`/`Oi4Pv`), `135ce3a` SF-078 (`Data`/`Metadata` templates), `81d67d7` SF-079 (`Set`/`Del` header), `2656353` SF-080 (`SubscriptionList`), `21c563a` SF-081 (`Filter` in `Set`/`Del`).
+  - `b2f0fe7` – findings register: SF-075 … 081 resolved, no open findings, next free id SF-082.
+- No new GL-ADR (none ordered by the PO).
+- GL-ADR-001 … 020; SF-001 … 081 resolved, none open; next free id SF-082.
