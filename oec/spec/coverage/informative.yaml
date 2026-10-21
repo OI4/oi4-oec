@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "c2be26b"
+baseline: "5bc2e85"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -151,9 +151,9 @@ items:
   - key: MG-8-1bac3dc2
     reason: History – Actions replace the former message type MSG; the rule is REQ-ACT-001.
   - key: MG-8.1.3-03402684
-    reason: Introduction of the non-exhaustive example Figure 6 (ua-action-request); the example is a golden payload vector (V-PAY-*).
+    reason: Introduction of the non-exhaustive example Figure 7 (ua-action-request); the example is a golden payload vector (V-PAY-*).
   - key: MG-8.1.3-adfb22f6
-    reason: Introduction of the non-exhaustive example Figure 7 (ua-action-response); the example is a golden payload vector (V-PAY-*).
+    reason: Introduction of the non-exhaustive example Figure 8 (ua-action-response); the example is a golden payload vector (V-PAY-*).
   - key: MG-8.1.4-229ec879
     reason: Consequence of the fixed content masks for a subscriber ("can rely"); the masks are REQ-MSG-004, REQ-MSG-017 and REQ-ACT-003.
   - key: MG-8.2-cd7f9f5e

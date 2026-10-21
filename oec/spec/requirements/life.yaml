@@ -10,7 +10,7 @@
 # Drafted in C-025; keywords, envelope and semantics added to the guideline in
 # C-026 (SF-057, SF-058, SF-059); PO review of C-026: SF-061.
 area: LIFE
-baseline: "c2be26b"
+baseline: "5bc2e85"
 requirements:
   # --- Birth message (MG 6.3.3) ---------------------------------------------
   - id: REQ-LIFE-001

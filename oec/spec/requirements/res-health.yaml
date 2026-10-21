@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-HEALTH
-baseline: "c2be26b"
+baseline: "5bc2e85"
 requirements:
   # --- DataSet content (MG 8.3.2) ---------------------------------------------
   - id: REQ-RES-HEALTH-001
@@ -28,7 +28,7 @@ requirements:
     inventory: [MG-8.3.2-4017a916, MG-8.3.2-8f5d5ddc, MG-8.3.2-c6d90f6d, MG-8.3.2-619204cc, MG-8.3.2-8e123ade, MG-8.3.2-729cc64d, MG-8.3.2-ed805854, MG-8.3.2-d2f6bc0e, MG-8.3.2-1f9968e2, MG-8.3.2-3ccbe376, MG-8.3.2-24c98eb7]
     status: reviewed
     notes: >-
-      Field presence and types per REQ-CMP-025/026; the rows of Table 3 define
+      Field presence and types per REQ-CMP-025/026; the rows of Table 13 define
       the enumeration values. HealthScore is independent of Health (MG 8.3.2,
       e.g. 30 % with NORMAL_0).
 
@@ -47,13 +47,13 @@ requirements:
     refs: [MG 8.3.2, SF-065]
     quotes:
       - ref: MG 8.3.2
-        text: The Health of the asset must reflect the most severe status of all Details, according to the severity defined in Table 3.
+        text: The Health of the asset must reflect the most severe status of all Details, according to the severity defined in Table 13.
       - ref: MG 8.3.2
         text: The order of severity is FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0
       - ref: MG 8.3.2
         text: Statuses with lower severity remain visible in Details, even if they are superimposed by a more severe status.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.2-58eaca8c, MG-8.3.2-2a0f2648]
+    inventory: [MG-8.3.2-d6f8e58c, MG-8.3.2-2a0f2648]
     status: reviewed
     notes: >-
       Order of the two low-severity states (CHECK_FUNCTION_2 before
@@ -63,7 +63,7 @@ requirements:
     title: NE107 symbols and colors for the Health states
     statement: >-
       An application that displays Health states uses the symbol and color
-      definitions of NAMUR NE107 (Table 3: green, red, orange, yellow, blue).
+      definitions of NAMUR NE107 (Table 13: green, red, orange, yellow, blue).
     keyword: SHOULD
     domain: messaging
     levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
@@ -72,9 +72,9 @@ requirements:
     refs: [MG 8.3.2]
     quotes:
       - ref: MG 8.3.2
-        text: The best practice is to combine the five states NORMAL_0, FAILURE_1, CHECK_FUNCTION_2, OFF_SPEC_3 and MAINTENANCE_REQUIRED_4 with the symbol/color definitions made by NAMUR NE107 (Table 3).
+        text: The best practice is to combine the five states NORMAL_0, FAILURE_1, CHECK_FUNCTION_2, OFF_SPEC_3 and MAINTENANCE_REQUIRED_4 with the symbol/color definitions made by NAMUR NE107 (Table 13).
     verification: [manual]
-    inventory: [MG-8.3.2-2a55d93d]
+    inventory: [MG-8.3.2-b75c4616]
     status: reviewed
 
   - id: REQ-RES-HEALTH-004
