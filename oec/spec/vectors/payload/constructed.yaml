@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21).
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "5bc2e85"
@@ -10,7 +10,7 @@ description: >-
   checked strictly. Since C-027 also invalid variants of golden vectors that
   each violate one rule of the resource content checks (Health, Pagination,
   MAM, PublicationList; since C-028 Event, Oi4Pv, SubscriptionList and Get
-  Metadata).
+  Metadata; since C-029 Config).
 vectors:
   - id: V-PAY-018
     title: "Pub Health with user-defined keys, strict validation"
@@ -562,4 +562,826 @@ vectors:
         "MetaData": {
           "Name": "oee"
         }
+      }
+
+  - id: V-PAY-103
+    title: "Pub Config with a group name starting with a digit"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-004]
+    reason: 'Group and configuration object names start with a letter or an underscore.'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-091 with the group network renamed to 1network.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "1network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-104
+    title: "Set Config with a Value that is not a string"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-007]
+    reason: 'Value is always transmitted as a string.'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-094 with the port Value as the JSON number 80.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "ip_address": {
+                  "Value": "192.168.1.1"
+                },
+                "subnet-mask": {
+                  "Value": "255.255.255.0"
+                },
+                "port": {
+                  "Value": 80
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-105
+    title: "Pub Config with a Value that does not represent its Type"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-007]
+    reason: 'The Value of a Number configuration object represents a number.'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-091 with the port Value "eighty" (Type Number).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "eighty"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-106
+    title: "Pub Config with a configuration object without Type"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-002]
+    reason: 'Every configuration object of a Pub Config carries Type, Value and Name.'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-091 without the Type of port.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-107
+    title: "Pub Config with an undefined Type"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-006]
+    reason: 'Type is one of Boolean, Number, String, DateTime and ByteString.'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-091 with the Type Integer for port.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Integer",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-108
+    title: "Set Config with a Value outside its Validation"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-008]
+    reason: 'A Value satisfies the Validation of its configuration object (port: Max 65535).'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-095 with the port Value 70000.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": "192.168.1.1"
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": "255.255.255.0"
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "70000"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-109
+    title: "Set Config with a group without configuration object"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-003]
+    reason: 'Every group of a Set Config carries at least one configuration object.'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-094 with an empty group network.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {}
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-110
+    title: "Get Config carrying a Config DataSetMessage"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-016]
+    reason: 'A Get Config carries no Config DataSetMessage.'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-088 with the DataSetMessage of V-PAY-094.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "ip_address": {
+                  "Value": "192.168.1.1"
+                },
+                "subnet-mask": {
+                  "Value": "255.255.255.0"
+                },
+                "port": {
+                  "Value": "80"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-111
+    title: "Set Config with two DataSetMessages"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-019]
+    reason: 'A Set Config carries exactly one DataSetMessage, that of the addressed DataSet.'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-094 with its DataSetMessage duplicated.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "ip_address": {
+                  "Value": "192.168.1.1"
+                },
+                "subnet-mask": {
+                  "Value": "255.255.255.0"
+                },
+                "port": {
+                  "Value": "80"
+                }
+              }
+            }
+          },
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "ip_address": {
+                  "Value": "192.168.1.1"
+                },
+                "subnet-mask": {
+                  "Value": "255.255.255.0"
+                },
+                "port": {
+                  "Value": "80"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-112
+    title: "Pub Config with an undefined key in a configuration object (strict)"
+    expected: invalid
+    violates: [REQ-MSG-001]
+    reason: 'Strict validation reports every key that is not defined for the object (SF-052).'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-091 with the undefined key Scale in port; V-PAY-113 is the tolerant view.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "",
+                  "Scale": "1"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-113
+    title: "Pub Config with an undefined key in a configuration object (tolerant)"
+    expected: valid
+    reqs: [REQ-MSG-046, REQ-RES-CONFIG-002]
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-112 checked tolerantly: the receiver ignores the undefined key Scale (REQ-
+      MSG-046).
+    mode: tolerant
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "",
+                  "Scale": "1"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
       }
