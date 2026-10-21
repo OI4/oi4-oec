@@ -128,3 +128,47 @@ PO request from the model-settings retro (point 3: automate the recurring bookke
   - `rebaseline -rev <commit> [-n] [-force]` – requires the commit to be checked out in the guideline repository and `docs/`/`rfcs_adrs/` to be clean; stops if only the register changed since the baseline (ADR-0001 amendment C-018). Replaces `baseline` in all catalog files and the `topic.abnf` header, regenerates inventory, topic patterns, views and coverage, runs `lint`, and lists the lines of AGENTS/STATUS/GUARDRAILS/ROADMAP/`oec/spec/README.md` that still name the old baseline (prose stays manual).
 - Verification: unit tests (`go test ./...` green, `vet`/`gofmt` clean). Dry runs on the workspace: `rebaseline -n -rev 594aaa9` → no re-baseline needed (register-only); `review -n matrix` → 26 payload columns; `review -n BUS` refused (draft requirements). In a temporary copy with a test guideline commit: full `rebaseline` (only baseline lines and generated files changed; lint reported V-PAY-021 as no longer verbatim, as expected) and a full `review` of all C-028 drafts (88 entries, 5 areas, 26 matrix rows; lint green; only status lines changed). Copy removed.
 - Docs: `oec/spec/README.md` (`68dfbbf`), STATUS next step 3 (`737c320`).
+
+## Addendum 1 – PO review (2026-10-21)
+
+PO feedback: views `res-event.md`, `res-data.md`, `res-meta.md`, `res-sublist.md`, `bus.md` reviewed and accepted; matrix payload columns (`matrix/view/method-resource.md`) reviewed and accepted; V-PAY-020 … 022 and V-PAY-055 … 087 reviewed; REQ-PAG-005 reviewed; the MQTT note and the cycle pointers in `informative.yaml` are fine. SF-075 … SF-081 accepted as proposed, to be implemented.
+
+- `spectool review` set the 55 requirements, the five areas (RES-EVENT, RES-DATA, RES-META, RES-SUBLIST, BUS → `reviewed`), 26 matrix payload columns and the 33 vectors V-PAY-055 … 087 to `reviewed`; V-PAY-020 … 022 and REQ-PAG-005 were already `reviewed` (the PO confirmed the C-028 changes). Views rendered (`87506ac`).
+
+## Addendum 2 – SF-075 … SF-081 in the guideline, re-baseline on `b2f0fe7` (2026-10-21)
+
+Guideline repository `oi4-oec-documentation`, branch `feature/spec-findings`, local commits (the PO ordered the guideline correction; no new GL-ADR – none was ordered):
+
+- `dd064fe` SF-075 – `SymbolicId` (8.3.6.1) and `MSG`/`HEADER` (8.3.6.2) are keys under `Details`; a `Syslog` event must not contain `Description`; B1.1.6 note says `<EventLevel>`.
+- `60d20f8` SF-076 – 8.3.6: `<EventCategory>` ↔ `Category`; 8.3.6.1: `<EventLevel>` = severity class of the StatusCode (bits 30–31; the reserved class 3 counts as `Bad`); 8.3.6.2: PRI 0 … 191, `<EventLevel>` = RFC 5424 severity name of PRI modulo 8; 9.1.6 aligned.
+- `491a028` SF-077 – Part 14-7.2.5.4 instead of 7.2.3/Table 152; `Sv<n>` only if the asset provides it, no other keys than `Pv` and `Sv<n>`; description = `Description` of the field in the metadata; `Oi4Pv` also in the aggregated publications.
+- `135ce3a` SF-078 – 9.1.4 `Pub` templates carry `DataSetClassId`; `Set` templates of 9.1.4/9.1.5 use the requester as `PublisherId`; `Oi4Pv` `Set` template without `correlationId`, `ReplyTo` like the other templates.
+- `81d67d7` SF-079 – 8.2.3: a `DataSetMessage` in a `Set`/`Del` request carries the `DataSetWriterId` of the addressed `DataSet` as published by the addressed application (for `PublicationList`/`SubscriptionList` the common one), the `Source` as `DataSetWriterName`, the `Filter` as `WriterGroupName` (empty string for resources without `Filter`) and no `SequenceNumber`; B1.1.4 "Set explicit Data tag" without `SequenceNumber`.
+- `2656353` SF-080 – 8.3.9/9.1.9/8.2.3/B1.1.9: `TopicPath` is the subscribed topic filter (wildcards allowed, concrete resource level), entry identity `Source` + `TopicPath`, `WriterGroupName` derived from the `TopicPath`, `Interval` is a processing interval (default 0, on arrival), `Config` read only (`NONE_0` neither changed nor deleted, `CONF_1` both), `Set`/`Del` rules and the republication after `Del`; B1.1.9 entries subscribe to `…/Pub/Data/<FDS>/oee`.
+- `21c563a` SF-081 – 9.1: `Source` and – for resources with a `Filter` – the `Filter` are required in the `Set`/`Del` topic.
+- `b2f0fe7` – register: SF-075 … 081 resolved (Closed table ascending), no open findings, next free id SF-082.
+- Checks: all 91 JSON blocks of B1 parse; `yarn build` ok (`.yarn/install-state.gz` is a local install artifact, not committed).
+
+Agent decisions while wording the corrections (G-4.4, for PO confirmation):
+
+- SF-076: the mapping rules are placed in 8.3.6/8.3.6.1/8.3.6.2 (where `Number`/`Category` are defined) instead of the topic chapter 7.7.
+- SF-077: added "Secondary values are only present if the asset provides them" next to the relaxed `Sv<n>` requirement.
+- SF-078: placeholder `<(meta)data specific GUID>` reused from the `Set` templates; requester `PublisherId` written as `<IdentificationLink>`; `ReplyTo` of the `Oi4Pv` `Set` template aligned with the other `Set` templates.
+- SF-079: the `Filter`/`WriterGroupName` sentence also covers resources without `Filter` (empty string).
+- SF-080: the 9.1.9 `Pub` template keeps `<IdentificationLink>` as `DataSetWriterName` placeholder (consistent with the other templates) plus the explicit note "The `DataSetWriterName` of each entry is its `Source`"; added "The `Config` of an entry is set by the application; an entry created via `Set` is freely configurable (`CONF_1`)" (otherwise `Set` could create an entry nobody may delete); the `WriterGroupName` rule is repeated in 8.2.3 next to the other `WriterGroupName` rules; (d) needed no change of the 9.1 index – 9.1 and 9.1.9 are consistent after the 9.1.9 rewrite.
+
+Workspace:
+
+- `9ba9084` re-baseline: `spectool rebaseline -rev b2f0fe7` – baseline in all catalog files, inventory (1344 items) and coverage report regenerated; areas outside C-028 unchanged in content.
+- `645679f` requirements: lint reported 33 stale or missing quotes/keys, all in the C-028 areas; remapped and requoted. Statements with new normative content went back to `draft` for PO review:
+  - REQ-RES-EVENT-004 – StatusCode class 3 is treated as `Bad` (SF-076).
+  - REQ-BUS-010 – empty `WriterGroupName` for resources without `Filter`, no `SequenceNumber` in `Set`/`Del` (SF-079); verification adds `schema`, `d7-validate`.
+  - REQ-RES-SUBLIST-002 – the resource level of the `TopicPath` is concrete (SF-080).
+  - REQ-RES-SUBLIST-004 – `Config` read only and set by the application, entries created via `Set` are `CONF_1`, a `Config` change is rejected (SF-080).
+  All other remapped requirements only got new quotes/inventory keys/notes (wording identical in meaning) and stay `reviewed`. Areas stay `reviewed` (the review command refuses only on the way to `reviewed`; the four drafts are listed for the PO).
+- `f23bfc5` vectors: V-PAY-061 without `SequenceNumber` (B1.1.4 "Set explicit Data tag" after SF-079); V-PAY-069 … 072, 074 without `original`/`edits` (B1.1.9 now carries the concrete `TopicPath`s, SF-080 (b)) – verbatim again, payload content identical to the reviewed edited form, so they stay `reviewed`; V-PAY-086 title/notes point to the former B1.1.9 `TopicPath` (guideline `ff1562f`).
+- `b2bc1fb` checker: StatusCode class 3 on `Status/Bad` is valid (was an error); a `SequenceNumber` in a `Set`/`Del` `DataSetMessage` is reported as REQ-BUS-010; a SubscriptionList `TopicPath` in the OEC namespace (`Oi4v2`, `+`, `#` as first level) with a non-concrete resource level is reported as REQ-RES-SUBLIST-002 (topic filters outside the OEC namespace are not checked). Tests added.
+- `3a3a85b` views.
+- Checks: `go vet ./...`, `gofmt -l .` (empty), `go test ./...` ok; `spectool lint` ok (20 area files, 358 requirements, 171 informative items; 66 combinations; vectors topic 146, IL 29, dnp 15, oi4identifier 13, payload 87); `render -check`, `coverage -check` (C-028 areas 0 open), `topic -check`, `inventory -check -rev b2f0fe7` (1344 items) ok.
+
+For the PO: review REQ-RES-EVENT-004, REQ-BUS-010, REQ-RES-SUBLIST-002, REQ-RES-SUBLIST-004 (views `res-event.md`, `bus.md`, `res-sublist.md`) and confirm the agent decisions above.
