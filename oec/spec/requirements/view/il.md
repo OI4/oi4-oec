@@ -496,7 +496,7 @@ The ManufacturerUri of an Oi4Identifier is written in lowercase; a generator con
 > Uppercase characters must not be used.
 > — MG 4.3.1
 
-Notes: Conversion by the generator per PO decision SF-043 (d) (C-020) – MG 4.3.1 note and A3 Table 5 (Example.com → example.com).
+Notes: Conversion by the generator per PO decision SF-043 (d) (C-020) – MG 4.3.1 note and A3 Table 8 (Example.com → example.com).
 
 ## REQ-IL-024
 
@@ -676,7 +676,7 @@ The dnp-encoding keeps the characters A-Z, a-z, 0-9, "-", ".", "_" and "~" and w
 > This also applies to control characters and to all characters outside US-ASCII, which must not be used in an Identification Link either (e.g. the tabulator becomes ,09, the character ä with the UTF-8 octets C3 A4 becomes ,C3,A4).
 > — MG A3
 
-Notes: Defines how the encoding works when it is used; whether it is used is REQ-IL-033 (MAY, SF-043 (e), C-019). Table 4 of MG A3 is the ASCII excerpt of the general rule for all UTF-8 octets (PO decision SF-043 (a), (b), C-020). Reference implementation il.DnpEncode; vectors V-DNP-….
+Notes: Defines how the encoding works when it is used; whether it is used is REQ-IL-033 (MAY, SF-043 (e), C-019). Table 7 of MG A3 is the ASCII excerpt of the general rule for all UTF-8 octets (PO decision SF-043 (a), (b), C-020). Reference implementation il.DnpEncode; vectors V-DNP-….
 
 ## REQ-IL-033
 
