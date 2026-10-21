@@ -113,6 +113,11 @@ func TestCleanInline(t *testing.T) {
 	if got := CleanInline(in); got != want {
 		t.Fatalf("got %q want %q", got, want)
 	}
+	code := "{\n  \"Value\": \"********\"\n}"
+	section := SectionTexts([]File{{Doc: "MG", Section: "9.9", Lines: strings.Split("```json\n"+code+"\n```", "\n")}})
+	if got := NormalizeCodeForCompare(code); !strings.Contains(section["MG 9.9"], got) {
+		t.Fatalf("code %q not found in section %q", got, section["MG 9.9"])
+	}
 }
 
 func TestCompareSections(t *testing.T) {

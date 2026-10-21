@@ -138,7 +138,7 @@ func checkPayloadOrigin(v Vector, msg any, sections map[string]string, add func(
 	if v.Original != "" {
 		text, what = v.Original, "original"
 	}
-	if !strings.Contains(sec, guideline.NormalizeForCompare(text)) {
+	if !strings.Contains(sec, guideline.NormalizeCodeForCompare(text)) {
 		add("%s not found verbatim in %s", what, v.Origin.Ref)
 	}
 }

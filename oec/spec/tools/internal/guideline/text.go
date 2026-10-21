@@ -66,6 +66,13 @@ func NormalizeForCompare(s string) string {
 	return strings.TrimSpace(spaces.ReplaceAllString(s, " "))
 }
 
+// NormalizeCodeForCompare normalizes the content of a code block (e.g. a JSON
+// payload) like SectionTexts does: code is not stripped of emphasis markers,
+// so values such as "********" survive.
+func NormalizeCodeForCompare(s string) string {
+	return NormalizeForCompare("`" + s + "`")
+}
+
 var abbreviations = map[string]bool{
 	"e.g": true, "i.e": true, "etc": true, "vs": true, "cf": true, "fig": true,
 	"no": true, "nr": true, "approx": true, "incl": true, "resp": true, "min": true, "max": true,
