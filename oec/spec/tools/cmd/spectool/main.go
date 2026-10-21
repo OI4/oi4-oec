@@ -8,6 +8,14 @@
 //	spectool coverage  [-spec DIR] [-check]           generate coverage/report.md
 //	spectool topic     [-spec DIR] [-check] [TOPIC...] generate topic/topic-patterns.json;
 //	                                                  with arguments: analyse the given topics
+//	spectool review    [-spec DIR] [-to reviewed|draft] [-n] ID...
+//	                                                  set the status after a PO review (requirements,
+//	                                                  vectors, areas, matrix payload columns; ranges
+//	                                                  such as REQ-QRY-001..004), then render, coverage, lint
+//	spectool rebaseline [-spec DIR] [-guideline DIR] [-rev REV] [-n]
+//	                                                  move the spec to a new guideline commit: inventory,
+//	                                                  baseline in all sources, topic patterns, render,
+//	                                                  coverage, lint; lists the project docs to update
 package main
 
 import (
@@ -16,6 +24,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"sort"
@@ -25,6 +34,7 @@ import (
 	"github.com/OI4/oec/spec/tools/internal/coverage"
 	"github.com/OI4/oec/spec/tools/internal/guideline"
 	"github.com/OI4/oec/spec/tools/internal/inventory"
+	"github.com/OI4/oec/spec/tools/internal/maintain"
 	"github.com/OI4/oec/spec/tools/internal/render"
 	"github.com/OI4/oec/spec/tools/internal/topic"
 	"github.com/OI4/oec/spec/tools/internal/vectors"
@@ -47,6 +57,10 @@ func main() {
 		err = cmdCoverage(os.Args[2:])
 	case "topic":
 		err = cmdTopic(os.Args[2:])
+	case "review":
+		err = cmdReview(os.Args[2:])
+	case "rebaseline":
+		err = cmdRebaseline(os.Args[2:])
 	case "-h", "--help", "help":
 		usage()
 		return
@@ -61,7 +75,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: spectool lint|render|inventory|coverage|topic [flags]  (spectool <cmd> -h for flags)")
+	fmt.Fprintln(os.Stderr, "usage: spectool lint|render|inventory|coverage|topic|review|rebaseline [flags]  (spectool <cmd> -h for flags)")
 }
 
 type common struct {
@@ -368,4 +382,149 @@ func writeAll(c *common, files map[string]string, check bool) error {
 		return fmt.Errorf("outdated generated file(s), run without -check: %s", strings.Join(stale, ", "))
 	}
 	return nil
+}
+
+// args returns the common flags for calling another subcommand.
+func (c *common) args(extra ...string) []string {
+	a := []string{"-spec", c.spec}
+	if c.guideline != "" {
+		a = append(a, "-guideline", c.guideline)
+	}
+	return append(a, extra...)
+}
+
+// regenerate writes the views and the coverage report and lints the result.
+func (c *common) regenerate() error {
+	if err := cmdRender(c.args()); err != nil {
+		return err
+	}
+	if err := cmdCoverage(c.args()); err != nil {
+		return err
+	}
+	return cmdLint(c.args())
+}
+
+func cmdReview(args []string) error {
+	fs, c := flags("review")
+	to := fs.String("to", maintain.Reviewed, "target status: reviewed (after a PO review) or draft (reopen)")
+	dry := fs.Bool("n", false, "dry run: show the changes without writing")
+	fs.Usage = func() {
+		fmt.Fprintln(os.Stderr, "usage: spectool review [flags] ID...\n"+
+			"  ID: requirement (REQ-QRY-001), vector (V-PAY-053), area code (QRY; drafted <-> reviewed),\n"+
+			"      matrix payload column (Pub/MAM) or \"matrix\" for all rows; ranges REQ-QRY-001..004, comma lists")
+		fs.PrintDefaults()
+	}
+	_ = fs.Parse(args)
+	if fs.NArg() == 0 {
+		fs.Usage()
+		return errors.New("no ids given")
+	}
+	ids, err := maintain.ExpandIDs(fs.Args())
+	if err != nil {
+		return err
+	}
+	changes, err := maintain.SetStatus(c.spec, ids, *to, *dry)
+	if err != nil {
+		return err
+	}
+	n := 0
+	for _, ch := range changes {
+		if ch.Unchanged() {
+			fmt.Printf("  %-34s %s already %s\n", ch.File, ch.ID, ch.To)
+			continue
+		}
+		n++
+		fmt.Printf("  %-34s %s %s -> %s\n", ch.File, ch.ID, ch.From, ch.To)
+	}
+	if *dry {
+		fmt.Printf("dry run: %d change(s), nothing written\n", n)
+		return nil
+	}
+	fmt.Printf("%d status change(s) written\n", n)
+	if n == 0 {
+		return nil
+	}
+	return c.regenerate()
+}
+
+// projectDocs are the living project documents that name the current baseline
+// (relative to the workspace root <spec>/../..).
+var projectDocs = []string{"AGENTS.md", "project/STATUS.md", "project/GUARDRAILS.md", "project/ROADMAP.md", "oec/spec/README.md"}
+
+func cmdRebaseline(args []string) error {
+	fs, c := flags("rebaseline")
+	rev := fs.String("rev", "", "new guideline commit; must be checked out (default: git HEAD of the guideline)")
+	dry := fs.Bool("n", false, "dry run: show the files whose baseline would change")
+	force := fs.Bool("force", false, "re-baseline even if only files outside docs/ and rfcs_adrs/ changed")
+	_ = fs.Parse(args)
+	s, err := catalog.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	old := s.Areas.Baseline
+	g := c.guidelineDir()
+	git := func(a ...string) (string, error) {
+		out, err := exec.Command("git", append([]string{"-C", g}, a...)...).Output()
+		return strings.TrimSpace(string(out)), err
+	}
+	head, err := git("rev-parse", "HEAD")
+	if err != nil {
+		return fmt.Errorf("cannot read the guideline HEAD in %s: %w", g, err)
+	}
+	if *rev == "" {
+		*rev = "HEAD"
+	}
+	full, err := git("rev-parse", "--verify", *rev+"^{commit}")
+	if err != nil {
+		return fmt.Errorf("unknown guideline commit %q", *rev)
+	}
+	if full != head {
+		return fmt.Errorf("guideline HEAD is %.7s, not %s – check out %s first (the inventory reads the working tree)", head, *rev, *rev)
+	}
+	if dirty, _ := git("status", "--porcelain", "--", "docs", "rfcs_adrs"); dirty != "" {
+		return fmt.Errorf("guideline working tree has uncommitted changes in docs/ or rfcs_adrs/ – commit them first:\n%s", dirty)
+	}
+	short, err := git("rev-parse", "--short=7", full)
+	if err != nil {
+		return err
+	}
+	if short == old {
+		fmt.Printf("spec baseline is already %s\n", old)
+		return nil
+	}
+	if diff, err := git("diff", "--name-only", old, full, "--", "docs", "rfcs_adrs"); err == nil && diff == "" && !*force {
+		fmt.Printf("guideline %s changes nothing in docs/ or rfcs_adrs/ since %s (e.g. register only) – no re-baseline needed (ADR-0001 amendment C-018); use -force to re-baseline anyway\n", short, old)
+		return nil
+	}
+	changed, err := maintain.Rebaseline(c.spec, old, short, *dry)
+	if err != nil {
+		return err
+	}
+	for _, f := range changed {
+		fmt.Printf("  baseline %s -> %s: %s\n", old, short, f)
+	}
+	if *dry {
+		fmt.Printf("dry run: %d file(s), nothing written\n", len(changed))
+		return nil
+	}
+	if err := cmdInventory(c.args("-rev", short)); err != nil {
+		return err
+	}
+	if err := cmdTopic(c.args()); err != nil {
+		return err
+	}
+	lintErr := c.regenerate()
+	root := filepath.Join(c.spec, "..", "..")
+	fmt.Printf("\nTo do by hand (baseline %s -> %s):\n", old, short)
+	if lintErr != nil {
+		fmt.Println("  - fix the lint problems above (remap inventory keys, sync golden vectors with edits/justification), then: spectool lint && spectool render && spectool coverage")
+	}
+	if m := maintain.Mentions(root, projectDocs, old); len(m) > 0 {
+		fmt.Println("  - update the baseline in the living project docs (move", old, "to the previous baselines where listed):")
+		for _, l := range m {
+			fmt.Println("      " + l)
+		}
+	}
+	fmt.Println("  - ADR-0001 amendment and the cycle log record the new baseline; commit catalog, generated files and docs separately")
+	return lintErr
 }
