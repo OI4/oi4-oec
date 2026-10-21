@@ -65,7 +65,7 @@ func TestValidate(t *testing.T) {
 }
 
 func TestDnpGuidelineExamples(t *testing.T) {
-	// MG A3 Table 8 and the URI example.
+	// MG A3 Table 19 and the URI example.
 	for _, c := range [][5]string{
 		{"example.com", "MyModel", "MyProductCode", "MySerial", "example.com/MyModel/MyProductCode/MySerial"},
 		{"example.com", "ABC DEF", "123.456/3&8", "123456#33", "example.com/ABC,20DEF/123.456,2F3,268/123456,2333"},

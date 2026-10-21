@@ -8,7 +8,7 @@ import (
 
 // DnpEncode applies the dnp-encoding (MG A3): the unreserved characters
 // A-Z a-z 0-9 - . _ ~ are kept, every other octet of the UTF-8 encoding is
-// written as "," followed by two upper-case hex digits. Table 7 is the ASCII
+// written as "," followed by two upper-case hex digits. Table 18 is the ASCII
 // excerpt of this rule (SF-043 a).
 func DnpEncode(s string) string {
 	var b strings.Builder
@@ -56,7 +56,7 @@ func CheckManufacturerURI(s string) []Violation {
 // guideline only permits the masking (SF-043 e); it is applied here so that
 // every nameplate value yields a valid Identification Link, and it leaves
 // values without such characters unchanged. The ManufacturerUri is converted
-// to lower case (MG A3 Table 8); empty elements become "nd". The result is
+// to lower case (MG A3 Table 19); empty elements become "nd". The result is
 // validated as an Identification Link.
 func Oi4Identifier(manufacturerURI, model, productCode, serialNumber string) (string, []Violation) {
 	m := strings.ToLower(manufacturerURI)
