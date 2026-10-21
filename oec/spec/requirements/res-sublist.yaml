@@ -6,10 +6,11 @@
 # entries: REQ-MSG-025 (GL-ADR-018), Filter structure: REQ-TOP-022. The
 # Status event after a Set/Del is REQ-RES-SUBLIST-013 (content: RES-EVENT).
 # Checked by tools/internal/payload (C-028).
-# Drafted in C-028; open finding: SF-080 (entry identity, TopicPath of the
-# B1.1.9 example, Interval wording, publication after Del, Config).
+# Drafted in C-028, reviewed in the C-028 review; SF-080 (entry identity,
+# TopicPath of the B1.1.9 example, Interval wording, publication after Del,
+# Config) resolved in the guideline (baseline b2f0fe7).
 area: RES-SUBLIST
-baseline: "ff1562f"
+baseline: "b2f0fe7"
 requirements:
   # --- DataSet content (MG 8.3.9) ---------------------------------------------
   - id: REQ-RES-SUBLIST-001
@@ -28,13 +29,15 @@ requirements:
     quotes:
       - ref: MG 8.3.9
         text: The SubscriptionList contains an array of DataSetMessage objects, each representing a subscription. Included are a topic path, an interval for application internal usage, and a configurability statement.
+      - ref: MG 8.3.9
+        text: The MQTT topic filter of the subscription, as subscribed at the broker (6 General Requirements on MQTT, 7 Topics Definition).
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.9-625af7da, MG-8.3.9-c59d2078, MG-8.3.9-5827b466]
+    inventory: [MG-8.3.9-625af7da, MG-8.3.9-c59d2078, MG-8.3.9-4b78ef6b]
     status: reviewed
     notes: >-
       The TopicPath is a topic filter as subscribed at the broker, wildcards
-      + and # allowed (MG 9.1.9 note on wildcards; SF-080 (a)). Enumeration
-      encoding <name>_<value> per REQ-MSG-031 (OPC UA Part 6 5.4.4).
+      + and # allowed (MG 8.3.9 since SF-080 (a)). Enumeration encoding
+      <name>_<value> per REQ-MSG-031 (OPC UA Part 6 5.4.4).
 
   - id: REQ-RES-SUBLIST-002
     title: An entry matches its DataSetMessage and its TopicPath
@@ -43,7 +46,9 @@ requirements:
       the subscription) and its WriterGroupName is <ResourceType>[/<Tag>]
       derived from the TopicPath – the resource level and, if the TopicPath
       contains no wildcard in the Filter levels, the Filter levels of the
-      subscribed topic; Source and TopicPath identify the entry.
+      subscribed topic; the resource level of the TopicPath is concrete
+      (neither + nor covered by #). Source and TopicPath identify the
+      entry.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -52,18 +57,25 @@ requirements:
     scope: [MG 7.7, MG 8.2.3]
     refs: [MG 8.3.9, MG 9.1.9, SF-080]
     quotes:
+      - ref: MG 8.3.9
+        text: The wildcards + and # are allowed, but the resource level must be concrete (neither + nor covered by #).
+      - ref: MG 8.3.9
+        text: The Source of an entry (its DataSetWriterName, the asset holding the subscription – usually the application itself) and its TopicPath identify the entry.
+      - ref: MG 8.3.9
+        text: >-
+          The WriterGroupName of an entry (8.2.3 DataSetMessage) is <ResourceType>[/<Tag>]: the resource level of the TopicPath, followed by its Filter levels (7.7 Filter Element) if the TopicPath has Filter levels and they contain no wildcard.
       - ref: MG 9.1.9
         text: In combination with a ResourceType (7.7 Filter Element) it is possible to get a SubscriptionList filtered for a defined resource. In addition to the ResourceType a Tag can be added, e.g., to address a defined DataSetMessage of the resource Data.
-    verification: [d7-validate]
-    inventory: [MG-9.1.9-55c5621a]
-    status: reviewed
+    verification: [schema, d7-validate]
+    inventory: [MG-9.1.9-55c5621a, MG-8.3.9-e5fa793a]
+    status: draft
     notes: >-
       Combines REQ-TOP-022 (Filter structure), REQ-MSG-023 (DataSetWriterName)
-      and REQ-MSG-025 (WriterGroupName) for the entries. The guideline does
-      not define how ResourceType and Tag of an entry relate to its
-      TopicPath, nor what identifies an entry; interpretation SF-080 (a)
-      (a TopicPath with a wildcard in the resource level cannot be filtered
-      by ResourceType – open with the PO).
+      and REQ-MSG-025 (WriterGroupName) for the entries; MG 8.3.9 and 8.2.3
+      since SF-080 (a). Since the C-028 review the statement includes the
+      concrete resource level (the alternative left open in SF-080 (a)),
+      hence draft; the payload checker reports a TopicPath without concrete
+      resource level.
 
   - id: REQ-RES-SUBLIST-003
     title: Interval is a processing interval of the subscriber
@@ -80,15 +92,15 @@ requirements:
     refs: [MG 8.3.9, SF-080]
     quotes:
       - ref: MG 8.3.9
-        text: By default, any DataSetMessage must be published on change => interval = 0.
+        text: By default, every publication is processed on arrival (Interval = 0).
       - ref: MG 8.3.9
         text: The subscribing client uses the key Interval to decide if every publication needs to be computed or not.
     verification: [manual]
-    inventory: [MG-8.3.9-efa775fa, MG-8.3.9-a5461507]
+    inventory: [MG-8.3.9-a5461507]
     status: reviewed
     notes: >-
-      "published on change" read as "processed on arrival" because Interval
-      is a subscriber setting (SF-080 (c)). Maximum 0xFFFFFFFF ≈ 50 days.
+      Wording of MG 8.3.9 corrected by SF-080 (c). Maximum 0xFFFFFFFF ≈ 50
+      days.
 
   - id: REQ-RES-SUBLIST-004
     title: Config defines whether an entry can be changed or deleted
@@ -96,22 +108,34 @@ requirements:
       Config NONE_0 (default) marks a subscription that can neither be
       changed nor deleted via Set or Del; CONF_1 marks a freely
       configurable subscription. A Set or Del of an entry with NONE_0 is
-      rejected with a status Event with EventLevel Bad; Config itself is
-      read only.
+      rejected with a status Event with EventLevel Bad (e.g. BadNotWritable),
+      as is a Set that changes the Config of an entry: Config is read only
+      and set by the application; an entry created via Set is CONF_1.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
     condition: The application offers Set or Del for SubscriptionList.
-    refs: [MG 8.3.9, SF-080]
+    refs: [MG 8.3.9, MG 9.1.9, SF-080]
+    quotes:
+      - ref: MG 8.3.9
+        text: >-
+          The configurability of subscriptions is limited to create/delete/not manipulable – depending on implementation and/or technical needs: NONE_0: No configuration possible – the entry can neither be changed nor deleted via Set or Del (9.1.9 SubscriptionList).
+      - ref: MG 8.3.9
+        text: The Config of an entry is set by the application; an entry created via Set is freely configurable (CONF_1).
+      - ref: MG 9.1.9
+        text: If the Set addresses an entry with Config NONE_0 or changes the Config of an entry, the Set must be rejected and the status Event must have the EventLevel Bad (e.g. BadNotWritable).
+      - ref: MG 9.1.9
+        text: If the entry has Config NONE_0, the Del must be rejected and the status Event must have the EventLevel Bad (e.g. BadNotWritable).
     verification: [d7-test]
-    inventory: []
-    status: reviewed
+    inventory: [MG-8.3.9-ad2fe906, MG-9.1.9-39acbd89, MG-9.1.9-5a8f1bed]
+    status: draft
     notes: >-
-      MG 8.3.9 defines the values without keyword: "NONE_0: No configuration
-      possible (delete is not possible). CONF_1: Freely configurable (delete
-      is possible)." Rejection and read-only Config follow REQ-RES-PUBLIST-016
-      and REQ-CMP-043 (SF-080 (e)).
+      MG 8.3.9 and 9.1.9 since SF-080 (e); same pattern as
+      REQ-RES-PUBLIST-016 and REQ-CMP-043. Since the C-028 review the
+      statement includes the rejection of a Config change and CONF_1 for
+      entries created via Set (agent addition in the guideline), hence
+      draft.
 
   # --- Message Bus (MG 9.1.9) -------------------------------------------------
   - id: REQ-RES-SUBLIST-005
@@ -131,7 +155,7 @@ requirements:
     verification: [d7-monitor]
     inventory: [MG-9.1.9-a4d38b53]
     status: reviewed
-    notes: After a Del see REQ-RES-SUBLIST-015 (SF-080 (d)).
+    notes: After a Del see REQ-RES-SUBLIST-015 (MG 9.1.9 since SF-080 (d)).
 
   - id: REQ-RES-SUBLIST-006
     title: Republication after a reconfiguration may be partial
@@ -189,7 +213,7 @@ requirements:
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [responder]
     condition: The application supports the resource SubscriptionList (REQ-CMP-039).
-    refs: [MG 9.1.9, SF-080]
+    refs: [MG 9.1.9]
     quotes:
       - ref: MG 9.1.9
         text: Via the <Method>/<Resource>[/<Source>[/<Filter>]] combination Get/SubscriptionList[/<Source>[/<ResourceType>[/<Tag>]]], the publication of this information to the Pub/SubscriptionList[/<Source>[/<ResourceType>[/<Tag>]]] topic can be triggered.
@@ -247,12 +271,14 @@ requirements:
         text: Each publication, using the method Set, must be done explicitly.
       - ref: MG 9.1.9
         text: Setting multiple DataSetMessages at once via Oi4v2/<ServiceType>/<AppId>/Set/SubscriptionList is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
+      - ref: MG 9.1.9
+        text: The Set carries the complete entry. If the Source has not subscribed the TopicPath yet, the Set creates a new entry; otherwise it reconfigures the entry with this TopicPath (8.3.9 SubscriptionList).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.9-c60d1703, MG-9.1.9-a1f2a02e, MG-9.1.9-2c8de6d9]
     status: reviewed
     notes: >-
       "create new entry or set new behavior" (heading of MG 9.1.9); entry
-      identity per SF-080 (a). Header per REQ-BUS-010 (SF-079).
+      identity per MG 8.3.9 (since SF-080 (a)). Header per REQ-BUS-010.
 
   - id: REQ-RES-SUBLIST-011
     title: Del SubscriptionList addresses exactly one entry
@@ -274,13 +300,14 @@ requirements:
         text: Each publication, using the method Del must be done explicitly.
       - ref: MG 9.1.9
         text: Deleting multiple DataSetMessages at once via Oi4v2/<ServiceType>/<AppId>/Del/SubscriptionList is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
+      - ref: MG 9.1.9
+        text: The Del carries the entry to delete, because several subscriptions can share one Filter; its TopicPath identifies the entry.
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.9-4f0f8bcc, MG-9.1.9-d3f9c5c4, MG-9.1.9-8b34854d]
+    inventory: [MG-9.1.9-4f0f8bcc, MG-9.1.9-d3f9c5c4, MG-9.1.9-8b34854d, MG-9.1.9-ea18e7e9]
     status: reviewed
     notes: >-
       Unlike the Del of ReferenceDesignation, the Del of SubscriptionList
-      carries the entry, because several subscriptions can share one
-      Filter (SF-080 (a)). Header per REQ-BUS-010 (SF-079).
+      carries the entry (MG 9.1.9 since SF-080 (a)). Header per REQ-BUS-010.
 
   - id: REQ-RES-SUBLIST-012
     title: Set and Del SubscriptionList are protected by ACL
@@ -355,11 +382,16 @@ requirements:
     applies_to: [application]
     condition: The application offers Del for SubscriptionList and the Del was successful.
     refs: [MG 9.1.9, MG 9.1, SF-080]
+    quotes:
+      - ref: MG 9.1.9
+        text: If deleting the entry was successful, the remaining entries of the Source and Filter of the Del must be published to the Pub/SubscriptionList/<Source>/<ResourceType>[/<Tag>] topic with the ReplyTo of the Del.
+      - ref: MG 9.1.9
+        text: If no entry remains, nothing is published (9.1 Resources).
     verification: [d7-test]
-    inventory: []
+    inventory: [MG-9.1.9-496d9c32, MG-9.1.9-a9e2a618]
     status: reviewed
     notes: >-
-      Reconciles REQ-RES-SUBLIST-005 ("(re)published" on delete) with
-      REQ-BUS-007 (nothing is published after the deletion of a whole
-      object) and REQ-BUS-008 (the changed resource is published after a
-      partial deletion): interpretation SF-080 (d).
+      Consistent with REQ-RES-SUBLIST-005 ("(re)published" on delete),
+      REQ-BUS-007 (nothing after the deletion of a whole object) and
+      REQ-BUS-008 (the changed resource after a partial deletion); MG 9.1.9
+      since SF-080 (d).

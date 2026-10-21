@@ -5,10 +5,11 @@
 # Metadata in the PublicationList: REQ-RES-PUBLIST-* (ON_REQUEST_FILTER_9);
 # Get of Metadata without Data: REQ-CMP-044. MG 8.3.5 is descriptive only
 # (no inventory item). Checked by tools/internal/payload (C-028).
-# Drafted in C-028; open findings: SF-078 (templates of MG 9.1.5), SF-079
-# (DataSetMetaData header of a Set request).
+# Drafted in C-028, reviewed in the C-028 review; SF-078 (templates of MG
+# 9.1.5) and SF-079 (DataSetMetaData header of a Set request) resolved in the
+# guideline (baseline b2f0fe7).
 area: RES-META
-baseline: "ff1562f"
+baseline: "b2f0fe7"
 requirements:
   - id: REQ-RES-META-001
     title: Get Metadata addresses one DataSet and carries an empty DataSetMetaData
@@ -99,9 +100,8 @@ requirements:
     inventory: [MG-9.1.5-589a70ef, MG-9.1.5-c88db582]
     status: reviewed
     notes: >-
-      PublisherId = requester (REQ-MSG-006; the MG 9.1.5 Set template says
-      "IdentificationLink_of_MetadataOwner", SF-078 (b)); header per
-      REQ-BUS-010 (SF-079).
+      PublisherId = requester (REQ-MSG-006; MG 9.1.5 Set template since
+      SF-078 (b)); header per REQ-BUS-010 (MG 8.2.3 since SF-079).
 
   - id: REQ-RES-META-005
     title: Set Metadata is protected by ACL

@@ -5,10 +5,11 @@
 # REQ-CMP-021; the Status events after Set/Del (MG 9.1) are REQ-RES-EVENT-005.
 # The per-resource rules are in RES-* (MG 9.1.x), the payload columns of
 # matrix/method-resource.yaml summarize them per Method × Resource.
-# Drafted in C-028; open findings: SF-079 (DataSetMessage header of Set/Del
-# requests), SF-080 (d) (publication after Del), SF-081 (Filter in Set/Del).
+# Drafted in C-028, reviewed in the C-028 review; SF-079 (DataSetMessage
+# header of Set/Del requests), SF-080 (d) (publication after Del) and SF-081
+# (Filter in Set/Del) resolved in the guideline (baseline b2f0fe7).
 area: BUS
-baseline: "ff1562f"
+baseline: "b2f0fe7"
 requirements:
   - id: REQ-BUS-001
     title: Publishing may start once the request topics are subscribed
@@ -90,14 +91,13 @@ requirements:
     refs: [MG 9.1, SF-081]
     quotes:
       - ref: MG 9.1
-        text: Service B must publish the updated resource object on Service A’s Set topic for this resource. Now, the Filter is required in the topic.
+        text: Service B must publish the updated resource object on Service A’s Set topic for this resource. Now, Source and – for resources with a Filter – the Filter are required in the topic.
     verification: [d7-validate]
-    inventory: [MG-9.1-4ea9b9b7, MG-9.1-c470061f]
+    inventory: [MG-9.1-4ea9b9b7, MG-9.1-224e1dcc]
     status: reviewed
     notes: >-
-      ReferenceDesignation has no Filter (REQ-TOP-013, MG 7.7); "the Filter
-      is required" read as "where the resource has a Filter" (SF-081). The
-      per-resource Set payloads are in the RES-* areas (exactly one
+      ReferenceDesignation has no Filter (REQ-TOP-013, MG 7.7; MG 9.1 since
+      SF-081). The per-resource Set payloads are in the RES-* areas (exactly one
       DataSetMessage, e.g. REQ-RES-DATA-009).
 
   - id: REQ-BUS-005
@@ -113,11 +113,11 @@ requirements:
     refs: [MG 9.1, SF-081]
     quotes:
       - ref: MG 9.1
-        text: To delete a resource object from Service A, Service B must know the Filter of the resource it aims to delete.
+        text: To delete a resource object from Service A, Service B must know the Source and – if the resource has one – the Filter of the resource it aims to delete.
     verification: [d7-validate]
-    inventory: [MG-9.1-679a6b3c]
+    inventory: [MG-9.1-b36c6821]
     status: reviewed
-    notes: Del exists for SubscriptionList (with Filter) and ReferenceDesignation (without Filter) only (REQ-TOP-013, SF-081).
+    notes: Del exists for SubscriptionList (with Filter) and ReferenceDesignation (without Filter) only (REQ-TOP-013; MG 9.1 since SF-081).
 
   - id: REQ-BUS-006
     title: A successful Set is followed by the publication of the changed object
@@ -163,7 +163,7 @@ requirements:
     notes: >-
       A Del of ReferenceDesignation always deletes the whole object
       (REQ-RES-REFDES-007); for SubscriptionList see REQ-RES-SUBLIST-015
-      (SF-080 (d)).
+      (MG 9.1.9 since SF-080 (d)).
 
   - id: REQ-BUS-008
     title: A partial deletion is followed by the publication of the changed resource
@@ -184,7 +184,7 @@ requirements:
     verification: [d7-test]
     inventory: [MG-9.1-da721bd7]
     status: reviewed
-    notes: Per resource REQ-RES-SUBLIST-015 (SF-080 (d)).
+    notes: Per resource REQ-RES-SUBLIST-015 (MG 9.1.9 since SF-080 (d)).
 
   - id: REQ-BUS-009
     title: Use-case-specific reactions beyond the Status event
@@ -211,19 +211,25 @@ requirements:
       the DataSetWriterId of the addressed DataSet as published by the
       addressed component (for PublicationList and SubscriptionList the
       common DataSetWriterId of the list), the Source of the topic as
-      DataSetWriterName and the Filter of the topic as WriterGroupName.
+      DataSetWriterName and the Filter of the topic as WriterGroupName (an
+      empty string for resources without Filter); it carries no
+      SequenceNumber.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [requester]
     refs: [MG 8.2.3, MG 9.1, SF-079]
-    verification: [d7-validate]
-    inventory: []
-    status: reviewed
+    quotes:
+      - ref: MG 8.2.3
+        text: >-
+          In a Set or Del request, the DataSetMessage carries the DataSetWriterId of the addressed DataSet as published by the addressed application (for PublicationList and SubscriptionList the common DataSetWriterId of the list), the Source of the topic as DataSetWriterName and the Filter of the topic as WriterGroupName (an empty string for resources without Filter); it carries no SequenceNumber.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.2.3-00dee0fa]
+    status: draft
     notes: >-
-      MG 8.2.3 defines the header for the publisher of a DataSet; for a
-      request it is not stated (SF-079). All examples (MG B1.1.4, B1.1.5,
-      B1.1.8, B1.1.9, B1.1.10) use the DataSetWriterId of the addressed
-      DataSet. A SequenceNumber belongs to the DataSetWriter of the
-      publisher and is meaningless in a request; B1.1.4 Set Data carries
-      one (SF-079, proposal: omit it in the example).
+      Stated in MG 8.2.3 since SF-079; the examples (MG B1.1.4, B1.1.5,
+      B1.1.8, B1.1.9, B1.1.10) follow it. Since the C-028 review the
+      statement includes "no SequenceNumber" and the empty WriterGroupName
+      (hence draft); the payload checker reports a SequenceNumber in a Set or
+      Del request. The DataSetWriterId of the addressed DataSet is only
+      known to the test against the addressed component (d7-validate).

@@ -6,10 +6,11 @@
 # events that answer a Set or Del of a resource are REQ-RES-EVENT-005 (general)
 # plus the per-resource requirements (e.g. REQ-RES-PUBLIST-024,
 # REQ-RES-REFDES-009). Checked by tools/internal/payload (C-028).
-# Drafted in C-028; open findings: SF-075 (category-specific keys in Details),
-# SF-076 (Number, Category and topic Filter).
+# Drafted in C-028, reviewed in the C-028 review; SF-075 (category-specific
+# keys in Details) and SF-076 (Number, Category and topic Filter) resolved in
+# the guideline (baseline b2f0fe7).
 area: RES-EVENT
-baseline: "ff1562f"
+baseline: "b2f0fe7"
 requirements:
   # --- DataSet content (MG 8.3.6) ---------------------------------------------
   - id: REQ-RES-EVENT-001
@@ -36,9 +37,9 @@ requirements:
     inventory: [MG-8.3.6-6c6f8e17, MG-8.3.6-f78f6741, MG-8.3.6-9181a931, MG-8.3.6-af98a12d]
     status: reviewed
     notes: >-
-      The category-specific keys SymbolicId (Status) and MSG/HEADER (Syslog)
-      are keys of Details, as in the examples of MG B1.1.6, not fields of
-      the Payload (SF-075 (a), proposed interpretation).
+      The category-specific keys SymbolicId (Status, MG 8.3.6.1) and
+      MSG/HEADER (Syslog, MG 8.3.6.2) are keys of Details, not fields of the
+      Payload (SF-075 (a), resolved).
 
   - id: REQ-RES-EVENT-002
     title: Category matches the EventCategory of the topic
@@ -51,8 +52,11 @@ requirements:
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The component publishes Events (REQ-CMP-038).
-    refs: [MG 8.3.6.1, MG 8.3.6.2, MG 8.3.6.3, MG 9.1.6, SF-076]
+    refs: [MG 8.3.6, MG 8.3.6.1, MG 8.3.6.2, MG 8.3.6.3, MG 9.1.6, SF-076]
     quotes:
+      - ref: MG 8.3.6
+        text: >-
+          The <EventCategory> of the topic (7.7 Filter Element) must correspond to Category: Syslog for CAT_SYSLOG_0, Status for CAT_STATUS_1 and Generic for CAT_GENERIC_99.
       - ref: MG 8.3.6.1
         text: The used category must always be CAT_STATUS_1.
       - ref: MG 8.3.6.2
@@ -60,9 +64,9 @@ requirements:
       - ref: MG 8.3.6.3
         text: The used category must always be CAT_GENERIC_99.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.6.1-10a94abf, MG-8.3.6.1-349a3648, MG-8.3.6.2-1d59b183, MG-8.3.6.2-95c405fe, MG-8.3.6.3-fbb5933d, MG-8.3.6.3-2b797dea]
+    inventory: [MG-8.3.6-f4578cff, MG-8.3.6.1-10a94abf, MG-8.3.6.1-349a3648, MG-8.3.6.2-1d59b183, MG-8.3.6.2-95c405fe, MG-8.3.6.3-fbb5933d, MG-8.3.6.3-2b797dea]
     status: reviewed
-    notes: The mapping EventCategory ↔ Category is listed in MG 9.1.6 (SF-076 (c)).
+    notes: The mapping EventCategory ↔ Category is stated in MG 8.3.6 since SF-076 (c).
 
   # --- Status (MG 8.3.6.1) ----------------------------------------------------
   - id: REQ-RES-EVENT-003
@@ -86,10 +90,11 @@ requirements:
       - ref: MG 8.3.6.1
         text: A symbolic ID, defined by the OPC Foundation, as short form of the description (e.g., “BadEncodingError” for 0x80060000).
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.6.1-108129a6, MG-8.3.6.1-d778a37f, MG-8.3.6.1-15d7b6b4, MG-8.3.6.1-1ae735cf]
+    inventory: [MG-8.3.6.1-108129a6, MG-8.3.6.1-d778a37f, MG-8.3.6.1-15d7b6b4, MG-8.3.6.1-e29d6cd9]
     status: reviewed
     notes: >-
-      SymbolicId is a key of Details (MG B1.1.6, B1.1.4 … B1.1.10; SF-075 (a)).
+      SymbolicId is a key of Details (MG 8.3.6.1 since SF-075 (a); examples
+      MG B1.1.4 … B1.1.10).
       JSON numbers are decimal; the hexadecimal notation is only used in the
       text.
 
@@ -98,9 +103,10 @@ requirements:
     statement: >-
       The EventLevel (topic Filter and WriterGroupName) of an Event of the
       category Status is the severity class of its Number (bits 30–31 of the
-      StatusCode): Good for 0x00, Uncertain for 0x40 and Bad for 0x80 as
-      leading byte; a SymbolicId, if present, starts with the same class
-      name.
+      StatusCode): Good for 0, Uncertain for 1 and Bad for 2 (leading byte
+      0x00, 0x40 or 0x80); the reserved class 3 (leading byte 0xC0) is
+      treated as Bad. A SymbolicId, if present, starts with the name of the
+      class.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -110,12 +116,20 @@ requirements:
     quotes:
       - ref: MG 7.7
         text: The class is based on the leading part of the symbol name or the starting 0x00 (Good), 0x40 (Uncertain) or 0x80 (Bad) hex code of the OPC UA Status Code (see OPC UA Part 6-A.2).
+      - ref: MG 8.3.6.1
+        text: >-
+          The EventLevel of the topic (7.7 Filter Element) must be the severity class of the status code in Number, given by its two most significant bits (30 and 31): 0 Good, 1 Uncertain, 2 Bad; the reserved value 3 is treated as Bad.
+      - ref: MG 8.3.6.1
+        text: A SymbolicId must start with the name of the severity class of Number (Good, Uncertain or Bad).
     verification: [schema, d7-validate]
-    status: reviewed
+    inventory: [MG-8.3.6.1-97b8f0e5, MG-8.3.6.1-fcafa0c3, MG-8.3.6.1-19fd9c52]
+    status: draft
     notes: >-
       The Filter values are REQ-TOP-023; this entry adds the consistency
-      between topic and payload (SF-076 (b)). The severity 0b11 is reserved
-      by OPC UA (Part 4 7.39) and not used.
+      between topic and payload (SF-076 (b), resolved). The severity class 3
+      is reserved by OPC UA (Part 4 7.39); since SF-076 it is treated as Bad
+      instead of being rejected (changed in the C-028 review, hence draft).
+      Example MG 8.3.6.1: 0x80060000 → Bad.
 
   - id: REQ-RES-EVENT-005
     title: Set and Del are answered with a Status event
@@ -142,7 +156,7 @@ requirements:
       - ref: MG 9.1
         text: From compliance Level 2 on, each Set and Del must be answered with an Event of the category Status; at Level 1, it should be answered this way (7.4 Method Element).
     verification: [d7-test]
-    inventory: [MG-8.3.6.1-41b095ec, MG-8.3.6.1-381a4fc6, MG-9.1-153191a2, MG-9.1-351e197e, MG-9.1-99138e23]
+    inventory: [MG-8.3.6.1-41b095ec, MG-8.3.6.1-6214f078, MG-9.1-153191a2, MG-9.1-351e197e, MG-9.1-99138e23]
     status: reviewed
     notes: >-
       Same obligation as REQ-TOP-014/015 and the per-resource requirements
@@ -168,7 +182,7 @@ requirements:
       - ref: MG 8.3.6.1
         text: The event category Status can be used to publish application specific information such as internal state.
     verification: [manual]
-    inventory: [MG-8.3.6.1-61ce38ec]
+    inventory: [MG-8.3.6.1-d28835e3]
     status: reviewed
 
   # --- Syslog (MG 8.3.6.2) ----------------------------------------------------
@@ -191,16 +205,16 @@ requirements:
       - ref: MG 8.3.6.2
         text: A number which represents the PRI of a syslog message.
       - ref: MG 8.3.6.2
-        text: The PRI is an 8-bit integer. It consists of Severity and Facility. Three bits are used for the coding of Severity, 5 bits are used for coding Facility.
+        text: Therefore, Number must be in the range 0 … 191.
       - ref: MG 8.3.6.2
-        text: The optional key Description is not used in context of this Category.
+        text: A Syslog event must not contain the key Description.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.6.2-5eb88824, MG-8.3.6.2-a95141f7, MG-8.3.6.2-99f931ec, MG-8.3.6.2-245da261, MG-8.3.6.2-f14e34ce]
+    inventory: [MG-8.3.6.2-c57fd9ab, MG-8.3.6.2-a95141f7, MG-8.3.6.2-2b1a7169, MG-8.3.6.2-3894fe8e, MG-8.3.6.2-2a71eccc, MG-8.3.6.2-a4906c5b]
     status: reviewed
     notes: >-
-      MSG and HEADER are keys of Details (MG B1.1.6; SF-075 (a)); "is not
-      used" read as "is not present" (SF-075 (b)). RFC 3164 defines the
-      Facilities 0 … 23, hence PRI ≤ 191 (SF-076 (a)).
+      MSG and HEADER are keys of Details and a Syslog event has no
+      Description (MG 8.3.6.2 since SF-075 (a)/(b)); PRI ≤ 191 (RFC 3164
+      Facilities 0 … 23, SF-076 (a)).
 
   - id: REQ-RES-EVENT-008
     title: EventLevel of a Syslog event is the severity of its PRI
@@ -215,13 +229,16 @@ requirements:
     applies_to: [application, device]
     condition: The component publishes Events of the category Syslog.
     refs: [MG 7.7, MG 8.3.6.2, SF-076]
+    quotes:
+      - ref: MG 8.3.6.2
+        text: >-
+          The EventLevel of the topic (7.7 Filter Element) must be the name of the Severity (Number modulo 8) according to RFC5424 6.2.1: 0 Emergency, 1 Alert, 2 Critical, 3 Error, 4 Warning, 5 Notice, 6 Informational, 7 Debug.
     verification: [schema, d7-validate]
+    inventory: [MG-8.3.6.2-f433b644, MG-8.3.6.2-a75b8112]
     status: reviewed
     notes: >-
-      MG 8.3.6.2 only notes "The EventLevel depends on severity level of
-      PRI"; the mapping follows the RFC 5424 names used for the LogLevels of
-      MG 7.7 (SF-076 (a)). Example MG B1.1.6: PRI 13 (user, Notice) →
-      Syslog/Notice.
+      Same names as the LogLevels of MG 7.7 (SF-076 (a), resolved). Example
+      MG 8.3.6.2 and B1.1.6: PRI 13 (user, Notice) → Syslog/Notice.
 
   # --- Generic (MG 8.3.6.3) ---------------------------------------------------
   - id: REQ-RES-EVENT-009
@@ -290,5 +307,4 @@ requirements:
     notes: >-
       Topic form per REQ-TOP-013 (matrix) and REQ-TOP-023; Source and
       Filter of each DataSetMessage per REQ-MSG-023/024. Event has no Get,
-      hence no PaginationRequest, Locale or Query (REQ-PAG-008, REQ-QRY-001). The note in
-      MG B1.1.6 says "EventFilter" instead of EventLevel (SF-075 (c)).
+      hence no PaginationRequest, Locale or Query (REQ-PAG-008, REQ-QRY-001).

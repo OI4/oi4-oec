@@ -5,10 +5,11 @@
 # Encoding of the DataSet fields: REQ-MSG-030/031. The Status event after a
 # Set is REQ-RES-DATA-011 (content: RES-EVENT). Checked by
 # tools/internal/payload (C-028).
-# Drafted in C-028; open findings: SF-077 (Data DataSet and Oi4Pv), SF-078
-# (templates of MG 9.1.4), SF-079 (DataSetMessage of a Set request).
+# Drafted in C-028, reviewed in the C-028 review; SF-077 (Data DataSet and
+# Oi4Pv), SF-078 (templates of MG 9.1.4) and SF-079 (DataSetMessage of a Set
+# request) resolved in the guideline (baseline b2f0fe7).
 area: RES-DATA
-baseline: "ff1562f"
+baseline: "b2f0fe7"
 requirements:
   # --- DataSet content (MG 8.3.4) ---------------------------------------------
   - id: REQ-RES-DATA-001
@@ -26,18 +27,16 @@ requirements:
     refs: [MG 8.3.4, MG 9.1.4, SF-077]
     quotes:
       - ref: MG 8.3.4
-        text: Each data object might look different, but it must follow the rules that the OPC Foundation has defined for JSON encoded PubSub DataSets (OPC UA Part 14-7.2.3-Table 152).
+        text: Each data object might look different, but it must follow the rules that the OPC Foundation has defined for JSON encoded PubSub DataSets (OPC UA Part 14-7.2.5.4 with the field encoding of Part 6-5.4).
       - ref: MG 9.1.4
-        text: Each data object might look different, but it must follow the rules of OPC Foundation's specification for JSON coded pub/sub DataSets (OPC UA Part 14-7.2.3-Table 152).
+        text: Each data object might look different, but it must follow the rules of OPC Foundation's specification for JSON coded pub/sub DataSets (OPC UA Part 14-7.2.5.4 with the field encoding of Part 6-5.4).
     verification: [d7-validate]
-    inventory: [MG-8.3.4-f3d5041b, MG-9.1.4-4ae94ebb]
+    inventory: [MG-8.3.4-b5d32f38, MG-9.1.4-a7f190f6]
     status: reviewed
     notes: >-
-      The cited Part 14 7.2.3 Table 152 defines sequence number sizes, not
-      the JSON DataSet encoding; the rules meant are Part 14 7.2.5.4 (JSON
-      DataSetMessage) and Part 6 5.4, as fixed for OI4 by REQ-MSG-030/031
-      (SF-077 (a)). The field values can only be checked against the
-      Metadata of the DataSet.
+      Part 14 7.2.5.4 (JSON DataSetMessage) and Part 6 5.4 as fixed for OI4
+      by REQ-MSG-030/031 (reference corrected by SF-077 (a)). The field
+      values can only be checked against the Metadata of the DataSet.
 
   - id: REQ-RES-DATA-002
     title: The standardized process value DataSet Oi4Pv is optional
@@ -73,15 +72,16 @@ requirements:
     refs: [MG 8.3.4, MG 9.1.4, SF-077]
     quotes:
       - ref: MG 8.3.4
-        text: It must be published via .../Pub/Data/<Source>/Oi4Pv.
+        text: The Tag and the WriterGroupName of Oi4Pv are always Oi4Pv, i.e. it must be published via .../Pub/Data/<Source>/Oi4Pv.
       - ref: MG 9.1.4
         text: To reach this standardized DataSet, the filter Oi4Pv is used for every asset supporting this feature.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.4-1e1c3f42]
+    inventory: [MG-8.3.4-db9fc005]
     status: reviewed
     notes: >-
       Like every Data DataSet, Oi4Pv is also contained in the answers to
-      Get/Data/<Source> and Get/Data (REQ-RES-DATA-007; SF-077 (d)).
+      Get/Data/<Source> and Get/Data (REQ-RES-DATA-007; MG 8.3.4 since
+      SF-077 (d)).
 
   - id: REQ-RES-DATA-004
     title: Fields of the Oi4Pv DataSet
@@ -103,14 +103,14 @@ requirements:
       - ref: MG 8.3.4
         text: Depending on the type of Sv, the value can be a scalar, an array of values or a complex object.
       - ref: MG 8.3.4
-        text: The range of secondary values are 1 to 255.
+        text: It must not contain keys other than Pv and Sv<n>.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.4-9f0a11ec, MG-8.3.4-35fba7b0, MG-8.3.4-187cc40e, MG-8.3.4-d7444f35]
+    inventory: [MG-8.3.4-9f0a11ec, MG-8.3.4-35fba7b0, MG-8.3.4-26f6ec09, MG-8.3.4-d7444f35, MG-8.3.4-0081f2b9]
     status: reviewed
     notes: >-
-      MG 8.3.4 lists Sv<n> as "Requirement: Mandatory", although secondary
-      values exist only if the asset has them; read as: Pv mandatory, Sv<n>
-      optional (SF-077 (b)).
+      Sv<n> is optional, <n> is 1 … 255 without leading zeros and secondary
+      values are only present if the asset provides them (MG 8.3.4 since
+      SF-077 (b)).
 
   - id: REQ-RES-DATA-005
     title: Measuring point in the description of the Oi4Pv metadata
@@ -126,11 +126,13 @@ requirements:
     refs: [MG 8.3.4, SF-077]
     quotes:
       - ref: MG 8.3.4
-        text: The reflected measuring point, most likely defined by a device description of the manufacturer, should be placed into the description field of the related metadata.
+        text: The reflected measuring point, most likely defined by a device description of the manufacturer, should be placed into the Description of the FieldMetaData (8.2.6 FieldMetaData) of Pv in the Metadata of Oi4Pv.
+      - ref: MG 8.3.4
+        text: The reflected measuring point, most likely defined by a device description of the manufacturer, should be placed into the Description of the FieldMetaData (8.2.6 FieldMetaData) of Sv<n> in the Metadata of Oi4Pv.
     verification: [manual]
-    inventory: [MG-8.3.4-b2b0e888, MG-8.3.4-8f2b3749]
+    inventory: [MG-8.3.4-61f7039f, MG-8.3.4-07c19d92]
     status: reviewed
-    notes: '"description field of the related metadata" read as FieldMetaData.Description (SF-077 (c)).'
+    notes: Wording of MG 8.3.4 clarified by SF-077 (c).
 
   # --- Message Bus (MG 9.1.4) -------------------------------------------------
   - id: REQ-RES-DATA-006
@@ -201,9 +203,8 @@ requirements:
     inventory: [MG-9.1.4-3873bdd8]
     status: reviewed
     notes: >-
-      The MG 9.1.4 templates of Pub omit the DataSetClassId that REQ-MSG-011
-      requires if all DataSetMessages belong to one DataSet class (SF-078
-      (a)).
+      The MG 9.1.4 templates of Pub carry the publisher-defined
+      DataSetClassId of REQ-MSG-011 (since SF-078 (a)).
 
   - id: REQ-RES-DATA-009
     title: Set Data addresses exactly one DataSet
@@ -228,9 +229,9 @@ requirements:
     status: reviewed
     notes: >-
       A DataSetMessage always contains all fields of its DataSet
-      (REQ-MSG-030). PublisherId = requester (REQ-MSG-006; the MG 9.1.4 Set
-      templates say "IdentificationLink_of_DataSetOwner", SF-078 (b));
-      header of the DataSetMessage per REQ-BUS-010 (SF-079). Which DataSets
+      (REQ-MSG-030). PublisherId = requester (REQ-MSG-006; MG 9.1.4 Set
+      templates since SF-078 (b)); header of the DataSetMessage per
+      REQ-BUS-010 (MG 8.2.3 since SF-079). Which DataSets
       are writable is announced by the component (MG B1.1.4 note).
 
   - id: REQ-RES-DATA-010
