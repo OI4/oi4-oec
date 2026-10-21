@@ -1,10 +1,9 @@
-# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20); V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (ff1562f); V-PAY-055 … 080 (Data, Event, SubscriptionList and the Status events of B1.1.3 … B1.1.10) drafted in C-028, reviewed by the PO (C-028 review 2026-10-21).
+# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20); V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (ff1562f); V-PAY-055 … 080 (Data, Event, SubscriptionList and the Status events of B1.1.3 … B1.1.10) drafted in C-028, reviewed by the PO (C-028 review 2026-10-21); V-PAY-088 … 102 (Config of B1.1.3, V-PAY-099/101 with SF-088 edits) drafted in C-029.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "5bc2e85"
 description: >-
-  Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12 except the
-  Config examples of B1.1.3, which follow in C-029; B1.2.1): topic and message of the
+  Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): topic and message of the
   Message Bus, including the Birth, Close and Will messages (MG 6.3.3 … 6.3.5,
   C-025); and the predefined MetaData of the Alliance resources (MG B2.1 …
   B2.8) as bare DataSetMetaDataType objects. The reference checks cover the
@@ -12,7 +11,7 @@ description: >-
   MAM, Health, Profile, PublicationList, ReferenceDesignation and the helper
   DataSets Pagination, PaginationRequest, Locale and Query (areas
   RES-MAM … QRY), since C-028 also of Data (Oi4Pv), Metadata (Get), Event and
-  SubscriptionList; Config follows in C-029. A vector that differs from its example
+  SubscriptionList, since C-029 also of Config. A vector that differs from its example
   keeps the verbatim example in original and lists every change in edits.
 vectors:
   - id: V-PAY-001
@@ -3491,7 +3490,8 @@ vectors:
       StatusCode (REQ-RES-EVENT-004, SF-076 (b)). B1.1.3 shows this Status event
       twice (after the Set of Network settings and of Overall device settings)
       with identical text; one vector covers both. The Config examples themselves
-      follow with RES-CONFIG in C-029.
+      are V-PAY-088 … 102 (C-029; the Sets V-PAY-094 … 097 and 100 … 102 refer
+      to this vector, REQ-RES-CONFIG-021).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
     payload: |-
       {
@@ -3670,6 +3670,1464 @@ vectors:
               "Category": "CAT_STATUS_1",
               "Details": {
                 "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-088
+    title: "B1.1.3: Get explicit Config tag of an explicit asset (network)"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-CONFIG-016]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Requests the Config DataSet "Network settings" of the asset: the Filter is the
+      topic Filter, the Get carries no Config DataSetMessage (REQ-RES-CONFIG-016) and
+      the predefined DataSetClassId of Config (REQ-MSG-011). The Filter is read as the
+      stable name of the DataSet, not as the localized Context.Name
+      (REQ-RES-CONFIG-015, SF-085). Answered by V-PAY-091 (REQ-RES-CONFIG-017).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-089
+    title: "B1.1.3: Get all Config tags of an explicit asset with Locale"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-LOC-001, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-MSG-019, REQ-MSG-040, REQ-RES-CONFIG-016]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Requests all Config DataSets of the asset in de-DE: the only DataSetMessage is
+      the helper DataSet Locale (DataSetWriterId 3, REQ-MSG-019), no Config
+      DataSetMessage (REQ-RES-CONFIG-016). The Pub V-PAY-092 has ReplyTo "" and en-US
+      texts, so it is read as an unsolicited publication, not as the answer to this
+      Get (SF-088 (f)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 3,
+            "WriterGroupName": "Locale",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "Locale": "de-DE"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-090
+    title: "B1.1.3: Get Config tags of all assets related to this application"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-CONFIG-016]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Requests the Config DataSets of all assets of the application (topic without
+      Source and Filter); no Config DataSetMessage (REQ-RES-CONFIG-016). The Pub
+      V-PAY-093 has ReplyTo "" and is read as an unsolicited publication (SF-088 (f)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-091
+    title: "B1.1.3: Pub explicit Config tag of an explicit asset (network)"
+    expected: valid
+    reqs: [REQ-BUS-003, REQ-MSG-011, REQ-MSG-015, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-018]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Answer to V-PAY-088 (ReplyTo = MessageId of the Get). One Config DataSetMessage
+      with group network (ip_address, subnet-mask, port) and the Context "Network
+      settings"; every configuration object carries Type, Value and Name
+      (REQ-RES-CONFIG-002), values are strings (REQ-RES-CONFIG-007) and satisfy their
+      Validation (REQ-RES-CONFIG-008). The unescaped dots of the device example
+      (SF-088 (b)) do not occur here; the description "IP address of Network DNS
+      server" is editorial (SF-088 (e)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-092
+    title: "B1.1.3: Pub all Config tags of an explicit asset (network)"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-018]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Same DataSet as V-PAY-091 with ReplyTo "": an unsolicited publication (SF-088
+      (f)); the Context description reads "network Configuration" (editorial, SF-088
+      (e)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network Configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-093
+    title: "B1.1.3: Pub Config tags of all assets related to this application (network)"
+    expected: valid
+    reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-018]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Same DataSet as V-PAY-091 with ReplyTo "" on the topic without Source and
+      Filter: an unsolicited publication (SF-088 (f)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-094
+    title: "B1.1.3: Set explicit Config tag of an explicit asset (network, new values, minimal)"
+    expected: valid
+    reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-007, REQ-RES-CONFIG-019]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Partial Set of the network example ("Network settings", DataSetWriterId 42):
+      only the Values of the group network (REQ-RES-CONFIG-003, SF-086 (a)), exactly
+      one DataSetMessage with the DataSetWriterId, DataSetWriterName and
+      WriterGroupName of the addressed DataSet (REQ-RES-CONFIG-019, REQ-BUS-010). The
+      answers are the Status event (REQ-RES-CONFIG-021, MG B1.1.3 Status event =
+      V-PAY-076) and a Pub Config with the changed values (REQ-RES-CONFIG-022); B1.1.3
+      shows only the Status event.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "ip_address": {
+                  "Value": "192.168.1.1"
+                },
+                "subnet-mask": {
+                  "Value": "255.255.255.0"
+                },
+                "port": {
+                  "Value": "80"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-095
+    title: "B1.1.3: Set explicit Config tag of an explicit asset (network, new values, full)"
+    expected: valid
+    reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-040, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-019]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Set of the network example ("Network settings", DataSetWriterId 42) repeating
+      the read-only properties of the Pub unchanged together with the new Values
+      (REQ-RES-CONFIG-003; changed read-only properties would be rejected,
+      REQ-RES-CONFIG-023, SF-086 (c)). The answers are the Status event
+      (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with
+      the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": "192.168.1.1"
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": "255.255.255.0"
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "80"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-096
+    title: "B1.1.3: Set explicit Config tag of an explicit asset (network, empty values, minimal)"
+    expected: valid
+    reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-007, REQ-RES-CONFIG-010, REQ-RES-CONFIG-019]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Unsets all configuration objects of the group network with an empty Value
+      (REQ-RES-CONFIG-010); none of them is mandatory. The answers are the Status
+      event (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config
+      with the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status
+      event.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "ip_address": {
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Value": ""
+                },
+                "port": {
+                  "Value": ""
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-097
+    title: "B1.1.3: Set explicit Config tag of an explicit asset (network, empty values, full)"
+    expected: valid
+    reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-040, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-010, REQ-RES-CONFIG-019]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Like V-PAY-096, repeating the read-only properties unchanged
+      (REQ-RES-CONFIG-003, SF-086 (c)). The answers are the Status event
+      (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with
+      the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Network settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "network": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes the network configuration of this service"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of Network DNS server"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "subnet-mask": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask of Network"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Subnetmask"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(((255\\.){3}(255|254|252|248|240|224|192|128|0+))|((255\\.){2}(255|254|252|248|240|224|192|128|0+)\\.0)|((255\\.)(255|254|252|248|240|224|192|128|0+)(\\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\\.0+){3}))$"
+                  },
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Network settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-098
+    title: "B1.1.3: Get explicit Config tag of an explicit asset (device)"
+    expected: valid
+    reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-CONFIG-016]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Requests the Config DataSet "Overall device settings" of the device example
+      ("Overall device settings", DataSetWriterId 42 – the same id as the network
+      example ("Network settings", DataSetWriterId 42), SF-088 (d)); no Config
+      DataSetMessage (REQ-RES-CONFIG-016). Answered by V-PAY-099.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-099
+    title: "B1.1.3: Pub explicit Config tag of an explicit asset (device)"
+    expected: valid
+    reqs: [REQ-BUS-003, REQ-MSG-011, REQ-MSG-015, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-012, REQ-RES-CONFIG-013, REQ-RES-CONFIG-014, REQ-RES-CONFIG-018]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Answer to V-PAY-098 (ReplyTo = MessageId of the Get). Two groups device1 and
+      common (REQ-RES-CONFIG-013/014) with mandatory (aut0-r3fr3sh, protocol) and
+      sensitive (password, REQ-RES-CONFIG-012, SF-087) configuration objects.
+      Corrected after SF-088: group Common and configuration object Unit renamed to
+      common and unit as in the Sets V-PAY-100/102 and the text of B1.1.3 (a), the
+      dots of the ip_address Pattern escaped (b), the quantity "Unit": "Temperature"
+      of unit removed (c). DataSetWriterId 42 is also used by the network example
+      ("Network settings", DataSetWriterId 42) (SF-088 (d)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Overall device settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "device1": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Device 1"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes device one configuration options"
+                },
+                "aut0-r3fr3sh": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Automatic Refresh Enabled"
+                  },
+                  "Type": "Boolean",
+                  "Value": "false"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of device to read values from"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "password": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Password"
+                  },
+                  "Sensitive": true,
+                  "Type": "String",
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                },
+                "protocol": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Protocol"
+                  },
+                  "Type": "String",
+                  "Value": ""
+                },
+                "readInterval": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Interval in which value is read from device"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Read Interval"
+                  },
+                  "Type": "Number",
+                  "Value": ""
+                },
+                "unit": {
+                  "DefaultValue": "°C",
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Unit of measurement"
+                  },
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Unit"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Values": ["K", "°C", "°De", "°F", "°N", "°R", "°Ré", "°Rø" ]
+                  },
+                  "Value": ""
+                },
+                "user-name": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Username"
+                  },
+                  "Type": "String",
+                  "Value": ""
+                }
+              },
+              "common": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "general configuration"
+                },
+                "date-time": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Date Time for service"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Date Time"
+                  },
+                  "Type": "DateTime",
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Overall device settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Common and specific settings"
+                }
+              }
+            }
+          }
+        ]
+      }
+    original: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Overall device settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "device1": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Device 1"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes device one configuration options"
+                },
+                "aut0-r3fr3sh": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Automatic Refresh Enabled"
+                  },
+                  "Type": "Boolean",
+                  "Value": "false"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of device to read values from"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": ""
+                },
+                "password": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Password"
+                  },
+                  "Sensitive": true,
+                  "Type": "String",
+                  "Value": ""
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": ""
+                },
+                "protocol": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Protocol"
+                  },
+                  "Type": "String",
+                  "Value": ""
+                },
+                "readInterval": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Interval in which value is read from device"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Read Interval"
+                  },
+                  "Type": "Number",
+                  "Value": ""
+                },
+                "Unit": {
+                  "DefaultValue": "°C",
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Unit of measurement"
+                  },
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Unit"
+                  },
+                  "Type": "String",
+                  "Unit": "Temperature",
+                  "Validation": {
+                    "Values": ["K", "°C", "°De", "°F", "°N", "°R", "°Ré", "°Rø" ]
+                  },
+                  "Value": ""
+                },
+                "user-name": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Username"
+                  },
+                  "Type": "String",
+                  "Value": ""
+                }
+              },
+              "Common": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "general configuration"
+                },
+                "date-time": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Date Time for service"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Date Time"
+                  },
+                  "Type": "DateTime",
+                  "Value": ""
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Overall device settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Common and specific settings"
+                }
+              }
+            }
+          }
+        ]
+      }
+    edits:
+      - target: "/Messages/0/Payload/common"
+        kind: corrected
+        reason: 'Group Common renamed to common as in the Sets "Minimal set of values" and the text of B1.1.3 (names are case-sensitive).'
+        sf: [SF-088]
+      - target: "/Messages/0/Payload/device1/unit"
+        kind: corrected
+        reason: 'Configuration object Unit renamed to unit as in the Sets "Minimal set of values".'
+        sf: [SF-088]
+      - target: "/Messages/0/Payload/device1/ip_address/Validation/Pattern"
+        kind: corrected
+        reason: 'Dots escaped (\.) as in the network example; the unescaped dot matches any character.'
+        sf: [SF-088]
+      - target: "/Messages/0/Payload/device1/Unit/Unit"
+        kind: removed
+        reason: '"Unit": "Temperature" names a quantity, not an EngineeringUnit (MG 8.3.3.1 Unit, REQ-RES-CONFIG-009).'
+        sf: [SF-088]
+
+  - id: V-PAY-100
+    title: "B1.1.3: Set explicit Config tag of an explicit asset (device, new values, minimal)"
+    expected: valid
+    reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-007, REQ-RES-CONFIG-011, REQ-RES-CONFIG-019]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Partial Set of the device example ("Overall device settings", DataSetWriterId 42
+      – the same id as the network example ("Network settings", DataSetWriterId 42),
+      SF-088 (d)): Values of both groups including the mandatory objects aut0-r3fr3sh
+      and protocol of device1 (REQ-RES-CONFIG-011), exactly one DataSetMessage
+      (REQ-RES-CONFIG-019, REQ-BUS-010); the sensitive password is sent in clear text
+      (SF-087). The answers are the Status event (REQ-RES-CONFIG-021, MG B1.1.3 Status
+      event = V-PAY-076) and a Pub Config with the changed values
+      (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Overall device settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "device1": {
+                "aut0-r3fr3sh": {
+                  "Value": "false"
+                },
+                "ip_address": {
+                  "Value": "192.168.1.123"
+                },
+                "password": {
+                  "Value": "ssh-it's a secret!"
+                },
+                "port": {
+                  "Value": "443"
+                },
+                "protocol": {
+                  "Value": "HTTPS"
+                },
+                "readInterval": {
+                  "Value": "100"
+                },
+                "unit": {
+                  "Value": "K"
+                },
+                "user-name": {
+                  "Value": "admin"
+                }
+              },
+              "common": {
+                "date-time": {
+                  "Value": "2020-12-24T20:15:00Z"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-101
+    title: "B1.1.3: Set explicit Config tag of an explicit asset (device, new values, full)"
+    expected: valid
+    reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-040, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-011, REQ-RES-CONFIG-019]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Set of the device example ("Overall device settings", DataSetWriterId 42 – the
+      same id as the network example ("Network settings", DataSetWriterId 42), SF-088
+      (d)) repeating the read-only properties of V-PAY-099 together with the new
+      Values. Corrected like V-PAY-099 (SF-088 (a) … (c)): common, unit, escaped
+      Pattern dots, no "Unit": "Temperature". The answers are the Status event
+      (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with
+      the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Overall device settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "device1": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Device 1"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes device one configuration options"
+                },
+                "aut0-r3fr3sh": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Automatic Refresh Enabled"
+                  },
+                  "Type": "Boolean",
+                  "Value": "false"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of device to read values from"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": "192.168.1.123"
+                },
+                "password": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Password"
+                  },
+                  "Sensitive": true,
+                  "Type": "String",
+                  "Value": "ssh-it's a secret!"
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "443"
+                },
+                "protocol": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Protocol"
+                  },
+                  "Type": "String",
+                  "Value": "HTTPS"
+                },
+                "readInterval": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Interval in which value is read from device"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Read Interval"
+                  },
+                  "Type": "Number",
+                  "Value": "100"
+                },
+                "unit": {
+                  "DefaultValue": "°C",
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Unit of measurement"
+                  },
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Unit"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Values": ["K", "°C", "°De", "°F", "°N", "°R", "°Ré", "°Rø" ]
+                  },
+                  "Value": "K"
+                },
+                "user-name": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Username"
+                  },
+                  "Type": "String",
+                  "Value": "admin"
+                }
+              },
+              "common": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "general configuration"
+                },
+                "date-time": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Date Time for service"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Date Time"
+                  },
+                  "Type": "DateTime",
+                  "Value": "2020-12-24T20:15:00Z"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Overall device settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Common and specific settings"
+                }
+              }
+            }
+          }
+        ]
+      }
+    original: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Overall device settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "device1": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Device 1"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes device one configuration options"
+                },
+                "aut0-r3fr3sh": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Automatic Refresh Enabled"
+                  },
+                  "Type": "Boolean",
+                  "Value": "false"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of device to read values from"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": "192.168.1.123"
+                },
+                "password": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Password"
+                  },
+                  "Sensitive": true,
+                  "Type": "String",
+                  "Value": "ssh-it's a secret!"
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "443"
+                },
+                "protocol": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Protocol"
+                  },
+                  "Type": "String",
+                  "Value": "HTTPS"
+                },
+                "readInterval": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Interval in which value is read from device"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Read Interval"
+                  },
+                  "Type": "Number",
+                  "Value": "100"
+                },
+                "Unit": {
+                  "DefaultValue": "°C",
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Unit of measurement"
+                  },
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Unit"
+                  },
+                  "Type": "String",
+                  "Unit": "Temperature",
+                  "Validation": {
+                    "Values": ["K", "°C", "°De", "°F", "°N", "°R", "°Ré", "°Rø" ]
+                  },
+                  "Value": "K"
+                },
+                "user-name": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Username"
+                  },
+                  "Type": "String",
+                  "Value": "admin"
+                }
+              },
+              "Common": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "general configuration"
+                },
+                "date-time": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Date Time for service"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Date Time"
+                  },
+                  "Type": "DateTime",
+                  "Value": "2020-12-24T20:15:00Z"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Overall device settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Common and specific settings"
+                }
+              }
+            }
+          }
+        ]
+      }
+    edits:
+      - target: "/Messages/0/Payload/common"
+        kind: corrected
+        reason: 'Group Common renamed to common as in the Sets "Minimal set of values" and the text of B1.1.3 (names are case-sensitive).'
+        sf: [SF-088]
+      - target: "/Messages/0/Payload/device1/unit"
+        kind: corrected
+        reason: 'Configuration object Unit renamed to unit as in the Sets "Minimal set of values".'
+        sf: [SF-088]
+      - target: "/Messages/0/Payload/device1/ip_address/Validation/Pattern"
+        kind: corrected
+        reason: 'Dots escaped (\.) as in the network example; the unescaped dot matches any character.'
+        sf: [SF-088]
+      - target: "/Messages/0/Payload/device1/Unit/Unit"
+        kind: removed
+        reason: '"Unit": "Temperature" names a quantity, not an EngineeringUnit (MG 8.3.3.1 Unit, REQ-RES-CONFIG-009).'
+        sf: [SF-088]
+
+  - id: V-PAY-102
+    title: "B1.1.3: Set explicit Config tag of an explicit asset (device, empty values, minimal)"
+    expected: valid
+    reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-007, REQ-RES-CONFIG-010, REQ-RES-CONFIG-011, REQ-RES-CONFIG-019]
+    origin: {kind: guideline, ref: MG B1.1.3}
+    status: draft
+    notes: >-
+      Unsets the configuration objects of the device example ("Overall device
+      settings", DataSetWriterId 42 – the same id as the network example ("Network
+      settings", DataSetWriterId 42), SF-088 (d)) with an empty Value
+      (REQ-RES-CONFIG-010), including the mandatory aut0-r3fr3sh and protocol:
+      format-valid, the owner may reject it with Bad (REQ-RES-CONFIG-011, SF-086 (b)).
+      user-name keeps "admin" (SF-088 (e)).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 42,
+            "WriterGroupName": "Overall device settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "device1": {
+                "aut0-r3fr3sh": {
+                  "Value": ""
+                },
+                "ip_address": {
+                  "Value": ""
+                },
+                "password": {
+                  "Value": ""
+                },
+                "port": {
+                  "Value": ""
+                },
+                "protocol": {
+                  "Value": ""
+                },
+                "readInterval": {
+                  "Value": ""
+                },
+                "unit": {
+                  "Value": ""
+                },
+                "user-name": {
+                  "Value": "admin"
+                }
+              },
+              "common": {
+                "date-time": {
+                  "Value": ""
+                }
               }
             }
           }
