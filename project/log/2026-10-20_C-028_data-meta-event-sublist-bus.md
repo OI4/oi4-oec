@@ -172,3 +172,35 @@ Workspace:
 - Checks: `go vet ./...`, `gofmt -l .` (empty), `go test ./...` ok; `spectool lint` ok (20 area files, 358 requirements, 171 informative items; 66 combinations; vectors topic 146, IL 29, dnp 15, oi4identifier 13, payload 87); `render -check`, `coverage -check` (C-028 areas 0 open), `topic -check`, `inventory -check -rev b2f0fe7` (1344 items) ok.
 
 For the PO: review REQ-RES-EVENT-004, REQ-BUS-010, REQ-RES-SUBLIST-002, REQ-RES-SUBLIST-004 (views `res-event.md`, `bus.md`, `res-sublist.md`) and confirm the agent decisions above.
+
+## Addendum 3 – PO acceptance, SF-082 lists of figures/tables, re-baseline on `c2be26b` (2026-10-21)
+
+PO (2026-10-21): REQ-RES-EVENT-004, REQ-BUS-010, REQ-RES-SUBLIST-002 and REQ-RES-SUBLIST-004 reviewed and accepted – set to `reviewed` with `spectool review` (`1e32276`). The guideline wording of SF-076 … 080 including the agent decisions of addendum 2 is accepted. Nothing in the catalog is `draft` any more.
+
+New PO order (no ADR, a spec-finding entry is enough, implement without PO review): the List of Figures and List of Tables of MG and RIG show chapter names instead of the captions, and not every entry is linked. Registered and resolved as **SF-082**.
+
+Guideline (`oi4-oec-documentation`, branch `feature/spec-findings`):
+
+- `2d9cfb5` – the four lists (MG/RIG figures/tables) now list every caption ("Figure n: …", "Table n: …") with a link to its page (MG: 21 figures, 11 tables; RIG: 2 figures, 10 tables). Found and fixed on the way:
+  - MG Figure 1 (Reference Architecture) had a caption but no image since the Confluence export; the unreferenced source `static/img/guideline/3eb410fc-….drawio` (page "Official OI4 Reference Architecture") was exported with the draw.io CLI to `…drawio.png` and embedded (link to the `.drawio` like the other figures).
+  - MG A2 lost its caption (originally "Table 14: Predefined DataSetClassIds …") in a format conversion; since SF-017/SF-053 A2 has three tables, now captioned Tables 4 (resources), 5 (Actions), 6 (reserved ids).
+  - MG A5 lost its caption (originally "Table 18: Authors (in alphabetical order)") inside a broken 40-column conversion table; rebuilt as Author/Company table with caption Table 10 (same 17 authors).
+  - Renumbering: MG A3 Tables 4/5 → 7/8 (incl. the A3 text reference and the MG 4.3.1 note), A4 Table 6 → 9, A6 Table 8 → 11. Figure 2 caption merged into one italic span; RIG Tables 7–9 captions got the colon.
+  - `yarn build` without warnings.
+- `c2be26b` – register: SF-082 closed/resolved, no open findings, next free id SF-083.
+
+Agent decisions (G-4.4, editorial, no PO review requested by the PO):
+
+- Links point to the page, not to the caption: in-page anchors (`<a id>` in MDX) are not registered by the Docusaurus 3 broken-anchor check and produced false warnings, so they were dropped.
+- Not captioned: the unnumbered notation example in MG 1.2 and about 20 tables that never had a caption (definition/field tables in MG 1.2, 1.3, 4.1, 4.2, 7.1, 8.1.4, 8.2.20, 8.4, B1.1.3, B1.1.8 and RIG 1.2). Numbering them would shift Table 3 (NE 107), which requirements quote. Offered to the PO as a follow-up.
+- The List of Figures of the OEC Process Description has the same defect; it was not part of the order (informative document) and is left unchanged.
+- Historical records (GL-ADRs, ADR-0001 amendments, older logs) keep the old table numbers.
+
+Workspace:
+
+- `a464725` re-baseline: `spectool rebaseline -rev c2be26b` – inventory unchanged (1344 items, same keys; only line numbers in MG 2 shift because of the Figure 1 image); baseline in all catalog files.
+- `2775093` references to MG A3 Table 4/5 updated to Table 7/8 – notes of two IL requirements, titles/description of the dnp-encoding and oi4identifier vectors and their views. Wording only; status stays `reviewed` (reason: SF-082 renumbering, content unchanged).
+- `82471f3` the same in comments of `oec/spec/tools/internal/il` (no code change).
+- Checks: `spectool lint` ok (20 area files, 358 requirements, 171 informative items; 66 combinations; vectors topic 146, IL 29, dnp 15, oi4identifier 13, payload 87); `render -check`, `coverage -check`, `topic -check`, `inventory -check -rev c2be26b` ok; `go test ./...` ok.
+
+Next: C-029 (RES-CONFIG).
