@@ -1,0 +1,176 @@
+# Requirements of area PLT – OEC platform requirements (RIG 5, RIG 5.1;
+# ADR-0018). The requirements on the platform are not graded by compliance
+# levels (RIG 5.1, RIG 1.2): domain platform, no levels. The list items of
+# RIG 5.1 take their obligation from the lead-in "must meet" where they have
+# no keyword of their own (SF-092 (a)).
+# Drafted in C-030.
+area: PLT
+baseline: "a77d331"
+requirements:
+  # --- Hardware (RIG 5.1) ---------------------------------------------------
+  - id: REQ-PLT-001
+    title: Minimum hardware of an OEC platform
+    statement: >-
+      The edge computer of an OEC platform uses one of the processor
+      architectures ARMv7, ARMv8 or amd64 and provides at least 1 GB RAM, at
+      least 4 GB non-volatile memory and at least one available network
+      interface.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1, SF-092]
+    quotes:
+      - ref: RIG 5.1
+        text: To achieve Open Industry 4.0 Alliance compliance, the hardware and software must meet several requirements.
+      - ref: RIG 5.1
+        text: The supported processor architectures are ARMv7, ARMv8, and amd64
+      - ref: RIG 5.1
+        text: A minimum of 1 GB RAM
+      - ref: RIG 5.1
+        text: At least one available network interface (likely Ethernet interface, but LTE or similar might be possible too)
+    verification: [d8, manual]
+    inventory: [RIG-5.1-7017a7e5]
+    status: draft
+    notes: >-
+      The list items have no keyword of their own; the obligation is taken
+      from the lead-in "must meet" (SF-092 (a)). The non-volatile memory may be
+      eMMC, SD card, SSD, HDD or similar. The architectures are also the
+      "supported platforms" of REQ-APP-001 (SF-092 (d)).
+
+  - id: REQ-PLT-002
+    title: Platform hardened for industrial use
+    statement: The system of an OEC platform is hardened for industrial use.
+    keyword: SHOULD
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1]
+    quotes:
+      - ref: RIG 5.1
+        text: The system should be hardened for industrial use
+    verification: [manual]
+    inventory: [RIG-5.1-4d6a88a1]
+    status: draft
+
+  # --- Software (RIG 5.1) ---------------------------------------------------
+  - id: REQ-PLT-003
+    title: Linux at the current patch level
+    statement: >-
+      The operating system of an OEC platform is a Linux-based distribution
+      at the current patch level.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1]
+    quotes:
+      - ref: RIG 5.1
+        text: The operating system shall be a Linux-based distribution at the current patch level.
+    verification: [d8, manual]
+    inventory: [RIG-5.1-c6087017]
+    status: draft
+
+  - id: REQ-PLT-004
+    title: User and role management with granular access control
+    statement: >-
+      The user interface of an OEC platform provides user and role management
+      for access control, by which the access to the available services of the
+      host system can be configured in a granular way.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1, SF-092]
+    quotes:
+      - ref: RIG 5.1
+        text: The user interface of an Open Edge Computing platform provides user and role management for access control.
+      - ref: RIG 5.1
+        text: Access to available services of the host system can be configured in a granular way via the user and role management.
+    verification: [manual]
+    inventory: [RIG-5.1-f306986f]
+    status: draft
+    notes: >-
+      "can be configured" describes a capability the platform has to offer;
+      the obligation comes from the lead-in "must meet" (SF-092 (a)).
+
+  - id: REQ-PLT-005
+    title: Industry-grade authentication
+    statement: The authentication methods of an OEC platform fulfill industry-grade standards.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1, RIG 3]
+    quotes:
+      - ref: RIG 5.1
+        text: The authentication methods must fulfill industry-grade standards.
+    verification: [manual]
+    inventory: [RIG-5.1-76e1f390]
+    status: draft
+    notes: The guideline names no specific standard; the check is a manual assessment.
+
+  - id: REQ-PLT-006
+    title: Container daemon
+    statement: >-
+      A daemon to run containerized applications is integrated in the OEC
+      platform and available for its users.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1, RIG 2.1]
+    quotes:
+      - ref: RIG 5.1
+        text: A daemon to run containerized applications must be integrated and available for Open Edge Computing users.
+    verification: [d8]
+    inventory: [RIG-5.1-ff4f2cea]
+    status: draft
+
+  - id: REQ-PLT-007
+    title: MQTT broker available
+    statement: >-
+      An MQTT broker is available on the edge computer or within the OEC
+      platform.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1, MG 6]
+    quotes:
+      - ref: RIG 5.1
+        text: A MQTT broker must be available on the edge computer or within the Open Edge Computing platform.
+    verification: [d8]
+    inventory: [RIG-5.1-d1c7b0b4]
+    status: draft
+    notes: Requirements on the broker itself are in area MQTT (REQ-MQTT-012 and following).
+
+  - id: REQ-PLT-008
+    title: OEC Registry available
+    statement: >-
+      An OEC Registry (MG A1, area REG) is available on the edge computer or
+      within the OEC platform.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1, MG A1, RIG A1]
+    quotes:
+      - ref: RIG 5.1
+        text: An OEC Registry must be available on the edge computer or within the Open Edge Computing platform.
+    verification: [d8]
+    inventory: [RIG-5.1-6c6b247d, MG-A4-4e9fcd9b, RIG-A1-515789f3]
+    status: draft
+    notes: The glossary entries of the OEC Registry (MG A4, RIG A1) state the same.
+
+  - id: REQ-PLT-009
+    title: Distributed infrastructure
+    statement: >-
+      The infrastructure of an OEC system may be distributed over several
+      computing instances, e.g. one instance running the MQTT broker, another
+      one the OEC Registry and further ones the containerized applications.
+    keyword: MAY
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 5.1]
+    quotes:
+      - ref: RIG 5.1
+        text: However, the infrastructure of an Open Edge Computing system may be distributed over several computing instances, e.g. one instance running the MQTT broker, another one running the OEC Registry and further ones running the containerized applications.
+    verification: [manual]
+    inventory: [RIG-5.1-8387aa07]
+    status: draft
+    notes: >-
+      A D8 check therefore must not assume that broker, Registry and
+      applications run on the same host.

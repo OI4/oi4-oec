@@ -1,0 +1,86 @@
+# Requirements of area APP – platform-related requirements on an application
+# (RIG 5.2; ADR-0018). Grading (RIG 1.2, RIG 5.2): the overview of RIG 5.2
+# applies to Level 3; at Level 2 the SBOM is mandatory and the remaining
+# requirements are recommended; Level 1 only requires the OCI container
+# (REQ-CMP-027). Detail entries of the reviewed umbrella REQ-CMP-032.
+# The SBOM item is covered by REQ-CNT-013, the legal item by REQ-LIC-004.
+# Recommendations stay SHOULD at Level 3 although REQ-CMP-032 is mandatory
+# at Level 3 (SF-091 (f)).
+# Drafted in C-030.
+area: APP
+baseline: "a77d331"
+requirements:
+  - id: REQ-APP-001
+    title: Images for at least one supported platform
+    statement: >-
+      The container images of an application are available for at least one
+      of the processor architectures supported by OEC platforms (ARMv7, ARMv8
+      or amd64, REQ-PLT-001).
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [container-image]
+    refs: [RIG 5.2, RIG 5.1, RIG 1.2, SF-092]
+    quotes:
+      - ref: RIG 5.2
+        text: Provided container images shall be available for at least one of the supported platforms, preferably as multi-architecture images.
+      - ref: RIG 5.2
+        text: The following overview applies to Level 3 (Full) of the OEC Service Container Compliance.
+    verification: [d8]
+    inventory: [RIG-5.2-40e23bb4]
+    status: draft
+    notes: >-
+      Detail of REQ-CMP-032 (reviewed umbrella). "supported platforms" is read
+      as the processor architectures of RIG 5.1 (SF-092 (d)).
+
+  - id: REQ-APP-002
+    title: Multi-architecture images
+    statement: >-
+      The container images of an application are provided as
+      multi-architecture images.
+    keyword: SHOULD
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: SHOULD}
+    applies_to: [container-image]
+    refs: [RIG 5.2, SF-091]
+    quotes:
+      - ref: RIG 5.2
+        text: Provided container images shall be available for at least one of the supported platforms, preferably as multi-architecture images.
+    verification: [d8]
+    inventory: [RIG-5.2-40e23bb4]
+    status: draft
+
+  - id: REQ-APP-003
+    title: Minimum hardware requirements described
+    statement: >-
+      The manufacturer of an application describes the minimum hardware
+      requirements of the application.
+    keyword: SHOULD
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: SHOULD}
+    applies_to: [manufacturer]
+    refs: [RIG 5.2, SF-091]
+    quotes:
+      - ref: RIG 5.2
+        text: Each application should describe its minimum hardware requirements
+    verification: [manual]
+    inventory: [RIG-5.2-eb253c18]
+    status: draft
+    notes: The guideline defines no format or location for the description.
+
+  - id: REQ-APP-004
+    title: Good software engineering and quality assurance
+    statement: >-
+      An application is developed according to established rules of good
+      software engineering and quality assurance.
+    keyword: SHOULD
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: SHOULD}
+    applies_to: [manufacturer]
+    refs: [RIG 5.2, SF-091]
+    quotes:
+      - ref: RIG 5.2
+        text: Each application should be developed according to established rules of good software engineering and quality assurance
+    verification: [manual]
+    inventory: [RIG-5.2-60a5f23c]
+    status: draft

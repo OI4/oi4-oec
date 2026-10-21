@@ -1,0 +1,556 @@
+# Requirements of area CNT – container environment (RIG 2, RIG 4; ADR-0018).
+# Grading (RIG 1.2, RIG 4 note): requirements on the container image or the
+# application use domain service-container – license and SBOM storage L1 –,
+# L2 MUST, L3 MUST; all other RIG 4 requirements L1 –, L2 SHOULD, L3 MUST
+# (umbrellas REQ-CMP-028 … 031). The host side of the storages and the
+# container name assignment are requirements on the platform (domain platform,
+# not graded, RIG 1.2).
+# Drafted in C-030.
+area: CNT
+baseline: "a77d331"
+requirements:
+  # --- Message Bus storage (RIG 4.1.1) --------------------------------------
+  - id: REQ-CNT-001
+    title: Platform provides the Message Bus storage
+    statement: >-
+      The platform maps a host-defined path, mounted read-only, to the target
+      path /etc/oi4/mqtt of every container. The Message Bus storage contains
+      at least broker.pem (public certificate of the broker), broker.json
+      (settings of the broker, REQ-CNT-003) and, if a local CA signed the
+      broker certificate, broker_ca.pem (that CA); without a local CA the CA
+      of the OI4 certificate storage (ca.pem, REQ-CNT-006) is used.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 4.1.1, SF-091]
+    quotes:
+      - ref: RIG 4.1.1
+        text: The Message Bus storage shall be used to make the public certificate and the settings of the MQTT broker available to the container and their MQTT clients.
+      - ref: RIG 4.1.1
+        text: The target path is the path inside the container, which must be mapped to a host-defined path inside the host system.
+      - ref: RIG 4.1.1
+        text: The host path shall be mounted read only!
+      - ref: RIG 4.1.1
+        text: 'The Message Bus storage shall contain at least the following files:'
+    verification: [d8]
+    inventory: [RIG-4.1.1-723b5b51, RIG-4.1.1-15bd8eb6, RIG-4.1.1-e577eb27, RIG-4.1.1-078a70a1]
+    status: draft
+    notes: >-
+      broker_ca.pem is listed among the files the storage contains "at
+      least", but the note of the table makes it optional (SF-091 (a)). The
+      broker address in broker.json is also required by REQ-MQTT-003.
+
+  - id: REQ-CNT-002
+    title: No private keys in the Message Bus and certificate storages
+    statement: >-
+      The platform stores no private keys in the Message Bus storage
+      (/etc/oi4/mqtt) and in the OI4 certificate storage (/etc/oi4/certs);
+      private keys are provided via the secret storage (REQ-CNT-008).
+    keyword: SHOULD
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 4.1.1, RIG 4.1.2]
+    quotes:
+      - ref: RIG 4.1.1
+        text: Folder which contains the MQTT settings and the public certificate of the broker HIGHLY RECOMMENDED Do not store any private keys here!
+      - ref: RIG 4.1.2
+        text: Storage for certificates. Such as client certificates for client certificate based authentication and CA certificate to validate other certificates. HIGHLY RECOMMENDED Do not store any private keys here!
+    verification: [d8]
+    inventory: [RIG-4.1.1-c7dae7e5, RIG-4.1.2-26f45379]
+    status: draft
+
+  - id: REQ-CNT-003
+    title: Content of broker.json
+    statement: >-
+      broker.json in the Message Bus storage is a JSON object with the
+      mandatory fields Address (String, IP address or host name of the
+      broker), SecurePort (UINT16, port on which the broker listens for TLS
+      connections) and MaxPacketSize (INT32, maximum size of an MQTT payload
+      in bytes, at least 262144). The broker accepts payloads up to
+      MaxPacketSize.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform, broker]
+    refs: [RIG 4.1.1, MG 6.2.1, SF-091]
+    quotes:
+      - ref: RIG 4.1.1
+        text: broker.json JSON coded file containing the settings of the MQTT broker.
+      - ref: RIG 4.1.1
+        text: Defines the maximum size of a MQTT payload in bytes.
+      - ref: RIG 4.1.1
+        text: The minimum value of MaxPacketSize is 262144 (256 KiB)
+      - ref: RIG 4.1.1
+        text: The intention of the MaxPacketSize is to protect the Message Bus broker and client.
+    verification: [d8]
+    inventory: [RIG-4.1.1-58d0cc4a, RIG-4.1.1-516de8c7, RIG-4.1.1-bf0c6b45]
+    status: draft
+    notes: >-
+      That the broker accepts payloads up to MaxPacketSize follows from the
+      purpose of the field (publishers may use the full size, REQ-PAG-005).
+      The effective upper bound of MQTT v3.1.1 (268435455 bytes remaining
+      length) is below INT32max (SF-091 (b)). A JSON Schema of broker.json
+      can be added with D8.
+
+  - id: REQ-CNT-004
+    title: Application uses the Message Bus storage
+    statement: >-
+      A containerized application takes the broker address (Address), the
+      port (SecurePort) and the MaxPacketSize from /etc/oi4/mqtt/broker.json
+      and verifies the broker certificate with broker_ca.pem or, if not
+      present, with the CA of the OI4 certificate storage; it needs no other
+      configuration of these settings.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, container-image]
+    refs: [RIG 4.1.1, RIG 1.2]
+    quotes:
+      - ref: RIG 4.1.1
+        text: The Message Bus storage shall be used to make the public certificate and the settings of the MQTT broker available to the container and their MQTT clients.
+    verification: [d8, manual]
+    inventory: [RIG-4.1.1-723b5b51]
+    status: draft
+    notes: >-
+      Graded by REQ-CMP-029. The client side of the messaging domain already
+      requires the port (REQ-MQTT-004), the certificate verification
+      (REQ-MQTT-008) and a NetworkMessage within MaxPacketSize (REQ-PAG-005)
+      at every messaging level.
+
+  # --- OI4 certificate storage (RIG 4.1.2) ----------------------------------
+  - id: REQ-CNT-005
+    title: Platform provides its CA in the certificate storage
+    statement: >-
+      If the system provides a certificate authority (CA) for signing
+      certificates, the platform makes the CA available in the OI4
+      certificate storage /etc/oi4/certs (REQ-CNT-006).
+    keyword: SHOULD
+    domain: platform
+    applies_to: [platform]
+    condition: The system provides a CA for signing certificates.
+    refs: [RIG 4.1.2, SF-091]
+    quotes:
+      - ref: RIG 4.1.2
+        text: 'In case the system provides a certificate authority (CA) for signing certificates, the CA should be made available by storing it as follows:'
+    verification: [d8]
+    inventory: [RIG-4.1.2-0e9d427e]
+    status: draft
+
+  - id: REQ-CNT-006
+    title: Content and mount of the certificate storage
+    statement: >-
+      If the platform provides the OI4 certificate storage, it maps a
+      host-defined path, mounted read-only, to the target path /etc/oi4/certs.
+      The storage contains at least ca.pem (CA for the validation of
+      certificates) and, for a container that authenticates with a client
+      certificate, its client certificate.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    condition: The platform provides the OI4 certificate storage.
+    refs: [RIG 4.1.2, SF-091]
+    quotes:
+      - ref: RIG 4.1.2
+        text: The target path is the path inside the Docker container, which must be mapped to a host-defined path inside the host system.
+      - ref: RIG 4.1.2
+        text: The host path shall be mounted read only!
+      - ref: RIG 4.1.2
+        text: 'The certificate storage shall contain at least the following files:'
+      - ref: RIG 4.1.2
+        text: ca.pem CA used for validation of certificates.
+    verification: [d8]
+    inventory: [RIG-4.1.2-aff2fc7b, RIG-4.1.2-9e0b30f0, RIG-4.1.2-e191918f, RIG-4.1.2-54831f39]
+    status: draft
+    notes: >-
+      The storage itself is a recommendation (REQ-CNT-005), its content
+      "shall" (SF-091 (c)); the client certificate is only needed for client
+      certificate authentication (REQ-MQTT-009/010).
+
+  - id: REQ-CNT-007
+    title: Client certificate named after the container
+    statement: >-
+      The client certificate of a container in the OI4 certificate storage is
+      named <containername>.pem, with the container name of RIG 4.2.
+    keyword: SHOULD
+    domain: platform
+    applies_to: [platform]
+    condition: The container authenticates with a client certificate.
+    refs: [RIG 4.1.2, RIG 4.2]
+    quotes:
+      - ref: RIG 4.1.2
+        text: <containername>.pem Client certificate of a specific application should be named as described in 4.2 Container Name Conventions.
+    verification: [d8]
+    inventory: [RIG-4.1.2-c5c21d8d]
+    status: draft
+
+  # --- Secret storage (RIG 4.1.3) -------------------------------------------
+  - id: REQ-CNT-008
+    title: Platform provides the MQTT secrets
+    statement: >-
+      The platform makes the MQTT secrets of a container available under
+      /run/secrets, mapped from a host-defined path and mounted read-only:
+      mqtt_credentials (base64(<username>:<password>)) for authentication by
+      username and password, mqtt_private_key.pem (PEM-encoded private key of
+      the client certificate in the OI4 certificate storage) and, if the key
+      is encrypted, mqtt_passphrase (base64-encoded passphrase). Each file is
+      present only if used; at least one means of authentication is
+      provided.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 4.1.3, MG 6.2.2, SF-091]
+    quotes:
+      - ref: RIG 4.1.3
+        text: 'In an Open Industry 4.0 Alliance-compliant application the MQTT credentials shall be made available to the container under the following path:'
+      - ref: RIG 4.1.3
+        text: The target path is the path inside the Docker container, which must be mapped to a host-defined path inside the host system.
+      - ref: RIG 4.1.3
+        text: The host path shall be mounted read only!
+      - ref: RIG 4.1.3
+        text: '/run/secrets/mqtt_credentials If present, it contains a base64 encoded username and password, which is used for MQTT authentication in the following format: base64(<username>:<password>)'
+    verification: [d8]
+    inventory: [RIG-4.1.3-ecda317f, RIG-4.1.3-04e70172, RIG-4.1.3-0b3ec5ba]
+    status: draft
+    notes: >-
+      Addressee (platform, not application) and "at least one means of
+      authentication" per SF-091 (d); the usernames follow REQ-MQTT-011.
+
+  - id: REQ-CNT-009
+    title: Application uses the certificate and secret storages
+    statement: >-
+      A containerized application takes its MQTT credentials from
+      /run/secrets: the username and password by base64-decoding
+      mqtt_credentials and splitting at the first ":", the private key of its
+      client certificate from mqtt_private_key.pem (decrypted with the
+      base64-decoded mqtt_passphrase, if present) and the client certificate
+      from /etc/oi4/certs/<containername>.pem; it needs no other
+      configuration of these secrets.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application, container-image]
+    refs: [RIG 4.1.3, RIG 4.1.2, RIG 1.2, SF-091]
+    quotes:
+      - ref: RIG 4.1.3
+        text: 'In an Open Industry 4.0 Alliance-compliant application the MQTT credentials shall be made available to the container under the following path:'
+    verification: [d8, manual]
+    inventory: [RIG-4.1.3-ecda317f]
+    status: draft
+    notes: >-
+      Graded by REQ-CMP-029 (secret handling). Which means is used if both
+      are available: REQ-MQTT-010. Splitting at the first ":" is possible
+      because a username contains no ":" (REQ-MQTT-011).
+
+  # --- Application specific storages (RIG 4.1.4) ----------------------------
+  - id: REQ-CNT-010
+    title: Application uses the OI4 application storage paths
+    statement: >-
+      If the system provides a persistent layer, a containerized application
+      that needs persistent configuration or data stores its configuration in
+      /etc/oi4/app and its data in /opt/oi4/app.
+    keyword: SHOULD
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: SHOULD}
+    applies_to: [application, container-image]
+    condition: The system provides a persistent layer and the application needs persistent configuration or data.
+    refs: [RIG 4.1.4, SF-091]
+    quotes:
+      - ref: RIG 4.1.4
+        text: In case the system provides a persistent layer, the application should use the following paths to make use of it.
+      - ref: RIG 4.1.4
+        text: /etc/oi4/app Application specific configuration shall be stored here
+      - ref: RIG 4.1.4
+        text: /opt/oi4/app Application specific data shall be stored here
+    verification: [manual]
+    inventory: [RIG-4.1.4-ffa2fd84, RIG-4.1.4-d501c1ac, RIG-4.1.4-f205ddea]
+    status: draft
+    notes: '"should use" in the sentence vs "shall be stored here" in the table: SF-091 (e).'
+
+  - id: REQ-CNT-011
+    title: Application storages are mapped and owned by one container
+    statement: >-
+      If the platform provides a persistent layer, it maps a host-defined
+      path to /etc/oi4/app and /opt/oi4/app of a container; only this one
+      container has access to its own application specific volume.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    condition: The platform provides a persistent layer.
+    refs: [RIG 4.1.4, SF-091]
+    quotes:
+      - ref: RIG 4.1.4
+        text: The target path is the path inside the Docker container, which must be mapped to a host-defined path inside the host system.
+      - ref: RIG 4.1.4
+        text: Attention must be paid to access permissions; to guarantee the data ownership, only one container shall have access to its own application specific volume.
+    verification: [d8]
+    inventory: [RIG-4.1.4-fba0af6c, RIG-4.1.4-4d7c9a08]
+    status: draft
+    notes: The host mapping does not apply to /opt/oi4/licenses (REQ-CNT-017, SF-091 (e)).
+
+  - id: REQ-CNT-012
+    title: Application detects manipulation of its stored data
+    statement: >-
+      A containerized application takes measures to detect manipulation of
+      the data in its application specific storages and protects it (e.g. by
+      encryption) if necessary.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application]
+    condition: The application uses an application specific storage.
+    refs: [RIG 4.1.4]
+    quotes:
+      - ref: RIG 4.1.4
+        text: Because container volumes are not protected against external access to read/write in general, the application has to take measures to detect data manipulation and might protect it (e.g. encryption) if necessary.
+    verification: [manual]
+    inventory: [RIG-4.1.4-4d2eb4a9]
+    status: draft
+    notes: Graded by REQ-CMP-029.
+
+  # --- License and SBOM storage (RIG 4.1.4) ---------------------------------
+  - id: REQ-CNT-013
+    title: SBOM in /opt/oi4/licenses
+    statement: >-
+      A containerized application provides a Software Bill of Materials
+      (SBOM) describing the licenses of all its software components in the
+      folder /opt/oi4/licenses: either SPDX (ISO/IEC 5962:2021) as
+      sbom.spdx.json or CycloneDX (ECMA-424) as sbom.cdx.json, each in the
+      JSON serialization of the format. Exactly one of these two files is
+      present.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [container-image]
+    refs: [RIG 4.1.4, RIG 4, RIG 1.2, RIG 5.2, GL-ADR-002]
+    quotes:
+      - ref: RIG 4.1.4
+        text: Instead, every Open Industry 4.0 Alliance-compliant application shall provide this information in the folder /opt/oi4/licenses.
+      - ref: RIG 4.1.4
+        text: 'The licenses of all software components used in the application shall be described in a Software Bill of Materials (SBOM) in one of the following formats:'
+      - ref: RIG 4.1.4
+        text: 'The SBOM shall use the JSON serialization of the selected format and shall be stored with a canonical file name, so that it can be detected without further configuration:'
+      - ref: RIG 4.1.4
+        text: Exactly one of these SBOM files shall be present.
+      - ref: RIG 4
+        text: The license and SBOM storage (4.1.4 Application Specific Storages) is mandatory from Level 2 on.
+    verification: [d8]
+    inventory: [RIG-4.1.4-0a58da0d, RIG-4.1.4-0b9c4e0b, RIG-4.1.4-97a172ef, RIG-4.1.4-e49f19d5, RIG-4.1.4-d208c6fb, RIG-4-686e2ed9, RIG-5.2-1b1e9b90]
+    status: draft
+    notes: Detail of REQ-CMP-028 (reviewed umbrella).
+
+  - id: REQ-CNT-014
+    title: License texts in the SBOM or as <License-ID>.txt
+    statement: >-
+      Every license text is either part of the SBOM or stored as
+      /opt/oi4/licenses/<License-ID>.txt, where <License-ID> is the SPDX
+      license identifier of the license or the LicenseRef- identifier used in
+      the SBOM for a license without SPDX identifier.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [container-image]
+    refs: [RIG 4.1.4, RIG 1.2, GL-ADR-002]
+    quotes:
+      - ref: RIG 4.1.4
+        text: The license texts shall either be part of the SBOM or be stored as separate text files /opt/oi4/licenses/<License-ID>.txt.
+      - ref: RIG 4.1.4
+        text: This way, each license text is clearly assignable to the corresponding license in the SBOM.
+    verification: [d8]
+    inventory: [RIG-4.1.4-9ffd2b93]
+    status: draft
+
+  - id: REQ-CNT-015
+    title: SBOM and license texts are part of the image
+    statement: >-
+      The SBOM and the license texts are part of the container image; they
+      are static and change only with a new version of the image.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [container-image]
+    refs: [RIG 4.1.4, RIG 1.2]
+    quotes:
+      - ref: RIG 4.1.4
+        text: The SBOM and the license texts shall be part of the container image. They are static and only change with a new version of the image.
+    verification: [d8]
+    inventory: [RIG-4.1.4-f4837530]
+    status: draft
+
+  - id: REQ-CNT-016
+    title: SBOM is created during the image build
+    statement: The SBOM is created automatically as part of the build process of the image.
+    keyword: SHOULD
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: SHOULD}
+    applies_to: [container-image, manufacturer]
+    refs: [RIG 4.1.4]
+    quotes:
+      - ref: RIG 4.1.4
+        text: Create the SBOM automatically as part of the build process of the image.
+    verification: [manual]
+    inventory: [RIG-4.1.4-f8ef731d]
+    status: draft
+
+  - id: REQ-CNT-017
+    title: /opt/oi4/licenses is not overlaid by a host mount
+    statement: >-
+      The platform does not overlay /opt/oi4/licenses of a container with a
+      host-defined mount; the content comes from the image.
+    keyword: MUST NOT
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 4.1.4]
+    quotes:
+      - ref: RIG 4.1.4
+        text: The content of /opt/oi4/licenses is provided by the image and not by the host. Therefore, it shall not be overlaid by a host-defined mount.
+    verification: [d8]
+    inventory: [RIG-4.1.4-db5179b6]
+    status: draft
+
+  - id: REQ-CNT-018
+    title: Platform may read the license folder
+    statement: >-
+      The platform may read the content of /opt/oi4/licenses, e.g. by
+      mounting the path as a read-only volume that is populated from the
+      image.
+    keyword: MAY
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 4.1.4]
+    quotes:
+      - ref: RIG 4.1.4
+        text: A platform may read the content, e.g. by mounting the path as a read-only volume that is populated from the image.
+    verification: [manual]
+    inventory: [RIG-4.1.4-150063ec]
+    status: draft
+
+  # --- Container name (RIG 4.2) ---------------------------------------------
+  - id: REQ-CNT-019
+    title: Unique container name set as hostname
+    statement: >-
+      When a container is created, the platform assigns it a well-defined
+      container name that is globally unique, has at most 63 characters and
+      follows the host name rules of RFC 1123, and sets the container
+      hostname to this name.
+    keyword: MUST
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 4.2, SF-090]
+    quotes:
+      - ref: RIG 4.2
+        text: Each OI4 Alliance-compliant container shall have a well-defined name for identification.
+      - ref: RIG 4.2
+        text: To meet these requirements, the container name must be globally unique according to the definition of the OI4 Alliance, while also not exceeding 63 characters.
+      - ref: RIG 4.2
+        text: The container name is assigned when the container is created and shall be made available to the container by setting the container hostname.
+      - ref: RIG 4.2
+        text: The RFC 1123 rules for assigning a host name must also be followed for container names so that DNS resolution works correctly.
+    verification: [d8]
+    inventory: [RIG-4.2-36a1dde9, RIG-4.2-8d376a21, RIG-4.2-2365c930, RIG-4.2-7d974d7e]
+    status: draft
+    notes: >-
+      Addressee (platform at container creation) and "globally unique" per
+      SF-090 (b), (c). RFC 1123 allows letters, digits and "-" only, so the
+      recommended separator "_" of REQ-CNT-020 conflicts (SF-090 (a)).
+
+  - id: REQ-CNT-020
+    title: Container name with a UUID postfix
+    statement: >-
+      The container name consists of a self-defined default container name
+      with a UUID as postfix (<DefaultContainerName>_<uuid>), so that several
+      instances never get the same name.
+    keyword: SHOULD
+    domain: platform
+    applies_to: [platform]
+    refs: [RIG 4.2, SF-090]
+    quotes:
+      - ref: RIG 4.2
+        text: Best practice is to use a naming scheme such as <DefaultContainerName>_<uuid>.
+      - ref: RIG 4.2
+        text: To avoid several instances of a container with the same container name, it is best practice to use a UUID as postfix on top of a self-defined container name such as <DefaultContainerName>_<uuid>.
+    verification: [d8]
+    inventory: [RIG-4.2-244d6b14, RIG-4.2-7323472b]
+    status: draft
+    notes: >-
+      Proposed in SF-090 (a): separator "-" instead of "_" (RFC 1123); with
+      a UUID of 36 characters the default container name has at most 26
+      characters (SF-090 (e)).
+
+  - id: REQ-CNT-021
+    title: Application uses its container name
+    statement: >-
+      A containerized application determines its container name from its
+      hostname and uses it as MQTT ClientId (REQ-MQTT-013), as name of its
+      client certificate (REQ-CNT-007) and, if it uses the Oi4Identifier as
+      Identification Link, as SerialNumber in the Oi4Identifier.
+    keyword: MUST
+    implicit: true
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: MUST}
+    applies_to: [application]
+    refs: [RIG 4.2, MG 4.3.1, RIG 1.2, SF-035, SF-090]
+    quotes:
+      - ref: RIG 4.2
+        text: 'The container name is used for several things:'
+      - ref: RIG 4.2
+        text: As a serial number inside the Oi4Identifier (OEC Messaging Guideline, 4.3 The Oi4Identifier), if the Oi4Identifier is used as Identification Link and thus as AppId (OEC Messaging Guideline, 7.3 AppId Element)
+      - ref: MG 4.3.1
+        text: When deploying a container which by its nature has no serial number and can be instantiated multiple times, use the container name as SerialNumber as defined in OEC Runtime & Infrastructure Guideline, 4.2 Container Name Conventions.
+    verification: [manual, d8]
+    status: draft
+    notes: >-
+      The list of uses has no keyword (SF-090 (d)); treated as MUST until
+      decided (G-1.6). Graded by REQ-CMP-029; the ClientId itself is a
+      messaging SHOULD at all levels (REQ-MQTT-013).
+
+  # --- Container image integrity (RIG 4.3) ----------------------------------
+  - id: REQ-CNT-022
+    title: Digest where an immutable image version is needed
+    statement: >-
+      Container images are referenced by tag by default. Where a dedicated,
+      immutable version of an image is needed (e.g. the same image on several
+      edge computers), the image is referenced by its digest (SHA256).
+    keyword: SHOULD
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: SHOULD}
+    applies_to: [container-image, platform]
+    condition: A dedicated, immutable version of the image is needed.
+    refs: [RIG 4.3, RIG 3, SF-091]
+    quotes:
+      - ref: RIG 4.3
+        text: Therefore, the usage of tags within the OI4 Alliance is permitted and the default.
+      - ref: RIG 4.3
+        text: In cases where a dedicated, immutable version of an image is needed, digests can be used. A digest is the unique identifier of an image as a SHA256 hash.
+    verification: [manual]
+    inventory: [RIG-4.3-b9c787bb, RIG-4.3-37a27c8a, RIG-3-d124e0fb]
+    status: draft
+    notes: >-
+      The only RIG 4.3 statement with a keyword is the recommendation (tip
+      box); REQ-CMP-030 (L3 Mandatory) therefore grades a recommendation,
+      which stays SHOULD at Level 3 (SF-091 (f)).
+      Addressed to whoever installs the image (operator, platform) and to the
+      provider, who publishes the digests.
+
+  # --- Container networks (RIG 4.4) -----------------------------------------
+  - id: REQ-CNT-023
+    title: Bridge network preferred
+    statement: >-
+      A container is attached to a bridge network rather than to the host
+      network, unless it needs low-level Ethernet communication.
+    keyword: SHOULD
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: SHOULD}
+    applies_to: [container-image, platform]
+    refs: [RIG 4.4, SF-091]
+    quotes:
+      - ref: RIG 4.4
+        text: For the use of containers in an OI4 Alliance-compliant Edge Computing environment, the use of bridge network types should be preferred.
+      - ref: RIG 4.4
+        text: Low level Ethernet communication is possible.
+    verification: [d8, manual]
+    inventory: [RIG-4.4-fbcccae3]
+    status: draft
+    notes: >-
+      The exception for low-level Ethernet (OT connectors) is derived from
+      the advantage/disadvantage tables (host network, bridge network).
+      REQ-CMP-031 (L3 Mandatory) grades this recommendation, which stays
+      SHOULD at Level 3 (SF-091 (f)).

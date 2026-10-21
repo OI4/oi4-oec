@@ -1,0 +1,96 @@
+# Requirements of area LIC – legal requirements and software licenses
+# (RIG 5.3; ADR-0018). Independent of the compliance level, the provider stays
+# responsible for the compliance with the software licenses and the
+# applicable law (RIG 1.2 note): these entries are MUST / MUST NOT at all
+# levels. Only the SBOM with the license texts is graded (from Level 2 on,
+# REQ-CMP-028, REQ-CNT-013/014).
+# Drafted in C-030.
+area: LIC
+baseline: "a77d331"
+requirements:
+  - id: REQ-LIC-001
+    title: Provider responsible for license compliance
+    statement: >-
+      The provider of a service (container image) ensures the compliance with
+      the software licenses of all third-party software it contains.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [manufacturer]
+    refs: [RIG 5.3, RIG 1.2]
+    quotes:
+      - ref: RIG 5.3
+        text: It is in the full responsibility of the provider that compliance with the associated software licenses must be fulfilled.
+      - ref: RIG 1.2
+        text: Independent of the compliance level, the provider is responsible for the compliance with the associated software licenses and the applicable law (5.3 Legal Requirements & Software Licenses).
+    verification: [manual]
+    inventory: [RIG-5.3-8bb5e94e]
+    status: draft
+
+  - id: REQ-LIC-002
+    title: Every license listed in the SBOM with its license text
+    statement: >-
+      Every license used within a service is listed in the SBOM and the
+      corresponding license text is provided; both are stored in the image
+      under /opt/oi4/licenses (REQ-CNT-013, REQ-CNT-014).
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [container-image]
+    refs: [RIG 5.3, RIG 4.1.4, RIG 1.2, SF-092]
+    quotes:
+      - ref: RIG 5.3
+        text: Every license used within a service must be listed in a Software Bill of Materials (SBOM), and the corresponding license texts must be provided.
+      - ref: RIG 5.3
+        text: Providing the SBOM is mandatory from OEC Service Container Compliance Level 2 on
+    verification: [d8, manual]
+    inventory: [RIG-5.3-b3b4f4ea, RIG-5.3-0b7941ca]
+    status: draft
+    notes: >-
+      Detail of REQ-CMP-028 (reviewed umbrella). RIG 5.3 cites MG 1.3 for the
+      level; the Service Container levels are defined in RIG 1.2 (SF-092 (b)).
+      D8 can check that every license of the SBOM has a text; whether the SBOM
+      is complete needs a manual assessment.
+
+  - id: REQ-LIC-003
+    title: Third-party patents and IP covered by agreements
+    statement: >-
+      Procedures and techniques used within a service that are protected by a
+      patent or intellectual property not belonging to the service provider
+      are covered by a valid patent usage or license agreement.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [manufacturer]
+    refs: [RIG 5.3, RIG 1.2]
+    quotes:
+      - ref: RIG 5.3
+        text: Utilized procedures and techniques within the services protected by any patent or intellectual property that does not belong to the service provider must be covered by a valid patent usage or licence agreement.
+    verification: [manual]
+    inventory: [RIG-5.3-5a1d6312]
+    status: draft
+
+  - id: REQ-LIC-004
+    title: Lawful operation, no harmful or abusive components
+    statement: >-
+      A service operates only within the boundaries of the applicable law and
+      neither supports unethical tasks nor contains harmful or abusive
+      components (such as crypto miners, spyware, trojan horses or viruses).
+    keyword: MUST NOT
+    domain: service-container
+    levels: {L1: MUST NOT, L2: MUST NOT, L3: MUST NOT}
+    applies_to: [container-image, manufacturer]
+    refs: [RIG 5.3, RIG 5.2, RIG 1.2, SF-092]
+    quotes:
+      - ref: RIG 5.3
+        text: The offered services may only operate within the boundaries of the applicable law and must not support unethical tasks, like crypto-mining or spy software.
+      - ref: RIG 5.2
+        text: Services offered by applications must follow legal guidelines and must not contain harmful or abusive components (such as crypto miners, spyware, trojan horses, viruses, etc.).
+    verification: [manual]
+    inventory: [RIG-5.3-83aa82cc, RIG-5.2-32110d74]
+    status: draft
+    notes: >-
+      Level-independent per the RIG 1.2 note, although RIG 5.2 lists the item
+      in the Level 3 overview and only recommends the remaining Level 3
+      requirements at Level 2 (SF-092 (c)). "may only operate within the
+      boundaries" is a restriction, not a permission.
