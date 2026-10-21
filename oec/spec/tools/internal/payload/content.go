@@ -1,6 +1,7 @@
 package payload
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -8,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -15,9 +17,9 @@ import (
 // Pagination, Locale and Query (areas PAG, LOC, QRY, RES-REFDES) for
 // every resource and the DataSets of MAM, Health, Profile, PublicationList
 // and ReferenceDesignation (areas RES-*, C-027) and of Data (Oi4Pv), Event
-// and SubscriptionList (C-028). The application-defined Data DataSets
-// themselves are not checked; Config follows in C-029. Only MUST rules are
-// reported; recommendations (SHOULD) are not checked.
+// and SubscriptionList (C-028) and Config (C-029). The application-defined
+// Data DataSets themselves are not checked. Only MUST rules are reported;
+// recommendations (SHOULD) are not checked.
 
 // dsm is a DataSetMessage of a ua-data NetworkMessage with a valid
 // DataSetWriterId.
@@ -46,6 +48,7 @@ var resourceRules = map[string]resourceRule{
 	"ReferenceDesignation": {get: "REQ-RES-REFDES-003", set: "REQ-RES-REFDES-006", del: "REQ-RES-REFDES-007", content: (*checker).referenceDesignation},
 	"Data":                 {get: "REQ-RES-DATA-006", set: "REQ-RES-DATA-009", content: (*checker).dataSet},
 	"Event":                {content: (*checker).event},
+	"Config":               {get: "REQ-RES-CONFIG-016", set: "REQ-RES-CONFIG-019", content: (*checker).config},
 	"SubscriptionList":     {get: "REQ-RES-SUBLIST-007", set: "REQ-RES-SUBLIST-010", del: "REQ-RES-SUBLIST-011", delOne: true, content: (*checker).subscriptionEntry},
 }
 
@@ -656,4 +659,217 @@ func (c *checker) subscriptionEntry(d dsm) {
 	if d.group != want {
 		c.add(join(d.ptr, "WriterGroupName"), "REQ-RES-SUBLIST-002", "WriterGroupName %q is not %q derived from the TopicPath", d.group, want)
 	}
+}
+
+// --- Config (MG 8.3.3) -------------------------------------------------------
+
+var (
+	configTypes = map[string]bool{"Boolean": true, "ByteString": true, "DateTime": true, "Number": true, "String": true}
+	// GroupName and ConfigName (MG 8.3.3.1/8.3.3.2, REQ-RES-CONFIG-004).
+	configNamePattern = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_-]*$`)
+	// Number as decimal text in JSON number syntax (REQ-RES-CONFIG-007, SF-084 (d)).
+	configNumberPattern = regexp.MustCompile(`^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?$`)
+)
+
+// config checks a Config DataSet (REQ-RES-CONFIG-002 for Pub,
+// REQ-RES-CONFIG-003 for Set): the keys of the Payload other than Context are
+// groups, the keys of a Group other than Name and Description are
+// configuration objects (SF-084 (a)). A non-empty Value or DefaultValue is
+// checked against Type (REQ-RES-CONFIG-007) and a non-empty Value against the
+// Validation of the same object (REQ-RES-CONFIG-008); whether the Set matches
+// the published Config (names, Mandatory, read-only properties) is not
+// decidable per message (REQ-RES-CONFIG-005/011/023).
+func (c *checker) config(d dsm) {
+	set := c.t.Method == "Set"
+	req := "REQ-RES-CONFIG-002"
+	if set {
+		req = "REQ-RES-CONFIG-003"
+	}
+	p := join(d.ptr, "Payload")
+	groups := 0
+	for _, k := range sortedKeys(d.payload) {
+		v := d.payload[k]
+		if k == "Context" {
+			m := c.object(join(p, k), v, shape{required: []string{"Name"}, optional: []string{"Description"}, missing: req})
+			c.configTexts(m, join(p, k))
+			continue
+		}
+		groups++
+		c.configName(p, k, "GroupName")
+		c.configGroup(join(p, k), v, req, set)
+	}
+	if groups == 0 {
+		c.add(p, req, "a Config DataSet contains at least one Group")
+	}
+}
+
+func (c *checker) configName(ptr, name, kind string) {
+	if !configNamePattern.MatchString(name) {
+		c.add(join(ptr, name), "REQ-RES-CONFIG-004", "%s %q contains characters other than a-z, A-Z, 0-9, - and _ or starts with a digit or -", kind, name)
+	}
+}
+
+// configTexts checks the LocalizedTexts Name and Description of a Group or
+// the Context (REQ-MSG-040).
+func (c *checker) configTexts(m map[string]any, ptr string) {
+	for _, k := range []string{"Name", "Description"} {
+		if v, ok := m[k]; ok {
+			c.localizedText(join(ptr, k), v)
+		}
+	}
+}
+
+func (c *checker) configGroup(ptr string, v any, req string, set bool) {
+	m, ok := v.(map[string]any)
+	if !ok {
+		c.add(ptr, req, "a Group must be a JSON object")
+		return
+	}
+	if _, ok := m["Name"]; !ok && !set {
+		c.add(ptr, req, "missing field Name")
+	}
+	c.configTexts(m, ptr)
+	configs := 0
+	for _, k := range sortedKeys(m) {
+		if k == "Name" || k == "Description" {
+			continue
+		}
+		configs++
+		c.configName(ptr, k, "ConfigName")
+		c.configObject(join(ptr, k), m[k], req, set)
+	}
+	if configs == 0 {
+		c.add(ptr, req, "a Group contains at least one configuration object")
+	}
+}
+
+func (c *checker) configObject(ptr string, v any, req string, set bool) {
+	s := shape{required: []string{"Type", "Value", "Name"}, optional: []string{"Unit", "DefaultValue", "Mandatory", "Sensitive", "Description", "Validation"}, missing: req}
+	if set {
+		s.required, s.optional = []string{"Value"}, append(s.optional, "Type", "Name")
+	}
+	m := c.object(ptr, v, s)
+	if m == nil {
+		return
+	}
+	typ, typeOK := c.enum(m, ptr, "Type", "REQ-RES-CONFIG-006", configTypes)
+	value, valueOK := c.str(m, ptr, "Value", "REQ-RES-CONFIG-007")
+	def, defOK := c.str(m, ptr, "DefaultValue", "REQ-RES-CONFIG-007")
+	c.str(m, ptr, "Unit", req)
+	for _, k := range []string{"Mandatory", "Sensitive"} {
+		if b, ok := m[k]; ok {
+			if _, isBool := b.(bool); !isBool {
+				c.add(join(ptr, k), req, "%s must be a Boolean", k)
+			}
+		}
+	}
+	c.configTexts(m, ptr)
+	if typeOK {
+		if valueOK {
+			c.configValue(join(ptr, "Value"), typ, value)
+		}
+		if defOK {
+			c.configValue(join(ptr, "DefaultValue"), typ, def)
+		}
+	}
+	val, ok := m["Validation"]
+	if !ok {
+		return
+	}
+	vp := join(ptr, "Validation")
+	vm := c.object(vp, val, shape{optional: []string{"Length", "Min", "Max", "Pattern", "Values"}, missing: req})
+	if vm == nil {
+		return
+	}
+	length, lengthOK := c.uint(vm, vp, "Length", req, maxUint32)
+	limits := map[string]float64{}
+	for _, k := range []string{"Min", "Max"} {
+		if x, ok := vm[k]; ok {
+			n, isNum := x.(json.Number)
+			f, err := n.Float64()
+			if !isNum || err != nil {
+				c.add(join(vp, k), req, "%s must be a number", k)
+				continue
+			}
+			limits[k] = f
+		}
+	}
+	pattern, patternOK := c.str(vm, vp, "Pattern", req)
+	var values []string
+	valuesOK := false
+	if x, ok := vm["Values"]; ok {
+		arr, isArr := x.([]any)
+		valuesOK = isArr
+		for i, e := range arr {
+			s, isStr := e.(string)
+			if !isStr {
+				c.add(join(join(vp, "Values"), strconv.Itoa(i)), req, "Values must be an array of strings")
+				valuesOK = false
+				continue
+			}
+			values = append(values, s)
+		}
+		if !isArr {
+			c.add(join(vp, "Values"), req, "Values must be an array of strings")
+		}
+	}
+	if !valueOK || value == "" {
+		return
+	}
+	const vreq = "REQ-RES-CONFIG-008"
+	at := join(ptr, "Value")
+	if lengthOK && int64(utf8.RuneCountInString(value)) > length {
+		c.add(at, vreq, "Value %q is longer than Length %d", value, length)
+	}
+	if typeOK && typ == "Number" && configNumberPattern.MatchString(value) {
+		f, err := strconv.ParseFloat(value, 64)
+		if min, ok := limits["Min"]; ok && err == nil && f < min {
+			c.add(at, vreq, "Value %s is below Min %v", value, min)
+		}
+		if max, ok := limits["Max"]; ok && err == nil && f > max {
+			c.add(at, vreq, "Value %s is above Max %v", value, max)
+		}
+	}
+	if patternOK {
+		// Patterns RE2 cannot compile (e.g. look-arounds) are not evaluated.
+		if re, err := regexp.Compile(pattern); err == nil && !re.MatchString(value) {
+			c.add(at, vreq, "Value %q does not match Pattern %q", value, pattern)
+		}
+	}
+	if valuesOK && !slices.Contains(values, value) {
+		c.add(at, vreq, "Value %q is not one of Values %q", value, values)
+	}
+}
+
+// configValue checks the string representation of a non-empty Value or
+// DefaultValue of the given Type (REQ-RES-CONFIG-007, SF-084 (d)).
+func (c *checker) configValue(ptr, typ, s string) {
+	if s == "" {
+		return
+	}
+	ok := true
+	switch typ {
+	case "Boolean":
+		ok = s == "true" || s == "false"
+	case "Number":
+		ok = configNumberPattern.MatchString(s)
+	case "DateTime":
+		_, err := time.Parse(time.RFC3339Nano, s)
+		ok = err == nil
+	case "ByteString":
+		_, err := base64.StdEncoding.DecodeString(s)
+		ok = err == nil
+	}
+	if !ok {
+		c.add(ptr, "REQ-RES-CONFIG-007", "%q is no %s in its string representation", s, typ)
+	}
+}
+
+func sortedKeys(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+	return keys
 }

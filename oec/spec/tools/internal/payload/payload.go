@@ -12,8 +12,8 @@
 // checked for the helper DataSets PaginationRequest, Pagination, Locale and
 // Query (areas PAG, LOC, QRY, RES-REFDES), the resources MAM, Health,
 // Profile, PublicationList and ReferenceDesignation (areas RES-*, C-027) and
-// Data (Oi4Pv), Metadata (empty Get), Event and SubscriptionList (C-028);
-// Config follows in C-029. The deep structure of the data type descriptions
+// Data (Oi4Pv), Metadata (empty Get), Event and SubscriptionList (C-028)
+// and Config (C-029). The deep structure of the data type descriptions
 // (MG 8.2.10 … 8.2.15) is not checked here.
 package payload
 

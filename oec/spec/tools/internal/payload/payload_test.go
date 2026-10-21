@@ -617,3 +617,90 @@ func TestContent(t *testing.T) {
 		t.Errorf("tolerant MAM: unexpected problems %v", ps)
 	}
 }
+
+var configPub = `{
+  "MessageId": "8-OTConnector/` + app + `",
+  "MessageType": "ua-data",
+  "PublisherId": "OTConnector/` + app + `",
+  "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+  "ReplyTo": "",
+  "Messages": [{
+    "DataSetWriterId": 42, "WriterGroupName": "Network", "DataSetWriterName": "` + app + `",
+    "Payload": {
+      "eth0": {
+        "Name": {"Locale": "en-US", "Text": "ETH0"},
+        "ip_address": {"Type": "String", "Value": "192.168.1.10", "Name": {"Locale": "en-US", "Text": "IP"},
+          "Mandatory": true, "Validation": {"Length": 15, "Pattern": "^[0-9.]+$"}},
+        "port": {"Type": "Number", "Value": "8080", "DefaultValue": "80", "Unit": "", "Name": {"Locale": "en-US", "Text": "Port"},
+          "Validation": {"Min": 1, "Max": 65535}},
+        "dhcp": {"Type": "Boolean", "Value": "false", "Name": {"Locale": "en-US", "Text": "DHCP"}, "Sensitive": false},
+        "mode": {"Type": "String", "Value": "auto", "Name": {"Locale": "en-US", "Text": "Mode"}, "Validation": {"Values": ["auto", "manual"]}},
+        "since": {"Type": "DateTime", "Value": "2026-10-21T10:00:00Z", "Name": {"Locale": "en-US", "Text": "Since"}},
+        "key": {"Type": "ByteString", "Value": "AQID", "Name": {"Locale": "en-US", "Text": "Key"}},
+        "note": {"Type": "String", "Value": "", "Name": {"Locale": "en-US", "Text": "Note"}, "Validation": {"Length": 1, "Values": ["x"]}}
+      },
+      "Context": {"Name": {"Locale": "en-US", "Text": "Network"}}
+    }
+  }]
+}`
+
+func TestContentC029(t *testing.T) {
+	cfg := func(method, source, filter string) Topic {
+		return Topic{ServiceType: "OTConnector", AppIL: app, Method: method, Resource: "Config", SourceIL: source, Filter: filter}
+	}
+	pub, get, set := cfg("Pub", app, "Network"), cfg("Get", "", ""), cfg("Set", app, "Network")
+	r := func(old, new string) string { return strings.Replace(configPub, old, new, 1) }
+	setMin := strings.Replace(configPub, configPub[strings.Index(configPub, `"Payload": {`):strings.Index(configPub, `
+  }]`)], `"Payload": {"eth0": {"port": {"Value": "1"}, "note": {"Value": ""}}}`, 1)
+	cases := []struct {
+		name string
+		top  Topic
+		msg  string
+		want []string
+	}{
+		{"pub", pub, configPub, nil},
+		{"set full", set, configPub, nil},
+		{"set minimal", set, setMin, nil},
+		{"get with config", get, configPub, []string{"REQ-RES-CONFIG-016"}},
+		{"set two", set, r(`}
+  }]`, `}
+  }, {"DataSetWriterId": 43, "WriterGroupName": "Network", "DataSetWriterName": "`+app+`", "Payload": {"g": {"c": {"Value": ""}}}}]`), []string{"REQ-RES-CONFIG-019"}},
+		{"group name digit", pub, r(`"eth0": {`, `"0eth": {`), []string{"REQ-RES-CONFIG-004"}},
+		{"config name minus", pub, r(`"port": {`, `"-port": {`), []string{"REQ-RES-CONFIG-004"}},
+		{"config name dot", pub, r(`"port": {`, `"p.ort": {`), []string{"REQ-RES-CONFIG-004"}},
+		{"no group", pub, strings.Replace(configPub, configPub[strings.Index(configPub, `"Payload": {`):strings.Index(configPub, `
+  }]`)], `"Payload": {"Context": {"Name": {"Locale": "en-US", "Text": "x"}}}`, 1), []string{"REQ-RES-CONFIG-002"}},
+		{"set empty group", set, strings.Replace(setMin, `"eth0": {"port": {"Value": "1"}, "note": {"Value": ""}}`, `"eth0": {"Name": {"Locale": "en-US", "Text": "x"}}`, 1), []string{"REQ-RES-CONFIG-003"}},
+		{"group not object", pub, r(`"Context": {"Name": {"Locale": "en-US", "Text": "Network"}}`, `"Context": {"Name": {"Locale": "en-US", "Text": "Network"}}, "g": 1`), []string{"REQ-RES-CONFIG-002"}},
+		{"group without name", pub, r(`"Name": {"Locale": "en-US", "Text": "ETH0"},`, ``), []string{"REQ-RES-CONFIG-002"}},
+		{"set group without name", set, r(`"Name": {"Locale": "en-US", "Text": "ETH0"},`, ``), nil},
+		{"pub config without type", pub, r(`"dhcp": {"Type": "Boolean", `, `"dhcp": {`), []string{"REQ-RES-CONFIG-002"}},
+		{"set config without value", set, strings.Replace(setMin, `{"Value": "1"}`, `{"Type": "Number"}`, 1), []string{"REQ-RES-CONFIG-003"}},
+		{"type integer", pub, r(`"Type": "Number"`, `"Type": "Integer"`), []string{"REQ-RES-CONFIG-006"}},
+		{"value number", pub, r(`"Value": "8080"`, `"Value": 8080`), []string{"REQ-RES-CONFIG-007"}},
+		{"boolean yes", pub, r(`"Value": "false"`, `"Value": "yes"`), []string{"REQ-RES-CONFIG-007"}},
+		{"number text", pub, r(`"DefaultValue": "80"`, `"DefaultValue": "eighty"`), []string{"REQ-RES-CONFIG-007"}},
+		{"date time", pub, r(`"2026-10-21T10:00:00Z"`, `"21.10.2026"`), []string{"REQ-RES-CONFIG-007"}},
+		{"byte string", pub, r(`"AQID"`, `"A*"`), []string{"REQ-RES-CONFIG-007"}},
+		{"mandatory string", pub, r(`"Mandatory": true`, `"Mandatory": "true"`), []string{"REQ-RES-CONFIG-002"}},
+		{"name text", pub, r(`"Text": "Port"}`, `"Text": "Port", "Foo": 1}`), []string{"REQ-MSG-001"}},
+		{"name plain", pub, r(`{"Locale": "en-US", "Text": "Port"}`, `"Port"`), []string{"REQ-MSG-040"}},
+		{"context without name", pub, r(`"Context": {"Name": {"Locale": "en-US", "Text": "Network"}}`, `"Context": {}`), []string{"REQ-RES-CONFIG-002"}},
+		{"unknown config key", pub, r(`"Sensitive": false`, `"Sensitive": false, "Access": "rw"`), []string{"REQ-MSG-001"}},
+		{"above max", pub, r(`"Value": "8080"`, `"Value": "70000"`), []string{"REQ-RES-CONFIG-008"}},
+		{"below min", pub, r(`"Value": "8080"`, `"Value": "0"`), []string{"REQ-RES-CONFIG-008"}},
+		{"too long", pub, r(`"192.168.1.10"`, `"192.168.100.100x"`), []string{"REQ-RES-CONFIG-008"}},
+		{"not in values", pub, r(`"Value": "auto"`, `"Value": "off"`), []string{"REQ-RES-CONFIG-008"}},
+		{"values not strings", pub, r(`["auto", "manual"]`, `["auto", 1]`), []string{"REQ-RES-CONFIG-002"}},
+		{"length negative", pub, r(`"Length": 15`, `"Length": -1`), []string{"REQ-RES-CONFIG-002"}},
+		{"min text", pub, r(`"Min": 1`, `"Min": "1"`), []string{"REQ-RES-CONFIG-002"}},
+		{"pattern re2 unsupported", pub, r(`"^[0-9.]+$"`, `"^(?=x)"`), nil},
+	}
+	for _, c := range cases {
+		got := reqs(t, c.top, c.msg)
+		if !reflect.DeepEqual(got, c.want) && !(len(got) == 0 && len(c.want) == 0) {
+			v, _ := Parse([]byte(c.msg))
+			t.Errorf("%s: got %v, want %v: %v", c.name, got, c.want, Check(c.top, v))
+		}
+	}
+}
