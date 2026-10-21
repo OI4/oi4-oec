@@ -68,7 +68,7 @@ The Filter of an entry is present exactly for the resources Data, Metadata, Conf
 - Refs: MG 8.3.8, MG 9.1.8, SF-067
 - Verification: schema, d7-validate
 - Status: reviewed
-- Inventory: MG-8.3.8-4b0d1d82, MG-9.1.8-50d5be83, MG-9.1.8-7e7fda6f
+- Inventory: MG-8.3.8-4b0d1d82, MG-9.1.8-4ac125ad, MG-9.1.8-7e7fda6f
 
 > In addition to the ResourceType a Tag can be added, e.g. to address a defined DataSetMessage of the resource Data.
 > — MG 9.1.8

@@ -11,12 +11,12 @@ Guideline baseline: `a77d331` · Area status: reviewed · Sections: MG 8.3.3, MG
 | [REQ-RES-CONFIG-004](#req-res-config-004) | Character set of GroupName and ConfigName | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-CONFIG-005](#req-res-config-005) | Groups and configuration objects are defined by the owner only | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-test | reviewed |
 | [REQ-RES-CONFIG-006](#req-res-config-006) | Type is one of five OPC UA base types | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-RES-CONFIG-007](#req-res-config-007) | Value and DefaultValue are strings in the representation of Type | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-RES-CONFIG-008](#req-res-config-008) | A set Value satisfies the Validation | MUST* | MUST | MUST | MUST | messaging | d7-validate | reviewed |
+| [REQ-RES-CONFIG-007](#req-res-config-007) | Value and DefaultValue are strings in the representation of Type | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
+| [REQ-RES-CONFIG-008](#req-res-config-008) | A set Value satisfies the Validation | MUST* | MUST | MUST | MUST | messaging | d7-validate | draft |
 | [REQ-RES-CONFIG-009](#req-res-config-009) | Unit is an EngineeringUnit DisplayName | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-CONFIG-010](#req-res-config-010) | A value is unset with an empty string, there is no Del | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-RES-CONFIG-011](#req-res-config-011) | Mandatory configuration objects are contained in every Set of their group | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
-| [REQ-RES-CONFIG-012](#req-res-config-012) | The Value of a sensitive configuration object may be hidden in user interfaces | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
+| [REQ-RES-CONFIG-012](#req-res-config-012) | Front-ends hide the value of a sensitive configuration object | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | draft |
 | [REQ-RES-CONFIG-013](#req-res-config-013) | A Group collects configuration objects configured at once | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-CONFIG-014](#req-res-config-014) | The group of common configuration objects is named common | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-CONFIG-015](#req-res-config-015) | The Filter of a Config DataSet is its context name | MUST* | MUST | MUST | MUST | messaging | d7-validate | reviewed |
@@ -26,8 +26,11 @@ Guideline baseline: `a77d331` · Area status: reviewed · Sections: MG 8.3.3, MG
 | [REQ-RES-CONFIG-019](#req-res-config-019) | Set Config addresses exactly one Config DataSet | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-CONFIG-020](#req-res-config-020) | Set Config is protected by ACL | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-RES-CONFIG-021](#req-res-config-021) | Status event after Set Config | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-RES-CONFIG-022](#req-res-config-022) | Changed Config is published after a successful Set | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-RES-CONFIG-023](#req-res-config-023) | A Set Config is applied completely or rejected | MUST* | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
+| [REQ-RES-CONFIG-022](#req-res-config-022) | Changed Config is published after a successful Set | MUST | MUST | MUST | MUST | messaging | d7-test | draft |
+| [REQ-RES-CONFIG-023](#req-res-config-023) | A Set Config is applied completely or rejected | MUST | SHOULD | MUST | MUST | messaging | d7-test | draft |
+| [REQ-RES-CONFIG-024](#req-res-config-024) | Sensitive configuration values are masked in every Pub | MUST | MUST | MUST | MUST | messaging | d7-validate, d7-test | draft |
+| [REQ-RES-CONFIG-025](#req-res-config-025) | The mask in a Set leaves a sensitive value unchanged | MUST* | SHOULD | MUST | MUST | messaging | d7-test | draft |
+| [REQ-RES-CONFIG-026](#req-res-config-026) | The operator restricts read access to Set/Config | SHOULD | n/a | n/a | n/a | platform | d8 | draft |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -65,9 +68,12 @@ The Payload of a published Config DataSetMessage contains one or more groups –
 - Refs: MG 8.3.3, MG 8.3.3.1, MG 9.1.3, SF-084
 - Verification: schema, d7-validate
 - Status: reviewed
-- Inventory: MG-8.3.3-1c34a2be, MG-8.3.3.1-026a7205, MG-8.3.3.1-04c6226d, MG-8.3.3.1-3252fe76, MG-8.3.3.1-3d0ae994, MG-8.3.3.1-429195c8, MG-8.3.3.1-4669c6f3, MG-8.3.3.1-61095915, MG-8.3.3.1-77df3d22, MG-8.3.3.1-985db72c, MG-8.3.3.1-a6e70e34, MG-8.3.3.1-a80b6582, MG-8.3.3.1-aebe7568, MG-8.3.3.1-b894e5a1, MG-8.3.3.1-bfb35734, MG-8.3.3.1-c082cd74, MG-8.3.3.1-c20c94a6, MG-8.3.3.1-c732cae9, MG-8.3.3.1-c7ff79ea, MG-8.3.3.1-cba0cd10, MG-8.3.3.1-ccbc6103, MG-8.3.3.1-ce7454d2, MG-8.3.3.1-d1b06f37, MG-8.3.3.1-e228ee18, MG-8.3.3.1-f4732596, MG-8.3.3.1-f5305ca8, MG-8.3.3.1-fcad6559, MG-8.3.3.1-feffc287, MG-8.3.3.1-ff239c31
+- Inventory: MG-8.3.3-1c34a2be, MG-8.3.3-565fc688, MG-8.3.3-c25cf82c, MG-8.3.3.1-026a7205, MG-8.3.3.1-04c6226d, MG-8.3.3.1-3252fe76, MG-8.3.3.1-3d0ae994, MG-8.3.3.1-429195c8, MG-8.3.3.1-4669c6f3, MG-8.3.3.1-61095915, MG-8.3.3.1-77df3d22, MG-8.3.3.1-985db72c, MG-8.3.3.1-9dfc31eb, MG-8.3.3.1-a6e70e34, MG-8.3.3.1-aebe7568, MG-8.3.3.1-b894e5a1, MG-8.3.3.1-bb506b94, MG-8.3.3.1-bfb35734, MG-8.3.3.1-c082cd74, MG-8.3.3.1-c732cae9, MG-8.3.3.1-c7ff79ea, MG-8.3.3.1-cba0cd10, MG-8.3.3.1-ccbc6103, MG-8.3.3.1-ce7454d2, MG-8.3.3.1-d1b06f37, MG-8.3.3.1-e228ee18, MG-8.3.3.1-f4732596, MG-8.3.3.1-f5305ca8, MG-8.3.3.1-f59df6f9, MG-8.3.3.1-feffc287, MG-8.3.3.1-ff239c31
 
 > The complete Config object has the same structure for the methods Pub and Set. However, they differ in which properties are mandatory.
+> — MG 8.3.3
+
+> The keys of the Payload other than Context are Group objects, the keys of a Group other than Name and Description are Config objects. Config, Validation and Context objects contain no other keys than listed.
 > — MG 8.3.3
 
 > A configuration object can only be added to a Group. Therefore at least one Group is mandatory, even when it contains only one single configuration object or several objects, which are not tightly coupled.
@@ -82,7 +88,7 @@ The Payload of a published Config DataSetMessage contains one or more groups –
 > A DisplayName for this Config object shall be given as localized text.
 > — MG 8.3.3.1
 
-Notes: The field tables of MG 8.3.3.1 are flat headings; the nesting (payload → &lt;GroupName>/Context, Group → Name/Description/&lt;ConfigName>, Config → Type … Validation, Validation → Length … Values) follows the templates of MG 9.1.3 and the examples of MG B1.1.3 (SF-084 (a)). Values is an array of strings although the table says "Type: String" (SF-084 (c)). Min and Max ("Real") are JSON numbers. The keys of a Group other than Name and Description are its configuration objects, the keys of the payload other than Context its groups. Field presence and types per REQ-CMP-025/026; LocalizedText per REQ-MSG-040.
+Notes: The nesting (payload → &lt;GroupName>/Context, Group → Name/Description/&lt;ConfigName>, Config → Type … Validation, Validation → Length … Values) is the structure overview of MG 8.3.3 (SF-084 (a)); Values is an "Array of String" (SF-084 (c)). Min and Max ("Real") are JSON numbers. Field presence and types per REQ-CMP-025/026; LocalizedText per REQ-MSG-040. Sensitive values are masked (REQ-RES-CONFIG-024).
 
 ## REQ-RES-CONFIG-003
 
@@ -96,15 +102,18 @@ The Payload of the Config DataSetMessage of a Set has the structure of REQ-RES-C
 - Refs: MG 8.3.3, MG 8.3.3.2, MG 9.1.3, SF-084, SF-086
 - Verification: schema, d7-validate
 - Status: reviewed
-- Inventory: MG-8.3.3.2-22624b9f, MG-8.3.3.2-25c785df, MG-8.3.3.2-25f2c93e, MG-8.3.3.2-2c218a3d, MG-8.3.3.2-2e0d0855, MG-8.3.3.2-44186564, MG-8.3.3.2-58c43c4f, MG-8.3.3.2-614eeff5, MG-8.3.3.2-626ac4bb, MG-8.3.3.2-6276f54f, MG-8.3.3.2-68250658, MG-8.3.3.2-72af5988, MG-8.3.3.2-75eb048a, MG-8.3.3.2-79633c2a, MG-8.3.3.2-7d60da83, MG-8.3.3.2-92c9fd11, MG-8.3.3.2-9c1c98ad, MG-8.3.3.2-b153b601, MG-8.3.3.2-bb89871c, MG-8.3.3.2-bbef6cbc, MG-8.3.3.2-bcaa5fb6, MG-8.3.3.2-c08294c1, MG-8.3.3.2-cc495a35, MG-8.3.3.2-d295d815, MG-8.3.3.2-d55011a4, MG-8.3.3.2-d9012dde, MG-8.3.3.2-e99d2012, MG-8.3.3.2-f6a75ae4, MG-9.1.3-36d1a38e
+- Inventory: MG-8.3.3.2-0e562920, MG-8.3.3.2-25c785df, MG-8.3.3.2-25f2c93e, MG-8.3.3.2-2c218a3d, MG-8.3.3.2-2c2ebbbd, MG-8.3.3.2-2e0d0855, MG-8.3.3.2-44186564, MG-8.3.3.2-506e3d6e, MG-8.3.3.2-58c43c4f, MG-8.3.3.2-614eeff5, MG-8.3.3.2-626ac4bb, MG-8.3.3.2-6276f54f, MG-8.3.3.2-67988e5d, MG-8.3.3.2-68250658, MG-8.3.3.2-75eb048a, MG-8.3.3.2-76395973, MG-8.3.3.2-7d60da83, MG-8.3.3.2-80b13559, MG-8.3.3.2-92c9fd11, MG-8.3.3.2-9c1c98ad, MG-8.3.3.2-9d0c7d81, MG-8.3.3.2-b153b601, MG-8.3.3.2-bbef6cbc, MG-8.3.3.2-bcaa5fb6, MG-8.3.3.2-cc495a35, MG-8.3.3.2-d295d815, MG-8.3.3.2-d9012dde, MG-8.3.3.2-e7184abe, MG-8.3.3.2-e99d2012, MG-8.3.3.2-f6a75ae4, MG-9.1.3-36d1a38e
 
 > A configuration object can only be added to a Group. Therefore at least one Group is mandatory, even when it contains only one single configuration object or several objects, which are not tightly coupled.
+> — MG 8.3.3.2
+
+> A Set of Config is a partial update: the Payload contains at least one Group object with at least one Config object, and every mandatory Config object (see Mandatory) of each contained Group object. Group and Config objects which are not contained stay unchanged. Besides the Value, a Config object may repeat the read-only properties received through Pub/Config unchanged.
 > — MG 8.3.3.2
 
 > In addition, it may also contain the other properties received through Pub/Config.
 > — MG 9.1.3
 
-Notes: "A DisplayName … shall be given" (MG 8.3.3.2) is read as "if given, as LocalizedText", because the same table makes Name optional (SF-084 (f)). A Set of a subset of the groups/configuration objects is a partial update – an exception to the complete key frame of REQ-MSG-030 and the "updated resource object" of REQ-BUS-004, proposed as SF-086 (a); the B1.1.3 examples contain every configuration object. The MG 9.1.3 Set templates omit the &lt;GroupName> level (SF-086 (e)).
+Notes: "If given, a DisplayName … shall be given as localized text" (MG 8.3.3.2, SF-084 (g)). A Set of a subset of the groups/configuration objects is a partial update – the exception to the complete key frame of REQ-MSG-030 and the "updated resource object" of REQ-BUS-004 (SF-086 (a)). A sensitive object may carry the mask (REQ-RES-CONFIG-025).
 
 ## REQ-RES-CONFIG-004
 
@@ -119,7 +128,7 @@ Every GroupName and ConfigName is a non-empty string of the characters a–z, A�
 - Refs: MG 8.3.3.1, MG 8.3.3.2, SF-084
 - Verification: schema, d7-validate
 - Status: reviewed
-- Inventory: MG-8.3.3.1-028278e0, MG-8.3.3.1-1e400088, MG-8.3.3.1-63ac43c1, MG-8.3.3.1-ec257974, MG-8.3.3.2-47e3c53f, MG-8.3.3.2-7c86dbf5, MG-8.3.3.2-974cf753, MG-8.3.3.2-d70a1784
+- Inventory: MG-8.3.3.1-028278e0, MG-8.3.3.1-1e400088, MG-8.3.3.1-63ac43c1, MG-8.3.3.1-669ef474, MG-8.3.3.1-e2f7095a, MG-8.3.3.1-ec257974, MG-8.3.3.2-47e3c53f, MG-8.3.3.2-7c86dbf5, MG-8.3.3.2-974cf753, MG-8.3.3.2-d70a1784, MG-8.3.3.2-d71dab9d, MG-8.3.3.2-e7996b9d
 
 > To avoid problems on JSON parsing in different languages, the GroupName must contain only the characters &lt;a..z>, &lt;A..Z>, &lt;0..9>, &lt;-> and &lt;_>. The GroupName must not start with a number (0..9) or with a minus (-).
 > — MG 8.3.3.1
@@ -127,7 +136,13 @@ Every GroupName and ConfigName is a non-empty string of the characters a–z, A�
 > To avoid problems on JSON parsing in different languages, the ConfigName must contain only the characters &lt;a..z>, &lt;A..Z>, &lt;0..9>, &lt;-> and &lt;_>. The ConfigName must not start with a number (0..9) or with a minus (-).
 > — MG 8.3.3.1
 
-Notes: The reserved names (Context; Name, Description) follow from the structure – such a key is read as the property, not as a group or configuration object – and are proposed as SF-084 (b). The checker reports names outside the character set.
+> A GroupName must not be Context.
+> — MG 8.3.3.1
+
+> A ConfigName must not be Name or Description.
+> — MG 8.3.3.1
+
+Notes: The reserved names (Context; Name, Description) avoid keys that cannot be told apart from the properties of the same level (SF-084 (b)). The checker reports names outside the character set.
 
 ## REQ-RES-CONFIG-005
 
@@ -152,7 +167,7 @@ Only the component that owns a Config DataSet defines its groups and configurati
 > As the device or application providing the resource is the owner of the configuration object, it is the only instance which can remove objects from within the config object.
 > — MG 9.1.3
 
-Notes: A Set with an unknown group or configuration object is rejected (REQ-RES-CONFIG-023, REQ-CMP-043). Names are compared exactly (case-sensitive); the device example of MG B1.1.3 uses "Unit"/"Common" in Pub and "unit"/"common" in Set (SF-088 (a)).
+Notes: A Set with an unknown group or configuration object is rejected (REQ-RES-CONFIG-023, REQ-CMP-043). Names are compared exactly (case-sensitive); the device example of MG B1.1.3 uses "unit" and "common" in every message since SF-088 (a).
 
 ## REQ-RES-CONFIG-006
 
@@ -180,14 +195,14 @@ Notes: A requester that repeats Type in a Set uses the published one (REQ-RES-CO
 
 **Value and DefaultValue are strings in the representation of Type**
 
-Value and DefaultValue are JSON strings. A non-empty one represents a value of Type: Boolean "true" or "false", Number a decimal number in JSON number syntax, DateTime an ISO 8601 date-time (RFC 3339), ByteString base64 and String any text. An empty Value means that the configuration object is not set.
+Value and DefaultValue are JSON strings. A non-empty one represents a value of Type: Boolean "true" or "false", Number a decimal number in JSON number syntax, DateTime an ISO 8601 date-time (RFC 3339), ByteString base64 and String any text. An empty Value means that the configuration object is not set. Exception: the mask of a sensitive configuration object (REQ-RES-CONFIG-024/025) is not interpreted with Type.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: application, device, requester
 - Refs: MG 8.3.3.1, MG 8.3.3.2, SF-084
 - Verification: schema, d7-validate
-- Status: reviewed
+- Status: draft
 - Inventory: MG-8.3.3.1-3b31fa9e, MG-8.3.3.1-61fb5a3d, MG-8.3.3.2-053b08f7, MG-8.3.3.2-8e5d40a5
 
 > The Value of a configuration item must always be a string, which must be interpreted with help of the Type information.
@@ -196,23 +211,29 @@ Value and DefaultValue are JSON strings. A non-empty one represents a value of T
 > The DefaultValue of a configuration item must always be a string, which must be interpreted with help of the Type information.
 > — MG 8.3.3.1
 
-> Each type will be presented as string in value key (e.g. a DateTime will be a stringified object).
+> Each type is presented as string in the Value and the DefaultValue:
 > — MG 8.3.3.1
 
-Notes: The string representation per Type is not defined in the guideline ("a DateTime will be a stringified object"); the representations above follow the JSON encoding of OPC UA Part 6 5.4 and are proposed as SF-084 (d). The checker checks them where Type and Value are in the same object (Pub, Set with Type).
+> An empty string means that the value is not set.
+> — MG 8.3.3.1
+
+> Exception: the mask `********` of a sensitive Config object (see Sensitive).
+> — MG 8.3.3.1
+
+Notes: The representations per Type are listed in MG 8.3.3.1/8.3.3.2 (SF-084 (d), in line with the JSON encoding of OPC UA Part 6 5.4). The checker checks them where Type and Value are in the same object (Pub, Set with Type) and skips the mask of a sensitive object.
 
 ## REQ-RES-CONFIG-008
 
 **A set Value satisfies the Validation**
 
-A non-empty Value satisfies the Validation of its configuration object: at most Length characters, for Type Number a number between Min and Max (inclusive), a match of the regular expression Pattern and one of Values, as far as these keys are given.
+A non-empty Value satisfies the Validation of its configuration object: at most Length characters, for Type Number a number between Min and Max (inclusive), a match of the regular expression Pattern and one of Values, as far as these keys are given. The mask of a sensitive configuration object (REQ-RES-CONFIG-024/025) is not checked against the Validation.
 
 - Keyword: MUST (implicit, SF-035)
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: application, device, requester
 - Refs: MG 8.3.3.1, MG 8.3.3.2, SF-035, SF-084
 - Verification: d7-validate
-- Status: reviewed
+- Status: draft
 - Inventory: MG-8.3.3.1-447047a4, MG-8.3.3.1-7500a301, MG-8.3.3.1-f4071468, MG-8.3.3.2-00c53dcc, MG-8.3.3.2-2fb581a1, MG-8.3.3.2-bf8e27b3
 
 > The Min contains the minimal value, a Value can get.
@@ -224,7 +245,10 @@ A non-empty Value satisfies the Validation of its configuration object: at most 
 > A type of enumeration to show, which values are allowed.
 > — MG 8.3.3.1
 
-Notes: "The Length contains the max length of a Value"; counted in characters (Unicode code points, SF-084 (d)). Patterns should be interoperable (MG 8.3.3.1 note); the checker evaluates a Pattern with Go RE2 and skips patterns it cannot compile. A Set that violates the Validation is rejected (REQ-RES-CONFIG-023).
+> The Length contains the max length of a Value, counted in characters.
+> — MG 8.3.3.1
+
+Notes: Length counts characters (Unicode code points); Min and Max apply to the Type Number (SF-084 (d)). Patterns should be interoperable (MG 8.3.3.1 note); the checker evaluates a Pattern with Go RE2 and skips patterns it cannot compile. A Set that violates the Validation is rejected (REQ-RES-CONFIG-023).
 
 ## REQ-RES-CONFIG-009
 
@@ -247,7 +271,7 @@ The Unit of a configuration object is the DisplayName of an EngineeringUnit of O
 > However, when a very rare unit does not exist in the list of EngineeringUnits, a self defined (or better industry specific) unit may be used here.
 > — MG 8.3.3.1
 
-Notes: The B1.1.3 device example has "Unit": "Temperature" (a quantity, no unit) – removed in the vectors (SF-088 (c)).
+Notes: The B1.1.3 device example had "Unit": "Temperature" (a quantity, no unit); removed with SF-088 (c).
 
 ## REQ-RES-CONFIG-010
 
@@ -286,41 +310,44 @@ A configuration object with Mandatory = true is contained, with its Value, in ev
 - Refs: MG 8.3.3.1, MG 8.3.3.2, MG 9.1.3, SF-086
 - Verification: d7-validate
 - Status: reviewed
-- Inventory: MG-8.3.3.1-59f324f8, MG-8.3.3.1-986cbccd, MG-8.3.3.2-846ccb16, MG-8.3.3.2-989c6b42, MG-9.1.3-78ad37ba, MG-9.1.3-f9183417
+- Inventory: MG-8.3.3.1-624778c8, MG-8.3.3.1-986cbccd, MG-8.3.3.1-f1218207, MG-8.3.3.2-30635d2a, MG-8.3.3.2-846ccb16, MG-8.3.3.2-bff5490c, MG-9.1.3-1d957d86, MG-9.1.3-7c151900, MG-9.1.3-cf25bdf3
 
-> If Mandatory is set to true, this Config object must be part of the Group and Value must be set during write operation.
+> If Mandatory is set to true, this Config object must be part of the Group in every Set which contains the Group, including its Value. An empty Value of a mandatory Config object is a valid message; the application may reject it with a status Event with the EventLevel Bad.
 > — MG 8.3.3.1
 
 > If it does not exist, the default behavior is the same as Mandatory = false.
 > — MG 8.3.3.1
 
-> In a Set message, all config elements which are mandatory ("Mandatory": true) must be provided!
+> A Set message is a partial update: it contains at least one group with at least one config element, and all config elements of a contained group which are mandatory ("Mandatory": true) must be provided!
 > — MG 9.1.3
 
-> The payload must contain the values of mandatory config names.
+> The payload must contain the values of the mandatory config names of each contained group.
 > — MG 9.1.3
 
-Notes: "Must be part of the Group" is read per group contained in the Set (SF-086 (a)). An empty Value of a mandatory object is a valid Set ("Value must be set" = present); the application may reject it (REQ-RES-CONFIG-023) – B1.1.3 unsets the mandatory objects aut0-r3fr3sh and protocol (SF-086 (b)). Checkable only against the published Config (Mandatory flags), not per message.
+Notes: An empty Value of a mandatory object is a valid Set; the application may reject it (REQ-RES-CONFIG-023) – B1.1.3 unsets the mandatory objects aut0-r3fr3sh and protocol (SF-086 (b)). A mandatory sensitive object can be sent with the mask (REQ-RES-CONFIG-025). Checkable only against the published Config (Mandatory flags), not per message.
 
 ## REQ-RES-CONFIG-012
 
-**The Value of a sensitive configuration object may be hidden in user interfaces**
+**Front-ends hide the value of a sensitive configuration object**
 
-An application that displays configuration values (e.g. a web front-end) may hide the Value of a configuration object with Sensitive = true (type "password").
+An application that displays or edits configuration values (e.g. a web front-end) hides the value of a configuration object with Sensitive = true (type "password"), also when a new value is entered.
 
-- Keyword: MAY
-- Levels: L1 MAY · L2 MAY · L3 MAY
+- Keyword: SHOULD
+- Levels: L1 SHOULD · L2 SHOULD · L3 SHOULD
 - Domain: messaging · Applies to: application
-- Condition: The application displays Config values.
-- Refs: MG 8.3.3.1, MG 8.3.3.2, SF-087
+- Condition: The application displays or edits Config values.
+- Refs: MG 8.3.3.1, MG 8.3.3.2, GL-ADR-021, SF-087
 - Verification: manual
-- Status: reviewed
-- Inventory: MG-8.3.3.1-da5ad6c2, MG-8.3.3.2-71486eba
+- Status: draft
+- Inventory: MG-8.3.3.1-6a2f01c3, MG-8.3.3.1-da5ad6c2, MG-8.3.3.2-71486eba
 
 > In context with the available OPC UA base types, the OI4 Alliance is missing type "password" which can be used to hide the value of an object (e.g. in user interfaces, such as web front-ends) if necessary.
 > — MG 8.3.3.1
 
-Notes: Sensitive does not change the encoding on the Message Bus: the Value is published like any other (B1.1.3 "password"); its confidentiality depends on the read ACL of Pub/Config. Whether a publisher should withhold sensitive values is proposed as SF-087.
+> Front-end applications should hide it as well, e.g. when a new value is entered.
+> — MG 8.3.3.1
+
+Notes: The Message Bus side is REQ-RES-CONFIG-024 (masking in every Pub) and REQ-RES-CONFIG-025 (mask in a Set). MAY → SHOULD with GL-ADR-021: the note of MG 8.3.3.1 recommends hiding the value in front-ends.
 
 ## REQ-RES-CONFIG-013
 
@@ -363,7 +390,7 @@ A component that collects common configuration objects in a Group names this gro
 > Configuration objects in this group do not necessarily have to be grouped this way, but it is a way to make it clear that these objects belong to the "common settings".
 > — MG 8.3.3.1
 
-Notes: Best practice → SHOULD (MG 1.2). B1.1.3 uses "Common" and "common" (SF-088 (a)).
+Notes: Best practice → SHOULD (MG 1.2). B1.1.3 uses "common" in every message since SF-088 (a).
 
 ## REQ-RES-CONFIG-015
 
@@ -378,11 +405,15 @@ Each Config DataSet of an asset has its own Filter, the name of its context, use
 - Refs: MG 8.3.3.1, MG 9.1.3, SF-035, SF-085
 - Verification: d7-validate
 - Status: reviewed
+- Inventory: MG-8.3.3.1-ed5a8ff3, MG-8.3.3.2-066620fe
 
 > The Context helps to define an overall name for the included Group objects.
 > — MG 8.3.3.1
 
-Notes: MG 9.1.3 writes the Filter as &lt;Context.Name> and the templates "&lt;object name; might correlate with content of context object>"; Context is optional and its Name a LocalizedText that follows the requested Locale – a localized Filter would change the topic. Proposed interpretation SF-085: stable, non-localized name; in B1.1.3 Filter and Context.Name (en-US) are equal ("Network settings", "Overall device settings").
+> The Filter (and the WriterGroupName) of a Config DataSetMessage is a stable, non-localized name chosen by the owner of the configuration, unique among the Config DataSetMessages of the Source. The Name of the Context is the display name of this Filter and can be localized; the Filter does not change with the requested Locale.
+> — MG 8.3.3.1
+
+Notes: Defined in MG 8.3.3.1/8.3.3.2 since SF-085; MG 9.1.3 writes the Filter as &lt;Filter>. In B1.1.3 Filter and Context.Name (en-US) are equal ("Network settings", "Overall device settings"). The definition has no keyword (implicit MUST).
 
 ## REQ-RES-CONFIG-016
 
@@ -506,34 +537,118 @@ Notes: Same obligation as REQ-TOP-014; ReplyTo and content per REQ-RES-EVENT-005
 
 **Changed Config is published after a successful Set**
 
-After a successful Set Config, the component publishes the new Config DataSet to Pub/Config/&lt;Source>/&lt;Filter> with the ReplyTo of the Set.
+After a successful Set Config, the component publishes the new Config DataSet to Pub/Config/&lt;Source>/&lt;Filter> with the ReplyTo of the Set; the values of sensitive configuration objects are masked as in every Pub (REQ-RES-CONFIG-024).
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: application, device
 - Condition: The component offers Set for Config and the Set was successful.
-- Refs: MG 9.1.3
+- Refs: MG 9.1.3, GL-ADR-021
 - Verification: d7-test
-- Status: reviewed
+- Status: draft
 - Inventory: MG-9.1.3-f44495ea
 
 > If setting Config was successful, the new Config must be published to the Pub/Config[/&lt;Source>[/&lt;Filter>]] topic, according to the settings in PublicationList (8.3.8 PublicationList).
 > — MG 9.1.3
 
-Notes: Read like REQ-RES-DATA-012 and REQ-RES-PUBLIST-025: the answer to the Set goes to the topic with Source and Filter of the Set and contains the complete Config DataSet (REQ-RES-CONFIG-002); publications configured in the PublicationList follow on their own. General rule: REQ-BUS-006.
+> As in every publication of Config, the values of sensitive config elements are masked.
+> — MG 9.1.3
+
+Notes: Read like REQ-RES-DATA-012 and REQ-RES-PUBLIST-025: the answer to the Set goes to the topic with Source and Filter of the Set and contains the complete Config DataSet (REQ-RES-CONFIG-002); publications configured in the PublicationList follow on their own. General rule: REQ-BUS-006. Example: MG B1.1.3 "Pub explicit Config tag after a successful set request" (V-PAY-114).
 
 ## REQ-RES-CONFIG-023
 
 **A Set Config is applied completely or rejected**
 
-A component applies a Set Config completely or not at all. It rejects the Set with a Status event of EventLevel Bad (REQ-RES-CONFIG-021) if the Set addresses a group or configuration object the Config DataSet does not have, changes a read-only property (every property except Value), lacks a mandatory configuration object of a contained group or carries a Value that does not represent its Type or violates its Validation; repeated unchanged read-only properties are accepted.
+A component applies a Set Config completely or not at all. It rejects the Set with a Status event of EventLevel Bad (REQ-RES-CONFIG-021) if the Set addresses a group or configuration object the Config DataSet does not have, changes a read-only property (every property except Value), lacks a mandatory configuration object of a contained group or carries a Value that does not represent its Type or violates its Validation (except the mask of a sensitive configuration object, REQ-RES-CONFIG-025); repeated unchanged read-only properties are accepted.
 
-- Keyword: MUST (implicit, SF-035)
+- Keyword: MUST
 - Levels: L1 SHOULD · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: application, device
 - Condition: The component offers Set for Config.
 - Refs: MG 8.3.3.2, MG 9.1.3, SF-035, SF-086
 - Verification: d7-test
-- Status: reviewed
+- Status: draft
+- Inventory: MG-8.3.3.2-3a8c3bb0, MG-9.1.3-7d1e4d10
 
-Notes: Proposed interpretation SF-086 (c)/(d), in line with PublicationList (REQ-RES-PUBLIST-016, SF-067 (f)) and REQ-CMP-043 (unknown object → Bad, e.g. BadNotFound, BadNotWritable, BadOutOfRange). The application may additionally reject a value it cannot apply (e.g. an empty Value of a mandatory object, REQ-RES-CONFIG-011).
+> The receiving application applies a Set completely or not at all
+> — MG 8.3.3.2
+
+> The Set is applied completely or not at all.
+> — MG 9.1.3
+
+> the Set must be rejected and the status Event must have the EventLevel Bad. Read-only properties which are repeated unchanged from Pub/Config are accepted.
+> — MG 9.1.3
+
+Notes: Stated in MG 8.3.3.2 and MG 9.1.3 since SF-086 (c)/(d), in line with PublicationList (REQ-RES-PUBLIST-016, SF-067 (f)) and REQ-CMP-043 (unknown object → Bad, e.g. BadNotFound, BadNotWritable, BadOutOfRange). The application may additionally reject a value it cannot apply (e.g. an empty Value of a mandatory object, REQ-RES-CONFIG-011).
+
+## REQ-RES-CONFIG-024
+
+**Sensitive configuration values are masked in every Pub**
+
+In every publication of a Config DataSet (answer to a Get, publication after a successful Set, publication configured in the PublicationList and any other publication), the publisher replaces a non-empty Value and a non-empty DefaultValue of a configuration object with Sensitive = true by the mask "********" (eight asterisks). An empty Value or DefaultValue is published as empty string. The mask is not interpreted with Type and not checked against Validation.
+
+- Keyword: MUST
+- Levels: L1 MUST · L2 MUST · L3 MUST
+- Domain: messaging · Applies to: application, device
+- Condition: The component offers Config (REQ-CMP-035).
+- Refs: MG 8.3.3.1, MG 9.1.3, GL-ADR-021, SF-087
+- Verification: d7-validate, d7-test
+- Status: draft
+- Inventory: MG-8.3.3.1-4b1b3520, MG-8.3.3.1-58f91f16, MG-8.3.3.1-84a33fca, MG-9.1.3-a94653f3
+
+> If Sensitive is set to true, the publisher must replace a non-empty Value and a non-empty DefaultValue of this Config object by the mask `********` (eight asterisks) in every publication of the Config (Pub/Config) – in the answer to a Get, in the publication after a successful Set and in any other publication. An empty Value or DefaultValue is published as empty string, so a consumer can see whether the value is set.
+> — MG 8.3.3.1
+
+> In every publication of Config, the publisher must replace a non-empty Value and DefaultValue of a sensitive config element ("Sensitive": true) by the mask `********`
+> — MG 9.1.3
+
+> The value of a sensitive Config object is not published on the Message Bus; it can only be set
+> — MG 8.3.3.1
+
+Notes: New with GL-ADR-021 (SF-087). Levels follow the Config DataSet: a component that offers Config masks always. The checker reports a non-empty Value/DefaultValue other than the mask of a sensitive object in a Pub. Examples: MG B1.1.3 (V-PAY-099, V-PAY-114).
+
+## REQ-RES-CONFIG-025
+
+**The mask in a Set leaves a sensitive value unchanged**
+
+A component that receives a Set Config whose Value of a configuration object with Sensitive = true is the mask "********" leaves this value unchanged and does not check the mask against Type and Validation. A sensitive value cannot be set to the mask itself; an empty Value unsets it as for every configuration object.
+
+- Keyword: MUST (implicit, SF-035)
+- Levels: L1 SHOULD · L2 MUST · L3 MUST
+- Domain: messaging · Applies to: application, device
+- Condition: The component offers Set for Config.
+- Refs: MG 8.3.3.2, MG 9.1.3, GL-ADR-021, SF-035, SF-087
+- Verification: d7-test
+- Status: draft
+- Inventory: MG-8.3.3.2-44a6e1bb, MG-8.3.3.2-e0ec94c7
+
+> If Sensitive is set to true, a Set whose Value of this Config object is the mask `********` leaves the value unchanged; the mask is not checked against Type and Validation. So a requester can send back a published Config unchanged and can include a mandatory sensitive Config object without knowing its value.
+> — MG 8.3.3.2
+
+> A Set with the mask `********` as Value of a sensitive config element leaves the value unchanged
+> — MG 9.1.3
+
+Notes: New with GL-ADR-021 (SF-087). Levels as REQ-RES-CONFIG-023 (Set handling). A requester can send a published Config back unchanged (REQ-RES-CONFIG-003) and can include a mandatory sensitive object (REQ-RES-CONFIG-011) without knowing its value.
+
+## REQ-RES-CONFIG-026
+
+**The operator restricts read access to Set/Config**
+
+Because a Set Config carries new sensitive values in clear text, the operator restricts, besides the write access, also the read access to the Set/Config topics via ACL.
+
+- Keyword: SHOULD
+- Domain: platform · Applies to: broker, platform
+- Condition: Components on the Message Bus offer Set for Config with sensitive configuration objects.
+- Refs: MG 8.3.3.2, MG 9.1.3, GL-ADR-021, SF-087
+- Verification: d8
+- Status: draft
+- Inventory: MG-8.3.3.2-19501841, MG-9.1.3-ac3a3f16
+
+> A Set carries a new sensitive value in clear text. Besides the write access, the operator should therefore also restrict the read access to the Set/Config topics via ACL
+> — MG 8.3.3.2
+
+> A Set carries new values of sensitive config elements in clear text. The operator should therefore also restrict the read access to the Set/Config topics via ACL.
+> — MG 9.1.3
+
+Notes: New with GL-ADR-021 (SF-087). Operator duty like the write ACL of REQ-RES-CONFIG-020; checked by the infrastructure CLI (D8).

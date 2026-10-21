@@ -8,7 +8,7 @@ Guideline baseline: `a77d331` · Area status: reviewed · Sections: MG 9
 | [REQ-BUS-001](#req-bus-001) | Publishing may start once the request topics are subscribed | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
 | [REQ-BUS-002](#req-bus-002) | A requester publishes on the request topic of the addressed component | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-BUS-003](#req-bus-003) | A Get is answered with a Pub | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-BUS-004](#req-bus-004) | A Set carries the updated object on the Set topic | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
+| [REQ-BUS-004](#req-bus-004) | A Set carries the updated object on the Set topic | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
 | [REQ-BUS-005](#req-bus-005) | A Del addresses the object with its Filter | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-BUS-006](#req-bus-006) | A successful Set is followed by the publication of the changed object | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-BUS-007](#req-bus-007) | Nothing is published after the deletion of a whole object | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-test | reviewed |
@@ -83,20 +83,20 @@ Notes: ReplyTo per REQ-MSG-015; empty list per REQ-CMP-041; exception Get of Met
 
 **A Set carries the updated object on the Set topic**
 
-A component that changes a resource object of another component publishes the complete updated object on the Set topic of that resource, addressing the object with Source and – for resources with a Filter – Filter.
+A component that changes a resource object of another component publishes the complete updated object on the Set topic of that resource, addressing the object with Source and – for resources with a Filter – Filter. Exception: a Set of Config may contain only a part of the Config DataSet (partial update, REQ-RES-CONFIG-003).
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: requester
-- Refs: MG 9.1, SF-081
+- Refs: MG 9.1, SF-081, SF-086
 - Verification: d7-validate
-- Status: reviewed
-- Inventory: MG-9.1-224e1dcc, MG-9.1-4ea9b9b7
+- Status: draft
+- Inventory: MG-9.1-224e1dcc, MG-9.1-4a98fe00
 
-> Service B must publish the updated resource object on Service A’s Set topic for this resource. Now, Source and – for resources with a Filter – the Filter are required in the topic.
+> Service B must publish the updated resource object on Service A’s Set topic for this resource (for Config, a partial update is possible, see 9.1.3 Config). Now, Source and – for resources with a Filter – the Filter are required in the topic.
 > — MG 9.1
 
-Notes: ReferenceDesignation has no Filter (REQ-TOP-013, MG 7.7; MG 9.1 since SF-081). The per-resource Set payloads are in the RES-* areas (exactly one DataSetMessage, e.g. REQ-RES-DATA-009).
+Notes: ReferenceDesignation has no Filter (REQ-TOP-013, MG 7.7; MG 9.1 since SF-081). The per-resource Set payloads are in the RES-* areas (exactly one DataSetMessage, e.g. REQ-RES-DATA-009). The Config exception was added to MG 9.1 with SF-086 (a).
 
 ## REQ-BUS-005
 

@@ -703,18 +703,23 @@ requirements:
     title: DataSetMessages are complete key frames
     statement: >-
       A DataSetMessage always contains all fields of its DataSet; the OPC UA
-      message types ua-deltaframe and ua-keepalive are not used.
+      message types ua-deltaframe and ua-keepalive are not used. Exception:
+      a Set of Config is a partial update and contains only a part of the
+      Config DataSet (REQ-RES-CONFIG-003/011).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher]
-    refs: [MG 8.2.3]
+    refs: [MG 8.2.3, SF-086]
     quotes:
       - ref: MG 8.2.3
         text: The OPC UA message types ua-deltaframe and ua-keepalive are not used in Open Industry 4.0 Alliance context. A DataSetMessage must always contain all fields of the DataSet.
+      - ref: MG 8.2.3
+        text: 'Exception: a Set of Config is a partial update and contains only a part of the DataSet'
     verification: [schema, d7-validate]
     inventory: [MG-8.2.3-61d61851]
-    status: reviewed
+    status: draft
+    notes: The Config exception was added to MG 8.2.3 with SF-086 (a).
 
   - id: REQ-MSG-031
     title: Payload fields use VerboseEncoding with RawData

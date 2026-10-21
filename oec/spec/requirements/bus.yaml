@@ -83,22 +83,24 @@ requirements:
       A component that changes a resource object of another component
       publishes the complete updated object on the Set topic of that
       resource, addressing the object with Source and – for resources with a
-      Filter – Filter.
+      Filter – Filter. Exception: a Set of Config may contain only a part of
+      the Config DataSet (partial update, REQ-RES-CONFIG-003).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [requester]
-    refs: [MG 9.1, SF-081]
+    refs: [MG 9.1, SF-081, SF-086]
     quotes:
       - ref: MG 9.1
-        text: Service B must publish the updated resource object on Service A’s Set topic for this resource. Now, Source and – for resources with a Filter – the Filter are required in the topic.
+        text: Service B must publish the updated resource object on Service A’s Set topic for this resource (for Config, a partial update is possible, see 9.1.3 Config). Now, Source and – for resources with a Filter – the Filter are required in the topic.
     verification: [d7-validate]
-    inventory: [MG-9.1-4ea9b9b7, MG-9.1-224e1dcc]
-    status: reviewed
+    inventory: [MG-9.1-4a98fe00, MG-9.1-224e1dcc]
+    status: draft
     notes: >-
       ReferenceDesignation has no Filter (REQ-TOP-013, MG 7.7; MG 9.1 since
       SF-081). The per-resource Set payloads are in the RES-* areas (exactly one
-      DataSetMessage, e.g. REQ-RES-DATA-009).
+      DataSetMessage, e.g. REQ-RES-DATA-009). The Config exception was added
+      to MG 9.1 with SF-086 (a).
 
   - id: REQ-BUS-005
     title: A Del addresses the object with its Filter

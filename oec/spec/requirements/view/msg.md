@@ -34,7 +34,7 @@ Guideline baseline: `a77d331` · Area status: reviewed · Sections: MG 8, MG A2
 | [REQ-MSG-027](#req-msg-027) | Status of a DataSetMessage contains Code and Symbol | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-028](#req-msg-028) | Receivers evaluate only the Code of a Status | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-MSG-029](#req-msg-029) | MessageType of the DataSetMessage | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-MSG-030](#req-msg-030) | DataSetMessages are complete key frames | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
+| [REQ-MSG-030](#req-msg-030) | DataSetMessages are complete key frames | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
 | [REQ-MSG-031](#req-msg-031) | Payload fields use VerboseEncoding with RawData | MUST* | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-032](#req-msg-032) | Fields of the DataSetMetaData | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-033](#req-msg-033) | DataSetMetaData matches its DataSetMessage | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
@@ -696,18 +696,23 @@ If a DataSetMessage contains a MessageType, it is "ua-event" for the resource Ev
 
 **DataSetMessages are complete key frames**
 
-A DataSetMessage always contains all fields of its DataSet; the OPC UA message types ua-deltaframe and ua-keepalive are not used.
+A DataSetMessage always contains all fields of its DataSet; the OPC UA message types ua-deltaframe and ua-keepalive are not used. Exception: a Set of Config is a partial update and contains only a part of the Config DataSet (REQ-RES-CONFIG-003/011).
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: publisher
-- Refs: MG 8.2.3
+- Refs: MG 8.2.3, SF-086
 - Verification: schema, d7-validate
-- Status: reviewed
+- Status: draft
 - Inventory: MG-8.2.3-61d61851
 
 > The OPC UA message types ua-deltaframe and ua-keepalive are not used in Open Industry 4.0 Alliance context. A DataSetMessage must always contain all fields of the DataSet.
 > — MG 8.2.3
+
+> Exception: a Set of Config is a partial update and contains only a part of the DataSet
+> — MG 8.2.3
+
+Notes: The Config exception was added to MG 8.2.3 with SF-086 (a).
 
 ## REQ-MSG-031
 

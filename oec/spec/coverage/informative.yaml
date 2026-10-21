@@ -382,8 +382,8 @@ items:
     reason: Explanation of the optional Description of the Context ("can"); presence and type are REQ-RES-CONFIG-002.
   - key: MG-8.3.3.1-24a5c25c
     reason: Usage hint ("can") for the Description of the Context; no obligation.
-  - key: MG-8.3.3.1-42e574df
-    reason: Usage hint ("can") for Validation; its keys are REQ-RES-CONFIG-002, their effect REQ-RES-CONFIG-008. The UInt16 example range is impossible (SF-084 (e)).
+  - key: MG-8.3.3.1-42e118f3
+    reason: Usage hint ("can") for Validation; its keys are REQ-RES-CONFIG-002, their effect REQ-RES-CONFIG-008 (example range Int16 since SF-084 (e)).
   - key: MG-8.3.3.2-23af7493
     reason: Usage hint ("can") for the Name of a Group (Set table); presence and type are REQ-RES-CONFIG-003.
   - key: MG-8.3.3.2-b912fcf3
@@ -396,18 +396,18 @@ items:
     reason: Explanation of the optional Description of a Config object ("can", Set table); presence and type are REQ-RES-CONFIG-003.
   - key: MG-8.3.3.2-f19e91ae
     reason: Usage hint ("can") for the Description of a Config object (Set table); no obligation.
-  - key: MG-8.3.3.2-8cc9038e
+  - key: MG-8.3.3.2-530d570a
     reason: Usage hint ("can") for the Name of the Context (Set table); presence and type are REQ-RES-CONFIG-003, relation to the Filter REQ-RES-CONFIG-015.
   - key: MG-8.3.3.2-f09c2395
     reason: Explanation of the optional Description of the Context ("can", Set table); presence and type are REQ-RES-CONFIG-003.
   - key: MG-8.3.3.2-e24f7d89
     reason: Usage hint ("can") for the Description of the Context (Set table); no obligation.
-  - key: MG-8.3.3.2-f1b7e024
-    reason: Usage hint ("can") for Validation (Set table); its keys are REQ-RES-CONFIG-003, their effect REQ-RES-CONFIG-008 (SF-084 (e)).
+  - key: MG-8.3.3.2-453202a1
+    reason: Usage hint ("can") for Validation (Set table); its keys are REQ-RES-CONFIG-003, their effect REQ-RES-CONFIG-008.
   - key: MG-9.1.3-dea12337
     reason: Hint how any application can listen to Config ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
-  - key: MG-9.1.3-c59724a1
-    reason: Template of the Pub topic with Source and Filter; the topic structure is REQ-TOP-* and the matrix, the Filter REQ-RES-CONFIG-015 (SF-085), the content REQ-RES-CONFIG-018.
+  - key: MG-9.1.3-9471c5bc
+    reason: Template of the Pub topic with Source and Filter; the topic structure is REQ-TOP-* and the matrix, the Filter REQ-RES-CONFIG-015, the content REQ-RES-CONFIG-018.
   - key: MG-9.1.3-fef76a3e
     reason: Template of the Pub topic with Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-CONFIG-018.
   - key: MG-9.1.3-14486a95
