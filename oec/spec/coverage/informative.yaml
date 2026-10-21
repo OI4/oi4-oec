@@ -363,3 +363,54 @@ items:
     reason: Obligation of the OI4 Alliance, not of a component; fulfilled by MG 8.3 and the predefined DataSetClassIds of MG A2 (REQ-MSG-010).
   - key: MG-9.1-13c6a834
     reason: Obligation of the OI4 Alliance, not of a component; fulfilled by MG 8.3 and MG A2 (REQ-MSG-010).
+  # --- RES-CONFIG (C-029) ---------------------------------------------------
+  - key: MG-8.3.3.1-03b50519
+    reason: Usage hint ("can") for the Name of a Group; presence and type are REQ-RES-CONFIG-002.
+  - key: MG-8.3.3.1-dc6320ac
+    reason: Explanation of the optional Description of a Group ("can"); presence and type are REQ-RES-CONFIG-002.
+  - key: MG-8.3.3.1-b9d1aeab
+    reason: Usage hint ("can") for the Description of a Group; no obligation.
+  - key: MG-8.3.3.1-16598473
+    reason: Usage hint ("can") for the Name of a Config object; presence and type are REQ-RES-CONFIG-002.
+  - key: MG-8.3.3.1-b09854c6
+    reason: Explanation of the optional Description of a Config object ("can"); presence and type are REQ-RES-CONFIG-002.
+  - key: MG-8.3.3.1-28d29212
+    reason: Usage hint ("can") for the Description of a Config object; no obligation.
+  - key: MG-8.3.3.1-bba6e68a
+    reason: Usage hint ("can") for the Name of the Context; presence and type are REQ-RES-CONFIG-002, relation to the Filter REQ-RES-CONFIG-015.
+  - key: MG-8.3.3.1-fb61096a
+    reason: Explanation of the optional Description of the Context ("can"); presence and type are REQ-RES-CONFIG-002.
+  - key: MG-8.3.3.1-24a5c25c
+    reason: Usage hint ("can") for the Description of the Context; no obligation.
+  - key: MG-8.3.3.1-42e574df
+    reason: Usage hint ("can") for Validation; its keys are REQ-RES-CONFIG-002, their effect REQ-RES-CONFIG-008. The UInt16 example range is impossible (SF-084 (e)).
+  - key: MG-8.3.3.2-23af7493
+    reason: Usage hint ("can") for the Name of a Group (Set table); presence and type are REQ-RES-CONFIG-003.
+  - key: MG-8.3.3.2-b912fcf3
+    reason: Explanation of the optional Description of a Group ("can", Set table); presence and type are REQ-RES-CONFIG-003.
+  - key: MG-8.3.3.2-21ea1c0f
+    reason: Usage hint ("can") for the Description of a Group (Set table); no obligation.
+  - key: MG-8.3.3.2-de47dca4
+    reason: Usage hint ("can") for the Name of a Config object (Set table); presence and type are REQ-RES-CONFIG-003.
+  - key: MG-8.3.3.2-708bb27a
+    reason: Explanation of the optional Description of a Config object ("can", Set table); presence and type are REQ-RES-CONFIG-003.
+  - key: MG-8.3.3.2-f19e91ae
+    reason: Usage hint ("can") for the Description of a Config object (Set table); no obligation.
+  - key: MG-8.3.3.2-8cc9038e
+    reason: Usage hint ("can") for the Name of the Context (Set table); presence and type are REQ-RES-CONFIG-003, relation to the Filter REQ-RES-CONFIG-015.
+  - key: MG-8.3.3.2-f09c2395
+    reason: Explanation of the optional Description of the Context ("can", Set table); presence and type are REQ-RES-CONFIG-003.
+  - key: MG-8.3.3.2-e24f7d89
+    reason: Usage hint ("can") for the Description of the Context (Set table); no obligation.
+  - key: MG-8.3.3.2-f1b7e024
+    reason: Usage hint ("can") for Validation (Set table); its keys are REQ-RES-CONFIG-003, their effect REQ-RES-CONFIG-008 (SF-084 (e)).
+  - key: MG-9.1.3-dea12337
+    reason: Hint how any application can listen to Config ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
+  - key: MG-9.1.3-c59724a1
+    reason: Template of the Pub topic with Source and Filter; the topic structure is REQ-TOP-* and the matrix, the Filter REQ-RES-CONFIG-015 (SF-085), the content REQ-RES-CONFIG-018.
+  - key: MG-9.1.3-fef76a3e
+    reason: Template of the Pub topic with Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-CONFIG-018.
+  - key: MG-9.1.3-14486a95
+    reason: Template of the Pub topic without Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-CONFIG-018.
+  - key: MG-9.1.3-fa58b0e9
+    reason: Reference to the examples of MG B1.1.3 (golden payload vectors V-PAY-088 ff.).
