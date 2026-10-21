@@ -3681,7 +3681,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-CONFIG-016]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Requests the Config DataSet "Network settings" of the asset: the Filter is the
       topic Filter, the Get carries no Config DataSetMessage (REQ-RES-CONFIG-016) and
@@ -3704,7 +3704,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-002, REQ-LOC-001, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-MSG-019, REQ-MSG-040, REQ-RES-CONFIG-016]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Requests all Config DataSets of the asset in de-DE: the only DataSetMessage is
       the helper DataSet Locale (DataSetWriterId 3, REQ-MSG-019), no Config
@@ -3736,7 +3736,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-CONFIG-016]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Requests the Config DataSets of all assets of the application (topic without
       Source and Filter); no Config DataSetMessage (REQ-RES-CONFIG-016). The Pub
@@ -3757,7 +3757,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-003, REQ-MSG-011, REQ-MSG-015, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-018]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to V-PAY-088 (ReplyTo = MessageId of the Get). One Config DataSetMessage
       with group network (ip_address, subnet-mask, port) and the Context "Network
@@ -3855,7 +3855,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-018]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Same DataSet as V-PAY-091 with ReplyTo "": an unsolicited publication (SF-088
       (f)); the Context description reads "network Configuration" (editorial, SF-088
@@ -3949,7 +3949,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-018]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Same DataSet as V-PAY-091 with ReplyTo "" on the topic without Source and
       Filter: an unsolicited publication (SF-088 (f)).
@@ -4042,7 +4042,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-007, REQ-RES-CONFIG-019]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Partial Set of the network example ("Network settings", DataSetWriterId 42):
       only the Values of the group network (REQ-RES-CONFIG-003, SF-086 (a)), exactly
@@ -4087,7 +4087,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-040, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-019]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Set of the network example ("Network settings", DataSetWriterId 42) repeating
       the read-only properties of the Pub unchanged together with the new Values
@@ -4184,7 +4184,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-007, REQ-RES-CONFIG-010, REQ-RES-CONFIG-019]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Unsets all configuration objects of the group network with an empty Value
       (REQ-RES-CONFIG-010); none of them is mandatory. The answers are the Status
@@ -4227,7 +4227,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-040, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-010, REQ-RES-CONFIG-019]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Like V-PAY-096, repeating the read-only properties unchanged
       (REQ-RES-CONFIG-003, SF-086 (c)). The answers are the Status event
@@ -4322,7 +4322,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-015, REQ-RES-CONFIG-016]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Requests the Config DataSet "Overall device settings" of the device example
       ("Overall device settings", DataSetWriterId 42 – the same id as the network
@@ -4344,7 +4344,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-003, REQ-MSG-011, REQ-MSG-015, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-012, REQ-RES-CONFIG-013, REQ-RES-CONFIG-014, REQ-RES-CONFIG-018]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to V-PAY-098 (ReplyTo = MessageId of the Get). Two groups device1 and
       common (REQ-RES-CONFIG-013/014) with mandatory (aut0-r3fr3sh, protocol) and
@@ -4677,7 +4677,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-007, REQ-RES-CONFIG-011, REQ-RES-CONFIG-019]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Partial Set of the device example ("Overall device settings", DataSetWriterId 42
       – the same id as the network example ("Network settings", DataSetWriterId 42),
@@ -4743,7 +4743,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-MSG-040, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-011, REQ-RES-CONFIG-019]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Set of the device example ("Overall device settings", DataSetWriterId 42 – the
       same id as the network example ("Network settings", DataSetWriterId 42), SF-088
@@ -5075,7 +5075,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-010, REQ-MSG-006, REQ-MSG-007, REQ-MSG-011, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-007, REQ-RES-CONFIG-010, REQ-RES-CONFIG-011, REQ-RES-CONFIG-019]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Unsets the configuration objects of the device example ("Overall device
       settings", DataSetWriterId 42 – the same id as the network example ("Network

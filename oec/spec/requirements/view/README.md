@@ -20,7 +20,7 @@ Guideline baseline: `5bc2e85`. Source of truth: the YAML files in `oec/spec/requ
 | [PAG](pag.md) | Pagination | C-027 | reviewed | 9 | MG 8.3.11 |
 | [LOC](loc.md) | Locale | C-027 | reviewed | 2 | MG 8.3.12 |
 | [QRY](qry.md) | Query (generic helper DataSet of a Get) | C-027 | reviewed | 4 | MG 8.3.13 |
-| [RES-CONFIG](res-config.md) | Resource Config | C-029 | drafted | 23 | MG 8.3.3, MG 9.1.3 |
+| [RES-CONFIG](res-config.md) | Resource Config | C-029 | reviewed | 23 | MG 8.3.3, MG 9.1.3 |
 | [RES-DATA](res-data.md) | Resource Data | C-028 | reviewed | 12 | MG 8.3.4, MG 9.1.4 |
 | [RES-META](res-meta.md) | Resource Metadata | C-028 | reviewed | 7 | MG 8.3.5, MG 9.1.5 |
 | [RES-EVENT](res-event.md) | Resource Event | C-028 | reviewed | 11 | MG 8.3.6, MG 9.1.6 |

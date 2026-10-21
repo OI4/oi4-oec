@@ -21,17 +21,17 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-085](#v-pay-085) | Del SubscriptionList without the entry to delete | invalid | violates: REQ-RES-SUBLIST-011 | constructed | reviewed |
 | [V-PAY-086](#v-pay-086) | Pub SubscriptionList entry with the former TopicPath of B1.1.9 | invalid | violates: REQ-RES-SUBLIST-002 | constructed | reviewed |
 | [V-PAY-087](#v-pay-087) | Get Metadata with a filled MetaData | invalid | violates: REQ-RES-META-001 | constructed | reviewed |
-| [V-PAY-103](#v-pay-103) | Pub Config with a group name starting with a digit | invalid | violates: REQ-RES-CONFIG-004 | constructed | draft |
-| [V-PAY-104](#v-pay-104) | Set Config with a Value that is not a string | invalid | violates: REQ-RES-CONFIG-007 | constructed | draft |
-| [V-PAY-105](#v-pay-105) | Pub Config with a Value that does not represent its Type | invalid | violates: REQ-RES-CONFIG-007 | constructed | draft |
-| [V-PAY-106](#v-pay-106) | Pub Config with a configuration object without Type | invalid | violates: REQ-RES-CONFIG-002 | constructed | draft |
-| [V-PAY-107](#v-pay-107) | Pub Config with an undefined Type | invalid | violates: REQ-RES-CONFIG-006 | constructed | draft |
-| [V-PAY-108](#v-pay-108) | Set Config with a Value outside its Validation | invalid | violates: REQ-RES-CONFIG-008 | constructed | draft |
-| [V-PAY-109](#v-pay-109) | Set Config with a group without configuration object | invalid | violates: REQ-RES-CONFIG-003 | constructed | draft |
-| [V-PAY-110](#v-pay-110) | Get Config carrying a Config DataSetMessage | invalid | violates: REQ-RES-CONFIG-016 | constructed | draft |
-| [V-PAY-111](#v-pay-111) | Set Config with two DataSetMessages | invalid | violates: REQ-RES-CONFIG-019 | constructed | draft |
-| [V-PAY-112](#v-pay-112) | Pub Config with an undefined key in a configuration object (strict) | invalid | violates: REQ-MSG-001 | constructed | draft |
-| [V-PAY-113](#v-pay-113) | Pub Config with an undefined key in a configuration object (tolerant) | valid | ok | constructed | draft |
+| [V-PAY-103](#v-pay-103) | Pub Config with a group name starting with a digit | invalid | violates: REQ-RES-CONFIG-004 | constructed | reviewed |
+| [V-PAY-104](#v-pay-104) | Set Config with a Value that is not a string | invalid | violates: REQ-RES-CONFIG-007 | constructed | reviewed |
+| [V-PAY-105](#v-pay-105) | Pub Config with a Value that does not represent its Type | invalid | violates: REQ-RES-CONFIG-007 | constructed | reviewed |
+| [V-PAY-106](#v-pay-106) | Pub Config with a configuration object without Type | invalid | violates: REQ-RES-CONFIG-002 | constructed | reviewed |
+| [V-PAY-107](#v-pay-107) | Pub Config with an undefined Type | invalid | violates: REQ-RES-CONFIG-006 | constructed | reviewed |
+| [V-PAY-108](#v-pay-108) | Set Config with a Value outside its Validation | invalid | violates: REQ-RES-CONFIG-008 | constructed | reviewed |
+| [V-PAY-109](#v-pay-109) | Set Config with a group without configuration object | invalid | violates: REQ-RES-CONFIG-003 | constructed | reviewed |
+| [V-PAY-110](#v-pay-110) | Get Config carrying a Config DataSetMessage | invalid | violates: REQ-RES-CONFIG-016 | constructed | reviewed |
+| [V-PAY-111](#v-pay-111) | Set Config with two DataSetMessages | invalid | violates: REQ-RES-CONFIG-019 | constructed | reviewed |
+| [V-PAY-112](#v-pay-112) | Pub Config with an undefined key in a configuration object (strict) | invalid | violates: REQ-MSG-001 | constructed | reviewed |
+| [V-PAY-113](#v-pay-113) | Pub Config with an undefined key in a configuration object (tolerant) | valid | ok | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -701,7 +701,7 @@ Payload:
 - Expected: invalid – Group and configuration object names start with a letter or an underscore.
 - Violates: [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-091 with the group network renamed to 1network.
 
@@ -803,7 +803,7 @@ Payload:
 - Expected: invalid – Value is always transmitted as a string.
 - Violates: [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-094 with the port Value as the JSON number 80.
 
@@ -852,7 +852,7 @@ Payload:
 - Expected: invalid – The Value of a Number configuration object represents a number.
 - Violates: [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-091 with the port Value "eighty" (Type Number).
 
@@ -954,7 +954,7 @@ Payload:
 - Expected: invalid – Every configuration object of a Pub Config carries Type, Value and Name.
 - Violates: [REQ-RES-CONFIG-002](../../requirements/view/res-config.md#req-res-config-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-091 without the Type of port.
 
@@ -1055,7 +1055,7 @@ Payload:
 - Expected: invalid – Type is one of Boolean, Number, String, DateTime and ByteString.
 - Violates: [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-091 with the Type Integer for port.
 
@@ -1157,7 +1157,7 @@ Payload:
 - Expected: invalid – A Value satisfies the Validation of its configuration object (port: Max 65535).
 - Violates: [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-095 with the port Value 70000.
 
@@ -1259,7 +1259,7 @@ Payload:
 - Expected: invalid – Every group of a Set Config carries at least one configuration object.
 - Violates: [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-094 with an empty group network.
 
@@ -1298,7 +1298,7 @@ Payload:
 - Expected: invalid – A Get Config carries no Config DataSetMessage.
 - Violates: [REQ-RES-CONFIG-016](../../requirements/view/res-config.md#req-res-config-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-088 with the DataSetMessage of V-PAY-094.
 
@@ -1347,7 +1347,7 @@ Payload:
 - Expected: invalid – A Set Config carries exactly one DataSetMessage, that of the addressed DataSet.
 - Violates: [REQ-RES-CONFIG-019](../../requirements/view/res-config.md#req-res-config-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-094 with its DataSetMessage duplicated.
 
@@ -1415,7 +1415,7 @@ Payload:
 - Expected: invalid – Strict validation reports every key that is not defined for the object (SF-052).
 - Violates: [REQ-MSG-001](../../requirements/view/msg.md#req-msg-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-091 with the undefined key Scale in port; V-PAY-113 is the tolerant view.
 
@@ -1519,7 +1519,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-046](../../requirements/view/msg.md#req-msg-046), [REQ-RES-CONFIG-002](../../requirements/view/res-config.md#req-res-config-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-112 checked tolerantly: the receiver ignores the undefined key Scale (REQ- MSG-046).
 

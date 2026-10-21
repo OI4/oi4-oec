@@ -29,7 +29,7 @@ requirements:
         text: Several configuration DataSetMessages may exist for an asset.
     verification: [manual]
     inventory: [MG-8.3.3-64a9097d, MG-9.1.3-c463268f]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-CONFIG-002
     title: Structure of the Config DataSet (Pub)
@@ -66,7 +66,7 @@ requirements:
         text: A DisplayName for this Config object shall be given as localized text.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.3-1c34a2be, MG-8.3.3.1-ff239c31, MG-8.3.3.1-ce7454d2, MG-8.3.3.1-a6e70e34, MG-8.3.3.1-3252fe76, MG-8.3.3.1-c732cae9, MG-8.3.3.1-77df3d22, MG-8.3.3.1-c7ff79ea, MG-8.3.3.1-026a7205, MG-8.3.3.1-b894e5a1, MG-8.3.3.1-04c6226d, MG-8.3.3.1-aebe7568, MG-8.3.3.1-4669c6f3, MG-8.3.3.1-985db72c, MG-8.3.3.1-f4732596, MG-8.3.3.1-ccbc6103, MG-8.3.3.1-429195c8, MG-8.3.3.1-c082cd74, MG-8.3.3.1-3d0ae994, MG-8.3.3.1-feffc287, MG-8.3.3.1-c20c94a6, MG-8.3.3.1-61095915, MG-8.3.3.1-f5305ca8, MG-8.3.3.1-d1b06f37, MG-8.3.3.1-cba0cd10, MG-8.3.3.1-a80b6582, MG-8.3.3.1-fcad6559, MG-8.3.3.1-e228ee18, MG-8.3.3.1-bfb35734]
-    status: draft
+    status: reviewed
     notes: >-
       The field tables of MG 8.3.3.1 are flat headings; the nesting
       (payload → <GroupName>/Context, Group → Name/Description/<ConfigName>,
@@ -102,7 +102,7 @@ requirements:
         text: In addition, it may also contain the other properties received through Pub/Config.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.3.2-92c9fd11, MG-8.3.3.2-44186564, MG-8.3.3.2-d295d815, MG-8.3.3.2-cc495a35, MG-8.3.3.2-7d60da83, MG-8.3.3.2-22624b9f, MG-8.3.3.2-2e0d0855, MG-8.3.3.2-e99d2012, MG-8.3.3.2-25f2c93e, MG-8.3.3.2-bbef6cbc, MG-8.3.3.2-626ac4bb, MG-8.3.3.2-58c43c4f, MG-8.3.3.2-72af5988, MG-8.3.3.2-b153b601, MG-8.3.3.2-79633c2a, MG-8.3.3.2-6276f54f, MG-8.3.3.2-68250658, MG-8.3.3.2-bb89871c, MG-8.3.3.2-75eb048a, MG-8.3.3.2-f6a75ae4, MG-8.3.3.2-2c218a3d, MG-8.3.3.2-614eeff5, MG-8.3.3.2-d9012dde, MG-8.3.3.2-25c785df, MG-8.3.3.2-c08294c1, MG-8.3.3.2-d55011a4, MG-8.3.3.2-9c1c98ad, MG-8.3.3.2-bcaa5fb6, MG-9.1.3-36d1a38e]
-    status: draft
+    status: reviewed
     notes: >-
       "A DisplayName … shall be given" (MG 8.3.3.2) is read as "if given, as
       LocalizedText", because the same table makes Name optional (SF-084
@@ -132,7 +132,7 @@ requirements:
         text: To avoid problems on JSON parsing in different languages, the ConfigName must contain only the characters <a..z>, <A..Z>, <0..9>, <-> and <_>. The ConfigName must not start with a number (0..9) or with a minus (-).
     verification: [schema, d7-validate]
     inventory: [MG-8.3.3.1-ec257974, MG-8.3.3.1-1e400088, MG-8.3.3.1-028278e0, MG-8.3.3.1-63ac43c1, MG-8.3.3.2-7c86dbf5, MG-8.3.3.2-47e3c53f, MG-8.3.3.2-d70a1784, MG-8.3.3.2-974cf753]
-    status: draft
+    status: reviewed
     notes: >-
       The reserved names (Context; Name, Description) follow from the
       structure – such a key is read as the property, not as a group or
@@ -160,7 +160,7 @@ requirements:
         text: As the device or application providing the resource is the owner of the configuration object, it is the only instance which can remove objects from within the config object.
     verification: [d7-test]
     inventory: [MG-8.3.3.1-59c566b4, MG-8.3.3.1-b7f9c7bc, MG-8.3.3.2-5920d940, MG-8.3.3.2-1652886e, MG-9.1.3-ddbafedb]
-    status: draft
+    status: reviewed
     notes: >-
       A Set with an unknown group or configuration object is rejected
       (REQ-RES-CONFIG-023, REQ-CMP-043). Names are compared exactly
@@ -185,7 +185,7 @@ requirements:
         text: The allowed subset is Boolean, ByteString, DateTime, Number and String.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.3.1-97fb7241, MG-8.3.3.2-538b6036]
-    status: draft
+    status: reviewed
     notes: >-
       A requester that repeats Type in a Set uses the published one
       (REQ-RES-CONFIG-023). Further restrictions of a type (e.g. a value
@@ -214,7 +214,7 @@ requirements:
         text: Each type will be presented as string in value key (e.g. a DateTime will be a stringified object).
     verification: [schema, d7-validate]
     inventory: [MG-8.3.3.1-61fb5a3d, MG-8.3.3.1-3b31fa9e, MG-8.3.3.2-053b08f7, MG-8.3.3.2-8e5d40a5]
-    status: draft
+    status: reviewed
     notes: >-
       The string representation per Type is not defined in the guideline
       ("a DateTime will be a stringified object"); the representations above
@@ -244,7 +244,7 @@ requirements:
         text: A type of enumeration to show, which values are allowed.
     verification: [d7-validate]
     inventory: [MG-8.3.3.1-447047a4, MG-8.3.3.1-7500a301, MG-8.3.3.1-f4071468, MG-8.3.3.2-00c53dcc, MG-8.3.3.2-bf8e27b3, MG-8.3.3.2-2fb581a1]
-    status: draft
+    status: reviewed
     notes: >-
       "The Length contains the max length of a Value"; counted in characters
       (Unicode code points, SF-084 (d)). Patterns should be interoperable
@@ -272,7 +272,7 @@ requirements:
         text: However, when a very rare unit does not exist in the list of EngineeringUnits, a self defined (or better industry specific) unit may be used here.
     verification: [manual]
     inventory: [MG-8.3.3.1-96cf48b1, MG-8.3.3.1-b96d6325, MG-8.3.3.2-50901c67, MG-8.3.3.2-6c35efd7]
-    status: draft
+    status: reviewed
     notes: >-
       The B1.1.3 device example has "Unit": "Temperature" (a quantity, no
       unit) – removed in the vectors (SF-088 (c)).
@@ -297,7 +297,7 @@ requirements:
         text: To do so, the sender must send a Set with an empty value of the config object.
     verification: [d7-validate]
     inventory: [MG-8.3.3.1-4670986b, MG-8.3.3.2-937d0e53, MG-9.1.3-3350ff5c, MG-9.1.3-516d732b]
-    status: draft
+    status: reviewed
     notes: Del Config is not allowed (matrix, REQ-TOP-013). Examples MG B1.1.3 "empty existing values".
 
   - id: REQ-RES-CONFIG-011
@@ -322,7 +322,7 @@ requirements:
         text: The payload must contain the values of mandatory config names.
     verification: [d7-validate]
     inventory: [MG-8.3.3.1-59f324f8, MG-8.3.3.1-986cbccd, MG-8.3.3.2-989c6b42, MG-8.3.3.2-846ccb16, MG-9.1.3-f9183417, MG-9.1.3-78ad37ba]
-    status: draft
+    status: reviewed
     notes: >-
       "Must be part of the Group" is read per group contained in the Set
       (SF-086 (a)). An empty Value of a mandatory object is a valid Set
@@ -348,7 +348,7 @@ requirements:
         text: In context with the available OPC UA base types, the OI4 Alliance is missing type "password" which can be used to hide the value of an object (e.g. in user interfaces, such as web front-ends) if necessary.
     verification: [manual]
     inventory: [MG-8.3.3.1-da5ad6c2, MG-8.3.3.2-71486eba]
-    status: draft
+    status: reviewed
     notes: >-
       Sensitive does not change the encoding on the Message Bus: the Value
       is published like any other (B1.1.3 "password"); its confidentiality
@@ -372,7 +372,7 @@ requirements:
         text: The Group helps to group configuration elements which should be configured at once, e.g. the group eth0 might contain configuration objects called ip_address, subnet_mask and standard_gateway.
     verification: [manual]
     inventory: [MG-8.3.3.1-0300b49d, MG-8.3.3.2-08b07130]
-    status: draft
+    status: reviewed
     notes: MG B1.1.3 "More complex example with two groups" (device1, common).
 
   - id: REQ-RES-CONFIG-014
@@ -393,7 +393,7 @@ requirements:
         text: Configuration objects in this group do not necessarily have to be grouped this way, but it is a way to make it clear that these objects belong to the "common settings".
     verification: [manual]
     inventory: [MG-8.3.3.1-31537929, MG-8.3.3.1-d95dbf3d, MG-8.3.3.2-6a638141, MG-8.3.3.2-3be484bd]
-    status: draft
+    status: reviewed
     notes: Best practice → SHOULD (MG 1.2). B1.1.3 uses "Common" and "common" (SF-088 (a)).
 
   - id: REQ-RES-CONFIG-015
@@ -415,7 +415,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: The Context helps to define an overall name for the included Group objects.
     verification: [d7-validate]
-    status: draft
+    status: reviewed
     notes: >-
       MG 9.1.3 writes the Filter as <Context.Name> and the templates
       "<object name; might correlate with content of context object>";
@@ -443,7 +443,7 @@ requirements:
         text: In combination with the method Get, the payload requires an empty NetworkMessage. The NetworkMessage can alternatively contain DataSetMessages for PaginationRequest (8.3.11.1 PaginationRequest) and Locale (8.3.12 Locale). A Config object is not included.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.3-10d496aa]
-    status: draft
+    status: reviewed
     notes: >-
       Config has no Query (GL-ADR-020, REQ-QRY-001); new query parameters
       would need a PO order. Get with Locale: MG B1.1.3 (REQ-LOC-*).
@@ -467,7 +467,7 @@ requirements:
         text: A topic such as Oi4v2/<ServiceType>/<AppId>/Get/Config must trigger a publication of all available Config information, each in its own DataSetMessage added to a single NetworkMessage and published to the topic Oi4v2/<ServiceType>/<AppId>/Pub/Config.
     verification: [d7-test]
     inventory: [MG-9.1.3-b89cf9e2]
-    status: draft
+    status: reviewed
     notes: >-
       Pagination of large answers is REQ-PAG-005, ReplyTo is REQ-MSG-015,
       the DataSetClassId REQ-MSG-010/011. A component without configuration
@@ -489,7 +489,7 @@ requirements:
         text: In combination with the method Pub, the payload contains DataSetMessages of type Config and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.3-6859d952]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-CONFIG-019
     title: Set Config addresses exactly one Config DataSet
@@ -512,7 +512,7 @@ requirements:
         text: Setting multiple DataSetMessages at once via Oi4v2/<ServiceType>/<AppId>/Set/Config is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.3-b1dfe637, MG-9.1.3-8b7226fb, MG-9.1.3-c61b6741]
-    status: draft
+    status: reviewed
     notes: >-
       PublisherId = requester (REQ-MSG-006); header of the DataSetMessage
       (DataSetWriterId of the addressed Config DataSet, Source, Filter, no
@@ -533,7 +533,7 @@ requirements:
         text: To prevent write access by unauthorized communication participants, the operator must prevent this via ACL.
     verification: [d8]
     inventory: [MG-9.1.3-2444e5a1, MG-9.1.3-da560694]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-CONFIG-021
     title: Status event after Set Config
@@ -553,7 +553,7 @@ requirements:
         text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
     verification: [d7-test]
     inventory: [MG-9.1.3-c083f27e]
-    status: draft
+    status: reviewed
     notes: >-
       Same obligation as REQ-TOP-014; ReplyTo and content per
       REQ-RES-EVENT-005. Example MG B1.1.3 (golden vector V-PAY-076).
@@ -574,7 +574,7 @@ requirements:
         text: If setting Config was successful, the new Config must be published to the Pub/Config[/<Source>[/<Filter>]] topic, according to the settings in PublicationList (8.3.8 PublicationList).
     verification: [d7-test]
     inventory: [MG-9.1.3-f44495ea]
-    status: draft
+    status: reviewed
     notes: >-
       Read like REQ-RES-DATA-012 and REQ-RES-PUBLIST-025: the answer to the
       Set goes to the topic with Source and Filter of the Set and contains
@@ -600,7 +600,7 @@ requirements:
     condition: The component offers Set for Config.
     refs: [MG 8.3.3.2, MG 9.1.3, SF-035, SF-086]
     verification: [d7-test]
-    status: draft
+    status: reviewed
     notes: >-
       Proposed interpretation SF-086 (c)/(d), in line with PublicationList
       (REQ-RES-PUBLIST-016, SF-067 (f)) and REQ-CMP-043 (unknown object →

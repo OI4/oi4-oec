@@ -80,21 +80,21 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 | [V-PAY-078](#v-pay-078) | B1.1.8: Status Event follows a set request | valid | ok | guideline MG B1.1.8 | reviewed |
 | [V-PAY-079](#v-pay-079) | B1.1.10: Status Event follows a set request | valid | ok | guideline MG B1.1.10 | reviewed |
 | [V-PAY-080](#v-pay-080) | B1.1.10: Status Event follows a delete request | valid | ok | guideline MG B1.1.10 | reviewed |
-| [V-PAY-088](#v-pay-088) | B1.1.3: Get explicit Config tag of an explicit asset (network) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-089](#v-pay-089) | B1.1.3: Get all Config tags of an explicit asset with Locale | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-090](#v-pay-090) | B1.1.3: Get Config tags of all assets related to this application | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-091](#v-pay-091) | B1.1.3: Pub explicit Config tag of an explicit asset (network) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-092](#v-pay-092) | B1.1.3: Pub all Config tags of an explicit asset (network) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-093](#v-pay-093) | B1.1.3: Pub Config tags of all assets related to this application (network) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-094](#v-pay-094) | B1.1.3: Set explicit Config tag of an explicit asset (network, new values, minimal) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-095](#v-pay-095) | B1.1.3: Set explicit Config tag of an explicit asset (network, new values, full) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-096](#v-pay-096) | B1.1.3: Set explicit Config tag of an explicit asset (network, empty values, minimal) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-097](#v-pay-097) | B1.1.3: Set explicit Config tag of an explicit asset (network, empty values, full) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-098](#v-pay-098) | B1.1.3: Get explicit Config tag of an explicit asset (device) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-099](#v-pay-099) | B1.1.3: Pub explicit Config tag of an explicit asset (device) | valid | ok | guideline MG B1.1.3 (edited: 4 change(s)) | draft |
-| [V-PAY-100](#v-pay-100) | B1.1.3: Set explicit Config tag of an explicit asset (device, new values, minimal) | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-101](#v-pay-101) | B1.1.3: Set explicit Config tag of an explicit asset (device, new values, full) | valid | ok | guideline MG B1.1.3 (edited: 4 change(s)) | draft |
-| [V-PAY-102](#v-pay-102) | B1.1.3: Set explicit Config tag of an explicit asset (device, empty values, minimal) | valid | ok | guideline MG B1.1.3 | draft |
+| [V-PAY-088](#v-pay-088) | B1.1.3: Get explicit Config tag of an explicit asset (network) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-089](#v-pay-089) | B1.1.3: Get all Config tags of an explicit asset with Locale | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-090](#v-pay-090) | B1.1.3: Get Config tags of all assets related to this application | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-091](#v-pay-091) | B1.1.3: Pub explicit Config tag of an explicit asset (network) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-092](#v-pay-092) | B1.1.3: Pub all Config tags of an explicit asset (network) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-093](#v-pay-093) | B1.1.3: Pub Config tags of all assets related to this application (network) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-094](#v-pay-094) | B1.1.3: Set explicit Config tag of an explicit asset (network, new values, minimal) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-095](#v-pay-095) | B1.1.3: Set explicit Config tag of an explicit asset (network, new values, full) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-096](#v-pay-096) | B1.1.3: Set explicit Config tag of an explicit asset (network, empty values, minimal) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-097](#v-pay-097) | B1.1.3: Set explicit Config tag of an explicit asset (network, empty values, full) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-098](#v-pay-098) | B1.1.3: Get explicit Config tag of an explicit asset (device) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-099](#v-pay-099) | B1.1.3: Pub explicit Config tag of an explicit asset (device) | valid | ok | guideline MG B1.1.3 (edited: 4 change(s)) | reviewed |
+| [V-PAY-100](#v-pay-100) | B1.1.3: Set explicit Config tag of an explicit asset (device, new values, minimal) | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-101](#v-pay-101) | B1.1.3: Set explicit Config tag of an explicit asset (device, new values, full) | valid | ok | guideline MG B1.1.3 (edited: 4 change(s)) | reviewed |
+| [V-PAY-102](#v-pay-102) | B1.1.3: Set explicit Config tag of an explicit asset (device, empty values, minimal) | valid | ok | guideline MG B1.1.3 | reviewed |
 
 ## V-PAY-001
 
@@ -4235,7 +4235,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-CONFIG-016](../../requirements/view/res-config.md#req-res-config-016)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Requests the Config DataSet "Network settings" of the asset: the Filter is the topic Filter, the Get carries no Config DataSetMessage (REQ-RES-CONFIG-016) and the predefined DataSetClassId of Config (REQ-MSG-011). The Filter is read as the stable name of the DataSet, not as the localized Context.Name (REQ-RES-CONFIG-015, SF-085). Answered by V-PAY-091 (REQ-RES-CONFIG-017).
 
@@ -4263,7 +4263,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-LOC-001](../../requirements/view/loc.md#req-loc-001), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-016](../../requirements/view/res-config.md#req-res-config-016)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Requests all Config DataSets of the asset in de-DE: the only DataSetMessage is the helper DataSet Locale (DataSetWriterId 3, REQ-MSG-019), no Config DataSetMessage (REQ-RES-CONFIG-016). The Pub V-PAY-092 has ReplyTo "" and en-US texts, so it is read as an unsolicited publication, not as the answer to this Get (SF-088 (f)).
 
@@ -4299,7 +4299,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-CONFIG-016](../../requirements/view/res-config.md#req-res-config-016)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Requests the Config DataSets of all assets of the application (topic without Source and Filter); no Config DataSetMessage (REQ-RES-CONFIG-016). The Pub V-PAY-093 has ReplyTo "" and is read as an unsolicited publication (SF-088 (f)).
 
@@ -4328,7 +4328,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-002](../../requirements/view/res-config.md#req-res-config-002), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008), [REQ-RES-CONFIG-018](../../requirements/view/res-config.md#req-res-config-018)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-088 (ReplyTo = MessageId of the Get). One Config DataSetMessage with group network (ip_address, subnet-mask, port) and the Context "Network settings"; every configuration object carries Type, Value and Name (REQ-RES-CONFIG-002), values are strings (REQ-RES-CONFIG-007) and satisfy their Validation (REQ-RES-CONFIG-008). The unescaped dots of the device example (SF-088 (b)) do not occur here; the description "IP address of Network DNS server" is editorial (SF-088 (e)).
 
@@ -4429,7 +4429,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-002](../../requirements/view/res-config.md#req-res-config-002), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008), [REQ-RES-CONFIG-018](../../requirements/view/res-config.md#req-res-config-018)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Same DataSet as V-PAY-091 with ReplyTo "": an unsolicited publication (SF-088 (f)); the Context description reads "network Configuration" (editorial, SF-088 (e)).
 
@@ -4529,7 +4529,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-002](../../requirements/view/res-config.md#req-res-config-002), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008), [REQ-RES-CONFIG-018](../../requirements/view/res-config.md#req-res-config-018)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Same DataSet as V-PAY-091 with ReplyTo "" on the topic without Source and Filter: an unsolicited publication (SF-088 (f)).
 
@@ -4631,7 +4631,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-019](../../requirements/view/res-config.md#req-res-config-019)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Partial Set of the network example ("Network settings", DataSetWriterId 42): only the Values of the group network (REQ-RES-CONFIG-003, SF-086 (a)), exactly one DataSetMessage with the DataSetWriterId, DataSetWriterName and WriterGroupName of the addressed DataSet (REQ-RES-CONFIG-019, REQ-BUS-010). The answers are the Status event (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
 
@@ -4680,7 +4680,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008), [REQ-RES-CONFIG-019](../../requirements/view/res-config.md#req-res-config-019)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Set of the network example ("Network settings", DataSetWriterId 42) repeating the read-only properties of the Pub unchanged together with the new Values (REQ-RES-CONFIG-003; changed read-only properties would be rejected, REQ-RES-CONFIG-023, SF-086 (c)). The answers are the Status event (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
 
@@ -4782,7 +4782,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-010](../../requirements/view/res-config.md#req-res-config-010), [REQ-RES-CONFIG-019](../../requirements/view/res-config.md#req-res-config-019)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Unsets all configuration objects of the group network with an empty Value (REQ-RES-CONFIG-010); none of them is mandatory. The answers are the Status event (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
 
@@ -4831,7 +4831,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008), [REQ-RES-CONFIG-010](../../requirements/view/res-config.md#req-res-config-010), [REQ-RES-CONFIG-019](../../requirements/view/res-config.md#req-res-config-019)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Like V-PAY-096, repeating the read-only properties unchanged (REQ-RES-CONFIG-003, SF-086 (c)). The answers are the Status event (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
 
@@ -4933,7 +4933,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-CONFIG-016](../../requirements/view/res-config.md#req-res-config-016)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Requests the Config DataSet "Overall device settings" of the device example ("Overall device settings", DataSetWriterId 42 – the same id as the network example ("Network settings", DataSetWriterId 42), SF-088 (d)); no Config DataSetMessage (REQ-RES-CONFIG-016). Answered by V-PAY-099.
 
@@ -4962,7 +4962,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-002](../../requirements/view/res-config.md#req-res-config-002), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008), [REQ-RES-CONFIG-012](../../requirements/view/res-config.md#req-res-config-012), [REQ-RES-CONFIG-013](../../requirements/view/res-config.md#req-res-config-013), [REQ-RES-CONFIG-014](../../requirements/view/res-config.md#req-res-config-014), [REQ-RES-CONFIG-018](../../requirements/view/res-config.md#req-res-config-018)
 - Origin: guideline MG B1.1.3 (edited: 4 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-098 (ReplyTo = MessageId of the Get). Two groups device1 and common (REQ-RES-CONFIG-013/014) with mandatory (aut0-r3fr3sh, protocol) and sensitive (password, REQ-RES-CONFIG-012, SF-087) configuration objects. Corrected after SF-088: group Common and configuration object Unit renamed to common and unit as in the Sets V-PAY-100/102 and the text of B1.1.3 (a), the dots of the ip_address Pattern escaped (b), the quantity "Unit": "Temperature" of unit removed (c). DataSetWriterId 42 is also used by the network example ("Network settings", DataSetWriterId 42) (SF-088 (d)).
 
@@ -5296,7 +5296,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-011](../../requirements/view/res-config.md#req-res-config-011), [REQ-RES-CONFIG-019](../../requirements/view/res-config.md#req-res-config-019)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Partial Set of the device example ("Overall device settings", DataSetWriterId 42 – the same id as the network example ("Network settings", DataSetWriterId 42), SF-088 (d)): Values of both groups including the mandatory objects aut0-r3fr3sh and protocol of device1 (REQ-RES-CONFIG-011), exactly one DataSetMessage (REQ-RES-CONFIG-019, REQ-BUS-010); the sensitive password is sent in clear text (SF-087). The answers are the Status event (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
 
@@ -5365,7 +5365,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008), [REQ-RES-CONFIG-011](../../requirements/view/res-config.md#req-res-config-011), [REQ-RES-CONFIG-019](../../requirements/view/res-config.md#req-res-config-019)
 - Origin: guideline MG B1.1.3 (edited: 4 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Set of the device example ("Overall device settings", DataSetWriterId 42 – the same id as the network example ("Network settings", DataSetWriterId 42), SF-088 (d)) repeating the read-only properties of V-PAY-099 together with the new Values. Corrected like V-PAY-099 (SF-088 (a) … (c)): common, unit, escaped Pattern dots, no "Unit": "Temperature". The answers are the Status event (REQ-RES-CONFIG-021, MG B1.1.3 Status event = V-PAY-076) and a Pub Config with the changed values (REQ-RES-CONFIG-022); B1.1.3 shows only the Status event.
 
@@ -5699,7 +5699,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-010](../../requirements/view/res-config.md#req-res-config-010), [REQ-RES-CONFIG-011](../../requirements/view/res-config.md#req-res-config-011), [REQ-RES-CONFIG-019](../../requirements/view/res-config.md#req-res-config-019)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Unsets the configuration objects of the device example ("Overall device settings", DataSetWriterId 42 – the same id as the network example ("Network settings", DataSetWriterId 42), SF-088 (d)) with an empty Value (REQ-RES-CONFIG-010), including the mandatory aut0-r3fr3sh and protocol: format-valid, the owner may reject it with Bad (REQ-RES-CONFIG-011, SF-086 (b)). user-name keeps "admin" (SF-088 (e)).
 

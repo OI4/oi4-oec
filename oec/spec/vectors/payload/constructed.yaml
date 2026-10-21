@@ -570,7 +570,7 @@ vectors:
     violates: [REQ-RES-CONFIG-004]
     reason: 'Group and configuration object names start with a letter or an underscore.'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-091 with the group network renamed to 1network.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -663,7 +663,7 @@ vectors:
     violates: [REQ-RES-CONFIG-007]
     reason: 'Value is always transmitted as a string.'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-094 with the port Value as the JSON number 80.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -703,7 +703,7 @@ vectors:
     violates: [REQ-RES-CONFIG-007]
     reason: 'The Value of a Number configuration object represents a number.'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-091 with the port Value "eighty" (Type Number).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -796,7 +796,7 @@ vectors:
     violates: [REQ-RES-CONFIG-002]
     reason: 'Every configuration object of a Pub Config carries Type, Value and Name.'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-091 without the Type of port.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -888,7 +888,7 @@ vectors:
     violates: [REQ-RES-CONFIG-006]
     reason: 'Type is one of Boolean, Number, String, DateTime and ByteString.'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-091 with the Type Integer for port.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -981,7 +981,7 @@ vectors:
     violates: [REQ-RES-CONFIG-008]
     reason: 'A Value satisfies the Validation of its configuration object (port: Max 65535).'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-095 with the port Value 70000.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -1074,7 +1074,7 @@ vectors:
     violates: [REQ-RES-CONFIG-003]
     reason: 'Every group of a Set Config carries at least one configuration object.'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-094 with an empty group network.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -1104,7 +1104,7 @@ vectors:
     violates: [REQ-RES-CONFIG-016]
     reason: 'A Get Config carries no Config DataSetMessage.'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-088 with the DataSetMessage of V-PAY-094.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -1144,7 +1144,7 @@ vectors:
     violates: [REQ-RES-CONFIG-019]
     reason: 'A Set Config carries exactly one DataSetMessage, that of the addressed DataSet.'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-094 with its DataSetMessage duplicated.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -1203,7 +1203,7 @@ vectors:
     violates: [REQ-MSG-001]
     reason: 'Strict validation reports every key that is not defined for the object (SF-052).'
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-091 with the undefined key Scale in port; V-PAY-113 is the tolerant view.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Network settings"
@@ -1296,7 +1296,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-046, REQ-RES-CONFIG-002]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-112 checked tolerantly: the receiver ignores the undefined key Scale (REQ-
       MSG-046).
