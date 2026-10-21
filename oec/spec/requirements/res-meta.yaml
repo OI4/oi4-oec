@@ -26,7 +26,7 @@ requirements:
         text: In combination with the method Get, the payload requires an empty DataSetMetaData. The topic must contain Resource, Source and Filter to be valid.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.5-ff9f8200]
-    status: draft
+    status: reviewed
     notes: >-
       Example V-PAY-020 (MG B1.1.5): the header addresses the Data DataSet
       (DataSetWriterId, WriterGroupName = Tag, DataSetWriterName = Source).
@@ -51,7 +51,7 @@ requirements:
         text: Via the <Method>/<Resource>/<Source>/<Filter> combination Get/Metadata/<Source>/<Tag>, the publication of this information to the Pub/Metadata/<Source>/<Tag> topic can be triggered.
     verification: [d7-test]
     inventory: [MG-9.1.5-bba195d4]
-    status: draft
+    status: reviewed
     notes: ReplyTo per REQ-MSG-015. Example V-PAY-020/021 (MG B1.1.5).
 
   - id: REQ-RES-META-003
@@ -71,7 +71,7 @@ requirements:
         text: In combination with the method Pub, the payload contains a filled DataSetMetaData. The topic must contain Resource, Source and Filter to be valid, because Metadata is always published for a single Data object (8.3.8 PublicationList, ON_REQUEST_FILTER_9).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.5-cbd58b97]
-    status: draft
+    status: reviewed
     notes: >-
       The content rules of DataSetMetaData are REQ-MSG-032 … 041, the
       header link to the DataSet REQ-MSG-033 (same DataSetWriterId,
@@ -97,7 +97,7 @@ requirements:
         text: Each publication using the method Set must be done explicitly. That means Set/Metadata is only possible by using a complete topic containing Resource, Source and Filter, such as Oi4v2/<ServiceType>/<AppId>/Set/Metadata/<Source>/<Tag>.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.5-589a70ef, MG-9.1.5-c88db582]
-    status: draft
+    status: reviewed
     notes: >-
       PublisherId = requester (REQ-MSG-006; the MG 9.1.5 Set template says
       "IdentificationLink_of_MetadataOwner", SF-078 (b)); header per
@@ -117,7 +117,7 @@ requirements:
         text: To prevent write access by unauthorized communication participants, the operator must prevent this via ACL.
     verification: [d8]
     inventory: [MG-9.1.5-0ebe87ac]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-META-006
     title: Status event after Set Metadata
@@ -137,7 +137,7 @@ requirements:
         text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
     verification: [d7-test]
     inventory: [MG-9.1.5-553935ed]
-    status: draft
+    status: reviewed
     notes: Same obligation as REQ-TOP-014; ReplyTo and content per REQ-RES-EVENT-005. Example MG B1.1.5.
 
   - id: REQ-RES-META-007
@@ -157,7 +157,7 @@ requirements:
         text: If setting Metadata was successful, the new Metadata must be published to the Pub/Metadata/<Source>/<Tag> topic, according to the settings in PublicationList (8.3.8 PublicationList).
     verification: [d7-test]
     inventory: [MG-9.1.5-ccacb85a]
-    status: draft
+    status: reviewed
     notes: >-
       Read like REQ-RES-PUBLIST-025 and REQ-RES-REFDES-010 (reviewed in
       C-027). A change of the Metadata updates its ConfigurationVersion

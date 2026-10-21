@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028).
+# Constructed payload vectors (C-024, C-027, C-028): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "ff1562f"
@@ -351,7 +351,7 @@ vectors:
     violates: [REQ-RES-EVENT-004]
     reason: "Number is 2147876864 (0x80060000, BadEncodingError, class Bad) on Status/Good with SymbolicId Good."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-063 with Number 0x80060000 (Bad); the EventLevel Good and the
       SymbolicId Good contradict its severity class (SF-076 (b)).
@@ -388,7 +388,7 @@ vectors:
     violates: [REQ-RES-EVENT-008]
     reason: "PRI 13 has the severity Notice (13 % 8 = 5), but the EventLevel is Error."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-064 on Syslog/Error instead of Syslog/Notice (SF-076 (a)).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Error"
@@ -424,7 +424,7 @@ vectors:
     violates: [REQ-RES-EVENT-002]
     reason: "Category CAT_GENERIC_99 on Status/Good."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-063 with Category CAT_GENERIC_99 (SF-076 (c)).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
@@ -460,7 +460,7 @@ vectors:
     violates: [REQ-RES-DATA-004]
     reason: "The Oi4Pv DataSet carries only Sv1; Pv is mandatory."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       Derived from V-PAY-058: Tag/WriterGroupName Oi4Pv, own DataSetWriterId 95,
       no DataSetClassId (REQ-MSG-011 allows to omit it), Payload with Sv1 only
@@ -492,7 +492,7 @@ vectors:
     violates: [REQ-RES-SUBLIST-011]
     reason: "A Del SubscriptionList carries exactly one entry whose TopicPath identifies the subscription; this one carries none."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-074 with empty Messages (as a Del ReferenceDesignation would be,
       SF-080 (a)).
@@ -513,7 +513,7 @@ vectors:
     violates: [REQ-RES-SUBLIST-002]
     reason: "The TopicPath subscribes to Pub/SubscriptionList/<Source>/Data/oee; the WriterGroupName derived from it would be SubscriptionList/Data/oee, not Data/oee."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       The verbatim example of V-PAY-069 (B1.1.9) – the reason for the corrected
       edit of SF-080 (b).
@@ -545,7 +545,7 @@ vectors:
     violates: [REQ-RES-META-001]
     reason: "The MetaData of a Get Metadata is the empty object {}."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-020 with a MetaData that carries a Name.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"

@@ -94,27 +94,27 @@ areas:
   - code: RES-DATA
     title: Resource Data
     cycle: C-028
-    status: drafted
+    status: reviewed
     sections: [MG 8.3.4, MG 9.1.4]
   - code: RES-META
     title: Resource Metadata
     cycle: C-028
-    status: drafted
+    status: reviewed
     sections: [MG 8.3.5, MG 9.1.5]
   - code: RES-EVENT
     title: Resource Event
     cycle: C-028
-    status: drafted
+    status: reviewed
     sections: [MG 8.3.6, MG 9.1.6]
   - code: RES-SUBLIST
     title: Resource SubscriptionList
     cycle: C-028
-    status: drafted
+    status: reviewed
     sections: [MG 8.3.9, MG 9.1.9]
   - code: BUS
     title: General Message Bus communication
     cycle: C-028
-    status: drafted
+    status: reviewed
     sections: [MG 9]
   - code: CNT
     title: Container environment

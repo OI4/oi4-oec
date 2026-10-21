@@ -14,13 +14,13 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-050](#v-pay-050) | Pub MAM with an inconsistent Pagination | invalid | violates: REQ-PAG-004 | constructed | reviewed |
 | [V-PAY-051](#v-pay-051) | Get MAM that carries a MAM DataSetMessage | invalid | violates: REQ-RES-MAM-020 | constructed | reviewed |
 | [V-PAY-052](#v-pay-052) | Pub PublicationList with an Event entry in Mode APPLICATION_2 | invalid | violates: REQ-RES-PUBLIST-012 | constructed | reviewed |
-| [V-PAY-081](#v-pay-081) | Pub Event of category Status whose EventLevel does not match the StatusCode | invalid | violates: REQ-RES-EVENT-004 | constructed | draft |
-| [V-PAY-082](#v-pay-082) | Pub Event of category Syslog whose EventLevel does not match the PRI | invalid | violates: REQ-RES-EVENT-008 | constructed | draft |
-| [V-PAY-083](#v-pay-083) | Pub Event whose Category does not match the EventCategory of the topic | invalid | violates: REQ-RES-EVENT-002 | constructed | draft |
-| [V-PAY-084](#v-pay-084) | Pub Oi4Pv without the primary value Pv | invalid | violates: REQ-RES-DATA-004 | constructed | draft |
-| [V-PAY-085](#v-pay-085) | Del SubscriptionList without the entry to delete | invalid | violates: REQ-RES-SUBLIST-011 | constructed | draft |
-| [V-PAY-086](#v-pay-086) | Pub SubscriptionList entry with the unedited TopicPath of B1.1.9 | invalid | violates: REQ-RES-SUBLIST-002 | constructed | draft |
-| [V-PAY-087](#v-pay-087) | Get Metadata with a filled MetaData | invalid | violates: REQ-RES-META-001 | constructed | draft |
+| [V-PAY-081](#v-pay-081) | Pub Event of category Status whose EventLevel does not match the StatusCode | invalid | violates: REQ-RES-EVENT-004 | constructed | reviewed |
+| [V-PAY-082](#v-pay-082) | Pub Event of category Syslog whose EventLevel does not match the PRI | invalid | violates: REQ-RES-EVENT-008 | constructed | reviewed |
+| [V-PAY-083](#v-pay-083) | Pub Event whose Category does not match the EventCategory of the topic | invalid | violates: REQ-RES-EVENT-002 | constructed | reviewed |
+| [V-PAY-084](#v-pay-084) | Pub Oi4Pv without the primary value Pv | invalid | violates: REQ-RES-DATA-004 | constructed | reviewed |
+| [V-PAY-085](#v-pay-085) | Del SubscriptionList without the entry to delete | invalid | violates: REQ-RES-SUBLIST-011 | constructed | reviewed |
+| [V-PAY-086](#v-pay-086) | Pub SubscriptionList entry with the unedited TopicPath of B1.1.9 | invalid | violates: REQ-RES-SUBLIST-002 | constructed | reviewed |
+| [V-PAY-087](#v-pay-087) | Get Metadata with a filled MetaData | invalid | violates: REQ-RES-META-001 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -413,7 +413,7 @@ Payload:
 - Expected: invalid – Number is 2147876864 (0x80060000, BadEncodingError, class Bad) on Status/Good with SymbolicId Good.
 - Violates: [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-063 with Number 0x80060000 (Bad); the EventLevel Good and the SymbolicId Good contradict its severity class (SF-076 (b)).
 
@@ -458,7 +458,7 @@ Payload:
 - Expected: invalid – PRI 13 has the severity Notice (13 % 8 = 5), but the EventLevel is Error.
 - Violates: [REQ-RES-EVENT-008](../../requirements/view/res-event.md#req-res-event-008)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-064 on Syslog/Error instead of Syslog/Notice (SF-076 (a)).
 
@@ -503,7 +503,7 @@ Payload:
 - Expected: invalid – Category CAT_GENERIC_99 on Status/Good.
 - Violates: [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-063 with Category CAT_GENERIC_99 (SF-076 (c)).
 
@@ -548,7 +548,7 @@ Payload:
 - Expected: invalid – The Oi4Pv DataSet carries only Sv1; Pv is mandatory.
 - Violates: [REQ-RES-DATA-004](../../requirements/view/res-data.md#req-res-data-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: Derived from V-PAY-058: Tag/WriterGroupName Oi4Pv, own DataSetWriterId 95, no DataSetClassId (REQ-MSG-011 allows to omit it), Payload with Sv1 only (SF-077 (b)).
 
@@ -587,7 +587,7 @@ Payload:
 - Expected: invalid – A Del SubscriptionList carries exactly one entry whose TopicPath identifies the subscription; this one carries none.
 - Violates: [REQ-RES-SUBLIST-011](../../requirements/view/res-sublist.md#req-res-sublist-011)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-074 with empty Messages (as a Del ReferenceDesignation would be, SF-080 (a)).
 
@@ -616,7 +616,7 @@ Payload:
 - Expected: invalid – The TopicPath subscribes to Pub/SubscriptionList/&lt;Source>/Data/oee; the WriterGroupName derived from it would be SubscriptionList/Data/oee, not Data/oee.
 - Violates: [REQ-RES-SUBLIST-002](../../requirements/view/res-sublist.md#req-res-sublist-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: The verbatim example of V-PAY-069 (B1.1.9) – the reason for the corrected edit of SF-080 (b).
 
@@ -656,7 +656,7 @@ Payload:
 - Expected: invalid – The MetaData of a Get Metadata is the empty object {}.
 - Violates: [REQ-RES-META-001](../../requirements/view/res-meta.md#req-res-meta-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-020 with a MetaData that carries a Name.
 

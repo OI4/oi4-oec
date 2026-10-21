@@ -34,7 +34,7 @@ requirements:
           This object depends on the category and its defined schema. In case of usage of CAT_GENERIC_99, no common schema validation is possible.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.6-6c6f8e17, MG-8.3.6-f78f6741, MG-8.3.6-9181a931, MG-8.3.6-af98a12d]
-    status: draft
+    status: reviewed
     notes: >-
       The category-specific keys SymbolicId (Status) and MSG/HEADER (Syslog)
       are keys of Details, as in the examples of MG B1.1.6, not fields of
@@ -61,7 +61,7 @@ requirements:
         text: The used category must always be CAT_GENERIC_99.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.6.1-10a94abf, MG-8.3.6.1-349a3648, MG-8.3.6.2-1d59b183, MG-8.3.6.2-95c405fe, MG-8.3.6.3-fbb5933d, MG-8.3.6.3-2b797dea]
-    status: draft
+    status: reviewed
     notes: The mapping EventCategory ↔ Category is listed in MG 9.1.6 (SF-076 (c)).
 
   # --- Status (MG 8.3.6.1) ----------------------------------------------------
@@ -87,7 +87,7 @@ requirements:
         text: A symbolic ID, defined by the OPC Foundation, as short form of the description (e.g., “BadEncodingError” for 0x80060000).
     verification: [schema, d7-validate]
     inventory: [MG-8.3.6.1-108129a6, MG-8.3.6.1-d778a37f, MG-8.3.6.1-15d7b6b4, MG-8.3.6.1-1ae735cf]
-    status: draft
+    status: reviewed
     notes: >-
       SymbolicId is a key of Details (MG B1.1.6, B1.1.4 … B1.1.10; SF-075 (a)).
       JSON numbers are decimal; the hexadecimal notation is only used in the
@@ -111,7 +111,7 @@ requirements:
       - ref: MG 7.7
         text: The class is based on the leading part of the symbol name or the starting 0x00 (Good), 0x40 (Uncertain) or 0x80 (Bad) hex code of the OPC UA Status Code (see OPC UA Part 6-A.2).
     verification: [schema, d7-validate]
-    status: draft
+    status: reviewed
     notes: >-
       The Filter values are REQ-TOP-023; this entry adds the consistency
       between topic and payload (SF-076 (b)). The severity 0b11 is reserved
@@ -143,7 +143,7 @@ requirements:
         text: From compliance Level 2 on, each Set and Del must be answered with an Event of the category Status; at Level 1, it should be answered this way (7.4 Method Element).
     verification: [d7-test]
     inventory: [MG-8.3.6.1-41b095ec, MG-8.3.6.1-381a4fc6, MG-9.1-153191a2, MG-9.1-351e197e, MG-9.1-99138e23]
-    status: draft
+    status: reviewed
     notes: >-
       Same obligation as REQ-TOP-014/015 and the per-resource requirements
       (REQ-RES-DATA-011, REQ-RES-META-006, REQ-RES-SUBLIST-013,
@@ -169,7 +169,7 @@ requirements:
         text: The event category Status can be used to publish application specific information such as internal state.
     verification: [manual]
     inventory: [MG-8.3.6.1-61ce38ec]
-    status: draft
+    status: reviewed
 
   # --- Syslog (MG 8.3.6.2) ----------------------------------------------------
   - id: REQ-RES-EVENT-007
@@ -196,7 +196,7 @@ requirements:
         text: The optional key Description is not used in context of this Category.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.6.2-5eb88824, MG-8.3.6.2-a95141f7, MG-8.3.6.2-99f931ec, MG-8.3.6.2-245da261, MG-8.3.6.2-f14e34ce]
-    status: draft
+    status: reviewed
     notes: >-
       MSG and HEADER are keys of Details (MG B1.1.6; SF-075 (a)); "is not
       used" read as "is not present" (SF-075 (b)). RFC 3164 defines the
@@ -216,7 +216,7 @@ requirements:
     condition: The component publishes Events of the category Syslog.
     refs: [MG 7.7, MG 8.3.6.2, SF-076]
     verification: [schema, d7-validate]
-    status: draft
+    status: reviewed
     notes: >-
       MG 8.3.6.2 only notes "The EventLevel depends on severity level of
       PRI"; the mapping follows the RFC 5424 names used for the LogLevels of
@@ -241,7 +241,7 @@ requirements:
         text: An application defined object which represents something in scope of the application.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.6.3-3366460b, MG-8.3.6.3-ff7d5f6f, MG-8.3.6.3-8b474e52]
-    status: draft
+    status: reviewed
 
   - id: REQ-RES-EVENT-010
     title: Generic event numbers and details are documented
@@ -262,7 +262,7 @@ requirements:
         text: It should be well documented on application side.
     verification: [manual]
     inventory: [MG-8.3.6.3-cd223e3d, MG-8.3.6.3-0d7dfbe4]
-    status: draft
+    status: reviewed
 
   # --- Message Bus (MG 9.1.6) -------------------------------------------------
   - id: REQ-RES-EVENT-011
@@ -286,7 +286,7 @@ requirements:
         text: Only DataSetMessages of type Event with same EventCategory and EventLevel can be combined in a single NetworkMessage.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.6-c02fef31, MG-9.1.6-ddada5a3]
-    status: draft
+    status: reviewed
     notes: >-
       Topic form per REQ-TOP-013 (matrix) and REQ-TOP-023; Source and
       Filter of each DataSetMessage per REQ-MSG-023/024. Event has no Get,

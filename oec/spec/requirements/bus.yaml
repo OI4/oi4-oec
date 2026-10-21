@@ -26,7 +26,7 @@ requirements:
         text: Once subscribing to the topics is done, Service A may start publishing.
     verification: [manual]
     inventory: [MG-9.1-49193b6c]
-    status: draft
+    status: reviewed
     notes: >-
       The first publication after connect is the Birth message
       (REQ-LIFE-015). Messages without subscriber are lost (no retained
@@ -50,7 +50,7 @@ requirements:
         text: Service B then must publish on the Del topic of Service A.
     verification: [d7-validate]
     inventory: [MG-9.1-2a8cc5e7, MG-9.1-478085b5]
-    status: draft
+    status: reviewed
     notes: The topic forms are REQ-TOP-013 (matrix); the PublisherId stays the requester's (REQ-MSG-006).
 
   - id: REQ-BUS-003
@@ -70,7 +70,7 @@ requirements:
         text: Service A receives the Get message from Service B through the Message Bus and must reply with a Pub message over the Message Bus.
     verification: [d7-test]
     inventory: [MG-9.1-c0d352ea]
-    status: draft
+    status: reviewed
     notes: >-
       ReplyTo per REQ-MSG-015; empty list per REQ-CMP-041; exception Get of
       Metadata without Data (REQ-CMP-044). The per-resource answers are
@@ -93,7 +93,7 @@ requirements:
         text: Service B must publish the updated resource object on Service A’s Set topic for this resource. Now, the Filter is required in the topic.
     verification: [d7-validate]
     inventory: [MG-9.1-4ea9b9b7, MG-9.1-c470061f]
-    status: draft
+    status: reviewed
     notes: >-
       ReferenceDesignation has no Filter (REQ-TOP-013, MG 7.7); "the Filter
       is required" read as "where the resource has a Filter" (SF-081). The
@@ -116,7 +116,7 @@ requirements:
         text: To delete a resource object from Service A, Service B must know the Filter of the resource it aims to delete.
     verification: [d7-validate]
     inventory: [MG-9.1-679a6b3c]
-    status: draft
+    status: reviewed
     notes: Del exists for SubscriptionList (with Filter) and ReferenceDesignation (without Filter) only (REQ-TOP-013, SF-081).
 
   - id: REQ-BUS-006
@@ -136,7 +136,7 @@ requirements:
         text: In case the Set was successful, Service A must publish the changed resource on the Pub topic in regard to the settings in PublicationList.
     verification: [d7-test]
     inventory: [MG-9.1-77f75f9b]
-    status: draft
+    status: reviewed
     notes: >-
       Interpretation of "in regard to the settings in PublicationList" as in
       REQ-RES-PUBLIST-025 and REQ-RES-REFDES-010 (reviewed in C-027); per
@@ -159,7 +159,7 @@ requirements:
         text: If the whole Filter has been deleted, Service A must not publish anything on the topic of the resource.
     verification: [d7-test]
     inventory: [MG-9.1-43ac5b14]
-    status: draft
+    status: reviewed
     notes: >-
       A Del of ReferenceDesignation always deletes the whole object
       (REQ-RES-REFDES-007); for SubscriptionList see REQ-RES-SUBLIST-015
@@ -183,7 +183,7 @@ requirements:
         text: In case the Del has deleted only parts of a Filter (e.g., a single subscription out of the SubscriptionList), this is a change to Service A and it must publish the changed resource on the Pub topic regarding to the settings in PublicationList.
     verification: [d7-test]
     inventory: [MG-9.1-da721bd7]
-    status: draft
+    status: reviewed
     notes: Per resource REQ-RES-SUBLIST-015 (SF-080 (d)).
 
   - id: REQ-BUS-009
@@ -202,7 +202,7 @@ requirements:
         text: Beyond that, the application should react use case-specific and, if necessary, initiate further events and/or syslog entries.
     verification: [manual]
     inventory: [MG-9.1-bb0018bd]
-    status: draft
+    status: reviewed
 
   - id: REQ-BUS-010
     title: DataSetMessage header of Set and Del requests
@@ -219,7 +219,7 @@ requirements:
     refs: [MG 8.2.3, MG 9.1, SF-079]
     verification: [d7-validate]
     inventory: []
-    status: draft
+    status: reviewed
     notes: >-
       MG 8.2.3 defines the header for the publisher of a DataSet; for a
       request it is not stated (SF-079). All examples (MG B1.1.4, B1.1.5,

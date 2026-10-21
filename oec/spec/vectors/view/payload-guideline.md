@@ -54,32 +54,32 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12 except the C
 | [V-PAY-047](#v-pay-047) | B1.1.12: Pub MAM of all assets in the requested Locale, reply to a Get | valid | ok | guideline MG B1.1.12 | reviewed |
 | [V-PAY-053](#v-pay-053) | B1.1.10: Get ReferenceDesignation of the children of an asset | valid | ok | guideline MG B1.1.10 | reviewed |
 | [V-PAY-054](#v-pay-054) | B1.1.10: Pub ReferenceDesignation of the children of an asset, reply to a Get | valid | ok | guideline MG B1.1.10 | reviewed |
-| [V-PAY-055](#v-pay-055) | B1.1.4: Get explicit data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | draft |
-| [V-PAY-056](#v-pay-056) | B1.1.4: Get all Data tags of an explicit asset | valid | ok | guideline MG B1.1.4 | draft |
-| [V-PAY-057](#v-pay-057) | B1.1.4: Get Data tags of all assets related to this application | valid | ok | guideline MG B1.1.4 | draft |
-| [V-PAY-058](#v-pay-058) | B1.1.4: Pub explicit Data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | draft |
-| [V-PAY-059](#v-pay-059) | B1.1.4: Pub all Data tags of an explicit asset | valid | ok | guideline MG B1.1.4 | draft |
-| [V-PAY-060](#v-pay-060) | B1.1.4: Pub Data tags of all assets related to this application | valid | ok | guideline MG B1.1.4 | draft |
-| [V-PAY-061](#v-pay-061) | B1.1.4: Set explicit Data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | draft |
-| [V-PAY-062](#v-pay-062) | B1.1.4: Status Event follows a set request | valid | ok | guideline MG B1.1.4 | draft |
-| [V-PAY-063](#v-pay-063) | B1.1.6: Pub Event of EventCategory Status (OPC UA Statuscode) | valid | ok | guideline MG B1.1.6 | draft |
-| [V-PAY-064](#v-pay-064) | B1.1.6: Pub Event of EventCategory Syslog | valid | ok | guideline MG B1.1.6 | draft |
-| [V-PAY-065](#v-pay-065) | B1.1.6: Pub Event of EventCategory Generic | valid | ok | guideline MG B1.1.6 | draft |
-| [V-PAY-066](#v-pay-066) | B1.1.9: Get explicit SubscriptionList entry | valid | ok | guideline MG B1.1.9 | draft |
-| [V-PAY-067](#v-pay-067) | B1.1.9: Get all SubscriptionList entries of an explicit asset | valid | ok | guideline MG B1.1.9 | draft |
-| [V-PAY-068](#v-pay-068) | B1.1.9: Get full SubscriptionList of all assets related to this application | valid | ok | guideline MG B1.1.9 | draft |
-| [V-PAY-069](#v-pay-069) | B1.1.9: Pub an explicit SubscriptionList entry | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | draft |
-| [V-PAY-070](#v-pay-070) | B1.1.9: Pub all SubscriptionList entries of an explicit asset | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | draft |
-| [V-PAY-071](#v-pay-071) | B1.1.9: Pub full SubscriptionList of all assets related to this application | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | draft |
-| [V-PAY-072](#v-pay-072) | B1.1.9: Set an explicit SubscriptionList entry | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | draft |
-| [V-PAY-073](#v-pay-073) | B1.1.9: Status event follows a set request | valid | ok | guideline MG B1.1.9 | draft |
-| [V-PAY-074](#v-pay-074) | B1.1.9: Del an explicit SubscriptionList entry | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | draft |
-| [V-PAY-075](#v-pay-075) | B1.1.9: Status event follows a delete request | valid | ok | guideline MG B1.1.9 | draft |
-| [V-PAY-076](#v-pay-076) | B1.1.3: Status event follows a set request | valid | ok | guideline MG B1.1.3 | draft |
-| [V-PAY-077](#v-pay-077) | B1.1.5: Status event follows a set request | valid | ok | guideline MG B1.1.5 | draft |
-| [V-PAY-078](#v-pay-078) | B1.1.8: Status Event follows a set request | valid | ok | guideline MG B1.1.8 | draft |
-| [V-PAY-079](#v-pay-079) | B1.1.10: Status Event follows a set request | valid | ok | guideline MG B1.1.10 | draft |
-| [V-PAY-080](#v-pay-080) | B1.1.10: Status Event follows a delete request | valid | ok | guideline MG B1.1.10 | draft |
+| [V-PAY-055](#v-pay-055) | B1.1.4: Get explicit data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-056](#v-pay-056) | B1.1.4: Get all Data tags of an explicit asset | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-057](#v-pay-057) | B1.1.4: Get Data tags of all assets related to this application | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-058](#v-pay-058) | B1.1.4: Pub explicit Data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-059](#v-pay-059) | B1.1.4: Pub all Data tags of an explicit asset | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-060](#v-pay-060) | B1.1.4: Pub Data tags of all assets related to this application | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-061](#v-pay-061) | B1.1.4: Set explicit Data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-062](#v-pay-062) | B1.1.4: Status Event follows a set request | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-063](#v-pay-063) | B1.1.6: Pub Event of EventCategory Status (OPC UA Statuscode) | valid | ok | guideline MG B1.1.6 | reviewed |
+| [V-PAY-064](#v-pay-064) | B1.1.6: Pub Event of EventCategory Syslog | valid | ok | guideline MG B1.1.6 | reviewed |
+| [V-PAY-065](#v-pay-065) | B1.1.6: Pub Event of EventCategory Generic | valid | ok | guideline MG B1.1.6 | reviewed |
+| [V-PAY-066](#v-pay-066) | B1.1.9: Get explicit SubscriptionList entry | valid | ok | guideline MG B1.1.9 | reviewed |
+| [V-PAY-067](#v-pay-067) | B1.1.9: Get all SubscriptionList entries of an explicit asset | valid | ok | guideline MG B1.1.9 | reviewed |
+| [V-PAY-068](#v-pay-068) | B1.1.9: Get full SubscriptionList of all assets related to this application | valid | ok | guideline MG B1.1.9 | reviewed |
+| [V-PAY-069](#v-pay-069) | B1.1.9: Pub an explicit SubscriptionList entry | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | reviewed |
+| [V-PAY-070](#v-pay-070) | B1.1.9: Pub all SubscriptionList entries of an explicit asset | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | reviewed |
+| [V-PAY-071](#v-pay-071) | B1.1.9: Pub full SubscriptionList of all assets related to this application | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | reviewed |
+| [V-PAY-072](#v-pay-072) | B1.1.9: Set an explicit SubscriptionList entry | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | reviewed |
+| [V-PAY-073](#v-pay-073) | B1.1.9: Status event follows a set request | valid | ok | guideline MG B1.1.9 | reviewed |
+| [V-PAY-074](#v-pay-074) | B1.1.9: Del an explicit SubscriptionList entry | valid | ok | guideline MG B1.1.9 (edited: 1 change(s)) | reviewed |
+| [V-PAY-075](#v-pay-075) | B1.1.9: Status event follows a delete request | valid | ok | guideline MG B1.1.9 | reviewed |
+| [V-PAY-076](#v-pay-076) | B1.1.3: Status event follows a set request | valid | ok | guideline MG B1.1.3 | reviewed |
+| [V-PAY-077](#v-pay-077) | B1.1.5: Status event follows a set request | valid | ok | guideline MG B1.1.5 | reviewed |
+| [V-PAY-078](#v-pay-078) | B1.1.8: Status Event follows a set request | valid | ok | guideline MG B1.1.8 | reviewed |
+| [V-PAY-079](#v-pay-079) | B1.1.10: Status Event follows a set request | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-080](#v-pay-080) | B1.1.10: Status Event follows a delete request | valid | ok | guideline MG B1.1.10 | reviewed |
 
 ## V-PAY-001
 
@@ -3195,7 +3195,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-DATA-006](../../requirements/view/res-data.md#req-res-data-006), [REQ-RES-DATA-007](../../requirements/view/res-data.md#req-res-data-007)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 Notes: A Get Data carries no Data DataSetMessage (REQ-RES-DATA-006). Data has no predefined DataSetClassId; the requester does not know the publisher-defined one and omits it (REQ-MSG-011, SF-048/SF-072). The answer is V-PAY-058.
 
@@ -3222,7 +3222,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-DATA-006](../../requirements/view/res-data.md#req-res-data-006), [REQ-RES-DATA-007](../../requirements/view/res-data.md#req-res-data-007)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 Notes: Without Tag the Get addresses all Data DataSets of the asset (REQ-RES- DATA-007); no DataSetClassId (see the note of the example).
 
@@ -3248,7 +3248,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-DATA-006](../../requirements/view/res-data.md#req-res-data-006), [REQ-RES-DATA-007](../../requirements/view/res-data.md#req-res-data-007)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 Notes: Without Source the Get addresses all Data DataSets of all assets of the application (REQ-RES-DATA-007).
 
@@ -3276,7 +3276,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-DATA-001](../../requirements/view/res-data.md#req-res-data-001), [REQ-RES-DATA-008](../../requirements/view/res-data.md#req-res-data-008)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-055 (ReplyTo = MessageId of the Get). All DataSetMessages belong to the class oee, so the NetworkMessage carries the publisher-defined DataSetClassId (REQ-MSG-011, SF-072). The content of an application-defined Data DataSet is not checked (REQ-RES-DATA-001 refers to its Metadata).
 
@@ -3318,7 +3318,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-DATA-001](../../requirements/view/res-data.md#req-res-data-001), [REQ-RES-DATA-008](../../requirements/view/res-data.md#req-res-data-008)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 Notes: Self-initiated publication (empty ReplyTo) of all Data DataSets of the asset; more DataSetMessages or a Pagination DataSet would follow in the same NetworkMessage (REQ-RES-DATA-008, REQ-PAG-005).
 
@@ -3359,7 +3359,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-DATA-001](../../requirements/view/res-data.md#req-res-data-001), [REQ-RES-DATA-008](../../requirements/view/res-data.md#req-res-data-008)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 Notes: Publication of the Data DataSets of all assets of the application (REQ-RES- DATA-008).
 
@@ -3402,7 +3402,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-004](../../requirements/view/bus.md#req-bus-004), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-DATA-009](../../requirements/view/res-data.md#req-res-data-009)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 Notes: The Set carries exactly one Data DataSetMessage – the complete DataSet oee – with the DataSetWriterId, DataSetWriterName and WriterGroupName of the addressed DataSet (REQ-BUS-010); the requester omits the publisher-defined DataSetClassId (REQ-MSG-011). The SequenceNumber 3985 is a counter of the responder's DataSetWriter; SF-079 proposes to remove it, the vector stays verbatim and valid (SequenceNumber is optional in a DataSetMessage). The answers are the Status event V-PAY-062 and a Pub Data with the ReplyTo of the Set (REQ-RES-DATA-012).
 
@@ -3444,7 +3444,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-DATA-011](../../requirements/view/res-data.md#req-res-data-011), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011)
 - Origin: guideline MG B1.1.4
-- Status: draft
+- Status: reviewed
 
 Notes: Status event about the Set Data V-PAY-061: published by the addressed application to Pub/Event/&lt;Source>/Status/Good with the Source of the request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
 
@@ -3489,7 +3489,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011)
 - Origin: guideline MG B1.1.6
-- Status: draft
+- Status: reviewed
 
 Notes: Event of the category Status: Number is the StatusCode 0 (Good), Description describes it, Details carry SymbolicId (SF-075 (a)); Category CAT_STATUS_1 corresponds to the EventCategory Status of the topic (REQ-RES-EVENT-002, SF-076 (c)) and EventLevel Good to the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)). The ReplyTo shows that it answers a request (REQ-RES-EVENT-005). The DataSetMessage MessageType ua-event is optional and omitted.
 
@@ -3534,7 +3534,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-007](../../requirements/view/res-event.md#req-res-event-007), [REQ-RES-EVENT-008](../../requirements/view/res-event.md#req-res-event-008), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011)
 - Origin: guideline MG B1.1.6
-- Status: draft
+- Status: reviewed
 
 Notes: Event of the category Syslog: Number is the PRI 13 (Facility 1 user-level × 8 + Severity 5), so the EventLevel is Notice (PRI % 8 = 5, RFC 5424 6.2.1; REQ-RES-EVENT-008, SF-076 (a)); MSG and HEADER are keys of Details and there is no Description (REQ-RES-EVENT-007, SF-075 (a)/(b)). Self-initiated (empty ReplyTo).
 
@@ -3579,7 +3579,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-009](../../requirements/view/res-event.md#req-res-event-009), [REQ-RES-EVENT-010](../../requirements/view/res-event.md#req-res-event-010), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011)
 - Origin: guideline MG B1.1.6
-- Status: draft
+- Status: reviewed
 
 Notes: Event of the category Generic: application-defined Number 4711, Description and Details (REQ-RES-EVENT-009); the EventLevel High is application-defined. Each EventCategory/EventLevel has its own DataSetWriterId (623, 625, 626; REQ-MSG-021).
 
@@ -3625,7 +3625,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-SUBLIST-007](../../requirements/view/res-sublist.md#req-res-sublist-007), [REQ-RES-SUBLIST-008](../../requirements/view/res-sublist.md#req-res-sublist-008)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 Notes: A Get SubscriptionList carries no entry (REQ-RES-SUBLIST-007) and the predefined DataSetClassId (REQ-MSG-011). The answer is V-PAY-069.
 
@@ -3653,7 +3653,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-SUBLIST-007](../../requirements/view/res-sublist.md#req-res-sublist-007), [REQ-RES-SUBLIST-008](../../requirements/view/res-sublist.md#req-res-sublist-008)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 Notes: Without Filter the Get addresses all entries of the asset (REQ-RES- SUBLIST-008).
 
@@ -3680,7 +3680,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-002](../../requirements/view/bus.md#req-bus-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-SUBLIST-007](../../requirements/view/res-sublist.md#req-res-sublist-007), [REQ-RES-SUBLIST-008](../../requirements/view/res-sublist.md#req-res-sublist-008)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 Notes: Without Source the Get addresses the whole SubscriptionList of the application (REQ-RES-SUBLIST-008).
 
@@ -3709,7 +3709,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-025](../../requirements/view/msg.md#req-msg-025), [REQ-RES-SUBLIST-001](../../requirements/view/res-sublist.md#req-res-sublist-001), [REQ-RES-SUBLIST-002](../../requirements/view/res-sublist.md#req-res-sublist-002), [REQ-RES-SUBLIST-009](../../requirements/view/res-sublist.md#req-res-sublist-009)
 - Origin: guideline MG B1.1.9 (edited: 1 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to V-PAY-066 (ReplyTo = MessageId of the Get). The entry has the common DataSetWriterId 227 of the list, the Source as DataSetWriterName and &lt;ResourceType>/&lt;Tag> = Data/oee as WriterGroupName, derived from the TopicPath (REQ-RES-SUBLIST-002, SF-080 (a)).
 
@@ -3780,7 +3780,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-025](../../requirements/view/msg.md#req-msg-025), [REQ-RES-SUBLIST-001](../../requirements/view/res-sublist.md#req-res-sublist-001), [REQ-RES-SUBLIST-002](../../requirements/view/res-sublist.md#req-res-sublist-002), [REQ-RES-SUBLIST-009](../../requirements/view/res-sublist.md#req-res-sublist-009)
 - Origin: guideline MG B1.1.9 (edited: 1 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Self-initiated publication of all entries of the asset (REQ-RES- SUBLIST-009).
 
@@ -3850,7 +3850,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-025](../../requirements/view/msg.md#req-msg-025), [REQ-RES-SUBLIST-001](../../requirements/view/res-sublist.md#req-res-sublist-001), [REQ-RES-SUBLIST-002](../../requirements/view/res-sublist.md#req-res-sublist-002), [REQ-RES-SUBLIST-009](../../requirements/view/res-sublist.md#req-res-sublist-009)
 - Origin: guideline MG B1.1.9 (edited: 1 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Publication of the whole SubscriptionList of the application (REQ-RES- SUBLIST-009).
 
@@ -3922,7 +3922,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-BUS-004](../../requirements/view/bus.md#req-bus-004), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-SUBLIST-001](../../requirements/view/res-sublist.md#req-res-sublist-001), [REQ-RES-SUBLIST-002](../../requirements/view/res-sublist.md#req-res-sublist-002), [REQ-RES-SUBLIST-010](../../requirements/view/res-sublist.md#req-res-sublist-010)
 - Origin: guideline MG B1.1.9 (edited: 1 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: The Set carries exactly one entry (REQ-RES-SUBLIST-010) and sets its Interval to 1000 ms; Config CONF_1 allows it (REQ-RES-SUBLIST-004). The answers are the Status event V-PAY-073 and the publication of the changed entry (REQ-RES-SUBLIST-014).
 
@@ -3994,7 +3994,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011), [REQ-RES-SUBLIST-013](../../requirements/view/res-sublist.md#req-res-sublist-013)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 Notes: Status event about the Set SubscriptionList V-PAY-072: published by the addressed application to Pub/Event/&lt;Source>/Status/Good with the Source of the request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
 
@@ -4039,7 +4039,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-005](../../requirements/view/bus.md#req-bus-005), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-SUBLIST-001](../../requirements/view/res-sublist.md#req-res-sublist-001), [REQ-RES-SUBLIST-002](../../requirements/view/res-sublist.md#req-res-sublist-002), [REQ-RES-SUBLIST-011](../../requirements/view/res-sublist.md#req-res-sublist-011)
 - Origin: guideline MG B1.1.9 (edited: 1 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Unlike ReferenceDesignation, the Del carries exactly one entry whose TopicPath identifies the subscription to delete (REQ-RES-SUBLIST-011, SF-080 (a)). The answers are the Status event V-PAY-075 and the publication of the remaining entries, or nothing if none remains (REQ-RES-SUBLIST-015, SF-080 (d)). Like all B1 examples it is a standalone illustration (MessageId as in the Set example).
 
@@ -4111,7 +4111,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011), [REQ-RES-SUBLIST-013](../../requirements/view/res-sublist.md#req-res-sublist-013)
 - Origin: guideline MG B1.1.9
-- Status: draft
+- Status: reviewed
 
 Notes: Status event about the Del SubscriptionList V-PAY-074: published by the addressed application to Pub/Event/&lt;Source>/Status/Good with the Source of the request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)). Its text equals the Status event after the Set (V-PAY-073); each B1 example is a standalone illustration.
 
@@ -4156,7 +4156,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Status event about the Set Config of B1.1.3: published by the addressed application to Pub/Event/&lt;Source>/Status/Good with the Source of the request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)). B1.1.3 shows this Status event twice (after the Set of Network settings and of Overall device settings) with identical text; one vector covers both. The Config examples themselves follow with RES-CONFIG in C-029.
 
@@ -4201,7 +4201,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011), [REQ-RES-META-006](../../requirements/view/res-meta.md#req-res-meta-006)
 - Origin: guideline MG B1.1.5
-- Status: draft
+- Status: reviewed
 
 Notes: Status event about the Set Metadata V-PAY-022: published by the addressed application to Pub/Event/&lt;Source>/Status/Good with the Source of the request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
 
@@ -4246,7 +4246,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011), [REQ-RES-PUBLIST-024](../../requirements/view/res-publist.md#req-res-publist-024)
 - Origin: guideline MG B1.1.8
-- Status: draft
+- Status: reviewed
 
 Notes: Status event about the Set PublicationList V-PAY-040: published by the addressed application to Pub/Event/&lt;Source>/Status/Good with the Source of the request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
 
@@ -4291,7 +4291,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011), [REQ-RES-REFDES-009](../../requirements/view/res-refdes.md#req-res-refdes-009)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: Status event about the Set ReferenceDesignation V-PAY-045: published by the addressed application to Pub/Event/&lt;Source>/Status/Good with the Source of the request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)).
 
@@ -4336,7 +4336,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-007](../../requirements/view/bus.md#req-bus-007), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001), [REQ-RES-EVENT-002](../../requirements/view/res-event.md#req-res-event-002), [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003), [REQ-RES-EVENT-004](../../requirements/view/res-event.md#req-res-event-004), [REQ-RES-EVENT-005](../../requirements/view/res-event.md#req-res-event-005), [REQ-RES-EVENT-011](../../requirements/view/res-event.md#req-res-event-011), [REQ-RES-REFDES-009](../../requirements/view/res-refdes.md#req-res-refdes-009)
 - Origin: guideline MG B1.1.10
-- Status: draft
+- Status: reviewed
 
 Notes: Status event about the Del ReferenceDesignation V-PAY-046: published by the addressed application to Pub/Event/&lt;Source>/Status/Good with the Source of the request, ReplyTo = MessageId of the request, Number 0 (Good) with SymbolicId Good in Details (SF-075 (a)); EventLevel Good is the severity class of the StatusCode (REQ-RES-EVENT-004, SF-076 (b)). After the deletion of the whole object nothing else is published (REQ-BUS-007).
 
