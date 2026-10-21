@@ -1,10 +1,10 @@
 # Status
 
-_Last updated: 2026-10-21, cycle C-029_
+_Last updated: 2026-10-21, cycle C-029 (review addenda)_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-028 reviewed by the PO 2026-10-21, SF-075 … 081 implemented, all four re-worded REQs reviewed; SF-082/SF-083 lists, captions and numbering of figures/tables fixed, re-baseline on `5bc2e85`; C-029 RES-CONFIG drafted, awaiting PO review, SF-084 … 088 open)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-028 reviewed by the PO 2026-10-21, SF-075 … 081 implemented, all four re-worded REQs reviewed; SF-082/SF-083 lists, captions and numbering of figures/tables fixed, re-baseline on `5bc2e85`; C-029 RES-CONFIG reviewed 2026-10-21; SF-084 … 088 and GL-ADR-021 (masking of sensitive Config values) implemented, re-baseline on `a77d331`, ten re-worded/new REQs, two matrix rows and V-PAY-114 … 116 await PO review)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -84,11 +84,13 @@ C-028 (addendum 4, 2026-10-21): PO order **SF-083** (no ADR, no review): every f
 
 C-029 (2026-10-21, `log/2026-10-21_C-029_res-config.md`): no split (one area). Area **RES-CONFIG** `drafted` – REQ-RES-CONFIG-001 … 023 (`draft`), 25 informative items, 144 inventory items 119 covered + 25 informative, 0 open. **Payload columns** of the three Config rows Pub/Get/Set (`draft`). Payload checker extended by the Config content (structure of Pub and Set, names, `Type`, string representation and `Validation` of `Value`/`DefaultValue`, `Context`). Golden vectors **V-PAY-088 … 102** (the 15 B1.1.3 Config examples; V-PAY-099/101 with `edits` per SF-088) and constructed **V-PAY-103 … 113** (`draft`); the three JSON payloads restored by SF-083 pass the checks unchanged. New findings **SF-084 … SF-088** (open, not blocking; register `2c367de`, `79c1606`, `7579da7`, no re-baseline). Reviewed items touched (logged): REQ-PAG-005 inventory/notes, notes of REQ-RES-EVENT-005, REQ-BUS-006 and V-PAY-076, matrix header comment.
 
+C-029 (addenda 1/2, 2026-10-21): PO review – RES-CONFIG, the Config matrix rows, V-PAY-088 … 113 and the reviewed-item changes **reviewed** (`37c46c4`); SF-084/085/086/088 accepted, SF-087 decided as **GL-ADR-021**: non-empty `Value`/`DefaultValue` of sensitive objects masked with `********` in every `Pub` (also after `Set`), the mask in a `Set` keeps the value. Guideline commits `55ac123` (ADR), `39651e7`, `d32c3d5`, `268b646`, `139637f`, `537faab`, `912e35b` (new B1.1.3 example "Pub … after a successful set request"), register `a77d331` (next SF-089). Workspace re-baselined on `a77d331` (`25d5e0d`, 1365 items), `CleanInline`/payload-verbatim tool fixes for `********` (`656f326`, `d7fe1fa`). Back to `draft`: REQ-RES-CONFIG-007/008/012/022/023, REQ-BUS-004, REQ-MSG-030; new `draft` REQ-RES-CONFIG-024 (mask in every Pub), 025 (mask in Set), 026 (read ACL); checker reports unmasked sensitive values (`5ad3352`); V-PAY-091 … 102 synced verbatim (stay `reviewed`), new V-PAY-114 … 116 and the Pub/Set Config rows `draft` (`333925c`). Agent decisions for confirmation in the log (addendum 2).
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **PO review of C-029** – REQ-RES-CONFIG-001 … 023, the Config payload columns of the matrix, V-PAY-088 … 113 and decisions on SF-084 … SF-088 (see "For the PO" in `log/2026-10-21_C-029_res-config.md`); accepted findings are implemented in the guideline only on PO order, then re-baseline and `spectool review`.
+1. **PO review of C-029 addendum 2** – GL-ADR-021 and the guideline commits, REQ-RES-CONFIG-007/008/012/022 … 026, REQ-BUS-004, REQ-MSG-030, the matrix rows Pub/Set Config, V-PAY-114 … 116 and the agent decisions (see "For the PO" in addendum 2 of `log/2026-10-21_C-029_res-config.md`); then `spectool review`.
 2. **C-030** – RIG areas `CNT`, `LIC`, `APP`, `PLT` + `REG` + `GEN` (187 inventory items). Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-031, C-032).
 3. Whenever the guideline commit changes, re-baseline first: `spectool rebaseline -rev <commit>` (inventory, `baseline` in all catalog files, topic patterns, views, coverage, lint; lists the project docs to update), then remap the keys `spectool lint` reports. After a PO review: `spectool review <ids>` sets the accepted entries to `reviewed`. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
@@ -96,7 +98,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, ACT, MQTT, LIFE, RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG, LOC, QRY and MSG reviewed; RES-DATA, RES-META, RES-EVENT, RES-SUBLIST, BUS reviewed (C-028); RES-CONFIG drafted (C-029, 23 REQs draft); RIG areas planned; topic grammar, topic and payload columns of the matrix (except Config, draft) and 203 topic/IL vectors reviewed; payload vectors V-PAY-001 … 087 reviewed, V-PAY-088 … 113 draft) |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, ACT, MQTT, LIFE, RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG, LOC, QRY and MSG reviewed; RES-DATA, RES-META, RES-EVENT, RES-SUBLIST, BUS reviewed (C-028); RES-CONFIG reviewed (C-029; REQ-RES-CONFIG-007/008/012/022 … 026, REQ-BUS-004, REQ-MSG-030 draft after GL-ADR-021); RIG areas planned; topic grammar, topic and payload columns of the matrix (Pub/Set Config draft) and 203 topic/IL vectors reviewed; payload vectors V-PAY-001 … 113 reviewed, V-PAY-114 … 116 draft) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
@@ -108,7 +110,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `5bc2e85`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 020, SF-001 … 083 resolved, SF-084 … 088 open (C-029, register only), next SF-089; OEC Process Description informative); previous `c2be26b`, `b2f0fe7`, `ff1562f`, `15eaa8a`, `70b4c01`, `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `a77d331`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 021, SF-001 … 088 resolved, no open findings, next SF-089; OEC Process Description informative); previous `5bc2e85`, `c2be26b`, `b2f0fe7`, `ff1562f`, `15eaa8a`, `70b4c01`, `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -120,7 +122,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. SF-084 … SF-088 (Config, C-029) are open but not blocking – the draft requirements follow their proposed interpretations; next free id SF-089.
+- None. No open spec findings (SF-001 … 088 resolved); next free id SF-089. Next free vector id V-PAY-117.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -159,4 +161,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-026 | 2026-10-19 | PO review of C-025: SF-057 … 060 implemented in the guideline (MG 6 keywords, real Birth/Close/Will timestamps, `NORMAL_0`/0 reserved, `FAILURE_1`/0 while connected + Birth after recovery, MQTT versions/certificate verification/ClientId without container); re-baseline on `720d862`, REQ-LIFE-015 … 017, V-PAY-023 … 025 verbatim; P1 cycles shifted by one. PO review: MQTT reviewed, SF-061 (Birth `Timestamp` allowed, Close MUST from L2, subscriber interpretation SHOULD), view fix for `<…>` placeholders, re-baseline on `c6453c7`, REQ-CMP-046 | `log/2026-10-19_C-026_sf057-060-guideline.md` |
 | C-027 | 2026-10-19 | Areas `RES-MAM`, `RES-HEALTH`, `RES-PROFILE`, `RES-PUBLIST`, `RES-REFDES`, `PAG`, `LOC` drafted (79 REQs, 36 informative items); DataSet content checks; golden vectors V-PAY-026 … 047 (B1.1.1/1.1.7/1.1.8/1.1.10/1.1.12) and constructed V-PAY-048 … 052; SF-062 … 068. PO review: all findings accepted, guideline corrected (SF-056, SF-062 … 068) + GL-ADR-019, re-baseline on `ca8d1c5` (REQ-PAG-009, REQ-RES-MAM-023 new); views accepted, areas reviewed; figures fixed (SF-070, SF-071); SF-069 → `ChildrenRequest` (GL-ADR-020), then generic `Query` (SF-073, GL-ADR-020 amended; area QRY, REQ-QRY-001 … 004, REQ-RES-REFDES-011 … 016, V-PAY-053/054), SF-072 implemented; all reviewed by the PO 2026-10-20; SF-074 accepted and implemented (B1.1.5), re-baseline on `ff1562f` | `log/2026-10-19_C-027_core-resources-pag-loc.md` |
 | C-028 | 2026-10-20 | RES-CONFIG split off to C-029; areas `RES-EVENT`, `RES-DATA`, `RES-META`, `RES-SUBLIST`, `BUS` drafted (55 REQs, 30 informative items); payload columns of the Method × Resource matrix (schema, lint, view); payload checker for Data/`Oi4Pv`, Metadata `Get`, Event, SubscriptionList; vectors V-PAY-055 … 087; SF-075 … 081. PO review 2026-10-21: all reviewed, SF-075 … 081 implemented in the guideline, re-baseline on `b2f0fe7`, REQ-RES-EVENT-004, REQ-BUS-010, REQ-RES-SUBLIST-002/004 back to draft, then reviewed; SF-082 lists of figures/tables (PO order), re-baseline on `c2be26b`; SF-083 all figures/tables captioned and renumbered (PO order), re-baseline on `5bc2e85` | `log/2026-10-20_C-028_data-meta-event-sublist-bus.md` |
-| C-029 | 2026-10-21 | Area `RES-CONFIG` drafted (REQ-RES-CONFIG-001 … 023, 25 informative items); payload columns of the Config rows; Config content checks; vectors V-PAY-088 … 113 (V-PAY-099/101 with SF-088 edits); SF-084 … 088 (open) | `log/2026-10-21_C-029_res-config.md` |
+| C-029 | 2026-10-21 | Area `RES-CONFIG` drafted (REQ-RES-CONFIG-001 … 023, 25 informative items); payload columns of the Config rows; Config content checks; vectors V-PAY-088 … 113 (V-PAY-099/101 with SF-088 edits); SF-084 … 088 (open). Review: SF-084 … 088 + GL-ADR-021 in the guideline, re-baseline `a77d331`, REQ-RES-CONFIG-024 … 026, V-PAY-114 … 116 | `log/2026-10-21_C-029_res-config.md` |
