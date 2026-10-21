@@ -50,10 +50,14 @@ go run ./cmd/spectool render -spec ..      # regenerate requirements/view/*.md, 
 go run ./cmd/spectool coverage -spec ..    # regenerate coverage/report.md
 go run ./cmd/spectool topic -spec ..       # regenerate topic/topic-patterns.json
 go run ./cmd/spectool topic -spec .. 'Oi4v2/…'   # analyze topics (grammar rule, Source/Filter, IL check, warnings)
+go run ./cmd/spectool review -spec .. REQ-QRY-001..004 QRY V-PAY-053,V-PAY-054 Pub/MAM   # PO accepted: draft -> reviewed, then render + coverage + lint
+go run ./cmd/spectool rebaseline -spec .. -rev <commit>   # move to a new guideline commit (see "After a guideline change")
 go test ./...
 ```
 
 `lint` also loads `topic.abnf` and the matrix and checks that every allowed matrix row has a grammar rule and – unless the area of its resource is still `planned` – consistent payload columns with known requirements (valid payload vectors must match them), that grammar, interpreter and generated regexes agree (random samples) and that every vector still yields its expected result with the reference code (`internal/topic`, `internal/il`, `internal/payload`); golden vectors must appear verbatim in the cited guideline section.
+
+`review` takes requirement and vector ids, area codes (`drafted` → `reviewed`), matrix rows `Method/Resource` (payload column) or `matrix` (all payload columns); ranges `REQ-QRY-001..004` and comma lists are expanded. It refuses unknown ids, unexpected states (e.g. a `planned` area) and an area that would keep `draft` requirements, and writes nothing then; `-to draft` reopens entries, `-n` is a dry run. Edits are line based – comments and formatting stay as they are; header comments that describe the review state are still updated by hand.
 
 Every command accepts `-check` (where it generates files) to fail instead of writing, for CI. The guideline repository defaults to `<spec>/../../oi4-oec-documentation`; override with `-guideline`.
 
@@ -72,6 +76,6 @@ Payload vectors (`V-PAY-`, kind `payload`) hold the `topic` and the message as J
 1. `areas.yaml` assigns guideline sections to the area (longest prefix wins).
 2. Every inventory item of these sections is either mapped by a requirement (`inventory`) or listed in `coverage/informative.yaml` with a reason.
 3. `lint`, `render`, `coverage` pass; the area status becomes `drafted`.
-4. The PO reviews `requirements/view/<area>.md` (and, for areas with a grammar or vectors, `matrix/view/method-resource.md` and `vectors/view/*.md`); confirmed entries and the area become `reviewed`.
+4. The PO reviews `requirements/view/<area>.md` (and, for areas with a grammar or vectors, `matrix/view/method-resource.md` and `vectors/view/*.md`); confirmed entries and the area become `reviewed` (`spectool review`).
 
-After a guideline change: regenerate the inventory with the new baseline, update `baseline` in all files (always quoted, e.g. `baseline: "2452494"` – an all-digit short hash is otherwise parsed as a YAML number), and remap the keys that `lint` reports as missing.
+After a guideline change: `spectool rebaseline -rev <commit>` (the commit must be checked out in the guideline repository, without uncommitted changes in `docs/` and `rfcs_adrs/`). It regenerates the inventory with the new baseline, updates `baseline` in all files (always quoted, e.g. `baseline: "2452494"` – an all-digit short hash is otherwise parsed as a YAML number) and the header of `topic.abnf`, regenerates topic patterns, views and coverage report and runs `lint`. Remap the keys that `lint` reports as missing and sync golden vectors whose example changed; the command lists the living project documents that still name the old baseline. If the guideline changed nothing in `docs/` or `rfcs_adrs/` since the baseline (e.g. a register-only commit), it stops: no re-baseline is needed (ADR-0001 amendment C-018; `-force` overrides).
