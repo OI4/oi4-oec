@@ -4,7 +4,7 @@ _Last updated: 2026-10-21, cycle C-028 (addendum 3)_
 
 ## Current phase
 
-**P1 – Spec baseline (in execution; C-028 reviewed by the PO 2026-10-21, SF-075 … 081 implemented, all four re-worded REQs reviewed; SF-082 lists of figures/tables fixed, re-baseline on `c2be26b`; nothing open for PO review; next C-029 RES-CONFIG)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
+**P1 – Spec baseline (in execution; C-028 reviewed by the PO 2026-10-21, SF-075 … 081 implemented, all four re-worded REQs reviewed; SF-082/SF-083 lists, captions and numbering of figures/tables fixed, re-baseline on `5bc2e85`; nothing open for PO review; next C-029 RES-CONFIG)** – C-012 wrote the P1 plan (`log/2026-10-14_C-012_p1-plan.md`), C-013 re-baselined on guideline `49b6fe2` and updated the plan (`log/2026-10-14_C-013_rebaseline-49b6fe2.md`), C-014 built `oec/spec/` with `spectool` and drafted area `CMP` (`log/2026-10-14_C-014_spec-skeleton-cmp.md`), C-015 implemented SF-036 … 038 in the guideline on PO request and re-baselined on `5cb109e` (`log/2026-10-15_C-015_guideline-sf036-038.md`). P3 leftovers (Rust/C API sketches, crate choices) continue in parallel.
 
 Previous phase: **P3 – SDK and conformance tool design** – architecture decided: S4 Rust SDK + C API (ADR-0011); local monorepo `oec/` (ADR-0012). Workspace is now a local git repo.
 
@@ -80,13 +80,14 @@ C-028 (PO review, 2026-10-21, addenda 1–2): areas, matrix payload columns, V-P
 
 C-028 (addendum 3, 2026-10-21): REQ-RES-EVENT-004, REQ-BUS-010, REQ-RES-SUBLIST-002/004 **reviewed** (`1e32276`), guideline wording of SF-076 … 080 accepted. PO order **SF-082** (no ADR, no review): MG/RIG lists of figures/tables now list the captions with links; MG Figure 1 image restored, A2/A5 captions restored, MG Tables 4–8 → 7–11 (`2d9cfb5`, register `c2be26b`, next SF-083). Workspace re-baselined on `c2be26b` (`a464725`, inventory unchanged), A3 table references in IL notes/vectors/comments updated (`2775093`, `82471f3`).
 
+C-028 (addendum 4, 2026-10-21): PO order **SF-083** (no ADR, no review): every figure/table of MG, RIG and PD captioned and numbered in reading order (MG 22/23, RIG 2/11, PD 8 figures), MG Tables 3 → 13 and 7/8 → 18/19 among others, conversion defects fixed (`&lt;br/&gt;`, empty headers, A6 dead links, B1.1.3 JSON-in-table, PD 2.2 image), lists regenerated (`b81d98e`, register `5bc2e85`, next SF-084). Workspace re-baselined on `5bc2e85` (`69e546b`, 1341 items, REQ-RES-HEALTH-002/003 remapped, Table 3 → 13), IL references Table 7/8 → 18/19 (`dacd109`, `612cbdb`); all stay `reviewed`.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **C-029** – area `RES-CONFIG` (MG 8.3.3 incl. 8.3.3.1/8.3.3.2, 9.1.3; 144 inventory items) + payload columns of the three `Config` rows + golden vectors of the B1.1.3 Config examples + Config content checks. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-030 … C-032).
-2. Optional follow-ups of SF-082 (only on PO order): captions for the uncaptioned MG/RIG tables and the MG 1.2 example figure; the List of Figures of the Process Description.
-3. Whenever the guideline commit changes, re-baseline first: `spectool rebaseline -rev <commit>` (inventory, `baseline` in all catalog files, topic patterns, views, coverage, lint; lists the project docs to update), then remap the keys `spectool lint` reports. After a PO review: `spectool review <ids>` sets the accepted entries to `reviewed`. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
+1. **C-029** – area `RES-CONFIG` (MG 8.3.3 incl. 8.3.3.1/8.3.3.2, 9.1.3; 144 inventory items) + payload columns of the three `Config` rows + golden vectors of the B1.1.3 Config examples (incl. a content check of the three JSON payloads restored from table cells in SF-083) + Config content checks. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-030 … C-032).
+2. Whenever the guideline commit changes, re-baseline first: `spectool rebaseline -rev <commit>` (inventory, `baseline` in all catalog files, topic patterns, views, coverage, lint; lists the project docs to update), then remap the keys `spectool lint` reports. After a PO review: `spectool review <ids>` sets the accepted entries to `reviewed`. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
 
@@ -104,7 +105,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `c2be26b`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 020, SF-001 … 082 resolved, none open, next SF-083; OEC Process Description informative); previous `b2f0fe7`, `ff1562f`, `15eaa8a`, `70b4c01`, `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `5bc2e85`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 020, SF-001 … 083 resolved, none open, next SF-084; OEC Process Description informative); previous `c2be26b`, `b2f0fe7`, `ff1562f`, `15eaa8a`, `70b4c01`, `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -116,7 +117,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. No open spec findings; next free id SF-083.
+- None. No open spec findings; next free id SF-084.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
@@ -154,4 +155,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-025 | 2026-10-19 | Areas `MQTT` + `LIFE` drafted (REQ-MQTT-001 … 019, REQ-LIFE-001 … 014, 14 informative items); golden vectors V-PAY-023 … 025 (Birth/Close/Will, `MessageId` edit per SF-058); new SF-057 … SF-060 (register `d20d8ff`, no re-baseline) | `log/2026-10-19_C-025_mqtt-life.md` |
 | C-026 | 2026-10-19 | PO review of C-025: SF-057 … 060 implemented in the guideline (MG 6 keywords, real Birth/Close/Will timestamps, `NORMAL_0`/0 reserved, `FAILURE_1`/0 while connected + Birth after recovery, MQTT versions/certificate verification/ClientId without container); re-baseline on `720d862`, REQ-LIFE-015 … 017, V-PAY-023 … 025 verbatim; P1 cycles shifted by one. PO review: MQTT reviewed, SF-061 (Birth `Timestamp` allowed, Close MUST from L2, subscriber interpretation SHOULD), view fix for `<…>` placeholders, re-baseline on `c6453c7`, REQ-CMP-046 | `log/2026-10-19_C-026_sf057-060-guideline.md` |
 | C-027 | 2026-10-19 | Areas `RES-MAM`, `RES-HEALTH`, `RES-PROFILE`, `RES-PUBLIST`, `RES-REFDES`, `PAG`, `LOC` drafted (79 REQs, 36 informative items); DataSet content checks; golden vectors V-PAY-026 … 047 (B1.1.1/1.1.7/1.1.8/1.1.10/1.1.12) and constructed V-PAY-048 … 052; SF-062 … 068. PO review: all findings accepted, guideline corrected (SF-056, SF-062 … 068) + GL-ADR-019, re-baseline on `ca8d1c5` (REQ-PAG-009, REQ-RES-MAM-023 new); views accepted, areas reviewed; figures fixed (SF-070, SF-071); SF-069 → `ChildrenRequest` (GL-ADR-020), then generic `Query` (SF-073, GL-ADR-020 amended; area QRY, REQ-QRY-001 … 004, REQ-RES-REFDES-011 … 016, V-PAY-053/054), SF-072 implemented; all reviewed by the PO 2026-10-20; SF-074 accepted and implemented (B1.1.5), re-baseline on `ff1562f` | `log/2026-10-19_C-027_core-resources-pag-loc.md` |
-| C-028 | 2026-10-20 | RES-CONFIG split off to C-029; areas `RES-EVENT`, `RES-DATA`, `RES-META`, `RES-SUBLIST`, `BUS` drafted (55 REQs, 30 informative items); payload columns of the Method × Resource matrix (schema, lint, view); payload checker for Data/`Oi4Pv`, Metadata `Get`, Event, SubscriptionList; vectors V-PAY-055 … 087; SF-075 … 081. PO review 2026-10-21: all reviewed, SF-075 … 081 implemented in the guideline, re-baseline on `b2f0fe7`, REQ-RES-EVENT-004, REQ-BUS-010, REQ-RES-SUBLIST-002/004 back to draft, then reviewed; SF-082 lists of figures/tables (PO order), re-baseline on `c2be26b` | `log/2026-10-20_C-028_data-meta-event-sublist-bus.md` |
+| C-028 | 2026-10-20 | RES-CONFIG split off to C-029; areas `RES-EVENT`, `RES-DATA`, `RES-META`, `RES-SUBLIST`, `BUS` drafted (55 REQs, 30 informative items); payload columns of the Method × Resource matrix (schema, lint, view); payload checker for Data/`Oi4Pv`, Metadata `Get`, Event, SubscriptionList; vectors V-PAY-055 … 087; SF-075 … 081. PO review 2026-10-21: all reviewed, SF-075 … 081 implemented in the guideline, re-baseline on `b2f0fe7`, REQ-RES-EVENT-004, REQ-BUS-010, REQ-RES-SUBLIST-002/004 back to draft, then reviewed; SF-082 lists of figures/tables (PO order), re-baseline on `c2be26b`; SF-083 all figures/tables captioned and renumbered (PO order), re-baseline on `5bc2e85` | `log/2026-10-20_C-028_data-meta-event-sublist-bus.md` |
