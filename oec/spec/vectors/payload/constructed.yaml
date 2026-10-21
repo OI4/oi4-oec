@@ -1,7 +1,7 @@
 # Constructed payload vectors (C-024, C-027, C-028): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "b2f0fe7"
+baseline: "c2be26b"
 description: >-
   Constructed payload vectors for the two validation modes of MG 8 (SF-052):
   strict validation reports every key that is not defined for the object
