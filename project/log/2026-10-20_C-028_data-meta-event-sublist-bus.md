@@ -118,3 +118,13 @@ Workspace: `5258438` plan · `3770a7c` RES-EVENT · `0a218d4` REQ-PAG-005 invent
 ## Next
 
 C-029 `RES-CONFIG` (MG 8.3.3 incl. 8.3.3.1/8.3.3.2, 9.1.3; 144 items), payload columns of the three `Config` rows, golden vectors of the B1.1.3 Config examples, Config content checks – after the PO review of C-028 or in parallel to it.
+
+## Addendum – tooling: spectool review/rebaseline (2026-10-21)
+
+PO request from the model-settings retro (point 3: automate the recurring bookkeeping). Logged here instead of a new cycle because C-029 … C-032 are already planned. No catalog content changed; nothing of C-028 was set to `reviewed`.
+
+- New package `oec/spec/tools/internal/maintain` and two `spectool` commands (`e303ed8`):
+  - `review [-to reviewed|draft] [-n] ID...` – sets requirements and vectors `draft` ↔ `reviewed`, areas `drafted` ↔ `reviewed`, matrix payload columns (`Method/Resource` or `matrix`); expands ranges (`REQ-QRY-001..004`) and comma lists. Refuses unknown ids, unexpected states and an area with remaining `draft` requirements (then writes nothing). Line-based edits keep comments. Then `render`, `coverage`, `lint`.
+  - `rebaseline -rev <commit> [-n] [-force]` – requires the commit to be checked out in the guideline repository and `docs/`/`rfcs_adrs/` to be clean; stops if only the register changed since the baseline (ADR-0001 amendment C-018). Replaces `baseline` in all catalog files and the `topic.abnf` header, regenerates inventory, topic patterns, views and coverage, runs `lint`, and lists the lines of AGENTS/STATUS/GUARDRAILS/ROADMAP/`oec/spec/README.md` that still name the old baseline (prose stays manual).
+- Verification: unit tests (`go test ./...` green, `vet`/`gofmt` clean). Dry runs on the workspace: `rebaseline -n -rev 594aaa9` → no re-baseline needed (register-only); `review -n matrix` → 26 payload columns; `review -n BUS` refused (draft requirements). In a temporary copy with a test guideline commit: full `rebaseline` (only baseline lines and generated files changed; lint reported V-PAY-021 as no longer verbatim, as expected) and a full `review` of all C-028 drafts (88 entries, 5 areas, 26 matrix rows; lint green; only status lines changed). Copy removed.
+- Docs: `oec/spec/README.md` (`68dfbbf`), STATUS next step 3 (`737c320`).
