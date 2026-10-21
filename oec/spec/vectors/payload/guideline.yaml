@@ -1,7 +1,7 @@
 # Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20); V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (ff1562f); V-PAY-055 … 080 (Data, Event, SubscriptionList and the Status events of B1.1.3 … B1.1.10) drafted in C-028, reviewed by the PO (C-028 review 2026-10-21).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "ff1562f"
+baseline: "b2f0fe7"
 description: >-
   Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12 except the
   Config examples of B1.1.3, which follow in C-029; B1.2.1): topic and message of the
@@ -2990,10 +2990,8 @@ vectors:
       The Set carries exactly one Data DataSetMessage – the complete DataSet oee –
       with the DataSetWriterId, DataSetWriterName and WriterGroupName of the
       addressed DataSet (REQ-BUS-010); the requester omits the publisher-defined
-      DataSetClassId (REQ-MSG-011). The SequenceNumber 3985 is a counter of the
-      responder's DataSetWriter; SF-079 proposes to remove it, the vector stays
-      verbatim and valid (SequenceNumber is optional in a DataSetMessage). The
-      answers are the Status event V-PAY-062 and a Pub Data with the ReplyTo of
+      DataSetClassId (REQ-MSG-011) and carries no SequenceNumber (REQ-BUS-010;
+      removed from the example by SF-079). The answers are the Status event V-PAY-062 and a Pub Data with the ReplyTo of
       the Set (REQ-RES-DATA-012).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
     payload: |-
@@ -3007,7 +3005,6 @@ vectors:
             "DataSetWriterId": 93,
             "WriterGroupName": "oee",
             "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "SequenceNumber": 3985,
             "Timestamp": "2021-12-16T22:25:10.000Z",
             "Payload": {
               "Availability": 99,
@@ -3269,35 +3266,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
-        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "Messages": [
-          {
-            "DataSetWriterId": 227,
-            "WriterGroupName": "Data/oee",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
-              "Interval": 0,
-              "Config": "CONF_1"
-            }
-          }
-        ]
-      }
-    edits:
-      - target: /Messages/0/Payload/TopicPath
-        kind: corrected
-        reason: >-
-          TopicPath of the example subscribes to the application's own
-          SubscriptionList while the entry is filed under Data/oee; minimal
-          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
-          may choose another topic).
-        sf: [SF-080]
 
   - id: V-PAY-070
     title: "B1.1.9: Pub all SubscriptionList entries of an explicit asset"
@@ -3329,35 +3297,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 227,
-            "WriterGroupName": "Data/oee",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
-              "Interval": 0,
-              "Config": "CONF_1"
-            }
-          }
-        ]
-      }
-    edits:
-      - target: /Messages/0/Payload/TopicPath
-        kind: corrected
-        reason: >-
-          TopicPath of the example subscribes to the application's own
-          SubscriptionList while the entry is filed under Data/oee; minimal
-          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
-          may choose another topic).
-        sf: [SF-080]
 
   - id: V-PAY-071
     title: "B1.1.9: Pub full SubscriptionList of all assets related to this application"
@@ -3389,35 +3328,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "MessageType": "ua-data",
-        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
-        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 227,
-            "WriterGroupName": "Data/oee",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
-              "Interval": 0,
-              "Config": "CONF_1"
-            }
-          }
-        ]
-      }
-    edits:
-      - target: /Messages/0/Payload/TopicPath
-        kind: corrected
-        reason: >-
-          TopicPath of the example subscribes to the application's own
-          SubscriptionList while the entry is filed under Data/oee; minimal
-          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
-          may choose another topic).
-        sf: [SF-080]
 
   - id: V-PAY-072
     title: "B1.1.9: Set an explicit SubscriptionList entry"
@@ -3451,35 +3361,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "MessageType": "ua-data",
-        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 227,
-            "WriterGroupName": "Data/oee",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
-              "Interval": 1000,
-              "Config": "CONF_1"
-            }
-          }
-        ]
-      }
-    edits:
-      - target: /Messages/0/Payload/TopicPath
-        kind: corrected
-        reason: >-
-          TopicPath of the example subscribes to the application's own
-          SubscriptionList while the entry is filed under Data/oee; minimal
-          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
-          may choose another topic).
-        sf: [SF-080]
 
   - id: V-PAY-073
     title: "B1.1.9: Status event follows a set request"
@@ -3554,35 +3435,6 @@ vectors:
           }
         ]
       }
-    original: |-
-      {
-        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "MessageType": "ua-data",
-        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
-        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
-        "ReplyTo": "",
-        "Messages": [
-          {
-            "DataSetWriterId": 227,
-            "WriterGroupName": "Data/oee",
-            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
-            "Payload": {
-              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee",
-              "Interval": 1000,
-              "Config": "CONF_1"
-            }
-          }
-        ]
-      }
-    edits:
-      - target: /Messages/0/Payload/TopicPath
-        kind: corrected
-        reason: >-
-          TopicPath of the example subscribes to the application's own
-          SubscriptionList while the entry is filed under Data/oee; minimal
-          correction to the Data topic of the entry (SF-080 (b), proposal – the PO
-          may choose another topic).
-        sf: [SF-080]
 
   - id: V-PAY-075
     title: "B1.1.9: Status event follows a delete request"

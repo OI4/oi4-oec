@@ -1,7 +1,7 @@
 # Constructed payload vectors (C-024, C-027, C-028): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "ff1562f"
+baseline: "b2f0fe7"
 description: >-
   Constructed payload vectors for the two validation modes of MG 8 (SF-052):
   strict validation reports every key that is not defined for the object
@@ -508,15 +508,15 @@ vectors:
       }
 
   - id: V-PAY-086
-    title: "Pub SubscriptionList entry with the unedited TopicPath of B1.1.9"
+    title: "Pub SubscriptionList entry with the former TopicPath of B1.1.9"
     expected: invalid
     violates: [REQ-RES-SUBLIST-002]
     reason: "The TopicPath subscribes to Pub/SubscriptionList/<Source>/Data/oee; the WriterGroupName derived from it would be SubscriptionList/Data/oee, not Data/oee."
     origin: {kind: constructed}
     status: reviewed
     notes: >-
-      The verbatim example of V-PAY-069 (B1.1.9) – the reason for the corrected
-      edit of SF-080 (b).
+      The example of V-PAY-069 as in B1.1.9 before SF-080 (b) (guideline
+      ff1562f) – the reason for the correction of the example.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
     payload: |-
       {
