@@ -141,7 +141,7 @@ A component answers every Set and Del it receives with an Event of the category 
 > From compliance Level 2 on, each Set and Del must be answered with an Event of the category Status; at Level 1, it should be answered this way (7.4 Method Element).
 > — MG 9.1
 
-Notes: Same obligation as REQ-TOP-014/015 and the per-resource requirements (REQ-RES-DATA-011, REQ-RES-META-006, REQ-RES-SUBLIST-013, REQ-RES-PUBLIST-024, REQ-RES-REFDES-009; Config in C-029); this entry fixes topic, ReplyTo and Number for all of them. A request that addresses an object the component does not have is answered with Bad (REQ-CMP-043); the optional answer to a Get of Metadata without Data is REQ-CMP-044. Examples: MG B1.1.4, B1.1.5, B1.1.6, B1.1.8 … B1.1.10.
+Notes: Same obligation as REQ-TOP-014/015 and the per-resource requirements (REQ-RES-DATA-011, REQ-RES-META-006, REQ-RES-SUBLIST-013, REQ-RES-PUBLIST-024, REQ-RES-REFDES-009, REQ-RES-CONFIG-021); this entry fixes topic, ReplyTo and Number for all of them. A request that addresses an object the component does not have is answered with Bad (REQ-CMP-043); the optional answer to a Get of Metadata without Data is REQ-CMP-044. Examples: MG B1.1.4, B1.1.5, B1.1.6, B1.1.8 … B1.1.10.
 
 ## REQ-RES-EVENT-006
 

@@ -20,7 +20,7 @@ Guideline baseline: `5bc2e85`. An inventory item is a candidate of a normative s
 | PAG | C-027 | reviewed | 42 | 38 | 4 | 0 |
 | LOC | C-027 | reviewed | 5 | 5 | 0 | 0 |
 | QRY | C-027 | reviewed | 4 | 3 | 1 | 0 |
-| RES-CONFIG | C-029 | planned | 144 | 0 | 0 | 144 |
+| RES-CONFIG | C-029 | drafted | 144 | 119 | 25 | 0 |
 | RES-DATA | C-028 | reviewed | 31 | 24 | 7 | 0 |
 | RES-META | C-028 | reviewed | 12 | 8 | 4 | 0 |
 | RES-EVENT | C-028 | reviewed | 42 | 36 | 6 | 0 |
@@ -32,4 +32,4 @@ Guideline baseline: `5bc2e85`. An inventory item is a candidate of a normative s
 | LIC | C-030 | planned | 5 | 0 | 0 | 5 |
 | REG | C-030 | planned | 13 | 0 | 0 | 13 |
 | GEN | C-030 | planned | 79 | 0 | 0 | 79 |
-| **Total** | | | 1341 | 839 | 171 | 331 |
+| **Total** | | | 1341 | 958 | 196 | 187 |

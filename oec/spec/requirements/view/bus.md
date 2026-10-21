@@ -135,7 +135,7 @@ After a successful Set, the component publishes the changed object on the Pub to
 > In case the Set was successful, Service A must publish the changed resource on the Pub topic in regard to the settings in PublicationList.
 > — MG 9.1
 
-Notes: Interpretation of "in regard to the settings in PublicationList" as in REQ-RES-PUBLIST-025 and REQ-RES-REFDES-010 (reviewed in C-027); per resource REQ-RES-DATA-012, REQ-RES-META-007, REQ-RES-SUBLIST-014.
+Notes: Interpretation of "in regard to the settings in PublicationList" as in REQ-RES-PUBLIST-025 and REQ-RES-REFDES-010 (reviewed in C-027); per resource REQ-RES-DATA-012, REQ-RES-META-007, REQ-RES-SUBLIST-014, REQ-RES-CONFIG-022.
 
 ## REQ-BUS-007
 
