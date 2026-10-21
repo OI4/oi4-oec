@@ -225,7 +225,7 @@ requirements:
           In a Set or Del request, the DataSetMessage carries the DataSetWriterId of the addressed DataSet as published by the addressed application (for PublicationList and SubscriptionList the common DataSetWriterId of the list), the Source of the topic as DataSetWriterName and the Filter of the topic as WriterGroupName (an empty string for resources without Filter); it carries no SequenceNumber.
     verification: [schema, d7-validate]
     inventory: [MG-8.2.3-00dee0fa]
-    status: draft
+    status: reviewed
     notes: >-
       Stated in MG 8.2.3 since SF-079; the examples (MG B1.1.4, B1.1.5,
       B1.1.8, B1.1.9, B1.1.10) follow it. Since the C-028 review the

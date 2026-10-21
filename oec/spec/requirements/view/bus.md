@@ -14,7 +14,7 @@ Guideline baseline: `b2f0fe7` · Area status: reviewed · Sections: MG 9
 | [REQ-BUS-007](#req-bus-007) | Nothing is published after the deletion of a whole object | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-test | reviewed |
 | [REQ-BUS-008](#req-bus-008) | A partial deletion is followed by the publication of the changed resource | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-BUS-009](#req-bus-009) | Use-case-specific reactions beyond the Status event | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
-| [REQ-BUS-010](#req-bus-010) | DataSetMessage header of Set and Del requests | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
+| [REQ-BUS-010](#req-bus-010) | DataSetMessage header of Set and Del requests | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -205,7 +205,7 @@ A DataSetMessage (or DataSetMetaData) in a Set or Del request carries the DataSe
 - Domain: messaging · Applies to: requester
 - Refs: MG 8.2.3, MG 9.1, SF-079
 - Verification: schema, d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.2.3-00dee0fa
 
 > In a Set or Del request, the DataSetMessage carries the DataSetWriterId of the addressed DataSet as published by the addressed application (for PublicationList and SubscriptionList the common DataSetWriterId of the list), the Source of the topic as DataSetWriterName and the Filter of the topic as WriterGroupName (an empty string for resources without Filter); it carries no SequenceNumber.

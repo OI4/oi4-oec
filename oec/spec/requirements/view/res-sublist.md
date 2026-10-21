@@ -6,9 +6,9 @@ Guideline baseline: `b2f0fe7` · Area status: reviewed · Sections: MG 8.3.9, MG
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
 | [REQ-RES-SUBLIST-001](#req-res-sublist-001) | Fields of a SubscriptionList entry | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-RES-SUBLIST-002](#req-res-sublist-002) | An entry matches its DataSetMessage and its TopicPath | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
+| [REQ-RES-SUBLIST-002](#req-res-sublist-002) | An entry matches its DataSetMessage and its TopicPath | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-SUBLIST-003](#req-res-sublist-003) | Interval is a processing interval of the subscriber | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
-| [REQ-RES-SUBLIST-004](#req-res-sublist-004) | Config defines whether an entry can be changed or deleted | MUST | MUST | MUST | MUST | messaging | d7-test | draft |
+| [REQ-RES-SUBLIST-004](#req-res-sublist-004) | Config defines whether an entry can be changed or deleted | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-SUBLIST-005](#req-res-sublist-005) | SubscriptionList is republished on every change | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
 | [REQ-RES-SUBLIST-006](#req-res-sublist-006) | Republication after a reconfiguration may be partial | MAY | MAY | MAY | MAY | messaging | d7-monitor | reviewed |
 | [REQ-RES-SUBLIST-007](#req-res-sublist-007) | Get SubscriptionList carries no SubscriptionList object | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
@@ -59,7 +59,7 @@ The DataSetWriterName of an entry is the Source (the asset that holds the subscr
 - Scope: MG 7.7, MG 8.2.3
 - Refs: MG 8.3.9, MG 9.1.9, SF-080
 - Verification: schema, d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.9-e5fa793a, MG-9.1.9-55c5621a
 
 > The wildcards + and
@@ -111,7 +111,7 @@ Config NONE_0 (default) marks a subscription that can neither be changed nor del
 - Condition: The application offers Set or Del for SubscriptionList.
 - Refs: MG 8.3.9, MG 9.1.9, SF-080
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.9-ad2fe906, MG-9.1.9-39acbd89, MG-9.1.9-5a8f1bed
 
 > The configurability of subscriptions is limited to create/delete/not manipulable – depending on implementation and/or technical needs: NONE_0: No configuration possible – the entry can neither be changed nor deleted via Set or Del (9.1.9 SubscriptionList).

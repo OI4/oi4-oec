@@ -8,7 +8,7 @@ Guideline baseline: `b2f0fe7` · Area status: reviewed · Sections: MG 8.3.6, MG
 | [REQ-RES-EVENT-001](#req-res-event-001) | Fields of the Event DataSet | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-EVENT-002](#req-res-event-002) | Category matches the EventCategory of the topic | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-EVENT-003](#req-res-event-003) | Content of a Status event | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-RES-EVENT-004](#req-res-event-004) | EventLevel of a Status event is the severity class of its Number | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
+| [REQ-RES-EVENT-004](#req-res-event-004) | EventLevel of a Status event is the severity class of its Number | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-EVENT-005](#req-res-event-005) | Set and Del are answered with a Status event | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-EVENT-006](#req-res-event-006) | Status events for application-specific states | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
 | [REQ-RES-EVENT-007](#req-res-event-007) | Content of a Syslog event | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
@@ -103,7 +103,7 @@ The EventLevel (topic Filter and WriterGroupName) of an Event of the category St
 - Condition: The component publishes Events of the category Status.
 - Refs: MG 7.7, MG 8.3.6.1, SF-006, SF-076
 - Verification: schema, d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.6.1-19fd9c52, MG-8.3.6.1-97b8f0e5, MG-8.3.6.1-fcafa0c3
 
 > The class is based on the leading part of the symbol name or the starting 0x00 (Good), 0x40 (Uncertain) or 0x80 (Bad) hex code of the OPC UA Status Code (see OPC UA Part 6-A.2).

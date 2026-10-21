@@ -123,7 +123,7 @@ requirements:
         text: A SymbolicId must start with the name of the severity class of Number (Good, Uncertain or Bad).
     verification: [schema, d7-validate]
     inventory: [MG-8.3.6.1-97b8f0e5, MG-8.3.6.1-fcafa0c3, MG-8.3.6.1-19fd9c52]
-    status: draft
+    status: reviewed
     notes: >-
       The Filter values are REQ-TOP-023; this entry adds the consistency
       between topic and payload (SF-076 (b), resolved). The severity class 3

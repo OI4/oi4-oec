@@ -68,7 +68,7 @@ requirements:
         text: In combination with a ResourceType (7.7 Filter Element) it is possible to get a SubscriptionList filtered for a defined resource. In addition to the ResourceType a Tag can be added, e.g., to address a defined DataSetMessage of the resource Data.
     verification: [schema, d7-validate]
     inventory: [MG-9.1.9-55c5621a, MG-8.3.9-e5fa793a]
-    status: draft
+    status: reviewed
     notes: >-
       Combines REQ-TOP-022 (Filter structure), REQ-MSG-023 (DataSetWriterName)
       and REQ-MSG-025 (WriterGroupName) for the entries; MG 8.3.9 and 8.2.3
@@ -129,7 +129,7 @@ requirements:
         text: If the entry has Config NONE_0, the Del must be rejected and the status Event must have the EventLevel Bad (e.g. BadNotWritable).
     verification: [d7-test]
     inventory: [MG-8.3.9-ad2fe906, MG-9.1.9-39acbd89, MG-9.1.9-5a8f1bed]
-    status: draft
+    status: reviewed
     notes: >-
       MG 8.3.9 and 9.1.9 since SF-080 (e); same pattern as
       REQ-RES-PUBLIST-016 and REQ-CMP-043. Since the C-028 review the
