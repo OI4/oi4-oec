@@ -132,7 +132,7 @@ A NetworkMessage does not exceed the MaxPacketSize of the Message Bus (RIG 4.1.1
 - Refs: MG 8.3.11, MG 8.3.11.1, MG 9.1.1, MG 9.1.2, MG 9.1.7, MG 9.1.8, MG 9.1.10, RIG 4.1.1, SF-062, SF-063
 - Verification: d7-monitor, d7-test
 - Status: reviewed
-- Inventory: MG-8.3.11-0a2549a0, MG-8.3.11-135129ca, MG-8.3.11-1d3f1c80, MG-8.3.11-2316f9db, MG-8.3.11-d1b705f1, MG-8.3.11.1-6db49b65, MG-9.1.1-5f90ef30, MG-9.1.1-a242a498, MG-9.1.10-23d0ef72, MG-9.1.10-e685d6ba, MG-9.1.2-0af27f74, MG-9.1.2-262fa218, MG-9.1.3-6a505dc1, MG-9.1.3-7b5c153c, MG-9.1.4-4fa8ccde, MG-9.1.4-82b9abfd, MG-9.1.7-a9a20bff, MG-9.1.7-fe765cc6, MG-9.1.8-03c98043, MG-9.1.8-ea9cd5b6, MG-9.1.9-d64e37b0, MG-9.1.9-d6d5f22d
+- Inventory: MG-8.3.11-0a2549a0, MG-8.3.11-135129ca, MG-8.3.11-1d3f1c80, MG-8.3.11-2316f9db, MG-8.3.11-d1b705f1, MG-8.3.11.1-6db49b65, MG-9.1.1-5f90ef30, MG-9.1.1-a242a498, MG-9.1.10-23d0ef72, MG-9.1.10-e685d6ba, MG-9.1.2-0af27f74, MG-9.1.2-262fa218, MG-9.1.3-6a505dc1, MG-9.1.3-7b5c153c, MG-9.1.4-4fa8ccde, MG-9.1.4-82b9abfd, MG-9.1.7-a9a20bff, MG-9.1.7-fe765cc6, MG-9.1.8-03c98043, MG-9.1.8-ea9cd5b6, MG-9.1.9-d64e37b0, MG-9.1.9-d6d5f22d, RIG-4.1.1-cd5b4003
 
 > A NetworkMessage must not exceed the MaxPacketSize of the Message Bus (OEC Runtime & Infrastructure Guideline, 4.1.1 Message Bus Storage, at least 262144 bytes).
 > — MG 8.3.11
@@ -149,7 +149,7 @@ A NetworkMessage does not exceed the MaxPacketSize of the Message Bus (RIG 4.1.1
 > The publisher must publish as many NetworkMessages to the same topic, using pagination object for telling so, till all DataSetMessages are published.
 > — MG 9.1.1
 
-Notes: For publications not triggered by a Get the publisher defines the maximum size on its own (MG 8.3.11), within the MaxPacketSize. The MaxPacketSize of the broker itself is a requirement of the infrastructure (RIG 4.1.1). The pagination sentences of Data and SubscriptionList (MG 9.1.4, 9.1.9) were mapped in C-028, those of Config (MG 9.1.3) in C-029 (inventory only, statement unchanged).
+Notes: For publications not triggered by a Get the publisher defines the maximum size on its own (MG 8.3.11), within the MaxPacketSize. The MaxPacketSize of the broker itself is a requirement of the infrastructure (RIG 4.1.1). The pagination sentences of Data and SubscriptionList (MG 9.1.4, 9.1.9) were mapped in C-028, those of Config (MG 9.1.3) in C-029 (inventory only, statement unchanged). The corresponding sentence of RIG 4.1.1 ("A NetworkMessage ... shall not exceed this size") was mapped in C-030 (inventory only).
 
 ## REQ-PAG-006
 
