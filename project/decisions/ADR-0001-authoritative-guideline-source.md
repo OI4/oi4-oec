@@ -212,3 +212,12 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `c2be26b` – findings register: SF-082 resolved, no open findings, next free id SF-083.
 - No new GL-ADR.
 - GL-ADR-001 … 020; SF-001 … 082 resolved, none open; next free id SF-083.
+
+## Amendment SF-083 (2026-10-21, guideline baseline `5bc2e85`)
+
+- The baseline is now `5bc2e85` on branch `feature/spec-findings` (local commits, PO order without review):
+  - `b81d98e` SF-083 – every figure and table of MG, RIG and PD captioned and numbered in reading order (MG 22/23, RIG 2/11, PD 8 figures); MG Tables renumbered (old 3 → 13, old 7/8 → 18/19 among others), MG Figures +1; conversion defects fixed (`&lt;br/&gt;`, empty headers, A6 dead links, B1.1.3 JSON-in-table, PD 2.2 image); lists regenerated (editorial, no normative change).
+  - `5bc2e85` – findings register: SF-083 resolved, no open findings, next free id SF-084.
+- Table and figure numbers cited in records older than this amendment are the numbers valid at that time.
+- No new GL-ADR.
+- GL-ADR-001 … 020; SF-001 … 083 resolved, none open; next free id SF-084.
