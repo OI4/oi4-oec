@@ -382,7 +382,8 @@ func TestContentC028(t *testing.T) {
 		{"status uncertain", ev("Status", "Uncertain"), statusEvent("Status/Uncertain", "CAT_STATUS_1", 1083310080, ``), nil},
 		{"status level", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 2147876864, ``), []string{"REQ-RES-EVENT-004"}},
 		{"status symbol", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 0, `, "Details": {"SymbolicId": "BadFoo"}`), []string{"REQ-RES-EVENT-004"}},
-		{"status reserved class", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 3221225472, ``), []string{"REQ-RES-EVENT-003"}},
+		{"status reserved class", ev("Status", "Bad"), statusEvent("Status/Bad", "CAT_STATUS_1", 3221225472, ``), nil},
+		{"status reserved class level", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 3221225472, ``), []string{"REQ-RES-EVENT-004"}},
 		{"status details key", ev("Status", "Good"), statusEvent("Status/Good", "CAT_STATUS_1", 0, `, "Details": {"MSG": "x"}`), []string{"REQ-RES-EVENT-003"}},
 		{"category mismatch", ev("Status", "Good"), statusEvent("Status/Good", "CAT_GENERIC_99", 0, ``), []string{"REQ-RES-EVENT-002"}},
 		{"category unknown", ev("Status", "Good"), statusEvent("Status/Good", "STATUS", 0, ``), []string{"REQ-RES-EVENT-001"}},
@@ -408,6 +409,10 @@ func TestContentC028(t *testing.T) {
 		{"sublist group", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/Data/y/other"`, 1), []string{"REQ-RES-SUBLIST-002"}},
 		{"sublist wildcard filter", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/Data/+/#"`, 1), nil},
 		{"sublist wildcard resource", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/Event/+/#"`, 1), []string{"REQ-RES-SUBLIST-002"}},
+		{"sublist resource plus", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/+/y/oee"`, 1), []string{"REQ-RES-SUBLIST-002"}},
+		{"sublist resource hash", sub("Pub", ""), strings.Replace(subList, `/x/Pub/Data/y/oee"`, `/#"`, 1), []string{"REQ-RES-SUBLIST-002"}},
+		{"sublist foreign topic", sub("Pub", ""), strings.Replace(subList, `"Oi4v2/OTConnector/x/Pub/Data/y/oee"`, `"site/line1/#"`, 1), nil},
+		{"set data sequence number", tDataSet, strings.Replace(dataPub, `"DataSetWriterName": "`+app+`",`, `"DataSetWriterName": "`+app+`", "SequenceNumber": 1,`, 1), []string{"REQ-BUS-010"}},
 		{"sublist no filter", sub("Pub", ""), strings.Replace(subList, `/Pub/Data/y/oee"`, `/Pub/Data/y"`, 1), []string{"REQ-RES-SUBLIST-002"}},
 	}
 	for _, c := range cases {

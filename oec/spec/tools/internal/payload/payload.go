@@ -518,6 +518,9 @@ func (c *checker) dataSetMessage(ptr string, v any, pubIL string) (dsm, bool) {
 		c.add(join(ptr, "Payload"), "REQ-MSG-016", "Payload must be a JSON object")
 	}
 	c.uint(m, ptr, "SequenceNumber", "REQ-MSG-016", maxUint32)
+	if _, ok := m["SequenceNumber"]; ok && (c.t.Method == "Set" || c.t.Method == "Del") {
+		c.add(join(ptr, "SequenceNumber"), "REQ-BUS-010", "a DataSetMessage in a %s request carries no SequenceNumber", c.t.Method)
+	}
 	c.dateTime(m, ptr, "Timestamp", "REQ-MSG-016")
 	_, hasMDV := m["MetaDataVersion"]
 	_, hasMinor := m["MinorVersion"]

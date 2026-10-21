@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -538,10 +539,11 @@ func (c *checker) dataSet(d dsm) {
 var (
 	eventCategories = map[string]string{"Syslog": "CAT_SYSLOG_0", "Status": "CAT_STATUS_1", "Generic": "CAT_GENERIC_99"}
 	categoryValues  = map[string]bool{"CAT_SYSLOG_0": true, "CAT_STATUS_1": true, "CAT_GENERIC_99": true}
-	// Severity names of RFC 5424 6.2.1 by PRI modulo 8 (SF-076).
+	// Severity names of RFC 5424 6.2.1 by PRI modulo 8 (MG 8.3.6.2).
 	syslogLevels = []string{"Emergency", "Alert", "Critical", "Error", "Warning", "Notice", "Informational", "Debug"}
-	// Severity classes of a StatusCode by bits 30–31 (OPC UA Part 4 7.39).
-	statusClasses = []string{"Good", "Uncertain", "Bad", ""}
+	// Severity classes of a StatusCode by bits 30–31 (OPC UA Part 4 7.39);
+	// the reserved class 3 is treated as Bad (MG 8.3.6.1).
+	statusClasses = []string{"Good", "Uncertain", "Bad", "Bad"}
 )
 
 func (c *checker) event(d dsm) {
@@ -577,10 +579,6 @@ func (c *checker) event(d dsm) {
 			return
 		}
 		class := statusClasses[number>>30]
-		if class == "" {
-			c.add(join(p, "Number"), req, "Number %d is no StatusCode (reserved severity bits 11)", number)
-			return
-		}
 		if level != class {
 			c.add(join(d.ptr, "WriterGroupName"), "REQ-RES-EVENT-004", "EventLevel %q is not the severity class %s of the StatusCode %d", level, class, number)
 		}
@@ -618,8 +616,8 @@ var subscriptionConfigs = map[string]bool{"NONE_0": true, "CONF_1": true}
 
 // subscriptionEntry checks an entry of the SubscriptionList: fields
 // (REQ-RES-SUBLIST-001) and the WriterGroupName derived from the TopicPath
-// (REQ-RES-SUBLIST-002) if the TopicPath is an OEC topic filter with a
-// concrete resource level.
+// (REQ-RES-SUBLIST-002): the resource level of an OEC TopicPath must be
+// concrete (MG 8.3.9); topic filters outside the OEC namespace are not checked.
 func (c *checker) subscriptionEntry(d dsm) {
 	const req = "REQ-RES-SUBLIST-001"
 	p := join(d.ptr, "Payload")
@@ -627,11 +625,18 @@ func (c *checker) subscriptionEntry(d dsm) {
 	c.uint(m, p, "Interval", req, maxUint32)
 	c.enum(m, p, "Config", req, subscriptionConfigs)
 	path, ok := c.str(m, p, "TopicPath", req)
-	if !ok || d.group == "" {
+	if !ok {
 		return
 	}
 	levels := strings.Split(path, "/")
-	if len(levels) < 5 || levels[0] != "Oi4v2" || strings.ContainsAny(levels[4], "+#") {
+	if levels[0] != "Oi4v2" && levels[0] != "+" && levels[0] != "#" {
+		return
+	}
+	if len(levels) < 5 || slices.Contains(levels[:5], "#") || strings.ContainsAny(levels[4], "+#") {
+		c.add(join(p, "TopicPath"), "REQ-RES-SUBLIST-002", "the resource level of TopicPath %q is not concrete", path)
+		return
+	}
+	if d.group == "" {
 		return
 	}
 	want, filter := levels[4], levels[min(len(levels), 6):]
