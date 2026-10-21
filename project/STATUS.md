@@ -82,7 +82,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 1. **PO review of C-028** – views `requirements/view/res-event.md`, `res-data.md`, `res-meta.md`, `res-sublist.md`, `bus.md`; payload tables in `matrix/view/method-resource.md`; vectors V-PAY-055 … 087; decisions on SF-075 … SF-081 (list in the C-028 log, "For the PO").
 2. **C-029** – area `RES-CONFIG` (MG 8.3.3 incl. 8.3.3.1/8.3.3.2, 9.1.3; 144 inventory items) + payload columns of the three `Config` rows + golden vectors of the B1.1.3 Config examples + Config content checks. Workflow per area: `oec/spec/README.md`. Further cycles per ROADMAP P1 (C-030 … C-032).
-3. Whenever the guideline commit changes, re-baseline first: `spectool inventory -rev <commit>`, bump `baseline` in all catalog files (quoted), remap the keys `spectool lint` reports. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
+3. Whenever the guideline commit changes, re-baseline first: `spectool rebaseline -rev <commit>` (inventory, `baseline` in all catalog files, topic patterns, views, coverage, lint; lists the project docs to update), then remap the keys `spectool lint` reports. After a PO review: `spectool review <ids>` sets the accepted entries to `reviewed`. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
 
