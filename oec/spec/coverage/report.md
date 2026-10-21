@@ -26,10 +26,10 @@ Guideline baseline: `a77d331`. An inventory item is a candidate of a normative s
 | RES-EVENT | C-028 | reviewed | 42 | 36 | 6 | 0 |
 | RES-SUBLIST | C-028 | reviewed | 40 | 32 | 8 | 0 |
 | BUS | C-028 | reviewed | 25 | 20 | 5 | 0 |
-| CNT | C-030 | planned | 70 | 0 | 0 | 70 |
-| PLT | C-030 | planned | 11 | 0 | 0 | 11 |
-| APP | C-030 | planned | 9 | 0 | 0 | 9 |
-| LIC | C-030 | planned | 5 | 0 | 0 | 5 |
-| REG | C-030 | planned | 13 | 0 | 0 | 13 |
-| GEN | C-030 | planned | 79 | 0 | 0 | 79 |
-| **Total** | | | 1365 | 982 | 196 | 187 |
+| CNT | C-030 | drafted | 70 | 45 | 25 | 0 |
+| PLT | C-030 | drafted | 11 | 9 | 2 | 0 |
+| APP | C-030 | drafted | 9 | 5 | 4 | 0 |
+| LIC | C-030 | drafted | 5 | 5 | 0 | 0 |
+| REG | C-030 | drafted | 13 | 9 | 4 | 0 |
+| GEN | C-030 | drafted | 79 | 4 | 75 | 0 |
+| **Total** | | | 1365 | 1059 | 306 | 0 |
