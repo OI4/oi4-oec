@@ -671,14 +671,20 @@ var (
 	configNumberPattern = regexp.MustCompile(`^-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?$`)
 )
 
+// configMask replaces the value of a sensitive configuration object in every
+// Pub and keeps it in a Set (GL-ADR-021, REQ-RES-CONFIG-024/025).
+const configMask = "********"
+
 // config checks a Config DataSet (REQ-RES-CONFIG-002 for Pub,
 // REQ-RES-CONFIG-003 for Set): the keys of the Payload other than Context are
 // groups, the keys of a Group other than Name and Description are
 // configuration objects (SF-084 (a)). A non-empty Value or DefaultValue is
 // checked against Type (REQ-RES-CONFIG-007) and a non-empty Value against the
-// Validation of the same object (REQ-RES-CONFIG-008); whether the Set matches
-// the published Config (names, Mandatory, read-only properties) is not
-// decidable per message (REQ-RES-CONFIG-005/011/023).
+// Validation of the same object (REQ-RES-CONFIG-008), except the mask of an
+// object with Sensitive = true. In a Pub, a non-empty Value or DefaultValue of
+// such an object must be the mask (REQ-RES-CONFIG-024). Whether the Set
+// matches the published Config (names, Mandatory, read-only properties,
+// Sensitive) is not decidable per message (REQ-RES-CONFIG-005/011/023/025).
 func (c *checker) config(d dsm) {
 	set := c.t.Method == "Set"
 	req := "REQ-RES-CONFIG-002"
@@ -764,6 +770,20 @@ func (c *checker) configObject(ptr string, v any, req string, set bool) {
 		}
 	}
 	c.configTexts(m, ptr)
+	sensitive := m["Sensitive"] == true
+	if sensitive && !set {
+		for _, f := range []struct {
+			key, s string
+			ok     bool
+		}{{"Value", value, valueOK}, {"DefaultValue", def, defOK}} {
+			if f.ok && f.s != "" && f.s != configMask {
+				c.add(join(ptr, f.key), "REQ-RES-CONFIG-024", "%s of a sensitive configuration object is published unmasked (expected %q)", f.key, configMask)
+			}
+		}
+	}
+	masked := func(s string) bool { return sensitive && s == configMask }
+	valueOK = valueOK && !masked(value)
+	defOK = defOK && !masked(def)
 	if typeOK {
 		if valueOK {
 			c.configValue(join(ptr, "Value"), typ, value)

@@ -652,6 +652,9 @@ func TestContentC029(t *testing.T) {
 	r := func(old, new string) string { return strings.Replace(configPub, old, new, 1) }
 	setMin := strings.Replace(configPub, configPub[strings.Index(configPub, `"Payload": {`):strings.Index(configPub, `
   }]`)], `"Payload": {"eth0": {"port": {"Value": "1"}, "note": {"Value": ""}}}`, 1)
+	sens := func(values string) string {
+		return r(`"Value": "8080", "DefaultValue": "80", "Unit": ""`, values+`, "Unit": "", "Sensitive": true`)
+	}
 	cases := []struct {
 		name string
 		top  Topic
@@ -695,6 +698,14 @@ func TestContentC029(t *testing.T) {
 		{"length negative", pub, r(`"Length": 15`, `"Length": -1`), []string{"REQ-RES-CONFIG-002"}},
 		{"min text", pub, r(`"Min": 1`, `"Min": "1"`), []string{"REQ-RES-CONFIG-002"}},
 		{"pattern re2 unsupported", pub, r(`"^[0-9.]+$"`, `"^(?=x)"`), nil},
+		// GL-ADR-021: masking of sensitive values.
+		{"sensitive masked", pub, sens(`"Value": "********", "DefaultValue": "********"`), nil},
+		{"sensitive empty", pub, sens(`"Value": "", "DefaultValue": ""`), nil},
+		{"sensitive value clear", pub, sens(`"Value": "8080", "DefaultValue": "********"`), []string{"REQ-RES-CONFIG-024"}},
+		{"sensitive default clear", pub, sens(`"Value": "********", "DefaultValue": "80"`), []string{"REQ-RES-CONFIG-024"}},
+		{"mask not sensitive", pub, r(`"Value": "8080"`, `"Value": "********"`), []string{"REQ-RES-CONFIG-007"}},
+		{"set mask sensitive", set, sens(`"Value": "********", "DefaultValue": "********"`), nil},
+		{"set clear sensitive", set, sens(`"Value": "8080", "DefaultValue": "80"`), nil},
 	}
 	for _, c := range cases {
 		got := reqs(t, c.top, c.msg)
