@@ -8,7 +8,7 @@
 # Drafted in C-029; interpretations of SF-084 … SF-088 (open) marked in the
 # notes.
 area: RES-CONFIG
-baseline: "5bc2e85"
+baseline: "a77d331"
 requirements:
   # --- DataSet content (MG 8.3.3, 8.3.3.1, 8.3.3.2) ---------------------------
   - id: REQ-RES-CONFIG-001
