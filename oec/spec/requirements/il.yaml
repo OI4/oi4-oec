@@ -3,7 +3,7 @@
 # catalog.schema.json). Reference checks: spectool package internal/il,
 # vectors in vectors/il/ and vectors/topic/.
 area: IL
-baseline: "c2be26b"
+baseline: "5bc2e85"
 requirements:
   # --- Identification Link in general (MG 4) -------------------------------
   - id: REQ-IL-001
@@ -485,7 +485,7 @@ requirements:
     verification: [manual]
     inventory: [MG-4.3.1-53d343d5, MG-4.3.1-cd8a517d, MG-4.3.1-fa2cffdc, MG-A3-4116b7ab]
     status: reviewed
-    notes: Conversion by the generator per PO decision SF-043 (d) (C-020) – MG 4.3.1 note and A3 Table 8 (Example.com → example.com).
+    notes: Conversion by the generator per PO decision SF-043 (d) (C-020) – MG 4.3.1 note and A3 Table 19 (Example.com → example.com).
 
   - id: REQ-IL-024
     title: Form of the ManufacturerUri
@@ -669,7 +669,7 @@ requirements:
     status: reviewed
     notes: >-
       Defines how the encoding works when it is used; whether it is used is
-      REQ-IL-033 (MAY, SF-043 (e), C-019). Table 7 of MG A3 is the ASCII
+      REQ-IL-033 (MAY, SF-043 (e), C-019). Table 18 of MG A3 is the ASCII
       excerpt of the general rule for all UTF-8 octets (PO decision SF-043
       (a), (b), C-020). Reference implementation il.DnpEncode; vectors
       V-DNP-….

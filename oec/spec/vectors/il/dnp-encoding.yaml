@@ -1,15 +1,15 @@
 # Test vectors of kind dnp-encoding (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: dnp-encoding
-baseline: "c2be26b"
+baseline: "5bc2e85"
 description: >-
-  dnp-encoding vectors (MG A3): examples of Table 8 and of the URI example,
-  the character classes of Table 7 and the extension to all UTF-8 octets
+  dnp-encoding vectors (MG A3): examples of Table 19 and of the URI example,
+  the character classes of Table 18 and the extension to all UTF-8 octets
   (SF-043 a). They define the encoding when it is used; its use is optional
   and limited to the Oi4Identifier elements (REQ-IL-033, SF-043 e).
 vectors:
   - id: V-DNP-001
-    title: "MG A3 Table 8: MyModel"
+    title: "MG A3 Table 19: MyModel"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
@@ -18,7 +18,7 @@ vectors:
     output: "MyModel"
 
   - id: V-DNP-002
-    title: "MG A3 Table 8: ABC DEF"
+    title: "MG A3 Table 19: ABC DEF"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
@@ -27,7 +27,7 @@ vectors:
     output: "ABC,20DEF"
 
   - id: V-DNP-003
-    title: "MG A3 Table 8: 123.456/3&8"
+    title: "MG A3 Table 19: 123.456/3&8"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
@@ -36,7 +36,7 @@ vectors:
     output: "123.456,2F3,268"
 
   - id: V-DNP-004
-    title: "MG A3 Table 8: 123456#33"
+    title: "MG A3 Table 19: 123456#33"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
@@ -45,7 +45,7 @@ vectors:
     output: "123456,2333"
 
   - id: V-DNP-005
-    title: "MG A3 Table 8: ABC@home"
+    title: "MG A3 Table 19: ABC@home"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
@@ -54,7 +54,7 @@ vectors:
     output: "ABC,40home"
 
   - id: V-DNP-006
-    title: "MG A3 Table 8: ABC*33<4"
+    title: "MG A3 Table 19: ABC*33<4"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
@@ -63,7 +63,7 @@ vectors:
     output: "ABC,2A33,3C4"
 
   - id: V-DNP-007
-    title: "MG A3 Table 8: 20123.4"
+    title: "MG A3 Table 19: 20123.4"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: guideline, ref: MG A3}
@@ -99,7 +99,7 @@ vectors:
     output: "Az09-._~"
 
   - id: V-DNP-011
-    title: "All reserved characters (Table 7)"
+    title: "All reserved characters (Table 18)"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: constructed}
@@ -108,7 +108,7 @@ vectors:
     output: ",23,2F,3A,3F,40,5B,5D,21,24,26,27,28,29,2A,2B,2C,3B,3D"
 
   - id: V-DNP-012
-    title: "All prohibited printable characters (Table 7)"
+    title: "All prohibited printable characters (Table 18)"
     expected: valid
     reqs: [REQ-IL-032]
     origin: {kind: constructed}

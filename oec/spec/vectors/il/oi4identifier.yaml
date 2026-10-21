@@ -1,7 +1,7 @@
 # Test vectors of kind oi4identifier (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: oi4identifier
-baseline: "c2be26b"
+baseline: "5bc2e85"
 description: >-
   Oi4Identifier vectors (MG 4.3.1, MG A3): construction from ManufacturerUri,
   Model, ProductCode and SerialNumber, nd for missing values and the checks of
@@ -22,7 +22,7 @@ vectors:
     oi4identifier: "provider.com/FieldDataService/FDS-001/1200-0345"
 
   - id: V-OID-002
-    title: "MG A3 Table 8 row 1"
+    title: "MG A3 Table 19 row 1"
     expected: valid
     reqs: [REQ-IL-022]
     origin: {kind: guideline, ref: MG A3}
@@ -35,7 +35,7 @@ vectors:
     notes: "No element needs masking; the dnp-encoding leaves the values unchanged."
 
   - id: V-OID-003
-    title: "MG A3 Table 8 row 2"
+    title: "MG A3 Table 19 row 2"
     expected: valid
     reqs: [REQ-IL-022, REQ-IL-032, REQ-IL-033]
     origin: {kind: guideline, ref: MG A3}
@@ -47,7 +47,7 @@ vectors:
     oi4identifier: "example.com/ABC,20DEF/123.456,2F3,268/123456,2333"
 
   - id: V-OID-004
-    title: "MG A3 Table 8 row 3: ManufacturerUri converted to lower case"
+    title: "MG A3 Table 19 row 3: ManufacturerUri converted to lower case"
     expected: valid
     reqs: [REQ-IL-022, REQ-IL-023, REQ-IL-032, REQ-IL-033]
     origin: {kind: guideline, ref: MG A3}
