@@ -25,11 +25,37 @@ func CleanInline(s string) string {
 		s = linkPattern.ReplaceAllString(s, "$1")
 	}
 	s = htmlBreak.ReplaceAllString(s, " ")
-	s = strings.ReplaceAll(s, "**", "")
+	s = outsideCode(s, func(t string) string {
+		return strings.ReplaceAll(t, "**", "")
+	})
 	s = escapePattern.ReplaceAllString(s, "$1")
-	s = emphasisPattern.ReplaceAllString(s, "$1$2")
+	s = outsideCode(s, func(t string) string {
+		return emphasisPattern.ReplaceAllString(t, "$1$2")
+	})
 	s = strings.NewReplacer("&lt;", "<", "&gt;", ">", "&amp;", "&", "&nbsp;", " ").Replace(s)
 	return strings.TrimSpace(spaces.ReplaceAllString(s, " "))
+}
+
+// outsideCode applies f to the parts of s outside inline code spans, so that
+// emphasis markers are not stripped from code such as `********`. An
+// unbalanced backtick leaves the rest of s to f.
+func outsideCode(s string, f func(string) string) string {
+	var b strings.Builder
+	for {
+		i := strings.IndexByte(s, '`')
+		if i < 0 {
+			break
+		}
+		j := strings.IndexByte(s[i+1:], '`')
+		if j < 0 {
+			break
+		}
+		b.WriteString(f(s[:i]))
+		b.WriteString(s[i : i+j+2])
+		s = s[i+j+2:]
+	}
+	b.WriteString(f(s))
+	return b.String()
 }
 
 // NormalizeForCompare makes text comparable independent of formatting:

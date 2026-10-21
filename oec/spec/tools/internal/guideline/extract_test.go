@@ -108,6 +108,11 @@ func TestCleanInline(t *testing.T) {
 	if got := CleanInline(in); got != want {
 		t.Fatalf("got %q want %q", got, want)
 	}
+	in = "the mask `********` (eight **asterisks**) and *it* in `a *b* c`"
+	want = "the mask `********` (eight asterisks) and it in `a *b* c`"
+	if got := CleanInline(in); got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
 }
 
 func TestCompareSections(t *testing.T) {
