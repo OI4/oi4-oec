@@ -204,3 +204,32 @@ Workspace:
 - Checks: `spectool lint` ok (20 area files, 358 requirements, 171 informative items; 66 combinations; vectors topic 146, IL 29, dnp 15, oi4identifier 13, payload 87); `render -check`, `coverage -check`, `topic -check`, `inventory -check -rev c2be26b` ok; `go test ./...` ok.
 
 Next: C-029 (RES-CONFIG).
+
+## Addendum 4 – SF-083 all figures/tables captioned and renumbered, re-baseline on `5bc2e85` (2026-10-21)
+
+PO order (2026-10-21, follow-up of SF-082, implement without review): fix all defects, add all missing captions, check the numbering. Registered and resolved as **SF-083** (editorial, no ADR).
+
+Guideline (`oi4-oec-documentation`, branch `feature/spec-findings`):
+
+- `b81d98e` – every figure and table of MG, RIG and the Process Description (PD) has a caption directly below it, numbered in reading order (Docusaurus sidebar order). Result: MG 22 figures / 23 tables, RIG 2 figures / 11 tables, PD 8 figures. A scan (caption follows every image/table outside code blocks, numbers 1..n per document) and `yarn build` (no warnings) were run.
+  - New captions: MG Figure 1 (1.2 UML sequence diagram example); MG Tables 1 (1.2 keywords), 2–3 (1.3 compliance functions, level examples), 6–7 (4.1 Identification Link components, examples), 8 (4.2 encoded examples), 9 (7.1 Namespace versions), 10–11 (8.1.4 content masks), 12 (8.2.20 ActionState usage), 14 (8.4 Actions), 23 (B1.1.8 precisions); RIG Table 1 (1.2 compliance functions).
+  - Renumbering: MG Figures 1–21 → 2–22; MG Tables 1→4, 2→5, 3→13, 4→15, 5→16, 6→17, 7→18, 8→19, 9→20, 10→21, 11→22; RIG Tables 1–10 → 2–11. Text references updated (MG 4.3.1, 8.1.1, 8.1.2, 8.3.2, A3). The MG 9.1 index called the overview diagram "figure 16" (already wrong before) – now "Figure 9".
+  - Conversion defects: literal `&lt;br/&gt;` (shown as text) → line break in MG 3.2, 8.3.2, A3, A6, B1.1.8 and RIG 4.1.1, 4.1.2; B1.1.8 precision table cells broken into lines; empty header rows replaced (MG A4 and RIG A1 glossaries `Term | Definition`; RIG 4.1.1–4.1.4 bold first row promoted to header); MG A6: 270 dead Confluence links and 4 links to a former Confluence (one broken) unlinked; MG B1.1.3: three JSON payloads the export had flattened into table cells are `json` code blocks again (content verbatim, `json.loads` valid); PD 2.2: the missing image exported from its drawio source (`d274072c-….drawio.png`) and embedded.
+  - Lists of figures/tables of MG, RIG and PD regenerated from the captions (page links).
+- `5bc2e85` – register: SF-083 closed/resolved, no open findings, next free id SF-084.
+
+Agent decisions (G-4.4, editorial):
+
+- Title pages (`index.md` logo and editor table of MG, RIG, PD) are front matter – no caption.
+- The NE 107 icons inside the MG 8.3.2 table are table content, not figures; JSON listings other than MG Figures 5–8 stay uncaptioned (examples in text, not figures).
+- B1.1.3 JSON blocks: only the format was repaired; whether the payloads are correct is checked in C-029 (RES-CONFIG golden vectors).
+- External references to OPC UA tables ("Part 6 Table 1") and historical records (GL-ADRs, ADR-0001 amendments, older logs) are unchanged.
+
+Workspace:
+
+- `69e546b` re-baseline: `spectool rebaseline -rev 5bc2e85` – 1341 items (−3: RIG 4.1.2/4.1.4 empty header rows gone); changed keys in MG 8.3.2 (2), MG A4 (39), RIG A1 (16), RIG 4.1.x – only the two MG 8.3.2 keys were mapped: REQ-RES-HEALTH-002/003 remapped to `MG-8.3.2-d6f8e58c`/`-b75c4616`, quotes, statement and notes "Table 3" → "Table 13"; `coverage/informative.yaml` MG 8.1.3 reasons "Figure 6/7" → "Figure 7/8". Renumbering only, status stays `reviewed`.
+- `dacd109` IL notes, dnp-encoding/oi4identifier vector titles and views: MG A3 Table 7/8 → 18/19 (status stays `reviewed`, same reason).
+- `612cbdb` the same in comments of `oec/spec/tools/internal/il`.
+- Checks: `spectool lint` ok (20 area files, 358 requirements, 171 informative items; 66 combinations; vectors topic 146, IL 29, dnp 15, oi4identifier 13, payload 87); `render -check`, `coverage -check`, `topic -check`, `inventory -check -rev 5bc2e85` ok; `go test ./...` ok.
+
+Next: C-029 (RES-CONFIG).
