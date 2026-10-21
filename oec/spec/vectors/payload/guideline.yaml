@@ -4804,7 +4804,7 @@ vectors:
     expected: valid
     reqs: [REQ-BUS-003, REQ-MSG-011, REQ-MSG-015, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-008, REQ-RES-CONFIG-013, REQ-RES-CONFIG-014, REQ-RES-CONFIG-018, REQ-RES-CONFIG-022, REQ-RES-CONFIG-024]
     origin: {kind: guideline, ref: MG B1.1.3}
-    status: draft
+    status: reviewed
     notes: >-
       Answer to the Sets V-PAY-100/101 (ReplyTo = MessageId of the Set) after the Status
       event (V-PAY-076): the complete Config DataSet "Overall device settings" with the

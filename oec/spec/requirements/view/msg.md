@@ -34,7 +34,7 @@ Guideline baseline: `a77d331` · Area status: reviewed · Sections: MG 8, MG A2
 | [REQ-MSG-027](#req-msg-027) | Status of a DataSetMessage contains Code and Symbol | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-028](#req-msg-028) | Receivers evaluate only the Code of a Status | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-MSG-029](#req-msg-029) | MessageType of the DataSetMessage | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-MSG-030](#req-msg-030) | DataSetMessages are complete key frames | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
+| [REQ-MSG-030](#req-msg-030) | DataSetMessages are complete key frames | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-031](#req-msg-031) | Payload fields use VerboseEncoding with RawData | MUST* | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-032](#req-msg-032) | Fields of the DataSetMetaData | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-033](#req-msg-033) | DataSetMetaData matches its DataSetMessage | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
@@ -703,7 +703,7 @@ A DataSetMessage always contains all fields of its DataSet; the OPC UA message t
 - Domain: messaging · Applies to: publisher
 - Refs: MG 8.2.3, SF-086
 - Verification: schema, d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.2.3-61d61851
 
 > The OPC UA message types ua-deltaframe and ua-keepalive are not used in Open Industry 4.0 Alliance context. A DataSetMessage must always contain all fields of the DataSet.

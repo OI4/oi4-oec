@@ -95,7 +95,7 @@ requirements:
         text: Service B must publish the updated resource object on Service A’s Set topic for this resource (for Config, a partial update is possible, see 9.1.3 Config). Now, Source and – for resources with a Filter – the Filter are required in the topic.
     verification: [d7-validate]
     inventory: [MG-9.1-4a98fe00, MG-9.1-224e1dcc]
-    status: draft
+    status: reviewed
     notes: >-
       ReferenceDesignation has no Filter (REQ-TOP-013, MG 7.7; MG 9.1 since
       SF-081). The per-resource Set payloads are in the RES-* areas (exactly one

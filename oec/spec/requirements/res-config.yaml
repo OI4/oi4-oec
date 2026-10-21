@@ -222,7 +222,7 @@ requirements:
         text: 'Exception: the mask `********` of a sensitive Config object (see Sensitive).'
     verification: [schema, d7-validate]
     inventory: [MG-8.3.3.1-61fb5a3d, MG-8.3.3.1-3b31fa9e, MG-8.3.3.2-053b08f7, MG-8.3.3.2-8e5d40a5]
-    status: draft
+    status: reviewed
     notes: >-
       The representations per Type are listed in MG 8.3.3.1/8.3.3.2 (SF-084
       (d), in line with the JSON encoding of OPC UA Part 6 5.4). The checker
@@ -255,7 +255,7 @@ requirements:
         text: The Length contains the max length of a Value, counted in characters.
     verification: [d7-validate]
     inventory: [MG-8.3.3.1-447047a4, MG-8.3.3.1-7500a301, MG-8.3.3.1-f4071468, MG-8.3.3.2-00c53dcc, MG-8.3.3.2-bf8e27b3, MG-8.3.3.2-2fb581a1]
-    status: draft
+    status: reviewed
     notes: >-
       Length counts characters (Unicode code points); Min and Max apply to
       the Type Number (SF-084 (d)). Patterns should be interoperable
@@ -360,7 +360,7 @@ requirements:
         text: Front-end applications should hide it as well, e.g. when a new value is entered.
     verification: [manual]
     inventory: [MG-8.3.3.1-da5ad6c2, MG-8.3.3.2-71486eba, MG-8.3.3.1-6a2f01c3]
-    status: draft
+    status: reviewed
     notes: >-
       The Message Bus side is REQ-RES-CONFIG-024 (masking in every Pub) and
       REQ-RES-CONFIG-025 (mask in a Set). MAY → SHOULD with GL-ADR-021: the
@@ -589,7 +589,7 @@ requirements:
         text: As in every publication of Config, the values of sensitive config elements are masked.
     verification: [d7-test]
     inventory: [MG-9.1.3-f44495ea]
-    status: draft
+    status: reviewed
     notes: >-
       Read like REQ-RES-DATA-012 and REQ-RES-PUBLIST-025: the answer to the
       Set goes to the topic with Source and Filter of the Set and contains
@@ -625,7 +625,7 @@ requirements:
         text: the Set must be rejected and the status Event must have the EventLevel Bad. Read-only properties which are repeated unchanged from Pub/Config are accepted.
     verification: [d7-test]
     inventory: [MG-9.1.3-7d1e4d10, MG-8.3.3.2-3a8c3bb0]
-    status: draft
+    status: reviewed
     notes: >-
       Stated in MG 8.3.3.2 and MG 9.1.3 since SF-086 (c)/(d), in line with PublicationList
       (REQ-RES-PUBLIST-016, SF-067 (f)) and REQ-CMP-043 (unknown object →
@@ -658,7 +658,7 @@ requirements:
         text: The value of a sensitive Config object is not published on the Message Bus; it can only be set
     verification: [d7-validate, d7-test]
     inventory: [MG-8.3.3.1-84a33fca, MG-8.3.3.1-58f91f16, MG-9.1.3-a94653f3, MG-8.3.3.1-4b1b3520]
-    status: draft
+    status: reviewed
     notes: >-
       New with GL-ADR-021 (SF-087). Levels follow the Config DataSet: a
       component that offers Config masks always. The checker reports a
@@ -687,7 +687,7 @@ requirements:
         text: A Set with the mask `********` as Value of a sensitive config element leaves the value unchanged
     verification: [d7-test]
     inventory: [MG-8.3.3.2-44a6e1bb, MG-8.3.3.2-e0ec94c7]
-    status: draft
+    status: reviewed
     notes: >-
       New with GL-ADR-021 (SF-087). Levels as REQ-RES-CONFIG-023 (Set
       handling). A requester can send a published Config back unchanged
@@ -712,7 +712,7 @@ requirements:
         text: A Set carries new values of sensitive config elements in clear text. The operator should therefore also restrict the read access to the Set/Config topics via ACL.
     verification: [d8]
     inventory: [MG-8.3.3.2-19501841, MG-9.1.3-ac3a3f16]
-    status: draft
+    status: reviewed
     notes: >-
       New with GL-ADR-021 (SF-087). Operator duty like the write ACL of
       REQ-RES-CONFIG-020; checked by the infrastructure CLI (D8).

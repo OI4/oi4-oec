@@ -8,7 +8,7 @@ Guideline baseline: `a77d331` · Area status: reviewed · Sections: MG 9
 | [REQ-BUS-001](#req-bus-001) | Publishing may start once the request topics are subscribed | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
 | [REQ-BUS-002](#req-bus-002) | A requester publishes on the request topic of the addressed component | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-BUS-003](#req-bus-003) | A Get is answered with a Pub | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-BUS-004](#req-bus-004) | A Set carries the updated object on the Set topic | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
+| [REQ-BUS-004](#req-bus-004) | A Set carries the updated object on the Set topic | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-BUS-005](#req-bus-005) | A Del addresses the object with its Filter | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-BUS-006](#req-bus-006) | A successful Set is followed by the publication of the changed object | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-BUS-007](#req-bus-007) | Nothing is published after the deletion of a whole object | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-test | reviewed |
@@ -90,7 +90,7 @@ A component that changes a resource object of another component publishes the co
 - Domain: messaging · Applies to: requester
 - Refs: MG 9.1, SF-081, SF-086
 - Verification: d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-9.1-224e1dcc, MG-9.1-4a98fe00
 
 > Service B must publish the updated resource object on Service A’s Set topic for this resource (for Config, a partial update is possible, see 9.1.3 Config). Now, Source and – for resources with a Filter – the Filter are required in the topic.

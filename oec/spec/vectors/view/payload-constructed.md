@@ -32,8 +32,8 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-111](#v-pay-111) | Set Config with two DataSetMessages | invalid | violates: REQ-RES-CONFIG-019 | constructed | reviewed |
 | [V-PAY-112](#v-pay-112) | Pub Config with an undefined key in a configuration object (strict) | invalid | violates: REQ-MSG-001 | constructed | reviewed |
 | [V-PAY-113](#v-pay-113) | Pub Config with an undefined key in a configuration object (tolerant) | valid | ok | constructed | reviewed |
-| [V-PAY-115](#v-pay-115) | Pub Config with an unmasked sensitive value | invalid | violates: REQ-RES-CONFIG-024 | constructed | draft |
-| [V-PAY-116](#v-pay-116) | Set Config with the mask for a sensitive value | valid | ok | constructed | draft |
+| [V-PAY-115](#v-pay-115) | Pub Config with an unmasked sensitive value | invalid | violates: REQ-RES-CONFIG-024 | constructed | reviewed |
+| [V-PAY-116](#v-pay-116) | Set Config with the mask for a sensitive value | valid | ok | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -1624,7 +1624,7 @@ Payload:
 - Expected: invalid – The non-empty Value of the sensitive configuration object password is published in clear text instead of the mask "********".
 - Violates: [REQ-RES-CONFIG-024](../../requirements/view/res-config.md#req-res-config-024)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-114 with the password published in clear text, as B1.1.3 showed it before GL-ADR-021 (SF-087).
 
@@ -1793,7 +1793,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-RES-CONFIG-003](../../requirements/view/res-config.md#req-res-config-003), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-025](../../requirements/view/res-config.md#req-res-config-025)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-101 with the mask "********" as Value of the sensitive password: the requester sends the published Config back with new values of the other objects; the password stays unchanged (REQ-RES-CONFIG-025, GL-ADR-021) and the mask is not checked against Type and Validation.
 

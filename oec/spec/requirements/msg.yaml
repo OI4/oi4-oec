@@ -718,7 +718,7 @@ requirements:
         text: 'Exception: a Set of Config is a partial update and contains only a part of the DataSet'
     verification: [schema, d7-validate]
     inventory: [MG-8.2.3-61d61851]
-    status: draft
+    status: reviewed
     notes: The Config exception was added to MG 8.2.3 with SF-086 (a).
 
   - id: REQ-MSG-031

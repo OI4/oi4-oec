@@ -95,7 +95,7 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 | [V-PAY-100](#v-pay-100) | B1.1.3: Set explicit Config tag of an explicit asset (device, new values, minimal) | valid | ok | guideline MG B1.1.3 | reviewed |
 | [V-PAY-101](#v-pay-101) | B1.1.3: Set explicit Config tag of an explicit asset (device, new values, full) | valid | ok | guideline MG B1.1.3 | reviewed |
 | [V-PAY-102](#v-pay-102) | B1.1.3: Set explicit Config tag of an explicit asset (device, empty values, minimal) | valid | ok | guideline MG B1.1.3 | reviewed |
-| [V-PAY-114](#v-pay-114) | B1.1.3: Pub explicit Config tag after a successful set request (device) | valid | ok | guideline MG B1.1.3 | draft |
+| [V-PAY-114](#v-pay-114) | B1.1.3: Pub explicit Config tag after a successful set request (device) | valid | ok | guideline MG B1.1.3 | reviewed |
 
 ## V-PAY-001
 
@@ -5439,7 +5439,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-BUS-003](../../requirements/view/bus.md#req-bus-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-002](../../requirements/view/res-config.md#req-res-config-002), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-008](../../requirements/view/res-config.md#req-res-config-008), [REQ-RES-CONFIG-013](../../requirements/view/res-config.md#req-res-config-013), [REQ-RES-CONFIG-014](../../requirements/view/res-config.md#req-res-config-014), [REQ-RES-CONFIG-018](../../requirements/view/res-config.md#req-res-config-018), [REQ-RES-CONFIG-022](../../requirements/view/res-config.md#req-res-config-022), [REQ-RES-CONFIG-024](../../requirements/view/res-config.md#req-res-config-024)
 - Origin: guideline MG B1.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Answer to the Sets V-PAY-100/101 (ReplyTo = MessageId of the Set) after the Status event (V-PAY-076): the complete Config DataSet "Overall device settings" with the values of the Set (REQ-RES-CONFIG-022); the non-empty sensitive password is published as the mask "********" (REQ-RES-CONFIG-024, GL-ADR-021, SF-087). Example added to MG B1.1.3 with GL-ADR-021 (912e35b).
 
