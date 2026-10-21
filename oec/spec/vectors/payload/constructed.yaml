@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029).
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "a77d331"
@@ -600,7 +600,7 @@ vectors:
                 "ip_address": {
                   "Description": {
                     "Locale": "en-US",
-                    "Text": "IP address of Network DNS server"
+                    "Text": "IP address of the network interface"
                   },
                   "Name": {
                     "Locale": "en-US",
@@ -733,7 +733,7 @@ vectors:
                 "ip_address": {
                   "Description": {
                     "Locale": "en-US",
-                    "Text": "IP address of Network DNS server"
+                    "Text": "IP address of the network interface"
                   },
                   "Name": {
                     "Locale": "en-US",
@@ -826,7 +826,7 @@ vectors:
                 "ip_address": {
                   "Description": {
                     "Locale": "en-US",
-                    "Text": "IP address of Network DNS server"
+                    "Text": "IP address of the network interface"
                   },
                   "Name": {
                     "Locale": "en-US",
@@ -918,7 +918,7 @@ vectors:
                 "ip_address": {
                   "Description": {
                     "Locale": "en-US",
-                    "Text": "IP address of Network DNS server"
+                    "Text": "IP address of the network interface"
                   },
                   "Name": {
                     "Locale": "en-US",
@@ -1011,7 +1011,7 @@ vectors:
                 "ip_address": {
                   "Description": {
                     "Locale": "en-US",
-                    "Text": "IP address of Network DNS server"
+                    "Text": "IP address of the network interface"
                   },
                   "Name": {
                     "Locale": "en-US",
@@ -1233,7 +1233,7 @@ vectors:
                 "ip_address": {
                   "Description": {
                     "Locale": "en-US",
-                    "Text": "IP address of Network DNS server"
+                    "Text": "IP address of the network interface"
                   },
                   "Name": {
                     "Locale": "en-US",
@@ -1328,7 +1328,7 @@ vectors:
                 "ip_address": {
                   "Description": {
                     "Locale": "en-US",
-                    "Text": "IP address of Network DNS server"
+                    "Text": "IP address of the network interface"
                   },
                   "Name": {
                     "Locale": "en-US",
@@ -1379,6 +1379,329 @@ vectors:
                 "Description": {
                   "Locale": "en-US",
                   "Text": "Settings of all network interfaces"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-115
+    title: "Pub Config with an unmasked sensitive value"
+    expected: invalid
+    violates: [REQ-RES-CONFIG-024]
+    reason: 'The non-empty Value of the sensitive configuration object password is published in clear text instead of the mask "********".'
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-114 with the password published in clear text, as B1.1.3 showed it
+      before GL-ADR-021 (SF-087).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
+    payload: |-
+      {
+        "MessageId": "1639693510095-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 43,
+            "WriterGroupName": "Overall device settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.095Z",
+            "Payload": {
+              "device1": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Device 1"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes device one configuration options"
+                },
+                "aut0-r3fr3sh": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Automatic Refresh Enabled"
+                  },
+                  "Type": "Boolean",
+                  "Value": "false"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of device to read values from"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": "192.168.1.123"
+                },
+                "password": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Password"
+                  },
+                  "Sensitive": true,
+                  "Type": "String",
+                  "Value": "ssh-it's a secret!"
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "443"
+                },
+                "protocol": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Protocol"
+                  },
+                  "Type": "String",
+                  "Value": "HTTPS"
+                },
+                "readInterval": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Interval in which value is read from device"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Read Interval"
+                  },
+                  "Type": "Number",
+                  "Value": "100"
+                },
+                "unit": {
+                  "DefaultValue": "°C",
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Unit of measurement"
+                  },
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Unit"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Values": ["K", "°C", "°De", "°F", "°N", "°R", "°Ré", "°Rø" ]
+                  },
+                  "Value": "K"
+                },
+                "user-name": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Username"
+                  },
+                  "Type": "String",
+                  "Value": "admin"
+                }
+              },
+              "common": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "general configuration"
+                },
+                "date-time": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Date Time for service"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Date Time"
+                  },
+                  "Type": "DateTime",
+                  "Value": "2020-12-24T20:15:00Z"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Overall device settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Common and specific settings"
+                }
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-116
+    title: "Set Config with the mask for a sensitive value"
+    expected: valid
+    reqs: [REQ-RES-CONFIG-003, REQ-RES-CONFIG-007, REQ-RES-CONFIG-025]
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-101 with the mask "********" as Value of the sensitive password: the
+      requester sends the published Config back with new values of the other
+      objects; the password stays unchanged (REQ-RES-CONFIG-025, GL-ADR-021) and the
+      mask is not checked against Type and Validation.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Overall device settings"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 43,
+            "WriterGroupName": "Overall device settings",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "device1": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Device 1"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Describes device one configuration options"
+                },
+                "aut0-r3fr3sh": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Automatic Refresh Enabled"
+                  },
+                  "Type": "Boolean",
+                  "Value": "false"
+                },
+                "ip_address": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "IP address of device to read values from"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "IP Address"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Pattern": "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                  },
+                  "Value": "192.168.1.123"
+                },
+                "password": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Password"
+                  },
+                  "Sensitive": true,
+                  "Type": "String",
+                  "Value": "********"
+                },
+                "port": {
+                  "DefaultValue": "80",
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Port"
+                  },
+                  "Type": "Number",
+                  "Validation": {
+                    "Min": 0,
+                    "Max": 65535
+                  },
+                  "Value": "443"
+                },
+                "protocol": {
+                  "Mandatory": true,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Protocol"
+                  },
+                  "Type": "String",
+                  "Value": "HTTPS"
+                },
+                "readInterval": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Interval in which value is read from device"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Read Interval"
+                  },
+                  "Type": "Number",
+                  "Value": "100"
+                },
+                "unit": {
+                  "DefaultValue": "°C",
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Unit of measurement"
+                  },
+                  "Mandatory": false,
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Unit"
+                  },
+                  "Type": "String",
+                  "Validation": {
+                    "Values": ["K", "°C", "°De", "°F", "°N", "°R", "°Ré", "°Rø" ]
+                  },
+                  "Value": "K"
+                },
+                "user-name": {
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Username"
+                  },
+                  "Type": "String",
+                  "Value": "admin"
+                }
+              },
+              "common": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "general configuration"
+                },
+                "date-time": {
+                  "Description": {
+                    "Locale": "en-US",
+                    "Text": "Date Time for service"
+                  },
+                  "Name": {
+                    "Locale": "en-US",
+                    "Text": "Date Time"
+                  },
+                  "Type": "DateTime",
+                  "Value": "2020-12-24T20:15:00Z"
+                }
+              },
+              "Context": {
+                "Name": {
+                  "Locale": "en-US",
+                  "Text": "Overall device settings"
+                },
+                "Description": {
+                  "Locale": "en-US",
+                  "Text": "Common and specific settings"
                 }
               }
             }
