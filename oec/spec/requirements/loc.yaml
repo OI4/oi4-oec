@@ -3,7 +3,7 @@
 # Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: LOC
-baseline: "2025207"
+baseline: "2018bc4"
 requirements:
   - id: REQ-LOC-001
     title: Field of the Locale DataSet

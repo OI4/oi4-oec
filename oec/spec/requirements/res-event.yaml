@@ -10,7 +10,7 @@
 # keys in Details) and SF-076 (Number, Category and topic Filter) resolved in
 # the guideline (baseline b2f0fe7).
 area: RES-EVENT
-baseline: "2025207"
+baseline: "2018bc4"
 requirements:
   # --- DataSet content (MG 8.3.6) ---------------------------------------------
   - id: REQ-RES-EVENT-001
