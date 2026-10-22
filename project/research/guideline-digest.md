@@ -111,8 +111,8 @@ It also covers the guideline ADRs **GL-ADR-001 … 018** in `rfcs_adrs/` and the
 |------|---------|
 | `/etc/oi4/mqtt` (ro) | `broker.json` {`Address`, `SecurePort` (UInt16), `MaxPacketSize` (Int32, **bytes**, min 262144)}, `broker.pem`, `broker_ca.pem` |
 | `/etc/oi4/certs` (ro) | `ca.pem`, `<containername>.pem` (no private keys) |
-| `/run/secrets/mqtt_credentials` | base64(`user:password`) |
-| `/run/secrets/mqtt_private_key.pem`, `/run/secrets/mqtt_passphrase` (base64) | client key + passphrase |
+| `/run/secrets/oi4/credentials` (GL-ADR-022) | base64(`user:password`) of the application identity |
+| `/run/secrets/oi4/private_key.pem`, `/run/secrets/oi4/passphrase` (base64) (GL-ADR-022) | private key of `<containername>.pem` + passphrase; one secret storage per container |
 | `/etc/oi4/app`, `/opt/oi4/app` | app config / app data |
 | `/opt/oi4/licenses` | exactly one SBOM `sbom.spdx.json` **or** `sbom.cdx.json` (JSON) + license texts embedded or as `<License-ID>.txt` (SPDX id or `LicenseRef-…`); part of the image, not overlaid by host mounts (L2+) |
 

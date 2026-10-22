@@ -221,3 +221,12 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 - Table and figure numbers cited in records older than this amendment are the numbers valid at that time.
 - No new GL-ADR.
 - GL-ADR-001 … 020; SF-001 … 083 resolved, none open; next free id SF-084.
+
+## Amendment GL-ADR-022 (2026-10-22, guideline baseline `6cb6a97`)
+
+- The previous baseline `a77d331` (C-029 review: SF-084 … 088 with GL-ADR-021) is recorded in the C-029 log, addendum 2.
+- The baseline is now `6cb6a97` on branch `feature/spec-findings` (local commits, PO order 2026-10-22):
+  - `4169156` GL-ADR-022 – secrets of the identity of an application in the secret storage `/run/secrets/oi4` (`credentials`, `private_key.pem`, `passphrase`); naming option chosen by the agent after a neutral evaluation, for PO confirmation.
+  - `31f0890` – RIG 4.1.3 rewritten; wording in RIG 4.1.2, 4.2 and 3 ("certificate of the application"); resolves SF-091 (d).
+  - `6cb6a97` – findings register: SF-091 (d) resolved, SF-089 … 093 otherwise open, next free id SF-094.
+- GL-ADR-001 … 022; SF-001 … 088 resolved, SF-089 … 093 open; next free id SF-094.
