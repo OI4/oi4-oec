@@ -4961,3 +4961,236 @@ vectors:
           }
         ]
       }
+
+  # --- MG body examples (C-031) ---------------------------------------------
+  - id: V-PAY-117
+    title: "MG 1.2: Pub Health reply (capitalization example)"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-015, REQ-MSG-016, REQ-MSG-020, REQ-MSG-023, REQ-MSG-024]
+    origin: {kind: guideline, ref: MG 1.2}
+    status: draft
+    notes: >-
+      The PascalCase example of MG 1.2 is a Pub Health of the field data service
+      about itself in reply to a Get (ReplyTo is the MessageId of V-PAY-001),
+      like V-PAY-003 but with DataSetWriterId 3875 and without SequenceNumber.
+      The guideline names no topic; it is completed from the PublisherId and
+      the DataSetWriterName.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    edits:
+      - {target: topic, kind: completed, reason: "MG 1.2 shows the message without its topic; Pub Health of the publisher about itself (DataSetWriterName = AppId)."}
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3875,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-118
+    title: "MG 8.1.1: ua-data with SequenceNumber, MetaDataVersion, Status and MessageType (Figure 5)"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-016, REQ-MSG-018, REQ-MSG-020, REQ-MSG-023, REQ-MSG-024, REQ-MSG-026, REQ-MSG-027, REQ-MSG-029, REQ-MSG-030]
+    origin: {kind: guideline, ref: MG 8.1.1}
+    status: draft
+    notes: >-
+      Self-initialized Pub Health (ReplyTo "") of an application whose
+      Identification Link is a URL (https scheme). The DataSetMessage carries
+      every optional field of the fixed content mask: SequenceNumber,
+      MetaDataVersion 1.0, a Timestamp with UTC offset, the non-Good Status
+      UncertainLastUsableValue (Code and Symbol) and MessageType ua-keyframe.
+      The MessageId time (2019-06-26T11:36:00Z) differs from the Timestamp;
+      MessageIds are opaque (REQ-MSG-009). The guideline names no topic; it is
+      completed from the PublisherId and the DataSetWriterName.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Health/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ"
+    edits:
+      - {target: topic, kind: completed, reason: "MG 8.1.1 shows the message without its topic; Pub Health of the publisher about itself (DataSetWriterName = AppId)."}
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 12,
+            "SequenceNumber": 4711,
+            "MetaDataVersion": {
+              "MajorVersion": 1,
+              "MinorVersion": 0
+            },
+            "Timestamp": "2019-06-26T13:16:00.000+01:00",
+            "Status": {
+              "Code": 1083179008,
+              "Symbol": "UncertainLastUsableValue"
+            },
+            "MessageType": "ua-keyframe",
+            "WriterGroupName": "",
+            "DataSetWriterName": "https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Health": "MAINTENANCE_REQUIRED_4",
+              "HealthScore": 80
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-119
+    title: "MG 8.1.3: Call NewDataSetWriterId with CorrelationData (Figure 7)"
+    expected: valid
+    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-006, REQ-ACT-010, REQ-ACT-019, REQ-ACT-020, REQ-ACT-021]
+    origin: {kind: guideline, ref: MG 8.1.3}
+    status: draft
+    notes: >-
+      V-PAY-008 (B1.2.1) with CorrelationData "MTYzOTY5MzUxMDAwMA==" (base64 of
+      the request time 1639693510000), which the Responder returns unchanged in
+      V-PAY-120 (REQ-ACT-007).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "CorrelationData": "MTYzOTY5MzUxMDAwMA==",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-120
+    title: "MG 8.1.3: Reply NewDataSetWriterId with CorrelationData (Figure 8)"
+    expected: valid
+    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-007, REQ-ACT-012, REQ-ACT-014, REQ-ACT-015, REQ-ACT-019, REQ-ACT-020, REQ-ACT-022]
+    origin: {kind: guideline, ref: MG 8.1.3}
+    status: draft
+    notes: >-
+      Final response (ActionState 2) to V-PAY-119 on its ResponseAddress, with
+      the CorrelationData of the request unchanged; otherwise V-PAY-009 (B1.2.1).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "CorrelationData": "MTYzOTY5MzUxMDAwMA==",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-121
+    title: "MG 8.1.2: ua-metadata of a user-defined DataSet (Figure 6)"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-012, REQ-MSG-020, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041, REQ-RES-META-003]
+    origin: {kind: guideline, ref: MG 8.1.2}
+    status: draft
+    notes: >-
+      Self-initialized Pub Metadata (ReplyTo "") of the publisher-defined Data
+      DataSet "Temperature" of a temperature sensor (Source) behind the field
+      data service, DataSetWriterId 15, Filter = WriterGroupName "Temperature".
+      Without DataSetClassId (publisher-defined DataSet, REQ-MSG-012 "may").
+      The field Temperature (Double, i=11) has the property EngineeringUnits
+      (EUInformation, degree Celsius, UNECE CEL = UnitId 4408652) – the
+      KeyValuePair example of MG 8.2.8. The guideline names no topic; it is
+      completed from the PublisherId, DataSetWriterName and WriterGroupName.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Metadata/aHR0cHM6Ly9pZC52ZW5kb3IuY29tL1RlbXBlcmF0dXJlU2Vuc29yL1RTLTEwMC80NzEx/Temperature"
+    edits:
+      - {target: topic, kind: completed, reason: "MG 8.1.2 shows the message without its topic; Pub Metadata with Source = DataSetWriterName and Filter = WriterGroupName."}
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 15,
+        "WriterGroupName": "Temperature",
+        "DataSetWriterName": "https://id.vendor.com/TemperatureSensor/TS-100/4711",
+        "Timestamp": "2019-06-26T13:16:00.000+01:00",
+        "ReplyTo": "",
+        "MetaData": {
+          "Namespaces": [],
+          "StructureDataTypes": [],
+          "EnumDataTypes": [],
+          "SimpleDataTypes": [],
+          "Name": "Temperature",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Current temperature of the sensor"
+          },
+          "Fields": [
+            {
+              "Name": "Temperature",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Measured temperature"
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "8e2e1a3c-6f0a-4b0f-9a35-2c9a3c1f6d11",
+              "Properties": [
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 4408652,
+                      "DisplayName": {
+                        "Text": "°C"
+                      },
+                      "Description": {
+                        "Text": "degree Celsius"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 1,
+            "MinorVersion": 0
+          }
+        }
+      }
