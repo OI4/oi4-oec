@@ -323,3 +323,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `4811e60` is recorded in addendum 13.
 - The baseline is now `69863d3` on branch `feature/spec-findings` (local commits `62f85f3` – PO edit of the MG lists of figures/tables – and `69863d3` – Docusaurus landing page takes over the Welcome content, `docs/intro.md` removed; PO order 2026-10-22). No normative text changed, no inventory change, no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 15 (2026-10-22, guideline baseline `21bf409`)
+
+- The previous baseline `69863d3` is recorded in addendum 14.
+- The baseline is now `21bf409` on branch `feature/spec-findings` (local commits `86dbf25` – MG 1.2 Conventions use MG-only examples and references – and `21bf409` – new RIG 1.2 Conventions, RIG compliance chapter renumbered to 1.3, RIG tables 1–11 → 2–12; PO decision 2026-10-22). Keyword mapping unchanged and identical in MG 1.2 and RIG 1.2 (G-1.6). Spec re-baselined (`249a00b`): key remap of the RIG compliance, label and MG 1.2 example items, 17 new RIG 1.2 items informative; no obligation changed, no finding, no GL-ADR. SF-001 … 095 resolved.
