@@ -275,3 +275,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `e0f1488` is recorded in the amendment above.
 - The baseline is now `4e15e02` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): whole-MG pass, plain-text section references turned into links; no wording change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
+
+## Amendment C-032 addendum 6 (2026-10-22, guideline baseline `df752cd`)
+
+- The previous baseline `4e15e02` is recorded in the amendment above.
+- The baseline is now `df752cd` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): explicit anchors at all figure/table captions and anchor links in the lists of figures/tables (MG and RIG); no wording change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
