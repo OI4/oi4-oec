@@ -33,3 +33,161 @@ Guideline baseline: `b942df3`. An inventory item is a candidate of a normative s
 | REG | C-030 | reviewed | 16 | 12 | 4 | 0 |
 | GEN | C-030 | reviewed | 79 | 4 | 75 | 0 |
 | **Total** | | | 1382 | 1076 | 306 | 0 |
+
+## Guideline examples
+
+Every fenced code block of MG and RIG (including MG Appendix B) is reproduced by a golden vector of its section, is a JSON fragment of a golden payload vector, or is explained in `coverage/examples.yaml`.
+
+| Part | Blocks | Golden vector | Explained | Open |
+|---|---:|---:|---:|---:|
+| MG | 42 | 8 | 34 | 0 |
+| MG Appendix B | 98 | 92 | 6 | 0 |
+| RIG | 4 | 0 | 4 | 0 |
+| **Total** | 144 | 100 | 44 | 0 |
+
+| Example | Section | Line | Language | Golden vectors / reason |
+|---|---|---:|---|---|
+| `MG-1.2-bd977fba` | MG 1.2 | 70 | json | explained: Command-line output (docker network ls) illustrating the code style of MG 1.2, no OEC message (SF-095 (a)). |
+| `MG-1.2-40013a1d` | MG 1.2 | 107 | json | V-PAY-117 |
+| `MG-4.2-8747056d` | MG 4.2 | 64 | python | explained: Implementation snippets (Python, JavaScript, C#) of the base64url encoding of MG 4.2, no data; the encoding is tested by the dnp-encoding and identification-link vectors. |
+| `MG-4.2-33fae34e` | MG 4.2 | 76 | javascript | explained: Implementation snippets (Python, JavaScript, C#) of the base64url encoding of MG 4.2, no data; the encoding is tested by the dnp-encoding and identification-link vectors. |
+| `MG-4.2-f0c582f7` | MG 4.2 | 83 | csharp | explained: Implementation snippets (Python, JavaScript, C#) of the base64url encoding of MG 4.2, no data; the encoding is tested by the dnp-encoding and identification-link vectors. |
+| `MG-6.3.3-272880e9` | MG 6.3.3 | 14 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-6.3.4-0811a25f` | MG 6.3.4 | 16 | json | fragment of V-PAY-024 |
+| `MG-6.3.5-b1907bd4` | MG 6.3.5 | 20 | json | fragment of V-PAY-025 |
+| `MG-8-07cc23cd` | MG 8 | 34 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-8.1.1-bd263478` | MG 8.1.1 | 12 | json | V-PAY-118 |
+| `MG-8.1.2-6930dfec` | MG 8.1.2 | 12 | json | V-PAY-121 |
+| `MG-8.1.3-e802a362` | MG 8.1.3 | 16 | json | V-PAY-119 |
+| `MG-8.1.3-d01a9230` | MG 8.1.3 | 44 | json | V-PAY-120 |
+| `MG-8.2.8-969f86e6` | MG 8.2.8 | 34 | json | fragment of V-PAY-121 |
+| `MG-9.1.1-0f69b8f7` | MG 9.1.1 | 41 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.1-779c6ecb` | MG 9.1.1 | 76 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.2-fc67c77f` | MG 9.1.2 | 41 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.2-13fb05a8` | MG 9.1.2 | 76 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.3-850e4a52` | MG 9.1.3 | 47 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.3-bce13dc8` | MG 9.1.3 | 85 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.3-ba6d7426` | MG 9.1.3 | 299 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.4-bda89779` | MG 9.1.4 | 51 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.5-1f17e4f7` | MG 9.1.5 | 37 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.5-212bf931` | MG 9.1.5 | 64 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.5-ff3a5047` | MG 9.1.5 | 101 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.6-6c8b8daf` | MG 9.1.6 | 43 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.7-fb70d5f9` | MG 9.1.7 | 44 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.7-58e1b53e` | MG 9.1.7 | 79 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.8-45cd690f` | MG 9.1.8 | 57 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.8-d919d7e0` | MG 9.1.8 | 96 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.8-83c8310b` | MG 9.1.8 | 230 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.9-58ed182e` | MG 9.1.9 | 58 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.9-77043bf0` | MG 9.1.9 | 97 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.9-943ed234` | MG 9.1.9 | 151 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.9-cb708125` | MG 9.1.9 | 197 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-381b725f` | MG 9.1.10 | 45 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-0df6526a` | MG 9.1.10 | 66 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-6b2ab2c8` | MG 9.1.10 | 107 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-8dc472d1` | MG 9.1.10 | 179 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-b848f78b` | MG 9.1.10 | 245 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.2.1-215f5370` | MG 9.2.1 | 24 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.2.1-f5a0f307` | MG 9.2.1 | 54 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-B1.1.1-82faa8c4` | MG B1.1.1 | 14 | json | V-PAY-026, V-PAY-027 |
+| `MG-B1.1.1-fd620b67` | MG B1.1.1 | 29 | json | V-PAY-026, V-PAY-027 |
+| `MG-B1.1.1-88bd6c79` | MG B1.1.1 | 52 | json | V-PAY-028 |
+| `MG-B1.1.1-8ae88069` | MG B1.1.1 | 111 | json | V-PAY-029 |
+| `MG-B1.1.1-f0c5a08c` | MG B1.1.1 | 160 | json | V-PAY-023 |
+| `MG-B1.1.2-e51ec3e5` | MG B1.1.2 | 14 | json | V-PAY-001, V-PAY-002 |
+| `MG-B1.1.2-165b22f0` | MG B1.1.2 | 29 | json | V-PAY-001, V-PAY-002 |
+| `MG-B1.1.2-3a410150` | MG B1.1.2 | 52 | json | V-PAY-003 |
+| `MG-B1.1.2-27b73a62` | MG B1.1.2 | 87 | json | V-PAY-004 |
+| `MG-B1.1.2-7d5e420b` | MG B1.1.2 | 132 | json | V-PAY-024 |
+| `MG-B1.1.2-54ef11b4` | MG B1.1.2 | 161 | json | V-PAY-025 |
+| `MG-B1.1.3-eec607aa` | MG B1.1.3 | 14 | json | V-PAY-088, V-PAY-090, V-PAY-098 |
+| `MG-B1.1.3-14222d3d` | MG B1.1.3 | 33 | json | V-PAY-089 |
+| `MG-B1.1.3-cf034206` | MG B1.1.3 | 57 | json | V-PAY-088, V-PAY-090, V-PAY-098 |
+| `MG-B1.1.3-bf4b9a42` | MG B1.1.3 | 76 | json | V-PAY-091 |
+| `MG-B1.1.3-218ef7f1` | MG B1.1.3 | 172 | json | V-PAY-092, V-PAY-093 |
+| `MG-B1.1.3-27ed17f5` | MG B1.1.3 | 268 | json | V-PAY-092, V-PAY-093 |
+| `MG-B1.1.3-1f5f6001` | MG B1.1.3 | 366 | json | V-PAY-094 |
+| `MG-B1.1.3-168964ac` | MG B1.1.3 | 399 | json | V-PAY-095 |
+| `MG-B1.1.3-b99d7942` | MG B1.1.3 | 489 | json | V-PAY-096 |
+| `MG-B1.1.3-bccfaa53` | MG B1.1.3 | 522 | json | V-PAY-097 |
+| `MG-B1.1.3-d36d877e` | MG B1.1.3 | 614 | json | V-PAY-076; fragment of V-PAY-062, V-PAY-073, V-PAY-075, V-PAY-079 |
+| `MG-B1.1.3-70fdea11` | MG B1.1.3 | 659 | json | V-PAY-088, V-PAY-090, V-PAY-098 |
+| `MG-B1.1.3-0f6460f3` | MG B1.1.3 | 678 | json | V-PAY-099 |
+| `MG-B1.1.3-23937996` | MG B1.1.3 | 835 | json | V-PAY-100 |
+| `MG-B1.1.3-9142cb17` | MG B1.1.3 | 888 | json | V-PAY-101 |
+| `MG-B1.1.3-47809341` | MG B1.1.3 | 1045 | json | V-PAY-102 |
+| `MG-B1.1.3-69aa44f2` | MG B1.1.3 | 1104 | json | V-PAY-076; fragment of V-PAY-062, V-PAY-073, V-PAY-075, V-PAY-079 |
+| `MG-B1.1.3-23a90d84` | MG B1.1.3 | 1139 | json | V-PAY-114 |
+| `MG-B1.1.4-c6a02126` | MG B1.1.4 | 14 | json | V-PAY-055, V-PAY-056, V-PAY-057 |
+| `MG-B1.1.4-3c94df79` | MG B1.1.4 | 32 | json | V-PAY-055, V-PAY-056, V-PAY-057 |
+| `MG-B1.1.4-05f389d2` | MG B1.1.4 | 46 | json | V-PAY-055, V-PAY-056, V-PAY-057 |
+| `MG-B1.1.4-555cc099` | MG B1.1.4 | 64 | json | V-PAY-058 |
+| `MG-B1.1.4-005ae88d` | MG B1.1.4 | 101 | json | V-PAY-059, V-PAY-060 |
+| `MG-B1.1.4-36cc1b95` | MG B1.1.4 | 134 | json | V-PAY-059, V-PAY-060 |
+| `MG-B1.1.4-b9286f1e` | MG B1.1.4 | 167 | json | V-PAY-061 |
+| `MG-B1.1.4-e34ab359` | MG B1.1.4 | 198 | json | V-PAY-062; fragment of V-PAY-073, V-PAY-075, V-PAY-076, V-PAY-079 |
+| `MG-B1.1.5-f8fc9ffd` | MG B1.1.5 | 16 | json | V-PAY-020 |
+| `MG-B1.1.5-4bd2ea0a` | MG B1.1.5 | 40 | json | V-PAY-021 |
+| `MG-B1.1.5-cf55902c` | MG B1.1.5 | 253 | json | V-PAY-022 |
+| `MG-B1.1.5-87e54adf` | MG B1.1.5 | 468 | json | V-PAY-077 |
+| `MG-B1.1.6-a515de65` | MG B1.1.6 | 22 | json | V-PAY-063 |
+| `MG-B1.1.6-5d344f84` | MG B1.1.6 | 61 | json | V-PAY-064 |
+| `MG-B1.1.6-ab81fceb` | MG B1.1.6 | 92 | json | V-PAY-065 |
+| `MG-B1.1.7-d7fe2d00` | MG B1.1.7 | 13 | json | V-PAY-030, V-PAY-031 |
+| `MG-B1.1.7-1ae04b86` | MG B1.1.7 | 28 | json | V-PAY-030, V-PAY-031 |
+| `MG-B1.1.7-aa6c73d8` | MG B1.1.7 | 51 | json | V-PAY-032 |
+| `MG-B1.1.7-1473f1e3` | MG B1.1.7 | 101 | json | V-PAY-033 |
+| `MG-B1.1.8-0545065d` | MG B1.1.8 | 25 | json | V-PAY-034, V-PAY-035, V-PAY-036 |
+| `MG-B1.1.8-73611cb4` | MG B1.1.8 | 40 | json | V-PAY-034, V-PAY-035, V-PAY-036 |
+| `MG-B1.1.8-33dedf51` | MG B1.1.8 | 55 | json | V-PAY-034, V-PAY-035, V-PAY-036 |
+| `MG-B1.1.8-79d526a4` | MG B1.1.8 | 74 | json | V-PAY-037 |
+| `MG-B1.1.8-9de2621d` | MG B1.1.8 | 111 | json | V-PAY-038 |
+| `MG-B1.1.8-1faa139d` | MG B1.1.8 | 212 | json | V-PAY-039 |
+| `MG-B1.1.8-b30cd5c4` | MG B1.1.8 | 309 | json | V-PAY-040 |
+| `MG-B1.1.8-08af43c5` | MG B1.1.8 | 343 | json | V-PAY-078 |
+| `MG-B1.1.9-f48da41f` | MG B1.1.9 | 25 | json | V-PAY-066, V-PAY-067, V-PAY-068 |
+| `MG-B1.1.9-c7403723` | MG B1.1.9 | 40 | json | V-PAY-066, V-PAY-067, V-PAY-068 |
+| `MG-B1.1.9-cffb4c7f` | MG B1.1.9 | 55 | json | V-PAY-066, V-PAY-067, V-PAY-068 |
+| `MG-B1.1.9-898f4cda` | MG B1.1.9 | 74 | json | V-PAY-069 |
+| `MG-B1.1.9-c2c34694` | MG B1.1.9 | 108 | json | V-PAY-070, V-PAY-071 |
+| `MG-B1.1.9-676d34ec` | MG B1.1.9 | 142 | json | V-PAY-070, V-PAY-071 |
+| `MG-B1.1.9-42b2e3b2` | MG B1.1.9 | 174 | json | V-PAY-072, V-PAY-074 |
+| `MG-B1.1.9-b69ccd96` | MG B1.1.9 | 204 | json | V-PAY-073, V-PAY-075; fragment of V-PAY-062, V-PAY-076, V-PAY-079 |
+| `MG-B1.1.9-f10ed6bd` | MG B1.1.9 | 235 | json | V-PAY-072, V-PAY-074 |
+| `MG-B1.1.9-73bb1129` | MG B1.1.9 | 265 | json | V-PAY-073, V-PAY-075; fragment of V-PAY-062, V-PAY-076, V-PAY-079 |
+| `MG-B1.1.10-0e330ede` | MG B1.1.10 | 13 | json | V-PAY-041, V-PAY-042 |
+| `MG-B1.1.10-26562794` | MG B1.1.10 | 28 | json | V-PAY-041, V-PAY-042 |
+| `MG-B1.1.10-bd579d16` | MG B1.1.10 | 51 | json | V-PAY-043 |
+| `MG-B1.1.10-6e15f1f2` | MG B1.1.10 | 115 | json | V-PAY-044 |
+| `MG-B1.1.10-cb50531b` | MG B1.1.10 | 169 | json | V-PAY-053 |
+| `MG-B1.1.10-bc789819` | MG B1.1.10 | 198 | json | V-PAY-054 |
+| `MG-B1.1.10-84599f4d` | MG B1.1.10 | 264 | json | V-PAY-045 |
+| `MG-B1.1.10-15e80fe7` | MG B1.1.10 | 318 | json | V-PAY-079; fragment of V-PAY-062, V-PAY-073, V-PAY-075, V-PAY-076 |
+| `MG-B1.1.10-6ff24a4e` | MG B1.1.10 | 349 | json | V-PAY-046 |
+| `MG-B1.1.10-7c5da2f1` | MG B1.1.10 | 368 | json | V-PAY-080 |
+| `MG-B1.1.11-8f50dd70` | MG B1.1.11 | 13 | json | V-PAY-005 |
+| `MG-B1.1.11-51d264ec` | MG B1.1.11 | 42 | json | V-PAY-006 |
+| `MG-B1.1.12-98dcf76f` | MG B1.1.12 | 14 | json | V-PAY-007 |
+| `MG-B1.1.12-596482ef` | MG B1.1.12 | 42 | json | V-PAY-047 |
+| `MG-B1.2.1-e3e28524` | MG B1.2.1 | 18 | json | V-PAY-008 |
+| `MG-B1.2.1-36740e44` | MG B1.2.1 | 49 | json | V-PAY-009 |
+| `MG-B2.1-8ef3cb92` | MG B2.1 | 14 | json | fragment of V-PAY-006, V-PAY-023, V-PAY-028, V-PAY-029 |
+| `MG-B2.1-545bcfda` | MG B2.1 | 43 | json | V-PAY-010 |
+| `MG-B2.2-e1e8c9b8` | MG B2.2 | 14 | json | explained: DataSet examples of the MG B2 MetaData examples that differ from the referenced B1.1 DataSetMessage (B2.7 with a wrong TopicPath); SF-094 proposes to replace them by the B1.1 payloads. The MetaData itself is covered by V-PAY-011 … 017. |
+| `MG-B2.2-4711eff8` | MG B2.2 | 31 | json | V-PAY-011 |
+| `MG-B2.3-5bfe0d75` | MG B2.3 | 14 | json | explained: DataSet examples of the MG B2 MetaData examples that differ from the referenced B1.1 DataSetMessage (B2.7 with a wrong TopicPath); SF-094 proposes to replace them by the B1.1 payloads. The MetaData itself is covered by V-PAY-011 … 017. |
+| `MG-B2.3-260a226b` | MG B2.3 | 70 | json | V-PAY-012 |
+| `MG-B2.4-0bd867ee` | MG B2.4 | 14 | json | fragment of V-PAY-062, V-PAY-063, V-PAY-073, V-PAY-075, V-PAY-076, V-PAY-077, V-PAY-078, V-PAY-079, V-PAY-080 |
+| `MG-B2.4-e54f2c88` | MG B2.4 | 27 | json | V-PAY-013 |
+| `MG-B2.5-01aa2823` | MG B2.5 | 14 | json | explained: DataSet examples of the MG B2 MetaData examples that differ from the referenced B1.1 DataSetMessage (B2.7 with a wrong TopicPath); SF-094 proposes to replace them by the B1.1 payloads. The MetaData itself is covered by V-PAY-011 … 017. |
+| `MG-B2.5-cc781b40` | MG B2.5 | 22 | json | V-PAY-014 |
+| `MG-B2.6-9fc4568e` | MG B2.6 | 14 | json | explained: DataSet examples of the MG B2 MetaData examples that differ from the referenced B1.1 DataSetMessage (B2.7 with a wrong TopicPath); SF-094 proposes to replace them by the B1.1 payloads. The MetaData itself is covered by V-PAY-011 … 017. |
+| `MG-B2.6-720d27d1` | MG B2.6 | 31 | json | V-PAY-015 |
+| `MG-B2.7-bb7c7c4a` | MG B2.7 | 14 | json | explained: DataSet examples of the MG B2 MetaData examples that differ from the referenced B1.1 DataSetMessage (B2.7 with a wrong TopicPath); SF-094 proposes to replace them by the B1.1 payloads. The MetaData itself is covered by V-PAY-011 … 017. |
+| `MG-B2.7-fd356e8a` | MG B2.7 | 24 | json | V-PAY-016 |
+| `MG-B2.8-8dba8b5d` | MG B2.8 | 14 | json | explained: DataSet examples of the MG B2 MetaData examples that differ from the referenced B1.1 DataSetMessage (B2.7 with a wrong TopicPath); SF-094 proposes to replace them by the B1.1 payloads. The MetaData itself is covered by V-PAY-011 … 017. |
+| `MG-B2.8-05946955` | MG B2.8 | 46 | json | V-PAY-017 |
+| `RIG-4.1.3-099c622d` | RIG 4.1.3 | 49 | yaml | explained: Docker Compose snippets showing how a platform mounts the storages and secrets (RIG 4.1.3, GL-ADR-022); deployment configuration, no message – tested by the infrastructure compliance CLI (D8), not by vectors. |
+| `RIG-4.1.3-5fffe7fd` | RIG 4.1.3 | 70 | yaml | explained: Docker Compose snippets showing how a platform mounts the storages and secrets (RIG 4.1.3, GL-ADR-022); deployment configuration, no message – tested by the infrastructure compliance CLI (D8), not by vectors. |
+| `RIG-4.2-6850cf4c` | RIG 4.2 | 37 | json | explained: Docker command line with <…> placeholders for container and host name (RIG 4.2, tagged json – SF-095 (c)), no test data; the naming rule is REQ-CNT-021. |
+| `RIG-4.4-f4bc67b0` | RIG 4.4 | 18 | powershell | explained: Command-line output (docker network ls) illustrating the container network types of RIG 4.4, no message. |

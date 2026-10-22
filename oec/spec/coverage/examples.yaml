@@ -1,0 +1,64 @@
+# Guideline examples without a golden vector (ADR-0018, C-031; schema: examples.schema.json).
+# Every fenced code block of MG and RIG (including MG Appendix B) is reproduced
+# by a golden vector of its section, is a JSON fragment of a golden payload
+# vector, or is explained here. 'spectool coverage' reports open and stale keys.
+baseline: "b942df3"
+items:
+  - keys:
+      - MG-1.2-bd977fba
+    reason: Command-line output (docker network ls) illustrating the code style of MG 1.2, no OEC message (SF-095 (a)).
+  - keys:
+      - MG-4.2-8747056d
+      - MG-4.2-33fae34e
+      - MG-4.2-f0c582f7
+    reason: Implementation snippets (Python, JavaScript, C#) of the base64url encoding of MG 4.2, no data; the encoding is tested by the dnp-encoding and identification-link vectors.
+  - keys:
+      - MG-6.3.3-272880e9
+      - MG-8-07cc23cd
+      - MG-9.1.1-0f69b8f7
+      - MG-9.1.1-779c6ecb
+      - MG-9.1.2-fc67c77f
+      - MG-9.1.2-13fb05a8
+      - MG-9.1.3-850e4a52
+      - MG-9.1.3-bce13dc8
+      - MG-9.1.3-ba6d7426
+      - MG-9.1.4-bda89779
+      - MG-9.1.5-1f17e4f7
+      - MG-9.1.5-212bf931
+      - MG-9.1.5-ff3a5047
+      - MG-9.1.6-6c8b8daf
+      - MG-9.1.7-fb70d5f9
+      - MG-9.1.7-58e1b53e
+      - MG-9.1.8-45cd690f
+      - MG-9.1.8-d919d7e0
+      - MG-9.1.8-83c8310b
+      - MG-9.1.9-58ed182e
+      - MG-9.1.9-77043bf0
+      - MG-9.1.9-943ed234
+      - MG-9.1.9-cb708125
+      - MG-9.1.10-381b725f
+      - MG-9.1.10-0df6526a
+      - MG-9.1.10-6b2ab2c8
+      - MG-9.1.10-8dc472d1
+      - MG-9.1.10-b848f78b
+      - MG-9.2.1-215f5370
+      - MG-9.2.1-f5a0f307
+    reason: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114).
+  - keys:
+      - MG-B2.2-e1e8c9b8
+      - MG-B2.3-5bfe0d75
+      - MG-B2.5-01aa2823
+      - MG-B2.6-9fc4568e
+      - MG-B2.7-bb7c7c4a
+      - MG-B2.8-8dba8b5d
+    reason: DataSet examples of the MG B2 MetaData examples that differ from the referenced B1.1 DataSetMessage (B2.7 with a wrong TopicPath); SF-094 proposes to replace them by the B1.1 payloads. The MetaData itself is covered by V-PAY-011 … 017.
+  - keys:
+      - RIG-4.1.3-099c622d
+      - RIG-4.1.3-5fffe7fd
+    reason: Docker Compose snippets showing how a platform mounts the storages and secrets (RIG 4.1.3, GL-ADR-022); deployment configuration, no message – tested by the infrastructure compliance CLI (D8), not by vectors.
+  - keys:
+      - RIG-4.2-6850cf4c
+    reason: Docker command line with <…> placeholders for container and host name (RIG 4.2, tagged json – SF-095 (c)), no test data; the naming rule is REQ-CNT-021.
+  - keys:
+      - RIG-4.4-f4bc67b0
+    reason: Command-line output (docker network ls) illustrating the container network types of RIG 4.4, no message.

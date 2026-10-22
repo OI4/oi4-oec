@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oi4:oec:v2:spec:examples",
+  "title": "OEC v2 coverage – guideline examples without a golden vector",
+  "description": "Format of oec/spec/coverage/examples.yaml (ADR-0018, C-031): fenced code blocks of MG and RIG that are neither reproduced by a golden vector nor a JSON fragment of one, with the reason.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["baseline", "items"],
+  "properties": {
+    "baseline": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["keys", "reason"],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^(MG|RIG)-[A-Za-z0-9.-]+-[0-9a-f]{8}$" }
+          },
+          "reason": { "type": "string", "minLength": 10 }
+        }
+      }
+    }
+  }
+}

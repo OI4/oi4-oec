@@ -5,7 +5,9 @@
 //	                                                  matrix/view/*.md and vectors/view/*.md
 //	spectool inventory [-spec DIR] [-guideline DIR] [-rev REV] [-check]
 //	                                                  extract normative-statement candidates
-//	spectool coverage  [-spec DIR] [-check]           generate coverage/report.md
+//	spectool coverage  [-spec DIR] [-guideline DIR] [-check]
+//	                                                  generate coverage/report.md (inventory items
+//	                                                  and guideline examples)
 //	spectool topic     [-spec DIR] [-check] [TOPIC...] generate topic/topic-patterns.json;
 //	                                                  with arguments: analyse the given topics
 //	spectool review    [-spec DIR] [-to reviewed|draft] [-n] ID...
@@ -32,6 +34,7 @@ import (
 
 	"github.com/OI4/oec/spec/tools/internal/catalog"
 	"github.com/OI4/oec/spec/tools/internal/coverage"
+	"github.com/OI4/oec/spec/tools/internal/examples"
 	"github.com/OI4/oec/spec/tools/internal/guideline"
 	"github.com/OI4/oec/spec/tools/internal/inventory"
 	"github.com/OI4/oec/spec/tools/internal/maintain"
@@ -336,7 +339,24 @@ func cmdCoverage(args []string) error {
 		return err
 	}
 	res := coverage.Compute(s, inv)
-	if err := writeAll(c, map[string]string{catalog.ReportFile: res.Report()}, *check); err != nil {
+	files, err := guideline.LoadFilesWithExamples(c.guidelineDir())
+	if err != nil {
+		return fmt.Errorf("%w (use -guideline)", err)
+	}
+	vfiles, err := vectors.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	ex, err := examples.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	exr := examples.Compute(examples.Extract(files), vfiles, ex)
+	if ex.Baseline != "" && ex.Baseline != inv.Baseline {
+		exr.Problems = append(exr.Problems, fmt.Sprintf("%s: baseline %s differs from the inventory baseline %s", examples.File, ex.Baseline, inv.Baseline))
+	}
+	problems := append(res.Problems, exr.Problems...)
+	if err := writeAll(c, map[string]string{catalog.ReportFile: res.Report() + exr.Report()}, *check); err != nil {
 		return err
 	}
 	for _, st := range res.Areas {
@@ -344,10 +364,16 @@ func cmdCoverage(args []string) error {
 			fmt.Printf("%-11s %-8s items=%4d covered=%4d informative=%4d open=%4d\n", st.Area.Code, st.Area.Status, st.Total, st.Covered, st.Informative, len(st.Open))
 		}
 	}
-	if *check && len(res.Problems) > 0 {
-		return errors.New(strings.Join(res.Problems, "; "))
+	order, counts := exr.Summary()
+	for _, o := range order {
+		if k := counts[o]; k.Blocks > 0 {
+			fmt.Printf("examples %-13s blocks=%3d golden=%3d explained=%3d open=%3d\n", o, k.Blocks, k.Covered, k.Explained, k.Open)
+		}
 	}
-	for _, p := range res.Problems {
+	if *check && len(problems) > 0 {
+		return errors.New(strings.Join(problems, "; "))
+	}
+	for _, p := range problems {
 		fmt.Fprintln(os.Stderr, "warning:", p)
 	}
 	return nil
