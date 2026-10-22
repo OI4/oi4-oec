@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-HEALTH
-baseline: "21bf409"
+baseline: "9b6b22f"
 requirements:
   # --- DataSet content (MG 8.3.2) ---------------------------------------------
   - id: REQ-RES-HEALTH-001

@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "21bf409"
+baseline: "9b6b22f"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -132,13 +132,13 @@ items:
     reason: Describes the origin of the Oi4Identifier data (nameplate); "can" expresses possibility. The creation rules are REQ-IL-022 … REQ-IL-029.
   - key: MG-4.3-e1b14605
     reason: Describes the reproducibility of the Oi4Identifier; "can" expresses possibility. The creation rules are REQ-IL-022 … REQ-IL-029.
-  - key: MG-4.3.1-1aeed8b4
+  - key: MG-4.3.1-7109f738
     reason: Cross-reference to RIG 4.2 Container Name Conventions; the container name requirement is stated there (area CNT, C-030).
-  - key: MG-4.3.1-63bbb644
+  - key: MG-4.3.1-e3d221de
     reason: Consequence of using "nd" as SerialNumber ("can" expresses possibility); no requirement on a component.
-  - key: MG-4.3.1-3c017310
+  - key: MG-4.3.1-493328cc
     reason: States that tracking of assets without serial number is an application concern; no testable requirement.
-  - key: MG-4.3.1-ed38521d
+  - key: MG-4.3.1-1850fa94
     reason: States that prohibited character combinations cannot be checked; the IEC 61406-1 requirement itself is REQ-IL-008.
   - key: MG-4.3.2-faac6c3c
     reason: Motivation for the announced ManufacturerUri table; no requirement until the table exists (see REQ-IL-026).
@@ -258,13 +258,13 @@ items:
   - key: MG-6.3.4-6cead004
     reason: Purpose of the Close message ("can" expresses possibility); the Close message is REQ-LIFE-005 … REQ-LIFE-007, its interpretation REQ-LIFE-011.
   # --- RES-MAM (C-027) ------------------------------------------------------
-  - key: MG-5-e6c13051
+  - key: MG-5-083d8692
     reason: Describes the purpose of a DeviceRevision ("may" expresses possibility); the MAM has no field DeviceRevision, its revisions are HardwareRevision and SoftwareRevision (REQ-RES-MAM-008 … REQ-RES-MAM-011).
-  - key: MG-5-8529492c
+  - key: MG-5-62ebe7f3
     reason: Describes the typical content of a device revision ("may change" expresses possibility); no requirement of its own (REQ-RES-MAM-008 … REQ-RES-MAM-011).
-  - key: MG-5-1fe670f0
+  - key: MG-5-e59ba43a
     reason: Describes the alternative of a semantic referencing framework for the purpose of an asset ("can" expresses possibility); the DeviceClass rule is REQ-RES-MAM-014.
-  - key: MG-5-49c6c10c
+  - key: MG-5-85a173b9
     reason: Description of the optional MAM field Description ("can be added" expresses possibility); the field is REQ-RES-MAM-001.
   - key: MG-9.1.1-3092daa5
     reason: Hint how any application can listen to MAM ("can" expresses possibility); subscriptions are free (area MQTT/TOP).

@@ -6,7 +6,7 @@
 # behavior of MG 9.1.1. Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-MAM
-baseline: "21bf409"
+baseline: "9b6b22f"
 requirements:
   # --- DataSet content (MG 5, MG 8.3.1) ---------------------------------------
   - id: REQ-RES-MAM-001
@@ -24,7 +24,7 @@ requirements:
     applies_to: [application, device]
     refs: [MG 5, MG 8.3.1, MG 8.2.7]
     verification: [schema, d7-validate]
-    inventory: [MG-5-13b8e44e, MG-5-aabb4907, MG-5-371b4112, MG-5-58415521, MG-5-daf2a20f, MG-5-a20f7ee2, MG-5-8e3fdbf3, MG-5-23d862c1, MG-5-905d12f9, MG-5-b6837d2e, MG-5-5cddea30, MG-5-acac9e54, MG-5-11cc48ac, MG-5-fb1de158]
+    inventory: [MG-5-55a1eaaa, MG-5-80c79ba0, MG-5-b88773c8, MG-5-46140157, MG-5-a288c1d3, MG-5-755ace06, MG-5-0ec823e8, MG-5-cfb31dc9, MG-5-8774e8c0, MG-5-51c8416c, MG-5-5cddea30, MG-5-acac9e54, MG-5-661ef283, MG-5-18d7af65]
     status: reviewed
     notes: >-
       Field presence and types per REQ-CMP-025/026; LocalizedText per
@@ -69,7 +69,7 @@ requirements:
       - ref: MG 5
         text: It should be noted that uniformity in the name representation should be a goal
     verification: [manual]
-    inventory: [MG-5-4af2deb0]
+    inventory: [MG-5-7f9f4557]
     status: reviewed
 
   - id: REQ-RES-MAM-004
@@ -94,7 +94,7 @@ requirements:
       - ref: MG 5
         text: ManufacturerUri may contain subdomains.
     verification: [schema, d7-validate]
-    inventory: [MG-5-76f030c4, MG-5-fe7b758d, MG-5-8af6d9de, MG-5-e64e556a]
+    inventory: [MG-5-14aeb68b, MG-5-85176e42, MG-5-ee170828, MG-5-023701f4]
     status: reviewed
     notes: Counterpart of REQ-IL-023/024 (ManufacturerUri of the Oi4Identifier).
 
@@ -113,7 +113,7 @@ requirements:
       - ref: MG 5
         text: ManufacturerUri should correspond to the domain of the Identification Link of the asset.
     verification: [manual]
-    inventory: [MG-5-31daaba6]
+    inventory: [MG-5-2d5ef3c9]
     status: reviewed
     notes: Same rule as REQ-IL-034 from the view of the MAM.
 
@@ -123,30 +123,30 @@ requirements:
       If an OEC application generates an Oi4Identifier as Identification Link
       of the asset, it uses the ManufacturerUri, Model, ProductCode and
       SerialNumber of the MAM for its elements, so that both stay consistent;
-      for the LocalizedText Model it uses the Text in the default locale
-      en-US, independent of a requested Locale.
+      for the LocalizedText Model it uses the Text in the locale en-US
+      (REQ-IL-027).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
     condition: The application generates an Oi4Identifier as Identification Link of the asset.
     scope: [MG 4.3.1]
-    refs: [MG 5, SF-064]
+    refs: [MG 5, MG 4.3.1, SF-064]
     quotes:
       - ref: MG 5
         text: The ManufacturerUri given for this property shall also be used for the Oi4Identifier of the asset if an Oi4Identifier is generated as Identification Link by an OI4 Alliance-compliant application.
       - ref: MG 5
-        text: The value given for this property shall also be used for the Oi4Identifier of the asset, if an Oi4Identifier is generated as Identification Link (4.3 The Oi4Identifier).
-      - ref: MG 5
         text: The ProductCode given for this property shall also be used for the Oi4Identifier of the asset, if an Oi4Identifier is generated as Identification Link (4.3 The Oi4Identifier).
       - ref: MG 5
         text: The SerialNumber given for this property shall also be used for the Oi4Identifier of the asset, if an Oi4Identifier is generated as Identification Link (4.3 The Oi4Identifier).
-      - ref: MG 5
-        text: For the Oi4Identifier, the Text of Model in the default locale English (en-US) must be used, so that the Oi4Identifier does not depend on a requested Locale (8.3.12 Locale).
     verification: [d7-validate]
-    inventory: [MG-5-6730acaf, MG-5-5694182f, MG-5-e0eafc63, MG-5-1318c738, MG-5-815df636]
-    status: reviewed
-    notes: Counterpart of REQ-IL-027 (dnp-encoding per REQ-IL-033 allowed); Model in en-US per SF-064 (d).
+    inventory: [MG-5-1d7325a6, MG-5-edaabec1, MG-5-afff2382]
+    status: draft
+    notes: >-
+      Counterpart of REQ-IL-027 (dnp-encoding per REQ-IL-033 allowed); Model in
+      en-US per SF-064 (d). Since 9b6b22f (PO request 2026-10-22) MG 5 no longer
+      states the Model rule; it is stated in MG 4.3.1 (REQ-IL-027), MG 5 only
+      requires en-US availability (REQ-RES-MAM-024).
 
   - id: REQ-RES-MAM-007
     title: Model is the product name
@@ -160,7 +160,7 @@ requirements:
       - ref: MG 5
         text: The property Model shall provide the name of the product that the Master Asset Model belongs to.
     verification: [manual]
-    inventory: [MG-5-7928f4e0]
+    inventory: [MG-5-b25459b1]
     status: reviewed
 
   - id: REQ-RES-MAM-008
@@ -187,7 +187,7 @@ requirements:
       - ref: MG 5
         text: If such a value is taken from the VendorNameplate of a physical asset, the Master Asset Model must use "undefined" instead (for HardwareRevision and SoftwareRevision), except for the cases with an empty string described in the notes of this chapter.
     verification: [manual]
-    inventory: [MG-5-2c23667a, MG-5-6e1704bb, MG-5-ac686720, MG-5-7c26ea6d, MG-5-3c6ca755, MG-5-d357784d]
+    inventory: [MG-5-529e97c9, MG-5-3ef2d14f, MG-5-cdffb46b, MG-5-4060ce8e, MG-5-e9aff043, MG-5-37aaf3a1]
     status: reviewed
     notes: >-
       Not checked by the payload checks: whether an asset is software-only is
@@ -208,7 +208,7 @@ requirements:
       - ref: MG 5
         text: A recommended best practice is to use Semantic Versioning (e.g. 1.0.1, SemanticVersionString of OPC UA Part 100) or a dot-separated four numbers schema.
     verification: [manual]
-    inventory: [MG-5-62283509, MG-5-a0df566f]
+    inventory: [MG-5-100f4000, MG-5-fd63be36]
     status: reviewed
 
   - id: REQ-RES-MAM-010
@@ -228,7 +228,7 @@ requirements:
       - ref: MG 5
         text: If for any asset a manufacturer does not have a formalized software revision, it shall be set by default to "undefined".
     verification: [manual]
-    inventory: [MG-5-26013cbc, MG-5-71c21f2d, MG-5-a782e54a]
+    inventory: [MG-5-420d4317, MG-5-925234e9, MG-5-a058c707]
     status: reviewed
 
   - id: REQ-RES-MAM-011
@@ -246,7 +246,7 @@ requirements:
       - ref: MG 5
         text: In this case, the SoftwareRevision should be set to an empty string!
     verification: [manual]
-    inventory: [MG-5-efcf82bf]
+    inventory: [MG-5-7c86eedd]
     status: reviewed
     notes: '"undefined" (REQ-RES-MAM-010) applies to software without formalized revision (SF-064 (b)).'
 
@@ -270,7 +270,7 @@ requirements:
       - ref: MG 5
         text: A path in a local file system (allowed by OPC UA Part 100) must not be used, since it can not be resolved by other participants of the Message Bus.
     verification: [schema, d7-validate]
-    inventory: [MG-5-2b4002f3, MG-5-93e03870, MG-5-32a672e8]
+    inventory: [MG-5-6bf83cbc, MG-5-2a2879c1, MG-5-93b822f3]
     status: reviewed
     notes: The empty string is used by the device examples of MG B1.1.11 and B1.1.12 (V-PAY-006).
 
@@ -286,7 +286,7 @@ requirements:
       - ref: MG 5
         text: The format of the document is currently unspecified, but a best practice would be a PDF document at the time of the writing of this document.
     verification: [manual]
-    inventory: [MG-5-65c4af8e]
+    inventory: [MG-5-45674dc1]
     status: reviewed
 
   - id: REQ-RES-MAM-014
@@ -303,7 +303,7 @@ requirements:
       - ref: MG 5
         text: However, best practice for OI4 Alliance-compliant applications is to name the ServiceType (7.2 ServiceType Element) here in the form of Oi4.<ServiceType>.
     verification: [d7-validate]
-    inventory: [MG-5-fbc6b429]
+    inventory: [MG-5-bac38ad3]
     status: reviewed
 
   - id: REQ-RES-MAM-015
@@ -324,7 +324,7 @@ requirements:
       - ref: MG 5
         text: If the assets do not have a unique serial number, it shall be generated in an appropriate way to be able to have instances of equal types.
     verification: [manual]
-    inventory: [MG-5-022d69c2, MG-5-7e2f3f25, MG-5-a8ce2b38]
+    inventory: [MG-5-cc876b07, MG-5-fdd0975a, MG-5-e2ab23f8]
     status: reviewed
 
   - id: REQ-RES-MAM-016
@@ -405,7 +405,7 @@ requirements:
       - ref: MG 5
         text: Each component, regardless if it is a physical thing or an application, which was detected by the OI4 Alliance framework, should get an Identification Link and a Master Asset Model.
     verification: [manual]
-    inventory: [MG-5-3b427aa8]
+    inventory: [MG-5-0089cb54]
     status: reviewed
     notes: Publishing MAM for all subordinate assets is REQ-CMP-006.
 
@@ -490,5 +490,26 @@ requirements:
       - ref: MG 5
         text: It should be provided if the asset has an AAS; otherwise it is omitted.
     verification: [manual]
-    inventory: [MG-5-afa522ee]
+    inventory: [MG-5-8b8467ac]
     status: reviewed
+
+  - id: REQ-RES-MAM-024
+    title: Model available in en-US if used for the Oi4Identifier
+    statement: >-
+      If the Model of the MAM is used as an element of the Oi4Identifier, the
+      MAM provides Model at least in the locale en-US, so that the Text in
+      en-US can be taken for the Oi4Identifier (REQ-IL-027). Other locales
+      are optional (OPC UA does not require en-US in general).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application, device]
+    condition: The Model of the MAM is used as an element of the Oi4Identifier.
+    refs: [MG 5, MG 4.3.1, MG 8.3.12]
+    quotes:
+      - ref: MG 5
+        text: If the Model is used as an element of the Oi4Identifier (4.3.1 Structure of the Oi4Identifier), it must at least be available in the locale English (en-US).
+    verification: [manual]
+    inventory: [MG-5-e24d1f2f]
+    status: draft
+    notes: PO request 2026-10-22 (moved from the former MG 5 Model rule, SF-064 (d)).

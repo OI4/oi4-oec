@@ -3,7 +3,7 @@
 # catalog.schema.json). Reference checks: spectool package internal/il,
 # vectors in vectors/il/ and vectors/topic/.
 area: IL
-baseline: "21bf409"
+baseline: "9b6b22f"
 requirements:
   # --- Identification Link in general (MG 4) -------------------------------
   - id: REQ-IL-001
@@ -63,7 +63,7 @@ requirements:
       - ref: MG 4.2
         text: The standard Base64 alphabet (RFC 4648, section 4) must not be used, because it contains the characters + and /, which have a special meaning in MQTT topics.
     verification: [d7-validate]
-    inventory: [MG-4.2-25d30dc8, MG-4.2-4593236c]
+    inventory: [MG-4.2-25d30dc8, MG-4.2-ac4495bd]
     status: reviewed
 
   - id: REQ-IL-004
@@ -461,7 +461,7 @@ requirements:
       - ref: MG 4.3.1
         text: The Oi4Identifier in the form of <ManufacturerUri/Model/ProductCode/SerialNumber> represents an IEC 61406-1 compliant Identification Link (4.1 IEC 61406-1 Identification Link) without scheme.
     verification: [manual]
-    inventory: [MG-4.3.1-a05c80e5, MG-4.3.1-19b2a4a1, MG-4.3.1-4183c5ed]
+    inventory: [MG-4.3.1-b4192d78, MG-4.3.1-8b0a5dee, MG-4.3.1-1f4d5d6c]
     status: reviewed
     notes: Reference implementation il.Oi4Identifier; vectors V-OID-….
 
@@ -483,7 +483,7 @@ requirements:
       - ref: MG 4.3.1
         text: Uppercase characters must not be used.
     verification: [manual]
-    inventory: [MG-4.3.1-53d343d5, MG-4.3.1-cd8a517d, MG-4.3.1-fa2cffdc, MG-A3-4116b7ab]
+    inventory: [MG-4.3.1-266ccc3f, MG-4.3.1-a6874c0e, MG-4.3.1-f71c50b5, MG-A3-4116b7ab]
     status: reviewed
     notes: Conversion by the generator per PO decision SF-043 (d) (C-020) – MG 4.3.1 note and A3 Table 19 (Example.com → example.com).
 
@@ -502,13 +502,13 @@ requirements:
     refs: [MG 4.3.1, SF-043]
     quotes:
       - ref: MG 4.3.1
-        text: The ManufacturerUri must be the domain part of the manufacturer URL in lower case, where the scheme (e. g. https://), port and path as well as the third level domain <www.> are excluded.
+        text: The ManufacturerUri must be the domain part of the manufacturer URL in lower case, where the scheme (e. g. https://), port and path as well as the third level domain, e.g. <www> are excluded.
       - ref: MG 4.3.1
         text: Typically, it is of the form <manufacturer>.<tld>; other subdomains may be used (see note below).
       - ref: MG 4.3.1
         text: A manufacturer may use subdomains of its internet domain for use as ManufacturerUri if it is considered necessary.
     verification: [manual]
-    inventory: [MG-4.3.1-a4894201, MG-4.3.1-91913cd6, MG-4.3.1-2a7cd5d3]
+    inventory: [MG-4.3.1-3ffb82de, MG-4.3.1-ee306191, MG-4.3.1-337aee99]
     status: reviewed
     notes: PO decision SF-043 (c) (C-020); reference check il.CheckManufacturerURI.
 
@@ -528,7 +528,7 @@ requirements:
       - ref: MG 4.3.1
         text: The ManufacturerUri shall refer to an existing internet domain that is under the management of the manufacturer.
     verification: [manual]
-    inventory: [MG-4.3.1-c42db4f0, MG-4.3.1-7f97a77b]
+    inventory: [MG-4.3.1-ec641655, MG-4.3.1-91b6cd70]
     status: reviewed
 
   - id: REQ-IL-026
@@ -547,7 +547,7 @@ requirements:
       - ref: MG 4.3.1
         text: For a generated ManufacturerUri from any kind of vendor ID, such as done by a protocol adapter, the globally available ManufacturerUri table should be used as reference (see 4.3.2 Additional Provisions Regarding the Oi4Identifier for details).
     verification: [manual]
-    inventory: [MG-4.3.1-f9a592b6]
+    inventory: [MG-4.3.1-aaa6e2d4]
     status: reviewed
     notes: The table is announced for the future (MG 4.3.2); until it exists, the requirement cannot be applied.
 
@@ -556,19 +556,23 @@ requirements:
     statement: >-
       If the Master Asset Model of the identified asset contains the property
       Model, ProductCode or SerialNumber when the Oi4Identifier is generated,
-      that value is used for the related element.
+      that value is used for the related element; for the LocalizedText Model
+      the Text in the locale en-US is used, independent of a requested Locale.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
     condition: The application generates an Oi4Identifier.
-    refs: [MG 4.3.1]
+    refs: [MG 4.3.1, MG 5, SF-064]
     quotes:
       - ref: MG 4.3.1
         text: If the Master Asset Model (see 5 The Master Asset Model) of the identified asset contains the Model property at the time the Oi4Identifier is generated, the value shall be used here.
+      - ref: MG 4.3.1
+        text: Since Model is a LocalizedText in the Master Asset Model, its Text in the locale English (en-US) must be used, so that the Oi4Identifier does not depend on a requested Locale (8.3.12 Locale).
     verification: [manual]
-    inventory: [MG-4.3.1-b61f2818, MG-4.3.1-b7bc32f0, MG-4.3.1-b7f446fe, MG-4.3.1-7f2a02e1]
-    status: reviewed
+    inventory: [MG-4.3.1-9dec055e, MG-4.3.1-33a35603, MG-4.3.1-d37218ba, MG-4.3.1-6224606c, MG-4.3.1-3c56250d]
+    status: draft
+    notes: The en-US rule for Model moved from MG 5 to MG 4.3.1 in 9b6b22f (PO request 2026-10-22; before in REQ-RES-MAM-006).
 
   - id: REQ-IL-028
     title: Missing Oi4Identifier elements are "nd"
@@ -585,7 +589,7 @@ requirements:
       - ref: MG 4.3.1
         text: If there are no values for a specific Oi4Identifier element, that element shall be represented by "nd" (no data).
     verification: [manual]
-    inventory: [MG-4.3.1-fe26a26d, MG-4.3.2-18e8b8ab]
+    inventory: [MG-4.3.1-b6cf1d35, MG-4.3.2-18e8b8ab]
     status: reviewed
 
   - id: REQ-IL-029
@@ -603,7 +607,7 @@ requirements:
       - ref: MG 4.3.1
         text: The whole Oi4Identifier, including the three forward slashes, must not exceed 255 characters.
     verification: [manual]
-    inventory: [MG-4.3.1-9a1fb926]
+    inventory: [MG-4.3.1-674df957]
     status: reviewed
 
   - id: REQ-IL-030
@@ -699,7 +703,7 @@ requirements:
       - ref: MG A3
         text: In this case, these components may be dnp-encoded (see 4.3.1 Structure of the Oi4Identifier).
     verification: [manual]
-    inventory: [MG-4.3.1-dd8a2dac, MG-A3-fc6806cf, MG-A3-b8922139]
+    inventory: [MG-4.3.1-c8598181, MG-A3-fc6806cf, MG-A3-b8922139]
     status: reviewed
     notes: PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference implementation il.Oi4Identifier applies the dnp-encoding (identity for values without such characters); vectors V-OID-….
 
@@ -720,7 +724,7 @@ requirements:
       - ref: MG 4.3.1
         text: The ManufacturerUri should correspond to the domain of the Identification Link of the asset.
     verification: [manual]
-    inventory: [MG-4.3.1-06757604]
+    inventory: [MG-4.3.1-81dc1468]
     status: reviewed
     notes: >-
       PO addition to SF-043 (C-020, 2026-10-17). The same rule for the MAM

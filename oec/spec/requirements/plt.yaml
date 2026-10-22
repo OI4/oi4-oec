@@ -4,7 +4,7 @@
 # RIG 5.1 has its own keyword since SF-092 (a) was resolved.
 # Drafted in C-030.
 area: PLT
-baseline: "21bf409"
+baseline: "9b6b22f"
 requirements:
   # --- Hardware (RIG 5.1) ---------------------------------------------------
   - id: REQ-PLT-001
