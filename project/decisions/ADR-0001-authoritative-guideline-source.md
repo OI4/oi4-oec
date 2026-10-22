@@ -240,3 +240,12 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `b942df3` – findings register: SF-089/090/092/093 resolved.
 - No new GL-ADR. GL-ADR-022 accepted by the PO.
 - GL-ADR-001 … 022; SF-001 … 090, 092, 093 resolved; SF-091 decided, not yet implemented; next free id SF-094.
+
+## Amendment C-032 (2026-10-22, guideline baseline `5fb0fd8`)
+
+- The previous baseline `b942df3` (C-030 closure) is recorded in the C-030 log, addendum 3, and in the C-031 log.
+- The baseline is now `5fb0fd8` on branch `feature/spec-findings` (local commits, PO order 2026-10-22):
+  - `fbe6173` SF-091 (RIG 4.1.1 conditional `broker_ca.pem` and MaxPacketSize ≤ 268435455, RIG 4.1.2 CA certificate "shall", RIG 4.1.4 table/note, RIG 1.2 note on "Mandatory", MG 6.2.2 CA-signed broker certificate "must", MG 1.2 note).
+  - `4036205` SF-094 (MG B2 DataSet examples = the referenced B1.1 payloads), `e25f64f` SF-095 (code block tags, MG 1.2 DataSetWriterId 3456).
+  - `5fb0fd8` – findings register: SF-091/094/095 resolved, no open finding.
+- No new GL-ADR. GL-ADR-001 … 022; SF-001 … 095 resolved; next free id SF-096. This is the baseline of the P1 exit.

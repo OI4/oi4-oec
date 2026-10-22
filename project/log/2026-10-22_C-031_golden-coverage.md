@@ -3,7 +3,7 @@
 - Date: 2026-10-22
 - Phase: P1
 - Agent: GitHub Copilot CLI (Claude Opus 5.5)
-- Status: done, awaiting PO review (C-032)
+- Status: done; reviewed and accepted by the PO in C-032 (`2026-10-22_C-032_p1-exit.md`)
 - Guideline baseline: `oi4-oec-documentation` @ `b942df3`, branch `feature/spec-findings` (GL-ADR-001 … 022, SF-001 … 090, 092, 093 resolved, SF-091 decided but not implemented, next free id SF-094). During the cycle the register-only commit `5ef2cc1` added SF-094/095 (open). The guideline text did not change, so there was no re-baseline.
 
 ## Intent
