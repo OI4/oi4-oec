@@ -260,3 +260,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `46ffbb1` is recorded in the amendment above.
 - The baseline is now `dcaeb04` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 8.2.3 plain-text references to MG 7.6/7.7 turned into links; no wording change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
+
+## Amendment C-032 addendum 3 (2026-10-22, guideline baseline `e36e762`)
+
+- The previous baseline `dcaeb04` is recorded in the amendment above.
+- The baseline is now `e36e762` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 9.1.8 plain-text references turned into links; no wording change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
