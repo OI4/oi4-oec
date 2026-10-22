@@ -4,7 +4,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: PAG
-baseline: "e0f1488"
+baseline: "4e15e02"
 requirements:
   - id: REQ-PAG-001
     title: Fields of the PaginationRequest DataSet

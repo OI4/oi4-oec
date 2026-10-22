@@ -1,7 +1,7 @@
 # Test vectors of kind oi4identifier (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: oi4identifier
-baseline: "e0f1488"
+baseline: "4e15e02"
 description: >-
   Oi4Identifier vectors (MG 4.3.1, MG A3): construction from ManufacturerUri,
   Model, ProductCode and SerialNumber, nd for missing values and the checks of
