@@ -313,3 +313,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 - The previous baseline `75da059` is recorded in addendum 11.
 - The baseline is now `c1419dd` on branch `feature/spec-findings` (local commits `eef0e04`, `afb6acb`, `c1419dd`, PO order 2026-10-22): Welcome and the start pages of MG, RIG and Process Description restructured (title pages removed, documents described, authors referenced), MG 1/1.1 reworked; the RIG start page states the independence of the compliance domains. No change of a requirement, no new finding, no GL-ADR. SF-001 … 095 resolved.
 - Spec: seven new informative inventory items, one removed (see log addendum 12).
+
+## Amendment C-032 addendum 13 (2026-10-22, guideline baseline `4811e60`)
+
+- The previous baseline `c1419dd` is recorded in addendum 12.
+- The baseline is now `4811e60` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): links to shops selling standards (IEC webstore, Beuth, ISO) and the Amazon BOM link removed, reference texts unchanged; only freely accessible standards are linked. No inventory change, no finding, no GL-ADR. SF-001 … 095 resolved.
