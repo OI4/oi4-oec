@@ -301,3 +301,9 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 - The previous baseline `2025207` is recorded in addendum 9.
 - The baseline is now `2018bc4` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 6.1 Protocol Version reworded (no MQTT 5.0 features needed, MQTT 3.1.1 minimum for maximum acceptance and interoperability; changes of the minimum are for the work groups and the technical committee). No new finding, no GL-ADR. SF-001 … 095 resolved.
 - Spec remap only: REQ-MQTT-001/002 quotes and inventory keys for the reworded sentences (statements unchanged, see log addendum 10).
+
+## Amendment C-032 addendum 11 (2026-10-22, guideline baseline `75da059`)
+
+- The previous baseline `2018bc4` is recorded in addendum 10.
+- The baseline is now `75da059` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 6.4 rewritten editorially, no change of meaning, no new finding, no GL-ADR. SF-001 … 095 resolved.
+- Spec remap only: REQ-MQTT-019 quotes and inventory keys (see log addendum 11).
