@@ -333,3 +333,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `21bf409` is recorded in addendum 15.
 - The baseline is now `9b6b22f` on branch `feature/spec-findings` (local commits `1b4904e` – PO text edits, headings of MG 5 and MG 4.3.1 without code formatting – and `9b6b22f` – the en-US rule for `Model` moved from MG 5 to MG 4.3.1, MG 5 requires `Model` at least in `en-US` if used for the `Oi4Identifier`; PO request 2026-10-22). Spec re-baselined (`da37e8b`): key remap, REQ-IL-027 and REQ-RES-MAM-006 re-worded and new REQ-RES-MAM-024, all three draft for PO re-review. No finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 17 (2026-10-22, guideline baseline `f951bcb`)
+
+- The previous baseline `9b6b22f` is recorded in addendum 16.
+- The baseline is now `f951bcb` on branch `feature/spec-findings` (local commit `f951bcb` – links in MG 2.3 and MG 5 `GlobalAssetId` (IDTA-01001), "from Table 8" in MG 4.2; PO request 2026-10-22). Spec re-baselined (`070d054`): one informative key remap, all REQs reviewed. No finding, no GL-ADR. SF-001 … 095 resolved.
