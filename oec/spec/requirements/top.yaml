@@ -3,7 +3,7 @@
 # topic/topic.abnf, the allowed forms per Method × Resource are listed in
 # matrix/method-resource.yaml; vectors in vectors/topic/.
 area: TOP
-baseline: "c67ec35"
+baseline: "e14726c"
 requirements:
   # --- Topic structure (MG 7) -----------------------------------------------
   - id: REQ-TOP-001
@@ -515,7 +515,7 @@ requirements:
       - ref: MG 7.7
         text: The <EventCategory> describes the category and must be one of Syslog, Status or Generic; other categories must not be used.
     verification: [d7-validate]
-    inventory: [MG-7.7-b9d63202, MG-7.7-bc04631c, MG-7.7-b11ab320, MG-7.7-04bfc38f, MG-7.7-776dbde7, MG-7.7-ed97d9a3, MG-7.7-e433a1da]
+    inventory: [MG-7.7-9eefb397, MG-7.7-33038eb8, MG-7.7-6b91a4d3, MG-7.7-30c43fe2, MG-7.7-d56fbf40, MG-7.7-1fb5a35b, MG-7.7-e433a1da]
     status: reviewed
     notes: Closed category set and free GenericLevel per PO decision SF-042 (b), (c) (C-018), stated in the guideline since C-020. Grammar rule event-filter.
 
@@ -533,7 +533,7 @@ requirements:
       - ref: MG 7.7
         text: This level shall not be used as default by any application, because logging over the Message Bus requires a lot of resources.
     verification: [d7-monitor]
-    inventory: [MG-7.7-e91ce103]
+    inventory: [MG-7.7-8a24fe93]
     status: reviewed
 
   - id: REQ-TOP-025
@@ -550,7 +550,7 @@ requirements:
       - ref: MG 7.7
         text: Any application should use this feature carefully.
     verification: [manual]
-    inventory: [MG-7.7-5968b302, MG-7.7-6d38ae12]
+    inventory: [MG-7.7-4fc20dcc, MG-7.7-d182e4b8]
     status: reviewed
 
   - id: REQ-TOP-026
@@ -572,7 +572,7 @@ requirements:
       - ref: MG 7.7
         text: 'The severity levels should be interpreted as follows: Internal Error and Warning: The component has detected an error in its hardware or software which is not allowed during normal operation.'
     verification: [manual]
-    inventory: [MG-7.7-21beeb6d, MG-7.7-f86df70c, MG-7.7-7fb7be38, MG-7.7-fe4f3756, MG-7.7-d9ba4ede, MG-7.7-108f4f92, MG-7.7-e3669139]
+    inventory: [MG-7.7-785b4967, MG-7.7-2bb26532, MG-7.7-7aacb10f, MG-7.7-7b650cec, MG-7.7-cf099025, MG-7.7-bcadb391, MG-7.7-fdf4f9f3]
     status: reviewed
     notes: >-
       "must be exchanged or serviced" and "must be indicated to the user"
@@ -594,5 +594,5 @@ requirements:
       - ref: MG 7.7
         text: It is best practice to make the log level configurable.
     verification: [d7-test]
-    inventory: [MG-7.7-a63fac39]
+    inventory: [MG-7.7-7ce18280]
     status: reviewed
