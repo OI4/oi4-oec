@@ -280,3 +280,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `4e15e02` is recorded in the amendment above.
 - The baseline is now `df752cd` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): explicit anchors at all figure/table captions and anchor links in the lists of figures/tables (MG and RIG); no wording change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
+
+## Amendment C-032 addendum 7 (2026-10-22, guideline baseline `a9008a1`)
+
+- The previous baseline `df752cd` is recorded in addendum 6.
+- The baseline is now `a9008a1` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 2 introduces the OI4 Guardrails instead of the old OI4 Reference Architecture (paragraph, Figure 2, List of Figures); informative chapter, no inventory change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
