@@ -169,7 +169,7 @@ requirements:
         text: The broker must use a certificate which is signed by a well-known (public) or a platform- or user-specific certificate authority (CA); self-signed broker certificates are not allowed.
     verification: [d8, manual]
     inventory: [MG-6.2.2-986fbb0d]
-    status: draft
+    status: reviewed
     notes: >-
       "preferably shall" replaced by "should" in C-026 (SF-057 (d)). SF-091
       (g), decided by the PO in the C-030 review (2026-10-22), revises this to

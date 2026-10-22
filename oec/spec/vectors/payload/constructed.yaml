@@ -1716,7 +1716,7 @@ vectors:
     violates: [REQ-MSG-010, REQ-MSG-014]
     reason: The NetworkMessage uses the reserved DataSetClassId of the removed resource License (MG A2), not the one of Health.
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-001 with the DataSetClassId 2ae0505e-2830-4980-b65e-0bbdf08e2d45
       (resource License, removed) instead of the Health id. The reserved id is
@@ -1738,7 +1738,7 @@ vectors:
     violates: [REQ-PAG-001]
     reason: The PaginationRequest has PerPage 0 and lacks the mandatory field Page.
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-005 (B1.1.11) with PerPage 0 and without Page.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM"
@@ -1767,7 +1767,7 @@ vectors:
     violates: [REQ-PAG-003]
     reason: HasNext of the Pagination is a string, not a Boolean.
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-003 with the helper DataSet Pagination (DataSetWriterId 2) whose
       HasNext is "false" (string).
@@ -1812,7 +1812,7 @@ vectors:
     violates: [REQ-PAG-008]
     reason: The helper DataSet Pagination is only sent with the method Pub.
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-001 with a Pagination (DataSetWriterId 2) instead of a
       PaginationRequest.
@@ -1846,7 +1846,7 @@ vectors:
     violates: [REQ-RES-HEALTH-005]
     reason: A Get Health carries no Health object, only the helper DataSets PaginationRequest and Locale.
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-001 with the Health DataSetMessage of V-PAY-003 in Messages.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"

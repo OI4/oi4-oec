@@ -34,11 +34,11 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-113](#v-pay-113) | Pub Config with an undefined key in a configuration object (tolerant) | valid | ok | constructed | reviewed |
 | [V-PAY-115](#v-pay-115) | Pub Config with an unmasked sensitive value | invalid | violates: REQ-RES-CONFIG-024 | constructed | reviewed |
 | [V-PAY-116](#v-pay-116) | Set Config with the mask for a sensitive value | valid | ok | constructed | reviewed |
-| [V-PAY-122](#v-pay-122) | Get Health with a reserved DataSetClassId | invalid | violates: REQ-MSG-010, REQ-MSG-014 | constructed | draft |
-| [V-PAY-123](#v-pay-123) | Get MAM with an invalid PaginationRequest | invalid | violates: REQ-PAG-001 | constructed | draft |
-| [V-PAY-124](#v-pay-124) | Pub Health with an invalid Pagination | invalid | violates: REQ-PAG-003 | constructed | draft |
-| [V-PAY-125](#v-pay-125) | Get Health with a Pagination | invalid | violates: REQ-PAG-008 | constructed | draft |
-| [V-PAY-126](#v-pay-126) | Get Health with a Health DataSetMessage | invalid | violates: REQ-RES-HEALTH-005 | constructed | draft |
+| [V-PAY-122](#v-pay-122) | Get Health with a reserved DataSetClassId | invalid | violates: REQ-MSG-010, REQ-MSG-014 | constructed | reviewed |
+| [V-PAY-123](#v-pay-123) | Get MAM with an invalid PaginationRequest | invalid | violates: REQ-PAG-001 | constructed | reviewed |
+| [V-PAY-124](#v-pay-124) | Pub Health with an invalid Pagination | invalid | violates: REQ-PAG-003 | constructed | reviewed |
+| [V-PAY-125](#v-pay-125) | Get Health with a Pagination | invalid | violates: REQ-PAG-008 | constructed | reviewed |
+| [V-PAY-126](#v-pay-126) | Get Health with a Health DataSetMessage | invalid | violates: REQ-RES-HEALTH-005 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -1966,7 +1966,7 @@ Payload:
 - Expected: invalid – The NetworkMessage uses the reserved DataSetClassId of the removed resource License (MG A2), not the one of Health.
 - Violates: [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-014](../../requirements/view/msg.md#req-msg-014)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-001 with the DataSetClassId 2ae0505e-2830-4980-b65e-0bbdf08e2d45 (resource License, removed) instead of the Health id. The reserved id is also the wrong id for the resource Health (REQ-MSG-010).
 
@@ -1993,7 +1993,7 @@ Payload:
 - Expected: invalid – The PaginationRequest has PerPage 0 and lacks the mandatory field Page.
 - Violates: [REQ-PAG-001](../../requirements/view/pag.md#req-pag-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-005 (B1.1.11) with PerPage 0 and without Page.
 
@@ -2030,7 +2030,7 @@ Payload:
 - Expected: invalid – HasNext of the Pagination is a string, not a Boolean.
 - Violates: [REQ-PAG-003](../../requirements/view/pag.md#req-pag-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 with the helper DataSet Pagination (DataSetWriterId 2) whose HasNext is "false" (string).
 
@@ -2082,7 +2082,7 @@ Payload:
 - Expected: invalid – The helper DataSet Pagination is only sent with the method Pub.
 - Violates: [REQ-PAG-008](../../requirements/view/pag.md#req-pag-008)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-001 with a Pagination (DataSetWriterId 2) instead of a PaginationRequest.
 
@@ -2123,7 +2123,7 @@ Payload:
 - Expected: invalid – A Get Health carries no Health object, only the helper DataSets PaginationRequest and Locale.
 - Violates: [REQ-RES-HEALTH-005](../../requirements/view/res-health.md#req-res-health-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-001 with the Health DataSetMessage of V-PAY-003 in Messages.
 

@@ -485,7 +485,7 @@ requirements:
         text: 'The RFC 1123 rules for assigning a host name must also be followed for container names so that DNS resolution works correctly: letters, digits and hyphens only.'
     verification: [d8]
     inventory: [RIG-4.2-36a1dde9, RIG-4.2-997b0f1d, RIG-4.2-75e6ea8e, RIG-4.2-f4e41f77]
-    status: draft
+    status: reviewed
     notes: >-
       SF-090 (b), (c) resolved: "unique within the Open Edge Computing
       platform" (before: "globally unique according to the definition of the
@@ -512,7 +512,7 @@ requirements:
         text: To avoid several instances of a container with the same container name, it is best practice to use a UUID as postfix on top of a self-defined container name such as <DefaultContainerName>-<uuid>.
     verification: [d8]
     inventory: [RIG-4.2-7935e203, RIG-4.2-21db7fba]
-    status: draft
+    status: reviewed
     notes: >-
       SF-090 (a), (e) resolved: separator "-" instead of "_" (RFC 1123), at
       most 26 characters for the default container name. Back to draft in the
@@ -541,7 +541,7 @@ requirements:
         text: When deploying a container which by its nature has no serial number and can be instantiated multiple times, use the container name as SerialNumber as defined in OEC Runtime & Infrastructure Guideline, 4.2 Container Name Conventions.
     verification: [manual, d8]
     inventory: [RIG-4.2-9b5221a1]
-    status: draft
+    status: reviewed
     notes: >-
       SF-090 (d) resolved: explicit "shall" (before: implicit MUST). The MQTT
       ClientId is no longer part of this requirement: RIG 4.2 now refers to

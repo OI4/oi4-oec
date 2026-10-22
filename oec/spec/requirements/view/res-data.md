@@ -5,7 +5,7 @@ Guideline baseline: `5fb0fd8` · Area status: reviewed · Sections: MG 8.3.4, MG
 
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
-| [REQ-RES-DATA-001](#req-res-data-001) | Data DataSets follow the OPC UA JSON DataSet rules | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
+| [REQ-RES-DATA-001](#req-res-data-001) | Data DataSets follow the OPC UA JSON DataSet rules | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-RES-DATA-002](#req-res-data-002) | The standardized process value DataSet Oi4Pv is optional | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
 | [REQ-RES-DATA-003](#req-res-data-003) | Oi4Pv is published with the Tag Oi4Pv | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-DATA-004](#req-res-data-004) | Fields of the Oi4Pv DataSet | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
@@ -32,7 +32,7 @@ The Payload of a Data DataSetMessage is an application-defined DataSet whose fie
 - Condition: The component publishes Data (REQ-CMP-036).
 - Refs: MG 8.3.4, MG 9.1.4, SF-077
 - Verification: d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.4-b5d32f38, MG-9.1.4-a7f190f6
 
 > Each data object might look different, but it must follow the rules that the OPC Foundation has defined for JSON encoded PubSub DataSets (OPC UA Part 14-7.2.5.4 with the field encoding of Part 6-5.4).

@@ -23,9 +23,9 @@ Guideline baseline: `5fb0fd8` · Area status: reviewed · Sections: RIG 2, RIG 4
 | [REQ-CNT-016](#req-cnt-016) | SBOM is created during the image build | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
 | [REQ-CNT-017](#req-cnt-017) | /opt/oi4/licenses is not overlaid by a host mount | MUST NOT | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-018](#req-cnt-018) | Platform may read the license folder | MAY | n/a | n/a | n/a | platform | manual | reviewed |
-| [REQ-CNT-019](#req-cnt-019) | Unique container name set as hostname | MUST | n/a | n/a | n/a | platform | d8 | draft |
-| [REQ-CNT-020](#req-cnt-020) | Container name with a UUID postfix | SHOULD | n/a | n/a | n/a | platform | d8 | draft |
-| [REQ-CNT-021](#req-cnt-021) | Application uses its container name | MUST | none | SHOULD | MUST | service-container | manual, d8 | draft |
+| [REQ-CNT-019](#req-cnt-019) | Unique container name set as hostname | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
+| [REQ-CNT-020](#req-cnt-020) | Container name with a UUID postfix | SHOULD | n/a | n/a | n/a | platform | d8 | reviewed |
+| [REQ-CNT-021](#req-cnt-021) | Application uses its container name | MUST | none | SHOULD | MUST | service-container | manual, d8 | reviewed |
 | [REQ-CNT-022](#req-cnt-022) | Digest where an immutable image version is needed | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
 | [REQ-CNT-023](#req-cnt-023) | Bridge network preferred | SHOULD | none | SHOULD | SHOULD | service-container | d8, manual | reviewed |
 | [REQ-CNT-024](#req-cnt-024) | One secret storage per container | MUST NOT | n/a | n/a | n/a | platform | d8, manual | reviewed |
@@ -448,7 +448,7 @@ When a container is created, the platform assigns it a well-defined container na
 - Domain: platform · Applies to: platform
 - Refs: RIG 4.2, SF-090
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.2-36a1dde9, RIG-4.2-75e6ea8e, RIG-4.2-997b0f1d, RIG-4.2-f4e41f77
 
 > Each OI4 Alliance-compliant container shall have a well-defined name for identification.
@@ -475,7 +475,7 @@ The container name consists of a self-defined default container name of at most 
 - Domain: platform · Applies to: platform
 - Refs: RIG 4.2, SF-090
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.2-21db7fba, RIG-4.2-7935e203
 
 > Best practice is to use a naming scheme such as &lt;DefaultContainerName>-&lt;uuid>; the UUID also makes the container name unique beyond the platform.
@@ -500,7 +500,7 @@ A containerized application determines its container name from its hostname and 
 - Domain: service-container · Applies to: application
 - Refs: RIG 4.2, MG 4.3.1, RIG 1.2, SF-090
 - Verification: manual, d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.2-9b5221a1
 
 > The application shall determine its container name from its hostname and shall use it as follows:

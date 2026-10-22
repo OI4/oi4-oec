@@ -6,12 +6,12 @@ Guideline baseline: `5fb0fd8` · Area status: reviewed · Sections: MG A1
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
 | [REQ-REG-001](#req-reg-001) | Registry collects MAM and Health of reachable assets | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-REG-002](#req-reg-002) | Registry republishes MAM and Health on Get | MUST | n/a | n/a | n/a | platform | d8 | draft |
+| [REQ-REG-002](#req-reg-002) | Registry republishes MAM and Health on Get | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-REG-003](#req-reg-003) | Registry web front-end lists applications and devices | MUST | n/a | n/a | n/a | platform | manual | reviewed |
 | [REQ-REG-004](#req-reg-004) | Optional content of the Registry web front-end | MAY | n/a | n/a | n/a | platform | manual | reviewed |
 | [REQ-REG-005](#req-reg-005) | Optional services of the Registry | MAY | n/a | n/a | n/a | platform | manual | reviewed |
 | [REQ-REG-006](#req-reg-006) | Registry started first | SHOULD | n/a | n/a | n/a | platform | manual | reviewed |
-| [REQ-REG-007](#req-reg-007) | Registry web front-end via TLS | SHOULD | n/a | n/a | n/a | platform | manual | draft |
+| [REQ-REG-007](#req-reg-007) | Registry web front-end via TLS | SHOULD | n/a | n/a | n/a | platform | manual | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -49,7 +49,7 @@ The OEC Registry answers Get requests on its own topics: a Get on Oi4v2/Registry
 - Domain: platform · Applies to: registry
 - Refs: MG A1, MG 7, MG 9.1.1, MG 9.1.2, MG 8.2.1, MG 8.2.3, MG 6.3.3, MG 6.3.4, MG 6.3.5, MG 8.3.11, SF-089
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: MG-A1-367de753, MG-A1-54951c67, MG-A1-f2801e0d
 
 > The OEC Registry must fulfill the following main tasks; items marked with "(optional)" are optional:
@@ -191,7 +191,7 @@ The OEC Registry provides its web front-end and the REST API to its back-end via
 - Domain: platform · Applies to: registry
 - Refs: MG A1, RIG 4.1.2, RIG 4.1.3, GL-ADR-022, SF-089
 - Verification: manual
-- Status: draft
+- Status: reviewed
 - Inventory: MG-A1-5f13c344, MG-A1-f4cbd047
 
 > The OEC Registry should provide its web front-end and the REST API to its back-end via TLS.

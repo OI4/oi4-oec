@@ -79,7 +79,7 @@ requirements:
         text: If the DataSetMessages exceed the maximum size of a message, the publication is paginated (8.3.11 Pagination).
     verification: [d8]
     inventory: [MG-A1-54951c67, MG-A1-f2801e0d, MG-A1-367de753]
-    status: draft
+    status: reviewed
     notes: >-
       SF-089 (b) resolved: the publisher, the DataSetWriterName, the payload
       and "available" are now stated in MG A1 (before: proposed
@@ -206,7 +206,7 @@ requirements:
         text: Without a configured certificate, a self-signed certificate is used.
     verification: [manual]
     inventory: [MG-A1-5f13c344, MG-A1-f4cbd047]
-    status: draft
+    status: reviewed
     notes: >-
       SF-089 (c) resolved: TLS moved from the note on the reference
       implementation into the main text (recommendation for every Registry);

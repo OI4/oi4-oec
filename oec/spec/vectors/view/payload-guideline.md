@@ -96,11 +96,11 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 | [V-PAY-101](#v-pay-101) | B1.1.3: Set explicit Config tag of an explicit asset (device, new values, full) | valid | ok | guideline MG B1.1.3 | reviewed |
 | [V-PAY-102](#v-pay-102) | B1.1.3: Set explicit Config tag of an explicit asset (device, empty values, minimal) | valid | ok | guideline MG B1.1.3 | reviewed |
 | [V-PAY-114](#v-pay-114) | B1.1.3: Pub explicit Config tag after a successful set request (device) | valid | ok | guideline MG B1.1.3 | reviewed |
-| [V-PAY-117](#v-pay-117) | MG 1.2: Pub Health reply (capitalization example) | valid | ok | guideline MG 1.2 (edited: 1 change(s)) | draft |
-| [V-PAY-118](#v-pay-118) | MG 8.1.1: ua-data with SequenceNumber, MetaDataVersion, Status and MessageType (Figure 5) | valid | ok | guideline MG 8.1.1 (edited: 1 change(s)) | draft |
-| [V-PAY-119](#v-pay-119) | MG 8.1.3: Call NewDataSetWriterId with CorrelationData (Figure 7) | valid | ok | guideline MG 8.1.3 | draft |
-| [V-PAY-120](#v-pay-120) | MG 8.1.3: Reply NewDataSetWriterId with CorrelationData (Figure 8) | valid | ok | guideline MG 8.1.3 | draft |
-| [V-PAY-121](#v-pay-121) | MG 8.1.2: ua-metadata of a user-defined DataSet (Figure 6) | valid | ok | guideline MG 8.1.2 (edited: 1 change(s)) | draft |
+| [V-PAY-117](#v-pay-117) | MG 1.2: Pub Health reply (capitalization example) | valid | ok | guideline MG 1.2 (edited: 1 change(s)) | reviewed |
+| [V-PAY-118](#v-pay-118) | MG 8.1.1: ua-data with SequenceNumber, MetaDataVersion, Status and MessageType (Figure 5) | valid | ok | guideline MG 8.1.1 (edited: 1 change(s)) | reviewed |
+| [V-PAY-119](#v-pay-119) | MG 8.1.3: Call NewDataSetWriterId with CorrelationData (Figure 7) | valid | ok | guideline MG 8.1.3 | reviewed |
+| [V-PAY-120](#v-pay-120) | MG 8.1.3: Reply NewDataSetWriterId with CorrelationData (Figure 8) | valid | ok | guideline MG 8.1.3 | reviewed |
+| [V-PAY-121](#v-pay-121) | MG 8.1.2: ua-metadata of a user-defined DataSet (Figure 6) | valid | ok | guideline MG 8.1.2 (edited: 1 change(s)) | reviewed |
 
 ## V-PAY-001
 
@@ -5612,7 +5612,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-020](../../requirements/view/msg.md#req-msg-020), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
 - Origin: guideline MG 1.2 (edited: 1 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: The PascalCase example of MG 1.2 is a Pub Health of the field data service about itself in reply to a Get (ReplyTo is the MessageId of V-PAY-001), like V-PAY-003 but without SequenceNumber. DataSetWriterId was 3875 until SF-095 (b) aligned it with V-PAY-003 (guideline e25f64f). The guideline names no topic; it is completed from the PublisherId and the DataSetWriterName.
 
@@ -5657,7 +5657,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-018](../../requirements/view/msg.md#req-msg-018), [REQ-MSG-020](../../requirements/view/msg.md#req-msg-020), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-026](../../requirements/view/msg.md#req-msg-026), [REQ-MSG-027](../../requirements/view/msg.md#req-msg-027), [REQ-MSG-029](../../requirements/view/msg.md#req-msg-029), [REQ-MSG-030](../../requirements/view/msg.md#req-msg-030)
 - Origin: guideline MG 8.1.1 (edited: 1 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Self-initialized Pub Health (ReplyTo "") of an application whose Identification Link is a URL (https scheme). The DataSetMessage carries every optional field of the fixed content mask: SequenceNumber, MetaDataVersion 1.0, a Timestamp with UTC offset, the non-Good Status UncertainLastUsableValue (Code and Symbol) and MessageType ua-keyframe. The MessageId time (2019-06-26T11:36:00Z) differs from the Timestamp; MessageIds are opaque (REQ-MSG-009). The guideline names no topic; it is completed from the PublisherId and the DataSetWriterName.
 
@@ -5711,7 +5711,7 @@ Edits against the guideline example:
 - Expected: valid
 - Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-006](../../requirements/view/act.md#req-act-006), [REQ-ACT-010](../../requirements/view/act.md#req-act-010), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-021](../../requirements/view/act.md#req-act-021)
 - Origin: guideline MG 8.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 (B1.2.1) with CorrelationData "MTYzOTY5MzUxMDAwMA==" (base64 of the request time 1639693510000), which the Responder returns unchanged in V-PAY-120 (REQ-ACT-007).
 
@@ -5751,7 +5751,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-007](../../requirements/view/act.md#req-act-007), [REQ-ACT-012](../../requirements/view/act.md#req-act-012), [REQ-ACT-014](../../requirements/view/act.md#req-act-014), [REQ-ACT-015](../../requirements/view/act.md#req-act-015), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-022](../../requirements/view/act.md#req-act-022)
 - Origin: guideline MG 8.1.3
-- Status: draft
+- Status: reviewed
 
 Notes: Final response (ActionState 2) to V-PAY-119 on its ResponseAddress, with the CorrelationData of the request unchanged; otherwise V-PAY-009 (B1.2.1).
 
@@ -5793,7 +5793,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-012](../../requirements/view/msg.md#req-msg-012), [REQ-MSG-020](../../requirements/view/msg.md#req-msg-020), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-MSG-041](../../requirements/view/msg.md#req-msg-041), [REQ-RES-META-003](../../requirements/view/res-meta.md#req-res-meta-003)
 - Origin: guideline MG 8.1.2 (edited: 1 change(s))
-- Status: draft
+- Status: reviewed
 
 Notes: Self-initialized Pub Metadata (ReplyTo "") of the publisher-defined Data DataSet "Temperature" of a temperature sensor (Source) behind the field data service, DataSetWriterId 15, Filter = WriterGroupName "Temperature". Without DataSetClassId (publisher-defined DataSet, REQ-MSG-012 "may"). The field Temperature (Double, i=11) has the property EngineeringUnits (EUInformation, degree Celsius, UNECE CEL = UnitId 4408652) – the KeyValuePair example of MG 8.2.8. The guideline names no topic; it is completed from the PublisherId, DataSetWriterName and WriterGroupName.
 
