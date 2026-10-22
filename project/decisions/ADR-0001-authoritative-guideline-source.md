@@ -328,3 +328,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `69863d3` is recorded in addendum 14.
 - The baseline is now `21bf409` on branch `feature/spec-findings` (local commits `86dbf25` – MG 1.2 Conventions use MG-only examples and references – and `21bf409` – new RIG 1.2 Conventions, RIG compliance chapter renumbered to 1.3, RIG tables 1–11 → 2–12; PO decision 2026-10-22). Keyword mapping unchanged and identical in MG 1.2 and RIG 1.2 (G-1.6). Spec re-baselined (`249a00b`): key remap of the RIG compliance, label and MG 1.2 example items, 17 new RIG 1.2 items informative; no obligation changed, no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 16 (2026-10-22, guideline baseline `9b6b22f`)
+
+- The previous baseline `21bf409` is recorded in addendum 15.
+- The baseline is now `9b6b22f` on branch `feature/spec-findings` (local commits `1b4904e` – PO text edits, headings of MG 5 and MG 4.3.1 without code formatting – and `9b6b22f` – the en-US rule for `Model` moved from MG 5 to MG 4.3.1, MG 5 requires `Model` at least in `en-US` if used for the `Oi4Identifier`; PO request 2026-10-22). Spec re-baselined (`da37e8b`): key remap, REQ-IL-027 and REQ-RES-MAM-006 re-worded and new REQ-RES-MAM-024, all three draft for PO re-review. No finding, no GL-ADR. SF-001 … 095 resolved.
