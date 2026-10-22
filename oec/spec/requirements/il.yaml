@@ -3,7 +3,7 @@
 # catalog.schema.json). Reference checks: spectool package internal/il,
 # vectors in vectors/il/ and vectors/topic/.
 area: IL
-baseline: "9b6b22f"
+baseline: "f951bcb"
 requirements:
   # --- Identification Link in general (MG 4) -------------------------------
   - id: REQ-IL-001
@@ -63,7 +63,7 @@ requirements:
       - ref: MG 4.2
         text: The standard Base64 alphabet (RFC 4648, section 4) must not be used, because it contains the characters + and /, which have a special meaning in MQTT topics.
     verification: [d7-validate]
-    inventory: [MG-4.2-25d30dc8, MG-4.2-ac4495bd]
+    inventory: [MG-4.2-25d30dc8, MG-4.2-6a558e64]
     status: reviewed
 
   - id: REQ-IL-004
@@ -571,7 +571,7 @@ requirements:
         text: Since Model is a LocalizedText in the Master Asset Model, its Text in the locale English (en-US) must be used, so that the Oi4Identifier does not depend on a requested Locale (8.3.12 Locale).
     verification: [manual]
     inventory: [MG-4.3.1-9dec055e, MG-4.3.1-33a35603, MG-4.3.1-d37218ba, MG-4.3.1-6224606c, MG-4.3.1-3c56250d]
-    status: draft
+    status: reviewed
     notes: The en-US rule for Model moved from MG 5 to MG 4.3.1 in 9b6b22f (PO request 2026-10-22; before in REQ-RES-MAM-006).
 
   - id: REQ-IL-028

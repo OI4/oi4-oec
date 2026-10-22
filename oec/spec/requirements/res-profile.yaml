@@ -4,7 +4,7 @@
 # resource is listed: REQ-CMP-021. Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PROFILE
-baseline: "9b6b22f"
+baseline: "f951bcb"
 requirements:
   - id: REQ-RES-PROFILE-001
     title: Fields of the Profile DataSet

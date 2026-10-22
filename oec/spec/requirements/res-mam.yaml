@@ -6,7 +6,7 @@
 # behavior of MG 9.1.1. Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-MAM
-baseline: "9b6b22f"
+baseline: "f951bcb"
 requirements:
   # --- DataSet content (MG 5, MG 8.3.1) ---------------------------------------
   - id: REQ-RES-MAM-001
@@ -141,7 +141,7 @@ requirements:
         text: The SerialNumber given for this property shall also be used for the Oi4Identifier of the asset, if an Oi4Identifier is generated as Identification Link (4.3 The Oi4Identifier).
     verification: [d7-validate]
     inventory: [MG-5-1d7325a6, MG-5-edaabec1, MG-5-afff2382]
-    status: draft
+    status: reviewed
     notes: >-
       Counterpart of REQ-IL-027 (dnp-encoding per REQ-IL-033 allowed); Model in
       en-US per SF-064 (d). Since 9b6b22f (PO request 2026-10-22) MG 5 no longer
@@ -511,5 +511,5 @@ requirements:
         text: If the Model is used as an element of the Oi4Identifier (4.3.1 Structure of the Oi4Identifier), it must at least be available in the locale English (en-US).
     verification: [manual]
     inventory: [MG-5-e24d1f2f]
-    status: draft
+    status: reviewed
     notes: PO request 2026-10-22 (moved from the former MG 5 Model rule, SF-064 (d)).
