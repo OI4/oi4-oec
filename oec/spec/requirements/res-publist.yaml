@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PUBLIST
-baseline: "5fb0fd8"
+baseline: "46ffbb1"
 requirements:
   # --- DataSet content (MG 8.3.8) ---------------------------------------------
   - id: REQ-RES-PUBLIST-001
