@@ -307,3 +307,9 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 - The previous baseline `2018bc4` is recorded in addendum 10.
 - The baseline is now `75da059` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 6.4 rewritten editorially, no change of meaning, no new finding, no GL-ADR. SF-001 … 095 resolved.
 - Spec remap only: REQ-MQTT-019 quotes and inventory keys (see log addendum 11).
+
+## Amendment C-032 addendum 12 (2026-10-22, guideline baseline `c1419dd`)
+
+- The previous baseline `75da059` is recorded in addendum 11.
+- The baseline is now `c1419dd` on branch `feature/spec-findings` (local commits `eef0e04`, `afb6acb`, `c1419dd`, PO order 2026-10-22): Welcome and the start pages of MG, RIG and Process Description restructured (title pages removed, documents described, authors referenced), MG 1/1.1 reworked; the RIG start page states the independence of the compliance domains. No change of a requirement, no new finding, no GL-ADR. SF-001 … 095 resolved.
+- Spec: seven new informative inventory items, one removed (see log addendum 12).
