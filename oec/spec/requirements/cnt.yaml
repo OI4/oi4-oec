@@ -17,9 +17,10 @@ requirements:
       The platform maps a host-defined path, mounted read-only, to the target
       path /etc/oi4/mqtt of every container. The Message Bus storage contains
       at least broker.pem (public certificate of the broker), broker.json
-      (settings of the broker, REQ-CNT-003) and, if a local CA signed the
-      broker certificate, broker_ca.pem (that CA); without a local CA the CA
-      of the OI4 certificate storage (ca.pem, REQ-CNT-006) is used.
+      (settings of the broker, REQ-CNT-003) and, if the broker certificate
+      was signed by a local CA other than the CA of ca.pem in the OI4
+      certificate storage (REQ-CNT-005), broker_ca.pem (that CA); otherwise
+      clients verify the broker certificate against ca.pem.
     keyword: MUST
     domain: platform
     applies_to: [platform]
@@ -35,11 +36,14 @@ requirements:
         text: 'The Message Bus storage shall contain at least the following files:'
     verification: [d8]
     inventory: [RIG-4.1.1-723b5b51, RIG-4.1.1-15bd8eb6, RIG-4.1.1-e577eb27, RIG-4.1.1-078a70a1]
-    status: reviewed
+    status: draft
     notes: >-
       broker_ca.pem is listed among the files the storage contains "at
-      least", but the note of the table makes it optional (SF-091 (a)). The
-      broker address in broker.json is also required by REQ-MQTT-003.
+      least", but the note of the table makes it optional (SF-091 (a)). With
+      REQ-CNT-005 a CA certificate for the verification of the broker
+      certificate (REQ-MQTT-008) is always available. The broker address in
+      broker.json is also required by REQ-MQTT-003. Back to draft in the
+      C-030 review (SF-091 revised 2026-10-22).
 
   - id: REQ-CNT-002
     title: No private keys in the Message Bus and certificate storages
@@ -119,35 +123,49 @@ requirements:
 
   # --- OI4 certificate storage (RIG 4.1.2) ----------------------------------
   - id: REQ-CNT-005
-    title: Platform provides its CA in the certificate storage
+    title: Platform always provides a CA certificate in the certificate storage
     statement: >-
-      If the system provides a certificate authority (CA) for signing
-      certificates, the platform makes the CA available in the OI4
-      certificate storage /etc/oi4/certs (REQ-CNT-006).
-    keyword: SHOULD
+      The platform provides the OI4 certificate storage /etc/oi4/certs
+      (REQ-CNT-006) to every container, with ca.pem: the certificate of the CA
+      used to validate certificates. If the broker certificate was not signed
+      by this CA, the CA that signed it is provided as broker_ca.pem
+      (REQ-CNT-001). Every container can thus verify the broker certificate
+      (REQ-MQTT-008).
+    keyword: MUST
+    implicit: true
     domain: platform
     applies_to: [platform]
-    condition: The system provides a CA for signing certificates.
-    refs: [RIG 4.1.2, SF-091]
+    refs: [RIG 4.1.2, RIG 4.1.1, MG 6.2.2, SF-035, SF-091]
     quotes:
       - ref: RIG 4.1.2
         text: 'In case the system provides a certificate authority (CA) for signing certificates, the CA should be made available by storing it as follows:'
+      - ref: MG 6.2.2
+        text: 'The client must verify the broker certificate when it establishes the TLS connection: the certificate chain against the CA certificate (broker_ca.pem of the Message Bus storage or, if no local CA is present, the CA of the OI4 certificate storage; for a client without container, its configured CA) and the broker address.'
     verification: [d8]
     inventory: [RIG-4.1.2-0e9d427e]
-    status: reviewed
+    status: draft
+    notes: >-
+      RIG 4.1.2 only recommends the CA ("In case … should"), but TLS is
+      mandatory (REQ-MQTT-005/006) and every client must verify the broker
+      certificate against broker_ca.pem or ca.pem (REQ-MQTT-008, MUST at every
+      level); without a CA certificate no containerized client could connect.
+      Implicit MUST per SF-091 (c)/(g), revised after a question of the PO in
+      the C-030 review (2026-10-22); the first draft was SHOULD with a
+      condition. ca.pem may be a well-known (public) or a platform-specific
+      CA; an own CA that issues certificates is only needed for client
+      certificates and certificates of the applications (REQ-CNT-007).
 
   - id: REQ-CNT-006
     title: Content and mount of the certificate storage
     statement: >-
-      If the platform provides the OI4 certificate storage, it maps a
-      host-defined path, mounted read-only, to the target path /etc/oi4/certs.
-      The storage contains at least ca.pem (CA for the validation of
+      The platform maps a host-defined path, mounted read-only, to the target
+      path /etc/oi4/certs of every container. The OI4 certificate storage
+      contains at least ca.pem (CA for the validation of
       certificates) and, for a container with a certificate, the certificate
       of its application (REQ-CNT-007).
     keyword: MUST
     domain: platform
     applies_to: [platform]
-    condition: The platform provides the OI4 certificate storage.
     refs: [RIG 4.1.2, SF-091]
     quotes:
       - ref: RIG 4.1.2
@@ -160,10 +178,10 @@ requirements:
         text: ca.pem CA used for validation of certificates.
     verification: [d8]
     inventory: [RIG-4.1.2-aff2fc7b, RIG-4.1.2-9e0b30f0, RIG-4.1.2-e191918f, RIG-4.1.2-54831f39]
-    status: reviewed
+    status: draft
     notes: >-
-      The storage itself is a recommendation (REQ-CNT-005), its content
-      "shall" (SF-091 (c)); the certificate of the application is only needed
+      The storage is always provided (REQ-CNT-005, SF-091 (c) revised in the
+      C-030 review; before: conditional), its content "shall"; the certificate of the application is only needed
       if the application uses it, e.g. for client certificate authentication
       (REQ-MQTT-009/010) or the other uses of REQ-CNT-025 (GL-ADR-022).
 
