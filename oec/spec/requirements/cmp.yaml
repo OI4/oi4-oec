@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "e36e762"
+baseline: "e0f1488"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
