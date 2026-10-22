@@ -3,7 +3,7 @@
 # topic/topic.abnf, the allowed forms per Method × Resource are listed in
 # matrix/method-resource.yaml; vectors in vectors/topic/.
 area: TOP
-baseline: "f951bcb"
+baseline: "c840cb5"
 requirements:
   # --- Topic structure (MG 7) -----------------------------------------------
   - id: REQ-TOP-001
@@ -278,7 +278,7 @@ requirements:
       - ref: MG 7.5.1
         text: Depending on the Resource, some submodels can only be published, others can also be requested or even written or deleted.
       - ref: MG 7.7
-        text: 'The following resources do not make use of filter: MAM, Health, Profile and ReferenceDesignation.'
+        text: 'The following resources do not make use of Filter: MAM, Health, Profile and ReferenceDesignation.'
     verification: [d7-validate]
     inventory: [MG-7-3d90df46, MG-7-db7ddd80, MG-7.4-0f22d9e7, MG-7.5.1-07b3b10a, MG-7.5.1-ca8822ce, MG-7.5.1-a89bdae7, MG-7.5.1-3d9669bd, MG-7.5.1-0315a6f9]
     status: reviewed
@@ -572,7 +572,7 @@ requirements:
       - ref: MG 7.7
         text: 'The severity levels should be interpreted as follows: Internal Error and Warning: The component has detected an error in its hardware or software which is not allowed during normal operation.'
     verification: [manual]
-    inventory: [MG-7.7-abfdb2f1, MG-7.7-df371f59, MG-7.7-acddd217, MG-7.7-ebe99dae, MG-7.7-a76f5fa5, MG-7.7-8e7f3db5, MG-7.7-fe826523]
+    inventory: [MG-7.7-3cb11688, MG-7.7-dee35081, MG-7.7-8f699bff, MG-7.7-ebe99dae, MG-7.7-a76f5fa5, MG-7.7-8e7f3db5, MG-7.7-fe826523]
     status: reviewed
     notes: >-
       "must be exchanged or serviced" and "must be indicated to the user"

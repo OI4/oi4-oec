@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "f951bcb"
+baseline: "c840cb5"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -165,8 +165,6 @@ items:
     reason: Consequence of the versioning concept (a client only subscribes to its version); no requirement.
   - key: MG-7.1-ca8dc9f5
     reason: Describes that versions can coexist on one Message Bus ("can" expresses possibility); the rules for several versions are REQ-TOP-004.
-  - key: MG-7.1-d3a3b551
-    reason: States that the versioning needs no MQTT 5 feature; the MQTT version requirements are area MQTT (C-025).
   - key: MG-7.2-90e1d54a
     reason: Typical behavior of an OTConnector ("typically", "can be listed"); describes the ServiceType, no requirement.
   - key: MG-7.2-9459e8f7
@@ -175,18 +173,12 @@ items:
     reason: Introduces OPC UA PubSub Actions as motivation for Call/Reply; the methods are REQ-TOP-011, the actions area ACT (C-023).
   - key: MG-7.4-7abd4cfd
     reason: Motivation for the methods Call and Reply; the methods are REQ-TOP-011.
-  - key: MG-7.4-91b8fcab
-    reason: Records a design decision of the technical committee (single technology stack MQTT); no requirement on a component.
   - key: MG-7.5-5e8bf8b2
     reason: Definition of the Resource element; the closed set is REQ-TOP-012.
   - key: MG-7.5-c74e6b55
     reason: Definition of a service (OPC UA PubSub Action); the actions are area ACT (C-023).
-  - key: MG-7.5-814f7a3b
-    reason: Records a design decision of the technical committee (single technology stack MQTT); no requirement on a component.
   - key: MG-7.5.1-4be49d7f
     reason: Describes the resources as schema-validatable submodels ("can be"); the schemas are areas RES-* (C-027, C-028).
-  - key: MG-7.5.2-669d3e1a
-    reason: Permission for broker operators to use the service name for access control; no requirement on a component (ACLs are area MQTT/RES-*).
   - key: MG-7.7-513c03ce
     reason: Purpose of the Filter element ("can be used"); the Filter rules are REQ-TOP-019 … REQ-TOP-023.
   - key: MG-7.7-466159d5
@@ -557,7 +549,7 @@ items:
     reason: Description of the MQTT connection ("can push" expresses possibility); no requirement.
   - key: MG-2.3-b285778e
     reason: Background on OPC UA PubSub; no requirement.
-  - key: MG-2.3-13060418
+  - key: MG-2.3-58b692d9
     reason: Description of OPC UA PubSub; its use is detailed in area MSG.
   - key: MG-3-2f7fc861
     reason: Restates MG 6.2.2 (TLS and authentication); the requirements are REQ-MQTT-005, REQ-MQTT-006 and REQ-MQTT-009 (reviewed).
