@@ -6,7 +6,7 @@
 # SF-051) were decided by the PO and resolved in the guideline in C-024; the
 # PO reviewed the area in the C-024 review (2026-10-19).
 area: ACT
-baseline: "2018bc4"
+baseline: "75da059"
 requirements:
   # --- Call/Reply with OPC UA PubSub Actions (MG 8.1, 8.1.3, 8.2.16) --------
   - id: REQ-ACT-001
