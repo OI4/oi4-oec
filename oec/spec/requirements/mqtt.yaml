@@ -9,7 +9,7 @@
 # keywords and connection details added to the guideline in C-026 (SF-057,
 # SF-060).
 area: MQTT
-baseline: "2025207"
+baseline: "2018bc4"
 requirements:
   # --- Protocol version (MG 6.1) --------------------------------------------
   - id: REQ-MQTT-001
@@ -33,11 +33,13 @@ requirements:
       - ref: MG 6.1
         text: All mechanisms defined in this guideline (e.g. Birth, Close and Will message, versioning of the topic namespace) work with MQTT v3.1.1 and do not require any MQTT v5.0 features.
       - ref: MG 6.1
-        text: MQTT v3.1.1 remains the required minimum version as long as it is sufficient for the requirements of this guideline.
+        text: Therefore MQTT v3.1.1 is the minimum required version, which ensures maximum acceptance and interoperability.
+      - ref: MG 6.1
+        text: This guideline does not require any MQTT v5.0 features.
       - ref: MG 6.1
         text: A client may connect with a later MQTT version supported by the broker, but it must not depend on features of later versions (e.g. MQTT v5.0 user properties, response topic, correlation data, message expiry) for the mechanisms of this guideline and must not put information that other participants need into such features.
     verification: [manual, d7-test]
-    inventory: [MG-6.1-460b8388, MG-6.1-5152cb4d, MG-6.1-6ba93300, MG-6.1-76c661f1, MG-6-31ee6521]
+    inventory: [MG-6.1-460b8388, MG-6.1-5152cb4d, MG-6.1-ec7a4cff, MG-6.1-4107e48f, MG-6.1-76c661f1, MG-6-31ee6521]
     status: reviewed
     notes: >-
       Graded by REQ-CMP-001 (mandatory at all levels). Use of later versions:
@@ -57,7 +59,7 @@ requirements:
       - ref: MG 6.1
         text: The broker must support MQTT v3.1.1.
     verification: [d8]
-    inventory: [MG-6.1-f1242c63, MG-6.1-460b8388, MG-6.1-6ba93300]
+    inventory: [MG-6.1-f1242c63, MG-6.1-460b8388]
     status: reviewed
     notes: SF-060 (a), C-026. The platform requirements of the RIG are area PLT.
 

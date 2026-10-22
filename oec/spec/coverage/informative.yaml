@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "2025207"
+baseline: "2018bc4"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -184,8 +184,6 @@ items:
     reason: Describes deployment options of the broker ("can" expresses possibility); no requirement on a component. Platform requirements are area PLT (C-030).
   - key: MG-6-2d114aae
     reason: Lead-in to the grading note of MG 6; the grading is REQ-CMP-001, REQ-CMP-002, REQ-CMP-003, REQ-CMP-009 and REQ-CMP-046.
-  - key: MG-6.1-4e50a9ff
-    reason: Historical rationale for the choice of MQTT v3.1.1; the version rule is REQ-MQTT-001 and REQ-MQTT-002.
   - key: MG-6.1-e0ba3cf6
     reason: List item naming an optional broker feature (access control list) without a requirement; platform features are area PLT (C-030).
   - key: MG-6.2-51ff65d2
