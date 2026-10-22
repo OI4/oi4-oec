@@ -119,30 +119,30 @@ areas:
   - code: CNT
     title: Container environment
     cycle: C-030
-    status: drafted
+    status: reviewed
     sections: [RIG 2, RIG 4]
   - code: PLT
     title: OEC platform requirements
     cycle: C-030
-    status: drafted
+    status: reviewed
     sections: [RIG 5]
   - code: APP
     title: Requirements on an application (runtime)
     cycle: C-030
-    status: drafted
+    status: reviewed
     sections: [RIG 5.2]
   - code: LIC
     title: Legal requirements and software licenses
     cycle: C-030
-    status: drafted
+    status: reviewed
     sections: [RIG 5.3]
   - code: REG
     title: OEC Registry
     cycle: C-030
-    status: drafted
+    status: reviewed
     sections: [MG A1]
   - code: GEN
     title: Introductory and general chapters, cyber security, glossaries
     cycle: C-030
-    status: drafted
+    status: reviewed
     sections: [MG 2, MG 3, MG A4, RIG 3, RIG A1]

@@ -23,7 +23,7 @@ requirements:
         text: Write access and Action calls over the Message Bus must be restricted to authorized communication participants, e.g. via an access control list (ACL) of the MQTT broker (9 Message Bus Communication).
     verification: [d8]
     inventory: [MG-3-22735921]
-    status: draft
+    status: reviewed
     notes: >-
       The write access per resource is detailed by REQ-RES-CONFIG, -DATA,
       -META, -PUBLIST, -REFDES and -SUBLIST ("protected by ACL", reviewed).

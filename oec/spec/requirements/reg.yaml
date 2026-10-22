@@ -25,7 +25,7 @@ requirements:
       - ref: MG A1
         text: Collect information about reachable assets (applications and devices) by listening mainly to MAM and Health resources
     verification: [d8]
-    status: draft
+    status: reviewed
     notes: >-
       The main tasks have no keyword (SF-089 (a)). D8 can check the effect via
       REQ-REG-002: an asset that published its MAM is returned by the
@@ -62,7 +62,7 @@ requirements:
         text: the topic Oi4v2/Registry/<AppId>/Get/Health/<Source> triggers the publication of specific Health information to the topic Oi4v2/Registry/<AppId>/Pub/Health/<Source>.
     verification: [d8]
     inventory: [MG-A1-54951c67]
-    status: draft
+    status: reviewed
     notes: >-
       Proposed interpretation (SF-089 (b)): the Registry is the publisher of
       these NetworkMessages with DataSetWriterIds of its own (REQ-MSG-021);
@@ -94,7 +94,7 @@ requirements:
       - ref: MG A1
         text: incl. the latest Health information (9.1.2 Health) and availability
     verification: [manual]
-    status: draft
+    status: reviewed
     notes: The main tasks have no keyword (SF-089 (a)).
 
   - id: REQ-REG-004
@@ -117,7 +117,7 @@ requirements:
         text: Show the audit trail published via the Event resource on the Message Bus (9.1.6 Event) (optional)
     verification: [manual]
     inventory: [MG-A1-661d05da, MG-A1-77512b6b, MG-A1-d7b2bbc2, MG-A1-c6ad2a8c]
-    status: draft
+    status: reviewed
 
   # --- Optional services (MG A1) --------------------------------------------
   - id: REQ-REG-005
@@ -141,7 +141,7 @@ requirements:
         text: Check basic conformity, based on schema validation of received messages, and show the result.
     verification: [manual]
     inventory: [MG-A1-9306caa6, MG-A1-a76196eb]
-    status: draft
+    status: reviewed
     notes: The observed compliance level is detailed by REQ-CMP-013 (reviewed); it is informative only.
 
   - id: REQ-REG-006
@@ -158,7 +158,7 @@ requirements:
         text: For seamless operation, the OEC Registry should be the application that is started first on the Open Edge Computing platform.
     verification: [manual]
     inventory: [MG-A1-a54eaa47]
-    status: draft
+    status: reviewed
     notes: >-
       Applications must not rely on it: the Registry learns about assets
       started earlier from their next MAM/Health publication or by Get
@@ -181,7 +181,7 @@ requirements:
         text: The certificate should be placed in a defined path; otherwise, a self-signed certificate is used.
     verification: [manual]
     inventory: [MG-A1-9e3cd7b1]
-    status: draft
+    status: reviewed
     notes: >-
       The sentences are part of a note about the reference implementation
       and the "defined path" is not defined (SF-089 (c)). The default ports

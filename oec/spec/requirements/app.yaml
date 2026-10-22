@@ -28,7 +28,7 @@ requirements:
         text: The following overview applies to Level 3 (Full) of the OEC Service Container Compliance.
     verification: [d8]
     inventory: [RIG-5.2-40e23bb4]
-    status: draft
+    status: reviewed
     notes: >-
       Detail of REQ-CMP-032 (reviewed umbrella). "supported platforms" is read
       as the processor architectures of RIG 5.1 (SF-092 (d)).
@@ -48,7 +48,7 @@ requirements:
         text: Provided container images shall be available for at least one of the supported platforms, preferably as multi-architecture images.
     verification: [d8]
     inventory: [RIG-5.2-40e23bb4]
-    status: draft
+    status: reviewed
 
   - id: REQ-APP-003
     title: Minimum hardware requirements described
@@ -65,7 +65,7 @@ requirements:
         text: Each application should describe its minimum hardware requirements
     verification: [manual]
     inventory: [RIG-5.2-eb253c18]
-    status: draft
+    status: reviewed
     notes: The guideline defines no format or location for the description.
 
   - id: REQ-APP-004
@@ -83,4 +83,4 @@ requirements:
         text: Each application should be developed according to established rules of good software engineering and quality assurance
     verification: [manual]
     inventory: [RIG-5.2-60a5f23c]
-    status: draft
+    status: reviewed

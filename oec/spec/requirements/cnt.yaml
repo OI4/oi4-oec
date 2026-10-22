@@ -35,7 +35,7 @@ requirements:
         text: 'The Message Bus storage shall contain at least the following files:'
     verification: [d8]
     inventory: [RIG-4.1.1-723b5b51, RIG-4.1.1-15bd8eb6, RIG-4.1.1-e577eb27, RIG-4.1.1-078a70a1]
-    status: draft
+    status: reviewed
     notes: >-
       broker_ca.pem is listed among the files the storage contains "at
       least", but the note of the table makes it optional (SF-091 (a)). The
@@ -58,7 +58,7 @@ requirements:
         text: Storage for certificates. Such as the certificates of the applications (see 4.1.3 Secret Storage) and CA certificate to validate other certificates. HIGHLY RECOMMENDED Do not store any private keys here!
     verification: [d8]
     inventory: [RIG-4.1.1-c7dae7e5, RIG-4.1.2-f09704cd]
-    status: draft
+    status: reviewed
 
   - id: REQ-CNT-003
     title: Content of broker.json
@@ -84,7 +84,7 @@ requirements:
         text: The intention of the MaxPacketSize is to protect the Message Bus broker and client.
     verification: [d8]
     inventory: [RIG-4.1.1-58d0cc4a, RIG-4.1.1-516de8c7, RIG-4.1.1-bf0c6b45]
-    status: draft
+    status: reviewed
     notes: >-
       That the broker accepts payloads up to MaxPacketSize follows from the
       purpose of the field (publishers may use the full size, REQ-PAG-005).
@@ -110,7 +110,7 @@ requirements:
         text: The Message Bus storage shall be used to make the public certificate and the settings of the MQTT broker available to the container and their MQTT clients.
     verification: [d8, manual]
     inventory: [RIG-4.1.1-723b5b51]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-029. The client side of the messaging domain already
       requires the port (REQ-MQTT-004), the certificate verification
@@ -134,7 +134,7 @@ requirements:
         text: 'In case the system provides a certificate authority (CA) for signing certificates, the CA should be made available by storing it as follows:'
     verification: [d8]
     inventory: [RIG-4.1.2-0e9d427e]
-    status: draft
+    status: reviewed
 
   - id: REQ-CNT-006
     title: Content and mount of the certificate storage
@@ -160,7 +160,7 @@ requirements:
         text: ca.pem CA used for validation of certificates.
     verification: [d8]
     inventory: [RIG-4.1.2-aff2fc7b, RIG-4.1.2-9e0b30f0, RIG-4.1.2-e191918f, RIG-4.1.2-54831f39]
-    status: draft
+    status: reviewed
     notes: >-
       The storage itself is a recommendation (REQ-CNT-005), its content
       "shall" (SF-091 (c)); the certificate of the application is only needed
@@ -184,7 +184,7 @@ requirements:
         text: <containername>.pem Certificate of a specific application (its identity, see 4.1.3 Secret Storage) should be named as described in 4.2 Container Name Conventions.
     verification: [d8]
     inventory: [RIG-4.1.2-7bd3e5d6]
-    status: draft
+    status: reviewed
     notes: >-
       Called "client certificate" until GL-ADR-022; the certificate is the
       identity of the application for all its uses (REQ-CNT-025).
@@ -221,7 +221,7 @@ requirements:
         text: The folder /run/secrets/oi4 is reserved for the files of Table 6.
     verification: [d8]
     inventory: [RIG-4.1.3-3ccf87cc, RIG-4.1.3-2494f946, RIG-4.1.3-04e70172, RIG-4.1.3-0b3ec5ba]
-    status: draft
+    status: reviewed
     notes: >-
       GL-ADR-022 (PO order 2026-10-22) replaced /run/secrets/mqtt_credentials,
       mqtt_private_key.pem and mqtt_passphrase by the folder /run/secrets/oi4
@@ -252,7 +252,7 @@ requirements:
         text: With this identity, the application authenticates itself at the Message Bus (OEC Messaging Guideline, 6.2.2 Security Settings).
     verification: [d8, manual]
     inventory: [RIG-4.1.3-7745248f, RIG-4.1.3-fabb06b7]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-029 (secret handling). Which means is used if both
       are available: REQ-MQTT-010. The decoding is explicit since GL-ADR-022
@@ -280,7 +280,7 @@ requirements:
         text: /opt/oi4/app Application specific data shall be stored here
     verification: [manual]
     inventory: [RIG-4.1.4-ffa2fd84, RIG-4.1.4-d501c1ac, RIG-4.1.4-f205ddea]
-    status: draft
+    status: reviewed
     notes: '"should use" in the sentence vs "shall be stored here" in the table: SF-091 (e).'
 
   - id: REQ-CNT-011
@@ -301,7 +301,7 @@ requirements:
         text: Attention must be paid to access permissions; to guarantee the data ownership, only one container shall have access to its own application specific volume.
     verification: [d8]
     inventory: [RIG-4.1.4-fba0af6c, RIG-4.1.4-4d7c9a08]
-    status: draft
+    status: reviewed
     notes: The host mapping does not apply to /opt/oi4/licenses (REQ-CNT-017, SF-091 (e)).
 
   - id: REQ-CNT-012
@@ -321,7 +321,7 @@ requirements:
         text: Because container volumes are not protected against external access to read/write in general, the application has to take measures to detect data manipulation and might protect it (e.g. encryption) if necessary.
     verification: [manual]
     inventory: [RIG-4.1.4-4d2eb4a9]
-    status: draft
+    status: reviewed
     notes: Graded by REQ-CMP-029.
 
   # --- License and SBOM storage (RIG 4.1.4) ---------------------------------
@@ -352,7 +352,7 @@ requirements:
         text: The license and SBOM storage (4.1.4 Application Specific Storages) is mandatory from Level 2 on.
     verification: [d8]
     inventory: [RIG-4.1.4-0a58da0d, RIG-4.1.4-0b9c4e0b, RIG-4.1.4-97a172ef, RIG-4.1.4-e49f19d5, RIG-4.1.4-d208c6fb, RIG-4-686e2ed9, RIG-5.2-1b1e9b90]
-    status: draft
+    status: reviewed
     notes: Detail of REQ-CMP-028 (reviewed umbrella).
 
   - id: REQ-CNT-014
@@ -374,7 +374,7 @@ requirements:
         text: This way, each license text is clearly assignable to the corresponding license in the SBOM.
     verification: [d8]
     inventory: [RIG-4.1.4-9ffd2b93]
-    status: draft
+    status: reviewed
 
   - id: REQ-CNT-015
     title: SBOM and license texts are part of the image
@@ -391,7 +391,7 @@ requirements:
         text: The SBOM and the license texts shall be part of the container image. They are static and only change with a new version of the image.
     verification: [d8]
     inventory: [RIG-4.1.4-f4837530]
-    status: draft
+    status: reviewed
 
   - id: REQ-CNT-016
     title: SBOM is created during the image build
@@ -406,7 +406,7 @@ requirements:
         text: Create the SBOM automatically as part of the build process of the image.
     verification: [manual]
     inventory: [RIG-4.1.4-f8ef731d]
-    status: draft
+    status: reviewed
 
   - id: REQ-CNT-017
     title: /opt/oi4/licenses is not overlaid by a host mount
@@ -422,7 +422,7 @@ requirements:
         text: The content of /opt/oi4/licenses is provided by the image and not by the host. Therefore, it shall not be overlaid by a host-defined mount.
     verification: [d8]
     inventory: [RIG-4.1.4-db5179b6]
-    status: draft
+    status: reviewed
 
   - id: REQ-CNT-018
     title: Platform may read the license folder
@@ -439,7 +439,7 @@ requirements:
         text: A platform may read the content, e.g. by mounting the path as a read-only volume that is populated from the image.
     verification: [manual]
     inventory: [RIG-4.1.4-150063ec]
-    status: draft
+    status: reviewed
 
   # --- Container name (RIG 4.2) ---------------------------------------------
   - id: REQ-CNT-019
@@ -464,7 +464,7 @@ requirements:
         text: The RFC 1123 rules for assigning a host name must also be followed for container names so that DNS resolution works correctly.
     verification: [d8]
     inventory: [RIG-4.2-36a1dde9, RIG-4.2-8d376a21, RIG-4.2-2365c930, RIG-4.2-7d974d7e]
-    status: draft
+    status: reviewed
     notes: >-
       Addressee (platform at container creation) and "globally unique" per
       SF-090 (b), (c). RFC 1123 allows letters, digits and "-" only, so the
@@ -487,7 +487,7 @@ requirements:
         text: To avoid several instances of a container with the same container name, it is best practice to use a UUID as postfix on top of a self-defined container name such as <DefaultContainerName>_<uuid>.
     verification: [d8]
     inventory: [RIG-4.2-244d6b14, RIG-4.2-7323472b]
-    status: draft
+    status: reviewed
     notes: >-
       Proposed in SF-090 (a): separator "-" instead of "_" (RFC 1123); with
       a UUID of 36 characters the default container name has at most 26
@@ -514,7 +514,7 @@ requirements:
       - ref: MG 4.3.1
         text: When deploying a container which by its nature has no serial number and can be instantiated multiple times, use the container name as SerialNumber as defined in OEC Runtime & Infrastructure Guideline, 4.2 Container Name Conventions.
     verification: [manual, d8]
-    status: draft
+    status: reviewed
     notes: >-
       The list of uses has no keyword (SF-090 (d)); treated as MUST until
       decided (G-1.6). Graded by REQ-CMP-029; the ClientId itself is a
@@ -540,7 +540,7 @@ requirements:
         text: In cases where a dedicated, immutable version of an image is needed, digests can be used. A digest is the unique identifier of an image as a SHA256 hash.
     verification: [manual]
     inventory: [RIG-4.3-b9c787bb, RIG-4.3-37a27c8a, RIG-3-d124e0fb]
-    status: draft
+    status: reviewed
     notes: >-
       The only RIG 4.3 statement with a keyword is the recommendation (tip
       box); REQ-CMP-030 (L3 Mandatory) therefore grades a recommendation,
@@ -566,7 +566,7 @@ requirements:
         text: Low level Ethernet communication is possible.
     verification: [d8, manual]
     inventory: [RIG-4.4-fbcccae3]
-    status: draft
+    status: reviewed
     notes: >-
       The exception for low-level Ethernet (OT connectors) is derived from
       the advantage/disadvantage tables (host network, bridge network).
@@ -590,7 +590,7 @@ requirements:
         text: The platform shall not make the secret storage of a container available to another container.
     verification: [d8, manual]
     inventory: [RIG-4.1.3-c4b8fd9f, RIG-4.1.3-fb9febc6]
-    status: draft
+    status: reviewed
     notes: >-
       New with GL-ADR-022: the private key is the identity of one application;
       the OI4 certificate storage, which holds only public data, may be shared
@@ -613,7 +613,7 @@ requirements:
         text: The application may also use its identity for other purposes, e.g. for signing messages, for the authentication at other systems or as server certificate of a web server (HTTPS) that the application provides.
     verification: [manual]
     inventory: [RIG-4.1.3-71d36c2a]
-    status: draft
+    status: reviewed
     notes: >-
       New with GL-ADR-022. Which purposes a certificate supports depends on
       its key usage and extended key usage set by the issuer (note in

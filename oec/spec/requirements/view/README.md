@@ -26,9 +26,9 @@ Guideline baseline: `6cb6a97`. Source of truth: the YAML files in `oec/spec/requ
 | [RES-EVENT](res-event.md) | Resource Event | C-028 | reviewed | 11 | MG 8.3.6, MG 9.1.6 |
 | [RES-SUBLIST](res-sublist.md) | Resource SubscriptionList | C-028 | reviewed | 15 | MG 8.3.9, MG 9.1.9 |
 | [BUS](bus.md) | General Message Bus communication | C-028 | reviewed | 10 | MG 9 |
-| [CNT](cnt.md) | Container environment | C-030 | drafted | 25 | RIG 2, RIG 4 |
-| [PLT](plt.md) | OEC platform requirements | C-030 | drafted | 9 | RIG 5 |
-| [APP](app.md) | Requirements on an application (runtime) | C-030 | drafted | 4 | RIG 5.2 |
-| [LIC](lic.md) | Legal requirements and software licenses | C-030 | drafted | 4 | RIG 5.3 |
-| [REG](reg.md) | OEC Registry | C-030 | drafted | 7 | MG A1 |
-| [GEN](gen.md) | Introductory and general chapters, cyber security, glossaries | C-030 | drafted | 1 | MG 2, MG 3, MG A4, RIG 3, RIG A1 |
+| [CNT](cnt.md) | Container environment | C-030 | reviewed | 25 | RIG 2, RIG 4 |
+| [PLT](plt.md) | OEC platform requirements | C-030 | reviewed | 9 | RIG 5 |
+| [APP](app.md) | Requirements on an application (runtime) | C-030 | reviewed | 4 | RIG 5.2 |
+| [LIC](lic.md) | Legal requirements and software licenses | C-030 | reviewed | 4 | RIG 5.3 |
+| [REG](reg.md) | OEC Registry | C-030 | reviewed | 7 | MG A1 |
+| [GEN](gen.md) | Introductory and general chapters, cyber security, glossaries | C-030 | reviewed | 1 | MG 2, MG 3, MG A4, RIG 3, RIG A1 |

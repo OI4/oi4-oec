@@ -30,7 +30,7 @@ requirements:
         text: At least one available network interface (likely Ethernet interface, but LTE or similar might be possible too)
     verification: [d8, manual]
     inventory: [RIG-5.1-7017a7e5]
-    status: draft
+    status: reviewed
     notes: >-
       The list items have no keyword of their own; the obligation is taken
       from the lead-in "must meet" (SF-092 (a)). The non-volatile memory may be
@@ -49,7 +49,7 @@ requirements:
         text: The system should be hardened for industrial use
     verification: [manual]
     inventory: [RIG-5.1-4d6a88a1]
-    status: draft
+    status: reviewed
 
   # --- Software (RIG 5.1) ---------------------------------------------------
   - id: REQ-PLT-003
@@ -66,7 +66,7 @@ requirements:
         text: The operating system shall be a Linux-based distribution at the current patch level.
     verification: [d8, manual]
     inventory: [RIG-5.1-c6087017]
-    status: draft
+    status: reviewed
 
   - id: REQ-PLT-004
     title: User and role management with granular access control
@@ -85,7 +85,7 @@ requirements:
         text: Access to available services of the host system can be configured in a granular way via the user and role management.
     verification: [manual]
     inventory: [RIG-5.1-f306986f]
-    status: draft
+    status: reviewed
     notes: >-
       "can be configured" describes a capability the platform has to offer;
       the obligation comes from the lead-in "must meet" (SF-092 (a)).
@@ -102,7 +102,7 @@ requirements:
         text: The authentication methods must fulfill industry-grade standards.
     verification: [manual]
     inventory: [RIG-5.1-76e1f390]
-    status: draft
+    status: reviewed
     notes: The guideline names no specific standard; the check is a manual assessment.
 
   - id: REQ-PLT-006
@@ -119,7 +119,7 @@ requirements:
         text: A daemon to run containerized applications must be integrated and available for Open Edge Computing users.
     verification: [d8]
     inventory: [RIG-5.1-ff4f2cea]
-    status: draft
+    status: reviewed
 
   - id: REQ-PLT-007
     title: MQTT broker available
@@ -135,7 +135,7 @@ requirements:
         text: A MQTT broker must be available on the edge computer or within the Open Edge Computing platform.
     verification: [d8]
     inventory: [RIG-5.1-d1c7b0b4]
-    status: draft
+    status: reviewed
     notes: Requirements on the broker itself are in area MQTT (REQ-MQTT-012 and following).
 
   - id: REQ-PLT-008
@@ -152,7 +152,7 @@ requirements:
         text: An OEC Registry must be available on the edge computer or within the Open Edge Computing platform.
     verification: [d8]
     inventory: [RIG-5.1-6c6b247d, MG-A4-4e9fcd9b, RIG-A1-515789f3]
-    status: draft
+    status: reviewed
     notes: The glossary entries of the OEC Registry (MG A4, RIG A1) state the same.
 
   - id: REQ-PLT-009
@@ -170,7 +170,7 @@ requirements:
         text: However, the infrastructure of an Open Edge Computing system may be distributed over several computing instances, e.g. one instance running the MQTT broker, another one running the OEC Registry and further ones running the containerized applications.
     verification: [manual]
     inventory: [RIG-5.1-8387aa07]
-    status: draft
+    status: reviewed
     notes: >-
       A D8 check therefore must not assume that broker, Registry and
       applications run on the same host.
