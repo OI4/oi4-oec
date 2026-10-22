@@ -7,7 +7,7 @@
 # (MG 8.3.13.1, GL-ADR-020, SF-069, SF-073) – REQ-RES-REFDES-011 … 016 (reviewed 2026-10-20);
 # the generic Query rules are area QRY.
 area: RES-REFDES
-baseline: "4e15e02"
+baseline: "df752cd"
 requirements:
   # --- DataSet content (MG 8.3.10) --------------------------------------------
   - id: REQ-RES-REFDES-001
