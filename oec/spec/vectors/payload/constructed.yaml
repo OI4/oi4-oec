@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review).
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "b942df3"
@@ -1704,6 +1704,167 @@ vectors:
                   "Text": "Common and specific settings"
                 }
               }
+            }
+          }
+        ]
+      }
+
+  # --- C-031 consistency review: checks without a vector ----------------------
+  - id: V-PAY-122
+    title: "Get Health with a reserved DataSetClassId"
+    expected: invalid
+    violates: [REQ-MSG-010, REQ-MSG-014]
+    reason: The NetworkMessage uses the reserved DataSetClassId of the removed resource License (MG A2), not the one of Health.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-001 with the DataSetClassId 2ae0505e-2830-4980-b65e-0bbdf08e2d45
+      (resource License, removed) instead of the Health id. The reserved id is
+      also the wrong id for the resource Health (REQ-MSG-010).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "2ae0505e-2830-4980-b65e-0bbdf08e2d45",
+        "ReplyTo": "",
+        "Messages": []
+      }
+
+  - id: V-PAY-123
+    title: "Get MAM with an invalid PaginationRequest"
+    expected: invalid
+    violates: [REQ-PAG-001]
+    reason: The PaginationRequest has PerPage 0 and lacks the mandatory field Page.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-005 (B1.1.11) with PerPage 0 and without Page.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/MAM"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 1,
+            "WriterGroupName": "PaginationRequest",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "PerPage": 0
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-124
+    title: "Pub Health with an invalid Pagination"
+    expected: invalid
+    violates: [REQ-PAG-003]
+    reason: HasNext of the Pagination is a string, not a Boolean.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 with the helper DataSet Pagination (DataSetWriterId 2) whose
+      HasNext is "false" (string).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          },
+          {
+            "DataSetWriterId": 2,
+            "WriterGroupName": "Pagination",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TotalCount": 1,
+              "PerPage": 25,
+              "Page": 1,
+              "HasNext": "false",
+              "PaginationId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-125
+    title: "Get Health with a Pagination"
+    expected: invalid
+    violates: [REQ-PAG-008]
+    reason: The helper DataSet Pagination is only sent with the method Pub.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-001 with a Pagination (DataSetWriterId 2) instead of a
+      PaginationRequest.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 2,
+            "WriterGroupName": "Pagination",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "TotalCount": 1,
+              "PerPage": 25,
+              "Page": 1,
+              "HasNext": false,
+              "PaginationId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-126
+    title: "Get Health with a Health DataSetMessage"
+    expected: invalid
+    violates: [REQ-RES-HEALTH-005]
+    reason: A Get Health carries no Health object, only the helper DataSets PaginationRequest and Locale.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-001 with the Health DataSetMessage of V-PAY-003 in Messages.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
             }
           }
         ]

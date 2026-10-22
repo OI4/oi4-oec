@@ -1,6 +1,6 @@
 # Requirements of area RES-DATA – resource Data
 # (MG 8.3.4, 9.1.4; ADR-0018, schema: catalog.schema.json).
-# Support: REQ-CMP-036 (resource Data), REQ-CMP-022 (Data ⇒ Metadata).
+# Support: REQ-CMP-036 (resource Data), REQ-CMP-037 (resource Metadata).
 # DataSetClassId: publisher-defined (REQ-MSG-011 … 013, SF-048/SF-072).
 # Encoding of the DataSet fields: REQ-MSG-030/031. The Status event after a
 # Set is REQ-RES-DATA-011 (content: RES-EVENT). Checked by
@@ -17,8 +17,9 @@ requirements:
     statement: >-
       The Payload of a Data DataSetMessage is an application-defined DataSet
       whose fields are encoded as JSON DataSet fields of OPC UA PubSub
-      (REQ-MSG-030, REQ-MSG-031) and are described by the Metadata of the
-      same Source and Tag (REQ-CMP-022).
+      (REQ-MSG-030, REQ-MSG-031). When the component supports the resource
+      Metadata (REQ-CMP-037), the fields are described by the Metadata of the
+      same Source and Tag.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -32,7 +33,7 @@ requirements:
         text: Each data object might look different, but it must follow the rules of OPC Foundation's specification for JSON coded pub/sub DataSets (OPC UA Part 14-7.2.5.4 with the field encoding of Part 6-5.4).
     verification: [d7-validate]
     inventory: [MG-8.3.4-b5d32f38, MG-9.1.4-a7f190f6]
-    status: reviewed
+    status: draft
     notes: >-
       Part 14 7.2.5.4 (JSON DataSetMessage) and Part 6 5.4 as fixed for OI4
       by REQ-MSG-030/031 (reference corrected by SF-077 (a)). The field

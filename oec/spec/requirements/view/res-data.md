@@ -5,7 +5,7 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: MG 8.3.4, MG
 
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
-| [REQ-RES-DATA-001](#req-res-data-001) | Data DataSets follow the OPC UA JSON DataSet rules | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
+| [REQ-RES-DATA-001](#req-res-data-001) | Data DataSets follow the OPC UA JSON DataSet rules | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
 | [REQ-RES-DATA-002](#req-res-data-002) | The standardized process value DataSet Oi4Pv is optional | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
 | [REQ-RES-DATA-003](#req-res-data-003) | Oi4Pv is published with the Tag Oi4Pv | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-DATA-004](#req-res-data-004) | Fields of the Oi4Pv DataSet | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
@@ -24,7 +24,7 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: MG 8.3.4, MG
 
 **Data DataSets follow the OPC UA JSON DataSet rules**
 
-The Payload of a Data DataSetMessage is an application-defined DataSet whose fields are encoded as JSON DataSet fields of OPC UA PubSub (REQ-MSG-030, REQ-MSG-031) and are described by the Metadata of the same Source and Tag (REQ-CMP-022).
+The Payload of a Data DataSetMessage is an application-defined DataSet whose fields are encoded as JSON DataSet fields of OPC UA PubSub (REQ-MSG-030, REQ-MSG-031). When the component supports the resource Metadata (REQ-CMP-037), the fields are described by the Metadata of the same Source and Tag.
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -32,7 +32,7 @@ The Payload of a Data DataSetMessage is an application-defined DataSet whose fie
 - Condition: The component publishes Data (REQ-CMP-036).
 - Refs: MG 8.3.4, MG 9.1.4, SF-077
 - Verification: d7-validate
-- Status: reviewed
+- Status: draft
 - Inventory: MG-8.3.4-b5d32f38, MG-9.1.4-a7f190f6
 
 > Each data object might look different, but it must follow the rules that the OPC Foundation has defined for JSON encoded PubSub DataSets (OPC UA Part 14-7.2.5.4 with the field encoding of Part 6-5.4).

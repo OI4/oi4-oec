@@ -6,8 +6,8 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: MG 8.3.5, MG
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
 | [REQ-RES-META-001](#req-res-meta-001) | Get Metadata addresses one DataSet and carries an empty DataSetMetaData | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-RES-META-002](#req-res-meta-002) | Get Metadata is answered on the Pub topic of the same DataSet | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-RES-META-003](#req-res-meta-003) | Pub Metadata carries the filled DataSetMetaData of one Data DataSet | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
+| [REQ-RES-META-002](#req-res-meta-002) | Get Metadata is answered on the Pub topic of the same DataSet | MUST | MUST | MUST | MUST | messaging | d7-test | draft |
+| [REQ-RES-META-003](#req-res-meta-003) | Pub Metadata carries the filled DataSetMetaData of one Data DataSet | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
 | [REQ-RES-META-004](#req-res-meta-004) | Set Metadata addresses one DataSet with a filled DataSetMetaData | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-META-005](#req-res-meta-005) | Set Metadata is protected by ACL | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-RES-META-006](#req-res-meta-006) | Status event after Set Metadata | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
@@ -43,10 +43,10 @@ A Get/Metadata/&lt;Source>/&lt;Tag> for a Data DataSet the component provides is
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: responder
-- Condition: The component publishes Data (REQ-CMP-022).
+- Condition: The component publishes Data and supports the resource Metadata (REQ-CMP-036, REQ-CMP-037).
 - Refs: MG 9.1.5
 - Verification: d7-test
-- Status: reviewed
+- Status: draft
 - Inventory: MG-9.1.5-bba195d4
 
 > Via the &lt;Method>/&lt;Resource>/&lt;Source>/&lt;Filter> combination Get/Metadata/&lt;Source>/&lt;Tag>, the publication of this information to the Pub/Metadata/&lt;Source>/&lt;Tag> topic can be triggered.
@@ -63,10 +63,10 @@ Metadata is published to Pub/Metadata/&lt;Source>/&lt;Tag> as a ua-metadata mess
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: publisher
-- Condition: The component publishes Data (REQ-CMP-022).
+- Condition: The component publishes Data and supports the resource Metadata (REQ-CMP-036, REQ-CMP-037).
 - Refs: MG 9.1.5, MG 8.3.5
 - Verification: schema, d7-validate
-- Status: reviewed
+- Status: draft
 - Inventory: MG-9.1.5-cbd58b97
 
 > In combination with the method Pub, the payload contains a filled DataSetMetaData. The topic must contain Resource, Source and Filter to be valid, because Metadata is always published for a single Data object (8.3.8 PublicationList, ON_REQUEST_FILTER_9).
