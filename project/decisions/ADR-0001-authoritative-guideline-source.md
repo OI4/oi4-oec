@@ -255,3 +255,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 - The previous baseline `5fb0fd8` (P1 exit) is recorded in the C-032 log.
 - The baseline is now `46ffbb1` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 7.7 headings only – the "Resource: …" labels are H2 headings, the syslog levels H4 below `<LogLevel>`; no content change.
 - No new GL-ADR, no finding. GL-ADR-001 … 022; SF-001 … 095 resolved; next free id SF-096.
+
+## Amendment C-032 addendum 2 (2026-10-22, guideline baseline `dcaeb04`)
+
+- The previous baseline `46ffbb1` is recorded in the amendment above.
+- The baseline is now `dcaeb04` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 8.2.3 plain-text references to MG 7.6/7.7 turned into links; no wording change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
