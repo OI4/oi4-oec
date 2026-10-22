@@ -6,7 +6,7 @@
 # for Action calls (SF-093).
 # Drafted in C-030.
 area: GEN
-baseline: "a77d331"
+baseline: "6cb6a97"
 requirements:
   - id: REQ-GEN-001
     title: Write access and Action calls restricted to authorized participants

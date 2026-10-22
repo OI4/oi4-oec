@@ -5,7 +5,7 @@
 # no keyword of their own (SF-092 (a)).
 # Drafted in C-030.
 area: PLT
-baseline: "a77d331"
+baseline: "6cb6a97"
 requirements:
   # --- Hardware (RIG 5.1) ---------------------------------------------------
   - id: REQ-PLT-001

@@ -5,7 +5,7 @@
 # details are SF-089.
 # Drafted in C-030.
 area: REG
-baseline: "a77d331"
+baseline: "6cb6a97"
 requirements:
   # --- Main tasks (MG A1) ---------------------------------------------------
   - id: REQ-REG-001
