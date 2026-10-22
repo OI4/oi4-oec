@@ -8,7 +8,7 @@
 # Drafted in C-029; SF-084 … SF-088 resolved in the guideline after the PO
 # review of C-029 (masking of sensitive values: GL-ADR-021).
 area: RES-CONFIG
-baseline: "e14726c"
+baseline: "485d8db"
 requirements:
   # --- DataSet content (MG 8.3.3, 8.3.3.1, 8.3.3.2) ---------------------------
   - id: REQ-RES-CONFIG-001
@@ -67,7 +67,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: A DisplayName for this Config object shall be given as localized text.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.3-1c34a2be, MG-8.3.3.1-ff239c31, MG-8.3.3.1-ce7454d2, MG-8.3.3.1-a6e70e34, MG-8.3.3.1-3252fe76, MG-8.3.3.1-c732cae9, MG-8.3.3.1-77df3d22, MG-8.3.3.1-c7ff79ea, MG-8.3.3.1-026a7205, MG-8.3.3.1-b894e5a1, MG-8.3.3.1-04c6226d, MG-8.3.3.1-aebe7568, MG-8.3.3.1-4669c6f3, MG-8.3.3.1-985db72c, MG-8.3.3.1-f4732596, MG-8.3.3.1-ccbc6103, MG-8.3.3.1-429195c8, MG-8.3.3.1-c082cd74, MG-8.3.3.1-3d0ae994, MG-8.3.3.1-feffc287, MG-8.3.3.1-f59df6f9, MG-8.3.3.1-61095915, MG-8.3.3.1-f5305ca8, MG-8.3.3.1-d1b06f37, MG-8.3.3.1-cba0cd10, MG-8.3.3.1-9dfc31eb, MG-8.3.3.1-bb506b94, MG-8.3.3.1-e228ee18, MG-8.3.3.1-bfb35734, MG-8.3.3-c25cf82c, MG-8.3.3-565fc688]
+    inventory: [MG-8.3.3-1c34a2be, MG-8.3.3.1-ff239c31, MG-8.3.3.1-ce7454d2, MG-8.3.3.1-a6e70e34, MG-8.3.3.1-3252fe76, MG-8.3.3.1-29da9752, MG-8.3.3.1-ab90ce46, MG-8.3.3.1-f52ec9eb, MG-8.3.3.1-db47c71a, MG-8.3.3.1-126ff9aa, MG-8.3.3.1-39df3233, MG-8.3.3.1-be3ae5c6, MG-8.3.3.1-d03cc921, MG-8.3.3.1-6015d8a2, MG-8.3.3.1-51d6f600, MG-8.3.3.1-27f5627b, MG-8.3.3.1-fc37558b, MG-8.3.3.1-af59cd36, MG-8.3.3.1-b91fda59, MG-8.3.3.1-d8646dba, MG-8.3.3.1-ccfb0db5, MG-8.3.3.1-2bcfa794, MG-8.3.3.1-0a897b4b, MG-8.3.3.1-4c862c5c, MG-8.3.3.1-23cbfa5a, MG-8.3.3.1-d7495ce2, MG-8.3.3.1-bb506b94, MG-8.3.3.1-ead395b9, MG-8.3.3.1-2b8af458, MG-8.3.3-c25cf82c, MG-8.3.3-565fc688]
     status: reviewed
     notes: >-
       The nesting (payload → <GroupName>/Context, Group →
@@ -102,7 +102,7 @@ requirements:
       - ref: MG 9.1.3
         text: In addition, it may also contain the other properties received through Pub/Config.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.3.2-92c9fd11, MG-8.3.3.2-44186564, MG-8.3.3.2-d295d815, MG-8.3.3.2-cc495a35, MG-8.3.3.2-7d60da83, MG-8.3.3.2-e7184abe, MG-8.3.3.2-2e0d0855, MG-8.3.3.2-e99d2012, MG-8.3.3.2-25f2c93e, MG-8.3.3.2-bbef6cbc, MG-8.3.3.2-626ac4bb, MG-8.3.3.2-58c43c4f, MG-8.3.3.2-0e562920, MG-8.3.3.2-b153b601, MG-8.3.3.2-80b13559, MG-8.3.3.2-6276f54f, MG-8.3.3.2-68250658, MG-8.3.3.2-2c2ebbbd, MG-8.3.3.2-75eb048a, MG-8.3.3.2-f6a75ae4, MG-8.3.3.2-2c218a3d, MG-8.3.3.2-614eeff5, MG-8.3.3.2-d9012dde, MG-8.3.3.2-25c785df, MG-8.3.3.2-67988e5d, MG-8.3.3.2-9d0c7d81, MG-8.3.3.2-9c1c98ad, MG-8.3.3.2-bcaa5fb6, MG-9.1.3-36d1a38e, MG-8.3.3.2-506e3d6e, MG-8.3.3.2-76395973]
+    inventory: [MG-8.3.3.2-92c9fd11, MG-8.3.3.2-44186564, MG-8.3.3.2-d295d815, MG-8.3.3.2-cc495a35, MG-8.3.3.2-38cd3bc9, MG-8.3.3.2-19812558, MG-8.3.3.2-3a584eb7, MG-8.3.3.2-3e3b85d6, MG-8.3.3.2-09688626, MG-8.3.3.2-4b6e2cdb, MG-8.3.3.2-84044ccd, MG-8.3.3.2-5914ee8d, MG-8.3.3.2-ca8e10c5, MG-8.3.3.2-c4c1f04f, MG-8.3.3.2-074c74ca, MG-8.3.3.2-26bdd0b2, MG-8.3.3.2-374ae62e, MG-8.3.3.2-d9274546, MG-8.3.3.2-00be2a42, MG-8.3.3.2-6187166d, MG-8.3.3.2-1cc9d955, MG-8.3.3.2-d9c2fcee, MG-8.3.3.2-edd4c24c, MG-8.3.3.2-edad7393, MG-8.3.3.2-c9217183, MG-8.3.3.2-9d0c7d81, MG-8.3.3.2-31bdf83e, MG-8.3.3.2-0ea05119, MG-9.1.3-36d1a38e, MG-8.3.3.2-506e3d6e, MG-8.3.3.2-76395973]
     status: reviewed
     notes: >-
       "If given, a DisplayName … shall be given as localized text" (MG
@@ -134,7 +134,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: A ConfigName must not be Name or Description.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.3.1-ec257974, MG-8.3.3.1-1e400088, MG-8.3.3.1-028278e0, MG-8.3.3.1-63ac43c1, MG-8.3.3.2-7c86dbf5, MG-8.3.3.2-47e3c53f, MG-8.3.3.2-d70a1784, MG-8.3.3.2-974cf753, MG-8.3.3.1-e2f7095a, MG-8.3.3.1-669ef474, MG-8.3.3.2-e7996b9d, MG-8.3.3.2-d71dab9d]
+    inventory: [MG-8.3.3.1-ec257974, MG-8.3.3.1-1e400088, MG-8.3.3.1-c6309630, MG-8.3.3.1-cbc11847, MG-8.3.3.2-7c86dbf5, MG-8.3.3.2-47e3c53f, MG-8.3.3.2-9e8bf02f, MG-8.3.3.2-04062350, MG-8.3.3.1-e2f7095a, MG-8.3.3.1-f1d934b9, MG-8.3.3.2-e7996b9d, MG-8.3.3.2-b0867894]
     status: reviewed
     notes: >-
       The reserved names (Context; Name, Description) avoid keys that cannot
@@ -161,7 +161,7 @@ requirements:
       - ref: MG 9.1.3
         text: As the device or application providing the resource is the owner of the configuration object, it is the only instance which can remove objects from within the config object.
     verification: [d7-test]
-    inventory: [MG-8.3.3.1-59c566b4, MG-8.3.3.1-b7f9c7bc, MG-8.3.3.2-5920d940, MG-8.3.3.2-1652886e, MG-9.1.3-ddbafedb]
+    inventory: [MG-8.3.3.1-59c566b4, MG-8.3.3.1-70cb55b3, MG-8.3.3.2-5920d940, MG-8.3.3.2-c2918061, MG-9.1.3-ddbafedb]
     status: reviewed
     notes: >-
       A Set with an unknown group or configuration object is rejected
@@ -186,7 +186,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: The allowed subset is Boolean, ByteString, DateTime, Number and String.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.3.1-97fb7241, MG-8.3.3.2-538b6036]
+    inventory: [MG-8.3.3.1-0c91156e, MG-8.3.3.2-6e8b3808]
     status: reviewed
     notes: >-
       A requester that repeats Type in a Set uses the published one
@@ -221,7 +221,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: 'Exception: the mask `********` of a sensitive Config object (see Sensitive).'
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.3.1-61fb5a3d, MG-8.3.3.1-3b31fa9e, MG-8.3.3.2-053b08f7, MG-8.3.3.2-8e5d40a5]
+    inventory: [MG-8.3.3.1-fda68158, MG-8.3.3.1-7641aa0a, MG-8.3.3.2-5ece4201, MG-8.3.3.2-c0ca9c8c]
     status: reviewed
     notes: >-
       The representations per Type are listed in MG 8.3.3.1/8.3.3.2 (SF-084
@@ -254,7 +254,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: The Length contains the max length of a Value, counted in characters.
     verification: [d7-validate]
-    inventory: [MG-8.3.3.1-447047a4, MG-8.3.3.1-7500a301, MG-8.3.3.1-f4071468, MG-8.3.3.2-00c53dcc, MG-8.3.3.2-bf8e27b3, MG-8.3.3.2-2fb581a1]
+    inventory: [MG-8.3.3.1-4bc68317, MG-8.3.3.1-f17be68d, MG-8.3.3.1-17f15d4d, MG-8.3.3.2-d15fa833, MG-8.3.3.2-6fb4d812, MG-8.3.3.2-8a6ca709]
     status: reviewed
     notes: >-
       Length counts characters (Unicode code points); Min and Max apply to
@@ -282,7 +282,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: However, when a very rare unit does not exist in the list of EngineeringUnits, a self defined (or better industry specific) unit may be used here.
     verification: [manual]
-    inventory: [MG-8.3.3.1-96cf48b1, MG-8.3.3.1-b96d6325, MG-8.3.3.2-50901c67, MG-8.3.3.2-6c35efd7]
+    inventory: [MG-8.3.3.1-8488db27, MG-8.3.3.1-f0f59ab3, MG-8.3.3.2-f0d82434, MG-8.3.3.2-ee0cf174]
     status: reviewed
     notes: >-
       The B1.1.3 device example had "Unit": "Temperature" (a quantity, no
@@ -307,7 +307,7 @@ requirements:
       - ref: MG 9.1.3
         text: To do so, the sender must send a Set with an empty value of the config object.
     verification: [d7-validate]
-    inventory: [MG-8.3.3.1-4670986b, MG-8.3.3.2-937d0e53, MG-9.1.3-3350ff5c, MG-9.1.3-516d732b]
+    inventory: [MG-8.3.3.1-225f710d, MG-8.3.3.2-4419a9e8, MG-9.1.3-3350ff5c, MG-9.1.3-516d732b]
     status: reviewed
     notes: Del Config is not allowed (matrix, REQ-TOP-013). Examples MG B1.1.3 "empty existing values".
 
@@ -332,7 +332,7 @@ requirements:
       - ref: MG 9.1.3
         text: The payload must contain the values of the mandatory config names of each contained group.
     verification: [d7-validate]
-    inventory: [MG-8.3.3.1-f1218207, MG-8.3.3.1-624778c8, MG-8.3.3.1-986cbccd, MG-8.3.3.2-bff5490c, MG-8.3.3.2-30635d2a, MG-8.3.3.2-846ccb16, MG-9.1.3-1d957d86, MG-9.1.3-7c151900, MG-9.1.3-cf25bdf3]
+    inventory: [MG-8.3.3.1-bc1d417b, MG-8.3.3.1-629dca2b, MG-8.3.3.1-269a6962, MG-8.3.3.2-ddc33ac3, MG-8.3.3.2-f3e06630, MG-8.3.3.2-aeff2f0d, MG-9.1.3-1d957d86, MG-9.1.3-7c151900, MG-9.1.3-cf25bdf3]
     status: reviewed
     notes: >-
       An empty Value of a mandatory object is a valid Set; the application
@@ -359,7 +359,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: Front-end applications should hide it as well, e.g. when a new value is entered.
     verification: [manual]
-    inventory: [MG-8.3.3.1-da5ad6c2, MG-8.3.3.2-71486eba, MG-8.3.3.1-6a2f01c3]
+    inventory: [MG-8.3.3.1-6ab60217, MG-8.3.3.2-16781fc2, MG-8.3.3.1-e2e7bd23]
     status: reviewed
     notes: >-
       The Message Bus side is REQ-RES-CONFIG-024 (masking in every Pub) and
@@ -657,7 +657,7 @@ requirements:
       - ref: MG 8.3.3.1
         text: The value of a sensitive Config object is not published on the Message Bus; it can only be set
     verification: [d7-validate, d7-test]
-    inventory: [MG-8.3.3.1-84a33fca, MG-8.3.3.1-58f91f16, MG-9.1.3-a94653f3, MG-8.3.3.1-4b1b3520]
+    inventory: [MG-8.3.3.1-72d258a9, MG-8.3.3.1-3f9abadb, MG-9.1.3-a94653f3, MG-8.3.3.1-8912ceb4]
     status: reviewed
     notes: >-
       New with GL-ADR-021 (SF-087). Levels follow the Config DataSet: a
@@ -686,7 +686,7 @@ requirements:
       - ref: MG 9.1.3
         text: A Set with the mask `********` as Value of a sensitive config element leaves the value unchanged
     verification: [d7-test]
-    inventory: [MG-8.3.3.2-44a6e1bb, MG-8.3.3.2-e0ec94c7]
+    inventory: [MG-8.3.3.2-c58a8f66, MG-8.3.3.2-6f1a91a8]
     status: reviewed
     notes: >-
       New with GL-ADR-021 (SF-087). Levels as REQ-RES-CONFIG-023 (Set
@@ -711,7 +711,7 @@ requirements:
       - ref: MG 9.1.3
         text: A Set carries new values of sensitive config elements in clear text. The operator should therefore also restrict the read access to the Set/Config topics via ACL.
     verification: [d8]
-    inventory: [MG-8.3.3.2-19501841, MG-9.1.3-ac3a3f16]
+    inventory: [MG-8.3.3.2-62425f11, MG-9.1.3-ac3a3f16]
     status: reviewed
     notes: >-
       New with GL-ADR-021 (SF-087). Operator duty like the write ACL of

@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PUBLIST
-baseline: "e14726c"
+baseline: "485d8db"
 requirements:
   # --- DataSet content (MG 8.3.8) ---------------------------------------------
   - id: REQ-RES-PUBLIST-001
@@ -32,7 +32,7 @@ requirements:
       - ref: MG 8.3.8
         text: The Filter shall be a topic encoded string as explained in 7.7 Filter Element.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.8-b9d2374e, MG-8.3.8-86fbe141, MG-8.3.8-c2821b10, MG-8.3.8-5ef901d0, MG-8.3.8-25e2c8ca, MG-8.3.8-f7d6d15a, MG-8.3.8-6ca0c9bc, MG-8.3.8-1f4ea694, MG-8.3.8-533ce7cf, MG-8.3.8-2237c2eb]
+    inventory: [MG-8.3.8-b9d2374e, MG-8.3.8-86fbe141, MG-8.3.8-c2821b10, MG-8.3.8-5ef901d0, MG-8.3.8-25e2c8ca, MG-8.3.8-f7d6d15a, MG-8.3.8-6ca0c9bc, MG-8.3.8-1f4ea694, MG-8.3.8-5afb0ffd, MG-8.3.8-2237c2eb]
     status: reviewed
     notes: >-
       The Value Range of a Precisions entry is 0.0 … 3.4·10^38 (SF-067 (d),
@@ -153,7 +153,7 @@ requirements:
       - ref: MG 8.3.8
         text: With OFF_0 the DataSetMessage must not be accessible via the Message Bus and must not be published at all.
     verification: [d7-test]
-    inventory: [MG-8.3.8-36c1539d]
+    inventory: [MG-8.3.8-b1593845]
     status: reviewed
 
   - id: REQ-RES-PUBLIST-008
@@ -171,7 +171,7 @@ requirements:
       - ref: MG 8.3.8
         text: The DataSetMessage must not be published in any way other than by a request.
     verification: [d7-monitor]
-    inventory: [MG-8.3.8-3465ed10, MG-8.3.8-83da2432]
+    inventory: [MG-8.3.8-d3bb12e3, MG-8.3.8-e6a91522]
     status: reviewed
 
   - id: REQ-RES-PUBLIST-009
@@ -191,7 +191,7 @@ requirements:
       - ref: MG 8.3.8
         text: With APPLICATION_2 the DataSetMessage must be published with other DataSetMessages of the same resource (7.5 Resource Element) and same application (7.3 AppId Element).
     verification: [d7-monitor]
-    inventory: [MG-8.3.8-30c0cddd, MG-8.3.8-0260e61c, MG-8.3.8-242c977b]
+    inventory: [MG-8.3.8-92e1afeb, MG-8.3.8-570d2e69, MG-8.3.8-13308f1d]
     status: reviewed
 
   - id: REQ-RES-PUBLIST-010
@@ -211,7 +211,7 @@ requirements:
       - ref: MG 8.3.8
         text: With SOURCE_3 the DataSetMessage must be published with other DataSetMessages of the same resource (7.5 Resource Element), same source (7.6 Source Element) and same application (7.3 AppId Element).
     verification: [d7-monitor]
-    inventory: [MG-8.3.8-2f684216, MG-8.3.8-d2000452, MG-8.3.8-1b645328]
+    inventory: [MG-8.3.8-59e01efb, MG-8.3.8-26ac5f28, MG-8.3.8-bc2a71a3]
     status: reviewed
 
   - id: REQ-RES-PUBLIST-011
@@ -231,7 +231,7 @@ requirements:
       - ref: MG 8.3.8
         text: With FILTER_4 the DataSetMessage must be published separately in an own NetworkMessage.
     verification: [d7-monitor]
-    inventory: [MG-8.3.8-fad93b18, MG-8.3.8-b8f0cde9, MG-8.3.8-3e5224b8, MG-8.3.8-7f0636da]
+    inventory: [MG-8.3.8-4833ce71, MG-8.3.8-6945d194, MG-8.3.8-4be48d44, MG-8.3.8-8ae37b21]
     status: reviewed
     notes: >-
       For resources without Filter (MAM, Health, Profile, ReferenceDesignation)
@@ -261,7 +261,7 @@ requirements:
       - ref: MG 8.3.8
         text: An entry of the resources MAM and Health must have a Mode that enables APPLICATION_2, SOURCE_3 or FILTER_4, because these resources must be published without request.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.8-57cde74e, MG-8.3.8-118f057e, MG-8.3.8-686fbc4b, MG-8.3.8-3c99b825]
+    inventory: [MG-8.3.8-2e85e573, MG-8.3.8-0708060d, MG-8.3.8-f8e8a679, MG-8.3.8-11e1835d]
     status: reviewed
     notes: >-
       Allowed topic forms per REQ-TOP-013, mandatory publications of MAM and
@@ -329,7 +329,7 @@ requirements:
       - ref: MG 8.3.8
         text: When republishing, it should occur only after a minimum defined change.
     verification: [d7-monitor]
-    inventory: [MG-8.3.8-ac7f1fff, MG-8.3.8-42cb238d, MG-8.3.8-01cce89c]
+    inventory: [MG-8.3.8-ac7f1fff, MG-8.3.8-42cb238d, MG-8.3.8-ea1a08ce]
     status: reviewed
 
   - id: REQ-RES-PUBLIST-016
@@ -355,7 +355,7 @@ requirements:
       - ref: MG 9.1.8
         text: If the Set changes a field which is read only or which can not be changed according to the Config of the entry (8.3.8 PublicationList), the Set must be rejected and the status Event must have the EventLevel Bad.
     verification: [d7-test]
-    inventory: [MG-8.3.8-a4583beb, MG-8.3.8-498c4139, MG-8.3.8-3b66b545, MG-9.1.8-083059eb]
+    inventory: [MG-8.3.8-618f09d9, MG-8.3.8-3ce8b144, MG-8.3.8-d6044a07, MG-9.1.8-083059eb]
     status: reviewed
     notes: The Config values themselves are a keyword-less definition (MG 8.3.8); read-only fields in a Set per SF-067 (f).
 

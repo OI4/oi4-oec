@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "e14726c"
+baseline: "485d8db"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -295,11 +295,11 @@ items:
   # --- RES-PUBLIST (C-027) --------------------------------------------------
   - key: MG-8.3.8-1ac7726d
     reason: Motivation of the PublicationList ("may" expresses possibility); the publishing behavior is REQ-RES-PUBLIST-007 … REQ-RES-PUBLIST-016.
-  - key: MG-8.3.8-51ee5db7
+  - key: MG-8.3.8-8015bc38
     reason: Use case of the Mode OFF_0 ("can be used" expresses possibility); the Mode is REQ-RES-PUBLIST-007.
-  - key: MG-8.3.8-dacdadfd
+  - key: MG-8.3.8-46a3d0cc
     reason: Use case of the Mode ON_REQUEST_1 ("may be used" expresses possibility); the Mode is REQ-RES-PUBLIST-008.
-  - key: MG-8.3.8-abb77071
+  - key: MG-8.3.8-854d54d8
     reason: Use case of Precisions ("can be used" expresses possibility); the rule is REQ-RES-PUBLIST-015.
   - key: MG-9.1.8-fdb7fdf3
     reason: Hint how any application can listen to PublicationList ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
@@ -400,45 +400,45 @@ items:
   - key: MG-9.1-13c6a834
     reason: Obligation of the OI4 Alliance, not of a component; fulfilled by MG 8.3 and MG A2 (REQ-MSG-010).
   # --- RES-CONFIG (C-029) ---------------------------------------------------
-  - key: MG-8.3.3.1-03b50519
+  - key: MG-8.3.3.1-1befafab
     reason: Usage hint ("can") for the Name of a Group; presence and type are REQ-RES-CONFIG-002.
-  - key: MG-8.3.3.1-dc6320ac
+  - key: MG-8.3.3.1-c56211fd
     reason: Explanation of the optional Description of a Group ("can"); presence and type are REQ-RES-CONFIG-002.
-  - key: MG-8.3.3.1-b9d1aeab
+  - key: MG-8.3.3.1-9290b338
     reason: Usage hint ("can") for the Description of a Group; no obligation.
-  - key: MG-8.3.3.1-16598473
+  - key: MG-8.3.3.1-a572cd49
     reason: Usage hint ("can") for the Name of a Config object; presence and type are REQ-RES-CONFIG-002.
-  - key: MG-8.3.3.1-b09854c6
+  - key: MG-8.3.3.1-9ff37309
     reason: Explanation of the optional Description of a Config object ("can"); presence and type are REQ-RES-CONFIG-002.
-  - key: MG-8.3.3.1-28d29212
+  - key: MG-8.3.3.1-55beeefd
     reason: Usage hint ("can") for the Description of a Config object; no obligation.
-  - key: MG-8.3.3.1-bba6e68a
+  - key: MG-8.3.3.1-f9dcfa25
     reason: Usage hint ("can") for the Name of the Context; presence and type are REQ-RES-CONFIG-002, relation to the Filter REQ-RES-CONFIG-015.
-  - key: MG-8.3.3.1-fb61096a
+  - key: MG-8.3.3.1-903857b6
     reason: Explanation of the optional Description of the Context ("can"); presence and type are REQ-RES-CONFIG-002.
-  - key: MG-8.3.3.1-24a5c25c
+  - key: MG-8.3.3.1-7358822e
     reason: Usage hint ("can") for the Description of the Context; no obligation.
-  - key: MG-8.3.3.1-42e118f3
+  - key: MG-8.3.3.1-9056871d
     reason: Usage hint ("can") for Validation; its keys are REQ-RES-CONFIG-002, their effect REQ-RES-CONFIG-008 (example range Int16 since SF-084 (e)).
-  - key: MG-8.3.3.2-23af7493
+  - key: MG-8.3.3.2-a3c897b5
     reason: Usage hint ("can") for the Name of a Group (Set table); presence and type are REQ-RES-CONFIG-003.
-  - key: MG-8.3.3.2-b912fcf3
+  - key: MG-8.3.3.2-c4e516dd
     reason: Explanation of the optional Description of a Group ("can", Set table); presence and type are REQ-RES-CONFIG-003.
-  - key: MG-8.3.3.2-21ea1c0f
+  - key: MG-8.3.3.2-e6e19378
     reason: Usage hint ("can") for the Description of a Group (Set table); no obligation.
-  - key: MG-8.3.3.2-de47dca4
+  - key: MG-8.3.3.2-60131fac
     reason: Usage hint ("can") for the Name of a Config object (Set table); presence and type are REQ-RES-CONFIG-003.
-  - key: MG-8.3.3.2-708bb27a
+  - key: MG-8.3.3.2-366c76ab
     reason: Explanation of the optional Description of a Config object ("can", Set table); presence and type are REQ-RES-CONFIG-003.
-  - key: MG-8.3.3.2-f19e91ae
+  - key: MG-8.3.3.2-4541620b
     reason: Usage hint ("can") for the Description of a Config object (Set table); no obligation.
-  - key: MG-8.3.3.2-530d570a
+  - key: MG-8.3.3.2-68c09a71
     reason: Usage hint ("can") for the Name of the Context (Set table); presence and type are REQ-RES-CONFIG-003, relation to the Filter REQ-RES-CONFIG-015.
-  - key: MG-8.3.3.2-f09c2395
+  - key: MG-8.3.3.2-234a1901
     reason: Explanation of the optional Description of the Context ("can", Set table); presence and type are REQ-RES-CONFIG-003.
-  - key: MG-8.3.3.2-e24f7d89
+  - key: MG-8.3.3.2-69cefea9
     reason: Usage hint ("can") for the Description of the Context (Set table); no obligation.
-  - key: MG-8.3.3.2-453202a1
+  - key: MG-8.3.3.2-ae7cf94a
     reason: Usage hint ("can") for Validation (Set table); its keys are REQ-RES-CONFIG-003, their effect REQ-RES-CONFIG-008.
   - key: MG-9.1.3-dea12337
     reason: Hint how any application can listen to Config ("can" expresses possibility); subscriptions are free (area MQTT/TOP).

@@ -7,7 +7,7 @@
 # (MG 8.3.13.1, GL-ADR-020, SF-069, SF-073) – REQ-RES-REFDES-011 … 016 (reviewed 2026-10-20);
 # the generic Query rules are area QRY.
 area: RES-REFDES
-baseline: "e14726c"
+baseline: "485d8db"
 requirements:
   # --- DataSet content (MG 8.3.10) --------------------------------------------
   - id: REQ-RES-REFDES-001
@@ -29,7 +29,7 @@ requirements:
     scope: [MG 4]
     refs: [MG 8.3.10, SF-068]
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.10-d84c70c5, MG-8.3.10-2594d1f8, MG-8.3.10-c7d632f5, MG-8.3.10-f15972dd, MG-8.3.10-3d78517a, MG-8.3.10-255b94f8, MG-8.3.10-362f96db, MG-8.3.10-39f50e4b, MG-8.3.10-87d2c21a, MG-8.3.10-dab61376, MG-8.3.10-913074aa, MG-8.3.10-2684af4b, MG-8.3.10-1f7e4106, MG-8.3.10-b9996a06, MG-8.3.10-26a4343a, MG-8.3.10-2d2571c9, MG-8.3.10-e66a9003, MG-8.3.10-dc755ab4, MG-8.3.10-3e41890a, MG-8.3.10-86bc7b35, MG-8.3.10-02f627f3]
+    inventory: [MG-8.3.10-d84c70c5, MG-8.3.10-6fbcf97c, MG-8.3.10-cd52e787, MG-8.3.10-9b0d0262, MG-8.3.10-e56a9465, MG-8.3.10-8193fbf4, MG-8.3.10-b4413780, MG-8.3.10-39f50e4b, MG-8.3.10-fefc7b1d, MG-8.3.10-8851752a, MG-8.3.10-019bdfbb, MG-8.3.10-afcbf2a0, MG-8.3.10-2f17eff0, MG-8.3.10-4a1eeb66, MG-8.3.10-26a4343a, MG-8.3.10-58beecf9, MG-8.3.10-22c4a47c, MG-8.3.10-7929f9e5, MG-8.3.10-9d8f0779, MG-8.3.10-ebee4426, MG-8.3.10-3bbf3213]
     status: reviewed
     notes: >-
       The structure is identical for all three objects (SF-068 (d),
@@ -50,7 +50,7 @@ requirements:
       - ref: MG 8.3.10
         text: Therefore, it must be persisted on an application-specific basis.
     verification: [d7-test]
-    inventory: [MG-8.3.10-1b81e498]
+    inventory: [MG-8.3.10-f5ceed18]
     status: reviewed
 
   # --- Message Bus (MG 9.1.10) -----------------------------------------------
@@ -145,7 +145,7 @@ requirements:
       - ref: MG 9.1.10
         text: Setting multiple reference designations at once via Oi4v2/<ServiceType>/<AppId>/Set/ReferenceDesignation is not possible due to security reasons because it can not be validated via an access control list by the Message Bus.
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.10-90a987bb, MG-9.1.10-e3d3cf86, MG-9.1.10-c7b9efea, MG-8.3.10-0bec1aee]
+    inventory: [MG-9.1.10-90a987bb, MG-9.1.10-e3d3cf86, MG-9.1.10-c7b9efea, MG-8.3.10-c4dc0834]
     status: reviewed
     notes: Whole-object semantics per SF-068 (f), GL-ADR-019; topic form per REQ-TOP-013 (matrix).
 
@@ -386,6 +386,6 @@ requirements:
       - ref: MG 8.3.10
         text: Therefore, the IdentificationLink of a Parent should be provided whenever the parent asset has an Identification Link.
     verification: [manual]
-    inventory: [MG-8.3.10-ed42bea0]
+    inventory: [MG-8.3.10-d8256e38]
     status: reviewed
     notes: The Query of ReferenceDesignation finds children only by Parent.IdentificationLink (REQ-RES-REFDES-014).
