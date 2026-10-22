@@ -338,3 +338,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `9b6b22f` is recorded in addendum 16.
 - The baseline is now `f951bcb` on branch `feature/spec-findings` (local commit `f951bcb` – links in MG 2.3 and MG 5 `GlobalAssetId` (IDTA-01001), "from Table 8" in MG 4.2; PO request 2026-10-22). Spec re-baselined (`070d054`): one informative key remap, all REQs reviewed. No finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 18 (2026-10-22, guideline baseline `c840cb5`)
+
+- The previous baseline `f951bcb` is recorded in addendum 17.
+- The baseline is now `c840cb5` on branch `feature/spec-findings` (local commits `05f7a30` – PO cleanup of informative notes in MG 7 and MG 2.3 wording – and `c840cb5` – RFC 5424 links in MG 7.7; PO request 2026-10-22). Spec re-baselined (`49dd3a7`): key remaps and four informative entries dropped; no obligation changed, no finding, no GL-ADR. SF-001 … 095 resolved.
