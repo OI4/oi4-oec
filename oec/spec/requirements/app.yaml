@@ -8,7 +8,7 @@
 # at Level 3 (SF-091 (f)).
 # Drafted in C-030.
 area: APP
-baseline: "6cb6a97"
+baseline: "b942df3"
 requirements:
   - id: REQ-APP-001
     title: Images for at least one supported platform
