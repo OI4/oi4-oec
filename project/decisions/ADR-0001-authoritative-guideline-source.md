@@ -353,3 +353,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `c67ec35` is recorded in addendum 19.
 - The baseline is now `e14726c` on branch `feature/spec-findings` (PO commit `d3f850e` – MG 7.7 Event filter sections restructured as `### EventCategory …` subsections – and local commit `e14726c` – interactive guardrails on the landing page, hero tags and community section removed; PO request 2026-10-22). Spec re-baselined (`7705a5d`): 17 key remaps, no content change, no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 21 (2026-10-22, guideline baseline `485d8db`)
+
+- The previous baseline `e14726c` is recorded in addendum 20.
+- The baseline is now `485d8db` on branch `feature/spec-findings` (local commit `485d8db` – heading levels of MG 8.2–8.4 straightened, nested object headings, PublicationList enum values as bold code; PO request 2026-10-22). Spec re-baselined (`8b01b76`): 153 key remaps, no content change, no finding, no GL-ADR. SF-001 … 095 resolved.
