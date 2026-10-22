@@ -249,3 +249,9 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `4036205` SF-094 (MG B2 DataSet examples = the referenced B1.1 payloads), `e25f64f` SF-095 (code block tags, MG 1.2 DataSetWriterId 3456).
   - `5fb0fd8` – findings register: SF-091/094/095 resolved, no open finding.
 - No new GL-ADR. GL-ADR-001 … 022; SF-001 … 095 resolved; next free id SF-096. This is the baseline of the P1 exit.
+
+## Amendment C-032 addendum (2026-10-22, guideline baseline `46ffbb1`)
+
+- The previous baseline `5fb0fd8` (P1 exit) is recorded in the C-032 log.
+- The baseline is now `46ffbb1` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 7.7 headings only – the "Resource: …" labels are H2 headings, the syslog levels H4 below `<LogLevel>`; no content change.
+- No new GL-ADR, no finding. GL-ADR-001 … 022; SF-001 … 095 resolved; next free id SF-096.
