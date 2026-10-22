@@ -1,7 +1,7 @@
 # Test vectors of kind dnp-encoding (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: dnp-encoding
-baseline: "dcaeb04"
+baseline: "e36e762"
 description: >-
   dnp-encoding vectors (MG A3): examples of Table 19 and of the URI example,
   the character classes of Table 18 and the extension to all UTF-8 octets
