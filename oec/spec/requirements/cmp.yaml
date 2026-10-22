@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "b942df3"
+baseline: "5fb0fd8"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -565,13 +565,17 @@ requirements:
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 4.1, RIG 4.2]
-    refs: [RIG 1.2]
+    refs: [RIG 1.2, SF-091]
     quotes:
       - ref: RIG 1.2
         text: Container environment requirements, such as storage conventions and secret handling (4.1 Container Storage, 4.2 Container Name Conventions) - Recommended Mandatory
     verification: [d8]
-    inventory: [RIG-1.2-e8490432]
+    inventory: [RIG-1.2-e8490432, RIG-1.2-4d77c512]
     status: reviewed
+    notes: >-
+      "Mandatory" at Level 3 means that the referenced chapter applies as
+      stated there; its recommendations stay SHOULD (RIG 1.2 note since
+      SF-091 (f), guideline fbe6173).
 
   - id: REQ-CMP-030
     title: Container image integrity
@@ -581,13 +585,17 @@ requirements:
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 4.3]
-    refs: [RIG 1.2]
+    refs: [RIG 1.2, SF-091]
     quotes:
       - ref: RIG 1.2
         text: Container image integrity (4.3 Container Image Integrity) - Recommended Mandatory
     verification: [d8]
-    inventory: [RIG-1.2-75b7fc09]
+    inventory: [RIG-1.2-75b7fc09, RIG-1.2-4d77c512]
     status: reviewed
+    notes: >-
+      "Mandatory" at Level 3 means that the referenced chapter applies as
+      stated there; its recommendations stay SHOULD (RIG 1.2 note since
+      SF-091 (f), guideline fbe6173).
 
   - id: REQ-CMP-031
     title: Container networks
@@ -597,13 +605,17 @@ requirements:
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 4.4]
-    refs: [RIG 1.2]
+    refs: [RIG 1.2, SF-091]
     quotes:
       - ref: RIG 1.2
         text: Container networks (4.4 Container Networks) - Recommended Mandatory
     verification: [d8]
-    inventory: [RIG-1.2-4e58ea2a]
+    inventory: [RIG-1.2-4e58ea2a, RIG-1.2-4d77c512]
     status: reviewed
+    notes: >-
+      "Mandatory" at Level 3 means that the referenced chapter applies as
+      stated there; its recommendations stay SHOULD (RIG 1.2 note since
+      SF-091 (f), guideline fbe6173).
 
   - id: REQ-CMP-032
     title: Platform-related application requirements
@@ -616,13 +628,17 @@ requirements:
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 5.2]
-    refs: [RIG 1.2]
+    refs: [RIG 1.2, SF-091]
     quotes:
       - ref: RIG 1.2
         text: Platform-related application requirements, such as supported processor architectures and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
     verification: [d8, manual]
-    inventory: [RIG-1.2-8af2c274, MG-1.3-0745092e]
+    inventory: [RIG-1.2-8af2c274, MG-1.3-0745092e, RIG-1.2-4d77c512]
     status: reviewed
+    notes: >-
+      "Mandatory" at Level 3 means that the referenced chapter applies as
+      stated there; its recommendations stay SHOULD (RIG 1.2 note since
+      SF-091 (f), guideline fbe6173).
 
   # --- Level 3: all messages (MG 1.3; SF-037, C-015) -----------------------
 

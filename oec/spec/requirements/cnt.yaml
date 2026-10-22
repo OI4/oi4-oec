@@ -8,7 +8,7 @@
 # Drafted in C-030; secret storage (REQ-CNT-007 … 009, 024, 025) reworked with
 # GL-ADR-022 (C-030 addendum 1).
 area: CNT
-baseline: "b942df3"
+baseline: "5fb0fd8"
 requirements:
   # --- Message Bus storage (RIG 4.1.1) --------------------------------------
   - id: REQ-CNT-001
@@ -38,8 +38,8 @@ requirements:
     inventory: [RIG-4.1.1-723b5b51, RIG-4.1.1-15bd8eb6, RIG-4.1.1-e577eb27, RIG-4.1.1-078a70a1]
     status: reviewed
     notes: >-
-      broker_ca.pem is listed among the files the storage contains "at
-      least", but the note of the table makes it optional (SF-091 (a)). With
+      broker_ca.pem is present only for a local CA other than the CA of
+      ca.pem (RIG 4.1.1 since SF-091 (a), guideline fbe6173). With
       REQ-CNT-005 a CA certificate for the verification of the broker
       certificate (REQ-MQTT-008) is always available. The broker address in
       broker.json is also required by REQ-MQTT-003. Back to draft in the
@@ -71,8 +71,8 @@ requirements:
       mandatory fields Address (String, IP address or host name of the
       broker), SecurePort (UINT16, port on which the broker listens for TLS
       connections) and MaxPacketSize (INT32, maximum size of an MQTT payload
-      in bytes, at least 262144). The broker accepts payloads up to
-      MaxPacketSize.
+      in bytes, at least 262144 and at most 268435455). The broker accepts
+      payloads up to MaxPacketSize.
     keyword: MUST
     domain: platform
     applies_to: [platform, broker]
@@ -92,8 +92,8 @@ requirements:
     notes: >-
       That the broker accepts payloads up to MaxPacketSize follows from the
       purpose of the field (publishers may use the full size, REQ-PAG-005).
-      The effective upper bound of MQTT v3.1.1 (268435455 bytes remaining
-      length) is below INT32max (SF-091 (b)). A JSON Schema of broker.json
+      The upper bound 268435455 (maximum remaining length of an MQTT v3.1.1
+      packet) replaced "INT32max" with SF-091 (b) (guideline fbe6173). A JSON Schema of broker.json
       can be added with D8.
 
   - id: REQ-CNT-004
@@ -132,25 +132,26 @@ requirements:
       (REQ-CNT-001). Every container can thus verify the broker certificate
       (REQ-MQTT-008).
     keyword: MUST
-    implicit: true
     domain: platform
     applies_to: [platform]
     refs: [RIG 4.1.2, RIG 4.1.1, MG 6.2.2, SF-035, SF-091]
     quotes:
       - ref: RIG 4.1.2
-        text: 'In case the system provides a certificate authority (CA) for signing certificates, the CA should be made available by storing it as follows:'
+        text: 'The platform shall make the certificate of the certificate authority (CA) used to validate certificates, in particular the broker certificate (OEC Messaging Guideline, 6.2.2 Security Settings), and the certificates of the applications available by storing them as follows:'
+      - ref: RIG 4.1.2
+        text: An own CA of the platform is only required if the platform issues certificates, e.g. the certificates of the applications.
       - ref: MG 6.2.2
         text: 'The client must verify the broker certificate when it establishes the TLS connection: the certificate chain against the CA certificate (broker_ca.pem of the Message Bus storage or, if no local CA is present, the CA of the OI4 certificate storage; for a client without container, its configured CA) and the broker address.'
     verification: [d8]
-    inventory: [RIG-4.1.2-0e9d427e]
+    inventory: [RIG-4.1.2-70fa2141, RIG-4.1.2-f5aa1987, RIG-4.1.2-1d32cac8]
     status: reviewed
     notes: >-
-      RIG 4.1.2 only recommends the CA ("In case … should"), but TLS is
-      mandatory (REQ-MQTT-005/006) and every client must verify the broker
-      certificate against broker_ca.pem or ca.pem (REQ-MQTT-008, MUST at every
-      level); without a CA certificate no containerized client could connect.
-      Implicit MUST per SF-091 (c)/(g), revised after a question of the PO in
-      the C-030 review (2026-10-22); the first draft was SHOULD with a
+      TLS is mandatory (REQ-MQTT-005/006) and every client must verify the
+      broker certificate against broker_ca.pem or ca.pem (REQ-MQTT-008, MUST
+      at every level); without a CA certificate no containerized client could
+      connect. Implicit MUST per SF-091 (c)/(g) (C-030 review, 2026-10-22),
+      explicit "shall" in RIG 4.1.2 since guideline fbe6173 (before: "In case
+      the system provides a CA … should"); the first draft was SHOULD with a
       condition. ca.pem may be a well-known (public) or a platform-specific
       CA; an own CA that issues certificates is only needed for client
       certificates and certificates of the applications (REQ-CNT-007).
@@ -293,13 +294,13 @@ requirements:
       - ref: RIG 4.1.4
         text: In case the system provides a persistent layer, the application should use the following paths to make use of it.
       - ref: RIG 4.1.4
-        text: /etc/oi4/app Application specific configuration shall be stored here
+        text: /etc/oi4/app Storage for application specific configuration
       - ref: RIG 4.1.4
-        text: /opt/oi4/app Application specific data shall be stored here
+        text: /opt/oi4/app Storage for application specific data
     verification: [manual]
-    inventory: [RIG-4.1.4-ffa2fd84, RIG-4.1.4-d501c1ac, RIG-4.1.4-f205ddea]
+    inventory: [RIG-4.1.4-ffa2fd84, RIG-4.1.4-b206a9a5, RIG-4.1.4-a5f1c4d1]
     status: reviewed
-    notes: '"should use" in the sentence vs "shall be stored here" in the table: SF-091 (e).'
+    notes: 'The paths are recommended (SF-091 (e)); the table said "shall be stored here" until guideline fbe6173.'
 
   - id: REQ-CNT-011
     title: Application storages are mapped and owned by one container
@@ -314,13 +315,13 @@ requirements:
     refs: [RIG 4.1.4, SF-091]
     quotes:
       - ref: RIG 4.1.4
-        text: The target path is the path inside the Docker container, which must be mapped to a host-defined path inside the host system.
+        text: The target paths /etc/oi4/app and /opt/oi4/app are paths inside the Docker container, which must be mapped to a host-defined path inside the host system.
       - ref: RIG 4.1.4
         text: Attention must be paid to access permissions; to guarantee the data ownership, only one container shall have access to its own application specific volume.
     verification: [d8]
-    inventory: [RIG-4.1.4-fba0af6c, RIG-4.1.4-4d7c9a08]
+    inventory: [RIG-4.1.4-9177c92c, RIG-4.1.4-4d7c9a08]
     status: reviewed
-    notes: The host mapping does not apply to /opt/oi4/licenses (REQ-CNT-017, SF-091 (e)).
+    notes: The host mapping does not apply to /opt/oi4/licenses (REQ-CNT-017, SF-091 (e); stated in the RIG 4.1.4 note since guideline fbe6173).
 
   - id: REQ-CNT-012
     title: Application detects manipulation of its stored data
@@ -438,8 +439,10 @@ requirements:
     quotes:
       - ref: RIG 4.1.4
         text: The content of /opt/oi4/licenses is provided by the image and not by the host. Therefore, it shall not be overlaid by a host-defined mount.
+      - ref: RIG 4.1.4
+        text: 'The path /opt/oi4/licenses is not part of the persistent layer: it is provided by the image and is required independent of a persistent layer'
     verification: [d8]
-    inventory: [RIG-4.1.4-db5179b6]
+    inventory: [RIG-4.1.4-db5179b6, RIG-4.1.4-ae9db98e]
     status: reviewed
 
   - id: REQ-CNT-018

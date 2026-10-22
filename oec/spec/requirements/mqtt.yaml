@@ -9,7 +9,7 @@
 # keywords and connection details added to the guideline in C-026 (SF-057,
 # SF-060).
 area: MQTT
-baseline: "b942df3"
+baseline: "5fb0fd8"
 requirements:
   # --- Protocol version (MG 6.1) --------------------------------------------
   - id: REQ-MQTT-001
@@ -166,16 +166,16 @@ requirements:
     refs: [MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-057, SF-091]
     quotes:
       - ref: MG 6.2.2
-        text: The broker should use a certificate which is signed by a well-known or user specific certificate authority (CA).
+        text: The broker must use a certificate which is signed by a well-known (public) or a platform- or user-specific certificate authority (CA); self-signed broker certificates are not allowed.
     verification: [d8, manual]
-    inventory: [MG-6.2.2-e60fcb10]
+    inventory: [MG-6.2.2-986fbb0d]
     status: draft
     notes: >-
       "preferably shall" replaced by "should" in C-026 (SF-057 (d)). SF-091
       (g), decided by the PO in the C-030 review (2026-10-22), revises this to
       MUST: the client must verify the broker certificate against a CA
-      certificate (REQ-MQTT-008). The guideline text of MG 6.2.2 still says
-      "should" until SF-091 is implemented. An own CA of the platform is only
+      certificate (REQ-MQTT-008). MG 6.2.2 says "must" since guideline
+      fbe6173 (SF-091 implemented on PO order 2026-10-22). An own CA of the platform is only
       required if it issues certificates. Back to draft in the C-030 closure
       (SHOULD → MUST).
 
