@@ -230,3 +230,13 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `31f0890` – RIG 4.1.3 rewritten; wording in RIG 4.1.2, 4.2 and 3 ("certificate of the application"); resolves SF-091 (d).
   - `6cb6a97` – findings register: SF-091 (d) resolved, SF-089 … 093 otherwise open, next free id SF-094.
 - GL-ADR-001 … 022; SF-001 … 088 resolved, SF-089 … 093 open; next free id SF-094.
+
+## Amendment C-030 closure (2026-10-22, guideline baseline `b942df3`)
+
+- The previous baseline `6cb6a97` (GL-ADR-022) is recorded in the C-030 log, addendum 1.
+- The baseline is now `b942df3` on branch `feature/spec-findings` (local commits, PO order 2026-10-22):
+  - `f4b2cd8` – findings register: SF-091 decided (revised proposal).
+  - `15115e8` SF-093 (MG 9.2 ACL box for Action calls), `527d8d8` SF-090 (RIG 4.2 container name), `e7f5459` SF-092 (RIG 5 keywords, RIG 1.2), `897c1cc` SF-089 (MG A1 Registry).
+  - `b942df3` – findings register: SF-089/090/092/093 resolved.
+- No new GL-ADR. GL-ADR-022 accepted by the PO.
+- GL-ADR-001 … 022; SF-001 … 090, 092, 093 resolved; SF-091 decided, not yet implemented; next free id SF-094.
