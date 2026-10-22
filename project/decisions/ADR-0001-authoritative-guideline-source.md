@@ -285,3 +285,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `df752cd` is recorded in addendum 6.
 - The baseline is now `a9008a1` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 2 introduces the OI4 Guardrails instead of the old OI4 Reference Architecture (paragraph, Figure 2, List of Figures); informative chapter, no inventory change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
+
+## Amendment C-032 addendum 8 (2026-10-22, guideline baseline `9e9f7cc`)
+
+- The previous baseline `a9008a1` is recorded in addendum 7.
+- The baseline is now `9e9f7cc` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 2.1 Introduction to Edge Computing updated (neutral to cloud/enterprise IT, offline operation, extended advantages, CRA); informative section, three informative inventory keys remapped, no requirement, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
