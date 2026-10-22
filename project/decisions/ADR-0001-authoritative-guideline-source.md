@@ -318,3 +318,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `c1419dd` is recorded in addendum 12.
 - The baseline is now `4811e60` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): links to shops selling standards (IEC webstore, Beuth, ISO) and the Amazon BOM link removed, reference texts unchanged; only freely accessible standards are linked. No inventory change, no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 14 (2026-10-22, guideline baseline `69863d3`)
+
+- The previous baseline `4811e60` is recorded in addendum 13.
+- The baseline is now `69863d3` on branch `feature/spec-findings` (local commits `62f85f3` – PO edit of the MG lists of figures/tables – and `69863d3` – Docusaurus landing page takes over the Welcome content, `docs/intro.md` removed; PO order 2026-10-22). No normative text changed, no inventory change, no finding, no GL-ADR. SF-001 … 095 resolved.
