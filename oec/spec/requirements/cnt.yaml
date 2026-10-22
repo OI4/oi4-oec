@@ -8,7 +8,7 @@
 # Drafted in C-030; secret storage (REQ-CNT-007 … 009, 024, 025) reworked with
 # GL-ADR-022 (C-030 addendum 1).
 area: CNT
-baseline: "df752cd"
+baseline: "a9008a1"
 requirements:
   # --- Message Bus storage (RIG 4.1.1) --------------------------------------
   - id: REQ-CNT-001
