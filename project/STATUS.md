@@ -1,6 +1,6 @@
 # Status
 
-_Last updated: 2026-10-22, cycle C-030 addendum 3 (SF-089/090/092/093 implemented, re-baseline on `b942df3`, C-030 closed)_
+_Last updated: 2026-10-22, cycle C-031 (golden vectors, examples coverage, consistency review; done, PO review pending)_
 
 ## Current phase
 
@@ -96,19 +96,21 @@ C-030 addendum 2 (2026-10-22): PO review – the six RIG areas, all their REQs a
 
 C-030 addendum 3 (2026-10-22): PO accepted SF-091 (revised), REQ-CNT-001/005/006 (`a11e9a2`) and GL-ADR-022. SF-089/090/092/093 implemented in the guideline (`15115e8` MG 9.2 ACL box for Action calls, `527d8d8` RIG 4.2 container name, `e7f5459` RIG 5 keywords, `897c1cc` MG A1 Registry; register `f4b2cd8`, `b942df3`). Re-baseline on `b942df3` (`9ed7606`), remap (`4323ab6`): mapping-only changes stay `reviewed`; **REQ-CNT-019/020/021, REQ-REG-002/007** and **REQ-MQTT-007** (SHOULD → MUST per SF-091 (g)) back to `draft`. SF-091 is decided but **not implemented in the guideline** (no order yet). C-030 closed.
 
+C-031 (2026-10-22, `log/2026-10-22_C-031_golden-coverage.md`): no split. **Examples coverage** (`internal/examples`, `coverage/examples.yaml`, report section "Guideline examples", ADR-0018 amendment C-031): 144 fenced code blocks of MG/RIG – 100 covered by golden vectors, 44 explained, 0 open. Golden vectors **V-PAY-117 … 121** from the MG body (MG 1.2, 8.1.1, 8.1.2 Figure 6, 8.1.3), constructed **V-PAY-122 … 126** for reference checks without a vector (all `draft`). Consistency review: REQ-RES-DATA-001 and REQ-RES-META-002/003 no longer cite the deprecated REQ-CMP-022 (→ `draft`); 21 `schema`/`d7-validate` REQs without a vector moved to the P2 exit (gap list in the log). **SF-094/095** (editorial, B2 DataSet examples, MG 1.2/RIG 4.2 examples) open (register `5ef2cc1`, no re-baseline). Workspace `e16d12a`, `829f6e0`, `74e4ecd`.
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** → **P2 JSON Schema** (+ D7 `validate`); remaining P3 work (Rust/C API sketches, crate choices) in parallel.
 
-1. **C-031** golden vectors + coverage report (in progress), then **C-032** PO review → P1 exit (ROADMAP P1).
-2. **PO:** review the C-030 follow-up drafts REQ-CNT-019/020/021, REQ-REG-002/007, REQ-MQTT-007 and the guideline commits `15115e8`, `527d8d8`, `e7f5459`, `897c1cc` (C-030 log, addendum 3); order the guideline implementation of SF-091 → re-baseline.
+1. **C-032** PO review → P1 exit (ROADMAP P1). Review list: C-031 log, section "For the PO" (V-PAY-117 … 126, examples coverage + ADR-0018 amendment C-031, REQ-RES-DATA-001 / REQ-RES-META-002/003, SF-094/095, gap list for P2/D7).
+2. **PO:** review the C-030 follow-up drafts REQ-CNT-019/020/021, REQ-REG-002/007, REQ-MQTT-007 and the guideline commits `15115e8`, `527d8d8`, `e7f5459`, `897c1cc` (C-030 log, addendum 3); order the guideline implementation of SF-091 (and SF-094/095 if accepted) → re-baseline.
 3. Whenever the guideline commit changes, re-baseline first: `spectool rebaseline -rev <commit>` (inventory, `baseline` in all catalog files, topic patterns, views, coverage, lint; lists the project docs to update), then remap the keys `spectool lint` reports. After a PO review: `spectool review <ids>` sets the accepted entries to `reviewed`. Commits that only touch `findings/` need no re-baseline (ADR-0001 amendment C-018).
 
 ## Deliverables
 
 | ID | Deliverable | State |
 |----|-------------|-------|
-| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, ACT, MQTT, LIFE, RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG, LOC, QRY and MSG reviewed; RES-DATA, RES-META, RES-EVENT, RES-SUBLIST, BUS reviewed (C-028); RES-CONFIG reviewed (C-029, incl. GL-ADR-021 follow-ups); RIG areas CNT, PLT, APP, LIC, REG, GEN reviewed (C-030; follow-up drafts REQ-CNT-019/020/021, REQ-REG-002/007, REQ-MQTT-007); topic grammar, topic and payload columns of the matrix and 203 topic/IL vectors reviewed; payload vectors V-PAY-001 … 116 reviewed) |
+| D1 | JSON Schema | not started – P1 spec baseline in `oec/spec/` (areas CMP, IL, TOP, ACT, MQTT, LIFE, RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG, LOC, QRY and MSG reviewed; RES-DATA, RES-META, RES-EVENT, RES-SUBLIST, BUS reviewed (C-028); RES-CONFIG reviewed (C-029, incl. GL-ADR-021 follow-ups); RIG areas CNT, PLT, APP, LIC, REG, GEN reviewed (C-030; follow-up drafts REQ-CNT-019/020/021, REQ-REG-002/007, REQ-MQTT-007); topic grammar, topic and payload columns of the matrix and 203 topic/IL vectors reviewed; payload vectors V-PAY-001 … 116 reviewed, V-PAY-117 … 126 drafted (C-031); all 144 code blocks of MG/RIG covered by a golden vector or explained (C-031)) |
 | D2 | SDK | not started – S4 Rust SDK + C API decided (ADR-0011); location `oec/sdk/rust` |
 | D3 | Weather demo | not started – target Messaging L3 = all messages (ADR-0016 amendment C-015) |
 | D4 | Logger demo | not started – target Messaging L1 (ADR-0016) |
@@ -120,7 +122,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Baselines
 
-- Guideline: `oi4-oec-documentation` @ `b942df3`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 022, SF-001 … 090, 092, 093 resolved, SF-091 decided, not yet implemented ((d) resolved with GL-ADR-022), next SF-094; OEC Process Description informative); previous `6cb6a97`, `a77d331`, `5bc2e85`, `c2be26b`, `b2f0fe7`, `ff1562f`, `15eaa8a`, `70b4c01`, `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
+- Guideline: `oi4-oec-documentation` @ `b942df3`, branch `feature/spec-findings` (MG + RIG + GL-ADR-001 … 022, SF-001 … 090, 092, 093 resolved, SF-091 decided, not yet implemented ((d) resolved with GL-ADR-022), SF-094/095 open (register `5ef2cc1`, editorial), next SF-096; OEC Process Description informative); previous `6cb6a97`, `a77d331`, `5bc2e85`, `c2be26b`, `b2f0fe7`, `ff1562f`, `15eaa8a`, `70b4c01`, `2bfc0d9`, `ca8d1c5`, `c6453c7`, `720d862`, `2f00e9f`, `4af61f3`, `a7d18f9`, `fd9da6e`, `2cf0d70`, `5dedfd5`, `ea80271`, `bc5d063`, `de852d6`, `5cb109e`, `49b6fe2`, `7bead4c`, `5f070bb`, `c85ce2a`
 - **Container engine:** Docker Desktop 28.4 is installed, but the daemon was **not running** on 2026-10-14. It is not needed for P1/P2, unit tests, host tests or the offline commands of D7/D8. It is **needed from P4 on** for:
   - the TLS dev broker (`oec/dev`, docker compose)
   - integration tests (SDK, D7 live tests, demos, registry)
@@ -132,7 +134,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- None. SF-091 is decided (2026-10-22) and used by the catalog; its guideline implementation awaits a PO order. Next free id SF-094. Next free vector id V-PAY-117.
+- None. SF-091 is decided (2026-10-22) and used by the catalog; its guideline implementation awaits a PO order. SF-094/095 (editorial) are open and do not block P1. Next free id SF-096. Next free vector id V-PAY-127.
 - Q-011 (publication/CRA) parked – working assumption: private GitHub repos only.
 
 ## Decided so far
