@@ -10,7 +10,7 @@
 # 9.1.5) and SF-079 (DataSetMetaData header of a Set request) resolved in the
 # guideline (baseline b2f0fe7).
 area: RES-META
-baseline: "9e9f7cc"
+baseline: "2025207"
 requirements:
   - id: REQ-RES-META-001
     title: Get Metadata addresses one DataSet and carries an empty DataSetMetaData
