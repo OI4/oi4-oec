@@ -11,7 +11,7 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: MG 6
 | [REQ-MQTT-004](#req-mqtt-004) | Broker port 8883 by default | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-MQTT-005](#req-mqtt-005) | MQTT over TLS 1.2 or higher only | MUST | MUST | MUST | MUST | messaging | d7-test, manual | reviewed |
 | [REQ-MQTT-006](#req-mqtt-006) | Broker accepts TLS connections only | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-MQTT-007](#req-mqtt-007) | Broker certificate signed by a CA | SHOULD | n/a | n/a | n/a | platform | d8, manual | reviewed |
+| [REQ-MQTT-007](#req-mqtt-007) | Broker certificate signed by a CA | MUST | n/a | n/a | n/a | platform | d8, manual | draft |
 | [REQ-MQTT-008](#req-mqtt-008) | Client verifies the broker certificate | MUST | MUST | MUST | MUST | messaging | manual, d7-test | reviewed |
 | [REQ-MQTT-009](#req-mqtt-009) | Client authenticates to the broker | MUST | MUST | MUST | MUST | messaging | d7-test, manual | reviewed |
 | [REQ-MQTT-010](#req-mqtt-010) | Client certificate takes precedence over username and password | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
@@ -161,19 +161,19 @@ The MQTT broker of an OEC platform accepts only connections encrypted with TLS 1
 
 **Broker certificate signed by a CA**
 
-The broker uses a certificate signed by a well-known or a user-specific certificate authority (CA). The broker certificate is provided via the Message Bus storage (RIG 4.1.1), the CA certificate via the OI4 certificate storage (RIG 4.1.2).
+The broker uses a certificate signed by a well-known (public) or a platform- or user-specific certificate authority (CA); self-signed broker certificates are not allowed. The certificate of the signing CA is provided as ca.pem in the OI4 certificate storage (REQ-CNT-005) or, for a different local CA, as broker_ca.pem in the Message Bus storage (REQ-CNT-001).
 
-- Keyword: SHOULD
+- Keyword: MUST
 - Domain: platform · Applies to: broker, platform
-- Refs: MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-057
+- Refs: MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-057, SF-091
 - Verification: d8, manual
-- Status: reviewed
+- Status: draft
 - Inventory: MG-6.2.2-e60fcb10
 
 > The broker should use a certificate which is signed by a well-known or user specific certificate authority (CA).
 > — MG 6.2.2
 
-Notes: "preferably shall" replaced by "should" in C-026 (SF-057 (d)).
+Notes: "preferably shall" replaced by "should" in C-026 (SF-057 (d)). SF-091 (g), decided by the PO in the C-030 review (2026-10-22), revises this to MUST: the client must verify the broker certificate against a CA certificate (REQ-MQTT-008). The guideline text of MG 6.2.2 still says "should" until SF-091 is implemented. An own CA of the platform is only required if it issues certificates. Back to draft in the C-030 closure (SHOULD → MUST).
 
 ## REQ-MQTT-008
 
@@ -294,13 +294,16 @@ A containerized application uses its container name (RIG 4.2) as MQTT ClientId. 
 - Refs: MG 6, MG 6.2.3, RIG 4.2, SF-060
 - Verification: manual, d8
 - Status: reviewed
-- Inventory: MG-6-4c5014ad, MG-6.2.3-845bb406, MG-6.2.3-e61860a9
+- Inventory: MG-6-4c5014ad, MG-6.2.3-845bb406, MG-6.2.3-e61860a9, RIG-4.2-5dfec198
 
 > To avoid problems with length and character restrictions in some MQTT implementations, a name of the container should be used which is unique, present and accessible in any OI4 Alliance-compliant container (OEC Runtime & Infrastructure Guideline, 4.2 Container Name Conventions).
 > — MG 6.2.3
 
 > A client without container (e.g. a device with its own MQTT client) should use a ClientId that is unique on the broker and stable across reconnects, e.g. derived from its Identification Link within the length and character limits of the broker.
 > — MG 6.2.3
+
+> As MQTT ClientId, as recommended in OEC Messaging Guideline, 6.2.3 Client Identifier
+> — RIG 4.2
 
 Notes: Graded by REQ-CMP-009. Component without container: SF-060 (c), C-026. MQTT v3.1.1 itself requires unique ClientIds per broker.
 

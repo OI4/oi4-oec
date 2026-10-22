@@ -23,9 +23,9 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: RIG 2, RIG 4
 | [REQ-CNT-016](#req-cnt-016) | SBOM is created during the image build | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
 | [REQ-CNT-017](#req-cnt-017) | /opt/oi4/licenses is not overlaid by a host mount | MUST NOT | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-018](#req-cnt-018) | Platform may read the license folder | MAY | n/a | n/a | n/a | platform | manual | reviewed |
-| [REQ-CNT-019](#req-cnt-019) | Unique container name set as hostname | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-CNT-020](#req-cnt-020) | Container name with a UUID postfix | SHOULD | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-CNT-021](#req-cnt-021) | Application uses its container name | MUST* | none | SHOULD | MUST | service-container | manual, d8 | reviewed |
+| [REQ-CNT-019](#req-cnt-019) | Unique container name set as hostname | MUST | n/a | n/a | n/a | platform | d8 | draft |
+| [REQ-CNT-020](#req-cnt-020) | Container name with a UUID postfix | SHOULD | n/a | n/a | n/a | platform | d8 | draft |
+| [REQ-CNT-021](#req-cnt-021) | Application uses its container name | MUST | none | SHOULD | MUST | service-container | manual, d8 | draft |
 | [REQ-CNT-022](#req-cnt-022) | Digest where an immutable image version is needed | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
 | [REQ-CNT-023](#req-cnt-023) | Bridge network preferred | SHOULD | none | SHOULD | SHOULD | service-container | d8, manual | reviewed |
 | [REQ-CNT-024](#req-cnt-024) | One secret storage per container | MUST NOT | n/a | n/a | n/a | platform | d8, manual | reviewed |
@@ -436,64 +436,71 @@ The platform may read the content of /opt/oi4/licenses, e.g. by mounting the pat
 
 **Unique container name set as hostname**
 
-When a container is created, the platform assigns it a well-defined container name that is globally unique, has at most 63 characters and follows the host name rules of RFC 1123, and sets the container hostname to this name.
+When a container is created, the platform assigns it a well-defined container name that is unique within the OEC platform, has at most 63 characters and follows the host name rules of RFC 1123 (letters, digits and hyphens only), and sets the container hostname to this name.
 
 - Keyword: MUST
 - Domain: platform · Applies to: platform
 - Refs: RIG 4.2, SF-090
 - Verification: d8
-- Status: reviewed
-- Inventory: RIG-4.2-2365c930, RIG-4.2-36a1dde9, RIG-4.2-7d974d7e, RIG-4.2-8d376a21
+- Status: draft
+- Inventory: RIG-4.2-36a1dde9, RIG-4.2-75e6ea8e, RIG-4.2-997b0f1d, RIG-4.2-f4e41f77
 
 > Each OI4 Alliance-compliant container shall have a well-defined name for identification.
 > — RIG 4.2
 
-> To meet these requirements, the container name must be globally unique according to the definition of the OI4 Alliance, while also not exceeding 63 characters.
+> To meet these requirements, the container name must be unique within the Open Edge Computing platform, while also not exceeding 63 characters.
 > — RIG 4.2
 
-> The container name is assigned when the container is created and shall be made available to the container by setting the container hostname.
+> The platform assigns the container name when the container is created and shall make it available to the container by setting the container hostname.
 > — RIG 4.2
 
-> The RFC 1123 rules for assigning a host name must also be followed for container names so that DNS resolution works correctly.
+> The RFC 1123 rules for assigning a host name must also be followed for container names so that DNS resolution works correctly: letters, digits and hyphens only.
 > — RIG 4.2
 
-Notes: Addressee (platform at container creation) and "globally unique" per SF-090 (b), (c). RFC 1123 allows letters, digits and "-" only, so the recommended separator "_" of REQ-CNT-020 conflicts (SF-090 (a)).
+Notes: SF-090 (b), (c) resolved: "unique within the Open Edge Computing platform" (before: "globally unique according to the definition of the OI4 Alliance") and the platform as addressee. Back to draft in the C-030 closure (uniqueness scope changed).
 
 ## REQ-CNT-020
 
 **Container name with a UUID postfix**
 
-The container name consists of a self-defined default container name with a UUID as postfix (&lt;DefaultContainerName>_&lt;uuid>), so that several instances never get the same name.
+The container name consists of a self-defined default container name of at most 26 characters with a UUID as postfix, separated by a hyphen (&lt;DefaultContainerName>-&lt;uuid>), so that several instances never get the same name and the name is unique beyond the platform as well.
 
 - Keyword: SHOULD
 - Domain: platform · Applies to: platform
 - Refs: RIG 4.2, SF-090
 - Verification: d8
-- Status: reviewed
-- Inventory: RIG-4.2-244d6b14, RIG-4.2-7323472b
+- Status: draft
+- Inventory: RIG-4.2-21db7fba, RIG-4.2-7935e203
 
-> Best practice is to use a naming scheme such as &lt;DefaultContainerName>_&lt;uuid>.
+> Best practice is to use a naming scheme such as &lt;DefaultContainerName>-&lt;uuid>; the UUID also makes the container name unique beyond the platform.
 > — RIG 4.2
 
-> To avoid several instances of a container with the same container name, it is best practice to use a UUID as postfix on top of a self-defined container name such as &lt;DefaultContainerName>_&lt;uuid>.
+> With a UUID of 36 characters and the separator, the &lt;DefaultContainerName> has at most 26 characters.
 > — RIG 4.2
 
-Notes: Proposed in SF-090 (a): separator "-" instead of "_" (RFC 1123); with a UUID of 36 characters the default container name has at most 26 characters (SF-090 (e)).
+> To avoid several instances of a container with the same container name, it is best practice to use a UUID as postfix on top of a self-defined container name such as &lt;DefaultContainerName>-&lt;uuid>.
+> — RIG 4.2
+
+Notes: SF-090 (a), (e) resolved: separator "-" instead of "_" (RFC 1123), at most 26 characters for the default container name. Back to draft in the C-030 closure (separator changed).
 
 ## REQ-CNT-021
 
 **Application uses its container name**
 
-A containerized application determines its container name from its hostname and uses it as MQTT ClientId (REQ-MQTT-013), as name of its certificate (REQ-CNT-007) and, if it uses the Oi4Identifier as Identification Link, as SerialNumber in the Oi4Identifier.
+A containerized application determines its container name from its hostname and uses it as name of its certificate (REQ-CNT-007) and, if it uses the Oi4Identifier as Identification Link, as SerialNumber in the Oi4Identifier.
 
-- Keyword: MUST (implicit, SF-035)
+- Keyword: MUST
 - Levels: L1 none · L2 SHOULD · L3 MUST
 - Domain: service-container · Applies to: application
-- Refs: RIG 4.2, MG 4.3.1, RIG 1.2, SF-035, SF-090
+- Refs: RIG 4.2, MG 4.3.1, RIG 1.2, SF-090
 - Verification: manual, d8
-- Status: reviewed
+- Status: draft
+- Inventory: RIG-4.2-9b5221a1
 
-> The container name is used for several things:
+> The application shall determine its container name from its hostname and shall use it as follows:
+> — RIG 4.2
+
+> As the name of the certificate of the application (4.1.2 OI4 Certificate Storage)
 > — RIG 4.2
 
 > As a serial number inside the Oi4Identifier (OEC Messaging Guideline, 4.3 The Oi4Identifier), if the Oi4Identifier is used as Identification Link and thus as AppId (OEC Messaging Guideline, 7.3 AppId Element)
@@ -502,7 +509,7 @@ A containerized application determines its container name from its hostname and 
 > When deploying a container which by its nature has no serial number and can be instantiated multiple times, use the container name as SerialNumber as defined in OEC Runtime & Infrastructure Guideline, 4.2 Container Name Conventions.
 > — MG 4.3.1
 
-Notes: The list of uses has no keyword (SF-090 (d)); treated as MUST until decided (G-1.6). Graded by REQ-CMP-029; the ClientId itself is a messaging SHOULD at all levels (REQ-MQTT-013).
+Notes: SF-090 (d) resolved: explicit "shall" (before: implicit MUST). The MQTT ClientId is no longer part of this requirement: RIG 4.2 now refers to the recommendation of MG 6.2.3 (REQ-MQTT-013, SHOULD at all levels). Graded by REQ-CMP-029. Back to draft in the C-030 closure (ClientId removed, no longer implicit).
 
 ## REQ-CNT-022
 

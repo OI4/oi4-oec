@@ -609,8 +609,8 @@ requirements:
     title: Platform-related application requirements
     statement: >-
       A containerized application meets the platform-related application
-      requirements of RIG 5.2, such as supported platforms and hardware
-      requirements.
+      requirements of RIG 5.2, such as supported processor architectures and
+      hardware requirements.
     keyword: MUST
     domain: service-container
     levels: {L1: none, L2: SHOULD, L3: MUST}
@@ -619,9 +619,9 @@ requirements:
     refs: [RIG 1.2]
     quotes:
       - ref: RIG 1.2
-        text: Platform-related application requirements, such as supported platforms and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
+        text: Platform-related application requirements, such as supported processor architectures and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
     verification: [d8, manual]
-    inventory: [RIG-1.2-ae863090, MG-1.3-0745092e]
+    inventory: [RIG-1.2-8af2c274, MG-1.3-0745092e]
     status: reviewed
 
   # --- Level 3: all messages (MG 1.3; SF-037, C-015) -----------------------

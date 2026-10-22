@@ -37,7 +37,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 018** in `rfcs_adrs/` and the
 - A keyword in the sentence wins over the admonition type (also in notes). Admonitions: `NOTE` (informative unless it has a keyword), `RECOMMENDED` = SHOULD, `HIGHLY RECOMMENDED` = strong SHOULD, `REQUIRED` = MUST, `ATTENTION`.
 - Statements about the operator/platform apply to the platform (RIG 5.1).
 - **Statements without keyword, examples and figures are informative.** Since C-016 the protocol behavior carries keywords (SF-035 resolved: Health timing, Birth topic, Status event after Set/Del, pagination continuation, PublicationList `Mode`, `ReplyTo` …). Keyword-less behavior found later → new spec finding (G-1.6).
-- `REQUIRED` boxes at `49b6fe2`: 9 ACL boxes (MG 9.1.x), MG 4.1 (scheme), MG 4.2 (base64url), RIG 4.1.1–4.1.4.
+- `REQUIRED` boxes at `49b6fe2`: 9 ACL boxes (MG 9.1.x; plus MG 9.2 for `Call` since SF-093), MG 4.1 (scheme), MG 4.2 (base64url), RIG 4.1.1–4.1.4.
 
 ## 1. Compliance (MG 1.3, 9.1; RIG 1.2)
 
@@ -116,12 +116,17 @@ It also covers the guideline ADRs **GL-ADR-001 … 018** in `rfcs_adrs/` and the
 | `/etc/oi4/app`, `/opt/oi4/app` | app config / app data |
 | `/opt/oi4/licenses` | exactly one SBOM `sbom.spdx.json` **or** `sbom.cdx.json` (JSON) + license texts embedded or as `<License-ID>.txt` (SPDX id or `LicenseRef-…`); part of the image, not overlaid by host mounts (L2+) |
 
-- **Container name:** globally unique, at most 63 chars, RFC 1123, best practice `<DefaultName>_<uuid>`. It is used as hostname, MQTT ClientId, certificate name and Oi4Identifier serial number.
+- **Container name** (SF-090):
+  - Assigned by the platform at creation and set as hostname.
+  - Unique within the platform, at most 63 chars, RFC 1123 (letters, digits, `-`).
+  - Best practice `<DefaultName>-<uuid>` (default name ≤ 26 chars).
+  - The application takes it from the hostname and must use it as certificate name and Oi4Identifier serial number; MQTT ClientId recommended (MG 6.2.3).
 - **Image integrity:** tags are allowed; digests are recommended. **Networks:** bridge network preferred.
 - **Platform (RIG 5.1):**
   - Architectures: ARMv7, ARMv8, amd64.
-  - Hardware: ≥ 1 GB RAM, ≥ 4 GB storage.
-  - Software: Linux, container daemon, MQTT broker, OEC Registry.
+  - Hardware: ≥ 1 GB RAM, ≥ 4 GB storage, ≥ 1 network interface (each item "must", SF-092).
+  - Software: Linux, user/role management, container daemon, MQTT broker, OEC Registry.
+- **Application (RIG 5.2):** images for ≥ 1 supported processor architecture (L3 MUST); legal compliance and no harmful components at every level (SF-092).
 
 ## 5. MQTT (MG 6)
 
@@ -304,11 +309,15 @@ Only these forms (and the Action forms below) are allowed; any other topic form 
 ## 9. Registry (MG A1)
 
 - Collects MAM and Health (plus Profile and Event, optionally) of all assets.
-- Answers `Oi4v2/Registry/<AppId>/Get/MAM[/<Source>]` and `Get/Health[/<Source>]`.
+- Main tasks are "must" (SF-089).
+- Answers `Oi4v2/Registry/<AppId>/Get/MAM[/<Source>]` and `Get/Health[/<Source>]`:
+  - publishes with its own `PublisherId`/`DataSetWriterId`s;
+  - `DataSetWriterName` = IL of the described asset, payload = last one received;
+  - only online assets (Birth, not after Close/Will); paginated if too large.
 - **Web UI:** lists applications and devices with MAM, health and availability, supported resources, related publisher and an audit trail.
 - **Conformity check:** optional, via schema validation.
 - **Observed compliance level** (informative) per application/device, from `Profile` + `Get` answers.
 - **Availability** from Birth / Close / Will (see §5).
 - Sends `Get` requests after a Birth message.
-- Default ports 5798 (UI) and 5799 (API), TLS.
+- Web UI/API via TLS (should); the certificate path is implementation-specific, the certificate of the application may be used. Default ports 5798 (UI) and 5799 (API).
 - Platform requirement (RIG 5.1).

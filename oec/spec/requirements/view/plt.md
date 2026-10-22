@@ -28,21 +28,24 @@ The edge computer of an OEC platform uses one of the processor architectures ARM
 - Refs: RIG 5.1, SF-092
 - Verification: d8, manual
 - Status: reviewed
-- Inventory: RIG-5.1-7017a7e5
+- Inventory: RIG-5.1-3245b5c2, RIG-5.1-6dd9b0bd, RIG-5.1-7017a7e5, RIG-5.1-937b5b97, RIG-5.1-b96535ec
 
 > To achieve Open Industry 4.0 Alliance compliance, the hardware and software must meet several requirements.
 > — RIG 5.1
 
-> The supported processor architectures are ARMv7, ARMv8, and amd64
+> The processor architecture must be one of the supported processor architectures ARMv7, ARMv8, and amd64
 > — RIG 5.1
 
-> A minimum of 1 GB RAM
+> The edge computer must provide a minimum of 1 GB RAM
 > — RIG 5.1
 
-> At least one available network interface (likely Ethernet interface, but LTE or similar might be possible too)
+> The edge computer must provide a minimum of 4 GB non-volatile memory (eMMC, SD Card, SSD, HDD, …)
 > — RIG 5.1
 
-Notes: The list items have no keyword of their own; the obligation is taken from the lead-in "must meet" (SF-092 (a)). The non-volatile memory may be eMMC, SD card, SSD, HDD or similar. The architectures are also the "supported platforms" of REQ-APP-001 (SF-092 (d)).
+> The edge computer must provide at least one available network interface (likely Ethernet interface, but LTE or similar might be possible too)
+> — RIG 5.1
+
+Notes: Each list item has its own "must" since SF-092 (a) was resolved. The non-volatile memory may be eMMC, SD card, SSD, HDD or similar. RIG 5.2 refers to these processor architectures (REQ-APP-001, SF-092 (d)).
 
 ## REQ-PLT-002
 
@@ -87,15 +90,15 @@ The user interface of an OEC platform provides user and role management for acce
 - Refs: RIG 5.1, SF-092
 - Verification: manual
 - Status: reviewed
-- Inventory: RIG-5.1-f306986f
+- Inventory: RIG-5.1-bde7cf36, RIG-5.1-d0d75d7e
 
-> The user interface of an Open Edge Computing platform provides user and role management for access control.
+> The user interface of an Open Edge Computing platform must provide user and role management for access control.
 > — RIG 5.1
 
-> Access to available services of the host system can be configured in a granular way via the user and role management.
+> It must be possible to configure the access to available services of the host system in a granular way via the user and role management.
 > — RIG 5.1
 
-Notes: "can be configured" describes a capability the platform has to offer; the obligation comes from the lead-in "must meet" (SF-092 (a)).
+Notes: Both items have their own "must" since SF-092 (a) was resolved.
 
 ## REQ-PLT-005
 

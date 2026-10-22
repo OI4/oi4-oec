@@ -5,13 +5,13 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: MG A1
 
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
-| [REQ-REG-001](#req-reg-001) | Registry collects MAM and Health of reachable assets | MUST* | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-REG-002](#req-reg-002) | Registry republishes MAM and Health on Get | MUST* | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-REG-003](#req-reg-003) | Registry web front-end lists applications and devices | MUST* | n/a | n/a | n/a | platform | manual | reviewed |
+| [REQ-REG-001](#req-reg-001) | Registry collects MAM and Health of reachable assets | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
+| [REQ-REG-002](#req-reg-002) | Registry republishes MAM and Health on Get | MUST | n/a | n/a | n/a | platform | d8 | draft |
+| [REQ-REG-003](#req-reg-003) | Registry web front-end lists applications and devices | MUST | n/a | n/a | n/a | platform | manual | reviewed |
 | [REQ-REG-004](#req-reg-004) | Optional content of the Registry web front-end | MAY | n/a | n/a | n/a | platform | manual | reviewed |
 | [REQ-REG-005](#req-reg-005) | Optional services of the Registry | MAY | n/a | n/a | n/a | platform | manual | reviewed |
 | [REQ-REG-006](#req-reg-006) | Registry started first | SHOULD | n/a | n/a | n/a | platform | manual | reviewed |
-| [REQ-REG-007](#req-reg-007) | Registry web front-end via TLS | SHOULD | n/a | n/a | n/a | platform | manual | reviewed |
+| [REQ-REG-007](#req-reg-007) | Registry web front-end via TLS | SHOULD | n/a | n/a | n/a | platform | manual | draft |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -21,11 +21,15 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: MG A1
 
 The OEC Registry collects information about the reachable assets (applications and devices) on the Message Bus by listening mainly to their MAM and Health resources.
 
-- Keyword: MUST (implicit, SF-035)
+- Keyword: MUST
 - Domain: platform · Applies to: registry
-- Refs: MG A1, MG 9.1.1, MG 9.1.2, SF-035, SF-089
+- Refs: MG A1, MG 9.1.1, MG 9.1.2, SF-089
 - Verification: d8
 - Status: reviewed
+- Inventory: MG-A1-f2801e0d
+
+> The OEC Registry must fulfill the following main tasks; items marked with "(optional)" are optional:
+> — MG A1
 
 > It collects the data of defined Open Industry 4.0 Alliance resources from the Message Bus and provides it to others via the Message Bus and a web front-end.
 > — MG A1
@@ -33,20 +37,23 @@ The OEC Registry collects information about the reachable assets (applications a
 > Collect information about reachable assets (applications and devices) by listening mainly to MAM and Health resources
 > — MG A1
 
-Notes: The main tasks have no keyword (SF-089 (a)). D8 can check the effect via REQ-REG-002: an asset that published its MAM is returned by the Registry.
+Notes: The main tasks are MUST by the lead-in since SF-089 (a) was resolved (before: implicit). D8 can check the effect via REQ-REG-002: an asset that published its MAM is returned by the Registry.
 
 ## REQ-REG-002
 
 **Registry republishes MAM and Health on Get**
 
-The OEC Registry answers Get requests on its own topics: a Get on Oi4v2/Registry/&lt;AppId>/Get/MAM triggers the publication of the MAM of all available assets to Oi4v2/Registry/&lt;AppId>/Pub/MAM, a Get on Oi4v2/Registry/&lt;AppId>/Get/MAM/&lt;Source> the publication of the MAM of the asset &lt;Source> to Oi4v2/Registry/&lt;AppId>/Pub/MAM/&lt;Source>; the same applies to Health (Oi4v2/Registry/&lt;AppId>/Get/Health[/&lt;Source>] → Oi4v2/Registry/&lt;AppId>/Pub/Health[/&lt;Source>]). &lt;AppId> is the encoded Identification Link of the Registry itself.
+The OEC Registry answers Get requests on its own topics: a Get on Oi4v2/Registry/&lt;AppId>/Get/MAM triggers the publication of the MAM of all available assets to Oi4v2/Registry/&lt;AppId>/Pub/MAM, a Get on Oi4v2/Registry/&lt;AppId>/Get/MAM/&lt;Source> the publication of the MAM of the asset &lt;Source> to Oi4v2/Registry/&lt;AppId>/Pub/MAM/&lt;Source>; the same applies to Health (Oi4v2/Registry/&lt;AppId>/Get/Health[/&lt;Source>] → Oi4v2/Registry/&lt;AppId>/Pub/Health[/&lt;Source>]). &lt;AppId> is the encoded Identification Link of the Registry itself. The Registry publishes with its own PublisherId and DataSetWriterIds; the DataSetWriterName of each DataSetMessage is the Identification Link of the described asset and its payload is the last MAM or Health received from that asset. Available assets are the assets that are online (after their Birth message, not after their Close or Will message). A publication that exceeds the maximum message size is paginated.
 
-- Keyword: MUST (implicit, SF-035)
+- Keyword: MUST
 - Domain: platform · Applies to: registry
-- Refs: MG A1, MG 7, MG 9.1.1, MG 9.1.2, SF-035, SF-089
+- Refs: MG A1, MG 7, MG 9.1.1, MG 9.1.2, MG 8.2.1, MG 8.2.3, MG 6.3.3, MG 6.3.4, MG 6.3.5, MG 8.3.11, SF-089
 - Verification: d8
-- Status: reviewed
-- Inventory: MG-A1-54951c67
+- Status: draft
+- Inventory: MG-A1-367de753, MG-A1-54951c67, MG-A1-f2801e0d
+
+> The OEC Registry must fulfill the following main tasks; items marked with "(optional)" are optional:
+> — MG A1
 
 > Whenever an application needs to know which other assets (applications and devices) are represented in Message Bus communication, the OEC Registry can provide the Identification Link, Master Asset Model (MAM), and Health information.
 > — MG A1
@@ -66,7 +73,19 @@ The OEC Registry answers Get requests on its own topics: a Get on Oi4v2/Registry
 > the topic Oi4v2/Registry/&lt;AppId>/Get/Health/&lt;Source> triggers the publication of specific Health information to the topic Oi4v2/Registry/&lt;AppId>/Pub/Health/&lt;Source>.
 > — MG A1
 
-Notes: Proposed interpretation (SF-089 (b)): the Registry is the publisher of these NetworkMessages with DataSetWriterIds of its own (REQ-MSG-021); the DataSetWriterName of each DataSetMessage is the Identification Link of the described asset (REQ-MSG-023), the payload is the last one received from the asset. "available" means online in the sense of REQ-LIFE-011 … 013. Too many DataSetMessages are paginated (REQ-PAG-005). "can provide" describes the use for other applications, not an option of the Registry.
+> The OEC Registry publishes these messages as publisher of its own: the PublisherId of the NetworkMessage (8.2.1 NetworkMessage) and the DataSetWriterIds are those of the OEC Registry.
+> — MG A1
+
+> The DataSetWriterName of each DataSetMessage (8.2.3 DataSetMessage) is the Identification Link of the described asset, and its payload is the last MAM or Health received from that asset.
+> — MG A1
+
+> Available assets are the assets that are online: an asset is available after its Birth message (6.3.3 Birth Message) and no longer available after its Close or Will message (6.3.4 Close Message, 6.3.5 Will Message).
+> — MG A1
+
+> If the DataSetMessages exceed the maximum size of a message, the publication is paginated (8.3.11 Pagination).
+> — MG A1
+
+Notes: SF-089 (b) resolved: the publisher, the DataSetWriterName, the payload and "available" are now stated in MG A1 (before: proposed interpretation in these notes, implicit MUST). Consistent with REQ-MSG-021 (own DataSetWriterIds), REQ-MSG-023 (DataSetWriterName), REQ-LIFE-011 … 013 (online/offline) and REQ-PAG-005 (pagination). "can provide" describes the use for other applications, not an option of the Registry. Back to draft in the C-030 closure (statement extended).
 
 ## REQ-REG-003
 
@@ -74,11 +93,15 @@ Notes: Proposed interpretation (SF-089 (b)): the Registry is the publisher of th
 
 The OEC Registry provides a web front-end that lists all running OI4 applications and all detected devices, each with its MAM, its latest Health information and its availability.
 
-- Keyword: MUST (implicit, SF-035)
+- Keyword: MUST
 - Domain: platform · Applies to: registry
-- Refs: MG A1, SF-035, SF-089
+- Refs: MG A1, SF-089
 - Verification: manual
 - Status: reviewed
+- Inventory: MG-A1-f2801e0d
+
+> The OEC Registry must fulfill the following main tasks; items marked with "(optional)" are optional:
+> — MG A1
 
 > Provide a web front-end that shows relevant information to its users:
 > — MG A1
@@ -92,7 +115,7 @@ The OEC Registry provides a web front-end that lists all running OI4 application
 > incl. the latest Health information (9.1.2 Health) and availability
 > — MG A1
 
-Notes: The main tasks have no keyword (SF-089 (a)).
+Notes: The main tasks are MUST by the lead-in since SF-089 (a) was resolved (before: implicit).
 
 ## REQ-REG-004
 
@@ -162,19 +185,22 @@ Notes: Applications must not rely on it: the Registry learns about assets starte
 
 **Registry web front-end via TLS**
 
-The OEC Registry serves its web front-end and REST API via TLS, using a certificate placed in a defined path or, if none is present, a self-signed certificate.
+The OEC Registry provides its web front-end and the REST API to its back-end via TLS. The location of the server certificate is implementation-specific; a containerized Registry can use the certificate of the application (REQ-CNT-007, REQ-CNT-008, REQ-CNT-025). Without a configured certificate, it uses a self-signed certificate.
 
 - Keyword: SHOULD
 - Domain: platform · Applies to: registry
-- Refs: MG A1, SF-089
+- Refs: MG A1, RIG 4.1.2, RIG 4.1.3, GL-ADR-022, SF-089
 - Verification: manual
-- Status: reviewed
-- Inventory: MG-A1-9e3cd7b1
+- Status: draft
+- Inventory: MG-A1-5f13c344, MG-A1-f4cbd047
 
-> The OEC Registry communicates via TLS.
+> The OEC Registry should provide its web front-end and the REST API to its back-end via TLS.
 > — MG A1
 
-> The certificate should be placed in a defined path; otherwise, a self-signed certificate is used.
+> Where the server certificate is stored is implementation-specific; a containerized OEC Registry can use the certificate of the application (OEC Runtime & Infrastructure Guideline, 4.1.2 OI4 Certificate Storage and 4.1.3 Secret Storage).
 > — MG A1
 
-Notes: The sentences are part of a note about the reference implementation and the "defined path" is not defined (SF-089 (c)). The default ports 5798 (web front-end) and 5799 (REST API) of the reference implementation are informative.
+> Without a configured certificate, a self-signed certificate is used.
+> — MG A1
+
+Notes: SF-089 (c) resolved: TLS moved from the note on the reference implementation into the main text (recommendation for every Registry); the "defined path" is implementation-specific, with the certificate of the application as option (GL-ADR-022). The default ports 5798 (web front-end) and 5799 (REST API) of the reference implementation are informative. Back to draft in the C-030 closure (statement changed).

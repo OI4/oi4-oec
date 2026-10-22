@@ -11,7 +11,7 @@ area: APP
 baseline: "b942df3"
 requirements:
   - id: REQ-APP-001
-    title: Images for at least one supported platform
+    title: Images for at least one supported processor architecture
     statement: >-
       The container images of an application are available for at least one
       of the processor architectures supported by OEC platforms (ARMv7, ARMv8
@@ -23,15 +23,15 @@ requirements:
     refs: [RIG 5.2, RIG 5.1, RIG 1.2, SF-092]
     quotes:
       - ref: RIG 5.2
-        text: Provided container images shall be available for at least one of the supported platforms, preferably as multi-architecture images.
+        text: Provided container images shall be available for at least one of the supported processor architectures (5.1 Minimum Requirements on an Alliance Compliant OEC Platform), preferably as multi-architecture images.
       - ref: RIG 5.2
-        text: The following overview applies to Level 3 (Full) of the OEC Service Container Compliance.
+        text: The following overview applies to Level 3 (Full) of the OEC Service Container Compliance (1.2 OEC Service Container Compliance).
     verification: [d8]
-    inventory: [RIG-5.2-40e23bb4]
+    inventory: [RIG-5.2-2a0e0364]
     status: reviewed
     notes: >-
-      Detail of REQ-CMP-032 (reviewed umbrella). "supported platforms" is read
-      as the processor architectures of RIG 5.1 (SF-092 (d)).
+      Detail of REQ-CMP-032 (reviewed umbrella). RIG 5.2 names the processor
+      architectures of RIG 5.1 since SF-092 (d) was resolved.
 
   - id: REQ-APP-002
     title: Multi-architecture images
@@ -45,9 +45,9 @@ requirements:
     refs: [RIG 5.2, SF-091]
     quotes:
       - ref: RIG 5.2
-        text: Provided container images shall be available for at least one of the supported platforms, preferably as multi-architecture images.
+        text: Provided container images shall be available for at least one of the supported processor architectures (5.1 Minimum Requirements on an Alliance Compliant OEC Platform), preferably as multi-architecture images.
     verification: [d8]
-    inventory: [RIG-5.2-40e23bb4]
+    inventory: [RIG-5.2-2a0e0364]
     status: reviewed
 
   - id: REQ-APP-003

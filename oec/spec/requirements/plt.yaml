@@ -1,8 +1,7 @@
 # Requirements of area PLT – OEC platform requirements (RIG 5, RIG 5.1;
 # ADR-0018). The requirements on the platform are not graded by compliance
-# levels (RIG 5.1, RIG 1.2): domain platform, no levels. The list items of
-# RIG 5.1 take their obligation from the lead-in "must meet" where they have
-# no keyword of their own (SF-092 (a)).
+# levels (RIG 5.1, RIG 1.2): domain platform, no levels. Every list item of
+# RIG 5.1 has its own keyword since SF-092 (a) was resolved.
 # Drafted in C-030.
 area: PLT
 baseline: "b942df3"
@@ -23,19 +22,20 @@ requirements:
       - ref: RIG 5.1
         text: To achieve Open Industry 4.0 Alliance compliance, the hardware and software must meet several requirements.
       - ref: RIG 5.1
-        text: The supported processor architectures are ARMv7, ARMv8, and amd64
+        text: The processor architecture must be one of the supported processor architectures ARMv7, ARMv8, and amd64
       - ref: RIG 5.1
-        text: A minimum of 1 GB RAM
+        text: The edge computer must provide a minimum of 1 GB RAM
       - ref: RIG 5.1
-        text: At least one available network interface (likely Ethernet interface, but LTE or similar might be possible too)
+        text: The edge computer must provide a minimum of 4 GB non-volatile memory (eMMC, SD Card, SSD, HDD, …)
+      - ref: RIG 5.1
+        text: The edge computer must provide at least one available network interface (likely Ethernet interface, but LTE or similar might be possible too)
     verification: [d8, manual]
-    inventory: [RIG-5.1-7017a7e5]
+    inventory: [RIG-5.1-7017a7e5, RIG-5.1-937b5b97, RIG-5.1-6dd9b0bd, RIG-5.1-3245b5c2, RIG-5.1-b96535ec]
     status: reviewed
     notes: >-
-      The list items have no keyword of their own; the obligation is taken
-      from the lead-in "must meet" (SF-092 (a)). The non-volatile memory may be
-      eMMC, SD card, SSD, HDD or similar. The architectures are also the
-      "supported platforms" of REQ-APP-001 (SF-092 (d)).
+      Each list item has its own "must" since SF-092 (a) was resolved. The
+      non-volatile memory may be eMMC, SD card, SSD, HDD or similar. RIG 5.2
+      refers to these processor architectures (REQ-APP-001, SF-092 (d)).
 
   - id: REQ-PLT-002
     title: Platform hardened for industrial use
@@ -80,15 +80,14 @@ requirements:
     refs: [RIG 5.1, SF-092]
     quotes:
       - ref: RIG 5.1
-        text: The user interface of an Open Edge Computing platform provides user and role management for access control.
+        text: The user interface of an Open Edge Computing platform must provide user and role management for access control.
       - ref: RIG 5.1
-        text: Access to available services of the host system can be configured in a granular way via the user and role management.
+        text: It must be possible to configure the access to available services of the host system in a granular way via the user and role management.
     verification: [manual]
-    inventory: [RIG-5.1-f306986f]
+    inventory: [RIG-5.1-bde7cf36, RIG-5.1-d0d75d7e]
     status: reviewed
     notes: >-
-      "can be configured" describes a capability the platform has to offer;
-      the obligation comes from the lead-in "must meet" (SF-092 (a)).
+      Both items have their own "must" since SF-092 (a) was resolved.
 
   - id: REQ-PLT-005
     title: Industry-grade authentication

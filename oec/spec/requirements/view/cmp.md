@@ -614,7 +614,7 @@ A containerized application meets the container network requirements of RIG 4.4.
 
 **Platform-related application requirements**
 
-A containerized application meets the platform-related application requirements of RIG 5.2, such as supported platforms and hardware requirements.
+A containerized application meets the platform-related application requirements of RIG 5.2, such as supported processor architectures and hardware requirements.
 
 - Keyword: MUST
 - Levels: L1 none · L2 SHOULD · L3 MUST
@@ -623,9 +623,9 @@ A containerized application meets the platform-related application requirements 
 - Refs: RIG 1.2
 - Verification: d8, manual
 - Status: reviewed
-- Inventory: MG-1.3-0745092e, RIG-1.2-ae863090
+- Inventory: MG-1.3-0745092e, RIG-1.2-8af2c274
 
-> Platform-related application requirements, such as supported platforms and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
+> Platform-related application requirements, such as supported processor architectures and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
 > — RIG 1.2
 
 ## REQ-CMP-033

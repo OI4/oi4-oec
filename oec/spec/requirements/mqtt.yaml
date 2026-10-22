@@ -154,21 +154,30 @@ requirements:
   - id: REQ-MQTT-007
     title: Broker certificate signed by a CA
     statement: >-
-      The broker uses a certificate signed by a well-known or a user-specific
-      certificate authority (CA). The broker certificate is provided via the
-      Message Bus storage (RIG 4.1.1), the CA certificate via the OI4
-      certificate storage (RIG 4.1.2).
-    keyword: SHOULD
+      The broker uses a certificate signed by a well-known (public) or a
+      platform- or user-specific certificate authority (CA); self-signed
+      broker certificates are not allowed. The certificate of the signing CA
+      is provided as ca.pem in the OI4 certificate storage (REQ-CNT-005) or,
+      for a different local CA, as broker_ca.pem in the Message Bus storage
+      (REQ-CNT-001).
+    keyword: MUST
     domain: platform
     applies_to: [broker, platform]
-    refs: [MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-057]
+    refs: [MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-057, SF-091]
     quotes:
       - ref: MG 6.2.2
         text: The broker should use a certificate which is signed by a well-known or user specific certificate authority (CA).
     verification: [d8, manual]
     inventory: [MG-6.2.2-e60fcb10]
-    status: reviewed
-    notes: '"preferably shall" replaced by "should" in C-026 (SF-057 (d)).'
+    status: draft
+    notes: >-
+      "preferably shall" replaced by "should" in C-026 (SF-057 (d)). SF-091
+      (g), decided by the PO in the C-030 review (2026-10-22), revises this to
+      MUST: the client must verify the broker certificate against a CA
+      certificate (REQ-MQTT-008). The guideline text of MG 6.2.2 still says
+      "should" until SF-091 is implemented. An own CA of the platform is only
+      required if it issues certificates. Back to draft in the C-030 closure
+      (SHOULD → MUST).
 
   - id: REQ-MQTT-008
     title: Client verifies the broker certificate
@@ -306,8 +315,10 @@ requirements:
         text: To avoid problems with length and character restrictions in some MQTT implementations, a name of the container should be used which is unique, present and accessible in any OI4 Alliance-compliant container (OEC Runtime & Infrastructure Guideline, 4.2 Container Name Conventions).
       - ref: MG 6.2.3
         text: A client without container (e.g. a device with its own MQTT client) should use a ClientId that is unique on the broker and stable across reconnects, e.g. derived from its Identification Link within the length and character limits of the broker.
+      - ref: RIG 4.2
+        text: As MQTT ClientId, as recommended in OEC Messaging Guideline, 6.2.3 Client Identifier
     verification: [manual, d8]
-    inventory: [MG-6.2.3-845bb406, MG-6.2.3-e61860a9, MG-6-4c5014ad]
+    inventory: [MG-6.2.3-845bb406, MG-6.2.3-e61860a9, MG-6-4c5014ad, RIG-4.2-5dfec198]
     status: reviewed
     notes: >-
       Graded by REQ-CMP-009. Component without container: SF-060 (c), C-026.

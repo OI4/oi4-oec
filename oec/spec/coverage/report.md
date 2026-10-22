@@ -5,11 +5,11 @@ Guideline baseline: `b942df3`. An inventory item is a candidate of a normative s
 
 | Area | Cycle | Status | Items | Covered | Informative | Open |
 |---|---|---|---:|---:|---:|---:|
-| CMP | C-014 | reviewed | 65 | 33 | 31 | 1 |
+| CMP | C-014 | reviewed | 65 | 34 | 31 | 0 |
 | IL | C-018 | reviewed | 97 | 73 | 24 | 0 |
 | TOP | C-018 | reviewed | 86 | 71 | 15 | 0 |
 | MSG | C-023 | reviewed | 181 | 172 | 9 | 0 |
-| ACT | C-023 | reviewed | 73 | 65 | 7 | 1 |
+| ACT | C-023 | reviewed | 73 | 66 | 7 | 0 |
 | MQTT | C-025 | reviewed | 43 | 30 | 13 | 0 |
 | LIFE | C-025 | reviewed | 23 | 20 | 3 | 0 |
 | RES-MAM | C-027 | reviewed | 72 | 64 | 8 | 0 |
@@ -26,63 +26,10 @@ Guideline baseline: `b942df3`. An inventory item is a candidate of a normative s
 | RES-EVENT | C-028 | reviewed | 42 | 36 | 6 | 0 |
 | RES-SUBLIST | C-028 | reviewed | 40 | 32 | 8 | 0 |
 | BUS | C-028 | reviewed | 25 | 20 | 5 | 0 |
-| CNT | C-030 | reviewed | 78 | 46 | 25 | 7 |
-| PLT | C-030 | reviewed | 16 | 8 | 2 | 6 |
-| APP | C-030 | reviewed | 9 | 3 | 4 | 2 |
-| LIC | C-030 | reviewed | 5 | 4 | 0 | 1 |
-| REG | C-030 | reviewed | 16 | 8 | 4 | 4 |
+| CNT | C-030 | reviewed | 78 | 53 | 25 | 0 |
+| PLT | C-030 | reviewed | 16 | 14 | 2 | 0 |
+| APP | C-030 | reviewed | 9 | 5 | 4 | 0 |
+| LIC | C-030 | reviewed | 5 | 5 | 0 | 0 |
+| REG | C-030 | reviewed | 16 | 12 | 4 | 0 |
 | GEN | C-030 | reviewed | 79 | 4 | 75 | 0 |
-| **Total** | | | 1382 | 1054 | 306 | 22 |
-
-## Problems
-
-- area CMP is reviewed but has 1 unmapped inventory items
-- area ACT is reviewed but has 1 unmapped inventory items
-- area CNT is reviewed but has 7 unmapped inventory items
-- area PLT is reviewed but has 6 unmapped inventory items
-- area APP is reviewed but has 2 unmapped inventory items
-- area LIC is reviewed but has 1 unmapped inventory items
-- area REG is reviewed but has 4 unmapped inventory items
-
-## Open items – CMP
-
-- `RIG-1.2-8af2c274` (docs/infrastructure-guideline/1-introduction-and-scope/1-2-oec-service-container-compliance.md:33): Required Function: Platform-related application requirements, such as supported processor architectures and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) | Level 1: – | Level 2: Recommended | Level 3: Mandatory
-
-## Open items – ACT
-
-- `MG-9.2-a99364df` (docs/guideline/9-message-bus-communication/9.2 Common Services/index.md:18): To prevent Action calls by unauthorized communication participants, the operator must prevent this via ACL.
-
-## Open items – CNT
-
-- `RIG-4.2-997b0f1d` (docs/infrastructure-guideline/4-container-environment/4-2-container-name-conventions.md:13): To meet these requirements, the container name must be unique within the Open Edge Computing platform, while also not exceeding 63 characters.
-- `RIG-4.2-7935e203` (docs/infrastructure-guideline/4-container-environment/4-2-container-name-conventions.md:13): Best practice is to use a naming scheme such as <DefaultContainerName>-<uuid>; the UUID also makes the container name unique beyond the platform.
-- `RIG-4.2-75e6ea8e` (docs/infrastructure-guideline/4-container-environment/4-2-container-name-conventions.md:15): The platform assigns the container name when the container is created and shall make it available to the container by setting the container hostname.
-- `RIG-4.2-9b5221a1` (docs/infrastructure-guideline/4-container-environment/4-2-container-name-conventions.md:17): The application shall determine its container name from its hostname and shall use it as follows:
-- `RIG-4.2-5dfec198` (docs/infrastructure-guideline/4-container-environment/4-2-container-name-conventions.md:21): As MQTT ClientId, as recommended in OEC Messaging Guideline, 6.2.3 Client Identifier
-- `RIG-4.2-21db7fba` (docs/infrastructure-guideline/4-container-environment/4-2-container-name-conventions.md:28): To avoid several instances of a container with the same container name, it is best practice to use a UUID as postfix on top of a self-defined container name such as <DefaultContainerName>-<uuid>.
-- `RIG-4.2-f4e41f77` (docs/infrastructure-guideline/4-container-environment/4-2-container-name-conventions.md:32): The RFC 1123 rules for assigning a host name must also be followed for container names so that DNS resolution works correctly: letters, digits and hyphens only.
-
-## Open items – PLT
-
-- `RIG-5.1-937b5b97` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-1-minimum-requirements-on-an-alliance-compliant-oec-platform.md:14): The processor architecture must be one of the supported processor architectures ARMv7, ARMv8, and amd64
-- `RIG-5.1-6dd9b0bd` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-1-minimum-requirements-on-an-alliance-compliant-oec-platform.md:15): The edge computer must provide a minimum of 1 GB RAM
-- `RIG-5.1-3245b5c2` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-1-minimum-requirements-on-an-alliance-compliant-oec-platform.md:16): The edge computer must provide a minimum of 4 GB non-volatile memory (eMMC, SD Card, SSD, HDD, …)
-- `RIG-5.1-b96535ec` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-1-minimum-requirements-on-an-alliance-compliant-oec-platform.md:17): The edge computer must provide at least one available network interface (likely Ethernet interface, but LTE or similar might be possible too)
-- `RIG-5.1-bde7cf36` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-1-minimum-requirements-on-an-alliance-compliant-oec-platform.md:23): The user interface of an Open Edge Computing platform must provide user and role management for access control.
-- `RIG-5.1-d0d75d7e` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-1-minimum-requirements-on-an-alliance-compliant-oec-platform.md:25): It must be possible to configure the access to available services of the host system in a granular way via the user and role management.
-
-## Open items – APP
-
-- `RIG-5.2-2a0e0364` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-2-minimum-requirements-on-an-oi4-alliance-compliant-application.md:18): Provided container images shall be available for at least one of the supported processor architectures (5.1 Minimum Requirements on an Alliance Compliant OEC Platform), preferably as multi-architecture images.
-- `RIG-5.2-9361ad54` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-2-minimum-requirements-on-an-oi4-alliance-compliant-application.md:29): Independent of the compliance level (1.2 OEC Service Container Compliance), services offered by applications must follow legal guidelines and must not contain harmful or abusive components (such as crypto miners, spyware, trojan horses, viruses, etc.) (5.3 Legal Requirements & Software Licenses).
-
-## Open items – LIC
-
-- `RIG-5.3-c1e43485` (docs/infrastructure-guideline/5-open-edge-computing-platform-requirements/5-3-legal-requirements-software-licenses.md:8): Providing the SBOM is mandatory from OEC Service Container Compliance Level 2 on (1.2 OEC Service Container Compliance).
-
-## Open items – REG
-
-- `MG-A1-f2801e0d` (docs/guideline/appendix-a/a1-the-oec-registry.md:14): The OEC Registry must fulfill the following main tasks; items marked with "(optional)" are optional:
-- `MG-A1-367de753` (docs/guideline/appendix-a/a1-the-oec-registry.md:24): The OEC Registry publishes these messages as publisher of its own: the `PublisherId` of the `NetworkMessage` (8.2.1 NetworkMessage) and the `DataSetWriterIds` are those of the OEC Registry.
-- `MG-A1-5f13c344` (docs/guideline/appendix-a/a1-the-oec-registry.md:48): The OEC Registry should provide its web front-end and the REST API to its back-end via TLS.
-- `MG-A1-f4cbd047` (docs/guideline/appendix-a/a1-the-oec-registry.md:48): Where the server certificate is stored is implementation-specific; a containerized OEC Registry can use the certificate of the application (OEC Runtime & Infrastructure Guideline, 4.1.2 OI4 Certificate Storage and 4.1.3 Secret Storage).
+| **Total** | | | 1382 | 1076 | 306 | 0 |

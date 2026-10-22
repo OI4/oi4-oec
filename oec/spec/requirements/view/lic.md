@@ -44,7 +44,7 @@ Every license used within a service is listed in the SBOM and the corresponding 
 - Refs: RIG 5.3, RIG 4.1.4, RIG 1.2, SF-092
 - Verification: d8, manual
 - Status: reviewed
-- Inventory: RIG-5.3-0b7941ca, RIG-5.3-b3b4f4ea
+- Inventory: RIG-5.3-b3b4f4ea, RIG-5.3-c1e43485
 
 > Every license used within a service must be listed in a Software Bill of Materials (SBOM), and the corresponding license texts must be provided.
 > — RIG 5.3
@@ -52,7 +52,7 @@ Every license used within a service is listed in the SBOM and the corresponding 
 > Providing the SBOM is mandatory from OEC Service Container Compliance Level 2 on
 > — RIG 5.3
 
-Notes: Detail of REQ-CMP-028 (reviewed umbrella). RIG 5.3 cites MG 1.3 for the level; the Service Container levels are defined in RIG 1.2 (SF-092 (b)). D8 can check that every license of the SBOM has a text; whether the SBOM is complete needs a manual assessment.
+Notes: Detail of REQ-CMP-028 (reviewed umbrella). RIG 5.3 cites RIG 1.2 for the level since SF-092 (b) was resolved. D8 can check that every license of the SBOM has a text; whether the SBOM is complete needs a manual assessment.
 
 ## REQ-LIC-003
 
@@ -83,12 +83,12 @@ A service operates only within the boundaries of the applicable law and neither 
 - Refs: RIG 5.3, RIG 5.2, RIG 1.2, SF-092
 - Verification: manual
 - Status: reviewed
-- Inventory: RIG-5.2-32110d74, RIG-5.3-83aa82cc
+- Inventory: RIG-5.2-9361ad54, RIG-5.3-83aa82cc
 
 > The offered services may only operate within the boundaries of the applicable law and must not support unethical tasks, like crypto-mining or spy software.
 > — RIG 5.3
 
-> Services offered by applications must follow legal guidelines and must not contain harmful or abusive components (such as crypto miners, spyware, trojan horses, viruses, etc.).
+> Independent of the compliance level (1.2 OEC Service Container Compliance), services offered by applications must follow legal guidelines and must not contain harmful or abusive components (such as crypto miners, spyware, trojan horses, viruses, etc.) (5.3 Legal Requirements & Software Licenses).
 > — RIG 5.2
 
-Notes: Level-independent per the RIG 1.2 note, although RIG 5.2 lists the item in the Level 3 overview and only recommends the remaining Level 3 requirements at Level 2 (SF-092 (c)). "may only operate within the boundaries" is a restriction, not a permission.
+Notes: Level-independent per the RIG 1.2 note and RIG 5.2 (the item moved out of the Level 3 overview when SF-092 (c) was resolved). "may only operate within the boundaries" is a restriction, not a permission.

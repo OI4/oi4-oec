@@ -464,9 +464,9 @@ requirements:
     title: Unique container name set as hostname
     statement: >-
       When a container is created, the platform assigns it a well-defined
-      container name that is globally unique, has at most 63 characters and
-      follows the host name rules of RFC 1123, and sets the container
-      hostname to this name.
+      container name that is unique within the OEC platform, has at most 63
+      characters and follows the host name rules of RFC 1123 (letters, digits
+      and hyphens only), and sets the container hostname to this name.
     keyword: MUST
     domain: platform
     applies_to: [platform]
@@ -475,68 +475,76 @@ requirements:
       - ref: RIG 4.2
         text: Each OI4 Alliance-compliant container shall have a well-defined name for identification.
       - ref: RIG 4.2
-        text: To meet these requirements, the container name must be globally unique according to the definition of the OI4 Alliance, while also not exceeding 63 characters.
+        text: To meet these requirements, the container name must be unique within the Open Edge Computing platform, while also not exceeding 63 characters.
       - ref: RIG 4.2
-        text: The container name is assigned when the container is created and shall be made available to the container by setting the container hostname.
+        text: The platform assigns the container name when the container is created and shall make it available to the container by setting the container hostname.
       - ref: RIG 4.2
-        text: The RFC 1123 rules for assigning a host name must also be followed for container names so that DNS resolution works correctly.
+        text: 'The RFC 1123 rules for assigning a host name must also be followed for container names so that DNS resolution works correctly: letters, digits and hyphens only.'
     verification: [d8]
-    inventory: [RIG-4.2-36a1dde9, RIG-4.2-8d376a21, RIG-4.2-2365c930, RIG-4.2-7d974d7e]
-    status: reviewed
+    inventory: [RIG-4.2-36a1dde9, RIG-4.2-997b0f1d, RIG-4.2-75e6ea8e, RIG-4.2-f4e41f77]
+    status: draft
     notes: >-
-      Addressee (platform at container creation) and "globally unique" per
-      SF-090 (b), (c). RFC 1123 allows letters, digits and "-" only, so the
-      recommended separator "_" of REQ-CNT-020 conflicts (SF-090 (a)).
+      SF-090 (b), (c) resolved: "unique within the Open Edge Computing
+      platform" (before: "globally unique according to the definition of the
+      OI4 Alliance") and the platform as addressee. Back to draft in the
+      C-030 closure (uniqueness scope changed).
 
   - id: REQ-CNT-020
     title: Container name with a UUID postfix
     statement: >-
       The container name consists of a self-defined default container name
-      with a UUID as postfix (<DefaultContainerName>_<uuid>), so that several
-      instances never get the same name.
+      of at most 26 characters with a UUID as postfix, separated by a hyphen
+      (<DefaultContainerName>-<uuid>), so that several instances never get
+      the same name and the name is unique beyond the platform as well.
     keyword: SHOULD
     domain: platform
     applies_to: [platform]
     refs: [RIG 4.2, SF-090]
     quotes:
       - ref: RIG 4.2
-        text: Best practice is to use a naming scheme such as <DefaultContainerName>_<uuid>.
+        text: Best practice is to use a naming scheme such as <DefaultContainerName>-<uuid>; the UUID also makes the container name unique beyond the platform.
       - ref: RIG 4.2
-        text: To avoid several instances of a container with the same container name, it is best practice to use a UUID as postfix on top of a self-defined container name such as <DefaultContainerName>_<uuid>.
+        text: With a UUID of 36 characters and the separator, the <DefaultContainerName> has at most 26 characters.
+      - ref: RIG 4.2
+        text: To avoid several instances of a container with the same container name, it is best practice to use a UUID as postfix on top of a self-defined container name such as <DefaultContainerName>-<uuid>.
     verification: [d8]
-    inventory: [RIG-4.2-244d6b14, RIG-4.2-7323472b]
-    status: reviewed
+    inventory: [RIG-4.2-7935e203, RIG-4.2-21db7fba]
+    status: draft
     notes: >-
-      Proposed in SF-090 (a): separator "-" instead of "_" (RFC 1123); with
-      a UUID of 36 characters the default container name has at most 26
-      characters (SF-090 (e)).
+      SF-090 (a), (e) resolved: separator "-" instead of "_" (RFC 1123), at
+      most 26 characters for the default container name. Back to draft in the
+      C-030 closure (separator changed).
 
   - id: REQ-CNT-021
     title: Application uses its container name
     statement: >-
       A containerized application determines its container name from its
-      hostname and uses it as MQTT ClientId (REQ-MQTT-013), as name of its
-      certificate (REQ-CNT-007) and, if it uses the Oi4Identifier as
-      Identification Link, as SerialNumber in the Oi4Identifier.
+      hostname and uses it as name of its certificate (REQ-CNT-007) and, if
+      it uses the Oi4Identifier as Identification Link, as SerialNumber in
+      the Oi4Identifier.
     keyword: MUST
-    implicit: true
     domain: service-container
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [application]
-    refs: [RIG 4.2, MG 4.3.1, RIG 1.2, SF-035, SF-090]
+    refs: [RIG 4.2, MG 4.3.1, RIG 1.2, SF-090]
     quotes:
       - ref: RIG 4.2
-        text: 'The container name is used for several things:'
+        text: 'The application shall determine its container name from its hostname and shall use it as follows:'
+      - ref: RIG 4.2
+        text: As the name of the certificate of the application (4.1.2 OI4 Certificate Storage)
       - ref: RIG 4.2
         text: As a serial number inside the Oi4Identifier (OEC Messaging Guideline, 4.3 The Oi4Identifier), if the Oi4Identifier is used as Identification Link and thus as AppId (OEC Messaging Guideline, 7.3 AppId Element)
       - ref: MG 4.3.1
         text: When deploying a container which by its nature has no serial number and can be instantiated multiple times, use the container name as SerialNumber as defined in OEC Runtime & Infrastructure Guideline, 4.2 Container Name Conventions.
     verification: [manual, d8]
-    status: reviewed
+    inventory: [RIG-4.2-9b5221a1]
+    status: draft
     notes: >-
-      The list of uses has no keyword (SF-090 (d)); treated as MUST until
-      decided (G-1.6). Graded by REQ-CMP-029; the ClientId itself is a
-      messaging SHOULD at all levels (REQ-MQTT-013).
+      SF-090 (d) resolved: explicit "shall" (before: implicit MUST). The MQTT
+      ClientId is no longer part of this requirement: RIG 4.2 now refers to
+      the recommendation of MG 6.2.3 (REQ-MQTT-013, SHOULD at all levels).
+      Graded by REQ-CMP-029. Back to draft in the C-030 closure (ClientId
+      removed, no longer implicit).
 
   # --- Container image integrity (RIG 4.3) ----------------------------------
   - id: REQ-CNT-022

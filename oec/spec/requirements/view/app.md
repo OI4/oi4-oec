@@ -5,7 +5,7 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: RIG 5.2
 
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
-| [REQ-APP-001](#req-app-001) | Images for at least one supported platform | MUST | none | SHOULD | MUST | service-container | d8 | reviewed |
+| [REQ-APP-001](#req-app-001) | Images for at least one supported processor architecture | MUST | none | SHOULD | MUST | service-container | d8 | reviewed |
 | [REQ-APP-002](#req-app-002) | Multi-architecture images | SHOULD | none | SHOULD | SHOULD | service-container | d8 | reviewed |
 | [REQ-APP-003](#req-app-003) | Minimum hardware requirements described | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
 | [REQ-APP-004](#req-app-004) | Good software engineering and quality assurance | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
@@ -14,7 +14,7 @@ Guideline baseline: `b942df3` · Area status: reviewed · Sections: RIG 5.2
 
 ## REQ-APP-001
 
-**Images for at least one supported platform**
+**Images for at least one supported processor architecture**
 
 The container images of an application are available for at least one of the processor architectures supported by OEC platforms (ARMv7, ARMv8 or amd64, REQ-PLT-001).
 
@@ -24,15 +24,15 @@ The container images of an application are available for at least one of the pro
 - Refs: RIG 5.2, RIG 5.1, RIG 1.2, SF-092
 - Verification: d8
 - Status: reviewed
-- Inventory: RIG-5.2-40e23bb4
+- Inventory: RIG-5.2-2a0e0364
 
-> Provided container images shall be available for at least one of the supported platforms, preferably as multi-architecture images.
+> Provided container images shall be available for at least one of the supported processor architectures (5.1 Minimum Requirements on an Alliance Compliant OEC Platform), preferably as multi-architecture images.
 > — RIG 5.2
 
-> The following overview applies to Level 3 (Full) of the OEC Service Container Compliance.
+> The following overview applies to Level 3 (Full) of the OEC Service Container Compliance (1.2 OEC Service Container Compliance).
 > — RIG 5.2
 
-Notes: Detail of REQ-CMP-032 (reviewed umbrella). "supported platforms" is read as the processor architectures of RIG 5.1 (SF-092 (d)).
+Notes: Detail of REQ-CMP-032 (reviewed umbrella). RIG 5.2 names the processor architectures of RIG 5.1 since SF-092 (d) was resolved.
 
 ## REQ-APP-002
 
@@ -46,9 +46,9 @@ The container images of an application are provided as multi-architecture images
 - Refs: RIG 5.2, SF-091
 - Verification: d8
 - Status: reviewed
-- Inventory: RIG-5.2-40e23bb4
+- Inventory: RIG-5.2-2a0e0364
 
-> Provided container images shall be available for at least one of the supported platforms, preferably as multi-architecture images.
+> Provided container images shall be available for at least one of the supported processor architectures (5.1 Minimum Requirements on an Alliance Compliant OEC Platform), preferably as multi-architecture images.
 > — RIG 5.2
 
 ## REQ-APP-003

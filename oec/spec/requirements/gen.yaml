@@ -2,8 +2,8 @@
 # security and glossaries (MG 2, MG 3, MG A4, RIG 3, RIG A1; ADR-0018). Most
 # items of these chapters restate requirements detailed in other areas or are
 # descriptive; they are listed in coverage/informative.yaml with the area that
-# covers them. Only the access restriction of MG 3 is not stated elsewhere
-# for Action calls (SF-093).
+# covers them. Only the access restriction of MG 3 (with the MG 9.2 box for
+# Action calls, SF-093) has a requirement here.
 # Drafted in C-030.
 area: GEN
 baseline: "b942df3"
@@ -17,16 +17,18 @@ requirements:
     keyword: MUST
     domain: platform
     applies_to: [broker, platform]
-    refs: [MG 3, MG 9, SF-093]
+    refs: [MG 3, MG 9, MG 9.2, SF-093]
     quotes:
       - ref: MG 3
         text: Write access and Action calls over the Message Bus must be restricted to authorized communication participants, e.g. via an access control list (ACL) of the MQTT broker (9 Message Bus Communication).
+      - ref: MG 9.2
+        text: To prevent Action calls by unauthorized communication participants, the operator must prevent this via ACL.
     verification: [d8]
-    inventory: [MG-3-22735921]
+    inventory: [MG-3-22735921, MG-9.2-a99364df]
     status: reviewed
     notes: >-
       The write access per resource is detailed by REQ-RES-CONFIG, -DATA,
       -META, -PUBLIST, -REFDES and -SUBLIST ("protected by ACL", reviewed).
-      For Action calls MG 3 is the only source; MG 9.2 (Common Services) and
-      MG 8.1.3/8.4 (area ACT) have no corresponding sentence (SF-093). D8 checks that a client without
+      For Action calls MG 9.2 (Common Services) has the corresponding
+      REQUIRED box since SF-093 was resolved. D8 checks that a client without
       authorization cannot publish to Set, Del and Call topics.

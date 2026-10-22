@@ -17,12 +17,15 @@ The operator of the Message Bus restricts write access (methods Set and Del) and
 
 - Keyword: MUST
 - Domain: platform · Applies to: broker, platform
-- Refs: MG 3, MG 9, SF-093
+- Refs: MG 3, MG 9, MG 9.2, SF-093
 - Verification: d8
 - Status: reviewed
-- Inventory: MG-3-22735921
+- Inventory: MG-3-22735921, MG-9.2-a99364df
 
 > Write access and Action calls over the Message Bus must be restricted to authorized communication participants, e.g. via an access control list (ACL) of the MQTT broker (9 Message Bus Communication).
 > — MG 3
 
-Notes: The write access per resource is detailed by REQ-RES-CONFIG, -DATA, -META, -PUBLIST, -REFDES and -SUBLIST ("protected by ACL", reviewed). For Action calls MG 3 is the only source; MG 9.2 (Common Services) and MG 8.1.3/8.4 (area ACT) have no corresponding sentence (SF-093). D8 checks that a client without authorization cannot publish to Set, Del and Call topics.
+> To prevent Action calls by unauthorized communication participants, the operator must prevent this via ACL.
+> — MG 9.2
+
+Notes: The write access per resource is detailed by REQ-RES-CONFIG, -DATA, -META, -PUBLIST, -REFDES and -SUBLIST ("protected by ACL", reviewed). For Action calls MG 9.2 (Common Services) has the corresponding REQUIRED box since SF-093 was resolved. D8 checks that a client without authorization cannot publish to Set, Del and Call topics.
