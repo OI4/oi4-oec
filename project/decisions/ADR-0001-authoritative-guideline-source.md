@@ -343,3 +343,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `f951bcb` is recorded in addendum 17.
 - The baseline is now `c840cb5` on branch `feature/spec-findings` (local commits `05f7a30` – PO cleanup of informative notes in MG 7 and MG 2.3 wording – and `c840cb5` – RFC 5424 links in MG 7.7; PO request 2026-10-22). Spec re-baselined (`49dd3a7`): key remaps and four informative entries dropped; no obligation changed, no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 19 (2026-10-22, guideline baseline `c67ec35`)
+
+- The previous baseline `c840cb5` is recorded in addendum 18.
+- The baseline is now `c67ec35` on branch `feature/spec-findings` (local commit `c67ec35` – MG 7.7 Filter value subheaders as bold code instead of headings; PO request 2026-10-22). Spec re-baselined (`8ed9b94`): 23 key remaps, no content change, no finding, no GL-ADR. SF-001 … 095 resolved.
