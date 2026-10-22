@@ -9,7 +9,7 @@ Machine-readable baseline derived **only** from the OEC guideline (Messaging Gui
 | `requirements/*.schema.json` | JSON Schema 2020-12 of the files above | hand |
 | `requirements/view/*.md` | Markdown view per area – the PO review artifact | `spectool render` |
 | `coverage/inventory.yaml` | all candidates of normative statements in MG + RIG (keyword, field, admonition, implicit, table) | `spectool inventory` |
-| `coverage/informative.yaml` | inventory items that are no requirement, with reason (MG 1.2) | hand |
+| `coverage/informative.yaml` | inventory items that are no requirement, with reason (MG 1.2, RIG 1.2) | hand |
 | `coverage/examples.yaml` (+ schema) | fenced code blocks of MG + RIG without a golden vector (templates, code in other languages, deployment snippets, examples with a spec finding), with reason (C-031) | hand |
 | `coverage/report.md` | coverage of the inventory per area and of the guideline examples by golden vectors | `spectool coverage` |
 | `topic/topic.abnf` | formal topic grammar (RFC 5234 + RFC 7405), one rule per allowed Method × Resource form | hand |
@@ -27,7 +27,7 @@ Use the id, e.g. `REQ-CMP-003`. Ids are never reused or renumbered; a replaced e
 Fields of an entry (`requirements/catalog.schema.json`):
 
 - `statement` – one atomic requirement in our words, written in present tense; the obligation is carried by `keyword` and `levels`, the guideline wording by `quotes`.
-- `keyword` – MUST / MUST NOT / SHOULD / SHOULD NOT / MAY as mapped by MG 1.2; for graded domains it equals the Level 3 obligation.
+- `keyword` – MUST / MUST NOT / SHOULD / SHOULD NOT / MAY as mapped by MG 1.2 / RIG 1.2; for graded domains it equals the Level 3 obligation.
 - `implicit: true` – the guideline states the behavior without keyword; treated as MUST by the interim rule of SF-035. Since C-016 the guideline carries the keywords (SF-035 resolved, `0de223c`), so new entries should not need this flag; a remaining keyword-less behavior is a new spec finding.
 - `domain` – `messaging` or `service-container` (graded, `levels` L1–L3 required) or `platform` (not graded, no `levels`).
 - `levels` – obligation per compliance level; `none` = not required at this level.
