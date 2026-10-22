@@ -5,12 +5,12 @@ Guideline baseline: `6cb6a97` · Area status: reviewed · Sections: RIG 2, RIG 4
 
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
-| [REQ-CNT-001](#req-cnt-001) | Platform provides the Message Bus storage | MUST | n/a | n/a | n/a | platform | d8 | draft |
+| [REQ-CNT-001](#req-cnt-001) | Platform provides the Message Bus storage | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-002](#req-cnt-002) | No private keys in the Message Bus and certificate storages | SHOULD | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-003](#req-cnt-003) | Content of broker.json | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-004](#req-cnt-004) | Application uses the Message Bus storage | MUST | none | SHOULD | MUST | service-container | d8, manual | reviewed |
-| [REQ-CNT-005](#req-cnt-005) | Platform always provides a CA certificate in the certificate storage | MUST* | n/a | n/a | n/a | platform | d8 | draft |
-| [REQ-CNT-006](#req-cnt-006) | Content and mount of the certificate storage | MUST | n/a | n/a | n/a | platform | d8 | draft |
+| [REQ-CNT-005](#req-cnt-005) | Platform always provides a CA certificate in the certificate storage | MUST* | n/a | n/a | n/a | platform | d8 | reviewed |
+| [REQ-CNT-006](#req-cnt-006) | Content and mount of the certificate storage | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-007](#req-cnt-007) | Certificate of the application named after the container | SHOULD | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-008](#req-cnt-008) | Platform provides the secrets of the identity of the application | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-009](#req-cnt-009) | Application uses the certificate and secret storages | MUST | none | SHOULD | MUST | service-container | d8, manual | reviewed |
@@ -43,7 +43,7 @@ The platform maps a host-defined path, mounted read-only, to the target path /et
 - Domain: platform · Applies to: platform
 - Refs: RIG 4.1.1, SF-091
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.1.1-078a70a1, RIG-4.1.1-15bd8eb6, RIG-4.1.1-723b5b51, RIG-4.1.1-e577eb27
 
 > The Message Bus storage shall be used to make the public certificate and the settings of the MQTT broker available to the container and their MQTT clients.
@@ -135,7 +135,7 @@ The platform provides the OI4 certificate storage /etc/oi4/certs (REQ-CNT-006) t
 - Domain: platform · Applies to: platform
 - Refs: RIG 4.1.2, RIG 4.1.1, MG 6.2.2, SF-035, SF-091
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.1.2-0e9d427e
 
 > In case the system provides a certificate authority (CA) for signing certificates, the CA should be made available by storing it as follows:
@@ -156,7 +156,7 @@ The platform maps a host-defined path, mounted read-only, to the target path /et
 - Domain: platform · Applies to: platform
 - Refs: RIG 4.1.2, SF-091
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.1.2-54831f39, RIG-4.1.2-9e0b30f0, RIG-4.1.2-aff2fc7b, RIG-4.1.2-e191918f
 
 > The target path is the path inside the Docker container, which must be mapped to a host-defined path inside the host system.

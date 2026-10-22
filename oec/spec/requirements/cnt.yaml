@@ -36,7 +36,7 @@ requirements:
         text: 'The Message Bus storage shall contain at least the following files:'
     verification: [d8]
     inventory: [RIG-4.1.1-723b5b51, RIG-4.1.1-15bd8eb6, RIG-4.1.1-e577eb27, RIG-4.1.1-078a70a1]
-    status: draft
+    status: reviewed
     notes: >-
       broker_ca.pem is listed among the files the storage contains "at
       least", but the note of the table makes it optional (SF-091 (a)). With
@@ -143,7 +143,7 @@ requirements:
         text: 'The client must verify the broker certificate when it establishes the TLS connection: the certificate chain against the CA certificate (broker_ca.pem of the Message Bus storage or, if no local CA is present, the CA of the OI4 certificate storage; for a client without container, its configured CA) and the broker address.'
     verification: [d8]
     inventory: [RIG-4.1.2-0e9d427e]
-    status: draft
+    status: reviewed
     notes: >-
       RIG 4.1.2 only recommends the CA ("In case … should"), but TLS is
       mandatory (REQ-MQTT-005/006) and every client must verify the broker
@@ -178,7 +178,7 @@ requirements:
         text: ca.pem CA used for validation of certificates.
     verification: [d8]
     inventory: [RIG-4.1.2-aff2fc7b, RIG-4.1.2-9e0b30f0, RIG-4.1.2-e191918f, RIG-4.1.2-54831f39]
-    status: draft
+    status: reviewed
     notes: >-
       The storage is always provided (REQ-CNT-005, SF-091 (c) revised in the
       C-030 review; before: conditional), its content "shall"; the certificate of the application is only needed
