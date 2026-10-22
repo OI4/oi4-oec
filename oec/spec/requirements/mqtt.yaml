@@ -9,7 +9,7 @@
 # keywords and connection details added to the guideline in C-026 (SF-057,
 # SF-060).
 area: MQTT
-baseline: "2018bc4"
+baseline: "75da059"
 requirements:
   # --- Protocol version (MG 6.1) --------------------------------------------
   - id: REQ-MQTT-001
@@ -447,13 +447,13 @@ requirements:
     refs: [MG 6, MG 6.4]
     quotes:
       - ref: MG 6.4
-        text: Even though this is clear to any MQTT user, it should be mentioned again; any change on a payload must be published without any external trigger on its corresponding topic.
+        text: 'MQTT is event driven: a change of a payload must be published on its corresponding topic immediately and without any external trigger.'
       - ref: MG 6.4
-        text: E. g. when a Data tag gets updated or a Health status changes, the related topic must be published immediately.
+        text: For example, when a Data tag is updated or the Health status changes, the related topic must be published right away.
       - ref: MG 6.4
-        text: Therefore, different publication rules are applicable, which can be configured through PublicationList (7.5.1 Resources).
+        text: Therefore, other publication rules can be configured through PublicationList (7.5.1 Resources).
     verification: [d7-monitor, d7-test]
-    inventory: [MG-6.4-31603ce3, MG-6.4-06b856de, MG-6.4-15d4253f, MG-6-4c5014ad]
+    inventory: [MG-6.4-61d48d6f, MG-6.4-875dd886, MG-6.4-46ef4f1e, MG-6-4c5014ad]
     status: reviewed
     notes: >-
       Graded by REQ-CMP-009. Health must be published on every change at all
