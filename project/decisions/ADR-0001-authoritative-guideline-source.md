@@ -358,3 +358,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `e14726c` is recorded in addendum 20.
 - The baseline is now `485d8db` on branch `feature/spec-findings` (local commit `485d8db` – heading levels of MG 8.2–8.4 straightened, nested object headings, PublicationList enum values as bold code; PO request 2026-10-22). Spec re-baselined (`8b01b76`): 153 key remaps, no content change, no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 22 (2026-10-22, guideline baseline `12c66fa`)
+
+- The previous baseline `485d8db` is recorded in addendum 21.
+- The baseline is now `12c66fa` on branch `feature/spec-findings` (PO commit `e8106b1` – hero button removed – and local commit `12c66fa` – Community section with badge and note, Tutorial moved into it, Blog unlinked; PO request 2026-10-22). Spec re-baselined (`3c8f9e1`): baseline id only, no finding, no GL-ADR. SF-001 … 095 resolved.
