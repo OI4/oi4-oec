@@ -1,10 +1,10 @@
 # Requirements of area PLT – OEC platform requirements (RIG 5, RIG 5.1;
 # ADR-0018). The requirements on the platform are not graded by compliance
-# levels (RIG 5.1, RIG 1.2): domain platform, no levels. Every list item of
+# levels (RIG 5.1, RIG 1.3): domain platform, no levels. Every list item of
 # RIG 5.1 has its own keyword since SF-092 (a) was resolved.
 # Drafted in C-030.
 area: PLT
-baseline: "69863d3"
+baseline: "21bf409"
 requirements:
   # --- Hardware (RIG 5.1) ---------------------------------------------------
   - id: REQ-PLT-001

@@ -1,14 +1,14 @@
 # Requirements of area CNT – container environment (RIG 2, RIG 4; ADR-0018).
-# Grading (RIG 1.2, RIG 4 note): requirements on the container image or the
+# Grading (RIG 1.3, RIG 4 note): requirements on the container image or the
 # application use domain service-container – license and SBOM storage L1 –,
 # L2 MUST, L3 MUST; all other RIG 4 requirements L1 –, L2 SHOULD, L3 MUST
 # (umbrellas REQ-CMP-028 … 031). The host side of the storages and the
 # container name assignment are requirements on the platform (domain platform,
-# not graded, RIG 1.2).
+# not graded, RIG 1.3).
 # Drafted in C-030; secret storage (REQ-CNT-007 … 009, 024, 025) reworked with
 # GL-ADR-022 (C-030 addendum 1).
 area: CNT
-baseline: "69863d3"
+baseline: "21bf409"
 requirements:
   # --- Message Bus storage (RIG 4.1.1) --------------------------------------
   - id: REQ-CNT-001
@@ -108,7 +108,7 @@ requirements:
     domain: service-container
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [application, container-image]
-    refs: [RIG 4.1.1, RIG 1.2]
+    refs: [RIG 4.1.1, RIG 1.3]
     quotes:
       - ref: RIG 4.1.1
         text: The Message Bus storage shall be used to make the public certificate and the settings of the MQTT broker available to the container and their MQTT clients.
@@ -237,7 +237,7 @@ requirements:
       - ref: RIG 4.1.3
         text: The host path shall be mounted read only!
       - ref: RIG 4.1.3
-        text: The folder /run/secrets/oi4 is reserved for the files of Table 6.
+        text: The folder /run/secrets/oi4 is reserved for the files of Table 7.
     verification: [d8]
     inventory: [RIG-4.1.3-3ccf87cc, RIG-4.1.3-2494f946, RIG-4.1.3-04e70172, RIG-4.1.3-0b3ec5ba]
     status: reviewed
@@ -261,7 +261,7 @@ requirements:
     domain: service-container
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [application, container-image]
-    refs: [RIG 4.1.3, RIG 4.1.2, RIG 1.2, MG 6.2.2, GL-ADR-022]
+    refs: [RIG 4.1.3, RIG 4.1.2, RIG 1.3, MG 6.2.2, GL-ADR-022]
     quotes:
       - ref: RIG 4.1.3
         text: To obtain the username and the password, the application shall decode the content of credentials (base64) and split the result at the first colon (:).
@@ -357,7 +357,7 @@ requirements:
     domain: service-container
     levels: {L1: none, L2: MUST, L3: MUST}
     applies_to: [container-image]
-    refs: [RIG 4.1.4, RIG 4, RIG 1.2, RIG 5.2, GL-ADR-002]
+    refs: [RIG 4.1.4, RIG 4, RIG 1.3, RIG 5.2, GL-ADR-002]
     quotes:
       - ref: RIG 4.1.4
         text: Instead, every Open Industry 4.0 Alliance-compliant application shall provide this information in the folder /opt/oi4/licenses.
@@ -385,7 +385,7 @@ requirements:
     domain: service-container
     levels: {L1: none, L2: MUST, L3: MUST}
     applies_to: [container-image]
-    refs: [RIG 4.1.4, RIG 1.2, GL-ADR-002]
+    refs: [RIG 4.1.4, RIG 1.3, GL-ADR-002]
     quotes:
       - ref: RIG 4.1.4
         text: The license texts shall either be part of the SBOM or be stored as separate text files /opt/oi4/licenses/<License-ID>.txt.
@@ -404,7 +404,7 @@ requirements:
     domain: service-container
     levels: {L1: none, L2: MUST, L3: MUST}
     applies_to: [container-image]
-    refs: [RIG 4.1.4, RIG 1.2]
+    refs: [RIG 4.1.4, RIG 1.3]
     quotes:
       - ref: RIG 4.1.4
         text: The SBOM and the license texts shall be part of the container image. They are static and only change with a new version of the image.
@@ -529,7 +529,7 @@ requirements:
     domain: service-container
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [application]
-    refs: [RIG 4.2, MG 4.3.1, RIG 1.2, SF-090]
+    refs: [RIG 4.2, MG 4.3.1, RIG 1.3, SF-090]
     quotes:
       - ref: RIG 4.2
         text: 'The application shall determine its container name from its hostname and shall use it as follows:'

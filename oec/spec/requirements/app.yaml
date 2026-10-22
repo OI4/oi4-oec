@@ -1,5 +1,5 @@
 # Requirements of area APP – platform-related requirements on an application
-# (RIG 5.2; ADR-0018). Grading (RIG 1.2, RIG 5.2): the overview of RIG 5.2
+# (RIG 5.2; ADR-0018). Grading (RIG 1.3, RIG 5.2): the overview of RIG 5.2
 # applies to Level 3; at Level 2 the SBOM is mandatory and the remaining
 # requirements are recommended; Level 1 only requires the OCI container
 # (REQ-CMP-027). Detail entries of the reviewed umbrella REQ-CMP-032.
@@ -8,7 +8,7 @@
 # at Level 3 (SF-091 (f)).
 # Drafted in C-030.
 area: APP
-baseline: "69863d3"
+baseline: "21bf409"
 requirements:
   - id: REQ-APP-001
     title: Images for at least one supported processor architecture
@@ -20,12 +20,12 @@ requirements:
     domain: service-container
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
-    refs: [RIG 5.2, RIG 5.1, RIG 1.2, SF-092]
+    refs: [RIG 5.2, RIG 5.1, RIG 1.3, SF-092]
     quotes:
       - ref: RIG 5.2
         text: Provided container images shall be available for at least one of the supported processor architectures (5.1 Minimum Requirements on an Alliance Compliant OEC Platform), preferably as multi-architecture images.
       - ref: RIG 5.2
-        text: The following overview applies to Level 3 (Full) of the OEC Service Container Compliance (1.2 OEC Service Container Compliance).
+        text: The following overview applies to Level 3 (Full) of the OEC Service Container Compliance (1.3 OEC Service Container Compliance).
     verification: [d8]
     inventory: [RIG-5.2-2a0e0364]
     status: reviewed

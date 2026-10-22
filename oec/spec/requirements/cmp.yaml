@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "69863d3"
+baseline: "21bf409"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -244,7 +244,7 @@ requirements:
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [container-image, manufacturer]
     condition: The application is labeled compliant without stating a compliance level.
-    refs: [MG 1.3, RIG 1.2]
+    refs: [MG 1.3, RIG 1.3]
     quotes:
       - ref: MG 1.3
         text: must fulfill Level 3 in all applicable compliance domains
@@ -506,7 +506,7 @@ requirements:
     inventory: [MG-1.2-4c4f95c8]
     status: reviewed
 
-  # --- OEC Service Container Compliance: level table (RIG 1.2) -------------
+  # --- OEC Service Container Compliance: level table (RIG 1.3) -------------
 
   - id: REQ-CMP-027
     title: OCI-compliant container
@@ -518,15 +518,15 @@ requirements:
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 2.1]
-    refs: [RIG 1.2, SF-038]
+    refs: [RIG 1.3, SF-038]
     quotes:
-      - ref: RIG 1.2
+      - ref: RIG 1.3
         text: Packaging and deployment as an OCI-compliant container (2.1 Introduction to Containerization) Mandatory Mandatory Mandatory
     verification: [d8]
-    inventory: [RIG-1.2-c392f9f8]
+    inventory: [RIG-1.3-5339a24c]
     status: reviewed
     notes: >-
-      RIG 1.2 defines the Service Container levels; since SF-038 (C-015) MG 1.3
+      RIG 1.3 defines the Service Container levels; since SF-038 (C-015) MG 1.3
       no longer suggests OCI from Level 2 only.
 
   - id: REQ-CMP-028
@@ -540,18 +540,18 @@ requirements:
     levels: {L1: none, L2: MUST, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 4.1.4, RIG 5.3]
-    refs: [RIG 1.2, SF-038]
+    refs: [RIG 1.3, SF-038]
     quotes:
-      - ref: RIG 1.2
+      - ref: RIG 1.3
         text: Software Bill of Materials (SBOM) including all used software packages, their licenses and the license texts
-      - ref: RIG 1.2
+      - ref: RIG 1.3
         text: The compliance levels only define from which level the license information has to be provided as SBOM.
     verification: [d8]
-    inventory: [RIG-1.2-786b58bf, RIG-1.2-8ce7fdab]
+    inventory: [RIG-1.3-93dbb58f, RIG-1.3-38bd2d09]
     status: reviewed
     notes: >-
       Independent of the level, the provider stays responsible for the
-      compliance with the software licenses and the applicable law (RIG 1.2
+      compliance with the software licenses and the applicable law (RIG 1.3
       note, RIG 5.3).
 
   - id: REQ-CMP-029
@@ -565,16 +565,16 @@ requirements:
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 4.1, RIG 4.2]
-    refs: [RIG 1.2, SF-091]
+    refs: [RIG 1.3, SF-091]
     quotes:
-      - ref: RIG 1.2
+      - ref: RIG 1.3
         text: Container environment requirements, such as storage conventions and secret handling (4.1 Container Storage, 4.2 Container Name Conventions) - Recommended Mandatory
     verification: [d8]
-    inventory: [RIG-1.2-e8490432, RIG-1.2-4d77c512]
+    inventory: [RIG-1.3-91015c5f, RIG-1.3-bb0b472d]
     status: reviewed
     notes: >-
       "Mandatory" at Level 3 means that the referenced chapter applies as
-      stated there; its recommendations stay SHOULD (RIG 1.2 note since
+      stated there; its recommendations stay SHOULD (RIG 1.3 note since
       SF-091 (f), guideline fbe6173).
 
   - id: REQ-CMP-030
@@ -585,16 +585,16 @@ requirements:
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 4.3]
-    refs: [RIG 1.2, SF-091]
+    refs: [RIG 1.3, SF-091]
     quotes:
-      - ref: RIG 1.2
+      - ref: RIG 1.3
         text: Container image integrity (4.3 Container Image Integrity) - Recommended Mandatory
     verification: [d8]
-    inventory: [RIG-1.2-75b7fc09, RIG-1.2-4d77c512]
+    inventory: [RIG-1.3-aca311f4, RIG-1.3-bb0b472d]
     status: reviewed
     notes: >-
       "Mandatory" at Level 3 means that the referenced chapter applies as
-      stated there; its recommendations stay SHOULD (RIG 1.2 note since
+      stated there; its recommendations stay SHOULD (RIG 1.3 note since
       SF-091 (f), guideline fbe6173).
 
   - id: REQ-CMP-031
@@ -605,16 +605,16 @@ requirements:
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 4.4]
-    refs: [RIG 1.2, SF-091]
+    refs: [RIG 1.3, SF-091]
     quotes:
-      - ref: RIG 1.2
+      - ref: RIG 1.3
         text: Container networks (4.4 Container Networks) - Recommended Mandatory
     verification: [d8]
-    inventory: [RIG-1.2-4e58ea2a, RIG-1.2-4d77c512]
+    inventory: [RIG-1.3-280dd701, RIG-1.3-bb0b472d]
     status: reviewed
     notes: >-
       "Mandatory" at Level 3 means that the referenced chapter applies as
-      stated there; its recommendations stay SHOULD (RIG 1.2 note since
+      stated there; its recommendations stay SHOULD (RIG 1.3 note since
       SF-091 (f), guideline fbe6173).
 
   - id: REQ-CMP-032
@@ -628,16 +628,16 @@ requirements:
     levels: {L1: none, L2: SHOULD, L3: MUST}
     applies_to: [container-image]
     scope: [RIG 5.2]
-    refs: [RIG 1.2, SF-091]
+    refs: [RIG 1.3, SF-091]
     quotes:
-      - ref: RIG 1.2
+      - ref: RIG 1.3
         text: Platform-related application requirements, such as supported processor architectures and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
     verification: [d8, manual]
-    inventory: [RIG-1.2-8af2c274, MG-1.3-0745092e, RIG-1.2-4d77c512]
+    inventory: [RIG-1.3-43d57db2, MG-1.3-0745092e, RIG-1.3-bb0b472d]
     status: reviewed
     notes: >-
       "Mandatory" at Level 3 means that the referenced chapter applies as
-      stated there; its recommendations stay SHOULD (RIG 1.2 note since
+      stated there; its recommendations stay SHOULD (RIG 1.3 note since
       SF-091 (f), guideline fbe6173).
 
   # --- Level 3: all messages (MG 1.3; SF-037, C-015) -----------------------

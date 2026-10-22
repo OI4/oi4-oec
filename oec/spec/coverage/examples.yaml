@@ -2,11 +2,11 @@
 # Every fenced code block of MG and RIG (including MG Appendix B) is reproduced
 # by a golden vector of its section, is a JSON fragment of a golden payload
 # vector, or is explained here. 'spectool coverage' reports open and stale keys.
-baseline: "69863d3"
+baseline: "21bf409"
 items:
   - keys:
-      - MG-1.2-bd977fba
-    reason: Command-line output (docker network ls) illustrating the code style of MG 1.2, no OEC message (tagged powershell since SF-095 (a)).
+      - MG-1.2-eb4d0dc3
+    reason: Python implementation snippet (base64url encoding of MG 4.2) illustrating the code style of MG 1.2, no data; the encoding is tested by the dnp-encoding and identification-link vectors.
   - keys:
       - MG-4.2-8747056d
       - MG-4.2-33fae34e
@@ -54,3 +54,6 @@ items:
   - keys:
       - RIG-4.4-f4bc67b0
     reason: Command-line output (docker network ls) illustrating the container network types of RIG 4.4, no message.
+  - keys:
+      - RIG-1.2-3d9063f4
+    reason: Command-line output (docker network ls, same as RIG 4.4) illustrating the code style of RIG 1.2, no message.

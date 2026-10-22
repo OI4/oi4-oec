@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "69863d3"
+baseline: "21bf409"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -31,17 +31,17 @@ items:
     reason: Convention for the level tables of MG 1.3; applied through the levels field of each entry (G-1.6).
   - key: MG-1.2-0160e12c
     reason: Defines the meaning of the tip box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
-  - key: MG-1.2-6a22350e
+  - key: MG-1.2-81893b6a
     reason: Example of a tip box in the conventions chapter; the requirement itself is stated in MG 4.1 (area IL).
   - key: MG-1.2-8a9147d2
     reason: Defines the meaning of the warning box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
   - key: MG-1.2-9d5b0f9a
     reason: Explains the warning box; "can" expresses possibility, not a permission (MG 1.2).
-  - key: MG-1.2-1a146aaf
-    reason: Example of a warning box in the conventions chapter; the storage rules for keys are stated in RIG 4.1.x (area CNT).
+  - key: MG-1.2-2a8d44a9
+    reason: Example of a warning box in the conventions chapter (no keyword); the read-access recommendation for Set/Config is stated in MG 9.1.3 (area RES-CONFIG).
   - key: MG-1.2-49b984d9
     reason: Defines the meaning of the info box (MUST); applied by the inventory (basis admonition) and the keyword field.
-  - key: MG-1.2-ca442b36
+  - key: MG-1.2-8347ad5b
     reason: Example of an info box in the conventions chapter; the ACL requirements are stated in MG 6.2.2 and MG 9.1.x.
   - key: MG-1.2-46546a7c
     reason: Defines the meaning of the danger box (immature content); no such box is left in the guideline (SF-033).
@@ -67,15 +67,49 @@ items:
     reason: Start-page disclaimer about the document type; "may" expresses possibility, not a permission (MG 1.2).
   - key: RIG-1.1-f65b3eb9
     reason: Scope description pointing to the Messaging Guideline; no requirement of its own.
-  - key: RIG-1.2-bebb6b04
+  - key: RIG-1.2-25b335b5
+    reason: Keyword mapping of RIG 1.2 (identical to MG 1.2); applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: RIG-1.2-227b12b9
+    reason: Keyword mapping of RIG 1.2 (identical to MG 1.2); applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: RIG-1.2-9c82bbed
+    reason: Keyword mapping of RIG 1.2 (identical to MG 1.2); applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: RIG-1.2-c24b0a7e
+    reason: Keyword mapping of RIG 1.2 (identical to MG 1.2); applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: RIG-1.2-e983de51
+    reason: Keyword mapping of RIG 1.2 (identical to MG 1.2); applied to every catalog entry through the keyword field (G-1.6), no requirement on a component.
+  - key: RIG-1.2-c3386669
+    reason: Keyword convention of RIG 1.2 (shall equals must); applied through the keyword field (G-1.6).
+  - key: RIG-1.2-af27218a
+    reason: Field convention of RIG 1.2 (Requirement attribute, same as MG 1.2); applied by the inventory (basis field) to the broker.json elements of RIG 4.1.1 (area CNT).
+  - key: RIG-1.2-bc6b3dc4
+    reason: Pointer to the level-table convention of RIG 1.3; applied through the levels field of each entry (G-1.6).
+  - key: RIG-1.2-ea3319ed
+    reason: Field format convention of RIG 1.2 (same as MG 1.2, REQ-CMP-026); applied to the broker.json elements of RIG 4.1.1 (area CNT).
+  - key: RIG-1.2-5d2204a9
+    reason: Defines the meaning of the tip box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
+  - key: RIG-1.2-52c63ac7
+    reason: Example of a tip box in the conventions chapter (no keyword); the SBOM recommendation is stated in RIG 4.1.4 (area CNT).
+  - key: RIG-1.2-461d8219
+    reason: Defines the meaning of the warning box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
+  - key: RIG-1.2-d467d41b
+    reason: Explains the warning box; "can" expresses possibility, not a permission (RIG 1.2).
+  - key: RIG-1.2-d1ea8a13
+    reason: Example of a warning box in the conventions chapter (no keyword); the storage rules for keys are stated in RIG 4.1.x (area CNT).
+  - key: RIG-1.2-14e26cbf
+    reason: Defines the meaning of the info box (MUST); applied by the inventory (basis admonition) and the keyword field.
+  - key: RIG-1.2-511cad44
+    reason: Example of an info box in the conventions chapter; the read-only mount requirements are stated in RIG 4.1.1 … 4.1.3 (area CNT).
+  - key: RIG-1.2-ed6ee29a
+    reason: Defines the meaning of the danger box (immature content); no such box is used in the RIG.
+  - key: RIG-1.3-214210d3
     reason: Independence of the compliance domains (SF-038) – defines how the two domains relate, no behavior of a component. Reflected by the domain field of every entry and the separate tools D7 (messaging) and D8 (service container, ADR-0014).
-  - key: RIG-1.2-4ccffeb5
+  - key: RIG-1.3-f83369fb
     reason: Example of the domain independence (Service Container Level 3 with Messaging Level 1); "can" expresses possibility.
-  - key: RIG-1.2-c4a760cf
+  - key: RIG-1.3-c1f3362a
     reason: Example explaining domain applicability; "can" expresses possibility. Reflected by applies_to container-image of the service-container entries.
-  - key: RIG-1.2-4ff9976a
+  - key: RIG-1.3-aa8b82d7
     reason: Introduces the level table; the table rows are REQ-CMP-027 to REQ-CMP-032.
-  - key: RIG-1.2-b16087c8
+  - key: RIG-1.3-6efdb860
     reason: Restates the level-table convention of MG 1.2; applied through the levels field.
   # --- IL (C-018) -----------------------------------------------------------
   - key: MG-4-25e837df
@@ -433,7 +467,7 @@ items:
     reason: Pointer to further information about container technology ("can be found"); no requirement.
   - key: RIG-4-03fc9c98
     reason: Motivation of chapter 4 ("has to define" addresses the guideline itself); the requirements are REQ-CNT-*.
-  - key: RIG-4-5b40fb44
+  - key: RIG-4-7d0ee322
     reason: Grading of the remaining RIG 4 requirements (L2 recommended, L3 mandatory); applied in the levels of REQ-CNT-* and the reviewed umbrellas REQ-CMP-029 … 031.
   - key: RIG-4-504791f2
     reason: Scope statement (no particular container runtime prescribed, "required settings" names the content); the settings are REQ-CNT-*.
@@ -477,7 +511,7 @@ items:
     reason: Risk explanation of the host network ("can lead to" expresses possibility); the bridge recommendation is REQ-CNT-023.
   # --- PLT (C-030) ----------------------------------------------------------
   - key: RIG-5-3f5b9c78
-    reason: Introduction to the compliance labeling; the domains and levels are defined in MG 1.3 and RIG 1.2 (area CMP), the requirements in the subchapters of RIG 5 (areas PLT, APP, LIC).
+    reason: Introduction to the compliance labeling; the domains and levels are defined in MG 1.3 and RIG 1.3 (area CMP), the requirements in the subchapters of RIG 5 (areas PLT, APP, LIC).
   - key: RIG-5.1-ea1e1a2c
     reason: Smart devices "can be connected" directly to the broker (possibility); their compliance domain is described by MG 1.3 (area CMP).
   # --- APP (C-030) ----------------------------------------------------------
@@ -593,7 +627,7 @@ items:
     reason: Glossary definition of OEC Messaging Guideline; no requirement.
   - key: MG-A4-543f46a4
     reason: Glossary definition of OEC Runtime & Infrastructure Guideline; no requirement.
-  - key: MG-A4-9ef31890
+  - key: MG-A4-265097ff
     reason: Glossary definition of OEC Service Container Compliance; no requirement.
   - key: MG-A4-eeb2fa75
     reason: Glossary definition of Oi4Identifier; the recommendation to use it for assets without own Identification Link is detailed in MG 4.3 (area IL).
@@ -641,7 +675,7 @@ items:
     reason: Glossary definition of OEC Messaging Guideline; no requirement.
   - key: RIG-A1-fd8ff259
     reason: Glossary definition of OEC Runtime & Infrastructure Guideline; no requirement.
-  - key: RIG-A1-75e20b59
+  - key: RIG-A1-ce23a12e
     reason: Glossary definition of OEC Service Container Compliance; no requirement.
   - key: RIG-A1-7210a4b7
     reason: Glossary definition of SBOM; no requirement.
