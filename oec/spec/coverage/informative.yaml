@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "a9008a1"
+baseline: "9e9f7cc"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -495,12 +495,12 @@ items:
     reason: Introductory statement that OPC UA definitions are best practice ("regarded as" describes, no recommendation to a participant); the use of OPC UA is detailed in areas MSG and RES-MAM.
   - key: MG-2-db284daf
     reason: Introductory statement; the Identification Link and the MAM are detailed in areas IL and RES-MAM.
-  - key: MG-2.1-a57f82fd
+  - key: MG-2.1-6b456be8
     reason: Description of Edge Computing ("may be processed" expresses possibility); no requirement.
-  - key: MG-2.1-04f2ae8c
-    reason: Description of Edge Computing versus on-premise systems; no requirement.
-  - key: MG-2.1-b0607c12
-    reason: Reference to the security standards IEC 62443 and DIN SPEC 27070; the concrete requirements are in MG 3, MG 6.2.2 and RIG 3 (areas GEN, MQTT, CNT).
+  - key: MG-2.1-d52606e2
+    reason: Description of Edge Computing versus on-premise systems ("does not require" describes that offline operation is possible); no requirement.
+  - key: MG-2.1-6f1c6117
+    reason: Reference to the security standards IEC 62443 and DIN SPEC 27070 (and the EU Cyber Resilience Act in the following sentence); the concrete requirements are in MG 3, MG 6.2.2 and RIG 3 (areas GEN, MQTT, CNT).
   - key: MG-2.2-0e31fd89
     reason: Quoted description of MQTT; no requirement.
   - key: MG-2.2-18f0b773
