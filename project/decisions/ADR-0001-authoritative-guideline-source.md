@@ -290,3 +290,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `a9008a1` is recorded in addendum 7.
 - The baseline is now `9e9f7cc` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): MG 2.1 Introduction to Edge Computing updated (neutral to cloud/enterprise IT, offline operation, extended advantages, CRA); informative section, three informative inventory keys remapped, no requirement, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
+
+## Amendment C-032 addendum 9 (2026-10-22, guideline baseline `2025207`)
+
+- The previous baseline `9e9f7cc` is recorded in addendum 8.
+- The baseline is now `2025207` on branch `feature/spec-findings` (local commit, PO order 2026-10-22): all entries of the MG Content list linked, 8.3.13/8.3.13.1 added to it; no wording change, no inventory change, no finding, no GL-ADR. SF-001 … 095 resolved; next free id SF-096.
