@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/health.schema.json",
+  "title": "Health resource",
+  "description": "Health DataSet (MG 8.3.2) and the Health DataSetMessage of a Pub Health (MG 9.1.2).",
+  "$defs": {
+    "HealthState": {
+      "$comment": "REQ-RES-HEALTH-001 (MG 8.3.2): NE 107 state",
+      "enum": [
+        "NORMAL_0",
+        "FAILURE_1",
+        "CHECK_FUNCTION_2",
+        "OFF_SPEC_3",
+        "MAINTENANCE_REQUIRED_4"
+      ]
+    },
+    "DetailObject": {
+      "$comment": "REQ-RES-HEALTH-001 (MG 8.3.2): DetailObject",
+      "type": "object",
+      "required": [
+        "Health"
+      ],
+      "properties": {
+        "Health": {
+          "$ref": "#/$defs/HealthState"
+        },
+        "DiagnosticCode": {
+          "type": "string"
+        },
+        "Location": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "Health": {
+      "$comment": "REQ-RES-HEALTH-001 (MG 8.3.2): fields of the Health DataSet",
+      "type": "object",
+      "required": [
+        "Health"
+      ],
+      "properties": {
+        "Health": {
+          "$ref": "#/$defs/HealthState"
+        },
+        "HealthScore": {
+          "$ref": "opcua.schema.json#/$defs/Byte",
+          "maximum": 100
+        },
+        "Details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DetailObject"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-RES-HEALTH-002 (MG 8.3.2): Health is the state with the highest priority of the Details; order FAILURE_1 > CHECK_FUNCTION_2 > OFF_SPEC_3 > MAINTENANCE_REQUIRED_4 > NORMAL_0 (SF-096)",
+          "if": {
+            "type": "object",
+            "required": [
+              "Details"
+            ],
+            "properties": {
+              "Details": {
+                "type": "array",
+                "contains": {
+                  "type": "object",
+                  "required": [
+                    "Health"
+                  ],
+                  "properties": {
+                    "Health": {
+                      "const": "FAILURE_1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "Health": {
+                "const": "FAILURE_1"
+              }
+            }
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "Details"
+              ],
+              "properties": {
+                "Details": {
+                  "type": "array",
+                  "contains": {
+                    "type": "object",
+                    "required": [
+                      "Health"
+                    ],
+                    "properties": {
+                      "Health": {
+                        "const": "CHECK_FUNCTION_2"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "Health": {
+                  "const": "CHECK_FUNCTION_2"
+                }
+              }
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "Details"
+                ],
+                "properties": {
+                  "Details": {
+                    "type": "array",
+                    "contains": {
+                      "type": "object",
+                      "required": [
+                        "Health"
+                      ],
+                      "properties": {
+                        "Health": {
+                          "const": "OFF_SPEC_3"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "Health": {
+                    "const": "OFF_SPEC_3"
+                  }
+                }
+              },
+              "else": {
+                "if": {
+                  "type": "object",
+                  "required": [
+                    "Details"
+                  ],
+                  "properties": {
+                    "Details": {
+                      "type": "array",
+                      "contains": {
+                        "type": "object",
+                        "required": [
+                          "Health"
+                        ],
+                        "properties": {
+                          "Health": {
+                            "const": "MAINTENANCE_REQUIRED_4"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "Health": {
+                      "const": "MAINTENANCE_REQUIRED_4"
+                    }
+                  }
+                },
+                "else": {
+                  "if": {
+                    "type": "object",
+                    "required": [
+                      "Details"
+                    ],
+                    "properties": {
+                      "Details": {
+                        "type": "array",
+                        "contains": {
+                          "type": "object",
+                          "required": [
+                            "Health"
+                          ],
+                          "properties": {
+                            "Health": {
+                              "const": "NORMAL_0"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "Health": {
+                        "const": "NORMAL_0"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "HealthDataSetMessage": {
+      "$ref": "envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-MSG-020 (MG 8.1.2): application DataSetWriterIds start at 10",
+          "minimum": 10
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-024 (MG 8.1.2, MG 7.7): Health has no Filter",
+          "const": ""
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.1.2)",
+          "const": "ua-keyframe"
+        },
+        "Payload": {
+          "$ref": "#/$defs/Health"
+        }
+      }
+    }
+  }
+}

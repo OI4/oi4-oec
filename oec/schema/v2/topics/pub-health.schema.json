@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/pub-health.schema.json",
+  "title": "Pub Health (topic form pub-health)",
+  "description": "Entry schema of the topic form pub-health (topic.abnf, matrix row Pub/Health, MG 9.1.2). Topic-dependent equalities (PublisherId, DataSetWriterName, WriterGroupName vs. topic) are rules of the rule layer.",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "allOf": [
+    {
+      "$comment": "REQ-MSG-011 (MG 8.1.1): the DataSetClassId of a predefined resource is present",
+      "required": [
+        "DataSetClassId"
+      ]
+    }
+  ],
+  "properties": {
+    "DataSetClassId": {
+      "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of Health",
+      "const": "d8e7b6df-42ba-448a-975a-199f59e8ffeb"
+    },
+    "Messages": {
+      "$comment": "REQ-RES-HEALTH-007 (MG 9.1.2): Health DataSetMessages and optionally Pagination; Locale is not named by the REQ and is accepted until SF-097 is decided",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 2
+            }
+          }
+        },
+        "then": {
+          "$ref": "../helpers.schema.json#/$defs/PaginationDataSetMessage"
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 1
+              }
+            }
+          },
+          "then": {
+            "$comment": "REQ-PAG-008 (MG 8.3.11): a PaginationRequest is only sent with the method Get",
+            "not": {}
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 3
+                }
+              }
+            },
+            "then": {
+              "$comment": "Locale in a Pub: accepted until SF-097 is decided",
+              "$ref": "../helpers.schema.json#/$defs/LocaleDataSetMessage"
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 9
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-QRY-001 (MG 8.3.13): a Query is only sent with the method Get",
+                "not": {}
+              },
+              "else": {
+                "$ref": "../health.schema.json#/$defs/HealthDataSetMessage"
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-PAG-008 (MG 8.3.11): at most one Pagination per NetworkMessage",
+          "type": "array",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 2
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "$comment": "REQ-RES-HEALTH-007 (MG 9.1.2): a Pub Health carries at least one resource (non-helper) DataSetMessage; only a page without resource DataSetMessages (REQ-PAG-002, beyond the last page) carries a Pagination alone",
+          "anyOf": [
+            {
+              "contains": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "not": {
+                      "enum": [
+                        1,
+                        2,
+                        3,
+                        9
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "contains": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 2
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

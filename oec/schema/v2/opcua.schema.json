@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/opcua.schema.json",
+  "title": "OPC UA base types of the OEC messages",
+  "description": "OPC UA 1.05.04 JSON encoding (OPC 10000-6 5.4) of the built-in and structured types used by MG 8. Base types are open building blocks without REQ tracing; the referencing schema carries the requirement ($comment).",
+  "$defs": {
+    "Byte": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "UInt16": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "UInt32": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "DateTime": {
+      "$comment": "RFC 3339 date-time with time zone (OPC UA DateTime, MG 8.1). The pattern bounds every field; calendar validity (e.g. 2026-02-30) is checked by the rule layer (R-4). format is an annotation only.",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+    },
+    "Guid": {
+      "$comment": "Lower-case GUID string (MG A2).",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "ConfigurationVersion": {
+      "$comment": "REQ-MSG-036 (MG 8.2.x ConfigurationVersionDataType)",
+      "type": "object",
+      "required": [
+        "MajorVersion",
+        "MinorVersion"
+      ],
+      "properties": {
+        "MajorVersion": {
+          "$ref": "#/$defs/UInt32"
+        },
+        "MinorVersion": {
+          "$ref": "#/$defs/UInt32"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/message.schema.json",
+  "title": "Any OEC message (topic-agnostic)",
+  "description": "Topic-agnostic entry: discriminates by MessageType and DataSetClassId and checks the structure only. Method-dependent content (e.g. Get vs. Pub) needs the topic entry schemas in topics/. PoC scope of ADR-0019: ua-data with Health.",
+  "if": {
+    "type": "object",
+    "required": [
+      "MessageType"
+    ],
+    "properties": {
+      "MessageType": {
+        "const": "ua-data"
+      }
+    }
+  },
+  "then": {
+    "$ref": "#/$defs/DataMessage"
+  },
+  "else": {
+    "$comment": "REQ-MSG-002 (MG 8.1): MessageType of a NetworkMessage",
+    "required": [
+      "MessageType"
+    ],
+    "properties": {
+      "MessageType": {
+        "enum": [
+          "ua-data",
+          "ua-metadata",
+          "ua-action-request",
+          "ua-action-response"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "DataMessage": {
+      "$ref": "envelope.schema.json#/$defs/DataNetworkMessage",
+      "if": {
+        "type": "object",
+        "required": [
+          "DataSetClassId"
+        ],
+        "properties": {
+          "DataSetClassId": {
+            "const": "d8e7b6df-42ba-448a-975a-199f59e8ffeb"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "Messages": {
+            "items": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 1
+                  }
+                }
+              },
+              "then": {
+                "$ref": "helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+              },
+              "else": {
+                "if": {
+                  "type": "object",
+                  "required": [
+                    "DataSetWriterId"
+                  ],
+                  "properties": {
+                    "DataSetWriterId": {
+                      "const": 2
+                    }
+                  }
+                },
+                "then": {
+                  "$ref": "helpers.schema.json#/$defs/PaginationDataSetMessage"
+                },
+                "else": {
+                  "if": {
+                    "type": "object",
+                    "required": [
+                      "DataSetWriterId"
+                    ],
+                    "properties": {
+                      "DataSetWriterId": {
+                        "const": 3
+                      }
+                    }
+                  },
+                  "then": {
+                    "$ref": "helpers.schema.json#/$defs/LocaleDataSetMessage"
+                  },
+                  "else": {
+                    "if": {
+                      "type": "object",
+                      "required": [
+                        "DataSetWriterId"
+                      ],
+                      "properties": {
+                        "DataSetWriterId": {
+                          "const": 9
+                        }
+                      }
+                    },
+                    "then": true,
+                    "else": {
+                      "$ref": "health.schema.json#/$defs/HealthDataSetMessage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "Messages": {
+            "items": {
+              "$ref": "envelope.schema.json#/$defs/DataSetMessage"
+            }
+          }
+        }
+      }
+    }
+  }
+}

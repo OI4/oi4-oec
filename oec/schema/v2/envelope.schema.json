@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/envelope.schema.json",
+  "title": "OEC message envelopes",
+  "description": "NetworkMessage and DataSetMessage of MG 8.1 (ua-data) with the fixed content masks of MG 8.1.4, and the OI4 identifier strings. PoC scope of ADR-0019: ua-data only; ua-metadata and the Action messages follow in P2.",
+  "$defs": {
+    "ServiceType": {
+      "enum": [
+        "Registry",
+        "OTConnector",
+        "Utility",
+        "Persistence",
+        "Aggregation",
+        "OOCConnector",
+        "ITConnector"
+      ]
+    },
+    "PublisherId": {
+      "$comment": "REQ-MSG-006 (MG 8.1.1): <ServiceType>/<IdentificationLink>, structure only; equality with the topic is a rule of the rule layer",
+      "type": "string",
+      "pattern": "^(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+    },
+    "MessageId": {
+      "$comment": "REQ-MSG-007 (MG 8.1.1): <unixTimestampInMs>-<PublisherId>, structure only; equality with the PublisherId is a rule of the rule layer",
+      "type": "string",
+      "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+    },
+    "ReplyTo": {
+      "$comment": "REQ-MSG-015 (MG 8.1.1): empty or a MessageId (structure of $defs/MessageId); that it is the MessageId of the trigger is checked by d7-test",
+      "type": "string",
+      "pattern": "^(?:[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+)?$"
+    },
+    "DataSetClassId": {
+      "$comment": "REQ-MSG-003 (MG 8.1.1): GUID string",
+      "$ref": "opcua.schema.json#/$defs/Guid",
+      "allOf": [
+        {
+          "$comment": "REQ-MSG-014 (MG A2 Reserved IDs): reserved DataSetClassIds are not used",
+          "not": {
+            "enum": [
+              "2ae0505e-2830-4980-b65e-0bbdf08e2d45",
+              "a6e6c727-4057-419f-b2ea-3fe9173e71cf",
+              "ebd12d4b-da1c-4671-ab86-db102fecc603",
+              "96d22d73-bce6-42d3-9949-45e0d04e4d54",
+              "32c0a57a-24fd-4378-8eb3-4a42a481bf56",
+              "0721c712-f7b5-4ad0-b2a0-58f0a5744963",
+              "d08ade63-777b-464a-8f58-73649dc3ec1c",
+              "965ab782-4669-480e-bab4-c6a3b14ee4cf",
+              "d2ee7674-cad5-4b59-a37c-3631bb0cd409",
+              "a9031581-4c03-4c6a-9c12-dd7fe0123ef5",
+              "04cac81f-9056-4af3-a8a0-686fc499b5f9",
+              "a04f4f5f-b2cc-40d7-9a6a-0884233ccce7",
+              "2b967128-5b7e-4c0f-a6eb-c59af1118ce6",
+              "54b8a5c2-812d-442e-8a91-257af7304161",
+              "2b4e35a2-437a-4a3d-b007-9b1c27b08127",
+              "97439c90-7d10-47b8-8ada-6913a466107d",
+              "4292bf9f-b9d0-4de1-a33e-f4736356d4c1",
+              "0b3b07af-9cf9-4b40-977f-75b5b02bb0d5",
+              "31c6e1c0-88c7-453b-ae9d-85fb6bc50275",
+              "3b4a62ba-026f-4ee8-bc99-3a5f85fc9f3b",
+              "760abda2-ba40-4e6e-863a-eea8c002b4e4",
+              "414e26f6-341b-43b7-90fc-bb9e0b1b0866",
+              "3b423a40-a676-4ba0-8017-f0b2cd65bc26",
+              "cfa96d87-e65c-42f4-9d9e-026797c37f4c",
+              "0c959a0f-ec83-43c1-9ccc-20ab20a0e171",
+              "bb725543-9de1-4f22-883f-d32c2de5dea1"
+            ]
+          }
+        }
+      ]
+    },
+    "DataNetworkMessage": {
+      "$comment": "REQ-MSG-003 (MG 8.1.1, MG 8.1.4): fields of a ua-data NetworkMessage",
+      "type": "object",
+      "required": [
+        "MessageId",
+        "MessageType",
+        "PublisherId",
+        "ReplyTo",
+        "Messages"
+      ],
+      "properties": {
+        "MessageId": {
+          "$ref": "#/$defs/MessageId"
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-002 (MG 8.1.1)",
+          "const": "ua-data"
+        },
+        "PublisherId": {
+          "$ref": "#/$defs/PublisherId"
+        },
+        "DataSetClassId": {
+          "$ref": "#/$defs/DataSetClassId"
+        },
+        "ReplyTo": {
+          "$ref": "#/$defs/ReplyTo"
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-003 (MG 8.1.4): the NetworkMessage has no WriterGroupName",
+          "not": {}
+        },
+        "Messages": {
+          "$comment": "REQ-MSG-005 (MG 8.1.1): Messages is always a JSON array; the DataSetMessages are typed by the entry schemas (topics/*, message.schema.json)",
+          "type": "array"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "DataSetWriterId": {
+      "$comment": "REQ-MSG-016 (MG 8.1.2): UInt16",
+      "$ref": "opcua.schema.json#/$defs/UInt16",
+      "allOf": [
+        {
+          "$comment": "REQ-MSG-020 (MG 8.1.2, MG A1): 0 is invalid, 4 … 8 are reserved",
+          "not": {
+            "enum": [
+              0,
+              4,
+              5,
+              6,
+              7,
+              8
+            ]
+          }
+        }
+      ]
+    },
+    "DataSetMessage": {
+      "$comment": "REQ-MSG-016 (MG 8.1.2, MG 8.1.4): fields of a DataSetMessage",
+      "type": "object",
+      "required": [
+        "DataSetWriterId",
+        "DataSetWriterName",
+        "WriterGroupName",
+        "Payload"
+      ],
+      "properties": {
+        "DataSetWriterId": {
+          "$ref": "#/$defs/DataSetWriterId"
+        },
+        "DataSetWriterName": {
+          "type": "string"
+        },
+        "WriterGroupName": {
+          "type": "string"
+        },
+        "PublisherId": {
+          "$comment": "REQ-MSG-016 (MG 8.1.4): the DataSetMessage has no PublisherId",
+          "not": {}
+        },
+        "SequenceNumber": {
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        },
+        "Timestamp": {
+          "$ref": "opcua.schema.json#/$defs/DateTime"
+        },
+        "MetaDataVersion": {
+          "$ref": "opcua.schema.json#/$defs/ConfigurationVersion"
+        },
+        "MinorVersion": {
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        },
+        "Status": {
+          "$comment": "REQ-MSG-027 (MG 8.1.2): Status object with Code and optional Symbol",
+          "type": "object",
+          "required": [
+            "Code"
+          ],
+          "properties": {
+            "Code": {
+              "$ref": "opcua.schema.json#/$defs/UInt32"
+            },
+            "Symbol": {
+              "type": "string"
+            }
+          },
+          "unevaluatedProperties": {
+            "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+            "not": {}
+          }
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.1.2)",
+          "enum": [
+            "ua-keyframe",
+            "ua-event"
+          ]
+        },
+        "Payload": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-MSG-018 (MG 8.1.2): MetaDataVersion and MinorVersion are not combined",
+          "not": {
+            "type": "object",
+            "required": [
+              "MetaDataVersion",
+              "MinorVersion"
+            ]
+          }
+        }
+      ],
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    }
+  }
+}

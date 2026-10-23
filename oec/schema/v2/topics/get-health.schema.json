@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/get-health.schema.json",
+  "title": "Get Health (topic form get-health)",
+  "description": "Entry schema of the topic form get-health (topic.abnf, matrix row Get/Health, MG 9.1.2).",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "allOf": [
+    {
+      "$comment": "REQ-MSG-011 (MG 8.1.1): the DataSetClassId of a predefined resource is present",
+      "required": [
+        "DataSetClassId"
+      ]
+    }
+  ],
+  "properties": {
+    "DataSetClassId": {
+      "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of Health",
+      "const": "d8e7b6df-42ba-448a-975a-199f59e8ffeb"
+    },
+    "Messages": {
+      "$comment": "REQ-RES-HEALTH-005 (MG 9.1.2): only the helper DataSets PaginationRequest and Locale",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 1
+            }
+          }
+        },
+        "then": {
+          "$ref": "../helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "then": {
+            "$ref": "../helpers.schema.json#/$defs/LocaleDataSetMessage"
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 2
+                }
+              }
+            },
+            "then": {
+              "$comment": "REQ-PAG-008 (MG 8.3.11): a Pagination is only sent with the method Pub",
+              "not": {}
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 9
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-QRY-001 (MG 8.3.13): Health has no Query",
+                "not": {}
+              },
+              "else": {
+                "$comment": "REQ-RES-HEALTH-005 (MG 9.1.2): a Get Health carries no Health DataSetMessage",
+                "not": {}
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-PAG-008 (MG 8.3.11): at most one PaginationRequest per NetworkMessage",
+          "type": "array",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 1
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ]
+    }
+  }
+}

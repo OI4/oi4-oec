@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/helpers.schema.json",
+  "title": "Helper DataSets",
+  "description": "PaginationRequest, Pagination and Locale (MG 8.3.11, MG 8.3.12) and their DataSetMessages with the reserved DataSetWriterIds 1, 2 and 3 (REQ-MSG-019). PoC scope of ADR-0019: Query (DataSetWriterId 9) follows in P2. DataSetWriterName = Identification Link of the sender is a rule of the rule layer.",
+  "$defs": {
+    "PaginationRequest": {
+      "$comment": "REQ-PAG-001 (MG 8.3.11.1)",
+      "type": "object",
+      "required": [
+        "PerPage",
+        "Page"
+      ],
+      "properties": {
+        "PerPage": {
+          "$ref": "opcua.schema.json#/$defs/UInt32",
+          "minimum": 1
+        },
+        "Page": {
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "Pagination": {
+      "$comment": "REQ-PAG-003 (MG 8.3.11.2); consistency of the values (REQ-PAG-004) is a rule of the rule layer",
+      "type": "object",
+      "required": [
+        "TotalCount",
+        "PerPage",
+        "Page",
+        "HasNext",
+        "PaginationId"
+      ],
+      "properties": {
+        "TotalCount": {
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        },
+        "PerPage": {
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        },
+        "Page": {
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        },
+        "HasNext": {
+          "type": "boolean"
+        },
+        "PaginationId": {
+          "$comment": "REQ-PAG-003 (MG 8.3.11): a MessageId (structure of envelope $defs/MessageId); equality with the sender and the first page is a rule-layer rule (R-2, R-3)",
+          "type": "string",
+          "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "Locale": {
+      "$comment": "REQ-LOC-001 (MG 8.3.12)",
+      "type": "object",
+      "required": [
+        "Locale"
+      ],
+      "properties": {
+        "Locale": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(?:-[A-Z]{2,3})?$"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "PaginationRequestDataSetMessage": {
+      "$ref": "envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "const": 1
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-019 (MG 8.1.2)",
+          "const": "PaginationRequest"
+        },
+        "Payload": {
+          "$ref": "#/$defs/PaginationRequest"
+        }
+      }
+    },
+    "PaginationDataSetMessage": {
+      "$ref": "envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "const": 2
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-019 (MG 8.1.2)",
+          "const": "Pagination"
+        },
+        "Payload": {
+          "$ref": "#/$defs/Pagination"
+        }
+      }
+    },
+    "LocaleDataSetMessage": {
+      "$ref": "envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "const": 3
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-019 (MG 8.1.2)",
+          "const": "Locale"
+        },
+        "Payload": {
+          "$ref": "#/$defs/Locale"
+        }
+      }
+    }
+  }
+}

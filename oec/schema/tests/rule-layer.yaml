@@ -1,0 +1,20 @@
+# Expectation list of the schema test suite (ADR-0019 §8).
+#
+# An invalid payload vector of oec/spec is rejected by its entry schema with
+# exactly the REQs of its `violates`. A vector whose violation the entry
+# schema cannot see completely is listed here with the partition of its
+# violated REQs:
+#   schema: REQs the entry schema reports (empty = the schema accepts it)
+#   rule:   REQs only the rule layer of D7 validate detects (ADR-0019 §5)
+#   rules:  rule-layer rules (R-1 … R-4) that detect them
+#   reason: why JSON Schema cannot express it
+# schema + rule must equal `violates`. The reviewed vector files are not
+# changed. Lint will check that every rule REQ carries d7-validate.
+#
+# Example:
+#   - vector: V-PAY-0xx
+#     schema: []
+#     rule: [REQ-MSG-019]
+#     rules: [R-2]
+#     reason: WriterGroupName differs from the Filter of the topic
+expectations: []
