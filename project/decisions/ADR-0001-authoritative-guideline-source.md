@@ -413,3 +413,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `adc9bbe` is recorded in addendum 32.
 - The baseline is now `1b779a7` on branch `feature/spec-findings` (local commit `1b779a7` – remaining references to OPC UA V1.04 / "not used anymore" removed in MG 8.2.6, 8.2.8 and 8.1.4; PO request 2026-10-23, editorial, no rule change). Spec re-baselined (`0b47fba`): REQ-MSG-031 key remapped, REQ-MSG-031/039 quotes follow the new wording; no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 34 (2026-10-23, guideline baseline `fa9ef19`)
+
+- The previous baseline `1b779a7` is recorded in addendum 33.
+- The baseline is now `fa9ef19` on branch `feature/spec-findings` (local commit `fa9ef19` – MG 8.3.1 links to 5 The Master Asset Model instead of 7.5.1 Resources; PO request 2026-10-23, editorial). Spec re-baselined (`b2378cc`): only the baseline id; no finding, no GL-ADR. SF-001 … 095 resolved.
