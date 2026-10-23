@@ -428,3 +428,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `43d5eec` is recorded in addendum 35 (register-only commits `8e47370` and `900b5aa` in addenda 36/37 did not change it).
 - The baseline is now `a3e4677` on branch `feature/spec-findings` (local commits `e51905d` – MG 8.3.2 order of priority `FAILURE_1` > `CHECK_FUNCTION_2` > `OFF_SPEC_3` > `MAINTENANCE_REQUIRED_4` > `NORMAL_0`, Table 13 without severity statements, B2.2 description, GL-ADR-001 implementation note and GL-ADR-019 adapted – and `a3e4677` – register: SF-096 resolved; PO decision 2026-10-23, no new GL-ADR). Spec re-baselined (`5920b84`): REQ-RES-HEALTH-001/002 remapped, REQ-RES-HEALTH-002 follows the new order. SF-001 … 096 resolved, no open finding, next SF-097.
+
+## Amendment C-032 addendum 39 (2026-10-23, guideline baseline `b6341d8`)
+
+- The previous baseline `a3e4677` is recorded in addendum 38.
+- The baseline is now `b6341d8` on branch `feature/spec-findings` (local commit: MG 8.3.13 Query – REST analogy corrected, the topic takes the role of the URL path and query parameters, the `Query` `DataSet` is the payload of the `Get`; editorial PO order, no GL-ADR, no SF). Spec re-baselined in `ba6a6bc`.
