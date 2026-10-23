@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PUBLIST
-baseline: "0810d79"
+baseline: "f99a769"
 requirements:
   # --- DataSet content (MG 8.3.8) ---------------------------------------------
   - id: REQ-RES-PUBLIST-001
@@ -504,7 +504,7 @@ requirements:
     title: Status event after Set PublicationList
     statement: >-
       After a Set PublicationList, the application publishes an Event of the
-      category Status about the Set on Pub/Event/<Source>/Status/<EventLevel>
+      category Status about the Set on Pub/Event/<Source>/Status/<StatusCode>
       with the Source of the Set topic – mandatory from Level 2 on,
       recommended at Level 1.
     keyword: MUST
@@ -515,9 +515,9 @@ requirements:
     refs: [MG 9.1.8, SF-067]
     quotes:
       - ref: MG 9.1.8
-        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
+        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<StatusCode> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
     verification: [d7-test]
-    inventory: [MG-9.1.8-ae82c770]
+    inventory: [MG-9.1.8-2afa547a]
     status: reviewed
     notes: >-
       Same obligation as REQ-TOP-014; the last topic level is the EventLevel

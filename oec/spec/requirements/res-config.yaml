@@ -8,7 +8,7 @@
 # Drafted in C-029; SF-084 … SF-088 resolved in the guideline after the PO
 # review of C-029 (masking of sensitive values: GL-ADR-021).
 area: RES-CONFIG
-baseline: "0810d79"
+baseline: "f99a769"
 requirements:
   # --- DataSet content (MG 8.3.3, 8.3.3.1, 8.3.3.2) ---------------------------
   - id: REQ-RES-CONFIG-001
@@ -550,7 +550,7 @@ requirements:
     title: Status event after Set Config
     statement: >-
       After a Set Config, the component publishes an Event of the category
-      Status about the command on Pub/Event/<Source>/Status/<EventLevel>
+      Status about the command on Pub/Event/<Source>/Status/<StatusCode>
       with the Source of the Set topic – mandatory from Level 2 on,
       recommended at Level 1.
     keyword: MUST
@@ -561,9 +561,9 @@ requirements:
     refs: [MG 9.1.3, MG 7.4]
     quotes:
       - ref: MG 9.1.3
-        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
+        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<StatusCode> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
     verification: [d7-test]
-    inventory: [MG-9.1.3-c083f27e]
+    inventory: [MG-9.1.3-11df4281]
     status: reviewed
     notes: >-
       Same obligation as REQ-TOP-014; ReplyTo and content per

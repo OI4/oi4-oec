@@ -10,7 +10,7 @@
 # TopicPath of the B1.1.9 example, Interval wording, publication after Del,
 # Config) resolved in the guideline (baseline b2f0fe7).
 area: RES-SUBLIST
-baseline: "0810d79"
+baseline: "f99a769"
 requirements:
   # --- DataSet content (MG 8.3.9) ---------------------------------------------
   - id: REQ-RES-SUBLIST-001
@@ -330,7 +330,7 @@ requirements:
     statement: >-
       After a Set or Del SubscriptionList, the application publishes an Event
       of the category Status about the command on
-      Pub/Event/<Source>/Status/<EventLevel> with the Source of the request
+      Pub/Event/<Source>/Status/<StatusCode> with the Source of the request
       topic and the MessageId of the request as ReplyTo – mandatory from
       Level 2 on, recommended at Level 1.
     keyword: MUST
@@ -341,11 +341,11 @@ requirements:
     refs: [MG 9.1.9, MG 7.4]
     quotes:
       - ref: MG 9.1.9
-        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller. The caller finds the related Event through the ReplyTo, which is equal to the MessageId of its Set request.
+        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<StatusCode> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller. The caller finds the related Event through the ReplyTo, which is equal to the MessageId of its Set request.
       - ref: MG 9.1.9
-        text: After a Del message arrived, the application must publish an Event message with status information about the Del command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller. The caller finds the related Event through the ReplyTo, which is equal to the MessageId of its Del request.
+        text: After a Del message arrived, the application must publish an Event message with status information about the Del command to the topic Pub/Event/<Source>/Status/<StatusCode> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller. The caller finds the related Event through the ReplyTo, which is equal to the MessageId of its Del request.
     verification: [d7-test]
-    inventory: [MG-9.1.9-adbe848e, MG-9.1.9-406fa1d1]
+    inventory: [MG-9.1.9-faf9c96b, MG-9.1.9-cd829b59]
     status: reviewed
     notes: Same obligation as REQ-TOP-014; content per REQ-RES-EVENT-005. Example MG B1.1.9.
 

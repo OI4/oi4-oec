@@ -10,7 +10,7 @@
 # keys in Details) and SF-076 (Number, Category and topic Filter) resolved in
 # the guideline (baseline b2f0fe7).
 area: RES-EVENT
-baseline: "0810d79"
+baseline: "f99a769"
 requirements:
   # --- DataSet content (MG 8.3.6) ---------------------------------------------
   - id: REQ-RES-EVENT-001
@@ -136,7 +136,7 @@ requirements:
     statement: >-
       A component answers every Set and Del it receives with an Event of the
       category Status about the result of the request: published to
-      Pub/Event/<Source>/Status/<EventLevel> with the Source of the request
+      Pub/Event/<Source>/Status/<StatusCode> with the Source of the request
       topic, ReplyTo = MessageId of the request, Number = StatusCode of the
       result (Good = 0 if the request was executed, otherwise e.g.
       BadNotFound or BadNotWritable) – mandatory from Level 2 on, recommended

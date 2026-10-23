@@ -9,7 +9,7 @@
 # header of Set/Del requests), SF-080 (d) (publication after Del) and SF-081
 # (Filter in Set/Del) resolved in the guideline (baseline b2f0fe7).
 area: BUS
-baseline: "0810d79"
+baseline: "f99a769"
 requirements:
   - id: REQ-BUS-001
     title: Publishing may start once the request topics are subscribed

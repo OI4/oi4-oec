@@ -7,7 +7,7 @@
 # (MG 8.3.13.1, GL-ADR-020, SF-069, SF-073) – REQ-RES-REFDES-011 … 016 (reviewed 2026-10-20);
 # the generic Query rules are area QRY.
 area: RES-REFDES
-baseline: "0810d79"
+baseline: "f99a769"
 requirements:
   # --- DataSet content (MG 8.3.10) --------------------------------------------
   - id: REQ-RES-REFDES-001
@@ -197,7 +197,7 @@ requirements:
     statement: >-
       After a Set or Del ReferenceDesignation, the component publishes an
       Event of the category Status about the command on
-      Pub/Event/<Source>/Status/<EventLevel> with the Source of the request
+      Pub/Event/<Source>/Status/<StatusCode> with the Source of the request
       topic – mandatory from Level 2 on, recommended at Level 1.
     keyword: MUST
     domain: messaging
@@ -207,11 +207,11 @@ requirements:
     refs: [MG 9.1.10, SF-067]
     quotes:
       - ref: MG 9.1.10
-        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
+        text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<StatusCode> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
       - ref: MG 9.1.10
-        text: After a Del message arrived, the application must publish an Event message with status information about the Del command to the topic Pub/Event/<Source>/Status/<EventLevel> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
+        text: After a Del message arrived, the application must publish an Event message with status information about the Del command to the topic Pub/Event/<Source>/Status/<StatusCode> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
     verification: [d7-test]
-    inventory: [MG-9.1.10-afc50173, MG-9.1.10-d9b53ba2]
+    inventory: [MG-9.1.10-b249d192, MG-9.1.10-10ba461f]
     status: reviewed
     notes: >-
       Same obligation as REQ-TOP-014/015; the last topic level is the
