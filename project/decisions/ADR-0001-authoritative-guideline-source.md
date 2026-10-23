@@ -388,3 +388,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `6cd6f0e` is recorded in addendum 27.
 - The baseline is now `f1e0cef` on branch `feature/spec-findings` (local commits `8fc0635` – card layout for MG 5 and MG 4.3.1 – and `f1e0cef` – card layout for RIG 4.1.1; PO request 2026-10-23, layout only via `<div>` wrappers). Spec re-baselined (`aee8e25`): no key change, only source line numbers; no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 29 (2026-10-23, guideline baseline `f30d664`)
+
+- The previous baseline `f1e0cef` is recorded in addendum 28.
+- The baseline is now `f30d664` on branch `feature/spec-findings` (local commits `8f585f9` – RIG 4.1.1 `broker_ca.pem` NOTE moved out of Table 4 into an admonition, wording unchanged –, `78c7624` – `JsonOverlay` component – and `f30d664` – block overlays for the JSON examples of MG 8.1.1 … 8.1.3; PO request 2026-10-23, layout only). Spec re-baselined (`3c6f824`): no key change, only source line numbers; no finding, no GL-ADR. SF-001 … 095 resolved.
