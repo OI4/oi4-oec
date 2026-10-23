@@ -493,3 +493,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `56bbcdb` is recorded in addendum 50.
 - The baseline is now `cd4b4db` on branch `feature/spec-findings`. Local commit: the MG 9.1.5 headings no longer end with "/filter". Editorial PO order: no GL-ADR, no SF. Spec re-baselined in `3632b1e`: 8 inventory keys remapped, no text changed.
+
+## Amendment C-032 addendum 53 (2026-10-23, guideline baseline `5b8fe59`)
+
+- The previous baseline `cd4b4db` is recorded in addendum 51; addendum 52 changed only figures (`5304671`, `static/`, no re-baseline).
+- The baseline is now `5b8fe59` on branch `feature/spec-findings`. Local commit: payload placeholders `"PublisherId": "<ServiceType>/<AppId>"`, `"DataSetWriterName": "<Source>"` and the matching Value Ranges, plus one clarifying paragraph on the PublisherId in MG 8.2.1. Editorial PO order: no GL-ADR, no SF. Spec re-baselined in `ad54200`.
