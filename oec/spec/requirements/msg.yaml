@@ -6,7 +6,7 @@
 # (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 area: MSG
-baseline: "a7e59a3"
+baseline: "b0eedbe"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
@@ -31,7 +31,7 @@ requirements:
       - ref: MG 8.2
         text: Fields marked as "Not used" must be omitted.
     verification: [schema, d7-validate]
-    inventory: [MG-8-ea83c386, MG-8.2-490014d6, MG-8.2-20499c7b, MG-8.2-750159ed]
+    inventory: [MG-8-ea83c386, MG-8.2-490014d6, MG-8.2-20499c7b, MG-8.2-674a78a9]
     status: reviewed
     notes: >-
       OPC UA fields that MG 8.2 does not list are no user-defined keys
@@ -83,9 +83,9 @@ requirements:
     refs: [MG 8.2.1]
     quotes:
       - ref: MG 8.2.1
-        text: It is not used in the NetworkMessage in Open Industry 4.0 Alliance context and shall be omitted.
+        text: The WriterGroupName is not used in the NetworkMessage in Open Industry 4.0 Alliance context and shall be omitted.
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.1-f4e10384, MG-8.2.1-b8c1ed00, MG-8.2.1-00cfed6e, MG-8.2.1-824316e6]
+    inventory: [MG-8.2.1-f4e10384, MG-8.2.1-ff8a823e, MG-8.2.1-00cfed6e, MG-8.2.1-824316e6]
     status: reviewed
 
   - id: REQ-MSG-004
@@ -765,9 +765,9 @@ requirements:
     refs: [MG 8.2.2]
     quotes:
       - ref: MG 8.2.2
-        text: In contrast to OPC UA Part 14 V1.04, the fields WriterGroupName, DataSetWriterName and Timestamp are mandatory in V1.05.
+        text: The fields WriterGroupName, DataSetWriterName and Timestamp are mandatory.
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.2-ff02c191, MG-8.2.2-4bc9755e, MG-8.2.2-e923159c, MG-8.2.2-3b6edd00, MG-8.2.2-6ca7b79e, MG-8.2.2-2bb4752d, MG-8.2.2-ca4f4b23, MG-8.2.2-96fe4c60]
+    inventory: [MG-8.2.2-278abf9b, MG-8.2.2-4bc9755e, MG-8.2.2-e923159c, MG-8.2.2-3b6edd00, MG-8.2.2-6ca7b79e, MG-8.2.2-2bb4752d, MG-8.2.2-ca4f4b23, MG-8.2.2-96fe4c60]
     status: reviewed
 
   - id: REQ-MSG-033

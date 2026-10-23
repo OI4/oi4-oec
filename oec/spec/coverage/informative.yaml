@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "a7e59a3"
+baseline: "b0eedbe"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -96,8 +96,6 @@ items:
   - key: RIG-1.3-6efdb860
     reason: Restates the level-table convention of MG 1.2; applied through the levels field.
   # --- IL (C-018) -----------------------------------------------------------
-  - key: MG-4-25e837df
-    reason: History note on earlier guideline versions (Oi4Identifier mandatory, four topic levels); describes the past, no requirement.
   - key: MG-4.1-4f84d457
     reason: Relation to the AAS globalAssetId; "may" describes what the AAS specification permits, no requirement of this guideline.
   - key: MG-4.1-5908543e
@@ -168,10 +166,8 @@ items:
   - key: MG-7.7-466159d5
     reason: Rationale of the unique percent-encoding (MQTT compares topics character by character); the rule is REQ-TOP-019.
   # --- MSG (C-023) ----------------------------------------------------------
-  - key: MG-8-ed7d9170
-    reason: History – former guideline versions were based on OPC UA V1.04; "not compatible" describes the change, no requirement on a component (the V1.05 rules are REQ-MSG-*).
-  - key: MG-8-1bac3dc2
-    reason: History – Actions replace the former message type MSG; the rule is REQ-ACT-001.
+  - key: MG-8-a2cd4a27
+    reason: Overview statement that the call/reply pattern uses OPC UA PubSub Actions; the rule is REQ-ACT-001.
   - key: MG-8.1.3-03402684
     reason: Introduction of the non-exhaustive example Figure 7 (ua-action-request); the example is a golden payload vector (V-PAY-*).
   - key: MG-8.1.3-adfb22f6

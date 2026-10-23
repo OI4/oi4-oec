@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "a7e59a3"
+baseline: "b0eedbe"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -173,7 +173,7 @@ requirements:
       - ref: MG 1.3
         text: Complete MQTT client behavior (6.2.3 Client Identifier, 6.2.4 Keep Alive, 6.2.5 Clean Session, 6.3.1 Quality of Service Level, 6.3.2 Retained Messages, 6.4 General Behavior of MQTT on Changes) Recommended Recommended Mandatory
     verification: [d7-test, d7-monitor]
-    inventory: [MG-1.3-7f72acf8, MG-1.3-0745092e]
+    inventory: [MG-1.3-7f72acf8, MG-1.3-c7e5f15e]
     status: reviewed
     notes: >-
       Origin: GL-ADR-009 (compliance levels). This requirement is the grading
@@ -206,7 +206,7 @@ requirements:
       - ref: MG 1.3
         text: 'Complete Message Bus behavior: all methods, resources and common services, i.e. in addition the methods Set and Del for all resources for which they are defined, the methods Call and Reply, the resources Config, Data, Metadata, Event, Profile, PublicationList, SubscriptionList and ReferenceDesignation and the common service NewDataSetWriterId, also if the component has no content for a resource (9 Message Bus Communication, 9.1 Resources) - Recommended Mandatory'
     verification: [d7-test, d7-monitor]
-    inventory: [MG-1.3-0fc2e320, MG-1.3-0745092e, MG-1.3-88c2af43]
+    inventory: [MG-1.3-0fc2e320, MG-1.3-c7e5f15e, MG-1.3-88c2af43]
     status: reviewed
     notes: SF-037 (decided by the PO in C-015, resolved in the guideline) – Level 3 requires all messages.
 
@@ -633,7 +633,7 @@ requirements:
       - ref: RIG 1.3
         text: Platform-related application requirements, such as supported processor architectures and hardware requirements (5.2 Minimum Requirements on an OI4 Alliance Compliant Application) - Recommended Mandatory
     verification: [d8, manual]
-    inventory: [RIG-1.3-43d57db2, MG-1.3-0745092e, RIG-1.3-bb0b472d]
+    inventory: [RIG-1.3-43d57db2, MG-1.3-c7e5f15e, RIG-1.3-bb0b472d]
     status: reviewed
     notes: >-
       "Mandatory" at Level 3 means that the referenced chapter applies as

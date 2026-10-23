@@ -6,7 +6,7 @@
 # SF-051) were decided by the PO and resolved in the guideline in C-024; the
 # PO reviewed the area in the C-024 review (2026-10-19).
 area: ACT
-baseline: "a7e59a3"
+baseline: "b0eedbe"
 requirements:
   # --- Call/Reply with OPC UA PubSub Actions (MG 8.1, 8.1.3, 8.2.16) --------
   - id: REQ-ACT-001
@@ -32,7 +32,7 @@ requirements:
       - ref: MG 8.2.16
         text: ua-action-request must be used for messages published with the method Call, ua-action-response for messages published with the method Reply.
     verification: [schema, d7-validate, d7-test]
-    inventory: [MG-8.1-0e566ba4, MG-8.1-f7f7330c, MG-8.1.3-aa30f206, MG-8.1.3-2f07634f, MG-8.2.16-2cd64af0, MG-8.2.16-25164d36, MG-8.2.16-e118d52d, MG-9.2-15fe1339]
+    inventory: [MG-8.1-0e566ba4, MG-8.1-52bb2c17, MG-8.1.3-aa30f206, MG-8.1.3-2f07634f, MG-8.2.16-2cd64af0, MG-8.2.16-25164d36, MG-8.2.16-e118d52d, MG-9.2-15fe1339]
     status: reviewed
     notes: Graded by REQ-CMP-034 (Call/Reply) and REQ-CMP-040 (NewDataSetWriterId).
 
