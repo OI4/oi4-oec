@@ -1,14 +1,12 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "12c66fa"
+baseline: "985cd3d"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
     reason: Preface disclaimer about the document type; "may" expresses possibility, not a permission (MG 1.2).
   - key: MG-preface-a3a548f2
     reason: Preface overview of chapter 6; the requirements are in MG 6 (areas MQTT, LIFE).
-  - key: MG-index-52a9a621
-    reason: Version status of the document on its start page; no requirement on a component.
   - key: MG-index-0a728c6e
     reason: Start-page disclaimer about the document type (same as the preface); "may" expresses possibility, not a permission (MG 1.2).
   - key: MG-index-0c647ad3
@@ -33,12 +31,6 @@ items:
     reason: Defines the meaning of the tip box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
   - key: MG-1.2-81893b6a
     reason: Example of a tip box in the conventions chapter; the requirement itself is stated in MG 4.1 (area IL).
-  - key: MG-1.2-8a9147d2
-    reason: Defines the meaning of the warning box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
-  - key: MG-1.2-9d5b0f9a
-    reason: Explains the warning box; "can" expresses possibility, not a permission (MG 1.2).
-  - key: MG-1.2-2a8d44a9
-    reason: Example of a warning box in the conventions chapter (no keyword); the read-access recommendation for Set/Config is stated in MG 9.1.3 (area RES-CONFIG).
   - key: MG-1.2-49b984d9
     reason: Defines the meaning of the info box (MUST); applied by the inventory (basis admonition) and the keyword field.
   - key: MG-1.2-8347ad5b
@@ -61,8 +53,6 @@ items:
     reason: Restates the level-table convention of MG 1.2; applied through the levels field.
   - key: RIG-index-e397cad4
     reason: Start-page description of the purpose of the RIG; the requirements are in RIG 4 and RIG 5.
-  - key: RIG-index-eaac867e
-    reason: Version status of the document on its start page; no requirement on a component.
   - key: RIG-index-2bbbcf88
     reason: Start-page disclaimer about the document type; "may" expresses possibility, not a permission (MG 1.2).
   - key: RIG-1.1-f65b3eb9
@@ -89,12 +79,6 @@ items:
     reason: Defines the meaning of the tip box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
   - key: RIG-1.2-52c63ac7
     reason: Example of a tip box in the conventions chapter (no keyword); the SBOM recommendation is stated in RIG 4.1.4 (area CNT).
-  - key: RIG-1.2-461d8219
-    reason: Defines the meaning of the warning box (SHOULD); applied by the inventory (basis admonition) and the keyword field.
-  - key: RIG-1.2-d467d41b
-    reason: Explains the warning box; "can" expresses possibility, not a permission (RIG 1.2).
-  - key: RIG-1.2-d1ea8a13
-    reason: Example of a warning box in the conventions chapter (no keyword); the storage rules for keys are stated in RIG 4.1.x (area CNT).
   - key: RIG-1.2-14e26cbf
     reason: Defines the meaning of the info box (MUST); applied by the inventory (basis admonition) and the keyword field.
   - key: RIG-1.2-511cad44
