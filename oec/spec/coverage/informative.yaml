@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "e8c149e"
+baseline: "69bc021"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -311,6 +311,9 @@ items:
     reason: Example of the risk of unpaginated answers; the rule is REQ-PAG-005.
   - key: MG-8.3.11-1d50c8a1
     reason: Introduction of the pagination mechanism ("can" expresses possibility); the rules are REQ-PAG-002, REQ-PAG-005 and REQ-PAG-006.
+  # --- QRY (C-027 review, SF-073) -------------------------------------------
+  - key: MG-8.3.13-5c648644
+    reason: Purpose of the Query and REST analogy ("can" expresses possibility); the rules are REQ-QRY-001 … 004, the query parameters per resource REQ-RES-REFDES-012.
   # --- RES-EVENT (C-028) ----------------------------------------------------
   - key: MG-9.1.6-78c01ef0
     reason: Purpose of the Event Filter ("can be used" expresses possibility); the Filter is REQ-TOP-023, the publication REQ-RES-EVENT-011.
