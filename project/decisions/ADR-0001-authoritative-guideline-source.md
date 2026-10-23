@@ -443,3 +443,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `eed0104` is recorded in addendum 40.
 - The baseline is now `e8c149e` on branch `feature/spec-findings` (local commit: MG 8.2.1 `WriterGroupName` field card removed, the omission stays defined by MG 8.1.4; editorial PO order, no GL-ADR, no SF). Spec re-baselined in `4e5617f` (REQ-MSG-003 remapped).
+
+## Amendment C-032 addendum 42 (2026-10-23, guideline baseline `69bc021`)
+
+- The previous baseline `e8c149e` is recorded in addendum 41.
+- The baseline is now `69bc021` on branch `feature/spec-findings` (local commit: MG 8.3.13 PO wording with the REST `GET` example restored, reverting `b6341d8`; editorial PO order, no GL-ADR, no SF). Spec re-baselined in `91eb21c`.
