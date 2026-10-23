@@ -40,10 +40,10 @@ Every fenced code block of MG and RIG (including MG Appendix B) is reproduced by
 
 | Part | Blocks | Golden vector | Explained | Open |
 |---|---:|---:|---:|---:|
-| MG | 42 | 8 | 5 | 29 |
+| MG | 42 | 8 | 34 | 0 |
 | MG Appendix B | 98 | 98 | 0 | 0 |
 | RIG | 5 | 0 | 5 | 0 |
-| **Total** | 145 | 106 | 10 | 29 |
+| **Total** | 145 | 106 | 39 | 0 |
 
 | Example | Section | Line | Language | Golden vectors / reason |
 |---|---|---:|---|---|
@@ -55,40 +55,40 @@ Every fenced code block of MG and RIG (including MG Appendix B) is reproduced by
 | `MG-6.3.3-272880e9` | MG 6.3.3 | 14 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
 | `MG-6.3.4-0811a25f` | MG 6.3.4 | 16 | json | fragment of V-PAY-024 |
 | `MG-6.3.5-b1907bd4` | MG 6.3.5 | 22 | json | fragment of V-PAY-025 |
-| `MG-8-d57ff9a0` | MG 8 | 34 | json | **open** |
+| `MG-8-d57ff9a0` | MG 8 | 34 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
 | `MG-8.1.1-bd263478` | MG 8.1.1 | 16 | json | V-PAY-118 |
 | `MG-8.1.2-6930dfec` | MG 8.1.2 | 16 | json | V-PAY-121 |
 | `MG-8.1.3-e802a362` | MG 8.1.3 | 16 | json | V-PAY-119 |
 | `MG-8.1.3-d01a9230` | MG 8.1.3 | 50 | json | V-PAY-120 |
 | `MG-8.2.8-969f86e6` | MG 8.2.8 | 52 | json | fragment of V-PAY-121 |
-| `MG-9.1.1-4f793075` | MG 9.1.1 | 48 | json | **open** |
-| `MG-9.1.1-782f4f6a` | MG 9.1.1 | 91 | json | **open** |
-| `MG-9.1.2-7f27b056` | MG 9.1.2 | 48 | json | **open** |
-| `MG-9.1.2-bfd29b17` | MG 9.1.2 | 91 | json | **open** |
-| `MG-9.1.3-bc89dda5` | MG 9.1.3 | 54 | json | **open** |
-| `MG-9.1.3-00680fc9` | MG 9.1.3 | 100 | json | **open** |
-| `MG-9.1.3-2c273c11` | MG 9.1.3 | 328 | json | **open** |
-| `MG-9.1.4-8182918f` | MG 9.1.4 | 58 | json | **open** |
-| `MG-9.1.5-43d59372` | MG 9.1.5 | 44 | json | **open** |
-| `MG-9.1.5-85599f62` | MG 9.1.5 | 79 | json | **open** |
-| `MG-9.1.5-c602c582` | MG 9.1.5 | 124 | json | **open** |
-| `MG-9.1.6-737ec896` | MG 9.1.6 | 50 | json | **open** |
-| `MG-9.1.7-47da0a9f` | MG 9.1.7 | 51 | json | **open** |
-| `MG-9.1.7-211c1cc7` | MG 9.1.7 | 94 | json | **open** |
-| `MG-9.1.8-c4876b7a` | MG 9.1.8 | 67 | json | **open** |
-| `MG-9.1.8-2c942fb0` | MG 9.1.8 | 114 | json | **open** |
-| `MG-9.1.8-f11d6de8` | MG 9.1.8 | 256 | json | **open** |
-| `MG-9.1.9-1f55ff8c` | MG 9.1.9 | 68 | json | **open** |
-| `MG-9.1.9-30b205f7` | MG 9.1.9 | 115 | json | **open** |
-| `MG-9.1.9-dee19503` | MG 9.1.9 | 177 | json | **open** |
-| `MG-9.1.9-d5fcd514` | MG 9.1.9 | 231 | json | **open** |
-| `MG-9.1.10-2ada3182` | MG 9.1.10 | 52 | json | **open** |
-| `MG-9.1.10-9a4de716` | MG 9.1.10 | 79 | json | **open** |
-| `MG-9.1.10-24696861` | MG 9.1.10 | 130 | json | **open** |
-| `MG-9.1.10-b1273c5b` | MG 9.1.10 | 210 | json | **open** |
-| `MG-9.1.10-1a25a819` | MG 9.1.10 | 284 | json | **open** |
-| `MG-9.2.1-645e0145` | MG 9.2.1 | 31 | json | **open** |
-| `MG-9.2.1-f8fbb0e8` | MG 9.2.1 | 69 | json | **open** |
+| `MG-9.1.1-4f793075` | MG 9.1.1 | 48 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.1-782f4f6a` | MG 9.1.1 | 91 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.2-7f27b056` | MG 9.1.2 | 48 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.2-bfd29b17` | MG 9.1.2 | 91 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.3-bc89dda5` | MG 9.1.3 | 54 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.3-00680fc9` | MG 9.1.3 | 100 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.3-2c273c11` | MG 9.1.3 | 328 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.4-8182918f` | MG 9.1.4 | 58 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.5-43d59372` | MG 9.1.5 | 44 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.5-85599f62` | MG 9.1.5 | 79 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.5-c602c582` | MG 9.1.5 | 124 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.6-737ec896` | MG 9.1.6 | 50 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.7-47da0a9f` | MG 9.1.7 | 51 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.7-211c1cc7` | MG 9.1.7 | 94 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.8-c4876b7a` | MG 9.1.8 | 67 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.8-2c942fb0` | MG 9.1.8 | 114 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.8-f11d6de8` | MG 9.1.8 | 256 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.9-1f55ff8c` | MG 9.1.9 | 68 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.9-30b205f7` | MG 9.1.9 | 115 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.9-dee19503` | MG 9.1.9 | 177 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.9-d5fcd514` | MG 9.1.9 | 231 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-2ada3182` | MG 9.1.10 | 52 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-9a4de716` | MG 9.1.10 | 79 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-24696861` | MG 9.1.10 | 130 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-b1273c5b` | MG 9.1.10 | 210 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.1.10-1a25a819` | MG 9.1.10 | 284 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.2.1-645e0145` | MG 9.2.1 | 31 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
+| `MG-9.2.1-f8fbb0e8` | MG 9.2.1 | 69 | json | explained: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114). |
 | `MG-B1.1.1-82faa8c4` | MG B1.1.1 | 14 | json | V-PAY-026, V-PAY-027 |
 | `MG-B1.1.1-fd620b67` | MG B1.1.1 | 29 | json | V-PAY-026, V-PAY-027 |
 | `MG-B1.1.1-88bd6c79` | MG B1.1.1 | 52 | json | V-PAY-028 |

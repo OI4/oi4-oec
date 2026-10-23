@@ -14,35 +14,35 @@ items:
     reason: Implementation snippets (Python, JavaScript, C#) of the base64url encoding of MG 4.2, no data; the encoding is tested by the dnp-encoding and identification-link vectors.
   - keys:
       - MG-6.3.3-272880e9
-      - MG-8-07cc23cd
-      - MG-9.1.1-0f69b8f7
-      - MG-9.1.1-779c6ecb
-      - MG-9.1.2-fc67c77f
-      - MG-9.1.2-13fb05a8
-      - MG-9.1.3-850e4a52
-      - MG-9.1.3-82a88575
-      - MG-9.1.3-c78bae95
-      - MG-9.1.4-bda89779
-      - MG-9.1.5-5cf89d90
-      - MG-9.1.5-45206429
-      - MG-9.1.5-55c64974
-      - MG-9.1.6-6c8b8daf
-      - MG-9.1.7-fb70d5f9
-      - MG-9.1.7-58e1b53e
-      - MG-9.1.8-45cd690f
-      - MG-9.1.8-d919d7e0
-      - MG-9.1.8-83c8310b
-      - MG-9.1.9-58ed182e
-      - MG-9.1.9-77043bf0
-      - MG-9.1.9-943ed234
-      - MG-9.1.9-cb708125
-      - MG-9.1.10-381b725f
-      - MG-9.1.10-0df6526a
-      - MG-9.1.10-6b2ab2c8
-      - MG-9.1.10-8dc472d1
-      - MG-9.1.10-b848f78b
-      - MG-9.2.1-215f5370
-      - MG-9.2.1-f5a0f307
+      - MG-8-d57ff9a0
+      - MG-9.1.1-4f793075
+      - MG-9.1.1-782f4f6a
+      - MG-9.1.2-7f27b056
+      - MG-9.1.2-bfd29b17
+      - MG-9.1.3-bc89dda5
+      - MG-9.1.3-00680fc9
+      - MG-9.1.3-2c273c11
+      - MG-9.1.4-8182918f
+      - MG-9.1.5-43d59372
+      - MG-9.1.5-85599f62
+      - MG-9.1.5-c602c582
+      - MG-9.1.6-737ec896
+      - MG-9.1.7-47da0a9f
+      - MG-9.1.7-211c1cc7
+      - MG-9.1.8-c4876b7a
+      - MG-9.1.8-2c942fb0
+      - MG-9.1.8-f11d6de8
+      - MG-9.1.9-1f55ff8c
+      - MG-9.1.9-30b205f7
+      - MG-9.1.9-dee19503
+      - MG-9.1.9-d5fcd514
+      - MG-9.1.10-2ada3182
+      - MG-9.1.10-9a4de716
+      - MG-9.1.10-24696861
+      - MG-9.1.10-b1273c5b
+      - MG-9.1.10-1a25a819
+      - MG-9.2.1-645e0145
+      - MG-9.2.1-f8fbb0e8
     reason: Templates with <…> placeholders (message structure per method and resource), not test data (C-012 §5); the concrete messages are the golden vectors of MG B1 (e.g. V-PAY-023 Birth, V-PAY-001 … 114).
   - keys:
       - RIG-4.1.3-099c622d
