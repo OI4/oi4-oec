@@ -6,7 +6,7 @@
 # (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 area: MSG
-baseline: "eed0104"
+baseline: "e8c149e"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
@@ -80,13 +80,18 @@ requirements:
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher]
-    refs: [MG 8.2.1]
+    refs: [MG 8.2.1, MG 8.1.4]
     quotes:
-      - ref: MG 8.2.1
-        text: The WriterGroupName is not used in the NetworkMessage in Open Industry 4.0 Alliance context and shall be omitted.
+      - ref: MG 8.1.4
+        text: Not used, the WriterGroupName is part of each DataSetMessage.
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.1-f4e10384, MG-8.2.1-ff8a823e, MG-8.2.1-00cfed6e, MG-8.2.1-824316e6]
+    inventory: [MG-8.2.1-00cfed6e, MG-8.2.1-824316e6, MG-8.1.4-21f73147]
     status: reviewed
+    notes: >-
+      The NetworkMessage has no WriterGroupName field (MG 8.2.1 lists only the
+      fields it carries); the JsonNetworkMessageContentMask of MG 8.1.4 sets
+      bit 6 WriterGroupName to 0. The WriterGroupName of each DataSetMessage
+      is REQ-MSG-016, REQ-MSG-021 and REQ-MSG-024 (MG 8.2.3).
 
   - id: REQ-MSG-004
     title: Fixed JsonNetworkMessageContentMask
