@@ -473,3 +473,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `6c2be2c` is recorded in addendum 46.
 - The baseline is now `0810d79` on branch `feature/spec-findings`. Local commit: in MG 9.1.4 and 9.1.5 the Filter of Data/Metadata is named `<Tag>`, as in MG 7.7. Editorial PO order: no GL-ADR, no SF. Spec re-baselined in `d91033b`: REQ-RES-DATA-012 aligned, one inventory key and three example keys remapped.
+
+## Amendment C-032 addendum 48 (2026-10-23, guideline baseline `f99a769`)
+
+- The previous baseline `0810d79` is recorded in addendum 47.
+- The baseline is now `f99a769` on branch `feature/spec-findings`. Local commit: the Set/Del feedback topic in MG 9.1.x is `Pub/Event/<Source>/Status/<StatusCode>`, the name used in MG 7.7. Editorial PO decision: no GL-ADR, no SF. Spec re-baselined in `5bd792f`: 7 REQs aligned, 8 inventory keys remapped.
