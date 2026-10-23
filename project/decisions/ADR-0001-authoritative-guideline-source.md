@@ -408,3 +408,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `b0eedbe` is recorded in addendum 31.
 - The baseline is now `adc9bbe` on branch `feature/spec-findings` (local commit `adc9bbe` – MG 8.1.3 Figures 7/8 `Payload` overlay boxes link to 8.2.17/8.2.18 `Payload` instead of 8.4.1 NewDataSetWriterId; PO request 2026-10-23, layout only). Spec re-baselined (`fd3aeda`): only the baseline id; no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 33 (2026-10-23, guideline baseline `1b779a7`)
+
+- The previous baseline `adc9bbe` is recorded in addendum 32.
+- The baseline is now `1b779a7` on branch `feature/spec-findings` (local commit `1b779a7` – remaining references to OPC UA V1.04 / "not used anymore" removed in MG 8.2.6, 8.2.8 and 8.1.4; PO request 2026-10-23, editorial, no rule change). Spec re-baselined (`0b47fba`): REQ-MSG-031 key remapped, REQ-MSG-031/039 quotes follow the new wording; no finding, no GL-ADR. SF-001 … 095 resolved.
