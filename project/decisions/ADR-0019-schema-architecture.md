@@ -1,6 +1,6 @@
 # ADR-0019 – Schema architecture of D1 (modules, topic-aware validation, `$id`, test suite)
 
-- Status: **proposed** (C-033, 2026-10-23); waiting for the PO's decision
+- Status: **accepted** (PO, C-033 review 2026-10-23; proposed in C-033). The PO accepted every recommendation, see "PO decision" below.
 - Date: 2026-10-23
 - Deciders: product owner (Thomas); proposal by the agent in C-033
 - Related: ADR-0003 (JSON Schema 2020-12), ADR-0006/0013/0014 (D7/D8 share only schemas and spec), ADR-0009 (no push), ADR-0011 (Rust SDK), ADR-0012 (monorepo `oec/`), ADR-0018 (spec baseline `oec/spec/`), GL-ADR-013 (NodeIds), SF-052 (strict/tolerant), SF-097 (Locale outside Get), C-033 log
@@ -31,7 +31,20 @@ The guideline constrains the schema design in five ways:
 - **OPC UA JSON encoding** (OPC UA 1.05.04 with the fixed content masks of MG 8.1.4), NodeIds as strings (GL-ADR-013).
 - **Cross-message rules** (pagination series, Set → Status event, Call → Reply) that no single-message schema can check.
 
-## Decision (proposed)
+## PO decision (C-033 review, 2026-10-23)
+
+The PO accepted the agent's recommendation on every open point:
+
+1. §5 topic-aware validation: **option B** (entry schema per topic form + small rule layer in D7 `validate`), with `message.schema.json` (option A) as topic-agnostic fallback.
+2. §3 tolerant flavor: **generated** from the strict source by removing the closures (no `$dynamicRef`).
+3. §6 `$id`: base **(a) `https://schemas.openindustry4.com`** and versioning **(i) major-only `$id`s**, the tools report the bundle version (`2.MINOR.PATCH` + guideline commit). Hosting still waits for Q-011.
+4. §8 validator gate: **Go santhosh-tekuri/jsonschema + Rust jsonschema-rs**; Python optional, Ajv best-effort.
+5. §9 verification split as described, including the reclassification candidates (REQ-MSG-026 and REQ-PAG-009 +`schema`, REQ-LIFE-003 +`d7-validate`; applied in the increment that covers them, C-034) and the umbrella rule (derived coverage through an explicit implication map).
+6. The P2 cycle cut C-034 … C-039 and the refined exit (ROADMAP P2).
+
+SF-097 (Locale outside `Get`) was decided as proposed in the same review: a `Locale` is only used with `Get`, at most once per NetworkMessage. The entry schemas of the other methods therefore forbid `DataSetWriterId` 3 once the guideline and the catalog implement SF-097.
+
+## Decision
 
 ### 1. Dialect and conventions
 
@@ -145,13 +158,13 @@ The rule layer and the oracle implement the same rules independently: `conforman
 
 - `$id` = `<base>/oec/v2/<path>`, absolute `https`, with only the **major** version in the path. `$ref`s between files are relative (`../envelope.schema.json#/$defs/…`), so the bundle can be moved to another base by rewriting one prefix.
 - Within `v2`, a file's `$id` stays stable. Fixes and additions are released as `2.MINOR.PATCH` in `CHANGELOG.md`, together with the guideline baseline; the version is not part of the `$id`. Breaking changes need a new major version, i.e. a new guideline major.
-- **Trade-off (PO decision, review finding):** with major-only `$id`s, two releases `2.x` cannot be loaded into one registry side by side, and a validation result names its contract only through the bundle version. The alternative is **immutable release `$id`s** (`<base>/oec/2.1.0/<path>`) plus a moving alias `<base>/oec/v2/` (a catalog or redirects). The relative `$ref`s make both possible with the same sources.
+- **Trade-off (review finding; PO decided (i)):** with major-only `$id`s, two releases `2.x` cannot be loaded into one registry side by side, and a validation result names its contract only through the bundle version. The alternative is **immutable release `$id`s** (`<base>/oec/2.1.0/<path>`) plus a moving alias `<base>/oec/v2/` (a catalog or redirects). The relative `$ref`s make both possible with the same sources.
   - (i) **major-only `$id`s** (PoC): simple and stable for consumers; D7 and the SDK embed exactly one bundle and **report its version** (`2.MINOR.PATCH` + guideline commit) with every result.
   - (ii) **release `$id`s + `v2` alias**: exact identity and coexistence; every release changes every `$id`, and consumers must pin or follow the alias.
 
   The agent recommends (i) for the P2 releases: every OEC tool embeds one bundle, and coexistence is not a use case yet. (ii) can be added later without changing the sources, because only the generated `$id` prefix differs.
 - Validators never fetch `$id`s: D7, the tests and the SDK load the embedded bundle (offline registry). Publishing the files at the `$id` URLs is a convenience for third parties, not a runtime dependency.
-- **PO decision on `<base>`:**
+- **`<base>` (PO decided (a)):**
   - (a) **`https://schemas.openindustry4.com`** (used in the PoC): neutral and permanent, but OI4 must run the host;
   - (b) `https://oi4.github.io/oi4-oec-schema` (GitHub Pages, like the guideline at `oi4.github.io/oi4-oec-documentation`): no own infrastructure, but bound to GitHub;
   - (c) a non-resolvable base (e.g. `https://schemas.oi4.example/…`) until publication: decouples from Q-011, but means a breaking `$id` change later.

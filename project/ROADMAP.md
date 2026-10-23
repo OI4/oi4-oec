@@ -36,7 +36,7 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
 
 ## P2 – JSON Schema (D1) – started C-033
 
-- **Architecture:** ADR-0019 (`proposed` in C-033). JSON Schema 2020-12 with modular files: OPC UA base types, envelopes, MetaData, Actions, helpers, one module per resource. Discrimination via `if`/`then`/`else` on `MessageType` → `DataSetClassId` → `DataSetWriterId`. Strict flavor (closures `unevaluatedProperties` with a REQ comment) as the source; a tolerant flavor (unknown-key tolerance) is generated. REQ ids in `$comment`.
+- **Architecture:** ADR-0019 (proposed in C-033, accepted in the C-033 review with every recommendation). JSON Schema 2020-12 with modular files: OPC UA base types, envelopes, MetaData, Actions, helpers, one module per resource. Discrimination via `if`/`then`/`else` on `MessageType` → `DataSetClassId` → `DataSetWriterId`. Strict flavor (closures `unevaluatedProperties` with a REQ comment) as the source; a tolerant flavor (unknown-key tolerance) is generated. REQ ids in `$comment`.
 - **Topic-aware validation** (ADR-0019 §5, recommendation option B): one entry schema per topic form (29 = ABNF rules = matrix rows), plus a topic-agnostic `message.schema.json`, plus a small rule layer in D7 `validate` (equality with topic values, IL decoding, cross-field arithmetic).
 - **Coverage** (OPC UA 1.05.04 JSON with the fixed content masks of MG 8.1.4):
   - NetworkMessage (`ua-data`, `ReplyTo`);
@@ -51,9 +51,10 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
 - **Test suite:** the reviewed vectors of `oec/spec/vectors` are the input; nothing is copied. Each vector is routed by topic to its entry schema. An expectation list (`oec/schema/tests/rule-layer.yaml`) names the invalid vectors that only the rule layer detects. Probes check schema paths during an increment. Two independent 2020-12 validators must agree on every case: Go `santhosh-tekuri/jsonschema` (also inside D7) and Rust `jsonschema`. The local CI is `oec/schema/check.sh`, next to the `spectool` checks.
 - **First increment of D7:** the offline `validate` command (topic + payload from file, stdin or directory), see P5.
 - **Increments and cycle cut** (C-033; ordered by dependency, each cycle ends with a PO review of its drafted vectors, reclassifications and ADR/SF decisions):
-  - **C-033 – plan + ADR-0019 + PoC** (done 2026-10-23): ADR-0019 `proposed`; PoC of the envelope, helpers and Health (`pub-health`, `get-health`) against 16 vectors and 17 probes with three validators (after an independent review of the ADR and PoC); SF-097. The full build-out waits for the acceptance of ADR-0019.
+  - **C-033 – plan + ADR-0019 + PoC** (done 2026-10-23): ADR-0019 proposed and accepted in the PO review (option B, generated tolerant flavor, `$id` base `schemas.openindustry4.com` with major-only `$id`s, santhosh + jsonschema-rs, verification split, umbrella rule, this cycle cut); SF-097 decided; PoC of the envelope, helpers and Health (`pub-health`, `get-health`) against 16 vectors and 17 probes with three validators (after an independent review of the ADR and PoC); SF-097. The full build-out waits for the acceptance of ADR-0019.
   - **C-034 – foundation + envelope:**
-    - PO decisions on ADR-0019 (option, `$id` base, umbrella rule) and SF-097;
+    - SF-097 in the guideline (on PO order) + re-baseline; LOC REQ, oracle and vectors for Locale only with `Get`;
+    - reclassifications REQ-MSG-026/REQ-PAG-009 (+`schema`), REQ-LIFE-003 (+`d7-validate`); umbrella implication map;
     - layout per ADR-0019;
     - expectation list;
     - `spectool coverage` per-REQ report: positive/negative vector per `schema`/`d7-validate` REQ, layer, entry schema per allowed matrix row;

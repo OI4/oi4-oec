@@ -3,7 +3,7 @@
 - Date: 2026-10-23
 - Phase: P2 (started in this cycle)
 - Agent: GitHub Copilot CLI (Claude Opus 5.5)
-- Status: done; waiting for PO review (ADR-0019 `proposed`, SF-097 open)
+- Status: done; reviewed by the PO on 2026-10-23 (addendum 1: ADR-0019 accepted, SF-097 decided)
 - Guideline baseline: `oi4-oec-documentation` @ `5b8fe59`, branch `feature/spec-findings` (GL-ADR-001 … 022, SF-001 … 096 resolved, next free id SF-097). During the cycle, the register-only commit `decc2da` added SF-097 (open). The guideline text did not change, so no re-baseline was needed (STATUS "Next step" 3).
 
 ## Intent
@@ -255,3 +255,26 @@ Guideline repo (`oi4-oec-documentation`, register only):
 6. **P2 cycle cut** C-034 … C-039 and the refined exit (ROADMAP P2).
 7. **SF-097** (Locale only with `Get`, at most once): accept the proposed interpretation, or allow `Locale` everywhere?
 8. **Baseline fix `fa96538`** (C-032 addendum 53 slip, derived keys only): for information.
+
+## Addendum 1 – PO review (2026-10-23)
+
+PO (chat, 2026-10-23): "SF-097 reviewed und akzeptiert. Bei den von dir genannten 6 anderen Punkten (1–6) akzeptiere ich jeweils deine Empfehlung."
+
+Decisions:
+
+1. ADR-0019 §5: option **B** (entry schema per topic form + D7 rule layer), option A as topic-agnostic fallback.
+2. ADR-0019 §3: tolerant flavor **generated** from the strict source.
+3. ADR-0019 §6: `$id` base **(a) `https://schemas.openindustry4.com`**, versioning **(i) major-only `$id`s**, the tools report the bundle version.
+4. ADR-0019 §8: validator gate **santhosh-tekuri/jsonschema (Go) + jsonschema-rs (Rust)**.
+5. ADR-0019 §9: verification split as proposed. The reclassification candidates REQ-MSG-026, REQ-PAG-009 (+`schema`) and REQ-LIFE-003 (+`d7-validate`) are applied in C-034 (the increment that covers them), and umbrella REQs get derived coverage through an implication map.
+6. P2 cycle cut C-034 … C-039 and refined exit (ROADMAP P2).
+7. SF-097 decided as proposed: a `Locale` only with `Get`, at most once per NetworkMessage; receivers ignore it elsewhere.
+
+Changes:
+
+- ADR-0019 status → **accepted**, with a "PO decision" section; the options in §6 are marked as decided.
+- Register: SF-097 → `decided (PO, C-033 review 2026-10-23, as proposed)`, commit `43c0000` (register only, no re-baseline).
+- STATUS (header, phase, C-033 paragraph, next step C-034, D1 row, baseline line, blocking questions, decided list, cycle history), ROADMAP P2 (architecture line, C-033 and C-034 items), `oec/README.md`, `oec/schema/README.md` and ADR-0003 updated.
+- No reviewed item changed. The schemas are unchanged: the PoC already uses the decided `$id` base. The `pub-health` entry schema still accepts a `Locale` until SF-097 is implemented in the guideline and the catalog (C-034).
+
+Open: SF-097 is decided but not implemented in MG 8.3.12. Guideline text changes only on PO order. After an order, C-034 starts with the guideline change and a re-baseline.

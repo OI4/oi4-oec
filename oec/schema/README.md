@@ -1,6 +1,6 @@
 # `oec/schema/` – D1 JSON Schemas of the OEC v2 messages
 
-> **State: proof of concept (C-033).** [ADR-0019](../../project/decisions/ADR-0019-schema-architecture.md) is `proposed`. The files cover the envelope (NetworkMessage, DataSetMessage), the helper DataSets and the resource Health with its topic forms `pub-health` and `get-health`. The full build-out starts when the PO accepts ADR-0019 (ROADMAP P2).
+> **State: proof of concept (C-033).** [ADR-0019](../../project/decisions/ADR-0019-schema-architecture.md) is accepted (C-033 review). The files cover the envelope (NetworkMessage, DataSetMessage), the helper DataSets and the resource Health with its topic forms `pub-health` and `get-health`. The full build-out starts in C-034 (ROADMAP P2).
 
 The schemas are derived from the spec baseline in [`../spec/`](../spec/), which is derived only from the guideline (ADR-0018). The schemas never define requirements of their own. Each constraint names the requirement it enforces in a `$comment` that starts with the REQ id(s).
 
@@ -20,7 +20,7 @@ The schemas are derived from the spec baseline in [`../spec/`](../spec/), which 
 | `tools/rust-check` | second, independent validator (Rust `jsonschema` crate) over `dist/cases.json` |
 | `check.sh` | local CI: both validators |
 
-Every file uses `$schema` 2020-12, with `$id` = `https://schemas.openindustry4.com/oec/v2/<path>`. The domain is still a PO decision (ADR-0019). The `v2/` sources are the **strict** flavor: OI4-defined objects are closed with a closure `"unevaluatedProperties": {"$comment": "REQ-MSG-001 …", "not": {}}`, so an undefined key maps to the REQ of its closure. The **tolerant** flavor (unknown-key tolerance of REQ-MSG-046, like the oracle mode `tolerant`) is generated, never edited. It is the same tree without the closures, with its `$id`s under `…/oec/v2/tolerant/`. `schematest` writes both flavors to `dist/<host>/oec/v2/…`.
+Every file uses `$schema` 2020-12, with `$id` = `https://schemas.openindustry4.com/oec/v2/<path>`. The base was decided by the PO (ADR-0019 §6: major-only `$id`s, the tools report the bundle version). The `v2/` sources are the **strict** flavor: OI4-defined objects are closed with a closure `"unevaluatedProperties": {"$comment": "REQ-MSG-001 …", "not": {}}`, so an undefined key maps to the REQ of its closure. The **tolerant** flavor (unknown-key tolerance of REQ-MSG-046, like the oracle mode `tolerant`) is generated, never edited. It is the same tree without the closures, with its `$id`s under `…/oec/v2/tolerant/`. `schematest` writes both flavors to `dist/<host>/oec/v2/…`.
 
 ## Running
 
