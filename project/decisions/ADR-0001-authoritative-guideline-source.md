@@ -423,3 +423,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `fa9ef19` is recorded in addendum 34.
 - The baseline is now `43d5eec` on branch `feature/spec-findings` (local commit `43d5eec` – MG 8.3.1, 8.3.2, 8.3.3, 8.3.6 … 8.3.10 state the concrete `DataSetClassId` from A2 Table 15 instead of the generic "provides a DataSetClassId" sentence; PO request 2026-10-23, editorial). Spec re-baselined (`060e992`): only the baseline id; no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 38 (2026-10-23, guideline baseline `a3e4677`)
+
+- The previous baseline `43d5eec` is recorded in addendum 35 (register-only commits `8e47370` and `900b5aa` in addenda 36/37 did not change it).
+- The baseline is now `a3e4677` on branch `feature/spec-findings` (local commits `e51905d` – MG 8.3.2 order of priority `FAILURE_1` > `CHECK_FUNCTION_2` > `OFF_SPEC_3` > `MAINTENANCE_REQUIRED_4` > `NORMAL_0`, Table 13 without severity statements, B2.2 description, GL-ADR-001 implementation note and GL-ADR-019 adapted – and `a3e4677` – register: SF-096 resolved; PO decision 2026-10-23, no new GL-ADR). Spec re-baselined (`5920b84`): REQ-RES-HEALTH-001/002 remapped, REQ-RES-HEALTH-002 follows the new order. SF-001 … 096 resolved, no open finding, next SF-097.
