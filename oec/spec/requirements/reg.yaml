@@ -4,7 +4,7 @@
 # lead-in "must fulfill" (SF-089, resolved).
 # Drafted in C-030.
 area: REG
-baseline: "5b8fe59"
+baseline: "cc2fb4b"
 requirements:
   # --- Main tasks (MG A1) ---------------------------------------------------
   - id: REQ-REG-001

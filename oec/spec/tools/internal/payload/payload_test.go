@@ -169,7 +169,7 @@ func TestViolations(t *testing.T) {
     "Payload": {"Health": "NORMAL_0"}`, ``, []string{"REQ-MSG-016"}},
 		{"timestamp", tHealth, healthPub, `2021-12-16T22:25:10.094Z`, `16.12.2021`, []string{"REQ-MSG-016"}},
 		{"metadata and minor version", tData, dataPub, `"MessageType": "ua-keyframe"`, `"MinorVersion": 2`, []string{"REQ-MSG-018"}},
-		{"helper writer group name", tHealth, healthPub, `"DataSetWriterId": 3456, "WriterGroupName": ""`, `"DataSetWriterId": 3, "WriterGroupName": "Pagination"`, []string{"REQ-LOC-001", "REQ-MSG-001", "REQ-MSG-019"}},
+		{"helper writer group name", tHealth, healthPub, `"DataSetWriterId": 3456, "WriterGroupName": ""`, `"DataSetWriterId": 3, "WriterGroupName": "Pagination"`, []string{"REQ-LOC-001", "REQ-LOC-003", "REQ-MSG-001", "REQ-MSG-019"}},
 		{"reserved writer id", tHealth, healthPub, `"DataSetWriterId": 3456`, `"DataSetWriterId": 8`, []string{"REQ-MSG-020"}},
 		{"writer id zero", tHealth, healthPub, `"DataSetWriterId": 3456`, `"DataSetWriterId": 0`, []string{"REQ-MSG-020"}},
 		{"writer name differs from source", tHealth, healthPub, `"DataSetWriterName": "provider.com`, `"DataSetWriterName": "x.com`, []string{"REQ-MSG-023"}},
@@ -441,8 +441,6 @@ var mamPub = `{
       "Description": {"Locale": "en-US", "Text": "Field data"}
     }
   }, {
-    "DataSetWriterId": 3, "WriterGroupName": "Locale", "DataSetWriterName": "` + app + `", "Payload": {"Locale": "de-DE"}
-  }, {
     "DataSetWriterId": 2, "WriterGroupName": "Pagination", "DataSetWriterName": "` + app + `",
     "Payload": {"TotalCount": 3, "PerPage": 1, "Page": 1, "HasNext": true, "PaginationId": "7-OTConnector/` + app + `"}
   }]
@@ -457,6 +455,8 @@ var mamGet = `{
   "Messages": [{
     "DataSetWriterId": 1, "WriterGroupName": "PaginationRequest", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
     "Payload": {"PerPage": 25, "Page": 0}
+  }, {
+    "DataSetWriterId": 3, "WriterGroupName": "Locale", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": {"Locale": "de-DE"}
   }]
 }`
 
@@ -535,7 +535,9 @@ func TestContent(t *testing.T) {
 		{"pagination has next", tMAM, mamPub, `"HasNext": true`, `"HasNext": false`, []string{"REQ-PAG-004"}},
 		{"pagination count", tMAM, mamPub, `"TotalCount": 3, "PerPage": 1`, `"TotalCount": 3, "PerPage": 2`, []string{"REQ-PAG-004"}},
 		{"pagination page zero", tMAM, mamPub, `"Page": 1`, `"Page": 0`, []string{"REQ-PAG-004"}},
-		{"locale", tMAM, mamPub, `"Locale": "de-DE"`, `"Locale": "german"`, []string{"REQ-LOC-001"}},
+		{"locale", tMAMGet, mamGet, `"Locale": "de-DE"`, `"Locale": "german"`, []string{"REQ-LOC-001"}},
+		{"locale in pub", tMAM, mamPub, `"DataSetWriterId": 2, "WriterGroupName": "Pagination"`, `"DataSetWriterId": 3, "WriterGroupName": "Locale", "DataSetWriterName": "` + app + `", "Payload": {"Locale": "de-DE"}}, {"DataSetWriterId": 2, "WriterGroupName": "Pagination"`, []string{"REQ-LOC-003"}},
+		{"second locale", tMAMGet, mamGet, `"Payload": {"Locale": "de-DE"}`, `"Payload": {"Locale": "de-DE"}}, {"DataSetWriterId": 3, "WriterGroupName": "Locale", "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": {"Locale": "fr-FR"}`, []string{"REQ-LOC-003"}},
 		{"get with mam", tMAMGet, mamGet, `"Messages": [{`, `"Messages": [{"DataSetWriterId": 55, "WriterGroupName": "", "DataSetWriterName": "x.com/a", "Payload": {}}, {`, []string{"REQ-RES-MAM-020"}},
 		{"mam missing field", tMAM, mamPub, `"ProductCode": "FDS-001",`, ``, []string{"REQ-RES-MAM-001"}},
 		{"mam unknown field", tMAM, mamPub, `"ProductCode": "FDS-001",`, `"ProductCode": "FDS-001", "Foo": 1,`, []string{"REQ-MSG-001"}},

@@ -103,6 +103,13 @@ func (c *checker) contents(dsms []dsm) {
 				c.paginationRequest(d)
 			}
 		case 3:
+			if c.t.Method != "Get" {
+				c.add(d.ptr, "REQ-LOC-003", "a Locale is only sent with the method Get")
+			}
+			if prev, dup := seen[d.id]; dup {
+				c.add(d.ptr, "REQ-LOC-003", "a second Locale (first at %s)", prev)
+			}
+			seen[d.id] = d.ptr
 			if d.payload != nil {
 				c.locale(d)
 			}

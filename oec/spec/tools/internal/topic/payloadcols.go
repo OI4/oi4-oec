@@ -149,7 +149,7 @@ func payloadConsistency(c Combination) []string {
 		switch h {
 		case "PaginationRequest", "Locale":
 			if c.Method != "Get" {
-				bad("helper %s only with Get (REQ-PAG-008, REQ-LOC-002)", h)
+				bad("helper %s only with Get (REQ-PAG-008, REQ-LOC-003)", h)
 			}
 		case "Pagination":
 			if c.Method != "Pub" {

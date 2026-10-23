@@ -7,7 +7,7 @@
 # (MG 8.3.13.1, GL-ADR-020, SF-069, SF-073) – REQ-RES-REFDES-011 … 016 (reviewed 2026-10-20);
 # the generic Query rules are area QRY.
 area: RES-REFDES
-baseline: "5b8fe59"
+baseline: "cc2fb4b"
 requirements:
   # --- DataSet content (MG 8.3.10) --------------------------------------------
   - id: REQ-RES-REFDES-001
@@ -119,7 +119,7 @@ requirements:
     verification: [schema, d7-validate]
     inventory: [MG-9.1.10-7175ba83]
     status: reviewed
-    notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-002).
+    notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-003).
 
   - id: REQ-RES-REFDES-006
     title: Set ReferenceDesignation addresses exactly one asset

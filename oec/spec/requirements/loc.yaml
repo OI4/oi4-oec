@@ -1,9 +1,10 @@
 # Requirements of area LOC – helper DataSet Locale (MG 8.3.12; ADR-0018).
 # Reserved DataSetWriterId and names: REQ-MSG-019; LocalizedText: MG 8.2.7.
 # Checked by tools/internal/payload (C-027).
-# Reviewed and accepted by the PO in the C-027 review (2026-10-20).
+# REQ-LOC-001/002 reviewed and accepted by the PO in the C-027 review (2026-10-20).
+# REQ-LOC-003 (SF-097, C-033 addendum 2) draft.
 area: LOC
-baseline: "5b8fe59"
+baseline: "cc2fb4b"
 requirements:
   - id: REQ-LOC-001
     title: Field of the Locale DataSet
@@ -28,9 +29,8 @@ requirements:
       A Get may carry a Locale. If the responder supports localization and
       the requested locale, it publishes all LocalizedText elements of the
       answer (with the ReplyTo of the Get) in the requested locale, otherwise
-      in the default language English (en-US). A Locale is only meaningful
-      with the method Get; in a NetworkMessage of another method it is
-      ignored by the receiver.
+      in the default language English (en-US). Placement of the Locale:
+      REQ-LOC-003.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -44,9 +44,31 @@ requirements:
       - ref: MG 8.3.12
         text: Otherwise, the LocalizedText elements must be provided in the default language English (en-US).
       - ref: MG 8.3.12
-        text: The DataSetMessage with Locale information is only meaningful in combination with the method Get; in a NetworkMessage of another method it is ignored by the receiver.
-      - ref: MG 8.3.12
         text: The information is provided via the method Get and can be combined with any Resource, which might have LocalizedText elements in it.
     verification: [d7-test]
-    inventory: [MG-8.3.12-5a01c78c, MG-8.3.12-af922472, MG-8.3.12-af07feb7, MG-8.3.12-f857d6fc]
+    inventory: [MG-8.3.12-5a01c78c, MG-8.3.12-af922472, MG-8.3.12-f857d6fc]
     status: reviewed
+
+  - id: REQ-LOC-003
+    title: Locale only in Get, at most once
+    statement: >-
+      A NetworkMessage contains a Locale only with the method Get, at most
+      once. A receiver ignores a Locale in a NetworkMessage of another
+      method.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [publisher, requester, responder]
+    refs: [MG 8.3.12, SF-062, SF-097]
+    quotes:
+      - ref: MG 8.3.12
+        text: A Locale must only be used with the method Get, at most once per NetworkMessage.
+      - ref: MG 8.3.12
+        text: A Locale in a NetworkMessage of another method is ignored by the receiver.
+    verification: [schema, d7-validate]
+    inventory: [MG-8.3.12-d7029076, MG-8.3.12-ed85293a]
+    status: draft
+    notes: >-
+      Same rule as REQ-PAG-008 (SF-097, PO decision 2026-10-23). The payload
+      checker reports a misplaced or repeated Locale (sender view, strict); a
+      tolerant receiver ignores it (REQ-MSG-046).

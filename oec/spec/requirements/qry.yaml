@@ -6,7 +6,7 @@
 # 015. Checked by tools/internal/payload (REQ-QRY-001; REQ-QRY-002 in the
 # tolerant mode). Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: QRY
-baseline: "5b8fe59"
+baseline: "cc2fb4b"
 requirements:
   - id: REQ-QRY-001
     title: A Query only in a Get of a resource with a defined Query
@@ -30,7 +30,7 @@ requirements:
     inventory: [MG-8.3.13-d238ce3d]
     status: reviewed
     notes: >-
-      Same pattern as PaginationRequest and Locale (REQ-PAG-008, REQ-LOC-002).
+      Same pattern as PaginationRequest and Locale (REQ-PAG-008, REQ-LOC-003).
       The resource-specific conditions are in the area of the resource (for
       ReferenceDesignation: only without Source, REQ-RES-REFDES-013). A
       receiver tolerates the misplaced helper (REQ-MSG-046); the strict
