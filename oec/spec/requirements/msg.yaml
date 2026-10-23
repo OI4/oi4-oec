@@ -6,7 +6,7 @@
 # (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 area: MSG
-baseline: "adc9bbe"
+baseline: "1b779a7"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
@@ -744,9 +744,9 @@ requirements:
       - ref: MG 8.1.4
         text: In Open Industry 4.0 Alliance context, only the bit RawData (bit 5) is set, which results in the value 0x20 (32).
       - ref: MG 8.1.4
-        text: The encodings selected by FieldEncoding2 = 0 (the encodings of OPC UA Part 14 V1.04) are deprecated with V1.05 and shall not be used.
+        text: The encodings selected by FieldEncoding2 = 0 are deprecated in OPC UA Part 14 and shall not be used.
     verification: [schema, d7-validate]
-    inventory: [MG-8.1.4-c10618ec]
+    inventory: [MG-8.1.4-54f331bb]
     status: reviewed
     notes: The DataSets of the OI4 resources and their schemas are areas RES-* (MG 8.3).
 
@@ -916,7 +916,7 @@ requirements:
       - ref: MG 8.2.6
         text: The namespace index form ("ns=<index>;...") shall not be used, because namespace indices are not stable across publishers.
       - ref: MG 8.2.6
-        text: The JSON object form of a NodeId (IdType, Id, Namespace) of OPC UA V1.04 is not used anymore.
+        text: The JSON object form of a NodeId (IdType, Id, Namespace) is not used.
     verification: [schema, d7-validate]
     inventory: [MG-8.2.6-cadb42b5]
     status: reviewed
