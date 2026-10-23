@@ -458,3 +458,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `223fb51` is recorded in addendum 43.
 - The baseline is now `fa315eb` on branch `feature/spec-findings` (local commit: MG 9.1.x and 9.2.1 card and box layout for the method sections; editorial PO order, no text change, no GL-ADR, no SF). Spec re-baselined in `e155e40`.
+
+## Amendment C-032 addendum 45 (2026-10-23, guideline baseline `f4826e3`)
+
+- The previous baseline `fa315eb` is recorded in addendum 44.
+- The baseline is now `f4826e3` on branch `feature/spec-findings`. Two local commits: `e19aa32` (MG 9.1.2 trial) and `f4826e3` (MG 9.1.x rollout). Both remove the outer `oi4-card` wrappers of the method sections and keep only the Publisher topic/Payload boxes. Editorial PO order: no text change, no GL-ADR, no SF. Spec re-baselined (baseline bump only).
