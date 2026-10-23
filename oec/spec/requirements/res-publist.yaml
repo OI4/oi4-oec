@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PUBLIST
-baseline: "985cd3d"
+baseline: "f024823"
 requirements:
   # --- DataSet content (MG 8.3.8) ---------------------------------------------
   - id: REQ-RES-PUBLIST-001
@@ -59,7 +59,7 @@ requirements:
       - ref: MG 8.3.8
         text: The DataSetWriterName of the DataSetMessage of an entry must be equal to its Source (8.2.3 DataSetMessage).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.8-4ac125ad, MG-9.1.8-7e7fda6f, MG-8.3.8-4b0d1d82]
+    inventory: [MG-9.1.8-af33ab36, MG-9.1.8-7e7fda6f, MG-8.3.8-4b0d1d82]
     status: reviewed
     notes: >-
       Combines REQ-TOP-022 (Filter structure), REQ-MSG-023 (DataSetWriterName)

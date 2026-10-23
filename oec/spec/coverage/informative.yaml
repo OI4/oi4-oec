@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "985cd3d"
+baseline: "f024823"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -360,7 +360,7 @@ items:
     reason: Example of the Interval note (cloud connector); the rule is REQ-RES-SUBLIST-003.
   - key: MG-8.3.9-9b50affb
     reason: Explanation of the Interval example; the rule is REQ-RES-SUBLIST-003.
-  - key: MG-9.1.9-787b4bdd
+  - key: MG-9.1.9-e6ca4329
     reason: Note on the Filter structure <ResourceType>[/<Tag>]; normative in REQ-TOP-022 (reviewed).
   - key: MG-9.1.9-ddb5a16d
     reason: Hint how any application can listen to SubscriptionList ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
