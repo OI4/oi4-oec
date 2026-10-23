@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "43d5eec"
+baseline: "a3e4677"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -249,8 +249,8 @@ items:
   # --- RES-HEALTH (C-027) ---------------------------------------------------
   - key: MG-8.3.2-9ffc3c06
     reason: Explains that HealthScore and Health are independent ("can coexist" expresses possibility); no requirement of its own (REQ-RES-HEALTH-001).
-  - key: MG-8.3.2-2d1ee307
-    reason: Explains that Details can provide several concurrent statuses besides the most severe one ("can be retrieved" expresses possibility); the rules are REQ-RES-HEALTH-001/002.
+  - key: MG-8.3.2-9b7b79a1
+    reason: Explains that Details can provide several concurrent statuses besides the one with the highest priority ("can be retrieved" expresses possibility); the rules are REQ-RES-HEALTH-001/002.
   - key: MG-8.3.2-e992ce79
     reason: States that all diagnostic information can be retrieved via Get/Health ("can" expresses possibility); the Get is REQ-RES-HEALTH-005/006 and REQ-CMP-017.
   - key: MG-9.1.2-3ca62884

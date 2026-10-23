@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-HEALTH
-baseline: "43d5eec"
+baseline: "a3e4677"
 requirements:
   # --- DataSet content (MG 8.3.2) ---------------------------------------------
   - id: REQ-RES-HEALTH-001
@@ -25,7 +25,7 @@ requirements:
     applies_to: [application, device]
     refs: [MG 8.3.2]
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.2-4017a916, MG-8.3.2-8f5d5ddc, MG-8.3.2-c6d90f6d, MG-8.3.2-619204cc, MG-8.3.2-8e123ade, MG-8.3.2-729cc64d, MG-8.3.2-ed805854, MG-8.3.2-d2f6bc0e, MG-8.3.2-1f9968e2, MG-8.3.2-3ccbe376, MG-8.3.2-24c98eb7]
+    inventory: [MG-8.3.2-4017a916, MG-8.3.2-8f5d5ddc, MG-8.3.2-c6d90f6d, MG-8.3.2-619204cc, MG-8.3.2-8e123ade, MG-8.3.2-729cc64d, MG-8.3.2-ed805854, MG-8.3.2-d2f6bc0e, MG-8.3.2-918d692d, MG-8.3.2-4b88043e, MG-8.3.2-75b94f9a]
     status: reviewed
     notes: >-
       Field presence and types per REQ-CMP-025/026; the rows of Table 13 define
@@ -33,31 +33,34 @@ requirements:
       e.g. 30 % with NORMAL_0).
 
   - id: REQ-RES-HEALTH-002
-    title: Health is the most severe status of the Details
+    title: Health is the status with the highest priority of the Details
     statement: >-
-      If Details is present, Health equals the most severe Health of all
-      DetailObjects, using the order of severity FAILURE_1 > OFF_SPEC_3 >
-      CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0; statuses of lower
-      severity stay listed in Details.
+      If Details is present, Health equals the Health with the highest
+      priority of all DetailObjects, using the order of priority FAILURE_1 >
+      CHECK_FUNCTION_2 > OFF_SPEC_3 > MAINTENANCE_REQUIRED_4 > NORMAL_0;
+      statuses of lower priority stay listed in Details.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The Health DataSet contains Details.
-    refs: [MG 8.3.2, SF-065]
+    refs: [MG 8.3.2, SF-065, SF-096]
     quotes:
       - ref: MG 8.3.2
-        text: The Health of the asset must reflect the most severe status of all Details, according to the severity defined in Table 13.
+        text: The Health of the asset must reflect the status with the highest priority of all Details.
       - ref: MG 8.3.2
-        text: The order of severity is FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0
+        text: The order of priority is FAILURE_1 > CHECK_FUNCTION_2 > OFF_SPEC_3 > MAINTENANCE_REQUIRED_4 > NORMAL_0
       - ref: MG 8.3.2
-        text: Statuses with lower severity remain visible in Details, even if they are superimposed by a more severe status.
+        text: Statuses with lower priority remain visible in Details, even if they are superimposed by a status with higher priority.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.2-d6f8e58c, MG-8.3.2-2a0f2648]
+    inventory: [MG-8.3.2-025d3ac2, MG-8.3.2-8b8f5239, MG-8.3.2-fbc1880c]
     status: reviewed
     notes: >-
-      Order of the two low-severity states (CHECK_FUNCTION_2 before
-      MAINTENANCE_REQUIRED_4) per SF-065 (a), GL-ADR-019.
+      Order of priority per SF-096 (PO decision 2026-10-23, GL-ADR-001
+      implementation note, GL-ADR-019): invalid signal (FAILURE_1) before
+      temporarily invalid (CHECK_FUNCTION_2), uncertain (OFF_SPEC_3) and
+      valid signal (MAINTENANCE_REQUIRED_4); it replaces the severity order of
+      SF-065 (a) (OFF_SPEC_3 before CHECK_FUNCTION_2).
 
   - id: REQ-RES-HEALTH-003
     title: NE107 symbols and colors for the Health states

@@ -1,7 +1,7 @@
 # Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
-baseline: "43d5eec"
+baseline: "a3e4677"
 description: >-
   Constructed payload vectors for the two validation modes of MG 8 (SF-052):
   strict validation reports every key that is not defined for the object
@@ -116,7 +116,7 @@ vectors:
       }
 
   - id: V-PAY-049
-    title: "Pub Health whose Health does not reflect the most severe Detail"
+    title: "Pub Health whose Health does not reflect the Detail with the highest priority"
     expected: invalid
     violates: [REQ-RES-HEALTH-002]
     reason: "Health is NORMAL_0 although a Detail reports FAILURE_1."
@@ -124,8 +124,9 @@ vectors:
     status: reviewed
     notes: >-
       V-PAY-003 with two Details, one of them FAILURE_1: the overall Health
-      reflects the most severe state of the Details (MG 8.3.2, order FAILURE_1 >
-      OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0).
+      reflects the state with the highest priority of the Details (MG 8.3.2,
+      order FAILURE_1 > CHECK_FUNCTION_2 > OFF_SPEC_3 > MAINTENANCE_REQUIRED_4 >
+      NORMAL_0).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
