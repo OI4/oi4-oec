@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.openindustry4.com/oec/v2/health.schema.json",
+  "$id": "https://schemas.openindustry4.com/oec/v2/resources/health.schema.json",
   "title": "Health resource",
   "description": "Health DataSet (MG 8.3.2) and the Health DataSetMessage of a Pub Health (MG 9.1.2).",
   "$defs": {
@@ -12,6 +12,11 @@
         "CHECK_FUNCTION_2",
         "OFF_SPEC_3",
         "MAINTENANCE_REQUIRED_4"
+      ],
+      "allOf": [
+        {
+          "$ref": "../opcua.schema.json#/$defs/VerboseEnum"
+        }
       ]
     },
     "DetailObject": {
@@ -50,7 +55,7 @@
           "$ref": "#/$defs/HealthState"
         },
         "HealthScore": {
-          "$ref": "opcua.schema.json#/$defs/Byte",
+          "$ref": "../opcua.schema.json#/$defs/Byte",
           "maximum": 100
         },
         "Details": {
@@ -224,18 +229,18 @@
       }
     },
     "HealthDataSetMessage": {
-      "$ref": "envelope.schema.json#/$defs/DataSetMessage",
+      "$ref": "../envelope.schema.json#/$defs/DataSetMessage",
       "properties": {
         "DataSetWriterId": {
-          "$comment": "REQ-MSG-020 (MG 8.1.2): application DataSetWriterIds start at 10",
+          "$comment": "REQ-MSG-020 (MG 8.2.3): application DataSetWriterIds start at 10",
           "minimum": 10
         },
         "WriterGroupName": {
-          "$comment": "REQ-MSG-024 (MG 8.1.2, MG 7.7): Health has no Filter",
+          "$comment": "REQ-MSG-024 (MG 8.2.3, MG 7.7): Health has no Filter",
           "const": ""
         },
         "MessageType": {
-          "$comment": "REQ-MSG-029 (MG 8.1.2)",
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
           "const": "ua-keyframe"
         },
         "Payload": {

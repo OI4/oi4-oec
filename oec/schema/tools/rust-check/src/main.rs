@@ -1,4 +1,4 @@
-//! Second, independent JSON Schema 2020-12 validator of the ADR-0019 PoC.
+//! Second, independent JSON Schema 2020-12 validator of the ADR-0019 test suite.
 //! Loads every schema of the bundle written by `schematest` (dist/), runs the
 //! cases of dist/cases.json with the Rust `jsonschema` crate and reports every
 //! verdict that differs from the first validator (santhosh-tekuri/jsonschema).

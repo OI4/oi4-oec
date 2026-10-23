@@ -1,6 +1,6 @@
 # ADR-0019 – Schema architecture of D1 (modules, topic-aware validation, `$id`, test suite)
 
-- Status: **accepted** (PO, C-033 review 2026-10-23; proposed in C-033). The PO accepted every recommendation, see "PO decision" below.
+- Status: **accepted** (PO, C-033 review 2026-10-23; proposed in C-033). The PO accepted every recommendation, see "PO decision" below. Editorial clarifications in C-034 (§1 type guards of asserting schemas, §1 reference lists, §2 Health module moved); no decision changed.
 - Date: 2026-10-23
 - Deciders: product owner (Thomas); proposal by the agent in C-033
 - Related: ADR-0003 (JSON Schema 2020-12), ADR-0006/0013/0014 (D7/D8 share only schemas and spec), ADR-0009 (no push), ADR-0011 (Rust SDK), ADR-0012 (monorepo `oec/`), ADR-0018 (spec baseline `oec/spec/`), GL-ADR-013 (NodeIds), SF-052 (strict/tolerant), SF-097 (Locale outside Get), C-033 log
@@ -53,7 +53,8 @@ SF-097 (Locale outside `Get`) was decided as proposed in the same review: a `Loc
 - **Regexes** use the portable dialect of `topic-patterns.json`: the common subset of ECMA-262 (with `u`), RE2, Python `re` and Rust `regex`; anchored, no look-around and no back-references.
 - **OPC UA integers** are written as `type: integer` plus `minimum`/`maximum` (Byte, UInt16, UInt32, Int32, …).
 - **Known divergences:** JSON Schema treats `1.0` as an integer, while the oracle compares numbers as written and rejects it; and calendar validity of DateTime (above). Such a vector stays an oracle/rule-layer case (see §8).
-- **Type guards:** `required`, `properties` and `const` are vacuously true for values of another type, and `contains` for non-arrays. Every predicate (`if`, `contains`, `not`) that tests object keys therefore states `"type": "object"`, and every schema with `contains` states `"type": "array"`. Otherwise a malformed value would select a wrong branch and report a secondary REQ (found in the C-033 review, probes P-13/P-14).
+- **Type guards:** `required`, `properties` and `const` are vacuously true for values of another type, and `contains` for non-arrays. Every predicate (`if`, `contains`, `not`) that tests object keys therefore states `"type": "object"`, and every predicate with `contains` states `"type": "array"`. Otherwise a malformed value would select a wrong branch and report a secondary REQ (found in the C-033 review, probes P-13/P-14). An **asserting** schema (e.g. `contains` + `maxContains` in an `allOf`) states no type of its own: the type error is reported once by the schema that owns the type (e.g. REQ-MSG-005 for `Messages`), and a second `"type"` would add a secondary REQ (editorial clarification C-034).
+- **Reference lists:** the parentheses after the REQ ids of a `$comment` name only refs of these REQs (e.g. `REQ-MSG-029 (MG 8.2.3)`); the harness checks this and the REQ ids against the catalog (C-034).
 - **REQ tracing:** every constraint that enforces a requirement carries a `"$comment"` that **starts with the REQ id(s)**, e.g. `"REQ-PAG-008 (MG 8.3.11): at most one Pagination per NetworkMessage"`.
   - The test harness maps every error to the REQs of the deepest such comment on its evaluation path.
   - Forbidden keys or branches are written as `{"$comment": "REQ-…", "not": {}}` instead of `false`, so that the comment is reachable. This includes the **closures**: `"unevaluatedProperties": {"$comment": "REQ-MSG-001 (MG 8): …", "not": {}}`, so an undefined key maps to the REQ of its closure (REQ-MSG-001; Action objects will use REQ-ACT-003). Nothing is hard-coded in the harness.
@@ -85,7 +86,7 @@ oec/schema/
   CHANGELOG.md                         release history 2.MINOR.PATCH with guideline baseline
 ```
 
-The PoC of C-033 still keeps `health.schema.json` at the top level. It moves to `resources/` in the first build-out increment.
+The PoC of C-033 kept `health.schema.json` at the top level; it moved to `resources/` in C-034.
 
 ### 3. Strict and tolerant flavors
 

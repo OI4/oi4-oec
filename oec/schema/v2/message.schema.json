@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.openindustry4.com/oec/v2/message.schema.json",
   "title": "Any OEC message (topic-agnostic)",
-  "description": "Topic-agnostic entry: discriminates by MessageType and DataSetClassId and checks the structure only. Method-dependent content (e.g. Get vs. Pub) needs the topic entry schemas in topics/. PoC scope of ADR-0019: ua-data with Health.",
+  "description": "Topic-agnostic entry: discriminates by MessageType and DataSetClassId and checks the structure only. Method-dependent content (e.g. Get vs. Pub) needs the topic entry schemas in topics/. Build-out state (C-034): ua-data with Health and the helper DataSets; the other resources, ua-metadata and the Actions follow in P2.",
   "if": {
     "type": "object",
     "required": [
@@ -107,9 +107,11 @@
                         }
                       }
                     },
-                    "then": true,
+                    "then": {
+                      "$ref": "helpers.schema.json#/$defs/QueryDataSetMessage"
+                    },
                     "else": {
-                      "$ref": "health.schema.json#/$defs/HealthDataSetMessage"
+                      "$ref": "resources/health.schema.json#/$defs/HealthDataSetMessage"
                     }
                   }
                 }

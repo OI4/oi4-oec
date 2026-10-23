@@ -1,7 +1,9 @@
-// Command schematest is the proof-of-concept test harness of ADR-0019. It
-// builds the schema bundle (strict source + generated tolerant flavor),
-// routes the payload vectors of oec/spec by their topic to an entry schema
-// (topic form, option B) and to the topic-agnostic message schema (option A),
+// Command schematest is the test harness of ADR-0019. It builds the schema
+// bundle (strict source + generated tolerant flavor), checks the REQ tracing
+// of the "$comment"s against the catalog of oec/spec, routes the payload
+// vectors of oec/spec by their topic to an entry schema (topic form, option
+// B), validates every valid vector with a topic against the topic-agnostic
+// message schema (option A),
 // validates them with santhosh-tekuri/jsonschema (draft 2020-12), maps every
 // error to the REQ ids in the nearest "$comment" of the evaluation path and
 // compares the result with the vector (expected, violates). It writes the
@@ -102,6 +104,16 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 			return err
 		}
 	}
+	reqs, err := loadRequirements(filepath.Join(specDir, "requirements"))
+	if err != nil {
+		return err
+	}
+	if problems := checkComments(docs, reqs); len(problems) > 0 {
+		for _, p := range problems {
+			fmt.Fprintln(os.Stderr, "FAIL", p)
+		}
+		return fmt.Errorf("%d $comment problems", len(problems))
+	}
 	patterns, err := loadPatterns(filepath.Join(specDir, "topic", "topic-patterns.json"))
 	if err != nil {
 		return err
@@ -117,27 +129,44 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 
 	var cases []testCase
 	var failures []string
-	routed, skipped := 0, 0
+	routed, agnostic, skipped := 0, 0, 0
 	fmt.Println("| Vector | Topic form | Mode | Expected (oracle) | Entry schema (B) | Generic schema (A) |")
 	fmt.Println("|--------|------------|------|-------------------|------------------|--------------------|")
 	for _, v := range vectors {
-		rule := route(patterns, v.Topic)
-		if rule == "" {
-			skipped++
-			continue
-		}
-		routed++
 		base := schema.BaseURI
 		mode := "strict"
 		if v.Mode == "tolerant" {
 			base, mode = schema.TolerantBaseURI, "tolerant"
 		}
+		generic := base + "message.schema.json"
+		rule := route(patterns, v.Topic)
+		if rule == "" {
+			if v.Topic == "" || v.Expected != "valid" {
+				skipped++
+				continue
+			}
+			// option A: every valid message passes the topic-agnostic schema
+			agnostic++
+			inst, err := jsonschema.UnmarshalJSON(strings.NewReader(v.Payload))
+			if err != nil {
+				return fmt.Errorf("%s: %w", v.ID, err)
+			}
+			a, err := validate(c, docs, generic, inst)
+			if err != nil {
+				return err
+			}
+			cases = append(cases, testCase{ID: v.ID + "/message", Schema: generic, Instance: compact(v.Payload), Valid: a.valid})
+			if !a.valid {
+				failures = append(failures, fmt.Sprintf("%s: valid vector rejected by %s: %v", v.ID, generic, a.msgs))
+			}
+			continue
+		}
+		routed++
 		inst, err := jsonschema.UnmarshalJSON(strings.NewReader(v.Payload))
 		if err != nil {
 			return fmt.Errorf("%s: %w", v.ID, err)
 		}
 		entry := base + "topics/" + rule + ".schema.json"
-		generic := base + "message.schema.json"
 		b, err := validate(c, docs, entry, inst)
 		if err != nil {
 			return err
@@ -184,7 +213,7 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 			}
 		}
 	}
-	fmt.Printf("\n%d payload vectors routed to an entry schema, %d without entry schema (out of PoC scope).\n", routed, skipped)
+	fmt.Printf("\n%d payload vectors routed to an entry schema, %d further valid vectors checked with the message schema only, %d without schema check yet (invalid without entry schema, or no topic).\n", routed, agnostic, skipped)
 	pc, pf, err := runProbes(c, docs, vectors)
 	if err != nil {
 		return err

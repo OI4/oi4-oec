@@ -6,7 +6,7 @@
   "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
   "allOf": [
     {
-      "$comment": "REQ-MSG-011 (MG 8.1.1): the DataSetClassId of a predefined resource is present",
+      "$comment": "REQ-MSG-011 (MG 8.2.1): the DataSetClassId of a predefined resource is present",
       "required": [
         "DataSetClassId"
       ]
@@ -83,7 +83,7 @@
                 "not": {}
               },
               "else": {
-                "$ref": "../health.schema.json#/$defs/HealthDataSetMessage"
+                "$ref": "../resources/health.schema.json#/$defs/HealthDataSetMessage"
               }
             }
           }
@@ -92,7 +92,6 @@
       "allOf": [
         {
           "$comment": "REQ-PAG-008 (MG 8.3.11): at most one Pagination per NetworkMessage",
-          "type": "array",
           "contains": {
             "type": "object",
             "required": [

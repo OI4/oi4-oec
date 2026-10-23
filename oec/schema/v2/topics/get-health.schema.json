@@ -6,7 +6,7 @@
   "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
   "allOf": [
     {
-      "$comment": "REQ-MSG-011 (MG 8.1.1): the DataSetClassId of a predefined resource is present",
+      "$comment": "REQ-MSG-011 (MG 8.2.1): the DataSetClassId of a predefined resource is present",
       "required": [
         "DataSetClassId"
       ]
@@ -92,7 +92,6 @@
       "allOf": [
         {
           "$comment": "REQ-PAG-008 (MG 8.3.11): at most one PaginationRequest per NetworkMessage",
-          "type": "array",
           "contains": {
             "type": "object",
             "required": [
@@ -109,7 +108,6 @@
         },
         {
           "$comment": "REQ-LOC-003 (MG 8.3.12): at most one Locale per NetworkMessage",
-          "type": "array",
           "contains": {
             "type": "object",
             "required": [

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.openindustry4.com/oec/v2/envelope.schema.json",
   "title": "OEC message envelopes",
-  "description": "NetworkMessage and DataSetMessage of MG 8.1 (ua-data) with the fixed content masks of MG 8.1.4, and the OI4 identifier strings. PoC scope of ADR-0019: ua-data only; ua-metadata and the Action messages follow in P2.",
+  "description": "NetworkMessage and DataSetMessage of MG 8.1/8.2 (ua-data) with the fixed content masks of MG 8.1.4, and the OI4 identifier strings. ua-metadata (C-035) and the Action messages (C-036) follow in P2.",
   "$defs": {
     "ServiceType": {
       "enum": [
@@ -16,26 +16,26 @@
       ]
     },
     "PublisherId": {
-      "$comment": "REQ-MSG-006 (MG 8.1.1): <ServiceType>/<IdentificationLink>, structure only; equality with the topic is a rule of the rule layer",
+      "$comment": "REQ-MSG-006 (MG 8.2.1): <ServiceType>/<IdentificationLink>, structure only; equality with the topic is a rule of the rule layer",
       "type": "string",
       "pattern": "^(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
     },
     "MessageId": {
-      "$comment": "REQ-MSG-007 (MG 8.1.1): <unixTimestampInMs>-<PublisherId>, structure only; equality with the PublisherId is a rule of the rule layer",
+      "$comment": "REQ-MSG-007 (MG 8.2.1): <unixTimestampInMs>-<PublisherId>, structure only; equality with the PublisherId is a rule of the rule layer",
       "type": "string",
       "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
     },
     "ReplyTo": {
-      "$comment": "REQ-MSG-015 (MG 8.1.1): empty or a MessageId (structure of $defs/MessageId); that it is the MessageId of the trigger is checked by d7-test",
+      "$comment": "REQ-MSG-015 (MG 8.2.1): empty or a MessageId (structure of $defs/MessageId); that it is the MessageId of the trigger is checked by d7-test",
       "type": "string",
       "pattern": "^(?:[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+)?$"
     },
     "DataSetClassId": {
-      "$comment": "REQ-MSG-003 (MG 8.1.1): GUID string",
+      "$comment": "REQ-MSG-003 (MG 8.2.1): GUID string",
       "$ref": "opcua.schema.json#/$defs/Guid",
       "allOf": [
         {
-          "$comment": "REQ-MSG-014 (MG A2 Reserved IDs): reserved DataSetClassIds are not used",
+          "$comment": "REQ-MSG-014 (MG A2): reserved DataSetClassIds are not used",
           "not": {
             "enum": [
               "2ae0505e-2830-4980-b65e-0bbdf08e2d45",
@@ -70,7 +70,7 @@
       ]
     },
     "DataNetworkMessage": {
-      "$comment": "REQ-MSG-003 (MG 8.1.1, MG 8.1.4): fields of a ua-data NetworkMessage",
+      "$comment": "REQ-MSG-003 (MG 8.2.1, MG 8.1.4): fields of a ua-data NetworkMessage",
       "type": "object",
       "required": [
         "MessageId",
@@ -84,7 +84,7 @@
           "$ref": "#/$defs/MessageId"
         },
         "MessageType": {
-          "$comment": "REQ-MSG-002 (MG 8.1.1)",
+          "$comment": "REQ-MSG-002 (MG 8.2.1)",
           "const": "ua-data"
         },
         "PublisherId": {
@@ -101,7 +101,7 @@
           "not": {}
         },
         "Messages": {
-          "$comment": "REQ-MSG-005 (MG 8.1.1): Messages is always a JSON array; the DataSetMessages are typed by the entry schemas (topics/*, message.schema.json)",
+          "$comment": "REQ-MSG-005 (MG 8.2.1): Messages is always a JSON array; the DataSetMessages are typed by the entry schemas (topics/*, message.schema.json)",
           "type": "array"
         }
       },
@@ -111,11 +111,11 @@
       }
     },
     "DataSetWriterId": {
-      "$comment": "REQ-MSG-016 (MG 8.1.2): UInt16",
+      "$comment": "REQ-MSG-016 (MG 8.2.3): UInt16",
       "$ref": "opcua.schema.json#/$defs/UInt16",
       "allOf": [
         {
-          "$comment": "REQ-MSG-020 (MG 8.1.2, MG A1): 0 is invalid, 4 … 8 are reserved",
+          "$comment": "REQ-MSG-020 (MG 8.2.3): 0 is invalid, 4 … 8 are reserved",
           "not": {
             "enum": [
               0,
@@ -130,7 +130,7 @@
       ]
     },
     "DataSetMessage": {
-      "$comment": "REQ-MSG-016 (MG 8.1.2, MG 8.1.4): fields of a DataSetMessage",
+      "$comment": "REQ-MSG-016 (MG 8.2.3): fields of a DataSetMessage",
       "type": "object",
       "required": [
         "DataSetWriterId",
@@ -149,7 +149,7 @@
           "type": "string"
         },
         "PublisherId": {
-          "$comment": "REQ-MSG-016 (MG 8.1.4): the DataSetMessage has no PublisherId",
+          "$comment": "REQ-MSG-016 (MG 8.2.3): the DataSetMessage has no PublisherId",
           "not": {}
         },
         "SequenceNumber": {
@@ -165,14 +165,22 @@
           "$ref": "opcua.schema.json#/$defs/UInt32"
         },
         "Status": {
-          "$comment": "REQ-MSG-027 (MG 8.1.2): Status object with Code and optional Symbol",
+          "$comment": "REQ-MSG-027 (MG 8.2.3): Status object with Code and optional Symbol",
           "type": "object",
           "required": [
             "Code"
           ],
           "properties": {
             "Code": {
-              "$ref": "opcua.schema.json#/$defs/UInt32"
+              "$ref": "opcua.schema.json#/$defs/UInt32",
+              "allOf": [
+                {
+                  "$comment": "REQ-MSG-026 (MG 8.2.3): a Status is only sent if it is not Good (Code 0)",
+                  "not": {
+                    "const": 0
+                  }
+                }
+              ]
             },
             "Symbol": {
               "type": "string"
@@ -184,10 +192,21 @@
           }
         },
         "MessageType": {
-          "$comment": "REQ-MSG-029 (MG 8.1.2)",
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
           "enum": [
             "ua-keyframe",
             "ua-event"
+          ],
+          "allOf": [
+            {
+              "$comment": "REQ-MSG-030 (MG 8.2.3): DataSetMessages are complete key frames; ua-deltaframe and ua-keepalive are not used",
+              "not": {
+                "enum": [
+                  "ua-deltaframe",
+                  "ua-keepalive"
+                ]
+              }
+            }
           ]
         },
         "Payload": {
@@ -196,7 +215,7 @@
       },
       "allOf": [
         {
-          "$comment": "REQ-MSG-018 (MG 8.1.2): MetaDataVersion and MinorVersion are not combined",
+          "$comment": "REQ-MSG-018 (MG 8.2.3, MG 8.1.4): MetaDataVersion and MinorVersion are not combined",
           "not": {
             "type": "object",
             "required": [

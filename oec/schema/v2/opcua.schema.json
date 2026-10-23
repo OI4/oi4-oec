@@ -31,7 +31,7 @@
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     },
     "ConfigurationVersion": {
-      "$comment": "REQ-MSG-036 (MG 8.2.x ConfigurationVersionDataType)",
+      "$comment": "REQ-MSG-036 (MG 8.2.5): ConfigurationVersionDataType",
       "type": "object",
       "required": [
         "MajorVersion",
@@ -48,6 +48,12 @@
       "unevaluatedProperties": {
         "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
         "not": {}
+      }
+    },
+    "VerboseEnum": {
+      "$comment": "REQ-MSG-031 (MG 8.2.3): an enumeration is encoded as the string \"<EnumName>_<EnumValue>\" (VerboseEncoding), not as its numeric value; used in the allOf of every enumeration whose values end with _<number>",
+      "not": {
+        "type": "number"
       }
     }
   }

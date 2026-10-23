@@ -12,7 +12,7 @@ import (
 
 // probe is a synthetic mutation of a payload vector. Probes are no catalog
 // vectors (no reviewed expectation, no oracle run); they only check that the
-// PoC schemas reject the mutation with the REQ of the "$comment" that the
+// schemas reject the mutation with the REQ of the "$comment" that the
 // schema author intended, for paths no reviewed vector exercises yet. Gaps
 // found this way become reviewed vectors in the P2 increments.
 type probe struct {

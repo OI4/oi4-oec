@@ -1,6 +1,6 @@
 # `oec/schema/` – D1 JSON Schemas of the OEC v2 messages
 
-> **State: proof of concept (C-033).** [ADR-0019](../../project/decisions/ADR-0019-schema-architecture.md) is accepted (C-033 review). The files cover the envelope (NetworkMessage, DataSetMessage), the helper DataSets and the resource Health with its topic forms `pub-health` and `get-health`. The full build-out starts in C-034 (ROADMAP P2).
+> **State: build-out (C-034).** [ADR-0019](../../project/decisions/ADR-0019-schema-architecture.md) is accepted (C-033 review). The files cover the ua-data envelope (NetworkMessage, DataSetMessage), the helper DataSets (PaginationRequest, Pagination, Locale, Query) and the resource Health with its topic forms `pub-health` and `get-health`. MetaData, the Actions and the other resources follow in C-035 … C-038 (ROADMAP P2).
 
 The schemas are derived from the spec baseline in [`../spec/`](../spec/), which is derived only from the guideline (ADR-0018). The schemas never define requirements of their own. Each constraint names the requirement it enforces in a `$comment` that starts with the REQ id(s).
 
@@ -8,15 +8,15 @@ The schemas are derived from the spec baseline in [`../spec/`](../spec/), which 
 
 | Path | Content |
 |---|---|
-| `v2/opcua.schema.json` | OPC UA base types used by the messages (Byte, UInt16, UInt32, DateTime, Guid, ConfigurationVersion) |
+| `v2/opcua.schema.json` | OPC UA base types used by the messages (Byte, UInt16, UInt32, DateTime, Guid, ConfigurationVersion) and `VerboseEnum` (REQ-MSG-031, in the `allOf` of every numbered enumeration) |
 | `v2/envelope.schema.json` | NetworkMessage and DataSetMessage of MessageType `ua-data`, plus PublisherId, MessageId, ReplyTo, DataSetClassId and DataSetWriterId |
-| `v2/helpers.schema.json` | helper DataSets PaginationRequest, Pagination and Locale, with their DataSetMessages (reserved DataSetWriterIds 1/2/3) |
-| `v2/health.schema.json` | resource module Health: the DataSet and its DataSetMessage |
+| `v2/helpers.schema.json` | helper DataSets PaginationRequest, Pagination, Locale and Query, with their DataSetMessages (reserved DataSetWriterIds 1/2/3/9); the Payload of a Query is refined by the resource module |
+| `v2/resources/<resource>.schema.json` | one module per OI4 resource: the DataSet and its DataSetMessage (so far `health`) |
 | `v2/topics/<rule>.schema.json` | **entry schema per topic form**. `<rule>` is the ABNF rule of `../spec/topic/topic.abnf` and of the matrix row (option B of ADR-0019) |
 | `v2/message.schema.json` | topic-agnostic schema of any OEC message, used for monitoring when the topic is unknown (option A, for comparison) |
 | `schema.go`, `go.mod` | Go module `github.com/OI4/oec/schema`: embeds `v2/` (`schema.FS`) for D7 |
-| `tools/cmd/schematest` | PoC harness: builds the bundle, validates the payload vectors and probes, maps errors to REQ ids, writes `dist/` |
-| `tests/rule-layer.yaml` | expectation list: invalid vectors whose violated REQs are partitioned into `schema` and `rule` (rule layer of D7 `validate`); empty in the PoC |
+| `tools/cmd/schematest` | harness: builds the bundle, checks the `$comment` tracing against the catalog, validates the payload vectors and probes, maps errors to REQ ids, writes `dist/` |
+| `tests/rule-layer.yaml` | expectation list: invalid vectors whose violated REQs are partitioned into `schema` and `rule` (rule layer of D7 `validate`) |
 | `tools/rust-check` | second, independent validator (Rust `jsonschema` crate) over `dist/cases.json` |
 | `check.sh` | local CI: both validators |
 
@@ -33,7 +33,9 @@ Requirements:
 cd tools && go run ./cmd/schematest -v        # table + error details per rejected vector
 ```
 
-`schematest` routes every payload vector of `../spec/vectors/payload/` through `topic-patterns.json`. A vector is in scope when the matched rule has an entry schema. For each vector in scope, the harness:
+`schematest` first checks the REQ tracing (ADR-0019 §1) against the catalog `../spec/requirements/`: every REQ at the start of a `$comment` exists, is not deprecated and carries the verification method `schema`, and every reference in the parentheses after the ids (e.g. `(MG 8.2.3)`) is a `ref` of one of these REQs.
+
+It then routes every payload vector of `../spec/vectors/payload/` through `topic-patterns.json`. A valid vector with a topic whose rule has no entry schema yet is validated against `message.schema.json` (A) only. A vector is in scope when the matched rule has an entry schema. For each vector in scope, the harness:
 
 1. validates the vector against the entry schema (B) and against `message.schema.json` (A), in the flavor of the vector `mode`;
 2. maps every error leaf to the REQ ids of the deepest `$comment` on its evaluation path (an undefined key maps to the REQ of its closure);
