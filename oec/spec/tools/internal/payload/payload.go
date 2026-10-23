@@ -548,6 +548,9 @@ func (c *checker) dataSetMessage(ptr string, v any, pubIL string) (dsm, bool) {
 		if s != want {
 			c.add(join(ptr, "MessageType"), "REQ-MSG-029", "MessageType of %s must be %s, got %q", c.t.Resource, want, s)
 		}
+		if s == "ua-deltaframe" || s == "ua-keepalive" {
+			c.add(join(ptr, "MessageType"), "REQ-MSG-030", "a DataSetMessage is a complete key frame, %s is not used", s)
+		}
 	}
 	if !idOK || id == 0 || (id >= 4 && id <= 8) {
 		return dsm{}, false

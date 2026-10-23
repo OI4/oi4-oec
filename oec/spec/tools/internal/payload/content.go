@@ -92,6 +92,9 @@ func (c *checker) contents(dsms []dsm) {
 			if c.t.Method != want {
 				c.add(d.ptr, "REQ-PAG-008", "a %s is only sent with the method %s", helperNames[d.id], want)
 			}
+			if c.t.Method == "Set" || c.t.Method == "Del" {
+				c.add(d.ptr, "REQ-PAG-009", "a %s is not paginated", c.t.Method)
+			}
 			if prev, dup := seen[d.id]; dup {
 				c.add(d.ptr, "REQ-PAG-008", "a second %s (first at %s)", helperNames[d.id], prev)
 			}
@@ -187,7 +190,20 @@ func (c *checker) int32(m map[string]any, ptr, key, req string) {
 	}
 }
 
+// numberedEnum matches the values of an OPC UA enumeration in
+// VerboseEncoding ("<Name>_<Value>", REQ-MSG-031).
+var numberedEnum = regexp.MustCompile(`_[0-9]+$`)
+
 func (c *checker) enum(m map[string]any, ptr, key, req string, values map[string]bool) (string, bool) {
+	if n, isNum := m[key].(json.Number); isNum {
+		numbered := len(values) > 0
+		for v := range values {
+			numbered = numbered && numberedEnum.MatchString(v)
+		}
+		if numbered {
+			c.add(join(ptr, key), "REQ-MSG-031", "%s %s is the numeric value of an enumeration; VerboseEncoding writes \"<Name>_<Value>\"", key, n)
+		}
+	}
 	s, ok := c.str(m, ptr, key, req)
 	if ok && !values[s] {
 		c.add(join(ptr, key), req, "%s %q is no value of the enumeration", key, s)
