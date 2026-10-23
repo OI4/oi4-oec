@@ -478,3 +478,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `0810d79` is recorded in addendum 47.
 - The baseline is now `f99a769` on branch `feature/spec-findings`. Local commit: the Set/Del feedback topic in MG 9.1.x is `Pub/Event/<Source>/Status/<StatusCode>`, the name used in MG 7.7. Editorial PO decision: no GL-ADR, no SF. Spec re-baselined in `5bd792f`: 7 REQs aligned, 8 inventory keys remapped.
+
+## Amendment C-032 addendum 49 (2026-10-23, guideline baseline `8406a6a`)
+
+- The previous baseline `f99a769` is recorded in addendum 48.
+- The baseline is now `8406a6a` on branch `feature/spec-findings`. Local commit: the rejection rules in MG 9.1.3 say `StatusCode` `Bad` instead of `EventLevel` `Bad`. Editorial PO order: no GL-ADR, no SF. Spec re-baselined in `52f7ed4`: REQ-RES-CONFIG-011/023 aligned, 2 inventory keys remapped.
