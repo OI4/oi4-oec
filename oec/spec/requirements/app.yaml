@@ -8,7 +8,7 @@
 # at Level 3 (SF-091 (f)).
 # Drafted in C-030.
 area: APP
-baseline: "6c2be2c"
+baseline: "0810d79"
 requirements:
   - id: REQ-APP-001
     title: Images for at least one supported processor architecture
