@@ -13,7 +13,7 @@
 # PO review (C-022, 2026-10-17): topic columns reviewed; payload columns
 # (C-028) reviewed by the PO (C-028 review 2026-10-21).
 
-baseline: "98b77ef"
+baseline: "6cd6f0e"
 combinations:
   - {method: Pub, resource: MAM, kind: resource, allowed: true, rule: pub-mam, source: optional, filter: forbidden, refs: [MG 9.1.1], payload: {status: reviewed, message_type: ua-data, class_id: predefined, writer_id: publisher, content: datasets, helpers: [Pagination], answer: none, reqs: [REQ-RES-MAM-022, REQ-RES-MAM-001, REQ-MSG-011, REQ-MSG-021]}}
   - {method: Get, resource: MAM, kind: resource, allowed: true, rule: get-mam, source: optional, filter: forbidden, refs: [MG 9.1.1], payload: {status: reviewed, message_type: ua-data, class_id: predefined, writer_id: none, content: none, helpers: [PaginationRequest, Locale], answer: pub, reqs: [REQ-RES-MAM-020, REQ-RES-MAM-021, REQ-BUS-003, REQ-MSG-011]}}
