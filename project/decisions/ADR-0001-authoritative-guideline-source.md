@@ -483,3 +483,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `f99a769` is recorded in addendum 48.
 - The baseline is now `8406a6a` on branch `feature/spec-findings`. Local commit: the rejection rules in MG 9.1.3 say `StatusCode` `Bad` instead of `EventLevel` `Bad`. Editorial PO order: no GL-ADR, no SF. Spec re-baselined in `52f7ed4`: REQ-RES-CONFIG-011/023 aligned, 2 inventory keys remapped.
+
+## Amendment C-032 addendum 50 (2026-10-23, guideline baseline `56bbcdb`)
+
+- The previous baseline `8406a6a` is recorded in addendum 49.
+- The baseline is now `56bbcdb` on branch `feature/spec-findings`. Local commit: the rejection rules in MG 9.1.8, 9.1.9, 8.3.3.1 and 8.3.3.2 say `StatusCode` `Bad`. Editorial PO order: no GL-ADR, no SF. Spec re-baselined in `be7cb07`: 4 REQs aligned, 6 inventory keys remapped.
