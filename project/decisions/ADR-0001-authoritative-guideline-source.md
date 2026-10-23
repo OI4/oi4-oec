@@ -383,3 +383,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `98b77ef` is recorded in addendum 26.
 - The baseline is now `6cd6f0e` on branch `feature/spec-findings` (local commits `d627d87` – MG heading levels – `2427718` – RIG heading levels – and `6cd6f0e` – Community page; PO request 2026-10-23: no jump from `#` to `###`). Spec re-baselined (`cb2b848`): baseline id only, no key change; no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 28 (2026-10-23, guideline baseline `f1e0cef`)
+
+- The previous baseline `6cd6f0e` is recorded in addendum 27.
+- The baseline is now `f1e0cef` on branch `feature/spec-findings` (local commits `8fc0635` – card layout for MG 5 and MG 4.3.1 – and `f1e0cef` – card layout for RIG 4.1.1; PO request 2026-10-23, layout only via `<div>` wrappers). Spec re-baselined (`aee8e25`): no key change, only source line numbers; no finding, no GL-ADR. SF-001 … 095 resolved.
