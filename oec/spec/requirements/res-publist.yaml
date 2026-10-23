@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PUBLIST
-baseline: "8406a6a"
+baseline: "56bbcdb"
 requirements:
   # --- DataSet content (MG 8.3.8) ---------------------------------------------
   - id: REQ-RES-PUBLIST-001
@@ -340,7 +340,7 @@ requirements:
       MODE_AND_INTERVAL_3 Mode, Interval and Precisions; Resource, Source,
       Filter, DataSetWriterId and Config are read only. A Set carries the
       complete entry; a Set that changes a read-only field or a setting not
-      enabled by Config is rejected with a status Event with EventLevel Bad.
+      enabled by Config is rejected with a status Event with StatusCode Bad.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -353,9 +353,9 @@ requirements:
       - ref: MG 8.3.8
         text: Publishing behavior can be set by manipulating Mode, Interval and Precisions.
       - ref: MG 9.1.8
-        text: If the Set changes a field which is read only or which can not be changed according to the Config of the entry (8.3.8 PublicationList), the Set must be rejected and the status Event must have the EventLevel Bad.
+        text: If the Set changes a field which is read only or which can not be changed according to the Config of the entry (8.3.8 PublicationList), the Set must be rejected and the status Event must have the StatusCode Bad.
     verification: [d7-test]
-    inventory: [MG-8.3.8-618f09d9, MG-8.3.8-3ce8b144, MG-8.3.8-d6044a07, MG-9.1.8-083059eb]
+    inventory: [MG-8.3.8-618f09d9, MG-8.3.8-3ce8b144, MG-8.3.8-d6044a07, MG-9.1.8-24c8e482]
     status: reviewed
     notes: The Config values themselves are a keyword-less definition (MG 8.3.8); read-only fields in a Set per SF-067 (f).
 

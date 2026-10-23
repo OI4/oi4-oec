@@ -10,7 +10,7 @@
 # TopicPath of the B1.1.9 example, Interval wording, publication after Del,
 # Config) resolved in the guideline (baseline b2f0fe7).
 area: RES-SUBLIST
-baseline: "8406a6a"
+baseline: "56bbcdb"
 requirements:
   # --- DataSet content (MG 8.3.9) ---------------------------------------------
   - id: REQ-RES-SUBLIST-001
@@ -108,7 +108,7 @@ requirements:
       Config NONE_0 (default) marks a subscription that can neither be
       changed nor deleted via Set or Del; CONF_1 marks a freely
       configurable subscription. A Set or Del of an entry with NONE_0 is
-      rejected with a status Event with EventLevel Bad (e.g. BadNotWritable),
+      rejected with a status Event with StatusCode Bad (e.g. BadNotWritable),
       as is a Set that changes the Config of an entry: Config is read only
       and set by the application; an entry created via Set is CONF_1.
     keyword: MUST
@@ -124,11 +124,11 @@ requirements:
       - ref: MG 8.3.9
         text: The Config of an entry is set by the application; an entry created via Set is freely configurable (CONF_1).
       - ref: MG 9.1.9
-        text: If the Set addresses an entry with Config NONE_0 or changes the Config of an entry, the Set must be rejected and the status Event must have the EventLevel Bad (e.g. BadNotWritable).
+        text: If the Set addresses an entry with Config NONE_0 or changes the Config of an entry, the Set must be rejected and the status Event must have the StatusCode Bad (e.g. BadNotWritable).
       - ref: MG 9.1.9
-        text: If the entry has Config NONE_0, the Del must be rejected and the status Event must have the EventLevel Bad (e.g. BadNotWritable).
+        text: If the entry has Config NONE_0, the Del must be rejected and the status Event must have the StatusCode Bad (e.g. BadNotWritable).
     verification: [d7-test]
-    inventory: [MG-8.3.9-ad2fe906, MG-9.1.9-39acbd89, MG-9.1.9-5a8f1bed]
+    inventory: [MG-8.3.9-ad2fe906, MG-9.1.9-a22afd5f, MG-9.1.9-a00d5bfe]
     status: reviewed
     notes: >-
       MG 8.3.9 and 9.1.9 since SF-080 (e); same pattern as
