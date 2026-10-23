@@ -57,8 +57,8 @@ var commonServices = map[string]bool{"NewDataSetWriterId": true}
 
 var (
 	domainPattern = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$`)
-	// Severity order of MG 8.3.2: FAILURE_1 > OFF_SPEC_3 > CHECK_FUNCTION_2 > MAINTENANCE_REQUIRED_4 > NORMAL_0.
-	healthRank     = map[string]int{"NORMAL_0": 0, "MAINTENANCE_REQUIRED_4": 1, "CHECK_FUNCTION_2": 2, "OFF_SPEC_3": 3, "FAILURE_1": 4}
+	// Order of priority of MG 8.3.2: FAILURE_1 > CHECK_FUNCTION_2 > OFF_SPEC_3 > MAINTENANCE_REQUIRED_4 > NORMAL_0.
+	healthRank     = map[string]int{"NORMAL_0": 0, "MAINTENANCE_REQUIRED_4": 1, "OFF_SPEC_3": 2, "CHECK_FUNCTION_2": 3, "FAILURE_1": 4}
 	configValues   = map[string]bool{"NONE_0": true, "MODE_1": true, "INTERVAL_2": true, "MODE_AND_INTERVAL_3": true}
 	filteredLists  = map[string]bool{"Data": true, "Metadata": true, "Config": true, "Event": true}
 	publishingMode = map[string]modeFlags{
@@ -361,7 +361,7 @@ func (c *checker) health(d dsm) {
 		}
 	}
 	if healthOK && allOK && worst != "" && healthRank[health] != healthRank[worst] {
-		c.add(join(p, "Health"), "REQ-RES-HEALTH-002", "Health %s is not the most severe Health of the Details (%s at %s)", health, worst, worstPtr)
+		c.add(join(p, "Health"), "REQ-RES-HEALTH-002", "Health %s is not the Health with the highest priority of the Details (%s at %s)", health, worst, worstPtr)
 	}
 }
 
