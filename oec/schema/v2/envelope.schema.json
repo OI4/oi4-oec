@@ -192,12 +192,14 @@
           }
         },
         "MessageType": {
-          "$comment": "REQ-MSG-029 (MG 8.2.3)",
-          "enum": [
-            "ua-keyframe",
-            "ua-event"
-          ],
           "allOf": [
+            {
+              "$comment": "REQ-MSG-029 (MG 8.2.3)",
+              "enum": [
+                "ua-keyframe",
+                "ua-event"
+              ]
+            },
             {
               "$comment": "REQ-MSG-030 (MG 8.2.3): DataSetMessages are complete key frames; ua-deltaframe and ua-keepalive are not used",
               "not": {

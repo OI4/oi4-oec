@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3).
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "cc2fb4b"
@@ -1944,6 +1944,821 @@ vectors:
             "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
             "Payload": {
               "Locale": "en-US"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-129
+    title: "Pub Health with the MessageType ua-metadata"
+    expected: invalid
+    violates: [REQ-MSG-002]
+    reason: A NetworkMessage that carries DataSetMessages has the MessageType ua-data.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 with the NetworkMessage MessageType ua-metadata.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-130
+    title: "Pub Health without ReplyTo"
+    expected: invalid
+    violates: [REQ-MSG-003]
+    reason: ReplyTo is a mandatory field of the NetworkMessage (empty string if there is no trigger).
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 without the field ReplyTo.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-131
+    title: "Pub Health with Messages as an object"
+    expected: invalid
+    violates: [REQ-MSG-005]
+    reason: Messages is always a JSON array, also for a single DataSetMessage.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose Messages is the Health DataSetMessage itself instead of
+      an array with it.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": {
+          "DataSetWriterId": 3456,
+          "WriterGroupName": "",
+          "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+          "SequenceNumber": 57,
+          "Timestamp": "2021-12-16T22:25:10.094Z",
+          "Payload": {
+            "Health": "NORMAL_0",
+            "HealthScore": 100
+          }
+        }
+      }
+
+  - id: V-PAY-132
+    title: "Pub Health with a PublisherId without ServiceType"
+    expected: invalid
+    violates: [REQ-MSG-006]
+    reason: The PublisherId lacks the ServiceType (<ServiceType>/<IdentificationLink>).
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 with the PublisherId provider.com/FieldDataService/FDS-001/1200-0345;
+      the MessageId is unchanged. The oracle compares the MessageId suffix with
+      the PublisherId only for a well-formed PublisherId, so REQ-MSG-007 is
+      not reported.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-133
+    title: "Pub Health with a MessageId without timestamp"
+    expected: invalid
+    violates: [REQ-MSG-007]
+    reason: The MessageId lacks the <unixTimestampInMs>- prefix.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose MessageId is the PublisherId only.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-134
+    title: "Pub Health without DataSetClassId"
+    expected: invalid
+    violates: [REQ-MSG-011]
+    reason: A NetworkMessage of a predefined resource carries its DataSetClassId.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 without the DataSetClassId of Health.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-135
+    title: "Pub Health with a ReplyTo that is no MessageId"
+    expected: invalid
+    violates: [REQ-MSG-015]
+    reason: ReplyTo is the empty string or a MessageId (<unixTimestampInMs>-<PublisherId>).
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose ReplyTo is the timestamp of the Get without its
+      PublisherId.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-136
+    title: "Pub Health with a PublisherId in the DataSetMessage"
+    expected: invalid
+    violates: [REQ-MSG-016]
+    reason: The fixed content mask of the DataSetMessage has no PublisherId.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose Health DataSetMessage repeats the PublisherId of the
+      NetworkMessage.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-137
+    title: "Pub Health with MetaDataVersion and MinorVersion"
+    expected: invalid
+    violates: [REQ-MSG-018]
+    reason: A DataSetMessage carries either MetaDataVersion or MinorVersion, not both.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-118 with the additional field MinorVersion 0 next to
+      MetaDataVersion 1.0.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Health/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 12,
+            "SequenceNumber": 4711,
+            "MetaDataVersion": {
+              "MajorVersion": 1,
+              "MinorVersion": 0
+            },
+            "MinorVersion": 0,
+            "Timestamp": "2019-06-26T13:16:00.000+01:00",
+            "Status": {
+              "Code": 1083179008,
+              "Symbol": "UncertainLastUsableValue"
+            },
+            "MessageType": "ua-keyframe",
+            "WriterGroupName": "",
+            "DataSetWriterName": "https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Health": "MAINTENANCE_REQUIRED_4",
+              "HealthScore": 80
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-138
+    title: "Pub Health with a Pagination under a wrong WriterGroupName"
+    expected: invalid
+    violates: [REQ-MSG-019]
+    reason: The WriterGroupName of the helper DataSet Pagination is "Pagination".
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 with a valid single-page Pagination (DataSetWriterId 2) whose
+      WriterGroupName is Paging.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          },
+          {
+            "DataSetWriterId": 2,
+            "WriterGroupName": "Paging",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TotalCount": 1,
+              "PerPage": 25,
+              "Page": 1,
+              "HasNext": false,
+              "PaginationId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-139
+    title: "Pub Health with the reserved DataSetWriterId 5"
+    expected: invalid
+    violates: [REQ-MSG-020]
+    reason: The DataSetWriterIds 4 … 8 are reserved; an application uses ids from 10.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose Health DataSetMessage has the DataSetWriterId 5.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 5,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-140
+    title: "Pub Health with a WriterGroupName"
+    expected: invalid
+    violates: [REQ-MSG-024]
+    reason: Health has no Filter, so the WriterGroupName is the empty string.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose Health DataSetMessage has the WriterGroupName Health.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "Health",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-141
+    title: "Pub Health with a Good Status"
+    expected: invalid
+    violates: [REQ-MSG-026]
+    reason: A Status is only sent if it is not Good; Code 0 is Good.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-118 whose Status is Good (Code 0, Symbol Good).
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Health/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 12,
+            "SequenceNumber": 4711,
+            "MetaDataVersion": {
+              "MajorVersion": 1,
+              "MinorVersion": 0
+            },
+            "Timestamp": "2019-06-26T13:16:00.000+01:00",
+            "Status": {
+              "Code": 0,
+              "Symbol": "Good"
+            },
+            "MessageType": "ua-keyframe",
+            "WriterGroupName": "",
+            "DataSetWriterName": "https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Health": "MAINTENANCE_REQUIRED_4",
+              "HealthScore": 80
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-142
+    title: "Pub Health with a Status without Code"
+    expected: invalid
+    violates: [REQ-MSG-027]
+    reason: A Status always contains the numeric Code.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-118 whose Status has only the Symbol.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Health/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 12,
+            "SequenceNumber": 4711,
+            "MetaDataVersion": {
+              "MajorVersion": 1,
+              "MinorVersion": 0
+            },
+            "Timestamp": "2019-06-26T13:16:00.000+01:00",
+            "Status": {
+              "Symbol": "UncertainLastUsableValue"
+            },
+            "MessageType": "ua-keyframe",
+            "WriterGroupName": "",
+            "DataSetWriterName": "https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Health": "MAINTENANCE_REQUIRED_4",
+              "HealthScore": 80
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-143
+    title: "Pub Health with the DataSetMessage MessageType ua-event"
+    expected: invalid
+    violates: [REQ-MSG-029]
+    reason: The DataSetMessage MessageType is ua-event only for the resource Event; Health uses ua-keyframe.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-118 whose Health DataSetMessage has the MessageType ua-event.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Health/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 12,
+            "SequenceNumber": 4711,
+            "MetaDataVersion": {
+              "MajorVersion": 1,
+              "MinorVersion": 0
+            },
+            "Timestamp": "2019-06-26T13:16:00.000+01:00",
+            "Status": {
+              "Code": 1083179008,
+              "Symbol": "UncertainLastUsableValue"
+            },
+            "MessageType": "ua-event",
+            "WriterGroupName": "",
+            "DataSetWriterName": "https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Health": "MAINTENANCE_REQUIRED_4",
+              "HealthScore": 80
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-144
+    title: "Pub Health as a delta frame"
+    expected: invalid
+    violates: [REQ-MSG-029, REQ-MSG-030]
+    reason: DataSetMessages are complete key frames; ua-deltaframe is not used (and is no MessageType of Health).
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-118 whose Health DataSetMessage has the MessageType ua-deltaframe.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Health/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 12,
+            "SequenceNumber": 4711,
+            "MetaDataVersion": {
+              "MajorVersion": 1,
+              "MinorVersion": 0
+            },
+            "Timestamp": "2019-06-26T13:16:00.000+01:00",
+            "Status": {
+              "Code": 1083179008,
+              "Symbol": "UncertainLastUsableValue"
+            },
+            "MessageType": "ua-deltaframe",
+            "WriterGroupName": "",
+            "DataSetWriterName": "https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Health": "MAINTENANCE_REQUIRED_4",
+              "HealthScore": 80
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-145
+    title: "Pub Health with a numeric enumeration value"
+    expected: invalid
+    violates: [REQ-MSG-031, REQ-RES-HEALTH-001]
+    reason: VerboseEncoding writes an enumeration as the string <EnumName>_<EnumValue>; Health is the string NORMAL_0, not 0.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose Health is the number 0. The value is also no value of
+      the Health enumeration (REQ-RES-HEALTH-001).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": 0,
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-146
+    title: "Get Health with an invalid Locale"
+    expected: invalid
+    violates: [REQ-LOC-001]
+    reason: The Locale is an OPC UA LocaleId (e.g. de-DE).
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-001 with a Locale (DataSetWriterId 3) whose value is German.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 3,
+            "WriterGroupName": "Locale",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "Locale": "German"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-147
+    title: "Get Health with a Query"
+    expected: invalid
+    violates: [REQ-QRY-001]
+    reason: A Query is only sent with Get on a resource with a defined Query; Health has none.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-001 with a Query (DataSetWriterId 9) that uses the query parameter
+      Parent of ReferenceDesignation.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 9,
+            "WriterGroupName": "Query",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "Parent": "provider.com/FieldDataService/FDS-001/1200-0345"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-148
+    title: "Pub Health whose DataSetWriterName differs from the Source"
+    expected: invalid
+    violates: [REQ-MSG-023]
+    reason: The DataSetWriterName is the decoded Source of the topic.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose DataSetWriterName names another asset than the Source of
+      the topic. Only the rule layer sees it (R-2, equality with a topic
+      value).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0346",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-149
+    title: "Set Data with a Pagination"
+    expected: invalid
+    violates: [REQ-PAG-008, REQ-PAG-009]
+    reason: A Set is not paginated and a Pagination is only sent with the method Pub.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-061 with a single-page Pagination (DataSetWriterId 2) after the
+      Data DataSetMessage.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "Availability": 99,
+              "PerformanceRate": 99,
+              "QualityRate": 99,
+              "Product": 97
+            }
+          },
+          {
+            "DataSetWriterId": 2,
+            "WriterGroupName": "Pagination",
+            "DataSetWriterName": "https://id.consumer.com/MEService/Inst07322",
+            "Payload": {
+              "TotalCount": 1,
+              "PerPage": 25,
+              "Page": 1,
+              "HasNext": false,
+              "PaginationId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-150
+    title: "Set Data with a SequenceNumber"
+    expected: invalid
+    violates: [REQ-BUS-010]
+    reason: A DataSetMessage of a Set request carries no SequenceNumber.
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-061 with the SequenceNumber 12 in the Data DataSetMessage (the
+      field removed from the guideline example by SF-079).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 12,
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "Availability": 99,
+              "PerformanceRate": 99,
+              "QualityRate": 99,
+              "Product": 97
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-151
+    title: "Pub PublicationList entry with the Filter as WriterGroupName"
+    expected: invalid
+    violates: [REQ-MSG-025, REQ-RES-PUBLIST-002]
+    reason: The WriterGroupName of a PublicationList entry is <ResourceType>[/<Tag>] of the entry (Data/oee).
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-037 whose entry has the WriterGroupName oee instead of Data/oee. The
+      value is no <ResourceType>[/<Tag>] (REQ-MSG-025) and differs from
+      Resource/Filter of the entry (REQ-RES-PUBLIST-002).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "217434d6-6e1e-4230-b907-f52bc9ffe152",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 161,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Resource": "Data",
+              "Source": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "Filter": "oee",
+              "DataSetWriterId": 93,
+              "Mode": "APPLICATION_SOURCE_FILTER_8",
+              "Config": "MODE_AND_INTERVAL_3"
             }
           }
         ]

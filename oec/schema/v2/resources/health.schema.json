@@ -6,14 +6,16 @@
   "$defs": {
     "HealthState": {
       "$comment": "REQ-RES-HEALTH-001 (MG 8.3.2): NE 107 state",
-      "enum": [
-        "NORMAL_0",
-        "FAILURE_1",
-        "CHECK_FUNCTION_2",
-        "OFF_SPEC_3",
-        "MAINTENANCE_REQUIRED_4"
-      ],
       "allOf": [
+        {
+          "enum": [
+            "NORMAL_0",
+            "FAILURE_1",
+            "CHECK_FUNCTION_2",
+            "OFF_SPEC_3",
+            "MAINTENANCE_REQUIRED_4"
+          ]
+        },
         {
           "$ref": "../opcua.schema.json#/$defs/VerboseEnum"
         }

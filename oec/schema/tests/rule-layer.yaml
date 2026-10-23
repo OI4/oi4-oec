@@ -17,4 +17,9 @@
 #     rule: [REQ-MSG-019]
 #     rules: [R-2]
 #     reason: WriterGroupName differs from the Filter of the topic
-expectations: []
+expectations:
+  - vector: V-PAY-148
+    schema: []
+    rule: [REQ-MSG-023]
+    rules: [R-2]
+    reason: The DataSetWriterName is a well-formed Identification Link; that it equals the decoded Source of the topic is an equality with a topic value.

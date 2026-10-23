@@ -9,11 +9,11 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 |---|---|---|---|---|---|
 | [V-PAY-001](#v-pay-001) | B1.1.2: Get Health of an explicit asset | valid | ok | guideline MG B1.1.2 | reviewed |
 | [V-PAY-002](#v-pay-002) | B1.1.2: Get Health of all assets related to this application | valid | ok | guideline MG B1.1.2 | reviewed |
-| [V-PAY-003](#v-pay-003) | B1.1.2: Pub Health of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.2 | reviewed |
+| [V-PAY-003](#v-pay-003) | B1.1.2: Pub Health of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.2 | draft |
 | [V-PAY-004](#v-pay-004) | B1.1.2: Pub Health of all assets, self-initialized | valid | ok | guideline MG B1.1.2 | reviewed |
-| [V-PAY-005](#v-pay-005) | B1.1.11: Get MAM of all assets with PaginationRequest | valid | ok | guideline MG B1.1.11 | reviewed |
-| [V-PAY-006](#v-pay-006) | B1.1.11: Pub MAM of all assets with Pagination | valid | ok | guideline MG B1.1.11 | reviewed |
-| [V-PAY-007](#v-pay-007) | B1.1.12: Get MAM of all assets with Locale | valid | ok | guideline MG B1.1.12 | reviewed |
+| [V-PAY-005](#v-pay-005) | B1.1.11: Get MAM of all assets with PaginationRequest | valid | ok | guideline MG B1.1.11 | draft |
+| [V-PAY-006](#v-pay-006) | B1.1.11: Pub MAM of all assets with Pagination | valid | ok | guideline MG B1.1.11 | draft |
+| [V-PAY-007](#v-pay-007) | B1.1.12: Get MAM of all assets with Locale | valid | ok | guideline MG B1.1.12 | draft |
 | [V-PAY-008](#v-pay-008) | B1.2.1: Call NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | reviewed |
 | [V-PAY-009](#v-pay-009) | B1.2.1: Reply NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | reviewed |
 | [V-PAY-010](#v-pay-010) | B2.1: predefined MetaData of MAM | valid | ok | guideline MG B2.1 | reviewed |
@@ -50,7 +50,7 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 | [V-PAY-043](#v-pay-043) | B1.1.10: Pub ReferenceDesignation of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.10 | reviewed |
 | [V-PAY-044](#v-pay-044) | B1.1.10: Pub ReferenceDesignation of all assets, self-initialized | valid | ok | guideline MG B1.1.10 | reviewed |
 | [V-PAY-045](#v-pay-045) | B1.1.10: Set ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | reviewed |
-| [V-PAY-046](#v-pay-046) | B1.1.10: Del ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | reviewed |
+| [V-PAY-046](#v-pay-046) | B1.1.10: Del ReferenceDesignation of an explicit asset | valid | ok | guideline MG B1.1.10 | draft |
 | [V-PAY-047](#v-pay-047) | B1.1.12: Pub MAM of all assets in the requested Locale, reply to a Get | valid | ok | guideline MG B1.1.12 | reviewed |
 | [V-PAY-053](#v-pay-053) | B1.1.10: Get ReferenceDesignation of the children of an asset | valid | ok | guideline MG B1.1.10 | reviewed |
 | [V-PAY-054](#v-pay-054) | B1.1.10: Pub ReferenceDesignation of the children of an asset, reply to a Get | valid | ok | guideline MG B1.1.10 | reviewed |
@@ -60,7 +60,7 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 | [V-PAY-058](#v-pay-058) | B1.1.4: Pub explicit Data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | reviewed |
 | [V-PAY-059](#v-pay-059) | B1.1.4: Pub all Data tags of an explicit asset | valid | ok | guideline MG B1.1.4 | reviewed |
 | [V-PAY-060](#v-pay-060) | B1.1.4: Pub Data tags of all assets related to this application | valid | ok | guideline MG B1.1.4 | reviewed |
-| [V-PAY-061](#v-pay-061) | B1.1.4: Set explicit Data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | reviewed |
+| [V-PAY-061](#v-pay-061) | B1.1.4: Set explicit Data tag of an explicit asset | valid | ok | guideline MG B1.1.4 | draft |
 | [V-PAY-062](#v-pay-062) | B1.1.4: Status Event follows a set request | valid | ok | guideline MG B1.1.4 | reviewed |
 | [V-PAY-063](#v-pay-063) | B1.1.6: Pub Event of EventCategory Status (OPC UA Statuscode) | valid | ok | guideline MG B1.1.6 | reviewed |
 | [V-PAY-064](#v-pay-064) | B1.1.6: Pub Event of EventCategory Syslog | valid | ok | guideline MG B1.1.6 | reviewed |
@@ -166,9 +166,9 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
+- Illustrates: [REQ-MSG-001](../../requirements/view/msg.md#req-msg-001), [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-014](../../requirements/view/msg.md#req-msg-014), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
 - Origin: guideline MG B1.1.2
-- Status: reviewed
+- Status: draft
 
 Notes: ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health has no Filter; DataSetWriterName is the decoded Source. The DataSet content (MG 8.3.2) is checked with the Health schema in C-027/C-028.
 
@@ -258,9 +258,9 @@ Payload:
 - ServiceType · Method · Resource: OTConnector · Get · MAM ([matrix](../../matrix/view/method-resource.md#mam))
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019)
+- Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019), [REQ-PAG-001](../../requirements/view/pag.md#req-pag-001), [REQ-PAG-008](../../requirements/view/pag.md#req-pag-008)
 - Origin: guideline MG B1.1.11
-- Status: reviewed
+- Status: draft
 
 Notes: The helper DataSet PaginationRequest uses DataSetWriterId 1, WriterGroupName "PaginationRequest" and the Identification Link of the sender as DataSetWriterName. The NetworkMessage keeps the DataSetClassId of MAM (REQ- MSG-011).
 
@@ -295,9 +295,9 @@ Payload:
 - ServiceType · Method · Resource: OTConnector · Pub · MAM ([matrix](../../matrix/view/method-resource.md#mam))
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019), [REQ-MSG-020](../../requirements/view/msg.md#req-msg-020), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
+- Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019), [REQ-MSG-020](../../requirements/view/msg.md#req-msg-020), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-PAG-003](../../requirements/view/pag.md#req-pag-003), [REQ-PAG-004](../../requirements/view/pag.md#req-pag-004), [REQ-PAG-008](../../requirements/view/pag.md#req-pag-008)
 - Origin: guideline MG B1.1.11
-- Status: reviewed
+- Status: draft
 
 Notes: Two MAM DataSetMessages (application and one device, WriterGroupName "" as MAM has no Filter) and the helper DataSet Pagination (DataSetWriterId 2). The MAM content (MG 8.3.1) is checked with the MAM schema in C-027/C-028.
 
@@ -393,9 +393,9 @@ Payload:
 - ServiceType · Method · Resource: OTConnector · Get · MAM ([matrix](../../matrix/view/method-resource.md#mam))
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019)
+- Illustrates: [REQ-LOC-003](../../requirements/view/loc.md#req-loc-003), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019)
 - Origin: guideline MG B1.1.12
-- Status: reviewed
+- Status: draft
 
 Notes: The helper DataSet Locale uses DataSetWriterId 3 and WriterGroupName "Locale".
 
@@ -2984,9 +2984,9 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-REFDES-007](../../requirements/view/res-refdes.md#req-res-refdes-007)
+- Illustrates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-PAG-009](../../requirements/view/pag.md#req-pag-009), [REQ-RES-REFDES-007](../../requirements/view/res-refdes.md#req-res-refdes-007)
 - Origin: guideline MG B1.1.10
-- Status: reviewed
+- Status: draft
 
 Notes: The IT connector deletes the ReferenceDesignation of the application: no ReferenceDesignation object, topic with Source; sent by the requesting IT connector with empty ReplyTo (example corrected by SF-068 (a), GL-ADR-019). The Status event that follows belongs to RES-EVENT (C-028).
 
@@ -3421,9 +3421,9 @@ Payload:
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `oee`
 - Expected: valid
-- Illustrates: [REQ-BUS-004](../../requirements/view/bus.md#req-bus-004), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-RES-DATA-009](../../requirements/view/res-data.md#req-res-data-009)
+- Illustrates: [REQ-BUS-004](../../requirements/view/bus.md#req-bus-004), [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-PAG-009](../../requirements/view/pag.md#req-pag-009), [REQ-RES-DATA-009](../../requirements/view/res-data.md#req-res-data-009)
 - Origin: guideline MG B1.1.4
-- Status: reviewed
+- Status: draft
 
 Notes: The Set carries exactly one Data DataSetMessage – the complete DataSet oee – with the DataSetWriterId, DataSetWriterName and WriterGroupName of the addressed DataSet (REQ-BUS-010); the requester omits the publisher-defined DataSetClassId (REQ-MSG-011) and carries no SequenceNumber (REQ-BUS-010; removed from the example by SF-079). The answers are the Status event V-PAY-062 and a Pub Data with the ReplyTo of the Set (REQ-RES-DATA-012).
 
