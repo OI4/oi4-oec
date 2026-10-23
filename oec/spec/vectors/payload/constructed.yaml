@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2).
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "cc2fb4b"
@@ -1877,7 +1877,7 @@ vectors:
     violates: [REQ-LOC-003]
     reason: The helper DataSet Locale is only sent with the method Get.
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-003 with a Locale (DataSetWriterId 3) of the publishing
       application after the Health DataSetMessage (SF-097).
@@ -1918,7 +1918,7 @@ vectors:
     violates: [REQ-LOC-003]
     reason: A NetworkMessage contains at most one Locale.
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-089 with a second Locale (en-US) after the first (SF-097 (b)).
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Config/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"

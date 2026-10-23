@@ -2,7 +2,7 @@
 # Reserved DataSetWriterId and names: REQ-MSG-019; LocalizedText: MG 8.2.7.
 # Checked by tools/internal/payload (C-027).
 # REQ-LOC-001/002 reviewed and accepted by the PO in the C-027 review (2026-10-20).
-# REQ-LOC-003 (SF-097, C-033 addendum 2) draft.
+# REQ-LOC-003 (SF-097, C-033 addendum 2) reviewed by the PO 2026-10-23 (C-033 addendum 3).
 area: LOC
 baseline: "cc2fb4b"
 requirements:
@@ -67,7 +67,7 @@ requirements:
         text: A Locale in a NetworkMessage of another method is ignored by the receiver.
     verification: [schema, d7-validate]
     inventory: [MG-8.3.12-d7029076, MG-8.3.12-ed85293a]
-    status: draft
+    status: reviewed
     notes: >-
       Same rule as REQ-PAG-008 (SF-097, PO decision 2026-10-23). The payload
       checker reports a misplaced or repeated Locale (sender view, strict); a

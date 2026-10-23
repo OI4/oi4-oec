@@ -39,8 +39,8 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-124](#v-pay-124) | Pub Health with an invalid Pagination | invalid | violates: REQ-PAG-003 | constructed | reviewed |
 | [V-PAY-125](#v-pay-125) | Get Health with a Pagination | invalid | violates: REQ-PAG-008 | constructed | reviewed |
 | [V-PAY-126](#v-pay-126) | Get Health with a Health DataSetMessage | invalid | violates: REQ-RES-HEALTH-005 | constructed | reviewed |
-| [V-PAY-127](#v-pay-127) | Pub Health with a Locale | invalid | violates: REQ-LOC-003 | constructed | draft |
-| [V-PAY-128](#v-pay-128) | Get Config with two Locales | invalid | violates: REQ-LOC-003 | constructed | draft |
+| [V-PAY-127](#v-pay-127) | Pub Health with a Locale | invalid | violates: REQ-LOC-003 | constructed | reviewed |
+| [V-PAY-128](#v-pay-128) | Get Config with two Locales | invalid | violates: REQ-LOC-003 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -2163,7 +2163,7 @@ Payload:
 - Expected: invalid – The helper DataSet Locale is only sent with the method Get.
 - Violates: [REQ-LOC-003](../../requirements/view/loc.md#req-loc-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 with a Locale (DataSetWriterId 3) of the publishing application after the Health DataSetMessage (SF-097).
 
@@ -2211,7 +2211,7 @@ Payload:
 - Expected: invalid – A NetworkMessage contains at most one Locale.
 - Violates: [REQ-LOC-003](../../requirements/view/loc.md#req-loc-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-089 with a second Locale (en-US) after the first (SF-097 (b)).
 

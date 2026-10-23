@@ -7,7 +7,7 @@ Guideline baseline: `cc2fb4b` · Area status: reviewed · Sections: MG 8.3.12
 |---|---|---|---|---|---|---|---|---|
 | [REQ-LOC-001](#req-loc-001) | Field of the Locale DataSet | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-LOC-002](#req-loc-002) | A Get with Locale is answered in the requested language | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-LOC-003](#req-loc-003) | Locale only in Get, at most once | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
+| [REQ-LOC-003](#req-loc-003) | Locale only in Get, at most once | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -63,7 +63,7 @@ A NetworkMessage contains a Locale only with the method Get, at most once. A rec
 - Domain: messaging · Applies to: publisher, requester, responder
 - Refs: MG 8.3.12, SF-062, SF-097
 - Verification: schema, d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.12-d7029076, MG-8.3.12-ed85293a
 
 > A Locale must only be used with the method Get, at most once per NetworkMessage.

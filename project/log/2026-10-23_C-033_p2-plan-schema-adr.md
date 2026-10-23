@@ -321,3 +321,11 @@ Commits:
 - Workspace: `411f88f` (spec re-baseline, REQ-LOC-003, oracle, vectors), `5a04cb3` (schema PoC), plus the docs commit.
 
 For the PO review: REQ-LOC-003 (new), the REQ-LOC-002 change, V-PAY-127/128, and the guideline wording in MG 8.3.12 (`cc2fb4b`). Next free ids: SF-098, V-PAY-129, ADR-0020.
+
+## Addendum 3 – PO review of addendum 2 (2026-10-23)
+
+PO (chat, 2026-10-23): "MG 8.3.12, REQ-LOC-002, REQ-LOC-003, V-PAY-127/128 reviewed und akzeptiert. Setze mit C-034 fort."
+
+- `spectool review REQ-LOC-003 V-PAY-127 V-PAY-128`: all three are now `reviewed`. The REQ-LOC-002 change is accepted as well (it was already `reviewed`).
+- The headers of `loc.yaml` and `constructed.yaml` record the review. Views were regenerated; all five checks are green.
+- No draft is left. C-033 is closed, and C-034 starts.
