@@ -73,6 +73,7 @@ type tableRow struct {
 	line  int
 	text  string
 	cells string
+	cols  []string // cleaned cell per column, "" for empty cells
 }
 
 type extractor struct {
@@ -89,16 +90,28 @@ type extractor struct {
 	table      []string
 	rows       []tableRow
 	seen       map[string]int
+	heading    string // overrides the heading path of the next emitted item (field tables)
 }
 
 // Extract returns all inventory candidates of a file.
 func Extract(f File) []Item {
 	e := &extractor{f: f, seen: map[string]int{}}
-	inFront, inCode := false, false
+	inFront, inCode, inQuote := false, false, false
 	for i, raw := range f.Lines {
 		ln := i + 1
 		line := strings.TrimRight(raw, " \t")
 		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			inQuote = false
+		}
+		// Blockquote content is read like normal text. Only blockquotes that
+		// start a block are recognized, so a "> " line inside a paragraph
+		// keeps its text.
+		if !inCode && strings.HasPrefix(trimmed, ">") && (inQuote || !e.pending()) {
+			inQuote = true
+			trimmed = strings.TrimSpace(strings.TrimPrefix(trimmed, ">"))
+			line = trimmed
+		}
 		if i == 0 && trimmed == "---" {
 			inFront = true
 			continue
@@ -185,6 +198,10 @@ func Extract(f File) []Item {
 	return e.items
 }
 
+func (e *extractor) pending() bool {
+	return len(e.para) > 0 || len(e.list) > 0 || len(e.field) > 0 || e.table != nil
+}
+
 func (e *extractor) flushAll() {
 	e.flushPara()
 	e.flushList()
@@ -196,8 +213,12 @@ func (e *extractor) flushAll() {
 // cells, all rows are emitted, because rows like "Set | – | Where applicable"
 // belong to the same normative table.
 func (e *extractor) flushTable() {
-	rows := e.rows
+	rows, header := e.rows, e.table
 	e.rows, e.table = nil, nil
+	if isFieldTable(header) {
+		e.flushFieldTable(header, rows)
+		return
+	}
 	normative := false
 	for _, r := range rows {
 		if _, kws := Keywords(r.cells); len(kws) > 0 {
@@ -207,6 +228,45 @@ func (e *extractor) flushTable() {
 	}
 	for _, r := range rows {
 		e.emitRow(r, normative)
+	}
+}
+
+// isFieldTable reports whether a table defines fields: its first column is
+// "Field" and it has a "Requirement" column (MG 1.2 field attributes).
+func isFieldTable(header []string) bool {
+	if len(header) < 2 || !strings.EqualFold(CleanInline(header[0]), "Field") {
+		return false
+	}
+	for _, h := range header[1:] {
+		if strings.EqualFold(CleanInline(h), "Requirement") {
+			return true
+		}
+	}
+	return false
+}
+
+// flushFieldTable emits each row of a field table as a field item, like a
+// field definition block below a heading named after the field: the text is
+// "<column>: <value>; …" without the Field column and the heading path ends
+// with the field name.
+func (e *extractor) flushFieldTable(header []string, rows []tableRow) {
+	for _, r := range rows {
+		if len(r.cols) == 0 || r.cols[0] == "" {
+			continue
+		}
+		e.fieldLine = r.line
+		for i := 1; i < len(r.cols) && i < len(header); i++ {
+			if r.cols[i] != "" {
+				e.field = append(e.field, CleanInline(header[i])+": "+r.cols[i])
+			}
+		}
+		if p := e.headingPath(); p != "" {
+			e.heading = p + " / " + r.cols[0]
+		} else {
+			e.heading = r.cols[0]
+		}
+		e.flushField()
+		e.heading = ""
 	}
 }
 
@@ -265,8 +325,10 @@ func (e *extractor) tableRow(row string, ln int) {
 		return
 	}
 	var parts, values []string
+	cols := make([]string, len(cells))
 	for i, c := range cells {
 		c = CleanInline(c)
+		cols[i] = c
 		if c == "" {
 			continue
 		}
@@ -282,7 +344,7 @@ func (e *extractor) tableRow(row string, ln int) {
 		}
 	}
 	if len(parts) > 0 {
-		e.rows = append(e.rows, tableRow{line: ln, text: strings.Join(parts, " | "), cells: strings.Join(values, " | ")})
+		e.rows = append(e.rows, tableRow{line: ln, text: strings.Join(parts, " | "), cells: strings.Join(values, " | "), cols: cols})
 	}
 }
 
@@ -335,6 +397,9 @@ func (e *extractor) emitWith(kind string, line int, text, kwText, fieldKeyword s
 	it := Item{
 		Section: e.f.Ref(), File: e.f.Path, Line: line, Kind: kind,
 		Heading: e.headingPath(), Admonition: e.admonition, Text: text,
+	}
+	if e.heading != "" {
+		it.Heading = e.heading
 	}
 	terms, kws := Keywords(kwText)
 	if kind == KindField {

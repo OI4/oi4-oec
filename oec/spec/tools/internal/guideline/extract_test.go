@@ -137,3 +137,56 @@ func TestCompareSections(t *testing.T) {
 		t.Fatal("SectionWithin must respect section boundaries")
 	}
 }
+
+func TestFieldTableEqualsFieldBlocks(t *testing.T) {
+	blocks := File{Doc: "MG", Section: "9.9", Lines: strings.Split(`## Details
+
+### Health
+
+Value Range: `+"`<Enum>`"+`  
+Type: Enumeration  
+Access: Read only  
+Requirement: Mandatory
+
+Text of the field.
+
+### Code
+
+Value Range: `+"`<String>`"+`  
+Type: String  
+Access: Read only  
+Requirement: Optional`, "\n")}
+	table := File{Doc: "MG", Section: "9.9", Lines: strings.Split(`## Details
+
+| **Field** | **Value Range** | **Type** | **Access** | **Requirement** |
+|:--|:--|:--|:--|:--|
+| [Health](#health-1) | `+"`<Enum>`"+` | Enumeration | Read only | Mandatory |
+| [Code](#code) | `+"`<String>`"+` | String | Read only | Optional |
+
+*Table 1: Fields*
+
+### Health
+
+Text of the field.`, "\n")}
+	a, b := Extract(blocks), Extract(table)
+	if len(a) != 2 || len(b) != 2 {
+		t.Fatalf("got %d/%d items: %+v / %+v", len(a), len(b), a, b)
+	}
+	for i := range a {
+		if a[i].Key != b[i].Key || a[i].Kind != KindField || b[i].Heading != a[i].Heading || b[i].Keywords[0] != a[i].Keywords[0] {
+			t.Errorf("item %d differs:\nblock %+v\ntable %+v", i, a[i], b[i])
+		}
+	}
+}
+
+func TestBlockquoteIsReadAsText(t *testing.T) {
+	f := File{Doc: "MG", Section: "9.9", Lines: []string{"> **`<Tag>`**  ", "> Value Range: `<String>`  ", "> Type: String", "", "> The tag must be short."}}
+	items := Extract(f)
+	if len(items) != 1 || items[0].Text != "The tag must be short." {
+		t.Fatalf("got %+v", items)
+	}
+	f = File{Doc: "MG", Section: "9.9", Lines: []string{"Values should be sent.", "> 0.0 means always."}}
+	if items = Extract(f); len(items) != 1 || items[0].Text != "Values should be sent. > 0.0 means always." {
+		t.Fatalf("quote inside a paragraph: got %+v", items)
+	}
+}
