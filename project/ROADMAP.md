@@ -34,14 +34,69 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
 - Guideline ADRs (GL-ADR-001 … 018) and their implementation notes are part of the baseline (G-1.1). The OEC Process Description (GL-ADR-015) is informative and not catalogued.
 - **Exit:** catalog + matrix + golden vectors reviewed by the PO; all blocking spec findings have a decided interpretation (at `5b8fe59` SF-001 … 096 are resolved, no open finding – SF-056 and SF-062 … 068 with GL-ADR-019, SF-069 and SF-073 with GL-ADR-020 in C-027, SF-075 … 081 in the C-028 review, SF-082/083 editorial, SF-084 … 088 (Config) in the C-029 review with GL-ADR-021; GL-ADR-022 (secret storage `/run/secrets/oi4`, PO order 2026-10-22) resolves SF-091 (d), SF-089/090/092/093 in the C-030 closure, SF-091 and the editorial SF-094/095 in C-032 – and the guideline carries keywords for protocol behavior (SF-035); areas CMP, IL, TOP, the topic columns of the matrix and the 203 topic/IL vectors are reviewed since C-022; MSG and ACT are reviewed since C-024, MQTT and LIFE since C-026; RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES, PAG and LOC drafted in C-027, re-baselined after the guideline correction and reviewed 2026-10-20 together with the payload vectors V-PAY-026 … 052; GL-ADR-020 (children of a ReferenceDesignation via the generic `Query`) added the area QRY; MSG, RES-REFDES and QRY reviewed together with V-PAY-053/054 on 2026-10-20; RES-DATA, RES-META, RES-EVENT, RES-SUBLIST, BUS, the payload columns of the matrix (except Config) and V-PAY-055 … 087 reviewed on 2026-10-21, then re-baselined on `b2f0fe7` after SF-075 … 081 on `c2be26b` after SF-082 and on `5bc2e85` after SF-083; RES-CONFIG, the payload columns of the Config rows and V-PAY-088 … 113 drafted in C-029 and reviewed 2026-10-21, then re-baselined on `a77d331` after SF-084 … 088 and GL-ADR-021; the follow-ups REQ-RES-CONFIG-024 … 026, the Pub/Set Config rows and V-PAY-114 … 116 reviewed as well; the RIG areas CNT, PLT, APP, LIC, REG and GEN drafted in C-030 and reviewed 2026-10-22, re-baselined on `b942df3` after SF-089/090/092/093; follow-up drafts REQ-CNT-019/020/021, REQ-REG-002/007 and REQ-MQTT-007 (SF-091 (g)) for the PO; C-031: every fenced code block of MG/RIG is covered by a golden vector or explained (`coverage/examples.yaml`), V-PAY-117 … 126 and REQ-RES-DATA-001/RES-META-002/003 drafted for the PO, SF-094/095 editorial; `schema`/`d7-validate` REQs without a vector are covered by the P2 exit). **Met 2026-10-22 (C-032):** PO review of C-031 and the C-030 follow-ups, SF-091/094/095 implemented, re-baseline on `5fb0fd8`, all 434 REQs and 329 vectors `reviewed`, the 21 REQs without a vector moved to the P2 exit (PO decision).
 
-## P2 – JSON Schema (D1)
+## P2 – JSON Schema (D1) – started C-033
 
-- Decide schema architecture (ADR): JSON Schema 2020-12; modular `$defs` (OPC UA base types, envelopes, OI4 resources, services); discriminating by `DataSetClassId`/`MessageType`; strict `unevaluatedProperties: false` for OI4-defined objects.
-- **Topic-aware validation:** payload rules depend on the topic (e.g. `Get` vs `Pub`, `Set` needs single message). Define a "message = topic + payload" validation model (schema + small rule layer, or schema per topic pattern) – decided in ADR.
-- Coverage (OPC UA 1.05.04 JSON with the fixed content masks of MG 8.1.4): NetworkMessage (`ua-data`, `ReplyTo`), DataSetMessage (`DataSetWriterName`, `WriterGroupName`, `Status` object, `MetaDataVersion` xor `MinorVersion`, `MessageType`), DataSetMetaData (`ua-metadata`, + FieldMetaData, StructureDescription, EnumDescription, ...), Actions (`ua-action-request`/`ua-action-response`, ActionRequest/ActionResponse/ActionMetaData/ActionState), all resources (MAM, Health incl. `Details[]`, Config Pub/Set, Data/Oi4Pv, Metadata, Event (Status/Syslog/Generic), Profile, PublicationList, SubscriptionList, ReferenceDesignation, Pagination, PaginationRequest, Locale), the only common-service Action `NewDataSetWriterId` (GL-ADR-012), `broker.json`. NodeIds as JSON strings (`i=`/`nsu=`, no `ns=`, GL-ADR-013); `LocaleId` regex; `DataSetWriterId` ≠ 0; helper DataSets (reserved DSWIDs 1–3) with their `WriterGroupName`.
-- Test suite: valid/invalid vectors per rule (language-neutral JSON files), CI-run with at least two independent 2020-12 validators.
-- First increment of D7: offline `validate` command (topic + payload from file/stdin/directory), see P5.
-- **Exit:** every REQ marked "schema-testable" is covered by a positive and negative vector; schemas published with stable `$id`s.
+- **Architecture:** ADR-0019 (`proposed` in C-033). JSON Schema 2020-12 with modular files: OPC UA base types, envelopes, MetaData, Actions, helpers, one module per resource. Discrimination via `if`/`then`/`else` on `MessageType` → `DataSetClassId` → `DataSetWriterId`. Strict flavor (closures `unevaluatedProperties` with a REQ comment) as the source; a tolerant flavor (unknown-key tolerance) is generated. REQ ids in `$comment`.
+- **Topic-aware validation** (ADR-0019 §5, recommendation option B): one entry schema per topic form (29 = ABNF rules = matrix rows), plus a topic-agnostic `message.schema.json`, plus a small rule layer in D7 `validate` (equality with topic values, IL decoding, cross-field arithmetic).
+- **Coverage** (OPC UA 1.05.04 JSON with the fixed content masks of MG 8.1.4):
+  - NetworkMessage (`ua-data`, `ReplyTo`);
+  - DataSetMessage (`DataSetWriterName`, `WriterGroupName`, `Status` object, `MetaDataVersion` xor `MinorVersion`, `MessageType`);
+  - DataSetMetaData (`ua-metadata`, FieldMetaData, StructureDescription, EnumDescription, …);
+  - Actions (`ua-action-request`/`ua-action-response`, ActionRequest/ActionResponse/ActionMetaData/ActionState);
+  - all resources: MAM, Health incl. `Details[]`, Config Pub/Set, Data/Oi4Pv, Metadata, Event (Status/Syslog/Generic), Profile, PublicationList, SubscriptionList, ReferenceDesignation;
+  - the helpers Pagination, PaginationRequest, Locale and Query;
+  - the only common-service Action `NewDataSetWriterId` (GL-ADR-012);
+  - `broker.json` (for D8);
+  - specific rules: NodeIds as JSON strings (`i=`/`nsu=`, no `ns=`, GL-ADR-013), the `LocaleId` regex, `DataSetWriterId` ≠ 0, helper DataSets (reserved DataSetWriterIds 1–3 and 9) with their `WriterGroupName`.
+- **Test suite:** the reviewed vectors of `oec/spec/vectors` are the input; nothing is copied. Each vector is routed by topic to its entry schema. An expectation list (`oec/schema/tests/rule-layer.yaml`) names the invalid vectors that only the rule layer detects. Probes check schema paths during an increment. Two independent 2020-12 validators must agree on every case: Go `santhosh-tekuri/jsonschema` (also inside D7) and Rust `jsonschema`. The local CI is `oec/schema/check.sh`, next to the `spectool` checks.
+- **First increment of D7:** the offline `validate` command (topic + payload from file, stdin or directory), see P5.
+- **Increments and cycle cut** (C-033; ordered by dependency, each cycle ends with a PO review of its drafted vectors, reclassifications and ADR/SF decisions):
+  - **C-033 – plan + ADR-0019 + PoC** (done 2026-10-23): ADR-0019 `proposed`; PoC of the envelope, helpers and Health (`pub-health`, `get-health`) against 16 vectors and 17 probes with three validators (after an independent review of the ADR and PoC); SF-097. The full build-out waits for the acceptance of ADR-0019.
+  - **C-034 – foundation + envelope:**
+    - PO decisions on ADR-0019 (option, `$id` base, umbrella rule) and SF-097;
+    - layout per ADR-0019;
+    - expectation list;
+    - `spectool coverage` per-REQ report: positive/negative vector per `schema`/`d7-validate` REQ, layer, entry schema per allowed matrix row;
+    - lint check "every allowed matrix row has an entry schema" (once all entry schemas exist);
+    - modules `opcua`, `envelope` (`ua-data`, `ua-metadata`), `metadata`, `helpers` (PAG, LOC, QRY);
+    - areas MSG, LIFE, BUS, PAG, LOC, QRY;
+    - negative vectors for them;
+    - gap REQs REQ-MSG-004/017/042/043/045 and REQ-PAG-009;
+    - the 8 bare MetaData vectors.
+  - **C-035 – Actions + core resources:**
+    - `actions`, NewDataSetWriterId (`call-`/`reply-newdatasetwriterid`);
+    - MAM, Health, Profile, PublicationList and ReferenceDesignation with their 13 topic forms;
+    - areas ACT, RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES;
+    - gap REQs REQ-ACT-013, REQ-RES-HEALTH-007, REQ-RES-MAM-006/014;
+    - oracle extensions (e.g. REQ-RES-HEALTH-007).
+  - **C-036 – Data, Metadata, Event, SubscriptionList:**
+    - Data/Oi4Pv, Metadata (deep data type descriptions, SF-050), Event (Status/Syslog/Generic), SubscriptionList, with their 11 topic forms;
+    - areas RES-DATA, RES-META, RES-EVENT, RES-SUBLIST;
+    - gap REQ REQ-RES-DATA-003.
+  - **C-037 – Config + `broker.json`:**
+    - Config Pub/Get/Set (groups, configuration objects, Validation, masking);
+    - area RES-CONFIG with gap REQ REQ-RES-CONFIG-015;
+    - `platform/broker.schema.json` (REQ-CNT-003, verification `d8` unchanged) with RIG 4.1.1 vectors.
+  - **C-038 – D7 `validate`:**
+    - `oec/conformance` Go module skeleton (ADR-0013) with the `validate` command: topic grammar + IL + embedded entry schemas + rule layer R-1 … R-4, report with REQ ids, JSON output, exit codes;
+    - every topic and payload vector passes as expected;
+    - areas TOP, IL, CMP (rule-layer parts) with gap REQs REQ-IL-005 and REQ-TOP-018;
+    - umbrella REQs REQ-CMP-004/005/025/026, REQ-TOP-002 and REQ-IL-001/008 (covered through their details, if the PO accepts ADR-0019 §9).
+  - **C-039 – P2 exit review:**
+    - consistency review;
+    - `coverage -check` as gate;
+    - `CHANGELOG` 2.0.0 of the schemas;
+    - `$id`s frozen;
+    - PO review → P2 exit.
+  - The agent may split a cycle that grows too large (allowed by the PO), with the reason in the log. P2 sizing at `5b8fe59`: 159 `schema`/`d7-validate` REQs; 129 lack a positive and/or a negative vector (93 positive only, 15 negative only, 21 none); 29 topic forms with 126 payload vectors.
+- **Exit:**
+  1. ADR-0019 accepted.
+  2. Every non-deprecated REQ with `schema` and/or `d7-validate` (159 at `5b8fe59`, including the 21 of the C-031 gap list) has at least one reviewed positive and one reviewed negative vector. Umbrella REQs are covered through their detail REQs, if the PO accepts ADR-0019 §9. `spectool coverage -check` gates this.
+  3. Every allowed matrix row has an entry schema, and the bare MetaData and `broker.json` have schemas. All valid vectors pass. Every invalid vector is rejected by its entry schema with exactly the REQs of `violates`, or the expectation list partitions its `violates` into schema REQs (reported exactly) and rule-layer REQs, which D7 `validate` then reports.
+  4. Both validators agree on every case.
+  5. The oracle (`oec/spec/tools/internal/payload`) checks every rule that a schema enforces, and `spectool lint` is green.
+  6. D7 `validate` (first increment) runs on Windows, macOS and Linux and reports REQ ids.
+  7. Schemas are released with stable `$id`s (`2.0.0`, `$id` base decided). Hosting at the `$id` URLs follows the publication decision (Q-011).
 
 ## P3 – SDK and conformance tool design (D2, D7, D8, D9) – decision phase
 
