@@ -463,3 +463,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `fa315eb` is recorded in addendum 44.
 - The baseline is now `f4826e3` on branch `feature/spec-findings`. Two local commits: `e19aa32` (MG 9.1.2 trial) and `f4826e3` (MG 9.1.x rollout). Both remove the outer `oi4-card` wrappers of the method sections and keep only the Publisher topic/Payload boxes. Editorial PO order: no text change, no GL-ADR, no SF. Spec re-baselined (baseline bump only).
+
+## Amendment C-032 addendum 46 (2026-10-23, guideline baseline `6c2be2c`)
+
+- The previous baseline `f4826e3` is recorded in addendum 45.
+- The baseline is now `6c2be2c` on branch `feature/spec-findings`. Local commit: in MG 9.1.3 the Filter of Config is named `<Context.Name>`, as in MG 7.7. Editorial PO request: no GL-ADR, no SF. Spec re-baselined in `ce9a52c`: REQ-RES-CONFIG-019/022 aligned, two inventory keys and two example keys remapped.
