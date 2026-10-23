@@ -20,7 +20,7 @@ const (
 const (
 	BasisKeyword    = "keyword"    // MG 1.2 keyword in the text
 	BasisField      = "field"      // field definition with Requirement attribute (MG 1.2)
-	BasisAdmonition = "admonition" // tip/warning/info box without keyword in the text (MG 1.2)
+	BasisAdmonition = "admonition" // tip/info box without keyword in the text (MG 1.2)
 	BasisImplicit   = "implicit"   // protocol behavior without keyword (SF-035 interim rule, G-1.6)
 	BasisTable      = "table"      // row without keyword in a table that has keyword rows (e.g. "Where applicable")
 )
@@ -58,7 +58,7 @@ var keywordMap = map[string]string{
 var implicitPattern = regexp.MustCompile(`(?i)\b(publish(es|ed)?|answer(s|ed)?|respond(s|ed)?|repl(y|ies|ied)|sends?|sent|reject(s|ed)?|ignor(e|es|ed)|has to|have to|needs? to|is to be|are to be|not allowed|is allowed|are allowed|forbidden|prohibited|cannot|never|always|requires?|expected to)\b`)
 
 // admonitionKeyword maps the box types of MG 1.2 to their obligation.
-var admonitionKeyword = map[string]string{"tip": "SHOULD", "warning": "SHOULD", "info": "MUST"}
+var admonitionKeyword = map[string]string{"tip": "SHOULD", "info": "MUST"}
 
 var (
 	fieldPattern    = regexp.MustCompile(`^(Value Range|Type|Access|Requirement|Default Value|Unit)\s*:\s*(.*)$`)
