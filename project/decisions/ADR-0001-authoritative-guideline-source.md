@@ -453,3 +453,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `69bc021` is recorded in addendum 42.
 - The baseline is now `223fb51` on branch `feature/spec-findings` (local commit: MG 6.3.5 – the `DataSetWriterId` of the Will message is the `DataSetWriterId` of all later `Health` messages of the application about itself; PO order, no GL-ADR, no SF). Spec re-baselined in `75e5c9d` (REQ-LIFE-009 extended).
+
+## Amendment C-032 addendum 44 (2026-10-23, guideline baseline `fa315eb`)
+
+- The previous baseline `223fb51` is recorded in addendum 43.
+- The baseline is now `fa315eb` on branch `feature/spec-findings` (local commit: MG 9.1.x and 9.2.1 card and box layout for the method sections; editorial PO order, no text change, no GL-ADR, no SF). Spec re-baselined in `e155e40`.
