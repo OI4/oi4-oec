@@ -368,3 +368,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `12c66fa` is recorded in addendum 22 (`4cf19ff` of addendum 23 needed no re-baseline).
 - The baseline is now `985cd3d` on branch `feature/spec-findings` (local commits `be49b65` … `14b7cbd` – data-structure cards for MG 7.7, 8.3.2, 8.3.8 and 8.3.10 without content change – and `164ca13`/`985cd3d` – HIGHLY RECOMMENDED admonition removed, RIG 4.1.1/4.1.2 table labels "RECOMMENDED", NOTE blue, REQUIRED yellow, start-page Status boxes as notes; PO request 2026-10-22). Spec re-baselined (`f0f9212`): 13 key remaps, REQ-CNT-002 quotes relabeled (SHOULD unchanged), 8 informative keys dropped, no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 25 (2026-10-23, guideline baseline `f024823`)
+
+- The previous baseline `985cd3d` is recorded in addendum 24.
+- The baseline is now `f024823` on branch `feature/spec-findings` (local commits `b8e9fb6` – MG 8.3.8 PO wording, "> 0.0" as text, NOTE admonition – `c602331` – plain NOTE paragraphs of MG 8.2.3, 9.1.8 and 9.1.9 as admonitions – and `f024823` – MG 7.7 "EventCategory: Syslog"; PO request 2026-10-23). Spec re-baselined (`979b923`): 15 key remaps, no content change, no finding, no GL-ADR. SF-001 … 095 resolved.
