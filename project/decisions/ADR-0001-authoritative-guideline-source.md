@@ -433,3 +433,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `a3e4677` is recorded in addendum 38.
 - The baseline is now `b6341d8` on branch `feature/spec-findings` (local commit: MG 8.3.13 Query – REST analogy corrected, the topic takes the role of the URL path and query parameters, the `Query` `DataSet` is the payload of the `Get`; editorial PO order, no GL-ADR, no SF). Spec re-baselined in `ba6a6bc`.
+
+## Amendment C-032 addendum 40 (2026-10-23, guideline baseline `eed0104`)
+
+- The previous baseline `b6341d8` is recorded in addendum 39.
+- The baseline is now `eed0104` on branch `feature/spec-findings` (local commit: MG 3.1 Table 4 left-aligned; editorial PO order, no GL-ADR, no SF). Spec re-baselined in `e2e37da`.
