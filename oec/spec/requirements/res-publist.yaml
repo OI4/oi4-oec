@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PUBLIST
-baseline: "cd4b4db"
+baseline: "5b8fe59"
 requirements:
   # --- DataSet content (MG 8.3.8) ---------------------------------------------
   - id: REQ-RES-PUBLIST-001
@@ -32,7 +32,7 @@ requirements:
       - ref: MG 8.3.8
         text: The Filter shall be a topic encoded string as explained in 7.7 Filter Element.
     verification: [schema, d7-validate]
-    inventory: [MG-8.3.8-b9d2374e, MG-8.3.8-86fbe141, MG-8.3.8-c2821b10, MG-8.3.8-5ef901d0, MG-8.3.8-25e2c8ca, MG-8.3.8-f7d6d15a, MG-8.3.8-6ca0c9bc, MG-8.3.8-1f4ea694, MG-8.3.8-5afb0ffd, MG-8.3.8-2237c2eb]
+    inventory: [MG-8.3.8-b9d2374e, MG-8.3.8-2f1a56b9, MG-8.3.8-c2821b10, MG-8.3.8-5ef901d0, MG-8.3.8-25e2c8ca, MG-8.3.8-f7d6d15a, MG-8.3.8-6ca0c9bc, MG-8.3.8-1f4ea694, MG-8.3.8-5afb0ffd, MG-8.3.8-2237c2eb]
     status: reviewed
     notes: >-
       The Value Range of a Precisions entry is 0.0 … 3.4·10^38 (SF-067 (d),

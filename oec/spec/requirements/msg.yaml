@@ -6,7 +6,7 @@
 # (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 area: MSG
-baseline: "cd4b4db"
+baseline: "5b8fe59"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
@@ -149,8 +149,8 @@ requirements:
     title: PublisherId is ServiceType and unencoded Identification Link
     statement: >-
       The PublisherId of a NetworkMessage and of a DataSetMetaData is
-      "<ServiceType>/<IdentificationLink>" of the sending application, with
-      the Identification Link unencoded (REQ-IL-005). For Pub it equals the
+      "<ServiceType>/<AppId>" of the sending application, with the AppId as
+      unencoded Identification Link (REQ-IL-005). For Pub it equals the
       ServiceType and the decoded AppId of the topic; for Get, Set and Del the
       topic contains the AppId of the addressed application (MG 7.3), so the
       PublisherId is that of the requesting application.
@@ -162,10 +162,12 @@ requirements:
     quotes:
       - ref: MG 8.2.1
         text: String consisting of ServiceType (see 7.2 ServiceType Element) and the unencoded Identification Link of the application (see 4 The Identification Link and 7.3 AppId Element) - separated by a “/”.
+      - ref: MG 8.2.1
+        text: For Get, Set and Del, the topic contains the AppId of the addressed application (7.3 AppId Element), and the PublisherId is that of the requesting application.
       - ref: MG 7.3
         text: For the methods Get, Set, and Del, the AppId of the destination that has to react to these methods must be chosen. For the Pub method, the AppId of the publisher of the data itself must be chosen.
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.1-99fe6ffc, MG-8.2.2-009e2d99]
+    inventory: [MG-8.2.1-3a360801, MG-8.2.1-fd17f8ba, MG-8.2.2-009e2d99]
     status: reviewed
 
   # --- MessageId (MG 8.2.1, MG 8.2.2) ----------------------------------------
@@ -405,7 +407,7 @@ requirements:
       - ref: MG 8.2.3
         text: A number which is strictly increasing in sequence and assigned to the DataSetMessage by the DataSetWriter.
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.3-e119b433, MG-8.2.3-41a1d503, MG-8.2.3-563fb32b, MG-8.2.3-23de9f9f, MG-8.2.3-8e6fbc4d, MG-8.2.3-8eedf843, MG-8.2.3-56563a65, MG-8.2.3-4c0a9d23, MG-8.2.3-513766b3, MG-8.2.3-951457a2, MG-8.2.3-63e4a763, MG-8.2.3-d3037df3, MG-8.2.3-e6e7d616]
+    inventory: [MG-8.2.3-e119b433, MG-8.2.3-41a1d503, MG-8.2.3-839937ac, MG-8.2.3-23de9f9f, MG-8.2.3-8e6fbc4d, MG-8.2.3-8eedf843, MG-8.2.3-56563a65, MG-8.2.3-4c0a9d23, MG-8.2.3-513766b3, MG-8.2.3-951457a2, MG-8.2.3-63e4a763, MG-8.2.3-d3037df3, MG-8.2.3-e6e7d616]
     status: reviewed
 
   - id: REQ-MSG-017
@@ -772,7 +774,7 @@ requirements:
       - ref: MG 8.2.2
         text: The fields WriterGroupName, DataSetWriterName and Timestamp are mandatory.
     verification: [schema, d7-validate]
-    inventory: [MG-8.2.2-278abf9b, MG-8.2.2-4bc9755e, MG-8.2.2-e923159c, MG-8.2.2-3b6edd00, MG-8.2.2-6ca7b79e, MG-8.2.2-2bb4752d, MG-8.2.2-ca4f4b23, MG-8.2.2-96fe4c60]
+    inventory: [MG-8.2.2-278abf9b, MG-8.2.2-4bc9755e, MG-8.2.2-e923159c, MG-8.2.2-3b6edd00, MG-8.2.2-f5acbaff, MG-8.2.2-2bb4752d, MG-8.2.2-ca4f4b23, MG-8.2.2-96fe4c60]
     status: reviewed
 
   - id: REQ-MSG-033
