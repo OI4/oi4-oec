@@ -6,7 +6,7 @@
 # REQ-CMP-028, REQ-CNT-013/014).
 # Drafted in C-030.
 area: LIC
-baseline: "6cd6f0e"
+baseline: "f1e0cef"
 requirements:
   - id: REQ-LIC-001
     title: Provider responsible for license compliance
