@@ -18,7 +18,7 @@
       "const": "d8e7b6df-42ba-448a-975a-199f59e8ffeb"
     },
     "Messages": {
-      "$comment": "REQ-RES-HEALTH-007 (MG 9.1.2): Health DataSetMessages and optionally Pagination; Locale is not named by the REQ and is accepted until SF-097 is decided",
+      "$comment": "REQ-RES-HEALTH-007 (MG 9.1.2): Health DataSetMessages and optionally Pagination",
       "items": {
         "if": {
           "type": "object",
@@ -63,8 +63,8 @@
               }
             },
             "then": {
-              "$comment": "Locale in a Pub: accepted until SF-097 is decided",
-              "$ref": "../helpers.schema.json#/$defs/LocaleDataSetMessage"
+              "$comment": "REQ-LOC-003 (MG 8.3.12): a Locale is only sent with the method Get",
+              "not": {}
             },
             "else": {
               "if": {

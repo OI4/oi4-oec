@@ -94,10 +94,15 @@ var probes = []probe{
 	{"P-16 ReplyTo without PublisherId", "V-PAY-003", "pub-health", func(m map[string]any) {
 		m["ReplyTo"] = "1639693510094-abc"
 	}, []string{"REQ-MSG-015"}},
-	{"P-17 Locale in Pub (accepted until SF-097)", "V-PAY-003", "pub-health", func(m map[string]any) {
+	{"P-17 Locale in Pub", "V-PAY-003", "pub-health", func(m map[string]any) {
 		m["Messages"] = append(msgs(m), map[string]any{"DataSetWriterId": json.Number("3"), "WriterGroupName": "Locale",
 			"DataSetWriterName": msgs(m)[0].(map[string]any)["DataSetWriterName"], "Payload": map[string]any{"Locale": "de-DE"}})
-	}, nil},
+	}, []string{"REQ-LOC-003"}},
+	{"P-18 two Locales in Get", "V-PAY-001", "get-health", func(m map[string]any) {
+		loc := map[string]any{"DataSetWriterId": json.Number("3"), "WriterGroupName": "Locale",
+			"DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": map[string]any{"Locale": "de-DE"}}
+		m["Messages"] = []any{loc, loc}
+	}, []string{"REQ-LOC-003"}},
 }
 
 // runProbes validates every probe against its entry schema and appends the
