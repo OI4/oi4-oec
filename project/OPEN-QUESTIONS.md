@@ -7,6 +7,7 @@ New questions are added to the first table. Once decided, the row moves to the s
 | ID | Question | Context / options | Blocks | Status |
 |----|----------|-------------------|--------|--------|
 | Q-011 | Publication of (parts of) the work and EU Cyber Resilience Act (CRA) | PO: publication must be reconsidered in light of the CRA (e.g. open-source steward role, SBOM, vulnerability handling, security updates, support period). Note C-006: the guideline itself now requires an SBOM in `/opt/oi4/licenses` from Level 2 (GL-ADR-002), which we generate anyway (G-4.8). Working assumption (PO, C-010): **no public availability on the internet** – publication target are **private GitHub repositories**; CRA review only becomes relevant before any public release / placing on the market. Pushing to the private repos still needs the PO's go (ADR-0009/0012). | P9 | open – parked; working assumption: private GitHub repos (C-010) |
+| Q-020 | How does D7 `validate` check the content of Birth, Close and Will messages (REQ-LIFE-003/007/009)? | C-034: a Birth/Close/Will looks exactly like a regular `Pub MAM`/`Pub Health`; one message does not show its role. Options: (a) optional vector field `role` (`birth`/`close`/`will`) and `validate --role`, so the rules are checked offline when the caller declares the role (recommended; +`d7-validate` for the three REQs); (b) keep them with `d7-test` only (live observation of connect/disconnect). See `log/2026-10-23_C-034_foundation-envelope.md`. | P2 (C-035) | open |
 
 ## Decided
 
