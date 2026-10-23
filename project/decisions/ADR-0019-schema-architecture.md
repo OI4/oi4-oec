@@ -42,7 +42,7 @@ The PO accepted the agent's recommendation on every open point:
 5. §9 verification split as described, including the reclassification candidates (REQ-MSG-026 and REQ-PAG-009 +`schema`, REQ-LIFE-003 +`d7-validate`; applied in the increment that covers them, C-034) and the umbrella rule (derived coverage through an explicit implication map).
 6. The P2 cycle cut C-034 … C-039 and the refined exit (ROADMAP P2).
 
-SF-097 (Locale outside `Get`) was decided as proposed in the same review: a `Locale` is only used with `Get`, at most once per NetworkMessage. The entry schemas of the other methods therefore forbid `DataSetWriterId` 3 once the guideline and the catalog implement SF-097.
+SF-097 (Locale outside `Get`) was decided as proposed in the same review: a `Locale` is only used with `Get`, at most once per NetworkMessage. The entry schemas of the other methods therefore forbid `DataSetWriterId` 3 once the guideline and the catalog implement SF-097. Implemented in C-033 addendum 2 (guideline `cc2fb4b`, REQ-LOC-003); the PoC entry schema `pub-health` forbids `DataSetWriterId` 3 and `get-health` allows at most one Locale (probes P-17/P-18, 52 cases) – the PoC notes below describe the state at acceptance.
 
 ## Decision
 

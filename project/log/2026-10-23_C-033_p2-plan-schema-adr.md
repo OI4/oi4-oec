@@ -3,7 +3,7 @@
 - Date: 2026-10-23
 - Phase: P2 (started in this cycle)
 - Agent: GitHub Copilot CLI (Claude Opus 5.5)
-- Status: done; reviewed by the PO on 2026-10-23 (addendum 1: ADR-0019 accepted, SF-097 decided)
+- Status: done; reviewed by the PO on 2026-10-23 (addendum 1: ADR-0019 accepted, SF-097 decided; addendum 2: SF-097 implemented on PO order, re-baseline on `cc2fb4b`)
 - Guideline baseline: `oi4-oec-documentation` @ `5b8fe59`, branch `feature/spec-findings` (GL-ADR-001 … 022, SF-001 … 096 resolved, next free id SF-097). During the cycle, the register-only commit `decc2da` added SF-097 (open). The guideline text did not change, so no re-baseline was needed (STATUS "Next step" 3).
 
 ## Intent
@@ -278,3 +278,46 @@ Changes:
 - No reviewed item changed. The schemas are unchanged: the PoC already uses the decided `$id` base. The `pub-health` entry schema still accepts a `Locale` until SF-097 is implemented in the guideline and the catalog (C-034).
 
 Open: SF-097 is decided but not implemented in MG 8.3.12. Guideline text changes only on PO order. After an order, C-034 starts with the guideline change and a re-baseline.
+
+## Addendum 2 – SF-097 in the guideline, re-baseline on `cc2fb4b` (2026-10-23, PO order)
+
+PO (chat, 2026-10-23): "Bitte arbeite SF-097 in die Guideline ein."
+
+Guideline (`oi4-oec-documentation`, branch `feature/spec-findings`):
+
+- `cc2fb4b` – MG 8.3.12: the sentence "… only meaningful in combination with the method `Get`; in a `NetworkMessage` of another method it is ignored by the receiver" becomes three sentences: still "only meaningful in combination with the method `Get`", then the proposed text of SF-097 – "A `Locale` must only be used with the method `Get`, at most once per `NetworkMessage`. A `Locale` in a `NetworkMessage` of another method is ignored by the receiver." This is the same wording as for `PaginationRequest` in MG 8.3.11. GL-ADR-019 (Locale decision and the 8.3.12 implementation line) records SF-097 the way GL-ADR-019 records SF-096; no new GL-ADR. The MG 9.1.x `Get` bullets already name `Locale` and the `Pub` bullets do not, so nothing else changes. Docusaurus build green.
+- `fb30ac7` – register: SF-097 → resolved (`cc2fb4b`) and moved to Closed; the open section reads "No open findings (after SF-097)"; next free id SF-098.
+
+Spec (`411f88f`), re-baseline with `spectool rebaseline -rev cc2fb4b`:
+
+- Inventory 1396 → **1397** items: the old sentence item `MG-8.3.12-af07feb7` is replaced by `MG-8.3.12-d7029076` (sender rule, MUST) and `MG-8.3.12-ed85293a` (receiver rule, implicit).
+- **REQ-LOC-003** (new, `draft`): "Locale only in Get, at most once". It has the same shape as REQ-PAG-008: MUST on L1–L3, applies to publisher/requester/responder, refs MG 8.3.12, SF-062, SF-097, verification `schema` + `d7-validate`, and it carries both new keys. The planned alternative, extending REQ-LOC-002, was not chosen: REQ-LOC-002 is about the responder's language behavior (`d7-test`), while the placement is a payload check that the schema and the oracle can make (`schema` + `d7-validate`).
+- **REQ-LOC-002** (reviewed) changed, for this reason: its placement sentence, the quote of the old sentence and the stale key `af07feb7` move to REQ-LOC-003. The statement now ends with "Placement of the Locale: REQ-LOC-003." Nothing else changes.
+- The pointer notes "A Locale is only meaningful in a Get and ignored in other methods" in REQ-RES-HEALTH, -MAM, -PROFILE, -PUBLIST, -REFDES and -SUBLIST, plus the QRY header note, now cite REQ-LOC-003 instead of REQ-LOC-002. Only the pointer moves with the rule; the meaning is unchanged.
+- Oracle (`tools/internal/payload/content.go`): a Locale (`DataSetWriterId` 3) outside `Get` and a second Locale each report REQ-LOC-003, like helpers 1/2 for REQ-PAG-008. The matrix helper check (`internal/topic/payloadcols.go`) cites REQ-LOC-003.
+  - Unit tests: the Locale fixture moves from the test Pub `mamPub` to the test Get `mamGet`. The Pub fixture was a test helper that SF-097 now forbids, not a vector.
+  - New cases: "locale in pub" and "second locale". The case "helper writer group name" (DataSetWriterId 3 in a Pub Health) now also expects REQ-LOC-003.
+- Vectors (`draft`):
+  - **V-PAY-127** – Pub Health with a Locale (V-PAY-003 + Locale).
+  - **V-PAY-128** – Get Config with two Locales (V-PAY-089 + a second Locale).
+  - Both are invalid and violate only REQ-LOC-003. The positive side is the reviewed V-PAY-089/V-PAY-007 (Get with exactly one Locale).
+- Existing vectors: no reviewed vector has a Locale outside `Get` or a second Locale, so no vector changed.
+- Matrix: unchanged; its `Pub` rows already listed only `Pagination` as a helper.
+
+Schema PoC (`5a04cb3`):
+
+- `pub-health`: `DataSetWriterId` 3 is now a closure `{"$comment": "REQ-LOC-003 …", "not": {}}` (it was "accepted until SF-097").
+- `get-health`: `maxContains` 1 for `DataSetWriterId` 3 (REQ-LOC-003).
+- Probes: P-17 "Locale in Pub" now expects invalid [REQ-LOC-003], and P-18 "two Locales in Get" is new. V-PAY-127 is routed to `pub-health` and is rejected with exactly REQ-LOC-003.
+- `check.sh`: 17 vectors + 18 probes, 52 cases. Go santhosh, Rust jsonschema-rs and Python jsonschema (session venv) find 0 disagreements.
+
+Checks: `spectool lint` (436 REQs, 128 payload vectors), `render -check`, `coverage -check` (`open=0`), `topic -check` and `inventory -check -rev cc2fb4b` (1397 items) are all green; `go test ./...` in `oec/spec/tools` is green.
+
+Docs: AGENTS, GUARDRAILS G-1.2, ADR-0001 (amendment C-033 addendum 2), ADR-0019 (note under the PO decision), STATUS and ROADMAP P2 (C-033 and C-034 items, sizing 160 REQs at `cc2fb4b`).
+
+Commits:
+
+- Guideline: `cc2fb4b` (MG 8.3.12 + GL-ADR-019) and `fb30ac7` (register).
+- Workspace: `411f88f` (spec re-baseline, REQ-LOC-003, oracle, vectors), `5a04cb3` (schema PoC), plus the docs commit.
+
+For the PO review: REQ-LOC-003 (new), the REQ-LOC-002 change, V-PAY-127/128, and the guideline wording in MG 8.3.12 (`cc2fb4b`). Next free ids: SF-098, V-PAY-129, ADR-0020.
