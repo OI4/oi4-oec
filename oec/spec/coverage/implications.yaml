@@ -1,0 +1,21 @@
+# Implication map of umbrella requirements (ADR-0019 §9, C-034; schema:
+# implications.schema.json). The oracle reports the detail REQs, and lint
+# requires `violates` = oracle result, so no vector names an umbrella in
+# `violates`. An umbrella counts as covered by vectors when every detail is
+# covered (reviewed positive and negative vector, or itself derived). The
+# remainder is the part of the umbrella that no detail implies; it stays with
+# the other verification methods of the umbrella and is not covered by
+# vectors. 'spectool coverage' writes coverage/vectors.md from this map.
+implications:
+  - umbrella: REQ-MSG-004
+    details: [REQ-MSG-003, REQ-MSG-005, REQ-MSG-011]
+    remainder: none – the content mask is not on the wire; its effect is the field presence of the NetworkMessage (details).
+  - umbrella: REQ-MSG-017
+    details: [REQ-MSG-016, REQ-MSG-018, REQ-MSG-024, REQ-MSG-029, REQ-MSG-031]
+    remainder: none – the content mask is not on the wire; its effect is the field presence of the DataSetMessage and the VerboseEncoding of the fields (details).
+  - umbrella: REQ-BUS-004
+    details: [REQ-BUS-010, REQ-MSG-030, REQ-TOP-013, REQ-RES-CONFIG-003, REQ-RES-CONFIG-019, REQ-RES-DATA-009, REQ-RES-META-004, REQ-RES-PUBLIST-022, REQ-RES-REFDES-006, REQ-RES-SUBLIST-010]
+    remainder: That the object is a resource object of the addressed component and the Set carries its complete updated state needs the publications of that component (d7-test, REQ-BUS-002).
+  - umbrella: REQ-BUS-005
+    details: [REQ-BUS-010, REQ-TOP-013, REQ-RES-REFDES-007, REQ-RES-SUBLIST-011]
+    remainder: That the addressed object exists at the addressed component needs its publications (d7-test, REQ-BUS-002).

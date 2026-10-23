@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oi4:oec:v2:spec:implications",
+  "title": "OEC v2 coverage – implication map of umbrella requirements",
+  "description": "Format of oec/spec/coverage/implications.yaml (ADR-0019 §9, C-034): an umbrella requirement is covered by vectors through its detail requirements; the remainder no detail implies stays with other verification methods.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["implications"],
+  "properties": {
+    "implications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["umbrella", "details", "remainder"],
+        "properties": {
+          "umbrella": { "type": "string", "pattern": "^REQ-[A-Z]+(-[A-Z]+)?-[0-9]{3}$" },
+          "details": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^REQ-[A-Z]+(-[A-Z]+)?-[0-9]{3}$" }
+          },
+          "remainder": { "type": "string", "minLength": 4 },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

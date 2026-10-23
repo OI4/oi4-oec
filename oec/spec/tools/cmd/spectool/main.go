@@ -5,9 +5,11 @@
 //	                                                  matrix/view/*.md and vectors/view/*.md
 //	spectool inventory [-spec DIR] [-guideline DIR] [-rev REV] [-check]
 //	                                                  extract normative-statement candidates
-//	spectool coverage  [-spec DIR] [-guideline DIR] [-check]
+//	spectool coverage  [-spec DIR] [-guideline DIR] [-check] [-gate]
 //	                                                  generate coverage/report.md (inventory items
-//	                                                  and guideline examples)
+//	                                                  and guideline examples) and coverage/vectors.md
+//	                                                  (vector coverage of schema/d7-validate REQs;
+//	                                                  -gate: P2 exit gate)
 //	spectool topic     [-spec DIR] [-check] [TOPIC...] generate topic/topic-patterns.json;
 //	                                                  with arguments: analyse the given topics
 //	spectool review    [-spec DIR] [-to reviewed|draft] [-n] ID...
@@ -39,6 +41,7 @@ import (
 	"github.com/OI4/oec/spec/tools/internal/inventory"
 	"github.com/OI4/oec/spec/tools/internal/maintain"
 	"github.com/OI4/oec/spec/tools/internal/render"
+	"github.com/OI4/oec/spec/tools/internal/reqcov"
 	"github.com/OI4/oec/spec/tools/internal/topic"
 	"github.com/OI4/oec/spec/tools/internal/vectors"
 )
@@ -329,6 +332,7 @@ func cmdInventory(args []string) error {
 func cmdCoverage(args []string) error {
 	fs, c := flags("coverage")
 	check := fs.Bool("check", false, "fail on coverage problems or an outdated report instead of writing it")
+	gate := fs.Bool("gate", false, "also fail on vector coverage gaps and missing entry schemas (P2 exit gate)")
 	_ = fs.Parse(args)
 	s, err := catalog.Load(c.spec)
 	if err != nil {
@@ -355,8 +359,25 @@ func cmdCoverage(args []string) error {
 	if ex.Baseline != "" && ex.Baseline != inv.Baseline {
 		exr.Problems = append(exr.Problems, fmt.Sprintf("%s: baseline %s differs from the inventory baseline %s", examples.File, ex.Baseline, inv.Baseline))
 	}
-	problems := append(res.Problems, exr.Problems...)
-	if err := writeAll(c, map[string]string{catalog.ReportFile: res.Report() + exr.Report()}, *check); err != nil {
+	ts, err := topic.Load(c.spec)
+	if err != nil {
+		return err
+	}
+	im, err := reqcov.LoadImplications(c.spec)
+	if err != nil {
+		return err
+	}
+	schemaDir := filepath.Join(c.spec, "..", "schema")
+	rl, err := reqcov.LoadExpectations(schemaDir)
+	if err != nil {
+		return err
+	}
+	vr := reqcov.Compute(s, vfiles, ts, im, rl, schemaDir)
+	problems := append(append(res.Problems, exr.Problems...), vr.Problems...)
+	if *gate {
+		problems = append(problems, vr.Gaps...)
+	}
+	if err := writeAll(c, map[string]string{catalog.ReportFile: res.Report() + exr.Report(), reqcov.ReportFile: vr.Report()}, *check); err != nil {
 		return err
 	}
 	for _, st := range res.Areas {
@@ -370,6 +391,7 @@ func cmdCoverage(args []string) error {
 			fmt.Printf("examples %-13s blocks=%3d golden=%3d explained=%3d open=%3d\n", o, k.Blocks, k.Covered, k.Explained, k.Open)
 		}
 	}
+	fmt.Printf("vectors   schema/d7-validate REQs=%d gaps=%d; entry schemas %d of %d allowed rows\n", len(vr.Entries), len(vr.Gaps)-vr.MissingSchemas(), len(vr.Rows)-vr.MissingSchemas(), len(vr.Rows))
 	if *check && len(problems) > 0 {
 		return errors.New(strings.Join(problems, "; "))
 	}
