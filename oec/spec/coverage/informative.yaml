@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "f4826e3"
+baseline: "6c2be2c"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -422,8 +422,8 @@ items:
     reason: Usage hint ("can") for Validation (Set table); its keys are REQ-RES-CONFIG-003, their effect REQ-RES-CONFIG-008.
   - key: MG-9.1.3-dea12337
     reason: Hint how any application can listen to Config ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
-  - key: MG-9.1.3-9471c5bc
-    reason: Template of the Pub topic with Source and Filter; the topic structure is REQ-TOP-* and the matrix, the Filter REQ-RES-CONFIG-015, the content REQ-RES-CONFIG-018.
+  - key: MG-9.1.3-c59724a1
+    reason: Template of the Pub topic with Source and Filter (Context.Name); the topic structure is REQ-TOP-* and the matrix, the Filter REQ-RES-CONFIG-015, the content REQ-RES-CONFIG-018.
   - key: MG-9.1.3-fef76a3e
     reason: Template of the Pub topic with Source; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-CONFIG-018.
   - key: MG-9.1.3-14486a95

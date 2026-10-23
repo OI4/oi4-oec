@@ -8,7 +8,7 @@
 # Drafted in C-029; SF-084 … SF-088 resolved in the guideline after the PO
 # review of C-029 (masking of sensitive values: GL-ADR-021).
 area: RES-CONFIG
-baseline: "f4826e3"
+baseline: "6c2be2c"
 requirements:
   # --- DataSet content (MG 8.3.3, 8.3.3.1, 8.3.3.2) ---------------------------
   - id: REQ-RES-CONFIG-001
@@ -505,7 +505,7 @@ requirements:
   - id: REQ-RES-CONFIG-019
     title: Set Config addresses exactly one Config DataSet
     statement: >-
-      A Set Config is sent to Set/Config/<Source>/<Filter> and its
+      A Set Config is sent to Set/Config/<Source>/<Context.Name> and its
       NetworkMessage contains exactly one Config DataSetMessage – the one
       addressed by the topic; several Config DataSets cannot be set at
       once.
@@ -573,7 +573,7 @@ requirements:
     title: Changed Config is published after a successful Set
     statement: >-
       After a successful Set Config, the component publishes the new Config
-      DataSet to Pub/Config/<Source>/<Filter> with the ReplyTo of the Set;
+      DataSet to Pub/Config/<Source>/<Context.Name> with the ReplyTo of the Set;
       the values of sensitive configuration objects are masked as in every
       Pub (REQ-RES-CONFIG-024).
     keyword: MUST
@@ -584,11 +584,11 @@ requirements:
     refs: [MG 9.1.3, GL-ADR-021]
     quotes:
       - ref: MG 9.1.3
-        text: If setting Config was successful, the new Config must be published to the Pub/Config[/<Source>[/<Filter>]] topic, according to the settings in PublicationList (8.3.8 PublicationList).
+        text: If setting Config was successful, the new Config must be published to the Pub/Config[/<Source>[/<Context.Name>]] topic, according to the settings in PublicationList (8.3.8 PublicationList).
       - ref: MG 9.1.3
         text: As in every publication of Config, the values of sensitive config elements are masked.
     verification: [d7-test]
-    inventory: [MG-9.1.3-f44495ea]
+    inventory: [MG-9.1.3-40911b2e]
     status: reviewed
     notes: >-
       Read like REQ-RES-DATA-012 and REQ-RES-PUBLIST-025: the answer to the
@@ -596,7 +596,8 @@ requirements:
       the complete Config DataSet (REQ-RES-CONFIG-002); publications
       configured in the PublicationList follow on their own. General rule:
       REQ-BUS-006. Example: MG B1.1.3 "Pub explicit Config tag after a
-      successful set request" (V-PAY-114).
+      successful set request" (V-PAY-114). The Filter of Config is the
+      Context.Name (MG 7.7); MG 9.1.3 names it so since 6c2be2c.
 
   - id: REQ-RES-CONFIG-023
     title: A Set Config is applied completely or rejected
