@@ -468,3 +468,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `f4826e3` is recorded in addendum 45.
 - The baseline is now `6c2be2c` on branch `feature/spec-findings`. Local commit: in MG 9.1.3 the Filter of Config is named `<Context.Name>`, as in MG 7.7. Editorial PO request: no GL-ADR, no SF. Spec re-baselined in `ce9a52c`: REQ-RES-CONFIG-019/022 aligned, two inventory keys and two example keys remapped.
+
+## Amendment C-032 addendum 47 (2026-10-23, guideline baseline `0810d79`)
+
+- The previous baseline `6c2be2c` is recorded in addendum 46.
+- The baseline is now `0810d79` on branch `feature/spec-findings`. Local commit: in MG 9.1.4 and 9.1.5 the Filter of Data/Metadata is named `<Tag>`, as in MG 7.7. Editorial PO order: no GL-ADR, no SF. Spec re-baselined in `d91033b`: REQ-RES-DATA-012 aligned, one inventory key and three example keys remapped.
