@@ -6,7 +6,7 @@ Guideline baseline: `cc2fb4b` · Area status: reviewed · Sections: MG 9
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
 | [REQ-BUS-001](#req-bus-001) | Publishing may start once the request topics are subscribed | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
-| [REQ-BUS-002](#req-bus-002) | A requester publishes on the request topic of the addressed component | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
+| [REQ-BUS-002](#req-bus-002) | A requester publishes on the request topic of the addressed component | MUST | MUST | MUST | MUST | messaging | d7-test | draft |
 | [REQ-BUS-003](#req-bus-003) | A Get is answered with a Pub | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-BUS-004](#req-bus-004) | A Set carries the updated object on the Set topic | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-BUS-005](#req-bus-005) | A Del addresses the object with its Filter | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
@@ -47,8 +47,8 @@ A component that requests, changes or deletes a resource of another component pu
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: requester
 - Refs: MG 9.1
-- Verification: d7-validate
-- Status: reviewed
+- Verification: d7-test
+- Status: draft
 - Inventory: MG-9.1-2a8cc5e7, MG-9.1-478085b5
 
 > In case Service B want to request a specific resource from Service A, Service B must publish on the Get topic of one of Service A’s resources, optionally providing a Filter.
@@ -57,7 +57,7 @@ A component that requests, changes or deletes a resource of another component pu
 > Service B then must publish on the Del topic of Service A.
 > — MG 9.1
 
-Notes: The topic forms are REQ-TOP-013 (matrix); the PublisherId stays the requester's (REQ-MSG-006).
+Notes: The topic forms are REQ-TOP-013 (matrix); the PublisherId stays the requester's (REQ-MSG-006). Verification d7-validate → d7-test (C-034, ADR-0019 §9): a single message shows the ServiceType and AppId of its topic, but not whether they belong to the addressed component; D7 test checks it against the component under test.
 
 ## REQ-BUS-003
 
