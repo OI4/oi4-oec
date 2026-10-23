@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "56bbcdb"
+baseline: "cd4b4db"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -345,11 +345,11 @@ items:
   # --- RES-META (C-028) -----------------------------------------------------
   - key: MG-9.1.5-95c7bb0b
     reason: Introduction ("can offer" expresses possibility); the need for Metadata is REQ-CMP-022.
-  - key: MG-9.1.5-175088bf
+  - key: MG-9.1.5-147122d3
     reason: Hint how any application can listen to Metadata ("can" expresses possibility); subscriptions are free (area MQTT/TOP).
-  - key: MG-9.1.5-9f0032c9
+  - key: MG-9.1.5-3c97cda0
     reason: Template of the Pub topic with Source and Tag; the topic structure is REQ-TOP-* and the matrix, the content REQ-RES-META-003.
-  - key: MG-9.1.5-f1506f12
+  - key: MG-9.1.5-5ce13151
     reason: Reference to the examples of MG B1.1.5 (golden payload vectors V-PAY-020 … 022 and the Status event vectors of C-028).
   # --- RES-SUBLIST (C-028) --------------------------------------------------
   - key: MG-8.3.9-7ff9dd73

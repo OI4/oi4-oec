@@ -10,7 +10,7 @@
 # 9.1.5) and SF-079 (DataSetMetaData header of a Set request) resolved in the
 # guideline (baseline b2f0fe7).
 area: RES-META
-baseline: "56bbcdb"
+baseline: "cd4b4db"
 requirements:
   - id: REQ-RES-META-001
     title: Get Metadata addresses one DataSet and carries an empty DataSetMetaData
@@ -52,7 +52,7 @@ requirements:
       - ref: MG 9.1.5
         text: Via the <Method>/<Resource>/<Source>/<Filter> combination Get/Metadata/<Source>/<Tag>, the publication of this information to the Pub/Metadata/<Source>/<Tag> topic can be triggered.
     verification: [d7-test]
-    inventory: [MG-9.1.5-bba195d4]
+    inventory: [MG-9.1.5-ff01e733]
     status: reviewed
     notes: ReplyTo per REQ-MSG-015. Example V-PAY-020/021 (MG B1.1.5).
 
@@ -98,7 +98,7 @@ requirements:
       - ref: MG 9.1.5
         text: Each publication using the method Set must be done explicitly. That means Set/Metadata is only possible by using a complete topic containing Resource, Source and Filter, such as Oi4v2/<ServiceType>/<AppId>/Set/Metadata/<Source>/<Tag>.
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.5-589a70ef, MG-9.1.5-c88db582]
+    inventory: [MG-9.1.5-589a70ef, MG-9.1.5-975c7775]
     status: reviewed
     notes: >-
       PublisherId = requester (REQ-MSG-006; MG 9.1.5 Set template since
@@ -117,7 +117,7 @@ requirements:
       - ref: MG 9.1.5
         text: To prevent write access by unauthorized communication participants, the operator must prevent this via ACL.
     verification: [d8]
-    inventory: [MG-9.1.5-0ebe87ac]
+    inventory: [MG-9.1.5-4aa46320]
     status: reviewed
 
   - id: REQ-RES-META-006
@@ -137,7 +137,7 @@ requirements:
       - ref: MG 9.1.5
         text: After a Set message arrived, the application must publish an Event message with status information about the Set command to the topic Pub/Event/<Source>/Status/<StatusCode> (8.3.6.1 Status) from compliance Level 2 on and should do so at Level 1 (7.4 Method Element) to provide feedback to the caller.
     verification: [d7-test]
-    inventory: [MG-9.1.5-a9e91781]
+    inventory: [MG-9.1.5-cefa84a2]
     status: reviewed
     notes: Same obligation as REQ-TOP-014; ReplyTo and content per REQ-RES-EVENT-005. Example MG B1.1.5.
 
@@ -157,7 +157,7 @@ requirements:
       - ref: MG 9.1.5
         text: If setting Metadata was successful, the new Metadata must be published to the Pub/Metadata/<Source>/<Tag> topic, according to the settings in PublicationList (8.3.8 PublicationList).
     verification: [d7-test]
-    inventory: [MG-9.1.5-ccacb85a]
+    inventory: [MG-9.1.5-3390a241]
     status: reviewed
     notes: >-
       Read like REQ-RES-PUBLIST-025 and REQ-RES-REFDES-010 (reviewed in
