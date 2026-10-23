@@ -6,7 +6,7 @@
 # 015. Checked by tools/internal/payload (REQ-QRY-001; REQ-QRY-002 in the
 # tolerant mode). Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: QRY
-baseline: "f1e0cef"
+baseline: "f30d664"
 requirements:
   - id: REQ-QRY-001
     title: A Query only in a Get of a resource with a defined Query
