@@ -3,7 +3,7 @@
 # catalog.schema.json). Reference checks: spectool package internal/il,
 # vectors in vectors/il/ and vectors/topic/.
 area: IL
-baseline: "69bc021"
+baseline: "223fb51"
 requirements:
   # --- Identification Link in general (MG 4) -------------------------------
   - id: REQ-IL-001

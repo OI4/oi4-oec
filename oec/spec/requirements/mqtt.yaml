@@ -9,7 +9,7 @@
 # keywords and connection details added to the guideline in C-026 (SF-057,
 # SF-060).
 area: MQTT
-baseline: "69bc021"
+baseline: "223fb51"
 requirements:
   # --- Protocol version (MG 6.1) --------------------------------------------
   - id: REQ-MQTT-001

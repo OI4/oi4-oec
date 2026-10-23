@@ -10,7 +10,7 @@
 # Drafted in C-025; keywords, envelope and semantics added to the guideline in
 # C-026 (SF-057, SF-058, SF-059); PO review of C-026: SF-061.
 area: LIFE
-baseline: "69bc021"
+baseline: "223fb51"
 requirements:
   # --- Birth message (MG 6.3.3) ---------------------------------------------
   - id: REQ-LIFE-001
@@ -206,23 +206,29 @@ requirements:
       The Will message is a Pub Health NetworkMessage (MG 8.1) with one
       DataSetMessage of type Health whose Payload is Health FAILURE_1 and
       HealthScore 0. It uses the DataSetWriterId of the component's Health
-      about itself.
+      about itself: all Health messages the component publishes about itself
+      (Source = AppId) after registering the Will message use the same
+      DataSetWriterId as the Will message.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [component]
-    refs: [MG 6, MG 6.3.5, MG 8.3.2, SF-057]
+    refs: [MG 6, MG 6.3.5, MG 8.2.3, MG 8.3.2, SF-057]
     quotes:
       - ref: MG 6.3.5
         text: The Will message must contain the predefined health information for an ungraceful disconnect of the application (8.3.2 Health).
       - ref: MG 6.3.5
         text: It must refer to topic resource Health (7.5.1 Resources) and share its payload.
+      - ref: MG 6.3.5
+        text: All Health messages that the application publishes about itself (Source = AppId) after registering the Will message must therefore use this DataSetWriterId as well.
     verification: [d7-test, schema]
-    inventory: [MG-6.3.5-572831c0, MG-6.3.5-38d4d8c4, MG-6-31ee6521]
+    inventory: [MG-6.3.5-572831c0, MG-6.3.5-38d4d8c4, MG-6.3.5-c27255e4, MG-6-31ee6521]
     status: reviewed
     notes: >-
-      Keywords added in C-026 (SF-057 (h)). The MessageId of the Will message
-      is REQ-LIFE-016. Example: V-PAY-025.
+      Keywords added in C-026 (SF-057 (h)). The DataSetWriterId binding to
+      the later Health messages was made explicit in MG 6.3.5 on PO request
+      (C-032 log addendum 43). The MessageId of the Will message is
+      REQ-LIFE-016. Example: V-PAY-025.
 
   - id: REQ-LIFE-010
     title: Will message without Timestamp and SequenceNumber
