@@ -6,7 +6,7 @@
 # (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 area: MSG
-baseline: "a3e4677"
+baseline: "b6341d8"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
