@@ -393,3 +393,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `f1e0cef` is recorded in addendum 28.
 - The baseline is now `f30d664` on branch `feature/spec-findings` (local commits `8f585f9` – RIG 4.1.1 `broker_ca.pem` NOTE moved out of Table 4 into an admonition, wording unchanged –, `78c7624` – `JsonOverlay` component – and `f30d664` – block overlays for the JSON examples of MG 8.1.1 … 8.1.3; PO request 2026-10-23, layout only). Spec re-baselined (`3c6f824`): no key change, only source line numbers; no finding, no GL-ADR. SF-001 … 095 resolved.
+
+## Amendment C-032 addendum 30 (2026-10-23, guideline baseline `a7e59a3`)
+
+- The previous baseline `f30d664` is recorded in addendum 29.
+- The baseline is now `a7e59a3` on branch `feature/spec-findings` (local commit `a7e59a3` – MG 8.1.1 Figure 5 `Payload` overlay box links to 8.2.3 DataSetMessage `Payload` instead of 8.3.2 Health; PO request 2026-10-23, layout only). Spec re-baselined (`10d9eef`): only the baseline id; no finding, no GL-ADR. SF-001 … 095 resolved.
