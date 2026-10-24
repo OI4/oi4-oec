@@ -1,6 +1,6 @@
 # ADR-0019 – Schema architecture of D1 (modules, topic-aware validation, `$id`, test suite)
 
-- Status: **accepted** (PO, C-033 review 2026-10-23; proposed in C-033). The PO accepted every recommendation, see "PO decision" below. Editorial clarifications in C-034 (§1 type guards of asserting schemas, one REQ per constraint object, reference lists; §2 Health module moved); no decision changed.
+- Status: **accepted** (PO, C-033 review 2026-10-23; proposed in C-033). The PO accepted every recommendation, see "PO decision" below. Editorial clarifications in C-034 (§1 type guards of asserting schemas, one REQ per constraint object, reference lists; §2 Health module moved); no decision changed. Amendment C-035 (bare MetaData routing, R-3 name uniqueness, rule R-6 declared role) is pending PO review.
 - Date: 2026-10-23
 - Deciders: product owner (Thomas); proposal by the agent in C-033
 - Related: ADR-0003 (JSON Schema 2020-12), ADR-0006/0013/0014 (D7/D8 share only schemas and spec), ADR-0009 (no push), ADR-0011 (Rust SDK), ADR-0012 (monorepo `oec/`), ADR-0018 (spec baseline `oec/spec/`), GL-ADR-013 (NodeIds), SF-052 (strict/tolerant), SF-097 (Locale outside Get), C-033 log
@@ -260,7 +260,7 @@ Results against the 16 payload vectors on the two Health topic forms:
 ## Consequences
 
 - The topic-form structure becomes part of D1. Every allowed matrix row gets an entry schema, and lint will check that.
-- D7 `validate` = topic grammar + IL + entry schema + a small rule layer (R-1 … R-4). The SDK can reuse the same entry schemas for its own tests.
+- D7 `validate` = topic grammar + IL + entry schema + a small rule layer (R-1 … R-4; R-6 since amendment C-035). The SDK can reuse the same entry schemas for its own tests.
 - The oracle stays the reference for the vectors. Where it lacks a rule that a schema enforces (e.g. REQ-RES-HEALTH-007), the oracle is extended in the same increment so that lint keeps `violates` = oracle result.
 - Strict is normative. The tolerant flavor is generated; consumers choose it by `$id` prefix.
 - `$comment` REQ prefixes are mandatory for constraints that enforce a REQ; the harness fails on unmapped errors.
@@ -275,3 +275,10 @@ Results against the 16 payload vectors on the two Health topic forms:
 - **One monolithic schema file:** poor review granularity, no 1:1 mapping to matrix rows.
 - **Authoring in a DSL that generates JSON Schema** (CUE, TypeSpec, …): an extra toolchain, weak or uneven 2020-12 output (`unevaluatedProperties`, `if` chains), and the PO reviews the generated files anyway. Hand-written JSON with a strong test harness is simpler.
 - **Ajv as a gate validator:** see §8.
+
+## Amendment C-035 (2026-10-24) – MetaData and declared roles (agent proposals within this ADR, G-4.4; PO review pending)
+
+1. **§8 bare MetaData vectors → `ResourceMetaData`.** A bare `object: DataSetMetaDataType` vector is the predefined MetaData of a resource (MG B2, SF-054). Lint (the oracle `CheckMetaDataType`) also checks the DataSetClassId of the predefined resources against MG A2 (REQ-MSG-012/010), which `#/$defs/DataSetMetaData` alone cannot see. The harness therefore validates such a vector against `metadata.schema.json#/$defs/ResourceMetaData` (B: `DataSetMetaData` + one `if Name = <resource> then DataSetClassId required and = <A2 id>` per resource with a predefined id) and against `#/$defs/DataSetMetaData` (A, generic). §8 originally named only `#/$defs/DataSetMetaData`.
+2. **§5 R-3 also covers name uniqueness by key:** unique field names of a DataSetMetaData (REQ-MSG-038), unique StructureField names (REQ-MSG-043) and unique EnumField names (REQ-MSG-044). `uniqueItems` compares whole array items, not one key; these are rule-layer checks (expectations V-PAY-159/165/167).
+3. **§5 new rule R-6 – declared role** (Q-020 (a)): with a declared role (`birth`/`close`/`will`; vector field `role`, D7 `validate --role`) the rule layer checks the single-message rules of the role: Birth = Pub MAM with exactly one DataSetMessage whose ProductInstanceUri is the AppId (REQ-LIFE-003); Close = Pub Health with exactly one DataSetMessage, Health NORMAL_0, HealthScore 0 (REQ-LIFE-007); Will = the same with FAILURE_1 (REQ-LIFE-009). The topic rules of the roles (Source = AppId, REQ-LIFE-002/006/008) and the DataSetWriterId shared with the regular messages stay with D7 `monitor`/`test`. The role is not visible in the message, so the schemas do not see it (expectations V-PAY-171 … 175). R-5 (multi-message) is unchanged; D7 `validate` = R-1 … R-4 + R-6.
+4. **§9 applied:** REQ-LIFE-003/007/009 carry `schema` + `d7-validate` (C-035, back to `draft` for the PO review).
