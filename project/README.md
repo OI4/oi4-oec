@@ -26,6 +26,7 @@ project/
   ROADMAP.md              phases, deliverables, exit criteria
   STATUS.md               current state + next step (always kept up to date)
   OPEN-QUESTIONS.md       pending decisions with the product owner
+  REVIEW.md               everything waiting for the PO: drafts to review, decisions (updated every cycle)
   decisions/              Architecture Decision Records (ADR-xxxx)
   log/                    one file per work cycle (chronological protocol)
   research/               digests and analyses (guideline digest, legacy analysis, ...)
