@@ -32,7 +32,7 @@ Current state: **32 drafts** (3 REQs, 29 payload vectors), **1 open spec finding
 - **Proposed interpretation (recommended):** the resource rule wins. Text for MG 8.3.11: "… and a `Del` contains at most one `DataSetMessage`, as defined for the resource in 9.1." Consequence: only the statement of REQ-PAG-009 changes; REQ-RES-SUBLIST-011, REQ-RES-REFDES-007, oracle and vectors stay.
 - **Alternative:** `Del SubscriptionList` without DataSetMessage (topic `Source`/`Filter` address the entry). Changes MG 9.1.9, REQ-RES-SUBLIST-011, the oracle and the reviewed `Del SubscriptionList` vectors.
 - **Also decide:** shall the agent implement it in the guideline (then re-baseline), or only record the decision?
-- **PO:** ☐ as proposed ☐ alternative ☐ other: … · implement in the guideline: ☐ yes ☐ later
+- **PO:** X as proposed ☐ alternative ☐ other: … · implement in the guideline: X yes ☐ later
 
 ### D-2 – Q-020: how D7 `validate` checks Birth, Close and Will (REQ-LIFE-003/007/009)
 
@@ -40,14 +40,14 @@ Current state: **32 drafts** (3 REQs, 29 payload vectors), **1 open spec finding
 - **Problem:** a Birth is a normal `Pub MAM`, a Close/Will a normal `Pub Health`. From one message the validator cannot tell the role, so REQ-LIFE-003 (Birth = own MAM), REQ-LIFE-007 (Close = `NORMAL_0`, HealthScore 0) and REQ-LIFE-009 (Will = `FAILURE_1`, HealthScore 0) cannot be checked offline. ADR-0019 §8 had listed "REQ-LIFE-003 + `d7-validate`" as a candidate; C-034 deferred it.
 - **Option (a) – recommended:** payload vectors get an optional field `role` (`birth`/`close`/`will`); D7 `validate --role <role>` applies the role rules; the three REQs get `d7-validate` in addition to `d7-test`, with positive/negative vectors in C-035. Pro: offline checkable, testable with vectors, SDK developers can check their Will message before deployment. Con: one more vector field and CLI option; the role is declared by the caller, not proven.
 - **Option (b):** keep REQ-LIFE-003/007/009 with `d7-test` only (live: connect, disconnect, kill). Pro: no new concepts. Con: no offline check, no vector coverage before P5.
-- **PO:** ☐ (a) ☐ (b) ☐ other: …
+- **PO:** X (a) ☐ (b) ☐ other: …
 
 ### D-3 – Cycle split (MetaData → C-035)
 
 - **Where:** `project/ROADMAP.md` P2, log [C-034 "Split"](log/2026-10-23_C-034_foundation-envelope.md#split-agent-decision-allowed-by-the-po).
 - **Change:** C-034 delivered foundation + `ua-data` envelope. The bare MetaData (`ua-metadata`, module `metadata`, REQ-MSG-012, REQ-MSG-032 … 045, gap REQs REQ-MSG-042/043/045, 8 bare MetaData vectors) becomes **C-035**. Later cycles shift by one: C-036 Actions + core resources · C-037 Data/Metadata/Event/SubscriptionList · C-038 Config + `broker.json` · C-039 D7 `validate` · **C-040 P2 exit review**.
 - **Reason:** MetaData is its own type system and would roughly double the schema and vector volume of C-034 (already 29 vector drafts to review).
-- **PO:** ☐ accepted ☐ other: …
+- **PO:** X accepted ☐ other: …
 
 ## Reviews
 
@@ -83,7 +83,7 @@ Current state: **32 drafts** (3 REQs, 29 payload vectors), **1 open spec finding
 | ☐ | [V-PAY-150](../oec/spec/vectors/view/payload-constructed.md#v-pay-150) | Set Data with a SequenceNumber | BUS-010 | V-PAY-061 | `SequenceNumber` 12 (removed from the guideline example by SF-079) |
 | ☐ | [V-PAY-151](../oec/spec/vectors/view/payload-constructed.md#v-pay-151) | Pub PublicationList entry with the Filter as WriterGroupName | MSG-025, RES-PUBLIST-002 | V-PAY-037 | entry `WriterGroupName` `oee` instead of `Data/oee` |
 
-**PO:** ☐ all accepted ☐ accepted except: …
+**PO:** X all accepted ☐ accepted except: …
 
 ### R-2 – Reviewed vectors with extended `reqs` (back to `draft`)
 
@@ -99,7 +99,7 @@ Current state: **32 drafts** (3 REQs, 29 payload vectors), **1 open spec finding
 | ☐ | [V-PAY-046](../oec/spec/vectors/view/payload-guideline.md#v-pay-046) | B1.1.10: Del ReferenceDesignation of an explicit asset | REQ-PAG-009 |
 | ☐ | [V-PAY-061](../oec/spec/vectors/view/payload-guideline.md#v-pay-061) | B1.1.4: Set explicit Data tag of an explicit asset | REQ-PAG-009 |
 
-**PO:** ☐ all accepted ☐ accepted except: …
+**PO:** X all accepted ☐ accepted except: …
 
 ### R-3 – Reclassified requirements (back to `draft`)
 
@@ -109,7 +109,7 @@ Current state: **32 drafts** (3 REQs, 29 payload vectors), **1 open spec finding
 | ☐ | [REQ-PAG-009](../oec/spec/requirements/view/pag.md#req-pag-009) | Set and Del are not paginated | `d7-validate` → `schema, d7-validate` | A PaginationRequest/Pagination in a `Set`/`Del` is visible from payload + topic method; the entry schemas reject DSWId 1 and 2 (ADR-0019 §8 candidate). Note points to SF-098 (D-1); `MaxPacketSize` not checked. Negative vector V-PAY-149. |
 | ☐ | [REQ-BUS-002](../oec/spec/requirements/view/bus.md#req-bus-002) | A requester publishes on the request topic of the addressed component | `d7-validate` → `d7-test` | One message shows the topic's ServiceType/AppId, but not whether they belong to the addressed component; D7 `test` checks it against the component under test. No negative vector is possible offline. |
 
-**PO:** ☐ all accepted ☐ accepted except: …
+**PO:** X all accepted ☐ accepted except: …
 
 ### R-4 – Umbrella implication map
 
@@ -124,7 +124,7 @@ Current state: **32 drafts** (3 REQs, 29 payload vectors), **1 open spec finding
 
 The maps of REQ-CMP-004/005/025/026, REQ-TOP-002 and REQ-IL-001/008 follow in C-039 (D7 `validate`).
 
-**PO:** ☐ accepted ☐ other: …
+**PO:** X accepted ☐ other: …
 
 ### R-5 – ADR-0019 editorial clarifications
 
@@ -134,7 +134,7 @@ The maps of REQ-CMP-004/005/025/026, REQ-TOP-002 and REQ-IL-001/008 follow in C-
 - §1 **Reference lists (new):** the MG refs in parentheses of a `$comment` are refs of the named REQs; the harness checks REQ ids and refs against the catalog.
 - §2: Health moved to `v2/resources/` (done).
 
-**PO:** ☐ accepted
+**PO:** X accepted
 
 ## Not open, for information
 
