@@ -6,6 +6,7 @@
 # (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 # REQ-MSG-026 reclassified (+schema) in C-034, reviewed in the C-034 review (2026-10-24).
+# REQ-MSG-038 reclassified (-schema, rule layer only) in C-035; draft for the PO review.
 area: MSG
 baseline: "68d878d"
 requirements:
@@ -907,9 +908,14 @@ requirements:
     quotes:
       - ref: MG 8.2.6
         text: The Name shall be unique in the DataSet.
-    verification: [schema, d7-validate]
+    verification: [d7-validate]
     inventory: [MG-8.2.6-231acec2]
-    status: reviewed
+    status: draft
+    notes: >-
+      Reclassified in C-035 (-schema, ADR-0019 §9): uniqueness of a key
+      across array items is not expressible in JSON Schema (uniqueItems
+      compares whole items); the rule layer of D7 validate checks it (R-3,
+      expectation V-PAY-159).
 
   - id: REQ-MSG-039
     title: NodeIds are JSON strings without namespace index

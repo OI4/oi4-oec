@@ -144,7 +144,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-MSG-035 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (12) | V-PAY-156* | positive only |
 | REQ-MSG-036 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-157* | positive only |
 | REQ-MSG-037 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-158* | positive only |
-| REQ-MSG-038 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-159* (rule) | positive only |
+| REQ-MSG-038 | d7-validate | draft | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-159* (rule) | positive only |
 | REQ-MSG-039 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-160* | positive only |
 | REQ-MSG-040 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (23) | V-PAY-161* | positive only |
 | REQ-MSG-041 | schema, d7-validate | reviewed | V-PAY-011, V-PAY-021, V-PAY-121 | V-PAY-162* | positive only |
