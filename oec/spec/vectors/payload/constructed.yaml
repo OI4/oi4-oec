@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034, reviewed by the PO (C-034 review 2026-10-24).
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034, reviewed by the PO (C-034 review 2026-10-24); V-PAY-152 … 170 (MetaData: DataSetMetaData envelope, DataSetMetaDataType and its data type descriptions, resource MetaData, Pub/Set with {}) drafted in C-035.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "68d878d"
@@ -10,7 +10,7 @@ description: >-
   checked strictly. Since C-027 also invalid variants of golden vectors that
   each violate one rule of the resource content checks (Health, Pagination,
   MAM, PublicationList; since C-028 Event, Oi4Pv, SubscriptionList and Get
-  Metadata; since C-029 Config).
+  Metadata; since C-029 Config; since C-035 the MetaData objects of MG 8.2.2 … 8.2.15).
 vectors:
   - id: V-PAY-018
     title: "Pub Health with user-defined keys, strict validation"
@@ -2762,4 +2762,2564 @@ vectors:
             }
           }
         ]
+      }
+
+  - id: V-PAY-152
+    title: "Pub Metadata with structure, enumeration and simple data types"
+    expected: valid
+    reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-020, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-042, REQ-MSG-043, REQ-MSG-044, REQ-MSG-045, REQ-RES-META-003]
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      Self-initialized Pub Metadata (ReplyTo "") of the publisher-defined Data
+      DataSet axis of the field data service (Source = the application, Filter
+      = WriterGroupName axis). The DataSet uses three vendor data types of the
+      namespace http://vendor.com/UA/ (NodeIds and QualifiedNames in the nsu=
+      form, REQ-MSG-039): the structure Range (StructureType Structure_0, two
+      scalar Double fields), the enumeration AxisMode (BuiltInType 6, Int64
+      Values as JSON strings, DisplayName as LocalizedText) and the simple
+      type Percent (based on Double). Without DataSetClassId (publisher-
+      defined DataSet, REQ-MSG-012 "may"). Constructed because no guideline
+      example shows a filled StructureDataTypes, EnumDataTypes or
+      SimpleDataTypes.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-153
+    title: "Predefined MetaData of ReferenceDesignation without DataSetClassId"
+    expected: invalid
+    violates: [REQ-MSG-012]
+    reason: "The MetaData of a resource with a predefined DataSetClassId (MG A2) contains it."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-017 (MG B2) without the DataSetClassId
+      27a75019-164a-496d-a38b-90e8a55c2cfa. A bare DataSetMetaDataType is the
+      predefined MetaData of the resource named by Name (MG B2, SF-054).
+    object: DataSetMetaDataType
+    payload: |-
+      {
+        "Name": "ReferenceDesignation",
+        "Description": {
+          "Locale": "en-US",
+          "Text": "Reference designations of a single asset according to IEC 81346."
+        },
+        "Fields": [
+          {
+            "Name": "Function",
+            "Description": {
+              "Locale": "en-US",
+              "Text": "Function-oriented reference designation of the asset."
+            },
+            "FieldFlags": 0,
+            "BuiltInType": 24,
+            "DataType": "i=22",
+            "ValueRank": -1,
+            "ArrayDimensions": [],
+            "MaxStringLength": 0,
+            "DataSetFieldId": "30ee622d-1232-5457-a9c9-15d97405d379",
+            "Properties": []
+          },
+          {
+            "Name": "Product",
+            "Description": {
+              "Locale": "en-US",
+              "Text": "Product-oriented reference designation of the asset."
+            },
+            "FieldFlags": 0,
+            "BuiltInType": 24,
+            "DataType": "i=22",
+            "ValueRank": -1,
+            "ArrayDimensions": [],
+            "MaxStringLength": 0,
+            "DataSetFieldId": "2a12dacd-7068-5f0b-bcaf-8fc2d5836ebb",
+            "Properties": []
+          },
+          {
+            "Name": "Location",
+            "Description": {
+              "Locale": "en-US",
+              "Text": "Location-oriented reference designation of the asset."
+            },
+            "FieldFlags": 0,
+            "BuiltInType": 24,
+            "DataType": "i=22",
+            "ValueRank": -1,
+            "ArrayDimensions": [],
+            "MaxStringLength": 0,
+            "DataSetFieldId": "80214364-6404-5f92-beda-4c65e61e21aa",
+            "Properties": []
+          }
+        ],
+        "ConfigurationVersion": {
+          "MajorVersion": 693008710,
+          "MinorVersion": 693008710
+        },
+        "Namespaces": [],
+        "StructureDataTypes": [],
+        "EnumDataTypes": [],
+        "SimpleDataTypes": []
+      }
+
+  - id: V-PAY-154
+    title: "Pub Metadata without Timestamp"
+    expected: invalid
+    violates: [REQ-MSG-032]
+    reason: "A DataSetMetaData contains the Timestamp of its first sending (MG 8.2.2)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 without Timestamp.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-155
+    title: "Pub Metadata with a numeric StructureType"
+    expected: invalid
+    violates: [REQ-MSG-034, REQ-MSG-042]
+    reason: "StructureType is written as \"Structure_0\" (VerboseEncoding), not as its numeric value 0."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose StructureDefinition has StructureType 0. The numeric
+      value violates the VerboseEncoding of the MetaData (REQ-MSG-034) and is
+      no value of EnumStructureType (REQ-MSG-042), as for the enumerations of
+      the resources (V-PAY-145).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": 0,
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-156
+    title: "Pub Metadata without the empty EnumDataTypes"
+    expected: invalid
+    violates: [REQ-MSG-035]
+    reason: "EnumDataTypes is Mandatory and is sent as an empty array (SF-045)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-121 without the empty array EnumDataTypes.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Metadata/aHR0cHM6Ly9pZC52ZW5kb3IuY29tL1RlbXBlcmF0dXJlU2Vuc29yL1RTLTEwMC80NzEx/Temperature"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 15,
+        "WriterGroupName": "Temperature",
+        "DataSetWriterName": "https://id.vendor.com/TemperatureSensor/TS-100/4711",
+        "Timestamp": "2019-06-26T13:16:00.000+01:00",
+        "ReplyTo": "",
+        "MetaData": {
+          "Namespaces": [],
+          "StructureDataTypes": [],
+          "SimpleDataTypes": [],
+          "Name": "Temperature",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Current temperature of the sensor"
+          },
+          "Fields": [
+            {
+              "Name": "Temperature",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Measured temperature"
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "8e2e1a3c-6f0a-4b0f-9a35-2c9a3c1f6d11",
+              "Properties": [
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 4408652,
+                      "DisplayName": {
+                        "Text": "°C"
+                      },
+                      "Description": {
+                        "Text": "degree Celsius"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 1,
+            "MinorVersion": 0
+          }
+        }
+      }
+
+  - id: V-PAY-157
+    title: "Pub Metadata with an incomplete ConfigurationVersion"
+    expected: invalid
+    violates: [REQ-MSG-036]
+    reason: "A ConfigurationVersionDataType contains MajorVersion and MinorVersion."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-121 whose ConfigurationVersion has no MinorVersion.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Metadata/aHR0cHM6Ly9pZC52ZW5kb3IuY29tL1RlbXBlcmF0dXJlU2Vuc29yL1RTLTEwMC80NzEx/Temperature"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 15,
+        "WriterGroupName": "Temperature",
+        "DataSetWriterName": "https://id.vendor.com/TemperatureSensor/TS-100/4711",
+        "Timestamp": "2019-06-26T13:16:00.000+01:00",
+        "ReplyTo": "",
+        "MetaData": {
+          "Namespaces": [],
+          "StructureDataTypes": [],
+          "EnumDataTypes": [],
+          "SimpleDataTypes": [],
+          "Name": "Temperature",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Current temperature of the sensor"
+          },
+          "Fields": [
+            {
+              "Name": "Temperature",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Measured temperature"
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "8e2e1a3c-6f0a-4b0f-9a35-2c9a3c1f6d11",
+              "Properties": [
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 4408652,
+                      "DisplayName": {
+                        "Text": "°C"
+                      },
+                      "Description": {
+                        "Text": "degree Celsius"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 1
+          }
+        }
+      }
+
+  - id: V-PAY-158
+    title: "Pub Metadata with the BuiltInType as name"
+    expected: invalid
+    violates: [REQ-MSG-037]
+    reason: "The BuiltInType of a FieldMetaData is a Byte (Part 6 Table 1), here 11 for Double."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose field Position has BuiltInType "Double".
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": "Double",
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-159
+    title: "Pub Metadata with two fields of the same name"
+    expected: invalid
+    violates: [REQ-MSG-038]
+    reason: "The Name of every FieldMetaData is unique within its DataSet."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose field Load is renamed to Position. Uniqueness is no JSON
+      Schema keyword; the rule layer of D7 validate detects it (ADR-0019 §8,
+      R-3).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-160
+    title: "Pub Metadata with a NodeId in the namespace index form"
+    expected: invalid
+    violates: [REQ-MSG-039]
+    reason: "A NodeId of another namespace than 0 uses nsu=<uri>; the index form ns=<index> is not used."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose field TravelRange has the DataType ns=1;i=3001 instead
+      of nsu=http://vendor.com/UA/;i=3001.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "ns=1;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-161
+    title: "Pub Metadata with a Description without Locale"
+    expected: invalid
+    violates: [REQ-MSG-040]
+    reason: "Every LocalizedText of MG 8.2 contains Locale and Text (SF-046)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-121 whose MetaData Description has only a Text.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Metadata/aHR0cHM6Ly9pZC52ZW5kb3IuY29tL1RlbXBlcmF0dXJlU2Vuc29yL1RTLTEwMC80NzEx/Temperature"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 15,
+        "WriterGroupName": "Temperature",
+        "DataSetWriterName": "https://id.vendor.com/TemperatureSensor/TS-100/4711",
+        "Timestamp": "2019-06-26T13:16:00.000+01:00",
+        "ReplyTo": "",
+        "MetaData": {
+          "Namespaces": [],
+          "StructureDataTypes": [],
+          "EnumDataTypes": [],
+          "SimpleDataTypes": [],
+          "Name": "Temperature",
+          "Description": {
+            "Text": "Current temperature of the sensor"
+          },
+          "Fields": [
+            {
+              "Name": "Temperature",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Measured temperature"
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "8e2e1a3c-6f0a-4b0f-9a35-2c9a3c1f6d11",
+              "Properties": [
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaType": 22,
+                    "Value": {
+                      "UaTypeId": "i=887",
+                      "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                      "UnitId": 4408652,
+                      "DisplayName": {
+                        "Text": "°C"
+                      },
+                      "Description": {
+                        "Text": "degree Celsius"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 1,
+            "MinorVersion": 0
+          }
+        }
+      }
+
+  - id: V-PAY-162
+    title: "Pub Metadata with a property value that is no Variant"
+    expected: invalid
+    violates: [REQ-MSG-041]
+    reason: "The Value of a KeyValuePair is a Variant object with UaType (Part 6 5.4.2.17)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-121 whose property EngineeringUnits carries the EUInformation body
+      directly, without the Variant wrapper {"UaType": 22, "Value": …}.
+    topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Metadata/aHR0cHM6Ly9pZC52ZW5kb3IuY29tL1RlbXBlcmF0dXJlU2Vuc29yL1RTLTEwMC80NzEx/Temperature"
+    payload: |-
+      {
+        "MessageId": "1561548960000-OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/https://id.provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 15,
+        "WriterGroupName": "Temperature",
+        "DataSetWriterName": "https://id.vendor.com/TemperatureSensor/TS-100/4711",
+        "Timestamp": "2019-06-26T13:16:00.000+01:00",
+        "ReplyTo": "",
+        "MetaData": {
+          "Namespaces": [],
+          "StructureDataTypes": [],
+          "EnumDataTypes": [],
+          "SimpleDataTypes": [],
+          "Name": "Temperature",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Current temperature of the sensor"
+          },
+          "Fields": [
+            {
+              "Name": "Temperature",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Measured temperature"
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "8e2e1a3c-6f0a-4b0f-9a35-2c9a3c1f6d11",
+              "Properties": [
+                {
+                  "Key": "EngineeringUnits",
+                  "Value": {
+                    "UaTypeId": "i=887",
+                    "NamespaceUri": "http://www.opcfoundation.org/UA/units/un/cefact",
+                    "UnitId": 4408652,
+                    "DisplayName": {
+                      "Text": "°C"
+                    },
+                    "Description": {
+                      "Text": "degree Celsius"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 1,
+            "MinorVersion": 0
+          }
+        }
+      }
+
+  - id: V-PAY-163
+    title: "Pub Metadata with an unknown StructureType"
+    expected: invalid
+    violates: [REQ-MSG-042]
+    reason: "StructureType is one of the values of EnumStructureType, e.g. \"Structure_0\"."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose StructureDefinition has StructureType "Structure" (name
+      without value).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-164
+    title: "Pub Metadata with a StructureField of ValueRank 0"
+    expected: invalid
+    violates: [REQ-MSG-043]
+    reason: "The ValueRank of a StructureField is -1 (scalar) or >= 1 (fixed rank array)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose structure field High has ValueRank 0
+      (OneOrMoreDimensions).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": 0,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-165
+    title: "Pub Metadata with two structure fields of the same name"
+    expected: invalid
+    violates: [REQ-MSG-043]
+    reason: "The Name of a StructureField is unique in its StructureDefinition."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose structure field High is renamed to Low. Uniqueness is
+      detected by the rule layer of D7 validate (ADR-0019 §8, R-3).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-166
+    title: "Pub Metadata with an enumeration value as JSON number"
+    expected: invalid
+    violates: [REQ-MSG-044]
+    reason: "The Value of an EnumField is an Int64, encoded as JSON string (\"1\")."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose enumeration field Automatic has the Value 1 as JSON
+      number.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": 1,
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-167
+    title: "Pub Metadata with two enumeration fields of the same name"
+    expected: invalid
+    violates: [REQ-MSG-044]
+    reason: "The Name of an EnumField is unique in its EnumDefinition."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose enumeration field Homing is renamed to Manual.
+      Uniqueness is detected by the rule layer of D7 validate (ADR-0019 §8,
+      R-3).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BaseDataType": "i=11",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-168
+    title: "Pub Metadata with a SimpleTypeDescription without BaseDataType"
+    expected: invalid
+    violates: [REQ-MSG-045]
+    reason: "A SimpleTypeDescription contains DataTypeId, Name, BaseDataType and BuiltInType."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 whose simple type Percent has no BaseDataType.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {
+          "Name": "axis",
+          "Description": {
+            "Locale": "en-US",
+            "Text": "Position, travel range, operating mode and load of the linear axis."
+          },
+          "Fields": [
+            {
+              "Name": "Position",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Current position of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "i=11",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e901",
+              "Properties": []
+            },
+            {
+              "Name": "TravelRange",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Software limits of the carriage in mm."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 22,
+              "DataType": "nsu=http://vendor.com/UA/;i=3001",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e902",
+              "Properties": []
+            },
+            {
+              "Name": "Mode",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Operating mode of the axis."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 6,
+              "DataType": "nsu=http://vendor.com/UA/;i=3002",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e903",
+              "Properties": []
+            },
+            {
+              "Name": "Load",
+              "Description": {
+                "Locale": "en-US",
+                "Text": "Motor load in percent of the rated torque."
+              },
+              "FieldFlags": 0,
+              "BuiltInType": 11,
+              "DataType": "nsu=http://vendor.com/UA/;i=3003",
+              "ValueRank": -1,
+              "ArrayDimensions": [],
+              "MaxStringLength": 0,
+              "DataSetFieldId": "5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904",
+              "Properties": []
+            }
+          ],
+          "Namespaces": [
+            "http://vendor.com/UA/"
+          ],
+          "StructureDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3001",
+              "Name": "nsu=http://vendor.com/UA/;Range",
+              "StructureDefinition": {
+                "DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001",
+                "BaseDataType": "i=22",
+                "StructureType": "Structure_0",
+                "Fields": [
+                  {
+                    "Name": "Low",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Lower limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  },
+                  {
+                    "Name": "High",
+                    "Description": {
+                      "Locale": "en-US",
+                      "Text": "Upper limit in mm."
+                    },
+                    "DataType": "i=11",
+                    "ValueRank": -1,
+                    "ArrayDimensions": [],
+                    "MaxStringLength": 0,
+                    "IsOptional": false
+                  }
+                ]
+              }
+            }
+          ],
+          "EnumDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3002",
+              "Name": "nsu=http://vendor.com/UA/;AxisMode",
+              "EnumDefinition": {
+                "Fields": [
+                  {
+                    "Value": "0",
+                    "Name": "Manual",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Manual"
+                    }
+                  },
+                  {
+                    "Value": "1",
+                    "Name": "Automatic",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Automatic"
+                    }
+                  },
+                  {
+                    "Value": "2",
+                    "Name": "Homing",
+                    "DisplayName": {
+                      "Locale": "en-US",
+                      "Text": "Homing"
+                    }
+                  }
+                ]
+              },
+              "BuiltInType": 6
+            }
+          ],
+          "SimpleDataTypes": [
+            {
+              "DataTypeId": "nsu=http://vendor.com/UA/;i=3003",
+              "Name": "nsu=http://vendor.com/UA/;Percent",
+              "BuiltInType": 11
+            }
+          ],
+          "ConfigurationVersion": {
+            "MajorVersion": 693357910,
+            "MinorVersion": 693357910
+          }
+        }
+      }
+
+  - id: V-PAY-169
+    title: "Pub Metadata with an empty MetaData"
+    expected: invalid
+    violates: [REQ-RES-META-003]
+    reason: "A Pub Metadata carries the filled DataSetMetaData; only a Get carries {} (MG 9.1.5)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-152 with the MetaData {} of a Get.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-metadata",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetWriterId": 95,
+        "WriterGroupName": "axis",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ReplyTo": "",
+        "MetaData": {}
+      }
+
+  - id: V-PAY-170
+    title: "Set Metadata with an empty MetaData"
+    expected: invalid
+    violates: [REQ-RES-META-004]
+    reason: "A Set Metadata carries the complete DataSetMetaData (MG 9.1.5)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-022 with the MetaData {} of a Get.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-metadata",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetWriterId": 93,
+        "WriterGroupName": "oee",
+        "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ReplyTo": "",
+        "MetaData": {}
       }
