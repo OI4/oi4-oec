@@ -7,14 +7,14 @@
 // every key that is not defined for an object (REQ-MSG-001, REQ-ACT-003 for
 // Action messages; conformance of the sender), Tolerant ignores such keys and
 // checks only the defined keys (REQ-MSG-046, view of a tolerant receiver).
-// CheckMetaDataType checks a bare DataSetMetaDataType, e.g. the predefined
-// MetaData of MG B2. The content of the DataSets (MG 8.3, content.go) is
+// CheckMetaDataType checks a bare DataSetMetaDataType, the predefined
+// MetaData of a resource (MG B2). The content of the DataSets (MG 8.3, content.go) is
 // checked for the helper DataSets PaginationRequest, Pagination, Locale and
 // Query (areas PAG, LOC, QRY, RES-REFDES), the resources MAM, Health,
 // Profile, PublicationList and ReferenceDesignation (areas RES-*, C-027) and
 // Data (Oi4Pv), Metadata (empty Get), Event and SubscriptionList (C-028)
-// and Config (C-029). The deep structure of the data type descriptions
-// (MG 8.2.10 … 8.2.15) is not checked here.
+// and Config (C-029). The data type descriptions of the MetaData
+// (MG 8.2.9 … 8.2.15) are checked since C-035.
 package payload
 
 import (
@@ -234,11 +234,15 @@ func Check(t Topic, msg any) []Problem {
 	return CheckMode(t, msg, Strict)
 }
 
-// CheckMetaDataType validates a bare DataSetMetaDataType (MG 8.2.4), e.g. the
-// predefined MetaData of a resource (MG B2).
+// CheckMetaDataType validates a bare DataSetMetaDataType (MG 8.2.4): the
+// predefined MetaData of a resource (MG B2, the only bare DataSetMetaDataType
+// of the guideline). The resource is named by its Name; for a resource with
+// a predefined DataSetClassId (MG A2) the MetaData carries exactly that id
+// (REQ-MSG-012, REQ-MSG-010).
 func CheckMetaDataType(v any, mode Mode) []Problem {
 	c := &checker{mode: mode}
 	c.metaDataType("", v)
+	c.resourceMetaData(v)
 	return c.sorted()
 }
 
@@ -604,12 +608,19 @@ func (c *checker) metadata(msg any) {
 		c.add("/WriterGroupName", "REQ-MSG-024", "WriterGroupName %q differs from the topic Filter %q", group, c.t.Filter)
 	}
 	if md, ok := m["MetaData"]; ok {
-		if c.t.Method == "Get" {
+		obj, isObj := md.(map[string]any)
+		empty := isObj && len(obj) == 0
+		switch {
+		case c.t.Method == "Get":
 			// A Get carries an empty DataSetMetaData (MG 9.1.5).
-			if obj, isObj := md.(map[string]any); !isObj || len(obj) > 0 {
+			if !empty {
 				c.add("/MetaData", "REQ-RES-META-001", "MetaData of a Get must be the empty object {}")
 			}
-		} else {
+		case empty && c.t.Method == "Pub":
+			c.add("/MetaData", "REQ-RES-META-003", "MetaData of a Pub must be the filled DataSetMetaData, got {}")
+		case empty && c.t.Method == "Set":
+			c.add("/MetaData", "REQ-RES-META-004", "MetaData of a Set must be the filled DataSetMetaData, got {}")
+		default:
 			c.metaDataType("/MetaData", md)
 		}
 	}
@@ -644,12 +655,17 @@ func (c *checker) metaDataType(ptr string, v any) {
 		}
 		for i, e := range arr {
 			ep := fmt.Sprintf("%s/%d", join(ptr, k), i)
-			if k == "Namespaces" {
+			switch k {
+			case "Namespaces":
 				if _, ok := e.(string); !ok {
 					c.add(ep, req, "a namespace is a string")
 				}
-			} else if _, ok := e.(map[string]any); !ok {
-				c.add(ep, req, "an entry of %s is a JSON object", k)
+			case "StructureDataTypes":
+				c.structureDescription(ep, e)
+			case "EnumDataTypes":
+				c.enumDescription(ep, e)
+			case "SimpleDataTypes":
+				c.simpleTypeDescription(ep, e)
 			}
 		}
 	}
@@ -689,27 +705,14 @@ func (c *checker) fieldMetaData(ptr string, v any) string {
 	}
 	c.uint(m, ptr, "FieldFlags", req, 65535)
 	c.uint(m, ptr, "BuiltInType", req, 25)
-	if s, ok := c.str(m, ptr, "DataType", req); ok {
-		c.nodeID(join(ptr, "DataType"), s)
-	}
+	c.nodeIDField(m, ptr, "DataType", req)
 	if v, ok := m["ValueRank"]; ok {
 		n, isNum := v.(json.Number)
 		if _, err := strconv.ParseInt(string(n), 10, 32); !isNum || err != nil {
 			c.add(join(ptr, "ValueRank"), req, "ValueRank must be an Int32")
 		}
 	}
-	if v, ok := m["ArrayDimensions"]; ok {
-		arr, isArr := v.([]any)
-		if !isArr {
-			c.add(join(ptr, "ArrayDimensions"), req, "ArrayDimensions must be a JSON array")
-		}
-		for i, d := range arr {
-			n, isNum := d.(json.Number)
-			if _, err := strconv.ParseUint(string(n), 10, 32); !isNum || err != nil {
-				c.add(fmt.Sprintf("%s/ArrayDimensions/%d", ptr, i), req, "a dimension is a UInt32")
-			}
-		}
-	}
+	c.arrayDimensions(m, ptr, req)
 	c.uint(m, ptr, "MaxStringLength", req, maxUint32)
 	if s, ok := c.str(m, ptr, "DataSetFieldId", req); ok && !guidPattern.MatchString(s) {
 		c.add(join(ptr, "DataSetFieldId"), req, "DataSetFieldId %q is no GUID string", s)
@@ -724,6 +727,216 @@ func (c *checker) fieldMetaData(ptr string, v any) string {
 		}
 	}
 	return name
+}
+
+func (c *checker) arrayDimensions(m map[string]any, ptr, req string) {
+	v, ok := m["ArrayDimensions"]
+	if !ok {
+		return
+	}
+	arr, isArr := v.([]any)
+	if !isArr {
+		c.add(join(ptr, "ArrayDimensions"), req, "ArrayDimensions must be a JSON array")
+	}
+	for i, d := range arr {
+		n, isNum := d.(json.Number)
+		if _, err := strconv.ParseUint(string(n), 10, 32); !isNum || err != nil {
+			c.add(fmt.Sprintf("%s/ArrayDimensions/%d", ptr, i), req, "a dimension is a UInt32")
+		}
+	}
+}
+
+// nodeIDField checks a NodeId key: a JSON string (req of the object) in the
+// format of REQ-MSG-039.
+func (c *checker) nodeIDField(m map[string]any, ptr, key, req string) {
+	if s, ok := c.str(m, ptr, key, req); ok {
+		c.nodeID(join(ptr, key), s)
+	}
+}
+
+// qualifiedName checks a QualifiedName key: a JSON string, not empty and not
+// in the namespace index form "<index>:<name>" (Part 6 5.1.12, REQ-MSG-041).
+func (c *checker) qualifiedName(m map[string]any, ptr, key, req string) {
+	if s, ok := c.str(m, ptr, key, req); ok && (s == "" || indexFormPattern.MatchString(s)) {
+		c.add(join(ptr, key), req, "%s %q is no QualifiedName string (plain name or nsu=<uri>;<name>)", key, s)
+	}
+}
+
+// structureTypes are the values of EnumStructureType (MG 8.2.10).
+var structureTypes = map[string]bool{
+	"Structure_0": true, "StructureWithOptionalFields_1": true, "Union_2": true,
+	"StructureWithSubtypedValues_3": true, "UnionWithSubtypedValues_4": true,
+}
+
+// enumBuiltInTypes are the BuiltInTypes of an EnumDescription (MG 8.2.12):
+// Int32 for enumerations, unsigned integers, ByteString or ExtensionObject
+// for OptionSets.
+var enumBuiltInTypes = map[int64]bool{6: true, 3: true, 5: true, 7: true, 9: true, 15: true, 22: true}
+
+// int64Text is an Int64 encoded as JSON string (Part 6 5.4.2.3).
+var int64Text = regexp.MustCompile(`^-?(?:0|[1-9][0-9]*)$`)
+
+func (c *checker) structureDescription(ptr string, v any) {
+	const req = "REQ-MSG-042"
+	m := c.object(ptr, v, shape{required: []string{"DataTypeId", "Name", "StructureDefinition"}, missing: req})
+	if m == nil {
+		return
+	}
+	c.nodeIDField(m, ptr, "DataTypeId", req)
+	c.qualifiedName(m, ptr, "Name", req)
+	if d, ok := m["StructureDefinition"]; ok {
+		c.structureDefinition(join(ptr, "StructureDefinition"), d)
+	}
+}
+
+func (c *checker) structureDefinition(ptr string, v any) {
+	const req = "REQ-MSG-042"
+	m := c.object(ptr, v, shape{required: []string{"DefaultEncodingId", "BaseDataType", "StructureType", "Fields"}, missing: req})
+	if m == nil {
+		return
+	}
+	c.nodeIDField(m, ptr, "DefaultEncodingId", req)
+	c.nodeIDField(m, ptr, "BaseDataType", req)
+	if n, isNum := m["StructureType"].(json.Number); isNum {
+		c.add(join(ptr, "StructureType"), "REQ-MSG-034", "StructureType %s is the numeric value of an enumeration; VerboseEncoding writes \"<Name>_<Value>\"", n)
+	}
+	if s, ok := c.str(m, ptr, "StructureType", req); ok && !structureTypes[s] {
+		c.add(join(ptr, "StructureType"), req, "StructureType %q is no value of EnumStructureType", s)
+	}
+	f, ok := m["Fields"]
+	if !ok {
+		return
+	}
+	arr, isArr := f.([]any)
+	if !isArr {
+		c.add(join(ptr, "Fields"), req, "Fields must be a JSON array")
+	}
+	names := map[string]bool{}
+	for i, e := range arr {
+		fp := fmt.Sprintf("%s/Fields/%d", ptr, i)
+		if name := c.structureField(fp, e); name != "" {
+			if names[name] {
+				c.add(join(fp, "Name"), "REQ-MSG-043", "field name %q is not unique in the StructureDefinition", name)
+			}
+			names[name] = true
+		}
+	}
+}
+
+func (c *checker) structureField(ptr string, v any) string {
+	const req = "REQ-MSG-043"
+	m := c.object(ptr, v, shape{
+		required: []string{"Name", "Description", "DataType", "ValueRank", "ArrayDimensions", "MaxStringLength", "IsOptional"},
+		missing:  req,
+	})
+	if m == nil {
+		return ""
+	}
+	name, _ := c.str(m, ptr, "Name", req)
+	if d, ok := m["Description"]; ok {
+		c.localizedText(join(ptr, "Description"), d)
+	}
+	c.nodeIDField(m, ptr, "DataType", req)
+	if v, ok := m["ValueRank"]; ok {
+		n, isNum := v.(json.Number)
+		r, err := strconv.ParseInt(string(n), 10, 32)
+		if !isNum || err != nil || (r != -1 && r < 1) {
+			c.add(join(ptr, "ValueRank"), req, "ValueRank must be -1 (scalar) or >= 1 (fixed rank array), got %v", v)
+		}
+	}
+	c.arrayDimensions(m, ptr, req)
+	c.uint(m, ptr, "MaxStringLength", req, maxUint32)
+	if v, ok := m["IsOptional"]; ok {
+		if _, isBool := v.(bool); !isBool {
+			c.add(join(ptr, "IsOptional"), req, "IsOptional must be a Boolean")
+		}
+	}
+	return name
+}
+
+func (c *checker) enumDescription(ptr string, v any) {
+	const req = "REQ-MSG-044"
+	m := c.object(ptr, v, shape{required: []string{"DataTypeId", "Name", "EnumDefinition", "BuiltInType"}, missing: req})
+	if m == nil {
+		return
+	}
+	c.nodeIDField(m, ptr, "DataTypeId", req)
+	c.qualifiedName(m, ptr, "Name", req)
+	if t, ok := c.uint(m, ptr, "BuiltInType", req, 255); ok && !enumBuiltInTypes[t] {
+		c.add(join(ptr, "BuiltInType"), req, "BuiltInType %d is neither 6 (enumeration) nor 3, 5, 7, 9, 15, 22 (OptionSet)", t)
+	}
+	d, ok := m["EnumDefinition"]
+	if !ok {
+		return
+	}
+	dp := join(ptr, "EnumDefinition")
+	def := c.object(dp, d, shape{required: []string{"Fields"}, missing: req})
+	if def == nil {
+		return
+	}
+	f, ok := def["Fields"]
+	if !ok {
+		return
+	}
+	arr, isArr := f.([]any)
+	if !isArr {
+		c.add(join(dp, "Fields"), req, "Fields must be a JSON array")
+	}
+	names := map[string]bool{}
+	for i, e := range arr {
+		fp := fmt.Sprintf("%s/Fields/%d", dp, i)
+		fm := c.object(fp, e, shape{required: []string{"Value", "Name"}, optional: []string{"DisplayName", "Description"}, missing: req})
+		if fm == nil {
+			continue
+		}
+		if s, ok := c.str(fm, fp, "Value", req); ok {
+			if _, err := strconv.ParseInt(s, 10, 64); err != nil || !int64Text.MatchString(s) {
+				c.add(join(fp, "Value"), req, "Value %q is no Int64 as JSON string", s)
+			}
+		}
+		for _, k := range []string{"DisplayName", "Description"} {
+			if t, ok := fm[k]; ok {
+				c.localizedText(join(fp, k), t)
+			}
+		}
+		if name, ok := c.str(fm, fp, "Name", req); ok {
+			if names[name] {
+				c.add(join(fp, "Name"), req, "field name %q is not unique in the EnumDefinition", name)
+			}
+			names[name] = true
+		}
+	}
+}
+
+func (c *checker) simpleTypeDescription(ptr string, v any) {
+	const req = "REQ-MSG-045"
+	m := c.object(ptr, v, shape{required: []string{"BaseDataType", "BuiltInType", "DataTypeId", "Name"}, missing: req})
+	if m == nil {
+		return
+	}
+	c.nodeIDField(m, ptr, "BaseDataType", req)
+	c.uint(m, ptr, "BuiltInType", req, 255)
+	c.nodeIDField(m, ptr, "DataTypeId", req)
+	c.qualifiedName(m, ptr, "Name", req)
+}
+
+// resourceMetaData checks the DataSetClassId of the predefined MetaData of a
+// resource (MG B2, MG A2): present (REQ-MSG-012) and the one of the resource
+// named by Name (REQ-MSG-010).
+func (c *checker) resourceMetaData(v any) {
+	m, _ := v.(map[string]any)
+	name, _ := m["Name"].(string)
+	want, ok := ClassIDs[name]
+	if !ok {
+		return
+	}
+	id, present := m["DataSetClassId"]
+	switch {
+	case !present:
+		c.add("", "REQ-MSG-012", "the MetaData of %s lacks its DataSetClassId %s", name, want)
+	case id != want:
+		c.add("/DataSetClassId", "REQ-MSG-010", "DataSetClassId of %s must be %s, got %v", name, want, id)
+	}
 }
 
 func (c *checker) keyValuePair(ptr string, v any) {

@@ -80,6 +80,18 @@ var metadataPub = `{
   }
 }`
 
+// metadataTypes is metadataPub with one entry in each data type
+// description array (MG 8.2.9 … 8.2.15).
+var metadataTypes = strings.Replace(metadataPub, `"StructureDataTypes": [], "EnumDataTypes": [], "SimpleDataTypes": []`,
+	`"StructureDataTypes": [{"DataTypeId": "nsu=http://vendor.com/UA/;i=3001", "Name": "nsu=http://vendor.com/UA/;Range",
+      "StructureDefinition": {"DefaultEncodingId": "nsu=http://vendor.com/UA/;i=5001", "BaseDataType": "i=22", "StructureType": "Structure_0",
+        "Fields": [
+          {"Name": "Low", "Description": {"Locale": "en-US", "Text": ""}, "DataType": "i=11", "ValueRank": -1, "ArrayDimensions": [], "MaxStringLength": 0, "IsOptional": false},
+          {"Name": "High", "Description": {"Locale": "en-US", "Text": ""}, "DataType": "i=11", "ValueRank": 1, "ArrayDimensions": [2], "MaxStringLength": 0, "IsOptional": false}]}}],
+    "EnumDataTypes": [{"DataTypeId": "nsu=http://vendor.com/UA/;i=3002", "Name": "nsu=http://vendor.com/UA/;Mode", "BuiltInType": 6,
+      "EnumDefinition": {"Fields": [{"Value": "0", "Name": "Off"}, {"Value": "-1", "Name": "On", "DisplayName": {"Locale": "en-US", "Text": "On"}}]}}],
+    "SimpleDataTypes": [{"DataTypeId": "nsu=http://vendor.com/UA/;i=3003", "Name": "nsu=http://vendor.com/UA/;Percent", "BaseDataType": "i=11", "BuiltInType": 11}]`, 1)
+
 var call = `{
   "MessageId": "1639693510000-` + requestor + `",
   "MessageType": "ua-action-request",
@@ -196,6 +208,28 @@ func TestViolations(t *testing.T) {
 		{"qualified name object form", tMetadata, metadataPub, `"Key": "Unit"`, `"Key": {"Name": "Unit"}`, []string{"REQ-MSG-041"}},
 		{"extension object without type id", tMetadata, metadataPub, `"UaTypeId": "i=887",`, ``, []string{"REQ-MSG-041"}},
 		{"description without locale", tMetadata, metadataPub, `"Description": {"Locale": "en-US", "Text": "OEE"}, "FieldFlags"`, `"Description": {"Text": "OEE"}, "FieldFlags"`, []string{"REQ-MSG-040"}},
+		{"structure description missing name", tMetadata, metadataTypes, `"Name": "nsu=http://vendor.com/UA/;Range",`, ``, []string{"REQ-MSG-042"}},
+		{"structure description name index form", tMetadata, metadataTypes, `"nsu=http://vendor.com/UA/;Range"`, `"1:Range"`, []string{"REQ-MSG-042"}},
+		{"structure definition node id", tMetadata, metadataTypes, `"BaseDataType": "i=22"`, `"BaseDataType": "ns=0;i=22"`, []string{"REQ-MSG-039"}},
+		{"structure type unknown", tMetadata, metadataTypes, `"Structure_0"`, `"Structure"`, []string{"REQ-MSG-042"}},
+		{"structure type numeric", tMetadata, metadataTypes, `"Structure_0"`, `0`, []string{"REQ-MSG-034", "REQ-MSG-042"}},
+		{"structure field value rank 0", tMetadata, metadataTypes, `"ValueRank": 1,`, `"ValueRank": 0,`, []string{"REQ-MSG-043"}},
+		{"structure field value rank -2", tMetadata, metadataTypes, `"ValueRank": 1,`, `"ValueRank": -2,`, []string{"REQ-MSG-043"}},
+		{"structure field is optional", tMetadata, metadataTypes, `"IsOptional": false}]}}]`, `"IsOptional": 0}]}}]`, []string{"REQ-MSG-043"}},
+		{"structure field missing description", tMetadata, metadataTypes, `{"Name": "Low", "Description": {"Locale": "en-US", "Text": ""},`, `{"Name": "Low",`, []string{"REQ-MSG-043"}},
+		{"structure field duplicate name", tMetadata, metadataTypes, `"Name": "High"`, `"Name": "Low"`, []string{"REQ-MSG-043"}},
+		{"structure field unknown key", tMetadata, metadataTypes, `"IsOptional": false},`, `"IsOptional": false, "Foo": 1},`, []string{"REQ-MSG-001"}},
+		{"enum built-in type", tMetadata, metadataTypes, `"BuiltInType": 6,`, `"BuiltInType": 11,`, []string{"REQ-MSG-044"}},
+		{"enum field value number", tMetadata, metadataTypes, `"Value": "0"`, `"Value": 0`, []string{"REQ-MSG-044"}},
+		{"enum field value text", tMetadata, metadataTypes, `"Value": "0"`, `"Value": "00"`, []string{"REQ-MSG-044"}},
+		{"enum field value overflow", tMetadata, metadataTypes, `"Value": "0"`, `"Value": "9223372036854775808"`, []string{"REQ-MSG-044"}},
+		{"enum field duplicate name", tMetadata, metadataTypes, `"Name": "On"`, `"Name": "Off"`, []string{"REQ-MSG-044"}},
+		{"enum field display name", tMetadata, metadataTypes, `"DisplayName": {"Locale": "en-US", "Text": "On"}`, `"DisplayName": "On"`, []string{"REQ-MSG-040"}},
+		{"enum definition missing fields", tMetadata, metadataTypes, `"EnumDefinition": {"Fields": [{"Value": "0", "Name": "Off"}, {"Value": "-1", "Name": "On", "DisplayName": {"Locale": "en-US", "Text": "On"}}]}`, `"EnumDefinition": {}`, []string{"REQ-MSG-044"}},
+		{"simple type missing built-in type", tMetadata, metadataTypes, `, "BuiltInType": 11}]`, `}]`, []string{"REQ-MSG-045"}},
+		{"simple type node id", tMetadata, metadataTypes, `"BaseDataType": "i=11"`, `"BaseDataType": "Double"`, []string{"REQ-MSG-039"}},
+		{"simple type entry no object", tMetadata, metadataTypes, `"SimpleDataTypes": [{`, `"SimpleDataTypes": [1, {`, []string{"REQ-MSG-045"}},
+		{"pub metadata empty", tMetadata, metadataPub, `"MetaData": {`, `"MetaData": {}, "x": {`, []string{"REQ-MSG-001", "REQ-RES-META-003"}},
 		{"null description", tMetadata, metadataPub, `"Description": {"Locale": "en-US", "Text": "OEE"}, "FieldFlags"`, `"Description": null, "FieldFlags"`, []string{"REQ-MSG-040"}},
 		{"action message type", tCall, call, `"ua-action-request"`, `"ua-data"`, []string{"REQ-ACT-001"}},
 		{"call without timeout", tCall, call, `"TimeoutHint": 10000,`, ``, []string{"REQ-ACT-002"}},
@@ -314,6 +348,51 @@ func TestCheckMetaDataType(t *testing.T) {
 	}
 	if ps := CheckMetaDataType(md, Tolerant); len(ps) != 1 || ps[0].Req != "REQ-MSG-035" {
 		t.Errorf("tolerant: got %v", ps)
+	}
+}
+
+func TestMetaDataTypes(t *testing.T) {
+	if got := reqs(t, tMetadata, metadataTypes); len(got) > 0 {
+		t.Errorf("unexpected problems %v", got)
+	}
+	set := tMetadata
+	set.Method = "Set"
+	v, _ := Parse([]byte(strings.Replace(metadataPub, `"MetaData": {`, `"MetaData": {}, "x": {`, 1)))
+	m := v.(map[string]any)
+	delete(m, "x")
+	got := map[string]bool{}
+	for _, p := range CheckMode(set, m, Strict) {
+		got[p.Req] = true
+	}
+	if !got["REQ-RES-META-004"] || len(got) != 1 {
+		t.Errorf("Set with empty MetaData: got %v", got)
+	}
+}
+
+func TestResourceMetaData(t *testing.T) {
+	health := `{"Name": "Health", "Namespaces": [], "StructureDataTypes": [], "EnumDataTypes": [], "SimpleDataTypes": [],
+"DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb"}`
+	for _, c := range []struct {
+		name, old, new string
+		want           []string
+	}{
+		{"valid", ``, ``, nil},
+		{"missing class id", `,
+"DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb"`, ``, []string{"REQ-MSG-012"}},
+		{"class id of another resource", `d8e7b6df-42ba-448a-975a-199f59e8ffeb`, `360ca8f3-5e66-42a2-8f10-9cdf45f4bf58`, []string{"REQ-MSG-010"}},
+		{"no resource", `"Name": "Health"`, `"Name": "oee"`, nil},
+	} {
+		v, err := Parse([]byte(strings.Replace(health, c.old, c.new, 1)))
+		if err != nil {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+		var got []string
+		for _, p := range CheckMetaDataType(v, Strict) {
+			got = append(got, p.Req)
+		}
+		if !reflect.DeepEqual(got, c.want) {
+			t.Errorf("%s: got %v, want %v", c.name, got, c.want)
+		}
 	}
 }
 
