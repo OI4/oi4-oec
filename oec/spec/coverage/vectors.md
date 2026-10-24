@@ -11,7 +11,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | BUS | 3 | 1 | 0 | 0 | 0 | 2 |
 | CMP | 4 | 0 | 0 | 0 | 0 | 4 |
 | IL | 10 | 6 | 0 | 0 | 1 | 3 |
-| LIFE | 3 | 0 | 0 | 3 | 0 | 0 |
+| LIFE | 3 | 0 | 0 | 0 | 0 | 3 |
 | LOC | 2 | 2 | 0 | 0 | 0 | 0 |
 | MSG | 38 | 22 | 2 | 11 | 0 | 3 |
 | PAG | 5 | 5 | 0 | 0 | 0 | 0 |
@@ -27,7 +27,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | RES-REFDES | 7 | 0 | 0 | 7 | 0 | 0 |
 | RES-SUBLIST | 6 | 2 | 0 | 4 | 0 | 0 |
 | TOP | 13 | 6 | 0 | 1 | 4 | 2 |
-| **Total** | 159 | 61 | 2 | 67 | 9 | 20 |
+| **Total** | 159 | 61 | 2 | 64 | 9 | 23 |
 
 ## Entry schemas per allowed matrix row
 
@@ -109,9 +109,9 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-IL-016 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (9) | V-IL-103 (R-1), V-IL-104 (R-1), V-IL-105 (R-1), V-IL-106 (R-1) … (6) | covered |
 | REQ-IL-018 | d7-validate | reviewed | V-IL-011, V-IL-012 | V-IL-109 (R-1), V-IL-110 (R-1), V-IL-117 (R-1), V-TOP-246 (R-1) | covered |
 | REQ-IL-019 | d7-validate | reviewed | V-IL-009, V-TOP-128 | V-IL-101 (R-1), V-IL-102 (R-1), V-TOP-245 (R-1) | covered |
-| REQ-LIFE-003 | schema, d7-validate, d7-monitor | draft | V-PAY-023 | V-PAY-171* (rule) | positive only |
-| REQ-LIFE-007 | schema, d7-validate, d7-test | draft | V-PAY-024 | V-PAY-172* (rule), V-PAY-173* (rule) | positive only |
-| REQ-LIFE-009 | schema, d7-validate, d7-test | draft | V-PAY-025 | V-PAY-174* (rule), V-PAY-175* (rule) | positive only |
+| REQ-LIFE-003 | schema, d7-validate, d7-monitor | draft | V-PAY-023* | V-PAY-171* (rule) | none |
+| REQ-LIFE-007 | schema, d7-validate, d7-test | draft | V-PAY-024* | V-PAY-172* (rule), V-PAY-173* (rule) | none |
+| REQ-LIFE-009 | schema, d7-validate, d7-test | draft | V-PAY-025* | V-PAY-174* (rule), V-PAY-175* (rule) | none |
 | REQ-LOC-001 | schema, d7-validate | reviewed | V-PAY-089 | V-PAY-146 | covered |
 | REQ-LOC-003 | schema, d7-validate | reviewed | V-PAY-007 | V-PAY-127, V-PAY-128 | covered |
 | REQ-MSG-001 | schema, d7-validate | reviewed | V-PAY-003 | V-PAY-018, V-PAY-112 | covered |
@@ -131,7 +131,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-MSG-018 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-137 | covered |
 | REQ-MSG-019 | schema, d7-validate | reviewed | V-PAY-005, V-PAY-006, V-PAY-007, V-PAY-053 … (5) | V-PAY-138 | covered |
 | REQ-MSG-020 | schema, d7-validate | reviewed | V-PAY-006, V-PAY-117, V-PAY-118, V-PAY-121 … (5) | V-PAY-139 | covered |
-| REQ-MSG-023 | schema, d7-validate | reviewed | V-PAY-003, V-PAY-021, V-PAY-023, V-PAY-024 … (32) | V-PAY-148 (rule) | covered |
+| REQ-MSG-023 | schema, d7-validate | reviewed | V-PAY-003, V-PAY-021, V-PAY-028, V-PAY-029 … (32) | V-PAY-148 (rule) | covered |
 | REQ-MSG-024 | schema, d7-validate | reviewed | V-PAY-003, V-PAY-004, V-PAY-006, V-PAY-021 … (28) | V-PAY-140 | covered |
 | REQ-MSG-025 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-069 … (6) | V-PAY-151 | covered |
 | REQ-MSG-026 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-141 | covered |
