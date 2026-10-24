@@ -18,12 +18,21 @@ import (
 type probe struct {
 	id     string
 	base   string // payload vector the mutation starts from
-	rule   string // topic form (entry schema)
+	rule   string // topic form (entry schema); bareMetaData for a bare MetaData
 	mutate func(m map[string]any)
 	want   []string // exact REQ set reported by the entry schema
 }
 
+// bareMetaData is the probe "rule" of a bare DataSetMetaDataType (MG B2).
+const bareMetaData = "(bare) ResourceMetaData"
+
 func msgs(m map[string]any) []any { return m["Messages"].([]any) }
+
+func meta(m map[string]any) map[string]any { return m["MetaData"].(map[string]any) }
+
+func metaField(m map[string]any, i int) map[string]any {
+	return meta(m)["Fields"].([]any)[i].(map[string]any)
+}
 
 func validPagination() map[string]any {
 	return map[string]any{
@@ -103,6 +112,60 @@ var probes = []probe{
 			"DataSetWriterName": "https://id.consumer.com/MEService/Inst07322", "Payload": map[string]any{"Locale": "de-DE"}}
 		m["Messages"] = []any{loc, loc}
 	}, []string{"REQ-LOC-003"}},
+	{"P-19 NodeId i= at the UInt32 bounds", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		metaField(m, 0)["DataType"] = "i=4294967295"
+		metaField(m, 1)["DataType"] = "nsu=http://vendor.com/UA/;i=0003001"
+		metaField(m, 2)["DataType"] = "nsu=http://vendor.com/UA/;s=Mode;1"
+		metaField(m, 3)["DataType"] = "g=5b0e8a52-3c1f-4a8e-9d27-6f41c2b7e904"
+	}, nil},
+	{"P-20 NodeId i= beyond UInt32", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		metaField(m, 0)["DataType"] = "i=4294967296"
+	}, []string{"REQ-MSG-039"}},
+	{"P-21 NodeId as JSON object", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		metaField(m, 0)["DataType"] = map[string]any{"Id": json.Number("11")}
+	}, []string{"REQ-MSG-037"}},
+	{"P-22 QualifiedName in the index form", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		meta(m)["SimpleDataTypes"].([]any)[0].(map[string]any)["Name"] = "2:Percent"
+	}, []string{"REQ-MSG-045"}},
+	{"P-23 reserved DataSetClassId in the MetaData", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		meta(m)["DataSetClassId"] = "2ae0505e-2830-4980-b65e-0bbdf08e2d45"
+	}, []string{"REQ-MSG-014"}},
+	{"P-24 MetaData DataSetWriterId 9", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		m["DataSetWriterId"] = json.Number("9")
+	}, []string{"REQ-MSG-020"}},
+	{"P-25 ExtensionObject Variant without UaTypeId", "V-PAY-121", "pub-metadata", func(m map[string]any) {
+		v := metaField(m, 0)["Properties"].([]any)[0].(map[string]any)["Value"].(map[string]any)["Value"].(map[string]any)
+		delete(v, "UaTypeId")
+	}, []string{"REQ-MSG-041"}},
+	{"P-26 EnumField Value with a leading zero", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		meta(m)["EnumDataTypes"].([]any)[0].(map[string]any)["EnumDefinition"].(map[string]any)["Fields"].([]any)[1].(map[string]any)["Value"] = "01"
+	}, []string{"REQ-MSG-044"}},
+	{"P-27 EnumDescription BuiltInType Int16", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		meta(m)["EnumDataTypes"].([]any)[0].(map[string]any)["BuiltInType"] = json.Number("4")
+	}, []string{"REQ-MSG-044"}},
+	{"P-28 unknown key in a StructureField", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		f := meta(m)["StructureDataTypes"].([]any)[0].(map[string]any)["StructureDefinition"].(map[string]any)["Fields"].([]any)[0].(map[string]any)
+		f["Unit"] = "mm"
+	}, []string{"REQ-MSG-001"}},
+	{"P-29 Pub Metadata MetaData is no object", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		m["MetaData"] = "axis"
+	}, []string{"REQ-MSG-035"}},
+	{"P-30 MessageType ua-data in a ua-metadata", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		m["MessageType"] = "ua-data"
+	}, []string{"REQ-MSG-002"}},
+	{"P-31 resource MetaData with the DataSetClassId of another resource", "V-PAY-011", bareMetaData, func(m map[string]any) {
+		m["DataSetClassId"] = "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58"
+	}, []string{"REQ-MSG-010"}},
+	{"P-32 publisher-defined bare MetaData without DataSetClassId", "V-PAY-011", bareMetaData, func(m map[string]any) {
+		m["Name"] = "oee"
+		delete(m, "DataSetClassId")
+	}, nil},
+	{"P-33 FieldMetaData ValueRank beyond Int32", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		metaField(m, 0)["ValueRank"] = json.Number("2147483648")
+	}, []string{"REQ-MSG-037"}},
+	{"P-34 LocalizedText with a lower-case region", "V-PAY-152", "pub-metadata", func(m map[string]any) {
+		meta(m)["Description"].(map[string]any)["Locale"] = "en-us"
+	}, []string{"REQ-MSG-040"}},
 }
 
 // runProbes validates every probe against its entry schema and appends the
@@ -127,6 +190,9 @@ func runProbes(c *jsonschema.Compiler, docs map[string]any, vectors []vector) ([
 		}
 		p.mutate(inst.(map[string]any))
 		entry := schema.BaseURI + "topics/" + p.rule + ".schema.json"
+		if p.rule == bareMetaData {
+			entry = schema.BaseURI + "metadata.schema.json#/$defs/ResourceMetaData"
+		}
 		r, err := validate(c, docs, entry, inst)
 		if err != nil {
 			return nil, nil, err

@@ -31,7 +31,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 
 ## Entry schemas per allowed matrix row
 
-2 of 29 allowed rows have an entry schema (`oec/schema/v2/topics/<rule>.schema.json`).
+5 of 29 allowed rows have an entry schema (`oec/schema/v2/topics/<rule>.schema.json`).
 
 | Method | Resource | Rule | Entry schema |
 |---|---|---|---|
@@ -45,9 +45,9 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | Pub | Data | `pub-data` | **missing** |
 | Get | Data | `get-data` | **missing** |
 | Set | Data | `set-data` | **missing** |
-| Pub | Metadata | `pub-metadata` | **missing** |
-| Get | Metadata | `get-metadata` | **missing** |
-| Set | Metadata | `set-metadata` | **missing** |
+| Pub | Metadata | `pub-metadata` | yes |
+| Get | Metadata | `get-metadata` | yes |
+| Set | Metadata | `set-metadata` | yes |
 | Pub | Event | `pub-event` | **missing** |
 | Pub | Profile | `pub-profile` | **missing** |
 | Get | Profile | `get-profile` | **missing** |
@@ -144,13 +144,13 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-MSG-035 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (12) | V-PAY-156* | positive only |
 | REQ-MSG-036 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-157* | positive only |
 | REQ-MSG-037 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-158* | positive only |
-| REQ-MSG-038 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-159* | positive only |
+| REQ-MSG-038 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-159* (rule) | positive only |
 | REQ-MSG-039 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (11) | V-PAY-160* | positive only |
 | REQ-MSG-040 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (23) | V-PAY-161* | positive only |
 | REQ-MSG-041 | schema, d7-validate | reviewed | V-PAY-011, V-PAY-021, V-PAY-121 | V-PAY-162* | positive only |
 | REQ-MSG-042 | schema, d7-validate | reviewed | V-PAY-152* | V-PAY-155*, V-PAY-163* | none |
-| REQ-MSG-043 | schema, d7-validate | reviewed | V-PAY-152* | V-PAY-164*, V-PAY-165* | none |
-| REQ-MSG-044 | schema, d7-validate | reviewed | V-PAY-011, V-PAY-152* | V-PAY-166*, V-PAY-167* | positive only |
+| REQ-MSG-043 | schema, d7-validate | reviewed | V-PAY-152* | V-PAY-164*, V-PAY-165* (rule) | none |
+| REQ-MSG-044 | schema, d7-validate | reviewed | V-PAY-011, V-PAY-152* | V-PAY-166*, V-PAY-167* (rule) | positive only |
 | REQ-MSG-045 | schema, d7-validate | reviewed | V-PAY-152* | V-PAY-168* | none |
 | REQ-PAG-001 | schema, d7-validate | reviewed | V-PAY-005 | V-PAY-123 | covered |
 | REQ-PAG-003 | schema, d7-validate | reviewed | V-PAY-006 | V-PAY-124 | covered |

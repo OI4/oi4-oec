@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.openindustry4.com/oec/v2/envelope.schema.json",
   "title": "OEC message envelopes",
-  "description": "NetworkMessage and DataSetMessage of MG 8.1/8.2 (ua-data) with the fixed content masks of MG 8.1.4, and the OI4 identifier strings. ua-metadata (C-035) and the Action messages (C-036) follow in P2.",
+  "description": "NetworkMessage and DataSetMessage of MG 8.1/8.2 (ua-data) with the fixed content masks of MG 8.1.4, the DataSetMetaData NetworkMessage (ua-metadata, MG 8.2.2) and the OI4 identifier strings. The Action messages (C-036) follow in P2.",
   "$defs": {
     "ServiceType": {
       "enum": [
@@ -30,42 +30,45 @@
       "type": "string",
       "pattern": "^(?:[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+)?$"
     },
+    "NotReservedClassId": {
+      "$comment": "REQ-MSG-014 (MG A2): reserved DataSetClassIds are not used",
+      "not": {
+        "enum": [
+          "2ae0505e-2830-4980-b65e-0bbdf08e2d45",
+          "a6e6c727-4057-419f-b2ea-3fe9173e71cf",
+          "ebd12d4b-da1c-4671-ab86-db102fecc603",
+          "96d22d73-bce6-42d3-9949-45e0d04e4d54",
+          "32c0a57a-24fd-4378-8eb3-4a42a481bf56",
+          "0721c712-f7b5-4ad0-b2a0-58f0a5744963",
+          "d08ade63-777b-464a-8f58-73649dc3ec1c",
+          "965ab782-4669-480e-bab4-c6a3b14ee4cf",
+          "d2ee7674-cad5-4b59-a37c-3631bb0cd409",
+          "a9031581-4c03-4c6a-9c12-dd7fe0123ef5",
+          "04cac81f-9056-4af3-a8a0-686fc499b5f9",
+          "a04f4f5f-b2cc-40d7-9a6a-0884233ccce7",
+          "2b967128-5b7e-4c0f-a6eb-c59af1118ce6",
+          "54b8a5c2-812d-442e-8a91-257af7304161",
+          "2b4e35a2-437a-4a3d-b007-9b1c27b08127",
+          "97439c90-7d10-47b8-8ada-6913a466107d",
+          "4292bf9f-b9d0-4de1-a33e-f4736356d4c1",
+          "0b3b07af-9cf9-4b40-977f-75b5b02bb0d5",
+          "31c6e1c0-88c7-453b-ae9d-85fb6bc50275",
+          "3b4a62ba-026f-4ee8-bc99-3a5f85fc9f3b",
+          "760abda2-ba40-4e6e-863a-eea8c002b4e4",
+          "414e26f6-341b-43b7-90fc-bb9e0b1b0866",
+          "3b423a40-a676-4ba0-8017-f0b2cd65bc26",
+          "cfa96d87-e65c-42f4-9d9e-026797c37f4c",
+          "0c959a0f-ec83-43c1-9ccc-20ab20a0e171",
+          "bb725543-9de1-4f22-883f-d32c2de5dea1"
+        ]
+      }
+    },
     "DataSetClassId": {
       "$comment": "REQ-MSG-003 (MG 8.2.1): GUID string",
       "$ref": "opcua.schema.json#/$defs/Guid",
       "allOf": [
         {
-          "$comment": "REQ-MSG-014 (MG A2): reserved DataSetClassIds are not used",
-          "not": {
-            "enum": [
-              "2ae0505e-2830-4980-b65e-0bbdf08e2d45",
-              "a6e6c727-4057-419f-b2ea-3fe9173e71cf",
-              "ebd12d4b-da1c-4671-ab86-db102fecc603",
-              "96d22d73-bce6-42d3-9949-45e0d04e4d54",
-              "32c0a57a-24fd-4378-8eb3-4a42a481bf56",
-              "0721c712-f7b5-4ad0-b2a0-58f0a5744963",
-              "d08ade63-777b-464a-8f58-73649dc3ec1c",
-              "965ab782-4669-480e-bab4-c6a3b14ee4cf",
-              "d2ee7674-cad5-4b59-a37c-3631bb0cd409",
-              "a9031581-4c03-4c6a-9c12-dd7fe0123ef5",
-              "04cac81f-9056-4af3-a8a0-686fc499b5f9",
-              "a04f4f5f-b2cc-40d7-9a6a-0884233ccce7",
-              "2b967128-5b7e-4c0f-a6eb-c59af1118ce6",
-              "54b8a5c2-812d-442e-8a91-257af7304161",
-              "2b4e35a2-437a-4a3d-b007-9b1c27b08127",
-              "97439c90-7d10-47b8-8ada-6913a466107d",
-              "4292bf9f-b9d0-4de1-a33e-f4736356d4c1",
-              "0b3b07af-9cf9-4b40-977f-75b5b02bb0d5",
-              "31c6e1c0-88c7-453b-ae9d-85fb6bc50275",
-              "3b4a62ba-026f-4ee8-bc99-3a5f85fc9f3b",
-              "760abda2-ba40-4e6e-863a-eea8c002b4e4",
-              "414e26f6-341b-43b7-90fc-bb9e0b1b0866",
-              "3b423a40-a676-4ba0-8017-f0b2cd65bc26",
-              "cfa96d87-e65c-42f4-9d9e-026797c37f4c",
-              "0c959a0f-ec83-43c1-9ccc-20ab20a0e171",
-              "bb725543-9de1-4f22-883f-d32c2de5dea1"
-            ]
-          }
+          "$ref": "#/$defs/NotReservedClassId"
         }
       ]
     },
@@ -103,6 +106,61 @@
         "Messages": {
           "$comment": "REQ-MSG-005 (MG 8.2.1): Messages is always a JSON array; the DataSetMessages are typed by the entry schemas (topics/*, message.schema.json)",
           "type": "array"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "MetaDataNetworkMessage": {
+      "$comment": "REQ-MSG-032 (MG 8.2.2): fields of a ua-metadata NetworkMessage (DataSetMetaData)",
+      "type": "object",
+      "required": [
+        "MessageId",
+        "MessageType",
+        "PublisherId",
+        "DataSetWriterId",
+        "WriterGroupName",
+        "DataSetWriterName",
+        "Timestamp",
+        "ReplyTo",
+        "MetaData"
+      ],
+      "properties": {
+        "MessageId": {
+          "$ref": "#/$defs/MessageId"
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-002 (MG 8.2.2)",
+          "const": "ua-metadata"
+        },
+        "PublisherId": {
+          "$ref": "#/$defs/PublisherId"
+        },
+        "DataSetWriterId": {
+          "$ref": "opcua.schema.json#/$defs/UInt16",
+          "allOf": [
+            {
+              "$comment": "REQ-MSG-020 (MG 8.2.3): 0 is invalid, 1 … 9 are reserved (helper DataSets have no DataSetMetaData)",
+              "minimum": 10
+            }
+          ]
+        },
+        "WriterGroupName": {
+          "type": "string"
+        },
+        "DataSetWriterName": {
+          "type": "string"
+        },
+        "Timestamp": {
+          "$ref": "opcua.schema.json#/$defs/DateTime"
+        },
+        "ReplyTo": {
+          "$ref": "#/$defs/ReplyTo"
+        },
+        "MetaData": {
+          "$comment": "DataSetMetaDataType, or {} in a Get (MG 9.1.5); typed per method by the entry schemas topics/*-metadata and by message.schema.json"
         }
       },
       "unevaluatedProperties": {

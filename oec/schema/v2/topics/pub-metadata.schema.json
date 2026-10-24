@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/pub-metadata.schema.json",
+  "title": "Pub Metadata (topic form pub-metadata)",
+  "description": "Entry schema of the topic form pub-metadata (topic.abnf, matrix row Pub/Metadata, MG 9.1.5).",
+  "$ref": "../envelope.schema.json#/$defs/MetaDataNetworkMessage",
+  "properties": {
+    "MetaData": {
+      "if": {
+        "type": "object",
+        "maxProperties": 0
+      },
+      "then": {
+        "$comment": "REQ-RES-META-003 (MG 9.1.5): a Pub carries the filled DataSetMetaData, not {}",
+        "not": {}
+      },
+      "else": {
+        "$ref": "../metadata.schema.json#/$defs/DataSetMetaData"
+      }
+    }
+  }
+}

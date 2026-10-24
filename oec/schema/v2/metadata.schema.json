@@ -1,0 +1,686 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/metadata.schema.json",
+  "title": "DataSetMetaDataType",
+  "description": "MetaData of a DataSetMetaData (MG 8.2.4 … 8.2.15): DataSetMetaDataType with FieldMetaData, KeyValuePair and the data type descriptions, and the predefined MetaData of the resources (MG B2). Uniqueness of names (REQ-MSG-038, REQ-MSG-043, REQ-MSG-044) and number semantics (Int64 range of an EnumField Value) are rules of the rule layer (ADR-0019 §8, R-3/R-4).",
+  "$defs": {
+    "DataSetMetaData": {
+      "$comment": "REQ-MSG-035 (MG 8.2.4): DataSetMetaDataType",
+      "type": "object",
+      "required": [
+        "Name",
+        "Namespaces",
+        "StructureDataTypes",
+        "EnumDataTypes",
+        "SimpleDataTypes"
+      ],
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "$ref": "opcua.schema.json#/$defs/LocalizedText"
+        },
+        "Fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldMetaData"
+          }
+        },
+        "DataSetClassId": {
+          "$ref": "opcua.schema.json#/$defs/Guid",
+          "allOf": [
+            {
+              "$ref": "envelope.schema.json#/$defs/NotReservedClassId"
+            }
+          ]
+        },
+        "ConfigurationVersion": {
+          "$ref": "opcua.schema.json#/$defs/ConfigurationVersion"
+        },
+        "Namespaces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "StructureDataTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StructureDescription"
+          }
+        },
+        "EnumDataTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EnumDescription"
+          }
+        },
+        "SimpleDataTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SimpleTypeDescription"
+          }
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "ResourceMetaData": {
+      "$comment": "Predefined MetaData of a resource (MG B2; bare DataSetMetaDataType, not published via Metadata, SF-054): a DataSetMetaData whose Name is a resource carries the DataSetClassId of that resource.",
+      "$ref": "#/$defs/DataSetMetaData",
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "Name"
+            ],
+            "properties": {
+              "Name": {
+                "const": "MAM"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-MSG-012 (MG 8.2.4, MG A2): the MetaData of a resource with a predefined DataSetClassId contains it",
+                "required": [
+                  "DataSetClassId"
+                ]
+              },
+              {
+                "properties": {
+                  "DataSetClassId": {
+                    "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of MAM",
+                    "const": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "Name"
+            ],
+            "properties": {
+              "Name": {
+                "const": "Health"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-MSG-012 (MG 8.2.4, MG A2): the MetaData of a resource with a predefined DataSetClassId contains it",
+                "required": [
+                  "DataSetClassId"
+                ]
+              },
+              {
+                "properties": {
+                  "DataSetClassId": {
+                    "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of Health",
+                    "const": "d8e7b6df-42ba-448a-975a-199f59e8ffeb"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "Name"
+            ],
+            "properties": {
+              "Name": {
+                "const": "Config"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-MSG-012 (MG 8.2.4, MG A2): the MetaData of a resource with a predefined DataSetClassId contains it",
+                "required": [
+                  "DataSetClassId"
+                ]
+              },
+              {
+                "properties": {
+                  "DataSetClassId": {
+                    "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of Config",
+                    "const": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "Name"
+            ],
+            "properties": {
+              "Name": {
+                "const": "Event"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-MSG-012 (MG 8.2.4, MG A2): the MetaData of a resource with a predefined DataSetClassId contains it",
+                "required": [
+                  "DataSetClassId"
+                ]
+              },
+              {
+                "properties": {
+                  "DataSetClassId": {
+                    "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of Event",
+                    "const": "543ae05e-b6d9-4161-a0a3-350a0fac5976"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "Name"
+            ],
+            "properties": {
+              "Name": {
+                "const": "Profile"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-MSG-012 (MG 8.2.4, MG A2): the MetaData of a resource with a predefined DataSetClassId contains it",
+                "required": [
+                  "DataSetClassId"
+                ]
+              },
+              {
+                "properties": {
+                  "DataSetClassId": {
+                    "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of Profile",
+                    "const": "48017c6a-05c8-48d7-9d85-4b08bbb707f3"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "Name"
+            ],
+            "properties": {
+              "Name": {
+                "const": "PublicationList"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-MSG-012 (MG 8.2.4, MG A2): the MetaData of a resource with a predefined DataSetClassId contains it",
+                "required": [
+                  "DataSetClassId"
+                ]
+              },
+              {
+                "properties": {
+                  "DataSetClassId": {
+                    "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of PublicationList",
+                    "const": "217434d6-6e1e-4230-b907-f52bc9ffe152"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "Name"
+            ],
+            "properties": {
+              "Name": {
+                "const": "SubscriptionList"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-MSG-012 (MG 8.2.4, MG A2): the MetaData of a resource with a predefined DataSetClassId contains it",
+                "required": [
+                  "DataSetClassId"
+                ]
+              },
+              {
+                "properties": {
+                  "DataSetClassId": {
+                    "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of SubscriptionList",
+                    "const": "e5d68c47-c276-4929-8ab9-4c1090cac785"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "Name"
+            ],
+            "properties": {
+              "Name": {
+                "const": "ReferenceDesignation"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-MSG-012 (MG 8.2.4, MG A2): the MetaData of a resource with a predefined DataSetClassId contains it",
+                "required": [
+                  "DataSetClassId"
+                ]
+              },
+              {
+                "properties": {
+                  "DataSetClassId": {
+                    "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of ReferenceDesignation",
+                    "const": "27a75019-164a-496d-a38b-90e8a55c2cfa"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "FieldMetaData": {
+      "$comment": "REQ-MSG-037 (MG 8.2.6): FieldMetaData",
+      "type": "object",
+      "required": [
+        "Name",
+        "Description",
+        "FieldFlags",
+        "BuiltInType",
+        "DataType",
+        "ValueRank",
+        "ArrayDimensions",
+        "MaxStringLength",
+        "DataSetFieldId",
+        "Properties"
+      ],
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "$ref": "opcua.schema.json#/$defs/LocalizedText"
+        },
+        "FieldFlags": {
+          "$ref": "opcua.schema.json#/$defs/UInt16"
+        },
+        "BuiltInType": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 25
+        },
+        "DataType": {
+          "type": "string",
+          "$ref": "opcua.schema.json#/$defs/NodeId"
+        },
+        "ValueRank": {
+          "$ref": "opcua.schema.json#/$defs/Int32"
+        },
+        "ArrayDimensions": {
+          "type": "array",
+          "items": {
+            "$ref": "opcua.schema.json#/$defs/UInt32"
+          }
+        },
+        "MaxStringLength": {
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        },
+        "DataSetFieldId": {
+          "$ref": "opcua.schema.json#/$defs/Guid"
+        },
+        "Properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/KeyValuePair"
+          }
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "KeyValuePair": {
+      "$comment": "REQ-MSG-041 (MG 8.2.8): KeyValuePair with a QualifiedName Key and a Variant Value",
+      "type": "object",
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "properties": {
+        "Key": {
+          "$ref": "opcua.schema.json#/$defs/QualifiedName"
+        },
+        "Value": {
+          "$comment": "REQ-MSG-041 (MG 8.2.8): Variant (Part 6 5.4.2.17) as JSON object with UaType; an ExtensionObject (UaType 22) Value carries its UaTypeId. The Variant is not closed: Part 6 defines further keys (e.g. Dimensions).",
+          "type": "object",
+          "required": [
+            "UaType"
+          ],
+          "properties": {
+            "UaType": {
+              "not": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "required": [
+              "UaType"
+            ],
+            "properties": {
+              "UaType": {
+                "const": 22
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "Value"
+            ],
+            "properties": {
+              "Value": {
+                "type": "object",
+                "required": [
+                  "UaTypeId"
+                ],
+                "properties": {
+                  "UaTypeId": {
+                    "not": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "StructureDescription": {
+      "$comment": "REQ-MSG-042 (MG 8.2.9): StructureDescription",
+      "type": "object",
+      "required": [
+        "DataTypeId",
+        "Name",
+        "StructureDefinition"
+      ],
+      "properties": {
+        "DataTypeId": {
+          "type": "string",
+          "$ref": "opcua.schema.json#/$defs/NodeId"
+        },
+        "Name": {
+          "$ref": "opcua.schema.json#/$defs/QualifiedName"
+        },
+        "StructureDefinition": {
+          "$ref": "#/$defs/StructureDefinition"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "StructureDefinition": {
+      "$comment": "REQ-MSG-042 (MG 8.2.10): StructureDefinition",
+      "type": "object",
+      "required": [
+        "DefaultEncodingId",
+        "BaseDataType",
+        "StructureType",
+        "Fields"
+      ],
+      "properties": {
+        "DefaultEncodingId": {
+          "type": "string",
+          "$ref": "opcua.schema.json#/$defs/NodeId"
+        },
+        "BaseDataType": {
+          "type": "string",
+          "$ref": "opcua.schema.json#/$defs/NodeId"
+        },
+        "StructureType": {
+          "allOf": [
+            {
+              "$comment": "REQ-MSG-042 (MG 8.2.10): EnumStructureType",
+              "enum": [
+                "Structure_0",
+                "StructureWithOptionalFields_1",
+                "Union_2",
+                "StructureWithSubtypedValues_3",
+                "UnionWithSubtypedValues_4"
+              ]
+            },
+            {
+              "$comment": "REQ-MSG-034 (MG 8.2.10): enumerations of the MetaData are written as \"<Name>_<Value>\" (VerboseEncoding), not as their numeric value",
+              "not": {
+                "type": "number"
+              }
+            }
+          ]
+        },
+        "Fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StructureField"
+          }
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "StructureField": {
+      "$comment": "REQ-MSG-043 (MG 8.2.11): StructureField",
+      "type": "object",
+      "required": [
+        "Name",
+        "Description",
+        "DataType",
+        "ValueRank",
+        "ArrayDimensions",
+        "MaxStringLength",
+        "IsOptional"
+      ],
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "$ref": "opcua.schema.json#/$defs/LocalizedText"
+        },
+        "DataType": {
+          "type": "string",
+          "$ref": "opcua.schema.json#/$defs/NodeId"
+        },
+        "ValueRank": {
+          "type": "integer",
+          "minimum": -1,
+          "maximum": 2147483647,
+          "not": {
+            "const": 0
+          }
+        },
+        "ArrayDimensions": {
+          "type": "array",
+          "items": {
+            "$ref": "opcua.schema.json#/$defs/UInt32"
+          }
+        },
+        "MaxStringLength": {
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        },
+        "IsOptional": {
+          "type": "boolean"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "EnumDescription": {
+      "$comment": "REQ-MSG-044 (MG 8.2.12): EnumDescription",
+      "type": "object",
+      "required": [
+        "DataTypeId",
+        "Name",
+        "EnumDefinition",
+        "BuiltInType"
+      ],
+      "properties": {
+        "DataTypeId": {
+          "type": "string",
+          "$ref": "opcua.schema.json#/$defs/NodeId"
+        },
+        "Name": {
+          "$ref": "opcua.schema.json#/$defs/QualifiedName"
+        },
+        "EnumDefinition": {
+          "$ref": "#/$defs/EnumDefinition"
+        },
+        "BuiltInType": {
+          "$comment": "REQ-MSG-044 (MG 8.2.12): 6 (Int32) for enumerations; 3, 5, 7, 9, 15 or 22 for OptionSets",
+          "enum": [
+            6,
+            3,
+            5,
+            7,
+            9,
+            15,
+            22
+          ]
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "EnumDefinition": {
+      "$comment": "REQ-MSG-044 (MG 8.2.13): EnumDefinition",
+      "type": "object",
+      "required": [
+        "Fields"
+      ],
+      "properties": {
+        "Fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EnumField"
+          }
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "EnumField": {
+      "$comment": "REQ-MSG-044 (MG 8.2.14): EnumField; the Value is an Int64 as JSON string (its range is checked by the rule layer, R-4)",
+      "type": "object",
+      "required": [
+        "Value",
+        "Name"
+      ],
+      "properties": {
+        "Value": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]{0,18})$"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "DisplayName": {
+          "$ref": "opcua.schema.json#/$defs/LocalizedText"
+        },
+        "Description": {
+          "$ref": "opcua.schema.json#/$defs/LocalizedText"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "SimpleTypeDescription": {
+      "$comment": "REQ-MSG-045 (MG 8.2.15): SimpleTypeDescription",
+      "type": "object",
+      "required": [
+        "BaseDataType",
+        "BuiltInType",
+        "DataTypeId",
+        "Name"
+      ],
+      "properties": {
+        "BaseDataType": {
+          "type": "string",
+          "$ref": "opcua.schema.json#/$defs/NodeId"
+        },
+        "BuiltInType": {
+          "$ref": "opcua.schema.json#/$defs/Byte"
+        },
+        "DataTypeId": {
+          "type": "string",
+          "$ref": "opcua.schema.json#/$defs/NodeId"
+        },
+        "Name": {
+          "$ref": "opcua.schema.json#/$defs/QualifiedName"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    }
+  }
+}

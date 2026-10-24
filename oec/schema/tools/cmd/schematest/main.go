@@ -2,8 +2,9 @@
 // bundle (strict source + generated tolerant flavor), checks the REQ tracing
 // of the "$comment"s against the catalog of oec/spec, routes the payload
 // vectors of oec/spec by their topic to an entry schema (topic form, option
-// B), validates every valid vector with a topic against the topic-agnostic
-// message schema (option A),
+// B) and the bare DataSetMetaDataType vectors to the predefined resource
+// MetaData, validates every valid vector with a topic against the
+// topic-agnostic message schema (option A),
 // validates them with santhosh-tekuri/jsonschema (draft 2020-12), maps every
 // error to the REQ ids in the nearest "$comment" of the evaluation path and
 // compares the result with the vector (expected, violates). It writes the
@@ -49,6 +50,7 @@ type vector struct {
 	Payload  string   `yaml:"payload"`
 	Expected string   `yaml:"expected"`
 	Mode     string   `yaml:"mode"`
+	Object   string   `yaml:"object"`
 	Violates []string `yaml:"violates"`
 }
 
@@ -140,6 +142,13 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 		}
 		generic := base + "message.schema.json"
 		rule := route(patterns, v.Topic)
+		entry := base + "topics/" + rule + ".schema.json"
+		if v.Object == "DataSetMetaDataType" {
+			// a bare MetaData is the predefined MetaData of a resource (MG B2)
+			rule = "(bare) ResourceMetaData"
+			entry = base + "metadata.schema.json#/$defs/ResourceMetaData"
+			generic = base + "metadata.schema.json#/$defs/DataSetMetaData"
+		}
 		if rule == "" {
 			if v.Topic == "" || v.Expected != "valid" {
 				skipped++
@@ -166,7 +175,6 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 		if err != nil {
 			return fmt.Errorf("%s: %w", v.ID, err)
 		}
-		entry := base + "topics/" + rule + ".schema.json"
 		b, err := validate(c, docs, entry, inst)
 		if err != nil {
 			return err
@@ -213,7 +221,7 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 			}
 		}
 	}
-	fmt.Printf("\n%d payload vectors routed to an entry schema, %d further valid vectors checked with the message schema only, %d without schema check yet (invalid without entry schema, or no topic).\n", routed, agnostic, skipped)
+	fmt.Printf("\n%d payload vectors routed to an entry schema (bare MetaData included), %d further valid vectors checked with the message schema only, %d without schema check yet (invalid without entry schema, or no topic).\n", routed, agnostic, skipped)
 	pc, pf, err := runProbes(c, docs, vectors)
 	if err != nil {
 		return err

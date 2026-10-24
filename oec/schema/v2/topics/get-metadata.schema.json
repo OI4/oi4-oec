@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/get-metadata.schema.json",
+  "title": "Get Metadata (topic form get-metadata)",
+  "description": "Entry schema of the topic form get-metadata (topic.abnf, matrix row Get/Metadata, MG 9.1.5).",
+  "$ref": "../envelope.schema.json#/$defs/MetaDataNetworkMessage",
+  "properties": {
+    "MetaData": {
+      "$comment": "REQ-RES-META-001 (MG 9.1.5): a Get carries the empty MetaData {}",
+      "type": "object",
+      "maxProperties": 0
+    }
+  }
+}

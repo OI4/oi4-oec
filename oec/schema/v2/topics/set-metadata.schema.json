@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/set-metadata.schema.json",
+  "title": "Set Metadata (topic form set-metadata)",
+  "description": "Entry schema of the topic form set-metadata (topic.abnf, matrix row Set/Metadata, MG 9.1.5).",
+  "$ref": "../envelope.schema.json#/$defs/MetaDataNetworkMessage",
+  "properties": {
+    "MetaData": {
+      "if": {
+        "type": "object",
+        "maxProperties": 0
+      },
+      "then": {
+        "$comment": "REQ-RES-META-004 (MG 9.1.5): a Set carries the complete DataSetMetaData, not {}",
+        "not": {}
+      },
+      "else": {
+        "$ref": "../metadata.schema.json#/$defs/DataSetMetaData"
+      }
+    }
+  }
+}
