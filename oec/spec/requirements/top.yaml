@@ -3,7 +3,7 @@
 # topic/topic.abnf, the allowed forms per Method × Resource are listed in
 # matrix/method-resource.yaml; vectors in vectors/topic/.
 area: TOP
-baseline: "cc2fb4b"
+baseline: "68d878d"
 requirements:
   # --- Topic structure (MG 7) -----------------------------------------------
   - id: REQ-TOP-001

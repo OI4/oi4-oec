@@ -6,7 +6,7 @@
 # reclassified (+schema) in C-034; statement follows SF-098; reviewed in the
 # C-034 review (2026-10-24).
 area: PAG
-baseline: "cc2fb4b"
+baseline: "68d878d"
 requirements:
   - id: REQ-PAG-001
     title: Fields of the PaginationRequest DataSet
@@ -244,7 +244,7 @@ requirements:
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [publisher, requester]
-    refs: [MG 8.3.11, SF-062]
+    refs: [MG 8.3.11, SF-062, SF-098]
     quotes:
       - ref: MG 8.3.11
         text: A single DataSetMessage must fit into one NetworkMessage; a provider should keep large DataSets well below the MaxPacketSize, e.g. by splitting a large Config into several contexts.
@@ -257,11 +257,12 @@ requirements:
       the Set and Del topic forms reject DataSetWriterIds 1 and 2, and the
       payload checker reports REQ-PAG-009 together with REQ-PAG-008. The
       number of resource DataSetMessages of a Set or Del is a rule of the
-      resource (e.g. REQ-RES-CONFIG-019, REQ-RES-SUBLIST-011). The wording
-      of MG 8.3.11 ("a Del contains no DataSetMessage") contradicts the Del
-      SubscriptionList of MG 9.1.9; SF-098 (decided by the PO in the C-034
-      review) reads "a Del contains at most one DataSetMessage, as defined
-      for the resource in 9.1" and the statement follows.
+      resource (e.g. REQ-RES-CONFIG-019, REQ-RES-SUBLIST-011). The former
+      wording of MG 8.3.11 ("a Del contains no DataSetMessage") contradicted
+      the Del SubscriptionList of MG 9.1.9; SF-098 (decided by the PO in the
+      C-034 review, resolved in MG 8.3.11 at 68d878d) reads "a Del contains
+      at most one DataSetMessage, as defined for the resource in 9.1" and
+      the statement follows.
       Whether a DataSetMessage fits into the MaxPacketSize depends on the
       broker configuration (RIG 4.1.1) and is not checked from the payload.
       The same sentence recommends (SHOULD) to keep large DataSets well

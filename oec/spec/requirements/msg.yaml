@@ -7,7 +7,7 @@
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 # REQ-MSG-026 reclassified (+schema) in C-034, reviewed in the C-034 review (2026-10-24).
 area: MSG
-baseline: "cc2fb4b"
+baseline: "68d878d"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
