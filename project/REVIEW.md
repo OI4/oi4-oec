@@ -4,6 +4,8 @@ _Last updated: 2026-10-24, after C-034 (workspace `f8eedd5`, guideline `cc2fb4b`
 
 This is the single list of everything that waits for the PO: items to **review** (drafts and changes to reviewed items) and items to **decide** (spec findings, open questions, cycle plan). Each cycle updates it; items leave the list once the PO has answered and `spectool review` (or the decision record) has been applied. Details are in the cycle log; this file links to them.
 
+A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVIEW_DE.md) (same numbering).
+
 **How to answer:** tick the box or write the decision into the "PO" field (or answer in the chat, e.g. "D-1: wie vorgeschlagen, R-1 … R-4 akzeptiert"). Anything not accepted gets a note; the agent reworks it in the next cycle.
 
 Current state: **32 drafts** (3 REQs, 29 payload vectors), **1 open spec finding** (SF-098), **1 open question** for P2 (Q-020), 1 plan change. Nothing else is open in `oec/spec` (all other items `reviewed`).

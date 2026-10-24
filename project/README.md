@@ -27,6 +27,7 @@ project/
   STATUS.md               current state + next step (always kept up to date)
   OPEN-QUESTIONS.md       pending decisions with the product owner
   REVIEW.md               everything waiting for the PO: drafts to review, decisions (updated every cycle)
+  REVIEW_DE.md            German explanation of REVIEW.md for the PO (PO request, exception to English artifacts)
   decisions/              Architecture Decision Records (ADR-xxxx)
   log/                    one file per work cycle (chronological protocol)
   research/               digests and analyses (guideline digest, legacy analysis, ...)
@@ -45,7 +46,7 @@ Every unit of work is a **cycle** `C-NNN`. A cycle is small (hours, not weeks) a
 2. **Align** – design decisions, scope changes and anything listed in GUARDRAILS G-3.4 are confirmed by the product owner *before* implementation.
 3. **Execute** – implement / research.
 4. **Verify** – run tests / builds / validations; record the commands and results.
-5. **Record** – complete the log file (what was done, why, results, deviations, follow-ups), update `STATUS.md` and `REVIEW.md` (open review items and decisions for the PO), add ADRs / spec findings / open questions where needed.
+5. **Record** – complete the log file (what was done, why, results, deviations, follow-ups), update `STATUS.md`, `REVIEW.md` (open review items and decisions for the PO) and its German explanation `REVIEW_DE.md`, add ADRs / spec findings / open questions where needed.
 
 A cycle is only "done" when step 5 is complete. A different agent must be able to continue from `STATUS.md` + the latest log without additional context.
 
