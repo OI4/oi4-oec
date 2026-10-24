@@ -212,6 +212,7 @@ The rule layer and the oracle implement the same rules independently: `conforman
 - Candidates found so far:
   - REQ-MSG-026 (Status Code ≠ Good) and REQ-PAG-009 (no Pagination in Set/Del) are schema-expressible with entry schemas → add `schema`;
   - REQ-LIFE-003 ("MAM of the component itself") needs Source vs AppId → add `d7-validate`.
+  - Note (C-034 review, Q-020 option (a), 2026-10-24): a Birth, Close or Will is not recognizable from one message. Payload vectors get an optional field `role` (`birth`/`close`/`will`) and D7 gets `validate --role <role>`; with a declared role REQ-LIFE-003/007/009 are checked offline and get `d7-validate` in addition to `d7-test` (C-035; the CLI option in C-039).
 - **Umbrella REQs** of the gap list (REQ-CMP-004/005/025/026, REQ-TOP-002, REQ-IL-001/008): the oracle reports the detail REQ, and lint requires `violates` = oracle result, so no vector can name the umbrella in `violates`. Proposal: the coverage report shows an umbrella as **derived** coverage, with an explicit implication map (umbrella → detail REQs) in the catalog data. An umbrella counts as covered for the P2 exit when all its mapped details are covered. A remainder that no detail implies (e.g. identity or external-standard claims in REQ-IL-001/008 and REQ-TOP-002) is named in the map and stays with `manual`/`d7-test`; it is not reported as covered by vectors.
 
 ### 10. Proof of concept (C-033)

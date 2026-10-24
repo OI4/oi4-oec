@@ -503,3 +503,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `5b8fe59` is recorded in C-032 addendum 53; the register commits `decc2da`, `43c0000` and `fb30ac7` touch only `findings/` (no re-baseline).
 - The baseline is now `cc2fb4b` on branch `feature/spec-findings`. Local commit: SF-097 (decided by the PO in the C-033 review) – MG 8.3.12 gets the sender rule "A `Locale` must only be used with the method `Get`, at most once per `NetworkMessage`"; the receiver rule is unchanged; the GL-ADR-019 Locale decision and implementation line are amended, no new GL-ADR (PO order 2026-10-23). Spec re-baselined in `411f88f`: 1397 inventory items, new REQ-LOC-003, REQ-LOC-002 remapped.
+
+## Amendment C-034 addendum 1 (2026-10-24, guideline baseline `68d878d`)
+
+- The previous baseline `cc2fb4b` is recorded in C-033 addendum 2; the register commits `72dcd60`, `5cb1869` and `ff0d842` touch only `findings/` (no re-baseline).
+- The baseline is now `68d878d` on branch `feature/spec-findings`. Local commit: SF-098 (decided by the PO in the C-034 review, implementation ticked in `project/REVIEW.md`) – MG 8.3.11 "a `Del` contains at most one `DataSetMessage`, as defined for the resource in 9.1" (none for `ReferenceDesignation`, the entry to be deleted for `SubscriptionList`) instead of "a `Del` contains no `DataSetMessage`"; the GL-ADR-019 Pagination decision and 8.3.11 implementation line are amended, no new GL-ADR. Spec re-baselined in `4037103`: inventory unchanged at 1397 items (the sentence carries no keyword item); REQ-PAG-009 refs +SF-098.

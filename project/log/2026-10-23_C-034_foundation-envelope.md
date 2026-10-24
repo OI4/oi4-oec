@@ -152,3 +152,35 @@ Workspace:
 5. **Cycle split:** MetaData → new C-035, exit review → C-040.
 6. **Decision Q-020 – LIFE roles:** optional vector field `role` + D7 `validate --role` (recommended: makes REQ-LIFE-003/007/009 offline-checkable for a declared Birth/Close/Will) or LIFE-003/007/009 with `d7-test` only.
 7. ADR-0019 editorial notes (§1, §2).
+
+## Addendum 1 – PO review, SF-098 in the guideline, re-baseline on `68d878d` (2026-10-24)
+
+PO (chat, 2026-10-24): "Ich habe alle gereviewed und jeweils deine Vorschläge akzeptiert. Mache nun weiter." In [`REVIEW.md`](../REVIEW.md) (commit `fec3030`, kept as the review record) the PO ticked: D-1 SF-098 **as proposed** and **implement in the guideline: yes**; D-2 Q-020 **option (a)**; D-3 split **accepted**; R-1 … R-5 **all accepted**.
+
+Review applied (`8447ec5`, `spectool review`):
+
+- 32 drafts → `reviewed`: REQ-MSG-026, REQ-PAG-009, REQ-BUS-002, V-PAY-129 … 151 and V-PAY-003/005/006/007/046/061.
+- **REQ-PAG-009 statement changed** (reviewed item; reason: SF-098 decided as proposed, announced in D-1): "… a Del none" → "… a Del at most one, as defined for the resource (MG 9.1)". The note now says that SF-098 was decided in the C-034 review. REQ-RES-SUBLIST-011, REQ-RES-REFDES-007, the oracle and the vectors stay unchanged, as announced.
+- Coverage (`coverage/vectors.md`): schema/d7-validate gaps 129 → **96** (reviewed vectors now count).
+
+SF-098 in the guideline (`oi4-oec-documentation`, branch `feature/spec-findings`):
+
+- `5cb1869` – register: SF-098 → decided (written before the REVIEW.md tick "implement: yes" was seen).
+- `68d878d` – MG 8.3.11: "a `Del` contains no `DataSetMessage`" → "a `Del` contains at most one `DataSetMessage`, as defined for the resource in 9.1 (none for 9.1.10 ReferenceDesignation, the entry to be deleted for 9.1.9 SubscriptionList)", with links. GL-ADR-019 (Pagination decision and the 8.3.11 implementation line) records SF-098 the same way as SF-097; no new GL-ADR. Docusaurus build green.
+- `ff0d842` – register: SF-098 → resolved (`68d878d`), moved to Closed; "No open findings (after SF-098)"; next free id SF-099.
+
+Spec re-baseline (`4037103`, `spectool rebaseline -rev 68d878d`, run with the guideline checked out at `68d878d`, then back to the branch head `ff0d842`, which only adds the register):
+
+- Inventory unchanged at **1397** items. The changed sentence has no keyword, so it is no inventory item and no key changes.
+- REQ-PAG-009: refs +SF-098; the note quotes the former wording and records SF-098 as resolved at `68d878d`. The statement is unchanged since `8447ec5`.
+- Docs: AGENTS, GUARDRAILS G-1.2, ADR-0001 (amendment C-034 addendum 1), STATUS.
+
+Q-020 decided (option (a)): moved to "Decided" in OPEN-QUESTIONS. ADR-0019 §9 gets a note (LIFE candidates: REQ-LIFE-003/007/009 +`d7-validate` with a declared role). Implementation in C-035: the optional vector field `role` (`birth`/`close`/`will`) in the vector schema, lint and oracle; REQ-LIFE-003/007/009 +`d7-validate` (back to `draft`, PO review); positive and negative role vectors. D7 `validate --role` is built in C-039.
+
+D-3 (split) confirmed: ROADMAP P2 stays as in C-034 (C-035 MetaData … C-040 exit).
+
+`REVIEW.md` / `REVIEW_DE.md`: reset to "nothing open"; C-035 fills them again.
+
+Checks: `spectool lint` (436 REQs, 151 payload vectors), `render -check`, `coverage -check`, `topic -check`, `inventory -check -rev 68d878d` (1397 items), `go test ./...` and `oec/schema/check.sh` (16 schemas, 172 cases, 0 disagreements): green.
+
+Next free ids: SF-099, V-PAY-152, ADR-0020, Q-021.
