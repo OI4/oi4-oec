@@ -80,6 +80,7 @@ type Vector struct {
 	Payload  string `json:"payload,omitempty"`
 	Object   string `json:"object,omitempty"` // payload is a bare object of this type, no message
 	Mode     string `json:"mode,omitempty"`   // validation mode: strict (default) or tolerant
+	Role     string `json:"role,omitempty"`   // declared message role: birth, close or will (Q-020 (a))
 	Original string `json:"original,omitempty"`
 	Edits    []Edit `json:"edits,omitempty"`
 }

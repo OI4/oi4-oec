@@ -23,6 +23,7 @@ func checkPayload(ts *topic.Spec, v Vector, sections map[string]string, add func
 		add("%v", err)
 		return nil
 	}
+	checkRoleReqs(v, add)
 	var problems []payload.Problem
 	msg, err := payload.Parse([]byte(v.Payload))
 	switch {
@@ -46,10 +47,19 @@ func checkPayload(ts *topic.Spec, v Vector, sections map[string]string, add func
 			return nil
 		}
 		p := res.Parsed
-		problems = payload.CheckMode(payload.Topic{
+		t := payload.Topic{
 			ServiceType: p.ServiceType, AppIL: p.AppIDIL, Method: p.Method,
 			Resource: p.Resource, SourceIL: p.SourceIL, Filter: p.Filter,
-		}, msg, mode)
+		}
+		problems = payload.CheckMode(t, msg, mode)
+		if v.Role != "" {
+			rp, rerr := payload.CheckRole(t, msg, v.Role)
+			if rerr != nil {
+				add("%v", rerr)
+				return nil
+			}
+			problems = append(problems, rp...)
+		}
 		if v.Expected == "valid" {
 			checkPayloadColumns(ts, p.Method, p.Resource, msg, add)
 		}
@@ -73,6 +83,20 @@ func checkPayload(ts *topic.Spec, v Vector, sections map[string]string, add func
 		checkPayloadOrigin(v, msg, sections, add)
 	}
 	return nil
+}
+
+// checkRoleReqs keeps the declared role and the role requirements
+// (REQ-LIFE-003/007/009) consistent: a valid vector demonstrates the
+// requirement of its role, and only a vector with that role names it.
+func checkRoleReqs(v Vector, add func(string, ...any)) {
+	if v.Role != "" && v.Expected == "valid" && !contains(v.Reqs, payload.Roles[v.Role]) {
+		add("role %s: reqs lack %s", v.Role, payload.Roles[v.Role])
+	}
+	for role, req := range payload.Roles {
+		if role != v.Role && (contains(v.Reqs, req) || contains(v.Violates, req)) {
+			add("%s needs role %s", req, role)
+		}
+	}
 }
 
 func joinProblems(ps []payload.Problem) string {

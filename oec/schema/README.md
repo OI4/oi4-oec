@@ -40,6 +40,6 @@ It then routes every payload vector of `../spec/vectors/payload/` through `topic
 
 1. validates the vector against the entry schema (B) and against `message.schema.json` (A), in the flavor of the vector `mode`;
 2. maps every error leaf to the REQ ids of the deepest `$comment` on its evaluation path (an undefined key maps to the REQ of its closure);
-3. checks that valid vectors pass. Invalid vectors must fail B with **exactly** the REQs of `violates`. A vector listed in `tests/rule-layer.yaml` must fail B with exactly its `schema` REQs (or pass B if they are empty); its `rule` REQs are left to the rule layer of D7 `validate`.
+3. checks that valid vectors pass. Invalid vectors must fail B with **exactly** the REQs of `violates`. A vector listed in `tests/rule-layer.yaml` must fail B with exactly its `schema` REQs (or pass B if they are empty); its `rule` REQs are left to the rule layer of D7 `validate`. A vector with a declared `role` (Birth, Close, Will; Q-020 (a)) is validated like any other message; the rules of its role are rule layer R-6 (ADR-0019 §5).
 
 The **probes** (`probes.go`) are synthetic mutations of vectors. They exercise schema paths that no reviewed vector covers yet, and they are not catalog vectors. Every verdict is written to `dist/cases.json`, which the Rust validator re-checks.

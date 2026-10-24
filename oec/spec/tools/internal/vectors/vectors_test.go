@@ -87,6 +87,10 @@ func TestCheckDetectsMismatches(t *testing.T) {
 			*v = Vector{ID: "V-DNP-001", Expected: "valid", Input: "a b", Output: "a,20b", Origin: Origin{Kind: "constructed"}}
 			v.Output = "a%20b"
 		}},
+		{"role reqs", "payload", "role close: reqs lack REQ-LIFE-007", func(v *Vector) { *v = closeVec(p); v.Reqs = []string{"REQ-TOP-001"} }},
+		{"role missing", "payload", "REQ-LIFE-007 needs role close", func(v *Vector) { *v = closeVec(p); v.Role = "" }},
+		{"role unknown", "payload", "unknown message role", func(v *Vector) { *v = closeVec(p); v.Role = "rebirth" }},
+		{"role content", "payload", "payload violates [REQ-LIFE-009]", func(v *Vector) { *v = closeVec(p); v.Role, v.Reqs = "will", []string{"REQ-LIFE-009"} }},
 		{"oid", "oi4identifier", "Oi4Identifier is", func(v *Vector) {
 			*v = Vector{ID: "V-OID-001", Expected: "valid", ManufacturerURI: "Example.com", Model: "M", ProductCode: "P", SerialNumber: "S",
 				Oi4Identifier: "Example.com/M/P/S", Origin: Origin{Kind: "constructed"}}
@@ -204,3 +208,17 @@ func TestCheckPayload(t *testing.T) {
 }
 
 func guidelineText(s string) string { return guideline.NormalizeForCompare(s) }
+
+// closeVec is a valid Close message (MG B1.1.2) with its declared role.
+func closeVec(p string) Vector {
+	const app = "provider.com/FieldDataService/FDS-001/1200-0345"
+	return Vector{
+		ID: "V-PAY-001", Title: "t", Expected: "valid", Reqs: []string{"REQ-LIFE-007"},
+		Origin: Origin{Kind: "constructed"}, Status: "draft", Role: "close",
+		Topic: "Oi4v2/OTConnector/" + p + "/Pub/Health/" + p,
+		Payload: `{"MessageId": "1639693570000-OTConnector/` + app + `", "MessageType": "ua-data",
+ "PublisherId": "OTConnector/` + app + `", "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb", "ReplyTo": "",
+ "Messages": [{"DataSetWriterId": 3456, "WriterGroupName": "", "DataSetWriterName": "` + app + `",
+  "Payload": {"Health": "NORMAL_0", "HealthScore": 0}}]}`,
+	}
+}

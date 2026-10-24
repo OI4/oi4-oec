@@ -109,9 +109,9 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-IL-016 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (9) | V-IL-103 (R-1), V-IL-104 (R-1), V-IL-105 (R-1), V-IL-106 (R-1) … (6) | covered |
 | REQ-IL-018 | d7-validate | reviewed | V-IL-011, V-IL-012 | V-IL-109 (R-1), V-IL-110 (R-1), V-IL-117 (R-1), V-TOP-246 (R-1) | covered |
 | REQ-IL-019 | d7-validate | reviewed | V-IL-009, V-TOP-128 | V-IL-101 (R-1), V-IL-102 (R-1), V-TOP-245 (R-1) | covered |
-| REQ-LIFE-003 | d7-monitor, schema | reviewed | V-PAY-023 | – | positive only |
-| REQ-LIFE-007 | d7-test, schema | reviewed | V-PAY-024 | – | positive only |
-| REQ-LIFE-009 | d7-test, schema | reviewed | V-PAY-025 | – | positive only |
+| REQ-LIFE-003 | schema, d7-validate, d7-monitor | draft | V-PAY-023 | V-PAY-171* (rule) | positive only |
+| REQ-LIFE-007 | schema, d7-validate, d7-test | draft | V-PAY-024 | V-PAY-172* (rule), V-PAY-173* (rule) | positive only |
+| REQ-LIFE-009 | schema, d7-validate, d7-test | draft | V-PAY-025 | V-PAY-174* (rule), V-PAY-175* (rule) | positive only |
 | REQ-LOC-001 | schema, d7-validate | reviewed | V-PAY-089 | V-PAY-146 | covered |
 | REQ-LOC-003 | schema, d7-validate | reviewed | V-PAY-007 | V-PAY-127, V-PAY-128 | covered |
 | REQ-MSG-001 | schema, d7-validate | reviewed | V-PAY-003 | V-PAY-018, V-PAY-112 | covered |

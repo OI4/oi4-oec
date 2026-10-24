@@ -1691,6 +1691,7 @@ vectors:
     status: reviewed
     notes: >-
       The Birth message is the Pub MAM of the application about itself (MG 6.3.3): the Source of the topic is the AppId of the publisher, the DataSetWriterId 55 is the one of its regular Pub MAM (B1.1.1), ReplyTo is empty and the optional Timestamp/SequenceNumber are omitted like in B1.1.1 (allowed since C-026, SF-061 (a)). Published as the first message after the connect at 2021-12-16T22:25:00.000Z; the MessageId carries the time of the publication (MG 8.2.1, SF-058).
+    role: birth
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -1740,6 +1741,7 @@ vectors:
     status: reviewed
     notes: >-
       The Close message is a Pub Health of the application about itself with NORMAL_0 and HealthScore 0 (MG 6.3.4), DataSetWriterId 3456 of its regular Pub Health (B1.1.2), published before the graceful disconnect at 2021-12-16T22:26:10.000Z. Timestamp/SequenceNumber are omitted as in the example; they may be used like in any Health message (SF-058 (b)).
+    role: close
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {
@@ -1769,6 +1771,7 @@ vectors:
     status: reviewed
     notes: >-
       The Will message is registered in the MQTT CONNECT (Will Retain false) and published by the broker after an ungraceful disconnect (MG 6.3.5): a Pub Health of the application about itself with FAILURE_1 and HealthScore 0, DataSetWriterId 3456 of its regular Pub Health (B1.1.2), without Timestamp/SequenceNumber. Its MessageId carries the time of its creation at connect, 2021-12-16T22:24:59.990Z, just before the Birth message of V-PAY-023 (MG 6.3.5, SF-058).
+    role: will
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     payload: |-
       {

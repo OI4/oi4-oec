@@ -136,11 +136,12 @@
         "payload": { "type": "string", "minLength": 2, "description": "The message (or the bare object, see 'object') as JSON text (RFC 8259), exactly one value, no duplicate keys." },
         "object": { "enum": ["DataSetMetaDataType"], "description": "The payload is a bare object of this type (e.g. the predefined MetaData of MG B2), not a message; it has no topic." },
         "mode": { "enum": ["strict", "tolerant"], "description": "Validation mode (MG 8, SF-052): strict (default) reports every undefined key, tolerant ignores undefined keys." },
+        "role": { "enum": ["birth", "close", "will"], "description": "Declared role of the message (Q-020 (a), C-035): Birth (MG 6.3.3), Close (MG 6.3.4) or Will (MG 6.3.5) message. The reference checks add the single-message rules of the role (REQ-LIFE-003/007/009); D7 validate takes it as --role. Only for a message with a topic." },
         "original": { "type": "string", "description": "Verbatim example of the guideline the payload was derived from (only if a JSON Pointer edit exists)." },
         "edits": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/edit" } }
       },
       "required": ["payload"],
-      "oneOf": [ { "required": ["topic"], "not": { "required": ["object"] } }, { "required": ["object"], "not": { "required": ["topic"] } } ],
+      "oneOf": [ { "required": ["topic"], "not": { "required": ["object"] } }, { "required": ["object"], "not": { "anyOf": [ { "required": ["topic"] }, { "required": ["role"] } ] } } ],
       "dependentRequired": { "original": ["edits"] },
       "if": { "properties": { "origin": { "properties": { "kind": { "const": "constructed" } } } } },
       "then": { "not": { "anyOf": [ { "required": ["original"] }, { "required": ["edits"] } ] } },

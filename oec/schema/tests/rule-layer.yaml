@@ -6,7 +6,7 @@
 # violated REQs:
 #   schema: REQs the entry schema reports (empty = the schema accepts it)
 #   rule:   REQs only the rule layer of D7 validate detects (ADR-0019 §5)
-#   rules:  rule-layer rules (R-1 … R-4, ADR-0019 §5) that detect them
+#   rules:  rule-layer rules (R-1 … R-4, R-6, ADR-0019 §5) that detect them
 #   reason: why JSON Schema cannot express it
 # schema + rule must equal `violates`. The reviewed vector files are not
 # changed. Lint will check that every rule REQ carries d7-validate.
@@ -38,3 +38,28 @@ expectations:
     rule: [REQ-MSG-044]
     rules: [R-3]
     reason: Unique EnumField names are a relation between array items by one key; uniqueItems compares whole items only.
+  - vector: V-PAY-171
+    schema: []
+    rule: [REQ-LIFE-003]
+    rules: [R-6]
+    reason: A Birth message has exactly one DataSetMessage, but the role is not visible in the message; it is declared outside (vector field role, D7 validate --role).
+  - vector: V-PAY-172
+    schema: []
+    rule: [REQ-LIFE-007]
+    rules: [R-6]
+    reason: A Close message has HealthScore 0, but the role is not visible in the message; it is declared outside (vector field role, D7 validate --role).
+  - vector: V-PAY-173
+    schema: []
+    rule: [REQ-LIFE-007]
+    rules: [R-6]
+    reason: A Close message has Health NORMAL_0, but the role is not visible in the message; it is declared outside (vector field role, D7 validate --role).
+  - vector: V-PAY-174
+    schema: []
+    rule: [REQ-LIFE-009]
+    rules: [R-6]
+    reason: A Will message has Health FAILURE_1, but the role is not visible in the message; it is declared outside (vector field role, D7 validate --role).
+  - vector: V-PAY-175
+    schema: []
+    rule: [REQ-LIFE-009]
+    rules: [R-6]
+    reason: A Will message has HealthScore 0, but the role is not visible in the message; it is declared outside (vector field role, D7 validate --role).
