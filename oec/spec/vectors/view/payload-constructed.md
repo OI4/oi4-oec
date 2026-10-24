@@ -41,29 +41,29 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-126](#v-pay-126) | Get Health with a Health DataSetMessage | invalid | violates: REQ-RES-HEALTH-005 | constructed | reviewed |
 | [V-PAY-127](#v-pay-127) | Pub Health with a Locale | invalid | violates: REQ-LOC-003 | constructed | reviewed |
 | [V-PAY-128](#v-pay-128) | Get Config with two Locales | invalid | violates: REQ-LOC-003 | constructed | reviewed |
-| [V-PAY-129](#v-pay-129) | Pub Health with the MessageType ua-metadata | invalid | violates: REQ-MSG-002 | constructed | draft |
-| [V-PAY-130](#v-pay-130) | Pub Health without ReplyTo | invalid | violates: REQ-MSG-003 | constructed | draft |
-| [V-PAY-131](#v-pay-131) | Pub Health with Messages as an object | invalid | violates: REQ-MSG-005 | constructed | draft |
-| [V-PAY-132](#v-pay-132) | Pub Health with a PublisherId without ServiceType | invalid | violates: REQ-MSG-006 | constructed | draft |
-| [V-PAY-133](#v-pay-133) | Pub Health with a MessageId without timestamp | invalid | violates: REQ-MSG-007 | constructed | draft |
-| [V-PAY-134](#v-pay-134) | Pub Health without DataSetClassId | invalid | violates: REQ-MSG-011 | constructed | draft |
-| [V-PAY-135](#v-pay-135) | Pub Health with a ReplyTo that is no MessageId | invalid | violates: REQ-MSG-015 | constructed | draft |
-| [V-PAY-136](#v-pay-136) | Pub Health with a PublisherId in the DataSetMessage | invalid | violates: REQ-MSG-016 | constructed | draft |
-| [V-PAY-137](#v-pay-137) | Pub Health with MetaDataVersion and MinorVersion | invalid | violates: REQ-MSG-018 | constructed | draft |
-| [V-PAY-138](#v-pay-138) | Pub Health with a Pagination under a wrong WriterGroupName | invalid | violates: REQ-MSG-019 | constructed | draft |
-| [V-PAY-139](#v-pay-139) | Pub Health with the reserved DataSetWriterId 5 | invalid | violates: REQ-MSG-020 | constructed | draft |
-| [V-PAY-140](#v-pay-140) | Pub Health with a WriterGroupName | invalid | violates: REQ-MSG-024 | constructed | draft |
-| [V-PAY-141](#v-pay-141) | Pub Health with a Good Status | invalid | violates: REQ-MSG-026 | constructed | draft |
-| [V-PAY-142](#v-pay-142) | Pub Health with a Status without Code | invalid | violates: REQ-MSG-027 | constructed | draft |
-| [V-PAY-143](#v-pay-143) | Pub Health with the DataSetMessage MessageType ua-event | invalid | violates: REQ-MSG-029 | constructed | draft |
-| [V-PAY-144](#v-pay-144) | Pub Health as a delta frame | invalid | violates: REQ-MSG-029, REQ-MSG-030 | constructed | draft |
-| [V-PAY-145](#v-pay-145) | Pub Health with a numeric enumeration value | invalid | violates: REQ-MSG-031, REQ-RES-HEALTH-001 | constructed | draft |
-| [V-PAY-146](#v-pay-146) | Get Health with an invalid Locale | invalid | violates: REQ-LOC-001 | constructed | draft |
-| [V-PAY-147](#v-pay-147) | Get Health with a Query | invalid | violates: REQ-QRY-001 | constructed | draft |
-| [V-PAY-148](#v-pay-148) | Pub Health whose DataSetWriterName differs from the Source | invalid | violates: REQ-MSG-023 | constructed | draft |
-| [V-PAY-149](#v-pay-149) | Set Data with a Pagination | invalid | violates: REQ-PAG-008, REQ-PAG-009 | constructed | draft |
-| [V-PAY-150](#v-pay-150) | Set Data with a SequenceNumber | invalid | violates: REQ-BUS-010 | constructed | draft |
-| [V-PAY-151](#v-pay-151) | Pub PublicationList entry with the Filter as WriterGroupName | invalid | violates: REQ-MSG-025, REQ-RES-PUBLIST-002 | constructed | draft |
+| [V-PAY-129](#v-pay-129) | Pub Health with the MessageType ua-metadata | invalid | violates: REQ-MSG-002 | constructed | reviewed |
+| [V-PAY-130](#v-pay-130) | Pub Health without ReplyTo | invalid | violates: REQ-MSG-003 | constructed | reviewed |
+| [V-PAY-131](#v-pay-131) | Pub Health with Messages as an object | invalid | violates: REQ-MSG-005 | constructed | reviewed |
+| [V-PAY-132](#v-pay-132) | Pub Health with a PublisherId without ServiceType | invalid | violates: REQ-MSG-006 | constructed | reviewed |
+| [V-PAY-133](#v-pay-133) | Pub Health with a MessageId without timestamp | invalid | violates: REQ-MSG-007 | constructed | reviewed |
+| [V-PAY-134](#v-pay-134) | Pub Health without DataSetClassId | invalid | violates: REQ-MSG-011 | constructed | reviewed |
+| [V-PAY-135](#v-pay-135) | Pub Health with a ReplyTo that is no MessageId | invalid | violates: REQ-MSG-015 | constructed | reviewed |
+| [V-PAY-136](#v-pay-136) | Pub Health with a PublisherId in the DataSetMessage | invalid | violates: REQ-MSG-016 | constructed | reviewed |
+| [V-PAY-137](#v-pay-137) | Pub Health with MetaDataVersion and MinorVersion | invalid | violates: REQ-MSG-018 | constructed | reviewed |
+| [V-PAY-138](#v-pay-138) | Pub Health with a Pagination under a wrong WriterGroupName | invalid | violates: REQ-MSG-019 | constructed | reviewed |
+| [V-PAY-139](#v-pay-139) | Pub Health with the reserved DataSetWriterId 5 | invalid | violates: REQ-MSG-020 | constructed | reviewed |
+| [V-PAY-140](#v-pay-140) | Pub Health with a WriterGroupName | invalid | violates: REQ-MSG-024 | constructed | reviewed |
+| [V-PAY-141](#v-pay-141) | Pub Health with a Good Status | invalid | violates: REQ-MSG-026 | constructed | reviewed |
+| [V-PAY-142](#v-pay-142) | Pub Health with a Status without Code | invalid | violates: REQ-MSG-027 | constructed | reviewed |
+| [V-PAY-143](#v-pay-143) | Pub Health with the DataSetMessage MessageType ua-event | invalid | violates: REQ-MSG-029 | constructed | reviewed |
+| [V-PAY-144](#v-pay-144) | Pub Health as a delta frame | invalid | violates: REQ-MSG-029, REQ-MSG-030 | constructed | reviewed |
+| [V-PAY-145](#v-pay-145) | Pub Health with a numeric enumeration value | invalid | violates: REQ-MSG-031, REQ-RES-HEALTH-001 | constructed | reviewed |
+| [V-PAY-146](#v-pay-146) | Get Health with an invalid Locale | invalid | violates: REQ-LOC-001 | constructed | reviewed |
+| [V-PAY-147](#v-pay-147) | Get Health with a Query | invalid | violates: REQ-QRY-001 | constructed | reviewed |
+| [V-PAY-148](#v-pay-148) | Pub Health whose DataSetWriterName differs from the Source | invalid | violates: REQ-MSG-023 | constructed | reviewed |
+| [V-PAY-149](#v-pay-149) | Set Data with a Pagination | invalid | violates: REQ-PAG-008, REQ-PAG-009 | constructed | reviewed |
+| [V-PAY-150](#v-pay-150) | Set Data with a SequenceNumber | invalid | violates: REQ-BUS-010 | constructed | reviewed |
+| [V-PAY-151](#v-pay-151) | Pub PublicationList entry with the Filter as WriterGroupName | invalid | violates: REQ-MSG-025, REQ-RES-PUBLIST-002 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -2279,7 +2279,7 @@ Payload:
 - Expected: invalid – A NetworkMessage that carries DataSetMessages has the MessageType ua-data.
 - Violates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 with the NetworkMessage MessageType ua-metadata.
 
@@ -2319,7 +2319,7 @@ Payload:
 - Expected: invalid – ReplyTo is a mandatory field of the NetworkMessage (empty string if there is no trigger).
 - Violates: [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 without the field ReplyTo.
 
@@ -2358,7 +2358,7 @@ Payload:
 - Expected: invalid – Messages is always a JSON array, also for a single DataSetMessage.
 - Violates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose Messages is the Health DataSetMessage itself instead of an array with it.
 
@@ -2396,7 +2396,7 @@ Payload:
 - Expected: invalid – The PublisherId lacks the ServiceType (&lt;ServiceType>/&lt;IdentificationLink>).
 - Violates: [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 with the PublisherId provider.com/FieldDataService/FDS-001/1200-0345; the MessageId is unchanged. The oracle compares the MessageId suffix with the PublisherId only for a well-formed PublisherId, so REQ-MSG-007 is not reported.
 
@@ -2436,7 +2436,7 @@ Payload:
 - Expected: invalid – The MessageId lacks the &lt;unixTimestampInMs>- prefix.
 - Violates: [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose MessageId is the PublisherId only.
 
@@ -2476,7 +2476,7 @@ Payload:
 - Expected: invalid – A NetworkMessage of a predefined resource carries its DataSetClassId.
 - Violates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 without the DataSetClassId of Health.
 
@@ -2515,7 +2515,7 @@ Payload:
 - Expected: invalid – ReplyTo is the empty string or a MessageId (&lt;unixTimestampInMs>-&lt;PublisherId>).
 - Violates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose ReplyTo is the timestamp of the Get without its PublisherId.
 
@@ -2555,7 +2555,7 @@ Payload:
 - Expected: invalid – The fixed content mask of the DataSetMessage has no PublisherId.
 - Violates: [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose Health DataSetMessage repeats the PublisherId of the NetworkMessage.
 
@@ -2596,7 +2596,7 @@ Payload:
 - Expected: invalid – A DataSetMessage carries either MetaDataVersion or MinorVersion, not both.
 - Violates: [REQ-MSG-018](../../requirements/view/msg.md#req-msg-018)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-118 with the additional field MinorVersion 0 next to MetaDataVersion 1.0.
 
@@ -2646,7 +2646,7 @@ Payload:
 - Expected: invalid – The WriterGroupName of the helper DataSet Pagination is "Pagination".
 - Violates: [REQ-MSG-019](../../requirements/view/msg.md#req-msg-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 with a valid single-page Pagination (DataSetWriterId 2) whose WriterGroupName is Paging.
 
@@ -2698,7 +2698,7 @@ Payload:
 - Expected: invalid – The DataSetWriterIds 4 … 8 are reserved; an application uses ids from 10.
 - Violates: [REQ-MSG-020](../../requirements/view/msg.md#req-msg-020)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose Health DataSetMessage has the DataSetWriterId 5.
 
@@ -2738,7 +2738,7 @@ Payload:
 - Expected: invalid – Health has no Filter, so the WriterGroupName is the empty string.
 - Violates: [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose Health DataSetMessage has the WriterGroupName Health.
 
@@ -2778,7 +2778,7 @@ Payload:
 - Expected: invalid – A Status is only sent if it is not Good; Code 0 is Good.
 - Violates: [REQ-MSG-026](../../requirements/view/msg.md#req-msg-026)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-118 whose Status is Good (Code 0, Symbol Good).
 
@@ -2827,7 +2827,7 @@ Payload:
 - Expected: invalid – A Status always contains the numeric Code.
 - Violates: [REQ-MSG-027](../../requirements/view/msg.md#req-msg-027)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-118 whose Status has only the Symbol.
 
@@ -2875,7 +2875,7 @@ Payload:
 - Expected: invalid – The DataSetMessage MessageType is ua-event only for the resource Event; Health uses ua-keyframe.
 - Violates: [REQ-MSG-029](../../requirements/view/msg.md#req-msg-029)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-118 whose Health DataSetMessage has the MessageType ua-event.
 
@@ -2924,7 +2924,7 @@ Payload:
 - Expected: invalid – DataSetMessages are complete key frames; ua-deltaframe is not used (and is no MessageType of Health).
 - Violates: [REQ-MSG-029](../../requirements/view/msg.md#req-msg-029), [REQ-MSG-030](../../requirements/view/msg.md#req-msg-030)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-118 whose Health DataSetMessage has the MessageType ua-deltaframe.
 
@@ -2973,7 +2973,7 @@ Payload:
 - Expected: invalid – VerboseEncoding writes an enumeration as the string &lt;EnumName>_&lt;EnumValue>; Health is the string NORMAL_0, not 0.
 - Violates: [REQ-MSG-031](../../requirements/view/msg.md#req-msg-031), [REQ-RES-HEALTH-001](../../requirements/view/res-health.md#req-res-health-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose Health is the number 0. The value is also no value of the Health enumeration (REQ-RES-HEALTH-001).
 
@@ -3013,7 +3013,7 @@ Payload:
 - Expected: invalid – The Locale is an OPC UA LocaleId (e.g. de-DE).
 - Violates: [REQ-LOC-001](../../requirements/view/loc.md#req-loc-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-001 with a Locale (DataSetWriterId 3) whose value is German.
 
@@ -3050,7 +3050,7 @@ Payload:
 - Expected: invalid – A Query is only sent with Get on a resource with a defined Query; Health has none.
 - Violates: [REQ-QRY-001](../../requirements/view/qry.md#req-qry-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-001 with a Query (DataSetWriterId 9) that uses the query parameter Parent of ReferenceDesignation.
 
@@ -3087,7 +3087,7 @@ Payload:
 - Expected: invalid – The DataSetWriterName is the decoded Source of the topic.
 - Violates: [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose DataSetWriterName names another asset than the Source of the topic. Only the rule layer sees it (R-2, equality with a topic value).
 
@@ -3128,7 +3128,7 @@ Payload:
 - Expected: invalid – A Set is not paginated and a Pagination is only sent with the method Pub.
 - Violates: [REQ-PAG-008](../../requirements/view/pag.md#req-pag-008), [REQ-PAG-009](../../requirements/view/pag.md#req-pag-009)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-061 with a single-page Pagination (DataSetWriterId 2) after the Data DataSetMessage.
 
@@ -3181,7 +3181,7 @@ Payload:
 - Expected: invalid – A DataSetMessage of a Set request carries no SequenceNumber.
 - Violates: [REQ-BUS-010](../../requirements/view/bus.md#req-bus-010)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-061 with the SequenceNumber 12 in the Data DataSetMessage (the field removed from the guideline example by SF-079).
 
@@ -3223,7 +3223,7 @@ Payload:
 - Expected: invalid – The WriterGroupName of a PublicationList entry is &lt;ResourceType>[/&lt;Tag>] of the entry (Data/oee).
 - Violates: [REQ-MSG-025](../../requirements/view/msg.md#req-msg-025), [REQ-RES-PUBLIST-002](../../requirements/view/res-publist.md#req-res-publist-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-037 whose entry has the WriterGroupName oee instead of Data/oee. The value is no &lt;ResourceType>[/&lt;Tag>] (REQ-MSG-025) and differs from Resource/Filter of the entry (REQ-RES-PUBLIST-002).
 

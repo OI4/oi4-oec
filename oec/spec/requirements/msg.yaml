@@ -5,7 +5,7 @@
 # the guideline in C-024; the PO reviewed the area in the C-024 review
 # (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
-# REQ-MSG-026 reclassified (+schema) in C-034 (draft).
+# REQ-MSG-026 reclassified (+schema) in C-034, reviewed in the C-034 review (2026-10-24).
 area: MSG
 baseline: "cc2fb4b"
 requirements:
@@ -647,7 +647,7 @@ requirements:
         text: Optional. The Status should only be sent, if it is not Good.
     verification: [schema, d7-validate]
     inventory: [MG-8.2.3-101d62fb, MG-8.1.4-4452f786]
-    status: draft
+    status: reviewed
     notes: >-
       Reclassified in C-034 (+schema, ADR-0019 §9): a Status with Code 0
       (Good) is visible in the single payload, so the envelope schema rejects

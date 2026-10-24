@@ -30,7 +30,7 @@ Guideline baseline: `cc2fb4b` · Area status: reviewed · Sections: MG 8, MG A2
 | [REQ-MSG-023](#req-msg-023) | DataSetWriterName is the unencoded Identification Link of the asset | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-024](#req-msg-024) | WriterGroupName is the topic Filter | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-025](#req-msg-025) | WriterGroupName of PublicationList and SubscriptionList entries | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-MSG-026](#req-msg-026) | Status is only sent if not Good | SHOULD NOT | SHOULD NOT | SHOULD NOT | SHOULD NOT | messaging | schema, d7-validate | draft |
+| [REQ-MSG-026](#req-msg-026) | Status is only sent if not Good | SHOULD NOT | SHOULD NOT | SHOULD NOT | SHOULD NOT | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-027](#req-msg-027) | Status of a DataSetMessage contains Code and Symbol | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-028](#req-msg-028) | Receivers evaluate only the Code of a Status | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-MSG-029](#req-msg-029) | MessageType of the DataSetMessage | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
@@ -629,7 +629,7 @@ A DataSetMessage contains a Status only if the status is not Good; a missing Sta
 - Domain: messaging · Applies to: publisher
 - Refs: MG 8.2.3, MG 8.1.4
 - Verification: schema, d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.1.4-4452f786, MG-8.2.3-101d62fb
 
 > The Status is not required and should not be sent when the status is OK.

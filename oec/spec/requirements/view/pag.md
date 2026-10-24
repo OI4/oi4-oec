@@ -13,7 +13,7 @@ Guideline baseline: `cc2fb4b` · Area status: reviewed · Sections: MG 8.3.11
 | [REQ-PAG-006](#req-pag-006) | A subscriber re-triggers a too long publication with PaginationRequest | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-PAG-007](#req-pag-007) | Paginated DataSetMessages are consistent | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-PAG-008](#req-pag-008) | PaginationRequest only in Get, Pagination only in Pub | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-PAG-009](#req-pag-009) | Set and Del are not paginated | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | draft |
+| [REQ-PAG-009](#req-pag-009) | Set and Del are not paginated | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -216,17 +216,17 @@ Notes: The payload checker reports a misplaced or repeated helper (sender view, 
 
 **Set and Del are not paginated**
 
-Set and Del messages are not paginated: a Set carries a single DataSetMessage addressed by Source and Filter of the topic, a Del none. A single DataSetMessage fits into one NetworkMessage (within the MaxPacketSize).
+Set and Del messages are not paginated: a Set carries a single DataSetMessage addressed by Source and Filter of the topic, a Del at most one, as defined for the resource (MG 9.1). A single DataSetMessage fits into one NetworkMessage (within the MaxPacketSize).
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: publisher, requester
 - Refs: MG 8.3.11, SF-062
 - Verification: schema, d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.11-0cb431c2
 
 > A single DataSetMessage must fit into one NetworkMessage; a provider should keep large DataSets well below the MaxPacketSize, e.g. by splitting a large Config into several contexts.
 > — MG 8.3.11
 
-Notes: Reclassified in C-034 (+schema, ADR-0019 §9): a Set or Del that carries a PaginationRequest or Pagination is paginated; the entry schemas of the Set and Del topic forms reject DataSetWriterIds 1 and 2, and the payload checker reports REQ-PAG-009 together with REQ-PAG-008. The number of resource DataSetMessages of a Set or Del is a rule of the resource (e.g. REQ-RES-CONFIG-019, REQ-RES-SUBLIST-011); "a Del none" contradicts the Del SubscriptionList of MG 9.1.9 (SF-098, open). Whether a DataSetMessage fits into the MaxPacketSize depends on the broker configuration (RIG 4.1.1) and is not checked from the payload. The same sentence recommends (SHOULD) to keep large DataSets well below the MaxPacketSize, e.g. by splitting a large Config into several contexts; the recommendation is covered by this key and not tested separately. Page numbers are no stable addresses (MG 8.3.11), so a Set can not address "page 5" of a large Config (PO review of C-027).
+Notes: Reclassified in C-034 (+schema, ADR-0019 §9): a Set or Del that carries a PaginationRequest or Pagination is paginated; the entry schemas of the Set and Del topic forms reject DataSetWriterIds 1 and 2, and the payload checker reports REQ-PAG-009 together with REQ-PAG-008. The number of resource DataSetMessages of a Set or Del is a rule of the resource (e.g. REQ-RES-CONFIG-019, REQ-RES-SUBLIST-011). The wording of MG 8.3.11 ("a Del contains no DataSetMessage") contradicts the Del SubscriptionList of MG 9.1.9; SF-098 (decided by the PO in the C-034 review) reads "a Del contains at most one DataSetMessage, as defined for the resource in 9.1" and the statement follows. Whether a DataSetMessage fits into the MaxPacketSize depends on the broker configuration (RIG 4.1.1) and is not checked from the payload. The same sentence recommends (SHOULD) to keep large DataSets well below the MaxPacketSize, e.g. by splitting a large Config into several contexts; the recommendation is covered by this key and not tested separately. Page numbers are no stable addresses (MG 8.3.11), so a Set can not address "page 5" of a large Config (PO review of C-027).
