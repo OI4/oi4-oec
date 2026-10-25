@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/pub-data.schema.json",
+  "title": "Pub Data (topic form pub-data)",
+  "description": "Entry schema of the topic form pub-data (topic.abnf, matrix row Pub/Data, MG 9.1.4). Data has no predefined DataSetClassId: the publisher-defined DataSetClassId is optional (REQ-MSG-011). Topic-dependent equalities (PublisherId, DataSetWriterName and WriterGroupName vs. topic) are rules of the rule layer. An empty Messages array is the answer to a Get without content (SF-099).",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "properties": {
+    "Messages": {
+      "$comment": "Data DataSetMessages and optionally Pagination (MG 9.1.4); REQ-RES-DATA-008 is an umbrella of these constraints (oec/spec/coverage/implications.yaml)",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 2
+            }
+          }
+        },
+        "then": {
+          "$ref": "../helpers.schema.json#/$defs/PaginationDataSetMessage"
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 1
+              }
+            }
+          },
+          "then": {
+            "$comment": "REQ-PAG-008 (MG 8.3.11): a PaginationRequest is only sent with the method Get",
+            "not": {}
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 3
+                }
+              }
+            },
+            "then": {
+              "$comment": "REQ-LOC-003 (MG 8.3.12): a Locale is only sent with the method Get",
+              "not": {}
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 9
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-QRY-001 (MG 8.3.13): a Query is only sent with the method Get",
+                "not": {}
+              },
+              "else": {
+                "$ref": "../resources/data.schema.json#/$defs/DataDataSetMessage"
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-PAG-008 (MG 8.3.11): at most one Pagination per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 2
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/resources/data.schema.json",
+  "title": "Data resource",
+  "description": "Data DataSetMessage of Pub and Set Data (MG 8.3.4, MG 9.1.4) and the predefined DataSet Oi4Pv (MG 8.3.4, SF-077). The Payload of an application-defined DataSet is any JSON object whose fields are described by the Metadata of the same Source and Tag (REQ-RES-DATA-001, d7-test); Data has no predefined DataSetClassId. Rules of the rule layer: WriterGroupName = topic Filter (REQ-MSG-024, R-2), DataSetWriterName = topic Source (REQ-MSG-023, R-2).",
+  "$defs": {
+    "Oi4Pv": {
+      "$comment": "REQ-RES-DATA-004 (MG 8.3.4, SF-077): the Oi4Pv DataSet has the mandatory field Pv and the optional fields Sv1 … Sv255 (no leading zeros), no other field; the values are described by its Metadata",
+      "type": "object",
+      "required": [
+        "Pv"
+      ],
+      "propertyNames": {
+        "pattern": "^(?:Pv|Sv(?:[1-9][0-9]?|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))$"
+      }
+    },
+    "DataDataSetMessage": {
+      "$ref": "../envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-MSG-020 (MG 8.2.3): application DataSetWriterIds start at 10",
+          "minimum": 10
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-024 (MG 8.2.3, MG 7.7): the WriterGroupName of a Data DataSetMessage is the Filter that addresses it: its Tag, one topic-encoded level",
+          "pattern": "^(?:[^\\x00#%+/]|%2B|%23|%2F|%25)+$"
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
+          "const": "ua-keyframe"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-RES-DATA-004 (MG 8.3.4, SF-077): the DataSet with the Tag and WriterGroupName Oi4Pv (REQ-RES-DATA-003) is the Oi4Pv DataSet",
+          "if": {
+            "type": "object",
+            "required": [
+              "WriterGroupName"
+            ],
+            "properties": {
+              "WriterGroupName": {
+                "const": "Oi4Pv"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "Payload": {
+                "$ref": "#/$defs/Oi4Pv"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

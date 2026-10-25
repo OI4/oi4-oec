@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/resources/subscriptionlist.schema.json",
+  "title": "SubscriptionList resource",
+  "description": "SubscriptionList entry (MG 8.3.9) and the SubscriptionList DataSetMessage of Pub, Set and Del SubscriptionList (MG 9.1.9). Rules of the rule layer: the WriterGroupName derived from the TopicPath (REQ-RES-SUBLIST-002, R-3), WriterGroupName = topic Filter (REQ-MSG-025, R-2), DataSetWriterName = topic Source (REQ-MSG-023, R-2).",
+  "$defs": {
+    "SubscriptionEntry": {
+      "$comment": "REQ-RES-SUBLIST-001 (MG 8.3.9, SF-080): fields of a SubscriptionList entry: TopicPath, optional Interval and Config",
+      "type": "object",
+      "required": [
+        "TopicPath"
+      ],
+      "properties": {
+        "TopicPath": {
+          "type": "string"
+        },
+        "Interval": {
+          "$ref": "../opcua.schema.json#/$defs/UInt32"
+        },
+        "Config": {
+          "allOf": [
+            {
+              "enum": [
+                "NONE_0",
+                "CONF_1"
+              ]
+            },
+            {
+              "$ref": "../opcua.schema.json#/$defs/VerboseEnum"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-RES-SUBLIST-002 (MG 8.3.9, SF-080): the resource level of an OEC TopicPath is concrete (neither + nor covered by #); topic filters outside the OEC namespace are not checked",
+          "if": {
+            "type": "object",
+            "required": [
+              "TopicPath"
+            ],
+            "properties": {
+              "TopicPath": {
+                "type": "string",
+                "pattern": "^(?:Oi4v2|\\+|#)(?:/|$)"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "TopicPath": {
+                "pattern": "^(?:Oi4v2|\\+)/(?:[^/#][^/]*|#[^/]+)?/(?:[^/#][^/]*|#[^/]+)?/(?:[^/#][^/]*|#[^/]+)?/[^/+#]*(?:/.*)?$"
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "SubscriptionListDataSetMessage": {
+      "$ref": "../envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-MSG-020 (MG 8.2.3): application DataSetWriterIds start at 10",
+          "minimum": 10
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-025 (MG 8.2.3, GL-ADR-018): the WriterGroupName of a list entry is <ResourceType>[/<Tag>]",
+          "pattern": "^(?:MAM|Health|Config|Data|Metadata|Event|Profile|PublicationList|SubscriptionList|ReferenceDesignation)(?:/|$)"
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
+          "const": "ua-keyframe"
+        },
+        "Payload": {
+          "$ref": "#/$defs/SubscriptionEntry"
+        }
+      }
+    }
+  }
+}

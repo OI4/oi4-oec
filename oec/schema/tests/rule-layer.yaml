@@ -113,3 +113,8 @@ expectations:
     rule: [REQ-RES-REFDES-013]
     rules: [R-2]
     reason: The topic form get-referencedesignation covers the topic with and without Source; whether the topic has a Source is a topic value the payload does not show.
+  - vector: V-PAY-086
+    schema: []
+    rule: [REQ-RES-SUBLIST-002]
+    rules: [R-3]
+    reason: The WriterGroupName is derived from the TopicPath of the same entry (its resource and Filter levels joined with "/", or only the resource level for a wildcard Filter); JSON Schema cannot compare a value with a computed part of another value.

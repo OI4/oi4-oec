@@ -1,0 +1,905 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/resources/event.schema.json",
+  "title": "Event resource",
+  "description": "Event DataSet (MG 8.3.6) and the Event DataSetMessage of Pub Event (MG 9.1.6) with the rules of the categories Status (MG 8.3.6.1), Syslog (MG 8.3.6.2) and Generic (MG 8.3.6.3). The relations between the WriterGroupName <EventCategory>/<EventLevel> and the Payload are checked within the DataSetMessage. A Generic Event has an application-defined Number and any Details (REQ-RES-EVENT-009). Rules of the rule layer: WriterGroupName = topic Filter (REQ-MSG-024, R-2), DataSetWriterName = topic Source (REQ-MSG-023, R-2).",
+  "$defs": {
+    "Event": {
+      "$comment": "REQ-RES-EVENT-001 (MG 8.3.6, SF-075): fields of the Event DataSet: Number (UInt32), Category (enumeration), optional Description and Details (object, keys by Category)",
+      "type": "object",
+      "required": [
+        "Number",
+        "Category"
+      ],
+      "properties": {
+        "Number": {
+          "$ref": "../opcua.schema.json#/$defs/UInt32"
+        },
+        "Category": {
+          "allOf": [
+            {
+              "enum": [
+                "CAT_SYSLOG_0",
+                "CAT_STATUS_1",
+                "CAT_GENERIC_99"
+              ]
+            },
+            {
+              "$ref": "../opcua.schema.json#/$defs/VerboseEnum"
+            }
+          ]
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Details": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-RES-EVENT-003 (MG 8.3.6.1, SF-075): the Details of a Status Event contain only the String SymbolicId",
+          "if": {
+            "type": "object",
+            "required": [
+              "Category"
+            ],
+            "properties": {
+              "Category": {
+                "const": "CAT_STATUS_1"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "Details": {
+                "properties": {
+                  "SymbolicId": {
+                    "type": "string"
+                  }
+                },
+                "propertyNames": {
+                  "const": "SymbolicId"
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "REQ-RES-EVENT-007 (MG 8.3.6.2, SF-075): a Syslog Event has the PRI (0 … 191) as Number, no Description and only the Strings MSG and HEADER in its Details",
+          "if": {
+            "type": "object",
+            "required": [
+              "Category"
+            ],
+            "properties": {
+              "Category": {
+                "const": "CAT_SYSLOG_0"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "Number": {
+                "if": {
+                  "$ref": "../opcua.schema.json#/$defs/UInt32"
+                },
+                "then": {
+                  "maximum": 191
+                }
+              },
+              "Description": {
+                "not": {}
+              },
+              "Details": {
+                "properties": {
+                  "MSG": {
+                    "type": "string"
+                  },
+                  "HEADER": {
+                    "type": "string"
+                  }
+                },
+                "propertyNames": {
+                  "enum": [
+                    "MSG",
+                    "HEADER"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "EventDataSetMessage": {
+      "$ref": "../envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-MSG-020 (MG 8.2.3): application DataSetWriterIds start at 10",
+          "minimum": 10
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-024 (MG 8.2.3, MG 7.7): the WriterGroupName of an Event is its Filter <EventCategory>/<EventLevel> (event-filter of topic.abnf)",
+          "pattern": "^(?:Syslog/(?:Debug|Informational|Notice|Warning|Error|Critical|Alert|Emergency)|Status/(?:Good|Uncertain|Bad)|Generic/(?:[^\\x00#%+/]|%2B|%23|%2F|%25)+)$"
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
+          "const": "ua-event"
+        },
+        "Payload": {
+          "$ref": "#/$defs/Event"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-RES-EVENT-002 (MG 8.3.6, MG 9.1.6, SF-076): the Category corresponds to the EventCategory of the WriterGroupName",
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "Payload": {
+                    "properties": {
+                      "Category": {
+                        "if": {
+                          "enum": [
+                            "CAT_SYSLOG_0",
+                            "CAT_STATUS_1",
+                            "CAT_GENERIC_99"
+                          ]
+                        },
+                        "then": {
+                          "const": "CAT_SYSLOG_0"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Status(?:/|$)"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "Payload": {
+                    "properties": {
+                      "Category": {
+                        "if": {
+                          "enum": [
+                            "CAT_SYSLOG_0",
+                            "CAT_STATUS_1",
+                            "CAT_GENERIC_99"
+                          ]
+                        },
+                        "then": {
+                          "const": "CAT_STATUS_1"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Generic(?:/|$)"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "Payload": {
+                    "properties": {
+                      "Category": {
+                        "if": {
+                          "enum": [
+                            "CAT_SYSLOG_0",
+                            "CAT_STATUS_1",
+                            "CAT_GENERIC_99"
+                          ]
+                        },
+                        "then": {
+                          "const": "CAT_GENERIC_99"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$comment": "REQ-RES-EVENT-004 (MG 8.3.6.1, SF-076): the EventLevel of a Status Event is the severity class of its StatusCode (bits 30–31, class 3 as Bad); a SymbolicId starts with the name of the class",
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Status(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_STATUS_1"
+                      },
+                      "Number": {
+                        "$ref": "../opcua.schema.json#/$defs/UInt32",
+                        "minimum": 0,
+                        "maximum": 1073741823
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Status/Good"
+                  },
+                  "Payload": {
+                    "properties": {
+                      "Details": {
+                        "properties": {
+                          "SymbolicId": {
+                            "pattern": "^Good"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Status(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_STATUS_1"
+                      },
+                      "Number": {
+                        "$ref": "../opcua.schema.json#/$defs/UInt32",
+                        "minimum": 1073741824,
+                        "maximum": 2147483647
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Status/Uncertain"
+                  },
+                  "Payload": {
+                    "properties": {
+                      "Details": {
+                        "properties": {
+                          "SymbolicId": {
+                            "pattern": "^Uncertain"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Status(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_STATUS_1"
+                      },
+                      "Number": {
+                        "$ref": "../opcua.schema.json#/$defs/UInt32",
+                        "minimum": 2147483648,
+                        "maximum": 4294967295
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Status/Bad"
+                  },
+                  "Payload": {
+                    "properties": {
+                      "Details": {
+                        "properties": {
+                          "SymbolicId": {
+                            "pattern": "^Bad"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "$comment": "REQ-RES-EVENT-008 (MG 8.3.6.2, SF-076): the EventLevel of a Syslog Event is the severity of its PRI (PRI modulo 8, RFC 5424 6.2.1)",
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_SYSLOG_0"
+                      },
+                      "Number": {
+                        "enum": [
+                          0,
+                          8,
+                          16,
+                          24,
+                          32,
+                          40,
+                          48,
+                          56,
+                          64,
+                          72,
+                          80,
+                          88,
+                          96,
+                          104,
+                          112,
+                          120,
+                          128,
+                          136,
+                          144,
+                          152,
+                          160,
+                          168,
+                          176,
+                          184
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Syslog/Emergency"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_SYSLOG_0"
+                      },
+                      "Number": {
+                        "enum": [
+                          1,
+                          9,
+                          17,
+                          25,
+                          33,
+                          41,
+                          49,
+                          57,
+                          65,
+                          73,
+                          81,
+                          89,
+                          97,
+                          105,
+                          113,
+                          121,
+                          129,
+                          137,
+                          145,
+                          153,
+                          161,
+                          169,
+                          177,
+                          185
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Syslog/Alert"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_SYSLOG_0"
+                      },
+                      "Number": {
+                        "enum": [
+                          2,
+                          10,
+                          18,
+                          26,
+                          34,
+                          42,
+                          50,
+                          58,
+                          66,
+                          74,
+                          82,
+                          90,
+                          98,
+                          106,
+                          114,
+                          122,
+                          130,
+                          138,
+                          146,
+                          154,
+                          162,
+                          170,
+                          178,
+                          186
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Syslog/Critical"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_SYSLOG_0"
+                      },
+                      "Number": {
+                        "enum": [
+                          3,
+                          11,
+                          19,
+                          27,
+                          35,
+                          43,
+                          51,
+                          59,
+                          67,
+                          75,
+                          83,
+                          91,
+                          99,
+                          107,
+                          115,
+                          123,
+                          131,
+                          139,
+                          147,
+                          155,
+                          163,
+                          171,
+                          179,
+                          187
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Syslog/Error"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_SYSLOG_0"
+                      },
+                      "Number": {
+                        "enum": [
+                          4,
+                          12,
+                          20,
+                          28,
+                          36,
+                          44,
+                          52,
+                          60,
+                          68,
+                          76,
+                          84,
+                          92,
+                          100,
+                          108,
+                          116,
+                          124,
+                          132,
+                          140,
+                          148,
+                          156,
+                          164,
+                          172,
+                          180,
+                          188
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Syslog/Warning"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_SYSLOG_0"
+                      },
+                      "Number": {
+                        "enum": [
+                          5,
+                          13,
+                          21,
+                          29,
+                          37,
+                          45,
+                          53,
+                          61,
+                          69,
+                          77,
+                          85,
+                          93,
+                          101,
+                          109,
+                          117,
+                          125,
+                          133,
+                          141,
+                          149,
+                          157,
+                          165,
+                          173,
+                          181,
+                          189
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Syslog/Notice"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_SYSLOG_0"
+                      },
+                      "Number": {
+                        "enum": [
+                          6,
+                          14,
+                          22,
+                          30,
+                          38,
+                          46,
+                          54,
+                          62,
+                          70,
+                          78,
+                          86,
+                          94,
+                          102,
+                          110,
+                          118,
+                          126,
+                          134,
+                          142,
+                          150,
+                          158,
+                          166,
+                          174,
+                          182,
+                          190
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Syslog/Informational"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "required": [
+                  "WriterGroupName",
+                  "Payload"
+                ],
+                "properties": {
+                  "WriterGroupName": {
+                    "type": "string",
+                    "pattern": "^Syslog(?:/|$)"
+                  },
+                  "Payload": {
+                    "type": "object",
+                    "required": [
+                      "Category",
+                      "Number"
+                    ],
+                    "properties": {
+                      "Category": {
+                        "const": "CAT_SYSLOG_0"
+                      },
+                      "Number": {
+                        "enum": [
+                          7,
+                          15,
+                          23,
+                          31,
+                          39,
+                          47,
+                          55,
+                          63,
+                          71,
+                          79,
+                          87,
+                          95,
+                          103,
+                          111,
+                          119,
+                          127,
+                          135,
+                          143,
+                          151,
+                          159,
+                          167,
+                          175,
+                          183,
+                          191
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "WriterGroupName": {
+                    "const": "Syslog/Debug"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/get-data.schema.json",
+  "title": "Get Data (topic form get-data)",
+  "description": "Entry schema of the topic form get-data (topic.abnf, matrix row Get/Data, MG 9.1.4). The DataSetClassId is optional (REQ-MSG-011).",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "properties": {
+    "Messages": {
+      "$comment": "REQ-RES-DATA-006 (MG 9.1.4): only the helper DataSets PaginationRequest and Locale",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 1
+            }
+          }
+        },
+        "then": {
+          "$ref": "../helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "then": {
+            "$ref": "../helpers.schema.json#/$defs/LocaleDataSetMessage"
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 2
+                }
+              }
+            },
+            "then": {
+              "$comment": "REQ-PAG-008 (MG 8.3.11): a Pagination is only sent with the method Pub",
+              "not": {}
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 9
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-QRY-001 (MG 8.3.13): Data has no Query",
+                "not": {}
+              },
+              "else": {
+                "$comment": "REQ-RES-DATA-006 (MG 9.1.4): a Get Data carries no Data DataSetMessage",
+                "not": {}
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-PAG-008 (MG 8.3.11): at most one PaginationRequest per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 1
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "$comment": "REQ-LOC-003 (MG 8.3.12): at most one Locale per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ]
+    }
+  }
+}

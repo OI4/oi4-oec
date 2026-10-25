@@ -31,7 +31,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 
 ## Entry schemas per allowed matrix row
 
-18 of 29 allowed rows have an entry schema (`oec/schema/v2/topics/<rule>.schema.json`).
+26 of 29 allowed rows have an entry schema (`oec/schema/v2/topics/<rule>.schema.json`).
 
 | Method | Resource | Rule | Entry schema |
 |---|---|---|---|
@@ -42,22 +42,22 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | Pub | Config | `pub-config` | **missing** |
 | Get | Config | `get-config` | **missing** |
 | Set | Config | `set-config` | **missing** |
-| Pub | Data | `pub-data` | **missing** |
-| Get | Data | `get-data` | **missing** |
-| Set | Data | `set-data` | **missing** |
+| Pub | Data | `pub-data` | yes |
+| Get | Data | `get-data` | yes |
+| Set | Data | `set-data` | yes |
 | Pub | Metadata | `pub-metadata` | yes |
 | Get | Metadata | `get-metadata` | yes |
 | Set | Metadata | `set-metadata` | yes |
-| Pub | Event | `pub-event` | **missing** |
+| Pub | Event | `pub-event` | yes |
 | Pub | Profile | `pub-profile` | yes |
 | Get | Profile | `get-profile` | yes |
 | Pub | PublicationList | `pub-publicationlist` | yes |
 | Get | PublicationList | `get-publicationlist` | yes |
 | Set | PublicationList | `set-publicationlist` | yes |
-| Pub | SubscriptionList | `pub-subscriptionlist` | **missing** |
-| Get | SubscriptionList | `get-subscriptionlist` | **missing** |
-| Set | SubscriptionList | `set-subscriptionlist` | **missing** |
-| Del | SubscriptionList | `del-subscriptionlist` | **missing** |
+| Pub | SubscriptionList | `pub-subscriptionlist` | yes |
+| Get | SubscriptionList | `get-subscriptionlist` | yes |
+| Set | SubscriptionList | `set-subscriptionlist` | yes |
+| Del | SubscriptionList | `del-subscriptionlist` | yes |
 | Pub | ReferenceDesignation | `pub-referencedesignation` | yes |
 | Get | ReferenceDesignation | `get-referencedesignation` | yes |
 | Set | ReferenceDesignation | `set-referencedesignation` | yes |
@@ -230,7 +230,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-REFDES-012 | schema, d7-validate | reviewed | V-PAY-053 | V-PAY-229 | covered |
 | REQ-RES-REFDES-013 | schema, d7-validate, d7-test | reviewed | V-PAY-053 | V-PAY-230 (rule) | covered |
 | REQ-RES-SUBLIST-001 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | – | positive only |
-| REQ-RES-SUBLIST-002 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-086 | covered |
+| REQ-RES-SUBLIST-002 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-086 (rule) | covered |
 | REQ-RES-SUBLIST-007 | schema, d7-validate | reviewed | V-PAY-066, V-PAY-067, V-PAY-068 | – | positive only |
 | REQ-RES-SUBLIST-009 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071 | – | details open (1 of 5) |
 | REQ-RES-SUBLIST-010 | schema, d7-validate | reviewed | V-PAY-072 | – | positive only |

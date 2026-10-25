@@ -269,6 +269,68 @@ var probes = []probe{
 	{"P-63 message: Pub ReferenceDesignation without Value", "V-PAY-043", anyMessage, func(m map[string]any) {
 		delete(payload(m)["Function"].(map[string]any), "Value")
 	}, []string{"REQ-RES-REFDES-001"}},
+	{"P-64 empty Pub Data (SF-099)", "V-PAY-058", "pub-data", func(m map[string]any) {
+		m["Messages"] = []any{}
+	}, nil},
+	{"P-65 empty Pub SubscriptionList (SF-099)", "V-PAY-069", "pub-subscriptionlist", func(m map[string]any) {
+		m["Messages"] = []any{}
+	}, nil},
+	{"P-66 Oi4Pv with a secondary value Sv01", "V-PAY-058", "pub-data", func(m map[string]any) {
+		item(m)["WriterGroupName"] = "Oi4Pv"
+		item(m)["Payload"] = map[string]any{"Pv": json.Number("1"), "Sv01": json.Number("2")}
+	}, []string{"REQ-RES-DATA-004"}},
+	{"P-67 Data WriterGroupName with two levels on a topic without Filter", "V-PAY-059", "pub-data", func(m map[string]any) {
+		item(m)["WriterGroupName"] = "oee/line"
+	}, []string{"REQ-MSG-024"}},
+	{"P-68 Status Event with the SymbolicId of another class", "V-PAY-063", "pub-event", func(m map[string]any) {
+		payload(m)["Details"] = map[string]any{"SymbolicId": "BadEncodingError"}
+	}, []string{"REQ-RES-EVENT-004"}},
+	{"P-69 Uncertain Status Event", "V-PAY-063", "pub-event", func(m map[string]any) {
+		item(m)["WriterGroupName"] = "Status/Uncertain"
+		payload(m)["Number"] = json.Number("1073741824")
+		payload(m)["Details"] = map[string]any{"SymbolicId": "Uncertain"}
+	}, nil},
+	{"P-70 Status Event of the reserved class 3 as Bad", "V-PAY-063", "pub-event", func(m map[string]any) {
+		item(m)["WriterGroupName"] = "Status/Bad"
+		payload(m)["Number"] = json.Number("3221225472")
+		payload(m)["Details"] = map[string]any{"SymbolicId": "Bad"}
+	}, nil},
+	{"P-71 Syslog Event with the PRI 192", "V-PAY-064", "pub-event", func(m map[string]any) {
+		payload(m)["Number"] = json.Number("192")
+	}, []string{"REQ-RES-EVENT-007"}},
+	{"P-72 Syslog Event with a Details key other than MSG and HEADER", "V-PAY-064", "pub-event", func(m map[string]any) {
+		payload(m)["Details"] = map[string]any{"MSG": "x", "STRUCTURED-DATA": "-"}
+	}, []string{"REQ-RES-EVENT-007"}},
+	{"P-73 Generic Event with application-defined Details", "V-PAY-065", "pub-event", func(m map[string]any) {
+		payload(m)["Details"] = map[string]any{"Fill": json.Number("97"), "Buffer": map[string]any{"Size": json.Number("1024")}}
+	}, nil},
+	{"P-74 Event with a numeric Category", "V-PAY-063", "pub-event", func(m map[string]any) {
+		payload(m)["Category"] = json.Number("1")
+	}, []string{"REQ-MSG-031", "REQ-RES-EVENT-001"}},
+	{"P-75 Event with the MessageType ua-keyframe", "V-PAY-063", "pub-event", func(m map[string]any) {
+		item(m)["MessageType"] = "ua-keyframe"
+	}, []string{"REQ-MSG-029"}},
+	{"P-76 SubscriptionList TopicPath with a wildcard resource level", "V-PAY-069", "pub-subscriptionlist", func(m map[string]any) {
+		payload(m)["TopicPath"] = "Oi4v2/+/+/Pub/+/#"
+	}, []string{"REQ-RES-SUBLIST-002"}},
+	{"P-77 SubscriptionList TopicPath outside the OEC namespace", "V-PAY-069", "pub-subscriptionlist", func(m map[string]any) {
+		payload(m)["TopicPath"] = "factory/line1/#"
+	}, nil},
+	{"P-78 SubscriptionList entry with an unknown Config", "V-PAY-069", "pub-subscriptionlist", func(m map[string]any) {
+		payload(m)["Config"] = "CONF_2"
+	}, []string{"REQ-RES-SUBLIST-001"}},
+	{"P-79 Del SubscriptionList with two entries", "V-PAY-074", "del-subscriptionlist", func(m map[string]any) {
+		m["Messages"] = []any{msgs(m)[0], msgs(m)[0]}
+	}, []string{"REQ-RES-SUBLIST-011"}},
+	{"P-80 Query in Get Data", "V-PAY-055", "get-data", func(m map[string]any) {
+		m["Messages"] = []any{map[string]any{"DataSetWriterId": json.Number("9"), "WriterGroupName": "Query", "DataSetWriterName": "x", "Payload": map[string]any{}}}
+	}, []string{"REQ-QRY-001"}},
+	{"P-81 message: Pub Event without Number", "V-PAY-063", anyMessage, func(m map[string]any) {
+		delete(payload(m), "Number")
+	}, []string{"REQ-RES-EVENT-001"}},
+	{"P-82 message: Pub SubscriptionList without TopicPath", "V-PAY-069", anyMessage, func(m map[string]any) {
+		delete(payload(m), "TopicPath")
+	}, []string{"REQ-RES-SUBLIST-001"}},
 }
 
 // runProbes validates every probe against its entry schema and appends the

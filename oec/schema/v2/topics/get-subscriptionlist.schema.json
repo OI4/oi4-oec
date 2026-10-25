@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/get-subscriptionlist.schema.json",
+  "title": "Get SubscriptionList (topic form get-subscriptionlist)",
+  "description": "Entry schema of the topic form get-subscriptionlist (topic.abnf, matrix row Get/SubscriptionList, MG 9.1.9).",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "allOf": [
+    {
+      "$comment": "REQ-MSG-011 (MG 8.2.1): the DataSetClassId of a predefined resource is present",
+      "required": [
+        "DataSetClassId"
+      ]
+    }
+  ],
+  "properties": {
+    "DataSetClassId": {
+      "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of SubscriptionList",
+      "const": "e5d68c47-c276-4929-8ab9-4c1090cac785"
+    },
+    "Messages": {
+      "$comment": "REQ-RES-SUBLIST-007 (MG 9.1.9): only the helper DataSets PaginationRequest and Locale",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 1
+            }
+          }
+        },
+        "then": {
+          "$ref": "../helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "then": {
+            "$ref": "../helpers.schema.json#/$defs/LocaleDataSetMessage"
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 2
+                }
+              }
+            },
+            "then": {
+              "$comment": "REQ-PAG-008 (MG 8.3.11): a Pagination is only sent with the method Pub",
+              "not": {}
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 9
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-QRY-001 (MG 8.3.13): SubscriptionList has no Query",
+                "not": {}
+              },
+              "else": {
+                "$comment": "REQ-RES-SUBLIST-007 (MG 9.1.9): a Get SubscriptionList carries no SubscriptionList DataSetMessage",
+                "not": {}
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-PAG-008 (MG 8.3.11): at most one PaginationRequest per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 1
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "$comment": "REQ-LOC-003 (MG 8.3.12): at most one Locale per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ]
+    }
+  }
+}
