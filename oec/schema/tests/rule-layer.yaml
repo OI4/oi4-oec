@@ -103,3 +103,13 @@ expectations:
     rule: [REQ-RES-PUBLIST-002]
     rules: [R-3]
     reason: The schema sees that the WriterGroupName does not start with a ResourceType; that it equals Resource[/Filter] of the entry is an equality between two fields of one DataSetMessage.
+  - vector: V-PAY-220
+    schema: []
+    rule: [REQ-RES-PUBLIST-003]
+    rules: [R-3]
+    reason: Unique entries by Resource, Source and Filter are a relation between array items by a compound key; uniqueItems compares whole items only, and two entries may differ in Mode or Interval.
+  - vector: V-PAY-230
+    schema: []
+    rule: [REQ-RES-REFDES-013]
+    rules: [R-2]
+    reason: The topic form get-referencedesignation covers the topic with and without Source; whether the topic has a Source is a topic value the payload does not show.

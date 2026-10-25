@@ -31,7 +31,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 
 ## Entry schemas per allowed matrix row
 
-11 of 29 allowed rows have an entry schema (`oec/schema/v2/topics/<rule>.schema.json`).
+18 of 29 allowed rows have an entry schema (`oec/schema/v2/topics/<rule>.schema.json`).
 
 | Method | Resource | Rule | Entry schema |
 |---|---|---|---|
@@ -51,17 +51,17 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | Pub | Event | `pub-event` | **missing** |
 | Pub | Profile | `pub-profile` | yes |
 | Get | Profile | `get-profile` | yes |
-| Pub | PublicationList | `pub-publicationlist` | **missing** |
-| Get | PublicationList | `get-publicationlist` | **missing** |
-| Set | PublicationList | `set-publicationlist` | **missing** |
+| Pub | PublicationList | `pub-publicationlist` | yes |
+| Get | PublicationList | `get-publicationlist` | yes |
+| Set | PublicationList | `set-publicationlist` | yes |
 | Pub | SubscriptionList | `pub-subscriptionlist` | **missing** |
 | Get | SubscriptionList | `get-subscriptionlist` | **missing** |
 | Set | SubscriptionList | `set-subscriptionlist` | **missing** |
 | Del | SubscriptionList | `del-subscriptionlist` | **missing** |
-| Pub | ReferenceDesignation | `pub-referencedesignation` | **missing** |
-| Get | ReferenceDesignation | `get-referencedesignation` | **missing** |
-| Set | ReferenceDesignation | `set-referencedesignation` | **missing** |
-| Del | ReferenceDesignation | `del-referencedesignation` | **missing** |
+| Pub | ReferenceDesignation | `pub-referencedesignation` | yes |
+| Get | ReferenceDesignation | `get-referencedesignation` | yes |
+| Set | ReferenceDesignation | `set-referencedesignation` | yes |
+| Del | ReferenceDesignation | `del-referencedesignation` | yes |
 | Call | NewDataSetWriterId | `call-newdatasetwriterid` | yes |
 | Reply | NewDataSetWriterId | `reply-newdatasetwriterid` | yes |
 
@@ -143,7 +143,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-MSG-027 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-142 | covered |
 | REQ-MSG-029 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-143, V-PAY-144 | covered |
 | REQ-MSG-030 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-144 | covered |
-| REQ-MSG-031 | schema, d7-validate | reviewed | V-PAY-004 | V-PAY-145 | covered |
+| REQ-MSG-031 | schema, d7-validate | reviewed | V-PAY-004 | V-PAY-145, V-PAY-224* | covered |
 | REQ-MSG-032 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-020, V-PAY-021, V-PAY-022 … (5) | V-PAY-154 | covered |
 | REQ-MSG-034 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-010, V-PAY-011, V-PAY-012 … (12) | V-PAY-155 | covered |
 | REQ-MSG-035 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-010, V-PAY-011, V-PAY-012 … (12) | V-PAY-156 | covered |
@@ -209,20 +209,20 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-PROFILE-001 | schema, d7-validate | reviewed | V-PAY-032, V-PAY-033 | V-PAY-214, V-PAY-215, V-PAY-216 | covered |
 | REQ-RES-PROFILE-003 | schema, d7-validate | reviewed | V-PAY-030, V-PAY-031 | V-PAY-217 | covered |
 | REQ-RES-PROFILE-005 | schema, d7-validate | reviewed | V-PAY-032, V-PAY-033 | – | derived |
-| REQ-RES-PUBLIST-001 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-040 | – | positive only |
-| REQ-RES-PUBLIST-002 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-040 | V-PAY-151 | covered |
-| REQ-RES-PUBLIST-003 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039 | – | positive only |
+| REQ-RES-PUBLIST-001 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-040 | V-PAY-218*, V-PAY-219*, V-PAY-224* | positive only |
+| REQ-RES-PUBLIST-002 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-040 | V-PAY-151 (rule), V-PAY-223* | covered |
+| REQ-RES-PUBLIST-003 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039 | V-PAY-220* (rule) | positive only |
 | REQ-RES-PUBLIST-012 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039 | V-PAY-052 | covered |
-| REQ-RES-PUBLIST-019 | schema, d7-validate | reviewed | V-PAY-034, V-PAY-035, V-PAY-036 | – | positive only |
+| REQ-RES-PUBLIST-019 | schema, d7-validate | reviewed | V-PAY-034, V-PAY-035, V-PAY-036 | V-PAY-221* | positive only |
 | REQ-RES-PUBLIST-021 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039 | – | details open (1 of 5) |
-| REQ-RES-PUBLIST-022 | schema, d7-validate | reviewed | V-PAY-040 | – | positive only |
-| REQ-RES-REFDES-001 | schema, d7-validate | reviewed | V-PAY-043, V-PAY-044, V-PAY-045, V-PAY-054 | – | positive only |
-| REQ-RES-REFDES-003 | schema, d7-validate | reviewed | V-PAY-041, V-PAY-042, V-PAY-053 | – | positive only |
+| REQ-RES-PUBLIST-022 | schema, d7-validate | reviewed | V-PAY-040 | V-PAY-222* | positive only |
+| REQ-RES-REFDES-001 | schema, d7-validate | reviewed | V-PAY-043, V-PAY-044, V-PAY-045, V-PAY-054 | V-PAY-225* | positive only |
+| REQ-RES-REFDES-003 | schema, d7-validate | reviewed | V-PAY-041, V-PAY-042, V-PAY-053 | V-PAY-226* | positive only |
 | REQ-RES-REFDES-005 | schema, d7-validate | reviewed | V-PAY-043, V-PAY-044, V-PAY-054 | – | details open (1 of 5) |
-| REQ-RES-REFDES-006 | schema, d7-validate | reviewed | V-PAY-045 | – | positive only |
-| REQ-RES-REFDES-007 | schema, d7-validate | reviewed | V-PAY-046 | – | positive only |
-| REQ-RES-REFDES-012 | schema, d7-validate | reviewed | V-PAY-053 | – | positive only |
-| REQ-RES-REFDES-013 | schema, d7-validate, d7-test | reviewed | V-PAY-053 | – | positive only |
+| REQ-RES-REFDES-006 | schema, d7-validate | reviewed | V-PAY-045 | V-PAY-227* | positive only |
+| REQ-RES-REFDES-007 | schema, d7-validate | reviewed | V-PAY-046 | V-PAY-228* | positive only |
+| REQ-RES-REFDES-012 | schema, d7-validate | reviewed | V-PAY-053 | V-PAY-229* | positive only |
+| REQ-RES-REFDES-013 | schema, d7-validate, d7-test | reviewed | V-PAY-053 | V-PAY-230* (rule) | positive only |
 | REQ-RES-SUBLIST-001 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | – | positive only |
 | REQ-RES-SUBLIST-002 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-086 | covered |
 | REQ-RES-SUBLIST-007 | schema, d7-validate | reviewed | V-PAY-066, V-PAY-067, V-PAY-068 | – | positive only |
