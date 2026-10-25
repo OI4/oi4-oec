@@ -7,15 +7,15 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-PAY-001](#v-pay-001) | B1.1.2: Get Health of an explicit asset | valid | ok | guideline MG B1.1.2 | reviewed |
+| [V-PAY-001](#v-pay-001) | B1.1.2: Get Health of an explicit asset | valid | ok | guideline MG B1.1.2 | draft |
 | [V-PAY-002](#v-pay-002) | B1.1.2: Get Health of all assets related to this application | valid | ok | guideline MG B1.1.2 | reviewed |
-| [V-PAY-003](#v-pay-003) | B1.1.2: Pub Health of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.2 | reviewed |
-| [V-PAY-004](#v-pay-004) | B1.1.2: Pub Health of all assets, self-initialized | valid | ok | guideline MG B1.1.2 | reviewed |
+| [V-PAY-003](#v-pay-003) | B1.1.2: Pub Health of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.2 | draft |
+| [V-PAY-004](#v-pay-004) | B1.1.2: Pub Health of all assets, self-initialized | valid | ok | guideline MG B1.1.2 | draft |
 | [V-PAY-005](#v-pay-005) | B1.1.11: Get MAM of all assets with PaginationRequest | valid | ok | guideline MG B1.1.11 | reviewed |
 | [V-PAY-006](#v-pay-006) | B1.1.11: Pub MAM of all assets with Pagination | valid | ok | guideline MG B1.1.11 | reviewed |
 | [V-PAY-007](#v-pay-007) | B1.1.12: Get MAM of all assets with Locale | valid | ok | guideline MG B1.1.12 | reviewed |
-| [V-PAY-008](#v-pay-008) | B1.2.1: Call NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | reviewed |
-| [V-PAY-009](#v-pay-009) | B1.2.1: Reply NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | reviewed |
+| [V-PAY-008](#v-pay-008) | B1.2.1: Call NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | draft |
+| [V-PAY-009](#v-pay-009) | B1.2.1: Reply NewDataSetWriterId | valid | ok | guideline MG B1.2.1 | draft |
 | [V-PAY-010](#v-pay-010) | B2.1: predefined MetaData of MAM | valid | ok | guideline MG B2.1 | reviewed |
 | [V-PAY-011](#v-pay-011) | B2.2: predefined MetaData of Health | valid | ok | guideline MG B2.2 | reviewed |
 | [V-PAY-012](#v-pay-012) | B2.3: predefined MetaData of Config | valid | ok | guideline MG B2.3 | reviewed |
@@ -32,7 +32,7 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 | [V-PAY-025](#v-pay-025) | B1.1.2: Will message of an application | valid | ok | guideline MG B1.1.2 | reviewed |
 | [V-PAY-026](#v-pay-026) | B1.1.1: Get MAM of an explicit asset | valid | ok | guideline MG B1.1.1 | reviewed |
 | [V-PAY-027](#v-pay-027) | B1.1.1: Get MAM of all assets related to this application | valid | ok | guideline MG B1.1.1 | reviewed |
-| [V-PAY-028](#v-pay-028) | B1.1.1: Pub MAM of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.1 | reviewed |
+| [V-PAY-028](#v-pay-028) | B1.1.1: Pub MAM of an explicit asset, reply to a Get | valid | ok | guideline MG B1.1.1 | draft |
 | [V-PAY-029](#v-pay-029) | B1.1.1: Pub MAM of all assets, self-initialized | valid | ok | guideline MG B1.1.1 | reviewed |
 | [V-PAY-030](#v-pay-030) | B1.1.7: Get Profile of an explicit asset | valid | ok | guideline MG B1.1.7 | reviewed |
 | [V-PAY-031](#v-pay-031) | B1.1.7: Get Profiles of all assets related to this application | valid | ok | guideline MG B1.1.7 | reviewed |
@@ -98,8 +98,8 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 | [V-PAY-114](#v-pay-114) | B1.1.3: Pub explicit Config tag after a successful set request (device) | valid | ok | guideline MG B1.1.3 | reviewed |
 | [V-PAY-117](#v-pay-117) | MG 1.2: Pub Health reply (capitalization example) | valid | ok | guideline MG 1.2 (edited: 1 change(s)) | reviewed |
 | [V-PAY-118](#v-pay-118) | MG 8.1.1: ua-data with SequenceNumber, MetaDataVersion, Status and MessageType (Figure 5) | valid | ok | guideline MG 8.1.1 (edited: 1 change(s)) | reviewed |
-| [V-PAY-119](#v-pay-119) | MG 8.1.3: Call NewDataSetWriterId with CorrelationData (Figure 7) | valid | ok | guideline MG 8.1.3 | reviewed |
-| [V-PAY-120](#v-pay-120) | MG 8.1.3: Reply NewDataSetWriterId with CorrelationData (Figure 8) | valid | ok | guideline MG 8.1.3 | reviewed |
+| [V-PAY-119](#v-pay-119) | MG 8.1.3: Call NewDataSetWriterId with CorrelationData (Figure 7) | valid | ok | guideline MG 8.1.3 | draft |
+| [V-PAY-120](#v-pay-120) | MG 8.1.3: Reply NewDataSetWriterId with CorrelationData (Figure 8) | valid | ok | guideline MG 8.1.3 | draft |
 | [V-PAY-121](#v-pay-121) | MG 8.1.2: ua-metadata of a user-defined DataSet (Figure 6) | valid | ok | guideline MG 8.1.2 (edited: 1 change(s)) | reviewed |
 
 ## V-PAY-001
@@ -111,9 +111,9 @@ Golden payload vectors taken from Appendix B (MG B1.1.1 … B1.1.12, B1.2.1): to
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015)
+- Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-RES-HEALTH-005](../../requirements/view/res-health.md#req-res-health-005)
 - Origin: guideline MG B1.1.2
-- Status: reviewed
+- Status: draft
 
 Notes: A request addresses the application in the topic (MG 7.3); the PublisherId and the MessageId are those of the requesting IT connector. The Source of the topic is the application itself. A Get without helper DataSets has an empty Messages array and an empty ReplyTo.
 
@@ -166,9 +166,9 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-001](../../requirements/view/msg.md#req-msg-001), [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-014](../../requirements/view/msg.md#req-msg-014), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024)
+- Illustrates: [REQ-MSG-001](../../requirements/view/msg.md#req-msg-001), [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-003](../../requirements/view/msg.md#req-msg-003), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-010](../../requirements/view/msg.md#req-msg-010), [REQ-MSG-014](../../requirements/view/msg.md#req-msg-014), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-RES-HEALTH-001](../../requirements/view/res-health.md#req-res-health-001)
 - Origin: guideline MG B1.1.2
-- Status: reviewed
+- Status: draft
 
 Notes: ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health has no Filter; DataSetWriterName is the decoded Source. The DataSet content (MG 8.3.2) is checked with the Health schema in C-027/C-028.
 
@@ -205,9 +205,9 @@ Payload:
 - ServiceType · Method · Resource: OTConnector · Pub · Health ([matrix](../../matrix/view/method-resource.md#health))
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-031](../../requirements/view/msg.md#req-msg-031)
+- Illustrates: [REQ-MSG-005](../../requirements/view/msg.md#req-msg-005), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-016](../../requirements/view/msg.md#req-msg-016), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-031](../../requirements/view/msg.md#req-msg-031), [REQ-RES-HEALTH-001](../../requirements/view/res-health.md#req-res-health-001), [REQ-RES-HEALTH-002](../../requirements/view/res-health.md#req-res-health-002)
 - Origin: guideline MG B1.1.2
-- Status: reviewed
+- Status: draft
 
 Notes: Topic without Source: one DataSetMessage per asset; here only the application itself. Self-initialized publication, so ReplyTo is empty.
 
@@ -429,9 +429,9 @@ Payload:
 - ServiceType · Method · Resource: OTConnector · Call · NewDataSetWriterId ([matrix](../../matrix/view/method-resource.md#newdatasetwriterid))
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-006](../../requirements/view/act.md#req-act-006), [REQ-ACT-010](../../requirements/view/act.md#req-act-010), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-021](../../requirements/view/act.md#req-act-021)
+- Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-006](../../requirements/view/act.md#req-act-006), [REQ-ACT-010](../../requirements/view/act.md#req-act-010), [REQ-ACT-013](../../requirements/view/act.md#req-act-013), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-021](../../requirements/view/act.md#req-act-021)
 - Origin: guideline MG B1.2.1
-- Status: reviewed
+- Status: draft
 
 Notes: PublisherId is the Responder (topic), RequestorId and MessageId are those of the IT connector; ResponseAddress is the Reply topic of the Call topic. Without CorrelationData.
 
@@ -468,9 +468,9 @@ Payload:
 - ServiceType · Method · Resource: OTConnector · Reply · NewDataSetWriterId ([matrix](../../matrix/view/method-resource.md#newdatasetwriterid))
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-012](../../requirements/view/act.md#req-act-012), [REQ-ACT-014](../../requirements/view/act.md#req-act-014), [REQ-ACT-015](../../requirements/view/act.md#req-act-015), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-022](../../requirements/view/act.md#req-act-022)
+- Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-012](../../requirements/view/act.md#req-act-012), [REQ-ACT-013](../../requirements/view/act.md#req-act-013), [REQ-ACT-014](../../requirements/view/act.md#req-act-014), [REQ-ACT-015](../../requirements/view/act.md#req-act-015), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-022](../../requirements/view/act.md#req-act-022)
 - Origin: guideline MG B1.2.1
-- Status: reviewed
+- Status: draft
 
 Notes: Final response (ActionState 2) to V-PAY-008 with Status {} (Good, CompactEncoding) and the new DataSetWriterId 57211, valid for 10 s.
 
@@ -2088,9 +2088,9 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-MAM-001](../../requirements/view/res-mam.md#req-res-mam-001), [REQ-RES-MAM-004](../../requirements/view/res-mam.md#req-res-mam-004), [REQ-RES-MAM-012](../../requirements/view/res-mam.md#req-res-mam-012), [REQ-RES-MAM-016](../../requirements/view/res-mam.md#req-res-mam-016), [REQ-RES-MAM-017](../../requirements/view/res-mam.md#req-res-mam-017), [REQ-RES-MAM-022](../../requirements/view/res-mam.md#req-res-mam-022)
+- Illustrates: [REQ-MSG-015](../../requirements/view/msg.md#req-msg-015), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-MAM-001](../../requirements/view/res-mam.md#req-res-mam-001), [REQ-RES-MAM-004](../../requirements/view/res-mam.md#req-res-mam-004), [REQ-RES-MAM-006](../../requirements/view/res-mam.md#req-res-mam-006), [REQ-RES-MAM-012](../../requirements/view/res-mam.md#req-res-mam-012), [REQ-RES-MAM-014](../../requirements/view/res-mam.md#req-res-mam-014), [REQ-RES-MAM-016](../../requirements/view/res-mam.md#req-res-mam-016), [REQ-RES-MAM-017](../../requirements/view/res-mam.md#req-res-mam-017), [REQ-RES-MAM-022](../../requirements/view/res-mam.md#req-res-mam-022)
 - Origin: guideline MG B1.1.1
-- Status: reviewed
+- Status: draft
 
 Notes: Answer to V-PAY-026 (ReplyTo = its MessageId). All mandatory MAM fields are present, ManufacturerUri is a domain without scheme, DeviceManual a URL and ProductInstanceUri equals the DataSetWriterName. SoftwareRevision "1.0.1" has three numbers instead of the recommended four (REQ-RES-MAM-009, SHOULD, not checked).
 
@@ -5709,9 +5709,9 @@ Edits against the guideline example:
 - ServiceType · Method · Resource: OTConnector · Call · NewDataSetWriterId ([matrix](../../matrix/view/method-resource.md#newdatasetwriterid))
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-006](../../requirements/view/act.md#req-act-006), [REQ-ACT-010](../../requirements/view/act.md#req-act-010), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-021](../../requirements/view/act.md#req-act-021)
+- Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-006](../../requirements/view/act.md#req-act-006), [REQ-ACT-010](../../requirements/view/act.md#req-act-010), [REQ-ACT-013](../../requirements/view/act.md#req-act-013), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-021](../../requirements/view/act.md#req-act-021)
 - Origin: guideline MG 8.1.3
-- Status: reviewed
+- Status: draft
 
 Notes: V-PAY-008 (B1.2.1) with CorrelationData "MTYzOTY5MzUxMDAwMA==" (base64 of the request time 1639693510000), which the Responder returns unchanged in V-PAY-120 (REQ-ACT-007).
 
@@ -5749,9 +5749,9 @@ Payload:
 - ServiceType · Method · Resource: OTConnector · Reply · NewDataSetWriterId ([matrix](../../matrix/view/method-resource.md#newdatasetwriterid))
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Expected: valid
-- Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-007](../../requirements/view/act.md#req-act-007), [REQ-ACT-012](../../requirements/view/act.md#req-act-012), [REQ-ACT-014](../../requirements/view/act.md#req-act-014), [REQ-ACT-015](../../requirements/view/act.md#req-act-015), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-022](../../requirements/view/act.md#req-act-022)
+- Illustrates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001), [REQ-ACT-002](../../requirements/view/act.md#req-act-002), [REQ-ACT-003](../../requirements/view/act.md#req-act-003), [REQ-ACT-004](../../requirements/view/act.md#req-act-004), [REQ-ACT-005](../../requirements/view/act.md#req-act-005), [REQ-ACT-007](../../requirements/view/act.md#req-act-007), [REQ-ACT-012](../../requirements/view/act.md#req-act-012), [REQ-ACT-013](../../requirements/view/act.md#req-act-013), [REQ-ACT-014](../../requirements/view/act.md#req-act-014), [REQ-ACT-015](../../requirements/view/act.md#req-act-015), [REQ-ACT-019](../../requirements/view/act.md#req-act-019), [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-ACT-022](../../requirements/view/act.md#req-act-022)
 - Origin: guideline MG 8.1.3
-- Status: reviewed
+- Status: draft
 
 Notes: Final response (ActionState 2) to V-PAY-119 on its ResponseAddress, with the CorrelationData of the request unchanged; otherwise V-PAY-009 (B1.2.1).
 

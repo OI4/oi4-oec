@@ -1,4 +1,4 @@
-# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20); V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (ff1562f); V-PAY-055 … 080 (Data, Event, SubscriptionList and the Status events of B1.1.3 … B1.1.10) drafted in C-028, reviewed by the PO (C-028 review 2026-10-21); V-PAY-088 … 102 (Config of B1.1.3) drafted in C-029, reviewed by the PO (C-029 review), synced with the guideline corrections of SF-084 … 088 (a77d331; V-PAY-099/101 verbatim since then); V-PAY-114 (Pub Config after Set, GL-ADR-021) drafted in the C-029 review; in C-034 the reqs of V-PAY-003, 005, 006, 007, 046 and 061 were extended by REQs these vectors already satisfy (positive coverage, ADR-0019 §8), reviewed by the PO (C-034 review 2026-10-24); V-PAY-023 … 025 got the field role (birth/close/will, Q-020 (a)) in C-035, reviewed by the PO (C-035 review 2026-10-25).
+# Golden payload vectors (C-023/C-024/C-025/C-027, ADR-0018 amendments C-013, C-023 and C-024); V-PAY-001 … 022 reviewed by the PO (C-024), V-PAY-023 … 025 reviewed by the PO (C-026; drafted in C-025, verbatim since C-026); V-PAY-026 … 047 drafted in C-027, reviewed by the PO (C-027 review 2026-10-20); V-PAY-053/054 (Query of ReferenceDesignation, GL-ADR-020) drafted in the C-027 review, reviewed by the PO (2026-10-20); V-PAY-021/022 synced with the SF-074 correction of B1.1.5 (ff1562f); V-PAY-055 … 080 (Data, Event, SubscriptionList and the Status events of B1.1.3 … B1.1.10) drafted in C-028, reviewed by the PO (C-028 review 2026-10-21); V-PAY-088 … 102 (Config of B1.1.3) drafted in C-029, reviewed by the PO (C-029 review), synced with the guideline corrections of SF-084 … 088 (a77d331; V-PAY-099/101 verbatim since then); V-PAY-114 (Pub Config after Set, GL-ADR-021) drafted in the C-029 review; in C-034 the reqs of V-PAY-003, 005, 006, 007, 046 and 061 were extended by REQs these vectors already satisfy (positive coverage, ADR-0019 §8), reviewed by the PO (C-034 review 2026-10-24); V-PAY-023 … 025 got the field role (birth/close/will, Q-020 (a)) in C-035, reviewed by the PO (C-035 review 2026-10-25); in C-036 the reqs of V-PAY-001, 003, 004, 008, 009, 028, 119 and 120 were extended by REQs these vectors already satisfy (REQ-ACT-013, REQ-RES-HEALTH-001/002/005, REQ-RES-MAM-006/014; positive coverage, ADR-0019 §8), draft until the C-036 review.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "68d878d"
@@ -17,9 +17,9 @@ vectors:
   - id: V-PAY-001
     title: "B1.1.2: Get Health of an explicit asset"
     expected: valid
-    reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-005, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-011, REQ-MSG-015]
+    reqs: [REQ-MSG-002, REQ-MSG-003, REQ-MSG-005, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-011, REQ-MSG-015, REQ-RES-HEALTH-005]
     origin: {kind: guideline, ref: MG B1.1.2}
-    status: reviewed
+    status: draft
     notes: >-
       A request addresses the application in the topic (MG 7.3); the PublisherId
       and the MessageId are those of the requesting IT connector. The Source of
@@ -60,9 +60,9 @@ vectors:
   - id: V-PAY-003
     title: "B1.1.2: Pub Health of an explicit asset, reply to a Get"
     expected: valid
-    reqs: [REQ-MSG-001, REQ-MSG-002, REQ-MSG-003, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-014, REQ-MSG-015, REQ-MSG-016, REQ-MSG-023, REQ-MSG-024]
+    reqs: [REQ-MSG-001, REQ-MSG-002, REQ-MSG-003, REQ-MSG-006, REQ-MSG-007, REQ-MSG-010, REQ-MSG-014, REQ-MSG-015, REQ-MSG-016, REQ-MSG-023, REQ-MSG-024, REQ-RES-HEALTH-001]
     origin: {kind: guideline, ref: MG B1.1.2}
-    status: reviewed
+    status: draft
     notes: >-
       ReplyTo is the MessageId of V-PAY-001. WriterGroupName is "" because Health
       has no Filter; DataSetWriterName is the decoded Source. The DataSet content
@@ -93,9 +93,9 @@ vectors:
   - id: V-PAY-004
     title: "B1.1.2: Pub Health of all assets, self-initialized"
     expected: valid
-    reqs: [REQ-MSG-005, REQ-MSG-006, REQ-MSG-015, REQ-MSG-016, REQ-MSG-024, REQ-MSG-031]
+    reqs: [REQ-MSG-005, REQ-MSG-006, REQ-MSG-015, REQ-MSG-016, REQ-MSG-024, REQ-MSG-031, REQ-RES-HEALTH-001, REQ-RES-HEALTH-002]
     origin: {kind: guideline, ref: MG B1.1.2}
-    status: reviewed
+    status: draft
     notes: >-
       Topic without Source: one DataSetMessage per asset; here only the
       application itself. Self-initialized publication, so ReplyTo is empty.
@@ -292,9 +292,9 @@ vectors:
   - id: V-PAY-008
     title: "B1.2.1: Call NewDataSetWriterId"
     expected: valid
-    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-006, REQ-ACT-010, REQ-ACT-019, REQ-ACT-020, REQ-ACT-021]
+    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-006, REQ-ACT-010, REQ-ACT-013, REQ-ACT-019, REQ-ACT-020, REQ-ACT-021]
     origin: {kind: guideline, ref: MG B1.2.1}
-    status: reviewed
+    status: draft
     notes: >-
       PublisherId is the Responder (topic), RequestorId and MessageId are those of
       the IT connector; ResponseAddress is the Reply topic of the Call topic.
@@ -325,9 +325,9 @@ vectors:
   - id: V-PAY-009
     title: "B1.2.1: Reply NewDataSetWriterId"
     expected: valid
-    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-012, REQ-ACT-014, REQ-ACT-015, REQ-ACT-019, REQ-ACT-020, REQ-ACT-022]
+    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-012, REQ-ACT-013, REQ-ACT-014, REQ-ACT-015, REQ-ACT-019, REQ-ACT-020, REQ-ACT-022]
     origin: {kind: guideline, ref: MG B1.2.1}
-    status: reviewed
+    status: draft
     notes: >-
       Final response (ActionState 2) to V-PAY-008 with Status {} (Good,
       CompactEncoding) and the new DataSetWriterId 57211, valid for 10 s.
@@ -1837,9 +1837,9 @@ vectors:
   - id: V-PAY-028
     title: "B1.1.1: Pub MAM of an explicit asset, reply to a Get"
     expected: valid
-    reqs: [REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-MAM-001, REQ-RES-MAM-004, REQ-RES-MAM-012, REQ-RES-MAM-016, REQ-RES-MAM-017, REQ-RES-MAM-022]
+    reqs: [REQ-MSG-015, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-MAM-001, REQ-RES-MAM-004, REQ-RES-MAM-006, REQ-RES-MAM-012, REQ-RES-MAM-014, REQ-RES-MAM-016, REQ-RES-MAM-017, REQ-RES-MAM-022]
     origin: {kind: guideline, ref: MG B1.1.1}
-    status: reviewed
+    status: draft
     notes: >-
       Answer to V-PAY-026 (ReplyTo = its MessageId). All mandatory MAM fields are
       present, ManufacturerUri is a domain without scheme, DeviceManual a URL and
@@ -5055,9 +5055,9 @@ vectors:
   - id: V-PAY-119
     title: "MG 8.1.3: Call NewDataSetWriterId with CorrelationData (Figure 7)"
     expected: valid
-    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-006, REQ-ACT-010, REQ-ACT-019, REQ-ACT-020, REQ-ACT-021]
+    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-006, REQ-ACT-010, REQ-ACT-013, REQ-ACT-019, REQ-ACT-020, REQ-ACT-021]
     origin: {kind: guideline, ref: MG 8.1.3}
-    status: reviewed
+    status: draft
     notes: >-
       V-PAY-008 (B1.2.1) with CorrelationData "MTYzOTY5MzUxMDAwMA==" (base64 of
       the request time 1639693510000), which the Responder returns unchanged in
@@ -5089,9 +5089,9 @@ vectors:
   - id: V-PAY-120
     title: "MG 8.1.3: Reply NewDataSetWriterId with CorrelationData (Figure 8)"
     expected: valid
-    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-007, REQ-ACT-012, REQ-ACT-014, REQ-ACT-015, REQ-ACT-019, REQ-ACT-020, REQ-ACT-022]
+    reqs: [REQ-ACT-001, REQ-ACT-002, REQ-ACT-003, REQ-ACT-004, REQ-ACT-005, REQ-ACT-007, REQ-ACT-012, REQ-ACT-013, REQ-ACT-014, REQ-ACT-015, REQ-ACT-019, REQ-ACT-020, REQ-ACT-022]
     origin: {kind: guideline, ref: MG 8.1.3}
-    status: reviewed
+    status: draft
     notes: >-
       Final response (ActionState 2) to V-PAY-119 on its ResponseAddress, with
       the CorrelationData of the request unchanged; otherwise V-PAY-009 (B1.2.1).

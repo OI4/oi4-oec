@@ -1,4 +1,4 @@
-# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
+# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-253 (NewDataSetWriterId without Filter, REQ-ACT-020) drafted in C-036.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
 baseline: "68d878d"
@@ -526,4 +526,14 @@ vectors:
     origin: {kind: constructed}
     status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health\n"
+    fails: grammar
+
+  - id: V-TOP-253
+    title: "Reply NewDataSetWriterId with Filter"
+    expected: invalid
+    violates: [REQ-ACT-020, REQ-TOP-013]
+    reason: "NewDataSetWriterId is answered on Reply/NewDataSetWriterId[/<Source>]; a Filter is not used (MG 9.2.1, SF-041 c)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/ReferenceDesignation"
     fails: grammar

@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034, reviewed by the PO (C-034 review 2026-10-24); V-PAY-152 … 170 (MetaData: DataSetMetaData envelope, DataSetMetaDataType and its data type descriptions, resource MetaData, Pub/Set with {}) and V-PAY-171 … 175 (declared roles Birth/Close/Will, Q-020 (a)) drafted in C-035, reviewed by the PO (C-035 review 2026-10-25).
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034, reviewed by the PO (C-034 review 2026-10-24); V-PAY-152 … 170 (MetaData: DataSetMetaData envelope, DataSetMetaDataType and its data type descriptions, resource MetaData, Pub/Set with {}) and V-PAY-171 … 175 (declared roles Birth/Close/Will, Q-020 (a)) drafted in C-035, reviewed by the PO (C-035 review 2026-10-25); V-PAY-176 … 203 (Actions, NewDataSetWriterId) and V-PAY-204 … 217 (MAM, Profile) drafted in C-036.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "68d878d"
@@ -5523,6 +5523,1603 @@ vectors:
             "Payload": {
               "Health": "FAILURE_1",
               "HealthScore": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-176
+    title: "Call with the MessageType ua-action-response"
+    expected: invalid
+    violates: [REQ-ACT-001]
+    reason: "A Call carries the MessageType ua-action-request."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 with the MessageType of a Reply.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-177
+    title: "Call without TimeoutHint"
+    expected: invalid
+    violates: [REQ-ACT-002]
+    reason: "An ActionRequest NetworkMessage contains a TimeoutHint."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 without TimeoutHint.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-178
+    title: "Reply with a ResponseAddress"
+    expected: invalid
+    violates: [REQ-ACT-002]
+    reason: "ResponseAddress and TimeoutHint belong to the ActionRequest NetworkMessage only."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 with the ResponseAddress of V-PAY-008.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-179
+    title: "Call with a DataSetClassId"
+    expected: invalid
+    violates: [REQ-ACT-003]
+    reason: "An Action NetworkMessage contains only the fields of MG 8.2.16; DataSetClassId belongs to ua-data."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 with a DataSetClassId.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "2ae0e8ad-3a3c-4b03-bb4b-4bc3d6da3f8c",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-180
+    title: "Reply with a DataSetWriterName in the ActionResponse"
+    expected: invalid
+    violates: [REQ-ACT-003]
+    reason: "An ActionResponse contains only the fields of MG 8.2.18."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 whose ActionResponse carries the DataSetWriterName of a
+      DataSetMessage.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-181
+    title: "Call with a MessageId without timestamp"
+    expected: invalid
+    violates: [REQ-ACT-004]
+    reason: "The MessageId is <unix timestamp in ms>-<PublisherId of the sender>."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 whose MessageId lacks the timestamp prefix.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-182
+    title: "Call with a MessageId of the Responder"
+    expected: invalid
+    violates: [REQ-ACT-004]
+    reason: "The MessageId of a Call names the sender, i.e. the RequestorId, not the Responder in the PublisherId."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 whose MessageId ends with the PublisherId (Responder). The
+      relation between MessageId and RequestorId is checked by the rule layer
+      of D7 validate (ADR-0019 §5, R-3).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-183
+    title: "Call with a RequestorId without ServiceType"
+    expected: invalid
+    violates: [REQ-ACT-005]
+    reason: "The RequestorId is <ServiceType>/<AppId> of the requesting application."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 whose RequestorId lacks the ServiceType.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-184
+    title: "Reply from another application than the Responder of the topic"
+    expected: invalid
+    violates: [REQ-ACT-005]
+    reason: "The PublisherId of a Reply is the Responder named by the ServiceType and AppId of the topic."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 sent with the PublisherId (and matching MessageId) of another
+      OT connector. The equality with the topic is checked by the rule layer
+      of D7 validate (ADR-0019 §5, R-2).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0346",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0346",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-185
+    title: "Call with a ResponseAddress of the Method Pub"
+    expected: invalid
+    violates: [REQ-ACT-006]
+    reason: "The ResponseAddress is the Reply topic of the Call topic."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 whose ResponseAddress uses the Method Pub.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-186
+    title: "Call with the Reply topic of another application as ResponseAddress"
+    expected: invalid
+    violates: [REQ-ACT-006]
+    reason: "The ResponseAddress is the Reply topic of the Call topic, i.e. with the same ServiceType and AppId."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 whose ResponseAddress names another OT connector. The equality
+      with the topic is checked by the rule layer of D7 validate (ADR-0019 §5,
+      R-2).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDY/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-187
+    title: "Call with ActionState 2"
+    expected: invalid
+    violates: [REQ-ACT-010]
+    reason: "An ActionRequest has ActionState 1 (Executing)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 with the ActionState of a final response.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-188
+    title: "Call without RequestId"
+    expected: invalid
+    violates: [REQ-ACT-010]
+    reason: "An ActionRequest contains a RequestId."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 whose ActionRequest has no RequestId.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-189
+    title: "Reply with ActionState 0"
+    expected: invalid
+    violates: [REQ-ACT-012]
+    reason: "An ActionResponse has ActionState 1 (Executing) or 2 (Done)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 with ActionState 0 (Idle).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 0,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-190
+    title: "Reply with a Bad Status and response fields"
+    expected: invalid
+    violates: [REQ-ACT-012]
+    reason: "An ActionResponse with a Bad Status carries an empty Payload."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 with the Status BadInvalidArgument (0x80AB0000) but still the
+      new DataSetWriterId.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {
+              "Code": 2158690304
+            },
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-191
+    title: "Call NewDataSetWriterId with a numeric Resource"
+    expected: invalid
+    violates: [REQ-ACT-013]
+    reason: "Each request field is encoded with its plain JSON value of the data type in the ActionMetaData; Resource is a String."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 whose Resource is the JSON number 3.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": 3
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-192
+    title: "Reply NewDataSetWriterId with Ttl as JSON string"
+    expected: invalid
+    violates: [REQ-ACT-013]
+    reason: "Ttl is a UInt32, encoded as JSON number."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 whose Ttl is the string "10".
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": "10"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-193
+    title: "Call NewDataSetWriterId with an unknown request field"
+    expected: invalid
+    violates: [REQ-ACT-013]
+    reason: "The Payload contains the request fields of the Action (Resource) only."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 with an additional request field Name.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation",
+              "Name": "Weather"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-194
+    title: "Reply NewDataSetWriterId with a DataSetWriterId above UInt16"
+    expected: invalid
+    violates: [REQ-ACT-013]
+    reason: "The DataSetWriterId of the response is a UInt16."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 with the DataSetWriterId 70000.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 70000,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-195
+    title: "Reply with the Good Status as Code 0"
+    expected: invalid
+    violates: [REQ-ACT-014]
+    reason: "In CompactEncoding a Good Status is {}; a Code is only given for a non-Good Status."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 whose Status is {"Code": 0}.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {
+              "Code": 0
+            },
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-196
+    title: "Reply with a Status Symbol"
+    expected: invalid
+    violates: [REQ-ACT-014]
+    reason: "The Status of an ActionResponse never carries a Symbol."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 rejected with BadInvalidArgument (0x80AB0000), empty Payload
+      and the Symbol of the code.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {
+              "Code": 2158690304,
+              "Symbol": "BadInvalidArgument"
+            },
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {}
+          }
+        ]
+      }
+
+  - id: V-PAY-197
+    title: "Call NewDataSetWriterId with the DataSetWriterId 7"
+    expected: invalid
+    violates: [REQ-ACT-019]
+    reason: "NewDataSetWriterId has the DataSetWriterId 8; 4 to 7 are reserved."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 with the DataSetWriterId 7.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 7,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-198
+    title: "Reply NewDataSetWriterId with the ActionTargetId 2"
+    expected: invalid
+    violates: [REQ-ACT-019]
+    reason: "For the common services the ActionTargetId is always 1."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 with the ActionTargetId 2.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 2,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-199
+    title: "Call NewDataSetWriterId for an unknown Resource"
+    expected: invalid
+    violates: [REQ-ACT-021]
+    reason: "Resource is one of the resources of MG 7.5.1."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 with the Resource "Status" (an event category, no resource).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "Status"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-200
+    title: "Call NewDataSetWriterId without Resource"
+    expected: invalid
+    violates: [REQ-ACT-021]
+    reason: "The request field Resource is mandatory."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 with the Payload {}.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {}
+          }
+        ]
+      }
+
+  - id: V-PAY-201
+    title: "Reply NewDataSetWriterId with the reserved DataSetWriterId 8"
+    expected: invalid
+    violates: [REQ-ACT-022]
+    reason: "The new DataSetWriterId is not reserved (>= 10)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 that hands out the DataSetWriterId 8.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 8,
+              "Ttl": 10
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-202
+    title: "Reply NewDataSetWriterId without Ttl"
+    expected: invalid
+    violates: [REQ-ACT-022]
+    reason: "A successful response carries DataSetWriterId and Ttl."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 without Ttl.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {},
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {
+              "DataSetWriterId": 57211
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-203
+    title: "Reply NewDataSetWriterId rejected with BadInvalidArgument"
+    expected: valid
+    reqs: [REQ-ACT-012, REQ-ACT-013, REQ-ACT-014]
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-009 as rejection (e.g. of V-PAY-199): Status {"Code": 2158690304}
+      (BadInvalidArgument, 0x80AB0000) without Symbol and an empty Payload,
+      ActionState 2.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-action-response",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.094Z",
+        "RequestorId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "Status": {
+              "Code": 2158690304
+            },
+            "RequestId": 1,
+            "ActionState": 2,
+            "Payload": {}
+          }
+        ]
+      }
+
+  - id: V-PAY-204
+    title: "Pub MAM without SerialNumber"
+    expected: invalid
+    violates: [REQ-RES-MAM-001]
+    reason: "The MAM contains all mandatory fields of MG 8.3.1."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 without SerialNumber.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-205
+    title: "Pub MAM with a RevisionCounter above Int32"
+    expected: invalid
+    violates: [REQ-RES-MAM-001]
+    reason: "RevisionCounter is an Int32."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 with the RevisionCounter 2147483648.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 2147483648,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-206
+    title: "Pub MAM with a ManufacturerUri with scheme"
+    expected: invalid
+    violates: [REQ-RES-MAM-004]
+    reason: "The ManufacturerUri is a domain name without scheme (MG 8.3.1)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 whose ManufacturerUri is https://provider.com.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "https://provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-207
+    title: "Pub MAM with an upper-case ManufacturerUri"
+    expected: invalid
+    violates: [REQ-RES-MAM-004]
+    reason: "The ManufacturerUri is a lower-case domain name."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 whose ManufacturerUri is Provider.com. The PublisherId keeps
+      provider.com, so the MAM-006 heuristic is not triggered (segment 0
+      equals the lower-case ManufacturerUri, all elements match).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "Provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-208
+    title: "Pub MAM with a DeviceManual without scheme"
+    expected: invalid
+    violates: [REQ-RES-MAM-012]
+    reason: "The DeviceManual is empty or a URL."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 whose DeviceManual lacks the scheme.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "www.provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-209
+    title: "Pub MAM with a DeviceManual without host"
+    expected: invalid
+    violates: [REQ-RES-MAM-012]
+    reason: "The DeviceManual is empty or a URL with a host that a client can retrieve."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 whose DeviceManual is a file URL without host.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "file:///C:/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-210
+    title: "Pub MAM whose ProductInstanceUri does not match its ProductCode"
+    expected: invalid
+    violates: [REQ-RES-MAM-006]
+    reason: "A generated Oi4Identifier is built from ManufacturerUri, Model, ProductCode and SerialNumber of the MAM (MG 4.3.1)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 with the ProductCode FDS-002, while the ProductInstanceUri
+      (and AppId) is the generated Oi4Identifier with FDS-001. Checked by the
+      rule layer of D7 validate (ADR-0019 §5, R-3), heuristically: only a
+      ProductInstanceUri without scheme of four segments whose first segment
+      is the ManufacturerUri is taken for a generated Oi4Identifier.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-002",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-211
+    title: "Pub MAM whose ProductInstanceUri differs from the DataSetWriterName"
+    expected: invalid
+    violates: [REQ-RES-MAM-016]
+    reason: "The ProductInstanceUri equals the Oi4Identifier in the DataSetWriterName."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 with a different ProductInstanceUri. The equality of two
+      fields is checked by the rule layer of D7 validate (ADR-0019 §5, R-3).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "https://provider.com/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-212
+    title: "Pub MAM with a ProductInstanceUri of 256 characters"
+    expected: invalid
+    violates: [REQ-RES-MAM-017]
+    reason: "The ProductInstanceUri has at most 255 characters."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-029 (Pub MAM without Source) for an asset whose ProductInstanceUri
+      and DataSetWriterName have 256 characters.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "https://provider.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.OTConnector",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "https://provider.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-213
+    title: "Pub MAM of an OT connector with the DeviceClass Oi4.Utility"
+    expected: invalid
+    violates: [REQ-RES-MAM-014]
+    reason: "The DeviceClass of an OEC application is Oi4.<ServiceType> of its own ServiceType."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-028 (MAM of the application itself) with the DeviceClass of a
+      Utility. The equality with the ServiceType of the topic is checked by
+      the rule layer of D7 validate (ADR-0019 §5, R-2).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/MAM/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 55,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 4,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Manufacturer": {
+                "Locale": "en-US",
+                "Text": "Provider Ltd."
+              },
+              "ManufacturerUri": "provider.com",
+              "Model": {
+                "Locale": "en-US",
+                "Text": "FieldDataService"
+              },
+              "ProductCode": "FDS-001",
+              "HardwareRevision": "",
+              "SoftwareRevision": "1.0.1",
+              "DeviceRevision": "",
+              "DeviceManual": "https://provider.com/manuals/FDS-001.pdf",
+              "DeviceClass": "Oi4.Utility",
+              "SerialNumber": "1200-0345",
+              "ProductInstanceUri": "provider.com/FieldDataService/FDS-001/1200-0345",
+              "RevisionCounter": 1,
+              "Description": {
+                "Locale": "en-US",
+                "Text": "This OT connector provides field data"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-214
+    title: "Pub Profile with an unknown resource"
+    expected: invalid
+    violates: [REQ-RES-PROFILE-001]
+    reason: "Resources lists resources of MG 7.5.1 and services of MG 7.5.2 only."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-032 with the additional entry "Status" (an event category, no
+      resource).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Profile/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "48017c6a-05c8-48d7-9d85-4b08bbb707f3",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 74,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 42,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Resources": [
+                "MAM",
+                "Health",
+                "Config",
+                "Data",
+                "Metadata",
+                "Event",
+                "Profile",
+                "PublicationList",
+                "SubscriptionList",
+                "ReferenceDesignation",
+                "NewDataSetWriterId",
+                "Status"
+              ]
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-215
+    title: "Pub Profile with a resource listed twice"
+    expected: invalid
+    violates: [REQ-RES-PROFILE-001]
+    reason: "Resources is a set; each resource is listed once."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-032 with "Health" instead of "Config", so Health is listed twice.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Profile/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "48017c6a-05c8-48d7-9d85-4b08bbb707f3",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 74,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 42,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Resources": [
+                "MAM",
+                "Health",
+                "Health",
+                "Data",
+                "Metadata",
+                "Event",
+                "Profile",
+                "PublicationList",
+                "SubscriptionList",
+                "ReferenceDesignation",
+                "NewDataSetWriterId"
+              ]
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-216
+    title: "Pub Profile without Resources"
+    expected: invalid
+    violates: [REQ-RES-PROFILE-001]
+    reason: "The Profile contains the field Resources."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-032 with the Payload {}.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Profile/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "48017c6a-05c8-48d7-9d85-4b08bbb707f3",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 74,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 42,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {}
+          }
+        ]
+      }
+
+  - id: V-PAY-217
+    title: "Get Profile that carries a Profile DataSetMessage"
+    expected: invalid
+    violates: [REQ-RES-PROFILE-003]
+    reason: "A Get Profile carries no Profile DataSetMessage (MG 8.3.7)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-030 with the DataSetMessage of V-PAY-032.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Profile/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "48017c6a-05c8-48d7-9d85-4b08bbb707f3",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 74,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 42,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Resources": [
+                "MAM",
+                "Health",
+                "Config",
+                "Data",
+                "Metadata",
+                "Event",
+                "Profile",
+                "PublicationList",
+                "SubscriptionList",
+                "ReferenceDesignation",
+                "NewDataSetWriterId"
+              ]
             }
           }
         ]

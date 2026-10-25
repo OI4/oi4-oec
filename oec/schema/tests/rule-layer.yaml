@@ -18,6 +18,11 @@
 #     rules: [R-2]
 #     reason: WriterGroupName differs from the Filter of the topic
 expectations:
+  - vector: V-PAY-050
+    schema: []
+    rule: [REQ-PAG-004]
+    rules: [R-3]
+    reason: The Pagination arithmetic (Page, PerPage, TotalCount and the number of DataSetMessages) relates values across fields and array lengths; JSON Schema cannot compute it.
   - vector: V-PAY-148
     schema: []
     rule: [REQ-MSG-023]
@@ -63,3 +68,33 @@ expectations:
     rule: [REQ-LIFE-009]
     rules: [R-6]
     reason: A Will message has HealthScore 0, but the role is not visible in the message; it is declared outside (vector field role, D7 validate --role).
+  - vector: V-PAY-182
+    schema: []
+    rule: [REQ-ACT-004]
+    rules: [R-3]
+    reason: The MessageId has the form of a MessageId; that its PublisherId part is the RequestorId of the same message is an equality between two fields.
+  - vector: V-PAY-184
+    schema: []
+    rule: [REQ-ACT-005]
+    rules: [R-2]
+    reason: PublisherId and MessageId are well-formed and consistent; that the PublisherId is the Responder of the topic is an equality with a topic value.
+  - vector: V-PAY-186
+    schema: []
+    rule: [REQ-ACT-006]
+    rules: [R-2]
+    reason: The ResponseAddress is a well-formed Reply topic of NewDataSetWriterId; that it is the Reply topic of the Call topic (same ServiceType and AppId) is an equality with topic values.
+  - vector: V-PAY-210
+    schema: []
+    rule: [REQ-RES-MAM-006]
+    rules: [R-3]
+    reason: Whether a ProductInstanceUri is a generated Oi4Identifier and matches Model, ProductCode and SerialNumber (plain or dnp-encoded) relates values across fields.
+  - vector: V-PAY-211
+    schema: []
+    rule: [REQ-RES-MAM-016]
+    rules: [R-3]
+    reason: The ProductInstanceUri equals the DataSetWriterName, an equality between two fields of one DataSetMessage.
+  - vector: V-PAY-213
+    schema: []
+    rule: [REQ-RES-MAM-014]
+    rules: [R-2]
+    reason: The DeviceClass of the application names its own ServiceType; this is an equality with the ServiceType of the topic, and only for the MAM of the application itself (DataSetWriterName = AppId).
