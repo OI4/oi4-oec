@@ -8943,7 +8943,7 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `Status/Good`
-- Expected: invalid – The Details of a Status Event carry only the SymbolicId of the status code (MG 8.3.6.2).
+- Expected: invalid – The Details of a Status Event carry only the SymbolicId of the status code (MG 8.3.6.1).
 - Violates: [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003)
 - Origin: constructed
 - Status: draft
@@ -8989,7 +8989,7 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `Syslog/Notice`
-- Expected: invalid – A Syslog Event carries no Description; the message text is the Details key MSG (MG 8.3.6.3).
+- Expected: invalid – A Syslog Event carries no Description; the message text is the Details key MSG (MG 8.3.6.2).
 - Violates: [REQ-RES-EVENT-007](../../requirements/view/res-event.md#req-res-event-007)
 - Origin: constructed
 - Status: draft
@@ -9035,7 +9035,7 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `Data/oee`
-- Expected: invalid – TopicPath is a mandatory field of a SubscriptionList entry (MG 8.3.11).
+- Expected: invalid – TopicPath is a mandatory field of a SubscriptionList entry (MG 8.3.9).
 - Violates: [REQ-RES-SUBLIST-001](../../requirements/view/res-sublist.md#req-res-sublist-001)
 - Origin: constructed
 - Status: draft
@@ -9074,7 +9074,7 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `Data/oee`
-- Expected: invalid – A Get SubscriptionList carries no SubscriptionList DataSetMessage (MG 9.1.11).
+- Expected: invalid – A Get SubscriptionList carries no SubscriptionList DataSetMessage (MG 9.1.9).
 - Violates: [REQ-RES-SUBLIST-007](../../requirements/view/res-sublist.md#req-res-sublist-007)
 - Origin: constructed
 - Status: draft
@@ -9114,7 +9114,7 @@ Payload:
 - AppId: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Source: `provider.com/FieldDataService/FDS-001/1200-0345` (decoded)
 - Filter: `Data/oee`
-- Expected: invalid – A Set SubscriptionList carries exactly one SubscriptionList DataSetMessage, the entry addressed by the topic (MG 9.1.11).
+- Expected: invalid – A Set SubscriptionList carries exactly one SubscriptionList DataSetMessage, the entry addressed by the topic (MG 9.1.9).
 - Violates: [REQ-RES-SUBLIST-010](../../requirements/view/res-sublist.md#req-res-sublist-010)
 - Origin: constructed
 - Status: draft

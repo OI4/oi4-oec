@@ -7758,7 +7758,7 @@ vectors:
     title: "Status Event with a Details key other than SymbolicId"
     expected: invalid
     violates: [REQ-RES-EVENT-003]
-    reason: "The Details of a Status Event carry only the SymbolicId of the status code (MG 8.3.6.2)."
+    reason: "The Details of a Status Event carry only the SymbolicId of the status code (MG 8.3.6.1)."
     origin: {kind: constructed}
     status: draft
     notes: >-
@@ -7795,7 +7795,7 @@ vectors:
     title: "Syslog Event with a Description"
     expected: invalid
     violates: [REQ-RES-EVENT-007]
-    reason: "A Syslog Event carries no Description; the message text is the Details key MSG (MG 8.3.6.3)."
+    reason: "A Syslog Event carries no Description; the message text is the Details key MSG (MG 8.3.6.2)."
     origin: {kind: constructed}
     status: draft
     notes: >-
@@ -7832,7 +7832,7 @@ vectors:
     title: "Pub SubscriptionList entry without TopicPath"
     expected: invalid
     violates: [REQ-RES-SUBLIST-001]
-    reason: "TopicPath is a mandatory field of a SubscriptionList entry (MG 8.3.11)."
+    reason: "TopicPath is a mandatory field of a SubscriptionList entry (MG 8.3.9)."
     origin: {kind: constructed}
     status: draft
     notes: >-
@@ -7862,7 +7862,7 @@ vectors:
     title: "Get SubscriptionList that carries a SubscriptionList DataSetMessage"
     expected: invalid
     violates: [REQ-RES-SUBLIST-007]
-    reason: "A Get SubscriptionList carries no SubscriptionList DataSetMessage (MG 9.1.11)."
+    reason: "A Get SubscriptionList carries no SubscriptionList DataSetMessage (MG 9.1.9)."
     origin: {kind: constructed}
     status: draft
     notes: >-
@@ -7893,7 +7893,7 @@ vectors:
     title: "Set SubscriptionList without entry"
     expected: invalid
     violates: [REQ-RES-SUBLIST-010]
-    reason: "A Set SubscriptionList carries exactly one SubscriptionList DataSetMessage, the entry addressed by the topic (MG 9.1.11)."
+    reason: "A Set SubscriptionList carries exactly one SubscriptionList DataSetMessage, the entry addressed by the topic (MG 9.1.9)."
     origin: {kind: constructed}
     status: draft
     notes: >-
