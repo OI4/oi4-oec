@@ -10,7 +10,7 @@
 # (Filter in Set/Del) resolved in the guideline (baseline b2f0fe7).
 # C-034: REQ-BUS-002 verification d7-validate → d7-test, reviewed in the C-034 review (2026-10-24).
 area: BUS
-baseline: "a42a132"
+baseline: "23f6cfd"
 requirements:
   - id: REQ-BUS-001
     title: Publishing may start once the request topics are subscribed
