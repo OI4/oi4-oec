@@ -78,6 +78,36 @@ var (
 	}
 )
 
+// publishingModes are the values of the enumeration Mode of a
+// PublicationList entry (MG 8.3.8).
+var publishingModes = func() map[string]bool {
+	out := map[string]bool{}
+	for k := range publishingMode {
+		out[k] = true
+	}
+	return out
+}()
+
+var (
+	// filterLevelPattern matches one level of a topic-encoded String
+	// (filter-level of topic.abnf, MG 7.7, SF-040).
+	filterLevelPattern = regexp.MustCompile(`^(?:[^\x00#%+/]|%2B|%23|%2F|%25)+$`)
+	// eventFilterPattern is the level structure of an Event Filter
+	// (event-filter of topic.abnf, SF-042); the characters of the levels are
+	// checked by filterLevelPattern.
+	eventFilterPattern = regexp.MustCompile(`^(?:Syslog/(?:Debug|Informational|Notice|Warning|Error|Critical|Alert|Emergency)|Status/(?:Good|Uncertain|Bad)|Generic/[^/]*)$`)
+)
+
+// isTagOf reports whether the levels of a Filter have the structure of a Tag
+// of the resource (list-filter of topic.abnf, REQ-TOP-022): one level for
+// Data, Metadata and Config, <EventCategory>/<EventLevel> for Event.
+func isTagOf(resource, filter string) bool {
+	if resource == "Event" {
+		return eventFilterPattern.MatchString(filter)
+	}
+	return !strings.Contains(filter, "/")
+}
+
 // modeFlags are the publication forms a Mode of a PublicationList entry
 // enables (MG 8.3.8).
 type modeFlags struct{ request, app, source, filter bool }
@@ -486,12 +516,16 @@ func (c *checker) publicationEntry(d dsm) {
 	if id, ok := c.uint(m, p, "DataSetWriterId", req, 65535); ok && id < 10 {
 		c.add(join(p, "DataSetWriterId"), "REQ-MSG-020", "DataSetWriterId %d of the publication is invalid or reserved", id)
 	}
-	mode, modeOK := c.str(m, p, "Mode", req)
-	flags, known := publishingMode[mode]
-	if modeOK && !known {
-		c.add(join(p, "Mode"), req, "Mode %q is no value of the enumeration", mode)
-		modeOK = false
+	if filterOK {
+		for _, l := range strings.Split(filter, "/") {
+			if !filterLevelPattern.MatchString(l) {
+				c.add(join(p, "Filter"), req, "Filter %q is no topic-encoded String (MG 7.7)", filter)
+				break
+			}
+		}
 	}
+	mode, modeOK := c.enum(m, p, "Mode", req, publishingModes)
+	flags := publishingMode[mode]
 	if _, present := m["Mode"]; !present {
 		mode, modeOK = "ON_REQUEST_1", true // default (MG 8.3.8)
 		flags = publishingMode[mode]
@@ -520,6 +554,8 @@ func (c *checker) publicationEntry(d dsm) {
 			c.add(p, match, "an entry of %s needs a Filter (its Tag)", resource)
 		case !filteredLists[resource] && hasFilter:
 			c.add(join(p, "Filter"), match, "an entry of %s has no Filter", resource)
+		case filterOK && !isTagOf(resource, filter):
+			c.add(join(p, "Filter"), match, "Filter %q is no Tag of %s", filter, resource)
 		}
 		want := resource
 		if filterOK {
