@@ -114,12 +114,13 @@ var reply = `{
 }`
 
 var (
-	tHealth   = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Health", SourceIL: app}
-	tData     = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Data", SourceIL: app, Filter: "oee"}
-	tPubList  = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "PublicationList"}
-	tMetadata = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Metadata", SourceIL: app, Filter: "oee"}
-	tCall     = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Call", Resource: "NewDataSetWriterId"}
-	tReply    = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Reply", Resource: "NewDataSetWriterId"}
+	tHealth       = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Health", SourceIL: app}
+	tData         = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Data", SourceIL: app, Filter: "oee"}
+	tDataNoFilter = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Data", SourceIL: app}
+	tPubList      = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "PublicationList"}
+	tMetadata     = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Pub", Resource: "Metadata", SourceIL: app, Filter: "oee"}
+	tCall         = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Call", Resource: "NewDataSetWriterId"}
+	tReply        = Topic{ServiceType: "OTConnector", AppIL: app, Method: "Reply", Resource: "NewDataSetWriterId"}
 )
 
 func reqs(t *testing.T, top Topic, msg string) []string {
@@ -189,6 +190,9 @@ func TestViolations(t *testing.T) {
 		{"writer name differs from source", tHealth, healthPub, `"DataSetWriterName": "provider.com`, `"DataSetWriterName": "x.com`, []string{"REQ-MSG-023"}},
 		{"health writer group name", tHealth, healthPub, `"WriterGroupName": ""`, `"WriterGroupName": "x"`, []string{"REQ-MSG-024"}},
 		{"data writer group name", tData, dataPub, `"WriterGroupName": "oee"`, `"WriterGroupName": "x"`, []string{"REQ-MSG-024"}},
+		{"data writer group name without topic filter", tDataNoFilter, dataPub, `"WriterGroupName": "oee"`, `"WriterGroupName": "oee/x"`, []string{"REQ-MSG-024"}},
+		{"data writer group name empty without topic filter", tDataNoFilter, dataPub, `"WriterGroupName": "oee"`, `"WriterGroupName": ""`, []string{"REQ-MSG-024"}},
+		{"data writer group name not encoded", tDataNoFilter, dataPub, `"WriterGroupName": "oee"`, `"WriterGroupName": "o+e"`, []string{"REQ-MSG-024"}},
 		{"list writer group name", tPubList, pubList, `"WriterGroupName": "Data/oee"`, `"WriterGroupName": "oee"`, []string{"REQ-MSG-025", "REQ-RES-PUBLIST-002"}},
 		{"good status", tHealth, healthPub, `"Code": 1083310080`, `"Code": 0`, []string{"REQ-MSG-026"}},
 		{"status without code", tHealth, healthPub, `"Code": 1083310080, `, ``, []string{"REQ-MSG-027"}},

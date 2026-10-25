@@ -576,7 +576,22 @@ func (c *checker) writerGroupName(ptr, group string) {
 		}
 	case c.t.Filter != "" && group != c.t.Filter:
 		c.add(ptr, "REQ-MSG-024", "WriterGroupName %q differs from the topic Filter %q", group, c.t.Filter)
+	case c.t.Filter == "" && filteredLists[c.t.Resource] && !isFilterOf(c.t.Resource, group):
+		// published without Filter: the WriterGroupName is the Filter that
+		// addresses this DataSet (MG 8.2.3), a topic-encoded Tag of the resource
+		c.add(ptr, "REQ-MSG-024", "WriterGroupName %q is no Filter of %s", group, c.t.Resource)
 	}
+}
+
+// isFilterOf reports whether filter is a topic-encoded Filter of the resource
+// (list-filter of topic.abnf): every level a filter-level, the levels a Tag.
+func isFilterOf(resource, filter string) bool {
+	for _, l := range strings.Split(filter, "/") {
+		if !filterLevelPattern.MatchString(l) {
+			return false
+		}
+	}
+	return isTagOf(resource, filter)
 }
 
 // --- ua-metadata -------------------------------------------------------------

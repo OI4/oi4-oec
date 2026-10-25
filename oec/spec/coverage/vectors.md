@@ -17,17 +17,17 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | PAG | 5 | 5 | 0 | 0 | 0 | 0 |
 | QRY | 1 | 1 | 0 | 0 | 0 | 0 |
 | RES-CONFIG | 13 | 9 | 0 | 3 | 0 | 1 |
-| RES-DATA | 6 | 0 | 0 | 4 | 1 | 1 |
-| RES-EVENT | 8 | 3 | 0 | 5 | 0 | 0 |
+| RES-DATA | 6 | 0 | 1 | 2 | 1 | 2 |
+| RES-EVENT | 8 | 3 | 1 | 3 | 0 | 1 |
 | RES-HEALTH | 4 | 3 | 1 | 0 | 0 | 0 |
 | RES-MAM | 9 | 8 | 1 | 0 | 0 | 0 |
 | RES-META | 3 | 3 | 0 | 0 | 0 | 0 |
 | RES-PROFILE | 3 | 2 | 1 | 0 | 0 | 0 |
 | RES-PUBLIST | 7 | 6 | 1 | 0 | 0 | 0 |
 | RES-REFDES | 7 | 6 | 1 | 0 | 0 | 0 |
-| RES-SUBLIST | 6 | 2 | 0 | 4 | 0 | 0 |
+| RES-SUBLIST | 6 | 2 | 0 | 3 | 0 | 1 |
 | TOP | 13 | 6 | 0 | 1 | 4 | 2 |
-| **Total** | 159 | 116 | 8 | 17 | 6 | 12 |
+| **Total** | 159 | 116 | 10 | 12 | 6 | 15 |
 
 ## Entry schemas per allowed matrix row
 
@@ -73,11 +73,17 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-BUS-005 (derived) | REQ-BUS-010 (covered), REQ-TOP-013 (covered), REQ-RES-REFDES-007 (covered), REQ-RES-SUBLIST-011 (covered) | That the addressed object exists at the addressed component needs its publications (d7-test, REQ-BUS-002). |
 | REQ-MSG-004 (derived) | REQ-MSG-003 (covered), REQ-MSG-005 (covered), REQ-MSG-011 (covered) | none – the content mask is not on the wire; its effect is the field presence of the NetworkMessage (details). |
 | REQ-MSG-017 (derived) | REQ-MSG-016 (covered), REQ-MSG-018 (covered), REQ-MSG-024 (covered), REQ-MSG-029 (covered), REQ-MSG-031 (covered) | none – the content mask is not on the wire; its effect is the field presence of the DataSetMessage and the VerboseEncoding of the fields (details). |
+| REQ-RES-DATA-001 (derived) | REQ-MSG-016 (covered), REQ-MSG-030 (covered), REQ-MSG-031 (covered) | That the fields are described by the Metadata of the same Source and Tag needs that Metadata (d7-test, REQ-CMP-037); an application-defined DataSet has no structure of its own on the wire. |
+| REQ-RES-DATA-003 (details open (1 of 2)) | REQ-MSG-024 (covered), REQ-RES-DATA-004 (negative only) | That no other DataSet uses the Tag Oi4Pv shows as a violation of the Oi4Pv content (REQ-RES-DATA-004); an Oi4Pv DataSet published under another Tag is not recognizable from one message (manual, REQ-RES-DATA-002). |
+| REQ-RES-DATA-008 (details open (1 of 5)) | REQ-RES-DATA-001 (derived), REQ-RES-DATA-004 (negative only), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Data DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource is not recognizable, since Data has no predefined DataSetClassId and an application-defined DataSet may have any fields (REQ-RES-DATA-001). |
+| REQ-RES-EVENT-009 (details open (1 of 2)) | REQ-RES-EVENT-001 (positive only), REQ-RES-EVENT-002 (covered) | The meaning of the Number and the structure of the Details of a Generic Event are application-defined (REQ-RES-EVENT-010, manual). |
+| REQ-RES-EVENT-011 (derived) | REQ-TOP-013 (covered), REQ-MSG-023 (covered), REQ-MSG-024 (covered) | none – the method is a topic rule (REQ-TOP-013), Source, EventCategory and EventLevel of every DataSetMessage are the equalities of DataSetWriterName and WriterGroupName with the topic (REQ-MSG-023, REQ-MSG-024). |
 | REQ-RES-HEALTH-007 (derived) | REQ-MSG-010 (covered), REQ-RES-HEALTH-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Health DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Health content (REQ-RES-HEALTH-001). |
 | REQ-RES-MAM-022 (derived) | REQ-MSG-010 (covered), REQ-RES-MAM-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without MAM DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the MAM content (REQ-RES-MAM-001). |
 | REQ-RES-PROFILE-005 (derived) | REQ-MSG-010 (covered), REQ-RES-PROFILE-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Profile DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Profile content (REQ-RES-PROFILE-001). |
 | REQ-RES-PUBLIST-021 (derived) | REQ-MSG-010 (covered), REQ-RES-PUBLIST-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without PublicationList DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the PublicationList content (REQ-RES-PUBLIST-001). |
 | REQ-RES-REFDES-005 (derived) | REQ-MSG-010 (covered), REQ-RES-REFDES-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without ReferenceDesignation DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the ReferenceDesignation content (REQ-RES-REFDES-001). |
+| REQ-RES-SUBLIST-009 (details open (1 of 5)) | REQ-MSG-010 (covered), REQ-RES-SUBLIST-001 (positive only), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without SubscriptionList DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the SubscriptionList content (REQ-RES-SUBLIST-001). |
 
 ## Requirements
 
@@ -176,11 +182,11 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-CONFIG-018 | schema, d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-099 … (5) | – | positive only |
 | REQ-RES-CONFIG-019 | schema, d7-validate | reviewed | V-PAY-094, V-PAY-095, V-PAY-096, V-PAY-097 … (7) | V-PAY-111 | covered |
 | REQ-RES-CONFIG-024 | d7-validate, d7-test | reviewed | V-PAY-099, V-PAY-114 | V-PAY-115 | covered |
-| REQ-RES-DATA-001 | d7-validate | reviewed | V-PAY-058, V-PAY-059, V-PAY-060 | – | positive only |
-| REQ-RES-DATA-003 | schema, d7-validate | reviewed | – | – | none |
+| REQ-RES-DATA-001 | d7-validate | reviewed | V-PAY-058, V-PAY-059, V-PAY-060 | – | derived |
+| REQ-RES-DATA-003 | schema, d7-validate | reviewed | – | – | details open (1 of 2) |
 | REQ-RES-DATA-004 | schema, d7-validate | reviewed | – | V-PAY-084 | negative only |
 | REQ-RES-DATA-006 | schema, d7-validate | reviewed | V-PAY-055, V-PAY-056, V-PAY-057 | – | positive only |
-| REQ-RES-DATA-008 | schema, d7-validate | reviewed | V-PAY-058, V-PAY-059, V-PAY-060 | – | positive only |
+| REQ-RES-DATA-008 | schema, d7-validate | reviewed | V-PAY-058, V-PAY-059, V-PAY-060 | – | details open (1 of 5) |
 | REQ-RES-DATA-009 | schema, d7-validate | reviewed | V-PAY-061 | – | positive only |
 | REQ-RES-EVENT-001 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | – | positive only |
 | REQ-RES-EVENT-002 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | V-PAY-083 | covered |
@@ -188,8 +194,8 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-EVENT-004 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-073, V-PAY-075 … (9) | V-PAY-081 | covered |
 | REQ-RES-EVENT-007 | schema, d7-validate | reviewed | V-PAY-064 | – | positive only |
 | REQ-RES-EVENT-008 | schema, d7-validate | reviewed | V-PAY-064 | V-PAY-082 | covered |
-| REQ-RES-EVENT-009 | schema, d7-validate | reviewed | V-PAY-065 | – | positive only |
-| REQ-RES-EVENT-011 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | – | positive only |
+| REQ-RES-EVENT-009 | schema, d7-validate | reviewed | V-PAY-065 | – | details open (1 of 2) |
+| REQ-RES-EVENT-011 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | – | derived |
 | REQ-RES-HEALTH-001 | schema, d7-validate | reviewed | V-PAY-003, V-PAY-004 | V-PAY-048, V-PAY-145 | covered |
 | REQ-RES-HEALTH-002 | schema, d7-validate | reviewed | V-PAY-004 | V-PAY-049 | covered |
 | REQ-RES-HEALTH-005 | schema, d7-validate | reviewed | V-PAY-001 | V-PAY-126 | covered |
@@ -226,7 +232,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-SUBLIST-001 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | – | positive only |
 | REQ-RES-SUBLIST-002 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-086 | covered |
 | REQ-RES-SUBLIST-007 | schema, d7-validate | reviewed | V-PAY-066, V-PAY-067, V-PAY-068 | – | positive only |
-| REQ-RES-SUBLIST-009 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071 | – | positive only |
+| REQ-RES-SUBLIST-009 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071 | – | details open (1 of 5) |
 | REQ-RES-SUBLIST-010 | schema, d7-validate | reviewed | V-PAY-072 | – | positive only |
 | REQ-RES-SUBLIST-011 | schema, d7-validate | reviewed | V-PAY-074 | V-PAY-085 | covered |
 | REQ-TOP-001 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (94) | V-TOP-201 (R-1), V-TOP-202 (R-1), V-TOP-250 (R-1), V-TOP-251 (R-1) … (5) | covered |

@@ -37,3 +37,23 @@ implications:
   - umbrella: REQ-RES-REFDES-005
     details: [REQ-MSG-010, REQ-RES-REFDES-001, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
     remainder: That a Pub without ReferenceDesignation DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the ReferenceDesignation content (REQ-RES-REFDES-001).
+  # C-038: Data, Event and SubscriptionList (MG 8.3.4, 8.3.6, 8.3.9, 9.1.4,
+  # 9.1.6, 9.1.9).
+  - umbrella: REQ-RES-DATA-001
+    details: [REQ-MSG-016, REQ-MSG-030, REQ-MSG-031]
+    remainder: That the fields are described by the Metadata of the same Source and Tag needs that Metadata (d7-test, REQ-CMP-037); an application-defined DataSet has no structure of its own on the wire.
+  - umbrella: REQ-RES-DATA-003
+    details: [REQ-MSG-024, REQ-RES-DATA-004]
+    remainder: That no other DataSet uses the Tag Oi4Pv shows as a violation of the Oi4Pv content (REQ-RES-DATA-004); an Oi4Pv DataSet published under another Tag is not recognizable from one message (manual, REQ-RES-DATA-002).
+  - umbrella: REQ-RES-DATA-008
+    details: [REQ-RES-DATA-001, REQ-RES-DATA-004, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
+    remainder: That a Pub without Data DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource is not recognizable, since Data has no predefined DataSetClassId and an application-defined DataSet may have any fields (REQ-RES-DATA-001).
+  - umbrella: REQ-RES-EVENT-009
+    details: [REQ-RES-EVENT-001, REQ-RES-EVENT-002]
+    remainder: The meaning of the Number and the structure of the Details of a Generic Event are application-defined (REQ-RES-EVENT-010, manual).
+  - umbrella: REQ-RES-EVENT-011
+    details: [REQ-TOP-013, REQ-MSG-023, REQ-MSG-024]
+    remainder: none – the method is a topic rule (REQ-TOP-013), Source, EventCategory and EventLevel of every DataSetMessage are the equalities of DataSetWriterName and WriterGroupName with the topic (REQ-MSG-023, REQ-MSG-024).
+  - umbrella: REQ-RES-SUBLIST-009
+    details: [REQ-MSG-010, REQ-RES-SUBLIST-001, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
+    remainder: That a Pub without SubscriptionList DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the SubscriptionList content (REQ-RES-SUBLIST-001).
