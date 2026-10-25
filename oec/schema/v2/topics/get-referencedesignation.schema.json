@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/get-referencedesignation.schema.json",
+  "title": "Get ReferenceDesignation (topic form get-referencedesignation)",
+  "description": "Entry schema of the topic form get-referencedesignation (topic.abnf, matrix row Get/ReferenceDesignation, MG 9.1.10). The topic form covers the topic with and without Source; that a Query is only sent without Source (REQ-RES-REFDES-013) is a rule of the rule layer (R-2).",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "allOf": [
+    {
+      "$comment": "REQ-MSG-011 (MG 8.2.1): the DataSetClassId of a predefined resource is present",
+      "required": [
+        "DataSetClassId"
+      ]
+    }
+  ],
+  "properties": {
+    "DataSetClassId": {
+      "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of ReferenceDesignation",
+      "const": "27a75019-164a-496d-a38b-90e8a55c2cfa"
+    },
+    "Messages": {
+      "$comment": "REQ-RES-REFDES-003 (MG 9.1.10): only the helper DataSets PaginationRequest, Locale and Query",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 1
+            }
+          }
+        },
+        "then": {
+          "$ref": "../helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "then": {
+            "$ref": "../helpers.schema.json#/$defs/LocaleDataSetMessage"
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 9
+                }
+              }
+            },
+            "then": {
+              "$ref": "../resources/referencedesignation.schema.json#/$defs/ReferenceDesignationQueryDataSetMessage"
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 2
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-PAG-008 (MG 8.3.11): a Pagination is only sent with the method Pub",
+                "not": {}
+              },
+              "else": {
+                "$comment": "REQ-RES-REFDES-003 (MG 9.1.10): a Get ReferenceDesignation carries no ReferenceDesignation DataSetMessage",
+                "not": {}
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-PAG-008 (MG 8.3.11): at most one PaginationRequest per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 1
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "$comment": "REQ-LOC-003 (MG 8.3.12): at most one Locale per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "$comment": "REQ-QRY-001 (MG 8.3.13): at most one Query per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 9
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/set-publicationlist.schema.json",
+  "title": "Set PublicationList (topic form set-publicationlist)",
+  "description": "Entry schema of the topic form set-publicationlist (topic.abnf, matrix row Set/PublicationList, MG 9.1.8). That the entry is the one addressed by Source and Filter of the topic (DataSetWriterName, WriterGroupName) is a rule of the rule layer.",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "allOf": [
+    {
+      "$comment": "REQ-MSG-011 (MG 8.2.1): the DataSetClassId of a predefined resource is present",
+      "required": [
+        "DataSetClassId"
+      ]
+    }
+  ],
+  "properties": {
+    "DataSetClassId": {
+      "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of PublicationList",
+      "const": "217434d6-6e1e-4230-b907-f52bc9ffe152"
+    },
+    "Messages": {
+      "$comment": "Exactly one PublicationList DataSetMessage, no helper DataSet (MG 9.1.8)",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 1
+            }
+          }
+        },
+        "then": {
+          "allOf": [
+            {
+              "$comment": "REQ-PAG-008 (MG 8.3.11): a PaginationRequest is only sent with the method Get",
+              "not": {}
+            },
+            {
+              "$comment": "REQ-PAG-009 (MG 8.3.11): a Set is not paginated",
+              "not": {}
+            }
+          ]
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 2
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-PAG-008 (MG 8.3.11): a Pagination is only sent with the method Pub",
+                "not": {}
+              },
+              {
+                "$comment": "REQ-PAG-009 (MG 8.3.11): a Set is not paginated",
+                "not": {}
+              }
+            ]
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 3
+                }
+              }
+            },
+            "then": {
+              "$comment": "REQ-LOC-003 (MG 8.3.12): a Locale is only sent with the method Get",
+              "not": {}
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 9
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-QRY-001 (MG 8.3.13): a Query is only sent with the method Get",
+                "not": {}
+              },
+              "else": {
+                "$ref": "../resources/publicationlist.schema.json#/$defs/PublicationListDataSetMessage"
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-RES-PUBLIST-022 (MG 9.1.8): a Set PublicationList carries exactly one PublicationList DataSetMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "type": "integer",
+                "minimum": 10,
+                "maximum": 65535
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "$comment": "REQ-BUS-010 (MG 8.2.3): a DataSetMessage in a Set or Del request carries no SequenceNumber",
+          "items": {
+            "properties": {
+              "SequenceNumber": {
+                "not": {}
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

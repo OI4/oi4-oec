@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/resources/referencedesignation.schema.json",
+  "title": "ReferenceDesignation resource",
+  "description": "ReferenceDesignation DataSet (MG 8.3.10), the ReferenceDesignation DataSetMessage of Pub and Set ReferenceDesignation and the Query of ReferenceDesignation (MG 8.3.13.1, GL-ADR-020) of Get ReferenceDesignation (MG 9.1.10). That a Query is only sent without Source (REQ-RES-REFDES-013) depends on the topic and is a rule of the rule layer (R-2).",
+  "$defs": {
+    "ReferenceDesignation": {
+      "$comment": "REQ-RES-REFDES-001 (MG 8.3.10, SF-068): fields of the ReferenceDesignation DataSet: the optional aspects Function, Product and Location",
+      "type": "object",
+      "properties": {
+        "Function": {
+          "$ref": "#/$defs/Designation"
+        },
+        "Product": {
+          "$ref": "#/$defs/Designation"
+        },
+        "Location": {
+          "$ref": "#/$defs/Designation"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "Designation": {
+      "$comment": "REQ-RES-REFDES-001 (MG 8.3.10, SF-068): one aspect: Value, optional Local and Parent",
+      "type": "object",
+      "required": [
+        "Value"
+      ],
+      "properties": {
+        "Value": {
+          "type": "string"
+        },
+        "Local": {
+          "type": "string"
+        },
+        "Parent": {
+          "$ref": "#/$defs/Parent"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "Parent": {
+      "$comment": "REQ-RES-REFDES-001 (MG 8.3.10, SF-068): Parent of an aspect: Value, optional Local and IdentificationLink (unencoded)",
+      "type": "object",
+      "required": [
+        "Value"
+      ],
+      "properties": {
+        "Value": {
+          "type": "string"
+        },
+        "Local": {
+          "type": "string"
+        },
+        "IdentificationLink": {
+          "type": "string"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "ReferenceDesignationDataSetMessage": {
+      "$ref": "../envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-MSG-020 (MG 8.2.3): application DataSetWriterIds start at 10",
+          "minimum": 10
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-024 (MG 8.2.3, MG 7.7): ReferenceDesignation has no Filter",
+          "const": ""
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
+          "const": "ua-keyframe"
+        },
+        "Payload": {
+          "$ref": "#/$defs/ReferenceDesignation"
+        }
+      }
+    },
+    "ReferenceDesignationQuery": {
+      "$comment": "REQ-RES-REFDES-012 (MG 8.3.13.1, GL-ADR-020): query parameters of ReferenceDesignation: Parent (non-empty unencoded Identification Link) and optional Aspect; a receiver ignores undefined parameters (tolerant flavor)",
+      "type": "object",
+      "required": [
+        "Parent"
+      ],
+      "properties": {
+        "Parent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "Aspect": {
+          "enum": [
+            "Function",
+            "Product",
+            "Location"
+          ]
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "ReferenceDesignationQueryDataSetMessage": {
+      "$ref": "../helpers.schema.json#/$defs/QueryDataSetMessage",
+      "properties": {
+        "Payload": {
+          "$ref": "#/$defs/ReferenceDesignationQuery"
+        }
+      }
+    }
+  }
+}

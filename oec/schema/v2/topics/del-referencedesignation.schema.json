@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/del-referencedesignation.schema.json",
+  "title": "Del ReferenceDesignation (topic form del-referencedesignation)",
+  "description": "Entry schema of the topic form del-referencedesignation (topic.abnf, matrix row Del/ReferenceDesignation, MG 9.1.10): the NetworkMessage carries no DataSetMessage (SF-098).",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "allOf": [
+    {
+      "$comment": "REQ-MSG-011 (MG 8.2.1): the DataSetClassId of a predefined resource is present",
+      "required": [
+        "DataSetClassId"
+      ]
+    }
+  ],
+  "properties": {
+    "DataSetClassId": {
+      "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of ReferenceDesignation",
+      "const": "27a75019-164a-496d-a38b-90e8a55c2cfa"
+    },
+    "Messages": {
+      "$comment": "No ReferenceDesignation DataSetMessage and no helper DataSet (MG 9.1.10)",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 1
+            }
+          }
+        },
+        "then": {
+          "allOf": [
+            {
+              "$comment": "REQ-PAG-008 (MG 8.3.11): a PaginationRequest is only sent with the method Get",
+              "not": {}
+            },
+            {
+              "$comment": "REQ-PAG-009 (MG 8.3.11): a Del is not paginated",
+              "not": {}
+            }
+          ]
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 2
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "$comment": "REQ-PAG-008 (MG 8.3.11): a Pagination is only sent with the method Pub",
+                "not": {}
+              },
+              {
+                "$comment": "REQ-PAG-009 (MG 8.3.11): a Del is not paginated",
+                "not": {}
+              }
+            ]
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 3
+                }
+              }
+            },
+            "then": {
+              "$comment": "REQ-LOC-003 (MG 8.3.12): a Locale is only sent with the method Get",
+              "not": {}
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 9
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-QRY-001 (MG 8.3.13): a Query is only sent with the method Get",
+                "not": {}
+              },
+              "else": {
+                "$comment": "REQ-RES-REFDES-007 (MG 9.1.10): a Del ReferenceDesignation carries no ReferenceDesignation DataSetMessage",
+                "not": {}
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-BUS-010 (MG 8.2.3): a DataSetMessage in a Set or Del request carries no SequenceNumber",
+          "items": {
+            "properties": {
+              "SequenceNumber": {
+                "not": {}
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

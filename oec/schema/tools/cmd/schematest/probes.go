@@ -206,6 +206,69 @@ var probes = []probe{
 	{"P-44 message: Pub Profile with an unknown resource", "V-PAY-032", anyMessage, func(m map[string]any) {
 		payload(m)["Resources"] = []any{"MAM", "Health", "Status"}
 	}, []string{"REQ-RES-PROFILE-001"}},
+	{"P-45 empty Pub PublicationList (SF-099)", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		m["Messages"] = []any{}
+	}, nil},
+	{"P-46 empty Pub ReferenceDesignation (SF-099)", "V-PAY-043", "pub-referencedesignation", func(m map[string]any) {
+		m["Messages"] = []any{}
+	}, nil},
+	{"P-47 entry Filter with an unencoded +", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		payload(m)["Filter"] = "o+e"
+	}, []string{"REQ-RES-PUBLIST-001"}},
+	{"P-48 Data entry Filter with two levels", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		payload(m)["Filter"] = "oee/line"
+	}, []string{"REQ-RES-PUBLIST-002"}},
+	{"P-49 Event entry Filter without EventLevel", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		payload(m)["Resource"] = "Event"
+		payload(m)["Filter"] = "Status/Fine"
+		payload(m)["Mode"] = "FILTER_4"
+	}, []string{"REQ-RES-PUBLIST-002"}},
+	{"P-50 MAM entry with a Filter", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		payload(m)["Resource"] = "MAM"
+	}, []string{"REQ-RES-PUBLIST-002"}},
+	{"P-51 Event entry with the Mode ON_REQUEST_1", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		payload(m)["Resource"] = "Event"
+		payload(m)["Filter"] = "Status/Good"
+		payload(m)["Mode"] = "ON_REQUEST_1"
+	}, []string{"REQ-RES-PUBLIST-012"}},
+	{"P-52 Metadata entry without Mode (default ON_REQUEST_1)", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		payload(m)["Resource"] = "Metadata"
+		delete(payload(m), "Mode")
+	}, []string{"REQ-RES-PUBLIST-012"}},
+	{"P-53 entry with a numeric Mode", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		payload(m)["Mode"] = json.Number("8")
+	}, []string{"REQ-MSG-031", "REQ-RES-PUBLIST-001"}},
+	{"P-54 entry describing the reserved DataSetWriterId 5", "V-PAY-037", "pub-publicationlist", func(m map[string]any) {
+		payload(m)["DataSetWriterId"] = json.Number("5")
+	}, []string{"REQ-MSG-020"}},
+	{"P-55 Query in Get PublicationList", "V-PAY-034", "get-publicationlist", func(m map[string]any) {
+		m["Messages"] = []any{map[string]any{"DataSetWriterId": json.Number("9"), "WriterGroupName": "Query", "DataSetWriterName": "x", "Payload": map[string]any{}}}
+	}, []string{"REQ-QRY-001"}},
+	{"P-56 Set PublicationList with a SequenceNumber", "V-PAY-040", "set-publicationlist", func(m map[string]any) {
+		item(m)["SequenceNumber"] = json.Number("4")
+	}, []string{"REQ-BUS-010"}},
+	{"P-57 Set PublicationList with a PaginationRequest", "V-PAY-040", "set-publicationlist", func(m map[string]any) {
+		m["Messages"] = append(msgs(m), map[string]any{"DataSetWriterId": json.Number("1"), "WriterGroupName": "PaginationRequest",
+			"DataSetWriterName": "x", "Payload": map[string]any{"PerPage": json.Number("5"), "Page": json.Number("1")}})
+	}, []string{"REQ-PAG-008", "REQ-PAG-009"}},
+	{"P-58 two Queries in Get ReferenceDesignation", "V-PAY-053", "get-referencedesignation", func(m map[string]any) {
+		m["Messages"] = []any{msgs(m)[0], msgs(m)[0]}
+	}, []string{"REQ-QRY-001"}},
+	{"P-59 Query with an empty Parent", "V-PAY-053", "get-referencedesignation", func(m map[string]any) {
+		payload(m)["Parent"] = ""
+	}, []string{"REQ-RES-REFDES-012"}},
+	{"P-60 Locale in Del ReferenceDesignation", "V-PAY-046", "del-referencedesignation", func(m map[string]any) {
+		m["Messages"] = []any{map[string]any{"DataSetWriterId": json.Number("3"), "WriterGroupName": "Locale", "DataSetWriterName": "x", "Payload": map[string]any{"Locale": "de-DE"}}}
+	}, []string{"REQ-LOC-003"}},
+	{"P-61 Pub ReferenceDesignation with a WriterGroupName", "V-PAY-043", "pub-referencedesignation", func(m map[string]any) {
+		item(m)["WriterGroupName"] = "Function"
+	}, []string{"REQ-MSG-024"}},
+	{"P-62 message: Pub PublicationList with an unknown Resource", "V-PAY-037", anyMessage, func(m map[string]any) {
+		payload(m)["Resource"] = "Status"
+	}, []string{"REQ-RES-PUBLIST-001"}},
+	{"P-63 message: Pub ReferenceDesignation without Value", "V-PAY-043", anyMessage, func(m map[string]any) {
+		delete(payload(m)["Function"].(map[string]any), "Value")
+	}, []string{"REQ-RES-REFDES-001"}},
 }
 
 // runProbes validates every probe against its entry schema and appends the

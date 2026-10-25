@@ -1,0 +1,353 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/resources/publicationlist.schema.json",
+  "title": "PublicationList resource",
+  "description": "PublicationList entry (MG 8.3.8) and the PublicationList DataSetMessage of Pub and Set PublicationList (MG 9.1.8). Rules of the rule layer: the uniqueness of Resource, Source and Filter (REQ-RES-PUBLIST-003, R-3), WriterGroupName = Resource[/Filter] and DataSetWriterName = Source of the entry (REQ-RES-PUBLIST-002, R-3), WriterGroupName = topic Filter (REQ-MSG-025, R-2).",
+  "$defs": {
+    "PublicationEntry": {
+      "$comment": "REQ-RES-PUBLIST-001 (MG 8.3.8, SF-067): fields of a PublicationList entry; the Filter is a topic-encoded String (every level a filter-level of topic.abnf)",
+      "type": "object",
+      "required": [
+        "Resource",
+        "Source",
+        "DataSetWriterId"
+      ],
+      "properties": {
+        "Resource": {
+          "enum": [
+            "MAM",
+            "Health",
+            "Config",
+            "Data",
+            "Metadata",
+            "Event",
+            "Profile",
+            "PublicationList",
+            "SubscriptionList",
+            "ReferenceDesignation"
+          ]
+        },
+        "Source": {
+          "type": "string"
+        },
+        "Filter": {
+          "type": "string",
+          "pattern": "^(?:[^\\x00#%+/]|%2B|%23|%2F|%25)+(?:/(?:[^\\x00#%+/]|%2B|%23|%2F|%25)+)*$"
+        },
+        "DataSetWriterId": {
+          "$ref": "../opcua.schema.json#/$defs/UInt16",
+          "allOf": [
+            {
+              "$comment": "REQ-MSG-020 (MG 8.2.3): the described publication has an application DataSetWriterId (from 10)",
+              "if": {
+                "$ref": "../opcua.schema.json#/$defs/UInt16"
+              },
+              "then": {
+                "minimum": 10
+              }
+            }
+          ]
+        },
+        "Mode": {
+          "allOf": [
+            {
+              "enum": [
+                "OFF_0",
+                "ON_REQUEST_1",
+                "APPLICATION_2",
+                "SOURCE_3",
+                "FILTER_4",
+                "APPLICATION_SOURCE_5",
+                "APPLICATION_FILTER_6",
+                "SOURCE_FILTER_7",
+                "APPLICATION_SOURCE_FILTER_8",
+                "ON_REQUEST_FILTER_9",
+                "ON_REQUEST_SOURCE_10",
+                "ON_REQUEST_APPLICATION_11",
+                "ON_REQUEST_SOURCE_FILTER_12",
+                "ON_REQUEST_APPLICATION_FILTER_13",
+                "ON_REQUEST_APPLICATION_SOURCE_14",
+                "ON_REQUEST_APPLICATION_SOURCE_FILTER_15"
+              ]
+            },
+            {
+              "$ref": "../opcua.schema.json#/$defs/VerboseEnum"
+            }
+          ]
+        },
+        "Interval": {
+          "$ref": "../opcua.schema.json#/$defs/UInt32"
+        },
+        "Precisions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3.4e+38
+          }
+        },
+        "Config": {
+          "allOf": [
+            {
+              "enum": [
+                "NONE_0",
+                "MODE_1",
+                "INTERVAL_2",
+                "MODE_AND_INTERVAL_3"
+              ]
+            },
+            {
+              "$ref": "../opcua.schema.json#/$defs/VerboseEnum"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-RES-PUBLIST-002 (MG 8.3.8, MG 9.1.8): the Filter is present exactly for the resources Data, Metadata, Config and Event",
+          "if": {
+            "type": "object",
+            "required": [
+              "Resource"
+            ],
+            "properties": {
+              "Resource": {
+                "enum": [
+                  "Data",
+                  "Metadata",
+                  "Config",
+                  "Event"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "Filter"
+            ]
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "Resource"
+              ],
+              "properties": {
+                "Resource": {
+                  "enum": [
+                    "MAM",
+                    "Health",
+                    "Profile",
+                    "PublicationList",
+                    "SubscriptionList",
+                    "ReferenceDesignation"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "Filter"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "$comment": "REQ-RES-PUBLIST-002 (MG 8.3.8, MG 9.1.8): the Filter of a Data, Metadata or Config entry is one topic level (its Tag or Context.Name)",
+          "if": {
+            "type": "object",
+            "required": [
+              "Resource",
+              "Filter"
+            ],
+            "properties": {
+              "Resource": {
+                "enum": [
+                  "Data",
+                  "Metadata",
+                  "Config"
+                ]
+              },
+              "Filter": {
+                "type": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "Filter": {
+                "pattern": "^[^/]*$"
+              }
+            }
+          }
+        },
+        {
+          "$comment": "REQ-RES-PUBLIST-002 (MG 8.3.8, MG 9.1.8): the Filter of an Event entry is <EventCategory>/<EventLevel> (event-filter of topic.abnf)",
+          "if": {
+            "type": "object",
+            "required": [
+              "Resource",
+              "Filter"
+            ],
+            "properties": {
+              "Resource": {
+                "const": "Event"
+              },
+              "Filter": {
+                "type": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "Filter": {
+                "pattern": "^(?:Syslog/(?:Debug|Informational|Notice|Warning|Error|Critical|Alert|Emergency)|Status/(?:Good|Uncertain|Bad)|Generic/[^/]*)$"
+              }
+            }
+          }
+        },
+        {
+          "$comment": "REQ-RES-PUBLIST-012 (MG 8.3.8, SF-067): an Event entry has the Mode OFF_0 or FILTER_4 (not the default ON_REQUEST_1)",
+          "if": {
+            "type": "object",
+            "required": [
+              "Resource"
+            ],
+            "properties": {
+              "Resource": {
+                "const": "Event"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "Mode"
+            ],
+            "properties": {
+              "Mode": {
+                "not": {
+                  "enum": [
+                    "ON_REQUEST_1",
+                    "APPLICATION_2",
+                    "SOURCE_3",
+                    "APPLICATION_SOURCE_5",
+                    "APPLICATION_FILTER_6",
+                    "SOURCE_FILTER_7",
+                    "APPLICATION_SOURCE_FILTER_8",
+                    "ON_REQUEST_FILTER_9",
+                    "ON_REQUEST_SOURCE_10",
+                    "ON_REQUEST_APPLICATION_11",
+                    "ON_REQUEST_SOURCE_FILTER_12",
+                    "ON_REQUEST_APPLICATION_FILTER_13",
+                    "ON_REQUEST_APPLICATION_SOURCE_14",
+                    "ON_REQUEST_APPLICATION_SOURCE_FILTER_15"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "REQ-RES-PUBLIST-012 (MG 8.3.8, SF-067): a Metadata entry has the Mode ON_REQUEST_FILTER_9",
+          "if": {
+            "type": "object",
+            "required": [
+              "Resource"
+            ],
+            "properties": {
+              "Resource": {
+                "const": "Metadata"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "Mode"
+            ],
+            "properties": {
+              "Mode": {
+                "not": {
+                  "enum": [
+                    "OFF_0",
+                    "ON_REQUEST_1",
+                    "APPLICATION_2",
+                    "SOURCE_3",
+                    "FILTER_4",
+                    "APPLICATION_SOURCE_5",
+                    "APPLICATION_FILTER_6",
+                    "SOURCE_FILTER_7",
+                    "APPLICATION_SOURCE_FILTER_8",
+                    "ON_REQUEST_SOURCE_10",
+                    "ON_REQUEST_APPLICATION_11",
+                    "ON_REQUEST_SOURCE_FILTER_12",
+                    "ON_REQUEST_APPLICATION_FILTER_13",
+                    "ON_REQUEST_APPLICATION_SOURCE_14",
+                    "ON_REQUEST_APPLICATION_SOURCE_FILTER_15"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "$comment": "REQ-RES-PUBLIST-012 (MG 8.3.8, SF-067): the entries of MAM and Health enable APPLICATION, SOURCE or FILTER (not the default ON_REQUEST_1)",
+          "if": {
+            "type": "object",
+            "required": [
+              "Resource"
+            ],
+            "properties": {
+              "Resource": {
+                "enum": [
+                  "MAM",
+                  "Health"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "Mode"
+            ],
+            "properties": {
+              "Mode": {
+                "not": {
+                  "enum": [
+                    "OFF_0",
+                    "ON_REQUEST_1"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "PublicationListDataSetMessage": {
+      "$ref": "../envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-MSG-020 (MG 8.2.3): application DataSetWriterIds start at 10",
+          "minimum": 10
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-025 (MG 8.2.3, GL-ADR-018): the WriterGroupName of a list entry is <ResourceType>[/<Tag>]",
+          "pattern": "^(?:MAM|Health|Config|Data|Metadata|Event|Profile|PublicationList|SubscriptionList|ReferenceDesignation)(?:/|$)"
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
+          "const": "ua-keyframe"
+        },
+        "Payload": {
+          "$ref": "#/$defs/PublicationEntry"
+        }
+      }
+    }
+  }
+}

@@ -98,3 +98,8 @@ expectations:
     rule: [REQ-RES-MAM-014]
     rules: [R-2]
     reason: The DeviceClass of the application names its own ServiceType; this is an equality with the ServiceType of the topic, and only for the MAM of the application itself (DataSetWriterName = AppId).
+  - vector: V-PAY-151
+    schema: [REQ-MSG-025]
+    rule: [REQ-RES-PUBLIST-002]
+    rules: [R-3]
+    reason: The schema sees that the WriterGroupName does not start with a ResourceType; that it equals Resource[/Filter] of the entry is an equality between two fields of one DataSetMessage.
