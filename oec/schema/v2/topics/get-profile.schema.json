@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/get-profile.schema.json",
+  "title": "Get Profile (topic form get-profile)",
+  "description": "Entry schema of the topic form get-profile (topic.abnf, matrix row Get/Profile, MG 9.1.7).",
+  "$ref": "../envelope.schema.json#/$defs/DataNetworkMessage",
+  "allOf": [
+    {
+      "$comment": "REQ-MSG-011 (MG 8.2.1): the DataSetClassId of a predefined resource is present",
+      "required": [
+        "DataSetClassId"
+      ]
+    }
+  ],
+  "properties": {
+    "DataSetClassId": {
+      "$comment": "REQ-MSG-010 (MG A2): DataSetClassId of Profile",
+      "const": "48017c6a-05c8-48d7-9d85-4b08bbb707f3"
+    },
+    "Messages": {
+      "$comment": "REQ-RES-PROFILE-003 (MG 9.1.7): only the helper DataSets PaginationRequest and Locale",
+      "items": {
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetWriterId"
+          ],
+          "properties": {
+            "DataSetWriterId": {
+              "const": 1
+            }
+          }
+        },
+        "then": {
+          "$ref": "../helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "then": {
+            "$ref": "../helpers.schema.json#/$defs/LocaleDataSetMessage"
+          },
+          "else": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 2
+                }
+              }
+            },
+            "then": {
+              "$comment": "REQ-PAG-008 (MG 8.3.11): a Pagination is only sent with the method Pub",
+              "not": {}
+            },
+            "else": {
+              "if": {
+                "type": "object",
+                "required": [
+                  "DataSetWriterId"
+                ],
+                "properties": {
+                  "DataSetWriterId": {
+                    "const": 9
+                  }
+                }
+              },
+              "then": {
+                "$comment": "REQ-QRY-001 (MG 8.3.13): Profile has no Query",
+                "not": {}
+              },
+              "else": {
+                "$comment": "REQ-RES-PROFILE-003 (MG 9.1.7): a Get Profile carries no Profile DataSetMessage",
+                "not": {}
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-PAG-008 (MG 8.3.11): at most one PaginationRequest per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 1
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "$comment": "REQ-LOC-003 (MG 8.3.12): at most one Locale per NetworkMessage",
+          "contains": {
+            "type": "object",
+            "required": [
+              "DataSetWriterId"
+            ],
+            "properties": {
+              "DataSetWriterId": {
+                "const": 3
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ]
+    }
+  }
+}

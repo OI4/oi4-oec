@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.openindustry4.com/oec/v2/envelope.schema.json",
   "title": "OEC message envelopes",
-  "description": "NetworkMessage and DataSetMessage of MG 8.1/8.2 (ua-data) with the fixed content masks of MG 8.1.4, the DataSetMetaData NetworkMessage (ua-metadata, MG 8.2.2) and the OI4 identifier strings. The Action messages (C-036) follow in P2.",
+  "description": "NetworkMessage and DataSetMessage of MG 8.1/8.2 (ua-data) with the fixed content masks of MG 8.1.4, the DataSetMetaData NetworkMessage (ua-metadata, MG 8.2.2) and the OI4 identifier strings. The Action messages are in actions.schema.json.",
   "$defs": {
     "ServiceType": {
       "enum": [

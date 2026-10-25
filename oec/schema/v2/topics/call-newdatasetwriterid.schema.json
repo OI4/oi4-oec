@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/topics/call-newdatasetwriterid.schema.json",
+  "title": "Call NewDataSetWriterId (topic form call-newdatasetwriterid)",
+  "description": "Entry schema of the topic form call-newdatasetwriterid (topic.abnf, matrix row Call/NewDataSetWriterId, MG 8.4.1, MG 9.2.1). PublisherId = Responder of the topic, ResponseAddress = Reply topic of the Call topic and MessageId suffix = RequestorId are rules of the rule layer.",
+  "$ref": "../actions.schema.json#/$defs/NewDataSetWriterIdRequestMessage"
+}

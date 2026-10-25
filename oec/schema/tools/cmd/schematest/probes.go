@@ -18,13 +18,22 @@ import (
 type probe struct {
 	id     string
 	base   string // payload vector the mutation starts from
-	rule   string // topic form (entry schema); bareMetaData for a bare MetaData
+	rule   string // topic form (entry schema); bareMetaData for a bare MetaData, anyMessage for message.schema.json
 	mutate func(m map[string]any)
 	want   []string // exact REQ set reported by the entry schema
 }
 
 // bareMetaData is the probe "rule" of a bare DataSetMetaDataType (MG B2).
 const bareMetaData = "(bare) ResourceMetaData"
+
+// anyMessage is the probe "rule" of the topic-agnostic message schema
+// (ADR-0019 option A), which dispatches by MessageType, DataSetClassId and
+// the DataSetWriterId of a common service.
+const anyMessage = "(message) topic-agnostic"
+
+func item(m map[string]any) map[string]any { return msgs(m)[0].(map[string]any) }
+
+func payload(m map[string]any) map[string]any { return item(m)["Payload"].(map[string]any) }
 
 func msgs(m map[string]any) []any { return m["Messages"].([]any) }
 
@@ -83,9 +92,9 @@ var probes = []probe{
 		p["WriterGroupName"] = "Paging"
 		m["Messages"] = []any{msgs(m)[0], p}
 	}, []string{"REQ-MSG-019"}},
-	{"P-11 empty Pub Health", "V-PAY-003", "pub-health", func(m map[string]any) {
+	{"P-11 empty Pub Health (answer to a Get without content, SF-099)", "V-PAY-003", "pub-health", func(m map[string]any) {
 		m["Messages"] = []any{}
-	}, []string{"REQ-RES-HEALTH-007"}},
+	}, nil},
 	{"P-12 page beyond the last page (Pagination only)", "V-PAY-124", "pub-health", func(m map[string]any) {
 		p := validPagination()
 		p["Payload"].(map[string]any)["Page"] = json.Number("2")
@@ -166,6 +175,37 @@ var probes = []probe{
 	{"P-34 LocalizedText with a lower-case region", "V-PAY-152", "pub-metadata", func(m map[string]any) {
 		meta(m)["Description"].(map[string]any)["Locale"] = "en-us"
 	}, []string{"REQ-MSG-040"}},
+	{"P-35 empty Pub MAM (SF-099)", "V-PAY-028", "pub-mam", func(m map[string]any) {
+		m["Messages"] = []any{}
+	}, nil},
+	{"P-36 empty Pub Profile (SF-099)", "V-PAY-032", "pub-profile", func(m map[string]any) {
+		m["Messages"] = []any{}
+	}, nil},
+	{"P-37 Reply with an Uncertain Status keeps its response fields", "V-PAY-009", "reply-newdatasetwriterid", func(m map[string]any) {
+		item(m)["Status"] = map[string]any{"Code": json.Number("1073741824")}
+	}, nil},
+	{"P-38 Reply with the lowest Bad Status and response fields", "V-PAY-009", "reply-newdatasetwriterid", func(m map[string]any) {
+		item(m)["Status"] = map[string]any{"Code": json.Number("2147483648")}
+	}, []string{"REQ-ACT-012"}},
+	{"P-39 message: Call NewDataSetWriterId for an unknown Resource", "V-PAY-008", anyMessage, func(m map[string]any) {
+		payload(m)["Resource"] = "Status"
+	}, []string{"REQ-ACT-021"}},
+	{"P-40 message: Reply NewDataSetWriterId with the reserved DataSetWriterId 8", "V-PAY-009", anyMessage, func(m map[string]any) {
+		payload(m)["DataSetWriterId"] = json.Number("8")
+	}, []string{"REQ-ACT-022"}},
+	{"P-41 message: Reply with a Bad Status and response fields", "V-PAY-009", anyMessage, func(m map[string]any) {
+		item(m)["Status"] = map[string]any{"Code": json.Number("2158690304")}
+	}, []string{"REQ-ACT-012"}},
+	{"P-42 message: Call of a publisher-defined Action", "V-PAY-008", anyMessage, func(m map[string]any) {
+		item(m)["DataSetWriterId"] = json.Number("100")
+		item(m)["Payload"] = map[string]any{"Speed": json.Number("3")}
+	}, nil},
+	{"P-43 message: Pub MAM without SerialNumber", "V-PAY-028", anyMessage, func(m map[string]any) {
+		delete(payload(m), "SerialNumber")
+	}, []string{"REQ-RES-MAM-001"}},
+	{"P-44 message: Pub Profile with an unknown resource", "V-PAY-032", anyMessage, func(m map[string]any) {
+		payload(m)["Resources"] = []any{"MAM", "Health", "Status"}
+	}, []string{"REQ-RES-PROFILE-001"}},
 }
 
 // runProbes validates every probe against its entry schema and appends the
@@ -190,8 +230,11 @@ func runProbes(c *jsonschema.Compiler, docs map[string]any, vectors []vector) ([
 		}
 		p.mutate(inst.(map[string]any))
 		entry := schema.BaseURI + "topics/" + p.rule + ".schema.json"
-		if p.rule == bareMetaData {
+		switch p.rule {
+		case bareMetaData:
 			entry = schema.BaseURI + "metadata.schema.json#/$defs/ResourceMetaData"
+		case anyMessage:
+			entry = schema.BaseURI + "message.schema.json"
 		}
 		r, err := validate(c, docs, entry, inst)
 		if err != nil {

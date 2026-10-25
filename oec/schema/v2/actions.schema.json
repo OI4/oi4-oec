@@ -1,0 +1,425 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/actions.schema.json",
+  "title": "OEC Action messages",
+  "description": "ActionNetworkMessage (ua-action-request, ua-action-response, MG 8.2.16) with ActionRequest (MG 8.2.17) and ActionResponse (MG 8.2.18) and the Payloads of the common service NewDataSetWriterId (MG 8.4.1). Topic-dependent equalities (PublisherId = Responder of the topic, ResponseAddress = Reply topic of the Call topic) and the MessageId suffix = sender are rules of the rule layer.",
+  "$defs": {
+    "ActionPublisherId": {
+      "$comment": "REQ-ACT-005 (MG 8.2.16, MG 7.4): <ServiceType>/<IdentificationLink>, structure only; that the PublisherId is the Responder of the topic is a rule of the rule layer",
+      "type": "string",
+      "pattern": "^(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+    },
+    "ActionMessageId": {
+      "$comment": "REQ-ACT-004 (MG 8.2.16, SF-049): <unixTimestampInMs>-<PublisherId of the sender>, structure only; that the suffix is the RequestorId (request) or the PublisherId (response) is a rule of the rule layer",
+      "type": "string",
+      "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+    },
+    "ActionNetworkMessage": {
+      "$comment": "REQ-ACT-002 (MG 8.2.16): fields of an ActionNetworkMessage",
+      "type": "object",
+      "required": [
+        "MessageId",
+        "MessageType",
+        "PublisherId",
+        "Timestamp",
+        "RequestorId",
+        "Messages"
+      ],
+      "properties": {
+        "MessageId": {
+          "$ref": "#/$defs/ActionMessageId"
+        },
+        "MessageType": {
+          "type": "string"
+        },
+        "PublisherId": {
+          "$ref": "#/$defs/ActionPublisherId"
+        },
+        "Timestamp": {
+          "$ref": "opcua.schema.json#/$defs/DateTime"
+        },
+        "RequestorId": {
+          "$ref": "#/$defs/ActionPublisherId"
+        },
+        "CorrelationData": {
+          "$comment": "REQ-ACT-002 (MG 8.2.16): Base64 ByteString",
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+        },
+        "ResponseAddress": {},
+        "TimeoutHint": {},
+        "Messages": {
+          "type": "array",
+          "minItems": 1
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-ACT-003 (MG 8.1.4, MG 8.2.16): CompactEncoding with the fixed content masks; a sender adds no key beyond the guideline, e.g. no DataSetClassId or ReplyTo in the ActionNetworkMessage (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "ActionRequestMessage": {
+      "$ref": "#/$defs/ActionNetworkMessage",
+      "allOf": [
+        {
+          "$comment": "REQ-ACT-002 (MG 8.2.16): a ua-action-request additionally contains ResponseAddress and TimeoutHint",
+          "required": [
+            "ResponseAddress",
+            "TimeoutHint"
+          ]
+        }
+      ],
+      "properties": {
+        "MessageType": {
+          "$comment": "REQ-ACT-001 (MG 8.2.16, MG 9.2): a Call publishes a ua-action-request",
+          "const": "ua-action-request"
+        },
+        "ResponseAddress": {
+          "$comment": "REQ-ACT-006 (MG 8.2.16, MG 9.2, MG 7.4): a Reply topic Oi4v2/<ServiceType>/<AppId>/Reply/<Service>[/<Source>], structure only; that it corresponds to the Call topic is a rule of the rule layer",
+          "type": "string",
+          "pattern": "^Oi4v2/(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/(?:[\\x2D0-9A-Z_a-z]{4}){0,84}(?:[\\x2D0-9A-Z_a-z]{4}|[\\x2D0-9A-Z_a-z][AQgw]|[\\x2D0-9A-Z_a-z]{2}[048AEIMQUYcgkosw])/Reply/(?:NewDataSetWriterId)(?:/(?:[\\x2D0-9A-Z_a-z]{4}){0,84}(?:[\\x2D0-9A-Z_a-z]{4}|[\\x2D0-9A-Z_a-z][AQgw]|[\\x2D0-9A-Z_a-z]{2}[048AEIMQUYcgkosw]))?$"
+        },
+        "TimeoutHint": {
+          "$comment": "REQ-ACT-002 (MG 8.2.16): TimeoutHint is a positive Duration in milliseconds",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "Messages": {
+          "items": {
+            "$ref": "#/$defs/ActionRequest"
+          }
+        }
+      }
+    },
+    "ActionResponseMessage": {
+      "$ref": "#/$defs/ActionNetworkMessage",
+      "properties": {
+        "MessageType": {
+          "$comment": "REQ-ACT-001 (MG 8.2.16, MG 9.2): a Reply publishes a ua-action-response",
+          "const": "ua-action-response"
+        },
+        "ResponseAddress": {
+          "$comment": "REQ-ACT-002 (MG 8.2.16): a ua-action-response has no ResponseAddress",
+          "not": {}
+        },
+        "TimeoutHint": {
+          "$comment": "REQ-ACT-002 (MG 8.2.16): a ua-action-response has no TimeoutHint",
+          "not": {}
+        },
+        "Messages": {
+          "items": {
+            "$ref": "#/$defs/ActionResponse"
+          }
+        }
+      }
+    },
+    "ActionRequest": {
+      "$comment": "REQ-ACT-010 (MG 8.2.17): fields of an ActionRequest",
+      "type": "object",
+      "required": [
+        "DataSetWriterId",
+        "ActionTargetId",
+        "RequestId",
+        "ActionState",
+        "Payload"
+      ],
+      "properties": {
+        "DataSetWriterId": {
+          "$ref": "opcua.schema.json#/$defs/UInt16"
+        },
+        "ActionTargetId": {
+          "$ref": "opcua.schema.json#/$defs/UInt16"
+        },
+        "RequestId": {
+          "$ref": "opcua.schema.json#/$defs/UInt16"
+        },
+        "MetaDataVersion": {
+          "$ref": "opcua.schema.json#/$defs/ConfigurationVersion"
+        },
+        "Timestamp": {
+          "$ref": "opcua.schema.json#/$defs/DateTime"
+        },
+        "Payload": {
+          "type": "object"
+        },
+        "ActionState": {
+          "$comment": "REQ-ACT-010 (MG 8.2.17): ActionState 1 (Executing) as number",
+          "const": 1
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-ACT-003 (MG 8.1.4, MG 8.2.16): CompactEncoding with the fixed content masks; an ActionRequest or ActionResponse has no SequenceNumber, MessageType, PublisherId, DataSetWriterName, WriterGroupName or MinorVersion and no other key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "ActionResponse": {
+      "$comment": "REQ-ACT-012 (MG 8.2.18): fields of an ActionResponse",
+      "type": "object",
+      "required": [
+        "DataSetWriterId",
+        "ActionTargetId",
+        "RequestId",
+        "Status",
+        "ActionState",
+        "Payload"
+      ],
+      "properties": {
+        "DataSetWriterId": {
+          "$ref": "opcua.schema.json#/$defs/UInt16"
+        },
+        "ActionTargetId": {
+          "$ref": "opcua.schema.json#/$defs/UInt16"
+        },
+        "RequestId": {
+          "$ref": "opcua.schema.json#/$defs/UInt16"
+        },
+        "MetaDataVersion": {
+          "$ref": "opcua.schema.json#/$defs/ConfigurationVersion"
+        },
+        "Timestamp": {
+          "$ref": "opcua.schema.json#/$defs/DateTime"
+        },
+        "Payload": {
+          "type": "object"
+        },
+        "ActionState": {
+          "$comment": "REQ-ACT-012 (MG 8.2.18, MG 8.2.20): ActionState 1 (Executing, intermediate) or 2 (Done, final) as number",
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "Status": {
+          "$ref": "#/$defs/ActionStatus"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "REQ-ACT-012 (MG 8.2.18, MG 8.2.20): the Payload of a response with a Bad Status is empty",
+          "if": {
+            "type": "object",
+            "required": [
+              "Status"
+            ],
+            "properties": {
+              "Status": {
+                "type": "object",
+                "required": [
+                  "Code"
+                ],
+                "properties": {
+                  "Code": {
+                    "type": "integer",
+                    "minimum": 2147483648,
+                    "maximum": 4294967295
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "Payload": {
+                "maxProperties": 0
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": {
+        "$comment": "REQ-ACT-003 (MG 8.1.4, MG 8.2.16): CompactEncoding with the fixed content masks; an ActionRequest or ActionResponse has no SequenceNumber, MessageType, PublisherId, DataSetWriterName, WriterGroupName or MinorVersion and no other key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "ActionStatus": {
+      "$comment": "REQ-ACT-014 (MG 8.2.3, MG 8.2.18): Status in CompactEncoding: {} for Good, otherwise {\"Code\": <UInt32>}, never a Symbol",
+      "type": "object",
+      "properties": {
+        "Code": {
+          "$ref": "opcua.schema.json#/$defs/UInt32",
+          "not": {
+            "const": 0
+          }
+        },
+        "Symbol": {
+          "$comment": "REQ-ACT-014 (MG 8.2.3, MG 8.2.18): the Status of an ActionResponse has no Symbol",
+          "not": {}
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-ACT-003 (MG 8.1.4, MG 8.2.16): the Status has no key beyond Code (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "NewDataSetWriterIdItem": {
+      "$comment": "ActionRequest or ActionResponse of the common service NewDataSetWriterId (MG 8.4.1)",
+      "allOf": [
+        {
+          "$comment": "REQ-ACT-019 (MG 8.4, MG 8.2.17): NewDataSetWriterId uses the reserved DataSetWriterId 8",
+          "properties": {
+            "DataSetWriterId": {
+              "if": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "then": {
+                "const": 8
+              }
+            }
+          }
+        },
+        {
+          "$comment": "REQ-ACT-019 (MG 8.4, MG 8.2.17): a common service uses ActionTargetId 1",
+          "properties": {
+            "ActionTargetId": {
+              "if": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "then": {
+                "const": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "NewDataSetWriterIdRequest": {
+      "$comment": "Payload of a NewDataSetWriterId ActionRequest (MG 8.4.1); the type object is checked by the ActionRequest (REQ-ACT-010)",
+      "allOf": [
+        {
+          "$comment": "REQ-ACT-021 (MG 8.4.1): the request contains Resource",
+          "required": [
+            "Resource"
+          ]
+        }
+      ],
+      "properties": {
+        "Resource": {
+          "$comment": "REQ-ACT-013 (MG 8.2.17, SF-035): Resource is a String",
+          "type": "string",
+          "allOf": [
+            {
+              "$comment": "REQ-ACT-021 (MG 8.4.1): Resource is a ResourceType of MG 7.5.1",
+              "if": {
+                "type": "string"
+              },
+              "then": {
+                "enum": [
+                  "MAM",
+                  "Health",
+                  "Config",
+                  "Data",
+                  "Metadata",
+                  "Event",
+                  "Profile",
+                  "PublicationList",
+                  "SubscriptionList",
+                  "ReferenceDesignation"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-ACT-013 (MG 8.2.17, MG 8.2.18, SF-035): the Payload has no field beyond the ActionMetaData of the Action (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "NewDataSetWriterIdResponse": {
+      "$comment": "Payload of a successful NewDataSetWriterId ActionResponse (MG 8.4.1); the type object is checked by the ActionResponse (REQ-ACT-012)",
+      "allOf": [
+        {
+          "$comment": "REQ-ACT-022 (MG 8.4.1): the response contains DataSetWriterId and Ttl",
+          "required": [
+            "DataSetWriterId",
+            "Ttl"
+          ]
+        }
+      ],
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-ACT-013 (MG 8.2.18, SF-035): DataSetWriterId is a UInt16",
+          "$ref": "opcua.schema.json#/$defs/UInt16",
+          "allOf": [
+            {
+              "$comment": "REQ-ACT-022 (MG 8.4.1, MG 9.2.1): the provided DataSetWriterId is not reserved (>= 10, REQ-MSG-020)",
+              "if": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              },
+              "then": {
+                "minimum": 10
+              }
+            }
+          ]
+        },
+        "Ttl": {
+          "$comment": "REQ-ACT-013 (MG 8.2.18, SF-035): Ttl is a UInt32 (seconds)",
+          "$ref": "opcua.schema.json#/$defs/UInt32"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-ACT-013 (MG 8.2.17, MG 8.2.18, SF-035): the Payload has no field beyond the ActionMetaData of the Action (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "NewDataSetWriterIdRequestMessage": {
+      "$ref": "#/$defs/ActionRequestMessage",
+      "properties": {
+        "Messages": {
+          "items": {
+            "$ref": "#/$defs/NewDataSetWriterIdItem",
+            "properties": {
+              "Payload": {
+                "$ref": "#/$defs/NewDataSetWriterIdRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "NewDataSetWriterIdResponseMessage": {
+      "$ref": "#/$defs/ActionResponseMessage",
+      "properties": {
+        "Messages": {
+          "items": {
+            "$ref": "#/$defs/NewDataSetWriterIdItem",
+            "if": {
+              "type": "object",
+              "required": [
+                "Status"
+              ],
+              "properties": {
+                "Status": {
+                  "type": "object",
+                  "required": [
+                    "Code"
+                  ],
+                  "properties": {
+                    "Code": {
+                      "type": "integer",
+                      "minimum": 2147483648,
+                      "maximum": 4294967295
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "Payload": {
+                  "$ref": "#/$defs/NewDataSetWriterIdResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

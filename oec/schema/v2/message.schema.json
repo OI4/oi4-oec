@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.openindustry4.com/oec/v2/message.schema.json",
   "title": "Any OEC message (topic-agnostic)",
-  "description": "Topic-agnostic entry: discriminates by MessageType and DataSetClassId and checks the structure only. Method-dependent content (e.g. Get vs. Pub) needs the topic entry schemas in topics/. Build-out state (C-035): ua-data with Health and the helper DataSets, ua-metadata; the other resources and the Actions follow in P2.",
+  "description": "Topic-agnostic entry: discriminates by MessageType, DataSetClassId and the reserved DataSetWriterId of a common service, and checks the structure only. Method-dependent content (e.g. Get vs. Pub) needs the topic entry schemas in topics/. Build-out state (C-036): ua-data with MAM, Health, Profile and the helper DataSets, ua-metadata, ua-action-request/-response with NewDataSetWriterId; the other resources follow in P2.",
   "if": {
     "type": "object",
     "required": [
@@ -33,18 +33,50 @@
       "$ref": "#/$defs/MetaDataMessage"
     },
     "else": {
-      "$comment": "REQ-MSG-002 (MG 8.1): MessageType of a NetworkMessage",
-      "required": [
-        "MessageType"
-      ],
-      "properties": {
-        "MessageType": {
-          "enum": [
-            "ua-data",
-            "ua-metadata",
-            "ua-action-request",
-            "ua-action-response"
-          ]
+      "if": {
+        "type": "object",
+        "required": [
+          "MessageType"
+        ],
+        "properties": {
+          "MessageType": {
+            "const": "ua-action-request"
+          }
+        }
+      },
+      "then": {
+        "$ref": "#/$defs/ActionRequestMessage"
+      },
+      "else": {
+        "if": {
+          "type": "object",
+          "required": [
+            "MessageType"
+          ],
+          "properties": {
+            "MessageType": {
+              "const": "ua-action-response"
+            }
+          }
+        },
+        "then": {
+          "$ref": "#/$defs/ActionResponseMessage"
+        },
+        "else": {
+          "$comment": "REQ-MSG-002 (MG 8.1): MessageType of a NetworkMessage",
+          "required": [
+            "MessageType"
+          ],
+          "properties": {
+            "MessageType": {
+              "enum": [
+                "ua-data",
+                "ua-metadata",
+                "ua-action-request",
+                "ua-action-response"
+              ]
+            }
+          }
         }
       }
     }
@@ -137,10 +169,182 @@
         }
       },
       "else": {
-        "properties": {
-          "Messages": {
-            "items": {
-              "$ref": "envelope.schema.json#/$defs/DataSetMessage"
+        "if": {
+          "type": "object",
+          "required": [
+            "DataSetClassId"
+          ],
+          "properties": {
+            "DataSetClassId": {
+              "const": "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "Messages": {
+              "items": {
+                "if": {
+                  "type": "object",
+                  "required": [
+                    "DataSetWriterId"
+                  ],
+                  "properties": {
+                    "DataSetWriterId": {
+                      "const": 1
+                    }
+                  }
+                },
+                "then": {
+                  "$ref": "helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+                },
+                "else": {
+                  "if": {
+                    "type": "object",
+                    "required": [
+                      "DataSetWriterId"
+                    ],
+                    "properties": {
+                      "DataSetWriterId": {
+                        "const": 2
+                      }
+                    }
+                  },
+                  "then": {
+                    "$ref": "helpers.schema.json#/$defs/PaginationDataSetMessage"
+                  },
+                  "else": {
+                    "if": {
+                      "type": "object",
+                      "required": [
+                        "DataSetWriterId"
+                      ],
+                      "properties": {
+                        "DataSetWriterId": {
+                          "const": 3
+                        }
+                      }
+                    },
+                    "then": {
+                      "$ref": "helpers.schema.json#/$defs/LocaleDataSetMessage"
+                    },
+                    "else": {
+                      "if": {
+                        "type": "object",
+                        "required": [
+                          "DataSetWriterId"
+                        ],
+                        "properties": {
+                          "DataSetWriterId": {
+                            "const": 9
+                          }
+                        }
+                      },
+                      "then": {
+                        "$ref": "helpers.schema.json#/$defs/QueryDataSetMessage"
+                      },
+                      "else": {
+                        "$ref": "resources/mam.schema.json#/$defs/MAMDataSetMessage"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "else": {
+          "if": {
+            "type": "object",
+            "required": [
+              "DataSetClassId"
+            ],
+            "properties": {
+              "DataSetClassId": {
+                "const": "48017c6a-05c8-48d7-9d85-4b08bbb707f3"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "Messages": {
+                "items": {
+                  "if": {
+                    "type": "object",
+                    "required": [
+                      "DataSetWriterId"
+                    ],
+                    "properties": {
+                      "DataSetWriterId": {
+                        "const": 1
+                      }
+                    }
+                  },
+                  "then": {
+                    "$ref": "helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+                  },
+                  "else": {
+                    "if": {
+                      "type": "object",
+                      "required": [
+                        "DataSetWriterId"
+                      ],
+                      "properties": {
+                        "DataSetWriterId": {
+                          "const": 2
+                        }
+                      }
+                    },
+                    "then": {
+                      "$ref": "helpers.schema.json#/$defs/PaginationDataSetMessage"
+                    },
+                    "else": {
+                      "if": {
+                        "type": "object",
+                        "required": [
+                          "DataSetWriterId"
+                        ],
+                        "properties": {
+                          "DataSetWriterId": {
+                            "const": 3
+                          }
+                        }
+                      },
+                      "then": {
+                        "$ref": "helpers.schema.json#/$defs/LocaleDataSetMessage"
+                      },
+                      "else": {
+                        "if": {
+                          "type": "object",
+                          "required": [
+                            "DataSetWriterId"
+                          ],
+                          "properties": {
+                            "DataSetWriterId": {
+                              "const": 9
+                            }
+                          }
+                        },
+                        "then": {
+                          "$ref": "helpers.schema.json#/$defs/QueryDataSetMessage"
+                        },
+                        "else": {
+                          "$ref": "resources/profile.schema.json#/$defs/ProfileDataSetMessage"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "Messages": {
+                "items": {
+                  "$ref": "envelope.schema.json#/$defs/DataSetMessage"
+                }
+              }
             }
           }
         }
@@ -157,6 +361,85 @@
           "then": true,
           "else": {
             "$ref": "metadata.schema.json#/$defs/DataSetMetaData"
+          }
+        }
+      }
+    },
+    "ActionRequestMessage": {
+      "$ref": "actions.schema.json#/$defs/ActionRequestMessage",
+      "properties": {
+        "Messages": {
+          "items": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 8
+                }
+              }
+            },
+            "then": {
+              "$ref": "actions.schema.json#/$defs/NewDataSetWriterIdItem",
+              "properties": {
+                "Payload": {
+                  "$ref": "actions.schema.json#/$defs/NewDataSetWriterIdRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ActionResponseMessage": {
+      "$ref": "actions.schema.json#/$defs/ActionResponseMessage",
+      "properties": {
+        "Messages": {
+          "items": {
+            "if": {
+              "type": "object",
+              "required": [
+                "DataSetWriterId"
+              ],
+              "properties": {
+                "DataSetWriterId": {
+                  "const": 8
+                }
+              }
+            },
+            "then": {
+              "$ref": "actions.schema.json#/$defs/NewDataSetWriterIdItem",
+              "if": {
+                "type": "object",
+                "required": [
+                  "Status"
+                ],
+                "properties": {
+                  "Status": {
+                    "type": "object",
+                    "required": [
+                      "Code"
+                    ],
+                    "properties": {
+                      "Code": {
+                        "type": "integer",
+                        "minimum": 2147483648,
+                        "maximum": 4294967295
+                      }
+                    }
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "Payload": {
+                    "$ref": "actions.schema.json#/$defs/NewDataSetWriterIdResponse"
+                  }
+                }
+              }
+            }
           }
         }
       }

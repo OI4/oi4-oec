@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/resources/profile.schema.json",
+  "title": "Profile resource",
+  "description": "Profile DataSet (MG 8.3.7) and the Profile DataSetMessage of a Pub Profile (MG 9.1.7). That the Profile lists every supported resource (REQ-RES-PROFILE-002) is checked by D7 test.",
+  "$defs": {
+    "Profile": {
+      "$comment": "REQ-RES-PROFILE-001 (MG 8.3.7, SF-066): fields of the Profile DataSet: Resources, each a resource of MG 7.5.1 or a common service of MG 7.5.2, listed once",
+      "type": "object",
+      "required": [
+        "Resources"
+      ],
+      "properties": {
+        "Resources": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "MAM",
+              "Health",
+              "Config",
+              "Data",
+              "Metadata",
+              "Event",
+              "Profile",
+              "PublicationList",
+              "SubscriptionList",
+              "ReferenceDesignation",
+              "NewDataSetWriterId"
+            ]
+          }
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "ProfileDataSetMessage": {
+      "$ref": "../envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-MSG-020 (MG 8.2.3): application DataSetWriterIds start at 10",
+          "minimum": 10
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-024 (MG 8.2.3, MG 7.7): Profile has no Filter",
+          "const": ""
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
+          "const": "ua-keyframe"
+        },
+        "Payload": {
+          "$ref": "#/$defs/Profile"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/v2/resources/mam.schema.json",
+  "title": "MAM resource",
+  "description": "Master Asset Management DataSet (MG 5, MG 8.3.1) and the MAM DataSetMessage of a Pub MAM (MG 9.1.1). ProductInstanceUri = DataSetWriterName (REQ-RES-MAM-016), the Oi4Identifier derived from the MAM (REQ-RES-MAM-006) and the DeviceClass of the application (REQ-RES-MAM-014) are rules of the rule layer.",
+  "$defs": {
+    "MAM": {
+      "$comment": "REQ-RES-MAM-001 (MG 8.3.1, MG 5): fields of the MAM DataSet",
+      "type": "object",
+      "required": [
+        "Manufacturer",
+        "ManufacturerUri",
+        "Model",
+        "ProductCode",
+        "HardwareRevision",
+        "SoftwareRevision",
+        "DeviceRevision",
+        "DeviceManual",
+        "DeviceClass",
+        "SerialNumber",
+        "ProductInstanceUri",
+        "RevisionCounter"
+      ],
+      "properties": {
+        "Manufacturer": {
+          "$ref": "../opcua.schema.json#/$defs/LocalizedText"
+        },
+        "ManufacturerUri": {
+          "type": "string",
+          "allOf": [
+            {
+              "$comment": "REQ-RES-MAM-004 (MG 5): a lower-case domain name without scheme, port or path",
+              "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$"
+            }
+          ]
+        },
+        "Model": {
+          "$ref": "../opcua.schema.json#/$defs/LocalizedText"
+        },
+        "ProductCode": {
+          "type": "string"
+        },
+        "HardwareRevision": {
+          "type": "string"
+        },
+        "SoftwareRevision": {
+          "type": "string"
+        },
+        "DeviceRevision": {
+          "type": "string"
+        },
+        "DeviceManual": {
+          "type": "string",
+          "allOf": [
+            {
+              "$comment": "REQ-RES-MAM-012 (MG 5): empty or a URL with scheme and host, no local file path",
+              "pattern": "^(?:[A-Za-z][A-Za-z0-9+.-]*://(?:[^/?#@]*@)?[^/?#@]+(?:[/?#][\\s\\S]*)?)?$"
+            }
+          ]
+        },
+        "DeviceClass": {
+          "type": "string"
+        },
+        "SerialNumber": {
+          "type": "string"
+        },
+        "ProductInstanceUri": {
+          "type": "string",
+          "allOf": [
+            {
+              "$comment": "REQ-RES-MAM-017 (MG 5): at most 255 characters",
+              "maxLength": 255
+            }
+          ]
+        },
+        "RevisionCounter": {
+          "$ref": "../opcua.schema.json#/$defs/Int32"
+        },
+        "Description": {
+          "$ref": "../opcua.schema.json#/$defs/LocalizedText"
+        },
+        "GlobalAssetId": {
+          "type": "string"
+        }
+      },
+      "unevaluatedProperties": {
+        "$comment": "REQ-MSG-001 (MG 8): a sender adds no key beyond the guideline (strict); the tolerant flavor drops this closure",
+        "not": {}
+      }
+    },
+    "MAMDataSetMessage": {
+      "$ref": "../envelope.schema.json#/$defs/DataSetMessage",
+      "properties": {
+        "DataSetWriterId": {
+          "$comment": "REQ-MSG-020 (MG 8.2.3): application DataSetWriterIds start at 10",
+          "minimum": 10
+        },
+        "WriterGroupName": {
+          "$comment": "REQ-MSG-024 (MG 8.2.3, MG 7.7): MAM has no Filter",
+          "const": ""
+        },
+        "MessageType": {
+          "$comment": "REQ-MSG-029 (MG 8.2.3)",
+          "const": "ua-keyframe"
+        },
+        "Payload": {
+          "$ref": "#/$defs/MAM"
+        }
+      }
+    }
+  }
+}
