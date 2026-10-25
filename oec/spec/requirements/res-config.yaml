@@ -8,7 +8,7 @@
 # Drafted in C-029; SF-084 … SF-088 resolved in the guideline after the PO
 # review of C-029 (masking of sensitive values: GL-ADR-021).
 area: RES-CONFIG
-baseline: "68d878d"
+baseline: "a42a132"
 requirements:
   # --- DataSet content (MG 8.3.3, 8.3.3.1, 8.3.3.2) ---------------------------
   - id: REQ-RES-CONFIG-001
@@ -497,9 +497,9 @@ requirements:
     refs: [MG 9.1.3]
     quotes:
       - ref: MG 9.1.3
-        text: In combination with the method Pub, the payload contains DataSetMessages of type Config and optional Pagination (8.3.11.2 Pagination).
+        text: In combination with the method Pub, the payload contains DataSetMessages of type Config – none in the answer to a Get without content (Resources Without Content) – and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.3-6859d952]
+    inventory: [MG-9.1.3-552b501a]
     status: reviewed
 
   - id: REQ-RES-CONFIG-019

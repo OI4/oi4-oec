@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "68d878d"
+baseline: "a42a132"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -780,22 +780,30 @@ requirements:
     statement: >-
       If an entity supports a resource but has no content for it, it answers a
       Get of the resource with a NetworkMessage on the related Pub topic that
-      contains no DataSetMessage ("Messages": []).
+      contains no DataSetMessage ("Messages": []). The same applies to a Get
+      whose Filter matches no content of a Source the entity provides; a Get
+      for a Source the entity does not provide is REQ-CMP-047.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The entity supports Get for the resource and has no content for it.
     scope: [MG 8.2.1]
-    refs: [MG 9.1, SF-037]
+    refs: [MG 9.1, SF-037, SF-099]
     quotes:
       - ref: MG 9.1
         text: Supporting a resource does not require that the entity has content for it.
       - ref: MG 9.1
         text: must be answered with an empty list
+      - ref: MG 9.1
+        text: This also applies to a Get whose Filter matches no content of a Source the entity provides.
     verification: [d7-test]
-    inventory: [MG-9.1-434d2112, MG-9.1-09ff70c0]
+    inventory: [MG-9.1-434d2112, MG-9.1-90f67b00]
     status: reviewed
+    notes: >-
+      SF-099 (PO decision in the C-036 review 2026-10-25, guideline a42a132):
+      the Filter case was added to the statement; the Pub of every resource
+      may therefore carry no DataSetMessage (schemas pub-<resource>).
 
   - id: REQ-CMP-042
     title: No unsolicited publication of a resource without content
@@ -914,3 +922,30 @@ requirements:
     notes: >-
       PO review of C-026 (SF-061 (b)): the Close message is mandatory from
       Level 2 on (before: part of REQ-CMP-009, mandatory only at Level 3).
+
+  # --- Added in C-036 addendum 2 (SF-099) -------------------------------------
+  - id: REQ-CMP-047
+    title: Get for an unknown asset – no Pub, Event Status Bad recommended
+    statement: >-
+      An entity does not answer a Get whose Source addresses an asset that the
+      entity neither is nor represents on the related Pub topic. It should
+      answer such a Get with an Event of the category Status and the level
+      Bad (BadNotFound, MG 8.3.6.1).
+    keyword: SHOULD
+    domain: messaging
+    levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
+    applies_to: [application, device]
+    condition: The entity receives a Get whose Source is neither its own identifier nor that of an entity it represents.
+    scope: [MG 8.3.6.1, MG 1.3]
+    refs: [MG 9.1, SF-099]
+    quotes:
+      - ref: MG 9.1
+        text: A Get whose Source addresses an asset that the entity neither is nor represents is not answered on the related Pub topic. The entity should answer such a Get with an Event of the category Status and the level Bad (BadNotFound, see 8.3.6.1 Status).
+    verification: [d7-test]
+    inventory: [MG-9.1-144b2f9a]
+    status: draft
+    notes: >-
+      SF-099, decided by the PO in the C-036 review (2026-10-25, revised
+      against the proposal) and implemented on PO order in a42a132. A Get of
+      a known Source without content is REQ-CMP-041 (empty list); a Get of
+      Metadata without Data is REQ-CMP-044.

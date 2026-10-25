@@ -10,7 +10,7 @@
 # TopicPath of the B1.1.9 example, Interval wording, publication after Del,
 # Config) resolved in the guideline (baseline b2f0fe7).
 area: RES-SUBLIST
-baseline: "68d878d"
+baseline: "a42a132"
 requirements:
   # --- DataSet content (MG 8.3.9) ---------------------------------------------
   - id: REQ-RES-SUBLIST-001
@@ -244,9 +244,9 @@ requirements:
     refs: [MG 9.1.9, SF-062]
     quotes:
       - ref: MG 9.1.9
-        text: In combination with the method Pub, the payload contains DataSetMessages of type SubscriptionList and optional Pagination (8.3.11.2 Pagination).
+        text: In combination with the method Pub, the payload contains DataSetMessages of type SubscriptionList – none in the answer to a Get without content (Resources Without Content) – and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.9-9318b6dc]
+    inventory: [MG-9.1.9-7db0e42d]
     status: reviewed
     notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-003).
 

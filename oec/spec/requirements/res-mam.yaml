@@ -6,7 +6,7 @@
 # behavior of MG 9.1.1. Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-MAM
-baseline: "68d878d"
+baseline: "a42a132"
 requirements:
   # --- DataSet content (MG 5, MG 8.3.1) ---------------------------------------
   - id: REQ-RES-MAM-001
@@ -468,9 +468,9 @@ requirements:
     refs: [MG 9.1.1, SF-062]
     quotes:
       - ref: MG 9.1.1
-        text: In combination with the method Pub, the payload contains DataSetMessages of type MAM and optional Pagination (8.3.11.2 Pagination).
+        text: In combination with the method Pub, the payload contains DataSetMessages of type MAM – none in the answer to a Get without content (Resources Without Content) – and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.1-4d028d73]
+    inventory: [MG-9.1.1-d250fbb9]
     status: reviewed
     notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-003).
 

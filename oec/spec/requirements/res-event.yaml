@@ -10,7 +10,7 @@
 # keys in Details) and SF-076 (Number, Category and topic Filter) resolved in
 # the guideline (baseline b2f0fe7).
 area: RES-EVENT
-baseline: "68d878d"
+baseline: "a42a132"
 requirements:
   # --- DataSet content (MG 8.3.6) ---------------------------------------------
   - id: REQ-RES-EVENT-001
@@ -150,13 +150,13 @@ requirements:
     quotes:
       - ref: MG 8.3.6.1
         text: >-
-          Status events must use Part 6-A.2 information to publish the status of modification requests (and of a Get of Metadata that cannot be answered, see 9.1 Resources) over the Message Bus as following:
+          Status events must use Part 6-A.2 information to publish the status of modification requests (and of a Get that is not answered – a Get of Metadata without Data or a Get for an unknown asset, see 9.1 Resources) over the Message Bus as following:
       - ref: MG 8.3.6.1
         text: The event category Status must be used to respond to modification requests, done over the Message Bus.
       - ref: MG 9.1
         text: From compliance Level 2 on, each Set and Del must be answered with an Event of the category Status; at Level 1, it should be answered this way (7.4 Method Element).
     verification: [d7-test]
-    inventory: [MG-8.3.6.1-41b095ec, MG-8.3.6.1-6214f078, MG-9.1-153191a2, MG-9.1-351e197e, MG-9.1-99138e23]
+    inventory: [MG-8.3.6.1-bf2cb6d0, MG-8.3.6.1-6214f078, MG-9.1-153191a2, MG-9.1-351e197e, MG-9.1-99138e23]
     status: reviewed
     notes: >-
       Same obligation as REQ-TOP-014/015 and the per-resource requirements
@@ -165,7 +165,8 @@ requirements:
       fixes topic, ReplyTo and Number for all of them. A request that
       addresses an object the component does not have is answered with Bad
       (REQ-CMP-043); the optional answer to a Get of Metadata without Data is
-      REQ-CMP-044. Examples: MG B1.1.4, B1.1.5, B1.1.6, B1.1.8 … B1.1.10.
+      REQ-CMP-044, the recommended answer to a Get for an unknown asset
+      REQ-CMP-047 (SF-099). Examples: MG B1.1.4, B1.1.5, B1.1.6, B1.1.8 … B1.1.10.
 
   - id: REQ-RES-EVENT-006
     title: Status events for application-specific states

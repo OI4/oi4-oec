@@ -7,7 +7,7 @@
 # (MG 8.3.13.1, GL-ADR-020, SF-069, SF-073) – REQ-RES-REFDES-011 … 016 (reviewed 2026-10-20);
 # the generic Query rules are area QRY.
 area: RES-REFDES
-baseline: "68d878d"
+baseline: "a42a132"
 requirements:
   # --- DataSet content (MG 8.3.10) --------------------------------------------
   - id: REQ-RES-REFDES-001
@@ -115,9 +115,9 @@ requirements:
     refs: [MG 9.1.10, SF-062]
     quotes:
       - ref: MG 9.1.10
-        text: In combination with the method Pub, the payload contains DataSetMessages of type ReferenceDesignation and optional Pagination (8.3.11.2 Pagination).
+        text: In combination with the method Pub, the payload contains DataSetMessages of type ReferenceDesignation – none in the answer to a Get without content (Resources Without Content) – and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.10-7175ba83]
+    inventory: [MG-9.1.10-060b0841]
     status: reviewed
     notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-003).
 

@@ -4,7 +4,7 @@
 # resource is listed: REQ-CMP-021. Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PROFILE
-baseline: "68d878d"
+baseline: "a42a132"
 requirements:
   - id: REQ-RES-PROFILE-001
     title: Fields of the Profile DataSet
@@ -116,8 +116,8 @@ requirements:
     refs: [MG 9.1.7, SF-062]
     quotes:
       - ref: MG 9.1.7
-        text: In combination with the method Pub, the payload contains DataSetMessages of type Profile and optional Pagination (8.3.11.2 Pagination).
+        text: In combination with the method Pub, the payload contains DataSetMessages of type Profile – none in the answer to a Get without content (Resources Without Content) – and optional Pagination (8.3.11.2 Pagination).
     verification: [schema, d7-validate]
-    inventory: [MG-9.1.7-09291906]
+    inventory: [MG-9.1.7-843ce3da]
     status: reviewed
     notes: A Locale is only meaningful in a Get and ignored in other methods (REQ-LOC-003).
