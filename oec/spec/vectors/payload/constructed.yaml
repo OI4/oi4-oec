@@ -7611,3 +7611,300 @@ vectors:
           }
         ]
       }
+
+  - id: V-PAY-231
+    title: "Pub Data Oi4Pv with a primary and a secondary value"
+    expected: valid
+    reqs: [REQ-RES-DATA-003, REQ-RES-DATA-004]
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-084 with the primary value Pv 21.4 added to the secondary value
+      Sv1. The Tag Oi4Pv selects the predefined DataSet Oi4Pv.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Oi4Pv"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 95,
+            "WriterGroupName": "Oi4Pv",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 3985,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Pv": 21.4,
+              "Sv1": 21.5
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-232
+    title: "Get Data that carries a Data DataSetMessage"
+    expected: invalid
+    violates: [REQ-RES-DATA-006]
+    reason: "A Get Data carries no Data DataSetMessage (MG 9.1.4)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-055 with the DataSetMessage of V-PAY-061.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "Availability": 99,
+              "PerformanceRate": 99,
+              "QualityRate": 99,
+              "Product": 97
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-233
+    title: "Set Data with two DataSetMessages"
+    expected: invalid
+    violates: [REQ-RES-DATA-009]
+    reason: "A Set Data carries exactly one Data DataSetMessage, the DataSet addressed by the topic (MG 9.1.4)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-061 with its DataSetMessage repeated.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "Availability": 99,
+              "PerformanceRate": 99,
+              "QualityRate": 99,
+              "Product": 97
+            }
+          },
+          {
+            "DataSetWriterId": 93,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Timestamp": "2021-12-16T22:25:10.000Z",
+            "Payload": {
+              "Availability": 99,
+              "PerformanceRate": 99,
+              "QualityRate": 99,
+              "Product": 97
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-234
+    title: "Pub Event without Number"
+    expected: invalid
+    violates: [REQ-RES-EVENT-001]
+    reason: "Number is a mandatory field of an Event (MG 8.3.6)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-063 without the Number.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 14,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good"
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-235
+    title: "Status Event with a Details key other than SymbolicId"
+    expected: invalid
+    violates: [REQ-RES-EVENT-003]
+    reason: "The Details of a Status Event carry only the SymbolicId of the status code (MG 8.3.6.2)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-063 with the additional Details key Code.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 623,
+            "WriterGroupName": "Status/Good",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 14,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 0,
+              "Description": "The operation succeeded.",
+              "Category": "CAT_STATUS_1",
+              "Details": {
+                "SymbolicId": "Good",
+                "Code": 0
+              }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-236
+    title: "Syslog Event with a Description"
+    expected: invalid
+    violates: [REQ-RES-EVENT-007]
+    reason: "A Syslog Event carries no Description; the message text is the Details key MSG (MG 8.3.6.3)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-064 with a Description.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Notice"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "543ae05e-b6d9-4161-a0a3-350a0fac5976",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 625,
+            "WriterGroupName": "Syslog/Notice",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 15,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Number": 13,
+              "Category": "CAT_SYSLOG_0",
+              "Details": {
+                "MSG": "FieldDataService[1]: publication interval of Data tag oee set to 1000 ms",
+                "HEADER": "Dec 16 22:25:10 FDS-001-1200-0345"
+              },
+              "Description": "publication interval changed"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-237
+    title: "Pub SubscriptionList entry without TopicPath"
+    expected: invalid
+    violates: [REQ-RES-SUBLIST-001]
+    reason: "TopicPath is a mandatory field of a SubscriptionList entry (MG 8.3.11)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-069 without the TopicPath of the entry.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "Interval": 0,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-238
+    title: "Get SubscriptionList that carries a SubscriptionList DataSetMessage"
+    expected: invalid
+    violates: [REQ-RES-SUBLIST-007]
+    reason: "A Get SubscriptionList carries no SubscriptionList DataSetMessage (MG 9.1.11)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-066 with the entry of V-PAY-072.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": [
+          {
+            "DataSetWriterId": 227,
+            "WriterGroupName": "Data/oee",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "Payload": {
+              "TopicPath": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee",
+              "Interval": 1000,
+              "Config": "CONF_1"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-239
+    title: "Set SubscriptionList without entry"
+    expected: invalid
+    violates: [REQ-RES-SUBLIST-010]
+    reason: "A Set SubscriptionList carries exactly one SubscriptionList DataSetMessage, the entry addressed by the topic (MG 9.1.11)."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-072 with empty Messages.
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "MessageType": "ua-data",
+        "PublisherId": "ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "DataSetClassId": "e5d68c47-c276-4929-8ab9-4c1090cac785",
+        "ReplyTo": "",
+        "Messages": []
+      }

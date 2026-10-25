@@ -183,16 +183,16 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-CONFIG-019 | schema, d7-validate | reviewed | V-PAY-094, V-PAY-095, V-PAY-096, V-PAY-097 … (7) | V-PAY-111 | covered |
 | REQ-RES-CONFIG-024 | d7-validate, d7-test | reviewed | V-PAY-099, V-PAY-114 | V-PAY-115 | covered |
 | REQ-RES-DATA-001 | d7-validate | reviewed | V-PAY-058, V-PAY-059, V-PAY-060 | – | derived |
-| REQ-RES-DATA-003 | schema, d7-validate | reviewed | – | – | details open (1 of 2) |
-| REQ-RES-DATA-004 | schema, d7-validate | reviewed | – | V-PAY-084 | negative only |
-| REQ-RES-DATA-006 | schema, d7-validate | reviewed | V-PAY-055, V-PAY-056, V-PAY-057 | – | positive only |
+| REQ-RES-DATA-003 | schema, d7-validate | reviewed | V-PAY-231* | – | details open (1 of 2) |
+| REQ-RES-DATA-004 | schema, d7-validate | reviewed | V-PAY-231* | V-PAY-084 | negative only |
+| REQ-RES-DATA-006 | schema, d7-validate | reviewed | V-PAY-055, V-PAY-056, V-PAY-057 | V-PAY-232* | positive only |
 | REQ-RES-DATA-008 | schema, d7-validate | reviewed | V-PAY-058, V-PAY-059, V-PAY-060 | – | details open (1 of 5) |
-| REQ-RES-DATA-009 | schema, d7-validate | reviewed | V-PAY-061 | – | positive only |
-| REQ-RES-EVENT-001 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | – | positive only |
+| REQ-RES-DATA-009 | schema, d7-validate | reviewed | V-PAY-061 | V-PAY-233* | positive only |
+| REQ-RES-EVENT-001 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | V-PAY-234* | positive only |
 | REQ-RES-EVENT-002 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | V-PAY-083 | covered |
-| REQ-RES-EVENT-003 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-073, V-PAY-075 … (9) | – | positive only |
+| REQ-RES-EVENT-003 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-073, V-PAY-075 … (9) | V-PAY-235* | positive only |
 | REQ-RES-EVENT-004 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-073, V-PAY-075 … (9) | V-PAY-081 | covered |
-| REQ-RES-EVENT-007 | schema, d7-validate | reviewed | V-PAY-064 | – | positive only |
+| REQ-RES-EVENT-007 | schema, d7-validate | reviewed | V-PAY-064 | V-PAY-236* | positive only |
 | REQ-RES-EVENT-008 | schema, d7-validate | reviewed | V-PAY-064 | V-PAY-082 | covered |
 | REQ-RES-EVENT-009 | schema, d7-validate | reviewed | V-PAY-065 | – | details open (1 of 2) |
 | REQ-RES-EVENT-011 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | – | derived |
@@ -229,11 +229,11 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-REFDES-007 | schema, d7-validate | reviewed | V-PAY-046 | V-PAY-228 | covered |
 | REQ-RES-REFDES-012 | schema, d7-validate | reviewed | V-PAY-053 | V-PAY-229 | covered |
 | REQ-RES-REFDES-013 | schema, d7-validate, d7-test | reviewed | V-PAY-053 | V-PAY-230 (rule) | covered |
-| REQ-RES-SUBLIST-001 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | – | positive only |
+| REQ-RES-SUBLIST-001 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-237* | positive only |
 | REQ-RES-SUBLIST-002 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-086 (rule) | covered |
-| REQ-RES-SUBLIST-007 | schema, d7-validate | reviewed | V-PAY-066, V-PAY-067, V-PAY-068 | – | positive only |
+| REQ-RES-SUBLIST-007 | schema, d7-validate | reviewed | V-PAY-066, V-PAY-067, V-PAY-068 | V-PAY-238* | positive only |
 | REQ-RES-SUBLIST-009 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071 | – | details open (1 of 5) |
-| REQ-RES-SUBLIST-010 | schema, d7-validate | reviewed | V-PAY-072 | – | positive only |
+| REQ-RES-SUBLIST-010 | schema, d7-validate | reviewed | V-PAY-072 | V-PAY-239* | positive only |
 | REQ-RES-SUBLIST-011 | schema, d7-validate | reviewed | V-PAY-074 | V-PAY-085 | covered |
 | REQ-TOP-001 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (94) | V-TOP-201 (R-1), V-TOP-202 (R-1), V-TOP-250 (R-1), V-TOP-251 (R-1) … (5) | covered |
 | REQ-TOP-002 | d7-validate, d7-monitor | reviewed | – | – | none |
