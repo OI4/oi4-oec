@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.openindustry4.com/oec/v2/message.schema.json",
   "title": "Any OEC message (topic-agnostic)",
-  "description": "Topic-agnostic entry: discriminates by MessageType, DataSetClassId and the reserved DataSetWriterId of a common service, and checks the structure only. Method-dependent content (e.g. Get vs. Pub) needs the topic entry schemas in topics/. Build-out state (C-038): ua-data with MAM, Health, Profile, PublicationList, ReferenceDesignation, Event, SubscriptionList and the helper DataSets (Data has no predefined DataSetClassId and stays generic), ua-metadata, ua-action-request/-response with NewDataSetWriterId; the other resources follow in P2.",
+  "description": "Topic-agnostic entry: discriminates by MessageType, DataSetClassId and the reserved DataSetWriterId of a common service, and checks the structure only. Method-dependent content (e.g. Get vs. Pub) needs the topic entry schemas in topics/. Build-out state (C-039): ua-data with MAM, Health, Profile, PublicationList, ReferenceDesignation, Event, SubscriptionList, Config (Set structure) and the helper DataSets (Data has no predefined DataSetClassId and stays generic), ua-metadata, ua-action-request/-response with NewDataSetWriterId; the other resources follow in P2.",
   "if": {
     "type": "object",
     "required": [
@@ -679,10 +679,97 @@
                     }
                   },
                   "else": {
-                    "properties": {
-                      "Messages": {
-                        "items": {
-                          "$ref": "envelope.schema.json#/$defs/DataSetMessage"
+                    "if": {
+                      "type": "object",
+                      "required": [
+                        "DataSetClassId"
+                      ],
+                      "properties": {
+                        "DataSetClassId": {
+                          "const": "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2"
+                        }
+                      }
+                    },
+                    "then": {
+                      "$comment": "Config: Pub and Set are not distinguishable without the topic; the Set structure (ConfigSet…, only Value mandatory, the mask of a sensitive value allowed) is the weaker one and accepts every valid Pub",
+                      "properties": {
+                        "Messages": {
+                          "items": {
+                            "if": {
+                              "type": "object",
+                              "required": [
+                                "DataSetWriterId"
+                              ],
+                              "properties": {
+                                "DataSetWriterId": {
+                                  "const": 1
+                                }
+                              }
+                            },
+                            "then": {
+                              "$ref": "helpers.schema.json#/$defs/PaginationRequestDataSetMessage"
+                            },
+                            "else": {
+                              "if": {
+                                "type": "object",
+                                "required": [
+                                  "DataSetWriterId"
+                                ],
+                                "properties": {
+                                  "DataSetWriterId": {
+                                    "const": 2
+                                  }
+                                }
+                              },
+                              "then": {
+                                "$ref": "helpers.schema.json#/$defs/PaginationDataSetMessage"
+                              },
+                              "else": {
+                                "if": {
+                                  "type": "object",
+                                  "required": [
+                                    "DataSetWriterId"
+                                  ],
+                                  "properties": {
+                                    "DataSetWriterId": {
+                                      "const": 3
+                                    }
+                                  }
+                                },
+                                "then": {
+                                  "$ref": "helpers.schema.json#/$defs/LocaleDataSetMessage"
+                                },
+                                "else": {
+                                  "if": {
+                                    "type": "object",
+                                    "required": [
+                                      "DataSetWriterId"
+                                    ],
+                                    "properties": {
+                                      "DataSetWriterId": {
+                                        "const": 9
+                                      }
+                                    }
+                                  },
+                                  "then": {
+                                    "$ref": "helpers.schema.json#/$defs/QueryDataSetMessage"
+                                  },
+                                  "else": {
+                                    "$ref": "resources/config.schema.json#/$defs/ConfigSetDataSetMessage"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "else": {
+                      "properties": {
+                        "Messages": {
+                          "items": {
+                            "$ref": "envelope.schema.json#/$defs/DataSetMessage"
+                          }
                         }
                       }
                     }

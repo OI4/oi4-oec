@@ -118,3 +118,8 @@ expectations:
     rule: [REQ-RES-SUBLIST-002]
     rules: [R-3]
     reason: The WriterGroupName is derived from the TopicPath of the same entry (its resource and Filter levels joined with "/", or only the resource level for a wildcard Filter); JSON Schema cannot compare a value with a computed part of another value.
+  - vector: V-PAY-108
+    schema: []
+    rule: [REQ-RES-CONFIG-008]
+    rules: [R-3]
+    reason: A Value satisfies Length, Min, Max, Pattern and Values of the Validation of the same configuration object; JSON Schema cannot apply a sibling value as constraint.

@@ -331,6 +331,102 @@ var probes = []probe{
 	{"P-82 message: Pub SubscriptionList without TopicPath", "V-PAY-069", anyMessage, func(m map[string]any) {
 		delete(payload(m), "TopicPath")
 	}, []string{"REQ-RES-SUBLIST-001"}},
+	// C-039: Config (V-PAY-091 network, V-PAY-114 device after a Set, V-PAY-094 Set, V-PAY-088 Get).
+	{"P-83 empty Pub Config (SF-099)", "V-PAY-091", "pub-config", func(m map[string]any) {
+		m["Messages"] = []any{}
+	}, nil},
+	{"P-84 Pub Config with a Context and no Group", "V-PAY-091", "pub-config", func(m map[string]any) {
+		delete(payload(m), "network")
+	}, []string{"REQ-RES-CONFIG-002"}},
+	{"P-85 Pub Config Group without Name", "V-PAY-091", "pub-config", func(m map[string]any) {
+		delete(group(m, "network"), "Name")
+	}, []string{"REQ-RES-CONFIG-002"}},
+	{"P-86 Pub Config Context without Name", "V-PAY-091", "pub-config", func(m map[string]any) {
+		delete(payload(m)["Context"].(map[string]any), "Name")
+	}, []string{"REQ-RES-CONFIG-002"}},
+	{"P-87 Pub Config DateTime value in another format", "V-PAY-114", "pub-config", func(m map[string]any) {
+		configObject(m, "common", "date-time")["Value"] = "24.12.2020 20:15"
+	}, []string{"REQ-RES-CONFIG-007"}},
+	{"P-88 Pub Config Boolean value yes", "V-PAY-114", "pub-config", func(m map[string]any) {
+		configObject(m, "device1", "aut0-r3fr3sh")["Value"] = "yes"
+	}, []string{"REQ-RES-CONFIG-007"}},
+	{"P-89 Pub Config ByteString value not Base64", "V-PAY-114", "pub-config", func(m map[string]any) {
+		o := configObject(m, "device1", "readInterval")
+		o["Type"], o["Value"] = "ByteString", "A*"
+	}, []string{"REQ-RES-CONFIG-007"}},
+	{"P-90 Pub Config Number value in exponent notation", "V-PAY-114", "pub-config", func(m map[string]any) {
+		configObject(m, "device1", "readInterval")["Value"] = "1.5e2"
+	}, nil},
+	{"P-91 Pub Config DefaultValue not a Number", "V-PAY-114", "pub-config", func(m map[string]any) {
+		configObject(m, "device1", "port")["DefaultValue"] = "eighty"
+	}, []string{"REQ-RES-CONFIG-007"}},
+	{"P-92 Pub Config sensitive Number masked", "V-PAY-114", "pub-config", func(m map[string]any) {
+		o := configObject(m, "device1", "port")
+		o["Sensitive"], o["Value"], o["DefaultValue"] = true, "********", "********"
+	}, nil},
+	{"P-93 Pub Config sensitive DefaultValue in clear", "V-PAY-114", "pub-config", func(m map[string]any) {
+		o := configObject(m, "device1", "port")
+		o["Sensitive"], o["Value"] = true, "********"
+	}, []string{"REQ-RES-CONFIG-024"}},
+	{"P-94 Pub Config sensitive Boolean in clear and not Boolean", "V-PAY-114", "pub-config", func(m map[string]any) {
+		o := configObject(m, "device1", "aut0-r3fr3sh")
+		o["Sensitive"], o["Value"] = true, "yes"
+	}, []string{"REQ-RES-CONFIG-007", "REQ-RES-CONFIG-024"}},
+	{"P-95 Pub Config mask of a not sensitive Number", "V-PAY-114", "pub-config", func(m map[string]any) {
+		configObject(m, "device1", "readInterval")["Value"] = "********"
+	}, []string{"REQ-RES-CONFIG-007"}},
+	{"P-96 Pub Config Mandatory as String", "V-PAY-114", "pub-config", func(m map[string]any) {
+		configObject(m, "device1", "protocol")["Mandatory"] = "true"
+	}, []string{"REQ-RES-CONFIG-002"}},
+	{"P-97 Pub Config Validation with an undefined key", "V-PAY-091", "pub-config", func(m map[string]any) {
+		configObject(m, "network", "port")["Validation"].(map[string]any)["Step"] = json.Number("1")
+	}, []string{"REQ-MSG-001"}},
+	{"P-98 Pub Config Validation with a negative Length", "V-PAY-091", "pub-config", func(m map[string]any) {
+		configObject(m, "network", "ip_address")["Validation"].(map[string]any)["Length"] = json.Number("-1")
+	}, []string{"REQ-RES-CONFIG-002"}},
+	{"P-99 Pub Config Validation Values not Strings", "V-PAY-114", "pub-config", func(m map[string]any) {
+		configObject(m, "device1", "unit")["Validation"].(map[string]any)["Values"] = []any{"K", json.Number("1")}
+	}, []string{"REQ-RES-CONFIG-002"}},
+	{"P-100 Pub Config ConfigName with a dot", "V-PAY-091", "pub-config", func(m map[string]any) {
+		g := group(m, "network")
+		g["p.ort"] = g["port"]
+		delete(g, "port")
+	}, []string{"REQ-RES-CONFIG-004"}},
+	{"P-101 Pub Config WriterGroupName with two levels", "V-PAY-091", "pub-config", func(m map[string]any) {
+		item(m)["WriterGroupName"] = "Network/settings"
+	}, []string{"REQ-MSG-024"}},
+	{"P-102 Query in Get Config", "V-PAY-088", "get-config", func(m map[string]any) {
+		m["Messages"] = []any{map[string]any{"DataSetWriterId": json.Number("9"), "WriterGroupName": "Query", "DataSetWriterName": "x", "Payload": map[string]any{}}}
+	}, []string{"REQ-QRY-001"}},
+	{"P-103 Set Config with a SequenceNumber", "V-PAY-094", "set-config", func(m map[string]any) {
+		item(m)["SequenceNumber"] = json.Number("1")
+	}, []string{"REQ-BUS-010"}},
+	{"P-104 Set Config Validation Min as String", "V-PAY-094", "set-config", func(m map[string]any) {
+		configObject(m, "network", "port")["Validation"] = map[string]any{"Min": "1"}
+	}, []string{"REQ-RES-CONFIG-003"}},
+	{"P-105 Set Config sensitive value in clear", "V-PAY-094", "set-config", func(m map[string]any) {
+		configObject(m, "network", "port")["Sensitive"] = true
+	}, nil},
+	{"P-106 Set Config mask of a not sensitive Number", "V-PAY-094", "set-config", func(m map[string]any) {
+		o := configObject(m, "network", "port")
+		o["Type"], o["Value"] = "Number", "********"
+	}, []string{"REQ-RES-CONFIG-007"}},
+	{"P-107 message: Pub Config without Value", "V-PAY-091", anyMessage, func(m map[string]any) {
+		delete(configObject(m, "network", "port"), "Value")
+	}, []string{"REQ-RES-CONFIG-003"}},
+	{"P-108 message: Set Config with a GroupName starting with a digit", "V-PAY-094", anyMessage, func(m map[string]any) {
+		p := payload(m)
+		p["1network"] = p["network"]
+		delete(p, "network")
+	}, []string{"REQ-RES-CONFIG-004"}},
+}
+
+func group(m map[string]any, name string) map[string]any {
+	return payload(m)[name].(map[string]any)
+}
+
+func configObject(m map[string]any, g, name string) map[string]any {
+	return group(m, g)[name].(map[string]any)
 }
 
 // runProbes validates every probe against its entry schema and appends the

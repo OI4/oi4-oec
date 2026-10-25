@@ -31,7 +31,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 
 ## Entry schemas per allowed matrix row
 
-26 of 29 allowed rows have an entry schema (`oec/schema/v2/topics/<rule>.schema.json`).
+29 of 29 allowed rows have an entry schema (`oec/schema/v2/topics/<rule>.schema.json`).
 
 | Method | Resource | Rule | Entry schema |
 |---|---|---|---|
@@ -39,9 +39,9 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | Get | MAM | `get-mam` | yes |
 | Pub | Health | `pub-health` | yes |
 | Get | Health | `get-health` | yes |
-| Pub | Config | `pub-config` | **missing** |
-| Get | Config | `get-config` | **missing** |
-| Set | Config | `set-config` | **missing** |
+| Pub | Config | `pub-config` | yes |
+| Get | Config | `get-config` | yes |
+| Set | Config | `set-config` | yes |
 | Pub | Data | `pub-data` | yes |
 | Get | Data | `get-data` | yes |
 | Set | Data | `set-data` | yes |
@@ -176,7 +176,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-CONFIG-004 | schema, d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-094 … (12) | V-PAY-103 | covered |
 | REQ-RES-CONFIG-006 | schema, d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-095 … (8) | V-PAY-107 | covered |
 | REQ-RES-CONFIG-007 | schema, d7-validate | reviewed | V-PAY-116, V-PAY-091, V-PAY-092, V-PAY-093 … (13) | V-PAY-104, V-PAY-105 | covered |
-| REQ-RES-CONFIG-008 | d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-095 … (8) | V-PAY-108 | covered |
+| REQ-RES-CONFIG-008 | d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-095 … (8) | V-PAY-108 (rule) | covered |
 | REQ-RES-CONFIG-010 | d7-validate | reviewed | V-PAY-096, V-PAY-097, V-PAY-102 | – | derived |
 | REQ-RES-CONFIG-015 | d7-validate | reviewed | – | – | none |
 | REQ-RES-CONFIG-016 | schema, d7-validate | reviewed | V-PAY-088, V-PAY-089, V-PAY-090, V-PAY-098 | V-PAY-110 | covered |
