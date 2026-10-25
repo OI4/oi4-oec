@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-25, after C-038 (guideline `a42a132`)._
+_Last updated: 2026-10-25, after C-038 (guideline `a42a132`); PO answers recorded 2026-10-25: D-1, D-2, R-1 … R-3 accepted._
 
 This is the single list of everything that waits for the PO: items to **review** (drafts and changes to reviewed items) and items to **decide** (spec findings, open questions, cycle plan). Each cycle updates it; items leave the list once the PO has answered and `spectool review` (or the decision record) has been applied. Details are in the cycle log; this file links to them.
 
@@ -14,11 +14,11 @@ Current state: **9 drafts** (payload vectors V-PAY-231 … 239), **2 decisions**
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | ADR-0019 amendment C-038 – Oi4Pv by WriterGroupName, Data without DataSetClassId, Event relations in the schema, dispatch, REQ-RES-SUBLIST-002 split, entry schemas, umbrellas | decide | C-038 | accept | ☐ |
-| D-2 | Oracle: the WriterGroupName of Data/Config/Event on a topic without Filter is a Filter of the resource (REQ-MSG-024) | decide | C-038 | accept | ☐ |
-| R-1 | 3 Data vectors V-PAY-231 … 233 | review | C-038 | accept | ☐ |
-| R-2 | 3 Event vectors V-PAY-234 … 236 | review | C-038 | accept | ☐ |
-| R-3 | 3 SubscriptionList vectors V-PAY-237 … 239 | review | C-038 | accept | ☐ |
+| D-1 | ADR-0019 amendment C-038 – Oi4Pv by WriterGroupName, Data without DataSetClassId, Event relations in the schema, dispatch, REQ-RES-SUBLIST-002 split, entry schemas, umbrellas | decide | C-038 | accept || ☑ accepted |
+| D-2 | Oracle: the WriterGroupName of Data/Config/Event on a topic without Filter is a Filter of the resource (REQ-MSG-024) | decide | C-038 | accept || ☑ accepted |
+| R-1 | 3 Data vectors V-PAY-231 … 233 | review | C-038 | accept || ☑ accepted |
+| R-2 | 3 Event vectors V-PAY-234 … 236 | review | C-038 | accept || ☑ accepted |
+| R-3 | 3 SubscriptionList vectors V-PAY-237 … 239 | review | C-038 | accept || ☑ accepted |
 
 ## Decisions
 
@@ -34,7 +34,7 @@ Current state: **9 drafts** (payload vectors V-PAY-231 … 239), **2 decisions**
 - **Change 7 – entry schemas (§8):** Get Data/SubscriptionList only PaginationRequest/Locale; Set Data/SubscriptionList and Del SubscriptionList exactly one DataSetMessage via `contains`, no `SequenceNumber`; empty `Pub` valid (SF-099).
 - **Change 8 – umbrellas (§9):** REQ-RES-DATA-001/003/008, REQ-RES-EVENT-009/011, REQ-RES-SUBLIST-009 in `coverage/implications.yaml` (table in the log §1).
 - **Recommendation:** accept. Only change 1 replaces an accepted sentence (moves a check from the rule layer into the schema); nothing else is reversed.
-- **PO:** ☐ accepted ☐ other: …
+- **PO:** ☑ accepted (2026-10-25)
 
 ### D-2 – Oracle: WriterGroupName on a topic without Filter
 
@@ -43,7 +43,7 @@ Current state: **9 drafts** (payload vectors V-PAY-231 … 239), **2 decisions**
 - **Effect:** no reviewed vector changes its verdict (the guideline examples V-PAY-059/060 carry the Tag `oee`). The schema patterns restate the rule (probe P-67).
 - **Alternative:** keep the WriterGroupName unchecked on these topics; the schema would then need a topic-dependent pattern, which option B cannot route (one entry schema per ABNF rule).
 - **Recommendation:** accept.
-- **PO:** ☐ accepted ☐ alternative ☐ other: …
+- **PO:** ☑ accepted (2026-10-25)
 
 ## Reviews
 
@@ -54,9 +54,9 @@ Current state: **9 drafts** (payload vectors V-PAY-231 … 239), **2 decisions**
 
 | ✅ | Vector | Title | Violates / reqs | Base | Content |
 |---|--------|-------|----------|------|--------|
-| ☐ | [V-PAY-231](../oec/spec/vectors/view/payload-constructed.md#v-pay-231) | Pub Data Oi4Pv with a primary and a secondary value | valid: DATA-003, DATA-004 | V-PAY-084 | `Pv` 21.4 added to `Sv1` |
-| ☐ | [V-PAY-232](../oec/spec/vectors/view/payload-constructed.md#v-pay-232) | Get Data that carries a Data DataSetMessage | DATA-006 | V-PAY-055 | Get Data with the DataSetMessage of V-PAY-061 |
-| ☐ | [V-PAY-233](../oec/spec/vectors/view/payload-constructed.md#v-pay-233) | Set Data with two DataSetMessages | DATA-009 | V-PAY-061 | its DataSetMessage twice |
+| ☑ | [V-PAY-231](../oec/spec/vectors/view/payload-constructed.md#v-pay-231) | Pub Data Oi4Pv with a primary and a secondary value | valid: DATA-003, DATA-004 | V-PAY-084 | `Pv` 21.4 added to `Sv1` |
+| ☑ | [V-PAY-232](../oec/spec/vectors/view/payload-constructed.md#v-pay-232) | Get Data that carries a Data DataSetMessage | DATA-006 | V-PAY-055 | Get Data with the DataSetMessage of V-PAY-061 |
+| ☑ | [V-PAY-233](../oec/spec/vectors/view/payload-constructed.md#v-pay-233) | Set Data with two DataSetMessages | DATA-009 | V-PAY-061 | its DataSetMessage twice |
 
 ### R-2 – Event vectors V-PAY-234 … 236 (`draft`)
 
@@ -65,9 +65,9 @@ Current state: **9 drafts** (payload vectors V-PAY-231 … 239), **2 decisions**
 
 | ✅ | Vector | Title | Violates | Base | Defect |
 |---|--------|-------|----------|------|--------|
-| ☐ | [V-PAY-234](../oec/spec/vectors/view/payload-constructed.md#v-pay-234) | Pub Event without Number | EVENT-001 | V-PAY-063 | no Number |
-| ☐ | [V-PAY-235](../oec/spec/vectors/view/payload-constructed.md#v-pay-235) | Status Event with a Details key other than SymbolicId | EVENT-003 | V-PAY-063 | Details key `Code` next to `SymbolicId` |
-| ☐ | [V-PAY-236](../oec/spec/vectors/view/payload-constructed.md#v-pay-236) | Syslog Event with a Description | EVENT-007 | V-PAY-064 | a Description |
+| ☑ | [V-PAY-234](../oec/spec/vectors/view/payload-constructed.md#v-pay-234) | Pub Event without Number | EVENT-001 | V-PAY-063 | no Number |
+| ☑ | [V-PAY-235](../oec/spec/vectors/view/payload-constructed.md#v-pay-235) | Status Event with a Details key other than SymbolicId | EVENT-003 | V-PAY-063 | Details key `Code` next to `SymbolicId` |
+| ☑ | [V-PAY-236](../oec/spec/vectors/view/payload-constructed.md#v-pay-236) | Syslog Event with a Description | EVENT-007 | V-PAY-064 | a Description |
 
 ### R-3 – SubscriptionList vectors V-PAY-237 … 239 (`draft`)
 
@@ -76,9 +76,9 @@ Current state: **9 drafts** (payload vectors V-PAY-231 … 239), **2 decisions**
 
 | ✅ | Vector | Title | Violates | Base | Defect |
 |---|--------|-------|----------|------|--------|
-| ☐ | [V-PAY-237](../oec/spec/vectors/view/payload-constructed.md#v-pay-237) | Pub SubscriptionList entry without TopicPath | SUBLIST-001 | V-PAY-069 | no TopicPath in the entry |
-| ☐ | [V-PAY-238](../oec/spec/vectors/view/payload-constructed.md#v-pay-238) | Get SubscriptionList that carries a SubscriptionList DataSetMessage | SUBLIST-007 | V-PAY-066 | Get SubscriptionList with the entry of V-PAY-072 |
-| ☐ | [V-PAY-239](../oec/spec/vectors/view/payload-constructed.md#v-pay-239) | Set SubscriptionList without entry | SUBLIST-010 | V-PAY-072 | empty Messages |
+| ☑ | [V-PAY-237](../oec/spec/vectors/view/payload-constructed.md#v-pay-237) | Pub SubscriptionList entry without TopicPath | SUBLIST-001 | V-PAY-069 | no TopicPath in the entry |
+| ☑ | [V-PAY-238](../oec/spec/vectors/view/payload-constructed.md#v-pay-238) | Get SubscriptionList that carries a SubscriptionList DataSetMessage | SUBLIST-007 | V-PAY-066 | Get SubscriptionList with the entry of V-PAY-072 |
+| ☑ | [V-PAY-239](../oec/spec/vectors/view/payload-constructed.md#v-pay-239) | Set SubscriptionList without entry | SUBLIST-010 | V-PAY-072 | empty Messages |
 
 ## Last review – C-037 (answered 2026-10-25)
 
