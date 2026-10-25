@@ -164,3 +164,22 @@ Collected in [`REVIEW.md`](../REVIEW.md) (German explanation: [`REVIEW_DE.md`](.
 3. R-1 V-PAY-231 … 233 (Data), R-2 V-PAY-234 … 236 (Event), R-3 V-PAY-237 … 239 (SubscriptionList).
 
 Next free ids: SF-100, REQ-CMP-048, V-PAY-240, V-TOP-254, ADR-0020, Q-021, probe P-83. Next cycle: C-039 – Config + `broker.json` (ROADMAP P2).
+
+## Addendum 1 – PO review (2026-10-25)
+
+PO (chat, 2026-10-25): "D-1, D-2, R-1 bis R-3 habe ich gereviewed und akzeptiert". Recorded in [`REVIEW.md`](../REVIEW.md) (commit `cc198a5`, kept as the review record): D-1 ADR-0019 amendment C-038 **accepted** (incl. item 1, which replaces the §4 sentence on the Oi4Pv selection); D-2 oracle reading of the WriterGroupName on a topic without Filter (REQ-MSG-024) **accepted**; R-1 V-PAY-231 … 233, R-2 V-PAY-234 … 236 and R-3 V-PAY-237 … 239 **accepted**.
+
+Review applied (`dc80c8a`, `spectool review V-PAY-231..239`):
+
+- 9 drafts → `reviewed`; views re-rendered.
+- Coverage (`coverage/vectors.md`): schema/d7-validate gaps 33 → **19** (as projected); entry schemas 26 of 29. RES-DATA, RES-EVENT and RES-SUBLIST have no gap left. The 19 remaining gaps: REQ-CMP-004/005/025/026, REQ-IL-001/004/005/008, REQ-TOP-002/009/011/012/018/020/021, REQ-RES-CONFIG-010/011/015/018.
+
+ADR-0019 (`574b8e0`): status line and amendment C-038 heading say accepted; §4 step 2 points to amendment C-038 item 1 at the replaced Oi4Pv sentence (editorial pointer, no further content change).
+
+No reviewed item changed beyond the accepted proposals; guideline unchanged at `a42a132`.
+
+`REVIEW.md` / `REVIEW_DE.md`: reset to "nothing open"; C-039 fills them again.
+
+Checks: `spectool lint` (437 REQs, 239 payload vectors, 147 topic vectors), `render -check`, `coverage -check`, `topic -check`, `inventory -check -rev a42a132` (1398 items), `go test ./...`, `oec/schema/check.sh` (82 schema files, 518 cases, 0 disagreements), Python validator (518 cases, 0 disagreements): green.
+
+Next free ids: SF-100, REQ-CMP-048, V-PAY-240, V-TOP-254, ADR-0020, Q-021, probe P-83. Next cycle: C-039 – Config + `broker.json` (ROADMAP P2).
