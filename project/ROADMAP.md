@@ -61,7 +61,7 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
     - areas MSG (without MetaData), BUS, PAG, LOC, QRY: oracle MSG-030/031, PAG-009; negative vectors V-PAY-129 … 151; positive coverage via six reviewed vectors; gap REQs REQ-MSG-004/017 (derived) and REQ-PAG-009;
     - SF-098 (`Del` with zero or one DataSetMessage): decided as proposed and implemented in MG 8.3.11 (`68d878d`), re-baseline (addendum 1);
     - Q-020 decided: option (a), vector field `role` + D7 `validate --role`.
-  - **C-035 – MetaData + LIFE roles** (new, split off C-034; done 2026-10-24, PO review pending, see `log/2026-10-24_C-035_metadata.md`):
+  - **C-035 – MetaData + LIFE roles** (new, split off C-034; done 2026-10-24, reviewed 2026-10-25 – all accepted, D-3 (a): REQ-LIFE-002/006/008 keep `d7-monitor`/`d7-test`; see `log/2026-10-24_C-035_metadata.md`):
     - scope change by the agent: the Pub/Get/Set Metadata entry schemas (3 topic forms, area RES-META) were pulled from C-037 – they only wrap the MetaData objects of this cycle;
     - ADR-0019 amendment C-035: bare MetaData → `ResourceMetaData`, name uniqueness is rule R-3, declared role is rule R-6;
     - envelope `ua-metadata`, module `metadata` (DataSetMetaData, FieldMetaData, StructureDescription, EnumDescription, ConfigurationVersion);
@@ -93,7 +93,7 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
     - `CHANGELOG` 2.0.0 of the schemas;
     - `$id`s frozen;
     - PO review → P2 exit.
-  - The agent may split a cycle that grows too large (allowed by the PO), with the reason in the log. P2 sizing at `5b8fe59`: 159 `schema`/`d7-validate` REQs; 129 lack a positive and/or a negative vector (93 positive only, 15 negative only, 21 none); 29 topic forms with 126 payload vectors. At `cc2fb4b` (C-033 addendum 2): 160 such REQs (+ REQ-LOC-003, with negative vectors V-PAY-127/128, positive V-PAY-089), 128 payload vectors. C-034: 159 such REQs (REQ-BUS-002 → `d7-test`), 151 payload vectors; 129 gaps while the C-034 drafts are unreviewed, 96 after their review (projection). C-035: 159 such REQs (REQ-MSG-038 −`schema`, REQ-LIFE-003/007/009 +`d7-validate`), 175 payload vectors; 96 gaps while the C-035 drafts are unreviewed, 77 after their review (projection); entry schemas 5 of 29.
+  - The agent may split a cycle that grows too large (allowed by the PO), with the reason in the log. P2 sizing at `5b8fe59`: 159 `schema`/`d7-validate` REQs; 129 lack a positive and/or a negative vector (93 positive only, 15 negative only, 21 none); 29 topic forms with 126 payload vectors. At `cc2fb4b` (C-033 addendum 2): 160 such REQs (+ REQ-LOC-003, with negative vectors V-PAY-127/128, positive V-PAY-089), 128 payload vectors. C-034: 159 such REQs (REQ-BUS-002 → `d7-test`), 151 payload vectors; 129 gaps while the C-034 drafts are unreviewed, 96 after their review (projection). C-035: 159 such REQs (REQ-MSG-038 −`schema`, REQ-LIFE-003/007/009 +`d7-validate`), 175 payload vectors; 96 gaps while the C-035 drafts were unreviewed, 77 after their review (2026-10-25); entry schemas 5 of 29.
 - **Exit:**
   1. ADR-0019 accepted.
   2. Every non-deprecated REQ with `schema` and/or `d7-validate` (159 at `5b8fe59`, 160 at `cc2fb4b` and `68d878d`, including the 21 of the C-031 gap list) has at least one reviewed positive and one reviewed negative vector. Umbrella REQs are covered through their detail REQs, if the PO accepts ADR-0019 §9. `spectool coverage -gate` gates this (C-034).
