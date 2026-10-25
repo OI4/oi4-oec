@@ -42,7 +42,7 @@ Guideline baseline: `68d878d` · Area status: reviewed · Sections: MG 8, MG A2
 | [REQ-MSG-035](#req-msg-035) | Fields of the DataSetMetaDataType | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-036](#req-msg-036) | ConfigurationVersionDataType | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-037](#req-msg-037) | Fields of the FieldMetaData | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-MSG-038](#req-msg-038) | Field names are unique in the DataSet | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
+| [REQ-MSG-038](#req-msg-038) | Field names are unique in the DataSet | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-MSG-039](#req-msg-039) | NodeIds are JSON strings without namespace index | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-040](#req-msg-040) | LocalizedText contains Locale and Text | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-041](#req-msg-041) | KeyValuePair | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
@@ -873,7 +873,7 @@ The Name of every FieldMetaData is unique within its DataSet.
 - Domain: messaging · Applies to: publisher
 - Refs: MG 8.2.6
 - Verification: d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.2.6-231acec2
 
 > The Name shall be unique in the DataSet.

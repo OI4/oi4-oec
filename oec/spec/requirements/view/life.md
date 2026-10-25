@@ -7,13 +7,13 @@ Guideline baseline: `68d878d` · Area status: reviewed · Sections: MG 6.3.3, MG
 |---|---|---|---|---|---|---|---|---|
 | [REQ-LIFE-001](#req-life-001) | Birth message on every connection | MUST | MUST | MUST | MUST | messaging | d7-monitor, d7-test | reviewed |
 | [REQ-LIFE-002](#req-life-002) | Birth message topic | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
-| [REQ-LIFE-003](#req-life-003) | Birth message is the MAM of the component itself | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-monitor | draft |
+| [REQ-LIFE-003](#req-life-003) | Birth message is the MAM of the component itself | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-monitor | reviewed |
 | [REQ-LIFE-004](#req-life-004) | Birth message without Timestamp and SequenceNumber | SHOULD NOT | SHOULD NOT | SHOULD NOT | SHOULD NOT | messaging | d7-monitor | deprecated |
 | [REQ-LIFE-005](#req-life-005) | Close message before a graceful disconnect | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-LIFE-006](#req-life-006) | Close message topic | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-LIFE-007](#req-life-007) | Close message content | MUST | SHOULD | MUST | MUST | messaging | schema, d7-validate, d7-test | draft |
+| [REQ-LIFE-007](#req-life-007) | Close message content | MUST | SHOULD | MUST | MUST | messaging | schema, d7-validate, d7-test | reviewed |
 | [REQ-LIFE-008](#req-life-008) | Will message registered on every connection | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-LIFE-009](#req-life-009) | Will message content | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-test | draft |
+| [REQ-LIFE-009](#req-life-009) | Will message content | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-test | reviewed |
 | [REQ-LIFE-010](#req-life-010) | Will message without Timestamp and SequenceNumber | SHOULD NOT | SHOULD NOT | SHOULD NOT | SHOULD NOT | messaging | d7-test | reviewed |
 | [REQ-LIFE-011](#req-life-011) | Subscribers interpret the Close message | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual, d7-test | reviewed |
 | [REQ-LIFE-012](#req-life-012) | Subscribers interpret the Will message | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual, d7-test | reviewed |
@@ -77,7 +77,7 @@ The Birth message is a complete Pub MAM NetworkMessage (MG 8.1) with one DataSet
 - Domain: messaging · Applies to: component
 - Refs: MG 5, MG 6, MG 6.3.3, MG 8.1, SF-057
 - Verification: schema, d7-validate, d7-monitor
-- Status: draft
+- Status: reviewed
 - Inventory: MG-6-31ee6521, MG-6.3.3-3ac518a8, MG-6.3.3-bee211aa
 
 > In an Open Industry 4.0 Alliance context, the Birth message must contain a NetworkMessage with a DataSetMessage of type Master Asset Model (5 The Master Asset Model) of the application.
@@ -157,7 +157,7 @@ The Close message is a Pub Health NetworkMessage (MG 8.1) with one DataSetMessag
 - Condition: The component publishes a Close message (REQ-LIFE-005).
 - Refs: MG 6, MG 6.3.4, MG 8.3.2, SF-057, SF-058
 - Verification: schema, d7-validate, d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-6-eafd1d73, MG-6.3.4-3ff69c8d, MG-6.3.4-58771e2c
 
 > The Close message must contain the health information for a graceful disconnect of the application (8.3.2 Health).
@@ -201,7 +201,7 @@ The Will message is a Pub Health NetworkMessage (MG 8.1) with one DataSetMessage
 - Domain: messaging · Applies to: component
 - Refs: MG 6, MG 6.3.5, MG 8.2.3, MG 8.3.2, SF-057
 - Verification: schema, d7-validate, d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-6-31ee6521, MG-6.3.5-38d4d8c4, MG-6.3.5-572831c0, MG-6.3.5-c27255e4
 
 > The Will message must contain the predefined health information for an ungraceful disconnect of the application (8.3.2 Health).

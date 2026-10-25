@@ -10,7 +10,8 @@
 # Drafted in C-025; keywords, envelope and semantics added to the guideline in
 # C-026 (SF-057, SF-058, SF-059); PO review of C-026: SF-061.
 # REQ-LIFE-003/007/009 reclassified (+d7-validate, declared role) in C-035
-# (Q-020 (a)); back to draft for the PO review.
+# (Q-020 (a)), reviewed in the C-035 review (2026-10-25); their topic REQs
+# REQ-LIFE-002/006/008 keep d7-monitor/d7-test (PO decision D-3 (a)).
 area: LIFE
 baseline: "68d878d"
 requirements:
@@ -77,7 +78,7 @@ requirements:
         text: It must refer to the topic resource MAM (7.5.1 Resources) and share its payload.
     verification: [schema, d7-validate, d7-monitor]
     inventory: [MG-6.3.3-3ac518a8, MG-6.3.3-bee211aa, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Keywords added in C-026 (SF-057 (f)). The envelope rules
       of a Pub message apply (area MSG); the Birth message is a regular Pub
@@ -175,7 +176,7 @@ requirements:
         text: It must refer to the topic resource Health (7.5.1 Resources) and share its payload.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-6.3.4-58771e2c, MG-6.3.4-3ff69c8d, MG-6-eafd1d73]
-    status: draft
+    status: reviewed
     notes: >-
       Keywords added in C-026 (SF-057 (g)); the payload values are given by
       the code block of MG 6.3.4. Graded by REQ-CMP-046 (SF-061 (b), C-026). The MessageId carries
@@ -235,7 +236,7 @@ requirements:
         text: All Health messages that the application publishes about itself (Source = AppId) after registering the Will message must therefore use this DataSetWriterId as well.
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-6.3.5-572831c0, MG-6.3.5-38d4d8c4, MG-6.3.5-c27255e4, MG-6-31ee6521]
-    status: draft
+    status: reviewed
     notes: >-
       Keywords added in C-026 (SF-057 (h)). The DataSetWriterId binding to
       the later Health messages was made explicit in MG 6.3.5 on PO request

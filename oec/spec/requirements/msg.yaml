@@ -6,7 +6,7 @@
 # (2026-10-19, REQ-MSG-046 changed to SHOULD). REQ-MSG-019/020 (DataSetWriterId 9
 # = Query, GL-ADR-020) reviewed by the PO in the C-027 review (2026-10-20).
 # REQ-MSG-026 reclassified (+schema) in C-034, reviewed in the C-034 review (2026-10-24).
-# REQ-MSG-038 reclassified (-schema, rule layer only) in C-035; draft for the PO review.
+# REQ-MSG-038 reclassified (-schema, rule layer only) in C-035, reviewed in the C-035 review (2026-10-25).
 area: MSG
 baseline: "68d878d"
 requirements:
@@ -910,7 +910,7 @@ requirements:
         text: The Name shall be unique in the DataSet.
     verification: [d7-validate]
     inventory: [MG-8.2.6-231acec2]
-    status: draft
+    status: reviewed
     notes: >-
       Reclassified in C-035 (-schema, ADR-0019 §9): uniqueness of a key
       across array items is not expressible in JSON Schema (uniqueItems

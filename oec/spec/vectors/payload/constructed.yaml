@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034, reviewed by the PO (C-034 review 2026-10-24); V-PAY-152 … 170 (MetaData: DataSetMetaData envelope, DataSetMetaDataType and its data type descriptions, resource MetaData, Pub/Set with {}) and V-PAY-171 … 175 (declared roles Birth/Close/Will, Q-020 (a)) drafted in C-035.
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034, reviewed by the PO (C-034 review 2026-10-24); V-PAY-152 … 170 (MetaData: DataSetMetaData envelope, DataSetMetaDataType and its data type descriptions, resource MetaData, Pub/Set with {}) and V-PAY-171 … 175 (declared roles Birth/Close/Will, Q-020 (a)) drafted in C-035, reviewed by the PO (C-035 review 2026-10-25).
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "68d878d"
@@ -2770,7 +2770,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-002, REQ-MSG-006, REQ-MSG-007, REQ-MSG-020, REQ-MSG-023, REQ-MSG-024, REQ-MSG-032, REQ-MSG-034, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-038, REQ-MSG-039, REQ-MSG-040, REQ-MSG-042, REQ-MSG-043, REQ-MSG-044, REQ-MSG-045, REQ-RES-META-003]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       Self-initialized Pub Metadata (ReplyTo "") of the publisher-defined Data
       DataSet axis of the field data service (Source = the application, Filter
@@ -2958,7 +2958,7 @@ vectors:
     violates: [REQ-MSG-012]
     reason: "The MetaData of a resource with a predefined DataSetClassId (MG A2) contains it."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-017 (MG B2) without the DataSetClassId
       27a75019-164a-496d-a38b-90e8a55c2cfa. A bare DataSetMetaDataType is the
@@ -3034,7 +3034,7 @@ vectors:
     violates: [REQ-MSG-032]
     reason: "A DataSetMetaData contains the Timestamp of its first sending (MG 8.2.2)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 without Timestamp.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
@@ -3211,7 +3211,7 @@ vectors:
     violates: [REQ-MSG-034, REQ-MSG-042]
     reason: "StructureType is written as \"Structure_0\" (VerboseEncoding), not as its numeric value 0."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose StructureDefinition has StructureType 0. The numeric
       value violates the VerboseEncoding of the MetaData (REQ-MSG-034) and is
@@ -3392,7 +3392,7 @@ vectors:
     violates: [REQ-MSG-035]
     reason: "EnumDataTypes is Mandatory and is sent as an empty array (SF-045)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-121 without the empty array EnumDataTypes.
     topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Metadata/aHR0cHM6Ly9pZC52ZW5kb3IuY29tL1RlbXBlcmF0dXJlU2Vuc29yL1RTLTEwMC80NzEx/Temperature"
@@ -3463,7 +3463,7 @@ vectors:
     violates: [REQ-MSG-036]
     reason: "A ConfigurationVersionDataType contains MajorVersion and MinorVersion."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-121 whose ConfigurationVersion has no MinorVersion.
     topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Metadata/aHR0cHM6Ly9pZC52ZW5kb3IuY29tL1RlbXBlcmF0dXJlU2Vuc29yL1RTLTEwMC80NzEx/Temperature"
@@ -3534,7 +3534,7 @@ vectors:
     violates: [REQ-MSG-037]
     reason: "The BuiltInType of a FieldMetaData is a Byte (Part 6 Table 1), here 11 for Double."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose field Position has BuiltInType "Double".
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
@@ -3712,7 +3712,7 @@ vectors:
     violates: [REQ-MSG-038]
     reason: "The Name of every FieldMetaData is unique within its DataSet."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose field Load is renamed to Position. Uniqueness is no JSON
       Schema keyword; the rule layer of D7 validate detects it (ADR-0019 §8,
@@ -3892,7 +3892,7 @@ vectors:
     violates: [REQ-MSG-039]
     reason: "A NodeId of another namespace than 0 uses nsu=<uri>; the index form ns=<index> is not used."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose field TravelRange has the DataType ns=1;i=3001 instead
       of nsu=http://vendor.com/UA/;i=3001.
@@ -4071,7 +4071,7 @@ vectors:
     violates: [REQ-MSG-040]
     reason: "Every LocalizedText of MG 8.2 contains Locale and Text (SF-046)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-121 whose MetaData Description has only a Text.
     topic: "Oi4v2/OTConnector/aHR0cHM6Ly9pZC5wcm92aWRlci5jb20vRmllbGREYXRhU2VydmljZS9GRFMtMDAxLzEyMDAtMDM0NQ/Pub/Metadata/aHR0cHM6Ly9pZC52ZW5kb3IuY29tL1RlbXBlcmF0dXJlU2Vuc29yL1RTLTEwMC80NzEx/Temperature"
@@ -4142,7 +4142,7 @@ vectors:
     violates: [REQ-MSG-041]
     reason: "The Value of a KeyValuePair is a Variant object with UaType (Part 6 5.4.2.17)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-121 whose property EngineeringUnits carries the EUInformation body
       directly, without the Variant wrapper {"UaType": 22, "Value": …}.
@@ -4212,7 +4212,7 @@ vectors:
     violates: [REQ-MSG-042]
     reason: "StructureType is one of the values of EnumStructureType, e.g. \"Structure_0\"."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose StructureDefinition has StructureType "Structure" (name
       without value).
@@ -4391,7 +4391,7 @@ vectors:
     violates: [REQ-MSG-043]
     reason: "The ValueRank of a StructureField is -1 (scalar) or >= 1 (fixed rank array)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose structure field High has ValueRank 0
       (OneOrMoreDimensions).
@@ -4570,7 +4570,7 @@ vectors:
     violates: [REQ-MSG-043]
     reason: "The Name of a StructureField is unique in its StructureDefinition."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose structure field High is renamed to Low. Uniqueness is
       detected by the rule layer of D7 validate (ADR-0019 §8, R-3).
@@ -4749,7 +4749,7 @@ vectors:
     violates: [REQ-MSG-044]
     reason: "The Value of an EnumField is an Int64, encoded as JSON string (\"1\")."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose enumeration field Automatic has the Value 1 as JSON
       number.
@@ -4928,7 +4928,7 @@ vectors:
     violates: [REQ-MSG-044]
     reason: "The Name of an EnumField is unique in its EnumDefinition."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose enumeration field Homing is renamed to Manual.
       Uniqueness is detected by the rule layer of D7 validate (ADR-0019 §8,
@@ -5108,7 +5108,7 @@ vectors:
     violates: [REQ-MSG-045]
     reason: "A SimpleTypeDescription contains DataTypeId, Name, BaseDataType and BuiltInType."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 whose simple type Percent has no BaseDataType.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
@@ -5285,7 +5285,7 @@ vectors:
     violates: [REQ-RES-META-003]
     reason: "A Pub Metadata carries the filled DataSetMetaData; only a Get carries {} (MG 9.1.5)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-152 with the MetaData {} of a Get.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/axis"
@@ -5308,7 +5308,7 @@ vectors:
     violates: [REQ-RES-META-004]
     reason: "A Set Metadata carries the complete DataSetMetaData (MG 9.1.5)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-022 with the MetaData {} of a Get.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Metadata/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
@@ -5331,7 +5331,7 @@ vectors:
     violates: [REQ-LIFE-003]
     reason: "A Birth message carries exactly one DataSetMessage of type MAM (MG 6.3.3)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-023 with a second DataSetMessage (DataSetWriterId 56) of the same MAM. As a regular Pub MAM it is valid; the declared role birth (Q-020 (a)) makes it invalid. Not checked by the schema (the role is not visible in the message): rule layer R-6.
     role: birth
@@ -5411,7 +5411,7 @@ vectors:
     violates: [REQ-LIFE-007]
     reason: "A Close message carries Health NORMAL_0 and HealthScore 0 (MG 6.3.4)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-024 without the HealthScore. As a regular Pub Health it is valid (HealthScore is optional, MG 8.3.2); the declared role close makes it invalid (rule layer R-6).
     role: close
@@ -5441,7 +5441,7 @@ vectors:
     violates: [REQ-LIFE-007]
     reason: "A Close message carries Health NORMAL_0 and HealthScore 0 (MG 6.3.4)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-024 with the Health of a Will message (FAILURE_1). Valid as a regular Pub Health; invalid with the declared role close (rule layer R-6).
     role: close
@@ -5472,7 +5472,7 @@ vectors:
     violates: [REQ-LIFE-009]
     reason: "A Will message carries Health FAILURE_1 and HealthScore 0 (MG 6.3.5)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-025 with the Health of a Close message (NORMAL_0). Valid as a regular Pub Health; invalid with the declared role will (rule layer R-6).
     role: will
@@ -5503,7 +5503,7 @@ vectors:
     violates: [REQ-LIFE-009]
     reason: "A Will message carries Health FAILURE_1 and HealthScore 0 (MG 6.3.5)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-025 with HealthScore 10. Valid as a regular Pub Health; invalid with the declared role will (rule layer R-6).
     role: will

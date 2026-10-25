@@ -64,30 +64,30 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-149](#v-pay-149) | Set Data with a Pagination | invalid | violates: REQ-PAG-008, REQ-PAG-009 | constructed | reviewed |
 | [V-PAY-150](#v-pay-150) | Set Data with a SequenceNumber | invalid | violates: REQ-BUS-010 | constructed | reviewed |
 | [V-PAY-151](#v-pay-151) | Pub PublicationList entry with the Filter as WriterGroupName | invalid | violates: REQ-MSG-025, REQ-RES-PUBLIST-002 | constructed | reviewed |
-| [V-PAY-152](#v-pay-152) | Pub Metadata with structure, enumeration and simple data types | valid | ok | constructed | draft |
-| [V-PAY-153](#v-pay-153) | Predefined MetaData of ReferenceDesignation without DataSetClassId | invalid | violates: REQ-MSG-012 | constructed | draft |
-| [V-PAY-154](#v-pay-154) | Pub Metadata without Timestamp | invalid | violates: REQ-MSG-032 | constructed | draft |
-| [V-PAY-155](#v-pay-155) | Pub Metadata with a numeric StructureType | invalid | violates: REQ-MSG-034, REQ-MSG-042 | constructed | draft |
-| [V-PAY-156](#v-pay-156) | Pub Metadata without the empty EnumDataTypes | invalid | violates: REQ-MSG-035 | constructed | draft |
-| [V-PAY-157](#v-pay-157) | Pub Metadata with an incomplete ConfigurationVersion | invalid | violates: REQ-MSG-036 | constructed | draft |
-| [V-PAY-158](#v-pay-158) | Pub Metadata with the BuiltInType as name | invalid | violates: REQ-MSG-037 | constructed | draft |
-| [V-PAY-159](#v-pay-159) | Pub Metadata with two fields of the same name | invalid | violates: REQ-MSG-038 | constructed | draft |
-| [V-PAY-160](#v-pay-160) | Pub Metadata with a NodeId in the namespace index form | invalid | violates: REQ-MSG-039 | constructed | draft |
-| [V-PAY-161](#v-pay-161) | Pub Metadata with a Description without Locale | invalid | violates: REQ-MSG-040 | constructed | draft |
-| [V-PAY-162](#v-pay-162) | Pub Metadata with a property value that is no Variant | invalid | violates: REQ-MSG-041 | constructed | draft |
-| [V-PAY-163](#v-pay-163) | Pub Metadata with an unknown StructureType | invalid | violates: REQ-MSG-042 | constructed | draft |
-| [V-PAY-164](#v-pay-164) | Pub Metadata with a StructureField of ValueRank 0 | invalid | violates: REQ-MSG-043 | constructed | draft |
-| [V-PAY-165](#v-pay-165) | Pub Metadata with two structure fields of the same name | invalid | violates: REQ-MSG-043 | constructed | draft |
-| [V-PAY-166](#v-pay-166) | Pub Metadata with an enumeration value as JSON number | invalid | violates: REQ-MSG-044 | constructed | draft |
-| [V-PAY-167](#v-pay-167) | Pub Metadata with two enumeration fields of the same name | invalid | violates: REQ-MSG-044 | constructed | draft |
-| [V-PAY-168](#v-pay-168) | Pub Metadata with a SimpleTypeDescription without BaseDataType | invalid | violates: REQ-MSG-045 | constructed | draft |
-| [V-PAY-169](#v-pay-169) | Pub Metadata with an empty MetaData | invalid | violates: REQ-RES-META-003 | constructed | draft |
-| [V-PAY-170](#v-pay-170) | Set Metadata with an empty MetaData | invalid | violates: REQ-RES-META-004 | constructed | draft |
-| [V-PAY-171](#v-pay-171) | Birth message with two DataSetMessages | invalid | violates: REQ-LIFE-003 | constructed | draft |
-| [V-PAY-172](#v-pay-172) | Close message without HealthScore | invalid | violates: REQ-LIFE-007 | constructed | draft |
-| [V-PAY-173](#v-pay-173) | Close message with Health FAILURE_1 | invalid | violates: REQ-LIFE-007 | constructed | draft |
-| [V-PAY-174](#v-pay-174) | Will message with Health NORMAL_0 | invalid | violates: REQ-LIFE-009 | constructed | draft |
-| [V-PAY-175](#v-pay-175) | Will message with HealthScore 10 | invalid | violates: REQ-LIFE-009 | constructed | draft |
+| [V-PAY-152](#v-pay-152) | Pub Metadata with structure, enumeration and simple data types | valid | ok | constructed | reviewed |
+| [V-PAY-153](#v-pay-153) | Predefined MetaData of ReferenceDesignation without DataSetClassId | invalid | violates: REQ-MSG-012 | constructed | reviewed |
+| [V-PAY-154](#v-pay-154) | Pub Metadata without Timestamp | invalid | violates: REQ-MSG-032 | constructed | reviewed |
+| [V-PAY-155](#v-pay-155) | Pub Metadata with a numeric StructureType | invalid | violates: REQ-MSG-034, REQ-MSG-042 | constructed | reviewed |
+| [V-PAY-156](#v-pay-156) | Pub Metadata without the empty EnumDataTypes | invalid | violates: REQ-MSG-035 | constructed | reviewed |
+| [V-PAY-157](#v-pay-157) | Pub Metadata with an incomplete ConfigurationVersion | invalid | violates: REQ-MSG-036 | constructed | reviewed |
+| [V-PAY-158](#v-pay-158) | Pub Metadata with the BuiltInType as name | invalid | violates: REQ-MSG-037 | constructed | reviewed |
+| [V-PAY-159](#v-pay-159) | Pub Metadata with two fields of the same name | invalid | violates: REQ-MSG-038 | constructed | reviewed |
+| [V-PAY-160](#v-pay-160) | Pub Metadata with a NodeId in the namespace index form | invalid | violates: REQ-MSG-039 | constructed | reviewed |
+| [V-PAY-161](#v-pay-161) | Pub Metadata with a Description without Locale | invalid | violates: REQ-MSG-040 | constructed | reviewed |
+| [V-PAY-162](#v-pay-162) | Pub Metadata with a property value that is no Variant | invalid | violates: REQ-MSG-041 | constructed | reviewed |
+| [V-PAY-163](#v-pay-163) | Pub Metadata with an unknown StructureType | invalid | violates: REQ-MSG-042 | constructed | reviewed |
+| [V-PAY-164](#v-pay-164) | Pub Metadata with a StructureField of ValueRank 0 | invalid | violates: REQ-MSG-043 | constructed | reviewed |
+| [V-PAY-165](#v-pay-165) | Pub Metadata with two structure fields of the same name | invalid | violates: REQ-MSG-043 | constructed | reviewed |
+| [V-PAY-166](#v-pay-166) | Pub Metadata with an enumeration value as JSON number | invalid | violates: REQ-MSG-044 | constructed | reviewed |
+| [V-PAY-167](#v-pay-167) | Pub Metadata with two enumeration fields of the same name | invalid | violates: REQ-MSG-044 | constructed | reviewed |
+| [V-PAY-168](#v-pay-168) | Pub Metadata with a SimpleTypeDescription without BaseDataType | invalid | violates: REQ-MSG-045 | constructed | reviewed |
+| [V-PAY-169](#v-pay-169) | Pub Metadata with an empty MetaData | invalid | violates: REQ-RES-META-003 | constructed | reviewed |
+| [V-PAY-170](#v-pay-170) | Set Metadata with an empty MetaData | invalid | violates: REQ-RES-META-004 | constructed | reviewed |
+| [V-PAY-171](#v-pay-171) | Birth message with two DataSetMessages | invalid | violates: REQ-LIFE-003 | constructed | reviewed |
+| [V-PAY-172](#v-pay-172) | Close message without HealthScore | invalid | violates: REQ-LIFE-007 | constructed | reviewed |
+| [V-PAY-173](#v-pay-173) | Close message with Health FAILURE_1 | invalid | violates: REQ-LIFE-007 | constructed | reviewed |
+| [V-PAY-174](#v-pay-174) | Will message with Health NORMAL_0 | invalid | violates: REQ-LIFE-009 | constructed | reviewed |
+| [V-PAY-175](#v-pay-175) | Will message with HealthScore 10 | invalid | violates: REQ-LIFE-009 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -3290,7 +3290,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-002](../../requirements/view/msg.md#req-msg-002), [REQ-MSG-006](../../requirements/view/msg.md#req-msg-006), [REQ-MSG-007](../../requirements/view/msg.md#req-msg-007), [REQ-MSG-020](../../requirements/view/msg.md#req-msg-020), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032), [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035), [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036), [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037), [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038), [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-MSG-042](../../requirements/view/msg.md#req-msg-042), [REQ-MSG-043](../../requirements/view/msg.md#req-msg-043), [REQ-MSG-044](../../requirements/view/msg.md#req-msg-044), [REQ-MSG-045](../../requirements/view/msg.md#req-msg-045), [REQ-RES-META-003](../../requirements/view/res-meta.md#req-res-meta-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: Self-initialized Pub Metadata (ReplyTo "") of the publisher-defined Data DataSet axis of the field data service (Source = the application, Filter = WriterGroupName axis). The DataSet uses three vendor data types of the namespace http://vendor.com/UA/ (NodeIds and QualifiedNames in the nsu= form, REQ-MSG-039): the structure Range (StructureType Structure_0, two scalar Double fields), the enumeration AxisMode (BuiltInType 6, Int64 Values as JSON strings, DisplayName as LocalizedText) and the simple type Percent (based on Double). Without DataSetClassId (publisher- defined DataSet, REQ-MSG-012 "may"). Constructed because no guideline example shows a filled StructureDataTypes, EnumDataTypes or SimpleDataTypes.
 
@@ -3473,7 +3473,7 @@ Payload:
 - Expected: invalid – The MetaData of a resource with a predefined DataSetClassId (MG A2) contains it.
 - Violates: [REQ-MSG-012](../../requirements/view/msg.md#req-msg-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-017 (MG B2) without the DataSetClassId 27a75019-164a-496d-a38b-90e8a55c2cfa. A bare DataSetMetaDataType is the predefined MetaData of the resource named by Name (MG B2, SF-054).
 
@@ -3556,7 +3556,7 @@ Payload:
 - Expected: invalid – A DataSetMetaData contains the Timestamp of its first sending (MG 8.2.2).
 - Violates: [REQ-MSG-032](../../requirements/view/msg.md#req-msg-032)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 without Timestamp.
 
@@ -3742,7 +3742,7 @@ Payload:
 - Expected: invalid – StructureType is written as "Structure_0" (VerboseEncoding), not as its numeric value 0.
 - Violates: [REQ-MSG-034](../../requirements/view/msg.md#req-msg-034), [REQ-MSG-042](../../requirements/view/msg.md#req-msg-042)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose StructureDefinition has StructureType 0. The numeric value violates the VerboseEncoding of the MetaData (REQ-MSG-034) and is no value of EnumStructureType (REQ-MSG-042), as for the enumerations of the resources (V-PAY-145).
 
@@ -3929,7 +3929,7 @@ Payload:
 - Expected: invalid – EnumDataTypes is Mandatory and is sent as an empty array (SF-045).
 - Violates: [REQ-MSG-035](../../requirements/view/msg.md#req-msg-035)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-121 without the empty array EnumDataTypes.
 
@@ -4009,7 +4009,7 @@ Payload:
 - Expected: invalid – A ConfigurationVersionDataType contains MajorVersion and MinorVersion.
 - Violates: [REQ-MSG-036](../../requirements/view/msg.md#req-msg-036)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-121 whose ConfigurationVersion has no MinorVersion.
 
@@ -4089,7 +4089,7 @@ Payload:
 - Expected: invalid – The BuiltInType of a FieldMetaData is a Byte (Part 6 Table 1), here 11 for Double.
 - Violates: [REQ-MSG-037](../../requirements/view/msg.md#req-msg-037)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose field Position has BuiltInType "Double".
 
@@ -4276,7 +4276,7 @@ Payload:
 - Expected: invalid – The Name of every FieldMetaData is unique within its DataSet.
 - Violates: [REQ-MSG-038](../../requirements/view/msg.md#req-msg-038)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose field Load is renamed to Position. Uniqueness is no JSON Schema keyword; the rule layer of D7 validate detects it (ADR-0019 §8, R-3).
 
@@ -4463,7 +4463,7 @@ Payload:
 - Expected: invalid – A NodeId of another namespace than 0 uses nsu=&lt;uri>; the index form ns=&lt;index> is not used.
 - Violates: [REQ-MSG-039](../../requirements/view/msg.md#req-msg-039)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose field TravelRange has the DataType ns=1;i=3001 instead of nsu=http://vendor.com/UA/;i=3001.
 
@@ -4650,7 +4650,7 @@ Payload:
 - Expected: invalid – Every LocalizedText of MG 8.2 contains Locale and Text (SF-046).
 - Violates: [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-121 whose MetaData Description has only a Text.
 
@@ -4730,7 +4730,7 @@ Payload:
 - Expected: invalid – The Value of a KeyValuePair is a Variant object with UaType (Part 6 5.4.2.17).
 - Violates: [REQ-MSG-041](../../requirements/view/msg.md#req-msg-041)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-121 whose property EngineeringUnits carries the EUInformation body directly, without the Variant wrapper {"UaType": 22, "Value": …}.
 
@@ -4808,7 +4808,7 @@ Payload:
 - Expected: invalid – StructureType is one of the values of EnumStructureType, e.g. "Structure_0".
 - Violates: [REQ-MSG-042](../../requirements/view/msg.md#req-msg-042)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose StructureDefinition has StructureType "Structure" (name without value).
 
@@ -4995,7 +4995,7 @@ Payload:
 - Expected: invalid – The ValueRank of a StructureField is -1 (scalar) or >= 1 (fixed rank array).
 - Violates: [REQ-MSG-043](../../requirements/view/msg.md#req-msg-043)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose structure field High has ValueRank 0 (OneOrMoreDimensions).
 
@@ -5182,7 +5182,7 @@ Payload:
 - Expected: invalid – The Name of a StructureField is unique in its StructureDefinition.
 - Violates: [REQ-MSG-043](../../requirements/view/msg.md#req-msg-043)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose structure field High is renamed to Low. Uniqueness is detected by the rule layer of D7 validate (ADR-0019 §8, R-3).
 
@@ -5369,7 +5369,7 @@ Payload:
 - Expected: invalid – The Value of an EnumField is an Int64, encoded as JSON string ("1").
 - Violates: [REQ-MSG-044](../../requirements/view/msg.md#req-msg-044)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose enumeration field Automatic has the Value 1 as JSON number.
 
@@ -5556,7 +5556,7 @@ Payload:
 - Expected: invalid – The Name of an EnumField is unique in its EnumDefinition.
 - Violates: [REQ-MSG-044](../../requirements/view/msg.md#req-msg-044)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose enumeration field Homing is renamed to Manual. Uniqueness is detected by the rule layer of D7 validate (ADR-0019 §8, R-3).
 
@@ -5743,7 +5743,7 @@ Payload:
 - Expected: invalid – A SimpleTypeDescription contains DataTypeId, Name, BaseDataType and BuiltInType.
 - Violates: [REQ-MSG-045](../../requirements/view/msg.md#req-msg-045)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 whose simple type Percent has no BaseDataType.
 
@@ -5929,7 +5929,7 @@ Payload:
 - Expected: invalid – A Pub Metadata carries the filled DataSetMetaData; only a Get carries {} (MG 9.1.5).
 - Violates: [REQ-RES-META-003](../../requirements/view/res-meta.md#req-res-meta-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-152 with the MetaData {} of a Get.
 
@@ -5961,7 +5961,7 @@ Payload:
 - Expected: invalid – A Set Metadata carries the complete DataSetMetaData (MG 9.1.5).
 - Violates: [REQ-RES-META-004](../../requirements/view/res-meta.md#req-res-meta-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-022 with the MetaData {} of a Get.
 
@@ -5992,7 +5992,7 @@ Payload:
 - Expected: invalid – A Birth message carries exactly one DataSetMessage of type MAM (MG 6.3.3).
 - Violates: [REQ-LIFE-003](../../requirements/view/life.md#req-life-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-023 with a second DataSetMessage (DataSetWriterId 56) of the same MAM. As a regular Pub MAM it is valid; the declared role birth (Q-020 (a)) makes it invalid. Not checked by the schema (the role is not visible in the message): rule layer R-6.
 
@@ -6079,7 +6079,7 @@ Payload:
 - Expected: invalid – A Close message carries Health NORMAL_0 and HealthScore 0 (MG 6.3.4).
 - Violates: [REQ-LIFE-007](../../requirements/view/life.md#req-life-007)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-024 without the HealthScore. As a regular Pub Health it is valid (HealthScore is optional, MG 8.3.2); the declared role close makes it invalid (rule layer R-6).
 
@@ -6116,7 +6116,7 @@ Payload:
 - Expected: invalid – A Close message carries Health NORMAL_0 and HealthScore 0 (MG 6.3.4).
 - Violates: [REQ-LIFE-007](../../requirements/view/life.md#req-life-007)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-024 with the Health of a Will message (FAILURE_1). Valid as a regular Pub Health; invalid with the declared role close (rule layer R-6).
 
@@ -6154,7 +6154,7 @@ Payload:
 - Expected: invalid – A Will message carries Health FAILURE_1 and HealthScore 0 (MG 6.3.5).
 - Violates: [REQ-LIFE-009](../../requirements/view/life.md#req-life-009)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-025 with the Health of a Close message (NORMAL_0). Valid as a regular Pub Health; invalid with the declared role will (rule layer R-6).
 
@@ -6192,7 +6192,7 @@ Payload:
 - Expected: invalid – A Will message carries Health FAILURE_1 and HealthScore 0 (MG 6.3.5).
 - Violates: [REQ-LIFE-009](../../requirements/view/life.md#req-life-009)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-025 with HealthScore 10. Valid as a regular Pub Health; invalid with the declared role will (rule layer R-6).
 
