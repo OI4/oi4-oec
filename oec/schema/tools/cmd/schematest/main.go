@@ -4,7 +4,8 @@
 // vectors of oec/spec by their topic to an entry schema (topic form, option
 // B) and the bare DataSetMetaDataType vectors to the predefined resource
 // MetaData, validates every valid vector with a topic against the
-// topic-agnostic message schema (option A),
+// topic-agnostic message schema (option A), routes the broker-json vectors
+// to the platform schema of broker.json (RIG 4.1.1),
 // validates them with santhosh-tekuri/jsonschema (draft 2020-12), maps every
 // error to the REQ ids in the nearest "$comment" of the evaluation path and
 // compares the result with the vector (expected, violates). It writes the
@@ -52,7 +53,12 @@ type vector struct {
 	Mode     string   `yaml:"mode"`
 	Object   string   `yaml:"object"`
 	Violates []string `yaml:"violates"`
+	Content  string   `yaml:"content"` // broker-json vectors
 }
+
+// brokerSchema is the schema of the platform file broker.json (RIG 4.1.1),
+// relative to schema.BaseURI.
+const brokerSchema = "platform/broker.schema.json"
 
 // expectation partitions the violated REQs of an invalid vector whose
 // violation the entry schema cannot see completely (ADR-0019 §8): Schema are
@@ -222,7 +228,16 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 		}
 	}
 	fmt.Printf("\n%d payload vectors routed to an entry schema (bare MetaData included), %d further valid vectors checked with the message schema only, %d without schema check yet (invalid without entry schema, or no topic).\n", routed, agnostic, skipped)
-	pc, pf, err := runProbes(c, docs, vectors)
+	brokers, err := loadVectors(filepath.Join(specDir, "vectors", "platform"))
+	if err != nil {
+		return err
+	}
+	bc, bf, err := runBroker(c, docs, brokers, verbose)
+	if err != nil {
+		return err
+	}
+	cases, failures = append(cases, bc...), append(failures, bf...)
+	pc, pf, err := runProbes(c, docs, append(slices.Clone(vectors), brokers...))
 	if err != nil {
 		return err
 	}
@@ -238,6 +253,54 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 	}
 	fmt.Println("ok")
 	return nil
+}
+
+// runBroker validates the content of every broker-json vector against the
+// platform schema of broker.json. broker.json has no closure (SF-100 (a),
+// proposed), so the tolerant flavor equals the strict one and is not
+// checked separately. An invalid vector must be rejected with exactly its
+// violated REQs; there is no rule layer for this file.
+func runBroker(c *jsonschema.Compiler, docs map[string]any, vectors []vector, verbose bool) ([]testCase, []string, error) {
+	var cases []testCase
+	var failures []string
+	entry := schema.BaseURI + brokerSchema
+	fmt.Println("\n| Vector | File | Expected (oracle) | Schema |")
+	fmt.Println("|--------|------|-------------------|--------|")
+	for i := range vectors {
+		v := &vectors[i]
+		v.Payload = v.Content // base of the broker.json probes
+		inst, err := jsonschema.UnmarshalJSON(strings.NewReader(v.Content))
+		if err != nil {
+			return nil, nil, fmt.Errorf("%s: %w", v.ID, err)
+		}
+		r, err := validate(c, docs, entry, inst)
+		if err != nil {
+			return nil, nil, err
+		}
+		cases = append(cases, testCase{ID: v.ID + "/file", Schema: entry, Instance: compact(v.Content), Valid: r.valid})
+		want := v.Expected
+		if want == "invalid" {
+			want = "invalid " + strings.Join(v.Violates, ", ")
+		}
+		fmt.Printf("| %s | broker.json | %s | %s |\n", v.ID, want, verdict(r))
+		if verbose {
+			for _, m := range r.msgs {
+				fmt.Println("    ", m)
+			}
+		}
+		violates := slices.Clone(v.Violates)
+		sort.Strings(violates)
+		switch {
+		case v.Expected == "valid" && !r.valid:
+			failures = append(failures, fmt.Sprintf("%s: valid vector rejected by %s: %v", v.ID, entry, r.msgs))
+		case v.Expected == "invalid" && r.valid:
+			failures = append(failures, fmt.Sprintf("%s: invalid vector accepted by %s", v.ID, entry))
+		case v.Expected == "invalid" && !slices.Equal(r.reqs, violates):
+			failures = append(failures, fmt.Sprintf("%s: %s reports %v, want %v: %v", v.ID, entry, r.reqs, violates, r.msgs))
+		}
+	}
+	fmt.Printf("\n%d broker-json vectors validated against %s.\n", len(vectors), brokerSchema)
+	return cases, failures, nil
 }
 
 func verdict(r result) string {

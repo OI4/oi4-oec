@@ -50,8 +50,9 @@ var commentRefs = regexp.MustCompile(`^(?:REQ-[A-Z]+(?:-[A-Z]+)*-[0-9]{3}[,;]?\s
 
 // checkComments checks the REQ tracing of ADR-0019 §1 against the catalog:
 // every REQ named at the start of a "$comment" exists, is not deprecated and
-// carries the verification method schema, and every reference in the
-// parentheses after the ids is a ref of at least one of these REQs.
+// carries the verification method schema (or d8 in the platform files), and
+// every reference in the parentheses after the ids is a ref of at least one
+// of these REQs.
 func checkComments(docs map[string]any, reqs map[string]requirement) []string {
 	var problems []string
 	ids := make([]string, 0, len(docs))
@@ -62,6 +63,10 @@ func checkComments(docs map[string]any, reqs map[string]requirement) []string {
 	}
 	sort.Strings(ids)
 	for _, id := range ids {
+		// the platform files (RIG 4) are checked by the infrastructure
+		// compliance CLI, so their REQs may have the verification d8 instead
+		// of schema (ADR-0019 amendment C-039)
+		platform := strings.HasPrefix(id, schema.BaseURI+"platform/")
 		walk(docs[id], "", func(ptr, c string) {
 			names := leadingReqs(c)
 			if len(names) == 0 {
@@ -75,7 +80,7 @@ func checkComments(docs map[string]any, reqs map[string]requirement) []string {
 					problems = append(problems, fmt.Sprintf("%s#%s: unknown %s", id, ptr, n))
 				case r.Status == "deprecated":
 					problems = append(problems, fmt.Sprintf("%s#%s: %s is deprecated", id, ptr, n))
-				case !slices.Contains(r.Verification, "schema"):
+				case !slices.Contains(r.Verification, "schema") && !(platform && slices.Contains(r.Verification, "d8")):
 					problems = append(problems, fmt.Sprintf("%s#%s: %s has no verification schema", id, ptr, n))
 				}
 				refs = append(refs, r.Refs...)

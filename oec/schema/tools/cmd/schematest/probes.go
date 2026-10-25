@@ -31,6 +31,10 @@ const bareMetaData = "(bare) ResourceMetaData"
 // the DataSetWriterId of a common service.
 const anyMessage = "(message) topic-agnostic"
 
+// brokerJSON is the probe "rule" of the platform file broker.json
+// (RIG 4.1.1); its base vectors are the broker-json vectors V-BRK-xxx.
+const brokerJSON = "(file) broker.json"
+
 func item(m map[string]any) map[string]any { return msgs(m)[0].(map[string]any) }
 
 func payload(m map[string]any) map[string]any { return item(m)["Payload"].(map[string]any) }
@@ -419,6 +423,36 @@ var probes = []probe{
 		p["1network"] = p["network"]
 		delete(p, "network")
 	}, []string{"REQ-RES-CONFIG-004"}},
+	// broker.json (RIG 4.1.1, SF-100 proposed): Address forms and value
+	// ranges the reviewed V-BRK vectors do not exercise
+	{"P-109 broker.json IPv6 loopback", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "::1" }, nil},
+	{"P-110 broker.json IPv4-mapped IPv6", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "::ffff:192.0.2.10" }, nil},
+	{"P-111 broker.json IPv6 in brackets", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "[fd00:10::5]" }, []string{"REQ-CNT-003"}},
+	{"P-112 broker.json IPv6 with zone", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "fe80::1%eth0" }, []string{"REQ-CNT-003"}},
+	{"P-113 broker.json IPv6 with two ::", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "fd00::10::5" }, []string{"REQ-CNT-003"}},
+	{"P-114 broker.json IPv4 octet 256", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "192.168.0.256" }, []string{"REQ-CNT-003"}},
+	{"P-115 broker.json IPv4 with leading zero", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "192.168.010.1" }, []string{"REQ-CNT-003"}},
+	{"P-116 broker.json host name with underscore", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "mqtt_broker" }, []string{"REQ-CNT-003"}},
+	{"P-117 broker.json host name with trailing dot", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "broker.example.com." }, []string{"REQ-CNT-003"}},
+	{"P-118 broker.json label starting with -", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "-broker.example.com" }, []string{"REQ-CNT-003"}},
+	{"P-119 broker.json label of 64 characters", "V-BRK-001", brokerJSON, func(m map[string]any) {
+		m["Address"] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com"
+	}, []string{"REQ-CNT-003"}},
+	{"P-120 broker.json label of 63 characters", "V-BRK-001", brokerJSON, func(m map[string]any) {
+		m["Address"] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example.com"
+	}, nil},
+	{"P-121 broker.json host name of 253 characters", "V-BRK-001", brokerJSON, func(m map[string]any) {
+		m["Address"] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+	}, nil},
+	{"P-122 broker.json host name of 254 characters", "V-BRK-001", brokerJSON, func(m map[string]any) {
+		m["Address"] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+	}, []string{"REQ-CNT-003"}},
+	{"P-123 broker.json label starting with a digit", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "3com.example" }, nil},
+	{"P-124 broker.json single-label host name", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "localhost" }, nil},
+	{"P-125 broker.json SecurePort 65535", "V-BRK-001", brokerJSON, func(m map[string]any) { m["SecurePort"] = json.Number("65535") }, nil},
+	{"P-126 broker.json SecurePort 443.5", "V-BRK-001", brokerJSON, func(m map[string]any) { m["SecurePort"] = json.Number("443.5") }, []string{"REQ-CNT-003"}},
+	{"P-127 broker.json Address null", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = nil }, []string{"REQ-CNT-003"}},
+	{"P-128 broker.json MaxPacketSize negative", "V-BRK-001", brokerJSON, func(m map[string]any) { m["MaxPacketSize"] = json.Number("-1") }, []string{"REQ-CNT-003"}},
 }
 
 func group(m map[string]any, name string) map[string]any {
@@ -456,6 +490,8 @@ func runProbes(c *jsonschema.Compiler, docs map[string]any, vectors []vector) ([
 			entry = schema.BaseURI + "metadata.schema.json#/$defs/ResourceMetaData"
 		case anyMessage:
 			entry = schema.BaseURI + "message.schema.json"
+		case brokerJSON:
+			entry = schema.BaseURI + brokerSchema
 		}
 		r, err := validate(c, docs, entry, inst)
 		if err != nil {
