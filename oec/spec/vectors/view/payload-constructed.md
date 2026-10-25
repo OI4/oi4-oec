@@ -143,15 +143,15 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-228](#v-pay-228) | Del ReferenceDesignation that carries a ReferenceDesignation DataSetMessage | invalid | violates: REQ-RES-REFDES-007 | constructed | reviewed |
 | [V-PAY-229](#v-pay-229) | Query of ReferenceDesignation without Parent | invalid | violates: REQ-RES-REFDES-012 | constructed | reviewed |
 | [V-PAY-230](#v-pay-230) | Query of ReferenceDesignation on a topic with Source | invalid | violates: REQ-RES-REFDES-013 | constructed | reviewed |
-| [V-PAY-231](#v-pay-231) | Pub Data Oi4Pv with a primary and a secondary value | valid | ok | constructed | draft |
-| [V-PAY-232](#v-pay-232) | Get Data that carries a Data DataSetMessage | invalid | violates: REQ-RES-DATA-006 | constructed | draft |
-| [V-PAY-233](#v-pay-233) | Set Data with two DataSetMessages | invalid | violates: REQ-RES-DATA-009 | constructed | draft |
-| [V-PAY-234](#v-pay-234) | Pub Event without Number | invalid | violates: REQ-RES-EVENT-001 | constructed | draft |
-| [V-PAY-235](#v-pay-235) | Status Event with a Details key other than SymbolicId | invalid | violates: REQ-RES-EVENT-003 | constructed | draft |
-| [V-PAY-236](#v-pay-236) | Syslog Event with a Description | invalid | violates: REQ-RES-EVENT-007 | constructed | draft |
-| [V-PAY-237](#v-pay-237) | Pub SubscriptionList entry without TopicPath | invalid | violates: REQ-RES-SUBLIST-001 | constructed | draft |
-| [V-PAY-238](#v-pay-238) | Get SubscriptionList that carries a SubscriptionList DataSetMessage | invalid | violates: REQ-RES-SUBLIST-007 | constructed | draft |
-| [V-PAY-239](#v-pay-239) | Set SubscriptionList without entry | invalid | violates: REQ-RES-SUBLIST-010 | constructed | draft |
+| [V-PAY-231](#v-pay-231) | Pub Data Oi4Pv with a primary and a secondary value | valid | ok | constructed | reviewed |
+| [V-PAY-232](#v-pay-232) | Get Data that carries a Data DataSetMessage | invalid | violates: REQ-RES-DATA-006 | constructed | reviewed |
+| [V-PAY-233](#v-pay-233) | Set Data with two DataSetMessages | invalid | violates: REQ-RES-DATA-009 | constructed | reviewed |
+| [V-PAY-234](#v-pay-234) | Pub Event without Number | invalid | violates: REQ-RES-EVENT-001 | constructed | reviewed |
+| [V-PAY-235](#v-pay-235) | Status Event with a Details key other than SymbolicId | invalid | violates: REQ-RES-EVENT-003 | constructed | reviewed |
+| [V-PAY-236](#v-pay-236) | Syslog Event with a Description | invalid | violates: REQ-RES-EVENT-007 | constructed | reviewed |
+| [V-PAY-237](#v-pay-237) | Pub SubscriptionList entry without TopicPath | invalid | violates: REQ-RES-SUBLIST-001 | constructed | reviewed |
+| [V-PAY-238](#v-pay-238) | Get SubscriptionList that carries a SubscriptionList DataSetMessage | invalid | violates: REQ-RES-SUBLIST-007 | constructed | reviewed |
+| [V-PAY-239](#v-pay-239) | Set SubscriptionList without entry | invalid | violates: REQ-RES-SUBLIST-010 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -8768,7 +8768,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-RES-DATA-003](../../requirements/view/res-data.md#req-res-data-003), [REQ-RES-DATA-004](../../requirements/view/res-data.md#req-res-data-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-084 with the primary value Pv 21.4 added to the secondary value Sv1. The Tag Oi4Pv selects the predefined DataSet Oi4Pv.
 
@@ -8808,7 +8808,7 @@ Payload:
 - Expected: invalid – A Get Data carries no Data DataSetMessage (MG 9.1.4).
 - Violates: [REQ-RES-DATA-006](../../requirements/view/res-data.md#req-res-data-006)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-055 with the DataSetMessage of V-PAY-061.
 
@@ -8849,7 +8849,7 @@ Payload:
 - Expected: invalid – A Set Data carries exactly one Data DataSetMessage, the DataSet addressed by the topic (MG 9.1.4).
 - Violates: [REQ-RES-DATA-009](../../requirements/view/res-data.md#req-res-data-009)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-061 with its DataSetMessage repeated.
 
@@ -8902,7 +8902,7 @@ Payload:
 - Expected: invalid – Number is a mandatory field of an Event (MG 8.3.6).
 - Violates: [REQ-RES-EVENT-001](../../requirements/view/res-event.md#req-res-event-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-063 without the Number.
 
@@ -8946,7 +8946,7 @@ Payload:
 - Expected: invalid – The Details of a Status Event carry only the SymbolicId of the status code (MG 8.3.6.1).
 - Violates: [REQ-RES-EVENT-003](../../requirements/view/res-event.md#req-res-event-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-063 with the additional Details key Code.
 
@@ -8992,7 +8992,7 @@ Payload:
 - Expected: invalid – A Syslog Event carries no Description; the message text is the Details key MSG (MG 8.3.6.2).
 - Violates: [REQ-RES-EVENT-007](../../requirements/view/res-event.md#req-res-event-007)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-064 with a Description.
 
@@ -9038,7 +9038,7 @@ Payload:
 - Expected: invalid – TopicPath is a mandatory field of a SubscriptionList entry (MG 8.3.9).
 - Violates: [REQ-RES-SUBLIST-001](../../requirements/view/res-sublist.md#req-res-sublist-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-069 without the TopicPath of the entry.
 
@@ -9077,7 +9077,7 @@ Payload:
 - Expected: invalid – A Get SubscriptionList carries no SubscriptionList DataSetMessage (MG 9.1.9).
 - Violates: [REQ-RES-SUBLIST-007](../../requirements/view/res-sublist.md#req-res-sublist-007)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-066 with the entry of V-PAY-072.
 
@@ -9117,7 +9117,7 @@ Payload:
 - Expected: invalid – A Set SubscriptionList carries exactly one SubscriptionList DataSetMessage, the entry addressed by the topic (MG 9.1.9).
 - Violates: [REQ-RES-SUBLIST-010](../../requirements/view/res-sublist.md#req-res-sublist-010)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-072 with empty Messages.
 

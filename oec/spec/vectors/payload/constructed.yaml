@@ -7617,7 +7617,7 @@ vectors:
     expected: valid
     reqs: [REQ-RES-DATA-003, REQ-RES-DATA-004]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-084 with the primary value Pv 21.4 added to the secondary value
       Sv1. The Tag Oi4Pv selects the predefined DataSet Oi4Pv.
@@ -7649,7 +7649,7 @@ vectors:
     violates: [REQ-RES-DATA-006]
     reason: "A Get Data carries no Data DataSetMessage (MG 9.1.4)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-055 with the DataSetMessage of V-PAY-061.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
@@ -7681,7 +7681,7 @@ vectors:
     violates: [REQ-RES-DATA-009]
     reason: "A Set Data carries exactly one Data DataSetMessage, the DataSet addressed by the topic (MG 9.1.4)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-061 with its DataSetMessage repeated.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/Data/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/oee"
@@ -7725,7 +7725,7 @@ vectors:
     violates: [REQ-RES-EVENT-001]
     reason: "Number is a mandatory field of an Event (MG 8.3.6)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-063 without the Number.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
@@ -7760,7 +7760,7 @@ vectors:
     violates: [REQ-RES-EVENT-003]
     reason: "The Details of a Status Event carry only the SymbolicId of the status code (MG 8.3.6.1)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-063 with the additional Details key Code.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Status/Good"
@@ -7797,7 +7797,7 @@ vectors:
     violates: [REQ-RES-EVENT-007]
     reason: "A Syslog Event carries no Description; the message text is the Details key MSG (MG 8.3.6.2)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-064 with a Description.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Event/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Syslog/Notice"
@@ -7834,7 +7834,7 @@ vectors:
     violates: [REQ-RES-SUBLIST-001]
     reason: "TopicPath is a mandatory field of a SubscriptionList entry (MG 8.3.9)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-069 without the TopicPath of the entry.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
@@ -7864,7 +7864,7 @@ vectors:
     violates: [REQ-RES-SUBLIST-007]
     reason: "A Get SubscriptionList carries no SubscriptionList DataSetMessage (MG 9.1.9)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-066 with the entry of V-PAY-072.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
@@ -7895,7 +7895,7 @@ vectors:
     violates: [REQ-RES-SUBLIST-010]
     reason: "A Set SubscriptionList carries exactly one SubscriptionList DataSetMessage, the entry addressed by the topic (MG 9.1.9)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-072 with empty Messages.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/SubscriptionList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
