@@ -1,13 +1,13 @@
 # C-037 – PublicationList and ReferenceDesignation schemas and vectors
 
-- **Date:** 2026-10-26
+- **Date:** 2026-10-25
 - **Phase:** P2 – JSON Schema (D1)
 - **Baseline:** guideline `a42a132` (branch `feature/spec-findings`, head `d4f79f3` = register only); no guideline change in this cycle, no re-baseline
 - **Start:** workspace `062aa13` (C-036 addendum 3 applied, all items `reviewed`)
 
 ## Intent
 
-PO (hand-over prompt, 2026-10-26): apply the review of C-036 addendum 2 (R-1 … R-3 accepted), then run C-037 as in STATUS "Next step" 1 and ROADMAP P2: PublicationList and ReferenceDesignation (Pub/Get/Set/Del, areas RES-PUBLIST and RES-REFDES):
+PO (hand-over prompt, 2026-10-25): apply the review of C-036 addendum 2 (R-1 … R-3 accepted), then run C-037 as in STATUS "Next step" 1 and ROADMAP P2: PublicationList and ReferenceDesignation (Pub/Get/Set/Del, areas RES-PUBLIST and RES-REFDES):
 
 1. oracle checks for the payload REQs of both resources where missing; umbrellas per ADR-0019 §9;
 2. resource modules, the entry schemas, the `message.schema.json` dispatch, harness routes and probes from P-45; regenerate `dist/`;
@@ -193,5 +193,26 @@ Collected in [`REVIEW.md`](../REVIEW.md) (German explanation: [`REVIEW_DE.md`](.
 1. D-1 ADR-0019 amendment C-037.
 2. D-2 Oracle reading of the entry Filter (topic-encoded, Tag structure of the resource).
 3. R-1 V-PAY-218 … 224 (PublicationList), R-2 V-PAY-225 … 230 (ReferenceDesignation).
+
+Next free ids: SF-100, REQ-CMP-048, V-PAY-231, V-TOP-254, ADR-0020, Q-021, probe P-64. Next cycle: C-038 – Data, Event, SubscriptionList (ROADMAP P2).
+
+## Addendum 1 – PO review (2026-10-25)
+
+PO (chat, 2026-10-25): "D-1, D-2, R-1 und R-2 gereviewed und akzeptiert, bitte weitermachen". Recorded in [`REVIEW.md`](../REVIEW.md) (commit `be07dcc`, kept as the review record): D-1 ADR-0019 amendment C-037 **accepted**; D-2 oracle reading of the PublicationList entry Filter (topic-encoded, Tag structure of the resource) **accepted**; R-1 V-PAY-218 … 224 and R-2 V-PAY-225 … 230 **accepted**.
+
+Review applied (`69a6bb4`, `spectool review V-PAY-218..230`):
+
+- 13 drafts → `reviewed`; views re-rendered.
+- Coverage (`coverage/vectors.md`): schema/d7-validate gaps 48 → **35** (as projected); entry schemas 18 of 29. RES-PUBLIST and RES-REFDES have no gap left.
+
+ADR-0019 (`097b812`): status line and amendment C-037 heading say accepted.
+
+Date correction (mechanical): this log was first written as `2026-10-26_C-037_publist-refdes.md`, but the whole cycle ran on 2026-10-25 (see the commit dates). The file is renamed to `2026-10-25_C-037_publist-refdes.md`; the dates in this log, the ADR-0019 amendment heading, STATUS, ROADMAP and REVIEW follow. No content changed.
+
+No reviewed item changed beyond the accepted proposals; guideline unchanged at `a42a132`.
+
+`REVIEW.md` / `REVIEW_DE.md`: reset to "nothing open"; C-038 fills them again.
+
+Checks: `spectool lint` (437 REQs, 230 payload vectors, 147 topic vectors), `render -check`, `coverage -check`, `topic -check`, `inventory -check -rev a42a132` (1398 items), `go test ./...`, `oec/schema/check.sh` (60 schema files, 439 cases, 0 disagreements): green.
 
 Next free ids: SF-100, REQ-CMP-048, V-PAY-231, V-TOP-254, ADR-0020, Q-021, probe P-64. Next cycle: C-038 – Data, Event, SubscriptionList (ROADMAP P2).
