@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 25.10.2026, nach dem Einbau von SF-099 in die Guideline (Guideline `a42a132`)._
+_Stand: 25.10.2026, nach deinem Review des Einbaus von SF-099 (Guideline `a42a132`)._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 wie vorgeschlagen, R-1 bis R-4 akzeptiert“.
 
@@ -21,17 +21,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Drei kleine Punkte aus dem Einbau von SF-099. Es gibt kein offenes Spec-Finding und keine offene Frage für P2 (Q-011 ist geparkt). Es bleiben 48 Abdeckungslücken; daran ändert SF-099 nichts, weil man beide betroffenen Regeln nur an einer laufenden Anwendung prüfen kann (`d7-test`).
-
-- **R-1 – neue Regel REQ-CMP-047:** Fragt jemand per `Get` nach einem Asset, das die Anwendung weder selbst ist noch vertritt, antwortet sie **nicht** auf dem `Pub`-Topic. Sie **sollte** stattdessen ein `Event` Status `Bad` (`BadNotFound`) schicken. „Sollte“ gilt auf allen Levels, so wie du es formuliert hast. Zum Vergleich: Bei `Set`/`Del` ist das Event ab Level 2 Pflicht.
-- **R-2 – REQ-CMP-041 ergänzt:** Die bestehende Regel „kein Inhalt → leere Liste“ sagt jetzt auch: Ein Filter, der bei einem bekannten Asset nichts trifft, bekommt ebenfalls eine leere Liste. Das hast du heute bestätigt. Die Regel bleibt auf `reviewed`, so wie damals bei SF-097/SF-098. Sag Bescheid, falls du sie trotzdem noch einmal sehen willst.
-- **R-3 – Text in der Guideline (`a42a132`):**
-  - MG 9.1 „Resources Without Content“ hat den Filter-Satz und einen neuen Punkt für das unbekannte Asset.
-  - In den acht 9.1.x-Abschnitten steht beim `Pub` jetzt „keine (DataSetMessages) in der Antwort auf ein `Get` ohne Inhalt“. So widerspricht der Satz der leeren Liste nicht mehr.
-  - MG 8.3.6.1 nennt auch das `Get` auf ein unbekanntes Asset als Anlass für ein Status-Event.
-  - Ein GL-ADR habe ich nicht angelegt, wie bei SF-075 … 081.
-
-Den genauen Wortlaut findest du in [`REVIEW.md`](REVIEW.md). Antwort im Chat genügt, z. B. „R-1 bis R-3 akzeptiert“.
+Nichts. Alles in `oec/spec` steht auf `reviewed`. Es gibt kein offenes Spec-Finding und keine offene Frage für P2 (Q-011 ist geparkt). Es bleiben 48 Abdeckungslücken; 11 der 29 Topic-Formen haben ein Entry-Schema. Der nächste Zyklus C-037 (PublicationList + ReferenceDesignation) füllt diese Liste wieder.
 
 ### Begriffe aus C-036
 
@@ -45,7 +35,13 @@ Den genauen Wortlaut findest du in [`REVIEW.md`](REVIEW.md). Antwort im Chat gen
 
 ---
 
-## Was aus deinem letzten Review (C-036) geworden ist
+## Was aus deinem letzten Review (SF-099 in der Guideline) geworden ist
+
+- **R-1 – REQ-CMP-047:** angenommen und auf `reviewed` gesetzt (`737cb14`).
+- **R-2 – REQ-CMP-041:** angenommen; die Regel bleibt `reviewed` mit dem Filter-Satz.
+- **R-3 – Guideline-Text (`a42a132`):** angenommen; nichts zu ändern.
+
+## Was aus dem Review davor (C-036) geworden ist
 
 - **D-1 – SF-099 (leerer `Pub`):** so eingetragen, wie du es entschieden hast (Register-Commit `5491830`, Status `decided`):
   - Fragt jemand per `Get` etwas ab, das es bei einem **bekannten** Asset gerade nicht gibt, antwortet die Anwendung mit einer **leeren Liste** (`"Messages": []`).
@@ -58,10 +54,3 @@ Den genauen Wortlaut findest du in [`REVIEW.md`](REVIEW.md). Antwort im Chat gen
 - **D-3 – Aufteilung:** angenommen. C-037 ist PublicationList und ReferenceDesignation, der P2-Abschluss ist C-041.
 - **D-4 – Heuristik für REQ-RES-MAM-006:** angenommen. Das Orakel bleibt, wie es ist.
 - **R-1 bis R-4:** alles freigegeben. Die 51 Entwürfe stehen auf `reviewed`. Die Lücken bei der Vektor-Abdeckung sinken von 81 auf 48.
-
-## Was aus dem Review davor (C-035) geworden ist
-
-- **D-1 – Nachtrag zu ADR-0019:** angenommen. Im ADR steht der Nachtrag jetzt als „accepted“: `ResourceMetaData` für die vordefinierten MetaData, Eindeutigkeit von Namen in der Regelschicht (R-3) und die neue Regel R-6 für die erklärte Rolle.
-- **D-2 – Metadata schon in C-035:** angenommen. Der Plan bleibt, wie er seit C-035 ist: C-037 enthält nur noch Data, Event und SubscriptionList.
-- **D-3 – Topic-Regeln der Rollen:** Option (a). REQ-LIFE-002/006/008 werden weiter live geprüft (`d7-monitor`/`d7-test`). `validate --role` prüft nur den Inhalt.
-- **R-1 bis R-4:** alles freigegeben. Die 31 Entwürfe stehen auf `reviewed`, auch REQ-MSG-038 ohne `schema`. Die Lücken bei der Vektor-Abdeckung sinken von 96 auf 77.

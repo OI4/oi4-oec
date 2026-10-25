@@ -259,3 +259,21 @@ Checks: `spectool lint` (437 REQs), `render -check`, `coverage -check` (gaps 48,
 
 Next free ids: SF-100, REQ-CMP-048, V-PAY-218, V-TOP-254, ADR-0020, Q-021.
 
+
+## Addendum 3 – PO review of addendum 2 (2026-10-25)
+
+PO (hand-over prompt C-037, 2026-10-25): "R-1 REQ-CMP-047: Akzeptiert · R-2 Änderung REQ-CMP-041: Akzeptiert · R-3 Guideline-Text SF-099 (`a42a132`): Akzeptiert". Recorded in [`REVIEW.md`](../REVIEW.md) (commit `5be6f29`, kept as the review record).
+
+Applied:
+
+- `737cb14` – `spectool review REQ-CMP-047`: REQ-CMP-047 `draft` → `reviewed`; view `cmp.md` regenerated.
+- R-2: REQ-CMP-041 stays `reviewed` with the extended statement (no catalog change).
+- R-3: guideline text at `a42a132` accepted; no change in either repo.
+
+No other item changed. Coverage unchanged: 159 `schema`/`d7-validate` REQs, 48 gaps (both REQs are `d7-test`); entry schemas 11 of 29.
+
+`REVIEW.md` / `REVIEW_DE.md`: reset to "nothing open"; C-037 fills them again.
+
+Checks: `spectool lint` (437 REQs, 0 drafts), `render -check`, `coverage -check` (gaps 48), `topic -check`, `inventory -check -rev a42a132` (1398 items), `go test ./...`, `oec/schema/check.sh` (42 schema files, 375 cases, 0 disagreements): green.
+
+Next free ids: SF-100, REQ-CMP-048, V-PAY-218, V-TOP-254, ADR-0020, Q-021. Next cycle: C-037 – PublicationList + ReferenceDesignation.
