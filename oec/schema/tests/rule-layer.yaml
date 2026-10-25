@@ -123,3 +123,8 @@ expectations:
     rule: [REQ-RES-CONFIG-008]
     rules: [R-3]
     reason: A Value satisfies Length, Min, Max, Pattern and Values of the Validation of the same configuration object; JSON Schema cannot apply a sibling value as constraint.
+  - vector: V-PAY-241
+    schema: []
+    rule: [REQ-RES-CONFIG-015]
+    rules: [R-3]
+    reason: The WriterGroupName of a Config DataSetMessage is unique among the DataSetMessages with the same DataSetWriterName; JSON Schema cannot express uniqueness across array items by a pair of keys.
