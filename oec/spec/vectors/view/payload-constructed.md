@@ -130,19 +130,19 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-215](#v-pay-215) | Pub Profile with a resource listed twice | invalid | violates: REQ-RES-PROFILE-001 | constructed | reviewed |
 | [V-PAY-216](#v-pay-216) | Pub Profile without Resources | invalid | violates: REQ-RES-PROFILE-001 | constructed | reviewed |
 | [V-PAY-217](#v-pay-217) | Get Profile that carries a Profile DataSetMessage | invalid | violates: REQ-RES-PROFILE-003 | constructed | reviewed |
-| [V-PAY-218](#v-pay-218) | Pub PublicationList entry without Source | invalid | violates: REQ-RES-PUBLIST-001 | constructed | draft |
-| [V-PAY-219](#v-pay-219) | Pub PublicationList entry with an unencoded Filter | invalid | violates: REQ-RES-PUBLIST-001 | constructed | draft |
-| [V-PAY-220](#v-pay-220) | Pub PublicationList with the same entry twice | invalid | violates: REQ-RES-PUBLIST-003 | constructed | draft |
-| [V-PAY-221](#v-pay-221) | Get PublicationList that carries a PublicationList DataSetMessage | invalid | violates: REQ-RES-PUBLIST-019 | constructed | draft |
-| [V-PAY-222](#v-pay-222) | Set PublicationList without entry | invalid | violates: REQ-RES-PUBLIST-022 | constructed | draft |
-| [V-PAY-223](#v-pay-223) | Pub PublicationList Event entry with an unknown EventLevel | invalid | violates: REQ-RES-PUBLIST-002 | constructed | draft |
-| [V-PAY-224](#v-pay-224) | Pub PublicationList entry with a numeric Mode | invalid | violates: REQ-MSG-031, REQ-RES-PUBLIST-001 | constructed | draft |
-| [V-PAY-225](#v-pay-225) | Pub ReferenceDesignation aspect without Value | invalid | violates: REQ-RES-REFDES-001 | constructed | draft |
-| [V-PAY-226](#v-pay-226) | Get ReferenceDesignation that carries a ReferenceDesignation DataSetMessage | invalid | violates: REQ-RES-REFDES-003 | constructed | draft |
-| [V-PAY-227](#v-pay-227) | Set ReferenceDesignation without DataSetMessage | invalid | violates: REQ-RES-REFDES-006 | constructed | draft |
-| [V-PAY-228](#v-pay-228) | Del ReferenceDesignation that carries a ReferenceDesignation DataSetMessage | invalid | violates: REQ-RES-REFDES-007 | constructed | draft |
-| [V-PAY-229](#v-pay-229) | Query of ReferenceDesignation without Parent | invalid | violates: REQ-RES-REFDES-012 | constructed | draft |
-| [V-PAY-230](#v-pay-230) | Query of ReferenceDesignation on a topic with Source | invalid | violates: REQ-RES-REFDES-013 | constructed | draft |
+| [V-PAY-218](#v-pay-218) | Pub PublicationList entry without Source | invalid | violates: REQ-RES-PUBLIST-001 | constructed | reviewed |
+| [V-PAY-219](#v-pay-219) | Pub PublicationList entry with an unencoded Filter | invalid | violates: REQ-RES-PUBLIST-001 | constructed | reviewed |
+| [V-PAY-220](#v-pay-220) | Pub PublicationList with the same entry twice | invalid | violates: REQ-RES-PUBLIST-003 | constructed | reviewed |
+| [V-PAY-221](#v-pay-221) | Get PublicationList that carries a PublicationList DataSetMessage | invalid | violates: REQ-RES-PUBLIST-019 | constructed | reviewed |
+| [V-PAY-222](#v-pay-222) | Set PublicationList without entry | invalid | violates: REQ-RES-PUBLIST-022 | constructed | reviewed |
+| [V-PAY-223](#v-pay-223) | Pub PublicationList Event entry with an unknown EventLevel | invalid | violates: REQ-RES-PUBLIST-002 | constructed | reviewed |
+| [V-PAY-224](#v-pay-224) | Pub PublicationList entry with a numeric Mode | invalid | violates: REQ-MSG-031, REQ-RES-PUBLIST-001 | constructed | reviewed |
+| [V-PAY-225](#v-pay-225) | Pub ReferenceDesignation aspect without Value | invalid | violates: REQ-RES-REFDES-001 | constructed | reviewed |
+| [V-PAY-226](#v-pay-226) | Get ReferenceDesignation that carries a ReferenceDesignation DataSetMessage | invalid | violates: REQ-RES-REFDES-003 | constructed | reviewed |
+| [V-PAY-227](#v-pay-227) | Set ReferenceDesignation without DataSetMessage | invalid | violates: REQ-RES-REFDES-006 | constructed | reviewed |
+| [V-PAY-228](#v-pay-228) | Del ReferenceDesignation that carries a ReferenceDesignation DataSetMessage | invalid | violates: REQ-RES-REFDES-007 | constructed | reviewed |
+| [V-PAY-229](#v-pay-229) | Query of ReferenceDesignation without Parent | invalid | violates: REQ-RES-REFDES-012 | constructed | reviewed |
+| [V-PAY-230](#v-pay-230) | Query of ReferenceDesignation on a topic with Source | invalid | violates: REQ-RES-REFDES-013 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -8169,7 +8169,7 @@ Payload:
 - Expected: invalid – Source is a mandatory field of a PublicationList entry (MG 8.3.8).
 - Violates: [REQ-RES-PUBLIST-001](../../requirements/view/res-publist.md#req-res-publist-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-037 without the Source of the entry.
 
@@ -8210,7 +8210,7 @@ Payload:
 - Expected: invalid – The Filter of an entry is topic-encoded; a '+' is encoded as %2B (MG 8.3.8, MG 7.7).
 - Violates: [REQ-RES-PUBLIST-001](../../requirements/view/res-publist.md#req-res-publist-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-037 with the Tag o+e unencoded in the Filter (the WriterGroupName repeats it, so only the encoding is wrong), on the topic without list filter (the topic Filter would be Data/o%2Be).
 
@@ -8253,7 +8253,7 @@ Payload:
 - Expected: invalid – Resource, Source and Filter identify an entry; they are unique within the publisher (MG 8.3.8).
 - Violates: [REQ-RES-PUBLIST-003](../../requirements/view/res-publist.md#req-res-publist-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-037 with its entry repeated. JSON Schema cannot compare items by a key; rule layer (R-3).
 
@@ -8309,7 +8309,7 @@ Payload:
 - Expected: invalid – A Get PublicationList carries no PublicationList DataSetMessage (MG 9.1.8).
 - Violates: [REQ-RES-PUBLIST-019](../../requirements/view/res-publist.md#req-res-publist-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-034 with the entry of V-PAY-040.
 
@@ -8353,7 +8353,7 @@ Payload:
 - Expected: invalid – A Set PublicationList carries exactly one PublicationList DataSetMessage, the entry addressed by the topic (MG 9.1.8).
 - Violates: [REQ-RES-PUBLIST-022](../../requirements/view/res-publist.md#req-res-publist-022)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-040 with empty Messages.
 
@@ -8381,7 +8381,7 @@ Payload:
 - Expected: invalid – The Filter of an Event entry is &lt;EventCategory>/&lt;EventLevel>; Fine is no EventLevel of the category Status (MG 8.3.8, MG 8.3.6).
 - Violates: [REQ-RES-PUBLIST-002](../../requirements/view/res-publist.md#req-res-publist-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-037 changed to an Event entry Status/Fine with the Mode FILTER_4, on the topic without list filter (Status/Fine is no topic filter).
 
@@ -8424,7 +8424,7 @@ Payload:
 - Expected: invalid – The Mode of an entry is a verbose enumeration (MG 8.2.3, MG 8.3.8).
 - Violates: [REQ-MSG-031](../../requirements/view/msg.md#req-msg-031), [REQ-RES-PUBLIST-001](../../requirements/view/res-publist.md#req-res-publist-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-037 with the Mode 8 instead of APPLICATION_SOURCE_FILTER_8.
 
@@ -8466,7 +8466,7 @@ Payload:
 - Expected: invalid – Value is a mandatory field of an aspect of the ReferenceDesignation (MG 8.3.10).
 - Violates: [REQ-RES-REFDES-001](../../requirements/view/res-refdes.md#req-res-refdes-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-043 without the Value of Function.
 
@@ -8530,7 +8530,7 @@ Payload:
 - Expected: invalid – A Get ReferenceDesignation carries no ReferenceDesignation DataSetMessage (MG 9.1.10).
 - Violates: [REQ-RES-REFDES-003](../../requirements/view/res-refdes.md#req-res-refdes-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-041 with the DataSetMessage of V-PAY-045.
 
@@ -8593,7 +8593,7 @@ Payload:
 - Expected: invalid – A Set ReferenceDesignation carries exactly one ReferenceDesignation DataSetMessage (MG 9.1.10).
 - Violates: [REQ-RES-REFDES-006](../../requirements/view/res-refdes.md#req-res-refdes-006)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-045 with empty Messages.
 
@@ -8621,7 +8621,7 @@ Payload:
 - Expected: invalid – A Del ReferenceDesignation carries no ReferenceDesignation DataSetMessage (MG 9.1.10, SF-098).
 - Violates: [REQ-RES-REFDES-007](../../requirements/view/res-refdes.md#req-res-refdes-007)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-046 with the DataSetMessage of V-PAY-045.
 
@@ -8683,7 +8683,7 @@ Payload:
 - Expected: invalid – Parent is the mandatory query parameter of ReferenceDesignation (MG 8.3.13.1).
 - Violates: [REQ-RES-REFDES-012](../../requirements/view/res-refdes.md#req-res-refdes-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-053 with only the Aspect.
 
@@ -8720,7 +8720,7 @@ Payload:
 - Expected: invalid – A Query is only sent on Get/ReferenceDesignation without Source (MG 8.3.13.1).
 - Violates: [REQ-RES-REFDES-013](../../requirements/view/res-refdes.md#req-res-refdes-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: The Query of V-PAY-053 on the topic of V-PAY-041. The payload alone is valid; the rule layer compares with the topic (R-2).
 

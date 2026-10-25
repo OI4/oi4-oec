@@ -7131,7 +7131,7 @@ vectors:
     violates: [REQ-RES-PUBLIST-001]
     reason: "Source is a mandatory field of a PublicationList entry (MG 8.3.8)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-037 without the Source of the entry.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
@@ -7164,7 +7164,7 @@ vectors:
     violates: [REQ-RES-PUBLIST-001]
     reason: "The Filter of an entry is topic-encoded; a '+' is encoded as %2B (MG 8.3.8, MG 7.7)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-037 with the Tag o+e unencoded in the Filter (the WriterGroupName
       repeats it, so only the encoding is wrong), on the topic without list
@@ -7200,7 +7200,7 @@ vectors:
     violates: [REQ-RES-PUBLIST-003]
     reason: "Resource, Source and Filter identify an entry; they are unique within the publisher (MG 8.3.8)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-037 with its entry repeated. JSON Schema cannot compare items by a
       key; rule layer (R-3).
@@ -7248,7 +7248,7 @@ vectors:
     violates: [REQ-RES-PUBLIST-019]
     reason: "A Get PublicationList carries no PublicationList DataSetMessage (MG 9.1.8)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-034 with the entry of V-PAY-040.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
@@ -7283,7 +7283,7 @@ vectors:
     violates: [REQ-RES-PUBLIST-022]
     reason: "A Set PublicationList carries exactly one PublicationList DataSetMessage, the entry addressed by the topic (MG 9.1.8)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-040 with empty Messages.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
@@ -7303,7 +7303,7 @@ vectors:
     violates: [REQ-RES-PUBLIST-002]
     reason: "The Filter of an Event entry is <EventCategory>/<EventLevel>; Fine is no EventLevel of the category Status (MG 8.3.8, MG 8.3.6)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-037 changed to an Event entry Status/Fine with the Mode FILTER_4,
       on the topic without list filter (Status/Fine is no topic filter).
@@ -7338,7 +7338,7 @@ vectors:
     violates: [REQ-MSG-031, REQ-RES-PUBLIST-001]
     reason: "The Mode of an entry is a verbose enumeration (MG 8.2.3, MG 8.3.8)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-037 with the Mode 8 instead of APPLICATION_SOURCE_FILTER_8.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/PublicationList/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Data/oee"
@@ -7372,7 +7372,7 @@ vectors:
     violates: [REQ-RES-REFDES-001]
     reason: "Value is a mandatory field of an aspect of the ReferenceDesignation (MG 8.3.10)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-043 without the Value of Function.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/ReferenceDesignation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
@@ -7428,7 +7428,7 @@ vectors:
     violates: [REQ-RES-REFDES-003]
     reason: "A Get ReferenceDesignation carries no ReferenceDesignation DataSetMessage (MG 9.1.10)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-041 with the DataSetMessage of V-PAY-045.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/ReferenceDesignation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
@@ -7483,7 +7483,7 @@ vectors:
     violates: [REQ-RES-REFDES-006]
     reason: "A Set ReferenceDesignation carries exactly one ReferenceDesignation DataSetMessage (MG 9.1.10)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-045 with empty Messages.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Set/ReferenceDesignation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
@@ -7503,7 +7503,7 @@ vectors:
     violates: [REQ-RES-REFDES-007]
     reason: "A Del ReferenceDesignation carries no ReferenceDesignation DataSetMessage (MG 9.1.10, SF-098)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-046 with the DataSetMessage of V-PAY-045.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Del/ReferenceDesignation/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
@@ -7558,7 +7558,7 @@ vectors:
     violates: [REQ-RES-REFDES-012]
     reason: "Parent is the mandatory query parameter of ReferenceDesignation (MG 8.3.13.1)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-053 with only the Aspect.
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Get/ReferenceDesignation"
@@ -7587,7 +7587,7 @@ vectors:
     violates: [REQ-RES-REFDES-013]
     reason: "A Query is only sent on Get/ReferenceDesignation without Source (MG 8.3.13.1)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       The Query of V-PAY-053 on the topic of V-PAY-041. The payload alone is
       valid; the rule layer compares with the topic (R-2).
