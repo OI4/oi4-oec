@@ -991,8 +991,10 @@ func (c *checker) configValue(ptr, typ, s string) {
 		_, err := time.Parse(time.RFC3339Nano, s)
 		ok = err == nil
 	case "ByteString":
+		// The decoder skips CR and LF; a Base64 text in the payload has none
+		// (pattern of the entry schemas, C-039).
 		_, err := base64.StdEncoding.DecodeString(s)
-		ok = err == nil
+		ok = err == nil && !strings.ContainsAny(s, "\r\n")
 	}
 	if !ok {
 		c.add(ptr, "REQ-RES-CONFIG-007", "%q is no %s in its string representation", s, typ)

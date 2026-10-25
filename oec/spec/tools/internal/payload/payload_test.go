@@ -803,6 +803,7 @@ func TestContentC029(t *testing.T) {
 		{"number text", pub, r(`"DefaultValue": "80"`, `"DefaultValue": "eighty"`), []string{"REQ-RES-CONFIG-007"}},
 		{"date time", pub, r(`"2026-10-21T10:00:00Z"`, `"21.10.2026"`), []string{"REQ-RES-CONFIG-007"}},
 		{"byte string", pub, r(`"AQID"`, `"A*"`), []string{"REQ-RES-CONFIG-007"}},
+		{"byte string newline", pub, r(`"AQID"`, `"AQ\nID"`), []string{"REQ-RES-CONFIG-007"}},
 		{"mandatory string", pub, r(`"Mandatory": true`, `"Mandatory": "true"`), []string{"REQ-RES-CONFIG-002"}},
 		{"name text", pub, r(`"Text": "Port"}`, `"Text": "Port", "Foo": 1}`), []string{"REQ-MSG-001"}},
 		{"name plain", pub, r(`{"Locale": "en-US", "Text": "Port"}`, `"Port"`), []string{"REQ-MSG-040"}},
