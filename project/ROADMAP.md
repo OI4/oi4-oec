@@ -53,7 +53,7 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
 - **Increments and cycle cut** (C-033; ordered by dependency, each cycle ends with a PO review of its drafted vectors, reclassifications and ADR/SF decisions):
   - **C-033 – plan + ADR-0019 + PoC** (done 2026-10-23): ADR-0019 proposed and accepted in the PO review (option B, generated tolerant flavor, `$id` base `schemas.openindustry4.com` with major-only `$id`s, santhosh + jsonschema-rs, verification split, umbrella rule, this cycle cut); SF-097 decided; PoC of the envelope, helpers and Health (`pub-health`, `get-health`) against 16 vectors and 17 probes with three validators (after an independent review of the ADR and PoC); SF-097. The full build-out waits for the acceptance of ADR-0019. Addendum 2 (PO order): SF-097 in MG 8.3.12 (`cc2fb4b`) + re-baseline; REQ-LOC-003, oracle check, V-PAY-127/128 (reviewed in addendum 3); PoC with 18 probes, 52 cases.
   - **C-034 – foundation + `ua-data` envelope** (done 2026-10-23, reviewed 2026-10-24 – all accepted, split confirmed; split: MetaData → C-035, see `log/2026-10-23_C-034_foundation-envelope.md`):
-    - reclassifications REQ-MSG-026/REQ-PAG-009 (+`schema`), REQ-BUS-002 (`d7-validate` → `d7-test`); REQ-LIFE-003/007/009 deferred (role question to the PO); umbrella implication map (REQ-MSG-004/017, REQ-BUS-004/005); maps of REQ-CMP-004/005/025/026, REQ-TOP-002, REQ-IL-001/008 move to C-039;
+    - reclassifications REQ-MSG-026/REQ-PAG-009 (+`schema`), REQ-BUS-002 (`d7-validate` → `d7-test`); REQ-LIFE-003/007/009 deferred (role question to the PO); umbrella implication map (REQ-MSG-004/017, REQ-BUS-004/005); maps of REQ-CMP-004/005/025/026, REQ-TOP-002, REQ-IL-001/008 move to C-040 (C-039 before the C-036 split);
     - layout per ADR-0019 (`v2/resources/`), expectation list (first entry V-PAY-148);
     - `spectool coverage` per-REQ report `coverage/vectors.md` and `coverage -gate` (no gap, entry schema per allowed matrix row);
     - modules `opcua` (VerboseEnum), `envelope` (`ua-data`: MSG-026/030), `helpers` (PAG, LOC, QRY);
@@ -62,38 +62,42 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
     - SF-098 (`Del` with zero or one DataSetMessage): decided as proposed and implemented in MG 8.3.11 (`68d878d`), re-baseline (addendum 1);
     - Q-020 decided: option (a), vector field `role` + D7 `validate --role`.
   - **C-035 – MetaData + LIFE roles** (new, split off C-034; done 2026-10-24, reviewed 2026-10-25 – all accepted, D-3 (a): REQ-LIFE-002/006/008 keep `d7-monitor`/`d7-test`; see `log/2026-10-24_C-035_metadata.md`):
-    - scope change by the agent: the Pub/Get/Set Metadata entry schemas (3 topic forms, area RES-META) were pulled from C-037 – they only wrap the MetaData objects of this cycle;
+    - scope change by the agent: the Pub/Get/Set Metadata entry schemas (3 topic forms, area RES-META) were pulled from C-037 (now C-038) – they only wrap the MetaData objects of this cycle;
     - ADR-0019 amendment C-035: bare MetaData → `ResourceMetaData`, name uniqueness is rule R-3, declared role is rule R-6;
     - envelope `ua-metadata`, module `metadata` (DataSetMetaData, FieldMetaData, StructureDescription, EnumDescription, ConfigurationVersion);
     - REQ-MSG-012, REQ-MSG-032 … 045 with negative vectors, gap REQs REQ-MSG-042/043/045;
     - the 8 bare MetaData vectors;
-    - LIFE roles per Q-020 (a): optional vector field `role` (`birth`/`close`/`will`) in vector schema, lint and oracle; REQ-LIFE-003/007/009 +`d7-validate`; positive and negative role vectors (`validate --role` itself in C-039) – done: V-PAY-152 … 175, V-PAY-023 … 025 with `role`.
-  - **C-036 – Actions + core resources:**
-    - `actions`, NewDataSetWriterId (`call-`/`reply-newdatasetwriterid`);
-    - MAM, Health, Profile, PublicationList and ReferenceDesignation with their 13 topic forms;
-    - areas ACT, RES-MAM, RES-HEALTH, RES-PROFILE, RES-PUBLIST, RES-REFDES;
-    - gap REQs REQ-ACT-013, REQ-RES-HEALTH-007, REQ-RES-MAM-006/014;
-    - oracle extensions (e.g. REQ-RES-HEALTH-007).
-  - **C-037 – Data, Event, SubscriptionList** (Metadata done in C-035):
+    - LIFE roles per Q-020 (a): optional vector field `role` (`birth`/`close`/`will`) in vector schema, lint and oracle; REQ-LIFE-003/007/009 +`d7-validate`; positive and negative role vectors (`validate --role` itself in C-040) – done: V-PAY-152 … 175, V-PAY-023 … 025 with `role`.
+  - **C-036 – Actions + MAM, Health, Profile** (split by the agent: PublicationList and ReferenceDesignation → new C-037, see `log/2026-10-25_C-036_actions-mam-profile.md`; done 2026-10-25, PO review pending):
+    - oracle: REQ-ACT-013 payload encoding, REQ-ACT-003 for the Action `Status`, REQ-RES-MAM-006 (heuristic) and REQ-RES-MAM-014;
+    - SF-099 (empty `Pub` as the answer to a `Get` without content) found, open; the `pub-<resource>` entry schemas accept `"Messages": []`;
+    - `Pub` content REQs REQ-RES-MAM-022, REQ-RES-HEALTH-007, REQ-RES-PROFILE-005, REQ-RES-PUBLIST-021, REQ-RES-REFDES-005 as umbrellas (ADR-0019 §9);
+    - modules `actions`, `resources/mam`, `resources/profile`; entry schemas `pub-`/`get-mam`, `pub-`/`get-profile`, `call-`/`reply-newdatasetwriterid`; Action dispatch in `message.schema.json`;
+    - areas ACT, RES-MAM, RES-HEALTH, RES-PROFILE incl. the gap REQs REQ-ACT-013, REQ-RES-HEALTH-007, REQ-RES-MAM-006/014;
+    - V-PAY-176 … 217, V-TOP-253 (REQ-ACT-020), reqs extensions of 8 reviewed vectors; probes P-35 … P-44; ADR-0019 amendment C-036 (proposed).
+  - **C-037 – PublicationList + ReferenceDesignation** (new, split off C-036):
+    - PublicationList (Pub/Get/Set/Del) and ReferenceDesignation (Pub/Get/Set/Del) with their 8 topic forms;
+    - areas RES-PUBLIST, RES-REFDES.
+  - **C-038 – Data, Event, SubscriptionList** (Metadata done in C-035):
     - Data/Oi4Pv, Event (Status/Syslog/Generic), SubscriptionList, with their 8 topic forms;
     - areas RES-DATA, RES-EVENT, RES-SUBLIST;
     - gap REQ REQ-RES-DATA-003.
-  - **C-038 – Config + `broker.json`:**
+  - **C-039 – Config + `broker.json`:**
     - Config Pub/Get/Set (groups, configuration objects, Validation, masking);
     - area RES-CONFIG with gap REQ REQ-RES-CONFIG-015;
     - `platform/broker.schema.json` (REQ-CNT-003, verification `d8` unchanged) with RIG 4.1.1 vectors.
-  - **C-039 – D7 `validate`:**
+  - **C-040 – D7 `validate`:**
     - `oec/conformance` Go module skeleton (ADR-0013) with the `validate` command: topic grammar + IL + embedded entry schemas + rule layer R-1 … R-4 and R-6 (`validate --role`, ADR-0019 amendment C-035), report with REQ ids, JSON output, exit codes;
     - every topic and payload vector passes as expected;
     - areas TOP, IL, CMP (rule-layer parts) with gap REQs REQ-IL-005 and REQ-TOP-018;
     - umbrella REQs REQ-CMP-004/005/025/026, REQ-TOP-002 and REQ-IL-001/008 (implication maps, ADR-0019 §9).
-  - **C-040 – P2 exit review:**
+  - **C-041 – P2 exit review:**
     - consistency review;
     - `coverage -gate` as gate;
     - `CHANGELOG` 2.0.0 of the schemas;
     - `$id`s frozen;
     - PO review → P2 exit.
-  - The agent may split a cycle that grows too large (allowed by the PO), with the reason in the log. P2 sizing at `5b8fe59`: 159 `schema`/`d7-validate` REQs; 129 lack a positive and/or a negative vector (93 positive only, 15 negative only, 21 none); 29 topic forms with 126 payload vectors. At `cc2fb4b` (C-033 addendum 2): 160 such REQs (+ REQ-LOC-003, with negative vectors V-PAY-127/128, positive V-PAY-089), 128 payload vectors. C-034: 159 such REQs (REQ-BUS-002 → `d7-test`), 151 payload vectors; 129 gaps while the C-034 drafts are unreviewed, 96 after their review (projection). C-035: 159 such REQs (REQ-MSG-038 −`schema`, REQ-LIFE-003/007/009 +`d7-validate`), 175 payload vectors; 96 gaps while the C-035 drafts were unreviewed, 77 after their review (2026-10-25); entry schemas 5 of 29.
+  - The agent may split a cycle that grows too large (allowed by the PO), with the reason in the log. P2 sizing at `5b8fe59`: 159 `schema`/`d7-validate` REQs; 129 lack a positive and/or a negative vector (93 positive only, 15 negative only, 21 none); 29 topic forms with 126 payload vectors. At `cc2fb4b` (C-033 addendum 2): 160 such REQs (+ REQ-LOC-003, with negative vectors V-PAY-127/128, positive V-PAY-089), 128 payload vectors. C-034: 159 such REQs (REQ-BUS-002 → `d7-test`), 151 payload vectors; 129 gaps while the C-034 drafts are unreviewed, 96 after their review (projection). C-035: 159 such REQs (REQ-MSG-038 −`schema`, REQ-LIFE-003/007/009 +`d7-validate`), 175 payload vectors; 96 gaps while the C-035 drafts were unreviewed, 77 after their review (2026-10-25); entry schemas 5 of 29. C-036: 159 such REQs, 217 payload vectors, 147 topic vectors; 81 gaps while the C-036 drafts are unreviewed (the 8 extended guideline vectors are draft again), 48 after their review (projection); entry schemas 11 of 29.
 - **Exit:**
   1. ADR-0019 accepted.
   2. Every non-deprecated REQ with `schema` and/or `d7-validate` (159 at `5b8fe59`, 160 at `cc2fb4b` and `68d878d`, including the 21 of the C-031 gap list) has at least one reviewed positive and one reviewed negative vector. Umbrella REQs are covered through their detail REQs, if the PO accepts ADR-0019 §9. `spectool coverage -gate` gates this (C-034).
