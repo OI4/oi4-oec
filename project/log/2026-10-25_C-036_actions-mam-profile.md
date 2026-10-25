@@ -207,3 +207,30 @@ Collected in [`REVIEW.md`](../REVIEW.md) (German explanation: [`REVIEW_DE.md`](.
 5. R-1 V-PAY-176 … 203 (Actions), R-2 V-PAY-204 … 217 (MAM, Profile), R-3 V-TOP-253, R-4 `reqs` of the 8 reviewed guideline vectors.
 
 Next free ids: SF-100, V-PAY-218, V-TOP-254, ADR-0020, Q-021.
+
+## Addendum 1 – PO review (2026-10-25)
+
+PO (chat, 2026-10-25): "SF-099 soll wie folgt sein. Wenn Get angefragt wird und es gibt nichts, dann leere Liste. Wenn es das asset nicht gibt, kommt keine Antwort und should für ein Event mit fehler. Das Event verhalten sollte bereits beschrieben sein. D-2, D-3, D-4 angenommen. R-1 bis R-4 durchgeführt und angenommen." Recorded in [`REVIEW.md`](../REVIEW.md) (commit `a9aae9c`, kept as the review record): D-1 SF-099 **decided, revised**; D-2 ADR-0019 amendment C-036 **accepted**; D-3 cycle split **accepted**; D-4 REQ-RES-MAM-006 heuristic **accepted**; R-1 … R-4 **accepted**.
+
+SF-099 (register `5491830` in the guideline repo, status `decided`):
+
+- `Get` of a resource of a known asset without content → `Pub` with `"Messages": []` (as MG 9.1 "Resources Without Content" already requires, REQ-CMP-041).
+- `Get` whose `Source` addresses an asset the entity does not know → **no** `Pub`; the entity should publish an `Event` of category `Status`, level `Bad` (e.g. `BadNotFound`). The PO is right that this behaviour is already described in MG 9.1 "Resources Without Content" – for `Set`/`Del` on an unknown object (must from Level 2, should at Level 1) and for `Get Metadata` without data (may); the `Get` case for an unknown asset is not yet named there.
+- Agent reading, **to be confirmed by the PO**: a `Filter` on a known asset that matches nothing (e.g. `Get/Data/<Source>/<unknown Tag>`) counts as "es gibt nichts" → empty list. `Get Metadata` stays the special case of 9.1 (no answer).
+- Proposed guideline text (new bullet in 9.1 "Resources Without Content", and "none in the answer to a `Get` without content" in the 9.1.x `Pub` bullets) is in the register; the guideline is changed only on PO order (then re-baseline and a REQ for the unknown-asset case, ADR-0018).
+- Effect on the workspace: none on the schemas (an empty `Pub` stays valid; whether a `Pub` answers a `Get`, or that no `Pub` follows a `Get` for an unknown asset, is runtime behaviour → `monitor`). No REQ, vector or matrix change.
+
+Review applied (`879e5e9`, `spectool review`):
+
+- 51 drafts → `reviewed`: V-PAY-176 … 217, V-TOP-253, V-PAY-001/003/004/008/009/028/119/120; header comments of `payload/guideline.yaml`, `payload/constructed.yaml`, `topic/invalid.yaml` updated.
+- Coverage (`coverage/vectors.md`): schema/d7-validate gaps 81 → **48** (as projected); entry schemas 11 of 29.
+
+ADR-0019 (`be648c9`): status line and amendment C-036 heading say accepted; point 1 states the SF-099 decision; the anchor link above follows the new heading.
+
+No reviewed item changed beyond the accepted proposals; guideline text unchanged at `68d878d` (register-only commit, no re-baseline).
+
+`REVIEW.md` / `REVIEW_DE.md`: reset to "nothing open"; C-037 fills them again.
+
+Checks: `spectool lint` (436 REQs, 217 payload vectors, 147 topic vectors), `render -check`, `coverage -check`, `topic -check`, `inventory -check -rev 68d878d` (1397 items), `go test ./...`, `oec/schema/check.sh` (42 schema files, 375 cases, 0 disagreements): green.
+
+Next free ids: SF-100, V-PAY-218, V-TOP-254, ADR-0020, Q-021. Next cycle: C-037 – PublicationList + ReferenceDesignation (ROADMAP P2).
