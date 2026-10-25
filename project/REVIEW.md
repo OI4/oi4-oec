@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-25, C-036 addendum 2 – SF-099 in the guideline (guideline `a42a132`)._
+_Last updated: 2026-10-25, PO answers for C-036 addendum 2 recorded (R-1 … R-3 accepted); guideline `a42a132`._
 
 This is the single list of everything that waits for the PO: items to **review** (drafts and changes to reviewed items) and items to **decide** (spec findings, open questions, cycle plan). Each cycle updates it; items leave the list once the PO has answered and `spectool review` (or the decision record) has been applied. Details are in the cycle log; this file links to them.
 
@@ -14,9 +14,9 @@ Current state: **3 review items** from implementing SF-099 (one draft REQ, one c
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| R-1 | New REQ-CMP-047 – `Get` for an unknown asset: no `Pub`, should `Event` Status Bad | review | C-036 add. 2 | accept | ☐ |
-| R-2 | REQ-CMP-041 (reviewed) – statement extended by the `Filter` case | review | C-036 add. 2 | accept | ☐ |
-| R-3 | Guideline wording of SF-099 (`a42a132`: MG 9.1, 9.1.x `Pub` bullets, 8.3.6.1) | review | C-036 add. 2 | accept | ☐ |
+| R-1 | New REQ-CMP-047 – `Get` for an unknown asset: no `Pub`, should `Event` Status Bad | review | C-036 add. 2 | accept | ✅ accepted |
+| R-2 | REQ-CMP-041 (reviewed) – statement extended by the `Filter` case | review | C-036 add. 2 | accept | ✅ accepted |
+| R-3 | Guideline wording of SF-099 (`a42a132`: MG 9.1, 9.1.x `Pub` bullets, 8.3.6.1) | review | C-036 add. 2 | accept | ✅ accepted |
 
 ## Reviews
 
@@ -24,12 +24,12 @@ Current state: **3 review items** from implementing SF-099 (one draft REQ, one c
 
 - **Where:** [`requirements/cmp.yaml`](../oec/spec/requirements/cmp.yaml) / [view](../oec/spec/requirements/view/cmp.md).
 - **Statement:** "An entity does not answer a Get whose Source addresses an asset that the entity neither is nor represents on the related Pub topic. It should answer such a Get with an Event of the category Status and the level Bad (BadNotFound, MG 8.3.6.1)." Keyword SHOULD at all levels (the PO said "should"; the Set/Del rule REQ-CMP-043 is MUST from Level 2), `d7-test`, inventory MG-9.1-144b2f9a.
-- **PO:** ☐ accepted ☐ change: …
+- **PO:** X accepted ☐ change: … (2026-10-25)
 
 ### R-2 – REQ-CMP-041 statement extended (reviewed item)
 
 - **Change:** appended "The same applies to a Get whose Filter matches no content of a Source the entity provides; a Get for a Source the entity does not provide is REQ-CMP-047." Quote and inventory key follow the guideline; refs +SF-099. Reason: the PO confirmed this reading on 2026-10-25. The item stays `reviewed` (SF-097/SF-098 precedent); please object if not.
-- **PO:** ☐ accepted ☐ change: …
+- **PO:** X accepted ☐ change: … (2026-10-25)
 
 ### R-3 – Guideline wording (`a42a132`)
 
@@ -37,7 +37,7 @@ Current state: **3 review items** from implementing SF-099 (one draft REQ, one c
 - MG 9.1.1/9.1.2/9.1.3/9.1.4/9.1.7/9.1.8/9.1.9/9.1.10, `Pub` bullet: "… `DataSetMessages` of type X – none in the answer to a `Get` without content (Resources Without Content) – and optional `Pagination` …".
 - MG 8.3.6.1: Status events also report "a `Get` that is not answered – a `Get` of `Metadata` without `Data` or a `Get` for an unknown asset".
 - "Neither is nor represents" uses the terms of MG 1.3 (directly connected / represented entities). No GL-ADR (GL-ADR-017 only moved the section). The 8 `Pub`-content REQs and REQ-RES-EVENT-005 only got new quotes/keys (mechanical, statements unchanged).
-- **PO:** ☐ accepted ☐ change: …
+- **PO:** X accepted ☐ change: … (2026-10-25)
 
 
 ## Last review – C-036 (answered 2026-10-25)
