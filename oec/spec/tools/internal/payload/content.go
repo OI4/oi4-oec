@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/OI4/oec/spec/tools/internal/il"
 )
 
 // Content of the DataSets (MG 8.3): the helper DataSets PaginationRequest,
@@ -18,8 +20,10 @@ import (
 // every resource and the DataSets of MAM, Health, Profile, PublicationList
 // and ReferenceDesignation (areas RES-*, C-027) and of Data (Oi4Pv), Event
 // and SubscriptionList (C-028) and Config (C-029). The application-defined
-// Data DataSets themselves are not checked. Only MUST rules are reported;
-// recommendations (SHOULD) are not checked.
+// Data DataSets themselves are not checked. Recommendations (SHOULD) are
+// only reported where a violation is unambiguous (REQ-MSG-026 for a Good
+// Status, REQ-RES-MAM-014 for an Oi4.<ServiceType> DeviceClass of another
+// ServiceType, C-036).
 
 // dsm is a DataSetMessage of a ua-data NetworkMessage with a valid
 // DataSetWriterId.
@@ -340,8 +344,50 @@ func (c *checker) mam(d dsm) {
 		if n := utf8.RuneCountInString(s); n > 255 {
 			c.add(join(p, "ProductInstanceUri"), "REQ-RES-MAM-017", "ProductInstanceUri has %d > 255 characters", n)
 		}
+		c.mamIdentifier(p, m, s)
 	}
 	c.int32(m, p, "RevisionCounter", req)
+	if dc, ok := m["DeviceClass"].(string); ok && d.name != "" && d.name == c.t.AppIL {
+		if st, found := strings.CutPrefix(dc, "Oi4."); found && serviceTypes[st] && st != c.t.ServiceType {
+			c.add(join(p, "DeviceClass"), "REQ-RES-MAM-014", "the DeviceClass %q of the application names another ServiceType than %s of its topic", dc, c.t.ServiceType)
+		}
+	}
+}
+
+// mamIdentifier checks REQ-RES-MAM-006 heuristically (C-036): a
+// ProductInstanceUri without scheme of four segments whose first segment is
+// the ManufacturerUri is taken for a generated Oi4Identifier (MG 4.3.1), so
+// its elements are the Model (only if its Locale is en-US, REQ-IL-027),
+// ProductCode and SerialNumber of the MAM, plain or dnp-encoded (MG A3), "nd"
+// for an empty value.
+func (c *checker) mamIdentifier(p string, m map[string]any, piu string) {
+	mu, ok := m["ManufacturerUri"].(string)
+	seg := strings.Split(piu, "/")
+	if !ok || mu == "" || il.Scheme(piu) != "" || len(seg) != 4 || seg[0] != strings.ToLower(mu) {
+		return
+	}
+	type element struct{ name, value string }
+	var elems [3]*element
+	if lt, ok := m["Model"].(map[string]any); ok && lt["Locale"] == "en-US" {
+		if t, ok := lt["Text"].(string); ok {
+			elems[0] = &element{"Model", t}
+		}
+	}
+	for i, k := range []string{"ProductCode", "SerialNumber"} {
+		if v, ok := m[k].(string); ok {
+			elems[i+1] = &element{k, v}
+		}
+	}
+	for i, e := range elems {
+		if e == nil {
+			continue
+		}
+		s := seg[i+1]
+		if e.value == "" && s == il.NoData || e.value != "" && (s == e.value || s == il.DnpEncode(e.value)) {
+			continue
+		}
+		c.add(join(p, "ProductInstanceUri"), "REQ-RES-MAM-006", "ProductInstanceUri %q is an Oi4Identifier of the ManufacturerUri, but its element %q is not the %s %q", piu, s, e.name, e.value)
+	}
 }
 
 // --- Health (MG 8.3.2) -------------------------------------------------------

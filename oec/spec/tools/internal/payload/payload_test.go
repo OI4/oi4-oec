@@ -247,6 +247,12 @@ func TestViolations(t *testing.T) {
 		{"common service writer id", tCall, call, `"DataSetWriterId": 8, "ActionTargetId": 1`, `"DataSetWriterId": 9, "ActionTargetId": 2`, []string{"REQ-ACT-019"}},
 		{"request resource", tCall, call, `"Resource": "ReferenceDesignation"`, `"Resource": "Foo"`, []string{"REQ-ACT-021"}},
 		{"response reserved id", tReply, reply, `"DataSetWriterId": 57211`, `"DataSetWriterId": 3`, []string{"REQ-ACT-022"}},
+		{"response without ttl", tReply, reply, `, "Ttl": 10`, ``, []string{"REQ-ACT-022"}},
+		{"request payload unknown field", tCall, call, `"Resource": "ReferenceDesignation"`, `"Resource": "ReferenceDesignation", "Tag": "x"`, []string{"REQ-ACT-013"}},
+		{"request resource type", tCall, call, `"Resource": "ReferenceDesignation"`, `"Resource": 5`, []string{"REQ-ACT-013"}},
+		{"response id out of range", tReply, reply, `"DataSetWriterId": 57211`, `"DataSetWriterId": 65536`, []string{"REQ-ACT-013"}},
+		{"ttl as string", tReply, reply, `"Ttl": 10`, `"Ttl": "10"`, []string{"REQ-ACT-013"}},
+		{"status unknown key", tReply, reply, `"Status": {}`, `"Status": {"Foo": 1}`, []string{"REQ-ACT-003"}},
 	}
 	for _, c := range cases {
 		if !strings.Contains(c.msg, c.old) {
@@ -629,6 +635,13 @@ func TestContent(t *testing.T) {
 		{"device manual", tMAM, mamPub, `"DeviceManual": "https://provider.com/fds.pdf"`, `"DeviceManual": "fds.pdf"`, []string{"REQ-RES-MAM-012"}},
 		{"device manual empty", tMAM, mamPub, `"DeviceManual": "https://provider.com/fds.pdf"`, `"DeviceManual": ""`, nil},
 		{"product instance uri", tMAM, mamPub, `"ProductInstanceUri": "provider.com`, `"ProductInstanceUri": "x.com`, []string{"REQ-RES-MAM-016"}},
+		{"oi4 identifier model", tMAM, mamPub, `"Text": "FieldDataService"`, `"Text": "FDS"`, []string{"REQ-RES-MAM-006"}},
+		{"oi4 identifier serial", tMAM, mamPub, `"SerialNumber": "1200-0345"`, `"SerialNumber": "1200-0346"`, []string{"REQ-RES-MAM-006"}},
+		{"oi4 identifier german model", tMAM, mamPub, `"Model": {"Locale": "en-US", "Text": "FieldDataService"}`, `"Model": {"Locale": "de-DE", "Text": "Felddatendienst"}`, nil},
+		{"oi4 identifier of other manufacturer", tMAM, mamPub, `"ManufacturerUri": "provider.com"`, `"ManufacturerUri": "vendor.com"`, nil},
+		{"device class of other service type", tMAM, mamPub, `"DeviceClass": "Oi4.OTConnector"`, `"DeviceClass": "Oi4.Registry"`, []string{"REQ-RES-MAM-014"}},
+		{"device class of vendor", tMAM, mamPub, `"DeviceClass": "Oi4.OTConnector"`, `"DeviceClass": "Vendor.Gateway"`, nil},
+		{"device class of oi4 role", tMAM, mamPub, `"DeviceClass": "Oi4.OTConnector"`, `"DeviceClass": "Oi4.Sensor"`, nil},
 		{"product instance uri length", tMAM, mamPub, `"ProductInstanceUri": "` + app + `"`, `"ProductInstanceUri": "` + strings.Repeat("a", 256) + `"`, []string{"REQ-RES-MAM-016", "REQ-RES-MAM-017"}},
 		{"health enum", tHealth, healthPub, `"Health": "NORMAL_0"`, `"Health": "NORMAL"`, []string{"REQ-RES-HEALTH-001"}},
 		{"health enum number", tHealth, healthPub, `"Health": "NORMAL_0"`, `"Health": 0`, []string{"REQ-MSG-031", "REQ-RES-HEALTH-001"}},
@@ -807,5 +820,25 @@ func TestContentC029(t *testing.T) {
 			v, _ := Parse([]byte(c.msg))
 			t.Errorf("%s: got %v, want %v: %v", c.name, got, c.want, Check(c.top, v))
 		}
+	}
+}
+
+// TestOi4IdentifierElements checks the element matching of REQ-RES-MAM-006:
+// dnp-encoded or plain values and "nd" for an empty value.
+func TestOi4IdentifierElements(t *testing.T) {
+	asset := "provider.com/Field,20Data/nd/1200,2F0345"
+	pub := strings.NewReplacer(`"DataSetWriterName": "`+app+`",
+    "Payload": {
+      "Manufacturer"`, `"DataSetWriterName": "`+asset+`",
+    "Payload": {
+      "Manufacturer"`, `"ProductInstanceUri": "`+app+`"`, `"ProductInstanceUri": "`+asset+`"`,
+		`"Text": "FieldDataService"`, `"Text": "Field Data"`, `"ProductCode": "FDS-001"`, `"ProductCode": ""`,
+		`"SerialNumber": "1200-0345"`, `"SerialNumber": "1200/0345"`).Replace(mamPub)
+	if got := reqs(t, tMAM, pub); len(got) != 0 {
+		t.Errorf("dnp-encoded Oi4Identifier: got %v", got)
+	}
+	bad := strings.Replace(pub, `"ProductCode": ""`, `"ProductCode": "FDS-001"`, 1)
+	if got := reqs(t, tMAM, bad); !reflect.DeepEqual(got, []string{"REQ-RES-MAM-006"}) {
+		t.Errorf("nd for a ProductCode: got %v", got)
 	}
 }

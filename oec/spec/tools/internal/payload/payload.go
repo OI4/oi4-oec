@@ -1136,7 +1136,7 @@ func (c *checker) actionMessage(ptr string, v any, request bool) (int64, bool) {
 	if !request {
 		if st, ok := m["Status"]; ok {
 			sp := join(ptr, "Status")
-			if sm := c.object(sp, st, shape{optional: []string{"Code", "Symbol"}, missing: "REQ-ACT-014"}); sm != nil {
+			if sm := c.object(sp, st, shape{optional: []string{"Code", "Symbol"}, missing: "REQ-ACT-014", unknown: "REQ-ACT-003"}); sm != nil {
 				if _, ok := sm["Symbol"]; ok {
 					c.add(join(sp, "Symbol"), "REQ-ACT-014", "the Status of an ActionResponse has no Symbol")
 				}
@@ -1158,19 +1158,25 @@ func (c *checker) actionMessage(ptr string, v any, request bool) (int64, bool) {
 	return rid, ridOK
 }
 
+// newDataSetWriterID checks the Payload of NewDataSetWriterId (MG 8.4.1): a
+// missing field or a value outside the semantics of the field violates
+// REQ-ACT-021/022, a field with a wrong JSON type, a value out of range of
+// its data type or a field not defined in the ActionMetaData violates the
+// encoding of REQ-ACT-013 (C-036).
 func (c *checker) newDataSetWriterID(ptr string, p map[string]any, request bool) {
+	const enc = "REQ-ACT-013"
 	if request {
 		const req = "REQ-ACT-021"
-		pm := c.object(ptr, p, shape{required: []string{"Resource"}, missing: req})
-		if s, ok := c.str(pm, ptr, "Resource", req); ok && !resources[s] {
+		pm := c.object(ptr, p, shape{required: []string{"Resource"}, missing: req, unknown: enc})
+		if s, ok := c.str(pm, ptr, "Resource", enc); ok && !resources[s] {
 			c.add(join(ptr, "Resource"), req, "Resource %q is no ResourceType", s)
 		}
 		return
 	}
 	const req = "REQ-ACT-022"
-	pm := c.object(ptr, p, shape{required: []string{"DataSetWriterId", "Ttl"}, missing: req})
-	if id, ok := c.uint(pm, ptr, "DataSetWriterId", req, 65535); ok && id < 10 {
+	pm := c.object(ptr, p, shape{required: []string{"DataSetWriterId", "Ttl"}, missing: req, unknown: enc})
+	if id, ok := c.uint(pm, ptr, "DataSetWriterId", enc, 65535); ok && id < 10 {
 		c.add(join(ptr, "DataSetWriterId"), req, "the provided DataSetWriterId %d is reserved", id)
 	}
-	c.uint(pm, ptr, "Ttl", req, maxUint32)
+	c.uint(pm, ptr, "Ttl", enc, maxUint32)
 }
