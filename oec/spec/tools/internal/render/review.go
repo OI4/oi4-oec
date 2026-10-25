@@ -314,8 +314,11 @@ func vectorFile(f vectors.File, ts *topic.Spec, areas map[string]bool) string {
 		if v.Notes != "" {
 			fmt.Fprintf(&b, "\nNotes: %s\n", oneLine(v.Notes))
 		}
-		if f.Kind == "payload" {
+		switch f.Kind {
+		case "payload":
 			payloadBlocks(&b, v)
+		case "broker-json":
+			fmt.Fprintf(&b, "\nContent of `broker.json`:\n\n```json\n%s\n```\n", strings.TrimRight(v.Content, "\n"))
 		}
 	}
 	return b.String()
@@ -344,7 +347,7 @@ func result(kind string, v vectors.Vector) string {
 			return "violations: " + strings.Join(v.Violations, ", ")
 		}
 		return "→ " + v.Oi4Identifier
-	case "payload":
+	case "payload", "broker-json":
 		if len(v.Violates) > 0 {
 			return "violates: " + strings.Join(v.Violates, ", ")
 		}

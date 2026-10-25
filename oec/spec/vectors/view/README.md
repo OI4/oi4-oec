@@ -10,6 +10,7 @@ Guideline baseline: `23f6cfd`. Source of truth: the YAML files in `oec/spec/vect
 | [il-oi4identifier](il-oi4identifier.md) | `vectors/il/oi4identifier.yaml` | oi4identifier | 13 | 7 | 6 | 4 | 0 | 13 |
 | [payload-constructed](payload-constructed.md) | `vectors/payload/constructed.yaml` | payload | 147 | 7 | 140 | 0 | 2 | 145 |
 | [payload-guideline](payload-guideline.md) | `vectors/payload/guideline.yaml` | payload | 94 | 94 | 0 | 94 | 0 | 94 |
+| [platform-broker-json](platform-broker-json.md) | `vectors/platform/broker-json.yaml` | broker-json | 18 | 4 | 14 | 0 | 18 | 0 |
 | [topic-guideline](topic-guideline.md) | `vectors/topic/guideline.yaml` | topic | 60 | 60 | 0 | 60 | 0 | 60 |
 | [topic-invalid](topic-invalid.md) | `vectors/topic/invalid.yaml` | topic | 53 | 0 | 53 | 0 | 0 | 53 |
 | [topic-valid](topic-valid.md) | `vectors/topic/valid.yaml` | topic | 34 | 34 | 0 | 0 | 0 | 34 |

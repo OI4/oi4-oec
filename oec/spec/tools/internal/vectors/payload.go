@@ -64,15 +64,7 @@ func checkPayload(ts *topic.Spec, v Vector, sections map[string]string, add func
 			checkPayloadColumns(ts, p.Method, p.Resource, msg, add)
 		}
 	}
-	var got []string
-	seen := map[string]bool{}
-	for _, pr := range problems {
-		if !seen[pr.Req] {
-			seen[pr.Req] = true
-			got = append(got, pr.Req)
-		}
-	}
-	sort.Strings(got)
+	got := reqsOf(problems)
 	switch {
 	case v.Expected == "valid" && len(problems) > 0:
 		add("payload violates %v:\n    %s", got, joinProblems(problems))
@@ -83,6 +75,20 @@ func checkPayload(ts *topic.Spec, v Vector, sections map[string]string, add func
 		checkPayloadOrigin(v, msg, sections, add)
 	}
 	return nil
+}
+
+// reqsOf returns the sorted distinct requirements of the problems.
+func reqsOf(problems []payload.Problem) []string {
+	var got []string
+	seen := map[string]bool{}
+	for _, pr := range problems {
+		if !seen[pr.Req] {
+			seen[pr.Req] = true
+			got = append(got, pr.Req)
+		}
+	}
+	sort.Strings(got)
+	return got
 }
 
 // checkRoleReqs keeps the declared role and the role requirements

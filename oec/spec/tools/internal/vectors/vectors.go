@@ -1,7 +1,8 @@
 // Package vectors loads the language-neutral test vectors in oec/spec/vectors
 // and recomputes every expected result with the reference checks: the topic
 // grammar (ABNF interpreter + generated regex), the Identification Link rules,
-// the dnp-encoding, the Oi4Identifier construction and the payload envelope.
+// the dnp-encoding, the Oi4Identifier construction, the payload envelope and
+// the platform files (broker.json).
 package vectors
 
 import (
@@ -14,6 +15,8 @@ import (
 
 	"github.com/OI4/oec/spec/tools/internal/guideline"
 	"github.com/OI4/oec/spec/tools/internal/il"
+	"github.com/OI4/oec/spec/tools/internal/payload"
+	"github.com/OI4/oec/spec/tools/internal/platform"
 	"github.com/OI4/oec/spec/tools/internal/schema"
 	"github.com/OI4/oec/spec/tools/internal/topic"
 	"github.com/OI4/oec/spec/tools/internal/yamlstrict"
@@ -83,6 +86,8 @@ type Vector struct {
 	Role     string `json:"role,omitempty"`   // declared message role: birth, close or will (Q-020 (a))
 	Original string `json:"original,omitempty"`
 	Edits    []Edit `json:"edits,omitempty"`
+
+	Content string `json:"content,omitempty"` // broker-json: the file content
 }
 
 // Edit records one change of a payload vector against its guideline
@@ -196,6 +201,8 @@ func Check(files []File, ts *topic.Spec, opt Options) []error {
 				}
 			case "oi4identifier":
 				checkOi4Identifier(v, add)
+			case "broker-json":
+				checkBroker(v, add)
 			}
 		}
 	}
@@ -312,6 +319,24 @@ func checkOi4Identifier(v Vector, add func(string, ...any)) {
 	}
 	if v.Expected == "valid" && id != v.Oi4Identifier {
 		add("Oi4Identifier is %q, vector says %q", id, v.Oi4Identifier)
+	}
+}
+
+// checkBroker recomputes a broker.json vector: strict JSON, no problem
+// (valid) or exactly the requirements in violates (invalid).
+func checkBroker(v Vector, add func(string, ...any)) {
+	doc, err := payload.Parse([]byte(v.Content))
+	if err != nil {
+		add("content is no strict JSON: %v", err)
+		return
+	}
+	problems := platform.CheckBroker(doc)
+	got := reqsOf(problems)
+	switch {
+	case v.Expected == "valid" && len(problems) > 0:
+		add("content violates %v:\n    %s", got, joinProblems(problems))
+	case v.Expected == "invalid" && !equalSet(got, v.Violates):
+		add("content violates %v, vector says %v:\n    %s", got, v.Violates, joinProblems(problems))
 	}
 }
 
