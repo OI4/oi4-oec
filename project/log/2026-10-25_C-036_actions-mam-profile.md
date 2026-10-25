@@ -142,7 +142,7 @@ Rule-layer expectations (`oec/schema/tests/rule-layer.yaml`): V-PAY-182 (ACT-004
 
 ### 7. ADR-0019 amendment C-036 (agent proposals, PO review)
 
-Appended to [ADR-0019](../decisions/ADR-0019-schema-architecture.md#amendment-c-036-2026-10-25--actions-and-core-resources-agent-proposals-within-this-adr-g-44-proposed-po-review-pending), status `proposed`:
+Appended to [ADR-0019](../decisions/ADR-0019-schema-architecture.md#amendment-c-036-2026-10-25--actions-and-core-resources-agent-proposals-within-this-adr-g-44-accepted-by-the-po-in-the-c-036-review-2026-10-25), status `proposed`:
 
 1. Empty `Pub` (SF-099): `pub-<resource>` accepts `"Messages": []`, the `pub-health` `anyOf` is removed.
 2. §9 umbrella rule applied to the `Pub` content REQs (§3 above).
