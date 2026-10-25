@@ -198,7 +198,16 @@ func (c *checker) contents(dsms []dsm) {
 		}
 	}
 	entries := map[string]string{}
+	contexts := map[string]string{}
 	for _, d := range res {
+		// A Set with two Config DataSetMessages is REQ-RES-CONFIG-019 only.
+		if c.t.Resource == "Config" && c.t.Method == "Pub" && d.name != "" && d.group != "" {
+			key := d.name + "\x00" + d.group
+			if prev, dup := contexts[key]; dup {
+				c.add(join(d.ptr, "WriterGroupName"), "REQ-RES-CONFIG-015", "Filter %q repeats the Config DataSet of the same Source at %s", d.group, prev)
+			}
+			contexts[key] = d.ptr
+		}
 		if d.payload == nil {
 			continue
 		}

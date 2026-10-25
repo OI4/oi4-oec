@@ -824,6 +824,16 @@ func TestContentC029(t *testing.T) {
 		{"mask not sensitive", pub, r(`"Value": "8080"`, `"Value": "********"`), []string{"REQ-RES-CONFIG-007"}},
 		{"set mask sensitive", set, sens(`"Value": "********", "DefaultValue": "********"`), nil},
 		{"set clear sensitive", set, sens(`"Value": "8080", "DefaultValue": "80"`), nil},
+		// C-039: the Filter is unique among the Config DataSets of the Source.
+		{"pub two contexts", cfg("Pub", app, ""), r(`}
+  }]`, `}
+  }, {"DataSetWriterId": 43, "WriterGroupName": "Device", "DataSetWriterName": "`+app+`", "Payload": {"g": {"Name": {"Locale": "en-US", "Text": "G"}, "c": {"Type": "String", "Value": "", "Name": {"Locale": "en-US", "Text": "C"}}}}}]`), nil},
+		{"pub repeated context", pub, r(`}
+  }]`, `}
+  }, {"DataSetWriterId": 43, "WriterGroupName": "Network", "DataSetWriterName": "`+app+`", "Payload": {"g": {"Name": {"Locale": "en-US", "Text": "G"}, "c": {"Type": "String", "Value": "", "Name": {"Locale": "en-US", "Text": "C"}}}}}]`), []string{"REQ-RES-CONFIG-015"}},
+		{"pub same context other source", cfg("Pub", "", ""), r(`}
+  }]`, `}
+  }, {"DataSetWriterId": 43, "WriterGroupName": "Network", "DataSetWriterName": "provider.com/Other/1/2", "Payload": {"g": {"Name": {"Locale": "en-US", "Text": "G"}, "c": {"Type": "String", "Value": "", "Name": {"Locale": "en-US", "Text": "C"}}}}}]`), nil},
 	}
 	for _, c := range cases {
 		got := reqs(t, c.top, c.msg)

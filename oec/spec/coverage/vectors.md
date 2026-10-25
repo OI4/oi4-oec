@@ -16,7 +16,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | MSG | 38 | 36 | 2 | 0 | 0 | 0 |
 | PAG | 5 | 5 | 0 | 0 | 0 | 0 |
 | QRY | 1 | 1 | 0 | 0 | 0 | 0 |
-| RES-CONFIG | 13 | 9 | 0 | 3 | 0 | 1 |
+| RES-CONFIG | 12 | 9 | 2 | 0 | 0 | 1 |
 | RES-DATA | 6 | 3 | 3 | 0 | 0 | 0 |
 | RES-EVENT | 8 | 6 | 2 | 0 | 0 | 0 |
 | RES-HEALTH | 4 | 3 | 1 | 0 | 0 | 0 |
@@ -27,7 +27,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | RES-REFDES | 7 | 6 | 1 | 0 | 0 | 0 |
 | RES-SUBLIST | 6 | 5 | 1 | 0 | 0 | 0 |
 | TOP | 13 | 6 | 0 | 1 | 4 | 2 |
-| **Total** | 159 | 125 | 15 | 4 | 5 | 10 |
+| **Total** | 158 | 125 | 17 | 1 | 5 | 10 |
 
 ## Entry schemas per allowed matrix row
 
@@ -73,6 +73,8 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-BUS-005 (derived) | REQ-BUS-010 (covered), REQ-TOP-013 (covered), REQ-RES-REFDES-007 (covered), REQ-RES-SUBLIST-011 (covered) | That the addressed object exists at the addressed component needs its publications (d7-test, REQ-BUS-002). |
 | REQ-MSG-004 (derived) | REQ-MSG-003 (covered), REQ-MSG-005 (covered), REQ-MSG-011 (covered) | none – the content mask is not on the wire; its effect is the field presence of the NetworkMessage (details). |
 | REQ-MSG-017 (derived) | REQ-MSG-016 (covered), REQ-MSG-018 (covered), REQ-MSG-024 (covered), REQ-MSG-029 (covered), REQ-MSG-031 (covered) | none – the content mask is not on the wire; its effect is the field presence of the DataSetMessage and the VerboseEncoding of the fields (details). |
+| REQ-RES-CONFIG-010 (derived) | REQ-TOP-013 (covered), REQ-RES-CONFIG-003 (covered), REQ-RES-CONFIG-007 (covered) | That the receiver unsets the value on an empty string is behavior of the responder (d7-test, REQ-RES-CONFIG-023); the message side is the absent Del Config (REQ-TOP-013), the mandatory Value of every configuration object of a Set (REQ-RES-CONFIG-003) and the empty string as valid Value of every Type (REQ-RES-CONFIG-007). |
+| REQ-RES-CONFIG-018 (derived) | REQ-MSG-010 (covered), REQ-RES-CONFIG-002 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Config DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Config content (REQ-RES-CONFIG-002). |
 | REQ-RES-DATA-001 (derived) | REQ-MSG-016 (covered), REQ-MSG-030 (covered), REQ-MSG-031 (covered) | That the fields are described by the Metadata of the same Source and Tag needs that Metadata (d7-test, REQ-CMP-037); an application-defined DataSet has no structure of its own on the wire. |
 | REQ-RES-DATA-003 (derived) | REQ-MSG-024 (covered), REQ-RES-DATA-004 (covered) | That no other DataSet uses the Tag Oi4Pv shows as a violation of the Oi4Pv content (REQ-RES-DATA-004); an Oi4Pv DataSet published under another Tag is not recognizable from one message (manual, REQ-RES-DATA-002). |
 | REQ-RES-DATA-008 (derived) | REQ-RES-DATA-001 (derived), REQ-RES-DATA-004 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Data DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource is not recognizable, since Data has no predefined DataSetClassId and an application-defined DataSet may have any fields (REQ-RES-DATA-001). |
@@ -175,13 +177,12 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-CONFIG-006 | schema, d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-095 … (8) | V-PAY-107 | covered |
 | REQ-RES-CONFIG-007 | schema, d7-validate | reviewed | V-PAY-116, V-PAY-091, V-PAY-092, V-PAY-093 … (13) | V-PAY-104, V-PAY-105 | covered |
 | REQ-RES-CONFIG-008 | d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-095 … (8) | V-PAY-108 | covered |
-| REQ-RES-CONFIG-010 | d7-validate | reviewed | V-PAY-096, V-PAY-097, V-PAY-102 | – | positive only |
-| REQ-RES-CONFIG-011 | d7-validate | reviewed | V-PAY-100, V-PAY-101, V-PAY-102 | – | positive only |
+| REQ-RES-CONFIG-010 | d7-validate | reviewed | V-PAY-096, V-PAY-097, V-PAY-102 | – | derived |
 | REQ-RES-CONFIG-015 | d7-validate | reviewed | – | – | none |
 | REQ-RES-CONFIG-016 | schema, d7-validate | reviewed | V-PAY-088, V-PAY-089, V-PAY-090, V-PAY-098 | V-PAY-110 | covered |
-| REQ-RES-CONFIG-018 | schema, d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-099 … (5) | – | positive only |
+| REQ-RES-CONFIG-018 | schema, d7-validate | reviewed | V-PAY-091, V-PAY-092, V-PAY-093, V-PAY-099 … (5) | – | derived |
 | REQ-RES-CONFIG-019 | schema, d7-validate | reviewed | V-PAY-094, V-PAY-095, V-PAY-096, V-PAY-097 … (7) | V-PAY-111 | covered |
-| REQ-RES-CONFIG-024 | d7-validate, d7-test | reviewed | V-PAY-099, V-PAY-114 | V-PAY-115 | covered |
+| REQ-RES-CONFIG-024 | schema, d7-validate, d7-test | draft | V-PAY-099, V-PAY-114 | V-PAY-115 | covered |
 | REQ-RES-DATA-001 | d7-validate | reviewed | V-PAY-058, V-PAY-059, V-PAY-060 | – | derived |
 | REQ-RES-DATA-003 | schema, d7-validate | reviewed | V-PAY-231 | – | derived |
 | REQ-RES-DATA-004 | schema, d7-validate | reviewed | V-PAY-231 | V-PAY-084 | covered |
