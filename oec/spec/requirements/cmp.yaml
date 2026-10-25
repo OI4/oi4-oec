@@ -943,7 +943,7 @@ requirements:
         text: A Get whose Source addresses an asset that the entity neither is nor represents is not answered on the related Pub topic. The entity should answer such a Get with an Event of the category Status and the level Bad (BadNotFound, see 8.3.6.1 Status).
     verification: [d7-test]
     inventory: [MG-9.1-144b2f9a]
-    status: draft
+    status: reviewed
     notes: >-
       SF-099, decided by the PO in the C-036 review (2026-10-25, revised
       against the proposal) and implemented on PO order in a42a132. A Get of

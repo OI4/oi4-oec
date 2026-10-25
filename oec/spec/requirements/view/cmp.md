@@ -53,7 +53,7 @@ Grading of the detailed requirements of the other areas per compliance level (um
 | [REQ-CMP-044](#req-cmp-044) | Get of Metadata without Data – no Metadata, optional Event Status Bad | MAY | MAY | MAY | MAY | messaging | d7-test | reviewed |
 | [REQ-CMP-045](#req-cmp-045) | Represented entities match the level of the representing application | MUST | MUST | MUST | MUST | messaging | d7-test, d7-monitor | reviewed |
 | [REQ-CMP-046](#req-cmp-046) | Close message | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-CMP-047](#req-cmp-047) | Get for an unknown asset – no Pub, Event Status Bad recommended | SHOULD | SHOULD | SHOULD | SHOULD | messaging | d7-test | draft |
+| [REQ-CMP-047](#req-cmp-047) | Get for an unknown asset – no Pub, Event Status Bad recommended | SHOULD | SHOULD | SHOULD | SHOULD | messaging | d7-test | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -922,7 +922,7 @@ An entity does not answer a Get whose Source addresses an asset that the entity 
 - Scope: MG 8.3.6.1, MG 1.3
 - Refs: MG 9.1, SF-099
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-9.1-144b2f9a
 
 > A Get whose Source addresses an asset that the entity neither is nor represents is not answered on the related Pub topic. The entity should answer such a Get with an Event of the category Status and the level Bad (BadNotFound, see 8.3.6.1 Status).
