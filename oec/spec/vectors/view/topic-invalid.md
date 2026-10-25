@@ -59,7 +59,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 | [V-TOP-250](#v-top-250) | Missing Resource | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-251](#v-top-251) | Leading slash | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-252](#v-top-252) | Line break after the Resource | invalid | fails: grammar | constructed | reviewed |
-| [V-TOP-253](#v-top-253) | Reply NewDataSetWriterId with Filter | invalid | fails: grammar | constructed | draft |
+| [V-TOP-253](#v-top-253) | Reply NewDataSetWriterId with Filter | invalid | fails: grammar | constructed | reviewed |
 
 ## V-TOP-201
 
@@ -644,4 +644,4 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – NewDataSetWriterId is answered on Reply/NewDataSetWriterId[/&lt;Source>]; a Filter is not used (MG 9.2.1, SF-041 c).
 - Violates: [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed

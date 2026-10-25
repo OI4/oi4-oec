@@ -7,27 +7,27 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 
 | Area | REQs | Covered | Derived | Positive only | Negative only | None / details open |
 |---|---:|---:|---:|---:|---:|---:|
-| ACT | 14 | 0 | 0 | 0 | 0 | 14 |
+| ACT | 14 | 14 | 0 | 0 | 0 | 0 |
 | BUS | 3 | 1 | 0 | 0 | 0 | 2 |
 | CMP | 4 | 0 | 0 | 0 | 0 | 4 |
 | IL | 10 | 6 | 0 | 0 | 1 | 3 |
 | LIFE | 3 | 3 | 0 | 0 | 0 | 0 |
 | LOC | 2 | 2 | 0 | 0 | 0 | 0 |
-| MSG | 38 | 33 | 1 | 0 | 3 | 1 |
+| MSG | 38 | 36 | 2 | 0 | 0 | 0 |
 | PAG | 5 | 5 | 0 | 0 | 0 | 0 |
 | QRY | 1 | 1 | 0 | 0 | 0 | 0 |
 | RES-CONFIG | 13 | 9 | 0 | 3 | 0 | 1 |
 | RES-DATA | 6 | 0 | 0 | 4 | 1 | 1 |
 | RES-EVENT | 8 | 3 | 0 | 5 | 0 | 0 |
-| RES-HEALTH | 4 | 0 | 0 | 0 | 3 | 1 |
-| RES-MAM | 9 | 1 | 0 | 5 | 0 | 3 |
+| RES-HEALTH | 4 | 3 | 1 | 0 | 0 | 0 |
+| RES-MAM | 9 | 8 | 1 | 0 | 0 | 0 |
 | RES-META | 3 | 3 | 0 | 0 | 0 | 0 |
-| RES-PROFILE | 3 | 0 | 0 | 2 | 0 | 1 |
+| RES-PROFILE | 3 | 2 | 1 | 0 | 0 | 0 |
 | RES-PUBLIST | 7 | 2 | 0 | 4 | 0 | 1 |
 | RES-REFDES | 7 | 0 | 0 | 6 | 0 | 1 |
 | RES-SUBLIST | 6 | 2 | 0 | 4 | 0 | 0 |
 | TOP | 13 | 6 | 0 | 1 | 4 | 2 |
-| **Total** | 159 | 77 | 1 | 34 | 12 | 35 |
+| **Total** | 159 | 106 | 5 | 27 | 6 | 15 |
 
 ## Entry schemas per allowed matrix row
 
@@ -72,10 +72,10 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-BUS-004 (details open (4 of 10)) | REQ-BUS-010 (covered), REQ-MSG-030 (covered), REQ-TOP-013 (covered), REQ-RES-CONFIG-003 (covered), REQ-RES-CONFIG-019 (covered), REQ-RES-DATA-009 (positive only), REQ-RES-META-004 (covered), REQ-RES-PUBLIST-022 (positive only), REQ-RES-REFDES-006 (positive only), REQ-RES-SUBLIST-010 (positive only) | That the object is a resource object of the addressed component and the Set carries its complete updated state needs the publications of that component (d7-test, REQ-BUS-002). |
 | REQ-BUS-005 (details open (1 of 4)) | REQ-BUS-010 (covered), REQ-TOP-013 (covered), REQ-RES-REFDES-007 (positive only), REQ-RES-SUBLIST-011 (covered) | That the addressed object exists at the addressed component needs its publications (d7-test, REQ-BUS-002). |
 | REQ-MSG-004 (derived) | REQ-MSG-003 (covered), REQ-MSG-005 (covered), REQ-MSG-011 (covered) | none – the content mask is not on the wire; its effect is the field presence of the NetworkMessage (details). |
-| REQ-MSG-017 (details open (1 of 5)) | REQ-MSG-016 (covered), REQ-MSG-018 (covered), REQ-MSG-024 (covered), REQ-MSG-029 (covered), REQ-MSG-031 (negative only) | none – the content mask is not on the wire; its effect is the field presence of the DataSetMessage and the VerboseEncoding of the fields (details). |
-| REQ-RES-HEALTH-007 (details open (1 of 5)) | REQ-MSG-010 (covered), REQ-RES-HEALTH-001 (negative only), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Health DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Health content (REQ-RES-HEALTH-001). |
-| REQ-RES-MAM-022 (details open (1 of 5)) | REQ-MSG-010 (covered), REQ-RES-MAM-001 (positive only), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without MAM DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the MAM content (REQ-RES-MAM-001). |
-| REQ-RES-PROFILE-005 (details open (1 of 5)) | REQ-MSG-010 (covered), REQ-RES-PROFILE-001 (positive only), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Profile DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Profile content (REQ-RES-PROFILE-001). |
+| REQ-MSG-017 (derived) | REQ-MSG-016 (covered), REQ-MSG-018 (covered), REQ-MSG-024 (covered), REQ-MSG-029 (covered), REQ-MSG-031 (covered) | none – the content mask is not on the wire; its effect is the field presence of the DataSetMessage and the VerboseEncoding of the fields (details). |
+| REQ-RES-HEALTH-007 (derived) | REQ-MSG-010 (covered), REQ-RES-HEALTH-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Health DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Health content (REQ-RES-HEALTH-001). |
+| REQ-RES-MAM-022 (derived) | REQ-MSG-010 (covered), REQ-RES-MAM-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without MAM DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the MAM content (REQ-RES-MAM-001). |
+| REQ-RES-PROFILE-005 (derived) | REQ-MSG-010 (covered), REQ-RES-PROFILE-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without Profile DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Profile content (REQ-RES-PROFILE-001). |
 | REQ-RES-PUBLIST-021 (details open (1 of 5)) | REQ-MSG-010 (covered), REQ-RES-PUBLIST-001 (positive only), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without PublicationList DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the PublicationList content (REQ-RES-PUBLIST-001). |
 | REQ-RES-REFDES-005 (details open (1 of 5)) | REQ-MSG-010 (covered), REQ-RES-REFDES-001 (positive only), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without ReferenceDesignation DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the ReferenceDesignation content (REQ-RES-REFDES-001). |
 
@@ -83,20 +83,20 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 
 | REQ | Verification | Status | Positive | Negative (layer) | Coverage |
 |---|---|---|---|---|---|
-| REQ-ACT-001 | schema, d7-validate, d7-test | reviewed | V-PAY-008*, V-PAY-009*, V-PAY-119*, V-PAY-120* | V-PAY-176* | none |
-| REQ-ACT-002 | schema, d7-validate | reviewed | V-PAY-008*, V-PAY-009*, V-PAY-119*, V-PAY-120* | V-PAY-177*, V-PAY-178* | none |
-| REQ-ACT-003 | schema, d7-validate | reviewed | V-PAY-008*, V-PAY-009*, V-PAY-119*, V-PAY-120* | V-PAY-179*, V-PAY-180* | none |
-| REQ-ACT-004 | schema, d7-validate, d7-monitor | reviewed | V-PAY-008*, V-PAY-009*, V-PAY-119*, V-PAY-120* | V-PAY-181*, V-PAY-182* (rule) | none |
-| REQ-ACT-005 | schema, d7-validate | reviewed | V-PAY-008*, V-PAY-009*, V-PAY-119*, V-PAY-120* | V-PAY-183*, V-PAY-184* (rule) | none |
-| REQ-ACT-006 | schema, d7-validate, d7-test | reviewed | V-PAY-008*, V-PAY-119* | V-PAY-185*, V-PAY-186* (rule) | none |
-| REQ-ACT-010 | schema, d7-validate | reviewed | V-PAY-008*, V-PAY-119* | V-PAY-187*, V-PAY-188* | none |
-| REQ-ACT-012 | schema, d7-validate, d7-test | reviewed | V-PAY-203*, V-PAY-009*, V-PAY-120* | V-PAY-189*, V-PAY-190* | none |
-| REQ-ACT-013 | schema, d7-validate | reviewed | V-PAY-203*, V-PAY-008*, V-PAY-009*, V-PAY-119* … (5) | V-PAY-191*, V-PAY-192*, V-PAY-193*, V-PAY-194* | none |
-| REQ-ACT-014 | schema, d7-validate, d7-test | reviewed | V-PAY-203*, V-PAY-009*, V-PAY-120* | V-PAY-195*, V-PAY-196* | none |
-| REQ-ACT-019 | schema, d7-validate | reviewed | V-PAY-008*, V-PAY-009*, V-PAY-119*, V-PAY-120* | V-PAY-197*, V-PAY-198* | none |
-| REQ-ACT-020 | d7-validate, d7-test | reviewed | V-PAY-008*, V-PAY-009*, V-PAY-119*, V-PAY-120* | V-TOP-253* (R-1) | none |
-| REQ-ACT-021 | schema, d7-validate | reviewed | V-PAY-008*, V-PAY-119* | V-PAY-199*, V-PAY-200* | none |
-| REQ-ACT-022 | schema, d7-validate, d7-test | reviewed | V-PAY-009*, V-PAY-120* | V-PAY-201*, V-PAY-202* | none |
+| REQ-ACT-001 | schema, d7-validate, d7-test | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-PAY-176 | covered |
+| REQ-ACT-002 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-PAY-177, V-PAY-178 | covered |
+| REQ-ACT-003 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-PAY-179, V-PAY-180 | covered |
+| REQ-ACT-004 | schema, d7-validate, d7-monitor | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-PAY-181, V-PAY-182 (rule) | covered |
+| REQ-ACT-005 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-PAY-183, V-PAY-184 (rule) | covered |
+| REQ-ACT-006 | schema, d7-validate, d7-test | reviewed | V-PAY-008, V-PAY-119 | V-PAY-185, V-PAY-186 (rule) | covered |
+| REQ-ACT-010 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-119 | V-PAY-187, V-PAY-188 | covered |
+| REQ-ACT-012 | schema, d7-validate, d7-test | reviewed | V-PAY-203, V-PAY-009, V-PAY-120 | V-PAY-189, V-PAY-190 | covered |
+| REQ-ACT-013 | schema, d7-validate | reviewed | V-PAY-203, V-PAY-008, V-PAY-009, V-PAY-119 … (5) | V-PAY-191, V-PAY-192, V-PAY-193, V-PAY-194 | covered |
+| REQ-ACT-014 | schema, d7-validate, d7-test | reviewed | V-PAY-203, V-PAY-009, V-PAY-120 | V-PAY-195, V-PAY-196 | covered |
+| REQ-ACT-019 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-PAY-197, V-PAY-198 | covered |
+| REQ-ACT-020 | d7-validate, d7-test | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-TOP-253 (R-1) | covered |
+| REQ-ACT-021 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-119 | V-PAY-199, V-PAY-200 | covered |
+| REQ-ACT-022 | schema, d7-validate, d7-test | reviewed | V-PAY-009, V-PAY-120 | V-PAY-201, V-PAY-202 | covered |
 | REQ-BUS-004 | d7-validate | reviewed | V-PAY-061, V-PAY-072 | – | details open (4 of 10) |
 | REQ-BUS-005 | d7-validate | reviewed | V-PAY-074 | – | details open (1 of 4) |
 | REQ-BUS-010 | schema, d7-validate | reviewed | V-PAY-022, V-PAY-061, V-PAY-072, V-PAY-074 … (11) | V-PAY-150 | covered |
@@ -119,31 +119,31 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-LIFE-009 | schema, d7-validate, d7-test | reviewed | V-PAY-025 | V-PAY-174 (rule), V-PAY-175 (rule) | covered |
 | REQ-LOC-001 | schema, d7-validate | reviewed | V-PAY-089 | V-PAY-146 | covered |
 | REQ-LOC-003 | schema, d7-validate | reviewed | V-PAY-007 | V-PAY-127, V-PAY-128 | covered |
-| REQ-MSG-001 | schema, d7-validate | reviewed | V-PAY-003* | V-PAY-018, V-PAY-112 | negative only |
-| REQ-MSG-002 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-002, V-PAY-020, V-PAY-021 … (10) | V-PAY-129 | covered |
-| REQ-MSG-003 | schema, d7-validate | reviewed | V-PAY-002, V-PAY-117, V-PAY-118, V-PAY-001* … (5) | V-PAY-130 | covered |
+| REQ-MSG-001 | schema, d7-validate | reviewed | V-PAY-003 | V-PAY-018, V-PAY-112 | covered |
+| REQ-MSG-002 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-001, V-PAY-002, V-PAY-003 … (10) | V-PAY-129 | covered |
+| REQ-MSG-003 | schema, d7-validate | reviewed | V-PAY-001, V-PAY-002, V-PAY-003, V-PAY-117 … (5) | V-PAY-130 | covered |
 | REQ-MSG-004 | schema, d7-validate | reviewed | – | – | derived |
-| REQ-MSG-005 | schema, d7-validate | reviewed | V-PAY-002, V-PAY-006, V-PAY-029, V-PAY-033 … (9) | V-PAY-131 | covered |
-| REQ-MSG-006 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-002, V-PAY-020, V-PAY-021 … (47) | V-PAY-132 | covered |
-| REQ-MSG-007 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-020, V-PAY-021, V-PAY-022 … (45) | V-PAY-133 | covered |
-| REQ-MSG-010 | schema, d7-validate | reviewed | V-PAY-010, V-PAY-011, V-PAY-012, V-PAY-013 … (13) | V-PAY-122 | covered |
-| REQ-MSG-011 | schema, d7-validate | reviewed | V-PAY-002, V-PAY-005, V-PAY-007, V-PAY-023 … (54) | V-PAY-134 | covered |
+| REQ-MSG-005 | schema, d7-validate | reviewed | V-PAY-001, V-PAY-002, V-PAY-004, V-PAY-006 … (9) | V-PAY-131 | covered |
+| REQ-MSG-006 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-001, V-PAY-002, V-PAY-003 … (47) | V-PAY-132 | covered |
+| REQ-MSG-007 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-001, V-PAY-003, V-PAY-020 … (45) | V-PAY-133 | covered |
+| REQ-MSG-010 | schema, d7-validate | reviewed | V-PAY-001, V-PAY-003, V-PAY-010, V-PAY-011 … (13) | V-PAY-122 | covered |
+| REQ-MSG-011 | schema, d7-validate | reviewed | V-PAY-001, V-PAY-002, V-PAY-005, V-PAY-007 … (54) | V-PAY-134 | covered |
 | REQ-MSG-012 | schema, d7-validate | reviewed | V-PAY-021, V-PAY-022, V-PAY-121 | V-PAY-153 | covered |
-| REQ-MSG-014 | schema, d7-validate | reviewed | V-PAY-003* | V-PAY-122 | negative only |
-| REQ-MSG-015 | schema, d7-test | reviewed | V-PAY-002, V-PAY-006, V-PAY-020, V-PAY-021 … (49) | V-PAY-135 | covered |
-| REQ-MSG-016 | schema, d7-validate | reviewed | V-PAY-117, V-PAY-118, V-PAY-003*, V-PAY-004* | V-PAY-136 | covered |
-| REQ-MSG-017 | schema, d7-validate | reviewed | – | – | details open (1 of 5) |
+| REQ-MSG-014 | schema, d7-validate | reviewed | V-PAY-003 | V-PAY-122 | covered |
+| REQ-MSG-015 | schema, d7-test | reviewed | V-PAY-001, V-PAY-002, V-PAY-003, V-PAY-004 … (49) | V-PAY-135 | covered |
+| REQ-MSG-016 | schema, d7-validate | reviewed | V-PAY-003, V-PAY-004, V-PAY-117, V-PAY-118 | V-PAY-136 | covered |
+| REQ-MSG-017 | schema, d7-validate | reviewed | – | – | derived |
 | REQ-MSG-018 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-137 | covered |
 | REQ-MSG-019 | schema, d7-validate | reviewed | V-PAY-005, V-PAY-006, V-PAY-007, V-PAY-053 … (5) | V-PAY-138 | covered |
 | REQ-MSG-020 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-006, V-PAY-117, V-PAY-118 … (5) | V-PAY-139 | covered |
-| REQ-MSG-023 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-021, V-PAY-023, V-PAY-024 … (32) | V-PAY-148 (rule) | covered |
-| REQ-MSG-024 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-006, V-PAY-021, V-PAY-023 … (28) | V-PAY-140 | covered |
+| REQ-MSG-023 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-003, V-PAY-021, V-PAY-023 … (32) | V-PAY-148 (rule) | covered |
+| REQ-MSG-024 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-003, V-PAY-004, V-PAY-006 … (28) | V-PAY-140 | covered |
 | REQ-MSG-025 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-069 … (6) | V-PAY-151 | covered |
 | REQ-MSG-026 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-141 | covered |
 | REQ-MSG-027 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-142 | covered |
 | REQ-MSG-029 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-143, V-PAY-144 | covered |
 | REQ-MSG-030 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-144 | covered |
-| REQ-MSG-031 | schema, d7-validate | reviewed | V-PAY-004* | V-PAY-145 | negative only |
+| REQ-MSG-031 | schema, d7-validate | reviewed | V-PAY-004 | V-PAY-145 | covered |
 | REQ-MSG-032 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-020, V-PAY-021, V-PAY-022 … (5) | V-PAY-154 | covered |
 | REQ-MSG-034 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-010, V-PAY-011, V-PAY-012 … (12) | V-PAY-155 | covered |
 | REQ-MSG-035 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-010, V-PAY-011, V-PAY-012 … (12) | V-PAY-156 | covered |
@@ -190,25 +190,25 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-EVENT-008 | schema, d7-validate | reviewed | V-PAY-064 | V-PAY-082 | covered |
 | REQ-RES-EVENT-009 | schema, d7-validate | reviewed | V-PAY-065 | – | positive only |
 | REQ-RES-EVENT-011 | schema, d7-validate | reviewed | V-PAY-062, V-PAY-063, V-PAY-064, V-PAY-065 … (11) | – | positive only |
-| REQ-RES-HEALTH-001 | schema, d7-validate | reviewed | V-PAY-003*, V-PAY-004* | V-PAY-048, V-PAY-145 | negative only |
-| REQ-RES-HEALTH-002 | schema, d7-validate | reviewed | V-PAY-004* | V-PAY-049 | negative only |
-| REQ-RES-HEALTH-005 | schema, d7-validate | reviewed | V-PAY-001* | V-PAY-126 | negative only |
-| REQ-RES-HEALTH-007 | schema, d7-validate | reviewed | – | – | details open (1 of 5) |
-| REQ-RES-MAM-001 | schema, d7-validate | reviewed | V-PAY-029, V-PAY-047, V-PAY-028* | V-PAY-204*, V-PAY-205* | positive only |
-| REQ-RES-MAM-004 | schema, d7-validate | reviewed | V-PAY-029, V-PAY-047, V-PAY-028* | V-PAY-206*, V-PAY-207* | positive only |
-| REQ-RES-MAM-006 | d7-validate | reviewed | V-PAY-028* | V-PAY-210* (rule) | none |
-| REQ-RES-MAM-012 | schema, d7-validate | reviewed | V-PAY-029, V-PAY-047, V-PAY-028* | V-PAY-208*, V-PAY-209* | positive only |
-| REQ-RES-MAM-014 | d7-validate | reviewed | V-PAY-028* | V-PAY-213* (rule) | none |
-| REQ-RES-MAM-016 | schema, d7-validate | reviewed | V-PAY-029, V-PAY-047, V-PAY-028* | V-PAY-211* (rule) | positive only |
-| REQ-RES-MAM-017 | schema, d7-validate | reviewed | V-PAY-029, V-PAY-047, V-PAY-028* | V-PAY-212* | positive only |
+| REQ-RES-HEALTH-001 | schema, d7-validate | reviewed | V-PAY-003, V-PAY-004 | V-PAY-048, V-PAY-145 | covered |
+| REQ-RES-HEALTH-002 | schema, d7-validate | reviewed | V-PAY-004 | V-PAY-049 | covered |
+| REQ-RES-HEALTH-005 | schema, d7-validate | reviewed | V-PAY-001 | V-PAY-126 | covered |
+| REQ-RES-HEALTH-007 | schema, d7-validate | reviewed | – | – | derived |
+| REQ-RES-MAM-001 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-204, V-PAY-205 | covered |
+| REQ-RES-MAM-004 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-206, V-PAY-207 | covered |
+| REQ-RES-MAM-006 | d7-validate | reviewed | V-PAY-028 | V-PAY-210 (rule) | covered |
+| REQ-RES-MAM-012 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-208, V-PAY-209 | covered |
+| REQ-RES-MAM-014 | d7-validate | reviewed | V-PAY-028 | V-PAY-213 (rule) | covered |
+| REQ-RES-MAM-016 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-211 (rule) | covered |
+| REQ-RES-MAM-017 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-212 | covered |
 | REQ-RES-MAM-020 | schema, d7-validate | reviewed | V-PAY-026, V-PAY-027 | V-PAY-051 | covered |
-| REQ-RES-MAM-022 | schema, d7-validate | reviewed | V-PAY-029, V-PAY-047, V-PAY-028* | – | details open (1 of 5) |
+| REQ-RES-MAM-022 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | – | derived |
 | REQ-RES-META-001 | schema, d7-validate | reviewed | V-PAY-020 | V-PAY-087 | covered |
 | REQ-RES-META-003 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-021, V-PAY-121 | V-PAY-169 | covered |
 | REQ-RES-META-004 | schema, d7-validate | reviewed | V-PAY-022 | V-PAY-170 | covered |
-| REQ-RES-PROFILE-001 | schema, d7-validate | reviewed | V-PAY-032, V-PAY-033 | V-PAY-214*, V-PAY-215*, V-PAY-216* | positive only |
-| REQ-RES-PROFILE-003 | schema, d7-validate | reviewed | V-PAY-030, V-PAY-031 | V-PAY-217* | positive only |
-| REQ-RES-PROFILE-005 | schema, d7-validate | reviewed | V-PAY-032, V-PAY-033 | – | details open (1 of 5) |
+| REQ-RES-PROFILE-001 | schema, d7-validate | reviewed | V-PAY-032, V-PAY-033 | V-PAY-214, V-PAY-215, V-PAY-216 | covered |
+| REQ-RES-PROFILE-003 | schema, d7-validate | reviewed | V-PAY-030, V-PAY-031 | V-PAY-217 | covered |
+| REQ-RES-PROFILE-005 | schema, d7-validate | reviewed | V-PAY-032, V-PAY-033 | – | derived |
 | REQ-RES-PUBLIST-001 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-040 | – | positive only |
 | REQ-RES-PUBLIST-002 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-040 | V-PAY-151 | covered |
 | REQ-RES-PUBLIST-003 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039 | – | positive only |

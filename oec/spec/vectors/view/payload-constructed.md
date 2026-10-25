@@ -88,48 +88,48 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-173](#v-pay-173) | Close message with Health FAILURE_1 | invalid | violates: REQ-LIFE-007 | constructed | reviewed |
 | [V-PAY-174](#v-pay-174) | Will message with Health NORMAL_0 | invalid | violates: REQ-LIFE-009 | constructed | reviewed |
 | [V-PAY-175](#v-pay-175) | Will message with HealthScore 10 | invalid | violates: REQ-LIFE-009 | constructed | reviewed |
-| [V-PAY-176](#v-pay-176) | Call with the MessageType ua-action-response | invalid | violates: REQ-ACT-001 | constructed | draft |
-| [V-PAY-177](#v-pay-177) | Call without TimeoutHint | invalid | violates: REQ-ACT-002 | constructed | draft |
-| [V-PAY-178](#v-pay-178) | Reply with a ResponseAddress | invalid | violates: REQ-ACT-002 | constructed | draft |
-| [V-PAY-179](#v-pay-179) | Call with a DataSetClassId | invalid | violates: REQ-ACT-003 | constructed | draft |
-| [V-PAY-180](#v-pay-180) | Reply with a DataSetWriterName in the ActionResponse | invalid | violates: REQ-ACT-003 | constructed | draft |
-| [V-PAY-181](#v-pay-181) | Call with a MessageId without timestamp | invalid | violates: REQ-ACT-004 | constructed | draft |
-| [V-PAY-182](#v-pay-182) | Call with a MessageId of the Responder | invalid | violates: REQ-ACT-004 | constructed | draft |
-| [V-PAY-183](#v-pay-183) | Call with a RequestorId without ServiceType | invalid | violates: REQ-ACT-005 | constructed | draft |
-| [V-PAY-184](#v-pay-184) | Reply from another application than the Responder of the topic | invalid | violates: REQ-ACT-005 | constructed | draft |
-| [V-PAY-185](#v-pay-185) | Call with a ResponseAddress of the Method Pub | invalid | violates: REQ-ACT-006 | constructed | draft |
-| [V-PAY-186](#v-pay-186) | Call with the Reply topic of another application as ResponseAddress | invalid | violates: REQ-ACT-006 | constructed | draft |
-| [V-PAY-187](#v-pay-187) | Call with ActionState 2 | invalid | violates: REQ-ACT-010 | constructed | draft |
-| [V-PAY-188](#v-pay-188) | Call without RequestId | invalid | violates: REQ-ACT-010 | constructed | draft |
-| [V-PAY-189](#v-pay-189) | Reply with ActionState 0 | invalid | violates: REQ-ACT-012 | constructed | draft |
-| [V-PAY-190](#v-pay-190) | Reply with a Bad Status and response fields | invalid | violates: REQ-ACT-012 | constructed | draft |
-| [V-PAY-191](#v-pay-191) | Call NewDataSetWriterId with a numeric Resource | invalid | violates: REQ-ACT-013 | constructed | draft |
-| [V-PAY-192](#v-pay-192) | Reply NewDataSetWriterId with Ttl as JSON string | invalid | violates: REQ-ACT-013 | constructed | draft |
-| [V-PAY-193](#v-pay-193) | Call NewDataSetWriterId with an unknown request field | invalid | violates: REQ-ACT-013 | constructed | draft |
-| [V-PAY-194](#v-pay-194) | Reply NewDataSetWriterId with a DataSetWriterId above UInt16 | invalid | violates: REQ-ACT-013 | constructed | draft |
-| [V-PAY-195](#v-pay-195) | Reply with the Good Status as Code 0 | invalid | violates: REQ-ACT-014 | constructed | draft |
-| [V-PAY-196](#v-pay-196) | Reply with a Status Symbol | invalid | violates: REQ-ACT-014 | constructed | draft |
-| [V-PAY-197](#v-pay-197) | Call NewDataSetWriterId with the DataSetWriterId 7 | invalid | violates: REQ-ACT-019 | constructed | draft |
-| [V-PAY-198](#v-pay-198) | Reply NewDataSetWriterId with the ActionTargetId 2 | invalid | violates: REQ-ACT-019 | constructed | draft |
-| [V-PAY-199](#v-pay-199) | Call NewDataSetWriterId for an unknown Resource | invalid | violates: REQ-ACT-021 | constructed | draft |
-| [V-PAY-200](#v-pay-200) | Call NewDataSetWriterId without Resource | invalid | violates: REQ-ACT-021 | constructed | draft |
-| [V-PAY-201](#v-pay-201) | Reply NewDataSetWriterId with the reserved DataSetWriterId 8 | invalid | violates: REQ-ACT-022 | constructed | draft |
-| [V-PAY-202](#v-pay-202) | Reply NewDataSetWriterId without Ttl | invalid | violates: REQ-ACT-022 | constructed | draft |
-| [V-PAY-203](#v-pay-203) | Reply NewDataSetWriterId rejected with BadInvalidArgument | valid | ok | constructed | draft |
-| [V-PAY-204](#v-pay-204) | Pub MAM without SerialNumber | invalid | violates: REQ-RES-MAM-001 | constructed | draft |
-| [V-PAY-205](#v-pay-205) | Pub MAM with a RevisionCounter above Int32 | invalid | violates: REQ-RES-MAM-001 | constructed | draft |
-| [V-PAY-206](#v-pay-206) | Pub MAM with a ManufacturerUri with scheme | invalid | violates: REQ-RES-MAM-004 | constructed | draft |
-| [V-PAY-207](#v-pay-207) | Pub MAM with an upper-case ManufacturerUri | invalid | violates: REQ-RES-MAM-004 | constructed | draft |
-| [V-PAY-208](#v-pay-208) | Pub MAM with a DeviceManual without scheme | invalid | violates: REQ-RES-MAM-012 | constructed | draft |
-| [V-PAY-209](#v-pay-209) | Pub MAM with a DeviceManual without host | invalid | violates: REQ-RES-MAM-012 | constructed | draft |
-| [V-PAY-210](#v-pay-210) | Pub MAM whose ProductInstanceUri does not match its ProductCode | invalid | violates: REQ-RES-MAM-006 | constructed | draft |
-| [V-PAY-211](#v-pay-211) | Pub MAM whose ProductInstanceUri differs from the DataSetWriterName | invalid | violates: REQ-RES-MAM-016 | constructed | draft |
-| [V-PAY-212](#v-pay-212) | Pub MAM with a ProductInstanceUri of 256 characters | invalid | violates: REQ-RES-MAM-017 | constructed | draft |
-| [V-PAY-213](#v-pay-213) | Pub MAM of an OT connector with the DeviceClass Oi4.Utility | invalid | violates: REQ-RES-MAM-014 | constructed | draft |
-| [V-PAY-214](#v-pay-214) | Pub Profile with an unknown resource | invalid | violates: REQ-RES-PROFILE-001 | constructed | draft |
-| [V-PAY-215](#v-pay-215) | Pub Profile with a resource listed twice | invalid | violates: REQ-RES-PROFILE-001 | constructed | draft |
-| [V-PAY-216](#v-pay-216) | Pub Profile without Resources | invalid | violates: REQ-RES-PROFILE-001 | constructed | draft |
-| [V-PAY-217](#v-pay-217) | Get Profile that carries a Profile DataSetMessage | invalid | violates: REQ-RES-PROFILE-003 | constructed | draft |
+| [V-PAY-176](#v-pay-176) | Call with the MessageType ua-action-response | invalid | violates: REQ-ACT-001 | constructed | reviewed |
+| [V-PAY-177](#v-pay-177) | Call without TimeoutHint | invalid | violates: REQ-ACT-002 | constructed | reviewed |
+| [V-PAY-178](#v-pay-178) | Reply with a ResponseAddress | invalid | violates: REQ-ACT-002 | constructed | reviewed |
+| [V-PAY-179](#v-pay-179) | Call with a DataSetClassId | invalid | violates: REQ-ACT-003 | constructed | reviewed |
+| [V-PAY-180](#v-pay-180) | Reply with a DataSetWriterName in the ActionResponse | invalid | violates: REQ-ACT-003 | constructed | reviewed |
+| [V-PAY-181](#v-pay-181) | Call with a MessageId without timestamp | invalid | violates: REQ-ACT-004 | constructed | reviewed |
+| [V-PAY-182](#v-pay-182) | Call with a MessageId of the Responder | invalid | violates: REQ-ACT-004 | constructed | reviewed |
+| [V-PAY-183](#v-pay-183) | Call with a RequestorId without ServiceType | invalid | violates: REQ-ACT-005 | constructed | reviewed |
+| [V-PAY-184](#v-pay-184) | Reply from another application than the Responder of the topic | invalid | violates: REQ-ACT-005 | constructed | reviewed |
+| [V-PAY-185](#v-pay-185) | Call with a ResponseAddress of the Method Pub | invalid | violates: REQ-ACT-006 | constructed | reviewed |
+| [V-PAY-186](#v-pay-186) | Call with the Reply topic of another application as ResponseAddress | invalid | violates: REQ-ACT-006 | constructed | reviewed |
+| [V-PAY-187](#v-pay-187) | Call with ActionState 2 | invalid | violates: REQ-ACT-010 | constructed | reviewed |
+| [V-PAY-188](#v-pay-188) | Call without RequestId | invalid | violates: REQ-ACT-010 | constructed | reviewed |
+| [V-PAY-189](#v-pay-189) | Reply with ActionState 0 | invalid | violates: REQ-ACT-012 | constructed | reviewed |
+| [V-PAY-190](#v-pay-190) | Reply with a Bad Status and response fields | invalid | violates: REQ-ACT-012 | constructed | reviewed |
+| [V-PAY-191](#v-pay-191) | Call NewDataSetWriterId with a numeric Resource | invalid | violates: REQ-ACT-013 | constructed | reviewed |
+| [V-PAY-192](#v-pay-192) | Reply NewDataSetWriterId with Ttl as JSON string | invalid | violates: REQ-ACT-013 | constructed | reviewed |
+| [V-PAY-193](#v-pay-193) | Call NewDataSetWriterId with an unknown request field | invalid | violates: REQ-ACT-013 | constructed | reviewed |
+| [V-PAY-194](#v-pay-194) | Reply NewDataSetWriterId with a DataSetWriterId above UInt16 | invalid | violates: REQ-ACT-013 | constructed | reviewed |
+| [V-PAY-195](#v-pay-195) | Reply with the Good Status as Code 0 | invalid | violates: REQ-ACT-014 | constructed | reviewed |
+| [V-PAY-196](#v-pay-196) | Reply with a Status Symbol | invalid | violates: REQ-ACT-014 | constructed | reviewed |
+| [V-PAY-197](#v-pay-197) | Call NewDataSetWriterId with the DataSetWriterId 7 | invalid | violates: REQ-ACT-019 | constructed | reviewed |
+| [V-PAY-198](#v-pay-198) | Reply NewDataSetWriterId with the ActionTargetId 2 | invalid | violates: REQ-ACT-019 | constructed | reviewed |
+| [V-PAY-199](#v-pay-199) | Call NewDataSetWriterId for an unknown Resource | invalid | violates: REQ-ACT-021 | constructed | reviewed |
+| [V-PAY-200](#v-pay-200) | Call NewDataSetWriterId without Resource | invalid | violates: REQ-ACT-021 | constructed | reviewed |
+| [V-PAY-201](#v-pay-201) | Reply NewDataSetWriterId with the reserved DataSetWriterId 8 | invalid | violates: REQ-ACT-022 | constructed | reviewed |
+| [V-PAY-202](#v-pay-202) | Reply NewDataSetWriterId without Ttl | invalid | violates: REQ-ACT-022 | constructed | reviewed |
+| [V-PAY-203](#v-pay-203) | Reply NewDataSetWriterId rejected with BadInvalidArgument | valid | ok | constructed | reviewed |
+| [V-PAY-204](#v-pay-204) | Pub MAM without SerialNumber | invalid | violates: REQ-RES-MAM-001 | constructed | reviewed |
+| [V-PAY-205](#v-pay-205) | Pub MAM with a RevisionCounter above Int32 | invalid | violates: REQ-RES-MAM-001 | constructed | reviewed |
+| [V-PAY-206](#v-pay-206) | Pub MAM with a ManufacturerUri with scheme | invalid | violates: REQ-RES-MAM-004 | constructed | reviewed |
+| [V-PAY-207](#v-pay-207) | Pub MAM with an upper-case ManufacturerUri | invalid | violates: REQ-RES-MAM-004 | constructed | reviewed |
+| [V-PAY-208](#v-pay-208) | Pub MAM with a DeviceManual without scheme | invalid | violates: REQ-RES-MAM-012 | constructed | reviewed |
+| [V-PAY-209](#v-pay-209) | Pub MAM with a DeviceManual without host | invalid | violates: REQ-RES-MAM-012 | constructed | reviewed |
+| [V-PAY-210](#v-pay-210) | Pub MAM whose ProductInstanceUri does not match its ProductCode | invalid | violates: REQ-RES-MAM-006 | constructed | reviewed |
+| [V-PAY-211](#v-pay-211) | Pub MAM whose ProductInstanceUri differs from the DataSetWriterName | invalid | violates: REQ-RES-MAM-016 | constructed | reviewed |
+| [V-PAY-212](#v-pay-212) | Pub MAM with a ProductInstanceUri of 256 characters | invalid | violates: REQ-RES-MAM-017 | constructed | reviewed |
+| [V-PAY-213](#v-pay-213) | Pub MAM of an OT connector with the DeviceClass Oi4.Utility | invalid | violates: REQ-RES-MAM-014 | constructed | reviewed |
+| [V-PAY-214](#v-pay-214) | Pub Profile with an unknown resource | invalid | violates: REQ-RES-PROFILE-001 | constructed | reviewed |
+| [V-PAY-215](#v-pay-215) | Pub Profile with a resource listed twice | invalid | violates: REQ-RES-PROFILE-001 | constructed | reviewed |
+| [V-PAY-216](#v-pay-216) | Pub Profile without Resources | invalid | violates: REQ-RES-PROFILE-001 | constructed | reviewed |
+| [V-PAY-217](#v-pay-217) | Get Profile that carries a Profile DataSetMessage | invalid | violates: REQ-RES-PROFILE-003 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -6271,7 +6271,7 @@ Payload:
 - Expected: invalid – A Call carries the MessageType ua-action-request.
 - Violates: [REQ-ACT-001](../../requirements/view/act.md#req-act-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 with the MessageType of a Reply.
 
@@ -6310,7 +6310,7 @@ Payload:
 - Expected: invalid – An ActionRequest NetworkMessage contains a TimeoutHint.
 - Violates: [REQ-ACT-002](../../requirements/view/act.md#req-act-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 without TimeoutHint.
 
@@ -6348,7 +6348,7 @@ Payload:
 - Expected: invalid – ResponseAddress and TimeoutHint belong to the ActionRequest NetworkMessage only.
 - Violates: [REQ-ACT-002](../../requirements/view/act.md#req-act-002)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 with the ResponseAddress of V-PAY-008.
 
@@ -6388,7 +6388,7 @@ Payload:
 - Expected: invalid – An Action NetworkMessage contains only the fields of MG 8.2.16; DataSetClassId belongs to ua-data.
 - Violates: [REQ-ACT-003](../../requirements/view/act.md#req-act-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 with a DataSetClassId.
 
@@ -6428,7 +6428,7 @@ Payload:
 - Expected: invalid – An ActionResponse contains only the fields of MG 8.2.18.
 - Violates: [REQ-ACT-003](../../requirements/view/act.md#req-act-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 whose ActionResponse carries the DataSetWriterName of a DataSetMessage.
 
@@ -6468,7 +6468,7 @@ Payload:
 - Expected: invalid – The MessageId is &lt;unix timestamp in ms>-&lt;PublisherId of the sender>.
 - Violates: [REQ-ACT-004](../../requirements/view/act.md#req-act-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 whose MessageId lacks the timestamp prefix.
 
@@ -6507,7 +6507,7 @@ Payload:
 - Expected: invalid – The MessageId of a Call names the sender, i.e. the RequestorId, not the Responder in the PublisherId.
 - Violates: [REQ-ACT-004](../../requirements/view/act.md#req-act-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 whose MessageId ends with the PublisherId (Responder). The relation between MessageId and RequestorId is checked by the rule layer of D7 validate (ADR-0019 §5, R-3).
 
@@ -6546,7 +6546,7 @@ Payload:
 - Expected: invalid – The RequestorId is &lt;ServiceType>/&lt;AppId> of the requesting application.
 - Violates: [REQ-ACT-005](../../requirements/view/act.md#req-act-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 whose RequestorId lacks the ServiceType.
 
@@ -6585,7 +6585,7 @@ Payload:
 - Expected: invalid – The PublisherId of a Reply is the Responder named by the ServiceType and AppId of the topic.
 - Violates: [REQ-ACT-005](../../requirements/view/act.md#req-act-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 sent with the PublisherId (and matching MessageId) of another OT connector. The equality with the topic is checked by the rule layer of D7 validate (ADR-0019 §5, R-2).
 
@@ -6624,7 +6624,7 @@ Payload:
 - Expected: invalid – The ResponseAddress is the Reply topic of the Call topic.
 - Violates: [REQ-ACT-006](../../requirements/view/act.md#req-act-006)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 whose ResponseAddress uses the Method Pub.
 
@@ -6663,7 +6663,7 @@ Payload:
 - Expected: invalid – The ResponseAddress is the Reply topic of the Call topic, i.e. with the same ServiceType and AppId.
 - Violates: [REQ-ACT-006](../../requirements/view/act.md#req-act-006)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 whose ResponseAddress names another OT connector. The equality with the topic is checked by the rule layer of D7 validate (ADR-0019 §5, R-2).
 
@@ -6702,7 +6702,7 @@ Payload:
 - Expected: invalid – An ActionRequest has ActionState 1 (Executing).
 - Violates: [REQ-ACT-010](../../requirements/view/act.md#req-act-010)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 with the ActionState of a final response.
 
@@ -6741,7 +6741,7 @@ Payload:
 - Expected: invalid – An ActionRequest contains a RequestId.
 - Violates: [REQ-ACT-010](../../requirements/view/act.md#req-act-010)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 whose ActionRequest has no RequestId.
 
@@ -6779,7 +6779,7 @@ Payload:
 - Expected: invalid – An ActionResponse has ActionState 1 (Executing) or 2 (Done).
 - Violates: [REQ-ACT-012](../../requirements/view/act.md#req-act-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 with ActionState 0 (Idle).
 
@@ -6818,7 +6818,7 @@ Payload:
 - Expected: invalid – An ActionResponse with a Bad Status carries an empty Payload.
 - Violates: [REQ-ACT-012](../../requirements/view/act.md#req-act-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 with the Status BadInvalidArgument (0x80AB0000) but still the new DataSetWriterId.
 
@@ -6859,7 +6859,7 @@ Payload:
 - Expected: invalid – Each request field is encoded with its plain JSON value of the data type in the ActionMetaData; Resource is a String.
 - Violates: [REQ-ACT-013](../../requirements/view/act.md#req-act-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 whose Resource is the JSON number 3.
 
@@ -6898,7 +6898,7 @@ Payload:
 - Expected: invalid – Ttl is a UInt32, encoded as JSON number.
 - Violates: [REQ-ACT-013](../../requirements/view/act.md#req-act-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 whose Ttl is the string "10".
 
@@ -6937,7 +6937,7 @@ Payload:
 - Expected: invalid – The Payload contains the request fields of the Action (Resource) only.
 - Violates: [REQ-ACT-013](../../requirements/view/act.md#req-act-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 with an additional request field Name.
 
@@ -6977,7 +6977,7 @@ Payload:
 - Expected: invalid – The DataSetWriterId of the response is a UInt16.
 - Violates: [REQ-ACT-013](../../requirements/view/act.md#req-act-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 with the DataSetWriterId 70000.
 
@@ -7016,7 +7016,7 @@ Payload:
 - Expected: invalid – In CompactEncoding a Good Status is {}; a Code is only given for a non-Good Status.
 - Violates: [REQ-ACT-014](../../requirements/view/act.md#req-act-014)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 whose Status is {"Code": 0}.
 
@@ -7057,7 +7057,7 @@ Payload:
 - Expected: invalid – The Status of an ActionResponse never carries a Symbol.
 - Violates: [REQ-ACT-014](../../requirements/view/act.md#req-act-014)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 rejected with BadInvalidArgument (0x80AB0000), empty Payload and the Symbol of the code.
 
@@ -7096,7 +7096,7 @@ Payload:
 - Expected: invalid – NewDataSetWriterId has the DataSetWriterId 8; 4 to 7 are reserved.
 - Violates: [REQ-ACT-019](../../requirements/view/act.md#req-act-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 with the DataSetWriterId 7.
 
@@ -7135,7 +7135,7 @@ Payload:
 - Expected: invalid – For the common services the ActionTargetId is always 1.
 - Violates: [REQ-ACT-019](../../requirements/view/act.md#req-act-019)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 with the ActionTargetId 2.
 
@@ -7174,7 +7174,7 @@ Payload:
 - Expected: invalid – Resource is one of the resources of MG 7.5.1.
 - Violates: [REQ-ACT-021](../../requirements/view/act.md#req-act-021)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 with the Resource "Status" (an event category, no resource).
 
@@ -7213,7 +7213,7 @@ Payload:
 - Expected: invalid – The request field Resource is mandatory.
 - Violates: [REQ-ACT-021](../../requirements/view/act.md#req-act-021)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 with the Payload {}.
 
@@ -7250,7 +7250,7 @@ Payload:
 - Expected: invalid – The new DataSetWriterId is not reserved (>= 10).
 - Violates: [REQ-ACT-022](../../requirements/view/act.md#req-act-022)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 that hands out the DataSetWriterId 8.
 
@@ -7289,7 +7289,7 @@ Payload:
 - Expected: invalid – A successful response carries DataSetWriterId and Ttl.
 - Violates: [REQ-ACT-022](../../requirements/view/act.md#req-act-022)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 without Ttl.
 
@@ -7327,7 +7327,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-ACT-012](../../requirements/view/act.md#req-act-012), [REQ-ACT-013](../../requirements/view/act.md#req-act-013), [REQ-ACT-014](../../requirements/view/act.md#req-act-014)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-009 as rejection (e.g. of V-PAY-199): Status {"Code": 2158690304} (BadInvalidArgument, 0x80AB0000) without Symbol and an empty Payload, ActionState 2.
 
@@ -7366,7 +7366,7 @@ Payload:
 - Expected: invalid – The MAM contains all mandatory fields of MG 8.3.1.
 - Violates: [REQ-RES-MAM-001](../../requirements/view/res-mam.md#req-res-mam-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 without SerialNumber.
 
@@ -7425,7 +7425,7 @@ Payload:
 - Expected: invalid – RevisionCounter is an Int32.
 - Violates: [REQ-RES-MAM-001](../../requirements/view/res-mam.md#req-res-mam-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 with the RevisionCounter 2147483648.
 
@@ -7485,7 +7485,7 @@ Payload:
 - Expected: invalid – The ManufacturerUri is a domain name without scheme (MG 8.3.1).
 - Violates: [REQ-RES-MAM-004](../../requirements/view/res-mam.md#req-res-mam-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 whose ManufacturerUri is https://provider.com.
 
@@ -7545,7 +7545,7 @@ Payload:
 - Expected: invalid – The ManufacturerUri is a lower-case domain name.
 - Violates: [REQ-RES-MAM-004](../../requirements/view/res-mam.md#req-res-mam-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 whose ManufacturerUri is Provider.com. The PublisherId keeps provider.com, so the MAM-006 heuristic is not triggered (segment 0 equals the lower-case ManufacturerUri, all elements match).
 
@@ -7605,7 +7605,7 @@ Payload:
 - Expected: invalid – The DeviceManual is empty or a URL.
 - Violates: [REQ-RES-MAM-012](../../requirements/view/res-mam.md#req-res-mam-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 whose DeviceManual lacks the scheme.
 
@@ -7665,7 +7665,7 @@ Payload:
 - Expected: invalid – The DeviceManual is empty or a URL with a host that a client can retrieve.
 - Violates: [REQ-RES-MAM-012](../../requirements/view/res-mam.md#req-res-mam-012)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 whose DeviceManual is a file URL without host.
 
@@ -7725,7 +7725,7 @@ Payload:
 - Expected: invalid – A generated Oi4Identifier is built from ManufacturerUri, Model, ProductCode and SerialNumber of the MAM (MG 4.3.1).
 - Violates: [REQ-RES-MAM-006](../../requirements/view/res-mam.md#req-res-mam-006)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 with the ProductCode FDS-002, while the ProductInstanceUri (and AppId) is the generated Oi4Identifier with FDS-001. Checked by the rule layer of D7 validate (ADR-0019 §5, R-3), heuristically: only a ProductInstanceUri without scheme of four segments whose first segment is the ManufacturerUri is taken for a generated Oi4Identifier.
 
@@ -7785,7 +7785,7 @@ Payload:
 - Expected: invalid – The ProductInstanceUri equals the Oi4Identifier in the DataSetWriterName.
 - Violates: [REQ-RES-MAM-016](../../requirements/view/res-mam.md#req-res-mam-016)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 with a different ProductInstanceUri. The equality of two fields is checked by the rule layer of D7 validate (ADR-0019 §5, R-3).
 
@@ -7844,7 +7844,7 @@ Payload:
 - Expected: invalid – The ProductInstanceUri has at most 255 characters.
 - Violates: [REQ-RES-MAM-017](../../requirements/view/res-mam.md#req-res-mam-017)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-029 (Pub MAM without Source) for an asset whose ProductInstanceUri and DataSetWriterName have 256 characters.
 
@@ -7904,7 +7904,7 @@ Payload:
 - Expected: invalid – The DeviceClass of an OEC application is Oi4.&lt;ServiceType> of its own ServiceType.
 - Violates: [REQ-RES-MAM-014](../../requirements/view/res-mam.md#req-res-mam-014)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-028 (MAM of the application itself) with the DeviceClass of a Utility. The equality with the ServiceType of the topic is checked by the rule layer of D7 validate (ADR-0019 §5, R-2).
 
@@ -7964,7 +7964,7 @@ Payload:
 - Expected: invalid – Resources lists resources of MG 7.5.1 and services of MG 7.5.2 only.
 - Violates: [REQ-RES-PROFILE-001](../../requirements/view/res-profile.md#req-res-profile-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-032 with the additional entry "Status" (an event category, no resource).
 
@@ -8016,7 +8016,7 @@ Payload:
 - Expected: invalid – Resources is a set; each resource is listed once.
 - Violates: [REQ-RES-PROFILE-001](../../requirements/view/res-profile.md#req-res-profile-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-032 with "Health" instead of "Config", so Health is listed twice.
 
@@ -8067,7 +8067,7 @@ Payload:
 - Expected: invalid – The Profile contains the field Resources.
 - Violates: [REQ-RES-PROFILE-001](../../requirements/view/res-profile.md#req-res-profile-001)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-032 with the Payload {}.
 
@@ -8104,7 +8104,7 @@ Payload:
 - Expected: invalid – A Get Profile carries no Profile DataSetMessage (MG 8.3.7).
 - Violates: [REQ-RES-PROFILE-003](../../requirements/view/res-profile.md#req-res-profile-003)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-030 with the DataSetMessage of V-PAY-032.
 
