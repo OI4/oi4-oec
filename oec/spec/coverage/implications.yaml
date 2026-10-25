@@ -19,3 +19,21 @@ implications:
   - umbrella: REQ-BUS-005
     details: [REQ-BUS-010, REQ-TOP-013, REQ-RES-REFDES-007, REQ-RES-SUBLIST-011]
     remainder: That the addressed object exists at the addressed component needs its publications (d7-test, REQ-BUS-002).
+  # C-036: the Pub content rule of a resource (MG 9.1.x) is the sum of its
+  # DataSetClassId, the content of its DataSet and the helper rules; an empty
+  # Pub is valid as the answer to a Get without content (SF-099).
+  - umbrella: REQ-RES-MAM-022
+    details: [REQ-MSG-010, REQ-RES-MAM-001, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
+    remainder: That a Pub without MAM DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the MAM content (REQ-RES-MAM-001).
+  - umbrella: REQ-RES-HEALTH-007
+    details: [REQ-MSG-010, REQ-RES-HEALTH-001, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
+    remainder: That a Pub without Health DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Health content (REQ-RES-HEALTH-001).
+  - umbrella: REQ-RES-PROFILE-005
+    details: [REQ-MSG-010, REQ-RES-PROFILE-001, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
+    remainder: That a Pub without Profile DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Profile content (REQ-RES-PROFILE-001).
+  - umbrella: REQ-RES-PUBLIST-021
+    details: [REQ-MSG-010, REQ-RES-PUBLIST-001, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
+    remainder: That a Pub without PublicationList DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the PublicationList content (REQ-RES-PUBLIST-001).
+  - umbrella: REQ-RES-REFDES-005
+    details: [REQ-MSG-010, REQ-RES-REFDES-001, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
+    remainder: That a Pub without ReferenceDesignation DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the ReferenceDesignation content (REQ-RES-REFDES-001).
