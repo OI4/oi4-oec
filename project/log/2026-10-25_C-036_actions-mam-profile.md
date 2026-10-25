@@ -234,3 +234,28 @@ No reviewed item changed beyond the accepted proposals; guideline text unchanged
 Checks: `spectool lint` (436 REQs, 217 payload vectors, 147 topic vectors), `render -check`, `coverage -check`, `topic -check`, `inventory -check -rev 68d878d` (1397 items), `go test ./...`, `oec/schema/check.sh` (42 schema files, 375 cases, 0 disagreements): green.
 
 Next free ids: SF-100, V-PAY-218, V-TOP-254, ADR-0020, Q-021. Next cycle: C-037 – PublicationList + ReferenceDesignation (ROADMAP P2).
+
+## Addendum 2 – SF-099 in the guideline, re-baseline on `a42a132` (2026-10-25)
+
+PO (chat, 2026-10-25): "Ich habe angenommen, dass auch ein Filter, der bei einem bekannten Asset nichts trifft, eine leere Liste bekommt. Passt das? -> ja das passt. SF-099 einbauen." The `Filter` reading of addendum 1 is confirmed; SF-099 goes into the guideline on PO order.
+
+Guideline (`oi4-oec-documentation`, branch `feature/spec-findings`):
+
+- `a42a132` – MG 9.1 "Resources Without Content": first bullet + "This also applies to a `Get` whose `Filter` matches no content of a `Source` the entity provides."; new second bullet "A `Get` whose `Source` addresses an asset that the entity neither is nor represents is not answered on the related `Pub` topic. The entity should answer such a `Get` with an `Event` of the category `Status` and the level `Bad` (`BadNotFound`, see 8.3.6.1 Status)." ("neither is nor represents" uses the terms of MG 1.3). The `Pub` bullets of 9.1.1, 9.1.2, 9.1.3, 9.1.4, 9.1.7, 9.1.8, 9.1.9, 9.1.10 say "– none in the answer to a `Get` without content (Resources Without Content) –". MG 8.3.6.1 lists "a `Get` that is not answered – a `Get` of `Metadata` without `Data` or a `Get` for an unknown asset" among the uses of Status events. 9.1.5 (`Pub Metadata`, a single filled `DataSetMetaData`) and 9.1.6 (`Event`, `Pub` only) are unchanged. `yarn build` green.
+- No GL-ADR: GL-ADR-017 only moved "Resources Without Content" (SF-037/039) and decided nothing about it; like SF-075 … 081 the finding is resolved without a GL-ADR.
+- `d4f79f3` – register: SF-099 `resolved (a42a132)`, moved to Closed; no open finding.
+
+Re-baseline (`1a608c1`; `spectool rebaseline -rev a42a132` with `a42a132` checked out detached, because the register commit `d4f79f3` is the branch head and touches only `findings/`):
+
+- Inventory 1397 → **1398** items (+1 SHOULD: MG-9.1-144b2f9a); 11 keys changed.
+- New **REQ-CMP-047** (`draft`, SHOULD at all levels, `d7-test`): `Get` for an asset the entity neither is nor represents – no `Pub`, should `Event` Status Bad.
+- **REQ-CMP-041** (reviewed item, changed; reason: PO confirmation above): statement + "The same applies to a Get whose Filter matches no content of a Source the entity provides; a Get for a Source the entity does not provide is REQ-CMP-047.", new quote, key MG-9.1-90f67b00, refs +SF-099, note. Stays `reviewed` (SF-097/098 precedent), listed as R-2 in `REVIEW.md`.
+- Mechanical remaps (quotes and keys follow the new text, statements unchanged, stay `reviewed`): REQ-RES-MAM-022, REQ-RES-HEALTH-007, REQ-RES-CONFIG-018, REQ-RES-DATA-008, REQ-RES-PROFILE-005, REQ-RES-PUBLIST-021, REQ-RES-SUBLIST-009, REQ-RES-REFDES-005, REQ-RES-EVENT-005 (note names REQ-CMP-047).
+- Schemas, oracle, vectors and matrix unchanged (both REQs are `d7-test`); coverage gaps stay 48.
+
+Docs: ADR-0001 amendment C-036 addendum 2; ADR-0019 amendment C-036 point 1 notes the implementation; AGENTS.md, GUARDRAILS G-1.2, STATUS, ROADMAP baseline `a42a132`; `REVIEW.md` / `REVIEW_DE.md` R-1 … R-3.
+
+Checks: `spectool lint` (437 REQs), `render -check`, `coverage -check` (gaps 48, CMP open=0), `topic -check`, `inventory -check -rev a42a132` (1398 items), `go test ./...`, `oec/schema/check.sh` (42 schema files, 375 cases, 0 disagreements): green.
+
+Next free ids: SF-100, REQ-CMP-048, V-PAY-218, V-TOP-254, ADR-0020, Q-021.
+

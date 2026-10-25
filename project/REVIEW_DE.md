@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 25.10.2026, nach deinem Review von C-036 (Guideline `68d878d`)._
+_Stand: 25.10.2026, nach dem Einbau von SF-099 in die Guideline (Guideline `a42a132`)._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 wie vorgeschlagen, R-1 bis R-4 akzeptiert“.
 
@@ -21,7 +21,17 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts zum Reviewen.** Alle Einträge in `oec/spec` stehen auf `reviewed`. SF-099 ist entschieden; es fehlt nur noch dein Auftrag, es in die Guideline einzuarbeiten (siehe unten). Es gibt keine offene Frage für P2 (Q-011 ist geparkt). Es bleiben 48 Abdeckungslücken; die schließen die nächsten Zyklen. Mit C-037 (PublicationList und ReferenceDesignation) kommen neue Punkte dazu.
+Drei kleine Punkte aus dem Einbau von SF-099. Es gibt kein offenes Spec-Finding und keine offene Frage für P2 (Q-011 ist geparkt). Es bleiben 48 Abdeckungslücken; daran ändert SF-099 nichts, weil man beide betroffenen Regeln nur an einer laufenden Anwendung prüfen kann (`d7-test`).
+
+- **R-1 – neue Regel REQ-CMP-047:** Fragt jemand per `Get` nach einem Asset, das die Anwendung weder selbst ist noch vertritt, antwortet sie **nicht** auf dem `Pub`-Topic. Sie **sollte** stattdessen ein `Event` Status `Bad` (`BadNotFound`) schicken. „Sollte“ gilt auf allen Levels, so wie du es formuliert hast. Zum Vergleich: Bei `Set`/`Del` ist das Event ab Level 2 Pflicht.
+- **R-2 – REQ-CMP-041 ergänzt:** Die bestehende Regel „kein Inhalt → leere Liste“ sagt jetzt auch: Ein Filter, der bei einem bekannten Asset nichts trifft, bekommt ebenfalls eine leere Liste. Das hast du heute bestätigt. Die Regel bleibt auf `reviewed`, so wie damals bei SF-097/SF-098. Sag Bescheid, falls du sie trotzdem noch einmal sehen willst.
+- **R-3 – Text in der Guideline (`a42a132`):**
+  - MG 9.1 „Resources Without Content“ hat den Filter-Satz und einen neuen Punkt für das unbekannte Asset.
+  - In den acht 9.1.x-Abschnitten steht beim `Pub` jetzt „keine (DataSetMessages) in der Antwort auf ein `Get` ohne Inhalt“. So widerspricht der Satz der leeren Liste nicht mehr.
+  - MG 8.3.6.1 nennt auch das `Get` auf ein unbekanntes Asset als Anlass für ein Status-Event.
+  - Ein GL-ADR habe ich nicht angelegt, wie bei SF-075 … 081.
+
+Den genauen Wortlaut findest du in [`REVIEW.md`](REVIEW.md). Antwort im Chat genügt, z. B. „R-1 bis R-3 akzeptiert“.
 
 ### Begriffe aus C-036
 
@@ -42,8 +52,8 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
   - Fragt jemand nach einem Asset, das die Anwendung **gar nicht kennt**, kommt **keine Antwort** auf dem `Pub`-Topic. Die Anwendung **sollte** stattdessen ein `Event` der Kategorie `Status` mit einem Fehlercode (`Bad`, z. B. `BadNotFound`) schicken.
   - Du hattest recht: Dieses Event-Verhalten steht schon in MG 9.1 „Resources Without Content“, und zwar für `Set`/`Del` auf etwas Unbekanntes und für `Get Metadata` ohne Daten. Für ein `Get` auf ein unbekanntes Asset fehlt dort nur ein Satz. Den Textvorschlag habe ich ins Register geschrieben.
   - Für die Schemas ändert sich nichts: Ein leerer `Pub` bleibt gültig. Ob überhaupt eine Antwort kommt, sieht man nur im laufenden Betrieb (D7 `monitor`).
-  - **Bitte bestätigen:** Ich lese „es gibt nichts“ so, dass auch ein Filter, der bei einem bekannten Asset nichts trifft (z. B. ein unbekannter `Tag` bei `Get/Data`), eine leere Liste bekommt.
-  - In die Guideline schreibe ich das erst auf deinen Auftrag (danach Re-Baseline und eine neue REQ für den Fall „unbekanntes Asset“).
+  - Du hast bestätigt: Auch ein Filter, der bei einem bekannten Asset nichts trifft (z. B. ein unbekannter `Tag` bei `Get/Data`), bekommt eine leere Liste.
+  - Auf deinen Auftrag steht das jetzt in der Guideline (`a42a132`). Danach habe ich die Re-Baseline gemacht und die neue Regel REQ-CMP-047 angelegt (siehe „Aktuell offen“).
 - **D-2 – Nachtrag C-036 zu ADR-0019:** angenommen. Im ADR steht der Nachtrag jetzt als „accepted“. Punkt 1 beschreibt deine SF-099-Entscheidung.
 - **D-3 – Aufteilung:** angenommen. C-037 ist PublicationList und ReferenceDesignation, der P2-Abschluss ist C-041.
 - **D-4 – Heuristik für REQ-RES-MAM-006:** angenommen. Das Orakel bleibt, wie es ist.

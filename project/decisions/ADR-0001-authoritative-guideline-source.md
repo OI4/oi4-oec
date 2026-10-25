@@ -508,3 +508,9 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `cc2fb4b` is recorded in C-033 addendum 2; the register commits `72dcd60`, `5cb1869` and `ff0d842` touch only `findings/` (no re-baseline).
 - The baseline is now `68d878d` on branch `feature/spec-findings`. Local commit: SF-098 (decided by the PO in the C-034 review, implementation ticked in `project/REVIEW.md`) – MG 8.3.11 "a `Del` contains at most one `DataSetMessage`, as defined for the resource in 9.1" (none for `ReferenceDesignation`, the entry to be deleted for `SubscriptionList`) instead of "a `Del` contains no `DataSetMessage`"; the GL-ADR-019 Pagination decision and 8.3.11 implementation line are amended, no new GL-ADR. Spec re-baselined in `4037103`: inventory unchanged at 1397 items (the sentence carries no keyword item); REQ-PAG-009 refs +SF-098.
+
+## Amendment C-036 addendum 2 (2026-10-25, guideline baseline `a42a132`)
+
+- The previous baseline `68d878d` is recorded in C-034 addendum 1; the register commits `29682b0`, `5491830` and `d4f79f3` touch only `findings/` (no re-baseline).
+- The baseline is now `a42a132` on branch `feature/spec-findings`. Local commit: SF-099 (decided by the PO in the C-036 review, revised; PO order 2026-10-25) – MG 9.1 "Resources Without Content": a `Get` whose `Filter` matches no content of a provided `Source` gets the empty list; a `Get` for an asset the entity neither is nor represents is not answered on `Pub`, the entity should answer with an `Event` Status `Bad` (`BadNotFound`); the `Pub` bullets of 9.1.1/9.1.2/9.1.3/9.1.4/9.1.7/9.1.8/9.1.9/9.1.10 say "none in the answer to a `Get` without content"; 8.3.6.1 names the `Get` for an unknown asset; no GL-ADR. Spec re-baselined in `1a608c1`: 1398 inventory items (+1 SHOULD), new REQ-CMP-047, REQ-CMP-041 statement extended, 9 REQs remapped.
+
