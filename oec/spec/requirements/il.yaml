@@ -3,7 +3,7 @@
 # catalog.schema.json). Reference checks: spectool package internal/il,
 # vectors in vectors/il/ and vectors/topic/.
 area: IL
-baseline: "e0262dd"
+baseline: "734c560"
 requirements:
   # --- Identification Link in general (MG 4) -------------------------------
   - id: REQ-IL-001
@@ -463,7 +463,7 @@ requirements:
         text: The Oi4Identifier in the form of <ManufacturerUri/Model/ProductCode/SerialNumber> represents an IEC 61406-1 compliant Identification Link (4.1 IEC 61406-1 Identification Link) without scheme.
     verification: [manual]
     inventory: [MG-4.3.1-b4192d78, MG-4.3.1-8b0a5dee, MG-4.3.1-1f4d5d6c]
-    status: draft
+    status: reviewed
     notes: >-
       Reference implementation il.Oi4Identifier; vectors V-OID-…. Statement
       changed in C-046 addendum 2 (SF-104, PO 2026-10-26: MG 4.1 governs, the
@@ -706,20 +706,22 @@ requirements:
       - ref: MG 4.1
         text: If values (e.g. a serial number) contain characters that are not permitted or have a special function in the URL syntax, they must be masked by other means.
       - ref: MG 4.3.1
-        text: If a value of Model, ProductCode or SerialNumber contains characters that are not permitted in an Identification Link, or a forward slash, which separates the elements, the dnp-encoding (A3 The dnp-Encoding) may be used to mask these characters.
+        text: If a value of Model, ProductCode or SerialNumber contains other characters than A–Z, a–z, 0–9, -, ., _ and ~, the value must be dnp-encoded (A3 The dnp-Encoding), so that the Oi4Identifier can be regenerated from the same values.
       - ref: MG A3
-        text: In this case, these components may be dnp-encoded (see 4.3.1 Structure of the Oi4Identifier).
+        text: In this case, these components are dnp-encoded (see 4.3.1 Structure of the Oi4Identifier).
     verification: [manual]
-    inventory: [MG-4.3.1-c8598181, MG-A3-fc6806cf, MG-A3-b8922139]
-    status: draft
+    inventory: [MG-4.3.1-8757ccac]
+    status: reviewed
     notes: >-
       Changed in C-046 addendum 2 from MAY to MUST: PO decision SF-104
       (2026-10-26) – MG 4.1 governs ("must be masked by other means"), the
       "may" of MG 4.3.1 and MG A3 names the means (dnp-encoding), not an
       option to leave such characters unmasked; masking only the offending
       characters equals encoding the whole element, because the dnp-encoding
-      keeps exactly the unreserved characters. The guideline text of MG 4.3.1
-      and MG A3 still says "may" (alignment pending a PO order). Before:
+      keeps exactly the unreserved characters. Guideline text of MG 4.3.1 and
+      MG A3 aligned on PO order (C-046 review D-1, guideline 734c560; quotes
+      and inventory remapped, the two former MAY sentences of MG A3 have no
+      keyword any more). Before:
       PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference
       implementation il.Oi4Identifier applies the dnp-encoding; vectors
       V-OID-…; D7 checks it heuristically in the MAM (REQ-RES-MAM-006,

@@ -210,7 +210,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-HEALTH-007 | schema, d7-validate | reviewed | – | – | derived |
 | REQ-RES-MAM-001 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-204, V-PAY-205 | covered |
 | REQ-RES-MAM-004 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-206, V-PAY-207 | covered |
-| REQ-RES-MAM-006 | d7-validate | reviewed | V-PAY-028 | V-PAY-210 (rule), V-PAY-245* (rule) | covered |
+| REQ-RES-MAM-006 | d7-validate | reviewed | V-PAY-028 | V-PAY-210 (rule), V-PAY-245 (rule) | covered |
 | REQ-RES-MAM-012 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-208, V-PAY-209 | covered |
 | REQ-RES-MAM-014 | d7-validate | reviewed | V-PAY-028 | V-PAY-213 (rule) | covered |
 | REQ-RES-MAM-016 | d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-211 (rule) | covered |
