@@ -22,7 +22,7 @@ Work after a release uses a pre-release version (e.g. `2.1.0-dev`) and an `Unrel
 
 ## 2.0.0
 
-First release, P2 exit (C-041). Guideline baseline `168e1d1` (OEC Messaging Guideline and Runtime & Infrastructure Guideline, branch `feature/spec-findings`, GL-ADR-001 … 020, SF-001 … 100).
+First release, P2 exit (C-041), accepted by the PO on 2026-10-26; local git tag `oec-schema-2.0.0`. Guideline baseline `168e1d1` (OEC Messaging Guideline and Runtime & Infrastructure Guideline, branch `feature/spec-findings`, GL-ADR-001 … 020, SF-001 … 100).
 
 **Content:** 45 source files (strict flavor), plus the generated tolerant flavor.
 
