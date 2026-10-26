@@ -178,9 +178,9 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
 
 ## P4 – SDK core implementation (D2) – in progress (C-046 …)
 
-Incremental, each increment test-covered. Workspace layout, crate roles, test-vector contract and gates: ADR-0026 (proposed C-046). Started in C-046 after the P3 exit; PO order: P4 first, P5 interleaved, P4b/P5b afterwards (C-045 review).
+Incremental, each increment test-covered. Workspace layout, crate roles, test-vector contract and gates: ADR-0026 (`accepted (agent, G-3.4 b)`, C-046 addendum 1). Started in C-046 after the P3 exit; PO order: P4 first, P5 interleaved, P4b/P5b afterwards (C-045 review).
 
-1. ✅ (C-046) Identity: IL validation, base64url codec, Oi4Identifier builder (optional dnp-encoding of its elements, MG 4.3.1/A3).
+1. ✅ (C-046) Identity: IL validation, base64url codec, Oi4Identifier builder (always dnp-encodes its elements, MG 4.1/4.3.1/A3, SF-104 resolved in C-046 addendum 3).
 2. ✅ (C-046) Topic model: build/parse/validate, wildcard subscription builder.
 3. Message model: typed NetworkMessage/DataSetMessage/MetaData/Action messages (OPC UA 1.05.04, fixed content masks), MessageId/`ReplyTo`/Action correlation (`RequestId`, `CorrelationData`, `ResponseAddress`), schema validation hook (schemas embedded by `build.rs`, ADR-0019 §7/ADR-0023; the SDK reports `schema.Version`/`schema.Baseline` of the embedded tree – the C-043 spike reported the newest release manifest, which differs during a pre-release such as `2.0.1-dev`).
 4. Bootstrap (blocking API by default, `run_async` for tokio users, Q-021; string-keyed Config getters, Q-022): explicit configuration (smart devices, Level 1) and optional container storage contract (`broker.json`, credentials/certs, ClientId from hostname).
