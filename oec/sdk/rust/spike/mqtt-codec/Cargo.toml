@@ -1,0 +1,9 @@
+[package]
+name = "oec-mqtt-codec-spike"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "MIT"
+description = "P3 spike (C-043, ADR-0023 option a, Q-026): the MQTT 3.1.1 client subset of OEC as a sans-IO codec without dependencies. Shows shape and size; not product code."
+
+[dependencies]
