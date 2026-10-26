@@ -33,30 +33,30 @@ Logs:
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | P3 plan: cycle cut C-042 … C-045, open points, dependencies, exit criteria (ROADMAP P3) | decide | C-042 | accept | ☐ |
-| D-2 | ADR-0020 Rust SDK public API (D2) | decide | C-042 | accept | ☐ |
-| D-3 | ADR-0021 C ABI `oec-ffi` | decide | C-042 | accept | ☐ |
-| D-4 | ADR-0022 micro SDK API (D9) | decide | C-042 | accept | ☐ |
-| D-5 | ADR-0023 Rust SDK dependencies | decide | C-043 | accept | ☐ |
-| D-6 | ADR-0024 micro SDK libraries (revises the open JSON candidates of ADR-0017) | decide | C-043 | accept | ☐ |
-| D-7 | ADR-0025 compliance tool architecture (D7/D8) | decide | C-044 | accept | ☐ |
-| D-8 | Q-021 execution model of the Rust SDK | decide | C-042 | (a) blocking by default | ☐ |
-| D-9 | Q-022 Config access | decide | C-042 | (a) string-keyed getters first | ☐ |
-| D-10 | Q-023 C ABI option style | decide | C-042 | (a) builder + string setters + JSON | ☐ |
-| D-11 | Q-024 logger demo in C | decide | C-042 | (a) yes | ☐ |
-| D-12 | Q-025 micro SDK prefix | decide | C-042 | (a) `oecm_` | ☐ |
-| D-13 | Q-026 MQTT client of the Rust SDK (`rumqttc` is out) | decide | C-043 | (a) own sans-IO codec | ☐ |
-| D-14 | Q-027 JSON reader of the micro SDK | decide | C-043 | (a) own bounded pull reader | ☐ |
-| D-15 | Q-028 proxy mode required for a full level claim | decide | C-044 | (a) yes | ☐ |
-| D-16 | Q-029 tester identity of D7 | decide | C-044 | (a) not announced by default | ☐ |
-| D-17 | Q-030 exit code 4 "inconclusive" | decide | C-044 | (a) yes | ☐ |
-| D-18 | SF-101 PublicationList `Mode` and `Get` | decide | C-042 | proposed interpretation + text | ☐ |
-| D-19 | SF-102 `ServiceType` of a directly connected smart device | decide | C-042 | `OTConnector` + text | ☐ |
-| R-1 | Rust API sketch with DX examples (`oec/sdk/rust/sketch`) | review | C-042 | accept | ☐ |
-| R-2 | C ABI sketch `oec.h` and D9 sketch `oecm.h` | review | C-042 | accept | ☐ |
-| R-3 | Spikes `schema-embed` and `mqtt-codec` | review | C-043 | accept | ☐ |
-| R-4 | Test catalog D7/D8 and its gate (`oec/conformance/catalog/`) | review | C-044 | accept | ☐ |
-| R-5 | Tool design `oec/conformance/DESIGN.md` | review | C-044 | accept | ☐ |
+| D-1 | P3 plan: cycle cut C-042 … C-045, open points, dependencies, exit criteria (ROADMAP P3) | decide | C-042 | accept | ☑ accepted |
+| D-2 | ADR-0020 Rust SDK public API (D2) | decide | C-042 | accept | ☑ accepted |
+| D-3 | ADR-0021 C ABI `oec-ffi` | decide | C-042 | accept | ☑ accepted |
+| D-4 | ADR-0022 micro SDK API (D9) | decide | C-042 | accept | ☑ accepted |
+| D-5 | ADR-0023 Rust SDK dependencies | decide | C-043 | accept | ☑ accepted |
+| D-6 | ADR-0024 micro SDK libraries (revises the open JSON candidates of ADR-0017) | decide | C-043 | accept | ☑ accepted |
+| D-7 | ADR-0025 compliance tool architecture (D7/D8) | decide | C-044 | accept | ☑ accepted |
+| D-8 | Q-021 execution model of the Rust SDK | decide | C-042 | (a) blocking by default | ☑ accepted |
+| D-9 | Q-022 Config access | decide | C-042 | (a) string-keyed getters first | ☑ accepted |
+| D-10 | Q-023 C ABI option style | decide | C-042 | (a) builder + string setters + JSON | ☑ accepted |
+| D-11 | Q-024 logger demo in C | decide | C-042 | (a) yes | ☑ accepted |
+| D-12 | Q-025 micro SDK prefix | decide | C-042 | (a) `oecm_` | ☑ accepted |
+| D-13 | Q-026 MQTT client of the Rust SDK (`rumqttc` is out) | decide | C-043 | (a) own sans-IO codec | ☑ accepted |
+| D-14 | Q-027 JSON reader of the micro SDK | decide | C-043 | (a) own bounded pull reader | ☑ accepted |
+| D-15 | Q-028 proxy mode required for a full level claim | decide | C-044 | (a) yes | ☑ accepted |
+| D-16 | Q-029 tester identity of D7 | decide | C-044 | (a) not announced by default | ☑ accepted |
+| D-17 | Q-030 exit code 4 "inconclusive" | decide | C-044 | (a) yes | ☑ accepted |
+| D-18 | SF-101 PublicationList `Mode` and `Get` | decide | C-042 | proposed interpretation + text | ☑ accepted |
+| D-19 | SF-102 `ServiceType` of a directly connected smart device | decide | C-042 | `OTConnector` + text | ☑ accepted |
+| R-1 | Rust API sketch with DX examples (`oec/sdk/rust/sketch`) | review | C-042 | accept | ☑ accepted |
+| R-2 | C ABI sketch `oec.h` and D9 sketch `oecm.h` | review | C-042 | accept | ☑ accepted |
+| R-3 | Spikes `schema-embed` and `mqtt-codec` | review | C-043 | accept | ☑ accepted |
+| R-4 | Test catalog D7/D8 and its gate (`oec/conformance/catalog/`) | review | C-044 | accept | ☑ accepted |
+| R-5 | Tool design `oec/conformance/DESIGN.md` | review | C-044 | accept | ☑ accepted |
 
 ## Decisions
 
@@ -73,7 +73,7 @@ Logs:
     - P6 needs Q-024.
   - Five concrete exit criteria. Criteria 3 and 4 are already gates in `oec/check.sh`: the sketches compile, and the catalog covers every REQ.
   - ROADMAP P4 got increment 10 (C ABI).
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-2 – ADR-0020 Rust SDK public API (`proposed`)
 
@@ -91,7 +91,7 @@ Logs:
   - Config, events and Syslog.
   - A consumer API.
   - Every decision names its REQ ids; a test checks that the cited REQs exist.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-3 – ADR-0021 C ABI `oec-ffi` (`proposed`)
 
@@ -116,7 +116,7 @@ Logs:
   - Versioning: `OEC_ABI_VERSION` / `oec_abi_version()`.
   - The behavior is exactly ADR-0020.
   - Proof by a C logger demo (Q-024).
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-4 – ADR-0022 micro SDK API (`proposed`)
 
@@ -133,7 +133,7 @@ Logs:
   - Level 2/3 come as additions.
   - Device identity defaults use `OTConnector` (SF-102).
   - The table of shared concepts and deliberate differences to the C ABI is in the ADR.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-5 – ADR-0023 Rust SDK dependencies (`proposed`)
 
@@ -150,7 +150,7 @@ Logs:
   - MSRV 1.89.
   - cargo-zigbuild for Linux arm64/ARMv7.
 - **Important finding:** `rumqttc`, the assumed MQTT client, is effectively unmaintained and pulls in a vulnerable `rustls-webpki` (see D-13).
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-6 – ADR-0024 micro SDK libraries (`proposed`)
 
@@ -162,7 +162,7 @@ Logs:
   - The Arduino port runs on esp-mqtt from the core; the fallback is arduino-mqtt.
   - M5Unified only in the demo.
 - **Effect on a reviewed item:** ADR-0017 named "cJSON or jsmn" as the JSON candidates and left the choice open. The facts changed: jsmn is abandoned, and cJSON is no longer bundled with IDF 6. If you accept D-6, C-045 adds an amendment note to ADR-0017.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-7 – ADR-0025 compliance tool architecture (`proposed`)
 
@@ -181,7 +181,7 @@ Logs:
   - A simulated CUT for positive and negative fixtures.
   - Static cross builds.
   - SDK independence as a test.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-8 … D-17 – Open questions
 
@@ -189,16 +189,16 @@ The full options are in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
 
 | # | Question | Recommendation | Alternative(s) | PO |
 |---|---|---|---|---|
-| D-8 | **Q-021** Rust execution model | (a) blocking by default; `App::run()` brings its own runtime; only consumer requests are `async` (each with a `_blocking` twin); same model as the C ABI | (b) async-first | ☐ |
-| D-9 | **Q-022** Config access | (a) string-keyed typed getters in P4, `#[derive(Config)]` later | (b) derive macro from the start | ☐ |
-| D-10 | **Q-023** C ABI option style | (a) builder functions + string setters + JSON text | (b) option structs with size/version | ☐ |
-| D-11 | **Q-024** logger demo (D4) in C on the C ABI | (a) yes; stays Messaging L1, configured by file/environment (ADR-0016). ROADMAP P6 still says "via `Config`" and would be aligned in C-045 | (b) Rust | ☐ |
-| D-12 | **Q-025** micro SDK prefix | (a) `oecm_` | (b) `oec_micro_`, (c) `oec_` | ☐ |
-| D-13 | **Q-026** MQTT client of the Rust SDK | (a) own sans-IO MQTT 3.1.1 codec + session in `oec-core` (spike: 307 lines, 8 tests; P4 ~1–1.5k lines incl. fuzzing) | (b) `rumqttc-v4-next` fork, (c) `paho-mqtt` (C + OpenSSL) | ☐ |
-| D-14 | **Q-027** JSON reader of the micro SDK | (a) own bounded pull reader without heap, fuzzed | (b) cJSON with a static arena | ☐ |
-| D-15 | **Q-028** proxy mode for a full level claim | (a) yes: without the proxy the connection tests (CONNECT, Will, TLS, certificates, recovery) are `skip` and the run is inconclusive | (b) also accept broker evidence, (c) make these REQs `manual` | ☐ |
-| D-16 | **Q-029** D7 tester identity | (a) a generated tester IL, not announced on the bus; `--announce` optional | (b) always announce as a Utility | ☐ |
-| D-17 | **Q-030** exit code 4 "inconclusive" | (a) yes; `--allow-skip` maps 4 → 0 | (b) skipped MUST = fail, (c) 0 with a warning | ☐ |
+| D-8 | **Q-021** Rust execution model | (a) blocking by default; `App::run()` brings its own runtime; only consumer requests are `async` (each with a `_blocking` twin); same model as the C ABI | (b) async-first | ☑ accepted |
+| D-9 | **Q-022** Config access | (a) string-keyed typed getters in P4, `#[derive(Config)]` later | (b) derive macro from the start | ☑ accepted |
+| D-10 | **Q-023** C ABI option style | (a) builder functions + string setters + JSON text | (b) option structs with size/version | ☑ accepted |
+| D-11 | **Q-024** logger demo (D4) in C on the C ABI | (a) yes; stays Messaging L1, configured by file/environment (ADR-0016). ROADMAP P6 still says "via `Config`" and would be aligned in C-045 | (b) Rust | ☑ accepted |
+| D-12 | **Q-025** micro SDK prefix | (a) `oecm_` | (b) `oec_micro_`, (c) `oec_` | ☑ accepted |
+| D-13 | **Q-026** MQTT client of the Rust SDK | (a) own sans-IO MQTT 3.1.1 codec + session in `oec-core` (spike: 307 lines, 8 tests; P4 ~1–1.5k lines incl. fuzzing) | (b) `rumqttc-v4-next` fork, (c) `paho-mqtt` (C + OpenSSL) | ☑ accepted |
+| D-14 | **Q-027** JSON reader of the micro SDK | (a) own bounded pull reader without heap, fuzzed | (b) cJSON with a static arena | ☑ accepted |
+| D-15 | **Q-028** proxy mode for a full level claim | (a) yes: without the proxy the connection tests (CONNECT, Will, TLS, certificates, recovery) are `skip` and the run is inconclusive | (b) also accept broker evidence, (c) make these REQs `manual` | ☑ accepted |
+| D-16 | **Q-029** D7 tester identity | (a) a generated tester IL, not announced on the bus; `--announce` optional | (b) always announce as a Utility | ☑ accepted |
+| D-17 | **Q-030** exit code 4 "inconclusive" | (a) yes; `--allow-skip` maps 4 → 0 | (b) skipped MUST = fail, (c) 0 with a warning | ☑ accepted |
 
 ### D-18 – SF-101 PublicationList `Mode` and `Get` (open, register `f80eba7`)
 
@@ -218,7 +218,7 @@ The full options are in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
   - The SDK defaults contain `ON_REQUEST` under both readings.
   - The D7 `Get` expectation (T7-GET-03) follows the decision.
   - Implementing it changes the guideline text, so C-045 needs a re-baseline and therefore a schema pre-release version (`2.0.1-dev`, schema content unchanged).
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-19 – SF-102 `ServiceType` of a smart device (open, register `f80eba7`)
 
@@ -229,7 +229,7 @@ The full options are in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
   - Its `DeviceClass` is the product's own class, not `Oi4.OTConnector`.
   - One sentence is added to MG 7.2.
 - **Alternative:** a new `ServiceType` such as `Device`. That needs a new guideline version and a schema change (2.1.0).
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ## Review items
 
@@ -244,7 +244,7 @@ The full options are in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
 - **REQ tracing:** `tests/sketch.rs` checks that every REQ id cited in the sketch exists in `oec/spec` and is not deprecated.
 - **Gate:** step 5 of `oec/check.sh`.
 - **Please check:** whether the hello world and the asset example read the way you want an SDK to feel.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### R-2 – C ABI sketch and D9 sketch
 
@@ -253,7 +253,7 @@ The full options are in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
   - `oec/sdk/micro/sketch/include/oecm.h` with `hello_device.c`.
 - **Gate:** the headers and the three examples pass a C17 syntax check with `-Wall -Wextra -Wpedantic -Werror` (step 5 of `oec/check.sh`).
 - **Please check:** the ownership and callback rules in the header comments, and the shared concepts vs. deliberate differences between `oec_` and `oecm_` (ADR-0022).
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### R-3 – Spikes (`oec/sdk/rust/spike/`, marked as spikes)
 
@@ -264,7 +264,7 @@ The full options are in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
   - Cost: +3.1 MB per binary. This is the reason for the opt-in feature `strict-validation`.
 - **`mqtt-codec`:** 307 lines, 8 byte-exact tests; evidence for Q-026 (a).
 - Both run offline in `oec/check.sh`. They are throw-away code; P4 rewrites them in `oec-core`.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### R-4 – Test catalog D7/D8 (`oec/conformance/catalog/`)
 
@@ -286,7 +286,7 @@ The full options are in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
   - the `manual` reasons:
     - REQ-CMP-011/012: rule for the tool, i.e. the default level;
     - REQ-LIFE-011…013: subscriber side, not observable.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### R-5 – Tool design (`oec/conformance/DESIGN.md`)
 
@@ -301,7 +301,7 @@ The full options are in [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md).
   - self-test with a simulated CUT;
   - distribution.
 - **Please check:** whether the command names and the CLI shape suit the vendors and operators you have in mind.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ## After your answers (C-045)
 
