@@ -176,12 +176,12 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
 
 **Exit assessment (C-045):** all five criteria are met. 1: ADR-0020 … 0025 accepted, ADR-0017 amended (C-045), ADR-0011 … 0016 unchanged. 2: Q-021 … Q-030 decided; SF-101/102 decided and resolved in the guideline (SF-103, found while implementing SF-101, is editorial and does not block). 3 and 4: enforced by `oec/sdk/check.sh` and `catalog_test.go` in `oec/check.sh` (green). 5: ADR-0023/0024. P3 closed by the PO acceptance of D-1 … D-19 and R-1 … R-5 (2026-10-26).
 
-## P4 – SDK core implementation (D2)
+## P4 – SDK core implementation (D2) – in progress (C-046 …)
 
-Incremental, each increment test-covered:
+Incremental, each increment test-covered. Workspace layout, crate roles, test-vector contract and gates: ADR-0026 (proposed C-046). Started in C-046 after the P3 exit; PO order: P4 first, P5 interleaved, P4b/P5b afterwards (C-045 review).
 
-1. Identity: IL validation, base64url codec, Oi4Identifier builder (optional dnp-encoding of its elements, MG 4.3.1/A3).
-2. Topic model: build/parse/validate, wildcard subscription builder.
+1. ✅ (C-046) Identity: IL validation, base64url codec, Oi4Identifier builder (optional dnp-encoding of its elements, MG 4.3.1/A3).
+2. ✅ (C-046) Topic model: build/parse/validate, wildcard subscription builder.
 3. Message model: typed NetworkMessage/DataSetMessage/MetaData/Action messages (OPC UA 1.05.04, fixed content masks), MessageId/`ReplyTo`/Action correlation (`RequestId`, `CorrelationData`, `ResponseAddress`), schema validation hook (schemas embedded by `build.rs`, ADR-0019 §7/ADR-0023; the SDK reports `schema.Version`/`schema.Baseline` of the embedded tree – the C-043 spike reported the newest release manifest, which differs during a pre-release such as `2.0.1-dev`).
 4. Bootstrap (blocking API by default, `run_async` for tokio users, Q-021; string-keyed Config getters, Q-022): explicit configuration (smart devices, Level 1) and optional container storage contract (`broker.json`, credentials/certs, ClientId from hostname).
 5. Connection & lifecycle: TLS MQTT client (own sans-IO MQTT 3.1.1 codec and session in `oec-core` on tokio + rustls, ADR-0023/Q-026; fuzzing and interop tests against the dev broker of increment 9), Birth/Will/Close, Health heartbeat incl. `Details[]`, reconnect; selectable compliance level (L1/L2/L3).
@@ -190,7 +190,31 @@ Incremental, each increment test-covered:
 8. Consumer side: typed subscriptions, discovery helpers, `Get` request with correlation + timeout, pagination reassembly.
 9. Dev environment: docker compose with TLS broker (e.g. Mosquitto), generated dev PKI, sample `/etc/oi4` layout.
 10. C ABI `oec-ffi` (ADR-0021, added in C-042): cbindgen header that keeps the contract of the P3 sketch `oec.h` (builder handles, string setters, JSON values, Q-023), shared + static library, C examples (`hello.c`, logger shape) as tests, also under AddressSanitizer. Prerequisite of the logger demo in C (P6, Q-024).
-- **Exit:** conformity test vectors pass; integration tests against broker pass (incl. D7 `test` against an SDK example app, as soon as available); example app documented.
+
+**Order and cycle cut** (agent, reason in `log/2026-10-26_C-046_p4-start.md`; cycles after C-047 are a plan and are re-cut at each cycle end):
+
+| Cycle | Increment | Content | New runtime dependencies (ADR-0023) |
+|---|---|---|---|
+| **C-046** ✅ | 1, 2 | workspace `oec/sdk/rust` (ADR-0026), `oec-core` modules `il` and `topic`, JSON export `oec/spec/export` as the vector contract, gate (fmt, clippy pedantic, tests, doc, cargo-deny) | none (dev: serde_json) |
+| C-047 | 3 | message model in `oec-core`, correlation, schema embedding (`build.rs`, `strict-validation`), payload vectors (valid and invalid, verdicts equal to the schema gate) | serde, serde_json, jsonschema `=0.60.1` (feature), time, uuid |
+| C-048 | 4 | crate `oec`: `App`/`AppBuilder`, `Level`, `Bootstrap` (explicit + container storage), `Store`, `Error`; the sketch API moves into `oec` piece by piece | thiserror, log |
+| C-049 … | 5 | MQTT 3.1.1 codec and session in `oec-core` (from spike `mqtt-codec`), fuzzing; transport on tokio + rustls; Birth/Will/Close, Health heartbeat, reconnect, level selection | tokio, rustls, tokio-rustls, rustls-pki-types |
+| then | 9 | dev environment (compose, Mosquitto with TLS, dev PKI, sample `/etc/oi4`): carries the interop tests of increment 5 (ADR-0023 Consequences), so it comes right after 5 | – (test infrastructure) |
+| P5 interleave | – | D7 `internal/mqttwire`, capture and `monitor --replay`, then `monitor` against the dev broker (ADR-0025 start); independent of the SDK code (Q-009) | – |
+| then | 6, 7, 8 | provider side, write side, consumer side; at the end of 8 the sketch is deleted and its REQ walker moves into `oec` (ADR-0026 §1) | – |
+| then | 10 | `oec-ffi` (cbindgen, ASan), prerequisite of the logger demo (P6) | – |
+
+Why this cut: increments 1–2 have no runtime dependencies and one vector contract, so they fit one review. Increment 3 brings the first runtime dependencies, the full cargo-deny tree and the largest typed model, so it gets a cycle of its own. Increment 9 moves before 6 because the transport of 5 needs a broker for its interop tests.
+
+**Dependencies:** P4b (D9) reuses the JSON export and the violation vocabulary of ADR-0026 but no code (ADR-0017). P5 does not depend on P4 (Q-009); the D7 `test` exit criterion needs the SDK example app (end of increment 8). P6 needs increment 8 (weather, Rust) and increment 10 (logger, C, Q-024).
+
+**Exit criteria** (concrete):
+1. Increments 1–10 are implemented; every public item of ADR-0020 and ADR-0021 exists in `oec`/`oec-ffi`; the sketch is deleted and its REQ walker runs in the workspace.
+2. All shared vectors relevant to D2 pass in `oec/check.sh`: IL, dnp, Oi4Identifier, topic, matrix (increments 1–2) and payload (increment 3, same verdicts as the schema gate in the `strict-validation` build).
+3. Integration tests against the dev TLS broker pass (increments 5, 9), including D7 `test` against the SDK example app as soon as D7 `test` exists (P5).
+4. The C examples (`hello.c`, logger shape) run against `oec-ffi`, also under AddressSanitizer.
+5. The gate is green: fmt, clippy pedantic, tests, doc, cargo-deny (no ignored advisory without a logged reason); builds on Linux/macOS/Windows amd64 and arm64, ARMv7 Linux best effort (Q-008).
+6. The example apps (hello world, device source, config, consumer) are documented and compile in the gate.
 
 ## P4b – Micro SDK (D9)
 
