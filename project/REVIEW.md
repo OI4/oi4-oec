@@ -14,9 +14,9 @@ Current state: **3 review items** from implementing SF-100 (two changed reviewed
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| R-1 | REQ-CNT-003 (reviewed → `draft`) – content of `broker.json`: Address forms, SecurePort 1 … 65535, further elements | review | C-039 add. 2 | accept | ☐ |
-| R-2 | REQ-CNT-004 (reviewed → `draft`) – the application ignores unknown elements of `broker.json` | review | C-039 add. 2 | accept | ☐ |
-| R-3 | Guideline wording of SF-100 (`168e1d1`: RIG 4.1.1) | review | C-039 add. 2 | accept | ☐ |
+| R-1 | REQ-CNT-003 (reviewed → `draft`) – content of `broker.json`: Address forms, SecurePort 1 … 65535, further elements | review | C-039 add. 2 | accept | ☑ accepted |
+| R-2 | REQ-CNT-004 (reviewed → `draft`) – the application ignores unknown elements of `broker.json` | review | C-039 add. 2 | accept | ☑ accepted |
+| R-3 | Guideline wording of SF-100 (`168e1d1`: RIG 4.1.1) | review | C-039 add. 2 | accept | ☑ accepted |
 
 ## Reviews
 
@@ -25,13 +25,13 @@ Current state: **3 review items** from implementing SF-100 (two changed reviewed
 - **Where:** [`requirements/cnt.yaml`](../oec/spec/requirements/cnt.yaml) / [view](../oec/spec/requirements/view/cnt.md#req-cnt-003).
 - **Statement (new parts in bold):** "broker.json in the Message Bus storage is a JSON object with the mandatory fields Address (String, IP address or host name of the broker**: an IPv4 address in dotted-decimal form without leading zeros, an IPv6 address in the text form of RFC 4291 without brackets and without zone index, or a host name of RFC 1123 – labels of 1 to 63 letters, digits and "-" that do not start or end with "-", the last label not all digits, at most 253 characters, no trailing "." –; no port, scheme or path**), SecurePort (UINT16, **1 … 65535,** port on which the broker listens for TLS connections) and MaxPacketSize (INT32, …, at least 262144 and at most 268435455). **It may contain further elements.** The broker accepts payloads up to MaxPacketSize."
 - **Also:** quotes + "Address contains no port, no scheme and no path." and "Clients ignore elements of broker.json they do not know."; inventory + RIG-4.1.1-77f0d05d; refs + SF-100; the note names `platform/broker.schema.json`, the oracle `internal/platform` and V-BRK-001 … 018. Verification stays `[d8]`.
-- **PO:** ☐ accepted ☐ change: …
+- **PO:** ☑ accepted (2026-10-26)
 
 ### R-2 – REQ-CNT-004 extended (`draft`)
 
 - **Where:** [view](../oec/spec/requirements/view/cnt.md#req-cnt-004).
 - **Change:** statement + "It ignores elements of broker.json it does not know."; quote of the new sentence; inventory + RIG-4.1.1-77f0d05d (shared with REQ-CNT-003: the platform may add elements, the application ignores them); refs + SF-100. Levels (L2 SHOULD, L3 MUST) and verification `[d8, manual]` unchanged – D8 can offer a `broker.json` with an extra element to the container.
-- **PO:** ☐ accepted ☐ change: …
+- **PO:** ☑ accepted (2026-10-26)
 
 ### R-3 – Guideline wording (`168e1d1`)
 
@@ -40,7 +40,7 @@ Current state: **3 review items** from implementing SF-100 (two changed reviewed
 - After the element list: "Clients ignore elements of `broker.json` they do not know."
 - **Beyond the register text:** the register proposed only the new value range for `Address`; the description sentences spell out the decided rules of SF-100 (b) so that the guideline, not only the register, carries them. Please object if you prefer the short form.
 - No GL-ADR (like SF-099). `yarn build` green. Register `7808df7`: SF-100 resolved.
-- **PO:** ☐ accepted ☐ change: …
+- **PO:** ☑ accepted (2026-10-26)
 
 ## Last review – C-039 (answered 2026-10-26)
 
