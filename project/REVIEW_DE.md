@@ -1,8 +1,8 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-046 (P4-Start)._
+_Stand: 26.10.2026, nach C-046 Nachtrag 1 (P4 läuft)._
 
-Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 bis D-5 wie empfohlen, R-1 bis R-4 akzeptiert“.
+Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 wie empfohlen“. Punkte mit A-x und R-x sind nur zur Info.
 
 ---
 
@@ -24,13 +24,15 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**P4 hat begonnen.** In C-046 habe ich die ersten echten Bausteine des Rust-SDK geschrieben: Identität und Topics. Der Code hängt noch an keiner fremden Bibliothek. Alle gemeinsamen Testvektoren dazu laufen grün durch. Für dich gibt es:
-- **5 Entscheidungen** (D-1 … D-5): wie das Rust-Projekt aufgebaut ist, wie die SDKs an die Testvektoren kommen, die Reihenfolge der nächsten Zyklen und zwei kleine Verhaltensfragen;
-- **4 Review-Punkte** (R-1 … R-4): der neue Code, der JSON-Export, die Lizenz- und Sicherheitsprüfung der Abhängigkeiten und die Strenge der Code-Prüfung.
+**Für dich gibt es genau eine Entscheidung: D-1 (SF-104).** Sie ist die Antwort auf deine Frage zu D-4 aus C-046.
 
-An REQs, Vektoren oder der Guideline hat sich nichts geändert. Die Lücken bleiben bei 0, und kein Spec-Finding ist offen.
+Außerdem habe ich deine neue Regel umgesetzt: **Technik-Entscheidungen** (Aufbau des Codes, Rust-Bibliotheken innerhalb der angenommenen Regeln, Build und Tests, Zyklusschnitt) **treffe ich selbst**, schreibe sie in ein ADR oder ins Log und zeige sie dir hier nur noch **zur Info** (A-x, R-x). Du kannst jede davon kippen, musst aber nicht antworten. **Gefragt wirst du** bei Widersprüchen oder fehlenden Definitionen in der Guideline (Spec-Findings), bei Guideline-Text, Umfang, Phasen-Reihenfolge, Programmiersprachen, Lizenzen und Veröffentlichung. Das steht jetzt so in GUARDRAILS G-3.4; `project/README.md` und AGENTS.md verweisen darauf. Testdaten (Vektoren) reviewst du weiterhin selbst (G-3.9).
 
-Log: [C-046](log/2026-10-26_C-046_p4-start.md).
+Damit sind die alten C-046-Punkte D-1, D-2, D-3 und D-5 von mir wie empfohlen entschieden (jetzt A-1 … A-4), ADR-0026 steht auf „accepted (agent)“, und R-1 … R-4 sind nur noch Info.
+
+An REQs, Vektoren oder der Guideline-Text hat sich nichts geändert; die Lücken bleiben bei 0. SF-104 ist das einzige offene Finding.
+
+Log: [C-046 inkl. Nachtrag 1](log/2026-10-26_C-046_p4-start.md).
 
 ### Begriffe aus C-046
 
@@ -42,109 +44,48 @@ Log: [C-046](log/2026-10-26_C-046_p4-start.md).
 - **cargo-deny:** ein Werkzeug, das alle fremden Rust-Bibliotheken prüft: erlaubte Lizenz? Bekannte Sicherheitslücke? Noch gepflegt? Nur eine TLS-Version?
 - **clippy / pedantic:** clippy ist der Rust-„Lektor“ für Code. `pedantic` ist seine strengste übliche Stufe.
 - **Warnung vs. Fehler:** Ein Fehler macht ein Topic ungültig. Eine Warnung sagt nur „das sollte man nicht tun“; das Topic bleibt gültig.
+- **dnp-encoding (Maskierung):** ein Verfahren aus MG A3. Jedes Zeichen außer `A–Z a–z 0–9 - . _ ~` wird als `,XX` geschrieben (XX = Hex-Code des Bytes). Aus `A/3` wird so `A,2F3`, aus `ABC@home` wird `ABC,40home`.
+- **G-3.4 (a)/(b):** die neue Arbeitsteilung. (a) fragt dich, (b) entscheide ich selbst und schreibe es auf.
 
 ---
 
-### D-1 – ADR-0026: Wie das Rust-Projekt aufgebaut ist
+### D-1 – SF-104: Ist das Oi4Identifier eindeutig, wenn Maskieren freiwillig ist?
 
-Die Ordnerstruktur im Repo entscheidest du (G-3.4). Mein Vorschlag:
-- **Ein Rust-Projekt `oec/sdk/rust`** mit drei Bibliotheken nebeneinander: `oec-core` (Protokollregeln), `oec` (das SDK für Entwickler) und `oec-ffi` (C-Schnittstelle). So steht es schon in ADR-0011.
-- **Die Skizze und die Spikes aus P3** bleiben vorerst daneben liegen. Die Skizze wird gelöscht, sobald `oec` ihre API wirklich kann.
-- **`oec-core` ist intern.** Es macht keine Stabilitätsversprechen, damit wir es frei umbauen können. Was Entwickler sehen, ist nur `oec`.
-- **Fehler** in `oec-core` sind genau (z. B. „Zeichen nicht erlaubt“, „zu lang“). `oec` gibt sie in der einfachen Form der angenommenen Skizze weiter.
-- **Fremde Bibliotheken** kommen erst ab Inkrement 3, und nur die, die du in ADR-0023 schon angenommen hast.
+**Deine Frage:** Kann ein Empfänger beim optionalen Maskieren erkennen, ob ein Wert maskiert ist oder die Zeichen von Haus aus enthält?
 
-**Empfehlung:** annehmen.
+**Antwort: Nein.** Es gibt kein Kennzeichen „ist maskiert“. Und das Maskierungszeichen `,` darf selbst in einem Identification Link vorkommen. `A,2F3` kann also die echte Seriennummer `A,2F3` sein oder die maskierte Seriennummer `A/3`.
 
-### D-2 – Die Testvektoren als JSON
+**Für Empfänger ist das aber kein Problem.** Laut MG 4.1 darf ein Empfänger einen Identification Link nie decodieren. Er vergleicht ihn nur als ganzen Text.
 
-Unsere Testvektoren liegen als YAML in `oec/spec/vectors`. Damit das Rust-SDK und später das C-SDK sie lesen können, ohne einen YAML-Leser einzubauen, erzeugt `spectool` jetzt automatisch eine **JSON-Kopie** in `oec/spec/export/`. `oec/check.sh` passt auf, dass die Kopie immer aktuell ist.
+**Das eigentliche Problem liegt beim Erzeuger.** Weil Maskieren freiwillig ist, können zwei Programme aus demselben Typenschild zwei verschiedene Kennungen bauen. Beispiel: Seriennummer `ABC@home` – das eine schreibt `ABC@home`, das andere `ABC,40home`. Beide sind gültig. Für den Bus sind das dann **zwei verschiedene Geräte**. MG 4.3 verspricht aber, dass man die Kennung jederzeit aus dem Typenschild neu erzeugen kann. Dazu kommt ein kleiner Widerspruch: Der Hinweis in MG 4.3.1 klingt, als würden nur die „störenden“ Zeichen maskiert. Die Beispieltabelle in MG A3 maskiert aber das ganze Element, auch erlaubte Zeichen wie `@`.
 
-**Warum:**
-- Der übliche Rust-YAML-Leser (`serde_yaml`) wird nicht mehr gepflegt.
-- Für C müssten wir eine YAML-Bibliothek einbauen.
-- JSON können beide sowieso.
+Das ist eine Lücke in der Guideline, darum frage ich dich. Ich habe sie als **SF-104** ins Register geschrieben (`c41b59a`).
 
-Die YAML-Dateien bleiben das Original, das du reviewst.
+**Möglichkeiten:**
+- **(a) Empfehlung: immer maskieren.** Model, ProductCode und SerialNumber werden immer dnp-codiert (der ManufacturerUri nicht). Elemente aus normalen Zeichen (Buchstaben, Ziffern, `-`, `.`, `_`, `~`) bleiben dabei unverändert, die meisten echten Kennungen ändern sich also nicht. Ergebnis: Pro Typenschild gibt es genau eine Kennung, und man kann sie eindeutig zurückrechnen. Das passt zur Tabelle in A3 und zu unseren Testvektoren. In der Guideline wird aus „may“ ein „must“, aus REQ-IL-033 MAY ein MUST.
+- **(b) nur maskieren, wenn nötig** (wenn ein verbotenes Zeichen oder `/` drin ist, dann das ganze Element). Auch eindeutig, aber nicht mehr sicher zurückrechenbar.
+- **(c) so lassen wie jetzt.** Die Mehrdeutigkeit bleibt; das SDK lässt die Wahl dem Entwickler.
 
-**Empfehlung:** annehmen.
+**Was (a) auslöst:** Guideline-Änderung in MG 4.3.1 und A3 (nur mit deinem Auftrag), neue Baseline, kleiner Versionssprung beim Schema, REQ-IL-022/033 gehen auf `draft` und kommen zu dir ins Review. Im SDK maskiert `build` dann immer, und die Option `.dnp_encoded()` fällt weg. Das Rust-SDK kann heute schon beides; der nächste Zyklus C-047 hängt nicht davon ab.
 
-### D-3 – Reihenfolge in P4
-
-Ich habe P4 in Zyklen geschnitten (ROADMAP P4):
-- **C-046 (fertig):** Identität und Topics.
-- **C-047:** Nachrichtenmodell (alle Payloads) und das Einbetten der Schemas. Dabei kommen die ersten fremden Bibliotheken dazu, deshalb ein eigener Zyklus.
-- **C-048:** das `oec`-Crate mit App, Level und Start-Konfiguration.
-- **Dann:** MQTT-Verbindung, gleich danach die **Testumgebung mit TLS-Broker** (Inkrement 9 vorgezogen, weil die Verbindung einen echten Broker zum Testen braucht).
-- **Dazwischen P5:** D7 lernt, MQTT-Mitschnitte zu lesen.
-- **Dann:** Daten anbieten, auf `Set`/`Del` reagieren, Daten anderer abonnieren (6–8), zuletzt die C-Schnittstelle (10).
-
-Die **Exit-Kriterien** sind jetzt konkret: alle Funktionen aus ADR-0020/0021 sind da, alle Vektoren grün, Tests gegen den Broker (inkl. D7 `test`), C-Beispiele laufen, Prüfungen grün auf allen Plattformen, Beispiel-Apps dokumentiert.
-
-**Gut zu wissen:** Ab der Testumgebung brauche ich eine laufende Container-Umgebung (Docker Desktop).
-
-**Empfehlung:** annehmen.
-
-### D-4 – `Oi4Identifier`: Maskierung nur auf Wunsch
-
-Aus Hersteller-URI, Modell, Produktcode und Seriennummer baut das SDK die Identität eines Assets (`Oi4Identifier`). Laut Guideline *darf* man dabei Sonderzeichen mit der „dnp-encoding“ maskieren, muss aber nicht.
-
-**Mein Vorschlag:**
-- Standardmäßig maskiert das SDK **nicht**. Ein `/` in einem Teil ist dann ein Fehler, weil er die vier Teile durcheinanderbringen würde.
-- Wer maskieren will, schreibt `.dnp_encoded()` dazu.
-
-**Warum nicht immer maskieren?** Die Maskierung ändert die Identität des Assets. Das soll der Entwickler bewusst entscheiden.
-
-**Empfehlung:** annehmen.
-
-### D-5 – Leerzeichen im Filter: nur eine Warnung
-
-Laut Guideline (MG 7.7) *sollen* Filter-Werte im Topic keine Leerzeichen oder Steuerzeichen enthalten. Das ist ein SHOULD, kein MUST.
-
-**Mein Vorschlag:** Das SDK nimmt solche Topics an und meldet eine Warnung. D7 macht es genauso. Beim Veröffentlichen schreibt `oec` später eine Warnung ins Log und sendet trotzdem.
-
-**Warum nicht ablehnen?** Dann würde das SDK aus einem SHOULD ein MUST machen.
-
-**Empfehlung:** annehmen.
-
-### R-1 – der neue Code (`oec-core`)
-
-In `oec/sdk/rust/oec-core` stehen rund 2.300 Zeilen Rust:
-- **Identität:** Prüfung von Identification Links (meldet alle Fehler auf einmal), base64url, Maskierung, `Oi4Identifier`.
-- **Topics:** zerlegen, bauen und prüfen; Filter; Abo-Filter mit `+`/`#`.
-
-Der Test liest alle passenden gemeinsamen Vektoren: 29 IL, 15 Maskierung, 13 `Oi4Identifier`, 151 Topics, die Topics aller gültigen Payload-Vektoren und die 66 Zeilen der Methoden-Matrix. **Alle grün.** Ungültige Topics bekommen dieselbe Fehlerart wie in D7.
-
-Eine Code-Abdeckung in Prozent kann ich noch nicht messen, weil dem installierten Rust ein Werkzeug fehlt.
-
-### R-2 – der JSON-Export
-
-Format der Kopie: oben ein Hinweis „automatisch erzeugt, nicht bearbeiten“ und der Pfad der YAML-Datei, dann dieselben Felder wie im YAML. Leere Felder fallen weg; ein fehlendes Feld heißt also „leer“.
-
-### R-3 – die Prüfung der fremden Bibliotheken (cargo-deny)
-
-`oec/check.sh` prüft jetzt mit `cargo deny` alle fremden Rust-Bibliotheken nach den Regeln, die du in ADR-0023 angenommen hast:
-- nur erlaubte Lizenzen;
-- keine bekannten Sicherheitslücken;
-- nichts Ungepflegtes;
-- genau eine TLS-Bibliothek;
-- kein OpenSSL;
-- nur crates.io als Quelle.
-
-Ohne Internet prüft es mit der zuletzt geladenen Datenbank. Neu nötig ist, dass `cargo-deny` installiert ist.
-
-### R-4 – wie streng der Code geprüft wird
-
-clippy läuft in der strengen Stufe `pedantic`, und jede Warnung bricht die Prüfung ab. Unsicherer Code (`unsafe`) ist verboten; nur die C-Schnittstelle bekommt später begründete Ausnahmen. Jede öffentliche Funktion braucht eine Doku.
-
-Eine Regel habe ich abgeschaltet: Sie will Begriffe wie ManufacturerUri in Backticks setzen. Bei uns sind das normale Wörter aus der Guideline.
+**Empfehlung:** (a).
 
 ---
 
-### Was nach deinen Antworten passiert (C-047)
+### Zur Info: was ich selbst entschieden habe (G-3.4 b)
 
-1. ADR-0026 auf „accepted“ (oder wie du es änderst).
-2. C-047: Nachrichtenmodell, Schemas einbetten, Payload-Vektoren; die ersten fremden Bibliotheken unter `cargo deny`.
+- **A-1 (war D-1) – ADR-0026, Aufbau des Rust-Projekts:** ein Workspace `oec/sdk/rust` mit `oec-core` (Protokollregeln, intern), `oec` (SDK für Entwickler) und `oec-ffi` (C-Schnittstelle). Status jetzt „accepted (agent)“. Der Teil zum Oi4Identifier (§5.2) wartet auf D-1.
+- **A-2 (war D-2) – Testvektoren als JSON:** `spectool` erzeugt JSON-Kopien der YAML-Vektoren, die SDKs lesen nur diese. Das Original bleibt YAML.
+- **A-3 (war D-3) – Reihenfolge in P4:** C-047 Nachrichtenmodell, C-048 `oec`-Crate, dann MQTT-Verbindung mit gleich danach der Testumgebung (TLS-Broker), dann P5-Zwischenschritt, dann 6–8, zuletzt die C-Schnittstelle.
+- **A-4 (war D-5) – Leerzeichen im Filter:** nur eine Warnung, kein Fehler, weil die Guideline „SHOULD NOT“ sagt.
+- **R-1 … R-4:** der neue Code in `oec-core`, das Format des JSON-Exports, die Prüfung der fremden Bibliotheken mit cargo-deny und die Strenge der Code-Prüfung (clippy pedantic). Alles ist in `oec/check.sh` grün. Anmerkungen sind willkommen, eine Antwort ist nicht nötig.
+
+---
+
+### Was als Nächstes passiert (C-047)
+
+1. P4 Inkrement 3: Nachrichtenmodell (alle Payloads), Schemas ins SDK einbetten, Payload-Vektoren; die ersten fremden Rust-Bibliotheken, geprüft mit cargo-deny.
+2. Nach deiner Antwort zu D-1: bei (a) oder (b) die Guideline-Änderung, neue Baseline, REQ-IL-033 zum Review, SDK angepasst.
 
 ---
 
@@ -223,7 +164,15 @@ Eine Regel habe ich abgeschaltet: Sie will Begriffe wie ManufacturerUri in Backt
 
 ---
 
-## Was aus deinem letzten Review (C-045) geworden ist
+## Was aus deinem letzten Review (C-046) geworden ist
+
+Du hast zu D-4 nachgefragt (Antwort oben in D-1, SF-104) und bestimmt, dass ich Technik-Entscheidungen wie D-1 selbst treffe. Daraus wurde im Nachtrag 1 zu C-046:
+- GUARDRAILS G-3.4 ist zweigeteilt: (a) fragt dich, (b) entscheide ich und protokolliere es.
+- D-1, D-2, D-3, D-5 habe ich wie empfohlen entschieden; ADR-0026 ist „accepted (agent)“.
+- R-1 … R-4 sind nur noch Info.
+- D-4 ist jetzt die Guideline-Frage SF-104 (D-1 oben).
+
+## Was aus dem Review davor (C-045) geworden ist
 
 Du hast alles angenommen („R-1 bis R-4, D-1, D-2 reviewed und deine Empfehlungen akzeptiert“). Das habe ich im Nachtrag 1 zu C-045 daraus gemacht:
 - **R-1 bis R-3:** REQ-RES-PUBLIST-026, REQ-RES-PUBLIST-027 und REQ-TOP-028 stehen auf `reviewed` (`08a09b6`). Es gibt keinen Entwurf mehr.
