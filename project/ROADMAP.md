@@ -135,8 +135,8 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
 | Public API of D2 (level selection, identity, bootstrap, lifecycle, resources, publishing, `Get`/`Set`/`Del`, Config, events, consumer) | ADR-0011, ROADMAP P3 | C-042, ADR-0020 |
 | C ABI contract (ownership, errors, callbacks, threading, versioning); C path of the logger demo | ADR-0011, `research/sdk-options.md` §5 | C-042, ADR-0021, Q-023, Q-024 |
 | D9 API ("follows `oec.h` where sensible"), PAL contract, memory model | ADR-0017 | C-042, ADR-0022, Q-025 |
-| Crates: MQTT client, TLS, JSON, schema validation/embedding, async runtime, logging, cbindgen | ADR-0011 ("decided in P3/P4"), ADR-0019 §7 | C-043, ADR-0023 |
-| D9 libraries: JSON encoder/decoder (own encoder, `cJSON` or `jsmn`), unit tests (Unity), ESP-IDF components, Arduino MQTT client with TLS and a Will per connect | ADR-0017 ("decided in P3/P4b") | C-043, ADR-0024 |
+| Crates: MQTT client, TLS, JSON, schema validation/embedding, async runtime, logging, cbindgen | ADR-0011 ("decided in P3/P4"), ADR-0019 §7 | C-043, ADR-0023, Q-026 (`rumqttc` is out: unmaintained, vulnerable `rustls-webpki` 0.102) |
+| D9 libraries: JSON encoder/decoder (own encoder, `cJSON` or `jsmn`), unit tests (Unity), ESP-IDF components, Arduino MQTT client with TLS and a Will per connect | ADR-0017 ("decided in P3/P4b") | C-043, ADR-0024, Q-027 (jsmn out: abandoned; cJSON no longer bundled from IDF 6) |
 | Binary names (`oec-check` – used since C-040; `oec-infra` – named in ADR-0019 amendment C-040), D7 `monitor`/`test`, D8 commands, test catalog, CLI contract, exit codes, reports, distribution | ADR-0014 ("names fixed in P3"), ADR-0019 §5 | C-044, ADR-0025 |
 | Further languages (S9 vs S1/S2 spike) | ADR-0011 | not in P3 – after P4 |
 
@@ -147,10 +147,10 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
   - C ABI sketch `oec.h` and D9 sketch `oecm.h` (compile as C17);
   - ADR-0020/0021/0022 (proposed), Q-021 … Q-025;
   - SF-101/102.
-- **C-043 – crates and libraries:**
+- **C-043 – crates and libraries** (done 2026-10-26, see `log/2026-10-26_C-043_p3-crates.md`):
   - selection under G-3.4/G-4.4 (license, maintenance, amd64/arm64 required, ARMv7 best effort Q-008) for D2 (MQTT, TLS, JSON, schema validation/embedding, async runtime, logging, cbindgen) and D9 (JSON, tests, ESP-IDF components, Arduino MQTT);
-  - spikes only where they back a decision;
-  - ADR-0023 (D2) and ADR-0024 (D9), both proposed.
+  - spikes `oec/sdk/rust/spike/schema-embed` (compile-time schema embedding) and `mqtt-codec` (sans-IO MQTT 3.1.1, Q-026 option a);
+  - ADR-0023 (D2) and ADR-0024 (D9), both proposed; Q-026, Q-027.
 - **C-044 – compliance tool architecture:**
   - D7 `oec-check` `monitor`/`test` beyond `validate`; D8 `oec-infra` in the same module;
   - test catalog (test case ↔ REQ ids, coverage of all `d7-test`/`d7-monitor`/`d8` REQs);
@@ -182,7 +182,7 @@ Incremental, each increment test-covered:
 2. Topic model: build/parse/validate, wildcard subscription builder.
 3. Message model: typed NetworkMessage/DataSetMessage/MetaData/Action messages (OPC UA 1.05.04, fixed content masks), MessageId/`ReplyTo`/Action correlation (`RequestId`, `CorrelationData`, `ResponseAddress`), schema validation hook.
 4. Bootstrap: explicit configuration (smart devices, Level 1) and optional container storage contract (`broker.json`, credentials/certs, ClientId from hostname).
-5. Connection & lifecycle: TLS MQTT client, Birth/Will/Close, Health heartbeat incl. `Details[]`, reconnect; selectable compliance level (L1/L2/L3).
+5. Connection & lifecycle: TLS MQTT client (own sans-IO MQTT 3.1.1 codec on tokio + rustls if Q-026 a is accepted, ADR-0023; fuzzing and interop tests against the dev broker of increment 9), Birth/Will/Close, Health heartbeat incl. `Details[]`, reconnect; selectable compliance level (L1/L2/L3).
 6. Provider side: resources registry, automatic answers to `Get`, `Profile`/`PublicationList` generation, publish modes, intervals/precisions, pagination, `MaxPacketSize`.
 7. Write side: `Set`/`Del` handling with Status events, Config resource with validation.
 8. Consumer side: typed subscriptions, discovery helpers, `Get` request with correlation + timeout, pagination reassembly.
@@ -194,7 +194,7 @@ Incremental, each increment test-covered:
 
 SDK for microcontroller-class smart devices without container (ADR-0016), written in **C17** with a platform abstraction layer; reference port ESP-IDF on **ESP32** (ADR-0017).
 
-- Portable core (IL/base64url, topics incl. percent-encoding, JSON encoding of NetworkMessage/MAM/Health, lifecycle state machine) + PAL (MQTT 3.1.1/TLS, clock, persistence); ESP-IDF port with `esp-mqtt` + `esp-tls`/mbedTLS; afterwards (best effort) **Arduino library** packaging with an Arduino-ESP32 PAL port (ADR-0017 amendment C-010).
+- Portable core (IL/base64url, topics incl. percent-encoding, JSON encoding of NetworkMessage/MAM/Health, lifecycle state machine) + PAL (MQTT 3.1.1/TLS, clock, persistence); ESP-IDF port with `esp-mqtt` + `esp-tls`/mbedTLS (libraries and Will-per-connect procedure: ADR-0024; JSON: own encoder + bounded pull reader if Q-027 a is accepted); afterwards (best effort) **Arduino library** packaging with an Arduino-ESP32 PAL port (ADR-0017 amendment C-010).
 - C safety measures: static analysis, ASan/UBSan in host tests, fuzzing of topic/JSON parsers.
 - Tests: host unit tests (CMake, Unity) against the shared D1 test vectors on macOS/Windows/Linux; integration in Espressif QEMU (`esp32`) against the dev broker with D7 (to be confirmed); final check on a real ESP32 board.
 - Scope: designed for Messaging **L3** (all messages, ADR-0016 amendment C-016 / Q-019), delivered incrementally: first **L1** (Birth/Will, Pub MAM + Health, TLS + auth, topic and payload format), then L2 (Get, Set/Del where applicable) and L3 (all resources incl. `SubscriptionList`, `Call`/`Reply` + `NewDataSetWriterId`, empty-list behavior) in later increments.
