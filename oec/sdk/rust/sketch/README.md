@@ -1,6 +1,8 @@
 # D2 API sketch (P3, C-042) – not product code
 
-Compile-checked sketch of the public API of the Rust SDK (D2), its C ABI and the protocol flows behind it. The decisions are in ADR-0020 (Rust API) and ADR-0021 (C ABI). This folder is deleted when the P4 crate exists.
+Compile-checked sketch of the public API of the Rust SDK (D2), its C ABI and the protocol flows behind it. The decisions are in ADR-0020 (Rust API) and ADR-0021 (C ABI). The API moves piece by piece into the crate `oec` (`../oec`, from P4 increment 4, C-048); this folder is deleted when the last piece has moved.
+
+**State (C-048):** implemented in `oec` – `Level`, `Error`, `Bootstrap`, `Broker`, `AppBuilder` (except `on_connection`), `App::builder`, `identity`, `store`, `status`, `event::SyslogLevel`, `config::{ConfigType, ConfigObject, ConfigDef, ConfigValues}`. For these items `oec` is the contract (with its additions, ADR-0020 amendment C-048); the sketch keeps them only so that the rest compiles and mirrors only changed items (`MemoryStore::new()`). Still only in the sketch: `App::run`/`run_async`/`handle`, `AppHandle`, `ConnectionState`, `AppBuilder::on_connection` (increment 5), `asset` (6), `data`, `ConfigHandle` (7), `GenericEvent`, `event::syslog`, `consumer` (8) and the C ABI (10).
 
 | Path | Content |
 |---|---|
@@ -74,7 +76,7 @@ Updates in between only change the state store; the newest state is published af
 | Bootstrap | container storage under `/` | ADR-0020 §5 |
 | Store | `FileStore` in `/etc/oi4/app/oec` (container), required when ReferenceDesignation is offered | REQ-CNT-010, REQ-RES-REFDES-002 |
 | Keep alive | 60 s | REQ-MQTT-014 |
-| ClientId | container name / serial number | REQ-MQTT-013 |
+| ClientId | container name; outside a container derived from the Identification Link (`oec` + FNV-1a 64 hex) | REQ-MQTT-013, REQ-CNT-021 |
 | Data Mode / Interval | `ON_REQUEST_FILTER_9` / 0 (on change) | ADR-0020 §7 |
 | MAM, Health, Profile, ReferenceDesignation Mode | `ON_REQUEST_SOURCE_10` | ADR-0020 §7, REQ-RES-PUBLIST-026 |
 | Lowest published Syslog level | `Notice` | REQ-TOP-024 |

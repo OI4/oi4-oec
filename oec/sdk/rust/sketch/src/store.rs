@@ -30,8 +30,18 @@ impl Store for FileStore {
     }
 }
 
-/// Volatile store (tests, Level 1/2 without persistence).
-pub struct MemoryStore;
+/// Volatile store (tests, Level 1 without persistence). Constructed with
+/// `MemoryStore::new()` (ADR-0020 amendment C-048: it holds its map).
+#[derive(Default)]
+pub struct MemoryStore {
+    _private: (),
+}
+
+impl MemoryStore {
+    pub fn new() -> Self {
+        unimplemented!()
+    }
+}
 
 impl Store for MemoryStore {
     fn load(&self, key: &str) -> std::io::Result<Option<Vec<u8>>> {

@@ -1,8 +1,9 @@
 #!/bin/sh
 # Checks of the SDKs (ADR-0026 proposed) and of the P3 sketches (ADR-0020 … 0022):
-#   0. rust (Cargo workspace of D2, from C-046): rustfmt, clippy (pedantic,
-#      warnings are errors), tests including the shared test vectors of
-#      oec/spec/export, rustdoc without warnings, cargo-deny (licenses,
+#   0. rust (Cargo workspace of D2: oec-core from C-046, oec from C-048):
+#      rustfmt, clippy (pedantic, warnings are errors), tests including the
+#      shared test vectors of oec/spec/export (IL, topic, payload,
+#      broker.json), rustdoc without warnings, cargo-deny (licenses,
 #      advisories, bans, sources; ADR-0023 §2). clippy, tests and rustdoc
 #      run twice: default features and `--features strict-validation`
 #      (oec-core embeds oec/schema/v2 and validates with jsonschema, C-047). cargo-deny fetches the RustSec
