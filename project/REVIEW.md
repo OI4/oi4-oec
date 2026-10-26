@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-25, after C-039 (guideline `23f6cfd`)._
+_Last updated: 2026-10-25, after C-039 (guideline `23f6cfd`); PO answers recorded 2026-10-26: D-1, D-2, R-1 … R-4 accepted; D-2: implement the RIG text._
 
 This is the single list of everything that waits for the PO: items to **review** (drafts and changes to reviewed items) and items to **decide** (spec findings, open questions, cycle plan). Each cycle updates it; items leave the list once the PO has answered and `spectool review` (or the decision record) has been applied. Details are in the cycle log; this file links to them.
 
@@ -14,12 +14,12 @@ Current state: **20 drafts** (payload vectors V-PAY-240/241, broker.json vectors
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | ADR-0019 amendment C-039 – Config def families, representation and masking, dispatch with the Set family, rule layer, entry schemas, umbrellas; platform module `broker.json`, `d8` tracing exception, vector kind `broker-json` | decide | C-039 | accept | ☐ |
-| D-2 | SF-100 – content of `broker.json` (RIG 4.1.1): (a) further elements, (b) Address syntax, (c) SecurePort 0 | decide | C-039 | as proposed | ☐ |
-| R-1 | REQ-RES-CONFIG-011 verification `d7-validate` → `d7-monitor` | review | C-039 | accept | ☐ |
-| R-2 | REQ-RES-CONFIG-024 verification +`schema` | review | C-039 | accept | ☐ |
-| R-3 | 2 Config vectors V-PAY-240/241 | review | C-039 | accept | ☐ |
-| R-4 | 18 `broker.json` vectors V-BRK-001 … 018 | review | C-039 | accept | ☐ |
+| D-1 | ADR-0019 amendment C-039 – Config def families, representation and masking, dispatch with the Set family, rule layer, entry schemas, umbrellas; platform module `broker.json`, `d8` tracing exception, vector kind `broker-json` | decide | C-039 | accept | ☑ accepted |
+| D-2 | SF-100 – content of `broker.json` (RIG 4.1.1): (a) further elements, (b) Address syntax, (c) SecurePort 0 | decide | C-039 | as proposed | ☑ as proposed, implement the RIG text |
+| R-1 | REQ-RES-CONFIG-011 verification `d7-validate` → `d7-monitor` | review | C-039 | accept | ☑ accepted |
+| R-2 | REQ-RES-CONFIG-024 verification +`schema` | review | C-039 | accept | ☑ accepted |
+| R-3 | 2 Config vectors V-PAY-240/241 | review | C-039 | accept | ☑ accepted |
+| R-4 | 18 `broker.json` vectors V-BRK-001 … 018 | review | C-039 | accept | ☑ accepted |
 | Info | Re-baseline on `23f6cfd` (MG A3 formatting fix `30fea57`, ids only) | info | C-039 | – | – |
 
 ## Decisions
@@ -37,7 +37,7 @@ Current state: **20 drafts** (payload vectors V-PAY-240/241, broker.json vectors
 - **Change 8 – tracing exception (§1):** a REQ in a `$comment` of a `platform/` file may have `d8` instead of `schema`. REQ-CNT-003 keeps `[d8]` and stays out of the `schema`/`d7-validate` coverage.
 - **Change 9 – vector kind `broker-json` (§8):** `V-BRK-xxx` with the file content in `content`; lint runs the oracle, `schematest` the schema; probes P-109 … P-128.
 - **Recommendation:** accept. No accepted sentence of ADR-0019 is replaced; changes 7 … 9 extend the bundle beyond messages (the platform file of RIG 4.1.1).
-- **PO:** ☐ accepted ☐ other: …
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-2 – SF-100: content of `broker.json`
 
@@ -48,7 +48,7 @@ Current state: **20 drafts** (payload vectors V-PAY-240/241, broker.json vectors
 - **Proposed RIG text:** Address value range "`<IPv4 address, IPv6 address (without brackets) or host name (RFC 1123)>`"; SecurePort value range "`1 … 65535`"; after the element list: "Clients ignore elements of `broker.json` they do not know."
 - **Effect:** schema, oracle and V-BRK vectors already implement the proposal (V-BRK-004 depends on (a), V-BRK-013 on (c), V-BRK-014 … 016 on (b)). On a different decision they are adapted. REQ-CNT-003 is reworded only after the guideline text changes (ADR-0018).
 - **Recommendation:** decide as proposed and order the RIG text (or let me implement it).
-- **PO:** ☐ as proposed ☐ as proposed, implement the RIG text ☐ other: …
+- **PO:** ☑ as proposed, implement the RIG text (2026-10-26)
 
 ## Reviews
 
@@ -57,13 +57,13 @@ Current state: **20 drafts** (payload vectors V-PAY-240/241, broker.json vectors
 - **Where:** [`res-config.md`](../oec/spec/requirements/view/res-config.md#req-res-config-011), log [§1](log/2026-10-25_C-039_config-broker.md#1-oracle-verification-changes-umbrellas-4e52e5c-10a7d8d).
 - **Change:** verification `d7-validate` → `d7-monitor`. "A configuration object with Mandatory = true is contained in every Set of its group" – the Set itself carries no Mandatory flags; only the last Pub Config of the addressed Source and Filter shows them. One message is not enough, a monitor that saw that Pub is.
 - **Effect:** the REQ leaves the `schema`/`d7-validate` count (159 → 158) and its gap closes.
-- **PO:** ☐ accepted ☐ other: …
+- **PO:** ☑ accepted (2026-10-26)
 
 ### R-2 – REQ-RES-CONFIG-024 +`schema` (`draft`)
 
 - **Where:** [`res-config.md`](../oec/spec/requirements/view/res-config.md#req-res-config-024).
 - **Change:** verification `[d7-validate, d7-test]` → `[schema, d7-validate, d7-test]`. `pub-config` restricts `Value`/`DefaultValue` of a Sensitive object to `""` or `********` (probes P-93/P-94, reviewed negative V-PAY-115). `d7-test` stays for the publications after a Set.
-- **PO:** ☐ accepted ☐ other: …
+- **PO:** ☑ accepted (2026-10-26)
 
 ### R-3 – Config vectors V-PAY-240/241 (`draft`)
 
@@ -72,8 +72,8 @@ Current state: **20 drafts** (payload vectors V-PAY-240/241, broker.json vectors
 
 | ✅ | Vector | Title | Violates / reqs | Base | Content |
 |---|--------|-------|----------|------|--------|
-| ☐ | [V-PAY-240](../oec/spec/vectors/view/payload-constructed.md#v-pay-240) | Pub all Config DataSets of an asset with two contexts | valid: CONFIG-015, CONFIG-024, … | – | `Pub/Config/<Source>` without Filter; contexts "Network settings" (DataSetWriterId 42) and "Overall device settings" (43); masked password |
-| ☐ | [V-PAY-241](../oec/spec/vectors/view/payload-constructed.md#v-pay-241) | Pub Config with the same context twice for one Source | CONFIG-015 (rule) | V-PAY-240 | second context renamed to "Network settings" |
+| ☑ | [V-PAY-240](../oec/spec/vectors/view/payload-constructed.md#v-pay-240) | Pub all Config DataSets of an asset with two contexts | valid: CONFIG-015, CONFIG-024, … | – | `Pub/Config/<Source>` without Filter; contexts "Network settings" (DataSetWriterId 42) and "Overall device settings" (43); masked password |
+| ☑ | [V-PAY-241](../oec/spec/vectors/view/payload-constructed.md#v-pay-241) | Pub Config with the same context twice for one Source | CONFIG-015 (rule) | V-PAY-240 | second context renamed to "Network settings" |
 
 ### R-4 – `broker.json` vectors V-BRK-001 … 018 (`draft`)
 
@@ -82,24 +82,24 @@ Current state: **20 drafts** (payload vectors V-PAY-240/241, broker.json vectors
 
 | ✅ | Vector | Title | Result |
 |---|--------|-------|--------|
-| ☐ | [V-BRK-001](../oec/spec/vectors/view/platform-broker-json.md#v-brk-001) | Minimal broker.json with host name and the smallest MaxPacketSize | valid |
-| ☐ | [V-BRK-002](../oec/spec/vectors/view/platform-broker-json.md#v-brk-002) | broker.json with IPv4 address and the largest MaxPacketSize | valid |
-| ☐ | [V-BRK-003](../oec/spec/vectors/view/platform-broker-json.md#v-brk-003) | broker.json with IPv6 address | valid |
-| ☐ | [V-BRK-004](../oec/spec/vectors/view/platform-broker-json.md#v-brk-004) | broker.json with a fully qualified host name and a further element | valid (SF-100 (a)) |
-| ☐ | [V-BRK-005](../oec/spec/vectors/view/platform-broker-json.md#v-brk-005) | broker.json without Address | REQ-CNT-003 |
-| ☐ | [V-BRK-006](../oec/spec/vectors/view/platform-broker-json.md#v-brk-006) | broker.json without SecurePort | REQ-CNT-003 |
-| ☐ | [V-BRK-007](../oec/spec/vectors/view/platform-broker-json.md#v-brk-007) | broker.json without MaxPacketSize | REQ-CNT-003 |
-| ☐ | [V-BRK-008](../oec/spec/vectors/view/platform-broker-json.md#v-brk-008) | MaxPacketSize below the minimum | REQ-CNT-003 |
-| ☐ | [V-BRK-009](../oec/spec/vectors/view/platform-broker-json.md#v-brk-009) | MaxPacketSize above the maximum | REQ-CNT-003 |
-| ☐ | [V-BRK-010](../oec/spec/vectors/view/platform-broker-json.md#v-brk-010) | MaxPacketSize as a string | REQ-CNT-003 |
-| ☐ | [V-BRK-011](../oec/spec/vectors/view/platform-broker-json.md#v-brk-011) | SecurePort above the UINT16 range | REQ-CNT-003 |
-| ☐ | [V-BRK-012](../oec/spec/vectors/view/platform-broker-json.md#v-brk-012) | SecurePort as a string | REQ-CNT-003 |
-| ☐ | [V-BRK-013](../oec/spec/vectors/view/platform-broker-json.md#v-brk-013) | SecurePort 0 | REQ-CNT-003 (SF-100 (c)) |
-| ☐ | [V-BRK-014](../oec/spec/vectors/view/platform-broker-json.md#v-brk-014) | Address with port | REQ-CNT-003 (SF-100 (b)) |
-| ☐ | [V-BRK-015](../oec/spec/vectors/view/platform-broker-json.md#v-brk-015) | Address as a URL | REQ-CNT-003 (SF-100 (b)) |
-| ☐ | [V-BRK-016](../oec/spec/vectors/view/platform-broker-json.md#v-brk-016) | Empty Address | REQ-CNT-003 (SF-100 (b)) |
-| ☐ | [V-BRK-017](../oec/spec/vectors/view/platform-broker-json.md#v-brk-017) | Element names not in PascalCase | REQ-CNT-003 |
-| ☐ | [V-BRK-018](../oec/spec/vectors/view/platform-broker-json.md#v-brk-018) | broker.json is no JSON object | REQ-CNT-003 |
+| ☑ | [V-BRK-001](../oec/spec/vectors/view/platform-broker-json.md#v-brk-001) | Minimal broker.json with host name and the smallest MaxPacketSize | valid |
+| ☑ | [V-BRK-002](../oec/spec/vectors/view/platform-broker-json.md#v-brk-002) | broker.json with IPv4 address and the largest MaxPacketSize | valid |
+| ☑ | [V-BRK-003](../oec/spec/vectors/view/platform-broker-json.md#v-brk-003) | broker.json with IPv6 address | valid |
+| ☑ | [V-BRK-004](../oec/spec/vectors/view/platform-broker-json.md#v-brk-004) | broker.json with a fully qualified host name and a further element | valid (SF-100 (a)) |
+| ☑ | [V-BRK-005](../oec/spec/vectors/view/platform-broker-json.md#v-brk-005) | broker.json without Address | REQ-CNT-003 |
+| ☑ | [V-BRK-006](../oec/spec/vectors/view/platform-broker-json.md#v-brk-006) | broker.json without SecurePort | REQ-CNT-003 |
+| ☑ | [V-BRK-007](../oec/spec/vectors/view/platform-broker-json.md#v-brk-007) | broker.json without MaxPacketSize | REQ-CNT-003 |
+| ☑ | [V-BRK-008](../oec/spec/vectors/view/platform-broker-json.md#v-brk-008) | MaxPacketSize below the minimum | REQ-CNT-003 |
+| ☑ | [V-BRK-009](../oec/spec/vectors/view/platform-broker-json.md#v-brk-009) | MaxPacketSize above the maximum | REQ-CNT-003 |
+| ☑ | [V-BRK-010](../oec/spec/vectors/view/platform-broker-json.md#v-brk-010) | MaxPacketSize as a string | REQ-CNT-003 |
+| ☑ | [V-BRK-011](../oec/spec/vectors/view/platform-broker-json.md#v-brk-011) | SecurePort above the UINT16 range | REQ-CNT-003 |
+| ☑ | [V-BRK-012](../oec/spec/vectors/view/platform-broker-json.md#v-brk-012) | SecurePort as a string | REQ-CNT-003 |
+| ☑ | [V-BRK-013](../oec/spec/vectors/view/platform-broker-json.md#v-brk-013) | SecurePort 0 | REQ-CNT-003 (SF-100 (c)) |
+| ☑ | [V-BRK-014](../oec/spec/vectors/view/platform-broker-json.md#v-brk-014) | Address with port | REQ-CNT-003 (SF-100 (b)) |
+| ☑ | [V-BRK-015](../oec/spec/vectors/view/platform-broker-json.md#v-brk-015) | Address as a URL | REQ-CNT-003 (SF-100 (b)) |
+| ☑ | [V-BRK-016](../oec/spec/vectors/view/platform-broker-json.md#v-brk-016) | Empty Address | REQ-CNT-003 (SF-100 (b)) |
+| ☑ | [V-BRK-017](../oec/spec/vectors/view/platform-broker-json.md#v-brk-017) | Element names not in PascalCase | REQ-CNT-003 |
+| ☑ | [V-BRK-018](../oec/spec/vectors/view/platform-broker-json.md#v-brk-018) | broker.json is no JSON object | REQ-CNT-003 |
 
 ## Information
 
