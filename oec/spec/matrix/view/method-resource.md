@@ -12,16 +12,16 @@ Payload columns (C-028, per resource below the topic table; values defined in [`
 | Resource / service | Pub | Get | Set | Del | Call | Reply |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | [MAM](#mam) | ✓ S? (5) | ✓ S? (3) | ✗ | ✗ | ✗ | ✗ |
-| [Health](#health) | ✓ S? (11) | ✓ S? (2) | ✗ | ✗ | ✗ | ✗ |
+| [Health](#health) | ✓ S? (12) | ✓ S? (2) | ✗ | ✗ | ✗ | ✗ |
 | [Config](#config) | ✓ S? F? (4) | ✓ S? F? (4) | ✓ S! F! (3) | ✗ | ✗ | ✗ |
 | [Data](#data) | ✓ S? F? (6) | ✓ S? F? (4) | ✓ S! F! (1) | ✗ | ✗ | ✗ |
 | [Metadata](#metadata) | ✓ S! F! (2) | ✓ S! F! (1) | ✓ S! F! (1) | ✗ | ✗ | ✗ |
-| [Event](#event) | ✓ S! F! (13) | ✗ | ✗ | ✗ | ✗ | ✗ |
+| [Event](#event) | ✓ S! F! (14) | ✗ | ✗ | ✗ | ✗ | ✗ |
 | [Profile](#profile) | ✓ S? (2) | ✓ S? (2) | ✗ | ✗ | ✗ | ✗ |
 | [PublicationList](#publicationlist) | ✓ S? F? (4) | ✓ S? F? (4) | ✓ S! F! (2) | ✗ | ✗ | ✗ |
 | [SubscriptionList](#subscriptionlist) | ✓ S? F? (3) | ✓ S? F? (4) | ✓ S! F! (1) | ✓ S! F! (2) | ✗ | ✗ |
 | [ReferenceDesignation](#referencedesignation) | ✓ S? (2) | ✓ S? (2) | ✓ S! (1) | ✓ S! (1) | ✗ | ✗ |
-| [NewDataSetWriterId](#newdatasetwriterid) | ✗ | ✗ | ✗ | ✗ | ✓ S? (2) | ✓ S? (2) |
+| [NewDataSetWriterId](#newdatasetwriterid) | ✗ | ✗ | ✗ | ✗ | ✓ S? (3) | ✓ S? (2) |
 
 ## MAM
 
@@ -49,7 +49,7 @@ Kind: resource
 
 | Method | Allowed | Topic form | Rule | Source | Filter | Refs | Vectors (V-TOP-nnn) | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Pub | ✓ | `Oi4v2/<ServiceType>/<AppId>/Pub/Health[/<Source>]` | `pub-health` | optional | forbidden | MG 9.1.2 | 11: [002](../../vectors/view/topic-guideline.md#v-top-002), [009](../../vectors/view/topic-guideline.md#v-top-009), [010](../../vectors/view/topic-guideline.md#v-top-010), [101](../../vectors/view/topic-valid.md#v-top-101), [102](../../vectors/view/topic-valid.md#v-top-102), [103](../../vectors/view/topic-valid.md#v-top-103), [104](../../vectors/view/topic-valid.md#v-top-104), [105](../../vectors/view/topic-valid.md#v-top-105), [106](../../vectors/view/topic-valid.md#v-top-106), [107](../../vectors/view/topic-valid.md#v-top-107), [128](../../vectors/view/topic-valid.md#v-top-128) |  |
+| Pub | ✓ | `Oi4v2/<ServiceType>/<AppId>/Pub/Health[/<Source>]` | `pub-health` | optional | forbidden | MG 9.1.2 | 12: [002](../../vectors/view/topic-guideline.md#v-top-002), [009](../../vectors/view/topic-guideline.md#v-top-009), [010](../../vectors/view/topic-guideline.md#v-top-010), [101](../../vectors/view/topic-valid.md#v-top-101), [102](../../vectors/view/topic-valid.md#v-top-102), [103](../../vectors/view/topic-valid.md#v-top-103), [104](../../vectors/view/topic-valid.md#v-top-104), [105](../../vectors/view/topic-valid.md#v-top-105), [106](../../vectors/view/topic-valid.md#v-top-106), [107](../../vectors/view/topic-valid.md#v-top-107), [128](../../vectors/view/topic-valid.md#v-top-128), [135](../../vectors/view/topic-valid.md#v-top-135) |  |
 | Get | ✓ | `Oi4v2/<ServiceType>/<AppId>/Get/Health[/<Source>]` | `get-health` | optional | forbidden | MG 9.1.2 | 2: [007](../../vectors/view/topic-guideline.md#v-top-007), [008](../../vectors/view/topic-guideline.md#v-top-008) |  |
 | Set | ✗ | – | – | – | – | MG 9.1.2 | – | No Set topic in MG 9.1.x for this resource. |
 | Del | ✗ | – | – | – | – | MG 9.1.2 | – | Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x). |
@@ -132,7 +132,7 @@ Kind: resource
 
 | Method | Allowed | Topic form | Rule | Source | Filter | Refs | Vectors (V-TOP-nnn) | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Pub | ✓ | `Oi4v2/<ServiceType>/<AppId>/Pub/Event/<Source>/<EventCategory>/<EventLevel>` | `pub-event` | required | required (`event-filter`) | MG 9.1.6 | 13: [018](../../vectors/view/topic-guideline.md#v-top-018), [032](../../vectors/view/topic-guideline.md#v-top-032), [033](../../vectors/view/topic-guideline.md#v-top-033), [111](../../vectors/view/topic-valid.md#v-top-111), [112](../../vectors/view/topic-valid.md#v-top-112), [113](../../vectors/view/topic-valid.md#v-top-113), [114](../../vectors/view/topic-valid.md#v-top-114), [115](../../vectors/view/topic-valid.md#v-top-115), [116](../../vectors/view/topic-valid.md#v-top-116), [117](../../vectors/view/topic-valid.md#v-top-117), [118](../../vectors/view/topic-valid.md#v-top-118), [119](../../vectors/view/topic-valid.md#v-top-119), [120](../../vectors/view/topic-valid.md#v-top-120) |  |
+| Pub | ✓ | `Oi4v2/<ServiceType>/<AppId>/Pub/Event/<Source>/<EventCategory>/<EventLevel>` | `pub-event` | required | required (`event-filter`) | MG 9.1.6 | 14: [018](../../vectors/view/topic-guideline.md#v-top-018), [032](../../vectors/view/topic-guideline.md#v-top-032), [033](../../vectors/view/topic-guideline.md#v-top-033), [111](../../vectors/view/topic-valid.md#v-top-111), [112](../../vectors/view/topic-valid.md#v-top-112), [113](../../vectors/view/topic-valid.md#v-top-113), [114](../../vectors/view/topic-valid.md#v-top-114), [115](../../vectors/view/topic-valid.md#v-top-115), [116](../../vectors/view/topic-valid.md#v-top-116), [117](../../vectors/view/topic-valid.md#v-top-117), [118](../../vectors/view/topic-valid.md#v-top-118), [119](../../vectors/view/topic-valid.md#v-top-119), [120](../../vectors/view/topic-valid.md#v-top-120), [137](../../vectors/view/topic-valid.md#v-top-137) |  |
 | Get | ✗ | – | – | – | – | MG 9.1.6 | – | Events are only published (MG 9.1.6). |
 | Set | ✗ | – | – | – | – | MG 9.1.6 | – | Events are only published (MG 9.1.6). |
 | Del | ✗ | – | – | – | – | MG 9.1.6 | – | Del only for ReferenceDesignation and SubscriptionList (MG 7.4, MG 9.1.x). |
@@ -240,7 +240,7 @@ Kind: service
 | Get | ✗ | – | – | – | – | MG 9.2.1 | – | Common services use Call/Reply only (MG 7.4). |
 | Set | ✗ | – | – | – | – | MG 9.2.1 | – | Common services use Call/Reply only (MG 7.4). |
 | Del | ✗ | – | – | – | – | MG 9.2.1 | – | Common services use Call/Reply only (MG 7.4). |
-| Call | ✓ | `Oi4v2/<ServiceType>/<AppId>/Call/NewDataSetWriterId[/<Source>]` | `call-newdatasetwriterid` | optional | forbidden | MG 9.2.1 | 2: [059](../../vectors/view/topic-guideline.md#v-top-059), [126](../../vectors/view/topic-valid.md#v-top-126) | SF-041 c: optional Source, no Filter (MG 7.4, MG 9.2.1). |
+| Call | ✓ | `Oi4v2/<ServiceType>/<AppId>/Call/NewDataSetWriterId[/<Source>]` | `call-newdatasetwriterid` | optional | forbidden | MG 9.2.1 | 3: [059](../../vectors/view/topic-guideline.md#v-top-059), [126](../../vectors/view/topic-valid.md#v-top-126), [136](../../vectors/view/topic-valid.md#v-top-136) | SF-041 c: optional Source, no Filter (MG 7.4, MG 9.2.1). |
 | Reply | ✓ | `Oi4v2/<ServiceType>/<AppId>/Reply/NewDataSetWriterId[/<Source>]` | `reply-newdatasetwriterid` | optional | forbidden | MG 9.2.1 | 2: [060](../../vectors/view/topic-guideline.md#v-top-060), [127](../../vectors/view/topic-valid.md#v-top-127) | SF-041 c: optional Source; equals the Call topic. |
 
 Payload:

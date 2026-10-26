@@ -1,4 +1,4 @@
-# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-253 (NewDataSetWriterId without Filter, REQ-ACT-020) drafted in C-036, reviewed by the PO (C-036 review 2026-10-25).
+# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-253 (NewDataSetWriterId without Filter, REQ-ACT-020) drafted in C-036, reviewed by the PO (C-036 review 2026-10-25); V-TOP-218 gained REQ-ACT-020 in C-040 (back to draft); V-TOP-254 (empty Source, REQ-TOP-018) drafted in C-040.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
 baseline: "168e1d1"
@@ -536,4 +536,14 @@ vectors:
     origin: {kind: constructed}
     status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/ReferenceDesignation"
+    fails: grammar
+
+  - id: V-TOP-254
+    title: "Empty Source level"
+    expected: invalid
+    violates: [REQ-TOP-018]
+    reason: "The Source is exactly one non-empty topic level (MG 7.6)."
+    origin: {kind: constructed}
+    status: draft
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/"
     fails: grammar

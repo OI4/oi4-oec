@@ -113,9 +113,9 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-CMP-025 | schema, d7-validate | reviewed | – | – | none |
 | REQ-CMP-026 | schema, d7-validate | reviewed | – | – | none |
 | REQ-IL-001 | d7-validate, d7-test | reviewed | – | – | none |
-| REQ-IL-002 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (102) | V-IL-115 (R-1), V-IL-116 (R-1), V-TOP-240 (R-1) | covered |
+| REQ-IL-002 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (105) | V-IL-115 (R-1), V-IL-116 (R-1), V-TOP-240 (R-1) | covered |
 | REQ-IL-003 | d7-validate | reviewed | V-TOP-131 | V-IL-112 (R-1), V-TOP-242 (R-1) | covered |
-| REQ-IL-004 | d7-validate | reviewed | – | V-IL-111 (R-1), V-IL-113 (R-1), V-IL-114 (R-1), V-TOP-241 (R-1) … (6) | negative only |
+| REQ-IL-004 | d7-validate | reviewed | V-TOP-135*, V-TOP-136* | V-IL-111 (R-1), V-IL-113 (R-1), V-IL-114 (R-1), V-TOP-241 (R-1) … (6) | negative only |
 | REQ-IL-005 | d7-validate | reviewed | V-PAY-244* | V-PAY-242* (rule), V-PAY-243* (rule) | none |
 | REQ-IL-008 | d7-validate, manual | reviewed | – | – | none |
 | REQ-IL-009 | d7-validate, manual | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (8) | V-IL-107 (R-1), V-IL-108 (R-1), V-TOP-249 (R-1) | covered |
@@ -236,16 +236,16 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-SUBLIST-009 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071 | – | derived |
 | REQ-RES-SUBLIST-010 | schema, d7-validate | reviewed | V-PAY-072 | V-PAY-239 | covered |
 | REQ-RES-SUBLIST-011 | schema, d7-validate | reviewed | V-PAY-074 | V-PAY-085 | covered |
-| REQ-TOP-001 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (94) | V-TOP-201 (R-1), V-TOP-202 (R-1), V-TOP-250 (R-1), V-TOP-251 (R-1) … (5) | covered |
+| REQ-TOP-001 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (97) | V-TOP-201 (R-1), V-TOP-202 (R-1), V-TOP-250 (R-1), V-TOP-251 (R-1) … (5) | covered |
 | REQ-TOP-002 | d7-validate, d7-monitor | reviewed | – | – | none |
 | REQ-TOP-005 | d7-validate | reviewed | V-TOP-101, V-TOP-102, V-TOP-103, V-TOP-104 … (7) | V-TOP-203 (R-1), V-TOP-204 (R-1) | covered |
-| REQ-TOP-009 | d7-validate | reviewed | – | V-TOP-239 (R-1) | negative only |
-| REQ-TOP-011 | d7-validate | reviewed | – | V-TOP-205 (R-1) | negative only |
-| REQ-TOP-012 | d7-validate | reviewed | – | V-TOP-206 (R-1), V-TOP-207 (R-1) | negative only |
-| REQ-TOP-013 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (94) | V-TOP-208 (R-1), V-TOP-209 (R-1), V-TOP-210 (R-1), V-TOP-211 (R-1) … (12) | covered |
-| REQ-TOP-018 | d7-validate, d7-test | reviewed | – | – | none |
+| REQ-TOP-009 | d7-validate | reviewed | V-TOP-135* | V-TOP-239 (R-1) | negative only |
+| REQ-TOP-011 | d7-validate | reviewed | V-TOP-135*, V-TOP-136* | V-TOP-205 (R-1) | negative only |
+| REQ-TOP-012 | d7-validate | reviewed | V-TOP-135*, V-TOP-136* | V-TOP-206 (R-1), V-TOP-207 (R-1) | negative only |
+| REQ-TOP-013 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (97) | V-TOP-208 (R-1), V-TOP-209 (R-1), V-TOP-210 (R-1), V-TOP-211 (R-1) … (12) | covered |
+| REQ-TOP-018 | d7-validate, d7-test | reviewed | V-TOP-135*, V-TOP-136* | V-TOP-254* (R-1) | none |
 | REQ-TOP-019 | d7-validate | reviewed | V-TOP-108, V-TOP-109, V-TOP-120, V-TOP-134 | V-TOP-225 (R-1), V-TOP-229 (R-1), V-TOP-230 (R-1), V-TOP-231 (R-1) … (8) | covered |
-| REQ-TOP-020 | d7-validate | reviewed | V-TOP-011, V-TOP-014, V-TOP-017, V-TOP-019 … (8) | – | positive only |
-| REQ-TOP-021 | d7-validate | reviewed | – | V-TOP-225 (R-1), V-TOP-236 (R-1), V-TOP-237 (R-1), V-TOP-238 (R-1) | negative only |
-| REQ-TOP-022 | d7-validate | reviewed | V-TOP-011, V-TOP-014, V-TOP-017, V-TOP-019 … (30) | V-TOP-226 (R-1), V-TOP-227 (R-1), V-TOP-228 (R-1) | covered |
+| REQ-TOP-020 | d7-validate | reviewed | V-TOP-011, V-TOP-014, V-TOP-017, V-TOP-019 … (9) | – | positive only |
+| REQ-TOP-021 | d7-validate | reviewed | V-TOP-137* | V-TOP-225 (R-1), V-TOP-236 (R-1), V-TOP-237 (R-1), V-TOP-238 (R-1) | negative only |
+| REQ-TOP-022 | d7-validate | reviewed | V-TOP-011, V-TOP-014, V-TOP-017, V-TOP-019 … (31) | V-TOP-226 (R-1), V-TOP-227 (R-1), V-TOP-228 (R-1) | covered |
 | REQ-TOP-023 | d7-validate | reviewed | V-TOP-018, V-TOP-032, V-TOP-033, V-TOP-111 … (15) | V-TOP-219 (R-1), V-TOP-220 (R-1), V-TOP-221 (R-1), V-TOP-222 (R-1) … (6) | covered |
