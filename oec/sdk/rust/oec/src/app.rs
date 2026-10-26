@@ -1,6 +1,7 @@
 //! Application: level selection, bootstrap and identity (ADR-0020 §2 … §5,
 //! §10). Connection and lifecycle (`App::run`, the handles, connection
-//! state) follow in P4 increment 5; until then their contract is the P3
+//! state) follow in P4 increment 5b (C-050) on the sans-IO session and
+//! lifecycle of `oec-core` (C-049); until then their contract is the P3
 //! sketch.
 
 use std::fmt;
@@ -595,7 +596,7 @@ fn revision_counter(store: &dyn Store) -> Result<i32> {
 
 /// An OEC application: the resolved identity, MAM and connection settings
 /// of a level (P4 increment 4). Connecting and running
-/// (`App::run`/`run_async`, handles) follow with increment 5 (ADR-0020 §2).
+/// (`App::run`/`run_async`, handles) follow with increment 5b (ADR-0020 §2).
 pub struct App {
     level: Level,
     service_type: ServiceType,

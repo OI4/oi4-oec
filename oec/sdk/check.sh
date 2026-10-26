@@ -3,7 +3,8 @@
 #   0. rust (Cargo workspace of D2: oec-core from C-046, oec from C-048):
 #      rustfmt, clippy (pedantic, warnings are errors), tests including the
 #      shared test vectors of oec/spec/export (IL, topic, payload,
-#      broker.json), rustdoc without warnings, cargo-deny (licenses,
+#      broker.json, lifecycle roles) and the MQTT codec/session tests with
+#      proptest (C-049), rustdoc without warnings, cargo-deny (licenses,
 #      advisories, bans, sources; ADR-0023 §2). clippy, tests and rustdoc
 #      run twice: default features and `--features strict-validation`
 #      (oec-core embeds oec/schema/v2 and validates with jsonschema, C-047). cargo-deny fetches the RustSec
@@ -19,7 +20,8 @@
 #      at compile time and reproduces every strict verdict of
 #      oec/schema/dist/cases.json (needs schema/check.sh first, as in
 #      oec/check.sh); rust/spike/mqtt-codec is the sans-IO MQTT 3.1.1 codec
-#      of option (a) of Q-026, byte-exact against hand-encoded packets.
+#      of option (a) of Q-026, byte-exact against hand-encoded packets (the
+#      product codec is oec-core::mqtt since C-049).
 set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
 cc="${CC:-cc}"

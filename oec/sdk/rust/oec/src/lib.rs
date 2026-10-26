@@ -5,7 +5,7 @@
 //! does what the guideline prescribes for that level. The sans-IO protocol
 //! logic lives in the internal crate `oec-core` (ADR-0026 §2); this crate
 //! re-exports or wraps its types and adds the I/O: bootstrap from the
-//! container storage, persistence and – from P4 increment 5 – the MQTT
+//! container storage, persistence and – from P4 increment 5b – the MQTT
 //! connection.
 //!
 //! **State of P4 (C-048, increment 4):** [`app::App::builder`] with
