@@ -64,3 +64,27 @@ implications:
   - umbrella: REQ-RES-CONFIG-018
     details: [REQ-MSG-010, REQ-RES-CONFIG-002, REQ-PAG-008, REQ-LOC-003, REQ-QRY-001]
     remainder: That a Pub without Config DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the Config content (REQ-RES-CONFIG-002).
+  # C-040: the conformance umbrellas of MG 1.2/1.3, MG 4 and MG 7.1. D7
+  # validate checks them through their details; the remainders need several
+  # messages or are not checkable.
+  - umbrella: REQ-CMP-004
+    details: [REQ-TOP-001, REQ-TOP-005, REQ-TOP-009, REQ-TOP-011, REQ-TOP-012, REQ-TOP-013, REQ-TOP-018, REQ-TOP-019, REQ-TOP-021, REQ-TOP-022, REQ-TOP-023, REQ-IL-002, REQ-IL-003, REQ-IL-004, REQ-ACT-020]
+    remainder: The topic rules that relate a topic to other messages or to the component (ServiceType and AppId of the destination or publisher REQ-TOP-006/010, Reply topic of the Call REQ-TOP-016, no other traffic in the namespace REQ-TOP-003; d7-monitor/d7-test). White space in a Filter level (REQ-TOP-020) is a recommendation, D7 reports it as a warning.
+  - umbrella: REQ-CMP-025
+    details: [REQ-MSG-001, REQ-MSG-003, REQ-MSG-016, REQ-MSG-027, REQ-MSG-032, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-040, REQ-MSG-041, REQ-MSG-042, REQ-MSG-043, REQ-MSG-044, REQ-MSG-045, REQ-ACT-002, REQ-ACT-010, REQ-ACT-012, REQ-ACT-021, REQ-ACT-022, REQ-BUS-010, REQ-LOC-001, REQ-PAG-001, REQ-PAG-003, REQ-RES-CONFIG-002, REQ-RES-CONFIG-003, REQ-RES-DATA-004, REQ-RES-EVENT-001, REQ-RES-HEALTH-001, REQ-RES-MAM-001, REQ-RES-PROFILE-001, REQ-RES-PUBLIST-001, REQ-RES-REFDES-001, REQ-RES-SUBLIST-001]
+    remainder: none – every payload object of MG 8/9 states the Requirement attribute of its fields in its "Fields of …" requirement (details); a field marked Not used or not defined is an undefined key (REQ-MSG-001).
+  - umbrella: REQ-CMP-026
+    details: [REQ-MSG-003, REQ-MSG-005, REQ-MSG-016, REQ-MSG-027, REQ-MSG-031, REQ-MSG-032, REQ-MSG-035, REQ-MSG-036, REQ-MSG-037, REQ-MSG-039, REQ-MSG-040, REQ-MSG-041, REQ-MSG-042, REQ-MSG-043, REQ-MSG-044, REQ-MSG-045, REQ-ACT-002, REQ-ACT-010, REQ-ACT-012, REQ-ACT-021, REQ-ACT-022, REQ-BUS-010, REQ-LOC-001, REQ-PAG-001, REQ-PAG-003, REQ-RES-CONFIG-002, REQ-RES-CONFIG-003, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-DATA-004, REQ-RES-EVENT-001, REQ-RES-HEALTH-001, REQ-RES-MAM-001, REQ-RES-MAM-004, REQ-RES-MAM-017, REQ-RES-PROFILE-001, REQ-RES-PUBLIST-001, REQ-RES-REFDES-001, REQ-RES-REFDES-012, REQ-RES-SUBLIST-001]
+    remainder: none – Type and Value Range of every field are stated by the "Fields of …" requirement of its object and the type and encoding requirements (details); calendar validity of a DateTime is checked by the rule layer (R-4) under the same requirements.
+  - umbrella: REQ-CMP-005
+    details: [REQ-MSG-001, REQ-MSG-002, REQ-MSG-003, REQ-MSG-005, REQ-MSG-016, REQ-MSG-031, REQ-MSG-034, REQ-CMP-025, REQ-CMP-026]
+    remainder: Strict JSON syntax (UTF-8, no duplicate keys, one JSON value) has no vector of its own; D7 validate reports a payload that is no strict JSON under this requirement (layer parse).
+  - umbrella: REQ-TOP-002
+    details: [REQ-CMP-004, REQ-CMP-005]
+    remainder: Conformance that needs several messages (series, request and answer, lifecycle) is checked by D7 monitor and test.
+  - umbrella: REQ-IL-001
+    details: [REQ-IL-002, REQ-IL-004, REQ-IL-009, REQ-IL-016, REQ-IL-018, REQ-IL-019, REQ-TOP-009, REQ-TOP-018, REQ-MSG-006, REQ-MSG-023]
+    remainder: That an asset is identified by exactly one Identification Link across all its messages (d7-test; REQ-IL-010, REQ-IL-012, REQ-IL-013).
+  - umbrella: REQ-IL-008
+    details: [REQ-IL-009, REQ-IL-016, REQ-IL-018, REQ-IL-019]
+    remainder: The character combinations with special functions of IEC 61406-1 cannot be checked (MG 4.1) and stay with the issuer (manual).
