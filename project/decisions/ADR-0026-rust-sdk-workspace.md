@@ -1,6 +1,6 @@
 # ADR-0026 – Rust SDK workspace, crate roles and test-vector contract (P4)
 
-- Status: **accepted (agent, G-3.4 b)** – proposed in C-046, accepted by the agent in C-046 addendum 1 after the PO delegated engineering decisions (GUARDRAILS G-3.4 amended 2026-10-26)
+- Status: **accepted (agent, G-3.4 b)** – proposed in C-046, accepted by the agent in C-046 addendum 1 after the PO delegated engineering decisions (GUARDRAILS G-3.4 amended 2026-10-26). Amendment C-047 (§7, increment 3) by the agent (G-3.4 b).
 - Date: 2026-10-26
 - Deciders: agent (delegated by the product owner, G-3.4 b); the PO can overrule
 - Related: ADR-0011 (S4: `oec-core` sans-IO, `oec` runtime, `oec-ffi`), ADR-0012 (monorepo), ADR-0018 (spec baseline), ADR-0020 (public Rust API), ADR-0021 (C ABI), ADR-0023 (dependencies, supply-chain rules), GUARDRAILS G-3.4 (b), G-4.4, SF-104
@@ -115,3 +115,18 @@ P5 interleaves after increment 5 (`internal/mqttwire`, `monitor --replay`) becau
 - D9 (P4b) reuses the JSON export for its host tests. The C vocabulary of violation codes should match §2.
 - Every change to `oec/spec/vectors` shows up in `oec/spec/export` in the same commit (`render -check`).
 - The sketch and the workspace exist side by side until `oec` replaces the sketch. Both are checked.
+
+## Amendment C-047 (2026-10-26) – increment 3: message model and schema embedding (agent, G-3.4 b)
+
+Decided by the agent within ADR-0020/0023 and this ADR; the PO can overrule. Details and REQ tracing: `log/2026-10-26_C-047_message-model.md`.
+
+### 7. Semantics fixed in increment 3 (SDK side, no spec change)
+
+1. **Modules:** `oec-core::message` (envelopes `ua-data`, `ua-metadata`, `ua-action-request`/`-response`, helper DataSets, DataSetMetaData, value types) and `oec-core::resource` (the payloads of MAM, Health, Profile, PublicationList, SubscriptionList, ReferenceDesignation, Config/ConfigSet, Data with the Oi4Pv view, Event). `Message::decode(&Topic, &[u8])` picks the type from the topic form (e.g. `Set/Config` → `ConfigSet`, `Call/NewDataSetWriterId` → Action request).
+2. **Tolerant decoder, typed by construction:** decoding ignores unknown keys (REQ-MSG-046; no `deny_unknown_fields`) and refuses what the type cannot hold: wrong JSON types, missing required fields, values outside closed sets, and model invariants (DataSetClassId of the resource, MessageType, reserved DataSetWriterIds, MetaDataVersion vs. Major/MinorVersion, Good `Status`, Action correlation fields). String patterns and cross-field rules that the type does not need are left to the schema (`strict-validation`) and the D7 rule layer. Measured on the vectors: 63 of 143 invalid payloads are refused by the decoder, the rest by the schema or rule layer.
+3. **Encoder = fixed content masks:** the SDK always writes the fields of the fixed content masks (REQ-MSG-004, REQ-MSG-016/017) in the guideline order, always sends the DataSetMessage `MessageType`, never a DataSetMessage `PublisherId`, and `ReplyTo` as `""` when there is no trigger. `DataSetClassId` is set from the resource (REQ-MSG-010/011); a publisher-defined one (Data, Metadata) refuses reserved and predefined ids (REQ-MSG-014).
+4. **Lossless values:** `DateTime` and `ByteString` keep their text (a decoded `CorrelationData` is echoed byte-identical, REQ-ACT-007); numbers that are int or float in the schema (`TimeoutHint`, Min/Max, Precisions) are `serde_json::Number`. Guids only in the lowercase hyphenated form. Object keys are kept in sorted maps (no `preserve_order`): key order is not significant in JSON.
+5. **Action correlation:** `ActionRequestMessage::new` takes the PublisherId from the Call topic (the Responder, REQ-ACT-005) and sets `ResponseAddress` to its Reply topic (REQ-ACT-006); `response()` copies PublisherId, RequestorId and CorrelationData; `ActionRequest::done`/`failed` build the matching ActionResponse (same DataSetWriterId, ActionTargetId, RequestId; a Bad Status has an empty Payload, REQ-ACT-012/014). `ActionResponse::payload` is an `Option` (`None` ↔ `{}`).
+6. **Config and Data:** Config groups are flattened maps (the group names are application-defined); Data is a raw JSON object with a typed `Oi4Pv` view (`Pv`, `Sv<n>`). SubscriptionList `TopicPath` stays a string (it may be any topic filter).
+7. **Schema embedding:** `build.rs` reads `Version` and `Baseline` from `oec/schema/schema.go` (the tree that is embedded, e.g. `2.0.1-dev` @ `734c560`), not from `oec/schema/release/` as the C-043 spike did; with `strict-validation` it embeds the 45 strict sources by `include_str!`. `schema::Validator` derives the tolerant flavor in memory and routes and attributes errors to REQ ids like the schema gate (ADR-0019 §8).
+8. **Tests as contract:** `tests/payload.rs` runs all 245 payload vectors: valid ones decode and re-encode to an equal JSON value (tolerant V-PAY-019/113: unknown keys dropped), invalid ones never panic, and in the `strict-validation` build the verdicts and REQ ids equal the schema gate, with the rule-layer cases of `oec/schema/tests/rule-layer.yaml` as the only valid-to-schema negatives; every re-encoding passes the strict schema. `tests/model.rs` covers the sender side (builders → strict schema → decode) and the Action correlation. The gate runs clippy, tests and rustdoc in both feature sets.
