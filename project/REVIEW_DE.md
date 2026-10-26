@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-046 Nachtrag 2 (P4 läuft)._
+_Stand: 26.10.2026, nach C-046 Nachtrag 3 (P4 läuft). **Für dich ist gerade nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,15 +24,13 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Deine Entscheidung zu SF-104 ist umgesetzt.** Du hast gesagt: MG 4.1 ist führend und eindeutig. Daraus folgt: Die Teile Model, ProductCode und SerialNumber des Oi4Identifier werden **immer** dnp-codiert (Option a). Für dich bleiben:
-- **D-1:** Darf ich den Guideline-Text in MG 4.3.1 und A3 angleichen („may“ → „must“)? Guideline-Text ändere ich nur mit deinem Auftrag.
-- **R-1, R-2:** zwei geänderte REQs und ein neuer Testvektor, die du reviewen sollst.
+**Nichts.** Dein Review (D-1, R-1, R-2) ist umgesetzt (Details unten unter „Was aus deinem letzten Review (C-046, Nachtrag 2) geworden ist“). SF-104 ist damit auch in der Guideline erledigt, und es gibt keine Entwürfe mehr.
 
-Alles andere (A-1 … A-9) ist nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner neuen Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
+Die Punkte A-1 … A-9 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
-Die Lücken bleiben bei 0, das Schema bleibt unverändert (`2.0.1-dev`).
+Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` (jetzt mit Baseline `734c560`).
 
-Log: [C-046 inkl. Nachtrag 1 und 2](log/2026-10-26_C-046_p4-start.md).
+Log: [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
 
 ### Begriffe aus C-046
 
@@ -49,35 +47,6 @@ Log: [C-046 inkl. Nachtrag 1 und 2](log/2026-10-26_C-046_p4-start.md).
 
 ---
 
-### D-1 – Guideline-Text an deine Entscheidung angleichen
-
-**Was du entschieden hast:** MG 4.1 sagt, dass Werte mit Zeichen, die nicht erlaubt sind oder in einer URL eine Sonderfunktion haben, maskiert werden **müssen**. MG 4.3.1 sagt, dass alles aus MG 4.1 auch für den Oi4Identifier gilt, und nennt die dnp-Codierung als Mittel dafür.
-
-**Warum daraus „immer codieren“ folgt:** Die dnp-Codierung lässt genau die harmlosen Zeichen (`A–Z a–z 0–9 - . _ ~`) stehen. Jedes andere Zeichen ist entweder verboten oder hat eine Sonderfunktion. „Nur die störenden Zeichen maskieren“ und „das ganze Element codieren“ ergeben also genau dasselbe. Ergebnis: Pro Typenschild gibt es genau eine Kennung, und man kann sie eindeutig zurückrechnen. Normale Kennungen wie `provider.com/FieldDataService/FDS-001/1200-0345` ändern sich nicht.
-
-**Was noch nicht passt:** In MG 4.3.1 und A3 steht noch „may“, das liest sich wie „freiwillig“. Mein Vorschlag (steht auch im Register bei SF-104):
-- MG 4.3.1: „Enthält Model, ProductCode oder SerialNumber andere Zeichen als `A–Z a–z 0–9 - . _ ~`, **muss** der Wert dnp-codiert werden (A3), damit sich das Oi4Identifier aus denselben Werten wieder erzeugen lässt.“
-- MG A3: „may be built / may be dnp-encoded“ → „are built / are dnp-encoded“.
-
-**Mit deinem Auftrag:** Ich ändere die Guideline, SF-104 wird „resolved“, und ich ziehe die Baseline nach. **Ohne Auftrag:** SF-104 bleibt „decided“; unsere Umsetzung folgt deiner Entscheidung schon jetzt.
-
-**Empfehlung:** Ja, angleichen.
-
----
-
-### R-1 – Zwei geänderte REQs
-
-- **REQ-IL-033** heißt jetzt „Oi4Identifier elements are dnp-encoded“ und ist ein **MUST** (vorher MAY, „optional“). Sie erklärt, warum das eindeutig und zurückrechenbar ist, und zitiert MG 4.1.
-- **REQ-IL-022** (Aufbau des Oi4Identifier): „may be masked“ → „are masked“.
-
-Beide stehen auf `draft`, bis du sie freigibst. Bei REQ-IL-032 habe ich nur einen Verweis in den Notizen angepasst; sie bleibt `reviewed`.
-
-### R-2 – Neuer Testvektor V-PAY-245
-
-Ein MAM eines Geräts mit der Seriennummer `ABC@home`, dessen Kennung die Seriennummer **unmaskiert** enthält (`…/FDS-001/ABC@home`). Das ist jetzt ungültig: Richtig wäre `…/FDS-001/ABC,40home`. D7 meldet es über die schon bestehende Prüfung „ProductInstanceUri passt zu Model, ProductCode und SerialNumber“ (REQ-RES-MAM-006). Der Vektor steht auf `draft`.
-
----
-
 ### Zur Info: was ich selbst entschieden oder nachgezogen habe (G-3.4 b)
 
 - **A-1 … A-4** (aus C-046): Aufbau des Rust-Projekts (ADR-0026), Testvektoren als JSON, Reihenfolge in P4, Leerzeichen im Filter nur als Warnung.
@@ -89,7 +58,6 @@ Ein MAM eines Geräts mit der Seriennummer `ABC@home`, dessen Kennung die Serien
 ### Was als Nächstes passiert (C-047)
 
 1. P4 Inkrement 3: Nachrichtenmodell (alle Payloads), Schemas ins SDK einbetten, Payload-Vektoren; die ersten fremden Rust-Bibliotheken, geprüft mit cargo-deny.
-2. Nach deinen Antworten: bei D-1 „ja“ die Guideline-Änderung und neue Baseline; R-1/R-2 auf `reviewed`.
 
 ---
 
@@ -168,13 +136,22 @@ Ein MAM eines Geräts mit der Seriennummer `ABC@home`, dessen Kennung die Serien
 
 ---
 
+## Was aus deinem letzten Review (C-046, Nachtrag 2) geworden ist
+
+Du hast geschrieben: „D-1 reviewed und akzeptiert -> übernehmen, R-1 und R-2 akzeptiert“. Daraus wurde Nachtrag 3 zu C-046:
+- **D-1 – Guideline-Text:** In MG 4.3.1 steht jetzt: Enthält Model, ProductCode oder SerialNumber andere Zeichen als `A–Z a–z 0–9 - . _ ~`, **muss** der Wert dnp-codiert werden, damit sich der Oi4Identifier aus denselben Werten wieder erzeugen lässt. In MG A3 wurde aus „may be built / may be dnp-encoded“ ein „are built / are dnp-encoded“ (`734c560`, Docusaurus-Build grün). Im Register ist SF-104 jetzt „resolved“ (`fce5cf5`); es gibt keine offenen Findings.
+  - Nicht geändert: GL-ADR-010. Das ist ein Entscheidungsprotokoll von damals und zitiert noch das alte „may“; das Register vermerkt, dass SF-104 diesen Punkt ablöst.
+- **Neue Baseline `734c560`:** Das Inventory hat jetzt 1399 statt 1401 Einträge. Der Satz in MG 4.3.1 ist jetzt ein MUST statt eines MAY. Die zwei Sätze in A3 enthalten kein Schlüsselwort mehr („are“ statt „may“) und fallen deshalb aus dem Inventory. Bei REQ-IL-033 habe ich nur die Zitate auf den neuen Text umgestellt; der Inhalt, den du freigegeben hast, ist gleich geblieben.
+- **R-1, R-2:** REQ-IL-022, REQ-IL-033 und V-PAY-245 stehen auf `reviewed`. Es gibt keinen Entwurf mehr.
+- Das Schema bleibt `2.0.1-dev` (nur die Baseline ist jetzt `734c560`), und `oec/check.sh` ist grün.
+
 ## Was aus deiner Nachfrage zu SF-104 geworden ist (C-046, Nachtrag 2)
 
-Du hast gefragt, ob es um das Topic oder die Nachricht geht und vor allem um `"`. Antwort: um beides gleich. Die Codierungen beim Übertragen (base64url im Topic, Escaping in JSON) gehen verlustfrei hin und zurück. Ein `"` ist in einem IL gar nicht erlaubt. Die Mehrdeutigkeit entsteht vorher, beim Bilden der Kennung, und betrifft nur die erlaubten Sonderzeichen wie `@`. Dann hast du entschieden: MG 4.1 ist führend. Das ist umgesetzt (siehe oben D-1, R-1, R-2, A-9); SF-104 steht im Register auf „decided“ (`726f2a3`).
+Du hast gefragt, ob es um das Topic oder die Nachricht geht und vor allem um `"`. Antwort: um beides gleich. Die Codierungen beim Übertragen (base64url im Topic, Escaping in JSON) gehen verlustfrei hin und zurück. Ein `"` ist in einem IL gar nicht erlaubt. Die Mehrdeutigkeit entsteht vorher, beim Bilden der Kennung, und betrifft nur die erlaubten Sonderzeichen wie `@`. Dann hast du entschieden: MG 4.1 ist führend. Das ist umgesetzt (REQ-IL-022/033, V-PAY-245, A-9); SF-104 stand danach im Register auf „decided“ (`726f2a3`) und ist seit Nachtrag 3 „resolved“.
 
-## Was aus deinem letzten Review (C-046) geworden ist
+## Was aus dem Review davor (C-046) geworden ist
 
-Du hast zu D-4 nachgefragt (Antwort oben in D-1, SF-104) und bestimmt, dass ich Technik-Entscheidungen wie D-1 selbst treffe. Daraus wurde im Nachtrag 1 zu C-046:
+Du hast zu D-4 nachgefragt (daraus wurde SF-104) und bestimmt, dass ich Technik-Entscheidungen wie D-1 selbst treffe. Daraus wurde im Nachtrag 1 zu C-046:
 - GUARDRAILS G-3.4 ist zweigeteilt: (a) fragt dich, (b) entscheide ich und protokolliere es.
 - D-1, D-2, D-3, D-5 habe ich wie empfohlen entschieden; ADR-0026 ist „accepted (agent)“.
 - R-1 … R-4 sind nur noch Info.
