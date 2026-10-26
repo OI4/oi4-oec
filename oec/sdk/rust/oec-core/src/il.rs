@@ -359,6 +359,10 @@ impl Oi4Identifier {
     /// Masks Model, ProductCode and SerialNumber with the dnp-encoding
     /// (REQ-IL-032, REQ-IL-033). Off by default: without it, a `/` or a
     /// character not permitted in an Identification Link is an error.
+    ///
+    /// SF-104 (open): the guideline makes the masking optional, so the same
+    /// nameplate can give two Oi4Identifiers; the proposed reading is to
+    /// always mask. The default may change with the decision.
     #[must_use]
     pub fn dnp_encoded(mut self) -> Self {
         self.dnp_encode = true;

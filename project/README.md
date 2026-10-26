@@ -43,7 +43,7 @@ Spec findings (ambiguities / contradictions found in the guideline, `SF-xxx`) ar
 Every unit of work is a **cycle** `C-NNN`. A cycle is small (hours, not weeks) and always follows:
 
 1. **Plan** – write the intent, scope and acceptance criteria into a new log file `log/YYYY-MM-DD_C-NNN_<slug>.md`.
-2. **Align** – design decisions, scope changes and anything listed in GUARDRAILS G-3.4 are confirmed by the product owner *before* implementation.
+2. **Align** – scope changes, spec interpretations and everything else listed in GUARDRAILS G-3.4 (a) are confirmed by the product owner *before* implementation. Engineering decisions (G-3.4 b) are made by the agent, recorded in an ADR or the log, and listed in `REVIEW.md` for information.
 3. **Execute** – implement / research.
 4. **Verify** – run tests / builds / validations; record the commands and results.
 5. **Record** – complete the log file (what was done, why, results, deviations, follow-ups), update `STATUS.md`, `REVIEW.md` (open review items and decisions for the PO) and its German explanation `REVIEW_DE.md`, add ADRs / spec findings / open questions where needed.

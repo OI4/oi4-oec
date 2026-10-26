@@ -1,9 +1,9 @@
 # ADR-0026 – Rust SDK workspace, crate roles and test-vector contract (P4)
 
-- Status: **proposed** (agent, C-046)
+- Status: **accepted (agent, G-3.4 b)** – proposed in C-046, accepted by the agent in C-046 addendum 1 after the PO delegated engineering decisions (GUARDRAILS G-3.4 amended 2026-10-26)
 - Date: 2026-10-26
-- Deciders: product owner (Thomas) – proposed by the agent in C-046
-- Related: ADR-0011 (S4: `oec-core` sans-IO, `oec` runtime, `oec-ffi`), ADR-0012 (monorepo), ADR-0018 (spec baseline), ADR-0020 (public Rust API), ADR-0021 (C ABI), ADR-0023 (dependencies, supply-chain rules), GUARDRAILS G-3.4 (repository layout needs the PO), G-4.4
+- Deciders: agent (delegated by the product owner, G-3.4 b); the PO can overrule
+- Related: ADR-0011 (S4: `oec-core` sans-IO, `oec` runtime, `oec-ffi`), ADR-0012 (monorepo), ADR-0018 (spec baseline), ADR-0020 (public Rust API), ADR-0021 (C ABI), ADR-0023 (dependencies, supply-chain rules), GUARDRAILS G-3.4 (b), G-4.4, SF-104
 
 ## Context
 
@@ -13,7 +13,7 @@ P4 starts with C-046. ADR-0011 named the three crates `oec-core`, `oec` and `oec
 - how the SDKs read the shared test vectors of `oec/spec/vectors/` (YAML);
 - the lints and gates of product code.
 
-G-3.4 makes the repository layout a PO decision, so this ADR is proposed rather than decided by the agent.
+G-3.4 first made the repository layout a PO decision, so C-046 proposed this ADR. On 2026-10-26 the PO delegated engineering decisions such as the layout to the agent (G-3.4 b), so the agent accepted it in C-046 addendum 1. Point §5.2 depends on the open spec finding SF-104, which stays with the PO.
 
 ## Decision
 
@@ -92,6 +92,7 @@ G-3.4 makes the repository layout a PO decision, so this ADR is proposed rather 
    - The dnp-encoding is opt-in (`.dnp_encoded()`, as in the accepted sketch), because MG 4.3.1/A3 permits the masking but does not require it (SF-043 e).
    - Without it, a `/` in Model, ProductCode or SerialNumber is the SDK-only violation `slash-in-element`, and other characters that are not permitted surface as the IL violations.
    - The spec tools always mask, so the vector test builds with `.dnp_encoded()`.
+   - **Pending SF-104** (open, PO): the optional masking lets the same nameplate give two Oi4Identifiers, which contradicts the regeneration promise of MG 4.3. The proposed reading (a) is to always mask. If the PO decides (a), `build` masks always, `.dnp_encoded()` and `slash-in-element` go away, and REQ-IL-033 changes; this default is kept until then because both variants are already implemented.
 3. **Topic parsing classifies like `spectool` and D7:**
    - First all structural rules, including the canonical `encoded-il` of AppId and Source → `grammar`.
    - Then the decoded AppId, then the Source, as Identification Links → `identification-link`.
