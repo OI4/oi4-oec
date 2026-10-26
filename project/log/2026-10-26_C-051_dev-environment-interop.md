@@ -311,3 +311,49 @@ Next free ids: SF-106, REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-TOP-029, V-PAY-246,
 - The state is handover-ready (G-3.7): this log, ADR-0026 §11, `oec/dev/README.md`, STATUS "Next step" 1, ROADMAP P4/P5 and `REVIEW.md`.
 
 Start prompt: `prompt.md` (German, not committed).
+
+## Addendum 1 – PO review: D-1 (2026-10-26)
+
+### PO input
+
+1. "Für D-1 wähle ich option b da sie präzise ist".
+   - This was ambiguous: (b) is one part of the proposal (the note on 268435455), not one of the choices (as proposed, (d), (e), other); on its own it does not solve problem (a).
+   - The PO was not available for a question, so the guideline was not changed (G-3.4 a).
+   - The reply and the question were recorded in REVIEW D-1 (`9ee19db`).
+2. Clarification: "Vorschlag komplett" → (a) + (b) + (c) as proposed.
+
+### Guideline (G-3.4 a, PO order)
+
+- `59e3ae3` (branch `feature/spec-findings`), RIG 4.1.1 card `MaxPacketSize`, after the sentence on the value range:
+  - (b) "A payload is limited further by the MQTT packet: payload + topic length + 4 must not exceed 268435455."
+  - (a) "The broker accepts every MQTT payload up to `MaxPacketSize`. If the broker limits the size of the whole MQTT packet, this limit includes the fixed header, the topic and the packet identifier and must therefore be larger than `MaxPacketSize` (by 65544 octets for any topic)."
+  - (c) no text: what the broker does with a larger payload stays open on purpose.
+  - (b) is placed before (a) so that it directly follows the sentence on the maximum it refines; the wording is the one of the proposal.
+- Register `d220c48`: SF-105 `resolved (59e3ae3)`, moved to Closed; no open finding; next SF-106.
+
+### Re-baseline on `59e3ae3`
+
+- Branch head was the text commit, so no detached checkout was needed; `spectool rebaseline -rev 59e3ae3`.
+- Inventory 1399 → **1401**: RIG-4.1.1-fb78a5f5 (MUST NOT, (b)) and RIG-4.1.1-674b5bb8 (MUST, packet limit of (a)); the sentence "The broker accepts …" has no keyword and is quoted only. No other key changed.
+- Both items are mapped to **REQ-CNT-003**:
+  - the statement now says that the broker accepts every payload up to MaxPacketSize, that a packet limit is larger by 65544 octets, and that payload + topic length + 4 does not exceed 268435455;
+  - three new quotes;
+  - the notes record SF-105 (c) and that (b) restates the MQTT remaining-length limit (no own check);
+  - status → `draft`, **R-1** for the PO.
+  - Not a mechanical remap, because the statement changes.
+- `spectool lint`, `render`, `coverage`: CNT 0 open, 158 REQs with 0 gaps.
+- Schema: `Baseline` `59e3ae3`, `Version` stays `2.0.1-dev` (no content change, `broker.json` keeps its form and range, V-BRK-001 … 018 unchanged), CHANGELOG `Unreleased` entry; D7/D8 catalog baselines `59e3ae3`.
+- **A-50 (agent, G-3.4 b):** D8 T8-BUS-01 additionally lists REQ-CNT-003. It publishes a payload of exactly `MaxPacketSize` on a long topic and expects delivery without a disconnect. Larger payloads are not checked (SF-105 (c)). Until now, D8 checked REQ-CNT-003 only on the host side (T8-HST-01, `broker.json`).
+- Unchanged, because they already follow the decision: `oec/dev/mosquitto/mosquitto.conf` (`message_size_limit 262144`, `max_packet_size 327688`), the SDK (`oec` limits the outgoing payload, accepts packets up to `MaxPacketSize` + 65539), the interop test `max_packet_size_limits_the_payload`. ADR-0026 §11.3 notes that SF-105 is resolved.
+- Project docs: AGENTS.md, GUARDRAILS G-1.2, ADR-0001 amendment C-051 review, STATUS, this log, review sheets; `prompt.md` (not committed) updated for C-052.
+
+### Checks
+
+- `oec/check.sh` → "all checks passed" (incl. `inventory -check -rev 59e3ae3` with 1401 items, coverage gate 158 REQs / 0 gaps, schema baseline = spec baseline, D7/D8 catalog coverage).
+- The interop run was not repeated: neither the broker configuration nor the SDK changed.
+
+### Next ids
+
+SF-106, REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-TOP-029, V-PAY-246, V-TOP-138 (valid) / V-TOP-255 (invalid), V-BRK-019, P-129, ADR-0027, Q-031, A-51.
+
+The agent decision for C-052 is unchanged: a **new agent**, start prompt in `prompt.md`.
