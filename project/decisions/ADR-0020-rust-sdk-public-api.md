@@ -1,6 +1,6 @@
 # ADR-0020 – Public API of the Rust SDK (D2)
 
-- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042). Amendment C-048 (first part of the crate `oec`: additions, `MemoryStore::new()`, rules of `build()`) by the agent (G-3.4 b).
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042). Amendment C-048 (first part of the crate `oec`: additions, `MemoryStore::new()`, rules of `build()`) and C-049 (no API change; `set_health_details` reads "equals" per REQ-RES-HEALTH-002) by the agent (G-3.4 b).
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-042
 - Related: ADR-0011 (S4 architecture), ADR-0016 (level targets), ADR-0019 §7 (schemas in D2), ADR-0021 (C ABI), ADR-0022 (D9 API), Q-021, Q-022, SF-101
@@ -217,3 +217,10 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
 ### D. Q-021 (`run_async`)
 
 `run`, `run_async`, `handle`, `AppHandle` and `ConnectionState` need the runtime and stay in the sketch until increment 5. No placeholder is added to `oec`; `App` is `Send + Sync` (tested), so the async form of §2 stays possible without an API change.
+
+## Amendment C-049 (2026-10-26) – P4 increment 5a: no API change, one clarification (agent, G-3.4 b)
+
+Increment 5a adds sans-IO building blocks to `oec-core` (ADR-0026 §9); the public API of `oec` and the sketch are unchanged. "Increment 5" in amendment C-048 D now means increment **5b** (C-050).
+
+1. **`set_health_details` (sketch `asset.rs`):** the sketch says "`Health` is then **at least** the most severe detail". REQ-RES-HEALTH-002 says Health **equals** the Health with the highest priority of the Details. The SDK implements "equals" (the core check `oec_core::lifecycle::check_health` refuses anything else). This is a wording fix of the described semantics, not a change; C-050 corrects the sketch doc when it moves `Asset` to `oec`. How `set_health` behaves while `Details` are set is decided there, within this rule.
+2. **Keep Alive never 0:** the core session takes Keep Alive as `NonZeroU16` seconds, matching C-048 C ("0 would disable the Will trigger").

@@ -1,6 +1,6 @@
 # ADR-0023 – Dependencies of the Rust SDK (D2)
 
-- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-043). Amendment C-047 (feature sets, version source `schema.go`, tolerant flavor in memory) and C-048 (thiserror, log in `oec`) by the agent (G-3.4 b).
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-043). Amendment C-047 (feature sets, version source `schema.go`, tolerant flavor in memory), C-048 (thiserror, log in `oec`) and C-049 (codec of Q-026 in `oec-core`, proptest as dev-dependency, no cargo-fuzz) by the agent (G-3.4 b).
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-043
 - Related: ADR-0004 (MIT), ADR-0011 (S4: `oec-core` sans-IO, `oec` runtime, `oec-ffi`), ADR-0019 §7/§8 (embedded schemas, jsonschema-rs), ADR-0020 (public API, execution model, `strict-validation`), ADR-0021 (C ABI), GUARDRAILS G-3.4/G-4.4, Q-008 (platforms), Q-026
@@ -95,3 +95,12 @@ Applied in P4 increment 4 within §1 (no new crate):
 - **thiserror** 2 (2.0.21, with `thiserror-impl`) for `oec::Error`; **log** 0.4 (0.4.34), default features, for SDK diagnostics. Both are workspace dependencies. `oec` also uses serde_json directly (container storage) and forwards `strict-validation` to `oec-core`.
 - **Tree of `oec`:** 22 crates in the default build, 74 with `strict-validation` (unique crates, normal edges). `cargo deny check`: advisories, bans, licenses and sources ok; no exception and no `ignore` entry (both crates are MIT OR Apache-2.0, G-4.4).
 - **Not yet:** tokio, rustls/tokio-rustls and rustls-pki-types come with the transport (increment 5), uuid `v4`/`v5` with the default DataSetClassId (increment 6), the `tracing` feature with the Syslog bridge (ADR-0020 §11). Base64 for the container secrets is a 30-line decoder in `oec` instead of a crate (only decoding, standard alphabet).
+
+## Amendment C-049 (2026-10-26) – MQTT codec of Q-026 and the property-test dev dependency (agent, G-3.4 b)
+
+Applied in P4 increment 5a within this ADR (libraries within the dependency rules, G-3.4 b). Details: `log/2026-10-26_C-049_mqtt-session-lifecycle.md`.
+
+- **Q-026 option (a) realized:** the MQTT 3.1.1 codec and the client session are `oec_core::mqtt` (packets, canonical codec, session state machine), written new from the spike `mqtt-codec` after review (the spike stays as the C-043 evidence). Product size: about 2.1k lines in `oec-core/src/mqtt/` (with docs) plus about 1.6k lines of codec, session and property tests. No new runtime dependency: the default tree of `oec-core` stays at 20 crates (81 with `strict-validation`).
+- **Fuzzing = proptest, no cargo-fuzz (decides the "cargo-fuzz or proptest" of the Consequences):** proptest 1.12 (MIT OR Apache-2.0) is a **dev-dependency** of `oec-core` only, workspace-managed, `default-features = false` with `std` (no `fork`/`timeout`, no `bit-set` persistence of failures). It runs on stable in the normal `cargo test` of the gate (codec round trips, garbage and mutation inputs, chunked streams, random session runs). cargo-fuzz needs nightly and libFuzzer (a C++ build); a fuzz target would sit outside the gate, so it is not set up. It can be added later as an optional `fuzz/` crate outside the workspace without touching the gate.
+- **Dev tree:** proptest adds 10 crates to `Cargo.lock` (chacha20, core_detect, cpufeatures 0.3, getrandom 0.4, r-efi 6, rand 0.10, rand_core 0.10, rand_xorshift, unarray, proptest), 33 crates in `oec-core` with dev edges. None of them is linked into the SDK. r-efi is `MIT OR Apache-2.0 OR LGPL-2.1-or-later` and is used under MIT/Apache-2.0 (G-4.4). `cargo deny check`: advisories, bans, licenses and sources ok; no exception and no `ignore` entry. The only warning is the pre-existing duplicate of `syn` (not a TLS or crypto crate).
+- **Still not yet:** tokio, rustls/tokio-rustls and rustls-pki-types come with the transport in increment 5b (C-050).
