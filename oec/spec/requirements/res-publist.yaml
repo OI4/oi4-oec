@@ -6,7 +6,7 @@
 # tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-PUBLIST
-baseline: "ccb475a"
+baseline: "e0262dd"
 requirements:
   # --- DataSet content (MG 8.3.8) ---------------------------------------------
   - id: REQ-RES-PUBLIST-001
@@ -573,9 +573,10 @@ requirements:
     notes: >-
       New in C-045 (guideline text of SF-101, ccb475a). Both values are valid
       and allow Get (REQ-RES-PUBLIST-027), so schema and D7 validate accept
-      both. The examples of MG B1.1.8/B2.6 and the vectors derived from them
-      use the short values (SF-103, open); a D7 monitor warning is a candidate
-      once SF-103 is decided. The SDK defaults already use combined values
+      both. The examples of MG B1.1.8/B2.6 and the golden vectors V-PAY-037 …
+      040 use the combined values since guideline e0262dd (SF-103); constructed
+      vectors keep the short values. A D7 monitor warning is a candidate for
+      P5. The SDK defaults already use combined values
       (ADR-0020 §7).
 
   - id: REQ-RES-PUBLIST-027
