@@ -208,3 +208,23 @@ Nothing to decide and no test data to review: no D-x or R-x. For information onl
 C-048 – P4 increment 4 (ROADMAP P4): crate `oec` with `App`/`AppBuilder`, `Level`, `Bootstrap` (explicit + container storage contract), `Store`, `Error`; the sketch API moves into `oec` piece by piece; new runtime dependencies thiserror and log.
 
 Next free ids (unchanged): SF-105, REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-TOP-029, V-PAY-246, V-TOP-138 (valid) / V-TOP-255 (invalid), V-BRK-019, P-129, ADR-0027, Q-031.
+
+Agent for C-048 (G-3.10, decided in addendum 1): **new agent**, start prompt in `prompt.md`.
+
+## Addendum 1 (2026-10-26) – PO instruction: agent hand-over rule
+
+**PO instruction (German, paraphrased):** at the end of every cycle, decide whether a new agent starts or the same one continues. If a new one starts, also fill `prompt.md` with a start prompt.
+
+**Done:**
+- GUARDRAILS **G-3.10** (new): the decision at every cycle end and addendum, recorded in the log and in the German summary; default criteria for new vs. same agent; structure of the start prompt; `prompt.md` is never committed and stays unchanged when the same agent continues.
+- G-3.6: `prompt.md` added to the German exceptions.
+- `project/README.md`: cycle step 6 "Hand over", "done" only after step 6, and the log template's "Next" section names the agent decision.
+
+**Decision for C-048: new agent.**
+- The context of this session was compacted several times during C-047.
+- C-048 starts a new increment in a new crate (`oec`) and works mostly in other files: ADR-0020 §2/§3/§5/§10/§14, the sketch, the storage contract (RIG) and the `broker.json` vectors.
+- The state is handover-ready (G-3.7): this log, STATUS "Next step" 1, ROADMAP P4 and `REVIEW.md`.
+
+**Start prompt:** `prompt.md` now holds the C-048 prompt. It is not committed.
+
+**Checks:** only `project/` docs changed, so no gate run was needed (the last run after `500cdf0` was green).

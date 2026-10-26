@@ -47,8 +47,9 @@ Every unit of work is a **cycle** `C-NNN`. A cycle is small (hours, not weeks) a
 3. **Execute** – implement / research.
 4. **Verify** – run tests / builds / validations; record the commands and results.
 5. **Record** – complete the log file (what was done, why, results, deviations, follow-ups), update `STATUS.md`, `REVIEW.md` (open review items and decisions for the PO) and its German explanation `REVIEW_DE.md`, add ADRs / spec findings / open questions where needed.
+6. **Hand over** – decide whether the next cycle runs in a new agent session or in the same one, and record the reason in the log (GUARDRAILS G-3.10). For a new agent, write the start prompt of the next cycle into `prompt.md` (German, not committed).
 
-A cycle is only "done" when step 5 is complete. A different agent must be able to continue from `STATUS.md` + the latest log without additional context.
+A cycle is only "done" when step 6 is complete. A different agent must be able to continue from `STATUS.md` + the latest log without additional context.
 
 ## Templates
 
@@ -69,6 +70,7 @@ A cycle is only "done" when step 5 is complete. A different agent must be able t
 ## Decisions taken (link ADRs)
 ## Findings (link SF-xxx, Q-xxx)
 ## Follow-ups / next step
+(incl. agent for the next cycle: new | same, with reason – G-3.10)
 ```
 
 ### ADR (`decisions/ADR-NNNN-<slug>.md`)
