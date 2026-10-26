@@ -434,7 +434,7 @@ func (c *checker) mamIdentifier(p string, m map[string]any, piu string) {
 			continue
 		}
 		s := seg[i+1]
-		if e.value == "" && s == ilink.NoData || e.value != "" && (s == e.value || s == ilink.DnpEncode(e.value)) {
+		if e.value == "" && s == ilink.NoData || e.value != "" && s == ilink.DnpEncode(e.value) {
 			continue
 		}
 		c.add(join(p, "ProductInstanceUri"), "REQ-RES-MAM-006", "ProductInstanceUri %q is an Oi4Identifier of the ManufacturerUri, but its element %q is not the %s %q", piu, s, e.name, e.value)

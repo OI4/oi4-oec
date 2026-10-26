@@ -449,8 +449,9 @@ requirements:
       "<ManufacturerUri>/<Model>/<ProductCode>/<SerialNumber>" without scheme;
       all four elements are mandatory strings. The result is an Identification
       Link, so all its rules apply (REQ-IL-008, REQ-IL-016); characters that
-      are not permitted or a "/" inside an element may be masked with the
-      dnp-encoding (REQ-IL-033).
+      are not permitted, have a special function in the URL syntax or are a
+      "/" inside an element are masked with the dnp-encoding (REQ-IL-017,
+      REQ-IL-033).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -462,8 +463,11 @@ requirements:
         text: The Oi4Identifier in the form of <ManufacturerUri/Model/ProductCode/SerialNumber> represents an IEC 61406-1 compliant Identification Link (4.1 IEC 61406-1 Identification Link) without scheme.
     verification: [manual]
     inventory: [MG-4.3.1-b4192d78, MG-4.3.1-8b0a5dee, MG-4.3.1-1f4d5d6c]
-    status: reviewed
-    notes: Reference implementation il.Oi4Identifier; vectors V-OID-….
+    status: draft
+    notes: >-
+      Reference implementation il.Oi4Identifier; vectors V-OID-…. Statement
+      changed in C-046 addendum 2 (SF-104, PO 2026-10-26: MG 4.1 governs, the
+      masking is mandatory): "may be masked" → "are masked".
 
   - id: REQ-IL-023
     title: ManufacturerUri in lowercase
@@ -672,40 +676,54 @@ requirements:
     inventory: [MG-A3-ffe5198a, MG-A3-d9344f53]
     status: reviewed
     notes: >-
-      Defines how the encoding works when it is used; whether it is used is
-      REQ-IL-033 (MAY, SF-043 (e), C-019). Table 18 of MG A3 is the ASCII
+      Defines how the encoding works; when it is used is REQ-IL-033 (MUST
+      since SF-104, C-046 addendum 2; before MAY, SF-043 (e), C-019). Table 18 of MG A3 is the ASCII
       excerpt of the general rule for all UTF-8 octets (PO decision SF-043
       (a), (b), C-020). Reference implementation il.DnpEncode; vectors
       V-DNP-….
 
   - id: REQ-IL-033
-    title: dnp-encoding of Oi4Identifier elements is optional
+    title: Oi4Identifier elements are dnp-encoded
     statement: >-
-      If a value of Model, ProductCode or SerialNumber contains characters
-      that are not permitted in an Identification Link or a "/", the generator
-      of the Oi4Identifier may mask these characters with the dnp-encoding
-      (REQ-IL-032). Without masking, such a value cannot be used in an
-      Oi4Identifier, because the Oi4Identifier has to fulfill all rules of an
-      Identification Link (REQ-IL-008, REQ-IL-016). The dnp-encoding is not
-      used anywhere else; in topics the Identification Link is base64url-encoded
-      (REQ-IL-002).
-    keyword: MAY
+      The generator of an Oi4Identifier writes Model, ProductCode and
+      SerialNumber dnp-encoded (REQ-IL-032). Values made only of A-Z, a-z,
+      0-9, "-", ".", "_" and "~" stay unchanged; every other character is not
+      permitted in an Identification Link, has a special function in the URL
+      syntax (REQ-IL-017) or is the "/" that separates the elements, and is
+      masked. So each nameplate gives exactly one Oi4Identifier (MG 4.3), and
+      every "," in an element is a mask sign. The dnp-encoding is not used
+      anywhere else; in topics the Identification Link is base64url-encoded
+      (REQ-IL-002), and receivers do not decode it (REQ-IL-029).
+    keyword: MUST
     domain: messaging
-    levels: {L1: MAY, L2: MAY, L3: MAY}
+    levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
     condition: The application generates an Oi4Identifier.
-    refs: [MG 4.3.1, MG A3, SF-043]
+    refs: [MG 4.3.1, MG A3, MG 4.1, SF-043, SF-104]
     quotes:
       - ref: MG 4.3.1
         text: All requirements of IEC 61406-1 and 4.1 IEC 61406-1 Identification Link also apply to the Oi4Identifier.
+      - ref: MG 4.1
+        text: If values (e.g. a serial number) contain characters that are not permitted or have a special function in the URL syntax, they must be masked by other means.
       - ref: MG 4.3.1
         text: If a value of Model, ProductCode or SerialNumber contains characters that are not permitted in an Identification Link, or a forward slash, which separates the elements, the dnp-encoding (A3 The dnp-Encoding) may be used to mask these characters.
       - ref: MG A3
         text: In this case, these components may be dnp-encoded (see 4.3.1 Structure of the Oi4Identifier).
     verification: [manual]
     inventory: [MG-4.3.1-c8598181, MG-A3-fc6806cf, MG-A3-b8922139]
-    status: reviewed
-    notes: PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference implementation il.Oi4Identifier applies the dnp-encoding (identity for values without such characters); vectors V-OID-….
+    status: draft
+    notes: >-
+      Changed in C-046 addendum 2 from MAY to MUST: PO decision SF-104
+      (2026-10-26) – MG 4.1 governs ("must be masked by other means"), the
+      "may" of MG 4.3.1 and MG A3 names the means (dnp-encoding), not an
+      option to leave such characters unmasked; masking only the offending
+      characters equals encoding the whole element, because the dnp-encoding
+      keeps exactly the unreserved characters. The guideline text of MG 4.3.1
+      and MG A3 still says "may" (alignment pending a PO order). Before:
+      PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference
+      implementation il.Oi4Identifier applies the dnp-encoding; vectors
+      V-OID-…; D7 checks it heuristically in the MAM (REQ-RES-MAM-006,
+      V-PAY-245).
 
   # --- ManufacturerUri and Identification Link (MG 4.3.1, C-020) -------------
   - id: REQ-IL-034

@@ -397,8 +397,9 @@ func (c *checker) mam(d dsm) {
 // ProductInstanceUri without scheme of four segments whose first segment is
 // the ManufacturerUri is taken for a generated Oi4Identifier (MG 4.3.1), so
 // its elements are the Model (only if its Locale is en-US, REQ-IL-027),
-// ProductCode and SerialNumber of the MAM, plain or dnp-encoded (MG A3), "nd"
-// for an empty value.
+// ProductCode and SerialNumber of the MAM, dnp-encoded (MG A3, REQ-IL-033,
+// SF-104: values of unreserved characters only stay unchanged), "nd" for an
+// empty value.
 func (c *checker) mamIdentifier(p string, m map[string]any, piu string) {
 	mu, ok := m["ManufacturerUri"].(string)
 	seg := strings.Split(piu, "/")
@@ -422,7 +423,7 @@ func (c *checker) mamIdentifier(p string, m map[string]any, piu string) {
 			continue
 		}
 		s := seg[i+1]
-		if e.value == "" && s == il.NoData || e.value != "" && (s == e.value || s == il.DnpEncode(e.value)) {
+		if e.value == "" && s == il.NoData || e.value != "" && s == il.DnpEncode(e.value) {
 			continue
 		}
 		c.add(join(p, "ProductInstanceUri"), "REQ-RES-MAM-006", "ProductInstanceUri %q is an Oi4Identifier of the ManufacturerUri, but its element %q is not the %s %q", piu, s, e.name, e.value)

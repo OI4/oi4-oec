@@ -6,8 +6,8 @@ description: >-
   Oi4Identifier vectors (MG 4.3.1, MG A3): construction from ManufacturerUri,
   Model, ProductCode and SerialNumber, nd for missing values and the checks of
   the ManufacturerUri. Elements with characters that are not permitted in an
-  Identification Link or a "/" are masked with the optional dnp-encoding
-  (REQ-IL-033, SF-043 e); the expected value is the dnp-encoded form.
+  Identification Link or a "/" are masked with the dnp-encoding
+  (REQ-IL-033, SF-043 e, mandatory since SF-104); the expected value is the dnp-encoded form.
 vectors:
   - id: V-OID-001
     title: "MG 4.3.1 example"

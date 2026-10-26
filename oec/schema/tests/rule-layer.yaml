@@ -87,7 +87,7 @@ expectations:
     schema: []
     rule: [REQ-RES-MAM-006]
     rules: [R-3]
-    reason: Whether a ProductInstanceUri is a generated Oi4Identifier and matches Model, ProductCode and SerialNumber (plain or dnp-encoded) relates values across fields.
+    reason: Whether a ProductInstanceUri is a generated Oi4Identifier and matches Model, ProductCode and SerialNumber (dnp-encoded, REQ-IL-033) relates values across fields.
   - vector: V-PAY-211
     schema: []
     rule: [REQ-RES-MAM-016]
@@ -138,3 +138,8 @@ expectations:
     rule: [REQ-IL-005]
     rules: [R-3]
     reason: An encoded Identification Link is recognized by decoding it (base64url) and validating the result; JSON Schema can neither decode a value nor tell an encoded IL from a valid IL-shaped string.
+  - vector: V-PAY-245
+    schema: []
+    rule: [REQ-RES-MAM-006]
+    rules: [R-3]
+    reason: Whether the elements of a generated Oi4Identifier are the dnp-encoded Model, ProductCode and SerialNumber (REQ-IL-033, SF-104) relates values across fields and needs the dnp-encoding.

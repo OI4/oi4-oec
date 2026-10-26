@@ -26,7 +26,7 @@ Guideline baseline: `e0262dd` · Area status: reviewed · Sections: MG 4, MG A3
 | [REQ-IL-019](#req-il-019) | Identification Link has at most 255 characters | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-validate | reviewed |
 | [REQ-IL-020](#req-il-020) | Identification Link is kept short | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-IL-021](#req-il-021) | Filtering by parts of the Identification Link is done by the application | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
-| [REQ-IL-022](#req-il-022) | Structure of the Oi4Identifier | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
+| [REQ-IL-022](#req-il-022) | Structure of the Oi4Identifier | MUST | MUST | MUST | MUST | messaging | manual | draft |
 | [REQ-IL-023](#req-il-023) | ManufacturerUri in lowercase | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-IL-024](#req-il-024) | Form of the ManufacturerUri | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-IL-025](#req-il-025) | ManufacturerUri is a domain of the manufacturer | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
@@ -37,7 +37,7 @@ Guideline baseline: `e0262dd` · Area status: reviewed · Sections: MG 4, MG A3
 | [REQ-IL-030](#req-il-030) | Oi4Identifier is known or retrievable | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-IL-031](#req-il-031) | Existing Identification Link is not overwritten | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | manual | reviewed |
 | [REQ-IL-032](#req-il-032) | dnp-encoding | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
-| [REQ-IL-033](#req-il-033) | dnp-encoding of Oi4Identifier elements is optional | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
+| [REQ-IL-033](#req-il-033) | Oi4Identifier elements are dnp-encoded | MUST | MUST | MUST | MUST | messaging | manual | draft |
 | [REQ-IL-034](#req-il-034) | ManufacturerUri corresponds to the Identification Link | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
@@ -459,7 +459,7 @@ A subscriber that needs assets of a specific manufacturer, model, product code o
 
 **Structure of the Oi4Identifier**
 
-An Oi4Identifier has the form "&lt;ManufacturerUri>/&lt;Model>/&lt;ProductCode>/&lt;SerialNumber>" without scheme; all four elements are mandatory strings. The result is an Identification Link, so all its rules apply (REQ-IL-008, REQ-IL-016); characters that are not permitted or a "/" inside an element may be masked with the dnp-encoding (REQ-IL-033).
+An Oi4Identifier has the form "&lt;ManufacturerUri>/&lt;Model>/&lt;ProductCode>/&lt;SerialNumber>" without scheme; all four elements are mandatory strings. The result is an Identification Link, so all its rules apply (REQ-IL-008, REQ-IL-016); characters that are not permitted, have a special function in the URL syntax or are a "/" inside an element are masked with the dnp-encoding (REQ-IL-017, REQ-IL-033).
 
 - Keyword: MUST
 - Levels: L1 MUST · L2 MUST · L3 MUST
@@ -467,13 +467,13 @@ An Oi4Identifier has the form "&lt;ManufacturerUri>/&lt;Model>/&lt;ProductCode>/
 - Condition: The application generates an Oi4Identifier.
 - Refs: MG 4.3.1
 - Verification: manual
-- Status: reviewed
+- Status: draft
 - Inventory: MG-4.3.1-1f4d5d6c, MG-4.3.1-8b0a5dee, MG-4.3.1-b4192d78
 
 > The Oi4Identifier in the form of &lt;ManufacturerUri/Model/ProductCode/SerialNumber> represents an IEC 61406-1 compliant Identification Link (4.1 IEC 61406-1 Identification Link) without scheme.
 > — MG 4.3.1
 
-Notes: Reference implementation il.Oi4Identifier; vectors V-OID-….
+Notes: Reference implementation il.Oi4Identifier; vectors V-OID-…. Statement changed in C-046 addendum 2 (SF-104, PO 2026-10-26: MG 4.1 governs, the masking is mandatory): "may be masked" → "are masked".
 
 ## REQ-IL-023
 
@@ -681,25 +681,28 @@ The dnp-encoding keeps the characters A-Z, a-z, 0-9, "-", ".", "_" and "~" and w
 > This also applies to control characters and to all characters outside US-ASCII, which must not be used in an Identification Link either (e.g. the tabulator becomes ,09, the character ä with the UTF-8 octets C3 A4 becomes ,C3,A4).
 > — MG A3
 
-Notes: Defines how the encoding works when it is used; whether it is used is REQ-IL-033 (MAY, SF-043 (e), C-019). Table 18 of MG A3 is the ASCII excerpt of the general rule for all UTF-8 octets (PO decision SF-043 (a), (b), C-020). Reference implementation il.DnpEncode; vectors V-DNP-….
+Notes: Defines how the encoding works; when it is used is REQ-IL-033 (MUST since SF-104, C-046 addendum 2; before MAY, SF-043 (e), C-019). Table 18 of MG A3 is the ASCII excerpt of the general rule for all UTF-8 octets (PO decision SF-043 (a), (b), C-020). Reference implementation il.DnpEncode; vectors V-DNP-….
 
 ## REQ-IL-033
 
-**dnp-encoding of Oi4Identifier elements is optional**
+**Oi4Identifier elements are dnp-encoded**
 
-If a value of Model, ProductCode or SerialNumber contains characters that are not permitted in an Identification Link or a "/", the generator of the Oi4Identifier may mask these characters with the dnp-encoding (REQ-IL-032). Without masking, such a value cannot be used in an Oi4Identifier, because the Oi4Identifier has to fulfill all rules of an Identification Link (REQ-IL-008, REQ-IL-016). The dnp-encoding is not used anywhere else; in topics the Identification Link is base64url-encoded (REQ-IL-002).
+The generator of an Oi4Identifier writes Model, ProductCode and SerialNumber dnp-encoded (REQ-IL-032). Values made only of A-Z, a-z, 0-9, "-", ".", "_" and "~" stay unchanged; every other character is not permitted in an Identification Link, has a special function in the URL syntax (REQ-IL-017) or is the "/" that separates the elements, and is masked. So each nameplate gives exactly one Oi4Identifier (MG 4.3), and every "," in an element is a mask sign. The dnp-encoding is not used anywhere else; in topics the Identification Link is base64url-encoded (REQ-IL-002), and receivers do not decode it (REQ-IL-029).
 
-- Keyword: MAY
-- Levels: L1 MAY · L2 MAY · L3 MAY
+- Keyword: MUST
+- Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: application
 - Condition: The application generates an Oi4Identifier.
-- Refs: MG 4.3.1, MG A3, SF-043
+- Refs: MG 4.3.1, MG A3, MG 4.1, SF-043, SF-104
 - Verification: manual
-- Status: reviewed
+- Status: draft
 - Inventory: MG-4.3.1-c8598181, MG-A3-b8922139, MG-A3-fc6806cf
 
 > All requirements of IEC 61406-1 and 4.1 IEC 61406-1 Identification Link also apply to the Oi4Identifier.
 > — MG 4.3.1
+
+> If values (e.g. a serial number) contain characters that are not permitted or have a special function in the URL syntax, they must be masked by other means.
+> — MG 4.1
 
 > If a value of Model, ProductCode or SerialNumber contains characters that are not permitted in an Identification Link, or a forward slash, which separates the elements, the dnp-encoding (A3 The dnp-Encoding) may be used to mask these characters.
 > — MG 4.3.1
@@ -707,7 +710,7 @@ If a value of Model, ProductCode or SerialNumber contains characters that are no
 > In this case, these components may be dnp-encoded (see 4.3.1 Structure of the Oi4Identifier).
 > — MG A3
 
-Notes: PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference implementation il.Oi4Identifier applies the dnp-encoding (identity for values without such characters); vectors V-OID-….
+Notes: Changed in C-046 addendum 2 from MAY to MUST: PO decision SF-104 (2026-10-26) – MG 4.1 governs ("must be masked by other means"), the "may" of MG 4.3.1 and MG A3 names the means (dnp-encoding), not an option to leave such characters unmasked; masking only the offending characters equals encoding the whole element, because the dnp-encoding keeps exactly the unreserved characters. The guideline text of MG 4.3.1 and MG A3 still says "may" (alignment pending a PO order). Before: PO decision SF-043 (e) (C-019, guideline 7de6cb8). Reference implementation il.Oi4Identifier applies the dnp-encoding; vectors V-OID-…; D7 checks it heuristically in the MAM (REQ-RES-MAM-006, V-PAY-245).
 
 ## REQ-IL-034
 

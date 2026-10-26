@@ -847,7 +847,8 @@ func TestContentC029(t *testing.T) {
 }
 
 // TestOi4IdentifierElements checks the element matching of REQ-RES-MAM-006:
-// dnp-encoded or plain values and "nd" for an empty value.
+// dnp-encoded values (SF-104: never plain with reserved characters) and "nd"
+// for an empty value.
 func TestOi4IdentifierElements(t *testing.T) {
 	asset := "provider.com/Field,20Data/nd/1200,2F0345"
 	pub := strings.NewReplacer(`"DataSetWriterName": "`+app+`",
@@ -863,5 +864,9 @@ func TestOi4IdentifierElements(t *testing.T) {
 	bad := strings.Replace(pub, `"ProductCode": ""`, `"ProductCode": "FDS-001"`, 1)
 	if got := reqs(t, tMAM, bad); !reflect.DeepEqual(got, []string{"REQ-RES-MAM-006"}) {
 		t.Errorf("nd for a ProductCode: got %v", got)
+	}
+	plain := strings.NewReplacer("1200,2F0345", "1200@0345", `"SerialNumber": "1200/0345"`, `"SerialNumber": "1200@0345"`).Replace(pub)
+	if got := reqs(t, tMAM, plain); !reflect.DeepEqual(got, []string{"REQ-RES-MAM-006"}) {
+		t.Errorf("plain reserved character: got %v", got)
 	}
 }
