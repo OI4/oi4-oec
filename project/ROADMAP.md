@@ -98,21 +98,21 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
     - every topic, IL, dnp and payload vector passes as expected (D7 found the missing REQ-ACT-020 of V-TOP-218);
     - REQ-IL-005 heuristic in oracle and D7 (V-PAY-242 … 244); topic vectors V-TOP-135 … 137, V-TOP-254; warning layer of REQ-TOP-020 in the coverage report;
     - umbrella REQs REQ-CMP-004/005/025/026, REQ-TOP-002 and REQ-IL-001/008 (ADR-0019 §9); ADR-0019 amendment C-040 (accepted).
-  - **C-041 – P2 exit review:**
-    - consistency review;
-    - `coverage -gate` as gate;
-    - `CHANGELOG` 2.0.0 of the schemas;
-    - `$id`s frozen;
-    - PO review → P2 exit.
+  - **C-041 – P2 exit review** (no split; done 2026-10-26, PO review pending, see `log/2026-10-26_C-041_p2-exit.md`):
+    - consistency review: 7 REQs lose `schema` (no schema reports them, all negatives rule-layer; `draft`); stale PoC file in `dist/` removed;
+    - oracle ↔ schema crosscheck `spectool crosscheck` (634 cases, 0 disagreements after the oracle ReplyTo fix) as evidence for exit criterion 5;
+    - top-level gate `oec/check.sh` (all spectool checks incl. `coverage -check -gate`, both validators, release freeze, crosscheck, conformance tests);
+    - schema release 2.0.0: `CHANGELOG.md`, manifest `release/2.0.0.json`, freeze check (`$id`s and `$defs` names never removed within v2), `schema.Version`/`Baseline`; D7 reports the bundle;
+    - ADR-0019 amendment C-041 (proposed); PO review → P2 exit.
   - The agent may split a cycle that grows too large (allowed by the PO), with the reason in the log. P2 sizing at `5b8fe59`: 159 `schema`/`d7-validate` REQs; 129 lack a positive and/or a negative vector (93 positive only, 15 negative only, 21 none); 29 topic forms with 126 payload vectors. At `cc2fb4b` (C-033 addendum 2): 160 such REQs (+ REQ-LOC-003, with negative vectors V-PAY-127/128, positive V-PAY-089), 128 payload vectors. C-034: 159 such REQs (REQ-BUS-002 → `d7-test`), 151 payload vectors; 129 gaps while the C-034 drafts are unreviewed, 96 after their review (projection). C-035: 159 such REQs (REQ-MSG-038 −`schema`, REQ-LIFE-003/007/009 +`d7-validate`), 175 payload vectors; 96 gaps while the C-035 drafts were unreviewed, 77 after their review (2026-10-25); entry schemas 5 of 29. C-036: 159 such REQs, 217 payload vectors, 147 topic vectors; 81 gaps while the C-036 drafts are unreviewed (the 8 extended guideline vectors are draft again), 48 after their review (2026-10-25); entry schemas 11 of 29. C-037: 159 such REQs, 230 payload vectors, 147 topic vectors; 48 gaps while the C-037 drafts were unreviewed, 35 after their review (2026-10-25); entry schemas 18 of 29. C-038: 159 such REQs, 239 payload vectors, 147 topic vectors; 33 gaps while the C-038 drafts were unreviewed (35 → 33 by two umbrellas), 19 after their review (2026-10-25); entry schemas 26 of 29. C-039: 158 such REQs (REQ-RES-CONFIG-011 → `d7-monitor`), 241 payload vectors, 147 topic vectors (+ 18 broker-json vectors, REQ-CNT-003 is `d8`); 16 gaps while the C-039 drafts are unreviewed (19 → 16 by the reclassification and two umbrellas), 15 after their review (2026-10-26); entry schemas 29 of 29. C-040: 158 such REQs, 244 payload vectors, 151 topic vectors; 11 gaps while the C-040 drafts are unreviewed (15 → 11 by the umbrellas), 0 after their review (2026-10-26, `coverage -check -gate` green – exit criterion 2 met).
 - **Exit:**
-  1. ADR-0019 accepted.
-  2. Every non-deprecated REQ with `schema` and/or `d7-validate` (159 at `5b8fe59`, 160 at `cc2fb4b` and `68d878d`, 159 since C-034 and at `a42a132`, 158 since C-039 at `23f6cfd` and `168e1d1`, including the 21 of the C-031 gap list) has at least one reviewed positive and one reviewed negative vector. Umbrella REQs are covered through their detail REQs, if the PO accepts ADR-0019 §9. `spectool coverage -gate` gates this (C-034).
-  3. Every allowed matrix row has an entry schema, and the bare MetaData and `broker.json` have schemas. All valid vectors pass. Every invalid vector is rejected by its entry schema with exactly the REQs of `violates`, or the expectation list partitions its `violates` into schema REQs (reported exactly) and rule-layer REQs, which D7 `validate` then reports.
-  4. Both validators agree on every case.
-  5. The oracle (`oec/spec/tools/internal/payload`) checks every rule that a schema enforces, and `spectool lint` is green.
-  6. D7 `validate` (first increment) runs on Windows, macOS and Linux and reports REQ ids. (C-040: pure Go, cross-compiles for windows/linux/darwin; tests run on macOS.)
-  7. Schemas are released with stable `$id`s (`2.0.0`, `$id` base decided). Hosting at the `$id` URLs follows the publication decision (Q-011).
+  1. ADR-0019 accepted. **C-041: met** (amendment C-041 proposed).
+  2. Every non-deprecated REQ with `schema` and/or `d7-validate` (159 at `5b8fe59`, 160 at `cc2fb4b` and `68d878d`, 159 since C-034 and at `a42a132`, 158 since C-039 at `23f6cfd` and `168e1d1`, including the 21 of the C-031 gap list) has at least one reviewed positive and one reviewed negative vector. Umbrella REQs are covered through their detail REQs, if the PO accepts ADR-0019 §9. `spectool coverage -gate` gates this (C-034). **C-041: met** – 158 REQs, 0 gaps.
+  3. Every allowed matrix row has an entry schema, and the bare MetaData and `broker.json` have schemas. All valid vectors pass. Every invalid vector is rejected by its entry schema with exactly the REQs of `violates`, or the expectation list partitions its `violates` into schema REQs (reported exactly) and rule-layer REQs, which D7 `validate` then reports. **C-041: met** – 29 of 29 entry schemas, 25 rule-layer expectations.
+  4. Both validators agree on every case. **C-041: met** – 634 cases, 0 disagreements (Python agrees, informative).
+  5. The oracle (`oec/spec/tools/internal/payload`) checks every rule that a schema enforces, and `spectool lint` is green. **C-041: met** – `spectool crosscheck`, 0 disagreements.
+  6. D7 `validate` (first increment) runs on Windows, macOS and Linux and reports REQ ids. (C-040: pure Go, cross-compiles for windows/linux/darwin; tests run on macOS.) **C-041: met** – no Windows/Linux test run before a hosted CI exists.
+  7. Schemas are released with stable `$id`s (`2.0.0`, `$id` base decided). Hosting at the `$id` URLs follows the publication decision (Q-011). **C-041: met** – release 2.0.0 frozen (`oec/schema/release/2.0.0.json`, `CHANGELOG.md`); hosting open (Q-011).
 
 ## P3 – SDK and conformance tool design (D2, D7, D8, D9) – decision phase
 
