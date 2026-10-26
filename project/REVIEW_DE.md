@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-048 (P4 läuft). **Für dich ist gerade nichts offen.**_
+_Stand: 26.10.2026, nach C-049 (P4 läuft). **Für dich ist gerade nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,12 +24,12 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** C-048 hat nur Code und Technik-Entscheidungen gebracht:
+**Nichts.** C-049 hat nur Code und Technik-Entscheidungen gebracht:
 - Keine reviewte REQ und kein reviewter Vektor wurde geändert.
 - Es gibt keinen neuen Vektor.
-- Es gibt kein neues Finding in der Guideline. Das SDK und das Schema bewerten alle 18 `broker.json`-Beispiele gleich (vorher in C-047: alle 245 Nachrichten-Beispiele).
+- Es gibt kein neues Finding in der Guideline. Will, Birth und Close, die das SDK erzeugt, haben genau den Inhalt der Beispiele aus MG 6.3 (V-PAY-025/023/024).
 
-Die Punkte A-1 … A-16 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
+Die Punkte A-1 … A-31 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
 Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.
 
@@ -39,7 +39,19 @@ Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-049
+
+- **MQTT:** das Protokoll, über das alle OEC-Anwendungen mit dem Broker (der „Post-Zentrale“) sprechen. Es besteht aus wenigen Paketarten: CONNECT (anmelden), PUBLISH (Nachricht senden), SUBSCRIBE (Thema abonnieren), PING (lebe ich noch?), DISCONNECT (sauber abmelden) und den passenden Antworten.
+- **Codec:** der Teil, der diese Pakete in Bytes umwandelt (kodieren) und Bytes wieder in Pakete (dekodieren). Unser Codec ist „kanonisch“: Es gibt für jedes Paket genau eine richtige Byte-Folge; alles andere lehnt er mit einer Begründung ab, die die verletzte Regel nennt.
+- **Session (Sitzung):** die Logik rund um eine Verbindung: anmelden, Keep Alive (regelmäßig „lebe noch“ senden und auf Antwort warten), Bestätigungen für wichtige Nachrichten (QoS 1) zählen, Abos nach einem Neuaufbau wiederherstellen.
+- **Sans-IO / Zustandsmaschine:** Die Session öffnet selbst keine Netzwerkverbindung und hat keine eigene Uhr. Man gibt ihr empfangene Bytes und die aktuelle Zeit, sie gibt zu sendende Bytes und Ereignisse zurück. Dadurch ist sie ohne Netzwerk komplett testbar; das Netzwerk kommt in C-050 dazu.
+- **Will („letzter Wille“):** eine Nachricht, die die App beim Anmelden beim Broker hinterlegt. Bricht die Verbindung unerwartet ab, verschickt der Broker sie (Health FAILURE_1/0). Bei einem sauberen Abmelden verwirft er sie. Jede Anmeldung bekommt einen neuen Will (REQ-LIFE-016).
+- **Birth / Close:** Birth ist die erste Nachricht nach dem Anmelden (das MAM, „hier bin ich“); Close ist die letzte vor dem sauberen Abmelden (Health NORMAL_0/0).
+- **Heartbeat:** Health wird alle 60 Sekunden gesendet und zusätzlich sofort bei jeder Änderung.
+- **Property-Tests (proptest):** Statt einzelner Beispiele erzeugt der Test tausende Zufallsfälle und prüft Grundregeln, z. B. „was kodiert wird, kommt beim Dekodieren gleich zurück“ oder „kaputte Bytes führen nie zum Absturz“.
+- **cargo-fuzz:** ein ähnliches Werkzeug, das noch tiefer sucht, aber eine Test-Version des Rust-Compilers (nightly) braucht. Deshalb nicht in der automatischen Prüfung.
 
 ### Begriffe aus C-047
 
@@ -73,30 +85,40 @@ Logs: [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bi
 - **A-1 … A-4** (aus C-046): Aufbau des Rust-Projekts (ADR-0026), Testvektoren als JSON, Reihenfolge in P4, Leerzeichen im Filter nur als Warnung.
 - **A-5 … A-8** (aus C-046): der neue Code in `oec-core`, das Format des JSON-Exports, die Prüfung der fremden Bibliotheken mit cargo-deny, die Strenge der Code-Prüfung.
 - **A-9** (aus C-046): Folgen aus SF-104. Das Rust-SDK maskiert jetzt immer; die Option „nur auf Wunsch maskieren“ ist weg. D7 und unser Referenz-Prüfer akzeptieren im MAM nur noch die maskierte Form. Kein bisher reviewter Vektor ändert dadurch sein Ergebnis.
-- **A-10 (neu) – toleranter, aber typisierter Leser:** Unbekannte Felder werden ignoriert. Abgelehnt wird nur, was nicht in den Typ passt: falscher JSON-Typ, fehlendes Pflichtfeld, unbekannter Aufzählungswert, verletzte Grundregel (z. B. falsche DataSetClassId, reservierte DataSetWriterId). Feinheiten wie Textmuster prüft das Schema. Von den 143 ungültigen Vektoren lehnt der Leser 63 selbst ab, den Rest erkennen Schema oder Regelschicht.
-- **A-11 (neu) – Schreiben nach fester Feldliste:** Das SDK schreibt immer genau die Felder der Guideline. `MessageType` im Datensatz wird immer mitgeschickt, `ReplyTo` ist `""`, wenn die Nachricht keine Antwort ist. Die DataSetClassId der Standard-Ressourcen setzt das SDK selbst.
-- **A-12 (neu) – nichts geht verloren:** Zeitstempel und Binärdaten (`CorrelationData`) behalten ihren Originaltext. So kommt `CorrelationData` Byte für Byte unverändert zurück, wie REQ-ACT-007 es verlangt.
-- **A-13 (neu) – Actions:** Wer eine Anfrage (Call) baut, bekommt Antwortadresse und Absender automatisch aus dem Topic. Die Antwort wird aus der Anfrage erzeugt und übernimmt alle Kennungen. Bei einem Fehlercode ist die Antwort leer, wie die Guideline es verlangt.
-- **A-14 (neu) – Form einzelner Ressourcen:** Config-Gruppen sind frei benannt und werden deshalb als Tabelle (Name → Wert) gespeichert. Data ist ein freies JSON-Objekt mit einer bequemen Sicht für `Oi4Pv`. Der `TopicPath` der SubscriptionList bleibt Text, weil er beliebige MQTT-Filter enthalten darf.
-- **A-15 (neu) – Schema und Bibliotheken:** Das SDK meldet die Schema-Version des eingebauten Stands (`2.0.1-dev` @ `734c560`), wie du es für C-047 vorgegeben hast. Die tolerante Schema-Variante wird beim Start im Speicher erzeugt statt ein zweites Mal eingebaut. Die neuen Bibliotheken sind auf das Nötigste beschränkt (20 Crates, 81 mit dem Schalter). cargo-deny ist ohne jede Ausnahme grün: alle Lizenzen erlaubt, keine bekannte Lücke. Die automatische Prüfung läuft jetzt mit und ohne den Schalter.
+- **A-10 – toleranter, aber typisierter Leser:** Unbekannte Felder werden ignoriert. Abgelehnt wird nur, was nicht in den Typ passt: falscher JSON-Typ, fehlendes Pflichtfeld, unbekannter Aufzählungswert, verletzte Grundregel (z. B. falsche DataSetClassId, reservierte DataSetWriterId). Feinheiten wie Textmuster prüft das Schema. Von den 143 ungültigen Vektoren lehnt der Leser 63 selbst ab, den Rest erkennen Schema oder Regelschicht.
+- **A-11 – Schreiben nach fester Feldliste:** Das SDK schreibt immer genau die Felder der Guideline. `MessageType` im Datensatz wird immer mitgeschickt, `ReplyTo` ist `""`, wenn die Nachricht keine Antwort ist. Die DataSetClassId der Standard-Ressourcen setzt das SDK selbst.
+- **A-12 – nichts geht verloren:** Zeitstempel und Binärdaten (`CorrelationData`) behalten ihren Originaltext. So kommt `CorrelationData` Byte für Byte unverändert zurück, wie REQ-ACT-007 es verlangt.
+- **A-13 – Actions:** Wer eine Anfrage (Call) baut, bekommt Antwortadresse und Absender automatisch aus dem Topic. Die Antwort wird aus der Anfrage erzeugt und übernimmt alle Kennungen. Bei einem Fehlercode ist die Antwort leer, wie die Guideline es verlangt.
+- **A-14 – Form einzelner Ressourcen:** Config-Gruppen sind frei benannt und werden deshalb als Tabelle (Name → Wert) gespeichert. Data ist ein freies JSON-Objekt mit einer bequemen Sicht für `Oi4Pv`. Der `TopicPath` der SubscriptionList bleibt Text, weil er beliebige MQTT-Filter enthalten darf.
+- **A-15 – Schema und Bibliotheken:** Das SDK meldet die Schema-Version des eingebauten Stands (`2.0.1-dev` @ `734c560`), wie du es für C-047 vorgegeben hast. Die tolerante Schema-Variante wird beim Start im Speicher erzeugt statt ein zweites Mal eingebaut. Die neuen Bibliotheken sind auf das Nötigste beschränkt (20 Crates, 81 mit dem Schalter). cargo-deny ist ohne jede Ausnahme grün: alle Lizenzen erlaubt, keine bekannte Lücke. Die automatische Prüfung läuft jetzt mit und ohne den Schalter.
 - **A-16 – Zyklusschnitt:** C-047 wurde nicht geteilt. Modell, Schema-Prüfung und Vektor-Test prüfen sich gegenseitig und gehören zusammen. Der Plan für die nächsten Zyklen bleibt gleich.
 
 Neu aus C-048 (die eigentliche SDK-Bibliothek `oec`):
-- **A-17 (neu) – Aufbau und Fehler:** `oec` gibt die fertigen Bausteine aus `oec-core` direkt weiter und verpackt nur die, deren Fehler Teil der API sind. Es gibt einen einzigen Fehlertyp `Error` mit den sechs Arten aus ADR-0020 (`Invalid`, `LevelNotMet`, `Bootstrap`, `Io`, `Timeout`, `Closed`). Fehler aus `oec-core` werden zu `Invalid` und behalten ihre Fehlercodes. Dateizugriffe gibt es nur in `oec`; `oec-core` bleibt reine Rechenlogik ohne Ein-/Ausgabe.
-- **A-18 (neu) – Container-Speichervertrag:** Der Container-Name kommt aus dem Hostnamen und muss ein gültiger Hostname sein. In `broker.json` müssen Port und Paketgröße ganze Zahlen sein: `8883.0` lehnen wir ab (wie unser Go-Prüfer), obwohl das Schema es durchließe; kein Vektor betrifft das. Ohne CA-Zertifikat (`broker_ca.pem`, sonst `ca.pem`) startet die App im Container nicht, denn Vertrauen kommt nur aus dem Speicher, nicht aus dem Betriebssystem. Liegen Zertifikat und Passwort beide vor, gewinnt das Zertifikat.
-- **A-19 (neu) – Gerät ohne Container:** Die Seriennummer ist Pflicht. Ohne Vorgabe wird die MQTT-ClientId aus einem Hash des Identification Link gebildet; sie bleibt so über Neustarts gleich. Ein Broker ohne Anmeldung (weder Passwort noch Zertifikat) wird mit `LevelNotMet` abgelehnt, weil jedes Level Anmeldung verlangt.
-- **A-20 (neu) – Level und Speicher:** Neuer Schalter `reference_designation(bool)`: auf Level 1 aus, auf Level 2/3 an; auf Level 3 lässt er sich nicht abschalten (REQ-CMP-020). Wer die ReferenceDesignation anbietet, braucht einen dauerhaften Speicher (REQ-RES-REFDES-002); ein `MemoryStore` reicht dann nicht und `build()` meldet `LevelNotMet`. `MemoryStore` wird jetzt mit `MemoryStore::new()` erzeugt (kleine API-Änderung, in ADR-0020 nachgetragen).
-- **A-21 (neu) – Konfiguration:** Die Config-Definition wird beim Bauen geprüft (Namen, Typen, Standardwerte). Werte liest man über Namen als Text-Schlüssel. Textmuster (`Pattern`) werden erst ab Inkrement 7 geprüft, weil dafür eine Regex-Bibliothek nötig ist.
-- **A-22 (neu) – Kleinkram mit Wirkung:** Gespeichert wird „atomar“ (erst in eine Hilfsdatei, dann umbenennen), damit bei Stromausfall nie eine halbe Datei bleibt. Keep Alive: 1 bis 65535 Sekunden; 0 würde das Will-Signal bei Verbindungsabbruch abschalten. Passwörter erscheinen nie im Debug-Text.
-- **A-23 (neu) – Bibliotheken:** Nur thiserror und log kamen dazu, beide mit erlaubter Lizenz (MIT/Apache-2.0). cargo-deny ist ohne Ausnahme grün. Base64 dekodieren wir selbst (ein paar Zeilen), statt eine weitere Bibliothek zu holen.
-- **A-24 (neu) – Zyklusschnitt:** C-048 wurde nicht geteilt. Inkrement 5 (Verbindung) ist dagegen zu groß für einen Zyklus und wird geteilt: **C-049** baut die reine Protokoll-Logik (MQTT-Nachrichten, Sitzung, Lebenszyklus; testbar ohne Netzwerk), **C-050** das Netzwerk (tokio, TLS) und `App::run`. Bis dahin bleiben `run`/`run_async` in der Skizze.
+- **A-17 – Aufbau und Fehler:** `oec` gibt die fertigen Bausteine aus `oec-core` direkt weiter und verpackt nur die, deren Fehler Teil der API sind. Es gibt einen einzigen Fehlertyp `Error` mit den sechs Arten aus ADR-0020 (`Invalid`, `LevelNotMet`, `Bootstrap`, `Io`, `Timeout`, `Closed`). Fehler aus `oec-core` werden zu `Invalid` und behalten ihre Fehlercodes. Dateizugriffe gibt es nur in `oec`; `oec-core` bleibt reine Rechenlogik ohne Ein-/Ausgabe.
+- **A-18 – Container-Speichervertrag:** Der Container-Name kommt aus dem Hostnamen und muss ein gültiger Hostname sein. In `broker.json` müssen Port und Paketgröße ganze Zahlen sein: `8883.0` lehnen wir ab (wie unser Go-Prüfer), obwohl das Schema es durchließe; kein Vektor betrifft das. Ohne CA-Zertifikat (`broker_ca.pem`, sonst `ca.pem`) startet die App im Container nicht, denn Vertrauen kommt nur aus dem Speicher, nicht aus dem Betriebssystem. Liegen Zertifikat und Passwort beide vor, gewinnt das Zertifikat.
+- **A-19 – Gerät ohne Container:** Die Seriennummer ist Pflicht. Ohne Vorgabe wird die MQTT-ClientId aus einem Hash des Identification Link gebildet; sie bleibt so über Neustarts gleich. Ein Broker ohne Anmeldung (weder Passwort noch Zertifikat) wird mit `LevelNotMet` abgelehnt, weil jedes Level Anmeldung verlangt.
+- **A-20 – Level und Speicher:** Neuer Schalter `reference_designation(bool)`: auf Level 1 aus, auf Level 2/3 an; auf Level 3 lässt er sich nicht abschalten (REQ-CMP-020). Wer die ReferenceDesignation anbietet, braucht einen dauerhaften Speicher (REQ-RES-REFDES-002); ein `MemoryStore` reicht dann nicht und `build()` meldet `LevelNotMet`. `MemoryStore` wird jetzt mit `MemoryStore::new()` erzeugt (kleine API-Änderung, in ADR-0020 nachgetragen).
+- **A-21 – Konfiguration:** Die Config-Definition wird beim Bauen geprüft (Namen, Typen, Standardwerte). Werte liest man über Namen als Text-Schlüssel. Textmuster (`Pattern`) werden erst ab Inkrement 7 geprüft, weil dafür eine Regex-Bibliothek nötig ist.
+- **A-22 – Kleinkram mit Wirkung:** Gespeichert wird „atomar“ (erst in eine Hilfsdatei, dann umbenennen), damit bei Stromausfall nie eine halbe Datei bleibt. Keep Alive: 1 bis 65535 Sekunden; 0 würde das Will-Signal bei Verbindungsabbruch abschalten. Passwörter erscheinen nie im Debug-Text.
+- **A-23 – Bibliotheken:** Nur thiserror und log kamen dazu, beide mit erlaubter Lizenz (MIT/Apache-2.0). cargo-deny ist ohne Ausnahme grün. Base64 dekodieren wir selbst (ein paar Zeilen), statt eine weitere Bibliothek zu holen.
+- **A-24 – Zyklusschnitt:** C-048 wurde nicht geteilt. Inkrement 5 (Verbindung) ist dagegen zu groß für einen Zyklus und wird geteilt: **C-049** baut die reine Protokoll-Logik (MQTT-Nachrichten, Sitzung, Lebenszyklus; testbar ohne Netzwerk), **C-050** das Netzwerk (tokio, TLS) und `App::run`. Bis dahin bleiben `run`/`run_async` in der Skizze.
 - **Offen für später (Technik, nicht für dich):** verschlüsselte private Schlüssel mit Passphrase und die CA eines Geräts ohne Container (C-050), Regex für `Pattern` (Inkrement 7), Länge der Speicher-Schlüssel für Assets (Inkrement 6).
+
+Neu aus C-049 (MQTT und Lebenszyklus, noch ohne Netzwerk):
+- **A-25 (neu) – MQTT-Codec:** Wir haben den MQTT-Teil selbst geschrieben, wie in ADR-0023 (Q-026) beschlossen; der Spike war nur Vorlage. Der Codec kann alle Pakete, die eine App braucht, aber kein QoS 2 und keinen gespeicherten („retained“) Will, beides verbietet die Guideline. Er ist streng: Jede Byte-Folge, die nicht exakt dem Standard entspricht, wird abgelehnt, und der Fehler nennt die Regel (z. B. `MQTT-3.1.2-22` oder REQ-MQTT-017).
+- **A-26 (neu) – Sitzung:** Die Sitzung meldet sich bei jedem Verbindungsaufbau mit einem neuen Will an. Sie sendet nach einer Minute Stille einen PING; kommt keine Antwort, gilt die Verbindung als tot. Bei jedem Fehler trennt sie **ohne** sauberes Abmelden, damit der Broker den Will verschickt und alle sehen, dass die App weg ist. Abos werden nach einem Neuaufbau automatisch wiederhergestellt. Unbestätigte wichtige Nachrichten meldet sie als „verloren“, die Laufzeit entscheidet dann, ob sie neu gesendet werden. Zu große Nachrichten (über der MaxPacketSize des Brokers) lehnt sie ab.
+- **A-27 (neu) – Form der Lebenszyklus-Nachrichten:** Will, Birth und Close sehen genau so aus wie die Beispiele in MG 6.3. Dort fehlt das Feld `MessageType` im Datensatz; laut REQ-MSG-029 bedeutet das „Keyframe“. Deshalb lassen wir es bei diesen Nachrichten weg, obwohl das SDK es sonst immer mitschickt (A-11). Beide Formen sind gültig.
+- **A-28 (neu) – Regeln für Health:** Gibt es eine Detail-Liste, muss Health **genau** dem schlimmsten Eintrag entsprechen (REQ-RES-HEALTH-002 sagt „equals“). In der Skizze stand „mindestens“; das korrigieren wir in C-050 (in ADR-0020 nachgetragen). NORMAL_0 mit Score 0 darf die App nicht selbst setzen, weil das „ich melde mich ab“ bedeutet (REQ-LIFE-014). War die App auf FAILURE_1/0 und erholt sich, sendet sie zuerst wieder eine Birth (REQ-LIFE-017).
+- **A-29 (neu) – MessageIds:** Jede Nachricht bekommt eine eindeutige Kennung aus Zeit und Absender. Kommen mehrere in derselben Millisekunde, wird hochgezählt (`-1`, `-2`, …). Springt die Uhr zurück, bleibt die Kennung trotzdem eindeutig und aufsteigend.
+- **A-30 (neu) – Zufallstests:** Für die Tests mit Zufallseingaben nehmen wir proptest. Es wird nur beim Testen gebraucht und ist nicht im fertigen SDK enthalten; die Lizenz ist MIT/Apache-2.0, cargo-deny ist ohne Ausnahme grün. cargo-fuzz haben wir nicht eingerichtet, weil es eine Test-Version des Compilers braucht und die automatische Prüfung sonst nicht durchliefe.
+- **A-31 (neu) – Übergabe an C-050 und Zyklusschnitt:** `oec-core` hat eigene Verbindungs-Einstellungen; die Übersetzung aus den Einstellungen von `oec` (`ConnectionSettings`) schreibt C-050 zusammen mit dem Netzwerkteil. C-049 wurde nicht geteilt, der Plan bleibt gleich.
+- **Offen für später (Technik, nicht für dich):** verschlüsselte private Schlüssel mit Passphrase und die CA eines Geräts ohne Container (unverändert, C-050), Birth als erste Nachricht auch bei einer dauerhaften Sitzung (C-050), Health setzen, während Details gesetzt sind (C-050).
 
 ---
 
-### Was als Nächstes passiert (C-049)
+### Was als Nächstes passiert (C-050)
 
-1. P4 Inkrement 5a: die MQTT-Protokoll-Logik in `oec-core` ohne Netzwerk (Nachrichten kodieren und dekodieren, Sitzung, Keep Alive, Will), dazu der Lebenszyklus (Birth, Health, Close) als reine Funktionen und Fuzz-Tests mit Zufallseingaben. Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`. Danach C-050 (5b): Netzwerk mit tokio und TLS, `App::run`.
+1. P4 Inkrement 5b: das Netzwerk in `oec`. Die App verbindet sich wirklich mit dem Broker (tokio und TLS mit rustls), `App::run`/`run_async`, `AppHandle`, Verbindungsstatus, Neuaufbau mit Wartezeit nach Abbrüchen. Dafür nutzt sie die Sitzung und den Lebenszyklus aus C-049. Dazu kommen neue Bibliotheken (tokio, rustls), die in ADR-0023 schon erlaubt sind. Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
 

@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, after C-048 (guideline `734c560`, register `fce5cf5`); P4 in progress. **Nothing open for the PO.**_
+_Last updated: 2026-10-26, after C-049 (guideline `734c560`, register `fce5cf5`); P4 in progress. **Nothing open for the PO.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -22,10 +22,11 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-047 (P4 increment 3): `oec-core` message model (all envelopes, helper DataSets, MetaData, Actions with correlation, all resource payloads), schema embedding via `build.rs` with `schema::Validator` behind `strict-validation`, all 245 payload vectors as tests with the same verdicts and REQ ids as the schema gate, first runtime dependencies (serde, serde_json, time, uuid, jsonschema) under `cargo deny` without exceptions. No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-10 … A-16 are for information.
 - C-047 addendum 1 (PO instruction): new GUARDRAILS G-3.10. At every cycle end the agent decides between a new agent session and the same one, and for a new one writes the start prompt into `prompt.md`. Decision for C-048: new agent; `prompt.md` is filled.
 - C-048 (P4 increment 4): crate `oec` with `Level`, `Error`, `App`/`AppBuilder`, `Bootstrap` (container storage contract and explicit `Broker`), `Store`, identity/MAM and string-keyed Config getters; all 18 `broker.json` vectors as tests with the same verdicts as `platform/broker.schema.json`; new runtime dependencies thiserror and log under `cargo deny` without exceptions; increment 5 split into 5a (C-049) and 5b (C-050). No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-17 … A-24 are for information. C-049 runs in a new agent; `prompt.md` is filled.
+- C-049 (P4 increment 5a): sans-IO in `oec-core` – own MQTT 3.1.1 codec (canonical, every refusal names its MQTT rule or REQ) and client `Session` as a state machine (new Will per CONNECT, keep alive, QoS 1, subscriptions, close → Will), `lifecycle` (Will/Birth/Close equal the role vectors V-PAY-025/023/024, Health heartbeat, Health checks), `MessageIds`; proptest as the only new (dev) dependency, `cargo deny` without exceptions. No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-25 … A-31 are for information. C-050 runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema unchanged (`2.0.1-dev` @ `734c560`).
 
-Logs: [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -55,6 +56,13 @@ Logs: [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-
 | A-22 | Store keys and atomic save; keep alive 1 … 65535 s; publish limit clamped; `Secret` redacted | info (agent) | C-048 | – | – |
 | A-23 | Dependencies thiserror 2 and log 0.4 only, own base64 decoder, no deny exception | info (agent) | C-048 | – | – |
 | A-24 | Cycle cut: C-048 not split, increment 5 split into 5a (C-049) and 5b (C-050); `run`/`run_async` stay in the sketch | info (agent) | C-048 | – | – |
+| A-25 | MQTT codec: client subset without QoS 2, symmetric and canonical, every refusal names its rule | info (agent) | C-049 | – | – |
+| A-26 | Session model: sans-IO, keep-alive timers, close without DISCONNECT on errors (→ Will), subscriptions restored, unacknowledged QoS 1 `Dropped` without session | info (agent) | C-049 | – | – |
+| A-27 | Lifecycle messages in the MG 6.3 shape: no DataSetMessage `MessageType` (exception to A-11) | info (agent) | C-049 | – | – |
+| A-28 | Health rules: Health equals the most severe Detail, NORMAL_0/0 only for Close, Birth after recovery from FAILURE_1/0 | info (agent) | C-049 | – | – |
+| A-29 | MessageIds: unique and monotonic per publisher, counter within a millisecond | info (agent) | C-049 | – | – |
+| A-30 | proptest (dev only) instead of cargo-fuzz; no deny exception | info (agent) | C-049 | – | – |
+| A-31 | Own `SessionConfig` in `oec-core`, mapping from `ConnectionSettings` in C-050; C-049 not split | info (agent) | C-049 | – | – |
 
 ## Decisions and review items
 
@@ -196,6 +204,48 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **Tests:** default 17 unit + 18 App + 1 `broker.json` test, strict 19 + 19 + 2; all 18 `broker.json` vectors agree with the schema gate.
 - **Open technical points (later cycles):** encrypted private keys (`passphrase`) and the CA of an explicit `Broker` in 5b; regex for Config Pattern in increment 7; store key length for represented assets in increment 6.
 
-## Next (C-049)
+### A-25 … A-31 – P4 increment 5a (C-049, agent)
 
-1. P4 increment 5a – sans-IO in `oec-core`: MQTT 3.1.1 codec and session (from the spike `mqtt-codec`) with fuzzing/property tests, lifecycle state machine and Birth/Will/Close/Health messages as pure functions; no runtime dependency. Runs in a new agent (start prompt in `prompt.md`). C-050 (5b) adds the tokio/rustls transport and `App::run`/`run_async`.
+- **Where:**
+  - `oec/sdk/rust/oec-core/src/mqtt/{packet,codec,session}.rs`, `src/lifecycle.rs`, `src/message/envelope.rs` (`MessageIds`);
+  - `oec/sdk/rust/oec-core/tests/{mqtt_codec,session,lifecycle,proptest_mqtt}.rs`;
+  - ADR-0026 §9, ADR-0023 amendment C-049, ADR-0020 amendment C-049;
+  - log [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md) with the REQ tracing tables.
+- **A-25 Codec:**
+  - All packets a client needs (CONNECT with Will and credentials, CONNACK, PUBLISH QoS 0/1, PUBACK, SUBSCRIBE/SUBACK, UNSUBSCRIBE/UNSUBACK, PING, DISCONNECT); QoS 2 and Will Retain are refused (REQ-MQTT-017/018).
+  - Symmetric and canonical: what decodes re-encodes byte-identically; a non-minimal Remaining Length, reserved bits or trailing bytes are refused.
+  - Every refusal is a `CodecError` whose `rule()` names the MQTT statement (`MQTT-x.y.z-n`), the section or the REQ.
+  - Written new after reviewing the spike; nothing was copied.
+- **A-26 Session:**
+  - Sans-IO: bytes and monotonic time in, bytes and events out.
+  - Every `connect` takes the Will of this connection (REQ-LIFE-016).
+  - Keep alive (default 60 s, REQ-MQTT-014): a PING after one idle period, a timeout after one more.
+  - Errors, timeouts and connection loss close **without** DISCONNECT, so the broker publishes the Will (REQ-LIFE-008).
+  - Subscriptions are restored after a reconnect without session. Unacknowledged QoS 1 messages are reported as `Dropped` (the runtime decides). A payload over MaxPacketSize is refused (REQ-PAG-005).
+- **A-27 Lifecycle message shape:**
+  - Will, Birth, Close and the self-Health are exactly the MG 6.3 examples (equal to V-PAY-025/023/024): one DataSetMessage, no Timestamp/SequenceNumber, empty WriterGroupName and **no DataSetMessage `MessageType`** (REQ-MSG-029 assumes `ua-keyframe`).
+  - This is an exception to A-11 ("always `MessageType`") for these messages only; both forms pass the schema.
+- **A-28 Health:**
+  - Health **equals** the most severe `Details` entry (REQ-RES-HEALTH-002). The sketch says "at least"; ADR-0020 amendment C-049 reads it as "equals", and C-050 fixes the sketch doc.
+  - NORMAL_0/0 is refused in `set_health` (it means Close, REQ-LIFE-014); HealthScore ≤ 100.
+  - Health on change (incl. `Details`) and every 60 s (REQ-TOP-017, REQ-RES-HEALTH-004).
+  - A Birth before the first non-failure Health after FAILURE_1/0 (REQ-LIFE-012/017).
+  - Asset Health refuses the AppId (REQ-CMP-007).
+- **A-29 MessageIds:** `<unix-ms>-<PublisherId>`, then `-1`, `-2`, … within the same millisecond; a wall clock that steps back keeps the last millisecond (REQ-MSG-007/008).
+- **A-30 Property tests:**
+  - proptest 1.12, dev-only, without default features. It adds 10 crates to the lock file, none linked into the SDK.
+  - Licenses: MIT OR Apache-2.0; r-efi also offers LGPL and is used under MIT/Apache-2.0.
+  - `cargo deny` without exceptions.
+  - cargo-fuzz is not set up: it needs nightly, so it could not run in the gate.
+- **A-31 Mapping and cycle cut:**
+  - `oec-core` has its own `SessionConfig` (the core does not depend on `oec`); `ConnectionSettings` → `SessionConfig` is mapped in C-050 with the runtime.
+  - C-049 not split; C-050 = 5b as planned.
+- **Tests:** codec 18, session 17, lifecycle 10 (strict 11: every generated payload passes the strict schema), proptest 6 × 1024 cases (about 0.7 s). All green.
+- **Open technical points (C-050):**
+  - encrypted private keys (`passphrase`) and the CA of an explicit `Broker` (unchanged from C-048);
+  - Birth first also with a persistent session (A-26 resends before the Birth; the default Clean Session avoids it);
+  - `set_health` while `Details` are set.
+
+## Next (C-050)
+
+1. P4 increment 5b – runtime in `oec`: transport tokio + rustls, `App::run`/`run_async`/`handle`, `AppHandle`, `ConnectionState`, `on_connection`, signals, reconnect with backoff, driving the `Session` and `Lifecycle` of C-049. Runs in a new agent (start prompt in `prompt.md`). New runtime dependencies (tokio, rustls, tokio-rustls, rustls-pki-types) are within ADR-0023.
