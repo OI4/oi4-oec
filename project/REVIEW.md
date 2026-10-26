@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, after C-051 (guideline `734c560`, register `a286511`); P4 in progress. **One item to decide: D-1 (SF-105).**_
+_Last updated: 2026-10-26, after the C-051 review (guideline `59e3ae3`, register `d220c48`); P4 in progress. **One item to review: R-1 (REQ-CNT-003 after SF-105).**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -25,8 +25,9 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-049 (P4 increment 5a): sans-IO in `oec-core` – own MQTT 3.1.1 codec (canonical, every refusal names its MQTT rule or REQ) and client `Session` as a state machine (new Will per CONNECT, keep alive, QoS 1, subscriptions, close → Will), `lifecycle` (Will/Birth/Close equal the role vectors V-PAY-025/023/024, Health heartbeat, Health checks), `MessageIds`; proptest as the only new (dev) dependency, `cargo deny` without exceptions. No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-25 … A-31 are for information. C-050 runs in a new agent; `prompt.md` is filled.
 - C-050 (P4 increment 5b): runtime in `oec` – TLS transport on tokio + rustls (CA-only trust, client certificate or credentials, PKCS#8 keys with passphrase), `App::run`/`run_async`/`handle`, `AppHandle`, `ConnectionState`, `on_connection`, reconnect with backoff, driving the `Session` and `Lifecycle` of C-049; runtime tests against an in-process TLS test broker; new dependencies tokio, rustls, tokio-rustls, rustls-pki-types, pkcs8 (dev: rcgen) under `cargo deny` without exceptions. No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-32 … A-41 are for information. Two of them refine the accepted sketch contract (ADR-0020 amendment C-050) and are worth a look: **A-34** (an explicit `Broker` needs a CA) and **A-37** (`run_async` installs no signal handlers). Increment 9 (C-051) runs in a new agent; `prompt.md` is filled.
 - C-051 (P4 increment 9): dev environment `oec/dev` – Mosquitto 2.1.2 pinned by digest (TLS 1.2/1.3, a password-file listener and a client-certificate listener), a dev PKI generator in Go (standard library), two sample container storages; opt-in interop tests of increment 5 against it via `oec/dev/interop.sh` (8 green, the gate stays without Docker); the C-050 smoke test is replaced. No SDK defect, no new dependency, no reviewed item changed, no new vector. **One finding: SF-105** (`MaxPacketSize` is a payload limit, brokers limit whole packets) → **D-1** to decide. A-42 … A-49 are for information. The P5 interleave (C-052) runs in a new agent; `prompt.md` is filled.
+- C-051 review: your answer to D-1 ("Vorschlag komplett", after a first reply "option b" that I asked you to clarify) is applied: RIG 4.1.1 in `59e3ae3`, **SF-105 resolved** (`d220c48`), re-baseline on `59e3ae3` (1401 inventory items). REQ-CNT-003 follows the new text and is back to `draft` (R-1). D8 T8-BUS-01 also covers REQ-CNT-003 (A-50).
 
-Coverage stays at 0 gaps; schema unchanged (`2.0.1-dev` @ `734c560`).
+Coverage stays at 0 gaps; schema `2.0.1-dev` @ `59e3ae3` (re-baseline, no content change).
 
 Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
@@ -34,7 +35,7 @@ Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | SF-105: `MaxPacketSize` (payload) vs. the packet limit of the broker | decide | C-051 | as proposed (broker accepts every payload ≤ `MaxPacketSize`) | ☐ |
+| R-1 | REQ-CNT-003 after SF-105 (broker accepts every payload ≤ `MaxPacketSize`, packet limit + 65544, payload + topic length + 4 ≤ 268435455) | review | C-051 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -84,30 +85,24 @@ Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026
 | A-47 | Interop test design: probe on the `oec-core` codec, killed child process for the Will, persistent probe + MessageId filter for the restart | info (agent) | C-051 | – | – |
 | A-48 | Smoke test (`OEC_SMOKE_*`) replaced by `explicit_broker`; no new dependency, ADR-0023 unchanged | info (agent) | C-051 | – | – |
 | A-49 | Cycle cut: C-051 not split; next the P5 interleave (C-052), then increments 6–8 and 10 | info (agent) | C-051 | – | – |
+| A-50 | D8 T8-BUS-01 also covers REQ-CNT-003: a payload of exactly `MaxPacketSize` on a long topic is accepted | info (agent) | C-051 review | – | – |
 
 ## Decisions and review items
 
-### D-1 – SF-105: `MaxPacketSize` and the packet limit of the broker (RIG 4.1.1)
+### R-1 – REQ-CNT-003 after SF-105 (C-051 review)
 
-- **Found:** while configuring Mosquitto 2.1.2 for the dev environment (C-051); register entry `a286511`, details in the register and in the [C-051 log](log/2026-10-26_C-051_dev-environment-interop.md).
-- **What the guideline says:** `MaxPacketSize` in `broker.json` is "the maximum size of a MQTT payload in bytes" (SF-091 (b)) and is meant to "protect the Message Bus broker and client". It says nothing about how the platform configures the broker.
-- **The problem:**
-  - (a) Brokers usually limit the whole **packet** (Mosquitto `max_packet_size`, MQTT 5 Maximum Packet Size). A PUBLISH carries up to 65544 octets of header and topic on top of the payload. A platform that sets the broker limit to `MaxPacketSize` disconnects a compliant publisher whose payload is exactly `MaxPacketSize`. Measured with Mosquitto 2.1.2: "oversize packet", the connection is closed, and the broker publishes the Will.
-  - (b) The upper bound 268435455 is the MQTT *remaining length* (topic and packet id included), so a payload can never be that large.
-  - (c) What the broker does with a larger payload is open: Mosquitto `message_size_limit` drops it silently, and a packet limit disconnects the publisher.
-- **Proposed interpretation (recommended):**
-  - (a) keep the payload semantics; the broker accepts every payload ≤ `MaxPacketSize` (a payload limit, or a packet limit ≥ `MaxPacketSize` + 65544). Proposed text for RIG 4.1.1: "The broker accepts every MQTT payload up to `MaxPacketSize`. If the broker limits the size of the whole MQTT packet, this limit includes the fixed header, the topic and the packet identifier and must therefore be larger than `MaxPacketSize` (by 65544 octets for any topic)."
-  - (b) add: "A payload is limited further by the MQTT packet: payload + topic length + 4 must not exceed 268435455."
-  - (c) no rule: a larger publication already violates MG 8.3.11, so the broker may drop it or close the connection; D8 checks only that payloads up to `MaxPacketSize` are accepted.
-- **Alternatives:** (d) redefine `MaxPacketSize` as a packet limit (changes SF-091 (b), the SDK limit and REQ-PAG-005); (e) leave the text as it is (platforms may keep disconnecting compliant publishers).
-- **Impact if decided as proposed:**
-  - guideline text RIG 4.1.1 by your order, re-baseline;
-  - REQ-CNT-003 quote and notes follow the text (→ `draft`, back to you as R-x);
-  - the dev broker and the SDK already behave this way.
-- **PO:** ☐ as proposed ☐ (d) ☐ (e) ☐ other: …
-- **PO reply 2026-10-26:** "option b, because it is precise". **Open – needs clarification:** (b) is one part of the proposal (the note on 268435455), not one of the choices. On its own it does not solve problem (a). Please choose one: **(1)** proposal complete (a) + (b) + (c) (recommended); **(2)** (a) + (b) without (c); **(3)** only (b); **(4)** alternative (d). The guideline text stays unchanged until then (G-3.4 a).
+- **Why:** RIG 4.1.1 has two new sentences since `59e3ae3` (your order D-1 "Vorschlag komplett"). The re-baseline found them as new inventory items RIG-4.1.1-fb78a5f5 (MUST NOT) and RIG-4.1.1-674b5bb8 (MUST). Both belong to REQ-CNT-003 (content of `broker.json`, platform/broker). The statement changes, so it is not a mechanical remap → `draft`.
+- **New end of the statement** (before: "The broker accepts payloads up to MaxPacketSize."): "The broker accepts every MQTT payload up to MaxPacketSize; if the broker limits the size of the whole MQTT packet, this limit includes the fixed header, the topic and the packet identifier and is therefore larger than MaxPacketSize (by 65544 octets for any topic). A payload is limited further by the MQTT packet: payload + topic length + 4 does not exceed 268435455."
+- **Quotes:** plus the three new sentences of RIG 4.1.1. **Inventory:** plus the two new keys.
+- **Notes:** the derivation "follows from the purpose of the field" is replaced by "RIG 4.1.1 since SF-105". (c) is deliberately not ruled: a larger payload violates REQ-PAG-005, so the broker may discard it or close the connection. (b) restates the MQTT remaining-length limit and needs no own check. D8 checks only that payloads up to `MaxPacketSize` are accepted (T8-BUS-01, A-50).
+- Unchanged: keyword MUST, verification `d8`, schema `platform/broker.schema.json` and the vectors V-BRK-001 … 018 (the form of `broker.json` is the same).
+- **View:** [`oec/spec/requirements/view/cnt.md`](../oec/spec/requirements/view/cnt.md), section REQ-CNT-003.
+- **PO:** ☐ accept ☐ change: …
 
 ### Answered earlier
+
+Answered in the C-051 review (2026-10-26) and applied in C-051 addendum 1:
+- D-1 – SF-105 (`MaxPacketSize` vs. the packet limit of the broker): first reply "option b", which was ambiguous ((b) is a part of the proposal) and was clarified; then ☑ "Vorschlag komplett" = (a) + (b) + (c) → guideline `59e3ae3` (RIG 4.1.1), SF-105 resolved (`d220c48`), re-baseline, REQ-CNT-003 → R-1.
 
 Answered in the C-046 review (2026-10-26) and applied in C-046 addendum 3:
 - D-1 – align MG 4.3.1/A3 with SF-104: ☑ yes → guideline `734c560`, SF-104 resolved (`fce5cf5`), re-baseline.
@@ -392,7 +387,14 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - Next: the P5 interleave (C-052: D7 `internal/mqttwire`, capture, `monitor --replay`, then `monitor` live against this broker), then increments 6–8 and 10.
   - C-050 risks closed: interop with a real broker, reconnect after a broker restart. Open as before: Windows/ARMv7 builds (CI), heartbeat timing (core tests), no offline queue (increment 6).
 
+### A-50 – D8 T8-BUS-01 covers REQ-CNT-003 (C-051 review, agent)
+
+- **Where:** `oec/conformance/catalog/d8.yaml`, test T8-BUS-01 (broker protocol, TLS and certificate).
+- Before, D8 checked REQ-CNT-003 only on the host (T8-HST-01: the content of `broker.json`). SF-105 adds a rule for the broker itself.
+- T8-BUS-01 now also publishes a payload of exactly `MaxPacketSize` on a long topic. It expects that the message is delivered and the connection stays open.
+- Larger payloads are not checked (SF-105 (c)). The test is `planned` (P5b).
+
 ## Next (C-052)
 
-1. **D-1 (SF-105)** – your decision; afterwards guideline text, register, re-baseline and REQ-CNT-003 (→ R-x) in the next cycle.
+1. **R-1 (REQ-CNT-003)** – your review.
 2. P5 interleave – D7 (Go, `oec/conformance`): `internal/mqttwire`, `internal/capture`, `monitor --replay`, then `monitor` live against the dev broker `oec/dev`. Runs in a new agent (start prompt in `prompt.md`).

@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-051 (P4 läuft). **Für dich offen: eine Entscheidung, D-1 (SF-105).**_
+_Stand: 26.10.2026, nach deinem Review von C-051 (P4 läuft). **Für dich offen: ein Review, R-1 (REQ-CNT-003 nach SF-105).**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,50 +24,37 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-C-051 hat die **Entwicklungsumgebung** gebracht: einen echten Mosquitto-Broker in Docker mit TLS, selbst erzeugte Test-Zertifikate und Beispiel-Ordner für `/etc/oi4`. Dagegen laufen jetzt die **Interop-Tests** des SDK, also Tests mit einem echten Broker statt mit unserem kleinen Test-Broker. Alle 8 Tests sind grün; einen Fehler im SDK haben sie nicht gefunden.
-- Keine reviewte REQ und kein reviewter Vektor wurde geändert, es gibt keinen neuen Vektor.
-- Beim Einrichten des Brokers ist mir aber eine **Lücke in der Guideline** aufgefallen: **SF-105**. Darüber musst du entscheiden (D-1).
+C-051 hat die **Entwicklungsumgebung** gebracht: einen echten Mosquitto-Broker in Docker mit TLS, selbst erzeugte Test-Zertifikate und Beispiel-Ordner für `/etc/oi4`. Dagegen laufen jetzt die **Interop-Tests** des SDK (8 grün, kein Fehler im SDK).
 
-### D-1 – SF-105: Wie groß darf eine Nachricht am Broker sein? (RIG 4.1.1)
+Deine Entscheidung zu D-1 (SF-105, „Vorschlag komplett“) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-051) geworden ist“. Dadurch hat sich eine reviewte REQ geändert. Die schaust du dir bitte noch einmal an (R-1).
 
-**Worum geht es?** In `broker.json` steht `MaxPacketSize`. Laut Guideline ist das die größte erlaubte **Nutzlast** (Payload) einer MQTT-Nachricht, also nur der JSON-Teil. So haben wir es in SF-091 auch festgelegt. Die Guideline sagt aber nicht, wie die Plattform den **Broker** einstellen soll.
+### R-1 – REQ-CNT-003: neuer Text nach SF-105
 
-**Das Problem:**
-- Broker begrenzen meist das **ganze Paket**, nicht nur die Nutzlast. Bei Mosquitto heißt die Einstellung `max_packet_size`, und in MQTT 5 ist es genauso.
-- Zum Paket gehören aber außer der Nutzlast noch Kopf und Topic, zusammen bis zu 65544 Byte.
-- Stellt eine Plattform den Broker-Wert einfach auf `MaxPacketSize`, dann wirft der Broker eine App hinaus, die sich genau an die Regel hält und eine Nutzlast von genau `MaxPacketSize` schickt. Schlimmer noch: Er verschickt dabei ihren Will, alle sehen „App ausgefallen“.
-- Das habe ich mit Mosquitto 2.1.2 nachgemessen, es ist also nicht nur Theorie.
-- Zwei Kleinigkeiten kommen dazu:
-  - Der genannte Höchstwert 268435455 ist eigentlich die Grenze für das ganze Paket. Eine Nutzlast kann nie so groß werden.
-  - Offen ist auch, was mit einer zu großen Nachricht passiert: Mosquitto kann sie still verwerfen oder die App trennen.
+**Worum geht es?** REQ-CNT-003 beschreibt den Inhalt von `broker.json` und was der Broker damit tun muss. Durch deine Entscheidung stehen in RIG 4.1.1 zwei neue Sätze. Die REQ muss ihnen folgen. Weil sich ihr Text ändert, steht sie wieder auf `draft`.
 
-**Mein Vorschlag (empfohlen):**
-- (a) `MaxPacketSize` bleibt eine Grenze für die Nutzlast. Neu wird ausdrücklich gesagt: Der Broker muss jede Nachricht bis `MaxPacketSize` Nutzlast annehmen. Begrenzt er das ganze Paket, muss seine Grenze um den Platz für Kopf und Topic größer sein (65544 Byte). Ein fertiger Satz für RIG 4.1.1 steht in `REVIEW.md`.
-- (b) Ein Hinweis, dass Nutzlast + Topic-Länge + 4 nicht über 268435455 gehen dürfen.
-- (c) Keine Regel für zu große Nachrichten: Die sind ohnehin verboten (MG 8.3.11), der Broker darf sie verwerfen oder die App trennen. D8 prüft später nur, dass erlaubte Größen durchkommen.
+**Was sich ändert:**
+- **Bisher** stand am Ende nur: „Der Broker nimmt Nutzlasten bis MaxPacketSize an.“ Das war von uns abgeleitet, die Guideline sagte es nicht ausdrücklich.
+- **Neu** steht dort:
+  - Der Broker nimmt jede Nutzlast bis `MaxPacketSize` an.
+  - Begrenzt er das ganze Paket, muss seine Grenze um 65544 Byte größer sein (Platz für Kopf und Topic).
+  - Nutzlast + Topic-Länge + 4 dürfen 268435455 nicht übersteigen.
+- Dazu kommen die drei neuen Sätze als Zitate und die zwei neuen Guideline-Stellen in der Liste der Fundstellen.
+- In den Notizen steht jetzt:
+  - Zu große Nachrichten regeln wir bewusst nicht (Teil (c)). Der Broker darf sie verwerfen oder die App trennen.
+  - Die Obergrenze aus (b) ist eine Eigenschaft von MQTT selbst; dafür braucht es keine eigene Prüfung.
+  - D8 prüft nur, dass erlaubte Größen durchkommen (A-50).
 
-**Alternativen:**
-- (d) `MaxPacketSize` zur Grenze für das ganze Paket machen. Dann ändern sich SF-091, REQ-PAG-005 und das SDK.
-- (e) Nichts ändern. Dann können Plattformen weiter regeltreue Apps hinauswerfen.
+**Was gleich bleibt:**
+- „muss“ (MUST) und die Prüfung durch D8;
+- das Schema für `broker.json` und die 18 `broker.json`-Vektoren, weil sich die Form der Datei nicht ändert.
 
-**Was dann passiert:**
-- Ich ändere den Text der Guideline nach deinem Auftrag und baseline neu.
-- REQ-CNT-003 passt sich an und kommt als R-x zu dir zurück.
-- Unser Dev-Broker und das SDK verhalten sich schon so, wie ich es vorschlage.
+Den vollständigen Text findest du in `oec/spec/requirements/view/cnt.md` unter REQ-CNT-003.
 
-Antwort z. B. „D-1 wie vorgeschlagen“.
+Antwort z. B. „R-1 akzeptiert“.
 
-**Deine Antwort vom 26.10.2026:** „Option b, da sie präzise ist“. **Noch offen, bitte präzisieren:** (b) ist nur ein Teil des Vorschlags, nämlich der Hinweis auf 268435455. Allein löst er das eigentliche Problem nicht: Eine Plattform könnte dann weiterhin regeltreue Apps hinauswerfen. Bitte wähle eine Variante:
-- **(1)** Vorschlag komplett, also (a) + (b) + (c) (empfohlen);
-- **(2)** (a) + (b), ohne (c);
-- **(3)** nur (b);
-- **(4)** Alternative (d).
+Die Punkte A-1 … A-50 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
-Bis dahin ändere ich den Guideline-Text nicht.
-
-Die Punkte A-1 … A-49 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
-
-Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.
+Die Lücken bleiben bei 0. Das Schema bleibt `2.0.1-dev`, hat jetzt aber die Baseline `59e3ae3`; am Inhalt ändert sich nichts.
 
 **Nachtrag 1 (deine Anweisung):** In den Guardrails steht jetzt die neue Regel **G-3.10**. Am Ende jedes Zyklus entscheide ich, ob der nächste Zyklus mit einem neuen Agenten oder mit demselben weiterläuft, und schreibe den Grund ins Log.
 - Einen **neuen Agenten** nehme ich in der Regel, wenn mein Kontext schon zusammengefasst wurde oder groß ist, oder wenn ein neues Inkrement, eine neue Phase oder ein neues Deliverable beginnt.
@@ -224,11 +211,19 @@ Neu aus C-051 (Entwicklungsumgebung und Interop-Tests):
   - Als Nächstes kommt der P5-Einschub (D7: `monitor`, erst offline mit aufgezeichneten Nachrichten, dann live gegen diesen Broker), danach die Inkremente 6 bis 8 und 10.
   - Erledigt aus den C-050-Risiken: Zusammenspiel mit einem echten Broker und Neuaufbau nach einem Broker-Neustart.
 
+Neu aus deinem Review von C-051:
+
+- **A-50 (neu) – D8 prüft die Paketgröße am Broker:**
+  - Der geplante D8-Test T8-BUS-01 deckt jetzt auch REQ-CNT-003 ab.
+  - Er schickt eine Nachricht mit genau `MaxPacketSize` Nutzlast über ein langes Topic. Sie muss ankommen, und die Verbindung muss stehen bleiben.
+  - Größere Nachrichten prüft er nicht (Teil (c)).
+  - Bisher hat D8 REQ-CNT-003 nur am Host geprüft, also nur den Inhalt von `broker.json`.
+
 ---
 
 ### Was als Nächstes passiert (C-052)
 
-1. **Deine Entscheidung zu D-1 (SF-105).** Danach setze ich sie um: Guideline-Text, Register, Neu-Baseline, REQ-CNT-003 zum Review.
+1. **Dein Review von R-1** (REQ-CNT-003).
 2. **P5-Einschub – D7** (das Compliance-Tool in Go):
    - eine eigene MQTT-Anbindung (`internal/mqttwire`);
    - Aufzeichnen und Abspielen von Nachrichten (`internal/capture`, `monitor --replay`);
@@ -312,7 +307,50 @@ Neu aus C-051 (Entwicklungsumgebung und Interop-Tests):
 
 ---
 
-## Was aus deinem letzten Review (C-046, Nachtrag 2) geworden ist
+## Was aus deinem letzten Review (C-051) geworden ist
+
+Deine erste Antwort war „Option b, da sie präzise ist“. (b) war aber nur ein Teil meines Vorschlags. Darum habe ich nachgefragt und bis zu deiner Antwort nichts an der Guideline geändert. Deine Präzisierung lautete „Vorschlag komplett“, also (a) + (b) + (c). Daraus wurde Nachtrag 1 zu C-051:
+- **Guideline-Text:** In RIG 4.1.1, Karte `MaxPacketSize`, stehen jetzt zwei neue Sätze (`59e3ae3`):
+  - „Nutzlast + Topic-Länge + 4 dürfen 268435455 nicht übersteigen.“
+  - „Der Broker nimmt jede Nutzlast bis `MaxPacketSize` an; begrenzt er das ganze Paket, muss die Grenze um 65544 Byte größer sein.“
+  - Zu zu großen Nachrichten steht bewusst nichts (Teil (c)).
+- **Register:** SF-105 ist „resolved“ (`d220c48`). Es gibt kein offenes Finding mehr; das nächste heißt SF-106.
+- **Neu-Baseline auf `59e3ae3`:** Die Zahl der Guideline-Stellen steigt von 1399 auf 1401. Die zwei neuen gehören zu REQ-CNT-003; die ist jetzt wieder `draft` (R-1).
+- **Schema:** Version `2.0.1-dev` mit Baseline `59e3ae3`, am Inhalt ändert sich nichts.
+- **Dev-Broker, SDK und Interop-Test** waren schon so gebaut. Daran ändert sich nichts.
+
+Zur Erinnerung, worum es ging:
+
+#### D-1 – SF-105: Wie groß darf eine Nachricht am Broker sein? (RIG 4.1.1)
+
+**Worum geht es?** In `broker.json` steht `MaxPacketSize`. Laut Guideline ist das die größte erlaubte **Nutzlast** (Payload) einer MQTT-Nachricht, also nur der JSON-Teil. So haben wir es in SF-091 auch festgelegt. Die Guideline sagt aber nicht, wie die Plattform den **Broker** einstellen soll.
+
+**Das Problem:**
+- Broker begrenzen meist das **ganze Paket**, nicht nur die Nutzlast. Bei Mosquitto heißt die Einstellung `max_packet_size`, und in MQTT 5 ist es genauso.
+- Zum Paket gehören aber außer der Nutzlast noch Kopf und Topic, zusammen bis zu 65544 Byte.
+- Stellt eine Plattform den Broker-Wert einfach auf `MaxPacketSize`, dann wirft der Broker eine App hinaus, die sich genau an die Regel hält und eine Nutzlast von genau `MaxPacketSize` schickt. Schlimmer noch: Er verschickt dabei ihren Will, alle sehen „App ausgefallen“.
+- Das habe ich mit Mosquitto 2.1.2 nachgemessen, es ist also nicht nur Theorie.
+- Zwei Kleinigkeiten kommen dazu:
+  - Der genannte Höchstwert 268435455 ist eigentlich die Grenze für das ganze Paket. Eine Nutzlast kann nie so groß werden.
+  - Offen ist auch, was mit einer zu großen Nachricht passiert: Mosquitto kann sie still verwerfen oder die App trennen.
+
+**Mein Vorschlag (so entschieden):**
+- (a) `MaxPacketSize` bleibt eine Grenze für die Nutzlast. Neu wird ausdrücklich gesagt: Der Broker muss jede Nachricht bis `MaxPacketSize` Nutzlast annehmen. Begrenzt er das ganze Paket, muss seine Grenze um den Platz für Kopf und Topic größer sein (65544 Byte). Ein fertiger Satz für RIG 4.1.1 steht in `REVIEW.md`.
+- (b) Ein Hinweis, dass Nutzlast + Topic-Länge + 4 nicht über 268435455 gehen dürfen.
+- (c) Keine Regel für zu große Nachrichten: Die sind ohnehin verboten (MG 8.3.11), der Broker darf sie verwerfen oder die App trennen. D8 prüft später nur, dass erlaubte Größen durchkommen.
+
+**Alternativen:**
+- (d) `MaxPacketSize` zur Grenze für das ganze Paket machen. Dann ändern sich SF-091, REQ-PAG-005 und das SDK.
+- (e) Nichts ändern. Dann können Plattformen weiter regeltreue Apps hinauswerfen.
+
+**Was dann passiert:**
+- Ich ändere den Text der Guideline nach deinem Auftrag und baseline neu.
+- REQ-CNT-003 passt sich an und kommt als R-x zu dir zurück.
+- Unser Dev-Broker und das SDK verhalten sich schon so, wie ich es vorschlage.
+
+---
+
+## Was aus dem Review davor (C-046, Nachtrag 2) geworden ist
 
 Du hast geschrieben: „D-1 reviewed und akzeptiert -> übernehmen, R-1 und R-2 akzeptiert“. Daraus wurde Nachtrag 3 zu C-046:
 - **D-1 – Guideline-Text:** In MG 4.3.1 steht jetzt: Enthält Model, ProductCode oder SerialNumber andere Zeichen als `A–Z a–z 0–9 - . _ ~`, **muss** der Wert dnp-codiert werden, damit sich der Oi4Identifier aus denselben Werten wieder erzeugen lässt. In MG A3 wurde aus „may be built / may be dnp-encoded“ ein „are built / are dnp-encoded“ (`734c560`, Docusaurus-Build grün). Im Register ist SF-104 jetzt „resolved“ (`fce5cf5`); es gibt keine offenen Findings.
