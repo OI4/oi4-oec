@@ -7,8 +7,10 @@
 #   2. schema/check.sh: bundle, release freeze, both validators;
 #   3. spectool crosscheck: oracle vs schema on every case of schema/dist;
 #   4. conformance: gofmt, vet, tests;
-#   5. sdk/check.sh: the P3 API sketches (Rust API, C headers) compile and
-#      every REQ id they cite is active (ADR-0020 … 0022, from C-042).
+#   5. sdk/check.sh: the Rust SDK workspace (fmt, clippy, tests against the
+#      shared vectors, doc, cargo-deny; ADR-0026, from C-046) and the P3 API
+#      sketches (Rust API, C headers) compile and every REQ id cited under
+#      oec/sdk/ is active (ADR-0020 … 0022, from C-042).
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
@@ -47,7 +49,7 @@ step "conformance: gofmt, vet, test"
 cd "$root/conformance"
 gocheck
 
-step "sdk/check.sh (P3 sketches)"
+step "sdk/check.sh (Rust SDK, P3 sketches)"
 "$root/sdk/check.sh"
 
 printf '\nall checks passed\n'

@@ -1,0 +1,64 @@
+# cargo-deny policy of the Rust SDK workspace (ADR-0023 §2, ADR-0026).
+# Run: cargo deny check   (part of oec/sdk/check.sh, step 5 of oec/check.sh)
+
+[graph]
+all-features = true
+
+[advisories]
+# RustSec advisories are errors. An unmaintained or unsound advisory that we
+# accept needs an `ignore` entry with the id and a reason, logged in the
+# cycle log (ADR-0023 §2).
+version = 2
+db-urls = ["https://github.com/rustsec/advisory-db"]
+yanked = "deny"
+unmaintained = "all"
+ignore = []
+
+[licenses]
+# Licenses of linked code (ADR-0023 §2, compatible with MIT, ADR-0004).
+# EPL, MPL, (L)GPL and AGPL are not allowed in linked code.
+version = 2
+allow = [
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "ISC",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "Zlib",
+    "Unicode-3.0",
+]
+confidence-threshold = 0.9
+# The list is the policy, not the current tree: unused entries are fine.
+unused-allowed-license = "allow"
+
+[licenses.private]
+# Workspace crates are not published (publish = false); their license is
+# still checked.
+ignore = false
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+# One major version of each TLS and crypto crate (ADR-0023 §2).
+deny = [
+    { crate = "rustls", deny-multiple-versions = true },
+    { crate = "rustls-webpki", deny-multiple-versions = true },
+    { crate = "rustls-pki-types", deny-multiple-versions = true },
+    { crate = "tokio-rustls", deny-multiple-versions = true },
+    { crate = "ring", deny-multiple-versions = true },
+    { crate = "aws-lc-rs", deny-multiple-versions = true },
+    { crate = "aws-lc-sys", deny-multiple-versions = true },
+    { crate = "rustls-pemfile" },
+    { crate = "openssl" },
+    { crate = "openssl-sys" },
+    { crate = "native-tls" },
+]
+
+[sources]
+# Only crates.io (ADR-0023 §2).
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

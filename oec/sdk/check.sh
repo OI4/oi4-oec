@@ -1,5 +1,12 @@
 #!/bin/sh
-# Checks of the P3 SDK sketches (spikes, not product code; ADR-0020 … 0022):
+# Checks of the SDKs (ADR-0026 proposed) and of the P3 sketches (ADR-0020 … 0022):
+#   0. rust (Cargo workspace of D2, from C-046): rustfmt, clippy (pedantic,
+#      warnings are errors), tests including the shared test vectors of
+#      oec/spec/export, rustdoc without warnings, cargo-deny (licenses,
+#      advisories, bans, sources; ADR-0023 §2). cargo-deny fetches the RustSec
+#      advisory DB; without network it falls back to the cached DB (a real
+#      violation fails both runs). Needs cargo-deny
+#      (cargo install cargo-deny --locked).
 #   1. rust/sketch: the public Rust API sketch of D2 compiles with all DX
 #      examples; tests: hello world ≤ 20 lines, every REQ id cited under
 #      oec/sdk/ exists and is not deprecated;
@@ -14,6 +21,18 @@ set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
 cc="${CC:-cc}"
 cflags="-std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only"
+
+echo "rust: cargo fmt, clippy, test, doc, deny"
+cd "$root/rust"
+cargo fmt --all --check
+cargo clippy --offline --locked --all-targets --quiet -- -D warnings
+cargo test --offline --locked --quiet
+RUSTDOCFLAGS="-D warnings" cargo doc --offline --locked --no-deps --quiet
+command -v cargo-deny >/dev/null || { echo "cargo-deny missing: cargo install cargo-deny --locked" >&2; exit 1; }
+cargo deny --log-level error check || {
+	echo "cargo deny: retrying with the cached advisory DB (no network?)" >&2
+	cargo deny --log-level error --frozen check
+}
 
 echo "rust/sketch: cargo test"
 cd "$root/rust/sketch"
@@ -37,4 +56,4 @@ for spike in schema-embed mqtt-codec; do
 	cargo test --offline --locked --quiet
 done
 
-echo "sdk sketches ok"
+echo "sdk checks ok"
