@@ -532,3 +532,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `ccb475a` – SF-102, MG 7.2: a smart device connected directly to the Message Bus uses the `ServiceType` `OTConnector`.
 - Register commit `13d6b1a`: SF-101/102 resolved, SF-103 opened (editorial, open). Spec re-baselined in `0e5ca66`: 1401 inventory items (+2 items of MG 8.3.8), no key change; new draft REQs REQ-RES-PUBLIST-026/027 and REQ-TOP-028. The schema bundle moved to `2.0.1-dev` with baseline `ccb475a` (`f96c95f`). SF-001 … 102 resolved, SF-103 open.
 
+## Amendment C-045 addendum 1 (2026-10-26, guideline baseline `e0262dd`)
+
+- The previous baseline `ccb475a` is recorded in amendment C-045; the register commit `13d6b1a` touches only `findings/`.
+- The baseline is now `e0262dd` on branch `feature/spec-findings`. Local commit: SF-103 (decided by the PO as proposed in the C-045 review, option (a), with the order to implement the text) – the PublicationList examples of MG B1.1.8 (12 entries) and B2.6 (1 entry) of requestable resources use `ON_REQUEST_APPLICATION_SOURCE_FILTER_15`; no GL-ADR. Register commit `2453eff`: SF-103 resolved, no open finding. Spec re-baselined in `350358a`: inventory unchanged at 1401 items, no key change, golden vectors V-PAY-037 … 040 synced with the examples. Schema bundle stays `2.0.1-dev` with baseline `e0262dd` (`3098805`). SF-001 … 103 resolved.
+
