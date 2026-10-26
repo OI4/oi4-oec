@@ -1,11 +1,14 @@
 #!/bin/sh
-# Local CI of the monorepo (ADR-0019 amendment C-041): the P2 gate.
+# Local CI of the monorepo (ADR-0019 amendment C-041): the P2 gate, extended
+# by the P3 sketches in C-042.
 #   1. spec/tools: gofmt, vet, tests and the spectool checks, including the
 #      coverage gate (every schema/d7-validate REQ has a reviewed positive and
 #      negative vector, every allowed matrix row has its entry schema);
 #   2. schema/check.sh: bundle, release freeze, both validators;
 #   3. spectool crosscheck: oracle vs schema on every case of schema/dist;
-#   4. conformance: gofmt, vet, tests.
+#   4. conformance: gofmt, vet, tests;
+#   5. sdk/check.sh: the P3 API sketches (Rust API, C headers) compile and
+#      every REQ id they cite is active (ADR-0020 … 0022, from C-042).
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
@@ -43,5 +46,8 @@ spectool crosscheck
 step "conformance: gofmt, vet, test"
 cd "$root/conformance"
 gocheck
+
+step "sdk/check.sh (P3 sketches)"
+"$root/sdk/check.sh"
 
 printf '\nall checks passed\n'
