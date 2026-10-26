@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-040 (D7 `validate`)._
+_Stand: 26.10.2026, nach deinem Review von C-040 (D7 `validate`)._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 bis D-4 wie vorgeschlagen, R-1 bis R-4 akzeptiert“.
 
@@ -21,78 +21,13 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-4 Entscheidungen (D-1 bis D-4) und 4 Review-Punkte (R-1 bis R-4) aus C-040. Es gibt kein offenes Spec-Finding (nächste Nummer SF-101) und keine offene Frage (Q-011 bleibt geparkt). Details stehen im [C-040-Log](log/2026-10-26_C-040_d7-validate.md).
-
-**Was ist passiert?** Es gibt jetzt das erste Stück des Prüftools D7: `oec-check validate`. Man gibt ihm eine Nachricht (Topic + JSON-Payload), und es sagt offline, ob sie gültig ist und welche REQs verletzt sind. Es prüft in vier Schichten:
-1. **Topic** – stimmt der Aufbau (`Oi4v2/…/Pub/Health/…`), ist die Kombination Methode × Ressource erlaubt, sind die Identification Links richtig?
-2. **Parse** – ist die Payload sauberes JSON?
-3. **Schema** – passt die Payload zum JSON Schema der Topic-Form?
-4. **Regeln** – was ein Schema nicht kann, z. B. „der Name im Datensatz muss gleich dem Source im Topic sein“.
-
-D7 besteht alle Vektoren, die wir haben. Dabei hat es bei einem Vektor eine fehlende REQ gefunden (R-1).
-
-**Die Lücken:** Vor C-040 hatten noch 15 REQs keinen freigegebenen positiven *und* negativen Vektor. Jetzt sind es 11, und **nach deinem Review sind es 0**. Das habe ich auf einer Kopie mit allen Entwürfen als „reviewed“ nachgerechnet; die Exit-Prüfung `coverage -gate` ist dort grün. Damit wäre das P2-Exit-Kriterium 2 erfüllt.
-
-### D-1 – Nachtrag C-040 zu ADR-0019 (wie D7 arbeitet)
-
-Ich schlage vor, die Bauweise von D7 im ADR festzuhalten:
-- die **vier Schichten** oben; jeder Befund nennt Schicht, REQ, Stelle in der Nachricht und Text;
-- **keine Doppelmeldungen:** Sehen Schema und Regelschicht denselben Fehler an derselben Stelle, meldet D7 ihn nur einmal;
-- **R-4 als „Probe“:** Feinheiten bei Zahlen und Datum (z. B. 30. Februar) prüft D7, indem es den Wert durch eine saubere Form ersetzt und das Schema noch einmal fragt. Das ist mit Unit-Tests abgesichert; heute braucht es kein Vektor;
-- **die Kommandozeile:** Optionen, Dateiformate, Exit-Codes (0 = gültig, Warnungen erlaubt; 1 = ungültig; 2 = falscher Aufruf oder Datei; 3 = interner Fehler). Das D8-Tool heißt später `oec-infra`;
-- **läuft überall:** reines Go ohne C-Teile. Es lässt sich für Windows, Linux und macOS bauen (P2-Exit-Kriterium 6); getestet habe ich bisher nur auf macOS.
-
-Dazu kommen die Punkte D-2 bis D-4 und R-4, die auch im Nachtrag stehen.
-
-### D-2 – Kaputtes JSON meldet REQ-CMP-005
-
-Ist die Payload gar kein gültiges JSON (z. B. ein Schlüssel doppelt oder ein Syntaxfehler), hatte D7 bisher keine REQ zum Nennen. Jetzt nennt es **REQ-CMP-005** („die Nachricht ist OPC-UA-konformes JSON“). Die Alternative wäre eine neue REQ „die Payload ist JSON“ über ein neues Spec-Finding. Das würde aber nur REQ-CMP-005 wiederholen.
-
-### D-3 – Codierter Identification Link in der Payload (REQ-IL-005)
-
-Im Topic steht ein Identification Link **base64url-codiert**, in der Payload dagegen **im Klartext** (REQ-IL-005). Ein typischer Fehler ist, die codierte Form aus dem Topic in die Payload zu kopieren. Orakel und D7 erkennen das jetzt mit einer **Heuristik**: Ist ein Wert kein gültiger Link, aber seine base64url-Decodierung ist einer, dann wird REQ-IL-005 gemeldet. Geprüft werden PublisherId, RequestorId, der Absender in MessageId und ReplyTo und jeder DataSetWriterName.
-- **Risiko:** Ein Wert, der zufällig wie ein codierter Link aussieht, würde fälschlich gemeldet. Ein solcher Fall ist mir aus der Guideline nicht bekannt.
-- **Alternative:** REQ-IL-005 nur als Schirm-REQ über die Formatregeln der einzelnen Felder führen. Dann würde D7 den typischen Fehler aber nicht gezielt erkennen.
-
-### D-4 – Leerzeichen im Filter zählen als „negativer“ Vektor für REQ-TOP-020
-
-REQ-TOP-020 ist eine **Empfehlung** (SHOULD): kein Leerzeichen im Filter. Ein Topic mit Leerzeichen ist trotzdem gültig; D7 gibt nur eine **Warnung** aus. Für die Abdeckungszählung schlage ich vor: Ein solcher Vektor zählt als **negatives** Beispiel für REQ-TOP-020 (er zeigt, dass D7 die Abweichung bemerkt), nicht als positives. Die 8 schon freigegebenen Leerzeichen-Vektoren bleiben unverändert; nur die Zählung ändert sich. Das positive Beispiel ist V-TOP-137 (R-3).
-
-### R-1 – V-TOP-218 bekommt eine zweite REQ
-
-V-TOP-218 ist ein `Call` an NewDataSetWriterId mit einem Filter im Topic. Bisher stand dort nur REQ-TOP-013. D7 meldet zusätzlich **REQ-ACT-020**, weil diese Action gar keinen Filter haben darf. V-TOP-253 hat das schon so. Der Vektor war freigegeben und steht deshalb wieder auf `draft`.
-
-### R-2 – Neue Payload-Vektoren V-PAY-242 bis 244
-
-- V-PAY-242 (ungültig): ein `Pub Health`, dessen ReplyTo den Link codiert enthält.
-- V-PAY-243 (ungültig): ein `Call`, dessen RequestorId und MessageId den Link codiert enthalten.
-- V-PAY-244 (gültig): ein `Pub Health` mit allen Links im Klartext.
-
-Das JSON Schema kann so etwas nicht sehen (es kann kein base64url decodieren); das macht die Regelschicht.
-
-### R-3 – Neue Topic-Vektoren V-TOP-135 bis 137 und V-TOP-254
-
-- V-TOP-135 (gültig): `Pub Health` eines Geräts (mit Source).
-- V-TOP-136 (gültig): `Call NewDataSetWriterId` mit Source.
-- V-TOP-137 (gültig): `Pub Event` mit Filter `Status/Bad`.
-- V-TOP-254 (ungültig): `…/Pub/Health/` – die Source-Ebene ist leer (REQ-TOP-018).
-
-Sie liefern die noch fehlenden Beispiele für einige TOP- und IL-REQs.
-
-### R-4 – Neue Schirm-REQs
-
-Sieben allgemeine REQs fasse ich als Schirm über ihre Einzelregeln (so wie in ADR-0019 §9 beschlossen):
-- REQ-CMP-004 (Topic ist konform) → die einzelnen Topic-Regeln;
-- REQ-CMP-025/026 (Felder) → die „Fields of …“-REQs;
-- REQ-CMP-005 (OPC-UA-JSON) → die JSON-Regeln, Rest: sauberes JSON (D-2);
-- REQ-TOP-002 → CMP-004 und CMP-005;
-- REQ-IL-001 und REQ-IL-008 → die einzelnen Link-Regeln.
-
-Was offline nicht prüfbar ist (z. B. „antwortet auf dem richtigen Topic“), steht als Rest im Schirm und gehört zu `d7-monitor`/`d7-test`.
+**Nichts.** Es gibt kein offenes Spec-Finding (nächste Nummer SF-101) und keine offene Frage (Q-011 bleibt geparkt). Alle 158 REQs mit `schema` oder `d7-validate` haben jetzt einen freigegebenen positiven und negativen Vektor (oder sind über eine Schirm-REQ abgedeckt): **0 Lücken**. Die Exit-Prüfung `coverage -gate` ist grün, P2-Exit-Kriterium 2 ist erfüllt. Als Nächstes kommt C-041, das P2-Exit-Review.
 
 ---
 
-## Neue Begriffe aus C-040
+## Begriffe aus den letzten Zyklen
+
+### Begriffe aus C-040
 
 - **D7 / `oec-check`:** das Prüftool für Anwendungen und Nachrichten. `validate` ist der erste Teil (offline); `monitor` und `test` folgen in P5.
 - **Schicht (Layer):** die Stufe, in der D7 einen Fehler findet: Topic, Parse, Schema oder Regel.
@@ -133,7 +68,14 @@ Was offline nicht prüfbar ist (z. B. „antwortet auf dem richtigen Topic“), 
 
 ---
 
-## Was aus deinem letzten Review (C-039, Nachtrag 2) geworden ist
+## Was aus deinem letzten Review (C-040) geworden ist
+
+- **D-1 – Nachtrag C-040 zu ADR-0019:** angenommen; im ADR steht er jetzt als „accepted“ (`7a50660`).
+- **D-2, D-3, D-4:** angenommen. Das war schon so umgesetzt; es musste nichts mehr geändert werden.
+- **R-1 bis R-3:** alle 8 Vektoren stehen auf `reviewed` (`81b3521`). Die Lücken sinken wie vorgerechnet von 11 auf **0**.
+- **R-4 – Schirm-REQs:** angenommen; sie standen schon in `implications.yaml`.
+
+## Was aus dem Review davor (C-039, Nachtrag 2) geworden ist
 
 - **R-1 – REQ-CNT-003** und **R-2 – REQ-CNT-004:** freigegeben, beide stehen auf `reviewed` (`995258d`).
 - **R-3 – der neue RIG-Text zu SF-100:** freigegeben; der Absatz mit den genauen Regeln bleibt drin.
