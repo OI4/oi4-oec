@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 25.10.2026, nach C-039 (Config und `broker.json`)._
+_Stand: 26.10.2026, nach deinem Review von C-039 und dem Einbau von SF-100 in die RIG._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 und D-2 wie vorgeschlagen, R-1 bis R-3 akzeptiert“.
 
@@ -21,68 +21,32 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-2 Entscheidungen (D-1, D-2), 2 geänderte REQs (R-1, R-2) und 20 neue Testvektoren (R-3, R-4). Es gibt ein offenes Spec-Finding (**SF-100**, in D-2) und keine offene Frage (Q-011 bleibt geparkt). Ein Info-Punkt (neue Guideline-Baseline) braucht keine Entscheidung. Details stehen im [C-039-Log](log/2026-10-25_C-039_config-broker.md).
+3 Review-Punkte (R-1 bis R-3). Sie sind entstanden, weil ich SF-100 wie beauftragt in die RIG eingebaut habe. Es gibt kein offenes Spec-Finding (nächste Nummer SF-101) und keine offene Frage (Q-011 bleibt geparkt). Die Abdeckungslücken bleiben bei 15, denn beide REQs prüft D8, nicht das Schema. Details stehen im [C-039-Log, Nachtrag 2](log/2026-10-25_C-039_config-broker.md#addendum-2--sf-100-in-the-guideline-re-baseline-on-168e1d1-2026-10-26).
 
-**Worum ging es?** In C-039 habe ich zwei Dinge gebaut:
-- **Config:** die Einstellungen einer Anwendung. Sie veröffentlicht sie in Gruppen (`Pub Config`), und man kann sie mit `Set Config` ändern. Jede Einstellung hat einen Typ (z. B. Zahl, Text, Datum), einen Wert und optional Prüfregeln (`Validation`). Geheime Werte (z. B. Passwörter) sind als `Sensitive` markiert und werden nur maskiert veröffentlicht (`********`).
-- **`broker.json`:** die kleine Datei, mit der eine OEC-Plattform den Anwendungen sagt, wo der MQTT-Broker läuft (Adresse, Port, maximale Nachrichtengröße; RIG 4.1.1). Das ist **keine Nachricht**, sondern eine Datei auf der Plattform. Sie gehört deshalb zum Infrastruktur-Prüftool D8, nicht zu D7.
+**Was ist passiert?** Der neue RIG-Text (Commit `168e1d1`) sagt jetzt genau, wie `Address` aussieht, dass `SecurePort` 1 bis 65535 ist und dass Anwendungen unbekannte Felder ignorieren. Danach habe ich auf den neuen Guideline-Stand umgestellt (Re-Baseline). Dabei ist ein neuer Satz im Inventar aufgetaucht („Clients ignore elements …“). Zwei schon freigegebene REQs habe ich an den neuen Text angepasst. Nach unserer Regel stehen sie deshalb wieder auf `draft`.
 
-Mit Config hat jetzt **jede der 29 Topic-Formen** ein Einstiegs-Schema; das Schema-Bundle ist damit für alle Nachrichten vollständig.
+### R-1 – REQ-CNT-003 (Inhalt von `broker.json`) angepasst
 
-**Zahlen:** Alle Prüfungen sind grün. Drei unabhängige Schema-Validatoren (Go, Rust, Python) kommen bei allen 628 Testfällen zum gleichen Ergebnis. Es gibt heute 16 Abdeckungslücken (vorher 19). Gibst du R-3 frei, sind es noch **15**. Config hat dann keine Lücke mehr. Die übrigen 15 sind allgemeine Regeln zu Topics, IdentificationLink und Komponenten; die meisten davon prüft die Regelschicht von D7 (nächster Zyklus C-040).
+Die REQ beschreibt, was in `broker.json` stehen muss. Neu darin:
+- die genaue Form der **Adresse**: IPv4 ohne führende Nullen, IPv6 ohne eckige Klammern, oder ein Host-Name nach RFC 1123; kein Port, kein `mqtts://`, kein Pfad;
+- der **Port** liegt zwischen 1 und 65535;
+- die Datei **darf weitere Felder** enthalten.
 
-### D-1 – Nachtrag C-039 zu ADR-0019 (Schema-Architektur)
+Dazu kommen zwei neue Zitate aus der RIG und ein Hinweis, dass das Schema, das Orakel und die 18 Vektoren genau das prüfen. Die Prüfmethode bleibt `d8`.
 
-Wie bei jedem Zyklus stehen die Bau-Entscheidungen als Nachtrag im ADR-0019. Kein schon angenommener Satz wird ersetzt. Inhaltlich:
+### R-2 – REQ-CNT-004 (Anwendung nutzt `broker.json`) ergänzt
 
-1. **Zwei Bauformen für Config.** Ein `Pub` enthält jede Einstellung vollständig (Name, Typ, Wert, Pflicht-Kennzeichen …). Ein `Set` ist eine Teil-Änderung: Dort ist nur der neue `Value` Pflicht, alles andere darf fehlen.
-2. **Wert passend zum Typ.** Das Schema prüft, ob der Wert zum `Type` passt: `true`/`false` bei Boolean, eine Zahl bei Number, ein Datum im Format RFC 3339 bei DateTime, Base64 bei ByteString. Ein leerer Text `""` heißt „nicht gesetzt“ und ist immer erlaubt. Die Maske `********` ist nur bei `Sensitive` = true erlaubt, und in einem `Pub` muss ein geheimer Wert leer oder maskiert sein (siehe R-2). Ob ein Datum im Kalender existiert (z. B. 30. Februar), prüft die Regelschicht. Nebenbei habe ich das Orakel angeglichen: Base64 mit Zeilenumbruch lehnt es jetzt wie das Schema ab.
-3. **Weiche im allgemeinen Schema.** Ohne Topic weiß man nicht, ob ein Config-Datensatz aus einem `Pub` oder einem `Set` stammt. Das allgemeine Schema prüft deshalb nach den lockereren `Set`-Regeln; die strengen `Pub`-Regeln prüft das Einstiegs-Schema `pub-config`.
-4. **Zwei Regeln für die Regelschicht.** „Der Wert hält seine eigenen Prüfregeln ein“ (z. B. Minimum, Muster) und „jeder Kontext kommt pro Quelle nur einmal vor“ kann ein JSON Schema nicht ausdrücken. Das prüft die Regelschicht von D7.
-5. **Einstiegs-Schemas:** `Get Config` enthält keinen Datensatz, `Set Config` genau einen (ohne `SequenceNumber`), ein leeres `Pub` ist gültig (SF-099), wie bei den anderen Ressourcen. Damit sind es **29 von 29**.
-6. **Zwei Schirm-REQs** (Umbrellas), wie in C-036 beschlossen.
-7. **Schema für `broker.json`** als eigenes Modul `platform/broker.schema.json`. Es setzt den Vorschlag aus SF-100 um (siehe D-2). Das Orakel hat dafür eine eigene Prüfung bekommen; beide nutzen dieselben Muster.
-8. **Ausnahme bei der Rückverfolgung.** Jede Regel im Schema nennt ihre REQ. Normalerweise muss die REQ dann die Methode `schema` haben. Die `broker.json`-REQ (REQ-CNT-003) behält aber `d8`, denn sie gehört zum Infrastruktur-Prüftool. Für Dateien im Ordner `platform/` ist das jetzt erlaubt. Sie zählt nicht zu den 158 REQs, die wir mit Vektoren abdecken müssen.
-9. **Neue Vektor-Art `broker-json`** (`V-BRK-xxx`): statt Topic + Nachricht steht dort der Datei-Inhalt. Orakel und Schema prüfen sie wie die Nachrichten-Vektoren.
+Die REQ sagt, dass eine Anwendung Adresse, Port und Paketgröße aus `broker.json` übernimmt. Neu ist der Satz: **„Sie ignoriert Felder, die sie nicht kennt.“** Das ist die Gegenseite zu R-1: Die Plattform darf Felder hinzufügen, und die Anwendung stolpert nicht darüber. D8 kann das testen, indem es dem Container eine `broker.json` mit einem Zusatzfeld gibt. Die Stufen bleiben gleich (L2 SHOULD, L3 MUST).
 
-**Empfehlung:** annehmen.
+### R-3 – Der neue Text in der RIG (`168e1d1`)
 
-### D-2 – SF-100: Was darf in `broker.json` stehen?
+- **Address:** Wertebereich „IPv4-Adresse, IPv6-Adresse (ohne Klammern) oder Host-Name (RFC 1123)“. Dazu ein Absatz, der die Formen genau erklärt (siehe [`REVIEW.md`](REVIEW.md#r-3--guideline-wording-168e1d1)).
+- **SecurePort:** Wertebereich „1 … 65535“.
+- **Nach der Feldliste:** „Clients ignore elements of `broker.json` they do not know.“
 
-Die RIG (4.1.1) nennt drei Pflichtfelder, lässt aber drei Fragen offen. Ich habe sie als **SF-100** ins Findings-Register geschrieben, mit diesem Vorschlag:
+**Ein Punkt geht über den Vorschlag im Register hinaus:** Dort stand als Textvorschlag für `Address` nur der neue Wertebereich. Die genauen Regeln (keine führenden Nullen, höchstens 253 Zeichen usw.) standen nur in der Begründung. Ich habe sie als Absatz in die RIG übernommen, damit sie in der Guideline selbst stehen und nicht nur im Register. Wenn dir die kurze Fassung lieber ist, nehme ich den Absatz wieder heraus.
 
-- **(a) Zusätzliche Felder:** erlaubt. Eine Anwendung ignoriert Felder, die sie nicht kennt. So kann eine spätere Version der Datei neue Felder bekommen, ohne alte Anwendungen zu stören. *Alternative:* verboten.
-- **(b) Form der Adresse:** „IP-Adresse oder Host-Name“ ist zu ungenau. Vorschlag: eine IPv4-Adresse (z. B. `192.168.0.10`, ohne führende Nullen), eine IPv6-Adresse ohne eckige Klammern, oder ein Host-Name nach RFC 1123 (Buchstaben, Ziffern, Bindestrich; höchstens 253 Zeichen). **Kein** Port, **kein** `mqtts://` davor. *Alternative:* jeder nicht leere Text.
-- **(c) Port 0:** Der Datentyp erlaubt 0, aber auf Port 0 kann kein Broker lauschen. Vorschlag: nur 1 bis 65535.
-
-Dazu habe ich einen Textvorschlag für die RIG ins Register geschrieben. Schema, Orakel und Vektoren setzen den Vorschlag schon um. Entscheidest du anders, passe ich sie an. Den Guideline-Text ändere ich nur auf deinen Auftrag.
-
-**Empfehlung:** wie vorgeschlagen; gern mit dem Auftrag, den RIG-Text einzuarbeiten.
-
-### R-1 – REQ-RES-CONFIG-011 wird `d7-monitor`
-
-Die Regel: „Eine Pflicht-Einstellung (`Mandatory` = true) muss in jedem `Set` ihrer Gruppe enthalten sein.“ In einem `Set` steht aber nicht, welche Einstellungen Pflicht sind. Das sieht man nur im letzten `Pub Config` derselben Quelle. Eine einzelne Nachricht reicht also nicht. D7 muss den Verkehr mitlesen (`d7-monitor`). Dadurch fällt die REQ aus der Vektor-Pflicht heraus (159 → 158), und ihre Lücke verschwindet.
-
-### R-2 – REQ-RES-CONFIG-024 bekommt zusätzlich `schema`
-
-Die Regel: „Geheime Werte sind in jedem `Pub` maskiert.“ Das kann das Schema `pub-config` an der Nachricht selbst prüfen: Bei `Sensitive` = true ist als `Value`/`DefaultValue` nur `""` oder `********` erlaubt. Die bisherigen Methoden bleiben (`d7-test` prüft z. B., dass auch nach einem `Set` maskiert wird).
-
-### R-3 – 2 Config-Vektoren (V-PAY-240, 241)
-
-- **V-PAY-240** (gültig): ein Gerät veröffentlicht alle Einstellungen auf einmal (Topic ohne Filter), in zwei Kontexten „Network settings“ und „Overall device settings“, mit einem maskierten Passwort.
-- **V-PAY-241** (ungültig): derselbe Vektor, aber der zweite Kontext heißt auch „Network settings“. Damit gibt es den Kontext zweimal für dieselbe Quelle (REQ-RES-CONFIG-015). Das erkennt nur die Regelschicht, nicht das Schema.
-
-### R-4 – 18 `broker.json`-Vektoren (V-BRK-001 … 018)
-
-Die RIG hat kein Beispiel für `broker.json`, also habe ich alle Vektoren selbst gebaut:
-- **4 gültige:** Host-Name, IPv4-Adresse, IPv6-Adresse, voller Domain-Name mit einem Zusatzfeld (hängt an SF-100 (a)). Dazu die kleinste und größte erlaubte Paketgröße.
-- **14 ungültige**, jeweils mit **genau einem** Fehler: ein Pflichtfeld fehlt (3×), Paketgröße zu klein, zu groß oder als Text, Port zu groß, als Text oder 0 (SF-100 (c)), Adresse mit Port, als URL oder leer (SF-100 (b)), Feldnamen klein geschrieben, Datei ist kein JSON-Objekt.
-
-Die Tabelle mit Links steht in [`REVIEW.md`](REVIEW.md#r-4--brokerjson-vectors-v-brk-001--018-draft).
-
-### Info – neue Guideline-Baseline `23f6cfd`
-
-Du hast den Guideline-Branch mit einem Commit von Konrad Heidrich zusammengeführt (`30fea57`: Formatierung `<sub>` in der Tabelle in MG A3). Inhaltlich ändert sich nichts. Ich habe darauf neu aufgesetzt; nur die Kennungen im Inventar haben sich geändert, die 1398 Einträge sind gleich geblieben. Nichts zu entscheiden.
+Es gibt kein GL-ADR, wie bei SF-099. Der Docusaurus-Build ist grün.
 
 ### Begriffe aus C-039
 
@@ -118,15 +82,15 @@ Du hast den Guideline-Branch mit einem Commit von Konrad Heidrich zusammengefüh
 
 ---
 
-## Was aus deinem letzten Review (C-038) geworden ist
+## Was aus deinem letzten Review (C-039) geworden ist
+
+- **D-1 – Nachtrag C-039 zu ADR-0019:** angenommen. Im ADR steht der Nachtrag jetzt als „accepted“. Punkt 7 sagt, dass das `broker.json`-Schema SF-100 umsetzt, wie entschieden (`d7520ba`).
+- **D-2 – SF-100:** wie vorgeschlagen entschieden. Den RIG-Text habe ich eingebaut (`168e1d1`), im Register steht SF-100 auf „resolved“ (`7808df7`). Daraus kommen die neuen Punkte R-1 bis R-3 oben.
+- **R-1 bis R-4:** alles freigegeben. Die 2 REQs und die 20 Vektoren stehen auf `reviewed` (`dd5893d`). Die Lücken sinken wie vorgerechnet von 16 auf **15**; Config hat keine Lücke mehr.
+- **Nebenbei:** An mehreren Stellen (Vektoren, Schema, Orakel) stand „SF-100, proposed“. Das „proposed“ habe ich entfernt. Am Inhalt hat sich nichts geändert.
+
+## Was aus dem Review davor (C-038) geworden ist
 
 - **D-1 – Nachtrag C-038 zu ADR-0019:** angenommen. Im ADR steht der Nachtrag jetzt als „accepted“. An dem Satz in §4, den Punkt 1 ersetzt (Oi4Pv), steht ein Verweis auf den Nachtrag, damit man ihn beim Lesen nicht übersieht (`574b8e0`).
 - **D-2 – `WriterGroupName` auf einem Topic ohne Filter:** angenommen. Das Orakel bleibt, wie es ist (`d6d5010`).
 - **R-1 bis R-3:** alles freigegeben. Die 9 Vektoren V-PAY-231 … 239 stehen auf `reviewed` (`dc80c8a`). Die Lücken sinken wie vorgerechnet von 33 auf 19. Data, Event und SubscriptionList haben keine Lücke mehr.
-
-## Was aus dem Review davor (C-037) geworden ist
-
-- **D-1 – Nachtrag C-037 zu ADR-0019:** angenommen. Im ADR steht der Nachtrag jetzt als „accepted“ (`097b812`).
-- **D-2 – Lesart des Eintrags-Filters:** angenommen. Der Filter in der PublicationList ist codiert wie im Topic; das Orakel bleibt, wie es ist.
-- **R-1 und R-2:** alles freigegeben. Die 13 Vektoren V-PAY-218 … 230 stehen auf `reviewed` (`69a6bb4`). Die Lücken bei der Vektor-Abdeckung sinken von 48 auf 35. PublicationList und ReferenceDesignation haben keine Lücke mehr.
-- **Nebenbei korrigiert:** Das C-037-Log hatte fälschlich das Datum 26.10.; es heißt jetzt `2026-10-25_C-037_publist-refdes.md`.

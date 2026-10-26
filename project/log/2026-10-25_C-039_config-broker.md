@@ -183,3 +183,41 @@ Collected in [`REVIEW.md`](../REVIEW.md) (German explanation: [`REVIEW_DE.md`](.
 5. Info: re-baseline on `23f6cfd`.
 
 Next free ids: SF-101, REQ-CMP-048, V-PAY-242, V-TOP-254, V-BRK-019, ADR-0020, Q-021, probe P-129. Next cycle: C-040 – D7 `validate` (ROADMAP P2).
+
+## Addendum 1 – PO review (2026-10-26)
+
+PO (chat, 2026-10-26): "R1 - R4 reviewed und akzeptiert · D-1 D-2 reviewed und akzeptiert · D-2 bitte in Guideline einbauen". Recorded in [`REVIEW.md`](../REVIEW.md) (commit `4ad2f96`, kept as the review record): D-1 ADR-0019 amendment C-039 **accepted**; D-2 SF-100 **decided as proposed**, with the order to implement the RIG text (addendum 2); R-1 … R-4 **accepted**.
+
+Review applied (`dd5893d`, `spectool review`):
+
+- 22 drafts → `reviewed`: REQ-RES-CONFIG-011 (`d7-monitor`), REQ-RES-CONFIG-024 (+`schema`), V-PAY-240/241, V-BRK-001 … 018.
+- Coverage (`coverage/vectors.md`): `schema`/`d7-validate` gaps 16 → **15** (as projected); Config has no gap. The 15: REQ-CMP-004/005/025/026, REQ-IL-001/004/005/008, REQ-TOP-002/009/011/012/018/020/021.
+
+ADR-0019 (`d7520ba`): status line and amendment C-039 heading say accepted; item 7 states that `broker.schema.json` implements SF-100 as decided and implemented (`168e1d1`).
+
+No reviewed item changed beyond the accepted proposals.
+
+## Addendum 2 – SF-100 in the guideline, re-baseline on `168e1d1` (2026-10-26)
+
+Guideline (`oi4-oec-documentation`, branch `feature/spec-findings`):
+
+- `168e1d1` – RIG 4.1.1, the text proposed in the register:
+  - `Address`: value range "`<IPv4 address, IPv6 address (without brackets) or host name (RFC 1123)>`"; the description defines the forms – "An IPv4 address is written in dotted-decimal form without leading zeros, an IPv6 address in the text form of RFC 4291 without brackets and without zone index. A host name consists of labels of 1 to 63 letters, digits and `-`, separated by `.`; a label does not start or end with `-`, the last label is not all digits, and the host name has at most 253 characters and does not end with `.`. `Address` contains no port, no scheme and no path." The register proposal named these rules under (b) but its text proposal changed only the value range; the description makes the decided rules readable in the guideline and quotable by REQ-CNT-003 (agent choice within the decision, R-3 below).
+  - `SecurePort`: value range "`1 … 65535`" (type UINT16 unchanged).
+  - After the element list: "Clients ignore elements of `broker.json` they do not know."
+  - No GL-ADR (like SF-099: a decided finding without protocol change). `yarn build` green.
+- `7808df7` – register: SF-100 `resolved (168e1d1)`, moved to Closed; no open finding; next SF-101.
+
+Re-baseline (`b70eb87`; `spectool rebaseline -rev 168e1d1` with `168e1d1` checked out detached, because the register commit `7808df7` is the branch head and touches only `findings/`; back on the branch afterwards):
+
+- Inventory 1398 → **1399** items: + RIG-4.1.1-77f0d05d "Clients ignore elements of `broker.json` they do not know." (implicit, term `ignore`; the inventory files it under the heading of the last card, `MaxPacketSize`). The value ranges and the new `Address` description carry no inventory item; no key changed, only line numbers.
+- **REQ-CNT-003** (reviewed item, changed; reason: guideline text of SF-100): statement spells out the `Address` forms, `SecurePort` 1 … 65535 and "It may contain further elements."; new quotes "Address contains no port, no scheme and no path." and "Clients ignore elements of broker.json they do not know."; + RIG-4.1.1-77f0d05d; refs + SF-100; note names the schema, the oracle and V-BRK. → `draft` (R-1). Verification stays `[d8]`.
+- **REQ-CNT-004** (reviewed item, changed; same reason): statement + "It ignores elements of broker.json it does not know."; quote; + RIG-4.1.1-77f0d05d (an inventory item may back several REQs: the platform may add elements – REQ-CNT-003 –, the application ignores them – REQ-CNT-004); refs + SF-100. → `draft` (R-2). Levels and verification `[d8, manual]` unchanged.
+- Unlike REQ-CMP-041 in C-036 addendum 2 (kept `reviewed`), both REQs go back to `draft`, as the hand-over rule for changed reviewed items says; neither is `schema`/`d7-validate`, so coverage is unaffected.
+- Mechanical (no content or expectation change, items stay `reviewed`): "SF-100 …, proposed" → "SF-100 …" in the V-BRK reasons and notes, the description of `vectors/platform/broker-json.yaml` (+ SecurePort 1 … 65535, "RIG 4.1.1 since guideline 168e1d1"), the comments of `internal/platform`, `oec/spec/README.md`; in `oec/schema` (`4a4461e`) the description and `$comment`s of `platform/broker.schema.json`, the probe comment and `oec/schema/README.md`. Constraints, oracle and vectors unchanged.
+
+Docs: ADR-0001 amendment C-039 addendum 2; AGENTS.md, GUARDRAILS G-1.2, STATUS, ROADMAP baseline `168e1d1`; `REVIEW.md` / `REVIEW_DE.md` R-1 … R-3 (REQ-CNT-003, REQ-CNT-004, guideline text).
+
+Checks: `spectool lint` (437 REQs, 2 drafts; a deliberately wrong quote was rejected), `render -check`, `coverage -check` (gaps 15, CNT open=0), `topic -check`, `inventory -check -rev 168e1d1` (1399 items), `go test ./...`, `oec/schema/check.sh` (92 schema files, 628 cases, 0 disagreements), Python validator (628 cases, 0 disagreements): green.
+
+Next free ids: SF-101, REQ-CMP-048, V-PAY-242, V-TOP-254, V-BRK-019, ADR-0020, Q-021, probe P-129. Next cycle: C-040 – D7 `validate` (ROADMAP P2).

@@ -518,3 +518,8 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `a42a132` is recorded in C-036 addendum 2; the register commit `d4f79f3` touches only `findings/` (no re-baseline).
 - The baseline is now `23f6cfd` on branch `feature/spec-findings`: the PO merged `origin/feature/spec-findings` with commit `30fea57` (Konrad Heidrich, 2026-10-23) – MG A3 renders the subscripts of the mask character as `<sub>` instead of escaped `&lt;sub>`; formatting only. Spec re-baselined in `889c569`: baseline id only, inventory unchanged at 1398 items, no key change, no finding, no GL-ADR. SF-001 … 099 resolved.
+
+## Amendment C-039 addendum 2 (2026-10-26, guideline baseline `168e1d1`)
+
+- The previous baseline `23f6cfd` is recorded in amendment C-039; the register commits `68141cb` and `7808df7` touch only `findings/` (no re-baseline).
+- The baseline is now `168e1d1` on branch `feature/spec-findings`. Local commit: SF-100 (decided by the PO as proposed in the C-039 review, PO order 2026-10-26 to implement the RIG text) – RIG 4.1.1 `Address` value range "`<IPv4 address, IPv6 address (without brackets) or host name (RFC 1123)>`" with a description of the forms (no port, scheme or path), `SecurePort` value range "`1 … 65535`", and after the element list "Clients ignore elements of `broker.json` they do not know."; no GL-ADR. Spec re-baselined in `b70eb87`: 1399 inventory items (+1 implicit item RIG-4.1.1-77f0d05d), REQ-CNT-003 and REQ-CNT-004 reworded (`draft`), no key change. SF-001 … 100 resolved.
