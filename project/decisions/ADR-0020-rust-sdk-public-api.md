@@ -1,6 +1,6 @@
 # ADR-0020 – Public API of the Rust SDK (D2)
 
-- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042)
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042). Amendment C-048 (first part of the crate `oec`: additions, `MemoryStore::new()`, rules of `build()`) by the agent (G-3.4 b).
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-042
 - Related: ADR-0011 (S4 architecture), ADR-0016 (level targets), ADR-0019 §7 (schemas in D2), ADR-0021 (C ABI), ADR-0022 (D9 API), Q-021, Q-022, SF-101
@@ -182,3 +182,38 @@ Every outgoing message is built from typed values (REQ-MSG-001). With the cargo 
 - **Message-oriented API** (the app builds DataSetMessages and calls `publish(topic, msg)`). Maximum control, but every app would have to implement PublicationList, pagination and Status events. That contradicts the purpose of D2.
 - **Code generation from a device description** (e.g. YAML → Rust). Useful later for large data models. Too early before the runtime API is stable.
 - **One trait per resource** (`impl DataProvider for MyType`). Clean for static models, but awkward for assets discovered at runtime (connectors). Closures plus definitions cover both.
+
+## Amendment C-048 (2026-10-26) – P4 increment 4: crate `oec`, first part (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details and REQ tracing: `log/2026-10-26_C-048_oec-crate-bootstrap.md`, REVIEW A-17 … A-24.
+
+### A. What moved from the sketch into `oec`
+
+`Level`, `Error`, `Result`, `ServiceType`, `Bootstrap`, `Broker`, `AppBuilder` (all methods except `on_connection`), `App::builder`, the module `identity` (`IdentificationLink`, `Oi4Identifier`, `Product`, `LocalizedText`), `store`, `status::StatusCode`, `event::SyslogLevel` and the definition part of `config` (`ConfigType`, `ConfigObject`, `ConfigDef`, `ConfigValues`). For these items the crate is the contract from now on; the sketch keeps them only so that its remaining items and examples compile. Everything else (runtime, assets, data, `ConfigHandle`, events, consumer) stays in the sketch until its increment (ROADMAP P4: 5 … 8) and is still the contract.
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `AppBuilder::reference_designation(bool)` | Makes "Level 2 by default" of §3 a switch: default off at L1, on at L2 (SHOULD) and L3 (MUST, REQ-CMP-020). `false` at L3 → `LevelNotMet`. Offered with a non-persistent store → `LevelNotMet` (REQ-RES-REFDES-002). |
+| `Store::is_persistent()` (provided, default `true`; `MemoryStore` → `false`) | `build()` needs to know whether the store keeps the ReferenceDesignation (§3). |
+| `App::{level, service_type, identification_link, mam, connection, reference_designation, syslog}` | Read access to what `build()` resolved; used by tests and by increment 5. |
+| `app::ConnectionSettings`, `app::Auth`, `app::Secret` | The resolved connection: host, port, CA, credentials or client certificate, ClientId, keep alive, MaxPacketSize and own publish limit. `Secret` has a redacted `Debug` (G-4.5). |
+| `IdentificationLink`: `Display`, `FromStr`, `AsRef<str>`; `identity::Mam` (re-export) | Usual conversions; the MAM is visible through `App::mam`. |
+| `ConfigDef::{context, values}` | `values()` validates the definition (names, defaults against Type and Validation) and returns the initial values with the getters of §10 (Q-022). |
+| `StatusCode::code()` | The numeric OPC UA code, needed by the Status events of increment 7. |
+| `FileStore::dir()` | Where the state lives (diagnostics). |
+
+### C. Changes of sketch items (need this amendment)
+
+1. **`MemoryStore` is constructed with `MemoryStore::new()` (or `Default`)** instead of being a unit struct: it holds its map. The sketch mirrors the change.
+2. **Builder rules made precise (no change of the described semantics):**
+   - in a container, `serial_number` is only accepted together with an explicit `identification_link` (the container name is the SerialNumber of the Oi4Identifier, REQ-CNT-021), and `client_id` is rejected (the container name is the ClientId, REQ-MQTT-013) – the sketch says "outside a container" for both;
+   - outside a container a serial number is required (REQ-RES-MAM-015) and the default ClientId is `oec` + the FNV-1a 64 hash of the Identification Link in hex (stable, "derived from the Identification Link" as in the sketch);
+   - `keep_alive` takes whole seconds 1 … 65535 (the MQTT field; 0 would disable the Will trigger, REQ-LIFE-008);
+   - `Broker` without credentials and client certificate → `LevelNotMet` (every level authenticates, REQ-CMP-002, REQ-MQTT-009); a missing CA, certificate or key file → `Io`;
+   - `max_packet_size` above the MaxPacketSize of the Message Bus is clamped with a warning (REQ-PAG-005), 0 is `Invalid`.
+
+### D. Q-021 (`run_async`)
+
+`run`, `run_async`, `handle`, `AppHandle` and `ConnectionState` need the runtime and stay in the sketch until increment 5. No placeholder is added to `oec`; `App` is `Send + Sync` (tested), so the async form of §2 stays possible without an API change.
