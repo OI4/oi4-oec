@@ -67,6 +67,8 @@ func main() {
 		err = cmdReview(os.Args[2:])
 	case "rebaseline":
 		err = cmdRebaseline(os.Args[2:])
+	case "crosscheck":
+		err = cmdCrosscheck(os.Args[2:])
 	case "-h", "--help", "help":
 		usage()
 		return
@@ -81,7 +83,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: spectool lint|render|inventory|coverage|topic|review|rebaseline [flags]  (spectool <cmd> -h for flags)")
+	fmt.Fprintln(os.Stderr, "usage: spectool lint|render|inventory|coverage|topic|review|rebaseline|crosscheck [flags]  (spectool <cmd> -h for flags)")
 }
 
 type common struct {
