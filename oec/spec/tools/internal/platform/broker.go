@@ -22,7 +22,7 @@ const (
 	MaxPacketSize = 268435455
 )
 
-// Address syntax (SF-100 (b), proposed): an IPv4 address in dotted-decimal
+// Address syntax (SF-100 (b)): an IPv4 address in dotted-decimal
 // form, an IPv6 address in text form (IPv6address of RFC 3986, without
 // brackets and zone) or a host name of RFC 1123 whose last label is not all
 // digits. The JSON Schema uses the same patterns.
@@ -70,7 +70,7 @@ func ipv6() string {
 
 // CheckBroker checks a decoded broker.json (payload.Parse): a JSON object
 // with Address, SecurePort and MaxPacketSize (RIG 4.1.1). Further members
-// are allowed (SF-100 (a), proposed).
+// are allowed (SF-100 (a)).
 func CheckBroker(doc any) []payload.Problem {
 	var out []payload.Problem
 	add := func(ptr, format string, a ...any) {
@@ -109,7 +109,7 @@ func CheckBroker(doc any) []payload.Problem {
 }
 
 // ValidAddress reports whether s is an IPv4 address, an IPv6 address or a
-// host name (SF-100 (b), proposed).
+// host name (SF-100 (b)).
 func ValidAddress(s string) bool {
 	if ipv4RE.MatchString(s) || ipv6RE.MatchString(s) {
 		return true

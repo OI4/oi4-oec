@@ -2,14 +2,14 @@
 # Message Bus storage (RIG 4.1.1). Format: vectors/vectors.schema.json;
 # checked by spectool lint (reference check internal/platform).
 kind: broker-json
-baseline: "23f6cfd"
+baseline: "168e1d1"
 description: >-
   Content of the file broker.json of the Message Bus storage (RIG 4.1.1,
   REQ-CNT-003): the mandatory elements Address (IP address or host name),
-  SecurePort (UINT16) and MaxPacketSize (INT32, 262144 … 268435455). RIG 4.1.1
-  has no example of the file; all vectors are constructed. The syntax of
-  Address, further elements and SecurePort 0 follow the proposed
-  interpretation of SF-100.
+  SecurePort (UINT16, 1 … 65535) and MaxPacketSize (INT32, 262144 …
+  268435455). RIG 4.1.1 has no example of the file; all vectors are
+  constructed. The syntax of Address, further elements and SecurePort 0
+  follow SF-100 (RIG 4.1.1 since guideline 168e1d1).
 vectors:
   - id: V-BRK-001
     title: "Minimal broker.json with host name and the smallest MaxPacketSize"
@@ -51,7 +51,7 @@ vectors:
     origin: {kind: constructed, ref: RIG 4.1.1}
     status: reviewed
     notes: >-
-      IPv6 address in text form without brackets (SF-100 (b), proposed); any
+      IPv6 address in text form without brackets (SF-100 (b)); any
       SecurePort of the range.
     content: |-
       {
@@ -68,7 +68,7 @@ vectors:
     status: reviewed
     notes: >-
       RIG 4.1.1 lists the elements broker.json contains; a further element is allowed
-      and ignored by the clients (SF-100 (a), proposed).
+      and ignored by the clients (SF-100 (a)).
     content: |-
       {
         "Address": "broker.plant-1.example.com",
@@ -206,11 +206,11 @@ vectors:
     title: "SecurePort 0"
     expected: invalid
     violates: [REQ-CNT-003]
-    reason: "SecurePort is the port the broker listens on; port 0 is no such port (SF-100 (c), proposed)."
+    reason: "SecurePort is the port the broker listens on; port 0 is no such port (SF-100 (c))."
     origin: {kind: constructed, ref: RIG 4.1.1}
     status: reviewed
     notes: >-
-      V-BRK-001 with SecurePort 0, the lower bound of UINT16 (SF-100 (c), proposed).
+      V-BRK-001 with SecurePort 0, the lower bound of UINT16 (SF-100 (c)).
     content: |-
       {
         "Address": "mqtt-broker",
@@ -275,7 +275,7 @@ vectors:
     status: reviewed
     notes: >-
       V-BRK-001 with camelCase element names; the three names count as further
-      elements (SF-100 (a), proposed), the mandatory elements are missing.
+      elements (SF-100 (a)), the mandatory elements are missing.
     content: |-
       {
         "address": "mqtt-broker",

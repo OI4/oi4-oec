@@ -4,7 +4,7 @@
 # REQ-LOC-001/002 reviewed and accepted by the PO in the C-027 review (2026-10-20).
 # REQ-LOC-003 (SF-097, C-033 addendum 2) reviewed by the PO 2026-10-23 (C-033 addendum 3).
 area: LOC
-baseline: "23f6cfd"
+baseline: "168e1d1"
 requirements:
   - id: REQ-LOC-001
     title: Field of the Locale DataSet
