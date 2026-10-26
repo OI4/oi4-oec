@@ -107,14 +107,14 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
   - The agent may split a cycle that grows too large (allowed by the PO), with the reason in the log. P2 sizing at `5b8fe59`: 159 `schema`/`d7-validate` REQs; 129 lack a positive and/or a negative vector (93 positive only, 15 negative only, 21 none); 29 topic forms with 126 payload vectors. At `cc2fb4b` (C-033 addendum 2): 160 such REQs (+ REQ-LOC-003, with negative vectors V-PAY-127/128, positive V-PAY-089), 128 payload vectors. C-034: 159 such REQs (REQ-BUS-002 → `d7-test`), 151 payload vectors; 129 gaps while the C-034 drafts are unreviewed, 96 after their review (projection). C-035: 159 such REQs (REQ-MSG-038 −`schema`, REQ-LIFE-003/007/009 +`d7-validate`), 175 payload vectors; 96 gaps while the C-035 drafts were unreviewed, 77 after their review (2026-10-25); entry schemas 5 of 29. C-036: 159 such REQs, 217 payload vectors, 147 topic vectors; 81 gaps while the C-036 drafts are unreviewed (the 8 extended guideline vectors are draft again), 48 after their review (2026-10-25); entry schemas 11 of 29. C-037: 159 such REQs, 230 payload vectors, 147 topic vectors; 48 gaps while the C-037 drafts were unreviewed, 35 after their review (2026-10-25); entry schemas 18 of 29. C-038: 159 such REQs, 239 payload vectors, 147 topic vectors; 33 gaps while the C-038 drafts were unreviewed (35 → 33 by two umbrellas), 19 after their review (2026-10-25); entry schemas 26 of 29. C-039: 158 such REQs (REQ-RES-CONFIG-011 → `d7-monitor`), 241 payload vectors, 147 topic vectors (+ 18 broker-json vectors, REQ-CNT-003 is `d8`); 16 gaps while the C-039 drafts are unreviewed (19 → 16 by the reclassification and two umbrellas), 15 after their review (2026-10-26); entry schemas 29 of 29. C-040: 158 such REQs, 244 payload vectors, 151 topic vectors; 11 gaps while the C-040 drafts are unreviewed (15 → 11 by the umbrellas), 0 after their review (2026-10-26, `coverage -check -gate` green – exit criterion 2 met).
 - **Exit:**
   1. ADR-0019 accepted. **C-041: met** (amendment C-041 accepted).
-  2. Every non-deprecated REQ with `schema` and/or `d7-validate` (159 at `5b8fe59`, 160 at `cc2fb4b` and `68d878d`, 159 since C-034 and at `a42a132`, 158 since C-039 at `23f6cfd` and `168e1d1`, including the 21 of the C-031 gap list) has at least one reviewed positive and one reviewed negative vector. Umbrella REQs are covered through their detail REQs, if the PO accepts ADR-0019 §9. `spectool coverage -gate` gates this (C-034). **C-041: met** – 158 REQs, 0 gaps.
+  2. Every non-deprecated REQ with `schema` and/or `d7-validate` (159 at `5b8fe59`, 160 at `cc2fb4b` and `68d878d`, 159 since C-034 and at `a42a132`, 158 since C-039 at `23f6cfd`, `168e1d1` and (C-045) `ccb475a`, including the 21 of the C-031 gap list) has at least one reviewed positive and one reviewed negative vector. Umbrella REQs are covered through their detail REQs, if the PO accepts ADR-0019 §9. `spectool coverage -gate` gates this (C-034). **C-041: met** – 158 REQs, 0 gaps.
   3. Every allowed matrix row has an entry schema, and the bare MetaData and `broker.json` have schemas. All valid vectors pass. Every invalid vector is rejected by its entry schema with exactly the REQs of `violates`, or the expectation list partitions its `violates` into schema REQs (reported exactly) and rule-layer REQs, which D7 `validate` then reports. **C-041: met** – 29 of 29 entry schemas, 25 rule-layer expectations.
   4. Both validators agree on every case. **C-041: met** – 634 cases, 0 disagreements (Python agrees, informative).
   5. The oracle (`oec/spec/tools/internal/payload`) checks every rule that a schema enforces, and `spectool lint` is green. **C-041: met** – `spectool crosscheck`, 0 disagreements.
   6. D7 `validate` (first increment) runs on Windows, macOS and Linux and reports REQ ids. (C-040: pure Go, cross-compiles for windows/linux/darwin; tests run on macOS.) **C-041: met** – no Windows/Linux test run before a hosted CI exists.
   7. Schemas are released with stable `$id`s (`2.0.0`, `$id` base decided). Hosting at the `$id` URLs follows the publication decision (Q-011). **C-041: met** – release 2.0.0 frozen (`oec/schema/release/2.0.0.json`, `CHANGELOG.md`); hosting open (Q-011).
 
-## P3 – SDK and conformance tool design (D2, D7, D8, D9) – decision phase, in progress (from C-042)
+## P3 – SDK and conformance tool design (D2, D7, D8, D9) ✅ (C-042 … C-045)
 
 Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Options: `research/sdk-architecture-comparison.md`, `research/sdk-options.md`. **Result: sketches and ADRs, no product code.** Small spikes under `oec/sdk/…` are allowed when they back a decision; they run in `oec/check.sh` or are marked as spikes.
 
@@ -156,16 +156,16 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
   - test catalog `oec/conformance/catalog/` (D7 54 tests, D8 17 tests, 5 `manual` entries) with a Go gate for coverage of all `d7-test`/`d7-monitor`/`d8` REQs and for SDK independence (Q-009);
   - CLI contract, attachment modes (bus/proxy/restart hook/peer), verdict model, exit codes 0–4, reports, distribution;
   - `oec/conformance/DESIGN.md`, ADR-0025 (proposed), Q-028 … Q-030.
-- **C-045 – P3 exit review** after the PO decisions on the C-042 … C-044 points:
-  - amendments of the ADRs from the answers;
-  - ADR-0020 … 0025 to `accepted`;
-  - ROADMAP P4/P4b/P5/P5b refined from the ADRs.
+- **C-045 – P3 exit review** (done 2026-10-26, see `log/2026-10-26_C-045_p3-exit.md`): the PO accepted D-1 … D-19 as recommended and R-1 … R-5:
+  - ADR-0020 … 0025 `accepted` with a "PO decision" section each; ADR-0017 amendment C-045 (JSON library settled by ADR-0024); Q-021 … Q-030 decided, all option (a);
+  - SF-101 (MG 8.3.8) and SF-102 (MG 7.2) implemented in the guideline on PO order; re-baseline on `ccb475a` (1401 items), new draft REQs REQ-RES-PUBLIST-026/027 and REQ-TOP-028; schema bundle `2.0.1-dev` (no content change); SF-103 (editorial) open;
+  - ROADMAP P4/P4b/P5/P5b/P6 refined from the ADRs.
 
 **Dependencies to the next phases:**
-- **P4 (D2):** needs ADR-0020, ADR-0021 and ADR-0023 accepted (C-045). P4 increments 5–8 implement ADR-0020; increment 10 implements ADR-0021.
-- **P4b (D9):** needs ADR-0022 and ADR-0024 accepted. Per ADR-0017 it does not depend on P4, so it can run in parallel.
-- **P5/P5b (D7/D8):** need ADR-0025 accepted. They do not depend on P4; the D7 `test` exit criterion needs an SDK example app (P4).
-- **P6 (demos):** needs P4 and Q-024 (language of the logger demo).
+- **P4 (D2):** ADR-0020, ADR-0021 and ADR-0023 accepted (C-045). P4 increments 5–8 implement ADR-0020; increment 10 implements ADR-0021.
+- **P4b (D9):** ADR-0022 and ADR-0024 accepted. Per ADR-0017 it does not depend on P4, so it can run in parallel.
+- **P5/P5b (D7/D8):** ADR-0025 accepted. They do not depend on P4; the D7 `test` exit criterion needs an SDK example app (P4).
+- **P6 (demos):** needs P4; the logger demo is written in C on the C ABI (Q-024), so it needs P4 increment 10.
 
 **Exit criteria** (concrete):
 1. ADR-0020 … ADR-0025 accepted by the PO; the earlier P3 decisions (ADR-0011 … 0017) are unchanged or amended.
@@ -174,27 +174,29 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
 4. Every API decision of ADR-0020 … 0022 names its REQ ids. Every `d7-test`, `d7-monitor` and `d8` REQ is mapped to a planned test of the D7/D8 catalog or explicitly marked `manual` (ADR-0025) – enforced by `oec/conformance/catalog/catalog_test.go` in `oec/check.sh` since C-044.
 5. Crate and library choices are documented with license, maintenance state and platform support (amd64/arm64 required, ARMv7 best effort) in ADR-0023/0024.
 
+**Exit assessment (C-045):** all five criteria are met. 1: ADR-0020 … 0025 accepted, ADR-0017 amended (C-045), ADR-0011 … 0016 unchanged. 2: Q-021 … Q-030 decided; SF-101/102 decided and resolved in the guideline (SF-103, found while implementing SF-101, is editorial and does not block). 3 and 4: enforced by `oec/sdk/check.sh` and `catalog_test.go` in `oec/check.sh` (green). 5: ADR-0023/0024. P3 closed by the PO acceptance of D-1 … D-19 and R-1 … R-5 (2026-10-26).
+
 ## P4 – SDK core implementation (D2)
 
 Incremental, each increment test-covered:
 
 1. Identity: IL validation, base64url codec, Oi4Identifier builder (optional dnp-encoding of its elements, MG 4.3.1/A3).
 2. Topic model: build/parse/validate, wildcard subscription builder.
-3. Message model: typed NetworkMessage/DataSetMessage/MetaData/Action messages (OPC UA 1.05.04, fixed content masks), MessageId/`ReplyTo`/Action correlation (`RequestId`, `CorrelationData`, `ResponseAddress`), schema validation hook.
-4. Bootstrap: explicit configuration (smart devices, Level 1) and optional container storage contract (`broker.json`, credentials/certs, ClientId from hostname).
-5. Connection & lifecycle: TLS MQTT client (own sans-IO MQTT 3.1.1 codec on tokio + rustls if Q-026 a is accepted, ADR-0023; fuzzing and interop tests against the dev broker of increment 9), Birth/Will/Close, Health heartbeat incl. `Details[]`, reconnect; selectable compliance level (L1/L2/L3).
-6. Provider side: resources registry, automatic answers to `Get`, `Profile`/`PublicationList` generation, publish modes, intervals/precisions, pagination, `MaxPacketSize`.
+3. Message model: typed NetworkMessage/DataSetMessage/MetaData/Action messages (OPC UA 1.05.04, fixed content masks), MessageId/`ReplyTo`/Action correlation (`RequestId`, `CorrelationData`, `ResponseAddress`), schema validation hook (schemas embedded by `build.rs`, ADR-0019 §7/ADR-0023; the SDK reports `schema.Version`/`schema.Baseline` of the embedded tree – the C-043 spike reported the newest release manifest, which differs during a pre-release such as `2.0.1-dev`).
+4. Bootstrap (blocking API by default, `run_async` for tokio users, Q-021; string-keyed Config getters, Q-022): explicit configuration (smart devices, Level 1) and optional container storage contract (`broker.json`, credentials/certs, ClientId from hostname).
+5. Connection & lifecycle: TLS MQTT client (own sans-IO MQTT 3.1.1 codec and session in `oec-core` on tokio + rustls, ADR-0023/Q-026; fuzzing and interop tests against the dev broker of increment 9), Birth/Will/Close, Health heartbeat incl. `Details[]`, reconnect; selectable compliance level (L1/L2/L3).
+6. Provider side: resources registry, automatic answers to `Get` (for every `Mode` except `OFF_0`, REQ-RES-PUBLIST-027), `Profile`/`PublicationList` generation with combined `ON_REQUEST_…` defaults (REQ-RES-PUBLIST-026), publish modes, intervals/precisions, pagination, `MaxPacketSize`.
 7. Write side: `Set`/`Del` handling with Status events, Config resource with validation.
 8. Consumer side: typed subscriptions, discovery helpers, `Get` request with correlation + timeout, pagination reassembly.
 9. Dev environment: docker compose with TLS broker (e.g. Mosquitto), generated dev PKI, sample `/etc/oi4` layout.
-10. C ABI `oec-ffi` (ADR-0021, added in C-042): cbindgen header that keeps the contract of the P3 sketch `oec.h`, shared + static library, C examples (`hello.c`, logger shape) as tests, also under AddressSanitizer.
+10. C ABI `oec-ffi` (ADR-0021, added in C-042): cbindgen header that keeps the contract of the P3 sketch `oec.h` (builder handles, string setters, JSON values, Q-023), shared + static library, C examples (`hello.c`, logger shape) as tests, also under AddressSanitizer. Prerequisite of the logger demo in C (P6, Q-024).
 - **Exit:** conformity test vectors pass; integration tests against broker pass (incl. D7 `test` against an SDK example app, as soon as available); example app documented.
 
 ## P4b – Micro SDK (D9)
 
 SDK for microcontroller-class smart devices without container (ADR-0016), written in **C17** with a platform abstraction layer; reference port ESP-IDF on **ESP32** (ADR-0017).
 
-- Portable core (IL/base64url, topics incl. percent-encoding, JSON encoding of NetworkMessage/MAM/Health, lifecycle state machine) + PAL (MQTT 3.1.1/TLS, clock, persistence); ESP-IDF port with `esp-mqtt` + `esp-tls`/mbedTLS (libraries and Will-per-connect procedure: ADR-0024; JSON: own encoder + bounded pull reader if Q-027 a is accepted); afterwards (best effort) **Arduino library** packaging with an Arduino-ESP32 PAL port (ADR-0017 amendment C-010).
+- Portable core (IL/base64url, topics incl. percent-encoding, JSON encoding of NetworkMessage/MAM/Health, lifecycle state machine) + PAL (MQTT 3.1.1/TLS, clock, persistence); ESP-IDF port with `esp-mqtt` + `esp-tls`/mbedTLS (libraries and Will-per-connect procedure: ADR-0024; JSON: own encoder + own bounded pull reader, Q-027; API prefix `oecm_`, ADR-0022/Q-025; `ServiceType` `OTConnector` for a directly connected smart device, REQ-TOP-028/SF-102); afterwards (best effort) **Arduino library** packaging with an Arduino-ESP32 PAL port (ADR-0017 amendment C-010).
 - C safety measures: static analysis, ASan/UBSan in host tests, fuzzing of topic/JSON parsers.
 - Tests: host unit tests (CMake, Unity) against the shared D1 test vectors on macOS/Windows/Linux; integration in Espressif QEMU (`esp32`) against the dev broker with D7 (to be confirmed); final check on a real ESP32 board.
 - Scope: designed for Messaging **L3** (all messages, ADR-0016 amendment C-016 / Q-019), delivered incrementally: first **L1** (Birth/Will, Pub MAM + Health, TLS + auth, topic and payload format), then L2 (Get, Set/Del where applicable) and L3 (all resources incl. `SubscriptionList`, `Call`/`Reply` + `NewDataSetWriterId`, empty-list behavior) in later increments.
@@ -216,7 +218,7 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
   - Data ⇒ Metadata; `Set`/`Del` ⇒ Status event with `ReplyTo`; `NewDataSetWriterId` Action (`Call`/`Reply`) correlation;
   - pagination/`MaxPacketSize`, Locale;
   - negative cases (invalid requests are rejected/ignored as specified).
-- Test catalog: every test case references REQ ids and guideline sections; selectable by tag and by compliance profile `level1` / `level2` / `level3` (declared level passed as CLI parameter and includes lower levels, MG 1.3). Planned in C-044: `oec/conformance/catalog/d7.yaml` (status `planned` → `implemented`), architecture in `oec/conformance/DESIGN.md` and ADR-0025 (attachment modes incl. proxy, verdict model, exit code 4 "inconclusive", Q-028 … Q-030). Start: `internal/mqttwire` + capture + `monitor --replay`.
+- Test catalog: every test case references REQ ids and guideline sections; selectable by tag and by compliance profile `level1` / `level2` / `level3` (declared level passed as CLI parameter and includes lower levels, MG 1.3). Planned in C-044: `oec/conformance/catalog/d7.yaml` (status `planned` → `implemented`), architecture in `oec/conformance/DESIGN.md` and ADR-0025 (accepted C-045): attachment modes bus/proxy/restart hook/peer – proxy mode required for a full level claim (Q-028); the tester is not announced on the bus by default, `--announce` optional (Q-029); verdict model with exit code 4 "inconclusive" and `--allow-skip` (Q-030). Start: `internal/mqttwire` + capture + `monitor --replay`, then `test` with the bus attachment, then proxy.
 - Connection: CLI flags/config file and optionally the container storage contract (`/etc/oi4/mqtt`, …); TLS + user/password or client certificate; explicit `--insecure` dev mode only.
 - Output: human-readable console report, machine-readable JSON and JUnit XML; meaningful exit codes for CI.
 - Distribution: single self-contained executable per OS/arch (Windows x64/arm64, macOS arm64/x64, Linux) and container image.
@@ -229,13 +231,13 @@ Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance 
 - `inspect-image` – offline: analyze an OCI image (registry reference or archive): OCI format, exactly one canonical SBOM (`sbom.spdx.json` / `sbom.cdx.json`) + license texts (`<License-ID>.txt` or embedded) in `/opt/oi4/licenses` (RIG 4.1.4), storage paths, user, labels, digest/integrity.
 - `inspect-container` – a running app container: storage mounts (`/etc/oi4/...`, `/run/secrets/...`), hostname = container name rules, networks.
 - `inspect-platform` – platform host/broker as far as testable (TLS-only broker, `broker.json` provisioning, registry ports 5798/5799).
-- Command names and catalog per ADR-0025 (proposed, C-044): `image`, `run` (sandbox start with generated storages), `container`, `host`, `bus` replace the working names `inspect-image`/`inspect-container`/`inspect-platform` above; catalog `oec/conformance/catalog/d8.yaml`.
+- Command names and catalog per ADR-0025 (accepted C-045; start with `image`, exit code 4 "inconclusive" as D7): `image`, `run` (sandbox start with generated storages), `container`, `host`, `bus` replace the working names `inspect-image`/`inspect-container`/`inspect-platform` above; catalog `oec/conformance/catalog/d8.yaml`.
 - **Exit:** our demo and registry images pass `level3`; purpose-built faulty images fail.
 
 ## P6 – Demo services (D3, D4)
 
 - **Weather service** (`OTConnector`): weather stations as assets (each with its own IL + MAM), `Data` (Oi4Pv: e.g. temperature as `Pv`, humidity/pressure/wind as `Sv<n>`) + `Metadata` with units, `Config` for locations and polling interval, `Health` reflecting API reachability. Data source via provider interface: default MET Norway (keyless, CC BY 4.0, honor User-Agent/caching/attribution rules) + offline simulation provider (ADR-0010, G-4.7).
-- **Logger service** (`Utility`): subscribes to selectable topics/resources (default: `Event`, `Health`, optionally `Data`), logs structured output (stdout/JSON, optional file), configurable via the `Config` resource, shows the consumer side of the SDK.
+- **Logger service** (`Utility`): **written in C on the C ABI of D2** (`oec-ffi`, ADR-0021, Q-024 decided in C-045); subscribes to selectable topics/resources (default: `Event`, `Health`, optionally `Data`), logs structured output (stdout/JSON, optional file), configured via file/environment (ADR-0016), shows the consumer side of the SDK from C. The writable `logging` DataSet of the P3 sketch is optional.
 - Both: Dockerfile (OCI, SBOM + license texts in `/opt/oi4/licenses`), compose integration, README. Service Container Level 3 (ADR-0016).
 - **Compliance targets (ADR-0016):** weather = Messaging **L3** (full provider showcase); logger = Messaging **L1** (minimal participant; configured via file/environment instead of the `Config` resource).
 - **Exit:** both demos run in the dev environment and pass D7 (`level3` resp. `level1` profile) and D8 (`level3`).

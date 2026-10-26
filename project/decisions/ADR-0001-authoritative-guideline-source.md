@@ -523,3 +523,12 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
 
 - The previous baseline `23f6cfd` is recorded in amendment C-039; the register commits `68141cb` and `7808df7` touch only `findings/` (no re-baseline).
 - The baseline is now `168e1d1` on branch `feature/spec-findings`. Local commit: SF-100 (decided by the PO as proposed in the C-039 review, PO order 2026-10-26 to implement the RIG text) – RIG 4.1.1 `Address` value range "`<IPv4 address, IPv6 address (without brackets) or host name (RFC 1123)>`" with a description of the forms (no port, scheme or path), `SecurePort` value range "`1 … 65535`", and after the element list "Clients ignore elements of `broker.json` they do not know."; no GL-ADR. Spec re-baselined in `b70eb87`: 1399 inventory items (+1 implicit item RIG-4.1.1-77f0d05d), REQ-CNT-003 and REQ-CNT-004 reworded (`draft`), no key change. SF-001 … 100 resolved.
+
+## Amendment C-045 (2026-10-26, guideline baseline `ccb475a`)
+
+- The previous baseline `168e1d1` is recorded in amendment C-039 addendum 2; the register commits `7808df7` and `f80eba7` (SF-101/102 opened in C-042) touch only `findings/` (no re-baseline).
+- The baseline is now `ccb475a` on branch `feature/spec-findings`. Local commits, both decided by the PO as proposed in the C-045 review with the order to implement the text, no GL-ADR:
+  - `df38e72` – SF-101, MG 8.3.8 after the list of modes: for resources that can be requested with `Get`, every `Mode` except `OFF_0` allows `Get`; the combined `ON_REQUEST_…` values equal the publishing modes alone and should be used. The proposed sentence was scoped to requestable resources by the agent, because `Event` entries can not be requested.
+  - `ccb475a` – SF-102, MG 7.2: a smart device connected directly to the Message Bus uses the `ServiceType` `OTConnector`.
+- Register commit `13d6b1a`: SF-101/102 resolved, SF-103 opened (editorial, open). Spec re-baselined in `0e5ca66`: 1401 inventory items (+2 items of MG 8.3.8), no key change; new draft REQs REQ-RES-PUBLIST-026/027 and REQ-TOP-028. The schema bundle moved to `2.0.1-dev` with baseline `ccb475a` (`f96c95f`). SF-001 … 102 resolved, SF-103 open.
+
