@@ -79,9 +79,9 @@ impl Asset {
         unimplemented!()
     }
 
-    /// Replaces the `Details`; `Health` is then at least the most severe
-    /// detail (REQ-RES-HEALTH-002) and a change is published
-    /// (REQ-RES-HEALTH-004).
+    /// Replaces the `Details`; `Health` then equals the Health with the
+    /// highest priority of the Details (REQ-RES-HEALTH-002; ADR-0020
+    /// amendment C-049) and a change is published (REQ-RES-HEALTH-004).
     pub fn set_health_details(&self, details: Vec<HealthDetail>) {
         unimplemented!()
     }

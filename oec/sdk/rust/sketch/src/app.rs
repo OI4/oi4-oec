@@ -52,8 +52,9 @@ impl Broker {
         unimplemented!()
     }
 
-    /// CA that verifies the broker certificate (REQ-MQTT-008). Without it
-    /// the platform trust store is used.
+    /// CA that verifies the broker certificate (REQ-MQTT-008); required
+    /// (`build` fails without it). Trust comes only from this file, not
+    /// from the platform trust store (ADR-0020 amendment C-050).
     pub fn ca_pem(self, pem_file: impl Into<PathBuf>) -> Self {
         unimplemented!()
     }
@@ -183,7 +184,9 @@ impl App {
     }
 
     /// Same as [`App::run`] inside an existing tokio runtime. The future is
-    /// `Send`, so it can be spawned.
+    /// `Send`, so it can be spawned. It does not listen for signals: the
+    /// application owns them and calls [`AppHandle::shutdown`] (ADR-0020
+    /// amendment C-050).
     #[allow(clippy::manual_async_fn)]
     pub fn run_async(self) -> impl Future<Output = Result<()>> + Send {
         async { unimplemented!() }
