@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, after C-050 (guideline `734c560`, register `fce5cf5`); P4 in progress. **Nothing open for the PO.**_
+_Last updated: 2026-10-26, after C-051 (guideline `734c560`, register `a286511`); P4 in progress. **One item to decide: D-1 (SF-105).**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -24,15 +24,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-048 (P4 increment 4): crate `oec` with `Level`, `Error`, `App`/`AppBuilder`, `Bootstrap` (container storage contract and explicit `Broker`), `Store`, identity/MAM and string-keyed Config getters; all 18 `broker.json` vectors as tests with the same verdicts as `platform/broker.schema.json`; new runtime dependencies thiserror and log under `cargo deny` without exceptions; increment 5 split into 5a (C-049) and 5b (C-050). No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-17 … A-24 are for information. C-049 runs in a new agent; `prompt.md` is filled.
 - C-049 (P4 increment 5a): sans-IO in `oec-core` – own MQTT 3.1.1 codec (canonical, every refusal names its MQTT rule or REQ) and client `Session` as a state machine (new Will per CONNECT, keep alive, QoS 1, subscriptions, close → Will), `lifecycle` (Will/Birth/Close equal the role vectors V-PAY-025/023/024, Health heartbeat, Health checks), `MessageIds`; proptest as the only new (dev) dependency, `cargo deny` without exceptions. No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-25 … A-31 are for information. C-050 runs in a new agent; `prompt.md` is filled.
 - C-050 (P4 increment 5b): runtime in `oec` – TLS transport on tokio + rustls (CA-only trust, client certificate or credentials, PKCS#8 keys with passphrase), `App::run`/`run_async`/`handle`, `AppHandle`, `ConnectionState`, `on_connection`, reconnect with backoff, driving the `Session` and `Lifecycle` of C-049; runtime tests against an in-process TLS test broker; new dependencies tokio, rustls, tokio-rustls, rustls-pki-types, pkcs8 (dev: rcgen) under `cargo deny` without exceptions. No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-32 … A-41 are for information. Two of them refine the accepted sketch contract (ADR-0020 amendment C-050) and are worth a look: **A-34** (an explicit `Broker` needs a CA) and **A-37** (`run_async` installs no signal handlers). Increment 9 (C-051) runs in a new agent; `prompt.md` is filled.
+- C-051 (P4 increment 9): dev environment `oec/dev` – Mosquitto 2.1.2 pinned by digest (TLS 1.2/1.3, a password-file listener and a client-certificate listener), a dev PKI generator in Go (standard library), two sample container storages; opt-in interop tests of increment 5 against it via `oec/dev/interop.sh` (8 green, the gate stays without Docker); the C-050 smoke test is replaced. No SDK defect, no new dependency, no reviewed item changed, no new vector. **One finding: SF-105** (`MaxPacketSize` is a payload limit, brokers limit whole packets) → **D-1** to decide. A-42 … A-49 are for information. The P5 interleave (C-052) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema unchanged (`2.0.1-dev` @ `734c560`).
 
-Logs: [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
+| D-1 | SF-105: `MaxPacketSize` (payload) vs. the packet limit of the broker | decide | C-051 | as proposed (broker accepts every payload ≤ `MaxPacketSize`) | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -74,10 +76,39 @@ Logs: [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10
 | A-39 | In-process TLS test broker with rcgen PKI; env-gated smoke test; no outside network in the gate | info (agent) | C-050 | – | – |
 | A-40 | Dependencies tokio, rustls, tokio-rustls, rustls-pki-types, pkcs8; features `crypto-aws-lc-rs`/`crypto-ring`; tree 22 → 73; no deny exception | info (agent) | C-050 | – | – |
 | A-41 | Cycle cut: C-050 not split, next increment 9; `set_health` stays in the sketch; ADR-0026 §9.6 wording fix | info (agent) | C-050 | – | – |
+| A-42 | Dev environment `oec/dev`; dev PKI generator in Go (standard library), its tests and a config lint in the gate | info (agent) | C-051 | – | – |
+| A-43 | Mosquitto 2.1.2 pinned by tag + digest; listeners 8883 (password file) and 8884 (client certificate, CN = user); TLS 1.2 minimum; loopback ports; persistence | info (agent) | C-051 | – | – |
+| A-44 | Broker packet limits: payload limit = `MaxPacketSize`, packet limit = `MaxPacketSize` + 65544 (follows the SF-105 proposal) | info (agent) | C-051 | – | – |
+| A-45 | Sample container storages: two roots (credentials / certificate with encrypted key), `Address` `localhost`, no `broker_ca.pem` | info (agent) | C-051 | – | – |
+| A-46 | Opt-in interop: `OEC_INTEROP=1` via `oec/dev/interop.sh`, skip with exit 0 without an engine, `OEC_COMPOSE` for Podman, pulls only there | info (agent) | C-051 | – | – |
+| A-47 | Interop test design: probe on the `oec-core` codec, killed child process for the Will, persistent probe + MessageId filter for the restart | info (agent) | C-051 | – | – |
+| A-48 | Smoke test (`OEC_SMOKE_*`) replaced by `explicit_broker`; no new dependency, ADR-0023 unchanged | info (agent) | C-051 | – | – |
+| A-49 | Cycle cut: C-051 not split; next the P5 interleave (C-052), then increments 6–8 and 10 | info (agent) | C-051 | – | – |
 
 ## Decisions and review items
 
-None open. Answered in the C-046 review (2026-10-26) and applied in C-046 addendum 3:
+### D-1 – SF-105: `MaxPacketSize` and the packet limit of the broker (RIG 4.1.1)
+
+- **Found:** while configuring Mosquitto 2.1.2 for the dev environment (C-051); register entry `a286511`, details in the register and in the [C-051 log](log/2026-10-26_C-051_dev-environment-interop.md).
+- **What the guideline says:** `MaxPacketSize` in `broker.json` is "the maximum size of a MQTT payload in bytes" (SF-091 (b)) and is meant to "protect the Message Bus broker and client". It says nothing about how the platform configures the broker.
+- **The problem:**
+  - (a) Brokers usually limit the whole **packet** (Mosquitto `max_packet_size`, MQTT 5 Maximum Packet Size). A PUBLISH carries up to 65544 octets of header and topic on top of the payload. A platform that sets the broker limit to `MaxPacketSize` disconnects a compliant publisher whose payload is exactly `MaxPacketSize`. Measured with Mosquitto 2.1.2: "oversize packet", the connection is closed, and the broker publishes the Will.
+  - (b) The upper bound 268435455 is the MQTT *remaining length* (topic and packet id included), so a payload can never be that large.
+  - (c) What the broker does with a larger payload is open: Mosquitto `message_size_limit` drops it silently, and a packet limit disconnects the publisher.
+- **Proposed interpretation (recommended):**
+  - (a) keep the payload semantics; the broker accepts every payload ≤ `MaxPacketSize` (a payload limit, or a packet limit ≥ `MaxPacketSize` + 65544). Proposed text for RIG 4.1.1: "The broker accepts every MQTT payload up to `MaxPacketSize`. If the broker limits the size of the whole MQTT packet, this limit includes the fixed header, the topic and the packet identifier and must therefore be larger than `MaxPacketSize` (by 65544 octets for any topic)."
+  - (b) add: "A payload is limited further by the MQTT packet: payload + topic length + 4 must not exceed 268435455."
+  - (c) no rule: a larger publication already violates MG 8.3.11, so the broker may drop it or close the connection; D8 checks only that payloads up to `MaxPacketSize` are accepted.
+- **Alternatives:** (d) redefine `MaxPacketSize` as a packet limit (changes SF-091 (b), the SDK limit and REQ-PAG-005); (e) leave the text as it is (platforms may keep disconnecting compliant publishers).
+- **Impact if decided as proposed:**
+  - guideline text RIG 4.1.1 by your order, re-baseline;
+  - REQ-CNT-003 quote and notes follow the text (→ `draft`, back to you as R-x);
+  - the dev broker and the SDK already behave this way.
+- **PO:** ☐ as proposed ☐ (d) ☐ (e) ☐ other: …
+
+### Answered earlier
+
+Answered in the C-046 review (2026-10-26) and applied in C-046 addendum 3:
 - D-1 – align MG 4.3.1/A3 with SF-104: ☑ yes → guideline `734c560`, SF-104 resolved (`fce5cf5`), re-baseline.
 - R-1 – REQ-IL-033 (MUST) and REQ-IL-022: ☑ accepted → `reviewed` (REQ-IL-033 quotes remapped to the aligned text, mechanical).
 - R-2 – V-PAY-245: ☑ accepted → `reviewed`.
@@ -305,6 +336,62 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - `set_health`/`set_health_details` stay in the sketch until `Asset` moves (increment 6); the sketch doc says "equals" now.
   - ADR-0026 §9.6 and A-29 described the MessageId counter as `-1`, `-2`; the code (and REQ-MSG-007) append it to the timestamp. Wording fixed, code unchanged.
 
-## Next (C-051)
+### A-42 … A-49 – P4 increment 9 (C-051, agent)
 
-1. P4 increment 9 – dev environment `oec/dev`: docker compose with Mosquitto (TLS, password file, client certificates), a generated dev PKI, a sample `/etc/oi4` layout; interop tests of increment 5 against it (opt-in, so the default gate needs no container engine). Runs in a new agent (start prompt in `prompt.md`). No new runtime dependency expected.
+- **Where:**
+  - `oec/dev/` (`compose.yaml`, `mosquitto/mosquitto.conf`, `pki/*.go`, `interop.sh`, `README.md`);
+  - `oec/sdk/rust/oec/tests/interop.rs`;
+  - `oec/check.sh` step 6;
+  - ADR-0026 §11;
+  - log [C-051](log/2026-10-26_C-051_dev-environment-interop.md).
+- **A-42 Dev environment and PKI generator:**
+  - `go run ./pki` (Go module `oec/dev`, standard library only) writes everything into the git-ignored `oec/dev/generated/`:
+    - ECDSA P-256 CA and certificates;
+    - the Mosquitto `$7$` password file;
+    - a PKCS#8 PBES2 key with passphrase;
+    - two sample storages.
+  - `-force` replaces only its own output (marker file).
+  - Go instead of an `openssl` script: portable to Windows/macOS/Linux, no LibreSSL/OpenSSL differences, no `mosquitto_passwd` needed.
+  - Its tests also lint `mosquitto.conf` and `compose.yaml` and run in the gate (step 6) without Docker.
+- **A-43 Broker:**
+  - `eclipse-mosquitto:2.1.2-alpine` pinned by tag and multi-arch digest.
+  - `8883`: TLS + password file (REQ-MQTT-009).
+  - `8884`: TLS + client certificate required, CN = user name (REQ-MQTT-010).
+  - `tls_version tlsv1.2` is the minimum (1.3 negotiated); TLS 1.0/1.1 are refused, checked with OpenSSL.
+  - No plain or anonymous access.
+  - Ports on `127.0.0.1`; persistence on (needed for the restart test).
+  - The entrypoint copies the TLS files to a broker-owned directory with mode 0600, so host permissions do not matter.
+- **A-44 Packet limits:**
+  - `message_size_limit 262144` (= `MaxPacketSize` of the sample `broker.json`: larger payloads are dropped, the connection stays);
+  - `max_packet_size 327688` (= 262144 + 65544: a packet with a full payload and the longest topic passes).
+  - This follows the proposal of SF-105 (D-1). The test `max_packet_size_limits_the_payload` pins it.
+- **A-45 Sample storages:**
+  - `generated/roots/oec-dev-app` (credentials, 8883) and `generated/roots/oec-dev-cert` (certificate + encrypted key + passphrase, 8884), laid out per RIG 4.1, read by `Bootstrap::ContainerStorage { root }`.
+  - `broker.json` has exactly the three keys of V-BRK-001 … 018, no new format.
+  - `Address` is `localhost` (apps run on the host); in a container on the compose network use `mosquitto`.
+  - No `broker_ca.pem`, so the fallback to `ca.pem` is used.
+- **A-46 Opt-in contract:**
+  - The interop tests are no-ops unless `OEC_INTEROP=1`. The gate compiles and lints them but needs no engine and no network.
+  - `oec/dev/interop.sh`:
+    - checks the container engine (none → note, exit 0);
+    - generates the PKI if missing;
+    - starts the broker, runs the tests single-threaded, removes the broker (`OEC_INTEROP_KEEP=1` keeps it).
+  - `OEC_COMPOSE` selects the compose command (Podman).
+  - Image pulls happen only here.
+- **A-47 Test design:**
+  - A probe client (on the `oec-core` codec) watches `Oi4v2/#` like a second application.
+  - For the Will, the test binary starts itself as a child process and kills it (no Close, no DISCONNECT possible).
+  - For the broker restart the probe keeps a persistent session and ignores redelivered messages older than the restart (by MessageId time), so a stale Will cannot pass the test.
+- **A-48 Smoke test and dependencies:**
+  - `explicit_broker` (explicit `Broker` with CA and credentials against the dev broker) replaces the env-gated smoke test of C-050 (`OEC_SMOKE_*` removed).
+  - No new Rust or Go dependency; ADR-0023 unchanged.
+  - No SDK defect was found. Two test defects were fixed before the commit: the AppId in the topic is base64url-encoded, and QoS 1 redelivery after the restart.
+- **A-49 Cycle cut:**
+  - C-051 not split.
+  - Next: the P5 interleave (C-052: D7 `internal/mqttwire`, capture, `monitor --replay`, then `monitor` live against this broker), then increments 6–8 and 10.
+  - C-050 risks closed: interop with a real broker, reconnect after a broker restart. Open as before: Windows/ARMv7 builds (CI), heartbeat timing (core tests), no offline queue (increment 6).
+
+## Next (C-052)
+
+1. **D-1 (SF-105)** – your decision; afterwards guideline text, register, re-baseline and REQ-CNT-003 (→ R-x) in the next cycle.
+2. P5 interleave – D7 (Go, `oec/conformance`): `internal/mqttwire`, `internal/capture`, `monitor --replay`, then `monitor` live against the dev broker `oec/dev`. Runs in a new agent (start prompt in `prompt.md`).

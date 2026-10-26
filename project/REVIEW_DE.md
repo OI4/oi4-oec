@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-050 (P4 läuft). **Für dich ist gerade nichts offen.**_
+_Stand: 26.10.2026, nach C-051 (P4 läuft). **Für dich offen: eine Entscheidung, D-1 (SF-105).**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,18 +24,40 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** C-050 hat wie C-049 nur Code und Technik-Entscheidungen gebracht:
-- Keine reviewte REQ und kein reviewter Vektor wurde geändert.
-- Es gibt keinen neuen Vektor.
-- Es gibt kein neues Finding in der Guideline.
+C-051 hat die **Entwicklungsumgebung** gebracht: einen echten Mosquitto-Broker in Docker mit TLS, selbst erzeugte Test-Zertifikate und Beispiel-Ordner für `/etc/oi4`. Dagegen laufen jetzt die **Interop-Tests** des SDK, also Tests mit einem echten Broker statt mit unserem kleinen Test-Broker. Alle 8 Tests sind grün; einen Fehler im SDK haben sie nicht gefunden.
+- Keine reviewte REQ und kein reviewter Vektor wurde geändert, es gibt keinen neuen Vektor.
+- Beim Einrichten des Brokers ist mir aber eine **Lücke in der Guideline** aufgefallen: **SF-105**. Darüber musst du entscheiden (D-1).
 
-C-050 hat das SDK zum ersten Mal wirklich mit einem Broker verbunden (TLS, Anmelden, Birth, Health, Close, Neuaufbau). Zwei Punkte präzisieren die Skizze, die du kennst. Sie stehen in ADR-0020 als Nachtrag und sind einen Blick wert:
-- **A-34:** Wer den Broker im Code selbst angibt, muss auch dessen CA-Zertifikat mitgeben.
-- **A-37:** `run_async` fängt kein Strg-C ab, das macht die App selbst.
+### D-1 – SF-105: Wie groß darf eine Nachricht am Broker sein? (RIG 4.1.1)
 
-Details unten bei A-32 … A-41. Außerdem habe ich einen Schreibfehler aus C-049 korrigiert: Bei A-29 war das Format der MessageId falsch beschrieben (der Code war richtig).
+**Worum geht es?** In `broker.json` steht `MaxPacketSize`. Laut Guideline ist das die größte erlaubte **Nutzlast** (Payload) einer MQTT-Nachricht, also nur der JSON-Teil. So haben wir es in SF-091 auch festgelegt. Die Guideline sagt aber nicht, wie die Plattform den **Broker** einstellen soll.
 
-Die Punkte A-1 … A-41 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
+**Das Problem:**
+- Broker begrenzen meist das **ganze Paket**, nicht nur die Nutzlast. Bei Mosquitto heißt die Einstellung `max_packet_size`, und in MQTT 5 ist es genauso.
+- Zum Paket gehören aber außer der Nutzlast noch Kopf und Topic, zusammen bis zu 65544 Byte.
+- Stellt eine Plattform den Broker-Wert einfach auf `MaxPacketSize`, dann wirft der Broker eine App hinaus, die sich genau an die Regel hält und eine Nutzlast von genau `MaxPacketSize` schickt. Schlimmer noch: Er verschickt dabei ihren Will, alle sehen „App ausgefallen“.
+- Das habe ich mit Mosquitto 2.1.2 nachgemessen, es ist also nicht nur Theorie.
+- Zwei Kleinigkeiten kommen dazu:
+  - Der genannte Höchstwert 268435455 ist eigentlich die Grenze für das ganze Paket. Eine Nutzlast kann nie so groß werden.
+  - Offen ist auch, was mit einer zu großen Nachricht passiert: Mosquitto kann sie still verwerfen oder die App trennen.
+
+**Mein Vorschlag (empfohlen):**
+- (a) `MaxPacketSize` bleibt eine Grenze für die Nutzlast. Neu wird ausdrücklich gesagt: Der Broker muss jede Nachricht bis `MaxPacketSize` Nutzlast annehmen. Begrenzt er das ganze Paket, muss seine Grenze um den Platz für Kopf und Topic größer sein (65544 Byte). Ein fertiger Satz für RIG 4.1.1 steht in `REVIEW.md`.
+- (b) Ein Hinweis, dass Nutzlast + Topic-Länge + 4 nicht über 268435455 gehen dürfen.
+- (c) Keine Regel für zu große Nachrichten: Die sind ohnehin verboten (MG 8.3.11), der Broker darf sie verwerfen oder die App trennen. D8 prüft später nur, dass erlaubte Größen durchkommen.
+
+**Alternativen:**
+- (d) `MaxPacketSize` zur Grenze für das ganze Paket machen. Dann ändern sich SF-091, REQ-PAG-005 und das SDK.
+- (e) Nichts ändern. Dann können Plattformen weiter regeltreue Apps hinauswerfen.
+
+**Was dann passiert:**
+- Ich ändere den Text der Guideline nach deinem Auftrag und baseline neu.
+- REQ-CNT-003 passt sich an und kommt als R-x zu dir zurück.
+- Unser Dev-Broker und das SDK verhalten sich schon so, wie ich es vorschlage.
+
+Antwort z. B. „D-1 wie vorgeschlagen“.
+
+Die Punkte A-1 … A-49 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
 Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.
 
@@ -45,7 +67,19 @@ Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-051
+
+- **Entwicklungsumgebung (`oec/dev`):** ein fertig eingerichteter Broker zum Ausprobieren auf dem eigenen Rechner. Gestartet wird er mit `docker compose up`; die Anleitung steht in `oec/dev/README.md`.
+- **Mosquitto:** ein verbreiteter, freier MQTT-Broker. Wir nutzen Version 2.1.2 und haben das Image über seinen Digest (eine Prüfsumme) festgenagelt. Es kommt also immer genau dasselbe Image, auch wenn jemand den Versions-Namen neu belegt.
+- **Listener:** ein Port, an dem der Broker Verbindungen annimmt. Wir haben zwei, beide nur mit TLS:
+  - 8883 für Anmeldung mit Benutzername und Passwort;
+  - 8884 für Anmeldung mit Client-Zertifikat.
+- **Dev-PKI:** die Test-Zertifikate (eine eigene CA, ein Zertifikat für den Broker, Zertifikate für die Apps). Ein kleines Go-Programm erzeugt sie mit `go run ./pki`. Sie landen im Ordner `generated/`, der nie committet wird. Jeder erzeugt sich seine eigenen.
+- **Interop-Test:** ein Test, ob unser SDK mit einem fremden, echten Broker zusammenarbeitet. Er braucht Docker und läuft deshalb nur auf Wunsch über `oec/dev/interop.sh`. Ohne Docker meldet das Skript „übersprungen“ und bricht nichts. Die normale Prüfung `oec/check.sh` braucht weiter kein Docker.
+- **Probe:** ein zweiter, mithörender MQTT-Client in den Tests. Er sieht, was die App wirklich am Broker veröffentlicht, so wie eine andere App auf dem Bus.
+- **Kindprozess:** Um den Will zu testen, muss die App „hart sterben“, ohne sich abzumelden. Der Test startet die App deshalb als eigenen Prozess und beendet ihn gewaltsam (wie `kill -9`). Dann muss der Broker den Will verschicken.
 
 ### Begriffe aus C-050
 
@@ -144,11 +178,54 @@ Neu aus C-050 (das Netzwerk, `App::run`):
 - **A-40 (neu) – Bibliotheken:** tokio, rustls, tokio-rustls, rustls-pki-types und pkcs8 (für die Passphrase), alle in ADR-0023 erlaubt bzw. dort nachgetragen; zum Testen rcgen (erzeugt Zertifikate). Das SDK zieht damit 73 statt 22 Bibliotheken nach sich, vor allem wegen tokio und der Kryptografie. Alle Lizenzen sind auf der erlaubten Liste, cargo-deny ist ohne Ausnahme grün. Wer statt aws-lc-rs lieber ring nimmt (z. B. weil dafür kein C-Compiler mit Assembler nötig ist), schaltet das Feature `crypto-ring` ein.
 - **A-41 (neu) – Zyklusschnitt und Kleinkram:** C-050 wurde nicht geteilt. Als Nächstes kommt Inkrement 9 (Entwicklungsumgebung mit echtem Broker). `set_health` zieht erst mit Inkrement 6 aus der Skizze ins SDK; in der Skizze steht aber schon „genau“ statt „mindestens“ (A-28). Den Schreibfehler bei A-29 habe ich in ADR-0026 und hier korrigiert.
 
+
+Neu aus C-051 (Entwicklungsumgebung und Interop-Tests):
+- **A-42 (neu) – Entwicklungsumgebung und Zertifikate:**
+  - Die Test-Zertifikate erzeugt ein kleines Go-Programm statt eines Shell-Skripts mit `openssl`. Grund: `openssl` verhält sich auf macOS, Linux und Windows unterschiedlich, Go läuft überall gleich.
+  - Es braucht keine fremde Bibliothek.
+  - Seine Tests prüfen auch die Broker-Einstellungen und laufen in der normalen Prüfung mit, ohne Docker.
+- **A-43 (neu) – Broker:**
+  - Mosquitto 2.1.2, fest über den Digest.
+  - Zwei TLS-Ports: 8883 mit Passwort, 8884 mit Client-Zertifikat. Der Name im Zertifikat ist dort der Benutzername.
+  - TLS 1.2 ist das Minimum, 1.3 geht auch. TLS 1.0/1.1 lehnt der Broker ab; das habe ich mit OpenSSL nachgeprüft.
+  - Kein unverschlüsselter Zugang, keine Anmeldung ohne Passwort.
+  - Die Ports sind nur auf dem eigenen Rechner erreichbar.
+- **A-44 (neu) – Größengrenzen am Broker:** So eingestellt, wie ich es in SF-105 vorschlage:
+  - Nutzlast bis 262144 Byte (= `MaxPacketSize`);
+  - das ganze Paket bis 262144 + 65544 Byte.
+  - Ein Test prüft beides.
+- **A-45 (neu) – Beispiel-Ordner für `/etc/oi4`:** Es gibt zwei fertige Beispiele:
+  - eine App mit Passwort;
+  - eine App mit Client-Zertifikat und verschlüsseltem Schlüssel.
+  - Das SDK liest sie direkt ein. `broker.json` hat genau die Form unserer Testvektoren, es ist kein neues Format.
+- **A-46 (neu) – Nur auf Wunsch:**
+  - Die Interop-Tests laufen nur mit `OEC_INTEROP=1`, und das setzt `interop.sh`.
+  - Ohne Docker meldet das Skript „übersprungen“ und endet ohne Fehler.
+  - Podman geht über die Variable `OEC_COMPOSE`.
+  - Images werden nur in diesem Pfad heruntergeladen.
+- **A-47 (neu) – Wie die Tests prüfen:**
+  - Ein mithörender Client (Probe) sieht, was am Broker ankommt.
+  - Für den Will wird die App als Kindprozess hart beendet.
+  - Beim Broker-Neustart werden alte, vom Broker nochmals zugestellte Nachrichten an ihrer Zeit in der MessageId erkannt und übersprungen. So kann kein alter Will den Test fälschlich bestehen lassen.
+- **A-48 (neu) – Smoke-Test ersetzt, keine neuen Bibliotheken:**
+  - Der Smoke-Test aus C-050 ist durch den Interop-Test `explicit_broker` ersetzt.
+  - Es gibt keine neue Rust- oder Go-Bibliothek.
+  - Im SDK wurde kein Fehler gefunden. Zwei Fehler in meinen eigenen Tests habe ich vor dem Commit behoben.
+- **A-49 (neu) – Zyklusschnitt:**
+  - C-051 wurde nicht geteilt.
+  - Als Nächstes kommt der P5-Einschub (D7: `monitor`, erst offline mit aufgezeichneten Nachrichten, dann live gegen diesen Broker), danach die Inkremente 6 bis 8 und 10.
+  - Erledigt aus den C-050-Risiken: Zusammenspiel mit einem echten Broker und Neuaufbau nach einem Broker-Neustart.
+
 ---
 
-### Was als Nächstes passiert (C-051)
+### Was als Nächstes passiert (C-052)
 
-1. P4 Inkrement 9: eine Entwicklungsumgebung unter `oec/dev`. Ein Mosquitto-Broker in Docker mit TLS, Passwort-Datei und Client-Zertifikaten, ein Skript, das die Test-Zertifikate erzeugt (nichts Geheimes im Repo), und ein Beispiel für `/etc/oi4`. Dagegen laufen dann die echten Interop-Tests von Inkrement 5: Anmelden mit Passwort bzw. Zertifikat, Will beim Abschießen der App, Neuaufbau nach einem Broker-Neustart. Diese Tests muss man ausdrücklich einschalten; die normale Prüfung braucht weiter kein Docker. Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
+1. **Deine Entscheidung zu D-1 (SF-105).** Danach setze ich sie um: Guideline-Text, Register, Neu-Baseline, REQ-CNT-003 zum Review.
+2. **P5-Einschub – D7** (das Compliance-Tool in Go):
+   - eine eigene MQTT-Anbindung (`internal/mqttwire`);
+   - Aufzeichnen und Abspielen von Nachrichten (`internal/capture`, `monitor --replay`);
+   - danach `monitor` live gegen den Dev-Broker aus C-051.
+   - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
 
