@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, after C-046 addendum 3 (guideline `734c560`, register `fce5cf5`); P4 in progress. **Nothing open for the PO.**_
+_Last updated: 2026-10-26, after C-047 (guideline `734c560`, register `fce5cf5`); P4 in progress. **Nothing open for the PO.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -19,9 +19,11 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - Addendum 2: your answer "MG 4.1 is leading and unambiguous" decided **SF-104** (register `726f2a3`): the `Oi4Identifier` elements are always dnp-encoded. Implemented on our side: REQ-IL-022/033, new V-PAY-245, oracle and D7, `oec-core` (A-9).
 - Addendum 3: your review ("D-1 reviewed und akzeptiert -> übernehmen, R-1 und R-2 akzeptiert") is applied: MG 4.3.1/A3 aligned in `734c560`, **SF-104 resolved** (`fce5cf5`), re-baseline on `734c560` (1399 inventory items, REQ-IL-033 quotes remapped), REQ-IL-022/033 and V-PAY-245 `reviewed`. No drafts, no open finding.
 
-Coverage stays at 0 gaps; schema unchanged (`2.0.1-dev`).
+- C-047 (P4 increment 3): `oec-core` message model (all envelopes, helper DataSets, MetaData, Actions with correlation, all resource payloads), schema embedding via `build.rs` with `schema::Validator` behind `strict-validation`, all 245 payload vectors as tests with the same verdicts and REQ ids as the schema gate, first runtime dependencies (serde, serde_json, time, uuid, jsonschema) under `cargo deny` without exceptions. No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-10 … A-16 are for information.
 
-Log: [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Coverage stays at 0 gaps; schema unchanged (`2.0.1-dev` @ `734c560`).
+
+Logs: [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -36,6 +38,13 @@ Log: [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 | A-7 | cargo-deny gate (`deny.toml`, offline fallback) | info | C-046 R-3 | – | – |
 | A-8 | Lint profile: clippy `pedantic`, `doc_markdown` allowed | info | C-046 R-4 | – | – |
 | A-9 | SF-104 consequences: `oec-core` always masks, D7/oracle R-3 only dnp-encoded | info (agent) | C-046 add. 2 | – | – |
+| A-10 | Tolerant typed decoder: unknown keys ignored, types and invariants enforced, patterns left to the schema | info (agent) | C-047 | – | – |
+| A-11 | Encoder with the fixed content masks (MessageType always, `ReplyTo` `""`, DataSetClassId from the resource) | info (agent) | C-047 | – | – |
+| A-12 | Lossless values: DateTime/ByteString keep their text, `Number` for int-or-float, lowercase Guids, sorted maps | info (agent) | C-047 | – | – |
+| A-13 | Action API: correlation derived from the Call topic, `response`/`done`/`failed` | info (agent) | C-047 | – | – |
+| A-14 | Shapes of Config (flattened groups), Data (raw object + Oi4Pv view), SubscriptionList `TopicPath` (string) | info (agent) | C-047 | – | – |
+| A-15 | Schema embedding (`schema.go` version, tolerant flavor in memory) and dependency feature sets; gate runs both feature sets | info (agent) | C-047 | – | – |
+| A-16 | C-047 cycle cut re-checked: no split | info (agent) | C-047 | – | – |
 
 ## Decisions and review items
 
@@ -119,6 +128,40 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - `oec-core`: `Oi4Identifier::build` always dnp-encodes; `dnp_encoded()` and the SDK-only violation `slash-in-element` are removed (also from the P3 sketch); ADR-0026 §5.2 rewritten.
 - Oracle and D7 `validate` (rule R-3 of REQ-RES-MAM-006): a generated Oi4Identifier in the MAM must carry the dnp-encoded elements; before, the plain value was accepted too. No reviewed vector changed its result. ADR-0019 R-3 got a note.
 
-## Next (C-047)
+### A-10 … A-16 – P4 increment 3 (C-047, agent)
 
-1. P4 increment 3 – message model, schema embedding (`build.rs`, `strict-validation`), payload vectors; first runtime dependencies under `cargo deny`.
+- **Where:**
+  - `oec/sdk/rust/oec-core/src/{message,resource,schema}`, `build.rs`, `tests/payload.rs`, `tests/model.rs`;
+  - ADR-0026 amendment C-047 §7, ADR-0023 amendment C-047;
+  - log [C-047](log/2026-10-26_C-047_message-model.md) with the REQ tracing tables (96 REQ ids cited).
+- **A-10 Tolerant typed decoder:**
+  - Decoding ignores keys beyond the guideline (REQ-MSG-046).
+  - It refuses wrong JSON types, missing required fields, values outside closed sets and broken model invariants: DataSetClassId, MessageType, reserved DataSetWriterIds, MetaDataVersion vs. Major/MinorVersion, Good `Status`, Action fields.
+  - Patterns and cross-field rules stay with the schema and the D7 rule layer.
+  - On the vectors, 63 of 143 invalid payloads are refused by the decoder; all 143 are caught by decoder, schema or rule layer.
+- **A-11 Encoder:**
+  - The SDK writes only the keys of the fixed content masks (REQ-MSG-001/003/004/016/017).
+  - It always sends the DataSetMessage `MessageType` and `ReplyTo` (`""` without a trigger).
+  - It sets the DataSetClassId of a predefined resource itself; publisher-defined ids refuse reserved and predefined values (REQ-MSG-014).
+- **A-12 Values:**
+  - `DateTime` and `ByteString` keep their text, so CorrelationData is echoed byte-identical (REQ-ACT-007).
+  - Int-or-float fields use `serde_json::Number`.
+  - Guids only lowercase hyphenated.
+  - Sorted maps (JSON key order carries no meaning).
+- **A-13 Actions:**
+  - `ActionRequestMessage::new` takes the Responder and the `ResponseAddress` from the Call topic (REQ-ACT-005/006).
+  - `response()` copies PublisherId, RequestorId and CorrelationData.
+  - `done()`/`failed()` build the matching ActionResponse; a Bad Status gets an empty Payload (REQ-ACT-012/014).
+- **A-14 Shapes:** Config groups are flattened maps; Data is a raw object with an `Oi4Pv` view; SubscriptionList `TopicPath` stays a string.
+- **A-15 Embedding and dependencies:**
+  - `schema::VERSION`/`BASELINE` come from `oec/schema/schema.go` (`2.0.1-dev` @ `734c560`), as ordered for this cycle.
+  - The 45 strict sources are embedded; the tolerant flavor is derived in memory.
+  - Minimal features: uuid without `v4`/`v5` until ids are generated.
+  - 20 crates (81 with `strict-validation`), `cargo deny` without exceptions.
+  - The gate runs clippy, tests and doc in both feature sets.
+- **A-16 Cycle cut:** no split; the model, schema hook and vector parity form one unit. The plan after C-047 is unchanged.
+- **Tests:** default 27 unit + 13 integration tests, strict 30 + 15; the parity with the schema gate held at the first run.
+
+## Next (C-048)
+
+1. P4 increment 4 – crate `oec`: `App`/`AppBuilder`, `Level`, `Bootstrap` (explicit + container storage contract), `Store`, `Error`; the sketch API moves into `oec`; new runtime dependencies thiserror and log.

@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-046 Nachtrag 3 (P4 läuft). **Für dich ist gerade nichts offen.**_
+_Stand: 26.10.2026, nach C-047 (P4 läuft). **Für dich ist gerade nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,13 +24,28 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** Dein Review (D-1, R-1, R-2) ist umgesetzt (Details unten unter „Was aus deinem letzten Review (C-046, Nachtrag 2) geworden ist“). SF-104 ist damit auch in der Guideline erledigt, und es gibt keine Entwürfe mehr.
+**Nichts.** C-047 hat nur Code und Technik-Entscheidungen gebracht:
+- Keine reviewte REQ und kein reviewter Vektor wurde geändert.
+- Es gibt keinen neuen Vektor.
+- Es gibt kein neues Finding in der Guideline. Das SDK, das Schema und die Vektoren waren sich in allen 245 Fällen einig.
 
-Die Punkte A-1 … A-9 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
+Die Punkte A-1 … A-16 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
-Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` (jetzt mit Baseline `734c560`).
+Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.
 
-Log: [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-047
+
+- **Nachrichtenmodell:** Rust-Typen für jede OEC-Nachricht. Statt mit losem JSON zu hantieren, baut man z. B. eine „Health-Nachricht“ und das SDK schreibt das JSON genau so, wie die Guideline es verlangt.
+- **Kodieren / Dekodieren:** Kodieren macht aus dem Rust-Typ das JSON zum Senden. Dekodieren macht aus empfangenem JSON wieder den Rust-Typ.
+- **Toleranter Leser:** Beim Empfangen ignoriert das SDK unbekannte Felder (so verlangt es REQ-MSG-046). Beim Senden schreibt es nur die Felder der Guideline.
+- **Content Mask:** die feste Liste, welche Felder eine Nachricht enthält. Die Guideline legt sie fest; das SDK hält sie immer ein.
+- **Korrelation (Action):** Woran der Aufrufer erkennt, dass eine Antwort zu seiner Frage gehört: dieselbe `RequestId`, dieselben `CorrelationData`, und die Antwort geht an die `ResponseAddress` aus der Frage.
+- **Schema einbetten:** Die JSON-Schemas (D1) werden beim Bauen ins Programm kopiert. Das fertige SDK braucht dann keine Schema-Dateien auf der Platte.
+- **Feature `strict-validation`:** ein Schalter beim Bauen. Ist er an, prüft das SDK Nachrichten zusätzlich gegen das Schema. Er zieht deutlich mehr Bibliotheken nach sich (81 statt 20), deshalb ist er optional. Unsere automatische Prüfung baut und testet beide Varianten.
+- **Paritätstest:** Der Test lässt alle 245 Payload-Vektoren durch das SDK laufen und vergleicht das Urteil mit dem Schema-Gate: gleiches Ergebnis und gleiche REQ-Nummern.
+- **Laufzeit-Abhängigkeit:** eine fremde Bibliothek, die im fertigen SDK mitläuft. Neu sind serde und serde_json (JSON), time (Zeitstempel), uuid (Kennungen) und, nur mit dem Schalter, jsonschema.
 
 ### Begriffe aus C-046
 
@@ -51,13 +66,20 @@ Log: [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
 
 - **A-1 … A-4** (aus C-046): Aufbau des Rust-Projekts (ADR-0026), Testvektoren als JSON, Reihenfolge in P4, Leerzeichen im Filter nur als Warnung.
 - **A-5 … A-8** (aus C-046): der neue Code in `oec-core`, das Format des JSON-Exports, die Prüfung der fremden Bibliotheken mit cargo-deny, die Strenge der Code-Prüfung.
-- **A-9 (neu):** Folgen aus SF-104. Das Rust-SDK maskiert jetzt immer; die Option „nur auf Wunsch maskieren“ ist weg. D7 und unser Referenz-Prüfer akzeptieren im MAM nur noch die maskierte Form. Kein bisher reviewter Vektor ändert dadurch sein Ergebnis.
+- **A-9** (aus C-046): Folgen aus SF-104. Das Rust-SDK maskiert jetzt immer; die Option „nur auf Wunsch maskieren“ ist weg. D7 und unser Referenz-Prüfer akzeptieren im MAM nur noch die maskierte Form. Kein bisher reviewter Vektor ändert dadurch sein Ergebnis.
+- **A-10 (neu) – toleranter, aber typisierter Leser:** Unbekannte Felder werden ignoriert. Abgelehnt wird nur, was nicht in den Typ passt: falscher JSON-Typ, fehlendes Pflichtfeld, unbekannter Aufzählungswert, verletzte Grundregel (z. B. falsche DataSetClassId, reservierte DataSetWriterId). Feinheiten wie Textmuster prüft das Schema. Von den 143 ungültigen Vektoren lehnt der Leser 63 selbst ab, den Rest erkennen Schema oder Regelschicht.
+- **A-11 (neu) – Schreiben nach fester Feldliste:** Das SDK schreibt immer genau die Felder der Guideline. `MessageType` im Datensatz wird immer mitgeschickt, `ReplyTo` ist `""`, wenn die Nachricht keine Antwort ist. Die DataSetClassId der Standard-Ressourcen setzt das SDK selbst.
+- **A-12 (neu) – nichts geht verloren:** Zeitstempel und Binärdaten (`CorrelationData`) behalten ihren Originaltext. So kommt `CorrelationData` Byte für Byte unverändert zurück, wie REQ-ACT-007 es verlangt.
+- **A-13 (neu) – Actions:** Wer eine Anfrage (Call) baut, bekommt Antwortadresse und Absender automatisch aus dem Topic. Die Antwort wird aus der Anfrage erzeugt und übernimmt alle Kennungen. Bei einem Fehlercode ist die Antwort leer, wie die Guideline es verlangt.
+- **A-14 (neu) – Form einzelner Ressourcen:** Config-Gruppen sind frei benannt und werden deshalb als Tabelle (Name → Wert) gespeichert. Data ist ein freies JSON-Objekt mit einer bequemen Sicht für `Oi4Pv`. Der `TopicPath` der SubscriptionList bleibt Text, weil er beliebige MQTT-Filter enthalten darf.
+- **A-15 (neu) – Schema und Bibliotheken:** Das SDK meldet die Schema-Version des eingebauten Stands (`2.0.1-dev` @ `734c560`), wie du es für C-047 vorgegeben hast. Die tolerante Schema-Variante wird beim Start im Speicher erzeugt statt ein zweites Mal eingebaut. Die neuen Bibliotheken sind auf das Nötigste beschränkt (20 Crates, 81 mit dem Schalter). cargo-deny ist ohne jede Ausnahme grün: alle Lizenzen erlaubt, keine bekannte Lücke. Die automatische Prüfung läuft jetzt mit und ohne den Schalter.
+- **A-16 (neu) – Zyklusschnitt:** C-047 wurde nicht geteilt. Modell, Schema-Prüfung und Vektor-Test prüfen sich gegenseitig und gehören zusammen. Der Plan für die nächsten Zyklen bleibt gleich.
 
 ---
 
-### Was als Nächstes passiert (C-047)
+### Was als Nächstes passiert (C-048)
 
-1. P4 Inkrement 3: Nachrichtenmodell (alle Payloads), Schemas ins SDK einbetten, Payload-Vektoren; die ersten fremden Rust-Bibliotheken, geprüft mit cargo-deny.
+1. P4 Inkrement 4: die eigentliche SDK-Bibliothek `oec`, mit Start der Anwendung (`App`), Compliance-Level, Konfiguration (explizit oder über den Speicher-Vertrag des Containers), Speicher und Fehlertyp. Neue Bibliotheken: thiserror (Fehlertypen) und log (Logging).
 
 ---
 
