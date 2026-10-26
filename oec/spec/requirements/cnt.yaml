@@ -98,7 +98,7 @@ requirements:
         text: Clients ignore elements of broker.json they do not know.
     verification: [d8]
     inventory: [RIG-4.1.1-58d0cc4a, RIG-4.1.1-516de8c7, RIG-4.1.1-bf0c6b45, RIG-4.1.1-77f0d05d]
-    status: draft
+    status: reviewed
     notes: >-
       That the broker accepts payloads up to MaxPacketSize follows from the
       purpose of the field (publishers may use the full size, REQ-PAG-005).
@@ -131,7 +131,7 @@ requirements:
         text: Clients ignore elements of broker.json they do not know.
     verification: [d8, manual]
     inventory: [RIG-4.1.1-723b5b51, RIG-4.1.1-77f0d05d]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-029. The client side of the messaging domain already
       requires the port (REQ-MQTT-004), the certificate verification
