@@ -1,8 +1,8 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-046 Nachtrag 1 (P4 läuft)._
+_Stand: 26.10.2026, nach C-046 Nachtrag 2 (P4 läuft)._
 
-Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 wie empfohlen“. Punkte mit A-x und R-x sind nur zur Info.
+Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
 ---
 
@@ -24,15 +24,15 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Für dich gibt es genau eine Entscheidung: D-1 (SF-104).** Sie ist die Antwort auf deine Frage zu D-4 aus C-046.
+**Deine Entscheidung zu SF-104 ist umgesetzt.** Du hast gesagt: MG 4.1 ist führend und eindeutig. Daraus folgt: Die Teile Model, ProductCode und SerialNumber des Oi4Identifier werden **immer** dnp-codiert (Option a). Für dich bleiben:
+- **D-1:** Darf ich den Guideline-Text in MG 4.3.1 und A3 angleichen („may“ → „must“)? Guideline-Text ändere ich nur mit deinem Auftrag.
+- **R-1, R-2:** zwei geänderte REQs und ein neuer Testvektor, die du reviewen sollst.
 
-Außerdem habe ich deine neue Regel umgesetzt: **Technik-Entscheidungen** (Aufbau des Codes, Rust-Bibliotheken innerhalb der angenommenen Regeln, Build und Tests, Zyklusschnitt) **treffe ich selbst**, schreibe sie in ein ADR oder ins Log und zeige sie dir hier nur noch **zur Info** (A-x, R-x). Du kannst jede davon kippen, musst aber nicht antworten. **Gefragt wirst du** bei Widersprüchen oder fehlenden Definitionen in der Guideline (Spec-Findings), bei Guideline-Text, Umfang, Phasen-Reihenfolge, Programmiersprachen, Lizenzen und Veröffentlichung. Das steht jetzt so in GUARDRAILS G-3.4; `project/README.md` und AGENTS.md verweisen darauf. Testdaten (Vektoren) reviewst du weiterhin selbst (G-3.9).
+Alles andere (A-1 … A-9) ist nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner neuen Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
-Damit sind die alten C-046-Punkte D-1, D-2, D-3 und D-5 von mir wie empfohlen entschieden (jetzt A-1 … A-4), ADR-0026 steht auf „accepted (agent)“, und R-1 … R-4 sind nur noch Info.
+Die Lücken bleiben bei 0, das Schema bleibt unverändert (`2.0.1-dev`).
 
-An REQs, Vektoren oder der Guideline-Text hat sich nichts geändert; die Lücken bleiben bei 0. SF-104 ist das einzige offene Finding.
-
-Log: [C-046 inkl. Nachtrag 1](log/2026-10-26_C-046_p4-start.md).
+Log: [C-046 inkl. Nachtrag 1 und 2](log/2026-10-26_C-046_p4-start.md).
 
 ### Begriffe aus C-046
 
@@ -49,45 +49,47 @@ Log: [C-046 inkl. Nachtrag 1](log/2026-10-26_C-046_p4-start.md).
 
 ---
 
-### D-1 – SF-104: Ist das Oi4Identifier eindeutig, wenn Maskieren freiwillig ist?
+### D-1 – Guideline-Text an deine Entscheidung angleichen
 
-**Deine Frage:** Kann ein Empfänger beim optionalen Maskieren erkennen, ob ein Wert maskiert ist oder die Zeichen von Haus aus enthält?
+**Was du entschieden hast:** MG 4.1 sagt, dass Werte mit Zeichen, die nicht erlaubt sind oder in einer URL eine Sonderfunktion haben, maskiert werden **müssen**. MG 4.3.1 sagt, dass alles aus MG 4.1 auch für den Oi4Identifier gilt, und nennt die dnp-Codierung als Mittel dafür.
 
-**Antwort: Nein.** Es gibt kein Kennzeichen „ist maskiert“. Und das Maskierungszeichen `,` darf selbst in einem Identification Link vorkommen. `A,2F3` kann also die echte Seriennummer `A,2F3` sein oder die maskierte Seriennummer `A/3`.
+**Warum daraus „immer codieren“ folgt:** Die dnp-Codierung lässt genau die harmlosen Zeichen (`A–Z a–z 0–9 - . _ ~`) stehen. Jedes andere Zeichen ist entweder verboten oder hat eine Sonderfunktion. „Nur die störenden Zeichen maskieren“ und „das ganze Element codieren“ ergeben also genau dasselbe. Ergebnis: Pro Typenschild gibt es genau eine Kennung, und man kann sie eindeutig zurückrechnen. Normale Kennungen wie `provider.com/FieldDataService/FDS-001/1200-0345` ändern sich nicht.
 
-**Für Empfänger ist das aber kein Problem.** Laut MG 4.1 darf ein Empfänger einen Identification Link nie decodieren. Er vergleicht ihn nur als ganzen Text.
+**Was noch nicht passt:** In MG 4.3.1 und A3 steht noch „may“, das liest sich wie „freiwillig“. Mein Vorschlag (steht auch im Register bei SF-104):
+- MG 4.3.1: „Enthält Model, ProductCode oder SerialNumber andere Zeichen als `A–Z a–z 0–9 - . _ ~`, **muss** der Wert dnp-codiert werden (A3), damit sich das Oi4Identifier aus denselben Werten wieder erzeugen lässt.“
+- MG A3: „may be built / may be dnp-encoded“ → „are built / are dnp-encoded“.
 
-**Das eigentliche Problem liegt beim Erzeuger.** Weil Maskieren freiwillig ist, können zwei Programme aus demselben Typenschild zwei verschiedene Kennungen bauen. Beispiel: Seriennummer `ABC@home` – das eine schreibt `ABC@home`, das andere `ABC,40home`. Beide sind gültig. Für den Bus sind das dann **zwei verschiedene Geräte**. MG 4.3 verspricht aber, dass man die Kennung jederzeit aus dem Typenschild neu erzeugen kann. Dazu kommt ein kleiner Widerspruch: Der Hinweis in MG 4.3.1 klingt, als würden nur die „störenden“ Zeichen maskiert. Die Beispieltabelle in MG A3 maskiert aber das ganze Element, auch erlaubte Zeichen wie `@`.
+**Mit deinem Auftrag:** Ich ändere die Guideline, SF-104 wird „resolved“, und ich ziehe die Baseline nach. **Ohne Auftrag:** SF-104 bleibt „decided“; unsere Umsetzung folgt deiner Entscheidung schon jetzt.
 
-**Deine Nachfrage – Topic oder Nachricht?** Beides gleich. base64url im Topic und JSON-Escaping in der Nachricht sind verlustfrei; die Mehrdeutigkeit entsteht vorher, wenn der IL-String gebildet wird. Darum unterscheiden sich beide Varianten im Topic (Source, Filter) genauso wie in der Nachricht (`ProductInstanceUri`, Registry). Ein `"` ist in einem IL gar nicht erlaubt (MG 4.1) und muss sowieso maskiert werden. Die freie Wahl gibt es nur bei den erlaubten reservierten Zeichen außer `/` (`: ? # [ ] @ ! $ & ' ( ) * + , ; =`). Außerdem sagt MG 4.1, solche Werte „must be masked“ – ein zweiter Widerspruch zum „may“ in MG 4.3.1/A3, der für (a) spricht.
-
-Das ist eine Lücke in der Guideline, darum frage ich dich. Ich habe sie als **SF-104** ins Register geschrieben (`c41b59a`, ergänzt um den MG-4.1-Widerspruch in `4b4a5c8`).
-
-**Möglichkeiten:**
-- **(a) Empfehlung: immer maskieren.** Model, ProductCode und SerialNumber werden immer dnp-codiert (der ManufacturerUri nicht). Elemente aus normalen Zeichen (Buchstaben, Ziffern, `-`, `.`, `_`, `~`) bleiben dabei unverändert, die meisten echten Kennungen ändern sich also nicht. Ergebnis: Pro Typenschild gibt es genau eine Kennung, und man kann sie eindeutig zurückrechnen. Das passt zur Tabelle in A3 und zu unseren Testvektoren. In der Guideline wird aus „may“ ein „must“, aus REQ-IL-033 MAY ein MUST.
-- **(b) nur maskieren, wenn nötig** (wenn ein verbotenes Zeichen oder `/` drin ist, dann das ganze Element). Auch eindeutig, aber nicht mehr sicher zurückrechenbar.
-- **(c) so lassen wie jetzt.** Die Mehrdeutigkeit bleibt; das SDK lässt die Wahl dem Entwickler.
-
-**Was (a) auslöst:** Guideline-Änderung in MG 4.3.1 und A3 (nur mit deinem Auftrag), neue Baseline, kleiner Versionssprung beim Schema, REQ-IL-022/033 gehen auf `draft` und kommen zu dir ins Review. Im SDK maskiert `build` dann immer, und die Option `.dnp_encoded()` fällt weg. Das Rust-SDK kann heute schon beides; der nächste Zyklus C-047 hängt nicht davon ab.
-
-**Empfehlung:** (a).
+**Empfehlung:** Ja, angleichen.
 
 ---
 
-### Zur Info: was ich selbst entschieden habe (G-3.4 b)
+### R-1 – Zwei geänderte REQs
 
-- **A-1 (war D-1) – ADR-0026, Aufbau des Rust-Projekts:** ein Workspace `oec/sdk/rust` mit `oec-core` (Protokollregeln, intern), `oec` (SDK für Entwickler) und `oec-ffi` (C-Schnittstelle). Status jetzt „accepted (agent)“. Der Teil zum Oi4Identifier (§5.2) wartet auf D-1.
-- **A-2 (war D-2) – Testvektoren als JSON:** `spectool` erzeugt JSON-Kopien der YAML-Vektoren, die SDKs lesen nur diese. Das Original bleibt YAML.
-- **A-3 (war D-3) – Reihenfolge in P4:** C-047 Nachrichtenmodell, C-048 `oec`-Crate, dann MQTT-Verbindung mit gleich danach der Testumgebung (TLS-Broker), dann P5-Zwischenschritt, dann 6–8, zuletzt die C-Schnittstelle.
-- **A-4 (war D-5) – Leerzeichen im Filter:** nur eine Warnung, kein Fehler, weil die Guideline „SHOULD NOT“ sagt.
-- **R-1 … R-4:** der neue Code in `oec-core`, das Format des JSON-Exports, die Prüfung der fremden Bibliotheken mit cargo-deny und die Strenge der Code-Prüfung (clippy pedantic). Alles ist in `oec/check.sh` grün. Anmerkungen sind willkommen, eine Antwort ist nicht nötig.
+- **REQ-IL-033** heißt jetzt „Oi4Identifier elements are dnp-encoded“ und ist ein **MUST** (vorher MAY, „optional“). Sie erklärt, warum das eindeutig und zurückrechenbar ist, und zitiert MG 4.1.
+- **REQ-IL-022** (Aufbau des Oi4Identifier): „may be masked“ → „are masked“.
+
+Beide stehen auf `draft`, bis du sie freigibst. Bei REQ-IL-032 habe ich nur einen Verweis in den Notizen angepasst; sie bleibt `reviewed`.
+
+### R-2 – Neuer Testvektor V-PAY-245
+
+Ein MAM eines Geräts mit der Seriennummer `ABC@home`, dessen Kennung die Seriennummer **unmaskiert** enthält (`…/FDS-001/ABC@home`). Das ist jetzt ungültig: Richtig wäre `…/FDS-001/ABC,40home`. D7 meldet es über die schon bestehende Prüfung „ProductInstanceUri passt zu Model, ProductCode und SerialNumber“ (REQ-RES-MAM-006). Der Vektor steht auf `draft`.
+
+---
+
+### Zur Info: was ich selbst entschieden oder nachgezogen habe (G-3.4 b)
+
+- **A-1 … A-4** (aus C-046): Aufbau des Rust-Projekts (ADR-0026), Testvektoren als JSON, Reihenfolge in P4, Leerzeichen im Filter nur als Warnung.
+- **A-5 … A-8** (aus C-046): der neue Code in `oec-core`, das Format des JSON-Exports, die Prüfung der fremden Bibliotheken mit cargo-deny, die Strenge der Code-Prüfung.
+- **A-9 (neu):** Folgen aus SF-104. Das Rust-SDK maskiert jetzt immer; die Option „nur auf Wunsch maskieren“ ist weg. D7 und unser Referenz-Prüfer akzeptieren im MAM nur noch die maskierte Form. Kein bisher reviewter Vektor ändert dadurch sein Ergebnis.
 
 ---
 
 ### Was als Nächstes passiert (C-047)
 
 1. P4 Inkrement 3: Nachrichtenmodell (alle Payloads), Schemas ins SDK einbetten, Payload-Vektoren; die ersten fremden Rust-Bibliotheken, geprüft mit cargo-deny.
-2. Nach deiner Antwort zu D-1: bei (a) oder (b) die Guideline-Änderung, neue Baseline, REQ-IL-033 zum Review, SDK angepasst.
+2. Nach deinen Antworten: bei D-1 „ja“ die Guideline-Änderung und neue Baseline; R-1/R-2 auf `reviewed`.
 
 ---
 
@@ -166,13 +168,17 @@ Das ist eine Lücke in der Guideline, darum frage ich dich. Ich habe sie als **S
 
 ---
 
+## Was aus deiner Nachfrage zu SF-104 geworden ist (C-046, Nachtrag 2)
+
+Du hast gefragt, ob es um das Topic oder die Nachricht geht und vor allem um `"`. Antwort: um beides gleich. Die Codierungen beim Übertragen (base64url im Topic, Escaping in JSON) gehen verlustfrei hin und zurück. Ein `"` ist in einem IL gar nicht erlaubt. Die Mehrdeutigkeit entsteht vorher, beim Bilden der Kennung, und betrifft nur die erlaubten Sonderzeichen wie `@`. Dann hast du entschieden: MG 4.1 ist führend. Das ist umgesetzt (siehe oben D-1, R-1, R-2, A-9); SF-104 steht im Register auf „decided“ (`726f2a3`).
+
 ## Was aus deinem letzten Review (C-046) geworden ist
 
 Du hast zu D-4 nachgefragt (Antwort oben in D-1, SF-104) und bestimmt, dass ich Technik-Entscheidungen wie D-1 selbst treffe. Daraus wurde im Nachtrag 1 zu C-046:
 - GUARDRAILS G-3.4 ist zweigeteilt: (a) fragt dich, (b) entscheide ich und protokolliere es.
 - D-1, D-2, D-3, D-5 habe ich wie empfohlen entschieden; ADR-0026 ist „accepted (agent)“.
 - R-1 … R-4 sind nur noch Info.
-- D-4 ist jetzt die Guideline-Frage SF-104 (D-1 oben).
+- D-4 wurde die Guideline-Frage SF-104 (Nachtrag 1).
 
 ## Was aus dem Review davor (C-045) geworden ist
 
