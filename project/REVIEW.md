@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, after C-046 addendum 1 (guideline `e0262dd`, register `c41b59a`); P4 in progress._
+_Last updated: 2026-10-26, after C-046 addendum 1 (guideline `e0262dd`, register `4b4a5c8`); P4 in progress._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -46,7 +46,8 @@ Log: [C-046 incl. addendum 1](log/2026-10-26_C-046_p4-start.md).
 - **Answer: no.** There is no marker. The mask sign `,` is itself permitted in an Identification Link, so `A,2F3` is either the native value `A,2F3` or the masked `A/3`.
 - **Receivers are not affected:** MG 4.1 forbids decoding an IL; receivers compare it as an opaque string.
 - **The real problem is on the generator side.** Because the masking is optional ("may", MG 4.3.1, MG A3, REQ-IL-033, SF-043 e), two generators can derive two different Oi4Identifiers from the same nameplate (e.g. `ABC@home` or `ABC,40home`). MG 4.3 promises that the identifier can be regenerated from the nameplate with the creation rules. In addition, the note in MG 4.3.1 says "mask these characters", while MG A3 Table 19 masks the whole element, including permitted characters such as `@`.
-- **Options (register `c41b59a`):**
+- **Follow-up (topic or payload?):** both alike. base64url in topics and JSON escaping in payloads are lossless; the ambiguity arises before, when the IL string is built, so the two variants differ in the topic (Source, Filter) and in the payload (`ProductInstanceUri`, registry). `"` is not permitted in an IL (MG 4.1), so it must be masked anyway; the free choice exists only for the permitted reserved characters other than `/`. MG 4.1 also says such values "must be masked" – a second contradiction with the "may" of MG 4.3.1/A3, which supports (a).
+- **Options (register, see SF-104):**
   - **(a) recommended – always dnp-encode** Model, ProductCode and SerialNumber (ManufacturerUri stays as it is). Elements with only unreserved characters (`A–Z a–z 0–9 - . _ ~`) stay unchanged. Deterministic and reversible; matches Table 19 and the spectool vectors. MG 4.3.1/A3 "may" → "must", REQ-IL-033 MAY → MUST (→ `draft`), SF-043 (e) amended. Existing identifiers whose elements are all unreserved do not change.
   - (b) encode a whole element only when needed (it contains a character not permitted in an IL, or `/`). Deterministic, but not reversible: a native `,40` cannot be told apart.
   - (c) keep "may" and accept the ambiguity; the SDK keeps the opt-in.
