@@ -108,7 +108,7 @@ requirements:
         text: Clients ignore elements of broker.json they do not know.
     verification: [d8]
     inventory: [RIG-4.1.1-58d0cc4a, RIG-4.1.1-516de8c7, RIG-4.1.1-bf0c6b45, RIG-4.1.1-77f0d05d, RIG-4.1.1-fb78a5f5, RIG-4.1.1-674b5bb8]
-    status: draft
+    status: reviewed
     notes: >-
       That the broker accepts every payload up to MaxPacketSize and that a
       packet limit of the broker leaves room for the header (fixed header 5 +

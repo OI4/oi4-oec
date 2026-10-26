@@ -7,7 +7,7 @@ Guideline baseline: `59e3ae3` · Area status: reviewed · Sections: RIG 2, RIG 4
 |---|---|---|---|---|---|---|---|---|
 | [REQ-CNT-001](#req-cnt-001) | Platform provides the Message Bus storage | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-002](#req-cnt-002) | No private keys in the Message Bus and certificate storages | SHOULD | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-CNT-003](#req-cnt-003) | Content of broker.json | MUST | n/a | n/a | n/a | platform | d8 | draft |
+| [REQ-CNT-003](#req-cnt-003) | Content of broker.json | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-004](#req-cnt-004) | Application uses the Message Bus storage | MUST | none | SHOULD | MUST | service-container | d8, manual | reviewed |
 | [REQ-CNT-005](#req-cnt-005) | Platform always provides a CA certificate in the certificate storage | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-006](#req-cnt-006) | Content and mount of the certificate storage | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
@@ -89,7 +89,7 @@ broker.json in the Message Bus storage is a JSON object with the mandatory field
 - Domain: platform · Applies to: platform, broker
 - Refs: RIG 4.1.1, MG 6.2.1, SF-091, SF-100
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.1.1-516de8c7, RIG-4.1.1-58d0cc4a, RIG-4.1.1-674b5bb8, RIG-4.1.1-77f0d05d, RIG-4.1.1-bf0c6b45, RIG-4.1.1-fb78a5f5
 
 > broker.json JSON coded file containing the settings of the MQTT broker.
