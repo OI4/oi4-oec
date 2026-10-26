@@ -1,9 +1,13 @@
 # ADR-0025 – Architecture of the compliance tools D7 `oec-check` and D8 `oec-infra`
 
-- Status: proposed
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-044)
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-044
 - Related: ADR-0006 (independence of D7 from the SDKs, modes), ADR-0013/0014 (Go, one module, two binaries), ADR-0016 (levels), ADR-0018 (spec baseline), ADR-0019 §5 and amendment C-040 item 7 (`validate` contract), ADR-0023 (license rules, dual licenses), Q-008, Q-009, Q-011, Q-028, Q-029, Q-030; design: [`oec/conformance/DESIGN.md`](../../oec/conformance/DESIGN.md)
+
+## PO decision (C-045 review, 2026-10-26)
+
+Accepted as proposed. Q-028 (a): proxy mode is required for a full level claim of `oec-check test`; a bus-only run ends as inconclusive. Q-029 (a): the tester is not announced on the bus by default (`--announce` optional). Q-030 (a): exit code 4 = inconclusive, `--allow-skip` maps 4 → 0 for partial CI runs; `validate` keeps 0–3.
 
 ## Context
 

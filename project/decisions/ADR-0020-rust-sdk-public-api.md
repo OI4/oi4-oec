@@ -1,9 +1,13 @@
 # ADR-0020 – Public API of the Rust SDK (D2)
 
-- Status: proposed
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042)
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-042
 - Related: ADR-0011 (S4 architecture), ADR-0016 (level targets), ADR-0019 §7 (schemas in D2), ADR-0021 (C ABI), ADR-0022 (D9 API), Q-021, Q-022, SF-101
+
+## PO decision (C-045 review, 2026-10-26)
+
+Accepted as proposed. Q-021 (a): blocking API by default, `run_async` on demand. Q-022 (a): string-keyed `Config` getters; a derive macro stays a possible P4+ addition. SF-101 decided as proposed: every `Mode` except `OFF_0` allows `Get` (§7); the SDK behavior sketched for the open state is now the specified behavior.
 
 ## Context
 

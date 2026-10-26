@@ -1,9 +1,13 @@
 # ADR-0021 – C ABI of the Rust SDK (`oec-ffi`)
 
-- Status: proposed
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042)
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-042
 - Related: ADR-0011 (S4: Rust core + C ABI), ADR-0020 (Rust API), ADR-0022 (D9 API), ADR-0016 (logger demo L1), Q-023, Q-024
+
+## PO decision (C-045 review, 2026-10-26)
+
+Accepted as proposed. Q-023 (a): opaque builder handles with string setters and JSON for values; option structs are not used. Q-024 (a): the logger demo D4 is written in C on this ABI, Messaging Level 1, configured by file/environment (ADR-0016); the writable DataSet of the sketch stays optional.
 
 ## Context
 

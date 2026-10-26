@@ -1,9 +1,13 @@
 # ADR-0024 – Libraries and toolchain of the micro SDK (D9)
 
-- Status: proposed
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-043)
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-043
 - Related: ADR-0016 (micro SDK, levels), ADR-0017 (C17, PAL, ESP32/ESP-IDF, Arduino, M5Stack; candidates), ADR-0022 (D9 API, PAL, Will per connect), ADR-0004 (MIT), GUARDRAILS G-3.4/G-4.4, Q-027
+
+## PO decision (C-045 review, 2026-10-26)
+
+Accepted as proposed. Q-027 (a): own bounded JSON pull reader in the core; cJSON is not used. ADR-0017 received a matching amendment (C-045).
 
 ## Context
 

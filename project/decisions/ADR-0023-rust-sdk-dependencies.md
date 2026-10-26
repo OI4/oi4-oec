@@ -1,9 +1,13 @@
 # ADR-0023 – Dependencies of the Rust SDK (D2)
 
-- Status: proposed
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-043)
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-043
 - Related: ADR-0004 (MIT), ADR-0011 (S4: `oec-core` sans-IO, `oec` runtime, `oec-ffi`), ADR-0019 §7/§8 (embedded schemas, jsonschema-rs), ADR-0020 (public API, execution model, `strict-validation`), ADR-0021 (C ABI), GUARDRAILS G-3.4/G-4.4, Q-008 (platforms), Q-026
+
+## PO decision (C-045 review, 2026-10-26)
+
+Accepted as proposed. Q-026 (a): own sans-IO MQTT 3.1.1 codec and session in `oec-core`; `rumqttc-v4-next` and `paho-mqtt` are not used.
 
 ## Context
 

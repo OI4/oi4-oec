@@ -89,3 +89,7 @@ They are programmed with Arduino (library `M5Unified`, MIT), ESP-IDF or UIFlow/M
 - **Example firmware for M5Stack** in addition to the generic example. It uses the display and buttons via `M5Unified`, e.g. to show the Identification Link, connection state and Health, or to switch Health with a button. This is part of the **example only**: the SDK core and the PALs do not depend on `M5Unified`.
 - **Ports:** the Arduino port (best effort, see C-010) covers M5Stack directly. The ESP-IDF port covers M5Stack too, since it is plain ESP32/ESP32-S3.
 - **Out of scope:** UIFlow/MicroPython bindings.
+
+## Amendment C-045 – JSON library
+
+ADR-0024 (accepted in the C-045 review, Q-027) settles the JSON candidates named under "Consequences": the core uses its **own encoder** and its **own bounded pull reader** (no heap, limits on depth, token length and members). `jsmn` is abandoned (G-4.4) and `cJSON` needs a heap or an arena and is an extra component since ESP-IDF 6, so neither is used. The license note on cJSON no longer applies. The rest of this ADR is unchanged.

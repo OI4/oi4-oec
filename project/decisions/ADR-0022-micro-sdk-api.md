@@ -1,9 +1,13 @@
 # ADR-0022 – API of the micro SDK (D9)
 
-- Status: proposed
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042)
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-042
 - Related: ADR-0016 (micro SDK, levels; amendment C-016 / Q-019: designed for L3), ADR-0017 (C17, PAL, ESP32/ESP-IDF, Arduino, M5Stack), ADR-0021 (C ABI of D2), Q-025, SF-102
+
+## PO decision (C-045 review, 2026-10-26)
+
+Accepted as proposed. Q-025 (a): prefix `oecm_` / `OECM_`. SF-102 decided as proposed: a directly connected smart device uses the `ServiceType` `OTConnector` (MG 7.2); its `DeviceClass` is the product class (REQ-RES-MAM-014 applies to applications). `OTConnector` is therefore the specified value, not only the example default.
 
 ## Context
 
