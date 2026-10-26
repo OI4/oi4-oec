@@ -1,0 +1,307 @@
+{
+  "version": "2.0.0",
+  "baseline": "168e1d1",
+  "base": "https://schemas.openindustry4.com/oec/v2/",
+  "files": [
+    {
+      "path": "actions.schema.json",
+      "sha256": "f4fffe3b57b39f78d3354be48c30ccaafcfd3d701ea404ca08d9223c24b116f5",
+      "defs": [
+        "ActionMessageId",
+        "ActionNetworkMessage",
+        "ActionPublisherId",
+        "ActionRequest",
+        "ActionRequestMessage",
+        "ActionResponse",
+        "ActionResponseMessage",
+        "ActionStatus",
+        "NewDataSetWriterIdItem",
+        "NewDataSetWriterIdRequest",
+        "NewDataSetWriterIdRequestMessage",
+        "NewDataSetWriterIdResponse",
+        "NewDataSetWriterIdResponseMessage"
+      ]
+    },
+    {
+      "path": "envelope.schema.json",
+      "sha256": "c142c3d734a49fb0fed41038e323bbc734a5403f1910b666ee5b50125f2ab34e",
+      "defs": [
+        "DataNetworkMessage",
+        "DataSetClassId",
+        "DataSetMessage",
+        "DataSetWriterId",
+        "MessageId",
+        "MetaDataNetworkMessage",
+        "NotReservedClassId",
+        "PublisherId",
+        "ReplyTo",
+        "ServiceType"
+      ]
+    },
+    {
+      "path": "helpers.schema.json",
+      "sha256": "ebb1f390fe4eaeb0b256b841dd1a069cecbc2ef103607b70ad00c8e512c7a147",
+      "defs": [
+        "Locale",
+        "LocaleDataSetMessage",
+        "Pagination",
+        "PaginationDataSetMessage",
+        "PaginationRequest",
+        "PaginationRequestDataSetMessage",
+        "QueryDataSetMessage"
+      ]
+    },
+    {
+      "path": "message.schema.json",
+      "sha256": "5afbe784a9b9f6343ae7da51c63683747eac2b44b5e875ce04068799cdf7505c",
+      "defs": [
+        "ActionRequestMessage",
+        "ActionResponseMessage",
+        "DataMessage",
+        "MetaDataMessage"
+      ]
+    },
+    {
+      "path": "metadata.schema.json",
+      "sha256": "79f93da4f3b1833905e3c9a4770d253a05dd1c5a4c87b74ba785e80a21ba6d0f",
+      "defs": [
+        "DataSetMetaData",
+        "EnumDefinition",
+        "EnumDescription",
+        "EnumField",
+        "FieldMetaData",
+        "KeyValuePair",
+        "ResourceMetaData",
+        "SimpleTypeDescription",
+        "StructureDefinition",
+        "StructureDescription",
+        "StructureField"
+      ]
+    },
+    {
+      "path": "opcua.schema.json",
+      "sha256": "0571d5c9a126eafdae28cbd16c270c59ba472473bf4d2d1f39bc040153dd24d5",
+      "defs": [
+        "Byte",
+        "ConfigurationVersion",
+        "DateTime",
+        "Guid",
+        "Int32",
+        "LocalizedText",
+        "NodeId",
+        "QualifiedName",
+        "UInt16",
+        "UInt32",
+        "VerboseEnum"
+      ]
+    },
+    {
+      "path": "platform/broker.schema.json",
+      "sha256": "1464343d6ed2b8d15646b1d86f0d78646d2c4ddb8dda759055b4b3c732b1265d"
+    },
+    {
+      "path": "resources/config.schema.json",
+      "sha256": "bc655611eb6ebfa9f488108567dcdda3c799506d6a96545e43be562174bcca54",
+      "defs": [
+        "Config",
+        "ConfigDataSetMessage",
+        "ConfigObject",
+        "ConfigObjectSet",
+        "ConfigSet",
+        "ConfigSetDataSetMessage",
+        "Context",
+        "ContextSet",
+        "Group",
+        "GroupSet",
+        "Validation",
+        "ValidationSet"
+      ]
+    },
+    {
+      "path": "resources/data.schema.json",
+      "sha256": "a79f3cd9cef17aa5af0faddc07c0873f5641a6df5c559f282ad007bfb61881f8",
+      "defs": [
+        "DataDataSetMessage",
+        "Oi4Pv"
+      ]
+    },
+    {
+      "path": "resources/event.schema.json",
+      "sha256": "5e2e7f82eea8ee75625bbec513d1717bd94cb851c70b6c97f0b81ce96a8e20fb",
+      "defs": [
+        "Event",
+        "EventDataSetMessage"
+      ]
+    },
+    {
+      "path": "resources/health.schema.json",
+      "sha256": "3dd6dbe082bc020441ad8e95a109e18cfaae2cd74a8b6227ebc84e8b821fe6ac",
+      "defs": [
+        "DetailObject",
+        "Health",
+        "HealthDataSetMessage",
+        "HealthState"
+      ]
+    },
+    {
+      "path": "resources/mam.schema.json",
+      "sha256": "207f57a0529f708348d0997434cc54f02931eec4d16b309e833b00a8fe35828e",
+      "defs": [
+        "MAM",
+        "MAMDataSetMessage"
+      ]
+    },
+    {
+      "path": "resources/profile.schema.json",
+      "sha256": "85bd2779a3ba7c6bbe83897fd58981b411553e7950c2308105e21bcaf60dae07",
+      "defs": [
+        "Profile",
+        "ProfileDataSetMessage"
+      ]
+    },
+    {
+      "path": "resources/publicationlist.schema.json",
+      "sha256": "7c79cc5cb02c2faf231a04786a82517e98883dcb738396c8b9108067848375f3",
+      "defs": [
+        "PublicationEntry",
+        "PublicationListDataSetMessage"
+      ]
+    },
+    {
+      "path": "resources/referencedesignation.schema.json",
+      "sha256": "c69f3801277ca320c46568f0577b83eae71eff4222f909add88143946c5d601c",
+      "defs": [
+        "Designation",
+        "Parent",
+        "ReferenceDesignation",
+        "ReferenceDesignationDataSetMessage",
+        "ReferenceDesignationQuery",
+        "ReferenceDesignationQueryDataSetMessage"
+      ]
+    },
+    {
+      "path": "resources/subscriptionlist.schema.json",
+      "sha256": "1a75291a1f27e71769ef4fd6734f5e7ffba0b94a6b0095573c550fe6df49d264",
+      "defs": [
+        "SubscriptionEntry",
+        "SubscriptionListDataSetMessage"
+      ]
+    },
+    {
+      "path": "topics/call-newdatasetwriterid.schema.json",
+      "sha256": "ffb91a46cf0bfb7138c0ae2ba50f99c89ab444fe1d3d8321ae32f71c48ac600e"
+    },
+    {
+      "path": "topics/del-referencedesignation.schema.json",
+      "sha256": "67dfa5233eb1de24d952208da33de6e9836e7abaf709ecac455d06df8ea74031"
+    },
+    {
+      "path": "topics/del-subscriptionlist.schema.json",
+      "sha256": "92107b2963527d3a700b734da3a7ee21939279aa56573aad8137e4f08e4811a4"
+    },
+    {
+      "path": "topics/get-config.schema.json",
+      "sha256": "392a44a340cd30339e5e7a5c59144c8b7b026e63ff39e1492d205dcc24459b16"
+    },
+    {
+      "path": "topics/get-data.schema.json",
+      "sha256": "7cb5203ca7d62247f951033f24b7f82ba921a9b0b73b99705d48138335cf094b"
+    },
+    {
+      "path": "topics/get-health.schema.json",
+      "sha256": "15225361bac639e1141b856da9bde7093f297d4ed0e4f5e83749131e7d342cce"
+    },
+    {
+      "path": "topics/get-mam.schema.json",
+      "sha256": "35b81465ac05f30bba3d6f02afee653a4be87b4670f98cac624a288b3ea65860"
+    },
+    {
+      "path": "topics/get-metadata.schema.json",
+      "sha256": "c52abcd03b1d595268a6954cd92b6bdbf48386cfcaca8f6ce1910a71303fac8c"
+    },
+    {
+      "path": "topics/get-profile.schema.json",
+      "sha256": "23b05ae237b73068517775b468057b2c48ce702d82522ff380b548346d328d29"
+    },
+    {
+      "path": "topics/get-publicationlist.schema.json",
+      "sha256": "9f39c97b0be0f729b1d496785dd479728d2d7afd468c8eb263abe625a12aa22f"
+    },
+    {
+      "path": "topics/get-referencedesignation.schema.json",
+      "sha256": "fd87a72d5098973a93c26005c5dac551d7b6810755b7911f0abbcb64197b30e4"
+    },
+    {
+      "path": "topics/get-subscriptionlist.schema.json",
+      "sha256": "1b10c4fec469cd87b29a6f45fa7b28d342362b93c7c0fe89360a4a08d2482e11"
+    },
+    {
+      "path": "topics/pub-config.schema.json",
+      "sha256": "bdb73908e1d2d6f82d34908bf106260673be1f5a2b998272ca5d345b0a9fdd5b"
+    },
+    {
+      "path": "topics/pub-data.schema.json",
+      "sha256": "4e4539e94a20350979919945d4b25ebcde1a35ddf16aedd31b03f8658986b88e"
+    },
+    {
+      "path": "topics/pub-event.schema.json",
+      "sha256": "81e5980e47a4b992fa7335a80b071bf7b0bda6a2d8f9b0d430fbf15ed0700df7"
+    },
+    {
+      "path": "topics/pub-health.schema.json",
+      "sha256": "b4d2bb59ea05bde1b36d46293fd970023a3f52149762e52a9906102b47674837"
+    },
+    {
+      "path": "topics/pub-mam.schema.json",
+      "sha256": "0193404cb7d853f4363d497890f8e8d4cc807258bed2dfd5dc4c2f8f2afe72d7"
+    },
+    {
+      "path": "topics/pub-metadata.schema.json",
+      "sha256": "ff67970ddf2339eeabd7532084b019e70e9c83ba0e1068568ab260294eb3d3b1"
+    },
+    {
+      "path": "topics/pub-profile.schema.json",
+      "sha256": "de9c76b27ce49c944d83283797684d2dd4f9fbc65af62e8861bf703fef2ae438"
+    },
+    {
+      "path": "topics/pub-publicationlist.schema.json",
+      "sha256": "6c1b17c3e8fe38fb85a5a4d0b6f8791111e931d5a139928f45e57ba3374317e6"
+    },
+    {
+      "path": "topics/pub-referencedesignation.schema.json",
+      "sha256": "d0e4818fee19622627751979f3e25ab948e1661fd01a83abbb2ed18fd9a025b9"
+    },
+    {
+      "path": "topics/pub-subscriptionlist.schema.json",
+      "sha256": "16b3f4c42693d9f06ba52115325edc2040ec1b4ab55666a7a9bf9d649b44cf30"
+    },
+    {
+      "path": "topics/reply-newdatasetwriterid.schema.json",
+      "sha256": "f25008b581c5ad2f6282df4165747bc4cd95eb2fa6fd2a826f73ee94432a73f2"
+    },
+    {
+      "path": "topics/set-config.schema.json",
+      "sha256": "fdb29ad9aeb6de7d26a7948126032afd4753e4f99b92931166c9d300f1da7133"
+    },
+    {
+      "path": "topics/set-data.schema.json",
+      "sha256": "6254643721e9ed84a9074a655ed7e6d61049359743fdbc3f8a6f62a95c2a8135"
+    },
+    {
+      "path": "topics/set-metadata.schema.json",
+      "sha256": "47e863aa16dae33054e208897577798bc32b86cffc75c8f85dbbc73411829044"
+    },
+    {
+      "path": "topics/set-publicationlist.schema.json",
+      "sha256": "f71e771743f93c05b17996905f3cc0e33f12e4bcc2f61aad6cf3968ed64684ea"
+    },
+    {
+      "path": "topics/set-referencedesignation.schema.json",
+      "sha256": "6cfdefcae72250dda2ba8841020f6725f3adbebafb6bd055d88904d3a18358ee"
+    },
+    {
+      "path": "topics/set-subscriptionlist.schema.json",
+      "sha256": "63643e61f00795f8ec13ef45f6deba264d2a89512962bec6505599d0689862ed"
+    }
+  ]
+}

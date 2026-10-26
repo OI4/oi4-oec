@@ -1,6 +1,6 @@
 # `oec/schema/` – D1 JSON Schemas of the OEC v2 messages
 
-> **State: build-out (C-039).** [ADR-0019](../../project/decisions/ADR-0019-schema-architecture.md) is accepted (C-033 review). The files cover the ua-data envelope (NetworkMessage, DataSetMessage), the helper DataSets (PaginationRequest, Pagination, Locale, Query), the resource Health with its topic forms `pub-health` and `get-health`, and the DataSetMetaData (ua-metadata) with the DataSetMetaDataType and its sub-objects (MG 8.2.2 … 8.2.15), the predefined resource MetaData (MG B2) and the topic forms `pub-metadata`, `get-metadata` and `set-metadata`, the Action messages (MG 8.2.16 … 8.2.18, 8.4.1) with the common service NewDataSetWriterId (MG 9.2.1) and its topic forms `call-newdatasetwriterid` and `reply-newdatasetwriterid`, the resources MAM and Profile with `pub-`/`get-mam` and `pub-`/`get-profile` (C-036), the resources PublicationList and ReferenceDesignation with `pub-`/`get-`/`set-publicationlist` and `pub-`/`get-`/`set-`/`del-referencedesignation` (C-037), and the resources Data (with the predefined DataSet Oi4Pv), Event and SubscriptionList with `pub-`/`get-`/`set-data`, `pub-event` and `pub-`/`get-`/`set-`/`del-subscriptionlist` (C-038), and the resource Config with `pub-`/`get-`/`set-config` (C-039). With Config, every allowed row of the method-resource matrix has its entry schema (29 of 29). Outside the messages, `platform/broker.schema.json` describes the platform file `broker.json` (RIG 4.1.1, C-039) for the infrastructure compliance CLI (D8).
+> **State: release 2.0.0 (C-041, pending the PO review of the P2 exit).** See [`CHANGELOG.md`](CHANGELOG.md). [ADR-0019](../../project/decisions/ADR-0019-schema-architecture.md) is accepted (C-033 review). The files cover the ua-data envelope (NetworkMessage, DataSetMessage), the helper DataSets (PaginationRequest, Pagination, Locale, Query), the resource Health with its topic forms `pub-health` and `get-health`, and the DataSetMetaData (ua-metadata) with the DataSetMetaDataType and its sub-objects (MG 8.2.2 … 8.2.15), the predefined resource MetaData (MG B2) and the topic forms `pub-metadata`, `get-metadata` and `set-metadata`, the Action messages (MG 8.2.16 … 8.2.18, 8.4.1) with the common service NewDataSetWriterId (MG 9.2.1) and its topic forms `call-newdatasetwriterid` and `reply-newdatasetwriterid`, the resources MAM and Profile with `pub-`/`get-mam` and `pub-`/`get-profile` (C-036), the resources PublicationList and ReferenceDesignation with `pub-`/`get-`/`set-publicationlist` and `pub-`/`get-`/`set-`/`del-referencedesignation` (C-037), and the resources Data (with the predefined DataSet Oi4Pv), Event and SubscriptionList with `pub-`/`get-`/`set-data`, `pub-event` and `pub-`/`get-`/`set-`/`del-subscriptionlist` (C-038), and the resource Config with `pub-`/`get-`/`set-config` (C-039). With Config, every allowed row of the method-resource matrix has its entry schema (29 of 29). Outside the messages, `platform/broker.schema.json` describes the platform file `broker.json` (RIG 4.1.1, C-039) for the infrastructure compliance CLI (D8).
 
 The schemas are derived from the spec baseline in [`../spec/`](../spec/), which is derived only from the guideline (ADR-0018). The schemas never define requirements of their own. Each constraint names the requirement it enforces in a `$comment` that starts with the REQ id(s).
 
@@ -17,11 +17,13 @@ The schemas are derived from the spec baseline in [`../spec/`](../spec/), which 
 | `v2/topics/<rule>.schema.json` | **entry schema per topic form**. `<rule>` is the ABNF rule of `../spec/topic/topic.abnf` and of the matrix row (option B of ADR-0019) |
 | `v2/platform/broker.schema.json` | content of the platform file `broker.json` of the Message Bus storage (RIG 4.1.1, REQ-CNT-003): Address (IPv4, IPv6 or host name), SecurePort, MaxPacketSize; no closure, further elements are allowed (SF-100); used by D8 |
 | `v2/message.schema.json` | topic-agnostic schema of any OEC message, used for monitoring when the topic is unknown (option A, for comparison) |
-| `schema.go`, `go.mod` | Go module `github.com/OI4/oec/schema`: embeds `v2/` (`schema.FS`) for D7 |
+| `schema.go`, `go.mod` | Go module `github.com/OI4/oec/schema`: embeds `v2/` (`schema.FS`) for D7; `schema.Version` (bundle version `2.MINOR.PATCH`) and `schema.Baseline` (guideline commit) |
+| `CHANGELOG.md` | versioning rules of the bundle and one section per release |
+| `release/<version>.json` | frozen manifest of a release: path, hash of the canonical JSON and `$defs` names of every source file (ADR-0019 amendment C-041) |
 | `tools/cmd/schematest` | harness: builds the bundle, checks the `$comment` tracing against the catalog, validates the payload vectors and probes, maps errors to REQ ids, writes `dist/` |
 | `tests/rule-layer.yaml` | expectation list: invalid vectors whose violated REQs are partitioned into `schema` and `rule` (rule layer of D7 `validate`) |
 | `tools/rust-check` | second, independent validator (Rust `jsonschema` crate) over `dist/cases.json` |
-| `check.sh` | local CI: both validators |
+| `check.sh` | local CI: tests, release freeze, both validators (the monorepo gate `../check.sh` runs it) |
 
 Every file uses `$schema` 2020-12, with `$id` = `https://schemas.openindustry4.com/oec/v2/<path>`. The base was decided by the PO (ADR-0019 §6: major-only `$id`s, the tools report the bundle version). The `v2/` sources are the **strict** flavor: OI4-defined objects are closed with a closure `"unevaluatedProperties": {"$comment": "REQ-MSG-001 …", "not": {}}`, so an undefined key maps to the REQ of its closure. The **tolerant** flavor (unknown-key tolerance of REQ-MSG-046, like the oracle mode `tolerant`) is generated, never edited. It is the same tree without the closures, with its `$id`s under `…/oec/v2/tolerant/`. `schematest` writes both flavors to `dist/<host>/oec/v2/…`.
 
@@ -34,7 +36,18 @@ Requirements:
 ```sh
 ./check.sh                                    # gofmt, vet, Go validator, Rust validator
 cd tools && go run ./cmd/schematest -v        # table + error details per rejected vector
+cd tools && go run ./cmd/schematest -write-release   # freeze the tree as release/<schema.Version>.json
 ```
+
+**Release freeze** (ADR-0019 §6, amendment C-041). `schematest` first checks the release rules:
+- `schema.Version` is `2.MINOR.PATCH`, optionally with a pre-release suffix such as `2.1.0-dev` for the work after a release;
+- `schema.Baseline` is the baseline of `../spec/requirements/areas.yaml`;
+- a release version has its manifest `release/<version>.json` and a section in `CHANGELOG.md`;
+- the tree equals the manifest of the current version: a released version is immutable;
+- a pre-release version is above every release;
+- no file (`$id`) and no `$defs` name of any release has been removed (a removal is breaking within v2).
+
+To change a schema after a release: set `schema.Version` to the next pre-release, add an `Unreleased` section to the changelog, and freeze with `-write-release` at the next release.
 
 `schematest` first checks the REQ tracing (ADR-0019 §1) against the catalog `../spec/requirements/`: every REQ at the start of a `$comment` exists, is not deprecated and carries the verification method `schema` (in `platform/` files also `d8`: these files are checked by the infrastructure compliance CLI; ADR-0019 amendment C-039), and every reference in the parentheses after the ids (e.g. `(MG 8.2.3)`) is a `ref` of one of these REQs.
 
@@ -46,4 +59,7 @@ It then routes every payload vector of `../spec/vectors/payload/` through `topic
 
 The broker-json vectors of `../spec/vectors/platform/` (`V-BRK-`) are validated against `platform/broker.schema.json`: valid ones must pass, invalid ones must fail with exactly their `violates` REQs (there is no rule layer for this file). Both flavors are equal here, because the file has no closure.
 
-The **probes** (`probes.go`) are synthetic mutations of vectors. They exercise schema paths that no reviewed vector covers yet, and they are not catalog vectors. Every verdict is written to `dist/cases.json`, which the Rust validator re-checks.
+The **probes** (`probes.go`) are synthetic mutations of vectors. They exercise schema paths that no reviewed vector covers yet, and they are not catalog vectors. Every verdict is written to `dist/cases.json`, which the Rust validator re-checks. Each case also carries its topic (or `object`/`file`), the flavor and the REQs the schema reports. `spectool crosscheck` (`../spec`) uses these fields to run the oracle on every case (ADR-0019 amendment C-041):
+- an entry schema's REQs must be reported by the oracle;
+- a rejection by the generic schema must be a rejection by the oracle;
+- a schema-valid case may only have rule-layer (`d7-validate`) findings of the oracle.

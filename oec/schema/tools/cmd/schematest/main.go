@@ -38,8 +38,17 @@ func main() {
 	expect := flag.String("expect", "../tests/rule-layer.yaml", "expectation list of the rule-layer cases")
 	dist := flag.String("dist", "../dist", "output directory of the bundle and the cases")
 	verbose := flag.Bool("v", false, "print the errors of every rejected vector")
+	release := flag.String("release", "../release", "directory of the release manifests")
+	changelog := flag.String("changelog", "../CHANGELOG.md", "changelog of the schema bundle")
+	freeze := flag.Bool("write-release", false, "write the manifest release/<schema.Version>.json of the current tree and exit")
 	flag.Parse()
-	if err := run(*spec, *expect, *dist, *verbose); err != nil {
+	var err error
+	if *freeze {
+		err = runWriteRelease(*release)
+	} else {
+		err = run(*spec, *expect, *dist, *release, *changelog, *verbose)
+	}
+	if err != nil {
 		fmt.Fprintln(os.Stderr, "schematest:", err)
 		os.Exit(1)
 	}
@@ -108,11 +117,38 @@ type result struct {
 	msgs  []string
 }
 
-func run(specDir, expectFile, distDir string, verbose bool) error {
+func runWriteRelease(dir string) error {
 	docs, err := bundle()
 	if err != nil {
 		return err
 	}
+	if err := writeRelease(docs, dir); err != nil {
+		return err
+	}
+	fmt.Printf("wrote %s/%s.json\n", dir, schema.Version)
+	return nil
+}
+
+func run(specDir, expectFile, distDir, releaseDir, changelog string, verbose bool) error {
+	docs, err := bundle()
+	if err != nil {
+		return err
+	}
+	specBaseline, err := loadBaseline(filepath.Join(specDir, "requirements", "areas.yaml"))
+	if err != nil {
+		return err
+	}
+	problems, err := checkRelease(docs, releaseDir, changelog, specBaseline)
+	if err != nil {
+		return err
+	}
+	if len(problems) > 0 {
+		for _, p := range problems {
+			fmt.Fprintln(os.Stderr, "FAIL", p)
+		}
+		return fmt.Errorf("%d release problems (ADR-0019 amendment C-041)", len(problems))
+	}
+	fmt.Printf("release: schemas %s (baseline %s) frozen, no released $id or $defs name removed\n", schema.Version, schema.Baseline)
 	if err := writeBundle(distDir, docs); err != nil {
 		return err
 	}
@@ -389,7 +425,16 @@ func tolerant(v any) any {
 	return v
 }
 
+// writeBundle writes the bundle below dir/<host>/; files of an earlier run
+// are removed first, so that no stale $id reaches the second validator.
 func writeBundle(dir string, docs map[string]any) error {
+	u, err := url.Parse(schema.BaseURI)
+	if err != nil {
+		return err
+	}
+	if err := os.RemoveAll(filepath.Join(dir, u.Host)); err != nil {
+		return err
+	}
 	for id, doc := range docs {
 		p := filepath.Join(dir, filepath.FromSlash(strings.TrimPrefix(id, "https://")))
 		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
@@ -499,6 +544,24 @@ func loadExpectations(p string, vectors []vector) (map[string]expectation, error
 		out[e.Vector] = e
 	}
 	return out, nil
+}
+
+// loadBaseline returns the guideline baseline of the spec catalog.
+func loadBaseline(p string) (string, error) {
+	data, err := os.ReadFile(p)
+	if err != nil {
+		return "", err
+	}
+	var a struct {
+		Baseline string `yaml:"baseline"`
+	}
+	if err := yaml.Unmarshal(data, &a); err != nil {
+		return "", fmt.Errorf("%s: %w", p, err)
+	}
+	if a.Baseline == "" {
+		return "", fmt.Errorf("%s: no baseline", p)
+	}
+	return a.Baseline, nil
 }
 
 func loadVectors(dir string) ([]vector, error) {
