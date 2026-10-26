@@ -37,6 +37,7 @@ import (
 	"github.com/OI4/oec/spec/tools/internal/catalog"
 	"github.com/OI4/oec/spec/tools/internal/coverage"
 	"github.com/OI4/oec/spec/tools/internal/examples"
+	"github.com/OI4/oec/spec/tools/internal/export"
 	"github.com/OI4/oec/spec/tools/internal/guideline"
 	"github.com/OI4/oec/spec/tools/internal/inventory"
 	"github.com/OI4/oec/spec/tools/internal/maintain"
@@ -281,8 +282,17 @@ func cmdRender(args []string) error {
 	for rel, content := range render.ReviewViews(s, ts, vfiles) {
 		views[rel] = content
 	}
-	for _, dir := range []string{catalog.ViewDir, path.Dir(render.MatrixView), render.VectorViewDir} {
+	exports, err := export.Files(ts, vfiles)
+	if err != nil {
+		return err
+	}
+	for rel, content := range exports {
+		views[rel] = content
+	}
+	for _, dir := range []string{catalog.ViewDir, path.Dir(render.MatrixView), render.VectorViewDir, export.VectorDir, export.MatrixDir} {
 		existing, _ := filepath.Glob(c.path(dir + "/*.md"))
+		more, _ := filepath.Glob(c.path(dir + "/*.json"))
+		existing = append(existing, more...)
 		for _, p := range existing {
 			rel := dir + "/" + filepath.Base(p)
 			if _, ok := views[rel]; !ok {

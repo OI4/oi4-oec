@@ -20,6 +20,7 @@ Machine-readable baseline derived **only** from the OEC guideline (Messaging Gui
 | `matrix/view/method-resource.md` | Markdown view of the matrix: overview grid, topic form and payload columns per combination, linked topic and payload vectors – PO review artifact | `spectool render` |
 | `vectors/` (+ `vectors.schema.json`) | language-neutral test vectors: `topic/` (golden from the guideline, constructed valid, invalid), `il/` (Identification Link, dnp-encoding, `Oi4Identifier`), `payload/` (topic + JSON message, golden from Appendix B and the concrete examples of the MG body), `platform/` (content of the platform file `broker.json`, RIG 4.1.1; C-039) | hand, checked by `spectool lint` |
 | `vectors/view/*.md` | Markdown view per vector file (overview table + one section per vector with decoded Identification Links and linked REQs) – PO review artifact | `spectool render` |
+| `export/vectors/*.json`, `export/matrix/method-resource.json` | JSON copies of the vector files and the matrix (same fields, plus `$comment` and `source`) for consumers without a YAML parser: the Rust SDK (D2) and the micro SDK (D9) run their tests against them (ADR-0026, C-046). Never edit; the YAML files are the source of truth | `spectool render` |
 | `tools/` | Go module with `spectool` | – |
 | `go.mod`, `spec.go` | Go module `github.com/OI4/oec/spec`: embeds the data files as `spec.FS` for D7 (`oec/conformance`, C-040) | hand |
 
@@ -50,7 +51,7 @@ Requires Go (the module pins its toolchain; `GOTOOLCHAIN=auto` downloads it). Ru
 ```sh
 go run ./cmd/spectool inventory -spec ..   # regenerate coverage/inventory.yaml from the guideline HEAD (-rev to set the baseline)
 go run ./cmd/spectool lint -spec ..        # schema + rules; checks refs and quotes against the guideline
-go run ./cmd/spectool render -spec ..      # regenerate requirements/view/*.md, matrix/view/*.md, vectors/view/*.md
+go run ./cmd/spectool render -spec ..      # regenerate requirements/view/*.md, matrix/view/*.md, vectors/view/*.md, export/**/*.json
 go run ./cmd/spectool coverage -spec ..    # regenerate coverage/report.md and coverage/vectors.md (-gate: P2 exit gate)
 go run ./cmd/spectool topic -spec ..       # regenerate topic/topic-patterns.json
 go run ./cmd/spectool topic -spec .. 'Oi4v2/…'   # analyze topics (grammar rule, Source/Filter, IL check, warnings)
