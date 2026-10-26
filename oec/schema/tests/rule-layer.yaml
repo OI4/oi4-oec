@@ -131,10 +131,10 @@ expectations:
   - vector: V-PAY-242
     schema: []
     rule: [REQ-IL-005]
-    rules: [R-1]
+    rules: [R-3]
     reason: An encoded Identification Link is recognized by decoding it (base64url) and validating the result; JSON Schema can neither decode a value nor tell an encoded IL from a valid IL-shaped string.
   - vector: V-PAY-243
     schema: []
     rule: [REQ-IL-005]
-    rules: [R-1]
+    rules: [R-3]
     reason: An encoded Identification Link is recognized by decoding it (base64url) and validating the result; JSON Schema can neither decode a value nor tell an encoded IL from a valid IL-shaped string.
