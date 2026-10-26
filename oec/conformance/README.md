@@ -11,7 +11,7 @@ Checks messages offline against the embedded baseline (ADR-0019 §5 and amendmen
 | `topic` (R-1) | topic grammar of `topic-patterns.json` and the Method × Resource matrix, diagnosed level by level (REQ-TOP-…, REQ-ACT-020); Identification Link of AppId and Source (REQ-IL-…); warnings for control characters and whitespace in Filter levels (`whitespace` = recommendation of REQ-TOP-020 not followed; the text report names the REQ) |
 | `parse` | strict JSON: UTF-8, one value, no duplicate keys; reported as REQ-CMP-005 (OPC UA-conform JSON, ADR-0019 amendment C-040) |
 | `schema` | the entry schema of the topic form (`topics/<rule>.schema.json`), `message.schema.json` or the bare `metadata.schema.json#/$defs/ResourceMetaData`; strict or tolerant flavor; each error is mapped to the REQ ids of its `$comment` |
-| `rule` | R-2 equality with topic values, R-3 relations inside one message, R-4 number and calendar semantics (mutation probes against the schema), R-6 declared role (`--role`) |
+| `rule` | R-2 equality with topic values, R-3 relations inside one message (incl. the heuristic check for an encoded Identification Link in the payload, REQ-IL-005), R-4 number and calendar semantics (mutation probes against the schema), R-6 declared role (`--role`) |
 
 ```sh
 cd oec/conformance
@@ -41,3 +41,5 @@ Exit codes: `0` every message is valid (warnings allowed), `1` at least one mess
 ## Tests
 
 `go test ./...` checks D7 against the vectors of the baseline: every topic, IL and dnp vector; every payload vector (valid → no finding, invalid → exactly its `violates`); the split between schema layer and rule layer of [`../schema/tests/rule-layer.yaml`](../schema/tests/rule-layer.yaml); R-4 probes; CLI exit codes. The Go toolchain is pinned in `go.mod` (`GOTOOLCHAIN=auto` with an older local Go).
+
+The module is pure Go without cgo; `GOOS=windows|linux|darwin go build ./cmd/oec-check` cross-compiles (checked in C-040 for windows/amd64, linux/amd64, linux/arm64 and darwin/arm64; tests run on macOS so far, CI on Linux/Windows comes with P4).
