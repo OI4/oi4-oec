@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-253 (NewDataSetWriterId without Filter, REQ-ACT-020) drafted in C-036, reviewed by the PO (C-036 review 2026-10-25); V-TOP-218 gained REQ-ACT-020 in C-040 (back to draft); V-TOP-254 (empty Source, REQ-TOP-018) drafted in C-040.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "734c560"
+baseline: "59e3ae3"
 description: >-
   Constructed invalid topic vectors. Each vector names the violated
   requirement and whether the topic fails the grammar or the Identification
