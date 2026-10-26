@@ -9,8 +9,8 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 |---|---:|---:|---:|---:|---:|---:|
 | ACT | 14 | 14 | 0 | 0 | 0 | 0 |
 | BUS | 3 | 1 | 2 | 0 | 0 | 0 |
-| CMP | 4 | 0 | 3 | 0 | 0 | 1 |
-| IL | 10 | 6 | 1 | 0 | 1 | 2 |
+| CMP | 4 | 0 | 4 | 0 | 0 | 0 |
+| IL | 10 | 8 | 2 | 0 | 0 | 0 |
 | LIFE | 3 | 3 | 0 | 0 | 0 | 0 |
 | LOC | 2 | 2 | 0 | 0 | 0 | 0 |
 | MSG | 38 | 36 | 2 | 0 | 0 | 0 |
@@ -26,8 +26,8 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | RES-PUBLIST | 7 | 6 | 1 | 0 | 0 | 0 |
 | RES-REFDES | 7 | 6 | 1 | 0 | 0 | 0 |
 | RES-SUBLIST | 6 | 5 | 1 | 0 | 0 | 0 |
-| TOP | 13 | 6 | 0 | 0 | 5 | 2 |
-| **Total** | 158 | 126 | 21 | 0 | 6 | 5 |
+| TOP | 13 | 12 | 1 | 0 | 0 | 0 |
+| **Total** | 158 | 134 | 24 | 0 | 0 | 0 |
 
 ## Entry schemas per allowed matrix row
 
@@ -71,11 +71,11 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 |---|---|---|
 | REQ-BUS-004 (derived) | REQ-BUS-010 (covered), REQ-MSG-030 (covered), REQ-TOP-013 (covered), REQ-RES-CONFIG-003 (covered), REQ-RES-CONFIG-019 (covered), REQ-RES-DATA-009 (covered), REQ-RES-META-004 (covered), REQ-RES-PUBLIST-022 (covered), REQ-RES-REFDES-006 (covered), REQ-RES-SUBLIST-010 (covered) | That the object is a resource object of the addressed component and the Set carries its complete updated state needs the publications of that component (d7-test, REQ-BUS-002). |
 | REQ-BUS-005 (derived) | REQ-BUS-010 (covered), REQ-TOP-013 (covered), REQ-RES-REFDES-007 (covered), REQ-RES-SUBLIST-011 (covered) | That the addressed object exists at the addressed component needs its publications (d7-test, REQ-BUS-002). |
-| REQ-CMP-004 (details open (6 of 15)) | REQ-TOP-001 (covered), REQ-TOP-005 (covered), REQ-TOP-009 (negative only), REQ-TOP-011 (negative only), REQ-TOP-012 (negative only), REQ-TOP-013 (covered), REQ-TOP-018 (none), REQ-TOP-019 (covered), REQ-TOP-021 (negative only), REQ-TOP-022 (covered), REQ-TOP-023 (covered), REQ-IL-002 (covered), REQ-IL-003 (covered), REQ-IL-004 (negative only), REQ-ACT-020 (covered) | The topic rules that relate a topic to other messages or to the component (ServiceType and AppId of the destination or publisher REQ-TOP-006/010, Reply topic of the Call REQ-TOP-016, no other traffic in the namespace REQ-TOP-003; d7-monitor/d7-test). White space in a Filter level (REQ-TOP-020) is a recommendation, D7 reports it as a warning. |
+| REQ-CMP-004 (derived) | REQ-TOP-001 (covered), REQ-TOP-005 (covered), REQ-TOP-009 (covered), REQ-TOP-011 (covered), REQ-TOP-012 (covered), REQ-TOP-013 (covered), REQ-TOP-018 (covered), REQ-TOP-019 (covered), REQ-TOP-021 (covered), REQ-TOP-022 (covered), REQ-TOP-023 (covered), REQ-IL-002 (covered), REQ-IL-003 (covered), REQ-IL-004 (covered), REQ-ACT-020 (covered) | The topic rules that relate a topic to other messages or to the component (ServiceType and AppId of the destination or publisher REQ-TOP-006/010, Reply topic of the Call REQ-TOP-016, no other traffic in the namespace REQ-TOP-003; d7-monitor/d7-test). White space in a Filter level (REQ-TOP-020) is a recommendation, D7 reports it as a warning. |
 | REQ-CMP-005 (derived) | REQ-MSG-001 (covered), REQ-MSG-002 (covered), REQ-MSG-003 (covered), REQ-MSG-005 (covered), REQ-MSG-016 (covered), REQ-MSG-031 (covered), REQ-MSG-034 (covered), REQ-CMP-025 (derived), REQ-CMP-026 (derived) | Strict JSON syntax (UTF-8, no duplicate keys, one JSON value) has no vector of its own; D7 validate reports a payload that is no strict JSON under this requirement (layer parse). |
 | REQ-CMP-025 (derived) | REQ-MSG-001 (covered), REQ-MSG-003 (covered), REQ-MSG-016 (covered), REQ-MSG-027 (covered), REQ-MSG-032 (covered), REQ-MSG-035 (covered), REQ-MSG-036 (covered), REQ-MSG-037 (covered), REQ-MSG-040 (covered), REQ-MSG-041 (covered), REQ-MSG-042 (covered), REQ-MSG-043 (covered), REQ-MSG-044 (covered), REQ-MSG-045 (covered), REQ-ACT-002 (covered), REQ-ACT-010 (covered), REQ-ACT-012 (covered), REQ-ACT-021 (covered), REQ-ACT-022 (covered), REQ-BUS-010 (covered), REQ-LOC-001 (covered), REQ-PAG-001 (covered), REQ-PAG-003 (covered), REQ-RES-CONFIG-002 (covered), REQ-RES-CONFIG-003 (covered), REQ-RES-DATA-004 (covered), REQ-RES-EVENT-001 (covered), REQ-RES-HEALTH-001 (covered), REQ-RES-MAM-001 (covered), REQ-RES-PROFILE-001 (covered), REQ-RES-PUBLIST-001 (covered), REQ-RES-REFDES-001 (covered), REQ-RES-SUBLIST-001 (covered) | none – every payload object of MG 8/9 states the Requirement attribute of its fields in its "Fields of …" requirement (details); a field marked Not used or not defined is an undefined key (REQ-MSG-001). |
 | REQ-CMP-026 (derived) | REQ-MSG-003 (covered), REQ-MSG-005 (covered), REQ-MSG-016 (covered), REQ-MSG-027 (covered), REQ-MSG-031 (covered), REQ-MSG-032 (covered), REQ-MSG-035 (covered), REQ-MSG-036 (covered), REQ-MSG-037 (covered), REQ-MSG-039 (covered), REQ-MSG-040 (covered), REQ-MSG-041 (covered), REQ-MSG-042 (covered), REQ-MSG-043 (covered), REQ-MSG-044 (covered), REQ-MSG-045 (covered), REQ-ACT-002 (covered), REQ-ACT-010 (covered), REQ-ACT-012 (covered), REQ-ACT-021 (covered), REQ-ACT-022 (covered), REQ-BUS-010 (covered), REQ-LOC-001 (covered), REQ-PAG-001 (covered), REQ-PAG-003 (covered), REQ-RES-CONFIG-002 (covered), REQ-RES-CONFIG-003 (covered), REQ-RES-CONFIG-004 (covered), REQ-RES-CONFIG-006 (covered), REQ-RES-CONFIG-007 (covered), REQ-RES-DATA-004 (covered), REQ-RES-EVENT-001 (covered), REQ-RES-HEALTH-001 (covered), REQ-RES-MAM-001 (covered), REQ-RES-MAM-004 (covered), REQ-RES-MAM-017 (covered), REQ-RES-PROFILE-001 (covered), REQ-RES-PUBLIST-001 (covered), REQ-RES-REFDES-001 (covered), REQ-RES-REFDES-012 (covered), REQ-RES-SUBLIST-001 (covered) | none – Type and Value Range of every field are stated by the "Fields of …" requirement of its object and the type and encoding requirements (details); calendar validity of a DateTime is checked by the rule layer (R-4) under the same requirements. |
-| REQ-IL-001 (details open (3 of 10)) | REQ-IL-002 (covered), REQ-IL-004 (negative only), REQ-IL-009 (covered), REQ-IL-016 (covered), REQ-IL-018 (covered), REQ-IL-019 (covered), REQ-TOP-009 (negative only), REQ-TOP-018 (none), REQ-MSG-006 (covered), REQ-MSG-023 (covered) | That an asset is identified by exactly one Identification Link across all its messages (d7-test; REQ-IL-010, REQ-IL-012, REQ-IL-013). |
+| REQ-IL-001 (derived) | REQ-IL-002 (covered), REQ-IL-004 (covered), REQ-IL-009 (covered), REQ-IL-016 (covered), REQ-IL-018 (covered), REQ-IL-019 (covered), REQ-TOP-009 (covered), REQ-TOP-018 (covered), REQ-MSG-006 (covered), REQ-MSG-023 (covered) | That an asset is identified by exactly one Identification Link across all its messages (d7-test; REQ-IL-010, REQ-IL-012, REQ-IL-013). |
 | REQ-IL-008 (derived) | REQ-IL-009 (covered), REQ-IL-016 (covered), REQ-IL-018 (covered), REQ-IL-019 (covered) | The character combinations with special functions of IEC 61406-1 cannot be checked (MG 4.1) and stay with the issuer (manual). |
 | REQ-MSG-004 (derived) | REQ-MSG-003 (covered), REQ-MSG-005 (covered), REQ-MSG-011 (covered) | none – the content mask is not on the wire; its effect is the field presence of the NetworkMessage (details). |
 | REQ-MSG-017 (derived) | REQ-MSG-016 (covered), REQ-MSG-018 (covered), REQ-MSG-024 (covered), REQ-MSG-029 (covered), REQ-MSG-031 (covered) | none – the content mask is not on the wire; its effect is the field presence of the DataSetMessage and the VerboseEncoding of the fields (details). |
@@ -92,7 +92,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-PUBLIST-021 (derived) | REQ-MSG-010 (covered), REQ-RES-PUBLIST-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without PublicationList DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the PublicationList content (REQ-RES-PUBLIST-001). |
 | REQ-RES-REFDES-005 (derived) | REQ-MSG-010 (covered), REQ-RES-REFDES-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without ReferenceDesignation DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the ReferenceDesignation content (REQ-RES-REFDES-001). |
 | REQ-RES-SUBLIST-009 (derived) | REQ-MSG-010 (covered), REQ-RES-SUBLIST-001 (covered), REQ-PAG-008 (covered), REQ-LOC-003 (covered), REQ-QRY-001 (covered) | That a Pub without SubscriptionList DataSetMessage only answers a Get (REQ-CMP-042, d7-monitor); a DataSetMessage of another resource shows only as a violation of the SubscriptionList content (REQ-RES-SUBLIST-001). |
-| REQ-TOP-002 (details open (1 of 2)) | REQ-CMP-004 (details open (6 of 15)), REQ-CMP-005 (derived) | Conformance that needs several messages (series, request and answer, lifecycle) is checked by D7 monitor and test. |
+| REQ-TOP-002 (derived) | REQ-CMP-004 (derived), REQ-CMP-005 (derived) | Conformance that needs several messages (series, request and answer, lifecycle) is checked by D7 monitor and test. |
 
 ## Requirements
 
@@ -109,21 +109,21 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-ACT-013 | schema, d7-validate | reviewed | V-PAY-203, V-PAY-008, V-PAY-009, V-PAY-119 … (5) | V-PAY-191, V-PAY-192, V-PAY-193, V-PAY-194 | covered |
 | REQ-ACT-014 | schema, d7-validate, d7-test | reviewed | V-PAY-203, V-PAY-009, V-PAY-120 | V-PAY-195, V-PAY-196 | covered |
 | REQ-ACT-019 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-PAY-197, V-PAY-198 | covered |
-| REQ-ACT-020 | d7-validate, d7-test | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-TOP-218* (R-1), V-TOP-253 (R-1) | covered |
+| REQ-ACT-020 | d7-validate, d7-test | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-TOP-218 (R-1), V-TOP-253 (R-1) | covered |
 | REQ-ACT-021 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-119 | V-PAY-199, V-PAY-200 | covered |
 | REQ-ACT-022 | schema, d7-validate, d7-test | reviewed | V-PAY-009, V-PAY-120 | V-PAY-201, V-PAY-202 | covered |
 | REQ-BUS-004 | d7-validate | reviewed | V-PAY-061, V-PAY-072 | – | derived |
 | REQ-BUS-005 | d7-validate | reviewed | V-PAY-074 | – | derived |
 | REQ-BUS-010 | schema, d7-validate | reviewed | V-PAY-022, V-PAY-061, V-PAY-072, V-PAY-074 … (11) | V-PAY-150 | covered |
-| REQ-CMP-004 | d7-validate | reviewed | – | – | details open (6 of 15) |
+| REQ-CMP-004 | d7-validate | reviewed | – | – | derived |
 | REQ-CMP-005 | schema, d7-validate | reviewed | – | – | derived |
 | REQ-CMP-025 | schema, d7-validate | reviewed | – | – | derived |
 | REQ-CMP-026 | schema, d7-validate | reviewed | – | – | derived |
-| REQ-IL-001 | d7-validate, d7-test | reviewed | – | – | details open (3 of 10) |
+| REQ-IL-001 | d7-validate, d7-test | reviewed | – | – | derived |
 | REQ-IL-002 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (105) | V-IL-115 (R-1), V-IL-116 (R-1), V-TOP-240 (R-1) | covered |
 | REQ-IL-003 | d7-validate | reviewed | V-TOP-131 | V-IL-112 (R-1), V-TOP-242 (R-1) | covered |
-| REQ-IL-004 | d7-validate | reviewed | V-TOP-135*, V-TOP-136* | V-IL-111 (R-1), V-IL-113 (R-1), V-IL-114 (R-1), V-TOP-241 (R-1) … (6) | negative only |
-| REQ-IL-005 | d7-validate | reviewed | V-PAY-244* | V-PAY-242* (rule), V-PAY-243* (rule) | none |
+| REQ-IL-004 | d7-validate | reviewed | V-TOP-135, V-TOP-136 | V-IL-111 (R-1), V-IL-113 (R-1), V-IL-114 (R-1), V-TOP-241 (R-1) … (6) | covered |
+| REQ-IL-005 | d7-validate | reviewed | V-PAY-244 | V-PAY-242 (rule), V-PAY-243 (rule) | covered |
 | REQ-IL-008 | d7-validate, manual | reviewed | – | – | derived |
 | REQ-IL-009 | d7-validate, manual | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (8) | V-IL-107 (R-1), V-IL-108 (R-1), V-TOP-249 (R-1) | covered |
 | REQ-IL-016 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (9) | V-IL-103 (R-1), V-IL-104 (R-1), V-IL-105 (R-1), V-IL-106 (R-1) … (6) | covered |
@@ -244,15 +244,15 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-SUBLIST-010 | schema, d7-validate | reviewed | V-PAY-072 | V-PAY-239 | covered |
 | REQ-RES-SUBLIST-011 | schema, d7-validate | reviewed | V-PAY-074 | V-PAY-085 | covered |
 | REQ-TOP-001 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (97) | V-TOP-201 (R-1), V-TOP-202 (R-1), V-TOP-250 (R-1), V-TOP-251 (R-1) … (5) | covered |
-| REQ-TOP-002 | d7-validate, d7-monitor | reviewed | – | – | details open (1 of 2) |
+| REQ-TOP-002 | d7-validate, d7-monitor | reviewed | – | – | derived |
 | REQ-TOP-005 | d7-validate | reviewed | V-TOP-101, V-TOP-102, V-TOP-103, V-TOP-104 … (7) | V-TOP-203 (R-1), V-TOP-204 (R-1) | covered |
-| REQ-TOP-009 | d7-validate | reviewed | V-TOP-135* | V-TOP-239 (R-1) | negative only |
-| REQ-TOP-011 | d7-validate | reviewed | V-TOP-135*, V-TOP-136* | V-TOP-205 (R-1) | negative only |
-| REQ-TOP-012 | d7-validate | reviewed | V-TOP-135*, V-TOP-136* | V-TOP-206 (R-1), V-TOP-207 (R-1) | negative only |
+| REQ-TOP-009 | d7-validate | reviewed | V-TOP-135 | V-TOP-239 (R-1) | covered |
+| REQ-TOP-011 | d7-validate | reviewed | V-TOP-135, V-TOP-136 | V-TOP-205 (R-1) | covered |
+| REQ-TOP-012 | d7-validate | reviewed | V-TOP-135, V-TOP-136 | V-TOP-206 (R-1), V-TOP-207 (R-1) | covered |
 | REQ-TOP-013 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (97) | V-TOP-208 (R-1), V-TOP-209 (R-1), V-TOP-210 (R-1), V-TOP-211 (R-1) … (12) | covered |
-| REQ-TOP-018 | d7-validate, d7-test | reviewed | V-TOP-135*, V-TOP-136* | V-TOP-254* (R-1) | none |
+| REQ-TOP-018 | d7-validate, d7-test | reviewed | V-TOP-135, V-TOP-136 | V-TOP-254 (R-1) | covered |
 | REQ-TOP-019 | d7-validate | reviewed | V-TOP-108, V-TOP-109, V-TOP-120, V-TOP-134 | V-TOP-225 (R-1), V-TOP-229 (R-1), V-TOP-230 (R-1), V-TOP-231 (R-1) … (8) | covered |
-| REQ-TOP-020 | d7-validate | reviewed | V-TOP-137* | V-TOP-011 (warning), V-TOP-014 (warning), V-TOP-017 (warning), V-TOP-019 (warning) … (8) | negative only |
-| REQ-TOP-021 | d7-validate | reviewed | V-TOP-137* | V-TOP-225 (R-1), V-TOP-236 (R-1), V-TOP-237 (R-1), V-TOP-238 (R-1) | negative only |
+| REQ-TOP-020 | d7-validate | reviewed | V-TOP-137 | V-TOP-011 (warning), V-TOP-014 (warning), V-TOP-017 (warning), V-TOP-019 (warning) … (8) | covered |
+| REQ-TOP-021 | d7-validate | reviewed | V-TOP-137 | V-TOP-225 (R-1), V-TOP-236 (R-1), V-TOP-237 (R-1), V-TOP-238 (R-1) | covered |
 | REQ-TOP-022 | d7-validate | reviewed | V-TOP-011, V-TOP-014, V-TOP-017, V-TOP-019 … (31) | V-TOP-226 (R-1), V-TOP-227 (R-1), V-TOP-228 (R-1) | covered |
 | REQ-TOP-023 | d7-validate | reviewed | V-TOP-018, V-TOP-032, V-TOP-033, V-TOP-111 … (15) | V-TOP-219 (R-1), V-TOP-220 (R-1), V-TOP-221 (R-1), V-TOP-222 (R-1) … (6) | covered |

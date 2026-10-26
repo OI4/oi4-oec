@@ -24,7 +24,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 | [V-TOP-215](#v-top-215) | Set Data without Filter | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-216](#v-top-216) | Pub Metadata without Tag | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-217](#v-top-217) | Pub Event without Filter | invalid | fails: grammar | constructed | reviewed |
-| [V-TOP-218](#v-top-218) | Call with Filter | invalid | fails: grammar | constructed | draft |
+| [V-TOP-218](#v-top-218) | Call with Filter | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-219](#v-top-219) | Event with category only | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-220](#v-top-220) | Unknown Syslog level | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-221](#v-top-221) | Unknown event category | invalid | fails: grammar | constructed | reviewed |
@@ -60,7 +60,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 | [V-TOP-251](#v-top-251) | Leading slash | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-252](#v-top-252) | Line break after the Resource | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-253](#v-top-253) | Reply NewDataSetWriterId with Filter | invalid | fails: grammar | constructed | reviewed |
-| [V-TOP-254](#v-top-254) | Empty Source level | invalid | fails: grammar | constructed | draft |
+| [V-TOP-254](#v-top-254) | Empty Source level | invalid | fails: grammar | constructed | reviewed |
 
 ## V-TOP-201
 
@@ -258,7 +258,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 - Expected: invalid – Call and Reply never carry a Filter (MG 7.4, SF-041 c); the topic of NewDataSetWriterId has no Filter (MG 9.2.1, as V-TOP-253).
 - Violates: [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-219
 
@@ -656,4 +656,4 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – The Source is exactly one non-empty topic level (MG 7.6).
 - Violates: [REQ-TOP-018](../../requirements/view/top.md#req-top-018)
 - Origin: constructed
-- Status: draft
+- Status: reviewed

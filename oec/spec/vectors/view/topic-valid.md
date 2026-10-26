@@ -41,9 +41,9 @@ Constructed valid topic vectors: every ServiceType, Filter encodings, Event leve
 | [V-TOP-132](#v-top-132) | Context.Name with white space (warning) | valid | rule set-config, warnings: whitespace | constructed | reviewed |
 | [V-TOP-133](#v-top-133) | Tag with a control character (warning) | valid | rule pub-data, warnings: control-character, whitespace | constructed | reviewed |
 | [V-TOP-134](#v-top-134) | Tag that looks like a percent-encoding of another character is not decoded | valid | rule pub-metadata | constructed | reviewed |
-| [V-TOP-135](#v-top-135) | Pub Health of a device: AppId and Source are canonical encoded Identification Links | valid | rule pub-health | constructed | draft |
-| [V-TOP-136](#v-top-136) | Call of the common service NewDataSetWriterId about a device | valid | rule call-newdatasetwriterid | constructed | draft |
-| [V-TOP-137](#v-top-137) | Pub Event with a Filter of two levels without white space | valid | rule pub-event | constructed | draft |
+| [V-TOP-135](#v-top-135) | Pub Health of a device: AppId and Source are canonical encoded Identification Links | valid | rule pub-health | constructed | reviewed |
+| [V-TOP-136](#v-top-136) | Call of the common service NewDataSetWriterId about a device | valid | rule call-newdatasetwriterid | constructed | reviewed |
+| [V-TOP-137](#v-top-137) | Pub Event with a Filter of two levels without white space | valid | rule pub-event | constructed | reviewed |
 
 ## V-TOP-101
 
@@ -557,7 +557,7 @@ Notes: Optional Source of Call/Reply (MG 7.4, SF-041 c).
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-009](../../requirements/view/top.md#req-top-009), [REQ-TOP-011](../../requirements/view/top.md#req-top-011), [REQ-TOP-012](../../requirements/view/top.md#req-top-012), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-TOP-018](../../requirements/view/top.md#req-top-018), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-004](../../requirements/view/il.md#req-il-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: AppId and Source are each one topic level holding the canonical base64url encoding without padding of a valid Identification Link; the Source names the device the Health is about (C-040).
 
@@ -573,7 +573,7 @@ Notes: AppId and Source are each one topic level holding the canonical base64url
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-011](../../requirements/view/top.md#req-top-011), [REQ-TOP-012](../../requirements/view/top.md#req-top-012), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-TOP-018](../../requirements/view/top.md#req-top-018), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-IL-004](../../requirements/view/il.md#req-il-004)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: Method Call and the common service NewDataSetWriterId of MG 7.5.2 in the Resource level; the optional Source is the asset the Action refers to (C-040).
 
@@ -590,6 +590,6 @@ Notes: Method Call and the common service NewDataSetWriterId of MG 7.5.2 in the 
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-020](../../requirements/view/top.md#req-top-020), [REQ-TOP-021](../../requirements/view/top.md#req-top-021), [REQ-TOP-022](../../requirements/view/top.md#req-top-022)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: "/" only separates the two levels of the Event Filter, no level is empty and no level contains white space, so no warning (C-040).

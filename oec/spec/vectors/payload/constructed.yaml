@@ -8119,7 +8119,7 @@ vectors:
     violates: [REQ-IL-005]
     reason: "Identification Links in the payload are not encoded (MG 4.2); the ReplyTo carries the base64url form of the requestor's IL."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-003 whose ReplyTo names the sender ITConnector/aHR0cHM6Ly9pZC5jb25zdW1lci5jb20vTUVTZXJ2aWNlL0luc3QwNzMyMg,
       the topic encoding of https://id.consumer.com/MEService/Inst07322. The
@@ -8154,7 +8154,7 @@ vectors:
     violates: [REQ-IL-005]
     reason: "Identification Links in the payload are not encoded (MG 4.2); RequestorId and MessageId carry the base64url form of the requestor's IL."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-008 whose RequestorId and MessageId use the topic encoding of
       https://id.consumer.com/MEService/Inst07322. MessageId and RequestorId
@@ -8187,7 +8187,7 @@ vectors:
     expected: valid
     reqs: [REQ-IL-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       The message of V-PAY-003: PublisherId, MessageId, ReplyTo and
       DataSetWriterName carry the Identification Links unencoded, the topic

@@ -183,7 +183,7 @@ vectors:
     violates: [REQ-ACT-020, REQ-TOP-013]
     reason: "Call and Reply never carry a Filter (MG 7.4, SF-041 c); the topic of NewDataSetWriterId has no Filter (MG 9.2.1, as V-TOP-253)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"
     fails: grammar
 
@@ -544,6 +544,6 @@ vectors:
     violates: [REQ-TOP-018]
     reason: "The Source is exactly one non-empty topic level (MG 7.6)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/"
     fails: grammar

@@ -154,9 +154,9 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-239](#v-pay-239) | Set SubscriptionList without entry | invalid | violates: REQ-RES-SUBLIST-010 | constructed | reviewed |
 | [V-PAY-240](#v-pay-240) | Pub all Config DataSets of an asset with two contexts | valid | ok | constructed | reviewed |
 | [V-PAY-241](#v-pay-241) | Pub Config with the same context twice for one Source | invalid | violates: REQ-RES-CONFIG-015 | constructed | reviewed |
-| [V-PAY-242](#v-pay-242) | Pub Health with an encoded Identification Link in the ReplyTo | invalid | violates: REQ-IL-005 | constructed | draft |
-| [V-PAY-243](#v-pay-243) | Call with an encoded Identification Link in RequestorId and MessageId | invalid | violates: REQ-IL-005 | constructed | draft |
-| [V-PAY-244](#v-pay-244) | Pub Health with all Identification Links unencoded | valid | ok | constructed | draft |
+| [V-PAY-242](#v-pay-242) | Pub Health with an encoded Identification Link in the ReplyTo | invalid | violates: REQ-IL-005 | constructed | reviewed |
+| [V-PAY-243](#v-pay-243) | Call with an encoded Identification Link in RequestorId and MessageId | invalid | violates: REQ-IL-005 | constructed | reviewed |
+| [V-PAY-244](#v-pay-244) | Pub Health with all Identification Links unencoded | valid | ok | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -9366,7 +9366,7 @@ Payload:
 - Expected: invalid – Identification Links in the payload are not encoded (MG 4.2); the ReplyTo carries the base64url form of the requestor's IL.
 - Violates: [REQ-IL-005](../../requirements/view/il.md#req-il-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-003 whose ReplyTo names the sender ITConnector/aHR0cHM6Ly9pZC5jb25zdW1lci5jb20vTUVTZXJ2aWNlL0luc3QwNzMyMg, the topic encoding of https://id.consumer.com/MEService/Inst07322. The oracle detects an encoded IL heuristically: the value is no valid IL but its base64url decoding is (C-040).
 
@@ -9405,7 +9405,7 @@ Payload:
 - Expected: invalid – Identification Links in the payload are not encoded (MG 4.2); RequestorId and MessageId carry the base64url form of the requestor's IL.
 - Violates: [REQ-IL-005](../../requirements/view/il.md#req-il-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-008 whose RequestorId and MessageId use the topic encoding of https://id.consumer.com/MEService/Inst07322. MessageId and RequestorId still agree, so REQ-ACT-004 holds; only REQ-IL-005 is violated (twice).
 
@@ -9445,7 +9445,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-IL-005](../../requirements/view/il.md#req-il-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: The message of V-PAY-003: PublisherId, MessageId, ReplyTo and DataSetWriterName carry the Identification Links unencoded, the topic carries them encoded (MG 4.2).
 
