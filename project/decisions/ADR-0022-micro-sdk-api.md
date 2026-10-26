@@ -65,7 +65,7 @@ The commonalities with and deliberate differences from `oec.h` are listed in ADR
   - host unit tests (CMake + Unity, test vectors of `oec/spec`);
   - the ESP-IDF port (esp-mqtt, esp-tls/mbedTLS, SNTP, NVS for persistence);
   - the M5Stack example.
-- The PAL makes the Arduino port (ADR-0017 amendment C-010) a second PAL implementation on top of an Arduino MQTT client. That client must support TLS and a Will per connect (checked in C-043).
+- The PAL makes the Arduino port (ADR-0017 amendment C-010) a second PAL implementation on top of an Arduino MQTT client. That client must support TLS and a Will per connect (checked in C-043, ADR-0024: the Arduino port reuses the ESP-IDF PAL on esp-mqtt from the Arduino-ESP32 core; fallback arduino-mqtt).
 - The fixed `OECM_DEVICE_SIZE` is a compile-time ABI constant. A core that needs more state fails the static assertion and the constant grows (minor version).
 
 ## Alternatives considered
