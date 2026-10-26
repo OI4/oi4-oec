@@ -423,7 +423,7 @@ var probes = []probe{
 		p["1network"] = p["network"]
 		delete(p, "network")
 	}, []string{"REQ-RES-CONFIG-004"}},
-	// broker.json (RIG 4.1.1, SF-100 proposed): Address forms and value
+	// broker.json (RIG 4.1.1, SF-100): Address forms and value
 	// ranges the reviewed V-BRK vectors do not exercise
 	{"P-109 broker.json IPv6 loopback", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "::1" }, nil},
 	{"P-110 broker.json IPv4-mapped IPv6", "V-BRK-001", brokerJSON, func(m map[string]any) { m["Address"] = "::ffff:192.0.2.10" }, nil},

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.openindustry4.com/oec/v2/platform/broker.schema.json",
   "title": "broker.json",
-  "description": "Content of the file broker.json in the Message Bus storage /etc/oi4/mqtt of a container (RIG 4.1.1): the settings of the MQTT broker. Used by the infrastructure compliance CLI (D8); REQ-CNT-003 keeps the verification d8 (ADR-0019 amendment C-039). Further elements are allowed (SF-100 (a), proposed), so the file has no closure and no tolerant variant of its own.",
+  "description": "Content of the file broker.json in the Message Bus storage /etc/oi4/mqtt of a container (RIG 4.1.1): the settings of the MQTT broker. Used by the infrastructure compliance CLI (D8); REQ-CNT-003 keeps the verification d8 (ADR-0019 amendment C-039). Further elements are allowed (SF-100 (a)), so the file has no closure and no tolerant variant of its own.",
   "$comment": "REQ-CNT-003 (RIG 4.1.1): broker.json is a JSON object with the mandatory elements Address, SecurePort and MaxPacketSize",
   "type": "object",
   "required": [
@@ -12,7 +12,7 @@
   ],
   "properties": {
     "Address": {
-      "$comment": "REQ-CNT-003 (RIG 4.1.1): IP address or host name of the broker – an IPv4 address in dotted-decimal form, an IPv6 address in text form without brackets and zone (IPv6address of RFC 3986) or a host name of RFC 1123 whose last label is not all digits (SF-100 (b), proposed)",
+      "$comment": "REQ-CNT-003 (RIG 4.1.1): IP address or host name of the broker – an IPv4 address in dotted-decimal form, an IPv6 address in text form without brackets and zone (IPv6address of RFC 3986) or a host name of RFC 1123 whose last label is not all digits (SF-100 (b))",
       "type": "string",
       "anyOf": [
         {
@@ -31,7 +31,7 @@
       ]
     },
     "SecurePort": {
-      "$comment": "REQ-CNT-003 (RIG 4.1.1): UINT16 port on which the broker listens for TLS connections; port 0 is no such port (SF-100 (c), proposed)",
+      "$comment": "REQ-CNT-003 (RIG 4.1.1): UINT16 port on which the broker listens for TLS connections; port 0 is no such port (SF-100 (c))",
       "type": "integer",
       "minimum": 1,
       "maximum": 65535

@@ -15,7 +15,7 @@ The schemas are derived from the spec baseline in [`../spec/`](../spec/), which 
 | `v2/helpers.schema.json` | helper DataSets PaginationRequest, Pagination, Locale and Query, with their DataSetMessages (reserved DataSetWriterIds 1/2/3/9); the Payload of a Query is refined by the resource module |
 | `v2/resources/<resource>.schema.json` | one module per OI4 resource: the DataSet and its DataSetMessage (`config`, `data`, `event`, `health`, `mam`, `profile`, `publicationlist`, `referencedesignation`, `subscriptionlist`) |
 | `v2/topics/<rule>.schema.json` | **entry schema per topic form**. `<rule>` is the ABNF rule of `../spec/topic/topic.abnf` and of the matrix row (option B of ADR-0019) |
-| `v2/platform/broker.schema.json` | content of the platform file `broker.json` of the Message Bus storage (RIG 4.1.1, REQ-CNT-003): Address (IPv4, IPv6 or host name), SecurePort, MaxPacketSize; no closure, further elements are allowed (SF-100, proposed); used by D8 |
+| `v2/platform/broker.schema.json` | content of the platform file `broker.json` of the Message Bus storage (RIG 4.1.1, REQ-CNT-003): Address (IPv4, IPv6 or host name), SecurePort, MaxPacketSize; no closure, further elements are allowed (SF-100); used by D8 |
 | `v2/message.schema.json` | topic-agnostic schema of any OEC message, used for monitoring when the topic is unknown (option A, for comparison) |
 | `schema.go`, `go.mod` | Go module `github.com/OI4/oec/schema`: embeds `v2/` (`schema.FS`) for D7 |
 | `tools/cmd/schematest` | harness: builds the bundle, checks the `$comment` tracing against the catalog, validates the payload vectors and probes, maps errors to REQ ids, writes `dist/` |
