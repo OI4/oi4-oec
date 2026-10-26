@@ -5,7 +5,9 @@
 #      shared test vectors of oec/spec/export (IL, topic, payload,
 #      broker.json, lifecycle roles) and the MQTT codec/session tests with
 #      proptest (C-049), the runtime of oec against an in-process TLS test
-#      broker (C-050; loopback only, PKI generated per test), rustdoc
+#      broker (C-050; loopback only, PKI generated per test; the interop
+#      tests of oec/tests/interop.rs are compiled and linted but skip
+#      without OEC_INTEROP=1, see oec/dev/interop.sh, C-051), rustdoc
 #      without warnings, cargo-deny (licenses, advisories, bans, sources;
 #      ADR-0023 §2). clippy, tests and rustdoc run twice: default features
 #      and `--features strict-validation` (oec-core embeds oec/schema/v2
