@@ -76,7 +76,7 @@ Updates in between only change the state store; the newest state is published af
 | Keep alive | 60 s | REQ-MQTT-014 |
 | ClientId | container name / serial number | REQ-MQTT-013 |
 | Data Mode / Interval | `ON_REQUEST_FILTER_9` / 0 (on change) | ADR-0020 §7 |
-| MAM, Health, Profile, ReferenceDesignation Mode | `ON_REQUEST_SOURCE_10` | ADR-0020 §7, SF-101 |
+| MAM, Health, Profile, ReferenceDesignation Mode | `ON_REQUEST_SOURCE_10` | ADR-0020 §7, REQ-RES-PUBLIST-026 |
 | Lowest published Syslog level | `Notice` | REQ-TOP-024 |
 | DataSetWriterIds | from 10 | REQ-MSG-020 |
 | SoftwareRevision / HardwareRevision / DeviceRevision of an app | `"undefined"` / `""` / `""` | REQ-RES-MAM-010, REQ-RES-MAM-008 (examples of MG 5) |

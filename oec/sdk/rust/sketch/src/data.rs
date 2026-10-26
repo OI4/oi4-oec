@@ -101,8 +101,9 @@ impl Field {
 /// ReferenceDesignation `ON_REQUEST_SOURCE_10`; Metadata
 /// `ON_REQUEST_FILTER_9` (fixed, REQ-RES-PUBLIST-012); Event entries
 /// `FILTER_4`, Syslog Debug/Informational `OFF_0` (REQ-TOP-024). The
-/// defaults of all resources that support `Get` contain `ON_REQUEST`, so they
-/// hold under both readings of SF-101 (`Get` without `ON_REQUEST`).
+/// defaults of all resources that support `Get` contain `ON_REQUEST`, as
+/// MG 8.3.8 recommends (REQ-RES-PUBLIST-026, SF-101); `Get` is answered for
+/// every Mode except `OFF_0` (REQ-RES-PUBLIST-027).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Mode {
     on_request: bool,

@@ -100,8 +100,8 @@ typedef struct oecm_mam {
 
 typedef struct oecm_config {
     oecm_level level;
-    /* A directly connected device uses OECM_ST_OT_CONNECTOR until SF-102
-     * is decided (ADR-0022). */
+    /* A directly connected smart device uses OECM_ST_OT_CONNECTOR
+     * (REQ-TOP-028, MG 7.2, SF-102; ADR-0022). */
     oecm_service_type service_type;
     /* NULL: the Oi4Identifier is built from the MAM (REQ-IL-007,
      * REQ-RES-MAM-006); else an existing Identification Link (REQ-IL-006). */
