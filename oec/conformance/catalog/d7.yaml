@@ -1,0 +1,406 @@
+# Test catalog of D7 `oec-check` (ADR-0025, design C-044).
+#
+# Each test names the requirements it checks. `catalog_test.go` keeps the
+# catalog consistent with oec/spec/requirements: every active REQ with the
+# verification `d7-monitor` is checked by a monitor test, every REQ with
+# `d7-test` by an active test or listed under `manual` (only if its
+# verification also contains `manual`).
+#
+# mode:   monitor – passive rule on the observed traffic (also active during `test`)
+#         test    – active test against one component under test (CUT)
+# level:  lowest level at which one of its REQs applies; the test runs at every
+#         declared level (--level) >= its level (MG 1.3). Each REQ of the test is
+#         judged by its own obligation at the declared level: e.g. at level 1 a
+#         Get that is not answered is no failure (REQ-CMP-015 applies from
+#         level 2), but a wrong answer is (REQ-BUS-003 applies at every level
+#         where the CUT answers Get).
+# needs:  attachment beyond a plain broker connection; without it the test is
+#         skipped and the run is inconclusive for MUST requirements:
+#         proxy        – D7 is the CUT's MQTT endpoint and relays to the broker
+#         restart-hook – a command that stops and starts the CUT
+#         peer         – D7 simulates a peer component that the CUT talks to
+# status: planned (P3) | implemented (P5)
+tool: oec-check
+baseline: "168e1d1"
+tests:
+  # --- monitor: passive rules -------------------------------------------
+  - id: T7-MON-01
+    title: Every message in the Oi4v2 namespace is valid
+    mode: monitor
+    level: 1
+    reqs: [REQ-TOP-002, REQ-TOP-003]
+    status: planned
+    notes: Every observed message runs through the four layers of `validate`.
+  - id: T7-MON-02
+    title: Pub topics carry the publisher's ServiceType and AppId
+    mode: monitor
+    level: 1
+    reqs: [REQ-TOP-006, REQ-TOP-010]
+    status: planned
+    notes: The ServiceType/AppId of a Pub topic belong to the component whose Birth carried that AppId; the PublisherId names the same component.
+  - id: T7-MON-03
+    title: Birth message on every connection
+    mode: monitor
+    level: 1
+    reqs: [REQ-CMP-003, REQ-LIFE-001, REQ-LIFE-002, REQ-LIFE-003]
+    status: planned
+    notes: After a Will or Close the next message of the component is a Birth; the Birth equals the regular Pub MAM about itself and uses its DataSetWriterId.
+  - id: T7-MON-04
+    title: MAM and Health for the component and every subordinate asset
+    mode: monitor
+    level: 1
+    reqs: [REQ-CMP-006, REQ-CMP-007, REQ-CMP-014, REQ-CMP-045]
+    status: planned
+    notes: Every Source seen in a Pub of the component has MAM and Health; represented entities never publish a Birth, Will or Close of their own.
+  - id: T7-MON-05
+    title: Health at start, on change and every 60 seconds
+    mode: monitor
+    level: 1
+    reqs: [REQ-TOP-017, REQ-RES-HEALTH-004, REQ-LIFE-014]
+    status: planned
+    notes: Heartbeat tolerance and the minimum observation time are parameters of the run (default 2 × 60 s + 5 s).
+  - id: T7-MON-06
+    title: MessageIds are unique
+    mode: monitor
+    level: 1
+    reqs: [REQ-MSG-008, REQ-ACT-004]
+    status: planned
+  - id: T7-MON-07
+    title: RequestIds are unique among pending requests
+    mode: monitor
+    level: 1
+    reqs: [REQ-ACT-011]
+    status: planned
+    notes: Applies when the CUT sends Calls.
+  - id: T7-MON-08
+    title: DataSetWriterIds are consistent
+    mode: monitor
+    level: 1
+    reqs: [REQ-MSG-021, REQ-MSG-033, REQ-RES-PUBLIST-005]
+    status: planned
+  - id: T7-MON-09
+    title: DataSetClassId is stable per structure
+    mode: monitor
+    level: 1
+    reqs: [REQ-MSG-013]
+    status: planned
+    notes: Compared across reconnects of the CUT; a restart across runs needs a recording of the earlier run (`--baseline-recording`).
+  - id: T7-MON-10
+    title: Identification Links are unique
+    mode: monitor
+    level: 1
+    reqs: [REQ-IL-010, REQ-IL-012]
+    status: planned
+    notes: Heuristic – two live Birth/Health streams or two different MAM for one Identification Link. A unique IL cannot be proven by observation (manual part of the REQs).
+  - id: T7-MON-11
+    title: No unsolicited publication without content
+    mode: monitor
+    level: 1
+    reqs: [REQ-CMP-042]
+    status: planned
+  - id: T7-MON-12
+    title: MQTT client behavior visible to a subscriber
+    mode: monitor
+    level: 1
+    reqs: [REQ-CMP-009, REQ-MQTT-017]
+    status: planned
+    notes: D7 subscribes with QoS 1, so the delivered QoS shows the publisher's QoS (MQTT 3.1.1 delivers min(publish, subscribe)). ClientId, keep alive and clean session are only visible in proxy mode (T7-CON-01).
+  - id: T7-MON-13
+    title: Data and Event publications
+    mode: monitor
+    level: 2
+    reqs: [REQ-CMP-010, REQ-CMP-036, REQ-CMP-038]
+    status: planned
+  - id: T7-MON-14
+    title: Publication rules of the PublicationList
+    mode: monitor
+    level: 1
+    reqs: [REQ-MQTT-019, REQ-RES-PUBLIST-008, REQ-RES-PUBLIST-009, REQ-RES-PUBLIST-010, REQ-RES-PUBLIST-011, REQ-RES-PUBLIST-013, REQ-RES-PUBLIST-014, REQ-RES-PUBLIST-015]
+    status: planned
+    notes: The rules are checked against the last published PublicationList (Mode, Interval, Precisions); interval tolerance is a parameter of the run.
+  - id: T7-MON-15
+    title: PublicationList and SubscriptionList are republished on change
+    mode: monitor
+    level: 1
+    reqs: [REQ-RES-PUBLIST-017, REQ-RES-PUBLIST-018, REQ-RES-SUBLIST-005, REQ-RES-SUBLIST-006]
+    status: planned
+  - id: T7-MON-16
+    title: RevisionCounter counts configuration changes
+    mode: monitor
+    level: 1
+    reqs: [REQ-RES-MAM-018]
+    status: planned
+  - id: T7-MON-17
+    title: Set Config contains the mandatory objects of its group
+    mode: monitor
+    level: 1
+    reqs: [REQ-RES-CONFIG-011]
+    status: planned
+    notes: Applies to Set Config requests sent by the CUT, checked against the Config published by the destination.
+  - id: T7-MON-18
+    title: Pagination and MaxPacketSize
+    mode: monitor
+    level: 1
+    reqs: [REQ-PAG-004, REQ-PAG-005]
+    status: planned
+    notes: MaxPacketSize from `broker.json` of the bus storage or `--max-packet-size`.
+  - id: T7-MON-19
+    title: No Syslog Debug by default
+    mode: monitor
+    level: 1
+    reqs: [REQ-TOP-024]
+    status: planned
+    notes: Checked from the Birth until the first Set of a log level.
+
+  # --- test: connection (proxy mode) ------------------------------------
+  - id: T7-CON-01
+    title: MQTT 3.1.1 CONNECT with the required client settings
+    mode: test
+    level: 1
+    needs: [proxy]
+    reqs: [REQ-CMP-001, REQ-CMP-009, REQ-MQTT-001]
+    status: planned
+    notes: Protocol level ≥ 4, ClientId, keep alive, clean session, as seen in the CONNECT packet.
+  - id: T7-CON-02
+    title: TLS 1.2 or higher only and broker certificate verified
+    mode: test
+    level: 1
+    needs: [proxy]
+    reqs: [REQ-CMP-002, REQ-MQTT-005, REQ-MQTT-008]
+    status: planned
+    notes: The proxy offers TLS 1.1 only, then a certificate of an untrusted CA, then a wrong host name; the CUT must not complete an MQTT CONNECT in any of them.
+  - id: T7-CON-03
+    title: Client authenticates to the broker
+    mode: test
+    level: 1
+    needs: [proxy]
+    reqs: [REQ-MQTT-009]
+    status: planned
+  - id: T7-CON-04
+    title: No retained messages
+    mode: test
+    level: 1
+    needs: [proxy]
+    reqs: [REQ-MQTT-018]
+    status: planned
+    notes: Without proxy, D7 reports retained deliveries on its own subscribe as evidence (a finding, but no pass).
+
+  # --- test: lifecycle ---------------------------------------------------
+  - id: T7-LIFE-01
+    title: Will registered on every connection
+    mode: test
+    level: 1
+    needs: [proxy]
+    reqs: [REQ-CMP-003, REQ-LIFE-008, REQ-LIFE-010, REQ-LIFE-016]
+    status: planned
+    notes: The Will of each CONNECT; its MessageId timestamp is the connect time (tolerance a parameter).
+  - id: T7-LIFE-02
+    title: Birth first after every connect and after recovery
+    mode: test
+    level: 1
+    needs: [proxy]
+    reqs: [REQ-LIFE-001, REQ-LIFE-015, REQ-LIFE-017]
+    status: planned
+    notes: The proxy drops the connection; the CUT reconnects and publishes its Birth before anything else.
+  - id: T7-LIFE-03
+    title: Will published on abnormal disconnect
+    mode: test
+    level: 1
+    needs: [proxy]
+    reqs: [REQ-LIFE-009]
+    status: planned
+  - id: T7-LIFE-04
+    title: Close message before a graceful disconnect
+    mode: test
+    level: 1
+    needs: [restart-hook]
+    reqs: [REQ-CMP-046, REQ-LIFE-005, REQ-LIFE-006, REQ-LIFE-007]
+    status: planned
+
+  # --- test: addressing and identification --------------------------------
+  - id: T7-ADR-01
+    title: Requests sent by the CUT address the destination
+    mode: test
+    level: 1
+    needs: [peer]
+    reqs: [REQ-BUS-002, REQ-TOP-006, REQ-TOP-010]
+    status: planned
+    notes: D7 announces a simulated peer (Birth, MAM, Health); applies when the CUT sends requests to it.
+  - id: T7-ADR-02
+    title: Versions are not mixed
+    mode: test
+    level: 1
+    reqs: [REQ-TOP-004]
+    status: planned
+  - id: T7-ADR-03
+    title: Identification Links in requests and answers
+    mode: test
+    level: 1
+    reqs: [REQ-IL-001, REQ-IL-013, REQ-IL-015, REQ-TOP-018]
+    status: planned
+    notes: Get with the exact IL of each asset is answered on that Source; a Get with an IL that differs only in case is not answered as the same asset.
+
+  # --- test: Get ---------------------------------------------------------
+  - id: T7-GET-01
+    title: Get MAM and Health
+    mode: test
+    level: 1
+    reqs: [REQ-BUS-003, REQ-CMP-015, REQ-CMP-017, REQ-MSG-015, REQ-RES-HEALTH-006, REQ-RES-MAM-021]
+    status: planned
+  - id: T7-GET-02
+    title: Profile lists exactly the supported resources
+    mode: test
+    level: 1
+    reqs: [REQ-CMP-018, REQ-CMP-021, REQ-RES-PROFILE-002, REQ-RES-PROFILE-004]
+    status: planned
+    notes: Every resource of the Profile answers a Get; a Get of a resource missing from the Profile gets no Pub.
+  - id: T7-GET-03
+    title: Get of every supported resource
+    mode: test
+    level: 1
+    reqs: [REQ-CMP-008, REQ-CMP-019, REQ-CMP-020, REQ-CMP-035, REQ-CMP-036, REQ-CMP-037, REQ-CMP-039, REQ-RES-CONFIG-017, REQ-RES-DATA-007, REQ-RES-META-002, REQ-RES-PUBLIST-020, REQ-RES-REFDES-004, REQ-RES-SUBLIST-008]
+    status: planned
+    notes: Each resource is required from the level of its CMP row; at level 2 a missing resource of CMP-035 … CMP-039 is a warning (recommended, REQ-CMP-010).
+  - id: T7-GET-04
+    title: Every represented entity fulfills the level
+    mode: test
+    level: 1
+    reqs: [REQ-CMP-010, REQ-CMP-024, REQ-CMP-045]
+    status: planned
+    notes: The Get tests repeat for every Source the CUT represents.
+  - id: T7-GET-05
+    title: Get without content, unknown asset, Metadata without Data
+    mode: test
+    level: 1
+    reqs: [REQ-CMP-041, REQ-CMP-044, REQ-CMP-047]
+    status: planned
+  - id: T7-GET-06
+    title: Pagination on request and by size
+    mode: test
+    level: 1
+    reqs: [REQ-PAG-002, REQ-PAG-005]
+    status: planned
+  - id: T7-GET-07
+    title: Query
+    mode: test
+    level: 1
+    reqs: [REQ-QRY-001, REQ-QRY-002, REQ-QRY-003, REQ-RES-REFDES-011, REQ-RES-REFDES-013, REQ-RES-REFDES-014]
+    status: planned
+  - id: T7-GET-08
+    title: Locale
+    mode: test
+    level: 1
+    reqs: [REQ-LOC-002]
+    status: planned
+  - id: T7-GET-09
+    title: Unknown keys in requests are ignored
+    mode: test
+    level: 1
+    reqs: [REQ-MSG-046]
+    status: planned
+
+  # --- test: Set and Del -------------------------------------------------
+  - id: T7-SET-01
+    title: Set and Del are answered with Status events and publications
+    mode: test
+    level: 1
+    reqs: [REQ-BUS-006, REQ-CMP-016, REQ-CMP-023, REQ-CMP-038, REQ-MQTT-019, REQ-MSG-015, REQ-RES-EVENT-005, REQ-TOP-014, REQ-TOP-015]
+    status: planned
+    notes: Runs for every object the CUT offers for modification (from Profile and Config); the Set writes the current value back where possible, so the CUT state is unchanged.
+  - id: T7-SET-02
+    title: Set or Del on an unknown or non-modifiable object
+    mode: test
+    level: 1
+    reqs: [REQ-CMP-043]
+    status: planned
+  - id: T7-SET-03
+    title: Set and Del for all resources
+    mode: test
+    level: 3
+    reqs: [REQ-CMP-033]
+    status: planned
+  - id: T7-SET-04
+    title: Del semantics
+    mode: test
+    level: 1
+    reqs: [REQ-BUS-007, REQ-BUS-008]
+    status: planned
+  - id: T7-SET-05
+    title: Set Config
+    mode: test
+    level: 1
+    reqs: [REQ-RES-CONFIG-005, REQ-RES-CONFIG-021, REQ-RES-CONFIG-022, REQ-RES-CONFIG-023, REQ-RES-CONFIG-024, REQ-RES-CONFIG-025]
+    status: planned
+  - id: T7-SET-06
+    title: Set Data
+    mode: test
+    level: 1
+    reqs: [REQ-RES-DATA-011, REQ-RES-DATA-012]
+    status: planned
+  - id: T7-SET-07
+    title: Set Metadata
+    mode: test
+    level: 1
+    reqs: [REQ-RES-META-006, REQ-RES-META-007]
+    status: planned
+  - id: T7-SET-08
+    title: Set PublicationList
+    mode: test
+    level: 1
+    reqs: [REQ-RES-PUBLIST-007, REQ-RES-PUBLIST-016, REQ-RES-PUBLIST-024, REQ-RES-PUBLIST-025]
+    status: planned
+  - id: T7-SET-09
+    title: Set and Del ReferenceDesignation
+    mode: test
+    level: 1
+    reqs: [REQ-RES-REFDES-009, REQ-RES-REFDES-010]
+    status: planned
+  - id: T7-SET-10
+    title: ReferenceDesignation survives a restart
+    mode: test
+    level: 1
+    needs: [restart-hook]
+    reqs: [REQ-RES-REFDES-002]
+    status: planned
+  - id: T7-SET-11
+    title: Set and Del SubscriptionList
+    mode: test
+    level: 1
+    reqs: [REQ-RES-SUBLIST-004, REQ-RES-SUBLIST-013, REQ-RES-SUBLIST-014, REQ-RES-SUBLIST-015]
+    status: planned
+  - id: T7-SET-12
+    title: Log level is configurable
+    mode: test
+    level: 1
+    reqs: [REQ-TOP-027]
+    status: planned
+
+  # --- test: Actions -----------------------------------------------------
+  - id: T7-ACT-01
+    title: NewDataSetWriterId Call and Reply
+    mode: test
+    level: 1
+    reqs: [REQ-ACT-001, REQ-ACT-006, REQ-ACT-007, REQ-ACT-012, REQ-ACT-014, REQ-ACT-015, REQ-ACT-016, REQ-ACT-020, REQ-ACT-022, REQ-CMP-034, REQ-CMP-040, REQ-TOP-016]
+    status: planned
+  - id: T7-ACT-02
+    title: Provided DataSetWriterId is valid for Ttl seconds
+    mode: test
+    level: 1
+    reqs: [REQ-ACT-023]
+    status: planned
+  - id: T7-ACT-03
+    title: No response to undecodable, unaddressable or rejected requests
+    mode: test
+    level: 1
+    reqs: [REQ-ACT-017]
+    status: planned
+
+manual:
+  - req: REQ-CMP-011
+    reason: A rule for D7 itself, not a test – `--level` defaults to 3 when the manufacturer states no level.
+  - req: REQ-LIFE-011
+    reason: Subscriber side – how a CUT interprets a Close of another component is not observable on the bus in general.
+  - req: REQ-LIFE-012
+    reason: Subscriber side – as REQ-LIFE-011 for the Will.
+  - req: REQ-LIFE-013
+    reason: Subscriber side – as REQ-LIFE-011 for the next Birth.

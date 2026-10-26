@@ -1,0 +1,153 @@
+# Test catalog of D8 `oec-infra` (ADR-0025, design C-044).
+#
+# Same model as d7.yaml. Every active REQ with the verification `d8` is
+# checked by a test here or listed under `manual` (only if its verification
+# also contains `manual`).
+#
+# mode:   image     – offline inspection of an OCI image (registry reference,
+#                     OCI layout or archive); no container daemon needed
+#         run       – D8 starts the image in a sandbox with generated test
+#                     storages (/etc/oi4/mqtt, /etc/oi4/certs, /run/secrets/oi4,
+#                     hostname) and its own MQTT test endpoint, and observes
+#                     what the application does with them
+#         container – inspection of a running container on an OEC platform
+#         host      – checks on the platform host (or in a probe container
+#                     with the platform's storages mounted)
+#         bus       – MQTT-level checks of the platform's Message Bus
+# level:  lowest Service Container level at which one of its REQs applies (as
+#         in d7.yaml); absent when the test checks only platform requirements
+#         (not graded, MG 1.3)
+# needs:  docker        – access to a container engine API (Docker or Podman)
+#         host-access   – D8 runs on the platform host (or a probe container)
+#         credentials-2 – a second, unprivileged set of bus credentials
+tool: oec-infra
+baseline: "168e1d1"
+tests:
+  # --- image: offline -----------------------------------------------------
+  - id: T8-IMG-01
+    title: OCI-compliant image
+    mode: image
+    level: 1
+    reqs: [REQ-CMP-027]
+    status: planned
+  - id: T8-IMG-02
+    title: Processor architectures and multi-architecture image
+    mode: image
+    level: 2
+    reqs: [REQ-APP-001, REQ-APP-002, REQ-CMP-032]
+    status: planned
+    notes: Architectures from the image index; the hardware part of RIG 5.2 is declared by the manufacturer and only reported.
+  - id: T8-IMG-03
+    title: SBOM and license texts in /opt/oi4/licenses
+    mode: image
+    level: 2
+    reqs: [REQ-CMP-028, REQ-CNT-013, REQ-CNT-014, REQ-CNT-015, REQ-LIC-002]
+    status: planned
+    notes: Exactly one of sbom.spdx.json / sbom.cdx.json; every license embedded or present as <License-ID>.txt; the files come from an image layer.
+  - id: T8-IMG-04
+    title: Image integrity
+    mode: image
+    level: 2
+    reqs: [REQ-CMP-030]
+    status: planned
+    notes: The checks follow RIG 4.3 (digests of manifest and layers; signature where RIG 4.3 requires it); details are fixed in P5b.
+
+  # --- run: sandbox with test storages --------------------------------------
+  - id: T8-RUN-01
+    title: Application uses the Message Bus storage
+    mode: run
+    level: 2
+    needs: [docker]
+    reqs: [REQ-CMP-029, REQ-CNT-004]
+    status: planned
+    notes: broker.json points to the D8 test endpoint with a non-default port and MaxPacketSize; the application must connect there and verify the endpoint's certificate with broker_ca.pem or ca.pem (a second run offers an untrusted certificate).
+  - id: T8-RUN-02
+    title: Application uses the certificate and secret storages
+    mode: run
+    level: 2
+    needs: [docker]
+    reqs: [REQ-CNT-009]
+    status: planned
+    notes: The test endpoint accepts only the generated credentials or the generated client certificate.
+  - id: T8-RUN-03
+    title: Application uses its container name
+    mode: run
+    level: 1
+    needs: [docker]
+    reqs: [REQ-CNT-021, REQ-MQTT-013]
+    status: planned
+    notes: D8 sets a container name with a UUID postfix as hostname; the MQTT ClientId and, with an Oi4Identifier, the SerialNumber in the MAM must use it.
+
+  # --- container: running container on a platform ----------------------------
+  - id: T8-CTR-01
+    title: Container networks
+    mode: container
+    level: 2
+    needs: [docker]
+    reqs: [REQ-CMP-031, REQ-CNT-023]
+    status: planned
+  - id: T8-CTR-02
+    title: Container name and hostname
+    mode: container
+    needs: [docker]
+    reqs: [REQ-CNT-019, REQ-CNT-020]
+    status: planned
+  - id: T8-CTR-03
+    title: Licenses are not overlaid by a host mount
+    mode: container
+    needs: [docker]
+    reqs: [REQ-CNT-017]
+    status: planned
+
+  # --- host: platform host --------------------------------------------------
+  - id: T8-HST-01
+    title: Message Bus storage
+    mode: host
+    needs: [host-access]
+    reqs: [REQ-CNT-001, REQ-CNT-003, REQ-MQTT-003]
+    status: planned
+    notes: broker.json is checked with the broker-json vectors of oec/spec (V-BRK-…) and platform/broker.schema.json.
+  - id: T8-HST-02
+    title: Certificate and secret storages
+    mode: host
+    needs: [host-access]
+    reqs: [REQ-CNT-002, REQ-CNT-005, REQ-CNT-006, REQ-CNT-007, REQ-CNT-008, REQ-MQTT-011]
+    status: planned
+  - id: T8-HST-03
+    title: Application storages are not shared
+    mode: host
+    needs: [host-access, docker]
+    reqs: [REQ-CNT-011, REQ-CNT-024]
+    status: planned
+  - id: T8-HST-04
+    title: Platform host
+    mode: host
+    needs: [host-access]
+    reqs: [REQ-PLT-001, REQ-PLT-003, REQ-PLT-006, REQ-PLT-007, REQ-PLT-008]
+    status: planned
+    notes: Architecture, RAM, storage, network interface and container daemon are measured; "current patch level" is reported (OS release and pending updates where the package manager tells), the verdict is manual.
+
+  # --- bus: the platform's Message Bus ------------------------------------------
+  - id: T8-BUS-01
+    title: Broker protocol, TLS and certificate
+    mode: bus
+    reqs: [REQ-MQTT-002, REQ-MQTT-006, REQ-MQTT-007]
+    status: planned
+    notes: MQTT 3.1.1 over TLS 1.2+ accepted; TLS 1.1 and a plain listener (e.g. 1883) refused; certificate chain to ca.pem / broker_ca.pem, not self-signed.
+  - id: T8-BUS-02
+    title: Write access and Actions restricted by ACL
+    mode: bus
+    needs: [credentials-2]
+    reqs: [REQ-GEN-001, REQ-RES-CONFIG-020, REQ-RES-CONFIG-026, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]
+    status: planned
+    notes: The unprivileged client publishes Set/Del/Call to a probe topic of D8; the privileged D8 client must not receive them. Set/Config must also not be readable by the unprivileged client.
+  - id: T8-BUS-03
+    title: OEC Registry
+    mode: bus
+    reqs: [REQ-REG-001, REQ-REG-002]
+    status: planned
+    notes: D8 announces a probe component (Birth, MAM, Health) and expects it in the Registry's answer to Get MAM / Get Health.
+
+manual:
+  - req: REQ-CMP-012
+    reason: A rule for D8 itself, not a test – `--level` defaults to 3 when the manufacturer states no level.
