@@ -3,7 +3,9 @@
 #   0. rust (Cargo workspace of D2, from C-046): rustfmt, clippy (pedantic,
 #      warnings are errors), tests including the shared test vectors of
 #      oec/spec/export, rustdoc without warnings, cargo-deny (licenses,
-#      advisories, bans, sources; ADR-0023 §2). cargo-deny fetches the RustSec
+#      advisories, bans, sources; ADR-0023 §2). clippy, tests and rustdoc
+#      run twice: default features and `--features strict-validation`
+#      (oec-core embeds oec/schema/v2 and validates with jsonschema, C-047). cargo-deny fetches the RustSec
 #      advisory DB; without network it falls back to the cached DB (a real
 #      violation fails both runs). Needs cargo-deny
 #      (cargo install cargo-deny --locked).
@@ -25,9 +27,14 @@ cflags="-std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only"
 echo "rust: cargo fmt, clippy, test, doc, deny"
 cd "$root/rust"
 cargo fmt --all --check
-cargo clippy --offline --locked --all-targets --quiet -- -D warnings
-cargo test --offline --locked --quiet
-RUSTDOCFLAGS="-D warnings" cargo doc --offline --locked --no-deps --quiet
+for features in "" "--features=strict-validation"; do
+	# shellcheck disable=SC2086
+	cargo clippy --offline --locked --all-targets --quiet $features -- -D warnings
+	# shellcheck disable=SC2086
+	cargo test --offline --locked --quiet $features
+	# shellcheck disable=SC2086
+	RUSTDOCFLAGS="-D warnings" cargo doc --offline --locked --no-deps --quiet $features
+done
 command -v cargo-deny >/dev/null || { echo "cargo-deny missing: cargo install cargo-deny --locked" >&2; exit 1; }
 cargo deny --log-level error check || {
 	echo "cargo deny: retrying with the cached advisory DB (no network?)" >&2
