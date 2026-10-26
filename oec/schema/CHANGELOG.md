@@ -20,6 +20,10 @@ Within v2:
 
 Work after a release uses a pre-release version (e.g. `2.1.0-dev`) and an `Unreleased` section here.
 
+## Unreleased (2.0.1-dev)
+
+- Re-baseline on guideline `ccb475a` (C-045): SF-101 (MG 8.3.8, `Get` with every `Mode` except `OFF_0`, combined `ON_REQUEST_…` values recommended) and SF-102 (MG 7.2, a directly connected smart device uses `OTConnector`). No schema content change: both `Mode` forms stay valid, and the `ServiceType` enumeration is unchanged. PATCH, because the re-baseline has no visible change.
+
 ## 2.0.0
 
 First release, P2 exit (C-041), accepted by the PO on 2026-10-26; local git tag `oec-schema-2.0.0`. Guideline baseline `168e1d1` (OEC Messaging Guideline and Runtime & Infrastructure Guideline, branch `feature/spec-findings`, GL-ADR-001 … 020, SF-001 … 100).

@@ -89,17 +89,25 @@ func writeRelease(docs map[string]any, dir string) error {
 //   - no $id and no $defs name of any release disappears (within v2, a
 //     removal is a breaking change).
 func checkRelease(docs map[string]any, dir, changelog, specBaseline string) ([]string, error) {
+	return checkVersion(schema.Version, schema.Baseline, docs, dir, changelog, specBaseline)
+}
+
+// checkVersion is checkRelease for a given bundle version and baseline, so
+// the tests can check release and pre-release states independently of the
+// current schema.Version.
+func checkVersion(version, baseline string, docs map[string]any, dir, changelog, specBaseline string) ([]string, error) {
 	var problems []string
-	if !versionPattern.MatchString(schema.Version) {
-		problems = append(problems, fmt.Sprintf("schema.Version %q is not 2.MINOR.PATCH[-pre]", schema.Version))
+	if !versionPattern.MatchString(version) {
+		problems = append(problems, fmt.Sprintf("schema.Version %q is not 2.MINOR.PATCH[-pre]", version))
 	}
-	if schema.Baseline != specBaseline {
-		problems = append(problems, fmt.Sprintf("schema.Baseline %q, the spec catalog is at %q", schema.Baseline, specBaseline))
+	if baseline != specBaseline {
+		problems = append(problems, fmt.Sprintf("schema.Baseline %q, the spec catalog is at %q", baseline, specBaseline))
 	}
 	cur, err := current(docs)
 	if err != nil {
 		return nil, err
 	}
+	cur.Version, cur.Baseline = version, baseline
 	files := map[string]manifestFile{}
 	for _, f := range cur.Files {
 		files[f.Path] = f
@@ -112,7 +120,7 @@ func checkRelease(docs map[string]any, dir, changelog, specBaseline string) ([]s
 	if err != nil {
 		return nil, err
 	}
-	pre := strings.Contains(schema.Version, "-")
+	pre := strings.Contains(version, "-")
 	own := false
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
@@ -152,15 +160,15 @@ func checkRelease(docs map[string]any, dir, changelog, specBaseline string) ([]s
 			}
 		}
 		switch {
-		case m.Version == schema.Version:
+		case m.Version == version:
 			own = true
 			problems = append(problems, diffRelease(m, cur)...)
-		case pre && !less(m.Version, schema.Version):
-			problems = append(problems, fmt.Sprintf("schema.Version %s is not above the release %s", schema.Version, m.Version))
+		case pre && !less(m.Version, version):
+			problems = append(problems, fmt.Sprintf("schema.Version %s is not above the release %s", version, m.Version))
 		}
 	}
 	if !pre && !own {
-		problems = append(problems, fmt.Sprintf("schema.Version %s has no manifest %s/%s.json (schematest -write-release)", schema.Version, filepath.Base(dir), schema.Version))
+		problems = append(problems, fmt.Sprintf("schema.Version %s has no manifest %s/%s.json (schematest -write-release)", version, filepath.Base(dir), version))
 	}
 	return problems, nil
 }

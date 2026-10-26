@@ -28,18 +28,36 @@ func TestLess(t *testing.T) {
 	}
 }
 
+// TestCheckRelease checks the freeze rules for a release version and for a
+// pre-release version, independently of the current schema.Version.
 func TestCheckRelease(t *testing.T) {
+	const rel, dev = "2.0.0", "2.0.1-dev"
 	docs, err := bundle()
 	if err != nil {
 		t.Fatal(err)
 	}
 	changelog := filepath.Join(t.TempDir(), "CHANGELOG.md")
-	if err := os.WriteFile(changelog, []byte("# Changelog\n\n## "+schema.Version+"\n"), 0o644); err != nil {
+	if err := os.WriteFile(changelog, []byte("# Changelog\n\n## Unreleased\n\n## "+rel+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	cur, err := current(docs)
 	if err != nil {
 		t.Fatal(err)
+	}
+	cur.Version, cur.Baseline = rel, schema.Baseline
+	write := func(t *testing.T, m manifest) string {
+		dir := t.TempDir()
+		if err := writeJSON(filepath.Join(dir, m.Version+".json"), m); err != nil {
+			t.Fatal(err)
+		}
+		return dir
+	}
+	check := func(t *testing.T, version, dir, specBaseline string) string {
+		problems, err := checkVersion(version, schema.Baseline, docs, dir, changelog, specBaseline)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return strings.Join(problems, "\n")
 	}
 	tests := []struct {
 		name   string
@@ -55,19 +73,11 @@ func TestCheckRelease(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			dir := t.TempDir()
 			m := cur
 			m.Files = append([]manifestFile(nil), cur.Files...)
 			m.Files[0].Defs = append([]string(nil), cur.Files[0].Defs...)
 			tc.mutate(&m)
-			if err := writeJSON(filepath.Join(dir, schema.Version+".json"), m); err != nil {
-				t.Fatal(err)
-			}
-			problems, err := checkRelease(docs, dir, changelog, schema.Baseline)
-			if err != nil {
-				t.Fatal(err)
-			}
-			got := strings.Join(problems, "\n")
+			got := check(t, rel, write(t, m), schema.Baseline)
 			switch {
 			case tc.want == "" && got != "":
 				t.Fatalf("unexpected problems:\n%s", got)
@@ -77,25 +87,41 @@ func TestCheckRelease(t *testing.T) {
 		})
 	}
 	t.Run("no manifest", func(t *testing.T) {
-		problems, err := checkRelease(docs, t.TempDir(), changelog, schema.Baseline)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(problems) != 1 || !strings.Contains(problems[0], "has no manifest") {
-			t.Fatalf("problems %q", problems)
+		if got := check(t, rel, t.TempDir(), schema.Baseline); !strings.Contains(got, "has no manifest") || strings.Contains(got, "\n") {
+			t.Fatalf("problems %q", got)
 		}
 	})
 	t.Run("other spec baseline", func(t *testing.T) {
-		dir := t.TempDir()
-		if err := writeJSON(filepath.Join(dir, schema.Version+".json"), cur); err != nil {
-			t.Fatal(err)
+		if got := check(t, rel, write(t, cur), "fffffff"); !strings.Contains(got, "the spec catalog is at") || strings.Contains(got, "\n") {
+			t.Fatalf("problems %q", got)
 		}
-		problems, err := checkRelease(docs, dir, changelog, "fffffff")
-		if err != nil {
-			t.Fatal(err)
+	})
+	t.Run("pre-release above the release", func(t *testing.T) {
+		m := cur
+		m.Baseline = "0000000" // the pre-release may have a new baseline and changed files
+		m.Files = m.Files[1:]
+		if got := check(t, dev, write(t, m), schema.Baseline); got != "" {
+			t.Fatalf("unexpected problems:\n%s", got)
 		}
-		if len(problems) != 1 || !strings.Contains(problems[0], "the spec catalog is at") {
-			t.Fatalf("problems %q", problems)
+	})
+	t.Run("pre-release without any release", func(t *testing.T) {
+		if got := check(t, dev, t.TempDir(), schema.Baseline); got != "" {
+			t.Fatalf("unexpected problems:\n%s", got)
+		}
+	})
+	t.Run("pre-release not above the release", func(t *testing.T) {
+		m := cur
+		m.Version = "2.0.1"
+		if got := check(t, dev, write(t, m), schema.Baseline); !strings.Contains(got, "is not above the release 2.0.1") {
+			t.Fatalf("problems %q", got)
+		}
+	})
+	t.Run("released $defs name removed in a pre-release", func(t *testing.T) {
+		m := cur
+		m.Files = append([]manifestFile(nil), cur.Files...)
+		m.Files[0].Defs = append(append([]string(nil), cur.Files[0].Defs...), "Gone")
+		if got := check(t, dev, write(t, m), schema.Baseline); !strings.Contains(got, "#/$defs/Gone was removed") {
+			t.Fatalf("problems %q", got)
 		}
 	})
 }
