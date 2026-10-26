@@ -57,6 +57,14 @@ C-051 hat die **Entwicklungsumgebung** gebracht: einen echten Mosquitto-Broker i
 
 Antwort z. B. „D-1 wie vorgeschlagen“.
 
+**Deine Antwort vom 26.10.2026:** „Option b, da sie präzise ist“. **Noch offen, bitte präzisieren:** (b) ist nur ein Teil des Vorschlags, nämlich der Hinweis auf 268435455. Allein löst er das eigentliche Problem nicht: Eine Plattform könnte dann weiterhin regeltreue Apps hinauswerfen. Bitte wähle eine Variante:
+- **(1)** Vorschlag komplett, also (a) + (b) + (c) (empfohlen);
+- **(2)** (a) + (b), ohne (c);
+- **(3)** nur (b);
+- **(4)** Alternative (d).
+
+Bis dahin ändere ich den Guideline-Text nicht.
+
 Die Punkte A-1 … A-49 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
 Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.

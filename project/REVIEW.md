@@ -105,6 +105,7 @@ Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026
   - REQ-CNT-003 quote and notes follow the text (→ `draft`, back to you as R-x);
   - the dev broker and the SDK already behave this way.
 - **PO:** ☐ as proposed ☐ (d) ☐ (e) ☐ other: …
+- **PO reply 2026-10-26:** "option b, because it is precise". **Open – needs clarification:** (b) is one part of the proposal (the note on 268435455), not one of the choices. On its own it does not solve problem (a). Please choose one: **(1)** proposal complete (a) + (b) + (c) (recommended); **(2)** (a) + (b) without (c); **(3)** only (b); **(4)** alternative (d). The guideline text stays unchanged until then (G-3.4 a).
 
 ### Answered earlier
 
