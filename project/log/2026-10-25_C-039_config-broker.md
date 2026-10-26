@@ -221,3 +221,10 @@ Docs: ADR-0001 amendment C-039 addendum 2; AGENTS.md, GUARDRAILS G-1.2, STATUS, 
 Checks: `spectool lint` (437 REQs, 2 drafts; a deliberately wrong quote was rejected), `render -check`, `coverage -check` (gaps 15, CNT open=0), `topic -check`, `inventory -check -rev 168e1d1` (1399 items), `go test ./...`, `oec/schema/check.sh` (92 schema files, 628 cases, 0 disagreements), Python validator (628 cases, 0 disagreements): green.
 
 Next free ids: SF-101, REQ-CMP-048, V-PAY-242, V-TOP-254, V-BRK-019, ADR-0020, Q-021, probe P-129. Next cycle: C-040 – D7 `validate` (ROADMAP P2).
+
+## Addendum 3 – PO review of addendum 2 (2026-10-26)
+
+PO (chat, 2026-10-26): "R-1: REQ-CNT-003, R-2: REQ-CNT-004 und R-3 reviewed und abgenommen". Recorded in [`REVIEW.md`](../REVIEW.md) (`2c7f76d`): R-1 REQ-CNT-003, R-2 REQ-CNT-004 and R-3 the guideline wording of SF-100 (`168e1d1`, RIG 4.1.1) **accepted**.
+
+- `995258d` – `spectool review REQ-CNT-003,REQ-CNT-004`: both REQs `reviewed`; 437 REQs, 0 drafts. Neither is `schema`/`d7-validate`, so the coverage stays at 15 gaps.
+- Nothing open from C-039. Next cycle: C-040 – D7 `validate` (ROADMAP P2).
