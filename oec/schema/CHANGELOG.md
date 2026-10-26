@@ -24,6 +24,7 @@ Work after a release uses a pre-release version (e.g. `2.1.0-dev`) and an `Unrel
 
 - Re-baseline on guideline `ccb475a` (C-045): SF-101 (MG 8.3.8, `Get` with every `Mode` except `OFF_0`, combined `ON_REQUEST_…` values recommended) and SF-102 (MG 7.2, a directly connected smart device uses `OTConnector`). No schema content change: both `Mode` forms stay valid, and the `ServiceType` enumeration is unchanged. PATCH, because the re-baseline has no visible change.
 - Re-baseline on guideline `e0262dd` (C-045 addendum 1): SF-103 (MG B1.1.8/B2.6 examples use `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` for requestable resources). No schema content change; the golden test vectors V-PAY-037 … 040 follow the examples.
+- Re-baseline on guideline `734c560` (C-046 review): SF-104 (MG 4.3.1 and MG A3: the elements `Model`, `ProductCode` and `SerialNumber` of the `Oi4Identifier` are always dnp-encoded, in line with the MG 4.1 masking rule). No schema content change: the rule cannot be expressed in JSON Schema and is checked by the rule layer R-3 (`ProductInstanceUri` of the MAM, REQ-RES-MAM-006); the new invalid vector V-PAY-245 is listed in `tests/rule-layer.yaml`.
 
 ## 2.0.0
 
