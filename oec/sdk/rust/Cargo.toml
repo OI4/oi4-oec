@@ -1,11 +1,11 @@
 # Cargo workspace of the Rust SDK D2 (ADR-0011, ADR-0023, ADR-0026 proposed).
-# Members grow with the P4 increments: oec-core (sans-IO protocol logic) now,
-# oec (runtime + public API, ADR-0020) and oec-ffi (C ABI, ADR-0021) later.
-# The P3 sketch and spikes stay stand-alone crates with their own lock files
-# until the crate `oec` replaces them (ADR-0020 §1).
+# Members grow with the P4 increments: oec-core (sans-IO protocol logic, from
+# C-046), oec (runtime + public API, ADR-0020, from C-048) and oec-ffi (C ABI,
+# ADR-0021) later. The P3 sketch and spikes stay stand-alone crates with their
+# own lock files until the crate `oec` replaces them (ADR-0020 §1).
 [workspace]
 resolver = "3"
-members = ["oec-core"]
+members = ["oec-core", "oec"]
 exclude = ["sketch", "spike"]
 
 [workspace.package]
@@ -26,6 +26,9 @@ uuid = { version = "1", default-features = false, features = ["std", "serde"] }
 # =-pinned together with the schema gate oec/schema/tools/rust-check
 # (ADR-0019 §8, ADR-0023).
 jsonschema = { version = "=0.60.1", default-features = false }
+# Runtime dependencies of oec (ADR-0023, ADR-0026 amendment C-048).
+thiserror = "2"
+log = "0.4"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
