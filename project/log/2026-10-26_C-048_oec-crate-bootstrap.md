@@ -191,7 +191,7 @@ Next free ids (unchanged): SF-105, REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-TOP-029
 
 **Agent for C-049 (G-3.10): new agent.**
 - The context of this session was compacted during C-048.
-- C-049 starts a new increment (5a) in other files: `oec-core` (new modules for MQTT and lifecycle), the spike `mqtt-codec`, ADR-0023 (MQTT codec, fuzzing), MG 6 and MG 9.2 (REQ-MQTT-*, REQ-LIFE-*).
+- C-049 starts a new increment (5a) in other files: `oec-core` (new modules for MQTT and lifecycle), the spike `mqtt-codec`, ADR-0023 (MQTT codec, fuzzing), MG 6 and MG 9.1.2 (Health) (REQ-MQTT-*, REQ-LIFE-*).
 - The state is handover-ready (G-3.7): this log, STATUS "Next step" 1, ROADMAP P4 and `REVIEW.md`.
 
 Start prompt: `prompt.md` (German, not committed).
