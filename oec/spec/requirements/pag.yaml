@@ -6,7 +6,7 @@
 # reclassified (+schema) in C-034; statement follows SF-098; reviewed in the
 # C-034 review (2026-10-24).
 area: PAG
-baseline: "168e1d1"
+baseline: "ccb475a"
 requirements:
   - id: REQ-PAG-001
     title: Fields of the PaginationRequest DataSet

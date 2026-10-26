@@ -21,7 +21,7 @@
 #         peer         – D7 simulates a peer component that the CUT talks to
 # status: planned (P3) | implemented (P5)
 tool: oec-check
-baseline: "168e1d1"
+baseline: "ccb475a"
 tests:
   # --- monitor: passive rules -------------------------------------------
   - id: T7-MON-01
@@ -258,9 +258,9 @@ tests:
     title: Get of every supported resource
     mode: test
     level: 1
-    reqs: [REQ-CMP-008, REQ-CMP-019, REQ-CMP-020, REQ-CMP-035, REQ-CMP-036, REQ-CMP-037, REQ-CMP-039, REQ-RES-CONFIG-017, REQ-RES-DATA-007, REQ-RES-META-002, REQ-RES-PUBLIST-020, REQ-RES-REFDES-004, REQ-RES-SUBLIST-008]
+    reqs: [REQ-CMP-008, REQ-CMP-019, REQ-CMP-020, REQ-CMP-035, REQ-CMP-036, REQ-CMP-037, REQ-CMP-039, REQ-RES-CONFIG-017, REQ-RES-DATA-007, REQ-RES-META-002, REQ-RES-PUBLIST-020, REQ-RES-PUBLIST-027, REQ-RES-REFDES-004, REQ-RES-SUBLIST-008]
     status: planned
-    notes: Each resource is required from the level of its CMP row; at level 2 a missing resource of CMP-035 … CMP-039 is a warning (recommended, REQ-CMP-010).
+    notes: Each resource is required from the level of its CMP row; at level 2 a missing resource of CMP-035 … CMP-039 is a warning (recommended, REQ-CMP-010). Every PublicationList entry of a requestable resource with a Mode other than OFF_0 is requested with Get, with or without ON_REQUEST in its Mode (REQ-RES-PUBLIST-027, SF-101).
   - id: T7-GET-04
     title: Every represented entity fulfills the level
     mode: test
