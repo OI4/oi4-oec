@@ -8,7 +8,7 @@ Guideline baseline: `168e1d1`. Source of truth: the YAML files in `oec/spec/vect
 | [il-dnp-encoding](il-dnp-encoding.md) | `vectors/il/dnp-encoding.yaml` | dnp-encoding | 15 | 15 | 0 | 9 | 0 | 15 |
 | [il-identification-link](il-identification-link.md) | `vectors/il/identification-link.yaml` | identification-link | 29 | 12 | 17 | 7 | 0 | 29 |
 | [il-oi4identifier](il-oi4identifier.md) | `vectors/il/oi4identifier.yaml` | oi4identifier | 13 | 7 | 6 | 4 | 0 | 13 |
-| [payload-constructed](payload-constructed.md) | `vectors/payload/constructed.yaml` | payload | 147 | 7 | 140 | 0 | 0 | 147 |
+| [payload-constructed](payload-constructed.md) | `vectors/payload/constructed.yaml` | payload | 150 | 8 | 142 | 0 | 3 | 147 |
 | [payload-guideline](payload-guideline.md) | `vectors/payload/guideline.yaml` | payload | 94 | 94 | 0 | 94 | 0 | 94 |
 | [platform-broker-json](platform-broker-json.md) | `vectors/platform/broker-json.yaml` | broker-json | 18 | 4 | 14 | 0 | 0 | 18 |
 | [topic-guideline](topic-guideline.md) | `vectors/topic/guideline.yaml` | topic | 60 | 60 | 0 | 60 | 0 | 60 |

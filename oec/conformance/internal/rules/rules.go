@@ -101,14 +101,56 @@ func uint(m map[string]any, k string, max uint64) (int64, bool) {
 	return int64(u), true
 }
 
-// publisherID returns "<ServiceType>/<IL>" or "" if it is malformed.
-func publisherID(m map[string]any, k string) string {
+// publisherID returns "<ServiceType>/<IL>" or "" if it is malformed and
+// checks that the IL is unencoded.
+func (c *checker) publisherID(m map[string]any, k string) string {
 	s, _ := str(m, k)
 	st, il, found := strings.Cut(s, "/")
 	if !found || !serviceTypes[st] || il == "" {
 		return ""
 	}
+	c.unencoded("/"+k, il)
 	return s
+}
+
+// encodedIL reports whether s is the topic encoding of an Identification
+// Link: s itself is no valid Identification Link, but its base64url
+// decoding is (REQ-IL-005).
+func encodedIL(s string) (string, bool) {
+	if s == "" || len(ilink.Validate(s)) == 0 {
+		return "", false
+	}
+	dec, v := ilink.CheckElement(s)
+	if v != nil || len(ilink.Validate(dec)) > 0 {
+		return "", false
+	}
+	return dec, true
+}
+
+// unencoded checks an Identification Link of the payload envelope
+// (REQ-IL-005).
+func (c *checker) unencoded(ptr, s string) {
+	if dec, ok := encodedIL(s); ok {
+		c.add(ptr, "REQ-IL-005", "%q is the encoded Identification Link %q; the payload carries it unencoded", s, dec)
+	}
+}
+
+// unencodedSender checks the IL of the sender in a MessageId or ReplyTo.
+func (c *checker) unencodedSender(ptr, s string) {
+	g := messageID.FindStringSubmatch(s)
+	if g == nil {
+		return
+	}
+	if st, il, found := strings.Cut(g[1], "/"); found && serviceTypes[st] {
+		c.unencoded(ptr, il)
+	}
+}
+
+// replyTo checks the IL of the sender in the ReplyTo of a ua-data or ua-metadata message.
+func (c *checker) replyTo(m map[string]any) {
+	if s, ok := str(m, "ReplyTo"); ok {
+		c.unencodedSender("/ReplyTo", s)
+	}
 }
 
 // Check runs the rule layer for a message on a topic.
@@ -145,6 +187,9 @@ func CheckMetaDataType(v any) []finding.Finding {
 
 func (c *checker) messageIDOf(m map[string]any, sender, req string) {
 	s, ok := str(m, "MessageId")
+	if ok {
+		c.unencodedSender("/MessageId", s)
+	}
 	if !ok || sender == "" {
 		return
 	}
@@ -167,9 +212,10 @@ type dsm struct {
 }
 
 func (c *checker) data(m map[string]any) {
-	c.pub = publisherID(m, "PublisherId")
+	c.pub = c.publisherID(m, "PublisherId")
 	c.topicPublisher(c.pub)
 	c.messageIDOf(m, c.pub, "REQ-MSG-007")
+	c.replyTo(m)
 	c.msgID, _ = str(m, "MessageId")
 	pubIL := ""
 	if c.pub != "" {
@@ -187,6 +233,9 @@ func (c *checker) data(m map[string]any) {
 		name, nameOK := str(dm, "DataSetWriterName")
 		group, groupOK := str(dm, "WriterGroupName")
 		d.id, d.name, d.group = id, name, group
+		if nameOK {
+			c.unencoded(join(d.ptr, "DataSetWriterName"), name)
+		}
 		d.payload, _ = dm["Payload"].(map[string]any)
 		switch {
 		case !idOK || id == 0 || id >= 4 && id <= 8:
@@ -529,11 +578,15 @@ func (c *checker) configValidation(ptr string, m map[string]any) {
 }
 
 func (c *checker) metadata(m map[string]any) {
-	pub := publisherID(m, "PublisherId")
+	pub := c.publisherID(m, "PublisherId")
 	c.topicPublisher(pub)
 	c.messageIDOf(m, pub, "REQ-MSG-007")
-	if name, ok := str(m, "DataSetWriterName"); ok && c.t.SourceIL != "" && name != c.t.SourceIL {
-		c.add("/DataSetWriterName", "REQ-MSG-023", "DataSetWriterName %q differs from the topic Source %q", name, c.t.SourceIL)
+	c.replyTo(m)
+	if name, ok := str(m, "DataSetWriterName"); ok {
+		c.unencoded("/DataSetWriterName", name)
+		if c.t.SourceIL != "" && name != c.t.SourceIL {
+			c.add("/DataSetWriterName", "REQ-MSG-023", "DataSetWriterName %q differs from the topic Source %q", name, c.t.SourceIL)
+		}
 	}
 	if group, ok := str(m, "WriterGroupName"); ok && c.t.Filter != "" && group != c.t.Filter {
 		c.add("/WriterGroupName", "REQ-MSG-024", "WriterGroupName %q differs from the topic Filter %q", group, c.t.Filter)
@@ -586,13 +639,13 @@ func (c *checker) uniqueNames(ptr string, v any, req string, withEmpty bool) {
 }
 
 func (c *checker) action(m map[string]any, request bool) {
-	pub := publisherID(m, "PublisherId")
+	pub := c.publisherID(m, "PublisherId")
 	if pub != "" && pub != c.t.ServiceType+"/"+c.t.AppIL {
 		c.add("/PublisherId", "REQ-ACT-005", "PublisherId %q is not the Responder of the topic (%s/%s)", pub, c.t.ServiceType, c.t.AppIL)
 	}
-	sender := pub
+	sender, requestor := pub, c.publisherID(m, "RequestorId")
 	if request {
-		sender = publisherID(m, "RequestorId")
+		sender = requestor
 	}
 	c.messageIDOf(m, sender, "REQ-ACT-004")
 	if !request {

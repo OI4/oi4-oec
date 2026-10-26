@@ -28,6 +28,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	ilink "github.com/OI4/oec/spec/tools/internal/il"
 )
 
 // Topic is the decomposition of the topic a message is published on.
@@ -384,7 +386,44 @@ func (c *checker) publisherID(m map[string]any, key, req string) (string, string
 		c.add(join("", key), req, "%s %q is not <ServiceType>/<IdentificationLink>", key, s)
 		return "", ""
 	}
+	c.unencoded(join("", key), il)
 	return s, il
+}
+
+// encodedIL reports whether s is the topic encoding of an Identification
+// Link: s itself is no valid Identification Link, but its base64url
+// decoding is (REQ-IL-005). A valid Identification Link is never taken for
+// an encoded one.
+func encodedIL(s string) (string, bool) {
+	if s == "" || len(ilink.Validate(s)) == 0 {
+		return "", false
+	}
+	dec, err := ilink.Decode(s)
+	if err != nil || len(ilink.Validate(dec)) > 0 {
+		return "", false
+	}
+	return dec, true
+}
+
+// unencoded checks an Identification Link of the payload envelope
+// (PublisherId, RequestorId, the sender of MessageId and ReplyTo,
+// DataSetWriterName): the payload carries it unencoded (REQ-IL-005).
+func (c *checker) unencoded(ptr, s string) {
+	if dec, ok := encodedIL(s); ok {
+		c.add(ptr, "REQ-IL-005", "%q is the encoded Identification Link %q; the payload carries it unencoded", s, dec)
+	}
+}
+
+// unencodedSender checks the Identification Link of the sender
+// <ServiceType>/<IdentificationLink> in a MessageId or ReplyTo.
+func (c *checker) unencodedSender(ptr, s string) {
+	g := messageIDPattern.FindStringSubmatch(s)
+	if g == nil {
+		return
+	}
+	if st, il, found := strings.Cut(g[1], "/"); found && serviceTypes[st] {
+		c.unencoded(ptr, il)
+	}
 }
 
 // topicPublisher checks that the PublisherId of a Pub message is the
@@ -398,6 +437,9 @@ func (c *checker) topicPublisher(pub string) {
 
 func (c *checker) messageID(m map[string]any, sender, req string) {
 	s, ok := c.str(m, "", "MessageId", req)
+	if ok {
+		c.unencodedSender("/MessageId", s)
+	}
 	if !ok || sender == "" {
 		return
 	}
@@ -410,6 +452,9 @@ func (c *checker) replyTo(m map[string]any) {
 	s, ok := c.str(m, "", "ReplyTo", "REQ-MSG-015")
 	if ok && s != "" && !messageIDPattern.MatchString(s) {
 		c.add("/ReplyTo", "REQ-MSG-015", "ReplyTo %q is neither empty nor a MessageId", s)
+	}
+	if ok {
+		c.unencodedSender("/ReplyTo", s)
 	}
 }
 
@@ -498,6 +543,9 @@ func (c *checker) dataSetMessage(ptr string, v any, pubIL string) (dsm, bool) {
 	id, idOK := c.uint(m, ptr, "DataSetWriterId", "REQ-MSG-016", 65535)
 	name, nameOK := c.str(m, ptr, "DataSetWriterName", "REQ-MSG-016")
 	group, groupOK := c.str(m, ptr, "WriterGroupName", "REQ-MSG-016")
+	if nameOK {
+		c.unencoded(join(ptr, "DataSetWriterName"), name)
+	}
 	switch {
 	case !idOK:
 	case id == 0 || (id >= 4 && id <= 8):
@@ -616,8 +664,11 @@ func (c *checker) metadata(msg any) {
 	if id, ok := c.uint(m, "", "DataSetWriterId", "REQ-MSG-032", 65535); ok && id < 10 {
 		c.add("/DataSetWriterId", "REQ-MSG-020", "DataSetWriterId %d is invalid or reserved", id)
 	}
-	if name, ok := c.str(m, "", "DataSetWriterName", "REQ-MSG-032"); ok && c.t.SourceIL != "" && name != c.t.SourceIL {
-		c.add("/DataSetWriterName", "REQ-MSG-023", "DataSetWriterName %q differs from the topic Source %q", name, c.t.SourceIL)
+	if name, ok := c.str(m, "", "DataSetWriterName", "REQ-MSG-032"); ok {
+		c.unencoded("/DataSetWriterName", name)
+		if c.t.SourceIL != "" && name != c.t.SourceIL {
+			c.add("/DataSetWriterName", "REQ-MSG-023", "DataSetWriterName %q differs from the topic Source %q", name, c.t.SourceIL)
+		}
 	}
 	if group, ok := c.str(m, "", "WriterGroupName", "REQ-MSG-032"); ok && c.t.Filter != "" && group != c.t.Filter {
 		c.add("/WriterGroupName", "REQ-MSG-024", "WriterGroupName %q differs from the topic Filter %q", group, c.t.Filter)

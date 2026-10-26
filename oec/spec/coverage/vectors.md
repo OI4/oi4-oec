@@ -116,7 +116,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-IL-002 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (102) | V-IL-115 (R-1), V-IL-116 (R-1), V-TOP-240 (R-1) | covered |
 | REQ-IL-003 | d7-validate | reviewed | V-TOP-131 | V-IL-112 (R-1), V-TOP-242 (R-1) | covered |
 | REQ-IL-004 | d7-validate | reviewed | – | V-IL-111 (R-1), V-IL-113 (R-1), V-IL-114 (R-1), V-TOP-241 (R-1) … (6) | negative only |
-| REQ-IL-005 | d7-validate | reviewed | – | – | none |
+| REQ-IL-005 | d7-validate | reviewed | V-PAY-244* | V-PAY-242* (rule), V-PAY-243* (rule) | none |
 | REQ-IL-008 | d7-validate, manual | reviewed | – | – | none |
 | REQ-IL-009 | d7-validate, manual | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (8) | V-IL-107 (R-1), V-IL-108 (R-1), V-TOP-249 (R-1) | covered |
 | REQ-IL-016 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (9) | V-IL-103 (R-1), V-IL-104 (R-1), V-IL-105 (R-1), V-IL-106 (R-1) … (6) | covered |

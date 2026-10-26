@@ -1,4 +1,4 @@
-# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034, reviewed by the PO (C-034 review 2026-10-24); V-PAY-152 … 170 (MetaData: DataSetMetaData envelope, DataSetMetaDataType and its data type descriptions, resource MetaData, Pub/Set with {}) and V-PAY-171 … 175 (declared roles Birth/Close/Will, Q-020 (a)) drafted in C-035, reviewed by the PO (C-035 review 2026-10-25); V-PAY-176 … 203 (Actions, NewDataSetWriterId) and V-PAY-204 … 217 (MAM, Profile) drafted in C-036, reviewed by the PO (C-036 review 2026-10-25).
+# Constructed payload vectors (C-024, C-027, C-028, C-029): validation modes of SF-052 (strict/tolerant) and violations of the resource content checks (C-027, reviewed; V-PAY-081 … 087 drafted in C-028, reviewed by the PO 2026-10-21; V-PAY-103 … 113 (Config) drafted in C-029, reviewed by the PO (C-029 review), descriptions synced with SF-088 (e); V-PAY-115/116 (masking, GL-ADR-021) drafted in the C-029 review; V-PAY-122 … 126 drafted in the C-031 consistency review; V-PAY-127/128 (Locale placement, SF-097) drafted in C-033 addendum 2, reviewed by the PO in addendum 3); V-PAY-129 … 151 (envelope, helpers and Set/list rules of MSG, PAG, LOC, QRY, BUS) drafted in C-034, reviewed by the PO (C-034 review 2026-10-24); V-PAY-152 … 170 (MetaData: DataSetMetaData envelope, DataSetMetaDataType and its data type descriptions, resource MetaData, Pub/Set with {}) and V-PAY-171 … 175 (declared roles Birth/Close/Will, Q-020 (a)) drafted in C-035, reviewed by the PO (C-035 review 2026-10-25); V-PAY-176 … 203 (Actions, NewDataSetWriterId) and V-PAY-204 … 217 (MAM, Profile) drafted in C-036, reviewed by the PO (C-036 review 2026-10-25); V-PAY-242 … 244 (unencoded Identification Links, REQ-IL-005) drafted in C-040.
 # Format: vectors/vectors.schema.json; checked by spectool lint (reference checks: tools/internal/payload).
 kind: payload
 baseline: "168e1d1"
@@ -8108,6 +8108,108 @@ vectors:
                   "Text": "Network settings"
                 }
               }
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-242
+    title: "Pub Health with an encoded Identification Link in the ReplyTo"
+    expected: invalid
+    violates: [REQ-IL-005]
+    reason: "Identification Links in the payload are not encoded (MG 4.2); the ReplyTo carries the base64url form of the requestor's IL."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-003 whose ReplyTo names the sender ITConnector/aHR0cHM6Ly9pZC5jb25zdW1lci5jb20vTUVTZXJ2aWNlL0luc3QwNzMyMg,
+      the topic encoding of https://id.consumer.com/MEService/Inst07322. The
+      oracle detects an encoded IL heuristically: the value is no valid IL but
+      its base64url decoding is (C-040).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/aHR0cHM6Ly9pZC5jb25zdW1lci5jb20vTUVTZXJ2aWNlL0luc3QwNzMyMg",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-243
+    title: "Call with an encoded Identification Link in RequestorId and MessageId"
+    expected: invalid
+    violates: [REQ-IL-005]
+    reason: "Identification Links in the payload are not encoded (MG 4.2); RequestorId and MessageId carry the base64url form of the requestor's IL."
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      V-PAY-008 whose RequestorId and MessageId use the topic encoding of
+      https://id.consumer.com/MEService/Inst07322. MessageId and RequestorId
+      still agree, so REQ-ACT-004 holds; only REQ-IL-005 is violated (twice).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId"
+    payload: |-
+      {
+        "MessageId": "1639693510000-ITConnector/aHR0cHM6Ly9pZC5jb25zdW1lci5jb20vTUVTZXJ2aWNlL0luc3QwNzMyMg",
+        "MessageType": "ua-action-request",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "Timestamp": "2021-12-16T22:25:10.000Z",
+        "ResponseAddress": "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Reply/NewDataSetWriterId",
+        "RequestorId": "ITConnector/aHR0cHM6Ly9pZC5jb25zdW1lci5jb20vTUVTZXJ2aWNlL0luc3QwNzMyMg",
+        "TimeoutHint": 10000,
+        "Messages": [
+          {
+            "DataSetWriterId": 8,
+            "ActionTargetId": 1,
+            "RequestId": 1,
+            "ActionState": 1,
+            "Payload": {
+              "Resource": "ReferenceDesignation"
+            }
+          }
+        ]
+      }
+
+  - id: V-PAY-244
+    title: "Pub Health with all Identification Links unencoded"
+    expected: valid
+    reqs: [REQ-IL-005]
+    origin: {kind: constructed}
+    status: draft
+    notes: >-
+      The message of V-PAY-003: PublisherId, MessageId, ReplyTo and
+      DataSetWriterName carry the Identification Links unencoded, the topic
+      carries them encoded (MG 4.2).
+    topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    payload: |-
+      {
+        "MessageId": "1639693510094-OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "MessageType": "ua-data",
+        "PublisherId": "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345",
+        "DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",
+        "ReplyTo": "1639693510000-ITConnector/https://id.consumer.com/MEService/Inst07322",
+        "Messages": [
+          {
+            "DataSetWriterId": 3456,
+            "WriterGroupName": "",
+            "DataSetWriterName": "provider.com/FieldDataService/FDS-001/1200-0345",
+            "SequenceNumber": 57,
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "Payload": {
+              "Health": "NORMAL_0",
+              "HealthScore": 100
             }
           }
         ]
