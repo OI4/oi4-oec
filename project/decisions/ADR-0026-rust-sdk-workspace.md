@@ -13,7 +13,7 @@ P4 starts with C-046. ADR-0011 named the three crates `oec-core`, `oec` and `oec
 - how the SDKs read the shared test vectors of `oec/spec/vectors/` (YAML);
 - the lints and gates of product code.
 
-G-3.4 first made the repository layout a PO decision, so C-046 proposed this ADR. On 2026-10-26 the PO delegated engineering decisions such as the layout to the agent (G-3.4 b), so the agent accepted it in C-046 addendum 1. Point §5.2 depends on the open spec finding SF-104, which stays with the PO.
+G-3.4 first made the repository layout a PO decision, so C-046 proposed this ADR. On 2026-10-26 the PO delegated engineering decisions such as the layout to the agent (G-3.4 b), so the agent accepted it in C-046 addendum 1. Point §5.2 depended on the spec finding SF-104, which stayed with the PO; the PO decided it in C-046 addendum 2 (§5.2 follows), and the guideline text says so since `734c560`.
 
 ## Decision
 
