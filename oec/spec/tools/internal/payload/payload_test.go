@@ -177,6 +177,7 @@ func TestViolations(t *testing.T) {
 		{"class id missing", tHealth, healthPub, `"DataSetClassId": "d8e7b6df-42ba-448a-975a-199f59e8ffeb",`, ``, []string{"REQ-MSG-011"}},
 		{"class id reserved", tData, dataPub, `"ReplyTo": ""`, `"ReplyTo": "", "DataSetClassId": "2ae0505e-2830-4980-b65e-0bbdf08e2d45"`, []string{"REQ-MSG-014"}},
 		{"reply to", tHealth, healthPub, `"ReplyTo": ""`, `"ReplyTo": "x"`, []string{"REQ-MSG-015"}},
+		{"reply to sender", tHealth, healthPub, `"ReplyTo": ""`, `"ReplyTo": "1639693510094-abc"`, []string{"REQ-MSG-015"}},
 		{"dsm publisher id", tHealth, healthPub, `"SequenceNumber": 58`, `"SequenceNumber": 58, "PublisherId": "x"`, []string{"REQ-MSG-016"}},
 		{"dsm missing payload", tHealth, healthPub, `,
     "Payload": {"Health": "NORMAL_0"}`, ``, []string{"REQ-MSG-016"}},

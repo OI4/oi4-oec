@@ -450,8 +450,17 @@ func (c *checker) messageID(m map[string]any, sender, req string) {
 
 func (c *checker) replyTo(m map[string]any) {
 	s, ok := c.str(m, "", "ReplyTo", "REQ-MSG-015")
-	if ok && s != "" && !messageIDPattern.MatchString(s) {
-		c.add("/ReplyTo", "REQ-MSG-015", "ReplyTo %q is neither empty nor a MessageId", s)
+	if ok && s != "" {
+		// A MessageId is <unixTimestampInMs>-<PublisherId> (MG 8.2.1, REQ-MSG-007).
+		g := messageIDPattern.FindStringSubmatch(s)
+		valid := g != nil
+		if valid {
+			st, il, found := strings.Cut(g[1], "/")
+			valid = found && serviceTypes[st] && il != ""
+		}
+		if !valid {
+			c.add("/ReplyTo", "REQ-MSG-015", "ReplyTo %q is neither empty nor a MessageId", s)
+		}
 	}
 	if ok {
 		c.unencodedSender("/ReplyTo", s)
