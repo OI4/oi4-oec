@@ -333,7 +333,7 @@ requirements:
         text: The payload must contain the values of the mandatory config names of each contained group.
     verification: [d7-monitor]
     inventory: [MG-8.3.3.1-bc1d417b, MG-8.3.3.1-ae206d08, MG-8.3.3.1-269a6962, MG-8.3.3.2-ddc33ac3, MG-8.3.3.2-502f7bf5, MG-8.3.3.2-aeff2f0d, MG-9.1.3-1d957d86, MG-9.1.3-7c151900, MG-9.1.3-2e08d4bd]
-    status: draft
+    status: reviewed
     notes: >-
       An empty Value of a mandatory object is a valid Set; the application
       may reject it (REQ-RES-CONFIG-023) – B1.1.3 unsets the mandatory
@@ -662,7 +662,7 @@ requirements:
         text: The value of a sensitive Config object is not published on the Message Bus; it can only be set
     verification: [schema, d7-validate, d7-test]
     inventory: [MG-8.3.3.1-72d258a9, MG-8.3.3.1-3f9abadb, MG-9.1.3-a94653f3, MG-8.3.3.1-8912ceb4]
-    status: draft
+    status: reviewed
     notes: >-
       New with GL-ADR-021 (SF-087). Levels follow the Config DataSet: a
       component that offers Config masks always. The checker reports a

@@ -152,8 +152,8 @@ Constructed payload vectors for the two validation modes of MG 8 (SF-052): stric
 | [V-PAY-237](#v-pay-237) | Pub SubscriptionList entry without TopicPath | invalid | violates: REQ-RES-SUBLIST-001 | constructed | reviewed |
 | [V-PAY-238](#v-pay-238) | Get SubscriptionList that carries a SubscriptionList DataSetMessage | invalid | violates: REQ-RES-SUBLIST-007 | constructed | reviewed |
 | [V-PAY-239](#v-pay-239) | Set SubscriptionList without entry | invalid | violates: REQ-RES-SUBLIST-010 | constructed | reviewed |
-| [V-PAY-240](#v-pay-240) | Pub all Config DataSets of an asset with two contexts | valid | ok | constructed | draft |
-| [V-PAY-241](#v-pay-241) | Pub Config with the same context twice for one Source | invalid | violates: REQ-RES-CONFIG-015 | constructed | draft |
+| [V-PAY-240](#v-pay-240) | Pub all Config DataSets of an asset with two contexts | valid | ok | constructed | reviewed |
+| [V-PAY-241](#v-pay-241) | Pub Config with the same context twice for one Source | invalid | violates: REQ-RES-CONFIG-015 | constructed | reviewed |
 
 ## V-PAY-018
 
@@ -9147,7 +9147,7 @@ Payload:
 - Expected: valid
 - Illustrates: [REQ-MSG-011](../../requirements/view/msg.md#req-msg-011), [REQ-MSG-021](../../requirements/view/msg.md#req-msg-021), [REQ-MSG-023](../../requirements/view/msg.md#req-msg-023), [REQ-MSG-024](../../requirements/view/msg.md#req-msg-024), [REQ-MSG-040](../../requirements/view/msg.md#req-msg-040), [REQ-RES-CONFIG-002](../../requirements/view/res-config.md#req-res-config-002), [REQ-RES-CONFIG-004](../../requirements/view/res-config.md#req-res-config-004), [REQ-RES-CONFIG-006](../../requirements/view/res-config.md#req-res-config-006), [REQ-RES-CONFIG-007](../../requirements/view/res-config.md#req-res-config-007), [REQ-RES-CONFIG-015](../../requirements/view/res-config.md#req-res-config-015), [REQ-RES-CONFIG-018](../../requirements/view/res-config.md#req-res-config-018), [REQ-RES-CONFIG-024](../../requirements/view/res-config.md#req-res-config-024)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: Unsolicited Pub Config on the topic with Source and without Filter (MG 9.1.3): one DataSetMessage per Config DataSet of the asset, each with its own context name as WriterGroupName (REQ-RES-CONFIG-015), "Network settings" (DataSetWriterId 42) and "Overall device settings" (DataSetWriterId 43) as in B1.1.3, with shortened groups. The set password is masked (REQ-RES-CONFIG-024).
 
@@ -9255,7 +9255,7 @@ Payload:
 - Expected: invalid – The Filter (WriterGroupName) of a Config DataSet is unique among the Config DataSets of the Source (MG 8.3.3.1).
 - Violates: [REQ-RES-CONFIG-015](../../requirements/view/res-config.md#req-res-config-015)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 Notes: V-PAY-240 with the second DataSetMessage renamed to the context "Network settings" of the first (WriterGroupName and Context.Name); same DataSetWriterName.
 

@@ -7914,7 +7914,7 @@ vectors:
     expected: valid
     reqs: [REQ-MSG-011, REQ-MSG-021, REQ-MSG-023, REQ-MSG-024, REQ-MSG-040, REQ-RES-CONFIG-002, REQ-RES-CONFIG-004, REQ-RES-CONFIG-006, REQ-RES-CONFIG-007, REQ-RES-CONFIG-015, REQ-RES-CONFIG-018, REQ-RES-CONFIG-024]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       Unsolicited Pub Config on the topic with Source and without Filter (MG 9.1.3):
       one DataSetMessage per Config DataSet of the asset, each with its own context name
@@ -8018,7 +8018,7 @@ vectors:
     violates: [REQ-RES-CONFIG-015]
     reason: "The Filter (WriterGroupName) of a Config DataSet is unique among the Config DataSets of the Source (MG 8.3.3.1)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     notes: >-
       V-PAY-240 with the second DataSetMessage renamed to the context "Network
       settings" of the first (WriterGroupName and Context.Name); same DataSetWriterName.

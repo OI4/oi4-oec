@@ -16,7 +16,7 @@ vectors:
     expected: valid
     reqs: [REQ-CNT-003]
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       The three mandatory elements of RIG 4.1.1; Address as a single-label host name
       (e.g. the container name of the broker), MaxPacketSize at its minimum 262144
@@ -33,7 +33,7 @@ vectors:
     expected: valid
     reqs: [REQ-CNT-003]
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       MaxPacketSize at its maximum 268435455, the maximum remaining length of an MQTT
       v3.1.1 packet (SF-091 (b)).
@@ -49,7 +49,7 @@ vectors:
     expected: valid
     reqs: [REQ-CNT-003]
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       IPv6 address in text form without brackets (SF-100 (b), proposed); any
       SecurePort of the range.
@@ -65,7 +65,7 @@ vectors:
     expected: valid
     reqs: [REQ-CNT-003]
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       RIG 4.1.1 lists the elements broker.json contains; a further element is allowed
       and ignored by the clients (SF-100 (a), proposed).
@@ -83,7 +83,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "Address is a mandatory element of broker.json (RIG 4.1.1)."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 without Address.
     content: |-
@@ -98,7 +98,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "SecurePort is a mandatory element of broker.json (RIG 4.1.1)."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 without SecurePort.
     content: |-
@@ -113,7 +113,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "MaxPacketSize is a mandatory element of broker.json (RIG 4.1.1)."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 without MaxPacketSize.
     content: |-
@@ -128,7 +128,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "The minimum value of MaxPacketSize is 262144 (RIG 4.1.1)."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with MaxPacketSize one below the minimum.
     content: |-
@@ -144,7 +144,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "The maximum value of MaxPacketSize is 268435455 (RIG 4.1.1, SF-091 (b))."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-002 with MaxPacketSize one above the maximum.
     content: |-
@@ -160,7 +160,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "MaxPacketSize is an INT32 (RIG 4.1.1), a JSON number."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with MaxPacketSize as a JSON string.
     content: |-
@@ -176,7 +176,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "SecurePort is a UINT16 (RIG 4.1.1)."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with SecurePort 65536.
     content: |-
@@ -192,7 +192,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "SecurePort is a UINT16 (RIG 4.1.1), a JSON number."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with SecurePort as a JSON string.
     content: |-
@@ -208,7 +208,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "SecurePort is the port the broker listens on; port 0 is no such port (SF-100 (c), proposed)."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with SecurePort 0, the lower bound of UINT16 (SF-100 (c), proposed).
     content: |-
@@ -224,7 +224,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "Address is an IP address or host name (RIG 4.1.1); the port is the element SecurePort."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with the port appended to the host name.
     content: |-
@@ -240,7 +240,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "Address is an IP address or host name (RIG 4.1.1), not a URL."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with a URL with scheme mqtts.
     content: |-
@@ -256,7 +256,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "Address is an IP address or host name (RIG 4.1.1); the empty string is neither."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with an empty Address.
     content: |-
@@ -272,7 +272,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "The elements of broker.json are written in PascalCase (RIG 1.2, RIG 4.1.1); with camelCase names the mandatory elements are missing."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 with camelCase element names; the three names count as further
       elements (SF-100 (a), proposed), the mandatory elements are missing.
@@ -289,7 +289,7 @@ vectors:
     violates: [REQ-CNT-003]
     reason: "broker.json is a JSON object with the elements of RIG 4.1.1."
     origin: {kind: constructed, ref: RIG 4.1.1}
-    status: draft
+    status: reviewed
     notes: >-
       V-BRK-001 wrapped in an array.
     content: |-

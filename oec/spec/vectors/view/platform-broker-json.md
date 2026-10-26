@@ -7,24 +7,24 @@ Content of the file broker.json of the Message Bus storage (RIG 4.1.1, REQ-CNT-0
 
 | ID | Title | Expected | Result | Origin | Status |
 |---|---|---|---|---|---|
-| [V-BRK-001](#v-brk-001) | Minimal broker.json with host name and the smallest MaxPacketSize | valid | ok | constructed RIG 4.1.1 | draft |
-| [V-BRK-002](#v-brk-002) | broker.json with IPv4 address and the largest MaxPacketSize | valid | ok | constructed RIG 4.1.1 | draft |
-| [V-BRK-003](#v-brk-003) | broker.json with IPv6 address | valid | ok | constructed RIG 4.1.1 | draft |
-| [V-BRK-004](#v-brk-004) | broker.json with a fully qualified host name and a further element | valid | ok | constructed RIG 4.1.1 | draft |
-| [V-BRK-005](#v-brk-005) | broker.json without Address | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-006](#v-brk-006) | broker.json without SecurePort | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-007](#v-brk-007) | broker.json without MaxPacketSize | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-008](#v-brk-008) | MaxPacketSize below the minimum | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-009](#v-brk-009) | MaxPacketSize above the maximum | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-010](#v-brk-010) | MaxPacketSize as a string | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-011](#v-brk-011) | SecurePort above the UINT16 range | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-012](#v-brk-012) | SecurePort as a string | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-013](#v-brk-013) | SecurePort 0 | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-014](#v-brk-014) | Address with port | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-015](#v-brk-015) | Address as a URL | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-016](#v-brk-016) | Empty Address | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-017](#v-brk-017) | Element names not in PascalCase | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
-| [V-BRK-018](#v-brk-018) | broker.json is no JSON object | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | draft |
+| [V-BRK-001](#v-brk-001) | Minimal broker.json with host name and the smallest MaxPacketSize | valid | ok | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-002](#v-brk-002) | broker.json with IPv4 address and the largest MaxPacketSize | valid | ok | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-003](#v-brk-003) | broker.json with IPv6 address | valid | ok | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-004](#v-brk-004) | broker.json with a fully qualified host name and a further element | valid | ok | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-005](#v-brk-005) | broker.json without Address | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-006](#v-brk-006) | broker.json without SecurePort | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-007](#v-brk-007) | broker.json without MaxPacketSize | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-008](#v-brk-008) | MaxPacketSize below the minimum | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-009](#v-brk-009) | MaxPacketSize above the maximum | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-010](#v-brk-010) | MaxPacketSize as a string | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-011](#v-brk-011) | SecurePort above the UINT16 range | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-012](#v-brk-012) | SecurePort as a string | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-013](#v-brk-013) | SecurePort 0 | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-014](#v-brk-014) | Address with port | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-015](#v-brk-015) | Address as a URL | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-016](#v-brk-016) | Empty Address | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-017](#v-brk-017) | Element names not in PascalCase | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
+| [V-BRK-018](#v-brk-018) | broker.json is no JSON object | invalid | violates: REQ-CNT-003 | constructed RIG 4.1.1 | reviewed |
 
 ## V-BRK-001
 
@@ -33,7 +33,7 @@ Content of the file broker.json of the Message Bus storage (RIG 4.1.1, REQ-CNT-0
 - Expected: valid
 - Illustrates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: The three mandatory elements of RIG 4.1.1; Address as a single-label host name (e.g. the container name of the broker), MaxPacketSize at its minimum 262144 (256 KiB).
 
@@ -54,7 +54,7 @@ Content of `broker.json`:
 - Expected: valid
 - Illustrates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: MaxPacketSize at its maximum 268435455, the maximum remaining length of an MQTT v3.1.1 packet (SF-091 (b)).
 
@@ -75,7 +75,7 @@ Content of `broker.json`:
 - Expected: valid
 - Illustrates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: IPv6 address in text form without brackets (SF-100 (b), proposed); any SecurePort of the range.
 
@@ -96,7 +96,7 @@ Content of `broker.json`:
 - Expected: valid
 - Illustrates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: RIG 4.1.1 lists the elements broker.json contains; a further element is allowed and ignored by the clients (SF-100 (a), proposed).
 
@@ -118,7 +118,7 @@ Content of `broker.json`:
 - Expected: invalid – Address is a mandatory element of broker.json (RIG 4.1.1).
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 without Address.
 
@@ -138,7 +138,7 @@ Content of `broker.json`:
 - Expected: invalid – SecurePort is a mandatory element of broker.json (RIG 4.1.1).
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 without SecurePort.
 
@@ -158,7 +158,7 @@ Content of `broker.json`:
 - Expected: invalid – MaxPacketSize is a mandatory element of broker.json (RIG 4.1.1).
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 without MaxPacketSize.
 
@@ -178,7 +178,7 @@ Content of `broker.json`:
 - Expected: invalid – The minimum value of MaxPacketSize is 262144 (RIG 4.1.1).
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with MaxPacketSize one below the minimum.
 
@@ -199,7 +199,7 @@ Content of `broker.json`:
 - Expected: invalid – The maximum value of MaxPacketSize is 268435455 (RIG 4.1.1, SF-091 (b)).
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-002 with MaxPacketSize one above the maximum.
 
@@ -220,7 +220,7 @@ Content of `broker.json`:
 - Expected: invalid – MaxPacketSize is an INT32 (RIG 4.1.1), a JSON number.
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with MaxPacketSize as a JSON string.
 
@@ -241,7 +241,7 @@ Content of `broker.json`:
 - Expected: invalid – SecurePort is a UINT16 (RIG 4.1.1).
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with SecurePort 65536.
 
@@ -262,7 +262,7 @@ Content of `broker.json`:
 - Expected: invalid – SecurePort is a UINT16 (RIG 4.1.1), a JSON number.
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with SecurePort as a JSON string.
 
@@ -283,7 +283,7 @@ Content of `broker.json`:
 - Expected: invalid – SecurePort is the port the broker listens on; port 0 is no such port (SF-100 (c), proposed).
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with SecurePort 0, the lower bound of UINT16 (SF-100 (c), proposed).
 
@@ -304,7 +304,7 @@ Content of `broker.json`:
 - Expected: invalid – Address is an IP address or host name (RIG 4.1.1); the port is the element SecurePort.
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with the port appended to the host name.
 
@@ -325,7 +325,7 @@ Content of `broker.json`:
 - Expected: invalid – Address is an IP address or host name (RIG 4.1.1), not a URL.
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with a URL with scheme mqtts.
 
@@ -346,7 +346,7 @@ Content of `broker.json`:
 - Expected: invalid – Address is an IP address or host name (RIG 4.1.1); the empty string is neither.
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with an empty Address.
 
@@ -367,7 +367,7 @@ Content of `broker.json`:
 - Expected: invalid – The elements of broker.json are written in PascalCase (RIG 1.2, RIG 4.1.1); with camelCase names the mandatory elements are missing.
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 with camelCase element names; the three names count as further elements (SF-100 (a), proposed), the mandatory elements are missing.
 
@@ -388,7 +388,7 @@ Content of `broker.json`:
 - Expected: invalid – broker.json is a JSON object with the elements of RIG 4.1.1.
 - Violates: [REQ-CNT-003](../../requirements/view/cnt.md#req-cnt-003)
 - Origin: constructed RIG 4.1.1
-- Status: draft
+- Status: reviewed
 
 Notes: V-BRK-001 wrapped in an array.
 

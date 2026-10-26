@@ -15,7 +15,7 @@ Guideline baseline: `23f6cfd` · Area status: reviewed · Sections: MG 8.3.3, MG
 | [REQ-RES-CONFIG-008](#req-res-config-008) | A set Value satisfies the Validation | MUST* | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-RES-CONFIG-009](#req-res-config-009) | Unit is an EngineeringUnit DisplayName | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-CONFIG-010](#req-res-config-010) | A value is unset with an empty string, there is no Del | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
-| [REQ-RES-CONFIG-011](#req-res-config-011) | Mandatory configuration objects are contained in every Set of their group | MUST | MUST | MUST | MUST | messaging | d7-monitor | draft |
+| [REQ-RES-CONFIG-011](#req-res-config-011) | Mandatory configuration objects are contained in every Set of their group | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
 | [REQ-RES-CONFIG-012](#req-res-config-012) | Front-ends hide the value of a sensitive configuration object | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-CONFIG-013](#req-res-config-013) | A Group collects configuration objects configured at once | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-CONFIG-014](#req-res-config-014) | The group of common configuration objects is named common | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
@@ -28,7 +28,7 @@ Guideline baseline: `23f6cfd` · Area status: reviewed · Sections: MG 8.3.3, MG
 | [REQ-RES-CONFIG-021](#req-res-config-021) | Status event after Set Config | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-CONFIG-022](#req-res-config-022) | Changed Config is published after a successful Set | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-CONFIG-023](#req-res-config-023) | A Set Config is applied completely or rejected | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-RES-CONFIG-024](#req-res-config-024) | Sensitive configuration values are masked in every Pub | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-test | draft |
+| [REQ-RES-CONFIG-024](#req-res-config-024) | Sensitive configuration values are masked in every Pub | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-test | reviewed |
 | [REQ-RES-CONFIG-025](#req-res-config-025) | The mask in a Set leaves a sensitive value unchanged | MUST* | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-CONFIG-026](#req-res-config-026) | The operator restricts read access to Set/Config | SHOULD | n/a | n/a | n/a | platform | d8 | reviewed |
 
@@ -309,7 +309,7 @@ A configuration object with Mandatory = true is contained, with its Value, in ev
 - Domain: messaging · Applies to: requester
 - Refs: MG 8.3.3.1, MG 8.3.3.2, MG 9.1.3, SF-086
 - Verification: d7-monitor
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.3.1-269a6962, MG-8.3.3.1-ae206d08, MG-8.3.3.1-bc1d417b, MG-8.3.3.2-502f7bf5, MG-8.3.3.2-aeff2f0d, MG-8.3.3.2-ddc33ac3, MG-9.1.3-1d957d86, MG-9.1.3-2e08d4bd, MG-9.1.3-7c151900
 
 > If Mandatory is set to true, this Config object must be part of the Group in every Set which contains the Group, including its Value. An empty Value of a mandatory Config object is a valid message; the application may reject it with a status Event with the StatusCode Bad.
@@ -594,7 +594,7 @@ In every publication of a Config DataSet (answer to a Get, publication after a s
 - Condition: The component offers Config (REQ-CMP-035).
 - Refs: MG 8.3.3.1, MG 9.1.3, GL-ADR-021, SF-087
 - Verification: schema, d7-validate, d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.3.1-3f9abadb, MG-8.3.3.1-72d258a9, MG-8.3.3.1-8912ceb4, MG-9.1.3-a94653f3
 
 > If Sensitive is set to true, the publisher must replace a non-empty Value and a non-empty DefaultValue of this Config object by the mask `********` (eight asterisks) in every publication of the Config (Pub/Config) – in the answer to a Get, in the publication after a successful Set and in any other publication. An empty Value or DefaultValue is published as empty string, so a consumer can see whether the value is set.
