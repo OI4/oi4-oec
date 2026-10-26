@@ -114,9 +114,10 @@ fn certificates(path: &Path) -> Result<Vec<CertificateDer<'static>>> {
 }
 
 /// The private key of a PEM file: PKCS#8, PKCS#1 (RSA) or SEC1 (EC), or a
-/// PKCS#8 `ENCRYPTED PRIVATE KEY` (PBES2: PBKDF2 or scrypt with AES)
-/// decrypted with the passphrase (REQ-CNT-008/009). The legacy OpenSSL
-/// encryption (`Proc-Type: 4,ENCRYPTED`) and PBES1 (DES, RC2) are refused.
+/// PKCS#8 `ENCRYPTED PRIVATE KEY` (PBES2: PBKDF2 with HMAC-SHA-2 or scrypt,
+/// with AES) decrypted with the passphrase (REQ-CNT-008/009). The legacy
+/// OpenSSL encryption (`Proc-Type: 4,ENCRYPTED`), PBES1 (DES, RC2) and
+/// PBKDF2 with HMAC-SHA-1 are refused.
 pub(crate) fn private_key(
     path: &Path,
     passphrase: Option<&Secret>,

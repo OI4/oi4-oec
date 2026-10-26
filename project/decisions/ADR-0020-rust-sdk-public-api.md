@@ -1,6 +1,6 @@
 # ADR-0020 – Public API of the Rust SDK (D2)
 
-- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042). Amendment C-048 (first part of the crate `oec`: additions, `MemoryStore::new()`, rules of `build()`) and C-049 (no API change; `set_health_details` reads "equals" per REQ-RES-HEALTH-002) by the agent (G-3.4 b).
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042). Amendment C-048 (first part of the crate `oec`: additions, `MemoryStore::new()`, rules of `build()`) C-049 (no API change; `set_health_details` reads "equals" per REQ-RES-HEALTH-002) and C-050 (runtime moved to `oec`; explicit `Broker` needs a CA; `run_async` installs no signal handlers) by the agent (G-3.4 b).
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-042
 - Related: ADR-0011 (S4 architecture), ADR-0016 (level targets), ADR-0019 §7 (schemas in D2), ADR-0021 (C ABI), ADR-0022 (D9 API), Q-021, Q-022, SF-101
@@ -224,3 +224,31 @@ Increment 5a adds sans-IO building blocks to `oec-core` (ADR-0026 §9); the publ
 
 1. **`set_health_details` (sketch `asset.rs`):** the sketch says "`Health` is then **at least** the most severe detail". REQ-RES-HEALTH-002 says Health **equals** the Health with the highest priority of the Details. The SDK implements "equals" (the core check `oec_core::lifecycle::check_health` refuses anything else). This is a wording fix of the described semantics, not a change; C-050 corrects the sketch doc when it moves `Asset` to `oec`. How `set_health` behaves while `Details` are set is decided there, within this rule.
 2. **Keep Alive never 0:** the core session takes Keep Alive as `NonZeroU16` seconds, matching C-048 C ("0 would disable the Will trigger").
+
+## Amendment C-050 (2026-10-26) – P4 increment 5b: runtime in `oec` (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details and REQ tracing: `log/2026-10-26_C-050_runtime-tokio-rustls.md`, REVIEW A-32 … A-41. Runtime semantics: ADR-0026 §10.
+
+### A. What moved from the sketch into `oec`
+
+`App::run`, `App::run_async`, `App::handle`, `impl Deref<Target = AppHandle> for App`, `AppHandle::{state, shutdown}`, `ConnectionState` and `AppBuilder::on_connection`. `AppHandle::{this, add_asset, asset, consumer}`, `Asset` (with `set_health`/`set_health_details`), DataSets, `ConfigHandle`, events and the consumer stay in the sketch until their increments (ROADMAP P4: 6 … 8) and are still the contract. Amendment C-048 D (Q-021) is realized: `run_async` returns a `Send` future (tested: it is spawned with `Runtime::spawn`, which requires `Send`).
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `AppHandle: Debug`, `ConnectionState: Copy + Eq + Debug` | Usual derives; `AppHandle` is `Clone + Send + Sync` as §2 requires (tested). |
+| `oec::prelude` exports `AppHandle` | It is named in application code that passes the handle to threads. |
+| Cargo features `crypto-aws-lc-rs` (default) and `crypto-ring` | Choice of the rustls crypto provider (ADR-0023 §1, amendment C-050); not an API item. |
+
+### C. Changes of sketch or C-048 items (need this amendment)
+
+1. **An explicit `Broker` needs a CA.** The sketch said "`ca_pem`: CA of the broker". Without a CA, `build()` now fails with `LevelNotMet` (REQ-CMP-002, REQ-MQTT-008: the application verifies the broker with the CA of the Message Bus storage). There is no fallback to the platform trust store; ADR-0023 §1 says trust comes from the storage only, and an OS trust store may become an explicit opt-in later (then as an addition). Consequently `ConnectionSettings::ca()` returns `&Path` instead of `Option<&Path>` (a C-048 addition).
+2. **`run_async` installs no signal handlers.** §2 and the sketch say "same as `App::run`". `run` owns its runtime and the process, so it handles SIGINT/SIGTERM (Windows: Ctrl-C, Close, Shutdown) and then sends Close and DISCONNECT (§5). `run_async` runs inside the application's tokio runtime; installing process-wide handlers there would steal the signals from the application. The application calls `AppHandle::shutdown` (e.g. from its own `tokio::signal::ctrl_c()`). Everything else is the same.
+3. **Precision, no change of the described semantics:**
+   - `ConnectionState` is `Closed` before `run` and after it returns; `Connecting` until the first CONNACK, `Online` while connected, `Reconnecting` after a connection was lost (until the next CONNACK). A refused or failed first attempt stays `Connecting`.
+   - `on_connection` is called on every change of the state (no repeated equal value), synchronously on the runtime thread; it must not block.
+   - `AppHandle::shutdown` is idempotent. Before `run` it makes `run` return `Ok(())` at once without connecting; during `run` it sends Close (if connected) and DISCONNECT, then `run` returns `Ok(())`.
+   - `run`/`run_async` fail only before the first connection: `Error::Bootstrap` for unusable TLS material (CA, client certificate, key, passphrase), `Error::Invalid` for a host that is no TLS server name, `Error::Io` if the runtime cannot start. A lost or refused connection is not an error: the SDK reconnects with backoff (ADR-0026 §10).
+   - `Error::Bootstrap` also covers the TLS material of the connection settings, not only the container storage (§14 lists the variant; its doc is widened).
+
