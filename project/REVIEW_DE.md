@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-049 (P4 läuft). **Für dich ist gerade nichts offen.**_
+_Stand: 26.10.2026, nach C-050 (P4 läuft). **Für dich ist gerade nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,12 +24,18 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** C-049 hat nur Code und Technik-Entscheidungen gebracht:
+**Nichts.** C-050 hat wie C-049 nur Code und Technik-Entscheidungen gebracht:
 - Keine reviewte REQ und kein reviewter Vektor wurde geändert.
 - Es gibt keinen neuen Vektor.
-- Es gibt kein neues Finding in der Guideline. Will, Birth und Close, die das SDK erzeugt, haben genau den Inhalt der Beispiele aus MG 6.3 (V-PAY-025/023/024).
+- Es gibt kein neues Finding in der Guideline.
 
-Die Punkte A-1 … A-31 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
+C-050 hat das SDK zum ersten Mal wirklich mit einem Broker verbunden (TLS, Anmelden, Birth, Health, Close, Neuaufbau). Zwei Punkte präzisieren die Skizze, die du kennst. Sie stehen in ADR-0020 als Nachtrag und sind einen Blick wert:
+- **A-34:** Wer den Broker im Code selbst angibt, muss auch dessen CA-Zertifikat mitgeben.
+- **A-37:** `run_async` fängt kein Strg-C ab, das macht die App selbst.
+
+Details unten bei A-32 … A-41. Außerdem habe ich einen Schreibfehler aus C-049 korrigiert: Bei A-29 war das Format der MessageId falsch beschrieben (der Code war richtig).
+
+Die Punkte A-1 … A-41 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
 Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.
 
@@ -39,7 +45,19 @@ Die Lücken bleiben bei 0, das Schema bleibt `2.0.1-dev` mit Baseline `734c560`.
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-050
+
+- **Laufzeit (Runtime):** der Teil des SDK, der wirklich arbeitet: Netzwerkverbindung öffnen, Bytes senden und empfangen, Zeit messen, Wartezeiten einhalten. Er „treibt“ die reine Logik aus C-049 (Sitzung und Lebenszyklus) an.
+- **tokio:** die verbreitetste Rust-Bibliothek für solche Laufzeiten. Sie kann viele Verbindungen und Zeitgeber gleichzeitig verwalten, ohne für jede einen eigenen Thread zu brauchen.
+- **TLS / rustls:** TLS verschlüsselt die Verbindung zum Broker und prüft per Zertifikat, dass es wirklich der richtige Broker ist. rustls ist eine TLS-Bibliothek in Rust. Die eigentliche Kryptografie liefert eine zweite Bibliothek: aws-lc-rs (Standard) oder ring (wählbar).
+- **CA (Zertifizierungsstelle):** das Zertifikat, dem man vertraut. Nur Broker, deren Zertifikat von dieser CA unterschrieben ist, werden akzeptiert. Wir vertrauen **nur** der CA aus dem Container-Speicher bzw. der, die die App mitgibt, nie den vielen CAs des Betriebssystems.
+- **Client-Zertifikat:** die App weist sich beim Broker mit einem eigenen Zertifikat aus statt mit Benutzername und Passwort. Ist eines da, hat es Vorrang (REQ-MQTT-010).
+- **Passphrase:** ein Passwort, mit dem der private Schlüssel der App verschlüsselt auf der Platte liegt. Das SDK entschlüsselt ihn beim Start.
+- **Backoff:** Bricht die Verbindung ab, versucht die App es erneut: erst nach etwa 1 Sekunde, dann 2, 4, 8 … höchstens 60 Sekunden. Ein Zufallsanteil sorgt dafür, dass nach einem Broker-Neustart nicht alle Apps im selben Moment anklopfen.
+- **Test-Broker:** ein kleiner Broker, den die Tests selbst starten, nur auf dem eigenen Rechner. Er versteht genug MQTT, um zu prüfen, was die App schickt, und kann absichtlich Fehler machen (Verbindung kappen, Anmeldung ablehnen).
+- **Smoke-Test:** ein kurzer Test gegen einen echten Broker (z. B. Mosquitto). Er läuft nur, wenn man ihn ausdrücklich einschaltet; die normale Prüfung braucht keinen Broker und kein Docker.
 
 ### Begriffe aus C-049
 
@@ -102,23 +120,35 @@ Neu aus C-048 (die eigentliche SDK-Bibliothek `oec`):
 - **A-22 – Kleinkram mit Wirkung:** Gespeichert wird „atomar“ (erst in eine Hilfsdatei, dann umbenennen), damit bei Stromausfall nie eine halbe Datei bleibt. Keep Alive: 1 bis 65535 Sekunden; 0 würde das Will-Signal bei Verbindungsabbruch abschalten. Passwörter erscheinen nie im Debug-Text.
 - **A-23 – Bibliotheken:** Nur thiserror und log kamen dazu, beide mit erlaubter Lizenz (MIT/Apache-2.0). cargo-deny ist ohne Ausnahme grün. Base64 dekodieren wir selbst (ein paar Zeilen), statt eine weitere Bibliothek zu holen.
 - **A-24 – Zyklusschnitt:** C-048 wurde nicht geteilt. Inkrement 5 (Verbindung) ist dagegen zu groß für einen Zyklus und wird geteilt: **C-049** baut die reine Protokoll-Logik (MQTT-Nachrichten, Sitzung, Lebenszyklus; testbar ohne Netzwerk), **C-050** das Netzwerk (tokio, TLS) und `App::run`. Bis dahin bleiben `run`/`run_async` in der Skizze.
-- **Offen für später (Technik, nicht für dich):** verschlüsselte private Schlüssel mit Passphrase und die CA eines Geräts ohne Container (C-050), Regex für `Pattern` (Inkrement 7), Länge der Speicher-Schlüssel für Assets (Inkrement 6).
+- **Offen für später (Technik, nicht für dich):** verschlüsselte private Schlüssel mit Passphrase und die CA eines Geräts ohne Container (C-050, inzwischen entschieden: A-33, A-34), Regex für `Pattern` (Inkrement 7), Länge der Speicher-Schlüssel für Assets (Inkrement 6).
 
 Neu aus C-049 (MQTT und Lebenszyklus, noch ohne Netzwerk):
 - **A-25 (neu) – MQTT-Codec:** Wir haben den MQTT-Teil selbst geschrieben, wie in ADR-0023 (Q-026) beschlossen; der Spike war nur Vorlage. Der Codec kann alle Pakete, die eine App braucht, aber kein QoS 2 und keinen gespeicherten („retained“) Will, beides verbietet die Guideline. Er ist streng: Jede Byte-Folge, die nicht exakt dem Standard entspricht, wird abgelehnt, und der Fehler nennt die Regel (z. B. `MQTT-3.1.2-22` oder REQ-MQTT-017).
 - **A-26 (neu) – Sitzung:** Die Sitzung meldet sich bei jedem Verbindungsaufbau mit einem neuen Will an. Sie sendet nach einer Minute Stille einen PING; kommt keine Antwort, gilt die Verbindung als tot. Bei jedem Fehler trennt sie **ohne** sauberes Abmelden, damit der Broker den Will verschickt und alle sehen, dass die App weg ist. Abos werden nach einem Neuaufbau automatisch wiederhergestellt. Unbestätigte wichtige Nachrichten meldet sie als „verloren“, die Laufzeit entscheidet dann, ob sie neu gesendet werden. Zu große Nachrichten (über der MaxPacketSize des Brokers) lehnt sie ab.
 - **A-27 (neu) – Form der Lebenszyklus-Nachrichten:** Will, Birth und Close sehen genau so aus wie die Beispiele in MG 6.3. Dort fehlt das Feld `MessageType` im Datensatz; laut REQ-MSG-029 bedeutet das „Keyframe“. Deshalb lassen wir es bei diesen Nachrichten weg, obwohl das SDK es sonst immer mitschickt (A-11). Beide Formen sind gültig.
 - **A-28 (neu) – Regeln für Health:** Gibt es eine Detail-Liste, muss Health **genau** dem schlimmsten Eintrag entsprechen (REQ-RES-HEALTH-002 sagt „equals“). In der Skizze stand „mindestens“; das korrigieren wir in C-050 (in ADR-0020 nachgetragen). NORMAL_0 mit Score 0 darf die App nicht selbst setzen, weil das „ich melde mich ab“ bedeutet (REQ-LIFE-014). War die App auf FAILURE_1/0 und erholt sich, sendet sie zuerst wieder eine Birth (REQ-LIFE-017).
-- **A-29 (neu) – MessageIds:** Jede Nachricht bekommt eine eindeutige Kennung aus Zeit und Absender. Kommen mehrere in derselben Millisekunde, wird hochgezählt (`-1`, `-2`, …). Springt die Uhr zurück, bleibt die Kennung trotzdem eindeutig und aufsteigend.
+- **A-29 (neu) – MessageIds:** Jede Nachricht bekommt eine eindeutige Kennung aus Zeit und Absender. Kommen mehrere in derselben Millisekunde, wird eine laufende Zahl direkt an den Zeitstempel angehängt (aus `…123-App` wird `…1231-App`, `…1232-App` usw., so verlangt es REQ-MSG-007). Korrektur in C-050: Hier stand vorher fälschlich `-1`, `-2`; der Code war schon richtig, nur die Beschreibung nicht. Springt die Uhr zurück, bleibt die Kennung trotzdem eindeutig und aufsteigend.
 - **A-30 (neu) – Zufallstests:** Für die Tests mit Zufallseingaben nehmen wir proptest. Es wird nur beim Testen gebraucht und ist nicht im fertigen SDK enthalten; die Lizenz ist MIT/Apache-2.0, cargo-deny ist ohne Ausnahme grün. cargo-fuzz haben wir nicht eingerichtet, weil es eine Test-Version des Compilers braucht und die automatische Prüfung sonst nicht durchliefe.
 - **A-31 (neu) – Übergabe an C-050 und Zyklusschnitt:** `oec-core` hat eigene Verbindungs-Einstellungen; die Übersetzung aus den Einstellungen von `oec` (`ConnectionSettings`) schreibt C-050 zusammen mit dem Netzwerkteil. C-049 wurde nicht geteilt, der Plan bleibt gleich.
-- **Offen für später (Technik, nicht für dich):** verschlüsselte private Schlüssel mit Passphrase und die CA eines Geräts ohne Container (unverändert, C-050), Birth als erste Nachricht auch bei einer dauerhaften Sitzung (C-050), Health setzen, während Details gesetzt sind (C-050).
+- **Offen für später (Technik, nicht für dich):** verschlüsselte private Schlüssel mit Passphrase und die CA eines Geräts ohne Container (unverändert, C-050), Birth als erste Nachricht auch bei einer dauerhaften Sitzung (C-050), Health setzen, während Details gesetzt sind (C-050). Die ersten drei hat C-050 entschieden (A-33, A-34, A-35); das letzte kommt mit Inkrement 6.
+
+Neu aus C-050 (das Netzwerk, `App::run`):
+- **A-32 (neu) – TLS-Verbindung:** Nur TLS 1.3 und 1.2, ältere Versionen lehnen wir ab (REQ-MQTT-005). Vertraut wird nur der CA aus dem Speicher bzw. aus dem mitgegebenen `Broker`. Hat die App ein Client-Zertifikat, meldet sie sich damit an und schickt kein Passwort mit. Zertifikate werden vor jedem Neuaufbau frisch eingelesen, damit erneuerte Zertifikate ohne Neustart greifen. Sind sie dabei kaputt, nimmt die App die letzten guten.
+- **A-33 (neu) – Schlüssel mit Passphrase:** Unterstützt wird das heute übliche Format (PKCS#8, so schreibt es OpenSSL 3). Ich habe das mit echten OpenSSL-Schlüsseln ausprobiert. Alte oder schwache Verfahren (das alte OpenSSL-Format, SHA-1) lehnt das SDK mit einer klaren Meldung ab, inklusive Hinweis, wie man den Schlüssel umwandelt. Die Guideline schreibt kein Format vor; deshalb ist das eine Technik-Entscheidung und kein Finding.
+- **A-34 (neu) – Eigener Broker braucht eine CA:** Gibt eine App ohne Container den Broker selbst im Code an, muss sie auch das CA-Zertifikat mitgeben, sonst meldet `build()` einen Fehler. Die Alternative wäre, den CAs des Betriebssystems zu vertrauen; das würde aber jeden Broker mit einem gekauften Zertifikat akzeptieren und widerspricht der Regel „Vertrauen nur aus dem Speicher“. Die Skizze erlaubte einen Broker ohne CA; deshalb steht das als Nachtrag in ADR-0020. Wenn du die Betriebssystem-CAs als Option möchtest, kann man sie später ergänzen, ohne etwas kaputt zu machen.
+- **A-35 (neu) – Birth zuerst:** Die App meldet sich immer mit „frischer Sitzung“ an (Clean Session). Dann hat der Broker keine alten Nachrichten für sie, die vor der Birth ankommen könnten. Meldet der Broker trotzdem eine alte Sitzung, bricht die App die Verbindung ab. Die Tests prüfen: erst Birth, dann Health.
+- **A-36 (neu) – Neuaufbau und Wartezeiten:** Wartezeit zwischen Versuchen von 1 bis 60 Sekunden mit Zufallsanteil (siehe „Backoff“). Die App gibt nie auf. Lehnt der Broker die Anmeldung ab (z. B. falsches Passwort), wird das als Fehler geloggt und weiter probiert, denn die Plattform kann das Passwort reparieren, ohne dass die App neu startet. Verbindungsaufbau und Senden dürfen höchstens so lange dauern wie das Keep-Alive-Intervall; für das saubere Abmelden gibt es 5 Sekunden.
+- **A-37 (neu) – `run` und `run_async`:** `run` bringt alles selbst mit und beendet sich sauber bei Strg-C bzw. wenn der Container gestoppt wird (SIGTERM): erst Close, dann Abmelden. `run_async` ist für Apps, die selbst tokio benutzen. Dort fängt das SDK **keine** Signale ab, denn die gehören der App; sie beendet das SDK über `AppHandle::shutdown`. In ADR-0020 stand „wie `run`“; das ist jetzt als Nachtrag präzisiert.
+- **A-38 (neu) – Verbindungsstatus:** `Closed` (vor und nach `run`), `Connecting` (erste Anmeldung läuft), `Online`, `Reconnecting` (nach einem Abbruch). `on_connection` meldet jede Änderung. `shutdown` darf man beliebig oft aufrufen, auch vor `run`. Empfangene Nachrichten werden vorerst ignoriert; das Lesen und Beantworten kommt mit den Inkrementen 6 bis 8.
+- **A-39 (neu) – Tests:** 12 Tests gegen den Test-Broker mit selbst erzeugten Zertifikaten. Sie prüfen u. a. die Reihenfolge Birth → Health → Close, Neuaufbau mit neuem Will und neuer Birth, Trennen ohne Abmelden, wenn der Broker nicht mehr antwortet (damit der Broker den Will verschickt), abgelehnte Anmeldung, falschen Broker, Client-Zertifikat, verschlüsselten Schlüssel und Beenden. Sie dauern etwa 3 Sekunden. Einmal habe ich zusätzlich von Hand gegen einen echten Mosquitto in Docker getestet; die Reihenfolge stimmte. Die richtigen Tests gegen Mosquitto kommen mit Inkrement 9.
+- **A-40 (neu) – Bibliotheken:** tokio, rustls, tokio-rustls, rustls-pki-types und pkcs8 (für die Passphrase), alle in ADR-0023 erlaubt bzw. dort nachgetragen; zum Testen rcgen (erzeugt Zertifikate). Das SDK zieht damit 73 statt 22 Bibliotheken nach sich, vor allem wegen tokio und der Kryptografie. Alle Lizenzen sind auf der erlaubten Liste, cargo-deny ist ohne Ausnahme grün. Wer statt aws-lc-rs lieber ring nimmt (z. B. weil dafür kein C-Compiler mit Assembler nötig ist), schaltet das Feature `crypto-ring` ein.
+- **A-41 (neu) – Zyklusschnitt und Kleinkram:** C-050 wurde nicht geteilt. Als Nächstes kommt Inkrement 9 (Entwicklungsumgebung mit echtem Broker). `set_health` zieht erst mit Inkrement 6 aus der Skizze ins SDK; in der Skizze steht aber schon „genau“ statt „mindestens“ (A-28). Den Schreibfehler bei A-29 habe ich in ADR-0026 und hier korrigiert.
 
 ---
 
-### Was als Nächstes passiert (C-050)
+### Was als Nächstes passiert (C-051)
 
-1. P4 Inkrement 5b: das Netzwerk in `oec`. Die App verbindet sich wirklich mit dem Broker (tokio und TLS mit rustls), `App::run`/`run_async`, `AppHandle`, Verbindungsstatus, Neuaufbau mit Wartezeit nach Abbrüchen. Dafür nutzt sie die Sitzung und den Lebenszyklus aus C-049. Dazu kommen neue Bibliotheken (tokio, rustls), die in ADR-0023 schon erlaubt sind. Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
+1. P4 Inkrement 9: eine Entwicklungsumgebung unter `oec/dev`. Ein Mosquitto-Broker in Docker mit TLS, Passwort-Datei und Client-Zertifikaten, ein Skript, das die Test-Zertifikate erzeugt (nichts Geheimes im Repo), und ein Beispiel für `/etc/oi4`. Dagegen laufen dann die echten Interop-Tests von Inkrement 5: Anmelden mit Passwort bzw. Zertifikat, Will beim Abschießen der App, Neuaufbau nach einem Broker-Neustart. Diese Tests muss man ausdrücklich einschalten; die normale Prüfung braucht weiter kein Docker. Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
 
