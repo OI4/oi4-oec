@@ -102,7 +102,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-ACT-013 | schema, d7-validate | reviewed | V-PAY-203, V-PAY-008, V-PAY-009, V-PAY-119 … (5) | V-PAY-191, V-PAY-192, V-PAY-193, V-PAY-194 | covered |
 | REQ-ACT-014 | schema, d7-validate, d7-test | reviewed | V-PAY-203, V-PAY-009, V-PAY-120 | V-PAY-195, V-PAY-196 | covered |
 | REQ-ACT-019 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-PAY-197, V-PAY-198 | covered |
-| REQ-ACT-020 | d7-validate, d7-test | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-TOP-253 (R-1) | covered |
+| REQ-ACT-020 | d7-validate, d7-test | reviewed | V-PAY-008, V-PAY-009, V-PAY-119, V-PAY-120 | V-TOP-218* (R-1), V-TOP-253 (R-1) | covered |
 | REQ-ACT-021 | schema, d7-validate | reviewed | V-PAY-008, V-PAY-119 | V-PAY-199, V-PAY-200 | covered |
 | REQ-ACT-022 | schema, d7-validate, d7-test | reviewed | V-PAY-009, V-PAY-120 | V-PAY-201, V-PAY-202 | covered |
 | REQ-BUS-004 | d7-validate | reviewed | V-PAY-061, V-PAY-072 | – | derived |

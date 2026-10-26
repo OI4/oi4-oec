@@ -180,10 +180,10 @@ vectors:
   - id: V-TOP-218
     title: "Call with Filter"
     expected: invalid
-    violates: [REQ-TOP-013]
-    reason: "Call and Reply never carry a Filter (MG 7.4, SF-041 c)."
+    violates: [REQ-ACT-020, REQ-TOP-013]
+    reason: "Call and Reply never carry a Filter (MG 7.4, SF-041 c); the topic of NewDataSetWriterId has no Filter (MG 9.2.1, as V-TOP-253)."
     origin: {kind: constructed}
-    status: reviewed
+    status: draft
     topic: "Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x"
     fails: grammar
 

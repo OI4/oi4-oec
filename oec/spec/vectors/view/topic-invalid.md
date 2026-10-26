@@ -24,7 +24,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 | [V-TOP-215](#v-top-215) | Set Data without Filter | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-216](#v-top-216) | Pub Metadata without Tag | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-217](#v-top-217) | Pub Event without Filter | invalid | fails: grammar | constructed | reviewed |
-| [V-TOP-218](#v-top-218) | Call with Filter | invalid | fails: grammar | constructed | reviewed |
+| [V-TOP-218](#v-top-218) | Call with Filter | invalid | fails: grammar | constructed | draft |
 | [V-TOP-219](#v-top-219) | Event with category only | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-220](#v-top-220) | Unknown Syslog level | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-221](#v-top-221) | Unknown event category | invalid | fails: grammar | constructed | reviewed |
@@ -254,10 +254,10 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 
 - Topic: `Oi4v2/OTConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Call/NewDataSetWriterId/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/x`
 - Fails: grammar
-- Expected: invalid – Call and Reply never carry a Filter (MG 7.4, SF-041 c).
-- Violates: [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
+- Expected: invalid – Call and Reply never carry a Filter (MG 7.4, SF-041 c); the topic of NewDataSetWriterId has no Filter (MG 9.2.1, as V-TOP-253).
+- Violates: [REQ-ACT-020](../../requirements/view/act.md#req-act-020), [REQ-TOP-013](../../requirements/view/top.md#req-top-013)
 - Origin: constructed
-- Status: reviewed
+- Status: draft
 
 ## V-TOP-219
 
