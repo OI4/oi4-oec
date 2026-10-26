@@ -1,97 +1,157 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, after C-045 (guideline `ccb475a`, register `13d6b1a`); P3 closed._
+_Last updated: 2026-10-26, after C-046 (guideline `e0262dd`, register `2453eff`); P4 in progress._
 
 This is the single list of everything that waits for the PO:
-- items to **review**: drafts, and changes to reviewed items;
-- items to **decide**: spec findings, open questions, cycle plan.
+- items to **review**: drafts, code, and changes to reviewed items;
+- items to **decide**: spec findings, open questions, ADRs, cycle plan.
 
-Each cycle updates it. Items leave the list once the PO has answered and `spectool review` (or the decision record) has been applied. Details are in the cycle logs; this file links to them.
+Each cycle updates it. Items leave the list once the PO has answered and the decision record has been applied. Details are in the cycle logs; this file links to them.
 
 A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVIEW_DE.md), with the same numbering.
 
-**How to answer:** tick the box or write the decision into the "PO" field. You can also answer in the chat, e.g. "R-1 … R-4 akzeptiert, D-1 und D-2 wie empfohlen".
+**How to answer:** tick the box or write the decision into the "PO" field. You can also answer in the chat, e.g. "D-1 … D-5 wie empfohlen, R-1 … R-4 akzeptiert".
 
-**Current state:** C-045 recorded your answers to C-042 … C-044 (all accepted as recommended). It:
-- set ADR-0020 … 0025 to `accepted` and amended ADR-0017;
-- moved Q-021 … Q-030 to "Decided";
-- implemented SF-101/102 in the guideline (`df38e72`, `ccb475a`) and re-baselined (1401 inventory items);
-- moved the schema bundle to the pre-release `2.0.1-dev` (no schema content change);
-- closed P3 in ROADMAP/STATUS and refined P4 … P6.
+**Current state:** your C-045 review was applied in C-045 addendum 1: three REQs `reviewed`, SF-103 in the guideline (`e0262dd`), re-baseline, P4 first. C-046 started P4:
+- P4 plan and cycle cut in ROADMAP P4;
+- JSON export of the vectors and the matrix (`oec/spec/export/`, `3f6e0a0`);
+- Rust workspace `oec/sdk/rust` with crate `oec-core`, increments 1 (identity) and 2 (topic model), with no runtime dependency (`bfb4a03`);
+- all IL, dnp, Oi4Identifier and 151 topic vectors, the payload topics and the 66 matrix rows pass;
+- the gate gained clippy pedantic and `cargo deny`;
+- ADR-0026 `proposed`.
 
-The re-baseline produced three draft REQs and one agent deviation from the accepted wording (R-4). Implementing SF-101 also exposed an editorial gap in the guideline examples (SF-103, D-1). Coverage stays at 0 gaps; the drafts are not `schema`/`d7-validate` REQs.
+No reviewed item changed, coverage stays at 0 gaps, and no spec finding is open.
 
-Log: [C-045](log/2026-10-26_C-045_p3-exit.md).
+Log: [C-046](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | SF-103: guideline examples without the combined `ON_REQUEST_…` values | decide | C-045 | change the 13 examples to `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` | ☑ accepted |
-| D-2 | Order of the next phases (P4, P4b, P5, P5b) | decide | C-045 | P4 first (critical path to P6/P7), P5 interleaved; P4b/P5b afterwards | ☑ accepted |
-| R-1 | REQ-RES-PUBLIST-026 (SHOULD combined values, `manual`) | review | C-045 | accept | ☑ accepted |
-| R-2 | REQ-RES-PUBLIST-027 (`Get` with every `Mode` except `OFF_0`, `d7-test`) | review | C-045 | accept | ☑ accepted |
-| R-3 | REQ-TOP-028 (smart device → `OTConnector`) and REQ-TOP-007 `replaced_by` | review | C-045 | accept | ☑ accepted |
-| R-4 | Guideline wording of SF-101 (scoped by the agent) and SF-102 | review | C-045 | accept | ☑ accepted |
+| D-1 | ADR-0026: Rust workspace layout and crate roles (G-3.4) | decide | C-046 | accept | ☐ |
+| D-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | decide | C-046 | accept | ☐ |
+| D-3 | P4 cycle cut and order (increment 3 in its own cycle; increment 9 before 6–8) | decide | C-046 | accept | ☐ |
+| D-4 | `Oi4Identifier`: dnp-encoding opt-in, `/` without it is an error (`slash-in-element`) | decide | C-046 | accept | ☐ |
+| D-5 | White space and control characters in Filter values: warning, not error | decide | C-046 | accept | ☐ |
+| R-1 | `oec-core` code and tests (increments 1–2) | review | C-046 | accept | ☐ |
+| R-2 | spectool JSON export (format, `omitempty`) | review | C-046 | accept | ☐ |
+| R-3 | cargo-deny gate (`deny.toml`, offline fallback) | review | C-046 | accept | ☐ |
+| R-4 | Lint profile: clippy `pedantic`, `doc_markdown` allowed | review | C-046 | accept | ☐ |
 
 ## Decisions
 
-### D-1 – SF-103 examples without the combined `ON_REQUEST_…` values (open, register `13d6b1a`)
+### D-1 – ADR-0026: Rust workspace layout and crate roles
 
-- **Where:** `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, SF-103 (MG B1.1.8, B2.6).
-- **Problem:** MG 8.3.8 now recommends the combined values for requestable resources (SF-101). The PublicationList examples do not follow it: 12 entries in B1.1.8 (`Data`, `MAM`, `Health`, `Profile`, `ReferenceDesignation`) and 1 in B2.6 use `APPLICATION_SOURCE_FILTER_8`. The `Event` entries with `FILTER_4` are correct.
-- **Not a protocol defect:** both values allow `Get`; the recommendation is a SHOULD.
-- **Options:**
-  - (a) change the 13 entries to `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` and keep `FILTER_4` for `Event` – **recommended**: examples are what implementers copy.
-  - (b) keep the examples (they show the equivalent short form).
-- **Effect:** with (a) the agent changes the guideline on your order and re-baselines (no new REQ expected; the example vectors stay valid either way, their values can follow the examples). With (a) a D7 `monitor` warning for REQ-RES-PUBLIST-026 becomes a candidate for P5.
-- **PO:** ☑ (a) (2026-10-26)
+- **Where:** `decisions/ADR-0026-rust-sdk-workspace.md` (`proposed`). The repository layout is a PO decision (G-3.4).
+- **Content:**
+  - one Cargo workspace `oec/sdk/rust` with flat crates `oec-core`, `oec` (increment 4) and `oec-ffi` (increment 10);
+  - sketch and spikes excluded until `oec` replaces them;
+  - `Cargo.lock` committed;
+  - `publish = false` until P9;
+  - edition 2024, MSRV 1.89.
+- **`oec-core`:**
+  - sans-IO and internal, with no stability promise of its own;
+  - no runtime dependency in increments 1–2; from increment 3, only the I/O-free crates of ADR-0023;
+  - structured errors with stable codes, which `oec` wraps into `oec::Error::Invalid` as the accepted sketch says.
+- **Alternative:** one crate with modules. It would mix the sans-IO core with tokio/rustls and make `oec-ffi` and fuzzing harder. ADR-0011 already names the three crates.
+- **PO:** ☐ accept ☐ change: …
 
-### D-2 – Order of the next phases
+### D-2 – JSON export as the test-vector contract
 
-P3 is closed. P4 (D2), P4b (D9), P5 (D7 `monitor`/`test`) and P5b (D8) can run in parallel by dependency, but the agent works one cycle at a time.
+- **What:** `spectool render` writes `oec/spec/export/vectors/*.json` and `export/matrix/method-resource.json`; `render -check` keeps them fresh. The SDKs read only the export (ADR-0026 §3).
+- **Why:**
+  - The Rust and C SDKs need no YAML parser: `serde_yaml` is archived/deprecated, and D9 would need a C YAML library.
+  - JSON is easy to turn into C arrays for the D9 host tests.
+  - The YAML stays the single reviewed source, and the export is generated.
+- **Alternative:** each SDK parses the YAML (`serde_yaml` or a fork for Rust, a C YAML library for D9).
+- **PO:** ☐ accept ☐ change: …
 
-- **Critical path:** P4 → P6 (demos, logger in C needs P4 increment 10) → P7 (registry) → P9. D7 `test` (P5 exit) also needs an SDK example app.
-- **Recommendation:**
-  1. P4 first (C-046 = P4 plan + increments 1–3: identity, topic model, message model; all offline, no container engine needed).
-  2. P5 interleaved: `internal/mqttwire` + capture + `monitor --replay` (offline), then `monitor` live with the dev broker of P4 increment 9.
-  3. P4b and P5b afterwards, or earlier if you want the ESP32 demo or the container checks sooner.
-- **Prerequisite from P4 increment 5/9 on:** a running container engine (Docker Desktop was not running on 2026-10-14; STATUS "Baselines").
-- **PO:** ☑ as recommended (2026-10-26)
+### D-3 – P4 cycle cut and order
+
+- **Where:** ROADMAP P4 "Order and cycle cut".
+- **Order:**
+  - C-046: increments 1–2;
+  - C-047: increment 3 (message model, schema embedding, first runtime dependencies);
+  - C-048: increment 4 (`oec` crate: App, Level, Bootstrap);
+  - then increment 5 (MQTT codec/session, transport);
+  - then **increment 9 (dev environment) directly after 5**, because the transport needs the TLS broker for its interop tests (ADR-0023 Consequences);
+  - P5 interleave (`internal/mqttwire`, `monitor --replay`);
+  - then 6–8 (provider, write, consumer side; sketch deleted);
+  - then 10 (`oec-ffi`).
+- **Concrete exit criteria (6):** all ADR-0020/0021 items implemented; all D2-relevant vectors pass; integration tests against the dev broker incl. D7 `test`; C examples under ASan; gate green on the platform matrix; example apps documented.
+- **Prerequisite from increment 5/9:** a running container engine (Docker Desktop).
+- **PO:** ☐ accept ☐ change: …
+
+### D-4 – `Oi4Identifier`: dnp-encoding opt-in
+
+- **Rule (MG 4.3.1, MG A3, SF-043 e):** the elements are plain strings; the dnp-encoding *may* be used for characters that are not permitted or for `/`.
+- **SDK behaviour:**
+  - `Oi4Identifier::new(uri, model, product_code, serial).build()` does not mask. A `/` in an element is the SDK-only violation `slash-in-element` (it would shift the four-part structure), and other characters that are not permitted are reported as IL violations.
+  - `.dnp_encoded()` masks every element first.
+- **Alternative:** always mask, as the spectool vectors do. Masking changes the IL of every asset with such characters, so the user should choose it explicitly. The sketch already had `.dnp_encoded()`.
+- **PO:** ☐ accept ☐ change: …
+
+### D-5 – White space in Filter values: warning
+
+- **Rule:** REQ-TOP-020 (MG 7.7) – Filter values SHOULD NOT contain white space or control characters.
+- **SDK behaviour:**
+  - `Topic::parse`/`Topic::new` accept such values (the topic is valid) and report them via `Topic::warnings()`. D7 `validate` does the same (warning, exit code 0).
+  - The publishing side of `oec` (increment 6) will log a warning and publish anyway.
+- **Alternative:** reject on publish. That would make a SHOULD into a MUST.
+- **PO:** ☐ accept ☐ change: …
 
 ## Review items
 
-### R-1 – REQ-RES-PUBLIST-026 (`draft`)
+### R-1 – `oec-core` code and tests (increments 1–2)
 
-- **Rule:** for an entry of a resource that can be requested with `Get`, a publisher that enables publishing modes uses the value combined with `ON_REQUEST_1` (e.g. `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` instead of `APPLICATION_SOURCE_FILTER_8`).
-- SHOULD at L1–L3, `applies_to [application]`, inventory MG-8.3.8-b1ebc429.
-- **Verification `manual`:** both values are valid, so schema and D7 `validate` accept both. A D7 `monitor` warning is a candidate after D-1.
-- **PO:** ☑ accepted (2026-10-26)
+- **Where:** `oec/sdk/rust/oec-core/src/` (about 2,100 lines incl. unit tests) and `tests/vectors.rs`.
+- **Increment 1:**
+  - base64url (strict, canonical);
+  - `IdentificationLink` (all violations at once, stable codes);
+  - `dnp_encode`;
+  - `Oi4Identifier`.
+- **Increment 2:**
+  - `ServiceType`/`Method`/`Resource`/`Service`/`Subject` (closed sets);
+  - `Form` (29 allowed combinations);
+  - `Filter` (Tag, Context.Name, Event, list filter, level encoding);
+  - `Topic` (parse/build, rule, reply, warnings);
+  - `TopicFilter` (builder, MQTT matching).
+- **Tests:** 22 unit tests and 6 vector tests: 29 IL, 15 dnp, 13 Oi4Identifier, 151 topic vectors, the payload topics and the 66 matrix rows. All pass. The error classification is the same as D7 (`grammar` before `identification-link`).
+- **Not yet:** coverage numbers (`cargo-llvm-cov` needs `llvm-tools`, which the Homebrew Rust lacks).
+- **PO:** ☐ accepted ☐ remarks: …
 
-### R-2 – REQ-RES-PUBLIST-027 (`draft`)
+### R-2 – spectool JSON export
 
-- **Rule:** the `DataSetMessage` of a resource that can be requested with `Get` can be requested with every `Mode` except `OFF_0`.
-- Implicit MUST (SF-035; the guideline sentence says "can"), inventory MG-8.3.8-dd632f21.
-- **Verification `d7-test`:** added to catalog test T7-GET-03.
-- **PO:** ☑ accepted (2026-10-26)
+- **Where:** `oec/spec/tools` (render), `oec/spec/export/`, `oec/spec/README.md`.
+- **Format:**
+  - `$comment` ("generated, do not edit"), `source` (the YAML path), then the fields of the Go model;
+  - Go zero values are omitted, so a missing `encoded` means "" (e.g. V-IL-116).
+- **PO:** ☐ accepted ☐ remarks: …
 
-### R-3 – REQ-TOP-028 (`draft`) and REQ-TOP-007
+### R-3 – cargo-deny gate
 
-- **Rule:** a smart device connected directly to the Message Bus uses the `ServiceType` `OTConnector` (MG 7.2 since `ccb475a`).
-- Implicit MUST (SF-035), `applies_to [device]`, `manual` (D7 cannot tell a device from an application). No inventory item: the guideline sentence has no keyword.
-- **REQ-TOP-007** (withdrawn by you in C-020 because the guideline had no such rule) stays `deprecated` and gets `replaced_by: REQ-TOP-028`. Ids are never reused.
-- **PO:** ☑ accepted (2026-10-26)
+- **Where:** `oec/sdk/rust/deny.toml`, `oec/sdk/check.sh` step 0.
+- **Policy (ADR-0023 §2):**
+  - license allowlist;
+  - advisories, unmaintained and yanked crates are errors;
+  - one version of each rustls/ring/aws-lc crate;
+  - `openssl`, `native-tls`, `rustls-pemfile` banned;
+  - crates.io only.
+- **Offline:** if the advisory DB cannot be fetched, the gate repeats with the cached DB (`--frozen`). A real violation fails both runs.
+- **New prerequisite:** `cargo install cargo-deny --locked` (0.20.2 installed).
+- **PO:** ☐ accepted ☐ remarks: …
 
-### R-4 – Guideline wording of SF-101 and SF-102
+### R-4 – Lint profile
 
-- **SF-101, MG 8.3.8 (`df38e72`):** "For resources that can be requested with `Get` (9.1 Resources), the `DataSetMessage` can be requested with `Get` with every `Mode` except `OFF_0`. For these resources, the values combining `ON_REQUEST_1` with publishing modes are equivalent to the publishing modes alone; publishers should use the combined values to make the availability on request explicit."
-  - **Agent deviation:** the accepted proposal had no scope ("every `Mode` except `OFF_0` allows `Get`"). MG 8.3.8 also says that `Event` entries cannot be requested, and MG 9.1 lists the requestable resources. The unscoped sentence would contradict both, so the agent added "For resources that can be requested with `Get`".
-- **SF-102, MG 7.2 (`ccb475a`):** "A smart device connected directly to the Message Bus (1.3 Compliance Domains and Levels) uses the `ServiceType` `OTConnector`."
-- **If not accepted:** the agent changes the text on your order and re-baselines again.
-- **PO:** ☑ accepted (2026-10-26)
+- **Where:** `oec/sdk/rust/Cargo.toml` `[workspace.lints]`.
+- **Profile:**
+  - `unsafe_code = forbid` (`oec-ffi` will opt out per module);
+  - `missing_docs`, `unreachable_pub`;
+  - clippy `all` + `pedantic` with `-D warnings` in the gate;
+  - allowed: `module_name_repetitions`, `must_use_candidate`, and `doc_markdown`, because the docs use guideline terms like ManufacturerUri or PublicationList as prose.
+- **PO:** ☐ accepted ☐ remarks: …
 
-## After your answers (C-046)
+## After your answers (C-047)
 
-1. `spectool review REQ-RES-PUBLIST-026 REQ-RES-PUBLIST-027 REQ-TOP-028` for the accepted REQs.
-2. D-1 (a): change the 13 examples, register, re-baseline (schema stays `2.0.1-dev`).
-3. Start the phase chosen in D-2 with its planning cycle.
+1. ADR-0026 → `accepted` (or changed as you say).
+2. C-047: P4 increment 3 – message model, schema embedding (`build.rs`, `strict-validation`), payload vectors; first runtime dependencies under `cargo deny`.

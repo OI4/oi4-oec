@@ -1,8 +1,8 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-045 (P3-Abschluss)._
+_Stand: 26.10.2026, nach C-046 (P4-Start)._
 
-Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „R-1 bis R-4 akzeptiert, D-1 und D-2 wie empfohlen“.
+Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 bis D-5 wie empfohlen, R-1 bis R-4 akzeptiert“.
 
 ---
 
@@ -24,13 +24,131 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**P3 ist abgeschlossen.** Was aus deinen Antworten geworden ist, steht weiter unten. Beim Umsetzen sind ein paar kleine neue Punkte entstanden:
-- **2 Entscheidungen** (D-1, D-2): ein neues, rein redaktionelles Spec-Finding und die Reihenfolge der nächsten Phasen;
-- **4 Review-Punkte** (R-1 … R-4): drei neue REQs (`draft`) und der genaue Wortlaut der zwei neuen Guideline-Sätze.
+**P4 hat begonnen.** In C-046 habe ich die ersten echten Bausteine des Rust-SDK geschrieben: Identität und Topics. Der Code hängt noch an keiner fremden Bibliothek. Alle gemeinsamen Testvektoren dazu laufen grün durch. Für dich gibt es:
+- **5 Entscheidungen** (D-1 … D-5): wie das Rust-Projekt aufgebaut ist, wie die SDKs an die Testvektoren kommen, die Reihenfolge der nächsten Zyklen und zwei kleine Verhaltensfragen;
+- **4 Review-Punkte** (R-1 … R-4): der neue Code, der JSON-Export, die Lizenz- und Sicherheitsprüfung der Abhängigkeiten und die Strenge der Code-Prüfung.
 
-Nichts davon blockiert den Start der nächsten Phase. Die Abdeckung bleibt bei 0 Lücken.
+An REQs, Vektoren oder der Guideline hat sich nichts geändert. Die Lücken bleiben bei 0, und kein Spec-Finding ist offen.
 
-Log: [C-045](log/2026-10-26_C-045_p3-exit.md).
+Log: [C-046](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-046
+
+- **Workspace (Cargo):** ein Rust-Projekt mit mehreren Bibliotheken (Crates), die zusammen gebaut und getestet werden. Unseres liegt in `oec/sdk/rust`.
+- **`oec-core`:** der innere Teil des SDK. Er kennt die Regeln des Protokolls (Topics, Identität, später Nachrichten), sendet aber selbst nichts („sans-IO“). Entwickler benutzen ihn nicht direkt, sondern über `oec`.
+- **`oec`:** die eigentliche SDK-Bibliothek, die Entwickler einbinden (ab Inkrement 4). **`oec-ffi`:** die C-Schnittstelle (Inkrement 10).
+- **Inkrement:** ein Baustein aus der Liste in ROADMAP P4 (1 Identität, 2 Topics, 3 Nachrichten, …).
+- **Export:** JSON-Kopien unserer Testvektoren, automatisch aus den YAML-Dateien erzeugt.
+- **cargo-deny:** ein Werkzeug, das alle fremden Rust-Bibliotheken prüft: erlaubte Lizenz? Bekannte Sicherheitslücke? Noch gepflegt? Nur eine TLS-Version?
+- **clippy / pedantic:** clippy ist der Rust-„Lektor“ für Code. `pedantic` ist seine strengste übliche Stufe.
+- **Warnung vs. Fehler:** Ein Fehler macht ein Topic ungültig. Eine Warnung sagt nur „das sollte man nicht tun“; das Topic bleibt gültig.
+
+---
+
+### D-1 – ADR-0026: Wie das Rust-Projekt aufgebaut ist
+
+Die Ordnerstruktur im Repo entscheidest du (G-3.4). Mein Vorschlag:
+- **Ein Rust-Projekt `oec/sdk/rust`** mit drei Bibliotheken nebeneinander: `oec-core` (Protokollregeln), `oec` (das SDK für Entwickler) und `oec-ffi` (C-Schnittstelle). So steht es schon in ADR-0011.
+- **Die Skizze und die Spikes aus P3** bleiben vorerst daneben liegen. Die Skizze wird gelöscht, sobald `oec` ihre API wirklich kann.
+- **`oec-core` ist intern.** Es macht keine Stabilitätsversprechen, damit wir es frei umbauen können. Was Entwickler sehen, ist nur `oec`.
+- **Fehler** in `oec-core` sind genau (z. B. „Zeichen nicht erlaubt“, „zu lang“). `oec` gibt sie in der einfachen Form der angenommenen Skizze weiter.
+- **Fremde Bibliotheken** kommen erst ab Inkrement 3, und nur die, die du in ADR-0023 schon angenommen hast.
+
+**Empfehlung:** annehmen.
+
+### D-2 – Die Testvektoren als JSON
+
+Unsere Testvektoren liegen als YAML in `oec/spec/vectors`. Damit das Rust-SDK und später das C-SDK sie lesen können, ohne einen YAML-Leser einzubauen, erzeugt `spectool` jetzt automatisch eine **JSON-Kopie** in `oec/spec/export/`. `oec/check.sh` passt auf, dass die Kopie immer aktuell ist.
+
+**Warum:**
+- Der übliche Rust-YAML-Leser (`serde_yaml`) wird nicht mehr gepflegt.
+- Für C müssten wir eine YAML-Bibliothek einbauen.
+- JSON können beide sowieso.
+
+Die YAML-Dateien bleiben das Original, das du reviewst.
+
+**Empfehlung:** annehmen.
+
+### D-3 – Reihenfolge in P4
+
+Ich habe P4 in Zyklen geschnitten (ROADMAP P4):
+- **C-046 (fertig):** Identität und Topics.
+- **C-047:** Nachrichtenmodell (alle Payloads) und das Einbetten der Schemas. Dabei kommen die ersten fremden Bibliotheken dazu, deshalb ein eigener Zyklus.
+- **C-048:** das `oec`-Crate mit App, Level und Start-Konfiguration.
+- **Dann:** MQTT-Verbindung, gleich danach die **Testumgebung mit TLS-Broker** (Inkrement 9 vorgezogen, weil die Verbindung einen echten Broker zum Testen braucht).
+- **Dazwischen P5:** D7 lernt, MQTT-Mitschnitte zu lesen.
+- **Dann:** Daten anbieten, auf `Set`/`Del` reagieren, Daten anderer abonnieren (6–8), zuletzt die C-Schnittstelle (10).
+
+Die **Exit-Kriterien** sind jetzt konkret: alle Funktionen aus ADR-0020/0021 sind da, alle Vektoren grün, Tests gegen den Broker (inkl. D7 `test`), C-Beispiele laufen, Prüfungen grün auf allen Plattformen, Beispiel-Apps dokumentiert.
+
+**Gut zu wissen:** Ab der Testumgebung brauche ich eine laufende Container-Umgebung (Docker Desktop).
+
+**Empfehlung:** annehmen.
+
+### D-4 – `Oi4Identifier`: Maskierung nur auf Wunsch
+
+Aus Hersteller-URI, Modell, Produktcode und Seriennummer baut das SDK die Identität eines Assets (`Oi4Identifier`). Laut Guideline *darf* man dabei Sonderzeichen mit der „dnp-encoding“ maskieren, muss aber nicht.
+
+**Mein Vorschlag:**
+- Standardmäßig maskiert das SDK **nicht**. Ein `/` in einem Teil ist dann ein Fehler, weil er die vier Teile durcheinanderbringen würde.
+- Wer maskieren will, schreibt `.dnp_encoded()` dazu.
+
+**Warum nicht immer maskieren?** Die Maskierung ändert die Identität des Assets. Das soll der Entwickler bewusst entscheiden.
+
+**Empfehlung:** annehmen.
+
+### D-5 – Leerzeichen im Filter: nur eine Warnung
+
+Laut Guideline (MG 7.7) *sollen* Filter-Werte im Topic keine Leerzeichen oder Steuerzeichen enthalten. Das ist ein SHOULD, kein MUST.
+
+**Mein Vorschlag:** Das SDK nimmt solche Topics an und meldet eine Warnung. D7 macht es genauso. Beim Veröffentlichen schreibt `oec` später eine Warnung ins Log und sendet trotzdem.
+
+**Warum nicht ablehnen?** Dann würde das SDK aus einem SHOULD ein MUST machen.
+
+**Empfehlung:** annehmen.
+
+### R-1 – der neue Code (`oec-core`)
+
+In `oec/sdk/rust/oec-core` stehen rund 2.300 Zeilen Rust:
+- **Identität:** Prüfung von Identification Links (meldet alle Fehler auf einmal), base64url, Maskierung, `Oi4Identifier`.
+- **Topics:** zerlegen, bauen und prüfen; Filter; Abo-Filter mit `+`/`#`.
+
+Der Test liest alle passenden gemeinsamen Vektoren: 29 IL, 15 Maskierung, 13 `Oi4Identifier`, 151 Topics, die Topics aller gültigen Payload-Vektoren und die 66 Zeilen der Methoden-Matrix. **Alle grün.** Ungültige Topics bekommen dieselbe Fehlerart wie in D7.
+
+Eine Code-Abdeckung in Prozent kann ich noch nicht messen, weil dem installierten Rust ein Werkzeug fehlt.
+
+### R-2 – der JSON-Export
+
+Format der Kopie: oben ein Hinweis „automatisch erzeugt, nicht bearbeiten“ und der Pfad der YAML-Datei, dann dieselben Felder wie im YAML. Leere Felder fallen weg; ein fehlendes Feld heißt also „leer“.
+
+### R-3 – die Prüfung der fremden Bibliotheken (cargo-deny)
+
+`oec/check.sh` prüft jetzt mit `cargo deny` alle fremden Rust-Bibliotheken nach den Regeln, die du in ADR-0023 angenommen hast:
+- nur erlaubte Lizenzen;
+- keine bekannten Sicherheitslücken;
+- nichts Ungepflegtes;
+- genau eine TLS-Bibliothek;
+- kein OpenSSL;
+- nur crates.io als Quelle.
+
+Ohne Internet prüft es mit der zuletzt geladenen Datenbank. Neu nötig ist, dass `cargo-deny` installiert ist.
+
+### R-4 – wie streng der Code geprüft wird
+
+clippy läuft in der strengen Stufe `pedantic`, und jede Warnung bricht die Prüfung ab. Unsicherer Code (`unsafe`) ist verboten; nur die C-Schnittstelle bekommt später begründete Ausnahmen. Jede öffentliche Funktion braucht eine Doku.
+
+Eine Regel habe ich abgeschaltet: Sie will Begriffe wie ManufacturerUri in Backticks setzen. Bei uns sind das normale Wörter aus der Guideline.
+
+---
+
+### Was nach deinen Antworten passiert (C-047)
+
+1. ADR-0026 auf „accepted“ (oder wie du es änderst).
+2. C-047: Nachrichtenmodell, Schemas einbetten, Payload-Vektoren; die ersten fremden Bibliotheken unter `cargo deny`.
+
+---
+
+## Begriffe aus den letzten Zyklen
 
 ### Begriffe aus C-045
 
@@ -39,65 +157,6 @@ Log: [C-045](log/2026-10-26_C-045_p3-exit.md).
 - **implizite REQ:** eine Regel, die in der Guideline ohne Schlüsselwort wie „MUST“ steht, aber offensichtlich verbindlich gemeint ist. Wir markieren sie mit `implicit: true` (so mit dir in SF-035 vereinbart).
 - **`replaced_by`:** Eine zurückgezogene REQ zeigt auf ihre Nachfolgerin. Nummern werden nie wiederverwendet.
 - **Vorab-Version `2.0.1-dev`:** der Arbeitsstand der Schemas nach 2.0.0. Die „1“ hinten heißt: nur eine kleine Änderung (hier nur die Spec-Baseline, kein Schema-Inhalt).
-
----
-
-### D-1 – SF-103: die Beispiele in der Guideline passen nicht zur neuen Empfehlung
-
-**Worum geht es?** Mit SF-101 steht jetzt in MG 8.3.8: Für anfragbare Ressourcen *sollen* Anwendungen die kombinierten Werte nehmen, also `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` statt `APPLICATION_SOURCE_FILTER_8`. Beide bedeuten technisch dasselbe; der kombinierte Wert sagt nur ausdrücklich „man kann auch fragen“.
-
-**Das Problem:** Die Beispiele der Guideline zeigen noch die kurze Form, und zwar 13 Einträge (12 in B1.1.8, 1 in B2.6). Wer die Beispiele abschreibt, folgt der Empfehlung also nicht. Die `Event`-Einträge (`FILTER_4`) sind richtig so.
-
-**Die Wahl:**
-- **(a) Beispiele anpassen** (Empfehlung): die 13 Einträge auf den kombinierten Wert ändern, `Event` bleibt. Entwickler schreiben Beispiele ab, also sollten sie die Empfehlung zeigen. Danach baseline ich neu; neue REQs erwarte ich nicht.
-- **(b) so lassen:** Die Beispiele sind nicht falsch, nur nicht vorbildlich.
-
-### D-2 – Womit geht es weiter?
-
-P3 ist fertig. Jetzt könnten vier Phasen starten: **P4** (Rust-SDK), **P4b** (Micro-SDK für ESP32), **P5** (D7 prüft laufende Anwendungen) und **P5b** (D8 prüft Container). Fachlich hängen sie kaum voneinander ab, aber ich arbeite einen Zyklus nach dem anderen ab. Deshalb brauche ich eine Reihenfolge.
-
-**Meine Empfehlung:**
-1. **P4 zuerst.** Das Rust-SDK liegt auf dem „kritischen Pfad“: Ohne SDK keine Demos (P6), ohne Demos keine Registry (P7). Auch der Abschlusstest von D7 braucht eine Beispiel-App aus dem SDK. Die ersten Schritte (Identität, Topics, Nachrichtenmodell) laufen komplett offline.
-2. **P5 dazwischen:** D7 lernt zuerst, MQTT-Mitschnitte zu lesen und offline auszuwerten; live geht es, sobald P4 den Test-Broker liefert.
-3. **P4b und P5b danach** – oder früher, wenn dir die ESP32-Demo oder die Container-Prüfung wichtiger ist.
-
-**Gut zu wissen:** Ab dem Test-Broker (P4, Schritt 5/9) brauche ich eine laufende Container-Umgebung (z. B. Docker Desktop). Die lief beim letzten Blick (14.10.) nicht.
-
-### R-1 – REQ-RES-PUBLIST-026: kombinierte Werte nehmen (SHOULD)
-
-Die Empfehlung aus SF-101 als REQ: Wer bei einer anfragbaren Ressource von sich aus veröffentlicht, *soll* den kombinierten `ON_REQUEST_…`-Wert nehmen. Prüfung: `manual`, weil beide Werte gültig sind und kein Tool einen Fehler melden darf. Später kann D7 beim Mithören eine *Warnung* ausgeben (Kandidat für P5, wenn D-1 entschieden ist).
-
-### R-2 – REQ-RES-PUBLIST-027: `Get` geht immer, außer bei `OFF_0`
-
-Die Klarstellung aus SF-101 als REQ: Eine anfragbare Ressource antwortet auf `Get` bei jedem Modus außer `OFF_0`. In der Guideline steht „can“; wir behandeln es als verbindlich (implizites MUST nach SF-035), weil sonst `Get` nicht verlässlich wäre. D7 prüft das im Test T7-GET-03.
-
-### R-3 – REQ-TOP-028: ein Smart Device ist ein `OTConnector`
-
-Die Regel aus SF-102 als REQ: Ein Gerät, das direkt am Message Bus hängt, meldet sich mit dem `ServiceType` `OTConnector`. Prüfung `manual`: D7 kann von außen nicht erkennen, ob ein Teilnehmer ein Gerät oder eine Software ist.
-
-**Ein Detail dazu:** Genau diese Regel gab es schon einmal als REQ-TOP-007. Du hattest sie in C-020 zurückgezogen, weil die Guideline damals nichts dazu sagte. Jetzt sagt sie es. REQ-TOP-007 bleibt zurückgezogen (Nummern werden nie neu vergeben) und zeigt jetzt auf die Nachfolgerin REQ-TOP-028.
-
-### R-4 – der genaue Wortlaut der zwei neuen Guideline-Sätze
-
-**SF-102 (MG 7.2)** – wie vorgeschlagen: „A smart device connected directly to the Message Bus (1.3 Compliance Domains and Levels) uses the `ServiceType` `OTConnector`.“
-
-**SF-101 (MG 8.3.8)** – **hier bin ich vom angenommenen Text abgewichen.** Vorgeschlagen war: „Jeder Modus außer `OFF_0` erlaubt `Get`.“ Das wäre aber für `Event` falsch: Dieselbe Seite sagt, dass man `Event`-Einträge nicht anfragen kann. Ich habe deshalb beide Sätze auf anfragbare Ressourcen eingeschränkt:
-
-> „For resources that can be requested with `Get` (9.1 Resources), the `DataSetMessage` can be requested with `Get` with every `Mode` except `OFF_0`. For these resources, the values combining `ON_REQUEST_1` with publishing modes are equivalent to the publishing modes alone; publishers should use the combined values to make the availability on request explicit.“
-
-**Bitte anschauen:** Ist die Einschränkung so in Ordnung? Wenn nicht, sag mir, wie es heißen soll; ich ändere den Text und baseline neu.
-
----
-
-### Was nach deinen Antworten passiert (C-046)
-
-1. Die angenommenen REQs setze ich auf `reviewed`.
-2. Bei D-1 (a) passe ich die 13 Beispiele an, trage SF-103 als erledigt ein und baseline neu (Schema bleibt `2.0.1-dev`).
-3. Ich starte die Phase, die du bei D-2 wählst, mit ihrem Planungszyklus.
-
----
-
-## Begriffe aus den letzten Zyklen
 
 ### Begriffe aus P3 (C-042 … C-044)
 
@@ -164,7 +223,15 @@ Die Regel aus SF-102 als REQ: Ein Gerät, das direkt am Message Bus hängt, meld
 
 ---
 
-## Was aus deinem letzten Review (C-042 … C-044) geworden ist
+## Was aus deinem letzten Review (C-045) geworden ist
+
+Du hast alles angenommen („R-1 bis R-4, D-1, D-2 reviewed und deine Empfehlungen akzeptiert“). Das habe ich im Nachtrag 1 zu C-045 daraus gemacht:
+- **R-1 bis R-3:** REQ-RES-PUBLIST-026, REQ-RES-PUBLIST-027 und REQ-TOP-028 stehen auf `reviewed` (`08a09b6`). Es gibt keinen Entwurf mehr.
+- **R-4:** Der Guideline-Text zu SF-101/102 bleibt, wie er ist.
+- **D-1 – SF-103:** Die 13 Beispiele in MG B1.1.8/B2.6 zeigen jetzt `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` (`e0262dd`). Im Register steht SF-103 auf „resolved“ (`2453eff`). Danach habe ich auf `e0262dd` neu gebaselinet; die vier Beispiel-Vektoren V-PAY-037 … 040 sind mitgezogen. Schema bleibt `2.0.1-dev`.
+- **D-2 – P4 zuerst:** So umgesetzt; C-046 ist der erste P4-Zyklus (siehe oben).
+
+## Was aus dem Review davor (C-042 … C-044) geworden ist
 
 Du hast alles wie empfohlen angenommen („D-1 bis D-19 wie empfohlen, R-1 bis R-5 akzeptiert“). Das habe ich in C-045 daraus gemacht:
 - **D-1 – P3-Plan:** umgesetzt; P3 ist jetzt in ROADMAP und STATUS abgeschlossen. Alle fünf Exit-Kriterien sind erfüllt.
