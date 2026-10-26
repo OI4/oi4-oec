@@ -21,7 +21,7 @@
 #         host-access   – D8 runs on the platform host (or a probe container)
 #         credentials-2 – a second, unprivileged set of bus credentials
 tool: oec-infra
-baseline: "734c560"
+baseline: "59e3ae3"
 tests:
   # --- image: offline -----------------------------------------------------
   - id: T8-IMG-01
@@ -131,9 +131,9 @@ tests:
   - id: T8-BUS-01
     title: Broker protocol, TLS and certificate
     mode: bus
-    reqs: [REQ-MQTT-002, REQ-MQTT-006, REQ-MQTT-007]
+    reqs: [REQ-MQTT-002, REQ-MQTT-006, REQ-MQTT-007, REQ-CNT-003]
     status: planned
-    notes: MQTT 3.1.1 over TLS 1.2+ accepted; TLS 1.1 and a plain listener (e.g. 1883) refused; certificate chain to ca.pem / broker_ca.pem, not self-signed.
+    notes: MQTT 3.1.1 over TLS 1.2+ accepted; TLS 1.1 and a plain listener (e.g. 1883) refused; certificate chain to ca.pem / broker_ca.pem, not self-signed. A PUBLISH whose payload is exactly MaxPacketSize of broker.json, sent on a long topic, is accepted and delivered without a disconnect (RIG 4.1.1, SF-105); larger payloads are not checked.
   - id: T8-BUS-02
     title: Write access and Actions restricted by ACL
     mode: bus
