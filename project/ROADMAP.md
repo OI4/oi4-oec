@@ -137,7 +137,7 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
 | D9 API ("follows `oec.h` where sensible"), PAL contract, memory model | ADR-0017 | C-042, ADR-0022, Q-025 |
 | Crates: MQTT client, TLS, JSON, schema validation/embedding, async runtime, logging, cbindgen | ADR-0011 ("decided in P3/P4"), ADR-0019 §7 | C-043, ADR-0023, Q-026 (`rumqttc` is out: unmaintained, vulnerable `rustls-webpki` 0.102) |
 | D9 libraries: JSON encoder/decoder (own encoder, `cJSON` or `jsmn`), unit tests (Unity), ESP-IDF components, Arduino MQTT client with TLS and a Will per connect | ADR-0017 ("decided in P3/P4b") | C-043, ADR-0024, Q-027 (jsmn out: abandoned; cJSON no longer bundled from IDF 6) |
-| Binary names (`oec-check` – used since C-040; `oec-infra` – named in ADR-0019 amendment C-040), D7 `monitor`/`test`, D8 commands, test catalog, CLI contract, exit codes, reports, distribution | ADR-0014 ("names fixed in P3"), ADR-0019 §5 | C-044, ADR-0025 |
+| Binary names (`oec-check` – used since C-040; `oec-infra` – named in ADR-0019 amendment C-040), D7 `monitor`/`test`, D8 commands, test catalog, CLI contract, exit codes, reports, distribution | ADR-0014 ("names fixed in P3"), ADR-0019 §5 | C-044, ADR-0025 (done; Q-028 … Q-030) |
 | Further languages (S9 vs S1/S2 spike) | ADR-0011 | not in P3 – after P4 |
 
 **Cycle cut** (the scope of the hand-over is too large for one reviewable cycle; split by the agent, reason in `log/2026-10-26_C-042_p3-sdk-api.md`):
@@ -151,11 +151,11 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
   - selection under G-3.4/G-4.4 (license, maintenance, amd64/arm64 required, ARMv7 best effort Q-008) for D2 (MQTT, TLS, JSON, schema validation/embedding, async runtime, logging, cbindgen) and D9 (JSON, tests, ESP-IDF components, Arduino MQTT);
   - spikes `oec/sdk/rust/spike/schema-embed` (compile-time schema embedding) and `mqtt-codec` (sans-IO MQTT 3.1.1, Q-026 option a);
   - ADR-0023 (D2) and ADR-0024 (D9), both proposed; Q-026, Q-027.
-- **C-044 – compliance tool architecture:**
+- **C-044 – compliance tool architecture** (done 2026-10-26, see `log/2026-10-26_C-044_p3-tools.md`):
   - D7 `oec-check` `monitor`/`test` beyond `validate`; D8 `oec-infra` in the same module;
-  - test catalog (test case ↔ REQ ids, coverage of all `d7-test`/`d7-monitor`/`d8` REQs);
-  - CLI contract, exit codes, reports, SDK independence (Q-009), distribution;
-  - `oec/conformance/DESIGN.md`, ADR-0025 (proposed).
+  - test catalog `oec/conformance/catalog/` (D7 54 tests, D8 17 tests, 5 `manual` entries) with a Go gate for coverage of all `d7-test`/`d7-monitor`/`d8` REQs and for SDK independence (Q-009);
+  - CLI contract, attachment modes (bus/proxy/restart hook/peer), verdict model, exit codes 0–4, reports, distribution;
+  - `oec/conformance/DESIGN.md`, ADR-0025 (proposed), Q-028 … Q-030.
 - **C-045 – P3 exit review** after the PO decisions on the C-042 … C-044 points:
   - amendments of the ADRs from the answers;
   - ADR-0020 … 0025 to `accepted`;
@@ -171,7 +171,7 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
 1. ADR-0020 … ADR-0025 accepted by the PO; the earlier P3 decisions (ADR-0011 … 0017) are unchanged or amended.
 2. Q-021 ff. answered; spec findings found in P3 (SF-101 ff.) decided.
 3. The API sketches (`oec/sdk/rust/sketch`, `oec/sdk/rust/sketch/c`, `oec/sdk/micro/sketch`) compile in `oec/check.sh`. Every REQ id cited there exists and is not deprecated. The DX examples exist: hello world ≤ 20 lines; asset source with data and `Set`; Config; consumer.
-4. Every API decision of ADR-0020 … 0022 names its REQ ids. Every `d7-test`, `d7-monitor` and `d8` REQ is mapped to a planned test of the D7/D8 catalog or explicitly marked `manual` (ADR-0025).
+4. Every API decision of ADR-0020 … 0022 names its REQ ids. Every `d7-test`, `d7-monitor` and `d8` REQ is mapped to a planned test of the D7/D8 catalog or explicitly marked `manual` (ADR-0025) – enforced by `oec/conformance/catalog/catalog_test.go` in `oec/check.sh` since C-044.
 5. Crate and library choices are documented with license, maintenance state and platform support (amd64/arm64 required, ARMv7 best effort) in ADR-0023/0024.
 
 ## P4 – SDK core implementation (D2)
@@ -216,11 +216,11 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
   - Data ⇒ Metadata; `Set`/`Del` ⇒ Status event with `ReplyTo`; `NewDataSetWriterId` Action (`Call`/`Reply`) correlation;
   - pagination/`MaxPacketSize`, Locale;
   - negative cases (invalid requests are rejected/ignored as specified).
-- Test catalog: every test case references REQ ids and guideline sections; selectable by tag and by compliance profile `level1` / `level2` / `level3` (declared level passed as CLI parameter and includes lower levels, MG 1.3).
+- Test catalog: every test case references REQ ids and guideline sections; selectable by tag and by compliance profile `level1` / `level2` / `level3` (declared level passed as CLI parameter and includes lower levels, MG 1.3). Planned in C-044: `oec/conformance/catalog/d7.yaml` (status `planned` → `implemented`), architecture in `oec/conformance/DESIGN.md` and ADR-0025 (attachment modes incl. proxy, verdict model, exit code 4 "inconclusive", Q-028 … Q-030). Start: `internal/mqttwire` + capture + `monitor --replay`.
 - Connection: CLI flags/config file and optionally the container storage contract (`/etc/oi4/mqtt`, …); TLS + user/password or client certificate; explicit `--insecure` dev mode only.
 - Output: human-readable console report, machine-readable JSON and JUnit XML; meaningful exit codes for CI.
 - Distribution: single self-contained executable per OS/arch (Windows x64/arm64, macOS arm64/x64, Linux) and container image.
-- **Exit:** `test` passes against the SDK example app and fails on purpose-built faulty fixtures; runs in CI on Windows, macOS and Linux runners.
+- **Exit:** `test` passes against the SDK example app and fails on purpose-built faulty fixtures (every implemented catalog test has a positive and a negative fixture of the simulated CUT, DESIGN.md §10); runs in CI on Windows, macOS and Linux runners.
 
 ## P5b – Infrastructure compliance tool (D8)
 
@@ -229,6 +229,7 @@ Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance 
 - `inspect-image` – offline: analyze an OCI image (registry reference or archive): OCI format, exactly one canonical SBOM (`sbom.spdx.json` / `sbom.cdx.json`) + license texts (`<License-ID>.txt` or embedded) in `/opt/oi4/licenses` (RIG 4.1.4), storage paths, user, labels, digest/integrity.
 - `inspect-container` – a running app container: storage mounts (`/etc/oi4/...`, `/run/secrets/...`), hostname = container name rules, networks.
 - `inspect-platform` – platform host/broker as far as testable (TLS-only broker, `broker.json` provisioning, registry ports 5798/5799).
+- Command names and catalog per ADR-0025 (proposed, C-044): `image`, `run` (sandbox start with generated storages), `container`, `host`, `bus` replace the working names `inspect-image`/`inspect-container`/`inspect-platform` above; catalog `oec/conformance/catalog/d8.yaml`.
 - **Exit:** our demo and registry images pass `level3`; purpose-built faulty images fail.
 
 ## P6 – Demo services (D3, D4)
