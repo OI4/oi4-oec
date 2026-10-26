@@ -103,6 +103,21 @@ impl LocalizedText {
     }
 }
 
+/// A text in the locale `en-US`, the locale of the Model used for the
+/// Oi4Identifier (REQ-RES-MAM-024, REQ-IL-027; ADR-0020 §4).
+impl From<&str> for LocalizedText {
+    fn from(text: &str) -> Self {
+        Self::new("en-US", text)
+    }
+}
+
+/// A text in the locale `en-US` (see `From<&str>`).
+impl From<String> for LocalizedText {
+    fn from(text: String) -> Self {
+        Self::new("en-US", text)
+    }
+}
+
 /// ConfigurationVersion of a DataSetMetaData (REQ-MSG-036).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]

@@ -177,6 +177,17 @@ pub enum Filter {
 }
 
 impl Filter {
+    /// The `<Context.Name>` Filter of a Config DataSet (REQ-RES-CONFIG-015).
+    ///
+    /// # Errors
+    ///
+    /// [`TopicError::Grammar`] if the value is empty or contains U+0000
+    /// (REQ-TOP-019).
+    pub fn context_name(value: &str) -> Result<Self, TopicError> {
+        validate_value(value)?;
+        Ok(Self::ContextName(value.to_owned()))
+    }
+
     /// Kind of the Filter.
     pub fn kind(&self) -> FilterKind {
         match self {

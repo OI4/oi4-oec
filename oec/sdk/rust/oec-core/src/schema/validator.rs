@@ -203,6 +203,20 @@ impl Validator {
             .then_some(entry)
     }
 
+    /// Any schema of the tree by its path below the base URI, with an
+    /// optional fragment, e.g. `platform/broker.schema.json` (REQ-CNT-003)
+    /// or `resources/mam.schema.json#/$defs/MAM`; `None` if the tree has no
+    /// such file.
+    pub fn schema(&self, path: &str) -> Option<Entry> {
+        let file = path.split('#').next().unwrap_or(path);
+        self.docs
+            .contains_key(&format!("{BASE_URI}{file}"))
+            .then(|| Entry {
+                path: path.to_owned(),
+                name: path.to_owned(),
+            })
+    }
+
     /// The schema for a payload on `topic`: the entry schema of its topic
     /// form, otherwise the generic [`Entry::message`] (the routing of the
     /// schema gate, ADR-0019 §8).

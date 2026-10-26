@@ -302,7 +302,10 @@ pub fn dnp_encode(s: &str) -> String {
 
 /// A ManufacturerUri is a lower-case domain name with at least two labels,
 /// without scheme, port, path and a leading `www.` (REQ-IL-024).
-fn valid_manufacturer_uri(s: &str) -> bool {
+/// Whether `s` is a valid ManufacturerUri: a lower-case domain name of at
+/// least two labels without scheme, port, path and `www.` (REQ-IL-024,
+/// REQ-RES-MAM-004). [`Oi4Identifier::build`] checks it after lower-casing.
+pub fn valid_manufacturer_uri(s: &str) -> bool {
     let label = |l: &str| {
         let b = l.as_bytes();
         !b.is_empty()
