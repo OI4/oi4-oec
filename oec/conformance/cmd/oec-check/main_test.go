@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/OI4/oec/conformance/internal/testvec"
+	schema "github.com/OI4/oec/schema"
 )
 
 func vectors(t *testing.T) map[string]testvec.Vector {
@@ -64,7 +65,7 @@ func TestExitCodes(t *testing.T) {
 	}{
 		{"no args", "", nil, exitUsage, ""},
 		{"unknown command", "", []string{"lint"}, exitUsage, ""},
-		{"version", "", []string{"version"}, exitValid, "baseline "},
+		{"version", "", []string{"version"}, exitValid, "(schemas " + schema.Version + ", baseline "},
 		{"valid file", "", []string{"validate", "--topic", valid.Topic, payload}, exitValid, "VALID"},
 		{"valid stdin", valid.Payload, []string{"validate", "--topic", valid.Topic}, exitValid, "VALID"},
 		{"invalid", invalid.Payload, []string{"validate", "--topic", invalid.Topic, "-"}, exitInvalid, "REQ-MSG-023"},
@@ -106,9 +107,9 @@ func TestJSONReport(t *testing.T) {
 		t.Fatalf("exit %d", code)
 	}
 	var r struct {
-		Tool, Baseline string
-		Valid          bool
-		Results        []struct {
+		Tool, Schemas, Baseline string
+		Valid                   bool
+		Results                 []struct {
 			Source   string
 			Valid    bool
 			Reqs     []string
@@ -119,7 +120,7 @@ func TestJSONReport(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &r); err != nil {
 		t.Fatal(err)
 	}
-	if r.Tool != tool || r.Baseline == "" || r.Valid || len(r.Results) != 1 {
+	if r.Tool != tool || r.Schemas != schema.Version || r.Baseline != schema.Baseline || r.Valid || len(r.Results) != 1 {
 		t.Fatalf("report %+v", r)
 	}
 	res := r.Results[0]

@@ -21,6 +21,7 @@ type Item struct {
 type Report struct {
 	Tool     string `json:"tool"`
 	Version  string `json:"version"`
+	Schemas  string `json:"schemas"` // version of the schema bundle (ADR-0019 §6)
 	Baseline string `json:"baseline"`
 	Valid    bool   `json:"valid"`
 	Count    int    `json:"count"`
@@ -29,8 +30,8 @@ type Report struct {
 }
 
 // New returns an empty report.
-func New(tool, version, baseline string) *Report {
-	return &Report{Tool: tool, Version: version, Baseline: baseline, Valid: true, Items: []Item{}}
+func New(tool, version, schemas, baseline string) *Report {
+	return &Report{Tool: tool, Version: version, Schemas: schemas, Baseline: baseline, Valid: true, Items: []Item{}}
 }
 
 // Add records one result.
@@ -85,7 +86,7 @@ func (r *Report) Text(w io.Writer) error {
 			fmt.Fprintf(&b, "  warning: %s\n", wn)
 		}
 	}
-	fmt.Fprintf(&b, "%s %s, baseline %s: %d message(s), %d invalid\n", r.Tool, r.Version, r.Baseline, r.Count, r.Invalid)
+	fmt.Fprintf(&b, "%s %s, schemas %s, baseline %s: %d message(s), %d invalid\n", r.Tool, r.Version, r.Schemas, r.Baseline, r.Count, r.Invalid)
 	_, err := io.WriteString(w, b.String())
 	return err
 }

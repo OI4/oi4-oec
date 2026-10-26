@@ -17,6 +17,7 @@ import (
 	"github.com/OI4/oec/conformance/internal/rules"
 	"github.com/OI4/oec/conformance/internal/schemas"
 	"github.com/OI4/oec/conformance/internal/topic"
+	schema "github.com/OI4/oec/schema"
 )
 
 // ObjectMetaData names the bare DataSetMetaDataType (the predefined
@@ -39,11 +40,18 @@ func New() (*Validator, error) {
 	if err != nil {
 		return nil, err
 	}
+	if schema.Baseline != ts.Baseline {
+		return nil, fmt.Errorf("schema bundle %s is derived from baseline %s, the spec data from %s", schema.Version, schema.Baseline, ts.Baseline)
+	}
 	return &Validator{Topics: ts, Schemas: ss}, nil
 }
 
 // Baseline returns the guideline revision of the embedded data.
 func (v *Validator) Baseline() string { return v.Topics.Baseline }
+
+// SchemaVersion returns the version of the embedded schema bundle
+// (2.MINOR.PATCH, ADR-0019 §6); D7 reports it with every result.
+func (v *Validator) SchemaVersion() string { return schema.Version }
 
 // Message is one message to validate.
 type Message struct {

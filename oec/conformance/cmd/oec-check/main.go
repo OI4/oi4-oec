@@ -68,7 +68,7 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 			return exitInternal
 		}
-		fmt.Fprintf(stdout, "%s %s (baseline %s, %d schema files)\n", tool, version, v.Baseline(), v.Schemas.Count())
+		fmt.Fprintf(stdout, "%s %s (schemas %s, baseline %s, %d schema files)\n", tool, version, v.SchemaVersion(), v.Baseline(), v.Schemas.Count())
 		return exitValid
 	case "help", "-h", "--help", "-help":
 		fmt.Fprint(stdout, usage)
@@ -112,7 +112,7 @@ func runValidate(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 		return exitUsage
 	}
-	rep := report.New(tool, version, v.Baseline())
+	rep := report.New(tool, version, v.SchemaVersion(), v.Baseline())
 	for _, s := range srcs {
 		res, err := v.Validate(s.msg)
 		if errors.Is(err, validate.ErrUsage) {
