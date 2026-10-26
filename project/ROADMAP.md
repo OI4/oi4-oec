@@ -114,15 +114,65 @@ Turn the prose guideline into a precise, testable baseline – the foundation fo
   6. D7 `validate` (first increment) runs on Windows, macOS and Linux and reports REQ ids. (C-040: pure Go, cross-compiles for windows/linux/darwin; tests run on macOS.) **C-041: met** – no Windows/Linux test run before a hosted CI exists.
   7. Schemas are released with stable `$id`s (`2.0.0`, `$id` base decided). Hosting at the `$id` URLs follows the publication decision (Q-011). **C-041: met** – release 2.0.0 frozen (`oec/schema/release/2.0.0.json`, `CHANGELOG.md`); hosting open (Q-011).
 
-## P3 – SDK and conformance tool design (D2, D7, D8, D9) – decision phase, next (from C-042)
+## P3 – SDK and conformance tool design (D2, D7, D8, D9) – decision phase, in progress (from C-042)
 
-Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Options: `research/sdk-architecture-comparison.md`, `research/sdk-options.md`. **Decided:** S4 Rust SDK + C API (ADR-0011), local monorepo `oec/` (ADR-0012). Remaining in P3: SDK API sketch (Rust + C), crate choices. D7 + D8 in Go (ADR-0013, ADR-0014). v2 only (ADR-0015). Level targets + micro SDK (ADR-0016); Micro SDK in C17 on ESP32/ESP-IDF (ADR-0017); its C API sketch is part of P3.
+Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Options: `research/sdk-architecture-comparison.md`, `research/sdk-options.md`. **Result: sketches and ADRs, no product code.** Small spikes under `oec/sdk/…` are allowed when they back a decision; they run in `oec/check.sh` or are marked as spikes.
 
-- Options paper: language(s) (TypeScript/Node, Go, Python, C#, ...), "SDK vs. sidecar/runtime vs. code generation", packaging, repo layout.
-- Developer-experience sketches: "hello world" OEC app in ≤ 20 lines; how to add a device/asset source, publish data, react to `Set`, expose config.
-- API design for: compliance level selection (L1 smart device without container … L3), identity (IL/Oi4Identifier), container storage bootstrap (optional), connection & lifecycle, resource registry (built-in MAM/Health/Profile/PublicationList/...), data publishing with PublicationList semantics (Mode/Interval/Precisions), `Get` handling + pagination, `Set`/`Del` with automatic Status events, Config resource, Event/Syslog logging, consumer side (typed subscriptions, request/response helpers).
-- Conformance tool: CLI shape (commands, options, exit codes, report formats), test catalog structure (test case ↔ REQ ids), independence from the SDK (Q-009), distribution for Windows/macOS.
-- **Exit:** accepted ADRs for language, repo layout, public SDK API sketch and conformance tool architecture.
+**Input (decided before P3):**
+- ADR-0011: S4 – Rust core + C ABI `oec-ffi`, layered core/runtime/front ends.
+- ADR-0012: monorepo `oec/`.
+- ADR-0013/0014: D7 and D8 in Go, one module `oec/conformance`, two binaries.
+- ADR-0015: v2 only.
+- ADR-0016: level targets and the micro SDK D9.
+- ADR-0017: D9 in C17, ESP32/ESP-IDF, Arduino port, M5Stack.
+- ADR-0018: spec baseline `oec/spec`.
+- ADR-0019 §7: D2 embeds the schemas with `include_str!`/`build.rs`; §5: the CLI contract of `oec-check validate`.
+
+**Open points collected from the ADRs** (where each is decided):
+
+| Open point | Source | Decided in |
+|---|---|---|
+| Public API of D2 (level selection, identity, bootstrap, lifecycle, resources, publishing, `Get`/`Set`/`Del`, Config, events, consumer) | ADR-0011, ROADMAP P3 | C-042, ADR-0020 |
+| C ABI contract (ownership, errors, callbacks, threading, versioning); C path of the logger demo | ADR-0011, `research/sdk-options.md` §5 | C-042, ADR-0021, Q-023, Q-024 |
+| D9 API ("follows `oec.h` where sensible"), PAL contract, memory model | ADR-0017 | C-042, ADR-0022, Q-025 |
+| Crates: MQTT client, TLS, JSON, schema validation/embedding, async runtime, logging, cbindgen | ADR-0011 ("decided in P3/P4"), ADR-0019 §7 | C-043, ADR-0023 |
+| D9 libraries: JSON encoder/decoder (own encoder, `cJSON` or `jsmn`), unit tests (Unity), ESP-IDF components, Arduino MQTT client with TLS and a Will per connect | ADR-0017 ("decided in P3/P4b") | C-043, ADR-0024 |
+| Binary names (`oec-check` – used since C-040; `oec-infra` – named in ADR-0019 amendment C-040), D7 `monitor`/`test`, D8 commands, test catalog, CLI contract, exit codes, reports, distribution | ADR-0014 ("names fixed in P3"), ADR-0019 §5 | C-044, ADR-0025 |
+| Further languages (S9 vs S1/S2 spike) | ADR-0011 | not in P3 – after P4 |
+
+**Cycle cut** (the scope of the hand-over is too large for one reviewable cycle; split by the agent, reason in `log/2026-10-26_C-042_p3-sdk-api.md`):
+- **C-042 – P3 plan and SDK APIs** (done 2026-10-26, see `log/2026-10-26_C-042_p3-sdk-api.md`):
+  - this plan;
+  - D2 Rust API sketch `oec/sdk/rust/sketch/` (compiles, DX examples, REQ tracing test);
+  - C ABI sketch `oec.h` and D9 sketch `oecm.h` (compile as C17);
+  - ADR-0020/0021/0022 (proposed), Q-021 … Q-025;
+  - SF-101/102.
+- **C-043 – crates and libraries:**
+  - selection under G-3.4/G-4.4 (license, maintenance, amd64/arm64 required, ARMv7 best effort Q-008) for D2 (MQTT, TLS, JSON, schema validation/embedding, async runtime, logging, cbindgen) and D9 (JSON, tests, ESP-IDF components, Arduino MQTT);
+  - spikes only where they back a decision;
+  - ADR-0023 (D2) and ADR-0024 (D9), both proposed.
+- **C-044 – compliance tool architecture:**
+  - D7 `oec-check` `monitor`/`test` beyond `validate`; D8 `oec-infra` in the same module;
+  - test catalog (test case ↔ REQ ids, coverage of all `d7-test`/`d7-monitor`/`d8` REQs);
+  - CLI contract, exit codes, reports, SDK independence (Q-009), distribution;
+  - `oec/conformance/DESIGN.md`, ADR-0025 (proposed).
+- **C-045 – P3 exit review** after the PO decisions on the C-042 … C-044 points:
+  - amendments of the ADRs from the answers;
+  - ADR-0020 … 0025 to `accepted`;
+  - ROADMAP P4/P4b/P5/P5b refined from the ADRs.
+
+**Dependencies to the next phases:**
+- **P4 (D2):** needs ADR-0020, ADR-0021 and ADR-0023 accepted (C-045). P4 increments 5–8 implement ADR-0020; increment 10 implements ADR-0021.
+- **P4b (D9):** needs ADR-0022 and ADR-0024 accepted. Per ADR-0017 it does not depend on P4, so it can run in parallel.
+- **P5/P5b (D7/D8):** need ADR-0025 accepted. They do not depend on P4; the D7 `test` exit criterion needs an SDK example app (P4).
+- **P6 (demos):** needs P4 and Q-024 (language of the logger demo).
+
+**Exit criteria** (concrete):
+1. ADR-0020 … ADR-0025 accepted by the PO; the earlier P3 decisions (ADR-0011 … 0017) are unchanged or amended.
+2. Q-021 ff. answered; spec findings found in P3 (SF-101 ff.) decided.
+3. The API sketches (`oec/sdk/rust/sketch`, `oec/sdk/rust/sketch/c`, `oec/sdk/micro/sketch`) compile in `oec/check.sh`. Every REQ id cited there exists and is not deprecated. The DX examples exist: hello world ≤ 20 lines; asset source with data and `Set`; Config; consumer.
+4. Every API decision of ADR-0020 … 0022 names its REQ ids. Every `d7-test`, `d7-monitor` and `d8` REQ is mapped to a planned test of the D7/D8 catalog or explicitly marked `manual` (ADR-0025).
+5. Crate and library choices are documented with license, maintenance state and platform support (amd64/arm64 required, ARMv7 best effort) in ADR-0023/0024.
 
 ## P4 – SDK core implementation (D2)
 
@@ -137,6 +187,7 @@ Incremental, each increment test-covered:
 7. Write side: `Set`/`Del` handling with Status events, Config resource with validation.
 8. Consumer side: typed subscriptions, discovery helpers, `Get` request with correlation + timeout, pagination reassembly.
 9. Dev environment: docker compose with TLS broker (e.g. Mosquitto), generated dev PKI, sample `/etc/oi4` layout.
+10. C ABI `oec-ffi` (ADR-0021, added in C-042): cbindgen header that keeps the contract of the P3 sketch `oec.h`, shared + static library, C examples (`hello.c`, logger shape) as tests, also under AddressSanitizer.
 - **Exit:** conformity test vectors pass; integration tests against broker pass (incl. D7 `test` against an SDK example app, as soon as available); example app documented.
 
 ## P4b – Micro SDK (D9)
