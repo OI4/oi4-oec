@@ -13,7 +13,7 @@ All deployable artifacts of the OEC v2.0 project live here (ADR-0012). Planning,
 | `demos/logger/` | D4 | Logger service (Utility, Messaging L1) | planned (P6) |
 | `registry/` | D5 | OEC Registry, read-only in step 1 (ADR-0008) | planned (P7) |
 | `docs/` | D6 | Developer documentation – standalone Docusaurus site (ADR-0012) | planned (P8, continuous) |
-| `dev/` | – | Local development environment: docker compose, TLS broker, dev PKI, sample `/etc/oi4` layout | planned (P4) |
+| `dev/` | – | Local development environment: docker compose with Mosquitto 2.1.2 (TLS 1.2/1.3, credentials and client certificate listeners), Go dev PKI generator, sample `/etc/oi4` container storages, opt-in interop tests `interop.sh` (ADR-0026 amendment C-051) | C-051 (P4 increment 9) |
 
 `./check.sh` is the local CI of the monorepo (spec checks with the coverage gate, schema bundle and release freeze, oracle/schema cross-check, conformance tests, Rust SDK workspace – fmt, clippy, tests against `spec/export/`, doc, `cargo deny` – and compile check of the P3 SDK sketches via `sdk/check.sh`; needs `cargo-deny`). Folders are created when their phase starts. Further language bindings (C#, Go, TypeScript, …) are added under `sdk/<language>/` once decided (ADR-0011).
 

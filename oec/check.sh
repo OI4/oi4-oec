@@ -10,7 +10,10 @@
 #   5. sdk/check.sh: the Rust SDK workspace (fmt, clippy, tests against the
 #      shared vectors, doc, cargo-deny; ADR-0026, from C-046) and the P3 API
 #      sketches (Rust API, C headers) compile and every REQ id cited under
-#      oec/sdk/ is active (ADR-0020 … 0022, from C-042).
+#      oec/sdk/ is active (ADR-0020 … 0022, from C-042);
+#   6. dev: gofmt, vet, tests of the dev PKI generator and the lint of the
+#      Mosquitto and compose configuration (C-051). No container engine: the
+#      interop tests against the broker are opt-in (oec/dev/interop.sh).
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
@@ -51,5 +54,9 @@ gocheck
 
 step "sdk/check.sh (Rust SDK, P3 sketches)"
 "$root/sdk/check.sh"
+
+step "dev: gofmt, vet, test (dev PKI, broker configuration)"
+cd "$root/dev"
+gocheck
 
 printf '\nall checks passed\n'
