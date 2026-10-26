@@ -19,7 +19,7 @@ The public items of `oec/sdk/rust/sketch/src/` (modules `app`, `identity`, `asse
 
 ### 2. Execution model: blocking by default, async on demand (Q-021)
 
-- `App::run()` blocks, starts its own runtime and needs no async knowledge. `App::run_async()` returns a `Send` future for applications that already use tokio. The runtime crate is chosen in C-043.
+- `App::run()` blocks, starts its own runtime and needs no async knowledge. `App::run_async()` returns a `Send` future for applications that already use tokio. The runtime crate is chosen in C-043 (ADR-0023: tokio).
 - Handles (`AppHandle`, `Asset`, `DataSet`, `ConfigHandle`, `Consumer`) are `Clone + Send + Sync`.
 - State updates (`DataSet::update`, `Asset::set_health`, …) are **synchronous and non-blocking**. They work from any thread or task, e.g. from a field-bus polling thread.
 - Handlers (`on_set`, `on_presence`, subscriptions) are synchronous closures. They run on an SDK worker, one at a time per application.
