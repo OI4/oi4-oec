@@ -506,7 +506,14 @@ func runProbes(c *jsonschema.Compiler, docs map[string]any, vectors []vector) ([
 		if err != nil {
 			return nil, nil, err
 		}
-		cases = append(cases, testCase{ID: p.id, Schema: entry, Instance: raw, Valid: r.valid})
+		tc := testCase{ID: p.id, Schema: entry, Instance: raw, Valid: r.valid, Topic: v.Topic, Reqs: r.reqs}
+		switch p.rule {
+		case bareMetaData:
+			tc.Topic, tc.Object = "", "DataSetMetaDataType"
+		case brokerJSON:
+			tc.Topic, tc.File = "", "broker.json"
+		}
+		cases = append(cases, tc)
 		switch {
 		case p.want == nil && !r.valid:
 			failures = append(failures, fmt.Sprintf("%s: rejected: %v", p.id, r.msgs))

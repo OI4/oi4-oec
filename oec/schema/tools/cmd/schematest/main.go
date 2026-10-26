@@ -79,11 +79,27 @@ type pattern struct {
 }
 
 // testCase is one validation of the cases file for the second validator.
+// Topic, Mode, Object, File and Reqs describe the case for the oracle
+// cross-check (spectool crosscheck, ADR-0019 amendment C-041); the
+// validators ignore them.
 type testCase struct {
 	ID       string          `json:"id"`
 	Schema   string          `json:"schema"`
 	Instance json.RawMessage `json:"instance"`
 	Valid    bool            `json:"valid"`
+	Topic    string          `json:"topic,omitempty"`
+	Mode     string          `json:"mode,omitempty"`   // "tolerant" for the tolerant flavor
+	Object   string          `json:"object,omitempty"` // DataSetMetaDataType for a bare MetaData
+	File     string          `json:"file,omitempty"`   // broker.json for the platform file
+	Reqs     []string        `json:"reqs,omitempty"`   // REQs the schema reports for an invalid case
+}
+
+// tolerantMode is the Mode of a case of the tolerant flavor.
+func tolerantMode(m string) string {
+	if m == "tolerant" {
+		return m
+	}
+	return ""
 }
 
 type result struct {
@@ -170,7 +186,8 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 			if err != nil {
 				return err
 			}
-			cases = append(cases, testCase{ID: v.ID + "/message", Schema: generic, Instance: compact(v.Payload), Valid: a.valid})
+			cases = append(cases, testCase{ID: v.ID + "/message", Schema: generic, Instance: compact(v.Payload), Valid: a.valid,
+				Topic: v.Topic, Mode: tolerantMode(v.Mode), Reqs: a.reqs})
 			if !a.valid {
 				failures = append(failures, fmt.Sprintf("%s: valid vector rejected by %s: %v", v.ID, generic, a.msgs))
 			}
@@ -191,8 +208,10 @@ func run(specDir, expectFile, distDir string, verbose bool) error {
 		}
 		raw := compact(v.Payload)
 		cases = append(cases,
-			testCase{ID: v.ID + "/entry", Schema: entry, Instance: raw, Valid: b.valid},
-			testCase{ID: v.ID + "/message", Schema: generic, Instance: raw, Valid: a.valid})
+			testCase{ID: v.ID + "/entry", Schema: entry, Instance: raw, Valid: b.valid,
+				Topic: v.Topic, Mode: tolerantMode(v.Mode), Object: v.Object, Reqs: b.reqs},
+			testCase{ID: v.ID + "/message", Schema: generic, Instance: raw, Valid: a.valid,
+				Topic: v.Topic, Mode: tolerantMode(v.Mode), Object: v.Object, Reqs: a.reqs})
 
 		want := v.Expected
 		if want == "invalid" {
@@ -277,7 +296,8 @@ func runBroker(c *jsonschema.Compiler, docs map[string]any, vectors []vector, ve
 		if err != nil {
 			return nil, nil, err
 		}
-		cases = append(cases, testCase{ID: v.ID + "/file", Schema: entry, Instance: compact(v.Content), Valid: r.valid})
+		cases = append(cases, testCase{ID: v.ID + "/file", Schema: entry, Instance: compact(v.Content), Valid: r.valid,
+			File: "broker.json", Reqs: r.reqs})
 		want := v.Expected
 		if want == "invalid" {
 			want = "invalid " + strings.Join(v.Violates, ", ")
