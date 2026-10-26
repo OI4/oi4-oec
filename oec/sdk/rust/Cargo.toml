@@ -17,8 +17,15 @@ publish = false
 repository = "https://github.com/OI4/oec"
 
 [workspace.dependencies]
+# Runtime dependencies of oec-core (ADR-0023, ADR-0026: I/O-free crates only).
 oec-core = { path = "oec-core" }
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+time = { version = "0.3", default-features = false, features = ["std", "formatting", "parsing"] }
+uuid = { version = "1", default-features = false, features = ["std", "serde"] }
+# =-pinned together with the schema gate oec/schema/tools/rust-check
+# (ADR-0019 §8, ADR-0023).
+jsonschema = { version = "=0.60.1", default-features = false }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
