@@ -255,6 +255,8 @@ impl FromStr for IdentificationLink {
     }
 }
 
+serde_str!(IdentificationLink);
+
 impl TryFrom<&str> for IdentificationLink {
     type Error = IlError;
 

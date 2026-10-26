@@ -1,18 +1,42 @@
 //! Sans-IO protocol logic of the OI4 OEC v2 SDK (D2).
 //!
 //! Internal crate of the SDK crate `oec` (ADR-0011, ADR-0026): no I/O, no
-//! runtime, no runtime dependencies and no stability promise of its own. The
-//! public API is the one of `oec` (ADR-0020); `oec` re-exports or wraps the
-//! types of this crate.
+//! runtime and no stability promise of its own. The public API is the one of
+//! `oec` (ADR-0020); `oec` re-exports or wraps the types of this crate.
+//! Runtime dependencies follow ADR-0023 (serde, serde_json, time, uuid;
+//! jsonschema behind the feature `strict-validation`).
 //!
 //! | Module | Content | Guideline |
 //! |---|---|---|
 //! | [`il`] | Identification Link, dnp-encoding, Oi4Identifier | MG 4, MG A3 |
 //! | [`topic`] | topic elements, allowed forms, Filter, topic parsing and building, subscription filters | MG 7, MG 9 |
+//! | [`message`] | typed NetworkMessages (`ua-data`, `ua-metadata`, Actions) with the fixed content masks, MessageId/`ReplyTo`, Action correlation, helper DataSets, DataSetMetaData | MG 8, MG 9.2 |
+//! | [`resource`] | the payloads of the resources (MAM, Health, Profile, PublicationList, SubscriptionList, ReferenceDesignation, Config, Data/Oi4Pv, Event) | MG 9 |
+//! | [`schema`] | embedded D1 schemas: version, baseline and (feature `strict-validation`) validation with REQ attribution | ADR-0019 |
 //!
 //! Every rule cites its requirement ids (`oec/spec/requirements/`); the
 //! shared test vectors (`oec/spec/export/`) are the acceptance test
-//! (`tests/vectors.rs`).
+//! (`tests/vectors.rs`, `tests/payload.rs`).
+
+/// Implements `Serialize` and `Deserialize` as the JSON string of `Display`
+/// and `FromStr`, so a decoded value always satisfies the invariants of its
+/// parser.
+macro_rules! serde_str {
+    ($name:ty) => {
+        impl serde::Serialize for $name {
+            fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+                s.collect_str(self)
+            }
+        }
+
+        impl<'de> serde::Deserialize<'de> for $name {
+            fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+                let s = String::deserialize(d)?;
+                s.parse().map_err(serde::de::Error::custom)
+            }
+        }
+    };
+}
 
 /// Defines a closed set of topic element values (REQ-TOP-005, REQ-TOP-011,
 /// REQ-TOP-012, REQ-TOP-023) with `ALL`, `as_str`, `Display` and `FromStr`.
@@ -55,9 +79,14 @@ macro_rules! element {
                 }
             }
         }
+
+        serde_str!($name);
     };
 }
 
 mod base64url;
 pub mod il;
+pub mod message;
+pub mod resource;
+pub mod schema;
 pub mod topic;

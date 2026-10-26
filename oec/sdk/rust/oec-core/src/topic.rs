@@ -156,6 +156,8 @@ impl core::str::FromStr for Subject {
     }
 }
 
+serde_str!(Subject);
+
 impl From<Resource> for Subject {
     fn from(r: Resource) -> Self {
         Self::Resource(r)
@@ -550,6 +552,8 @@ impl core::str::FromStr for Topic {
         Self::parse(s)
     }
 }
+
+serde_str!(Topic);
 
 #[cfg(test)]
 mod tests {
