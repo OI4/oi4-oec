@@ -35,7 +35,7 @@ G-3.4 first made the repository layout a PO decision, so C-046 proposed this ADR
 - **`oec`** is the public API of ADR-0020. It re-exports or wraps `oec-core` types.
   - Where the accepted sketch signature differs, `oec` adapts and the sketch wins. For example, `oec::Result` with `Error::Invalid(String)` wraps the structured `oec-core` errors.
 - **`oec-core` errors are structured:**
-  - `IlError` lists all violations, each with a stable code that is also the vocabulary of the IL vectors: `empty`, `too-long`, `forbidden-character`, `empty-authority`, `uppercase-authority`, `encoding`, `manufacturer-uri`. There is one SDK-only code, `slash-in-element` (§5).
+  - `IlError` lists all violations, each with a stable code that is also the vocabulary of the IL vectors: `empty`, `too-long`, `forbidden-character`, `empty-authority`, `uppercase-authority`, `encoding`, `manufacturer-uri`. There is no SDK-only code (the former `slash-in-element` went away with SF-104, §5.2).
   - `TopicError` has the kinds `grammar` and `identification-link`, which are the `fails` values of the topic vectors.
 - **Names follow the sketch:** `Resource::Mam`, `ServiceType::OTConnector`, and `SyslogLevel` ordered from Emergency to Debug.
   - `oec-core` adds two internal names: `Subject` (resource or service in the fifth topic level) and `Form` (the allowed Method × Resource combination with Source/Filter presence).
@@ -89,10 +89,8 @@ G-3.4 first made the repository layout a PO decision, so C-046 proposed this ADR
    - `decode` accepts only the canonical unpadded base64url form (REQ-IL-004).
    - Octets that are not UTF-8 count as forbidden characters.
 2. **Oi4Identifier:**
-   - The dnp-encoding is opt-in (`.dnp_encoded()`, as in the accepted sketch), because MG 4.3.1/A3 permits the masking but does not require it (SF-043 e).
-   - Without it, a `/` in Model, ProductCode or SerialNumber is the SDK-only violation `slash-in-element`, and other characters that are not permitted surface as the IL violations.
-   - The spec tools always mask, so the vector test builds with `.dnp_encoded()`.
-   - **Pending SF-104** (open, PO): the optional masking lets the same nameplate give two Oi4Identifiers, which contradicts the regeneration promise of MG 4.3. The proposed reading (a) is to always mask. If the PO decides (a), `build` masks always, `.dnp_encoded()` and `slash-in-element` go away, and REQ-IL-033 changes; this default is kept until then because both variants are already implemented.
+   - `build` always dnp-encodes Model, ProductCode and SerialNumber (REQ-IL-033, SF-104). Values made only of unreserved characters stay unchanged, so typical identifiers are not affected; the result is one Oi4Identifier per nameplate, as the spec tools and the vectors already build it.
+   - History: C-046 made the dnp-encoding opt-in (`.dnp_encoded()`, as in the sketch), with the SDK-only violation `slash-in-element` for a `/` without it, because MG 4.3.1/A3 said "may" (SF-043 e). The PO question on it led to SF-104; the PO decided on 2026-10-26 that MG 4.1 governs ("must be masked by other means"), so C-046 addendum 2 removed the opt-in and the violation (also from the sketch).
 3. **Topic parsing classifies like `spectool` and D7:**
    - First all structural rules, including the canonical `encoded-il` of AppId and Source → `grammar`.
    - Then the decoded AppId, then the Source, as Identification Links → `identification-link`.

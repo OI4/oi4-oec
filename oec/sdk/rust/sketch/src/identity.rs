@@ -27,14 +27,15 @@ impl IdentificationLink {
 }
 
 /// Builder of an Oi4Identifier `<ManufacturerUri>/<Model>/<ProductCode>/<SerialNumber>`
-/// (MG 4.3, REQ-IL-007, REQ-IL-022 … REQ-IL-034).
+/// (MG 4.3, REQ-IL-007, REQ-IL-022 … REQ-IL-034). Model, ProductCode and
+/// SerialNumber are always dnp-encoded (REQ-IL-033, SF-104; the former opt-in
+/// `dnp_encoded()` was removed in C-046 addendum 2).
 #[derive(Debug, Clone)]
 pub struct Oi4Identifier {
     manufacturer_uri: String,
     model: String,
     product_code: String,
     serial_number: Option<String>,
-    dnp_encode: bool,
 }
 
 impl Oi4Identifier {
@@ -48,15 +49,8 @@ impl Oi4Identifier {
         unimplemented!()
     }
 
-    /// Masks characters not permitted in an IL and `/` with the
-    /// dnp-encoding (REQ-IL-032, REQ-IL-033). Off by default: without it,
-    /// such characters are an error.
-    pub fn dnp_encoded(self) -> Self {
-        unimplemented!()
-    }
-
-    /// Builds the Identification Link; fails above 255 characters
-    /// (REQ-IL-029) or on characters not permitted (REQ-IL-016).
+    /// Builds the Identification Link; fails above 255 characters including
+    /// the masking characters (REQ-IL-029).
     pub fn build(&self) -> Result<IdentificationLink> {
         unimplemented!()
     }

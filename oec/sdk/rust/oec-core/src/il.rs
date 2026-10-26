@@ -43,12 +43,6 @@ pub enum Violation {
     /// The ManufacturerUri is not a lower-case domain name without scheme,
     /// path and `www.` (REQ-IL-024).
     ManufacturerUri,
-    /// An Oi4Identifier element contains `/` and the dnp-encoding is off
-    /// (REQ-IL-022, REQ-IL-033).
-    SlashInElement {
-        /// `Model`, `ProductCode` or `SerialNumber`.
-        element: &'static str,
-    },
 }
 
 impl Violation {
@@ -62,7 +56,6 @@ impl Violation {
             Self::UppercaseAuthority => "uppercase-authority",
             Self::Encoding(_) => "encoding",
             Self::ManufacturerUri => "manufacturer-uri",
-            Self::SlashInElement { .. } => "slash-in-element",
         }
     }
 }
@@ -85,9 +78,6 @@ impl fmt::Display for Violation {
             Self::ManufacturerUri => f.write_str(
                 "the ManufacturerUri is not a domain name of the form <manufacturer>.<tld> without www.",
             ),
-            Self::SlashInElement { element } => {
-                write!(f, "{element} contains \"/\" (enable the dnp-encoding)")
-            }
         }
     }
 }
@@ -325,13 +315,17 @@ fn valid_manufacturer_uri(s: &str) -> bool {
 /// Builder of an Oi4Identifier
 /// `<ManufacturerUri>/<Model>/<ProductCode>/<SerialNumber>` (MG 4.3,
 /// REQ-IL-007, REQ-IL-022 … REQ-IL-034).
+///
+/// Model, ProductCode and SerialNumber are always dnp-encoded (REQ-IL-033,
+/// SF-104): values made only of `A–Z a–z 0–9 - . _ ~` stay unchanged, every
+/// other character is masked, so a nameplate gives exactly one
+/// Oi4Identifier (MG 4.3).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Oi4Identifier {
     manufacturer_uri: String,
     model: String,
     product_code: String,
     serial_number: Option<String>,
-    dnp_encode: bool,
 }
 
 impl Oi4Identifier {
@@ -344,7 +338,6 @@ impl Oi4Identifier {
             model: model.to_owned(),
             product_code: product_code.to_owned(),
             serial_number: None,
-            dnp_encode: false,
         }
     }
 
@@ -356,48 +349,29 @@ impl Oi4Identifier {
         self
     }
 
-    /// Masks Model, ProductCode and SerialNumber with the dnp-encoding
-    /// (REQ-IL-032, REQ-IL-033). Off by default: without it, a `/` or a
-    /// character not permitted in an Identification Link is an error.
-    ///
-    /// SF-104 (open): the guideline makes the masking optional, so the same
-    /// nameplate can give two Oi4Identifiers; the proposed reading is to
-    /// always mask. The default may change with the decision.
-    #[must_use]
-    pub fn dnp_encoded(mut self) -> Self {
-        self.dnp_encode = true;
-        self
-    }
-
     /// Builds the Identification Link.
     ///
     /// # Errors
     ///
-    /// [`Violation::ManufacturerUri`] (REQ-IL-024); without dnp-encoding
-    /// [`Violation::SlashInElement`]; otherwise the violations of the
-    /// resulting Identification Link, e.g. more than 255 characters
-    /// including the masking characters (REQ-IL-029) or characters not
-    /// permitted (REQ-IL-016).
+    /// [`Violation::ManufacturerUri`] (REQ-IL-024); otherwise the violations
+    /// of the resulting Identification Link, e.g. more than 255 characters
+    /// including the masking characters (REQ-IL-029).
     pub fn build(&self) -> Result<IdentificationLink, IlError> {
         if !valid_manufacturer_uri(&self.manufacturer_uri) {
             return Err(IlError::new(vec![Violation::ManufacturerUri]));
         }
         let elements = [
-            ("Model", self.model.as_str()),
-            ("ProductCode", self.product_code.as_str()),
-            ("SerialNumber", self.serial_number.as_deref().unwrap_or("")),
+            self.model.as_str(),
+            self.product_code.as_str(),
+            self.serial_number.as_deref().unwrap_or(""),
         ];
         let mut id = self.manufacturer_uri.clone();
-        for (element, value) in elements {
+        for value in elements {
             id.push('/');
             if value.is_empty() {
                 id.push_str(NO_DATA);
-            } else if self.dnp_encode {
-                id.push_str(&dnp_encode(value));
-            } else if value.contains('/') {
-                return Err(IlError::new(vec![Violation::SlashInElement { element }]));
             } else {
-                id.push_str(value);
+                id.push_str(&dnp_encode(value));
             }
         }
         IdentificationLink::try_from(id)
@@ -498,18 +472,13 @@ mod tests {
         );
         let nd = Oi4Identifier::new("provider.com", "", "P").build().unwrap();
         assert_eq!(nd.as_str(), "provider.com/nd/P/nd");
-        // Without dnp-encoding, "/" and forbidden characters are errors.
+        // SF-104: "/", forbidden and reserved characters are always masked.
         let slash = Oi4Identifier::new("provider.com", "M", "123/4").serial_number("S");
-        assert_eq!(codes(slash.build()), ["slash-in-element"]);
-        assert_eq!(
-            slash.dnp_encoded().build().unwrap().as_str(),
-            "provider.com/M/123,2F4/S"
-        );
+        assert_eq!(slash.build().unwrap().as_str(), "provider.com/M/123,2F4/S");
         let space = Oi4Identifier::new("provider.com", "A B", "P");
-        assert_eq!(codes(space.build()), ["forbidden-character"]);
-        // Reserved characters are permitted in an IL and stay unmasked.
-        let at = Oi4Identifier::new("provider.com", "A@B", "P").serial_number("S");
-        assert_eq!(at.build().unwrap().as_str(), "provider.com/A@B/P/S");
+        assert_eq!(space.build().unwrap().as_str(), "provider.com/A,20B/P/nd");
+        let at = Oi4Identifier::new("provider.com", "M", "P").serial_number("ABC@home");
+        assert_eq!(at.build().unwrap().as_str(), "provider.com/M/P/ABC,40home");
     }
 
     // REQ-IL-024: domain name without scheme, port, path, www.

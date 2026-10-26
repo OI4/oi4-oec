@@ -86,7 +86,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 018** in `rfcs_adrs/` and the
 - **Oi4Identifier** = `ManufacturerUri/Model/ProductCode/SerialNumber` (MG 4.3.1); all IL rules apply, max. 255 chars including the three `/`.
   - `ManufacturerUri`: lowercase domain without scheme, port, path and `www.`, typically `<manufacturer>.<tld>`, subdomains allowed; should correspond to the domain of the asset's IL (in doubt `<manufacturer>.<tld>`); an upper-case value is converted to lower case when the Oi4Identifier is generated (SF-043, C-020).
   - A missing serial number becomes `"nd"`; containers use the container name as serial number.
-  - The elements may be dnp-encoded (`,` + 2 upper-case hex digits per UTF-8 octet outside `A–Z a–z 0–9 - . _ ~`, MG A3) to mask characters not permitted in an IL or a `/` (SF-043, C-019/C-020). The dnp-encoding is not used anywhere else (not in topics).
+  - The elements Model, ProductCode and SerialNumber are dnp-encoded (`,` + 2 upper-case hex digits per UTF-8 octet outside `A–Z a–z 0–9 - . _ ~`, MG A3); values of unreserved characters only stay unchanged (SF-043, C-019/C-020; mandatory since SF-104, PO 2026-10-26: MG 4.1 "must be masked" governs, the "may" of MG 4.3.1/A3 is still to be aligned). The dnp-encoding is not used anywhere else (not in topics).
 
 ## 3. MAM (MG 5, 8.3.1) – DataSetClassId `360ca8f3-5e66-42a2-8f10-9cdf45f4bf58`
 

@@ -92,7 +92,6 @@ fn oi4identifier() {
         let f = |k| str_field(&v, k).unwrap_or("");
         let built = Oi4Identifier::new(f("manufacturer_uri"), f("model"), f("product_code"))
             .serial_number(f("serial_number"))
-            .dnp_encoded()
             .build();
         if valid(&v) {
             assert_eq!(
