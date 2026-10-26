@@ -91,6 +91,31 @@ func TestCompute(t *testing.T) {
 	}
 }
 
+func TestWarning(t *testing.T) {
+	s := &catalog.Spec{Files: []catalog.AreaFile{{Area: "TOP", Requirements: []catalog.Requirement{
+		req("REQ-TOP-020", "d7-validate"),
+		req("REQ-TOP-022", "d7-validate"),
+	}}}}
+	files := []vectors.File{{Kind: "topic", Vectors: []vectors.Vector{
+		{ID: "V-TOP-011", Expected: "valid", Status: "reviewed", Reqs: []string{"REQ-TOP-020", "REQ-TOP-022"}, Warnings: []string{"control-character", "whitespace"}},
+		{ID: "V-TOP-137", Expected: "valid", Status: "draft", Reqs: []string{"REQ-TOP-020"}},
+	}}}
+	r := Compute(s, files, &topic.Spec{}, &Implications{}, &Expectations{}, t.TempDir())
+	e := r.all["REQ-TOP-020"]
+	if len(e.Pos) != 0 || len(e.PosDraft) != 1 || len(e.Neg) != 1 || e.Neg[0] != (Neg{ID: "V-TOP-011", Reviewed: true, Layer: "warning"}) {
+		t.Errorf("REQ-TOP-020: pos %v, draft %v, neg %+v", e.Pos, e.PosDraft, e.Neg)
+	}
+	if got := r.State("REQ-TOP-020"); got != "negative only" {
+		t.Errorf("REQ-TOP-020: state %q", got)
+	}
+	if got := r.State("REQ-TOP-022"); got != "positive only" {
+		t.Errorf("REQ-TOP-022: state %q", got)
+	}
+	if !strings.Contains(r.Report(), "V-TOP-011 (warning)") {
+		t.Error("report lacks the warning layer")
+	}
+}
+
 func TestChecks(t *testing.T) {
 	s := &catalog.Spec{Files: []catalog.AreaFile{{Area: "MSG", Requirements: []catalog.Requirement{
 		req("REQ-MSG-001", "schema"),

@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/OI4/oec/conformance/internal/topic"
 	"github.com/OI4/oec/conformance/internal/validate"
 )
 
@@ -78,6 +79,9 @@ func (r *Report) Text(w io.Writer) error {
 			fmt.Fprintf(&b, "  [%s] %s%s: %s\n", f.Layer, req, at, f.Detail)
 		}
 		for _, wn := range it.Warnings {
+			if id := topic.WarningReqs[wn]; id != "" {
+				wn += " (" + id + ")"
+			}
 			fmt.Fprintf(&b, "  warning: %s\n", wn)
 		}
 	}

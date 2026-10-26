@@ -29,6 +29,12 @@ const (
 	EntrySchemaDir   = "v2/topics"
 )
 
+// WarningReqs maps a warning code of a valid topic vector to the requirement
+// whose recommendation the topic does not follow (MG 7.7 "should not"). The
+// vector is a negative vector of that requirement with layer "warning" and no
+// positive vector of it (C-040).
+var WarningReqs = map[string]string{topic.WarnWhitespace: "REQ-TOP-020"}
+
 // Implication maps an umbrella requirement to its details.
 type Implication struct {
 	Umbrella  string   `json:"umbrella"`
@@ -102,7 +108,7 @@ func LoadExpectations(schemaDir string) (*Expectations, error) {
 type Neg struct {
 	ID       string
 	Reviewed bool
-	Layer    string // schema, rule (expectation list) or R-1 (topic and IL vectors)
+	Layer    string // schema, rule (expectation list), R-1 (topic and IL vectors) or warning (WarningReqs)
 }
 
 // Entry is the coverage of one requirement.
@@ -171,8 +177,19 @@ func Compute(s *catalog.Spec, files []vectors.File, ts *topic.Spec, im *Implicat
 			vecs[v.ID], kinds[v.ID] = v, f.Kind
 			reviewed := v.Status == "reviewed"
 			if v.Expected == "valid" {
+				warned := map[string]bool{}
+				if f.Kind == "topic" {
+					for _, w := range v.Warnings {
+						if id := WarningReqs[w]; id != "" && !warned[id] {
+							warned[id] = true
+							if e := r.all[id]; e != nil {
+								e.Neg = append(e.Neg, Neg{ID: v.ID, Reviewed: reviewed, Layer: "warning"})
+							}
+						}
+					}
+				}
 				for _, id := range v.Reqs {
-					if e := r.all[id]; e != nil {
+					if e := r.all[id]; e != nil && !warned[id] {
 						if reviewed {
 							e.Pos = append(e.Pos, v.ID)
 						} else {
@@ -361,7 +378,8 @@ func (r *Result) Report() string {
 		"**covered** = at least one reviewed valid vector names it in `reqs` and one reviewed invalid vector in `violates`; " +
 		"**derived** = umbrella of `coverage/implications.yaml` whose details are all covered or derived. " +
 		"Draft vectors are marked with `*` and do not count. The layer of a negative vector is `schema` (its entry schema reports the REQ, no mark), " +
-		"`rule` (rule layer of D7 validate per `oec/schema/tests/rule-layer.yaml`) or `R-1` (topic and Identification Link vectors). " +
+		"`rule` (rule layer of D7 validate per `oec/schema/tests/rule-layer.yaml`), `R-1` (topic and Identification Link vectors) or `warning` " +
+		"(a valid topic vector whose warning `whitespace` shows that the topic does not follow the recommendation of REQ-TOP-020; it is no positive vector of it). " +
 		"P2 exit gate (ROADMAP P2 exit 2 and 3): `spectool coverage -check -gate`.\n\n")
 	b.WriteString("## Summary\n\n| Area | REQs | Covered | Derived | Positive only | Negative only | None / details open |\n|---|---:|---:|---:|---:|---:|---:|\n")
 	type sum struct{ n, cov, der, pos, neg, none int }

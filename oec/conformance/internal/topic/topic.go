@@ -32,6 +32,10 @@ const (
 	WarnWhitespace = "whitespace"
 )
 
+// WarningReqs maps a warning code to the requirement whose recommendation
+// the topic does not follow (MG 7.7: white space "should not be used").
+var WarningReqs = map[string]string{WarnWhitespace: "REQ-TOP-020"}
+
 // Presence of Source or Filter in a combination.
 const (
 	Required  = "required"
