@@ -56,6 +56,7 @@ go run ./cmd/spectool topic -spec ..       # regenerate topic/topic-patterns.jso
 go run ./cmd/spectool topic -spec .. 'Oi4v2/…'   # analyze topics (grammar rule, Source/Filter, IL check, warnings)
 go run ./cmd/spectool review -spec .. REQ-QRY-001..004 QRY V-PAY-053,V-PAY-054 Pub/MAM   # PO accepted: draft -> reviewed, then render + coverage + lint
 go run ./cmd/spectool rebaseline -spec .. -rev <commit>   # move to a new guideline commit (see "After a guideline change")
+go run ./cmd/spectool crosscheck -spec ..  # oracle vs schema on every case of ../schema/dist/cases.json (run ../schema/check.sh first)
 go test ./...
 ```
 

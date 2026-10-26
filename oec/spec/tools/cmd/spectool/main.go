@@ -575,6 +575,7 @@ func cmdRebaseline(args []string) error {
 			fmt.Println("      " + l)
 		}
 	}
+	fmt.Println("  - schema bundle: set schema.Baseline in oec/schema/schema.go to", short, "and schema.Version to the next pre-release (e.g. 2.1.0-dev) with an Unreleased section in oec/schema/CHANGELOG.md; a released version stays frozen (ADR-0019 amendment C-041)")
 	fmt.Println("  - ADR-0001 amendment and the cycle log record the new baseline; commit catalog, generated files and docs separately")
 	return lintErr
 }
