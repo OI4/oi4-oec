@@ -19,7 +19,9 @@ fn container(level: Level, root: &Root) -> oec::Result<App> {
 }
 
 fn explicit() -> Broker {
-    Broker::new("mqtt.example.com").credentials("user", "secret")
+    Broker::new("mqtt.example.com")
+        .credentials("user", "secret")
+        .ca_pem(common::ca_file())
 }
 
 fn device(level: Level, broker: Broker) -> oec::app::AppBuilder {
@@ -57,7 +59,7 @@ fn container_defaults() {
         (c.host(), c.port(), c.max_packet_size()),
         ("mqtt-broker", 8883, 262_144)
     );
-    assert_eq!(c.ca(), Some(root.path("etc/oi4/certs/ca.pem").as_path()));
+    assert_eq!(c.ca(), root.path("etc/oi4/certs/ca.pem"));
     assert_eq!(credentials(c), ("user", &b"pa:ss"[..]));
     assert_eq!(c.keep_alive(), Duration::from_secs(60));
     // persistent store on the application specific volume (REQ-CNT-010)
@@ -86,7 +88,7 @@ fn broker_ca_wins_over_ca() {
     root.write("etc/oi4/mqtt/broker_ca.pem", "BROKER CA");
     let app = container(Level::L1, &root).unwrap();
     let ca = root.path("etc/oi4/mqtt/broker_ca.pem");
-    assert_eq!(app.connection().ca(), Some(ca.as_path()));
+    assert_eq!(app.connection().ca(), ca);
 }
 
 #[test]
@@ -238,7 +240,7 @@ fn explicit_broker() {
     let c = app.connection();
     assert_eq!(
         (c.host(), c.port(), c.ca()),
-        ("mqtt.example.com", 8883, None)
+        ("mqtt.example.com", 8883, common::ca_file().as_path())
     );
     assert_eq!(credentials(c), ("user", &b"secret"[..]));
     // derived ClientId, stable (REQ-MQTT-013)
@@ -303,9 +305,17 @@ fn explicit_rejections() {
         device(Level::L1, Broker::new("broker")).build(),
         Err(oec::Error::LevelNotMet(_))
     ));
+    // no CA: the broker certificate cannot be verified (REQ-MQTT-008); no
+    // fallback to the trust store of the platform (ADR-0020 amendment C-050)
+    assert!(matches!(
+        device(Level::L1, Broker::new("broker").credentials("u", "p")).build(),
+        Err(oec::Error::LevelNotMet(m)) if m.contains("REQ-MQTT-008")
+    ));
     assert!(invalid(device(
         Level::L1,
-        Broker::new("broker:8883").credentials("u", "p")
+        Broker::new("broker:8883")
+            .credentials("u", "p")
+            .ca_pem(common::ca_file())
     )));
     assert!(invalid(device(Level::L1, explicit().port(0))));
     assert!(invalid(device(Level::L1, explicit().max_packet_size(1000))));

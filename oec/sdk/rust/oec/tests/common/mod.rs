@@ -4,12 +4,25 @@
 #![allow(dead_code)]
 
 use std::path::PathBuf;
+use std::sync::OnceLock;
 
 use oec::app::Bootstrap;
 use oec::identity::Product;
 
 /// `base64("user:pa:ss")`: the password contains the separator.
 pub(crate) const CREDENTIALS: &str = "dXNlcjpwYTpzcw==\n";
+
+/// A placeholder CA file for tests that only build (TLS material is loaded
+/// by `App::run`).
+pub(crate) fn ca_file() -> PathBuf {
+    static CA: OnceLock<PathBuf> = OnceLock::new();
+    CA.get_or_init(|| {
+        let path = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("oec-placeholder-ca.pem");
+        std::fs::write(&path, "CA").unwrap();
+        path
+    })
+    .clone()
+}
 
 /// The product of the tests.
 pub(crate) fn product() -> Product {

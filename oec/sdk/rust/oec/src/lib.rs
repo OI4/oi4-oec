@@ -5,17 +5,24 @@
 //! does what the guideline prescribes for that level. The sans-IO protocol
 //! logic lives in the internal crate `oec-core` (ADR-0026 §2); this crate
 //! re-exports or wraps its types and adds the I/O: bootstrap from the
-//! container storage, persistence and – from P4 increment 5b – the MQTT
-//! connection.
+//! container storage, persistence and the MQTT connection over TLS.
 //!
-//! **State of P4 (C-048, increment 4):** [`app::App::builder`] with
+//! **State of P4 (C-050, increments 4 and 5):** [`app::App::builder`] with
 //! [`app::Bootstrap`] (container storage contract or explicit broker),
 //! identity ([`identity`]), persistence ([`store`]), the Config model with
 //! string-keyed typed getters ([`config`], Q-022) and the errors ([`Error`]).
 //! [`app::AppBuilder::build`] resolves and validates everything that does not
-//! need a connection. `App::run`, the handles, assets, DataSets, events and
-//! the consumer follow with increments 5 … 8; until then their contract is
-//! the P3 sketch `oec/sdk/rust/sketch` (ADR-0020 §1).
+//! need a connection. [`app::App::run`] (blocking) and [`app::App::run_async`]
+//! connect over TLS (tokio + rustls, ADR-0023), publish Birth, Health and
+//! Close and register a new Will per connect (MG 6.3), reconnect with backoff
+//! and report the [`app::ConnectionState`]; [`app::AppHandle`] stops them.
+//! Assets, DataSets, events and the consumer follow with increments 6 … 8;
+//! until then their contract is the P3 sketch `oec/sdk/rust/sketch`
+//! (ADR-0020 §1).
+//!
+//! **Cargo features:** `crypto-aws-lc-rs` (default) or `crypto-ring` pick the
+//! crypto provider of rustls (`crypto-ring` wins if both are on);
+//! `strict-validation` validates against the embedded D1 schemas.
 //!
 //! ```no_run
 //! use oec::prelude::*;
@@ -29,7 +36,8 @@
 //!         .bootstrap(Bootstrap::container())
 //!         .build()?;
 //!     println!("{} connects to {}", app.identification_link(), app.connection().host());
-//!     Ok(())
+//!     app.run() // until SIGINT/SIGTERM: Birth, Health, …, Close
+
 //! }
 //! ```
 //!
@@ -44,6 +52,8 @@ pub mod store;
 
 mod address;
 mod container;
+mod runtime;
+mod transport;
 
 /// `ServiceType` topic element (REQ-TOP-005); one per application. The MAM
 /// `DeviceClass` of the application is derived as `Oi4.<ServiceType>`
@@ -85,7 +95,9 @@ pub enum Error {
     /// The configuration cannot fulfill the chosen [`Level`].
     #[error("level not met: {0}")]
     LevelNotMet(String),
-    /// Container storage (`/etc/oi4`, `/run/secrets/oi4`) missing or invalid.
+    /// Container storage (`/etc/oi4`, `/run/secrets/oi4`) missing or invalid,
+    /// or the TLS material of the connection settings (CA, client
+    /// certificate, private key, passphrase) unusable.
     #[error("bootstrap: {0}")]
     Bootstrap(String),
     /// Connection, TLS or I/O failure (including the [`store::Store`]).
@@ -119,10 +131,10 @@ impl From<oec_core::topic::TopicError> for Error {
 /// Result type of the SDK API.
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
-/// Everything a typical application needs (the items of increment 4; the
-/// sketch prelude grows with increments 5 … 8).
+/// Everything a typical application needs (the items of increments 4 and 5;
+/// the sketch prelude grows with increments 6 … 8).
 pub mod prelude {
-    pub use crate::app::{App, Bootstrap, Broker};
+    pub use crate::app::{App, AppHandle, Bootstrap, Broker};
     pub use crate::config::{ConfigDef, ConfigObject, ConfigValues};
     pub use crate::event::SyslogLevel;
     pub use crate::identity::{IdentificationLink, Oi4Identifier, Product};

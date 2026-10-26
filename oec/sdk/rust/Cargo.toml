@@ -29,6 +29,19 @@ jsonschema = { version = "=0.60.1", default-features = false }
 # Runtime dependencies of oec (ADR-0023, ADR-0026 amendment C-048).
 thiserror = "2"
 log = "0.4"
+# Transport of oec (ADR-0023 §1, amendment C-050): tokio without `full`,
+# rustls/tokio-rustls without default features; the crypto provider is chosen
+# by the features of oec (aws-lc-rs default, `crypto-ring`).
+tokio = { version = "1.54", default-features = false, features = ["rt", "net", "time", "sync", "signal"] }
+rustls = { version = "0.23.46", default-features = false, features = ["std", "tls12", "logging"] }
+tokio-rustls = { version = "0.26.6", default-features = false }
+rustls-pki-types = { version = "1.15", default-features = false, features = ["std"] }
+# Encrypted private keys of the secret storage (REQ-CNT-008/009, ADR-0023
+# amendment C-050): PKCS#8 PBES2 only (no `des-insecure`/`sha1-insecure`).
+pkcs8 = { version = "0.11", default-features = false, features = ["std", "pem", "encryption"] }
+# Dev dependency of oec: the test PKI of the runtime tests (ADR-0023
+# amendment C-050).
+rcgen = { version = "0.14", default-features = false, features = ["pem", "aws_lc_rs"] }
 # Dev dependency of oec-core: property tests of codec, session and lifecycle
 # (ADR-0023 amendment C-049). Without the default features fork/timeout
 # (no rusty-fork, no tempfile).

@@ -9,15 +9,29 @@ publish.workspace = true
 repository.workspace = true
 
 [features]
+default = ["crypto-aws-lc-rs"]
 # Validates against the embedded D1 schemas (ADR-0019 §7, ADR-0020 §13,
 # ADR-0023): on in the SDK's own tests and examples.
 strict-validation = ["oec-core/strict-validation"]
+# Crypto provider of rustls (ADR-0023 §1): aws-lc-rs by default; `crypto-ring`
+# selects ring 0.17 (wins if both are enabled), e.g. with
+# `default-features = false, features = ["crypto-ring"]` for ARMv7 (Q-008).
+crypto-aws-lc-rs = ["rustls/aws_lc_rs", "rustls/prefer-post-quantum"]
+crypto-ring = ["rustls/ring"]
 
 [dependencies]
 oec-core.workspace = true
 thiserror.workspace = true
 log.workspace = true
 serde_json.workspace = true
+tokio.workspace = true
+rustls.workspace = true
+tokio-rustls.workspace = true
+rustls-pki-types.workspace = true
+pkcs8.workspace = true
+
+[dev-dependencies]
+rcgen.workspace = true
 
 [lints]
 workspace = true

@@ -4,10 +4,14 @@
 #      rustfmt, clippy (pedantic, warnings are errors), tests including the
 #      shared test vectors of oec/spec/export (IL, topic, payload,
 #      broker.json, lifecycle roles) and the MQTT codec/session tests with
-#      proptest (C-049), rustdoc without warnings, cargo-deny (licenses,
-#      advisories, bans, sources; ADR-0023 §2). clippy, tests and rustdoc
-#      run twice: default features and `--features strict-validation`
-#      (oec-core embeds oec/schema/v2 and validates with jsonschema, C-047). cargo-deny fetches the RustSec
+#      proptest (C-049), the runtime of oec against an in-process TLS test
+#      broker (C-050; loopback only, PKI generated per test), rustdoc
+#      without warnings, cargo-deny (licenses, advisories, bans, sources;
+#      ADR-0023 §2). clippy, tests and rustdoc run twice: default features
+#      and `--features strict-validation` (oec-core embeds oec/schema/v2
+#      and validates with jsonschema, C-047); clippy once more for oec with
+#      the crypto provider ring instead of aws-lc-rs (`crypto-ring`,
+#      ADR-0023 amendment C-050). cargo-deny fetches the RustSec
 #      advisory DB; without network it falls back to the cached DB (a real
 #      violation fails both runs). Needs cargo-deny
 #      (cargo install cargo-deny --locked).
@@ -38,6 +42,7 @@ for features in "" "--features=strict-validation"; do
 	# shellcheck disable=SC2086
 	RUSTDOCFLAGS="-D warnings" cargo doc --offline --locked --no-deps --quiet $features
 done
+cargo clippy --offline --locked -p oec --all-targets --quiet --no-default-features --features=crypto-ring -- -D warnings
 command -v cargo-deny >/dev/null || { echo "cargo-deny missing: cargo install cargo-deny --locked" >&2; exit 1; }
 cargo deny --log-level error check || {
 	echo "cargo deny: retrying with the cached advisory DB (no network?)" >&2

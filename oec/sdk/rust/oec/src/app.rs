@@ -1,19 +1,22 @@
-//! Application: level selection, bootstrap and identity (ADR-0020 §2 … §5,
-//! §10). Connection and lifecycle (`App::run`, the handles, connection
-//! state) follow in P4 increment 5b (C-050) on the sans-IO session and
-//! lifecycle of `oec-core` (C-049); until then their contract is the P3
-//! sketch.
+//! Application: level selection, bootstrap, identity and the runtime
+//! (ADR-0020 §2 … §5, §10): [`AppBuilder::build`] resolves everything that
+//! needs no connection; [`App::run`] / [`App::run_async`] connect over TLS
+//! and drive the sans-IO session and lifecycle of `oec-core` (P4 increment
+//! 5b, C-050); [`AppHandle`] and [`ConnectionState`] observe and stop it.
 
 use std::fmt;
+use std::future::Future;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
+
+use tokio::sync::watch;
 
 use crate::container::{self, MAX_PACKET_SIZE, MIN_PACKET_SIZE};
 use crate::event::SyslogLevel;
 use crate::identity::{IdentificationLink, Mam, Product};
 use crate::store::{FileStore, MemoryStore, Store};
-use crate::{Error, Level, Result, ServiceType};
+use crate::{Error, Level, Result, ServiceType, runtime};
 
 /// Store key of the RevisionCounter of the application (REQ-RES-MAM-018).
 const REVISION_COUNTER: &str = "app/revision-counter";
@@ -85,8 +88,10 @@ impl Broker {
         self
     }
 
-    /// CA that verifies the broker certificate (REQ-MQTT-008). Without it
-    /// the platform trust store is used.
+    /// CA that verifies the broker certificate (REQ-MQTT-008); required.
+    /// Trust comes only from this file, not from the OS trust store
+    /// (ADR-0023 §1); for a broker with a certificate of a public CA, give
+    /// that CA's root certificate.
     #[must_use]
     pub fn ca_pem(mut self, pem_file: impl Into<PathBuf>) -> Self {
         self.ca = Some(pem_file.into());
@@ -122,7 +127,7 @@ impl Broker {
     }
 
     /// Checks the settings and picks the means of authentication.
-    fn resolve(self) -> Result<(String, u16, Option<PathBuf>, usize, Auth)> {
+    fn resolve(self) -> Result<(String, u16, PathBuf, usize, Auth)> {
         if !crate::address::valid(&self.host) {
             return Err(Error::Invalid(format!(
                 "broker host {:?} is no IP address or host name (REQ-CNT-003)",
@@ -166,7 +171,14 @@ impl Broker {
                 ));
             }
         };
-        Ok((self.host, self.port, self.ca, self.max_packet_size, auth))
+        let Some(ca) = self.ca else {
+            return Err(Error::LevelNotMet(
+                "the broker needs a CA (Broker::ca_pem): every level verifies the broker \
+                 certificate (REQ-CMP-002, REQ-MQTT-008)"
+                    .to_owned(),
+            ));
+        };
+        Ok((self.host, self.port, ca, self.max_packet_size, auth))
     }
 }
 
@@ -224,7 +236,7 @@ pub enum Auth {
 pub struct ConnectionSettings {
     host: String,
     port: u16,
-    ca: Option<PathBuf>,
+    ca: PathBuf,
     auth: Auth,
     client_id: String,
     keep_alive: Duration,
@@ -243,10 +255,10 @@ impl ConnectionSettings {
         self.port
     }
 
-    /// CA that verifies the broker (REQ-MQTT-008); `None`: the platform
-    /// trust store (explicit bootstrap without CA).
-    pub fn ca(&self) -> Option<&Path> {
-        self.ca.as_deref()
+    /// CA that verifies the broker (REQ-MQTT-008): `broker_ca.pem` or
+    /// `ca.pem` of the container storage, or [`Broker::ca_pem`].
+    pub fn ca(&self) -> &Path {
+        &self.ca
     }
 
     /// Means of authentication (REQ-MQTT-009/010).
@@ -290,6 +302,7 @@ pub struct AppBuilder {
     max_packet_size: Option<usize>,
     syslog: SyslogLevel,
     reference_designation: Option<bool>,
+    on_connection: Option<Callback>,
 }
 
 impl AppBuilder {
@@ -378,6 +391,14 @@ impl AppBuilder {
         self
     }
 
+    /// Called on every change of the [`ConnectionState`], on the thread of
+    /// the runtime: keep it short and do not block.
+    #[must_use]
+    pub fn on_connection(mut self, f: impl Fn(ConnectionState) + Send + Sync + 'static) -> Self {
+        self.on_connection = Some(Box::new(f));
+        self
+    }
+
     /// Validates identity, bootstrap and level (e.g. a ReferenceDesignation
     /// without a persistent store → [`Error::LevelNotMet`]). Reads the
     /// container storage and the store; does not connect.
@@ -425,6 +446,7 @@ impl AppBuilder {
             store,
             reference_designation,
             syslog: self.syslog,
+            handle: AppHandle::new(self.on_connection),
         })
     }
 
@@ -462,7 +484,7 @@ impl AppBuilder {
                     client_id: Some(c.name),
                     host: c.broker.address,
                     port: c.broker.secure_port,
-                    ca: Some(c.ca),
+                    ca: c.ca,
                     max_packet_size: c.broker.max_packet_size,
                     auth: c.auth,
                 };
@@ -539,7 +561,7 @@ struct Resolved {
     client_id: Option<String>,
     host: String,
     port: u16,
-    ca: Option<PathBuf>,
+    ca: PathBuf,
     max_packet_size: usize,
     auth: Auth,
 }
@@ -595,8 +617,8 @@ fn revision_counter(store: &dyn Store) -> Result<i32> {
 }
 
 /// An OEC application: the resolved identity, MAM and connection settings
-/// of a level (P4 increment 4). Connecting and running
-/// (`App::run`/`run_async`, handles) follow with increment 5b (ADR-0020 §2).
+/// of a level, run by [`App::run`] or [`App::run_async`]. Derefs to
+/// [`AppHandle`] for everything that is also possible while it runs.
 pub struct App {
     level: Level,
     service_type: ServiceType,
@@ -606,6 +628,7 @@ pub struct App {
     store: Arc<dyn Store>,
     reference_designation: bool,
     syslog: SyslogLevel,
+    handle: AppHandle,
 }
 
 impl App {
@@ -624,6 +647,7 @@ impl App {
             max_packet_size: None,
             syslog: SyslogLevel::Notice,
             reference_designation: None,
+            on_connection: None,
         }
     }
 
@@ -661,6 +685,153 @@ impl App {
     pub fn syslog(&self) -> SyslogLevel {
         self.syslog
     }
+
+    /// Connects and runs until SIGINT/SIGTERM (Windows: Ctrl-C, Close,
+    /// Shutdown) or [`AppHandle::shutdown`]: TLS connect with Will
+    /// (REQ-LIFE-008, REQ-LIFE-016), Birth (REQ-LIFE-001/015), Health at
+    /// start, on change and every 60 s (REQ-TOP-017), the bus behavior of
+    /// the level, reconnect, Close on shutdown (REQ-LIFE-005). Blocking;
+    /// starts its own runtime (a tokio `current_thread` runtime on the
+    /// calling thread).
+    ///
+    /// A lost connection is not an error: the SDK reconnects with
+    /// exponential backoff (1 s doubling to 60 s, with jitter) and reports
+    /// [`ConnectionState::Reconnecting`].
+    ///
+    /// # Errors
+    ///
+    /// Before the first connection only: [`Error::Bootstrap`] if the CA,
+    /// the client certificate or its key cannot be loaded (REQ-MQTT-008,
+    /// REQ-CNT-009), [`Error::Invalid`] for a host that is no TLS server
+    /// name, [`Error::Io`] if the runtime cannot start.
+    pub fn run(self) -> Result<()> {
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_io()
+            .enable_time()
+            .build()?;
+        let handle = self.handle();
+        rt.block_on(async move {
+            let signals = tokio::spawn(runtime::signals(handle));
+            let result = runtime::run(self).await;
+            signals.abort();
+            result
+        })
+    }
+
+    /// A handle that outlives `run` (threads, tasks, signal handlers).
+    pub fn handle(&self) -> AppHandle {
+        self.handle.clone()
+    }
+
+    /// Same as [`App::run`] inside an existing tokio runtime (with I/O and
+    /// time enabled). The future is `Send`, so it can be spawned. It does
+    /// not listen for signals: the application owns them and calls
+    /// [`AppHandle::shutdown`].
+    ///
+    /// # Errors
+    ///
+    /// As [`App::run`].
+    #[allow(clippy::manual_async_fn)]
+    pub fn run_async(self) -> impl Future<Output = Result<()>> + Send {
+        async move { runtime::run(self).await }
+    }
+}
+
+impl std::ops::Deref for App {
+    type Target = AppHandle;
+    fn deref(&self) -> &AppHandle {
+        &self.handle
+    }
+}
+
+/// Connection state reported to [`AppBuilder::on_connection`] and by
+/// [`AppHandle::state`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConnectionState {
+    /// Connecting for the first time (TCP, TLS, CONNECT); retried with
+    /// backoff until the broker accepts.
+    Connecting,
+    /// Connected; Birth sent as first message (REQ-LIFE-001, REQ-LIFE-015).
+    Online,
+    /// Connection lost; the SDK reconnects with backoff and sends Birth
+    /// again (REQ-LIFE-001). The broker publishes the Will (REQ-LIFE-008).
+    Reconnecting,
+    /// Close sent, connection closed (REQ-LIFE-005, REQ-CMP-046). Also the
+    /// state before `run` and after it returned: no connection, no attempt.
+    Closed,
+}
+
+type Callback = Box<dyn Fn(ConnectionState) + Send + Sync>;
+
+struct Shared {
+    state: Mutex<ConnectionState>,
+    on_connection: Option<Callback>,
+    shutdown: watch::Sender<bool>,
+}
+
+/// Cheap, cloneable handle (`Send + Sync`), usable from any thread or task.
+#[derive(Clone)]
+pub struct AppHandle {
+    shared: Arc<Shared>,
+}
+
+impl AppHandle {
+    fn new(on_connection: Option<Callback>) -> Self {
+        Self {
+            shared: Arc::new(Shared {
+                state: Mutex::new(ConnectionState::Closed),
+                on_connection,
+                shutdown: watch::Sender::new(false),
+            }),
+        }
+    }
+
+    /// The current connection state.
+    pub fn state(&self) -> ConnectionState {
+        *self
+            .shared
+            .state
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+    }
+
+    /// Sends Close and stops [`App::run`] (REQ-LIFE-005). Idempotent; a
+    /// shutdown before `run` makes it return at once without connecting.
+    pub fn shutdown(&self) {
+        self.shared.shutdown.send_replace(true);
+    }
+
+    /// Sets the state and calls the callback on a change.
+    pub(crate) fn set_state(&self, state: ConnectionState) {
+        let previous = std::mem::replace(
+            &mut *self
+                .shared
+                .state
+                .lock()
+                .unwrap_or_else(PoisonError::into_inner),
+            state,
+        );
+        if previous != state {
+            log::info!("connection state: {state:?}");
+            if let Some(f) = &self.shared.on_connection {
+                f(state);
+            }
+        }
+    }
+
+    /// The shutdown flag.
+    pub(crate) fn subscribe(&self) -> watch::Receiver<bool> {
+        self.shared.shutdown.subscribe()
+    }
+}
+
+impl fmt::Debug for AppHandle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AppHandle")
+            .field("state", &self.state())
+            .field("shutdown", &*self.shared.shutdown.borrow())
+            .finish_non_exhaustive()
+    }
 }
 
 impl fmt::Debug for App {
@@ -674,6 +845,7 @@ impl fmt::Debug for App {
             .field("persistent_store", &self.store.is_persistent())
             .field("reference_designation", &self.reference_designation)
             .field("syslog", &self.syslog)
+            .field("handle", &self.handle)
             .finish()
     }
 }
