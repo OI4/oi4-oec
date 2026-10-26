@@ -1,8 +1,8 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-044 (P3-Entwurf: SDK-APIs, Bibliotheken, Prüftools)._
+_Stand: 26.10.2026, nach C-045 (P3-Abschluss)._
 
-Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 bis D-19 wie empfohlen, R-1 bis R-5 akzeptiert“.
+Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „R-1 bis R-4 akzeptiert, D-1 und D-2 wie empfohlen“.
 
 ---
 
@@ -24,22 +24,82 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-P3 ist die **Entscheidungsphase** für die SDKs und die Prüftools. Es gibt noch keinen fertigen Produktcode, sondern Skizzen, ADRs und Fragen an dich. Ich habe P3 selbst in Zyklen geteilt:
-- **C-042:** die Programmierschnittstellen (APIs) der SDKs;
-- **C-043:** die Bibliotheken;
-- **C-044:** die Architektur der Prüftools.
+**P3 ist abgeschlossen.** Was aus deinen Antworten geworden ist, steht weiter unten. Beim Umsetzen sind ein paar kleine neue Punkte entstanden:
+- **2 Entscheidungen** (D-1, D-2): ein neues, rein redaktionelles Spec-Finding und die Reihenfolge der nächsten Phasen;
+- **4 Review-Punkte** (R-1 … R-4): drei neue REQs (`draft`) und der genaue Wortlaut der zwei neuen Guideline-Sätze.
 
-Daraus ergeben sich:
-- **19 Entscheidungen** (D-1 … D-19): der P3-Plan, 6 ADRs, 10 Fragen, 2 Spec-Findings;
-- **5 Review-Punkte** (R-1 … R-5): Skizzen, Spikes, Testkatalog, Tool-Design.
+Nichts davon blockiert den Start der nächsten Phase. Die Abdeckung bleibt bei 0 Lücken.
 
-Geändert habe ich nichts, was du schon freigegeben hattest: keine REQ, keinen Vektor, kein Schema. Die Abdeckung bleibt bei 0 Lücken, Schema 2.0.0 ist unverändert.
+Log: [C-045](log/2026-10-26_C-045_p3-exit.md).
 
-Logs: [C-042](log/2026-10-26_C-042_p3-sdk-api.md), [C-043](log/2026-10-26_C-043_p3-crates.md), [C-044](log/2026-10-26_C-044_p3-tools.md).
+### Begriffe aus C-045
 
-**Tipp zum Antworten:** Jedes ADR ist so geschrieben, als hättest du bei seinen Fragen die Empfehlung gewählt. Wählst du bei einer Frage etwas anderes, passe ich das ADR in C-045 an, bevor es auf „accepted“ geht. Wenn du mit allen Empfehlungen einverstanden bist, reicht: „D-1 bis D-19 wie empfohlen, R-1 bis R-5 akzeptiert“.
+- **`Mode` (PublicationList):** sagt, *wann* eine Anwendung einen Datensatz veröffentlicht. Die Grundwerte sind `OFF_0` (nie), `ON_REQUEST_1` (nur auf Anfrage mit `Get`), `APPLICATION_2`, `SOURCE_3`, `FILTER_4` (von sich aus veröffentlichen, unterschiedlich gebündelt: mit allen Datensätzen der Anwendung, je Quelle oder einzeln). Es gibt auch kombinierte Werte, z. B. `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` = „von sich aus *und* auf Anfrage“.
+- **anfragbare Ressource:** eine Ressource, die man mit `Get` abfragen kann (Liste in MG 9.1). `Event` gehört *nicht* dazu: Ein Ereignis passiert einmal, man kann es nicht nachträglich abfragen.
+- **implizite REQ:** eine Regel, die in der Guideline ohne Schlüsselwort wie „MUST“ steht, aber offensichtlich verbindlich gemeint ist. Wir markieren sie mit `implicit: true` (so mit dir in SF-035 vereinbart).
+- **`replaced_by`:** Eine zurückgezogene REQ zeigt auf ihre Nachfolgerin. Nummern werden nie wiederverwendet.
+- **Vorab-Version `2.0.1-dev`:** der Arbeitsstand der Schemas nach 2.0.0. Die „1“ hinten heißt: nur eine kleine Änderung (hier nur die Spec-Baseline, kein Schema-Inhalt).
 
-### Begriffe aus P3
+---
+
+### D-1 – SF-103: die Beispiele in der Guideline passen nicht zur neuen Empfehlung
+
+**Worum geht es?** Mit SF-101 steht jetzt in MG 8.3.8: Für anfragbare Ressourcen *sollen* Anwendungen die kombinierten Werte nehmen, also `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` statt `APPLICATION_SOURCE_FILTER_8`. Beide bedeuten technisch dasselbe; der kombinierte Wert sagt nur ausdrücklich „man kann auch fragen“.
+
+**Das Problem:** Die Beispiele der Guideline zeigen noch die kurze Form, und zwar 13 Einträge (12 in B1.1.8, 1 in B2.6). Wer die Beispiele abschreibt, folgt der Empfehlung also nicht. Die `Event`-Einträge (`FILTER_4`) sind richtig so.
+
+**Die Wahl:**
+- **(a) Beispiele anpassen** (Empfehlung): die 13 Einträge auf den kombinierten Wert ändern, `Event` bleibt. Entwickler schreiben Beispiele ab, also sollten sie die Empfehlung zeigen. Danach baseline ich neu; neue REQs erwarte ich nicht.
+- **(b) so lassen:** Die Beispiele sind nicht falsch, nur nicht vorbildlich.
+
+### D-2 – Womit geht es weiter?
+
+P3 ist fertig. Jetzt könnten vier Phasen starten: **P4** (Rust-SDK), **P4b** (Micro-SDK für ESP32), **P5** (D7 prüft laufende Anwendungen) und **P5b** (D8 prüft Container). Fachlich hängen sie kaum voneinander ab, aber ich arbeite einen Zyklus nach dem anderen ab. Deshalb brauche ich eine Reihenfolge.
+
+**Meine Empfehlung:**
+1. **P4 zuerst.** Das Rust-SDK liegt auf dem „kritischen Pfad“: Ohne SDK keine Demos (P6), ohne Demos keine Registry (P7). Auch der Abschlusstest von D7 braucht eine Beispiel-App aus dem SDK. Die ersten Schritte (Identität, Topics, Nachrichtenmodell) laufen komplett offline.
+2. **P5 dazwischen:** D7 lernt zuerst, MQTT-Mitschnitte zu lesen und offline auszuwerten; live geht es, sobald P4 den Test-Broker liefert.
+3. **P4b und P5b danach** – oder früher, wenn dir die ESP32-Demo oder die Container-Prüfung wichtiger ist.
+
+**Gut zu wissen:** Ab dem Test-Broker (P4, Schritt 5/9) brauche ich eine laufende Container-Umgebung (z. B. Docker Desktop). Die lief beim letzten Blick (14.10.) nicht.
+
+### R-1 – REQ-RES-PUBLIST-026: kombinierte Werte nehmen (SHOULD)
+
+Die Empfehlung aus SF-101 als REQ: Wer bei einer anfragbaren Ressource von sich aus veröffentlicht, *soll* den kombinierten `ON_REQUEST_…`-Wert nehmen. Prüfung: `manual`, weil beide Werte gültig sind und kein Tool einen Fehler melden darf. Später kann D7 beim Mithören eine *Warnung* ausgeben (Kandidat für P5, wenn D-1 entschieden ist).
+
+### R-2 – REQ-RES-PUBLIST-027: `Get` geht immer, außer bei `OFF_0`
+
+Die Klarstellung aus SF-101 als REQ: Eine anfragbare Ressource antwortet auf `Get` bei jedem Modus außer `OFF_0`. In der Guideline steht „can“; wir behandeln es als verbindlich (implizites MUST nach SF-035), weil sonst `Get` nicht verlässlich wäre. D7 prüft das im Test T7-GET-03.
+
+### R-3 – REQ-TOP-028: ein Smart Device ist ein `OTConnector`
+
+Die Regel aus SF-102 als REQ: Ein Gerät, das direkt am Message Bus hängt, meldet sich mit dem `ServiceType` `OTConnector`. Prüfung `manual`: D7 kann von außen nicht erkennen, ob ein Teilnehmer ein Gerät oder eine Software ist.
+
+**Ein Detail dazu:** Genau diese Regel gab es schon einmal als REQ-TOP-007. Du hattest sie in C-020 zurückgezogen, weil die Guideline damals nichts dazu sagte. Jetzt sagt sie es. REQ-TOP-007 bleibt zurückgezogen (Nummern werden nie neu vergeben) und zeigt jetzt auf die Nachfolgerin REQ-TOP-028.
+
+### R-4 – der genaue Wortlaut der zwei neuen Guideline-Sätze
+
+**SF-102 (MG 7.2)** – wie vorgeschlagen: „A smart device connected directly to the Message Bus (1.3 Compliance Domains and Levels) uses the `ServiceType` `OTConnector`.“
+
+**SF-101 (MG 8.3.8)** – **hier bin ich vom angenommenen Text abgewichen.** Vorgeschlagen war: „Jeder Modus außer `OFF_0` erlaubt `Get`.“ Das wäre aber für `Event` falsch: Dieselbe Seite sagt, dass man `Event`-Einträge nicht anfragen kann. Ich habe deshalb beide Sätze auf anfragbare Ressourcen eingeschränkt:
+
+> „For resources that can be requested with `Get` (9.1 Resources), the `DataSetMessage` can be requested with `Get` with every `Mode` except `OFF_0`. For these resources, the values combining `ON_REQUEST_1` with publishing modes are equivalent to the publishing modes alone; publishers should use the combined values to make the availability on request explicit.“
+
+**Bitte anschauen:** Ist die Einschränkung so in Ordnung? Wenn nicht, sag mir, wie es heißen soll; ich ändere den Text und baseline neu.
+
+---
+
+### Was nach deinen Antworten passiert (C-046)
+
+1. Die angenommenen REQs setze ich auf `reviewed`.
+2. Bei D-1 (a) passe ich die 13 Beispiele an, trage SF-103 als erledigt ein und baseline neu (Schema bleibt `2.0.1-dev`).
+3. Ich starte die Phase, die du bei D-2 wählst, mit ihrem Planungszyklus.
+
+---
+
+## Begriffe aus den letzten Zyklen
+
+### Begriffe aus P3 (C-042 … C-044)
 
 - **SDK:** eine Bibliothek, mit der Hersteller ihre Anwendung OEC-fähig machen, ohne das Protokoll selbst zu programmieren.
   - **D2:** das Haupt-SDK in Rust, mit C-Schnittstelle.
@@ -55,216 +115,6 @@ Logs: [C-042](log/2026-10-26_C-042_p3-sdk-api.md), [C-043](log/2026-10-26_C-043_
 - **Testkatalog:** die Liste aller geplanten Prüfungen von D7 und D8. Jede nennt die REQs, die sie prüft.
 - **Exit-Code:** die Zahl, mit der ein Kommandozeilenprogramm endet. CI-Systeme (automatische Build-Pipelines) entscheiden daran, ob ein Lauf grün oder rot ist.
 - **JUnit-XML:** ein Berichtsformat, das praktisch jedes CI-System anzeigen kann.
-
----
-
-### D-1 – Der P3-Plan
-
-Der Auftrag war zu groß für einen einzigen Zyklus, den du sinnvoll reviewen kannst. Deshalb:
-- C-042 SDK-APIs, C-043 Bibliotheken, C-044 Prüftools – das ist erledigt;
-- **C-045** kommt nach deinen Antworten und schließt P3 ab.
-
-In ROADMAP P3 stehen außerdem:
-- **Eine Tabelle der offenen Punkte** aus den früheren ADRs, jeweils mit dem Zyklus, der sie schließt. Beispiele: die Crate-Wahl aus ADR-0011, die D9-Kandidaten aus ADR-0017, die Binary-Namen aus ADR-0014.
-- **Die Abhängigkeiten:**
-  - P4 (Rust-SDK) braucht D-2, D-3 und D-5.
-  - P4b (Micro-SDK) braucht D-4 und D-6. Es hängt nicht von P4 ab und kann parallel laufen.
-  - P5/P5b (Prüftools) brauchen D-7.
-- **Fünf konkrete Exit-Kriterien.** Zwei davon prüft `oec/check.sh` schon automatisch: dass die Skizzen kompilieren und dass jede prüfbare REQ einen geplanten Test hat.
-
-**Empfehlung:** annehmen.
-
-### D-2 – ADR-0020: so sieht das Rust-SDK aus
-
-Die wichtigsten Ideen:
-
-1. **Man wählt das Level, das Protokoll macht das SDK.** Die Anwendung sagt „ich bin Level 2“. Das SDK bietet dann automatisch alles an, was Level 2 verlangt: MAM, Health, Profile, PublicationList usw. Passt eine Einstellung nicht zum Level, lehnt `build()` sie schon beim Start ab. Ein Beispiel ist ein Speicher, der beim Neustart verloren geht, obwohl die ReferenceDesignation bleiben muss.
-2. **Die Anwendung setzt Zustände, das SDK verschickt Nachrichten.** Die App sagt nur „die Temperatur ist jetzt 21,3“. *Wann* und *wie oft* das veröffentlicht wird, entscheidet das SDK anhand der PublicationList: Modus, Intervall, Genauigkeit.
-3. **`Get`, Seitenaufteilung (Pagination), Sprache (Locale) und Abfragen (Query)** erledigt das SDK komplett. Die App merkt davon nichts.
-4. **`Set`/`Del`:** Die App entscheidet nur „erlaubt oder nicht“. Prüfen, Speichern, neu Veröffentlichen und das Status-Event als Antwort macht das SDK.
-5. **Nur TLS:** Eine unverschlüsselte Verbindung kann man gar nicht erst einstellen.
-6. Jede dieser Entscheidungen nennt die REQs, aus denen sie folgt. Ein Test prüft, dass es diese REQs wirklich gibt.
-
-**Empfehlung:** annehmen.
-
-### D-3 – ADR-0021: die C-Schnittstelle des Rust-SDK
-
-Für die vielen Hersteller, die in C programmieren:
-- **Wer räumt auf?** Was man mit `oec_…_new` bekommt, gibt man mit `oec_…_free` wieder frei. Alles andere gehört dem SDK.
-- **Strukturierte Werte als JSON-Text.** Damit gibt es keine komplizierten C-Strukturen für zehn Ressourcen. Der C-Entwickler sieht genau das Format, das auch auf dem Bus steht.
-- **Fehler** kommen als Rückgabecode, dazu eine Fehlermeldung je Thread.
-- **Rückrufe (Callbacks)** laufen nacheinander auf einem Thread des SDK.
-- **Das Verhalten ist exakt das des Rust-SDK.** Die C-Schicht ist nur eine dünne Hülle.
-
-**Empfehlung:** annehmen.
-
-### D-4 – ADR-0022: das Micro-SDK für kleine Geräte
-
-Für Mikrocontroller wie den ESP32:
-- **Kein dynamischer Speicher (kein Heap).** Alles ist statisch; der Speicherbedarf ist vorher bekannt.
-- **Ein einziger Thread**, der Reihe nach abgearbeitet.
-- **Plattformanpassung über die PAL** (siehe Begriffe).
-- **Bei jeder Verbindung wird der „letzte Wille“ (Will) neu gesetzt**, wie die Guideline es verlangt.
-- **Eine echte Uhrzeit ist Pflicht**, weil jede Nachricht einen Zeitstempel braucht.
-- **Zuerst Level 1;** Level 2/3 kommen später als Ergänzung dazu.
-
-**Empfehlung:** annehmen.
-
-### D-5 – ADR-0023: Bibliotheken für das Rust-SDK
-
-**Die wichtigste Erkenntnis:** Die MQTT-Bibliothek, mit der alle gerechnet hatten (`rumqttc`), wird praktisch nicht mehr gepflegt. Sie zieht eine TLS-Komponente mit fünf bekannten Sicherheitslücken nach sich, und Korrekturen werden nicht mehr übernommen. Deshalb schlage ich vor, den kleinen Teil von MQTT, den OEC braucht, selbst zu schreiben (siehe D-13).
-
-Der Rest sind bewährte Standardbausteine:
-- tokio für die Nebenläufigkeit;
-- rustls für TLS 1.2/1.3;
-- serde_json für JSON;
-- die Schema-Prüfung (jsonschema) nur als Option für Tests, weil sie jedes Programm um ca. 3 MB größer macht;
-- cargo-deny ab P4: Es stellt automatisch sicher, dass keine Bibliothek mit unpassender Lizenz hineinrutscht.
-
-**Empfehlung:** annehmen.
-
-### D-6 – ADR-0024: Bibliotheken für das Micro-SDK
-
-- **ESP-IDF und esp-mqtt.** Wie man damit bei jedem Wiederverbinden einen neuen Will setzt, habe ich im Quellcode nachgelesen. Auf echter Hardware prüfen wir das in P4b.
-- **JSON:** ein eigener, kleiner Leser ohne Heap (siehe D-14).
-- **Arduino** nutzt dieselbe MQTT-Basis wie ESP-IDF.
-
-**Hinweis:** ADR-0017 nannte „cJSON oder jsmn“ als Kandidaten und ließ die Wahl offen. Inzwischen wird jsmn nicht mehr gepflegt, und cJSON ist nicht mehr fest in ESP-IDF enthalten. ADR-0017 selbst habe ich nicht geändert. Nimmst du D-6 an, ergänze ich in C-045 einen Hinweis dort.
-
-**Empfehlung:** annehmen.
-
-### D-7 – ADR-0025: so funktionieren die Prüftools
-
-**D7 `oec-check`** (prüft Anwendungen und Geräte) bekommt zu `validate` drei Funktionen dazu:
-- **`monitor`:** hört passiv auf dem Bus mit und prüft jede Nachricht. Es kann eine Aufzeichnung speichern und später offline erneut abspielen; das ist gut für Fehlerberichte.
-- **`test`:** prüft eine laufende Anwendung aktiv. Es schickt `Get`/`Set`/`Del`/`Call` und bewertet die Antworten. Was es dabei an der Anwendung ändert, stellt es danach wieder her.
-- **`list` / `explain`:** zeigen den Testkatalog und erklären einzelne Tests oder REQs.
-
-**D8 `oec-infra`** (prüft Container und Plattform) hat:
-- `image`: das Container-Image offline;
-- `run`: das Image probeweise starten;
-- `container`: einen laufenden Container;
-- `host`: den Rechner der Plattform;
-- `bus`: Broker, TLS, Zugriffsrechte, Registry.
-
-Diese Namen ersetzen die Arbeitstitel `inspect-…` aus der ROADMAP.
-
-**Bewertung:** Ob ein Verstoß ein *Fehler* oder nur eine *Warnung* ist, hängt davon ab, ob die REQ beim geprüften Level MUST (Pflicht) oder SHOULD (Empfehlung) ist.
-
-**Berichte** gibt es als Text, als JSON und als JUnit-XML für CI-Systeme.
-
-**Unabhängigkeit:** Die Tools nutzen keinen SDK-Code (Q-009). Ein Test stellt das automatisch sicher.
-
-**Empfehlung:** annehmen.
-
-### D-8 bis D-17 – die offenen Fragen
-
-| # | Frage | Worum es geht | Meine Empfehlung |
-|---|---|---|---|
-| D-8 | Q-021 | Muss man im Rust-SDK „async“ programmieren (eine anspruchsvollere Technik)? | **Nein, normal (blockierend) als Standard.** Async nur, wer es will. So ist es einfacher und gleich wie in C. |
-| D-9 | Q-022 | Wie liest die App ihre Einstellungen (Config)? | **Erst einfach über Namen** (`number("Polling", "Interval")`), eine bequemere typisierte Variante später. |
-| D-10 | Q-023 | Wie übergibt man in C Optionen? | **Über einzelne Setter-Funktionen und JSON-Text** statt über C-Strukturen. Das ist stabiler bei neuen Optionen. |
-| D-11 | Q-024 | Schreiben wir das Logger-Demo in C? | **Ja.** So beweisen wir, dass der C-Weg für die vielen C-Hersteller wirklich funktioniert. Das Demo bleibt bei Level 1 und wird über Datei/Umgebung konfiguriert (wie in ADR-0016). |
-| D-12 | Q-025 | Welches Namenspräfix bekommt das Micro-SDK? | **`oecm_`.** Kurz und ohne Namenskonflikt mit `oec_` des großen SDK. |
-| D-13 | Q-026 | Welche MQTT-Bibliothek nutzt das Rust-SDK? | **Einen eigenen, kleinen MQTT-Teil.** OEC braucht nur einen kleinen, festen Ausschnitt von MQTT 3.1.1. Der Spike zeigt: ca. 300 Zeilen für den Kern, im Produkt ca. 1.000–1.500 Zeilen mit Tests. Die Alternativen sind ein junger Fork mit nur einem Betreuer oder eine C-Bibliothek mit OpenSSL (schwieriger zu bauen). |
-| D-14 | Q-027 | Wie liest das Micro-SDK JSON? | **Mit einem eigenen kleinen Leser ohne Heap**, mit Zufallstests (Fuzzing) abgesichert. Die Alternative cJSON braucht mehr Speicher. |
-| D-15 | Q-028 | Braucht man für eine volle Level-Bestätigung den Proxy-Modus? | **Ja.** Nur so sieht D7, ob die Anwendung TLS ≥ 1.2 nutzt, Zertifikate prüft und den Will setzt. Ohne Proxy werden diese Tests übersprungen, und das Ergebnis heißt „nicht schlüssig“ statt „bestanden“. |
-| D-16 | Q-029 | Soll sich D7 beim Testen auf dem Bus wie eine Anwendung anmelden? | **Standardmäßig nein**, damit Testläufe keine Spuren in Registry und Logs hinterlassen. Mit `--announce` ist es möglich. |
-| D-17 | Q-030 | Neuer Exit-Code 4 „nicht schlüssig“? | **Ja.** 0 = bestanden, 1 = Verstoß, 2 = falscher Aufruf, 3 = interner Fehler, **4 = kein Verstoß gefunden, aber Pflichttests konnten nicht laufen**. Sonst würde ein unvollständiger Lauf wie „bestanden“ aussehen. |
-
-### D-18 – SF-101: `Get` und der PublicationList-Modus
-
-In der Guideline steht, dass man bei `ON_REQUEST` die Daten per `Get` abfragen kann. Bei den anderen Modi (`APPLICATION`, `SOURCE`, `FILTER`) steht aber *auch*: „Zusätzlich kann man sie abfragen.“ Damit wären die kombinierten Modi (`ON_REQUEST_APPLICATION…`) überflüssig, und es ist unklar, ob `Get` ohne `ON_REQUEST` erlaubt ist.
-
-**Mein Vorschlag:**
-- Bei jedem Modus außer `OFF` darf man per `Get` abfragen.
-- `ON_REQUEST` allein heißt „*nur* auf Anfrage, sonst nie veröffentlichen“.
-- In den kombinierten Werten ist `ON_REQUEST` nur ein Hinweis.
-- Dazu ein Satz in MG 8.3.8.
-
-**Die Alternative:** `Get` nur mit `ON_REQUEST`. Dann bräuchten MAM und Health eine Ausnahme, weil sie ab Level 2 immer abfragbar sein müssen.
-
-**Folge:** Setze ich den Text um, ändert sich der Guideline-Stand. Dann muss ich neu baselinen, und die Schemas bekommen formal eine Vorab-Version `2.0.1-dev`; inhaltlich bleiben sie gleich.
-
-### D-19 – SF-102: welcher `ServiceType` für ein Smart Device?
-
-Die Guideline erlaubt Geräte, die sich direkt mit dem Bus verbinden (z. B. ein Temperatursensor mit eigenem MQTT). Die sieben `ServiceType`-Werte beschreiben aber alle *Anwendungen*, und keiner passt richtig zu so einem Gerät.
-
-**Mein Vorschlag:**
-- Das Gerät nimmt **`OTConnector`**, denn es stellt ein OT-Asset (sich selbst) auf dem Bus bereit.
-- Seine Geräteklasse (`DeviceClass`) ist die eigene Produktklasse.
-- Dazu ein Satz in MG 7.2.
-
-**Die Alternative:** ein neuer `ServiceType` `Device`. Das bräuchte eine neue Guideline-Version und eine Schema-Änderung (2.1.0).
-
----
-
-### R-1 – Rust-Skizze (`oec/sdk/rust/sketch`)
-
-Vier Beispiele zeigen, wie sich das SDK anfühlt:
-- **„Hello World“ in 16 Zeilen;**
-- ein Gerät als Datenquelle, das auf `Set` reagiert;
-- Einstellungen (Config);
-- die Gegenseite, die Daten abonniert (Consumer).
-
-**Bitte anschauen:** Liest sich das so, wie du dir ein SDK für Hersteller wünschst?
-
-### R-2 – C-Skizzen (`oec.h` für das große SDK, `oecm.h` für das Micro-SDK)
-
-Beide Header und drei Beispielprogramme werden in `oec/check.sh` als C17 geprüft.
-
-**Bitte anschauen:**
-- die Regeln, wer welchen Speicher freigibt;
-- die Gegenüberstellung, was bei `oec_` und `oecm_` gleich und was bewusst anders ist (in ADR-0022).
-
-### R-3 – die zwei Spikes
-
-- **`schema-embed`:** Die Schemas werden beim Bauen ins Programm eingebettet und liefern dieselben Ergebnisse wie unsere Schema-Prüfung (630 Fälle). Kosten: ca. 3 MB.
-- **`mqtt-codec`:** Der eigene MQTT-Kern ist klein und testbar (Beleg für D-13).
-
-Beides ist Wegwerf-Code und klar als Spike markiert.
-
-### R-4 – der Testkatalog von D7/D8
-
-**D7** hat 54 geplante Tests:
-- 19 passive, die nur mithören;
-- 35 aktive.
-
-**D8** hat 17 Tests.
-
-Jede REQ, die ein Tool prüfen kann, steckt in mindestens einem Test. Ein automatischer Test passt darauf auf. Kommt durch eine neue Guideline-Version eine REQ dazu, wird `oec/check.sh` rot, bis der Katalog nachgezogen ist.
-
-5 REQs stehen bewusst auf „manuell“, mit Begründung:
-- REQ-CMP-011/012: Das sind Regeln *für das Tool*, nämlich dass ohne Angabe Level 3 gilt.
-- REQ-LIFE-011…013: Was ein Empfänger intern tut, kann man von außen nicht sehen.
-
-**Bitte stichprobenartig anschauen:** die Gruppen T7-CON/T7-LIFE (Verbindung, Proxy) und T7-GET/T7-SET.
-
-### R-5 – das Tool-Design (`oec/conformance/DESIGN.md`)
-
-Die Details hinter D-7:
-- Aufbau des Codes;
-- alle Befehle und Optionen;
-- Format der Aufzeichnung;
-- was `test` an der Anwendung ändert und wie es das zurücksetzt;
-- Inhalt der Berichte;
-- Konfiguration;
-- Selbsttest mit einer simulierten Anwendung;
-- Verteilung als einzelne Programmdatei für Windows, macOS und Linux.
-
-**Bitte anschauen:** Passen Befehlsnamen und Bedienung zu den Herstellern und Betreibern, die du im Kopf hast?
-
----
-
-### Was nach deinen Antworten passiert (C-045)
-
-1. Ich passe die ADRs an deine Antworten an und setze sie auf „accepted“.
-2. Wenn du SF-101/102 annimmst, schreibe ich die Sätze in die Guideline und baseline neu.
-3. Ich verfeinere die ROADMAP für P4/P4b/P5/P5b und schließe P3 ab. Danach können SDK, Micro-SDK und Prüftools parallel starten.
-
----
-
-## Begriffe aus den letzten Zyklen
 
 ### Begriffe aus C-041
 
@@ -314,7 +164,19 @@ Die Details hinter D-7:
 
 ---
 
-## Was aus deinem letzten Review (C-041) geworden ist
+## Was aus deinem letzten Review (C-042 … C-044) geworden ist
+
+Du hast alles wie empfohlen angenommen („D-1 bis D-19 wie empfohlen, R-1 bis R-5 akzeptiert“). Das habe ich in C-045 daraus gemacht:
+- **D-1 – P3-Plan:** umgesetzt; P3 ist jetzt in ROADMAP und STATUS abgeschlossen. Alle fünf Exit-Kriterien sind erfüllt.
+- **D-2 bis D-7 – ADR-0020 … 0025:** alle stehen auf „accepted“. Jedes ADR hat einen kurzen Abschnitt „PO decision“, der deine Antworten nennt (`2658c21`). ADR-0017 hat einen Nachtrag: Das Micro-SDK nimmt eigenen JSON-Code, nicht jsmn oder cJSON.
+- **D-8 bis D-17 – Q-021 … Q-030:** stehen in `OPEN-QUESTIONS.md` unter „Decided“, alle Option (a). Offen ist nur noch Q-011 (Veröffentlichung/CRA, geparkt).
+- **D-18 – SF-101** und **D-19 – SF-102:** in die Guideline eingebaut (`df38e72`, `ccb475a`), im Register „resolved“ (`13d6b1a`). Beim Einbau habe ich den Satz zu SF-101 eingeschränkt (siehe R-4) und ein neues Finding SF-103 gefunden (siehe D-1).
+- **Neu-Baseline:** auf `ccb475a`. Daraus kamen 2 neue Inventar-Einträge und die 3 neuen REQs von R-1 bis R-3.
+- **Schema:** Version 2.0.0 bleibt eingefroren. Weil sich die Spec-Baseline geändert hat, heißt der Arbeitsstand jetzt `2.0.1-dev`. Am Inhalt der Schemas hat sich nichts geändert. Die Release-Prüfung konnte noch nicht mit Vorab-Versionen umgehen; das habe ich repariert.
+- **R-1 bis R-5:** angenommen. Skizzen, Spikes, Testkatalog und Tool-Design bleiben so; die Kommentare in den Skizzen nennen SF-101/102 nicht mehr „offen“.
+- **ROADMAP:** P4, P4b, P5, P5b und P6 sind nach deinen Antworten verfeinert. Wichtig: Die Logger-Demo wird in C geschrieben (über die C-Schnittstelle) und über Datei/Umgebungsvariablen konfiguriert. Der alte Satz „konfigurierbar über die `Config`-Ressource“ ist korrigiert.
+
+## Was aus dem Review davor (C-041) geworden ist
 
 - **D-1 – Nachtrag C-041 zu ADR-0019:** angenommen; im ADR steht er jetzt als „accepted“ (`03ec842`).
 - **D-2 – P2 abschließen:** angenommen. P2 ist in ROADMAP und STATUS als abgeschlossen markiert; die aktuelle Phase ist jetzt P3.
