@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach deinem Review von C-051 (P4 läuft). **Für dich offen: ein Review, R-1 (REQ-CNT-003 nach SF-105).**_
+_Stand: 26.10.2026, nach deinem Review von C-051 und Nachtrag 2 (P4 läuft). **Für dich ist nichts offen** (R-1 angenommen, REQ-CNT-003 steht auf `reviewed`)._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -26,31 +26,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 C-051 hat die **Entwicklungsumgebung** gebracht: einen echten Mosquitto-Broker in Docker mit TLS, selbst erzeugte Test-Zertifikate und Beispiel-Ordner für `/etc/oi4`. Dagegen laufen jetzt die **Interop-Tests** des SDK (8 grün, kein Fehler im SDK).
 
-Deine Entscheidung zu D-1 (SF-105, „Vorschlag komplett“) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-051) geworden ist“. Dadurch hat sich eine reviewte REQ geändert. Die schaust du dir bitte noch einmal an (R-1).
-
-### R-1 – REQ-CNT-003: neuer Text nach SF-105
-
-**Worum geht es?** REQ-CNT-003 beschreibt den Inhalt von `broker.json` und was der Broker damit tun muss. Durch deine Entscheidung stehen in RIG 4.1.1 zwei neue Sätze. Die REQ muss ihnen folgen. Weil sich ihr Text ändert, steht sie wieder auf `draft`.
-
-**Was sich ändert:**
-- **Bisher** stand am Ende nur: „Der Broker nimmt Nutzlasten bis MaxPacketSize an.“ Das war von uns abgeleitet, die Guideline sagte es nicht ausdrücklich.
-- **Neu** steht dort:
-  - Der Broker nimmt jede Nutzlast bis `MaxPacketSize` an.
-  - Begrenzt er das ganze Paket, muss seine Grenze um 65544 Byte größer sein (Platz für Kopf und Topic).
-  - Nutzlast + Topic-Länge + 4 dürfen 268435455 nicht übersteigen.
-- Dazu kommen die drei neuen Sätze als Zitate und die zwei neuen Guideline-Stellen in der Liste der Fundstellen.
-- In den Notizen steht jetzt:
-  - Zu große Nachrichten regeln wir bewusst nicht (Teil (c)). Der Broker darf sie verwerfen oder die App trennen.
-  - Die Obergrenze aus (b) ist eine Eigenschaft von MQTT selbst; dafür braucht es keine eigene Prüfung.
-  - D8 prüft nur, dass erlaubte Größen durchkommen (A-50).
-
-**Was gleich bleibt:**
-- „muss“ (MUST) und die Prüfung durch D8;
-- das Schema für `broker.json` und die 18 `broker.json`-Vektoren, weil sich die Form der Datei nicht ändert.
-
-Den vollständigen Text findest du in `oec/spec/requirements/view/cnt.md` unter REQ-CNT-003.
-
-Antwort z. B. „R-1 akzeptiert“.
+Deine Entscheidung zu D-1 (SF-105, „Vorschlag komplett“) und dein „R-1 akzeptiert“ sind umgesetzt, siehe unten „Was aus deinem letzten Review (C-051) geworden ist“. **Für dich ist gerade nichts offen.**
 
 Die Punkte A-1 … A-50 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
 
@@ -223,8 +199,7 @@ Neu aus deinem Review von C-051:
 
 ### Was als Nächstes passiert (C-052)
 
-1. **Dein Review von R-1** (REQ-CNT-003).
-2. **P5-Einschub – D7** (das Compliance-Tool in Go):
+1. **P5-Einschub – D7** (das Compliance-Tool in Go):
    - eine eigene MQTT-Anbindung (`internal/mqttwire`);
    - Aufzeichnen und Abspielen von Nachrichten (`internal/capture`, `monitor --replay`);
    - danach `monitor` live gegen den Dev-Broker aus C-051.
@@ -315,9 +290,11 @@ Deine erste Antwort war „Option b, da sie präzise ist“. (b) war aber nur ei
   - „Der Broker nimmt jede Nutzlast bis `MaxPacketSize` an; begrenzt er das ganze Paket, muss die Grenze um 65544 Byte größer sein.“
   - Zu zu großen Nachrichten steht bewusst nichts (Teil (c)).
 - **Register:** SF-105 ist „resolved“ (`d220c48`). Es gibt kein offenes Finding mehr; das nächste heißt SF-106.
-- **Neu-Baseline auf `59e3ae3`:** Die Zahl der Guideline-Stellen steigt von 1399 auf 1401. Die zwei neuen gehören zu REQ-CNT-003; die ist jetzt wieder `draft` (R-1).
+- **Neu-Baseline auf `59e3ae3`:** Die Zahl der Guideline-Stellen steigt von 1399 auf 1401. Die zwei neuen gehören zu REQ-CNT-003; die stand deshalb wieder auf `draft` (R-1).
 - **Schema:** Version `2.0.1-dev` mit Baseline `59e3ae3`, am Inhalt ändert sich nichts.
 - **Dev-Broker, SDK und Interop-Test** waren schon so gebaut. Daran ändert sich nichts.
+- **R-1 – REQ-CNT-003:** Du hast geschrieben „R-1, REQ-CNT-003 akzeptiert“. Die REQ steht jetzt auf `reviewed` (`41c9f44`, Nachtrag 2). Es gibt keinen Entwurf mehr.
+  - Neu steht in ihr: Der Broker nimmt jede Nutzlast bis `MaxPacketSize` an; begrenzt er das ganze Paket, ist die Grenze um 65544 Byte größer; Nutzlast + Topic-Länge + 4 bleiben unter 268435455.
 
 Zur Erinnerung, worum es ging:
 

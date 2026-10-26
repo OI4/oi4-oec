@@ -357,3 +357,10 @@ Start prompt: `prompt.md` (German, not committed).
 SF-106, REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-TOP-029, V-PAY-246, V-TOP-138 (valid) / V-TOP-255 (invalid), V-BRK-019, P-129, ADR-0027, Q-031, A-51.
 
 The agent decision for C-052 is unchanged: a **new agent**, start prompt in `prompt.md`.
+
+## Addendum 2 – PO review: R-1
+
+- PO input (2026-10-26): "R-1, REQ-CNT-003 akzeptiert".
+- `spectool review REQ-CNT-003` → `reviewed` (`41c9f44`); `render` and `coverage` OK (158 REQs, 0 gaps). No draft is left.
+- Nothing else changed: guideline `59e3ae3`, schema `2.0.1-dev` @ `59e3ae3`, catalogs, SDK and dev environment stay as they are.
+- Nothing is open for the PO. Next ids unchanged (SF-106 … A-51). C-052 still runs with a **new agent** (`prompt.md` updated).

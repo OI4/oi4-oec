@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, after the C-051 review (guideline `59e3ae3`, register `d220c48`); P4 in progress. **One item to review: R-1 (REQ-CNT-003 after SF-105).**_
+_Last updated: 2026-10-26, after the C-051 review and its addendum 2 (guideline `59e3ae3`, register `d220c48`); P4 in progress. **Nothing open for the PO** (R-1 accepted, REQ-CNT-003 `reviewed`)._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -26,6 +26,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-050 (P4 increment 5b): runtime in `oec` – TLS transport on tokio + rustls (CA-only trust, client certificate or credentials, PKCS#8 keys with passphrase), `App::run`/`run_async`/`handle`, `AppHandle`, `ConnectionState`, `on_connection`, reconnect with backoff, driving the `Session` and `Lifecycle` of C-049; runtime tests against an in-process TLS test broker; new dependencies tokio, rustls, tokio-rustls, rustls-pki-types, pkcs8 (dev: rcgen) under `cargo deny` without exceptions. No reviewed item changed, no new vector, no spec finding, so there is nothing to decide or review; A-32 … A-41 are for information. Two of them refine the accepted sketch contract (ADR-0020 amendment C-050) and are worth a look: **A-34** (an explicit `Broker` needs a CA) and **A-37** (`run_async` installs no signal handlers). Increment 9 (C-051) runs in a new agent; `prompt.md` is filled.
 - C-051 (P4 increment 9): dev environment `oec/dev` – Mosquitto 2.1.2 pinned by digest (TLS 1.2/1.3, a password-file listener and a client-certificate listener), a dev PKI generator in Go (standard library), two sample container storages; opt-in interop tests of increment 5 against it via `oec/dev/interop.sh` (8 green, the gate stays without Docker); the C-050 smoke test is replaced. No SDK defect, no new dependency, no reviewed item changed, no new vector. **One finding: SF-105** (`MaxPacketSize` is a payload limit, brokers limit whole packets) → **D-1** to decide. A-42 … A-49 are for information. The P5 interleave (C-052) runs in a new agent; `prompt.md` is filled.
 - C-051 review: your answer to D-1 ("Vorschlag komplett", after a first reply "option b" that I asked you to clarify) is applied: RIG 4.1.1 in `59e3ae3`, **SF-105 resolved** (`d220c48`), re-baseline on `59e3ae3` (1401 inventory items). REQ-CNT-003 follows the new text and is back to `draft` (R-1). D8 T8-BUS-01 also covers REQ-CNT-003 (A-50).
+- C-051 addendum 2: you accepted R-1; REQ-CNT-003 is `reviewed` (`41c9f44`). No drafts, no open finding.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `59e3ae3` (re-baseline, no content change).
 
@@ -35,7 +36,6 @@ Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| R-1 | REQ-CNT-003 after SF-105 (broker accepts every payload ≤ `MaxPacketSize`, packet limit + 65544, payload + topic length + 4 ≤ 268435455) | review | C-051 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -89,17 +89,10 @@ Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026
 
 ## Decisions and review items
 
-### R-1 – REQ-CNT-003 after SF-105 (C-051 review)
-
-- **Why:** RIG 4.1.1 has two new sentences since `59e3ae3` (your order D-1 "Vorschlag komplett"). The re-baseline found them as new inventory items RIG-4.1.1-fb78a5f5 (MUST NOT) and RIG-4.1.1-674b5bb8 (MUST). Both belong to REQ-CNT-003 (content of `broker.json`, platform/broker). The statement changes, so it is not a mechanical remap → `draft`.
-- **New end of the statement** (before: "The broker accepts payloads up to MaxPacketSize."): "The broker accepts every MQTT payload up to MaxPacketSize; if the broker limits the size of the whole MQTT packet, this limit includes the fixed header, the topic and the packet identifier and is therefore larger than MaxPacketSize (by 65544 octets for any topic). A payload is limited further by the MQTT packet: payload + topic length + 4 does not exceed 268435455."
-- **Quotes:** plus the three new sentences of RIG 4.1.1. **Inventory:** plus the two new keys.
-- **Notes:** the derivation "follows from the purpose of the field" is replaced by "RIG 4.1.1 since SF-105". (c) is deliberately not ruled: a larger payload violates REQ-PAG-005, so the broker may discard it or close the connection. (b) restates the MQTT remaining-length limit and needs no own check. D8 checks only that payloads up to `MaxPacketSize` are accepted (T8-BUS-01, A-50).
-- Unchanged: keyword MUST, verification `d8`, schema `platform/broker.schema.json` and the vectors V-BRK-001 … 018 (the form of `broker.json` is the same).
-- **View:** [`oec/spec/requirements/view/cnt.md`](../oec/spec/requirements/view/cnt.md), section REQ-CNT-003.
-- **PO:** ☐ accept ☐ change: …
-
 ### Answered earlier
+
+Answered after the C-051 review (2026-10-26) and applied in C-051 addendum 2:
+- R-1 – REQ-CNT-003 after SF-105: ☑ accepted → `reviewed` (`41c9f44`).
 
 Answered in the C-051 review (2026-10-26) and applied in C-051 addendum 1:
 - D-1 – SF-105 (`MaxPacketSize` vs. the packet limit of the broker): first reply "option b", which was ambiguous ((b) is a part of the proposal) and was clarified; then ☑ "Vorschlag komplett" = (a) + (b) + (c) → guideline `59e3ae3` (RIG 4.1.1), SF-105 resolved (`d220c48`), re-baseline, REQ-CNT-003 → R-1.
@@ -396,5 +389,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-052)
 
-1. **R-1 (REQ-CNT-003)** – your review.
-2. P5 interleave – D7 (Go, `oec/conformance`): `internal/mqttwire`, `internal/capture`, `monitor --replay`, then `monitor` live against the dev broker `oec/dev`. Runs in a new agent (start prompt in `prompt.md`).
+1. P5 interleave – D7 (Go, `oec/conformance`): `internal/mqttwire`, `internal/capture`, `monitor --replay`, then `monitor` live against the dev broker `oec/dev`. Runs in a new agent (start prompt in `prompt.md`).
