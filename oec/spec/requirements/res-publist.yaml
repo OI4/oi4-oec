@@ -569,7 +569,7 @@ requirements:
         text: For these resources, the values combining ON_REQUEST_1 with publishing modes are equivalent to the publishing modes alone; publishers should use the combined values to make the availability on request explicit.
     verification: [manual]
     inventory: [MG-8.3.8-b1ebc429]
-    status: draft
+    status: reviewed
     notes: >-
       New in C-045 (guideline text of SF-101, ccb475a). Both values are valid
       and allow Get (REQ-RES-PUBLIST-027), so schema and D7 validate accept
@@ -596,7 +596,7 @@ requirements:
         text: For resources that can be requested with Get (9.1 Resources), the DataSetMessage can be requested with Get with every Mode except OFF_0.
     verification: [d7-test]
     inventory: [MG-8.3.8-dd632f21]
-    status: draft
+    status: reviewed
     notes: >-
       New in C-045 (guideline text of SF-101, ccb475a). Summarizes the
       "Additionally ... can be requested" parts of REQ-RES-PUBLIST-009 ... 011

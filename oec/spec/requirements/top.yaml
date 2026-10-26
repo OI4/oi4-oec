@@ -616,7 +616,7 @@ requirements:
       - ref: MG 7.2
         text: A smart device connected directly to the Message Bus (1.3 Compliance Domains and Levels) uses the ServiceType OTConnector.
     verification: [manual]
-    status: draft
+    status: reviewed
     notes: >-
       New in C-045 (guideline text of SF-102, ccb475a); the sentence has no
       keyword, so it carries no inventory item. It reintroduces the rule of

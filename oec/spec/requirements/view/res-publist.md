@@ -30,8 +30,8 @@ Guideline baseline: `ccb475a` · Area status: reviewed · Sections: MG 8.3.8, MG
 | [REQ-RES-PUBLIST-023](#req-res-publist-023) | Set PublicationList is protected by ACL | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-RES-PUBLIST-024](#req-res-publist-024) | Status event after Set PublicationList | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-PUBLIST-025](#req-res-publist-025) | Changed entry is published after a successful Set | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-RES-PUBLIST-026](#req-res-publist-026) | Combined ON_REQUEST values for requestable resources | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | draft |
-| [REQ-RES-PUBLIST-027](#req-res-publist-027) | Get with every Mode except OFF_0 | MUST* | MUST | MUST | MUST | messaging | d7-test | draft |
+| [REQ-RES-PUBLIST-026](#req-res-publist-026) | Combined ON_REQUEST values for requestable resources | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
+| [REQ-RES-PUBLIST-027](#req-res-publist-027) | Get with every Mode except OFF_0 | MUST* | MUST | MUST | MUST | messaging | d7-test | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -551,7 +551,7 @@ For an entry of a resource that can be requested with Get, a publisher that enab
 - Condition: The resource of the entry can be requested with Get (MG 9.1) and its Mode enables APPLICATION_2, SOURCE_3 or FILTER_4.
 - Refs: MG 8.3.8, SF-101
 - Verification: manual
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.8-b1ebc429
 
 > For these resources, the values combining ON_REQUEST_1 with publishing modes are equivalent to the publishing modes alone; publishers should use the combined values to make the availability on request explicit.
@@ -571,7 +571,7 @@ For a resource that can be requested with Get, the application answers a Get for
 - Condition: The resource can be requested with Get (MG 9.1) and the application answers Get for it (from Level 2 required by REQ-CMP-015).
 - Refs: MG 8.3.8, SF-101, SF-035
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.8-dd632f21
 
 > For resources that can be requested with Get (9.1 Resources), the DataSetMessage can be requested with Get with every Mode except OFF_0.

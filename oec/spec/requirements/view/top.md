@@ -32,7 +32,7 @@ Guideline baseline: `ccb475a` · Area status: reviewed · Sections: MG 7
 | [REQ-TOP-025](#req-top-025) | Syslog level Informational is used carefully | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-TOP-026](#req-top-026) | Syslog levels are chosen by their meaning | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-TOP-027](#req-top-027) | Log level is configurable | SHOULD | SHOULD | SHOULD | SHOULD | messaging | d7-test | reviewed |
-| [REQ-TOP-028](#req-top-028) | Directly connected smart device uses OTConnector | MUST* | MUST | MUST | MUST | messaging | manual | draft |
+| [REQ-TOP-028](#req-top-028) | Directly connected smart device uses OTConnector | MUST* | MUST | MUST | MUST | messaging | manual | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -610,7 +610,7 @@ A smart device connected directly to the Message Bus with its own MQTT client us
 - Condition: The device is directly connected (MG 1.3).
 - Refs: MG 7.2, MG 1.3, SF-102, SF-035
 - Verification: manual
-- Status: draft
+- Status: reviewed
 
 > A smart device connected directly to the Message Bus (1.3 Compliance Domains and Levels) uses the ServiceType OTConnector.
 > — MG 7.2
