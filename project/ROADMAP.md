@@ -182,7 +182,7 @@ Incremental, each increment test-covered. Workspace layout, crate roles, test-ve
 
 1. ✅ (C-046) Identity: IL validation, base64url codec, Oi4Identifier builder (always dnp-encodes its elements, MG 4.1/4.3.1/A3, SF-104 resolved in C-046 addendum 3).
 2. ✅ (C-046) Topic model: build/parse/validate, wildcard subscription builder.
-3. Message model: typed NetworkMessage/DataSetMessage/MetaData/Action messages (OPC UA 1.05.04, fixed content masks), MessageId/`ReplyTo`/Action correlation (`RequestId`, `CorrelationData`, `ResponseAddress`), schema validation hook (schemas embedded by `build.rs`, ADR-0019 §7/ADR-0023; the SDK reports `schema.Version`/`schema.Baseline` of the embedded tree – the C-043 spike reported the newest release manifest, which differs during a pre-release such as `2.0.1-dev`).
+3. ✅ (C-047) Message model: typed NetworkMessage/DataSetMessage/MetaData/Action messages (OPC UA 1.05.04, fixed content masks), MessageId/`ReplyTo`/Action correlation (`RequestId`, `CorrelationData`, `ResponseAddress`), schema validation hook (schemas embedded by `build.rs`, ADR-0019 §7/ADR-0023; the SDK reports `schema.Version`/`schema.Baseline` of the embedded tree – the C-043 spike reported the newest release manifest, which differs during a pre-release such as `2.0.1-dev`). Done in C-047: modules `message`, `resource`, `schema` of `oec-core`; semantics in ADR-0026 §7 (amendment C-047), dependency features in ADR-0023 amendment C-047.
 4. Bootstrap (blocking API by default, `run_async` for tokio users, Q-021; string-keyed Config getters, Q-022): explicit configuration (smart devices, Level 1) and optional container storage contract (`broker.json`, credentials/certs, ClientId from hostname).
 5. Connection & lifecycle: TLS MQTT client (own sans-IO MQTT 3.1.1 codec and session in `oec-core` on tokio + rustls, ADR-0023/Q-026; fuzzing and interop tests against the dev broker of increment 9), Birth/Will/Close, Health heartbeat incl. `Details[]`, reconnect; selectable compliance level (L1/L2/L3).
 6. Provider side: resources registry, automatic answers to `Get` (for every `Mode` except `OFF_0`, REQ-RES-PUBLIST-027), `Profile`/`PublicationList` generation with combined `ON_REQUEST_…` defaults (REQ-RES-PUBLIST-026), publish modes, intervals/precisions, pagination, `MaxPacketSize`.
@@ -191,12 +191,12 @@ Incremental, each increment test-covered. Workspace layout, crate roles, test-ve
 9. Dev environment: docker compose with TLS broker (e.g. Mosquitto), generated dev PKI, sample `/etc/oi4` layout.
 10. C ABI `oec-ffi` (ADR-0021, added in C-042): cbindgen header that keeps the contract of the P3 sketch `oec.h` (builder handles, string setters, JSON values, Q-023), shared + static library, C examples (`hello.c`, logger shape) as tests, also under AddressSanitizer. Prerequisite of the logger demo in C (P6, Q-024).
 
-**Order and cycle cut** (agent, reason in `log/2026-10-26_C-046_p4-start.md`; cycles after C-047 are a plan and are re-cut at each cycle end):
+**Order and cycle cut** (agent, reason in `log/2026-10-26_C-046_p4-start.md`, re-checked in `log/2026-10-26_C-047_message-model.md` without change; cycles after C-047 are a plan and are re-cut at each cycle end):
 
 | Cycle | Increment | Content | New runtime dependencies (ADR-0023) |
 |---|---|---|---|
 | **C-046** ✅ | 1, 2 | workspace `oec/sdk/rust` (ADR-0026), `oec-core` modules `il` and `topic`, JSON export `oec/spec/export` as the vector contract, gate (fmt, clippy pedantic, tests, doc, cargo-deny) | none (dev: serde_json) |
-| C-047 | 3 | message model in `oec-core`, correlation, schema embedding (`build.rs`, `strict-validation`), payload vectors (valid and invalid, verdicts equal to the schema gate) | serde, serde_json, jsonschema `=0.60.1` (feature), time, uuid |
+| **C-047** ✅ | 3 | message model in `oec-core`, correlation, schema embedding (`build.rs`, `strict-validation`), payload vectors (valid and invalid, verdicts equal to the schema gate) | serde, serde_json, jsonschema `=0.60.1` (feature), time, uuid (20 crates, 81 with the feature; no deny exception) |
 | C-048 | 4 | crate `oec`: `App`/`AppBuilder`, `Level`, `Bootstrap` (explicit + container storage), `Store`, `Error`; the sketch API moves into `oec` piece by piece | thiserror, log |
 | C-049 … | 5 | MQTT 3.1.1 codec and session in `oec-core` (from spike `mqtt-codec`), fuzzing; transport on tokio + rustls; Birth/Will/Close, Health heartbeat, reconnect, level selection | tokio, rustls, tokio-rustls, rustls-pki-types |
 | then | 9 | dev environment (compose, Mosquitto with TLS, dev PKI, sample `/etc/oi4`): carries the interop tests of increment 5 (ADR-0023 Consequences), so it comes right after 5 | – (test infrastructure) |
@@ -210,7 +210,7 @@ Why this cut: increments 1–2 have no runtime dependencies and one vector contr
 
 **Exit criteria** (concrete):
 1. Increments 1–10 are implemented; every public item of ADR-0020 and ADR-0021 exists in `oec`/`oec-ffi`; the sketch is deleted and its REQ walker runs in the workspace.
-2. All shared vectors relevant to D2 pass in `oec/check.sh`: IL, dnp, Oi4Identifier, topic, matrix (increments 1–2) and payload (increment 3, same verdicts as the schema gate in the `strict-validation` build).
+2. All shared vectors relevant to D2 pass in `oec/check.sh`: IL, dnp, Oi4Identifier, topic, matrix (increments 1–2) and payload (increment 3, same verdicts as the schema gate in the `strict-validation` build). Met since C-047 for the current vector set; stays enforced by the gate.
 3. Integration tests against the dev TLS broker pass (increments 5, 9), including D7 `test` against the SDK example app as soon as D7 `test` exists (P5).
 4. The C examples (`hello.c`, logger shape) run against `oec-ffi`, also under AddressSanitizer.
 5. The gate is green: fmt, clippy pedantic, tests, doc, cargo-deny (no ignored advisory without a logged reason); builds on Linux/macOS/Windows amd64 and arm64, ARMv7 Linux best effort (Q-008).
