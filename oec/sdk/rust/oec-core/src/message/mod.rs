@@ -3,7 +3,9 @@
 //! `ua-action-response`, their DataSetMessages and helper DataSets.
 //!
 //! The model encodes with the fixed content masks of the guideline
-//! (REQ-MSG-004, REQ-MSG-017, REQ-ACT-003). Decoding is tolerant towards
+//! (REQ-MSG-003, REQ-MSG-004, REQ-MSG-017, REQ-ACT-003) and writes only the
+//! keys the guideline defines; publisher-defined names exist only inside a
+//! DataSet (Data, Config groups; REQ-MSG-001). Decoding is tolerant towards
 //! keys beyond the guideline (REQ-MSG-046) and checks types, required
 //! fields, closed enumerations and the invariants the types carry
 //! (reserved DataSetWriterIds and DataSetClassIds, MessageType, the version

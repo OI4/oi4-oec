@@ -543,8 +543,8 @@ pub const RESERVED_CLASS_IDS: [Uuid; 26] = [
     uuid::uuid!("bb725543-9de1-4f22-883f-d32c2de5dea1"),
 ];
 
-/// A NetworkMessage `ua-data` (MG 8.1.1) with the fixed
-/// JsonNetworkMessageContentMask (REQ-MSG-004): PublisherId and ReplyTo are
+/// A NetworkMessage `ua-data` (MG 8.1.1) with the fields of REQ-MSG-003 and
+/// the fixed JsonNetworkMessageContentMask (REQ-MSG-004): PublisherId and ReplyTo are
 /// always sent, WriterGroupName and SingleDataSetMessage never, the
 /// DataSetClassId as REQ-MSG-011 requires.
 #[derive(Debug, Clone, PartialEq)]
