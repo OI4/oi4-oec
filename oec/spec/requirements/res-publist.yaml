@@ -82,7 +82,7 @@ requirements:
         text: The Filter, in combination with the Resource and Source must be unique within the scope of a publisher.
     verification: [d7-validate]
     inventory: [MG-8.3.8-f43474c4]
-    status: draft
+    status: reviewed
     notes: >-
       Reclassified in C-041 (-schema, consistency review of the P2 exit,
       ADR-0019 §9): uniqueness of a key across array items is not expressible

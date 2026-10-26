@@ -579,7 +579,7 @@ requirements:
         text: In contrast to the topic, the DataSetWriterName contains the unencoded Identification Link.
     verification: [d7-validate]
     inventory: [MG-8.2.3-b8ab5b57]
-    status: draft
+    status: reviewed
     notes: >-
       Exception for the helper DataSets with DataSetWriterIds 1 to 3 and 9
       (REQ-MSG-019). Reclassified in C-041 (-schema, consistency review of the

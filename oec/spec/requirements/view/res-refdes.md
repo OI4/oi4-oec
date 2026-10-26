@@ -17,7 +17,7 @@ Guideline baseline: `168e1d1` · Area status: reviewed · Sections: MG 8.3.10, M
 | [REQ-RES-REFDES-010](#req-res-refdes-010) | Changed ReferenceDesignation is published after a successful Set | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-REFDES-011](#req-res-refdes-011) | Support of the Query of ReferenceDesignation | MUST | MAY | MAY | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-REFDES-012](#req-res-refdes-012) | Query parameters of ReferenceDesignation | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-RES-REFDES-013](#req-res-refdes-013) | Query of ReferenceDesignation only without Source | MUST* | MUST | MUST | MUST | messaging | d7-validate, d7-test | draft |
+| [REQ-RES-REFDES-013](#req-res-refdes-013) | Query of ReferenceDesignation only without Source | MUST* | MUST | MUST | MUST | messaging | d7-validate, d7-test | reviewed |
 | [REQ-RES-REFDES-014](#req-res-refdes-014) | A Query of ReferenceDesignation is answered with the direct children | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-REFDES-015](#req-res-refdes-015) | Requester checks the Parent of the answer | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-REFDES-016](#req-res-refdes-016) | IdentificationLink of the Parent is provided | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
@@ -297,7 +297,7 @@ A Query is only sent on Get/ReferenceDesignation without Source; a receiver igno
 - Scope: MG 8.3.13
 - Refs: MG 8.3.13.1, GL-ADR-020, SF-035
 - Verification: d7-validate, d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.3.13.1-3feaca7a
 
 > The Query of ReferenceDesignation is only meaningful in combination with the topic …/Get/ReferenceDesignation without Source; with Source it is ignored by the receiver.

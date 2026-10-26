@@ -129,9 +129,9 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-IL-016 | d7-validate | reviewed | V-IL-001, V-IL-002, V-IL-003, V-IL-004 … (9) | V-IL-103 (R-1), V-IL-104 (R-1), V-IL-105 (R-1), V-IL-106 (R-1) … (6) | covered |
 | REQ-IL-018 | d7-validate | reviewed | V-IL-011, V-IL-012 | V-IL-109 (R-1), V-IL-110 (R-1), V-IL-117 (R-1), V-TOP-246 (R-1) | covered |
 | REQ-IL-019 | d7-validate | reviewed | V-IL-009, V-TOP-128 | V-IL-101 (R-1), V-IL-102 (R-1), V-TOP-245 (R-1) | covered |
-| REQ-LIFE-003 | d7-validate, d7-monitor | draft | V-PAY-023 | V-PAY-171 (rule) | covered |
-| REQ-LIFE-007 | d7-validate, d7-test | draft | V-PAY-024 | V-PAY-172 (rule), V-PAY-173 (rule) | covered |
-| REQ-LIFE-009 | d7-validate, d7-test | draft | V-PAY-025 | V-PAY-174 (rule), V-PAY-175 (rule) | covered |
+| REQ-LIFE-003 | d7-validate, d7-monitor | reviewed | V-PAY-023 | V-PAY-171 (rule) | covered |
+| REQ-LIFE-007 | d7-validate, d7-test | reviewed | V-PAY-024 | V-PAY-172 (rule), V-PAY-173 (rule) | covered |
+| REQ-LIFE-009 | d7-validate, d7-test | reviewed | V-PAY-025 | V-PAY-174 (rule), V-PAY-175 (rule) | covered |
 | REQ-LOC-001 | schema, d7-validate | reviewed | V-PAY-089 | V-PAY-146 | covered |
 | REQ-LOC-003 | schema, d7-validate | reviewed | V-PAY-007 | V-PAY-127, V-PAY-128 | covered |
 | REQ-MSG-001 | schema, d7-validate | reviewed | V-PAY-003 | V-PAY-018, V-PAY-112 | covered |
@@ -151,7 +151,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-MSG-018 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-137 | covered |
 | REQ-MSG-019 | schema, d7-validate | reviewed | V-PAY-005, V-PAY-006, V-PAY-007, V-PAY-053 … (5) | V-PAY-138 | covered |
 | REQ-MSG-020 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-006, V-PAY-117, V-PAY-118 … (5) | V-PAY-139 | covered |
-| REQ-MSG-023 | d7-validate | draft | V-PAY-152, V-PAY-240, V-PAY-003, V-PAY-021 … (33) | V-PAY-148 (rule) | covered |
+| REQ-MSG-023 | d7-validate | reviewed | V-PAY-152, V-PAY-240, V-PAY-003, V-PAY-021 … (33) | V-PAY-148 (rule) | covered |
 | REQ-MSG-024 | schema, d7-validate | reviewed | V-PAY-152, V-PAY-240, V-PAY-003, V-PAY-004 … (29) | V-PAY-140 | covered |
 | REQ-MSG-025 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-069 … (6) | V-PAY-151 | covered |
 | REQ-MSG-026 | schema, d7-validate | reviewed | V-PAY-118 | V-PAY-141 | covered |
@@ -213,7 +213,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-MAM-006 | d7-validate | reviewed | V-PAY-028 | V-PAY-210 (rule) | covered |
 | REQ-RES-MAM-012 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-208, V-PAY-209 | covered |
 | REQ-RES-MAM-014 | d7-validate | reviewed | V-PAY-028 | V-PAY-213 (rule) | covered |
-| REQ-RES-MAM-016 | d7-validate | draft | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-211 (rule) | covered |
+| REQ-RES-MAM-016 | d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-211 (rule) | covered |
 | REQ-RES-MAM-017 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | V-PAY-212 | covered |
 | REQ-RES-MAM-020 | schema, d7-validate | reviewed | V-PAY-026, V-PAY-027 | V-PAY-051 | covered |
 | REQ-RES-MAM-022 | schema, d7-validate | reviewed | V-PAY-028, V-PAY-029, V-PAY-047 | – | derived |
@@ -225,7 +225,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-PROFILE-005 | schema, d7-validate | reviewed | V-PAY-032, V-PAY-033 | – | derived |
 | REQ-RES-PUBLIST-001 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-040 | V-PAY-218, V-PAY-219, V-PAY-224 | covered |
 | REQ-RES-PUBLIST-002 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039, V-PAY-040 | V-PAY-151 (rule), V-PAY-223 | covered |
-| REQ-RES-PUBLIST-003 | d7-validate | draft | V-PAY-037, V-PAY-038, V-PAY-039 | V-PAY-220 (rule) | covered |
+| REQ-RES-PUBLIST-003 | d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039 | V-PAY-220 (rule) | covered |
 | REQ-RES-PUBLIST-012 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039 | V-PAY-052 | covered |
 | REQ-RES-PUBLIST-019 | schema, d7-validate | reviewed | V-PAY-034, V-PAY-035, V-PAY-036 | V-PAY-221 | covered |
 | REQ-RES-PUBLIST-021 | schema, d7-validate | reviewed | V-PAY-037, V-PAY-038, V-PAY-039 | – | derived |
@@ -236,7 +236,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-REFDES-006 | schema, d7-validate | reviewed | V-PAY-045 | V-PAY-227 | covered |
 | REQ-RES-REFDES-007 | schema, d7-validate | reviewed | V-PAY-046 | V-PAY-228 | covered |
 | REQ-RES-REFDES-012 | schema, d7-validate | reviewed | V-PAY-053 | V-PAY-229 | covered |
-| REQ-RES-REFDES-013 | d7-validate, d7-test | draft | V-PAY-053 | V-PAY-230 (rule) | covered |
+| REQ-RES-REFDES-013 | d7-validate, d7-test | reviewed | V-PAY-053 | V-PAY-230 (rule) | covered |
 | REQ-RES-SUBLIST-001 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-237 | covered |
 | REQ-RES-SUBLIST-002 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-086 (rule) | covered |
 | REQ-RES-SUBLIST-007 | schema, d7-validate | reviewed | V-PAY-066, V-PAY-067, V-PAY-068 | V-PAY-238 | covered |

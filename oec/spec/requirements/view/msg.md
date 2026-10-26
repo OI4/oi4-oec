@@ -27,7 +27,7 @@ Guideline baseline: `168e1d1` · Area status: reviewed · Sections: MG 8, MG A2
 | [REQ-MSG-020](#req-msg-020) | Application DataSetWriterIds start at 10 | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-021](#req-msg-021) | One DataSetWriterId per resource, DataSetWriterName and WriterGroupName | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
 | [REQ-MSG-022](#req-msg-022) | Consumers do not store DataSetWriterIds permanently | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | manual | reviewed |
-| [REQ-MSG-023](#req-msg-023) | DataSetWriterName is the unencoded Identification Link of the asset | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
+| [REQ-MSG-023](#req-msg-023) | DataSetWriterName is the unencoded Identification Link of the asset | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-MSG-024](#req-msg-024) | WriterGroupName is the topic Filter | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-025](#req-msg-025) | WriterGroupName of PublicationList and SubscriptionList entries | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-MSG-026](#req-msg-026) | Status is only sent if not Good | SHOULD NOT | SHOULD NOT | SHOULD NOT | SHOULD NOT | messaging | schema, d7-validate | reviewed |
@@ -560,7 +560,7 @@ The DataSetWriterName of a DataSetMessage and of a DataSetMetaData is the unenco
 - Domain: messaging · Applies to: publisher
 - Refs: MG 8.2.3, MG 8.2.2, MG 7.6
 - Verification: d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.2.3-b8ab5b57
 
 > In Open Industry 4.0 Alliance context, the DataSetWriterName must always describe the asset providing the information.

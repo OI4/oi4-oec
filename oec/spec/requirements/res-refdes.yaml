@@ -301,7 +301,7 @@ requirements:
         text: The Query of ReferenceDesignation is only meaningful in combination with the topic …/Get/ReferenceDesignation without Source; with Source it is ignored by the receiver.
     verification: [d7-validate, d7-test]
     inventory: [MG-8.3.13.1-3feaca7a]
-    status: draft
+    status: reviewed
     notes: >-
       The generic placement (method Get, at most once) is REQ-QRY-001. A
       receiver tolerates the misplaced helper (REQ-MSG-046); the strict

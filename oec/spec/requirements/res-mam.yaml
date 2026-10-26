@@ -349,7 +349,7 @@ requirements:
         text: An Identification Link provided by the manufacturer must not be overwritten by a generated Identification Link such as the Oi4Identifier.
     verification: [d7-validate]
     inventory: [MG-5-7b92aa74, MG-5-8895ae9f, MG-5-8d0992fd, MG-5-f63a5307]
-    status: draft
+    status: reviewed
     notes: >-
       Counterpart of REQ-IL-031 and REQ-MSG-023; "should be used" of MG 5 is
       read together with "must be provided here unchanged". Reclassified in
