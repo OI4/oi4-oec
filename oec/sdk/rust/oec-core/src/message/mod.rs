@@ -31,7 +31,7 @@ pub use action::{
 };
 pub use envelope::{
     DataNetworkMessage, DataSet, DataSetEntry, DataSetMessage, DataSetMessageType, DataSetStatus,
-    DataSetVersion, DataSetWriterId, MessageId, MetaDataNetworkMessage, PublisherId,
+    DataSetVersion, DataSetWriterId, MessageId, MessageIds, MetaDataNetworkMessage, PublisherId,
     RESERVED_CLASS_IDS,
 };
 pub use helper::{Locale, Pagination, PaginationRequest, Query};

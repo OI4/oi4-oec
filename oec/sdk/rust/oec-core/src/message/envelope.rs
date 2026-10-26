@@ -122,6 +122,54 @@ impl FromStr for MessageId {
 
 serde_str!(MessageId);
 
+/// The MessageIds of one publisher: unique (REQ-MSG-008) and with the
+/// timestamp of their creation (REQ-MSG-007, REQ-LIFE-016).
+///
+/// The first id of a millisecond has no counter, the next ones of the same
+/// millisecond carry the counter 1, 2, … . The timestamp never goes back:
+/// after a backward step of the wall clock the generator stays at the last
+/// millisecond and counts on, so uniqueness wins over clock precision.
+/// While the timestamp has the same number of digits (13 digits until the
+/// year 2286), two ids of the generator differ in their text.
+#[derive(Debug, Clone)]
+pub struct MessageIds {
+    publisher: PublisherId,
+    last_ms: u64,
+    counter: Option<u32>,
+}
+
+impl MessageIds {
+    /// The generator of `publisher`; one per application, shared by all its
+    /// publications.
+    pub fn new(publisher: PublisherId) -> Self {
+        Self {
+            publisher,
+            last_ms: 0,
+            counter: None,
+        }
+    }
+
+    /// The PublisherId.
+    pub fn publisher(&self) -> &PublisherId {
+        &self.publisher
+    }
+
+    /// The next MessageId at the Unix time `unix_ms`.
+    pub fn next_id(&mut self, unix_ms: u64) -> MessageId {
+        let next = self.counter.map_or(Some(1), |c| c.checked_add(1));
+        if unix_ms > self.last_ms {
+            self.last_ms = unix_ms;
+            self.counter = None;
+        } else if let Some(c) = next {
+            self.counter = Some(c);
+        } else {
+            self.last_ms += 1;
+            self.counter = None;
+        }
+        MessageId::new(self.last_ms, self.counter, &self.publisher)
+    }
+}
+
 /// ReplyTo: the MessageId of the triggering message, `None` (the empty
 /// string) for a message that is no reaction (REQ-MSG-015).
 mod reply_to {

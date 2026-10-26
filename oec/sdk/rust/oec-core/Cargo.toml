@@ -1,6 +1,6 @@
 [package]
 name = "oec-core"
-description = "Sans-IO protocol logic of the OI4 OEC v2 SDK (D2): Identification Link, Oi4Identifier, topic model, message model, embedded schemas. Internal crate of `oec`; no stability promise of its own (ADR-0026)."
+description = "Sans-IO protocol logic of the OI4 OEC v2 SDK (D2): Identification Link, Oi4Identifier, topic model, message model, embedded schemas, MQTT 3.1.1 codec and session, lifecycle. Internal crate of `oec`; no stability promise of its own (ADR-0026)."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -19,6 +19,10 @@ serde_json.workspace = true
 time.workspace = true
 uuid.workspace = true
 jsonschema = { workspace = true, optional = true }
+
+[dev-dependencies]
+# Property tests of the MQTT codec and session (ADR-0023 amendment C-049).
+proptest.workspace = true
 
 [lints]
 workspace = true

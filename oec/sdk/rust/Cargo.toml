@@ -29,6 +29,10 @@ jsonschema = { version = "=0.60.1", default-features = false }
 # Runtime dependencies of oec (ADR-0023, ADR-0026 amendment C-048).
 thiserror = "2"
 log = "0.4"
+# Dev dependency of oec-core: property tests of codec, session and lifecycle
+# (ADR-0023 amendment C-049). Without the default features fork/timeout
+# (no rusty-fork, no tempfile).
+proptest = { version = "1.12", default-features = false, features = ["std"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
