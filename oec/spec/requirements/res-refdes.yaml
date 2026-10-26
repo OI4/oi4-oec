@@ -299,13 +299,16 @@ requirements:
     quotes:
       - ref: MG 8.3.13.1
         text: The Query of ReferenceDesignation is only meaningful in combination with the topic …/Get/ReferenceDesignation without Source; with Source it is ignored by the receiver.
-    verification: [schema, d7-validate, d7-test]
+    verification: [d7-validate, d7-test]
     inventory: [MG-8.3.13.1-3feaca7a]
-    status: reviewed
+    status: draft
     notes: >-
       The generic placement (method Get, at most once) is REQ-QRY-001. A
       receiver tolerates the misplaced helper (REQ-MSG-046); the strict
-      checker flags it at the sender (REQ-MSG-001).
+      checker flags it at the sender (REQ-MSG-001). Reclassified in C-041
+      (-schema, consistency review of the P2 exit, ADR-0019 §9): a Query only
+      without Source depends on the topic (R-2); the entry schema covers the
+      topic form with and without Source and does not report this requirement.
 
   - id: REQ-RES-REFDES-014
     title: A Query of ReferenceDesignation is answered with the direct children

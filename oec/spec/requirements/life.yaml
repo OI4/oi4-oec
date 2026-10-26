@@ -76,9 +76,9 @@ requirements:
         text: In an Open Industry 4.0 Alliance context, the Birth message must contain a NetworkMessage with a DataSetMessage of type Master Asset Model (5 The Master Asset Model) of the application.
       - ref: MG 6.3.3
         text: It must refer to the topic resource MAM (7.5.1 Resources) and share its payload.
-    verification: [schema, d7-validate, d7-monitor]
+    verification: [d7-validate, d7-monitor]
     inventory: [MG-6.3.3-3ac518a8, MG-6.3.3-bee211aa, MG-6-31ee6521]
-    status: reviewed
+    status: draft
     notes: >-
       Keywords added in C-026 (SF-057 (f)). The envelope rules
       of a Pub message apply (area MSG); the Birth message is a regular Pub
@@ -89,6 +89,12 @@ requirements:
       single-message part is checked offline – a Pub MAM with exactly one
       DataSetMessage whose ProductInstanceUri is the AppId. The same
       DataSetWriterId as the regular Pub MAM stays with d7-monitor.
+      Reclassified in C-041 (-schema, consistency review of the P2 exit,
+      ADR-0019 §9): the role of a Birth message is not visible in one
+      message, so no entry schema can check it; the schema checks the
+      message as a regular Pub MAM under the MAM and MSG requirements.
+      The single-message part with a declared role is the rule layer's
+      (R-6, D7 validate --role).
 
   - id: REQ-LIFE-004
     title: Birth message without Timestamp and SequenceNumber
@@ -174,9 +180,9 @@ requirements:
         text: The Close message must contain the health information for a graceful disconnect of the application (8.3.2 Health).
       - ref: MG 6.3.4
         text: It must refer to the topic resource Health (7.5.1 Resources) and share its payload.
-    verification: [schema, d7-validate, d7-test]
+    verification: [d7-validate, d7-test]
     inventory: [MG-6.3.4-58771e2c, MG-6.3.4-3ff69c8d, MG-6-eafd1d73]
-    status: reviewed
+    status: draft
     notes: >-
       Keywords added in C-026 (SF-057 (g)); the payload values are given by
       the code block of MG 6.3.4. Graded by REQ-CMP-046 (SF-061 (b), C-026). The MessageId carries
@@ -187,6 +193,12 @@ requirements:
       single-message part is checked offline – a Pub Health with exactly one
       DataSetMessage, Health NORMAL_0 and HealthScore 0. The DataSetWriterId
       of the regular Health stays with d7-test.
+      Reclassified in C-041 (-schema, consistency review of the P2 exit,
+      ADR-0019 §9): the role of a Close message is not visible in one
+      message, so no entry schema can check it; the schema checks the
+      message as a regular Pub Health under the Health and MSG requirements.
+      The single-message part with a declared role is the rule layer's
+      (R-6, D7 validate --role).
 
   # --- Will message (MG 6.3.5) ----------------------------------------------
   - id: REQ-LIFE-008
@@ -234,9 +246,9 @@ requirements:
         text: It must refer to topic resource Health (7.5.1 Resources) and share its payload.
       - ref: MG 6.3.5
         text: All Health messages that the application publishes about itself (Source = AppId) after registering the Will message must therefore use this DataSetWriterId as well.
-    verification: [schema, d7-validate, d7-test]
+    verification: [d7-validate, d7-test]
     inventory: [MG-6.3.5-572831c0, MG-6.3.5-38d4d8c4, MG-6.3.5-c27255e4, MG-6-31ee6521]
-    status: reviewed
+    status: draft
     notes: >-
       Keywords added in C-026 (SF-057 (h)). The DataSetWriterId binding to
       the later Health messages was made explicit in MG 6.3.5 on PO request
@@ -247,6 +259,12 @@ requirements:
       single-message part is checked offline – a Pub Health with exactly one
       DataSetMessage, Health FAILURE_1 and HealthScore 0. The DataSetWriterId
       shared with the later Health messages stays with d7-test.
+      Reclassified in C-041 (-schema, consistency review of the P2 exit,
+      ADR-0019 §9): the role of a Will message is not visible in one
+      message, so no entry schema can check it; the schema checks the
+      message as a regular Pub Health under the Health and MSG requirements.
+      The single-message part with a declared role is the rule layer's
+      (R-6, D7 validate --role).
 
   - id: REQ-LIFE-010
     title: Will message without Timestamp and SequenceNumber

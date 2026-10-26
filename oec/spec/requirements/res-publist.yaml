@@ -80,9 +80,14 @@ requirements:
     quotes:
       - ref: MG 8.3.8
         text: The Filter, in combination with the Resource and Source must be unique within the scope of a publisher.
-    verification: [schema, d7-validate]
+    verification: [d7-validate]
     inventory: [MG-8.3.8-f43474c4]
-    status: reviewed
+    status: draft
+    notes: >-
+      Reclassified in C-041 (-schema, consistency review of the P2 exit,
+      ADR-0019 §9): uniqueness of a key across array items is not expressible
+      in JSON Schema (as REQ-MSG-038 in C-035); the rule layer checks it
+      (R-3).
 
   - id: REQ-RES-PUBLIST-004
     title: Speaking Filter names

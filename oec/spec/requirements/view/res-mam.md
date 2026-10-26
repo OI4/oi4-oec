@@ -20,7 +20,7 @@ Guideline baseline: `168e1d1` · Area status: reviewed · Sections: MG 5, MG 8.3
 | [REQ-RES-MAM-013](#req-res-mam-013) | DeviceManual as PDF document | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-MAM-014](#req-res-mam-014) | DeviceClass of OEC applications | SHOULD | SHOULD | SHOULD | SHOULD | messaging | d7-validate | reviewed |
 | [REQ-RES-MAM-015](#req-res-mam-015) | SerialNumber identifies the instance | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
-| [REQ-RES-MAM-016](#req-res-mam-016) | ProductInstanceUri is the Identification Link of the asset | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
+| [REQ-RES-MAM-016](#req-res-mam-016) | ProductInstanceUri is the Identification Link of the asset | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
 | [REQ-RES-MAM-017](#req-res-mam-017) | ProductInstanceUri has at most 255 characters | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-MAM-018](#req-res-mam-018) | RevisionCounter counts configuration changes of the asset | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
 | [REQ-RES-MAM-019](#req-res-mam-019) | Detected components get an Identification Link and a MAM | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
@@ -347,8 +347,8 @@ The ProductInstanceUri is the unencoded Identification Link of the asset as used
 - Domain: messaging · Applies to: application, device
 - Scope: MG 4.3.2, MG 8.2.3
 - Refs: MG 5
-- Verification: schema, d7-validate
-- Status: reviewed
+- Verification: d7-validate
+- Status: draft
 - Inventory: MG-5-7b92aa74, MG-5-8895ae9f, MG-5-8d0992fd, MG-5-f63a5307
 
 > The ProductInstanceUri shall contain the Identification Link of the asset (4 The Identification Link), i.e. the unencoded Identification Link that is used for this asset in the topic elements AppId and Source (7.3 AppId Element and 7.6 Source Element) and in the payload.
@@ -357,7 +357,7 @@ The ProductInstanceUri is the unencoded Identification Link of the asset as used
 > An Identification Link provided by the manufacturer must not be overwritten by a generated Identification Link such as the Oi4Identifier.
 > — MG 5
 
-Notes: Counterpart of REQ-IL-031 and REQ-MSG-023; "should be used" of MG 5 is read together with "must be provided here unchanged".
+Notes: Counterpart of REQ-IL-031 and REQ-MSG-023; "should be used" of MG 5 is read together with "must be provided here unchanged". Reclassified in C-041 (-schema, consistency review of the P2 exit, ADR-0019 §9): ProductInstanceUri = DataSetWriterName is an equality of two fields (R-3); no entry schema reports this requirement.
 
 ## REQ-RES-MAM-017
 

@@ -577,10 +577,15 @@ requirements:
         text: In Open Industry 4.0 Alliance context, the DataSetWriterName must always describe the asset providing the information.
       - ref: MG 8.2.3
         text: In contrast to the topic, the DataSetWriterName contains the unencoded Identification Link.
-    verification: [schema, d7-validate]
+    verification: [d7-validate]
     inventory: [MG-8.2.3-b8ab5b57]
-    status: reviewed
-    notes: Exception for the helper DataSets with DataSetWriterIds 1 to 3 and 9 (REQ-MSG-019).
+    status: draft
+    notes: >-
+      Exception for the helper DataSets with DataSetWriterIds 1 to 3 and 9
+      (REQ-MSG-019). Reclassified in C-041 (-schema, consistency review of the
+      P2 exit, ADR-0019 §9): DataSetWriterName = decoded Source is a topic
+      equality (R-2), and that it is an unencoded Identification Link is the
+      heuristic of REQ-IL-005 (R-3); no entry schema reports this requirement.
 
   - id: REQ-MSG-024
     title: WriterGroupName is the topic Filter

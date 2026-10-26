@@ -347,10 +347,15 @@ requirements:
         text: The ProductInstanceUri shall contain the Identification Link of the asset (4 The Identification Link), i.e. the unencoded Identification Link that is used for this asset in the topic elements AppId and Source (7.3 AppId Element and 7.6 Source Element) and in the payload.
       - ref: MG 5
         text: An Identification Link provided by the manufacturer must not be overwritten by a generated Identification Link such as the Oi4Identifier.
-    verification: [schema, d7-validate]
+    verification: [d7-validate]
     inventory: [MG-5-7b92aa74, MG-5-8895ae9f, MG-5-8d0992fd, MG-5-f63a5307]
-    status: reviewed
-    notes: Counterpart of REQ-IL-031 and REQ-MSG-023; "should be used" of MG 5 is read together with "must be provided here unchanged".
+    status: draft
+    notes: >-
+      Counterpart of REQ-IL-031 and REQ-MSG-023; "should be used" of MG 5 is
+      read together with "must be provided here unchanged". Reclassified in
+      C-041 (-schema, consistency review of the P2 exit, ADR-0019 §9):
+      ProductInstanceUri = DataSetWriterName is an equality of two fields
+      (R-3); no entry schema reports this requirement.
 
   - id: REQ-RES-MAM-017
     title: ProductInstanceUri has at most 255 characters

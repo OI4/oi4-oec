@@ -7,7 +7,7 @@ Guideline baseline: `168e1d1` · Area status: reviewed · Sections: MG 8.3.8, MG
 |---|---|---|---|---|---|---|---|---|
 | [REQ-RES-PUBLIST-001](#req-res-publist-001) | Fields of a PublicationList entry | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-RES-PUBLIST-002](#req-res-publist-002) | Entry matches its DataSetMessage and its topic | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-RES-PUBLIST-003](#req-res-publist-003) | Resource, Source and Filter identify an entry | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
+| [REQ-RES-PUBLIST-003](#req-res-publist-003) | Resource, Source and Filter identify an entry | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
 | [REQ-RES-PUBLIST-004](#req-res-publist-004) | Speaking Filter names | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-PUBLIST-005](#req-res-publist-005) | DataSetWriterId of an entry is the one of the publication | MUST* | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
 | [REQ-RES-PUBLIST-006](#req-res-publist-006) | The publisher assigns the DataSetWriterIds | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
@@ -89,12 +89,14 @@ The combination of Resource, Source and Filter of an entry is unique within the 
 - Domain: messaging · Applies to: application
 - Condition: The application supports the resource PublicationList (REQ-CMP-019).
 - Refs: MG 8.3.8
-- Verification: schema, d7-validate
-- Status: reviewed
+- Verification: d7-validate
+- Status: draft
 - Inventory: MG-8.3.8-f43474c4
 
 > The Filter, in combination with the Resource and Source must be unique within the scope of a publisher.
 > — MG 8.3.8
+
+Notes: Reclassified in C-041 (-schema, consistency review of the P2 exit, ADR-0019 §9): uniqueness of a key across array items is not expressible in JSON Schema (as REQ-MSG-038 in C-035); the rule layer checks it (R-3).
 
 ## REQ-RES-PUBLIST-004
 

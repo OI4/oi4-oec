@@ -17,7 +17,7 @@ Guideline baseline: `168e1d1` · Area status: reviewed · Sections: MG 8.3.10, M
 | [REQ-RES-REFDES-010](#req-res-refdes-010) | Changed ReferenceDesignation is published after a successful Set | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-REFDES-011](#req-res-refdes-011) | Support of the Query of ReferenceDesignation | MUST | MAY | MAY | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-REFDES-012](#req-res-refdes-012) | Query parameters of ReferenceDesignation | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
-| [REQ-RES-REFDES-013](#req-res-refdes-013) | Query of ReferenceDesignation only without Source | MUST* | MUST | MUST | MUST | messaging | schema, d7-validate, d7-test | reviewed |
+| [REQ-RES-REFDES-013](#req-res-refdes-013) | Query of ReferenceDesignation only without Source | MUST* | MUST | MUST | MUST | messaging | d7-validate, d7-test | draft |
 | [REQ-RES-REFDES-014](#req-res-refdes-014) | A Query of ReferenceDesignation is answered with the direct children | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-REFDES-015](#req-res-refdes-015) | Requester checks the Parent of the answer | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
 | [REQ-RES-REFDES-016](#req-res-refdes-016) | IdentificationLink of the Parent is provided | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
@@ -296,14 +296,14 @@ A Query is only sent on Get/ReferenceDesignation without Source; a receiver igno
 - Condition: The Get/ReferenceDesignation carries a Query.
 - Scope: MG 8.3.13
 - Refs: MG 8.3.13.1, GL-ADR-020, SF-035
-- Verification: schema, d7-validate, d7-test
-- Status: reviewed
+- Verification: d7-validate, d7-test
+- Status: draft
 - Inventory: MG-8.3.13.1-3feaca7a
 
 > The Query of ReferenceDesignation is only meaningful in combination with the topic …/Get/ReferenceDesignation without Source; with Source it is ignored by the receiver.
 > — MG 8.3.13.1
 
-Notes: The generic placement (method Get, at most once) is REQ-QRY-001. A receiver tolerates the misplaced helper (REQ-MSG-046); the strict checker flags it at the sender (REQ-MSG-001).
+Notes: The generic placement (method Get, at most once) is REQ-QRY-001. A receiver tolerates the misplaced helper (REQ-MSG-046); the strict checker flags it at the sender (REQ-MSG-001). Reclassified in C-041 (-schema, consistency review of the P2 exit, ADR-0019 §9): a Query only without Source depends on the topic (R-2); the entry schema covers the topic form with and without Source and does not report this requirement.
 
 ## REQ-RES-REFDES-014
 

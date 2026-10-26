@@ -7,13 +7,13 @@ Guideline baseline: `168e1d1` · Area status: reviewed · Sections: MG 6.3.3, MG
 |---|---|---|---|---|---|---|---|---|
 | [REQ-LIFE-001](#req-life-001) | Birth message on every connection | MUST | MUST | MUST | MUST | messaging | d7-monitor, d7-test | reviewed |
 | [REQ-LIFE-002](#req-life-002) | Birth message topic | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
-| [REQ-LIFE-003](#req-life-003) | Birth message is the MAM of the component itself | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-monitor | reviewed |
+| [REQ-LIFE-003](#req-life-003) | Birth message is the MAM of the component itself | MUST | MUST | MUST | MUST | messaging | d7-validate, d7-monitor | draft |
 | [REQ-LIFE-004](#req-life-004) | Birth message without Timestamp and SequenceNumber | SHOULD NOT | SHOULD NOT | SHOULD NOT | SHOULD NOT | messaging | d7-monitor | deprecated |
 | [REQ-LIFE-005](#req-life-005) | Close message before a graceful disconnect | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-LIFE-006](#req-life-006) | Close message topic | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-LIFE-007](#req-life-007) | Close message content | MUST | SHOULD | MUST | MUST | messaging | schema, d7-validate, d7-test | reviewed |
+| [REQ-LIFE-007](#req-life-007) | Close message content | MUST | SHOULD | MUST | MUST | messaging | d7-validate, d7-test | draft |
 | [REQ-LIFE-008](#req-life-008) | Will message registered on every connection | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-LIFE-009](#req-life-009) | Will message content | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-test | reviewed |
+| [REQ-LIFE-009](#req-life-009) | Will message content | MUST | MUST | MUST | MUST | messaging | d7-validate, d7-test | draft |
 | [REQ-LIFE-010](#req-life-010) | Will message without Timestamp and SequenceNumber | SHOULD NOT | SHOULD NOT | SHOULD NOT | SHOULD NOT | messaging | d7-test | reviewed |
 | [REQ-LIFE-011](#req-life-011) | Subscribers interpret the Close message | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual, d7-test | reviewed |
 | [REQ-LIFE-012](#req-life-012) | Subscribers interpret the Will message | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual, d7-test | reviewed |
@@ -76,8 +76,8 @@ The Birth message is a complete Pub MAM NetworkMessage (MG 8.1) with one DataSet
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: component
 - Refs: MG 5, MG 6, MG 6.3.3, MG 8.1, SF-057
-- Verification: schema, d7-validate, d7-monitor
-- Status: reviewed
+- Verification: d7-validate, d7-monitor
+- Status: draft
 - Inventory: MG-6-31ee6521, MG-6.3.3-3ac518a8, MG-6.3.3-bee211aa
 
 > In an Open Industry 4.0 Alliance context, the Birth message must contain a NetworkMessage with a DataSetMessage of type Master Asset Model (5 The Master Asset Model) of the application.
@@ -86,7 +86,7 @@ The Birth message is a complete Pub MAM NetworkMessage (MG 8.1) with one DataSet
 > It must refer to the topic resource MAM (7.5.1 Resources) and share its payload.
 > — MG 6.3.3
 
-Notes: Keywords added in C-026 (SF-057 (f)). The envelope rules of a Pub message apply (area MSG); the Birth message is a regular Pub MAM, so ReplyTo is empty and the MessageId carries the time of the publication (MG 8.2.1, SF-058 (a)). Example: V-PAY-023. Reclassified in C-035 (+d7-validate, Q-020 (a), ADR-0019 §9): with a declared role birth (vector field role, D7 validate --role) the single-message part is checked offline – a Pub MAM with exactly one DataSetMessage whose ProductInstanceUri is the AppId. The same DataSetWriterId as the regular Pub MAM stays with d7-monitor.
+Notes: Keywords added in C-026 (SF-057 (f)). The envelope rules of a Pub message apply (area MSG); the Birth message is a regular Pub MAM, so ReplyTo is empty and the MessageId carries the time of the publication (MG 8.2.1, SF-058 (a)). Example: V-PAY-023. Reclassified in C-035 (+d7-validate, Q-020 (a), ADR-0019 §9): with a declared role birth (vector field role, D7 validate --role) the single-message part is checked offline – a Pub MAM with exactly one DataSetMessage whose ProductInstanceUri is the AppId. The same DataSetWriterId as the regular Pub MAM stays with d7-monitor. Reclassified in C-041 (-schema, consistency review of the P2 exit, ADR-0019 §9): the role of a Birth message is not visible in one message, so no entry schema can check it; the schema checks the message as a regular Pub MAM under the MAM and MSG requirements. The single-message part with a declared role is the rule layer's (R-6, D7 validate --role).
 
 ## REQ-LIFE-004
 
@@ -156,8 +156,8 @@ The Close message is a Pub Health NetworkMessage (MG 8.1) with one DataSetMessag
 - Domain: messaging · Applies to: component
 - Condition: The component publishes a Close message (REQ-LIFE-005).
 - Refs: MG 6, MG 6.3.4, MG 8.3.2, SF-057, SF-058
-- Verification: schema, d7-validate, d7-test
-- Status: reviewed
+- Verification: d7-validate, d7-test
+- Status: draft
 - Inventory: MG-6-eafd1d73, MG-6.3.4-3ff69c8d, MG-6.3.4-58771e2c
 
 > The Close message must contain the health information for a graceful disconnect of the application (8.3.2 Health).
@@ -166,7 +166,7 @@ The Close message is a Pub Health NetworkMessage (MG 8.1) with one DataSetMessag
 > It must refer to the topic resource Health (7.5.1 Resources) and share its payload.
 > — MG 6.3.4
 
-Notes: Keywords added in C-026 (SF-057 (g)); the payload values are given by the code block of MG 6.3.4. Graded by REQ-CMP-046 (SF-061 (b), C-026). The MessageId carries the time of the publication; Timestamp and SequenceNumber may be used like in any Health message (SF-058, B1.1.2). Example: V-PAY-024. Reclassified in C-035 (+d7-validate, Q-020 (a), ADR-0019 §9): with a declared role close (vector field role, D7 validate --role) the single-message part is checked offline – a Pub Health with exactly one DataSetMessage, Health NORMAL_0 and HealthScore 0. The DataSetWriterId of the regular Health stays with d7-test.
+Notes: Keywords added in C-026 (SF-057 (g)); the payload values are given by the code block of MG 6.3.4. Graded by REQ-CMP-046 (SF-061 (b), C-026). The MessageId carries the time of the publication; Timestamp and SequenceNumber may be used like in any Health message (SF-058, B1.1.2). Example: V-PAY-024. Reclassified in C-035 (+d7-validate, Q-020 (a), ADR-0019 §9): with a declared role close (vector field role, D7 validate --role) the single-message part is checked offline – a Pub Health with exactly one DataSetMessage, Health NORMAL_0 and HealthScore 0. The DataSetWriterId of the regular Health stays with d7-test. Reclassified in C-041 (-schema, consistency review of the P2 exit, ADR-0019 §9): the role of a Close message is not visible in one message, so no entry schema can check it; the schema checks the message as a regular Pub Health under the Health and MSG requirements. The single-message part with a declared role is the rule layer's (R-6, D7 validate --role).
 
 ## REQ-LIFE-008
 
@@ -200,8 +200,8 @@ The Will message is a Pub Health NetworkMessage (MG 8.1) with one DataSetMessage
 - Levels: L1 MUST · L2 MUST · L3 MUST
 - Domain: messaging · Applies to: component
 - Refs: MG 6, MG 6.3.5, MG 8.2.3, MG 8.3.2, SF-057
-- Verification: schema, d7-validate, d7-test
-- Status: reviewed
+- Verification: d7-validate, d7-test
+- Status: draft
 - Inventory: MG-6-31ee6521, MG-6.3.5-38d4d8c4, MG-6.3.5-572831c0, MG-6.3.5-c27255e4
 
 > The Will message must contain the predefined health information for an ungraceful disconnect of the application (8.3.2 Health).
@@ -213,7 +213,7 @@ The Will message is a Pub Health NetworkMessage (MG 8.1) with one DataSetMessage
 > All Health messages that the application publishes about itself (Source = AppId) after registering the Will message must therefore use this DataSetWriterId as well.
 > — MG 6.3.5
 
-Notes: Keywords added in C-026 (SF-057 (h)). The DataSetWriterId binding to the later Health messages was made explicit in MG 6.3.5 on PO request (C-032 log addendum 43). The MessageId of the Will message is REQ-LIFE-016. Example: V-PAY-025. Reclassified in C-035 (+d7-validate, Q-020 (a), ADR-0019 §9): with a declared role will (vector field role, D7 validate --role) the single-message part is checked offline – a Pub Health with exactly one DataSetMessage, Health FAILURE_1 and HealthScore 0. The DataSetWriterId shared with the later Health messages stays with d7-test.
+Notes: Keywords added in C-026 (SF-057 (h)). The DataSetWriterId binding to the later Health messages was made explicit in MG 6.3.5 on PO request (C-032 log addendum 43). The MessageId of the Will message is REQ-LIFE-016. Example: V-PAY-025. Reclassified in C-035 (+d7-validate, Q-020 (a), ADR-0019 §9): with a declared role will (vector field role, D7 validate --role) the single-message part is checked offline – a Pub Health with exactly one DataSetMessage, Health FAILURE_1 and HealthScore 0. The DataSetWriterId shared with the later Health messages stays with d7-test. Reclassified in C-041 (-schema, consistency review of the P2 exit, ADR-0019 §9): the role of a Will message is not visible in one message, so no entry schema can check it; the schema checks the message as a regular Pub Health under the Health and MSG requirements. The single-message part with a declared role is the rule layer's (R-6, D7 validate --role).
 
 ## REQ-LIFE-010
 
