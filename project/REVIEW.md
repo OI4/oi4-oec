@@ -14,10 +14,10 @@ Current state: **3 decisions** (ADR-0019 amendment C-041, the P2 exit, the relea
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | ADR-0019 amendment C-041 – crosscheck gate, oracle ReplyTo fix, `oec/check.sh`, release/freeze rules, D7 bundle reporting, enforced meaning of `schema` | decide | C-041 §8 | accept | ☐ |
-| D-2 | P2 exit: all 7 exit criteria met (6 without a Windows/Linux test run, 7 without hosting) → close P2 | decide | C-041 "P2 exit assessment" | accept | ☐ |
-| D-3 | Local git tag `oec-schema-2.0.0` on the release commit | decide | C-041 §6 | accept | ☐ |
-| R-1 | REQ-LIFE-003/007/009, REQ-MSG-023, REQ-RES-MAM-016, REQ-RES-PUBLIST-003, REQ-RES-REFDES-013 (reviewed → `draft`): verification `schema` removed | review | C-041 §4 | accept | ☐ |
+| D-1 | ADR-0019 amendment C-041 – crosscheck gate, oracle ReplyTo fix, `oec/check.sh`, release/freeze rules, D7 bundle reporting, enforced meaning of `schema` | decide | C-041 §8 | accept | ☑ accepted |
+| D-2 | P2 exit: all 7 exit criteria met (6 without a Windows/Linux test run, 7 without hosting) → close P2 | decide | C-041 "P2 exit assessment" | accept | ☑ accepted |
+| D-3 | Local git tag `oec-schema-2.0.0` on the release commit | decide | C-041 §6 | accept | ☑ accepted |
+| R-1 | REQ-LIFE-003/007/009, REQ-MSG-023, REQ-RES-MAM-016, REQ-RES-PUBLIST-003, REQ-RES-REFDES-013 (reviewed → `draft`): verification `schema` removed | review | C-041 §4 | accept | ☑ accepted |
 
 ## Decisions
 
@@ -31,7 +31,7 @@ Current state: **3 decisions** (ADR-0019 amendment C-041, the P2 exit, the relea
   4. Release rules: `schema.Version`/`Baseline`, `CHANGELOG.md`, manifest `release/<version>.json`; a release is immutable; no `$id`/`$defs` name of a release disappears within v2; after a release the next change is a pre-release `2.x.y-dev`; `Baseline` = spec baseline (a rebaseline forces a version bump); `dist/` is cleaned before writing.
   5. D7 reports `schemas` (bundle version) and `baseline` and refuses a mismatch.
   6. `schema` only when a schema reports the REQ (R-1).
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-2 – P2 exit
 
@@ -47,14 +47,14 @@ Current state: **3 decisions** (ADR-0019 amendment C-041, the P2 exit, the relea
 
 - **Recommendation:** close P2 after D-1 and R-1. The two limits depend on the publication (Q-011, hosted CI), not on P2 work; they are named in `oec/schema/CHANGELOG.md`.
 - **Next:** ROADMAP order P3 (Rust SDK + C API sketch, crate choices; D8 CLI shape on the D7 base) → P4 SDK core. The PO picks the order.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ### D-3 – Tag `oec-schema-2.0.0`
 
 - After acceptance, the commit that holds the accepted release (2.0.0 manifest + ADR status) gets the local tag `oec-schema-2.0.0` (no push, ADR-0009).
 - Not `oec/schema/v2.0.0`: Go reads `<module dir>/vX.Y.Z` tags as module versions, and the module path `github.com/OI4/oec/schema` has no `/v2` suffix, so `go get` would reject it.
 - **Alternative:** no tag; the manifest alone identifies the release.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ## Review items
 
@@ -69,7 +69,7 @@ Current state: **3 decisions** (ADR-0019 amendment C-041, the P2 exit, the relea
 | REQ-RES-REFDES-013 | `d7-validate` + `d7-test` | rule R-2 (`Query` only without Source) |
 
 - No schema `$comment` and no schema case reports these REQs; every negative vector of them is a rule-layer expectation. Statements unchanged; only the verification and a note. Coverage stays 0 gaps.
-- **PO:** ☐
+- **PO:** ☑ accepted (2026-10-26)
 
 ## Last review – C-040 (answered 2026-10-26)
 
