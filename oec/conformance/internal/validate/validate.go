@@ -105,7 +105,7 @@ func (v *Validator) Validate(m Message) (Result, error) {
 	}
 	inst, err := Parse(m.Payload)
 	if err != nil {
-		res.Findings = append(res.Findings, finding.Finding{Layer: finding.LayerParse, Detail: "the payload is no strict JSON: " + err.Error()})
+		res.Findings = append(res.Findings, finding.Finding{Req: "REQ-CMP-005", Layer: finding.LayerParse, Detail: "the payload is no strict JSON: " + err.Error()})
 		return v.done(res), nil
 	}
 	rule := ""

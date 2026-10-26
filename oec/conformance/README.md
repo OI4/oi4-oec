@@ -9,7 +9,7 @@ Checks messages offline against the embedded baseline (ADR-0019 §5 and amendmen
 | Layer | Checks |
 |---|---|
 | `topic` (R-1) | topic grammar of `topic-patterns.json` and the Method × Resource matrix, diagnosed level by level (REQ-TOP-…, REQ-ACT-020); Identification Link of AppId and Source (REQ-IL-…); warnings for control characters and whitespace in Filter levels (`whitespace` = recommendation of REQ-TOP-020 not followed; the text report names the REQ) |
-| `parse` | strict JSON: UTF-8, one value, no duplicate keys (no REQ, see the C-040 log) |
+| `parse` | strict JSON: UTF-8, one value, no duplicate keys; reported as REQ-CMP-005 (OPC UA-conform JSON, ADR-0019 amendment C-040) |
 | `schema` | the entry schema of the topic form (`topics/<rule>.schema.json`), `message.schema.json` or the bare `metadata.schema.json#/$defs/ResourceMetaData`; strict or tolerant flavor; each error is mapped to the REQ ids of its `$comment` |
 | `rule` | R-2 equality with topic values, R-3 relations inside one message, R-4 number and calendar semantics (mutation probes against the schema), R-6 declared role (`--role`) |
 

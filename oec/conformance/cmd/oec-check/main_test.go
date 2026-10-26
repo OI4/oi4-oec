@@ -69,7 +69,7 @@ func TestExitCodes(t *testing.T) {
 		{"valid stdin", valid.Payload, []string{"validate", "--topic", valid.Topic}, exitValid, "VALID"},
 		{"invalid", invalid.Payload, []string{"validate", "--topic", invalid.Topic, "-"}, exitInvalid, "REQ-MSG-023"},
 		{"invalid topic", "{}", []string{"validate", "--topic", "Oi4v2/Foo"}, exitInvalid, "REQ-TOP-001"},
-		{"strict json", `{"a":1,"a":2}`, []string{"validate", "--topic", valid.Topic}, exitInvalid, "[parse] -"},
+		{"strict json", `{"a":1,"a":2}`, []string{"validate", "--topic", valid.Topic}, exitInvalid, "[parse] REQ-CMP-005"},
 		{"message stdin", message(valid) + "\n" + message(invalid), []string{"validate"}, exitInvalid, "-#2: INVALID"},
 		{"pretty message stdin", "{\n \"topic\": " + strTopic(valid) + ",\n \"payload\": " + valid.Payload + "\n}", []string{"validate"}, exitValid, "-: VALID"},
 		{"directory", "", []string{"validate", sub}, exitInvalid, "3 message(s), 1 invalid"},
