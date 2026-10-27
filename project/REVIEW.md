@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-052 review (D-1 and R-1 applied; guideline `9044929`, register `b94e803`). **Open for the PO: R-2 (REQ-TOP-017 after SF-106, review).**_
+_Last updated: 2026-10-27, C-052 addendum 2 (R-2 applied: REQ-TOP-017 `reviewed`; guideline `9044929`, register `b94e803`). **Nothing is open for the PO.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -39,6 +39,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-052 review: your answer ("Ich stimme D-1 und R-1 zu") is applied.
   - D-1: MG 7.5.1 in `9044929` as proposed, **SF-106 resolved** (`b94e803`), re-baseline on `9044929` (1402 inventory items). REQ-TOP-017 follows the new text and is back to `draft` (**R-2**). D7 T7-MON-05 and the SDK already match, nothing changes there.
   - R-1: the 18 capture fixtures are `reviewed`.
+- C-052 addendum 2: you accepted R-2; REQ-TOP-017 is `reviewed` (`8d7538b`). No drafts, no open finding.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `9044929` (re-baseline, no content change).
 
@@ -48,7 +49,6 @@ Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| R-2 | REQ-TOP-017 after SF-106 (statement, quotes and notes follow MG 7.5.1 in `9044929`) | review (G-3.9 / changed reviewed item) | C-052 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -114,21 +114,12 @@ Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_
 
 ## Decisions and review items
 
-### R-2 – REQ-TOP-017 after SF-106
-
-- **Why:** you decided SF-106 as proposed (D-1 of C-052); the text of MG 7.5.1 changed in `9044929`, so the reviewed REQ-TOP-017 follows it and is back to `draft` (not a mechanical remap: the statement changes).
-- **Before (`reviewed`):** "Health is published once when the application is initialized, whenever the value of Health changes, and every 60 seconds as heartbeat." (one quote, inventory MG-7.5.1-40b7ae71)
-- **Now (`draft`):**
-  - title: "Health is published at start, on change, and for the application itself at least every 60 seconds";
-  - statement: "Health is published once when the application is initialized and whenever the value of Health changes. The Health of the application itself (Source = AppId) is additionally published at least every 60 seconds as heartbeat; for subordinate assets a periodic publication is optional." (MUST, L1–L3, `d7-monitor`);
-  - quotes (MG 7.5.1): "Health must be published once when the application is initialized and whenever the value of Health changes." and "The Health of the application itself (Source = AppId) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional.";
-  - refs `MG 7.5.1`, `SF-106`; inventory MG-7.5.1-1c8fe8e7, MG-7.5.1-5426cf3c;
-  - notes: "at least every 60 seconds" means any own Health (on change, or as the answer to a `Get`) restarts the period; the guideline gives no tolerance, D7 documents its own (T7-MON-05: 5 s); the optional periodic Health of a subordinate asset is not checked.
-- **Please check:** does the statement say exactly what MG 7.5.1 says now?
-- **If accepted:** `spectool review REQ-TOP-017` → `reviewed`.
-- **PO:** ☐ accepted ☐ remarks: …
+Nothing is open for the PO.
 
 ### Answered earlier
+
+Answered after the C-052 review (2026-10-27) and applied in C-052 addendum 2:
+- R-2 – REQ-TOP-017 after SF-106: ☑ accepted → `reviewed` (`8d7538b`).
 
 Answered in the C-052 review (2026-10-27) and applied in C-052 addendum 1:
 - D-1 – SF-106 (scope of the 60 s Health heartbeat): ☑ as proposed → guideline `9044929` (MG 7.5.1), SF-106 resolved (`b94e803`), re-baseline, REQ-TOP-017 → R-2.
@@ -461,5 +452,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-053)
 
-1. If you answer R-2 first: applied as addendum 2 of the C-052 log (`spectool review REQ-TOP-017`).
-2. P4 increment 6 – provider side in `oec` (resources registry, automatic `Get` answers, `Profile`/`PublicationList` generation, publish modes, pagination, `MaxPacketSize`, offline queue). Runs in a new agent (start prompt in `prompt.md`).
+1. P4 increment 6 – provider side in `oec` (resources registry, automatic `Get` answers, `Profile`/`PublicationList` generation, publish modes, pagination, `MaxPacketSize`, offline queue). Runs in a new agent (start prompt in `prompt.md`).

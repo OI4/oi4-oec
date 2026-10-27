@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 27.10.2026, nach deinem Review von C-052 (D-1 und R-1 umgesetzt). **Für dich offen: R-2 (REQ-TOP-017 nach SF-106, reviewen).**_
+_Stand: 27.10.2026, nach C-052 Nachtrag 2 (D-1, R-1 und R-2 umgesetzt). **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -31,30 +31,13 @@ C-052 war der **P5-Einschub**: Das Prüftool D7 (`oec-check`) kann jetzt nicht n
 - Gegen den echten Mosquitto aus C-051 lief es einmal grün, mit beiden Anmeldearten.
 - Im Zyklus selbst wurde nichts Reviewtes geändert. Nach deinem Review ist das Schema `2.0.1-dev` @ `9044929` (nur neue Baseline, kein neuer Inhalt), die Lücken bleiben bei 0.
 
-**Für dich offen ist ein Punkt:**
-
-### R-2 – REQ-TOP-017 nach SF-106 (reviewen)
-
-**Warum:** Du hast SF-106 so entschieden, wie ich es vorgeschlagen hatte (D-1). Damit hat sich der Text von MG 7.5.1 geändert (`9044929`). REQ-TOP-017 ist die Regel, die genau diesen Satz abbildet. Sie war schon `reviewed`; weil sich ihre Aussage ändert (nicht nur eine Stelle verschoben), steht sie wieder auf `draft` und kommt zu dir.
-
-**Vorher:** „Health wird beim Start gesendet, bei jeder Änderung und alle 60 Sekunden als Herzschlag.“
-
-**Jetzt (Englisch, wie in der Datei):**
-- Titel: „Health is published at start, on change, and for the application itself at least every 60 seconds“.
-- Aussage: „Health is published once when the application is initialized and whenever the value of Health changes. The Health of the application itself (Source = AppId) is additionally published at least every 60 seconds as heartbeat; for subordinate assets a periodic publication is optional.“
-- Auf Deutsch: Health kommt beim Start und bei jeder Änderung. Das Health **der App selbst** kommt zusätzlich **mindestens** alle 60 Sekunden; für die Assets darunter ist das freiwillig.
-- Die zwei Zitate sind wörtlich die zwei neuen Sätze aus MG 7.5.1; Verweise: MG 7.5.1 und SF-106.
-- In den Notizen steht: Jedes Health der App setzt die 60 Sekunden neu („mindestens“). Die Guideline nennt keine Toleranz; D7 nimmt 5 Sekunden. Das freiwillige Health der Assets prüft D7 nicht.
-
-**Worauf du achten solltest:** Sagt die Regel genau das, was jetzt in MG 7.5.1 steht, nicht mehr und nicht weniger?
-
-**Wenn du zustimmst:** REQ-TOP-017 geht auf `reviewed`. An D7 und am SDK ändert sich nichts, beide verhalten sich schon so.
+**Für dich ist nichts offen.** Dein „R-2 ist reviewed“ ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
 
 ---
 
 Die Punkte A-1 … A-62 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-052 (A-51 … A-62) stehen unten.
 
-Aus C-052: Deine Zustimmung zu D-1 (SF-106) und R-1 (Testdaten) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
+Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-017) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
 
 **Nachtrag 1 (deine Anweisung):** In den Guardrails steht jetzt die neue Regel **G-3.10**. Am Ende jedes Zyklus entscheide ich, ob der nächste Zyklus mit einem neuen Agenten oder mit demselben weiterläuft, und schreibe den Grund ins Log.
 - Einen **neuen Agenten** nehme ich in der Regel, wenn mein Kontext schon zusammengefasst wurde oder groß ist, oder wenn ein neues Inkrement, eine neue Phase oder ein neues Deliverable beginnt.
@@ -269,8 +252,7 @@ Neu aus C-052 (D7 `monitor`):
 
 ### Was als Nächstes passiert (C-053)
 
-1. Wenn du R-2 vorher beantwortest, setze ich das als Nachtrag 2 zu C-052 um (REQ-TOP-017 → `reviewed`).
-2. **P4 Inkrement 6** – das SDK beantwortet Anfragen selbst: Ressourcen-Verzeichnis, automatische Antworten auf `Get`, `Profile` und `PublicationList` erzeugen, Sende-Modi und Intervalle, Seitenaufteilung großer Antworten, `MaxPacketSize`, Warteschlange bei Verbindungsabbruch.
+1. **P4 Inkrement 6** – das SDK beantwortet Anfragen selbst: Ressourcen-Verzeichnis, automatische Antworten auf `Get`, `Profile` und `PublicationList` erzeugen, Sende-Modi und Intervalle, Seitenaufteilung großer Antworten, `MaxPacketSize`, Warteschlange bei Verbindungsabbruch.
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
@@ -355,12 +337,28 @@ Neu aus C-052 (D7 `monitor`):
 Du hast geschrieben: „Ich stimme D-1 und R-1 zu, bzw. habe das Review abgeschlossen“. Daraus wurde Nachtrag 1 zu C-052:
 - **Guideline-Text:** In MG 7.5.1 (Hinweis zu `Health`) steht jetzt dein entschiedener Text (`9044929`): Health kommt beim Start und bei jeder Änderung; das Health der App selbst (`Source` = `AppId`) zusätzlich mindestens alle 60 Sekunden als Herzschlag; für untergeordnete Assets ist das freiwillig.
 - **Register:** SF-106 ist „resolved“ (`b94e803`). Es gibt kein offenes Finding mehr; das nächste heißt SF-107.
-- **Neu-Baseline auf `9044929`:** Die Zahl der Guideline-Stellen steigt von 1401 auf 1402, weil aus dem einen Satz zwei wurden. Beide gehören zu REQ-TOP-017; die steht deshalb wieder auf `draft` (R-2 oben).
+- **Neu-Baseline auf `9044929`:** Die Zahl der Guideline-Stellen steigt von 1401 auf 1402, weil aus dem einen Satz zwei wurden. Beide gehören zu REQ-TOP-017; die stand deshalb wieder auf `draft` (R-2).
 - **Schema:** Version `2.0.1-dev` mit Baseline `9044929`, am Inhalt ändert sich nichts.
 - **D7 und SDK:** D7 (T7-MON-05) prüfte schon so, das SDK schickt den Herzschlag ohnehin für jedes Asset. Daran ändert sich nichts.
 - **R-1 – Testdaten:** Die 18 Aufzeichnungen stehen jetzt in `index.yaml` auf `reviewed`. Neue Aufzeichnungen beginnen weiter als `draft`.
+- **R-2 – REQ-TOP-017:** Du hast geschrieben „Geänderter R-2 – REQ-TOP-017 ist reviewed“. Die REQ steht jetzt auf `reviewed` (`8d7538b`, Nachtrag 2). Es gibt keinen Entwurf mehr.
 
-Zur Erinnerung, worum es ging:
+Zur Erinnerung, was in R-2 stand:
+
+**Warum:** Du hast SF-106 so entschieden, wie ich es vorgeschlagen hatte (D-1). Damit hat sich der Text von MG 7.5.1 geändert (`9044929`). REQ-TOP-017 ist die Regel, die genau diesen Satz abbildet. Sie war schon `reviewed`; weil sich ihre Aussage ändert (nicht nur eine Stelle verschoben), steht sie wieder auf `draft` und kommt zu dir.
+
+**Vorher:** „Health wird beim Start gesendet, bei jeder Änderung und alle 60 Sekunden als Herzschlag.“
+
+**Jetzt (Englisch, wie in der Datei):**
+- Titel: „Health is published at start, on change, and for the application itself at least every 60 seconds“.
+- Aussage: „Health is published once when the application is initialized and whenever the value of Health changes. The Health of the application itself (Source = AppId) is additionally published at least every 60 seconds as heartbeat; for subordinate assets a periodic publication is optional.“
+- Auf Deutsch: Health kommt beim Start und bei jeder Änderung. Das Health **der App selbst** kommt zusätzlich **mindestens** alle 60 Sekunden; für die Assets darunter ist das freiwillig.
+- Die zwei Zitate sind wörtlich die zwei neuen Sätze aus MG 7.5.1; Verweise: MG 7.5.1 und SF-106.
+- In den Notizen steht: Jedes Health der App setzt die 60 Sekunden neu („mindestens“). Die Guideline nennt keine Toleranz; D7 nimmt 5 Sekunden. Das freiwillige Health der Assets prüft D7 nicht.
+
+An D7 und am SDK ändert sich dadurch nichts, beide verhalten sich schon so.
+
+Zur Erinnerung, worum es bei D-1 und R-1 ging:
 
 #### D-1 – SF-106: Gilt der 60-Sekunden-Herzschlag für jedes Asset? (entschieden: wie vorgeschlagen)
 
