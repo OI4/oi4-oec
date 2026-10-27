@@ -357,6 +357,16 @@ fn set_data_completion_answers_as_decided() {
     p.remove_data(&pump, "t").unwrap();
     let out = p.complete_set_data(&req, Ok(()), MS + 4);
     assert_eq!(status_of(&out), code(StatusCode::BAD_NOT_FOUND));
+    assert_eq!(status(&out)["Source"], PUMP);
+    // the asset removed meanwhile: under the AppId (SF-108)
+    p.add_data(&pump, temp("t", Mode::FILTER, Writable::Nothing), MS)
+        .unwrap();
+    p.accept_set_data(&pump, "t", true).unwrap();
+    let req = set_data(&mut p, "t", &ok).unwrap();
+    p.remove_asset(&pump).unwrap();
+    let out = p.complete_set_data(&req, Ok(()), MS + 5);
+    assert_eq!(status(&out)["Source"], APP);
+    assert_eq!(status_of(&out), code(StatusCode::BAD_NOT_FOUND));
 }
 
 // ----------------------------------------------------- Set PublicationList

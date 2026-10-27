@@ -862,7 +862,7 @@ impl Provider {
                 Err(c) => code = c,
             }
         }
-        out.extend(self.status_event(&request.source, code, Some(&request.message_id), unix_ms));
+        out.extend(self.answer(&request.source, code, &request.message_id, unix_ms));
         (out, changed)
     }
 

@@ -21,6 +21,7 @@ pub mod config;
 pub mod data;
 pub mod overrides;
 pub mod pagination;
+mod refdes;
 mod sets;
 pub mod versions;
 mod write;
@@ -36,9 +37,12 @@ use crate::il::IdentificationLink;
 use crate::lifecycle::{Lifecycle, LifecycleError, Publication, check_health};
 use crate::message::{
     DataSet, DataSetMessage, DataSetMetaData, DataSetWriterId, MessageId, MetaDataNetworkMessage,
-    PaginationRequest, PublisherId,
+    PaginationRequest, PublisherId, Query,
 };
-use crate::resource::{Data, Health, HealthState, Mam, Profile, PublicationEntry, PublicationMode};
+use crate::resource::{
+    Data, Health, HealthState, Mam, Profile, PublicationEntry, PublicationMode,
+    ReferenceDesignationQuery,
+};
 use crate::topic::{
     Filter, ListFilter, Method, Resource, StatusLevel, Subject, Topic, TopicError, TopicFilter,
 };
@@ -47,6 +51,7 @@ pub use config::{ConfigSpec, SetConfigRequest, StoredConfigValues};
 use data::{DataSetSpec, Value as FieldValue};
 pub use overrides::{PublicationOverride, PublicationOverrides};
 use pagination::Envelope;
+pub use refdes::{ReferenceDesignationRequest, StoredReferenceDesignations};
 use sets::{Set, date_time};
 pub use versions::{MetaDataVersions, VersionsError};
 pub use write::SetDataRequest;
@@ -257,15 +262,18 @@ pub enum Handled {
     /// The application decides about this `Set Config`; then
     /// [`Provider::complete_set_config`] answers.
     SetConfig(SetConfigRequest),
+    /// The application decides about this `Set` or `Del` of a
+    /// ReferenceDesignation; then [`Provider::complete_reference_designation`]
+    /// answers.
+    SetReferenceDesignation(ReferenceDesignationRequest),
 }
 
 impl Handled {
-    /// The publications; `None` for a [`Handled::SetData`] and a
-    /// [`Handled::SetConfig`].
+    /// The publications; `None` for a request the application decides.
     pub fn into_publications(self) -> Option<Vec<Publication>> {
         match self {
             Self::Publish(p) => Some(p),
-            Self::SetData(_) | Self::SetConfig(_) => None,
+            Self::SetData(_) | Self::SetConfig(_) | Self::SetReferenceDesignation(_) => None,
         }
     }
 }
@@ -278,6 +286,7 @@ struct Unsaved {
     versions: bool,
     overrides: bool,
     config: bool,
+    refdes: bool,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -315,6 +324,7 @@ pub struct Provider {
     configs: Vec<ConfigEntry>,
     config_values: StoredConfigValues,
     config_instance: u64,
+    refdes: Option<StoredReferenceDesignations>,
     unsaved: Unsaved,
     pending: Pending,
     connected: bool,
@@ -345,6 +355,7 @@ impl Provider {
             configs: Vec::new(),
             config_values: StoredConfigValues::new(),
             config_instance: 0,
+            refdes: None,
             unsaved: Unsaved::default(),
             pending: Pending::default(),
             connected: false,
@@ -451,7 +462,7 @@ impl Provider {
             return Vec::new();
         }
         let st = self.lifecycle.publisher_id().service_type();
-        let get = SERVED.iter().map(|r| (Method::Get, *r));
+        let get = self.served().into_iter().map(|r| (Method::Get, r));
         let set = SET.iter().map(|r| (Method::Set, *r));
         let del = DEL.iter().map(|r| (Method::Del, *r));
         get.chain(set)
@@ -490,6 +501,9 @@ impl Provider {
         ];
         if self.config.get {
             keys.push(WriterKey::new(Resource::Profile, il.as_str()));
+            if self.refdes.is_some() {
+                keys.push(WriterKey::new(Resource::ReferenceDesignation, il.as_str()));
+            }
             keys.extend(
                 StatusLevel::ALL
                     .iter()
@@ -848,7 +862,7 @@ impl Provider {
         unix_ms: u64,
     ) -> Result<Handled, Ignored> {
         let resource = match topic.subject() {
-            Subject::Resource(r) if self.config.get && SERVED.contains(&r) => r,
+            Subject::Resource(r) if self.config.get && self.served().contains(&r) => r,
             s => return Err(Ignored::NotServed(s)),
         };
         let get = GetWire::parse(payload)?;
@@ -903,6 +917,19 @@ impl Provider {
                 let (items, classes) = self.data_items(source, tag, |_| true);
                 self.series_of(items, &classes, req, Some(&get.message_id), limit, unix_ms)
             }
+            Resource::ReferenceDesignation => {
+                // a Query only without Source, ignored with one
+                // (REQ-RES-REFDES-013)
+                let query = match (source, &get.query) {
+                    (None, Some(q)) => Some(
+                        ReferenceDesignationQuery::try_from(&Query(q.clone()))
+                            .map_err(|e| Ignored::Payload(format!("Query: {e}")))?,
+                    ),
+                    _ => None,
+                };
+                let items = self.refdes_items(source, query.as_ref());
+                self.series(items, req, Some(&get.message_id), limit, unix_ms)
+            }
             _ => {
                 let filter = match topic.filter() {
                     Some(Filter::List(f)) => Some(f),
@@ -921,6 +948,16 @@ impl Provider {
                 })
                 .collect(),
         ))
+    }
+
+    /// The resources served by `Get`: [`SERVED`] and the
+    /// ReferenceDesignation if offered.
+    fn served(&self) -> Vec<Resource> {
+        let mut out = SERVED.to_vec();
+        if self.refdes.is_some() {
+            out.push(Resource::ReferenceDesignation);
+        }
+        out
     }
 
     fn find(&self, il: &IdentificationLink) -> Option<usize> {
@@ -1321,7 +1358,17 @@ impl Provider {
             .into_iter()
             .map(|il| {
                 let id = self.writer(Resource::Profile, &il);
-                let resources = PROFILE.iter().map(|r| Subject::Resource(*r)).collect();
+                let resources = PROFILE
+                    .iter()
+                    .flat_map(|r| {
+                        // the ReferenceDesignation if offered, after the
+                        // Metadata
+                        let refdes = (*r == Resource::Metadata && self.refdes.is_some())
+                            .then_some(Resource::ReferenceDesignation);
+                        core::iter::once(*r).chain(refdes)
+                    })
+                    .map(Subject::Resource)
+                    .collect();
                 DataSetMessage::new(id, il, "", Profile { resources })
             })
             .collect()
@@ -1360,6 +1407,7 @@ impl Provider {
                 };
                 out.push(DataSetMessage::new(id, il.clone(), r.as_str(), entry));
             }
+            out.extend(self.refdes_list_item(&il, filter, id));
             for &level in StatusLevel::ALL {
                 let f = write::status_filter(level);
                 if filter.is_some_and(|lf| {
@@ -1418,6 +1466,7 @@ fn normal() -> Health {
 struct GetWire {
     message_id: MessageId,
     pagination: Option<PaginationRequest>,
+    query: Option<serde_json::Map<String, Value>>,
 }
 
 impl GetWire {
@@ -1439,9 +1488,11 @@ impl GetWire {
             .map(PaginationRequest::deserialize)
             .transpose()
             .map_err(|e| Ignored::Payload(format!("PaginationRequest: {e}")))?;
+        let query = refdes::query_of(&w.messages).cloned();
         Ok(Self {
             message_id: w.message_id,
             pagination,
+            query,
         })
     }
 }

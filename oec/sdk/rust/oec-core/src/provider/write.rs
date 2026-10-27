@@ -273,6 +273,24 @@ impl Provider {
         Some(Publication { topic, payload })
     }
 
+    /// The Status event answering a request the application decided: about
+    /// `source`, or under the AppId if `source` was removed meanwhile, as
+    /// the application no longer represents it (SF-108).
+    pub(super) fn answer(
+        &mut self,
+        source: &IdentificationLink,
+        code: StatusCode,
+        reply_to: &MessageId,
+        unix_ms: u64,
+    ) -> Option<Publication> {
+        let source = if self.is_source(source) {
+            source.clone()
+        } else {
+            self.app_id().clone()
+        };
+        self.status_event(&source, code, Some(reply_to), unix_ms)
+    }
+
     /// The answer to a request to a Source that is no asset: the Status
     /// event `BadNotFound`, published under the AppId because the
     /// application does not represent the addressed asset (REQ-CMP-043,
@@ -315,6 +333,14 @@ impl Provider {
                 }
             }
             (Method::Set, Resource::Metadata) => Err(self.set_meta_data(topic, &source)),
+            (Method::Set | Method::Del, Resource::ReferenceDesignation)
+                if self.refdes.is_some() =>
+            {
+                match self.reference_designation_request(topic.method(), &source, &wire) {
+                    Ok(request) => return Ok(Handled::SetReferenceDesignation(request)),
+                    Err(code) => Err(code),
+                }
+            }
             _ => Err(StatusCode::BAD_NOT_FOUND),
         };
         let (mut out, code) = match result {
@@ -408,7 +434,7 @@ impl Provider {
                 Err(c) => code = c,
             }
         }
-        out.extend(self.status_event(&request.source, code, Some(&request.message_id), unix_ms));
+        out.extend(self.answer(&request.source, code, &request.message_id, unix_ms));
         out
     }
 
