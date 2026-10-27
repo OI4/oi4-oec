@@ -1,7 +1,9 @@
 //! The provider side of an application as a state machine (MG 9.1; P4
-//! increment 6a, ADR-0026 §12): the sources it serves (itself and its
-//! subordinate assets), their MAM, Health and Profile, the PublicationList
-//! with stable DataSetWriterIds, the answers to `Get` and pagination.
+//! increments 6a and 6b, ADR-0026 §12 and §13): the sources it serves
+//! (itself and its subordinate assets), their MAM, Health, Profile and
+//! Data DataSets with Metadata, the PublicationList with stable
+//! DataSetWriterIds, the publish modes, Intervals and Precisions of the
+//! Data, the answers to `Get` and pagination.
 //!
 //! It owns the [`Lifecycle`]. The runtime calls [`Provider::on_connected`]
 //! after CONNACK, [`Provider::poll`] at [`Provider::poll_timeout`] and on
@@ -12,7 +14,10 @@
 //! changes only mark the state, and [`Provider::on_connected`] publishes
 //! the current state of every source.
 
+pub mod data;
 pub mod pagination;
+mod sets;
+pub mod versions;
 pub mod writers;
 
 use core::fmt;
@@ -24,11 +29,15 @@ use serde_json::Value;
 use crate::il::IdentificationLink;
 use crate::lifecycle::{Lifecycle, LifecycleError, Publication, check_health};
 use crate::message::{
-    DataSet, DataSetMessage, DataSetWriterId, MessageId, PaginationRequest, PublisherId,
+    DataSet, DataSetMessage, DataSetMetaData, DataSetWriterId, MessageId, MetaDataNetworkMessage,
+    PaginationRequest, PublisherId,
 };
-use crate::resource::{Health, HealthState, Mam, Profile, PublicationEntry, PublicationMode};
+use crate::resource::{Data, Health, HealthState, Mam, Profile, PublicationEntry, PublicationMode};
 use crate::topic::{Filter, ListFilter, Method, Resource, Subject, Topic, TopicError, TopicFilter};
+use data::{DataSetSpec, Value as FieldValue};
 use pagination::Envelope;
+use sets::{Set, date_time};
+pub use versions::{MetaDataVersions, VersionsError};
 pub use writers::{WriterIdError, WriterIds, WriterKey};
 
 /// The settings of a [`Provider`].
@@ -64,6 +73,25 @@ pub enum ProviderError {
     ProductInstanceUri(String),
     /// A topic can not be built.
     Topic(TopicError),
+    /// The definition of a Data DataSet is refused.
+    DataSet(String),
+    /// The source already has a Data DataSet with this Tag
+    /// (REQ-RES-PUBLIST-003).
+    DuplicateDataSet {
+        /// The source.
+        source: String,
+        /// The Tag.
+        tag: String,
+    },
+    /// The source has no Data DataSet with this Tag.
+    UnknownDataSet {
+        /// The source.
+        source: String,
+        /// The Tag.
+        tag: String,
+    },
+    /// A field value is refused: unknown field or wrong type.
+    Value(String),
 }
 
 impl fmt::Display for ProviderError {
@@ -78,6 +106,14 @@ impl fmt::Display for ProviderError {
             Self::UnknownAsset(il) => write!(f, "no asset {il:?} is registered"),
             Self::ProductInstanceUri(e) => write!(f, "invalid ProductInstanceUri: {e}"),
             Self::Topic(e) => e.fmt(f),
+            Self::DataSet(e) => write!(f, "invalid Data DataSet: {e}"),
+            Self::DuplicateDataSet { source, tag } => {
+                write!(f, "the source {source:?} already has a DataSet {tag:?}")
+            }
+            Self::UnknownDataSet { source, tag } => {
+                write!(f, "the source {source:?} has no DataSet {tag:?}")
+            }
+            Self::Value(e) => write!(f, "invalid value: {e}"),
         }
     }
 }
@@ -118,6 +154,9 @@ pub enum Ignored {
     UnknownSource(IdentificationLink),
     /// The payload is no `Get` NetworkMessage with a valid MessageId.
     Payload(String),
+    /// A `Get` of Metadata without Source and Tag or for a DataSet the
+    /// application does not provide; silence is conformant (REQ-CMP-044).
+    NoMetadata(String),
 }
 
 impl fmt::Display for Ignored {
@@ -131,14 +170,17 @@ impl fmt::Display for Ignored {
                 "Get for the Source {il}, which is no asset of the application (REQ-CMP-047)"
             ),
             Self::Payload(e) => write!(f, "invalid Get payload: {e}"),
+            Self::NoMetadata(e) => write!(f, "Get Metadata not answered (REQ-CMP-044): {e}"),
         }
     }
 }
 
 /// The resources served by `Get`, in the order of the Profile.
-const SERVED: [Resource; 4] = [
+const SERVED: [Resource; 6] = [
     Resource::Mam,
     Resource::Health,
+    Resource::Data,
+    Resource::Metadata,
     Resource::Profile,
     Resource::PublicationList,
 ];
@@ -173,6 +215,9 @@ pub struct Provider {
     writers: WriterIds,
     writers_changed: bool,
     assets: Vec<Asset>,
+    sets: Vec<Set>,
+    versions: MetaDataVersions,
+    versions_changed: bool,
     pending: Pending,
     connected: bool,
 }
@@ -197,6 +242,9 @@ impl Provider {
             writers,
             writers_changed: false,
             assets: Vec::new(),
+            sets: Vec::new(),
+            versions: MetaDataVersions::new(),
+            versions_changed: false,
             pending: Pending::default(),
             connected: false,
         };
@@ -239,6 +287,26 @@ impl Provider {
     /// the ids stay stable across restarts (REQ-RES-PUBLIST-006).
     pub fn take_writer_ids(&mut self) -> Option<Vec<u8>> {
         core::mem::take(&mut self.writers_changed).then(|| self.writers.to_json())
+    }
+
+    /// The provider with the persisted ConfigurationVersions of the
+    /// Metadata (empty at the first start), so an unchanged Metadata keeps
+    /// its version and Timestamp across restarts (REQ-MSG-032).
+    #[must_use]
+    pub fn with_meta_data_versions(mut self, versions: MetaDataVersions) -> Self {
+        self.versions = versions;
+        self
+    }
+
+    /// The table of ConfigurationVersions.
+    pub fn meta_data_versions(&self) -> &MetaDataVersions {
+        &self.versions
+    }
+
+    /// The table of ConfigurationVersions as JSON if it changed since the
+    /// last call; persist it.
+    pub fn take_meta_data_versions(&mut self) -> Option<Vec<u8>> {
+        core::mem::take(&mut self.versions_changed).then(|| self.versions.to_json())
     }
 
     /// The topic filters to subscribe: `Get` of every served resource to
@@ -314,6 +382,7 @@ impl Provider {
             .find(il)
             .ok_or_else(|| ProviderError::UnknownAsset(il.to_string()))?;
         self.assets.remove(i);
+        self.sets.retain(|s| &s.source != il);
         self.pending.list = self.config.get;
         Ok(())
     }
@@ -398,6 +467,129 @@ impl Provider {
         Ok(true)
     }
 
+    /// Adds a Data DataSet to the application or an asset (MG 8.3.4) and
+    /// returns its DataSetWriterId. Its Metadata is derived from the
+    /// fields (REQ-RES-META-003) with the DataSetClassId of the definition
+    /// or a UUIDv5 of Tag and field structure (REQ-MSG-013) and a
+    /// ConfigurationVersion that changes only with the Metadata
+    /// (REQ-MSG-036). The DataSet is published once every field has a
+    /// value; the Metadata at once while connected (unless the Mode is
+    /// OFF_0), and the PublicationList again.
+    ///
+    /// # Errors
+    ///
+    /// [`ProviderError::UnknownAsset`], [`ProviderError::DataSet`],
+    /// [`ProviderError::Topic`] for a Tag that is no valid Filter,
+    /// [`ProviderError::DuplicateDataSet`], [`ProviderError::WriterId`].
+    pub fn add_data(
+        &mut self,
+        source: &IdentificationLink,
+        spec: DataSetSpec,
+        unix_ms: u64,
+    ) -> Result<DataSetWriterId, ProviderError> {
+        if source != self.app_id() && self.find(source).is_none() {
+            return Err(ProviderError::UnknownAsset(source.to_string()));
+        }
+        spec.check().map_err(ProviderError::DataSet)?;
+        let tag = Filter::Tag(spec.tag.clone());
+        self.topic(Resource::Data, Some(source), Some(tag.clone()))?;
+        if self.find_set(source, &spec.tag).is_some() {
+            return Err(ProviderError::DuplicateDataSet {
+                source: source.to_string(),
+                tag: spec.tag,
+            });
+        }
+        let filter = tag.to_string();
+        let class_id = spec
+            .class_id
+            .unwrap_or_else(|| data::class_id(&spec.tag, &spec.fields));
+        let mut meta = data::meta_data(&spec, class_id);
+        let mut versions = self.versions.clone();
+        let (version, changed) = versions.version(source.as_str(), &filter, &meta, unix_ms);
+        meta.configuration_version = Some(version);
+        let size = self.meta_message_size(source, &filter, &meta, unix_ms);
+        if size > self.config.max_packet_size {
+            return Err(ProviderError::DataSet(format!(
+                "its Metadata of {size} octets exceeds the MaxPacketSize of {} octets",
+                self.config.max_packet_size
+            )));
+        }
+        let writer = self.assign(WriterKey {
+            resource: Resource::Data,
+            source: source.as_str().to_owned(),
+            filter: filter.clone(),
+        })?;
+        self.versions = versions;
+        self.versions_changed |= changed;
+        let mut set = Set::new(source.clone(), spec, filter, class_id, meta, writer);
+        set.meta_pending = set.mode().is_on();
+        self.sets.push(set);
+        self.pending.list = self.config.get;
+        Ok(writer)
+    }
+
+    /// Sets field values of a Data DataSet, all or none: the state that is
+    /// published as its PublicationList entry says (REQ-MQTT-019,
+    /// REQ-RES-PUBLIST-013 … 015). `unix_ms` is the Timestamp of the
+    /// DataSetMessage. Returns whether a value changed.
+    ///
+    /// # Errors
+    ///
+    /// [`ProviderError::UnknownDataSet`], [`ProviderError::Value`] for an
+    /// unknown field or a value that does not fit its type.
+    pub fn update_data(
+        &mut self,
+        source: &IdentificationLink,
+        tag: &str,
+        values: Vec<(String, FieldValue)>,
+        unix_ms: u64,
+    ) -> Result<bool, ProviderError> {
+        let i = self.set_index(source, tag)?;
+        self.sets[i]
+            .update(values, unix_ms)
+            .map_err(ProviderError::Value)
+    }
+
+    /// Removes a Data DataSet; the PublicationList is published again. Its
+    /// DataSetWriterId and ConfigurationVersion stay reserved for it.
+    ///
+    /// # Errors
+    ///
+    /// [`ProviderError::UnknownDataSet`].
+    pub fn remove_data(
+        &mut self,
+        source: &IdentificationLink,
+        tag: &str,
+    ) -> Result<(), ProviderError> {
+        let i = self.set_index(source, tag)?;
+        self.sets.remove(i);
+        self.pending.list = self.config.get;
+        Ok(())
+    }
+
+    /// The Tags of the Data DataSets of a source in the order of addition.
+    pub fn data_tags<'a>(
+        &'a self,
+        source: &'a IdentificationLink,
+    ) -> impl Iterator<Item = &'a str> {
+        self.sets
+            .iter()
+            .filter(move |s| &s.source == source)
+            .map(Set::tag)
+    }
+
+    /// The Metadata of a Data DataSet with its ConfigurationVersion.
+    pub fn meta_data(&self, source: &IdentificationLink, tag: &str) -> Option<&DataSetMetaData> {
+        self.find_set(source, tag).map(|i| &self.sets[i].meta)
+    }
+
+    /// The current values of a Data DataSet in field order, once every
+    /// field has one.
+    pub fn data_values(&self, source: &IdentificationLink, tag: &str) -> Option<Vec<FieldValue>> {
+        self.find_set(source, tag)
+            .and_then(|i| self.sets[i].values())
+    }
+
     /// The Will of the next CONNECT (see [`Lifecycle::will`]).
     pub fn will(&mut self, unix_ms: u64) -> crate::mqtt::LastWill {
         self.lifecycle.will(unix_ms)
@@ -417,7 +609,9 @@ impl Provider {
     /// The connection is established (CONNACK): the Birth and the Health of
     /// the application (REQ-LIFE-001, REQ-LIFE-015), then MAM and Health of
     /// every asset, from Level 2 the Profile of every source and the
-    /// PublicationList – the current state, nothing queued.
+    /// PublicationList, then the Metadata of every DataSet not OFF_0 and
+    /// the Data of every published DataSet with a value set – the current
+    /// state, nothing queued; every Interval starts anew.
     pub fn on_connected(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
         self.connected = true;
         let mut out = self.lifecycle.on_connected(now, unix_ms);
@@ -432,28 +626,40 @@ impl Provider {
             profile: self.config.get,
             list: self.config.get,
         };
-        out.extend(self.changes(unix_ms));
+        for s in &mut self.sets {
+            s.restart();
+        }
+        out.extend(self.changes(now, unix_ms));
         out
     }
 
-    /// The instant [`Self::poll`] has work (monotonic time).
+    /// The instant [`Self::poll`] has work (monotonic time): at once after
+    /// a change, else the next heartbeat or the next cyclic publication of
+    /// a DataSet with an Interval.
     pub fn poll_timeout(&self) -> Duration {
-        if self.connected && self.dirty() {
-            Duration::ZERO
-        } else {
-            self.lifecycle.poll_timeout()
+        let lifecycle = self.lifecycle.poll_timeout();
+        if !self.connected {
+            return lifecycle;
         }
+        if self.dirty() {
+            return Duration::ZERO;
+        }
+        self.sets
+            .iter()
+            .filter_map(Set::deadline)
+            .fold(lifecycle, Duration::min)
     }
 
     /// The publications due at `now` while connected: those of the
-    /// lifecycle, then the changed MAM, Health and Profile of the assets
-    /// and the PublicationList after a change of the sources.
+    /// lifecycle, then the changed MAM, Health and Profile of the assets,
+    /// the PublicationList after a change of the sources, the changed
+    /// Metadata and the due Data.
     pub fn poll(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
         if !self.connected {
             return Vec::new();
         }
         let mut out = self.lifecycle.poll(now, unix_ms);
-        out.extend(self.changes(unix_ms));
+        out.extend(self.changes(now, unix_ms));
         out
     }
 
@@ -488,6 +694,9 @@ impl Provider {
         }
         let get = GetWire::parse(payload)?;
         let source = topic.source();
+        if resource == Resource::Metadata {
+            return self.answer_meta_data(&topic, &get, unix_ms);
+        }
         let reply = Topic::new(
             topic.service_type(),
             topic.app_id().clone(),
@@ -511,6 +720,14 @@ impl Provider {
             Resource::Profile => {
                 let items = self.profile_items(source);
                 self.series(items, req, Some(&get.message_id), limit, unix_ms)
+            }
+            Resource::Data => {
+                let tag = match topic.filter() {
+                    Some(Filter::Tag(t)) => Some(t.as_str()),
+                    _ => None,
+                };
+                let (items, classes) = self.data_items(source, tag, |_| true);
+                self.series_of(items, &classes, req, Some(&get.message_id), limit, unix_ms)
             }
             _ => {
                 let filter = match topic.filter() {
@@ -555,10 +772,249 @@ impl Provider {
                 .assets
                 .iter()
                 .any(|a| a.dirty.mam || a.dirty.health || a.dirty.profile)
+            || self
+                .sets
+                .iter()
+                .any(|s| s.meta_pending || s.due(Duration::ZERO))
+    }
+
+    fn find_set(&self, source: &IdentificationLink, tag: &str) -> Option<usize> {
+        self.sets
+            .iter()
+            .position(|s| &s.source == source && s.tag() == tag)
+    }
+
+    fn set_index(&self, source: &IdentificationLink, tag: &str) -> Result<usize, ProviderError> {
+        self.find_set(source, tag)
+            .ok_or_else(|| ProviderError::UnknownDataSet {
+                source: source.to_string(),
+                tag: tag.to_owned(),
+            })
+    }
+
+    fn topic(
+        &self,
+        resource: Resource,
+        source: Option<&IdentificationLink>,
+        filter: Option<Filter>,
+    ) -> Result<Topic, TopicError> {
+        Topic::new(
+            self.lifecycle.publisher_id().service_type(),
+            self.app_id().clone(),
+            Method::Pub,
+            resource,
+            source.cloned(),
+            filter,
+        )
+    }
+
+    /// The pending publications of assets, Profiles and PublicationList,
+    /// then Metadata and Data.
+    fn changes(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
+        let mut out = self.resource_changes(unix_ms);
+        out.extend(self.meta_data_changes(unix_ms));
+        out.extend(self.data_changes(now, unix_ms));
+        out
+    }
+
+    /// The changed Metadata on `Pub/Metadata/<Source>/<Tag>`
+    /// (REQ-RES-META-003; ON_REQUEST_FILTER_9, REQ-RES-PUBLIST-012).
+    fn meta_data_changes(&mut self, unix_ms: u64) -> Vec<Publication> {
+        let mut out = Vec::new();
+        for i in 0..self.sets.len() {
+            if !core::mem::take(&mut self.sets[i].meta_pending) || !self.sets[i].mode().is_on() {
+                continue;
+            }
+            let s = &self.sets[i];
+            let topic = self
+                .topic(
+                    Resource::Metadata,
+                    Some(&s.source),
+                    Some(Filter::Tag(s.tag().to_owned())),
+                )
+                .expect("add_data checked the Tag");
+            let payload = self.meta_message(i, None, unix_ms);
+            out.push(Publication { topic, payload });
+        }
+        out
+    }
+
+    /// The due Data (REQ-RES-PUBLIST-009 … 011, 013 … 015): with
+    /// APPLICATION_2 all such DataSets on `Pub/Data`, with SOURCE_3 those
+    /// of the source on `Pub/Data/<Source>`, with FILTER_4 the DataSet
+    /// alone on `Pub/Data/<Source>/<Tag>`. A group carries every DataSet
+    /// of the form that has a value set (the state), due or not.
+    fn data_changes(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
+        let due: Vec<usize> = (0..self.sets.len())
+            .filter(|i| self.sets[*i].due(now))
+            .collect();
+        if due.is_empty() {
+            return Vec::new();
+        }
+        let mut along = vec![false; self.sets.len()];
+        let mut out = Vec::new();
+        if due.iter().any(|i| self.sets[*i].mode().application()) {
+            let (items, classes) = self.data_items(None, None, |s| s.mode().application());
+            for (flag, s) in along.iter_mut().zip(&self.sets) {
+                *flag |= s.available() && s.mode().application();
+            }
+            out.extend(self.publish_data(None, None, items, &classes, unix_ms));
+        }
+        let mut sources: Vec<IdentificationLink> = Vec::new();
+        for i in &due {
+            let s = &self.sets[*i];
+            if s.mode().source() && !sources.contains(&s.source) {
+                sources.push(s.source.clone());
+            }
+        }
+        for src in sources {
+            let (items, classes) = self.data_items(Some(&src), None, |s| s.mode().source());
+            for (flag, s) in along.iter_mut().zip(&self.sets) {
+                *flag |= s.source == src && s.available() && s.mode().source();
+            }
+            out.extend(self.publish_data(Some(&src), None, items, &classes, unix_ms));
+        }
+        for i in &due {
+            let s = &self.sets[*i];
+            if s.mode().filter() {
+                let src = s.source.clone();
+                let tag = Filter::Tag(s.tag().to_owned());
+                let items = vec![s.message()];
+                let classes = [s.class_id];
+                out.extend(self.publish_data(Some(&src), Some(tag), items, &classes, unix_ms));
+            }
+        }
+        for (i, s) in self.sets.iter_mut().enumerate() {
+            if due.contains(&i) {
+                s.published_due(now);
+            } else if along[i] {
+                s.published_along();
+            }
+        }
+        out
+    }
+
+    fn publish_data(
+        &mut self,
+        source: Option<&IdentificationLink>,
+        filter: Option<Filter>,
+        items: Vec<DataSetMessage<Data>>,
+        classes: &[uuid::Uuid],
+        unix_ms: u64,
+    ) -> Vec<Publication> {
+        let topic = self
+            .topic(Resource::Data, source, filter)
+            .expect("add_data checked the Tag");
+        let limit = self.config.publish_limit.min(self.config.max_packet_size);
+        self.series_of(items, classes, None, None, limit, unix_ms)
+            .into_iter()
+            .map(|payload| Publication {
+                topic: topic.clone(),
+                payload,
+            })
+            .collect()
+    }
+
+    /// The available Data DataSets of the sources addressed, with Tag
+    /// `tag` if given and selected by `select`, in the order of sources
+    /// and addition; and their DataSetClassIds.
+    fn data_items(
+        &self,
+        source: Option<&IdentificationLink>,
+        tag: Option<&str>,
+        select: impl Fn(&Set) -> bool,
+    ) -> (Vec<DataSetMessage<Data>>, Vec<uuid::Uuid>) {
+        let mut items = Vec::new();
+        let mut classes = Vec::new();
+        for il in self.sources(source) {
+            for s in &self.sets {
+                if s.source == il && tag.is_none_or(|t| s.tag() == t) && s.available() && select(s)
+                {
+                    items.push(s.message());
+                    classes.push(s.class_id);
+                }
+            }
+        }
+        (items, classes)
+    }
+
+    /// Answers a `Get` of Metadata of an available DataSet with its
+    /// DataSetMetaData (REQ-RES-META-002); silent otherwise (REQ-CMP-044).
+    fn answer_meta_data(
+        &mut self,
+        topic: &Topic,
+        get: &GetWire,
+        unix_ms: u64,
+    ) -> Result<Vec<Publication>, Ignored> {
+        let (Some(source), Some(Filter::Tag(tag))) = (topic.source(), topic.filter()) else {
+            return Err(Ignored::NoMetadata(
+                "a Get of Metadata addresses Source and Tag (REQ-RES-META-001)".to_owned(),
+            ));
+        };
+        let i = self
+            .find_set(source, tag)
+            .filter(|i| self.sets[*i].mode().is_on())
+            .ok_or_else(|| {
+                Ignored::NoMetadata(format!("the source {source} provides no Data {tag:?}"))
+            })?;
+        let reply = self
+            .topic(Resource::Metadata, Some(source), topic.filter().cloned())
+            .map_err(Ignored::Topic)?;
+        let payload = self.meta_message(i, Some(get.message_id.clone()), unix_ms);
+        Ok(vec![Publication {
+            topic: reply,
+            payload,
+        }])
+    }
+
+    /// The ua-metadata NetworkMessage of a DataSet; its Timestamp is the
+    /// first sending of the version (REQ-MSG-032).
+    fn meta_message(&mut self, i: usize, reply_to: Option<MessageId>, unix_ms: u64) -> Vec<u8> {
+        let s = &self.sets[i];
+        let (first, changed) = self
+            .versions
+            .first_sent(s.source.as_str(), &s.filter, unix_ms);
+        self.versions_changed |= changed;
+        let s = &self.sets[i];
+        let msg = MetaDataNetworkMessage {
+            message_id: self.lifecycle.next_message_id(unix_ms),
+            publisher_id: self.lifecycle.publisher_id().clone(),
+            data_set_writer_id: s.writer,
+            writer_group_name: s.filter.clone(),
+            data_set_writer_name: s.source.clone(),
+            timestamp: date_time(first),
+            reply_to,
+            meta_data: Some(s.meta.clone()),
+        };
+        serde_json::to_vec(&msg).expect("a MetaDataNetworkMessage always serializes")
+    }
+
+    /// The size of the ua-metadata NetworkMessage of a DataSet with the
+    /// longest MessageId and a ReplyTo.
+    fn meta_message_size(
+        &self,
+        source: &IdentificationLink,
+        filter: &str,
+        meta: &DataSetMetaData,
+        unix_ms: u64,
+    ) -> usize {
+        let publisher = self.lifecycle.publisher_id();
+        let id = MessageId::new(unix_ms, Some(u32::MAX), publisher);
+        let msg = MetaDataNetworkMessage {
+            message_id: id.clone(),
+            publisher_id: publisher.clone(),
+            data_set_writer_id: DataSetWriterId::new(u16::MAX).expect("a valid id"),
+            writer_group_name: filter.to_owned(),
+            data_set_writer_name: source.clone(),
+            timestamp: date_time(unix_ms),
+            reply_to: Some(id),
+            meta_data: Some(meta.clone()),
+        };
+        serde_json::to_vec(&msg).map_or(usize::MAX, |v| v.len())
     }
 
     /// The pending publications of assets, Profiles and PublicationList.
-    fn changes(&mut self, unix_ms: u64) -> Vec<Publication> {
+    fn resource_changes(&mut self, unix_ms: u64) -> Vec<Publication> {
         let mut out = Vec::new();
         for i in 0..self.assets.len() {
             let il = self.assets[i].il.clone();
@@ -623,6 +1079,19 @@ impl Provider {
         limit: usize,
         unix_ms: u64,
     ) -> Vec<Vec<u8>> {
+        self.series_of(items, &[], request, reply_to, limit, unix_ms)
+    }
+
+    /// [`Self::series`] with the DataSetClassIds of Data items.
+    fn series_of<P: DataSet>(
+        &mut self,
+        items: Vec<DataSetMessage<P>>,
+        classes: &[uuid::Uuid],
+        request: Option<&PaginationRequest>,
+        reply_to: Option<&MessageId>,
+        limit: usize,
+        unix_ms: u64,
+    ) -> Vec<Vec<u8>> {
         let publisher: PublisherId = self.lifecycle.publisher_id().clone();
         let app = self.app_id().clone();
         let env = Envelope {
@@ -630,6 +1099,7 @@ impl Provider {
             app: &app,
             reply_to,
             limit,
+            classes,
         };
         let lifecycle = &mut self.lifecycle;
         pagination::series(items, request, &env, &mut || {
@@ -683,7 +1153,8 @@ impl Provider {
 
     /// The PublicationList entries: per source MAM, Health and Profile,
     /// each published on its Source topic and answered on `Get`
-    /// (ON_REQUEST_SOURCE_10, REQ-RES-PUBLIST-012/026).
+    /// (ON_REQUEST_SOURCE_10, REQ-RES-PUBLIST-012/026), then its Data
+    /// DataSets with their Metadata in the order of addition.
     fn list_items(
         &self,
         source: Option<&IdentificationLink>,
@@ -710,6 +1181,18 @@ impl Provider {
                     config: None,
                 };
                 out.push(DataSetMessage::new(id, il.clone(), r.as_str(), entry));
+            }
+            for s in self.sets.iter().filter(|s| s.source == il) {
+                for e in s.entries(id) {
+                    let p = e.payload();
+                    let tag = Filter::Tag(s.tag().to_owned());
+                    if filter.is_some_and(|f| {
+                        f.resource() != p.resource || f.filter().is_some_and(|t| t != &tag)
+                    }) {
+                        continue;
+                    }
+                    out.push(e);
+                }
             }
         }
         out

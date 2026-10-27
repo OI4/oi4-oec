@@ -121,7 +121,15 @@ fn connect_publishes_the_state_of_every_source() {
             .iter()
             .map(ToString::to_string)
             .collect::<Vec<_>>(),
-        ["MAM", "Health", "Profile", "PublicationList"].map(|r| topic("Get", &format!("{r}/#")))
+        [
+            "MAM",
+            "Health",
+            "Data",
+            "Metadata",
+            "Profile",
+            "PublicationList"
+        ]
+        .map(|r| topic("Get", &format!("{r}/#")))
     );
     // offline: nothing is published, nothing queued (ADR-0020 §7)
     let pump = p.add_asset(mam(PUMP)).unwrap();
@@ -181,7 +189,14 @@ fn connect_publishes_the_state_of_every_source() {
     // Profile: what is served (REQ-RES-PROFILE-002)
     assert_eq!(
         json_of(&out[5])["Messages"][0]["Payload"]["Resources"],
-        json!(["MAM", "Health", "Profile", "PublicationList"])
+        json!([
+            "MAM",
+            "Health",
+            "Data",
+            "Metadata",
+            "Profile",
+            "PublicationList"
+        ])
     );
     // the Health set while offline
     assert_eq!(

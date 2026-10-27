@@ -4,6 +4,8 @@
 
 use core::ops::Range;
 
+use uuid::Uuid;
+
 use crate::il::IdentificationLink;
 use crate::message::{
     DataNetworkMessage, DataSet, DataSetEntry, DataSetMessage, MessageId, Pagination,
@@ -123,6 +125,10 @@ pub(crate) struct Envelope<'a> {
     pub(crate) app: &'a IdentificationLink,
     pub(crate) reply_to: Option<&'a MessageId>,
     pub(crate) limit: usize,
+    /// The publisher-defined DataSetClassIds of Data DataSetMessages, one
+    /// per item; empty for the other resources. A page carries the class
+    /// if all its DataSetMessages share it (REQ-MSG-011).
+    pub(crate) classes: &'a [Uuid],
 }
 
 /// The encoded NetworkMessages of a publication of `items`, paginated as
@@ -135,10 +141,12 @@ pub(crate) fn series<P: DataSet>(
 ) -> Vec<Vec<u8>> {
     let sizes: Vec<usize> = items.iter().map(|m| encode(m).len()).collect();
     let probe = MessageId::new(u64::MAX, Some(u32::MAX), env.publisher);
+    let probe_class = env.classes.first().copied();
     let empty = |pagination: bool| {
         let msg = network::<P>(
             probe.clone(),
             env,
+            probe_class,
             pagination.then(|| max_pagination(&probe, env)),
         );
         encode(&msg).len()
@@ -161,9 +169,14 @@ pub(crate) fn series<P: DataSet>(
                 pagination_id: series,
             }
         });
+        let class = env.classes.get(range.clone()).and_then(|c| match c {
+            [first, rest @ ..] if rest.iter().all(|r| r == first) => Some(*first),
+            _ => None,
+        });
         let mut msg = network::<P>(
             id,
             env,
+            class,
             pagination.map(|p| DataSetMessage::helper(env.app.clone(), p)),
         );
         let skip = range.start.saturating_sub(at);
@@ -179,9 +192,15 @@ pub(crate) fn series<P: DataSet>(
 fn network<P: DataSet>(
     id: MessageId,
     env: &Envelope<'_>,
+    class: Option<Uuid>,
     pagination: Option<DataSetMessage<Pagination>>,
 ) -> DataNetworkMessage<P> {
     let mut msg = DataNetworkMessage::new(id, env.publisher.clone());
+    if let Some(c) = class {
+        msg = msg
+            .with_data_set_class_id(c)
+            .expect("the provider checked the DataSetClassId (REQ-MSG-014)");
+    }
     if let Some(r) = env.reply_to {
         msg = msg.in_reply_to(r.clone());
     }

@@ -21,6 +21,7 @@ pub use config::{
     Config, ConfigObject, ConfigObjectSet, ConfigSet, ConfigType, Context, Group, GroupSet,
     SENSITIVE_MASK, Validation,
 };
+pub(crate) use data::sv_index;
 pub use data::{Data, Oi4Pv};
 pub use event::{Event, EventCategory};
 pub use health::{DetailObject, Health, HealthState};

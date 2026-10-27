@@ -43,7 +43,7 @@ pub struct Oi4Pv {
 }
 
 /// The index of `Sv1` … `Sv255` without leading zeros.
-fn sv_index(key: &str) -> Option<u8> {
+pub(crate) fn sv_index(key: &str) -> Option<u8> {
     let n = key.strip_prefix("Sv")?;
     if n.starts_with('0') {
         return None;
