@@ -180,7 +180,7 @@ func TestMonitorLive(t *testing.T) {
 		}
 		defer pub.Close()
 		for _, r := range fixture.Records {
-			if err := pub.Publish(ctx, mqttwire.Message{Topic: r.Topic, Payload: r.Payload, QoS: 1}); err != nil {
+			if err := pub.Publish(ctx, mqttwire.Message{Topic: r.Topic, Payload: r.Payload, QoS: r.QoS}); err != nil {
 				t.Error(err)
 				return
 			}

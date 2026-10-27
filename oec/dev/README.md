@@ -14,6 +14,7 @@ environment and interop test contract).
 | `mosquitto/mosquitto.conf` | TLS 1.2/1.3 only, credentials listener, client certificate listener, packet limits |
 | `pki/` | Go generator of the dev PKI, the password file and the sample container storages (standard library only) |
 | `interop.sh` | Opt-in interop tests of the Rust SDK against this broker |
+| `../conformance/live.sh` | Opt-in live run of `oec-check monitor` (D7) against this broker (C-052) |
 | `generated/` | Output of `go run ./pki` – **never commit** |
 
 ## Prerequisites
@@ -205,6 +206,30 @@ $env:OEC_INTEROP = "1"
 cargo test -p oec --test interop -- --test-threads=1
 cd ../../dev
 docker compose down -v
+```
+
+## Live run of `oec-check monitor` (D7)
+
+```sh
+oec/conformance/live.sh
+```
+
+Same pattern as `interop.sh` (PKI if missing, broker up, tests, broker down;
+`OEC_LIVE_KEEP=1` keeps it, `OEC_LIVE_OUT=DIR` keeps the recorded captures).
+It runs `go test ./cmd/oec-check -run TestMonitorDevBroker` with
+`OEC_LIVE=1`: two monitors attach with the sample storages
+(`--bus-storage generated/roots/oec-dev-cert`, client certificate on 8884;
+`--bus-storage generated/roots/oec-dev-app`, credentials on 8883), a
+simulated component logs in with the probe credentials, publishes its Birth,
+is killed (the broker publishes its Will) and reconnects with a new Birth.
+Both monitors must record the five messages and judge the lifecycle as
+passed (the heartbeat stays inconclusive in 6 s, exit 4). By hand:
+
+```sh
+cd oec/conformance
+go run ./cmd/oec-check monitor --bus-storage ../dev/generated/roots/oec-dev-cert \
+  --duration 3m --record /tmp/bus.jsonl
+go run ./cmd/oec-check monitor --replay /tmp/bus.jsonl
 ```
 
 `podman-compose` 1.x does not support `up --wait`; use `podman compose` with
