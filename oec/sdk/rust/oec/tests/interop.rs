@@ -7,7 +7,8 @@
 //! limits of SF-105 and the explicit bootstrap (replaces the smoke test of
 //! C-050); since C-053 the Level 2 provider side (assets, `Get` answers),
 //! since C-054 Data DataSets with Metadata and an Interval, since C-055
-//! the write side (`Set Data`, `Set PublicationList`, Status events).
+//! the write side (`Set Data`, `Set PublicationList`, Status events),
+//! since C-056 the Config (`Get`/`Set Config`, masking).
 //!
 //! Opt-in: the tests pass at once unless `OEC_INTEROP=1` is set, so the
 //! gate needs no container engine. Run them with `oec/dev/interop.sh`
@@ -1272,6 +1273,119 @@ fn level_2_set_data_and_publication_list() {
         event["Messages"][0]["Payload"]["Number"],
         StatusCode::BadNotFound.code()
     );
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+    probe.disconnect();
+}
+
+/// The DataSetClassId of the Config (REQ-MSG-010).
+const CONFIG: &str = "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2";
+
+/// Config through Mosquitto (P4 increment 7b): `Get Config` with the
+/// sensitive API key masked (GL-ADR-021, REQ-RES-CONFIG-016/018); a
+/// `Set Config` with the mask keeps the key and is answered with the Config
+/// and Good; the application's own rule refuses with its code
+/// (REQ-RES-CONFIG-020 … 025, REQ-RES-EVENT-005).
+#[test]
+fn level_2_config() {
+    let Some(dev) = dev() else { return };
+    let mut probe = dev.probe("oec-probe-config", true);
+    let states = States::default();
+    let broker = Broker::new("localhost")
+        .port(dev.port)
+        .ca_pem(dev.file("broker/ca.pem"))
+        .credentials(&dev.user, &dev.password);
+    let on = states.clone();
+    let app = App::builder(Level::L2, ServiceType::Utility, product())
+        .bootstrap(Bootstrap::Explicit(broker))
+        .serial_number("oec-config")
+        .reference_designation(false)
+        .keep_alive(Duration::from_secs(5))
+        .on_connection(move |s| on.0.lock().unwrap().push(s))
+        .build()
+        .unwrap();
+    let config = app
+        .this()
+        .add_config(
+            ConfigDef::new("service").group(
+                "common",
+                "Common settings",
+                [
+                    ConfigObject::number("interval", 60.0)
+                        .min(10.0)
+                        .max(3600.0)
+                        .mandatory(),
+                    ConfigObject::string("api_key", "").sensitive(),
+                ],
+            ),
+        )
+        .unwrap();
+    config
+        .on_set(|proposed| match proposed.number("common", "interval") {
+            Some(i) if i % 10.0 != 0.0 => Err(StatusCode::BadOutOfRange),
+            _ => Ok(()),
+        })
+        .unwrap();
+    config.set("common", "api_key", "s3cr3t").unwrap();
+    let me = oec_core::il::IdentificationLink::parse(app.identification_link().as_str())
+        .unwrap()
+        .encode();
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = thread::spawn(move || app.run());
+    states.wait_for(ConnectionState::Online);
+    let topic = format!("{prefix}Pub/Config/{me}/service");
+
+    let id = "1700000000010-Aggregation/vendor.com/Client/C-1/1";
+    get(
+        &mut probe,
+        format!("{prefix}Get/Config/{me}/service"),
+        &request(id, CONFIG, &serde_json::json!([])),
+    );
+    let got = answer(&mut probe, &topic, id);
+    assert_eq!(got["DataSetClassId"], CONFIG);
+    assert_eq!(got["Messages"][0]["WriterGroupName"], "service");
+    let common = &got["Messages"][0]["Payload"]["common"];
+    assert_eq!(common["interval"]["Value"], "60");
+    assert_eq!(common["api_key"]["Value"], "********");
+    assert!(!String::from_utf8_lossy(&serde_json::to_vec(&got).unwrap()).contains("s3cr3t"));
+
+    let id = "1700000000011-Aggregation/vendor.com/Client/C-1/1";
+    let set = serde_json::json!({"common": {
+        "interval": {"Value": "30"},
+        "api_key": {"Value": "********"}
+    }});
+    get(
+        &mut probe,
+        format!("{prefix}Set/Config/{me}/service"),
+        &request(id, CONFIG, &with_payload(&got, &set)),
+    );
+    let changed = answer(&mut probe, &topic, id);
+    let common = &changed["Messages"][0]["Payload"]["common"];
+    assert_eq!(common["interval"]["Value"], "30");
+    assert_eq!(common["api_key"]["Value"], "********");
+    let good = format!("{prefix}Pub/Event/{me}/Status/Good");
+    assert_eq!(
+        answer(&mut probe, &good, id)["Messages"][0]["Payload"]["Number"],
+        0
+    );
+
+    let id = "1700000000012-Aggregation/vendor.com/Client/C-1/1";
+    let set = serde_json::json!({"common": {"interval": {"Value": "25"}}});
+    get(
+        &mut probe,
+        format!("{prefix}Set/Config/{me}/service"),
+        &request(id, CONFIG, &with_payload(&got, &set)),
+    );
+    let bad = format!("{prefix}Pub/Event/{me}/Status/Bad");
+    assert_eq!(
+        answer(&mut probe, &bad, id)["Messages"][0]["Payload"]["Number"],
+        StatusCode::BadOutOfRange.code()
+    );
+    let values = config.values();
+    assert_eq!(values.number("common", "interval"), Some(30.0));
+    assert_eq!(values.string("common", "api_key"), Some("s3cr3t"));
 
     handle.shutdown();
     run.join().unwrap().unwrap();
