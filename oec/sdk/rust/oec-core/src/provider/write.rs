@@ -6,7 +6,8 @@
 //! the application accepts, decided by the application outside the
 //! provider (REQ-RES-DATA-009, REQ-RES-DATA-011, REQ-RES-DATA-012); and
 //! the Status event `BadNotFound` for a `Get` to an unknown Source
-//! (REQ-CMP-047).
+//! (REQ-CMP-047). `Set Config` is checked in [`super::config`] and
+//! decided by the application (P4 increment 7b).
 
 use std::collections::BTreeMap;
 
@@ -81,8 +82,8 @@ impl SetDataRequest {
 }
 
 /// The parts of a `Set` or `Del` NetworkMessage the provider uses.
-struct WriteWire {
-    message_id: MessageId,
+pub(super) struct WriteWire {
+    pub(super) message_id: MessageId,
     messages: Option<Json>,
 }
 
@@ -105,7 +106,7 @@ impl WriteWire {
 
     /// The one DataSetMessage of the resource; helper DataSets
     /// (DataSetWriterId 1 … 9, REQ-MSG-019) aside.
-    fn single(&self) -> Result<&Map<String, Json>, StatusCode> {
+    pub(super) fn single(&self) -> Result<&Map<String, Json>, StatusCode> {
         let Some(Json::Array(all)) = &self.messages else {
             return Err(StatusCode::BAD_DECODING_ERROR);
         };
@@ -317,6 +318,12 @@ impl Provider {
             },
             (Method::Set, Resource::PublicationList) => {
                 self.set_publication_list(topic, &source, &wire, unix_ms)
+            }
+            (Method::Set, Resource::Config) => {
+                match self.set_config_request(topic, &source, &wire) {
+                    Ok(request) => return Ok(Handled::SetConfig(request)),
+                    Err(code) => Err(code),
+                }
             }
             (Method::Set, Resource::Metadata) => Err(self.set_meta_data(topic, &source)),
             _ => Err(StatusCode::BAD_NOT_FOUND),

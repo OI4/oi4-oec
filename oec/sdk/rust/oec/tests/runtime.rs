@@ -476,6 +476,7 @@ fn served_filters(prefix: &str) -> Vec<String> {
         .into_iter()
         .chain(
             [
+                "Config",
                 "Data",
                 "Health",
                 "MAM",
@@ -1028,6 +1029,7 @@ fn level_2_publishes_its_sources_and_answers_get() {
         &serde_json::json!([
             "MAM",
             "Health",
+            "Config",
             "Data",
             "Metadata",
             "Event",

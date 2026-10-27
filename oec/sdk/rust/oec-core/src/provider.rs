@@ -5,7 +5,8 @@
 //! DataSetWriterIds, the publish modes, Intervals and Precisions of the
 //! Data, the answers to `Get` and pagination; and the write side (P4
 //! increment 7a, ADR-0026 §14): `Set` and `Del` with Status events,
-//! `Set PublicationList` and `Set Data`.
+//! `Set PublicationList` and `Set Data`; and the Config DataSets (P4
+//! increment 7b, ADR-0026 §15) with `Get` and `Set Config`.
 //!
 //! It owns the [`Lifecycle`]. The runtime calls [`Provider::on_connected`]
 //! after CONNACK, [`Provider::poll`] at [`Provider::poll_timeout`] and on
@@ -16,6 +17,7 @@
 //! changes only mark the state, and [`Provider::on_connected`] publishes
 //! the current state of every source.
 
+pub mod config;
 pub mod data;
 pub mod overrides;
 pub mod pagination;
@@ -40,6 +42,8 @@ use crate::resource::{Data, Health, HealthState, Mam, Profile, PublicationEntry,
 use crate::topic::{
     Filter, ListFilter, Method, Resource, StatusLevel, Subject, Topic, TopicError, TopicFilter,
 };
+use config::ConfigEntry;
+pub use config::{ConfigSpec, SetConfigRequest, StoredConfigValues};
 use data::{DataSetSpec, Value as FieldValue};
 pub use overrides::{PublicationOverride, PublicationOverrides};
 use pagination::Envelope;
@@ -98,8 +102,26 @@ pub enum ProviderError {
         /// The Tag.
         tag: String,
     },
-    /// A field value is refused: unknown field or wrong type.
+    /// A field or configuration value is refused: unknown field or
+    /// object, wrong type or Validation.
     Value(String),
+    /// The definition of a Config DataSet is refused.
+    Config(String),
+    /// The source already has a Config DataSet with this context name
+    /// (REQ-RES-CONFIG-015).
+    DuplicateConfig {
+        /// The source.
+        source: String,
+        /// The context name.
+        context: String,
+    },
+    /// The source has no Config DataSet with this context name.
+    UnknownConfig {
+        /// The source.
+        source: String,
+        /// The context name.
+        context: String,
+    },
 }
 
 impl fmt::Display for ProviderError {
@@ -122,6 +144,13 @@ impl fmt::Display for ProviderError {
                 write!(f, "the source {source:?} has no DataSet {tag:?}")
             }
             Self::Value(e) => write!(f, "invalid value: {e}"),
+            Self::Config(e) => write!(f, "invalid Config DataSet: {e}"),
+            Self::DuplicateConfig { source, context } => {
+                write!(f, "the source {source:?} already has a Config {context:?}")
+            }
+            Self::UnknownConfig { source, context } => {
+                write!(f, "the source {source:?} has no Config {context:?}")
+            }
         }
     }
 }
@@ -187,9 +216,10 @@ impl fmt::Display for Ignored {
 }
 
 /// The resources served by `Get`.
-const SERVED: [Resource; 6] = [
+const SERVED: [Resource; 7] = [
     Resource::Mam,
     Resource::Health,
+    Resource::Config,
     Resource::Data,
     Resource::Metadata,
     Resource::Profile,
@@ -198,9 +228,10 @@ const SERVED: [Resource; 6] = [
 
 /// The resources in the Profile, in its order: those served by `Get` and
 /// the Status events (REQ-RES-EVENT-005).
-const PROFILE: [Resource; 7] = [
+const PROFILE: [Resource; 8] = [
     Resource::Mam,
     Resource::Health,
+    Resource::Config,
     Resource::Data,
     Resource::Metadata,
     Resource::Event,
@@ -232,25 +263,30 @@ pub enum Handled {
     /// The application decides about this `Set Data`; then
     /// [`Provider::complete_set_data`] answers.
     SetData(SetDataRequest),
+    /// The application decides about this `Set Config`; then
+    /// [`Provider::complete_set_config`] answers.
+    SetConfig(SetConfigRequest),
 }
 
 impl Handled {
-    /// The publications; `None` for a [`Handled::SetData`].
+    /// The publications; `None` for a [`Handled::SetData`] and a
+    /// [`Handled::SetConfig`].
     pub fn into_publications(self) -> Option<Vec<Publication>> {
         match self {
             Self::Publish(p) => Some(p),
-            Self::SetData(_) => None,
+            Self::SetData(_) | Self::SetConfig(_) => None,
         }
     }
 }
 
 /// The tables changed since they were last taken for persistence.
 #[derive(Debug, Clone, Copy, Default)]
-#[allow(clippy::struct_field_names)]
+#[allow(clippy::struct_field_names, clippy::struct_excessive_bools)]
 struct Unsaved {
     writers: bool,
     versions: bool,
     overrides: bool,
+    config: bool,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -285,6 +321,9 @@ pub struct Provider {
     sets: Vec<Set>,
     versions: MetaDataVersions,
     overrides: PublicationOverrides,
+    configs: Vec<ConfigEntry>,
+    config_values: StoredConfigValues,
+    config_instance: u64,
     unsaved: Unsaved,
     pending: Pending,
     connected: bool,
@@ -312,6 +351,9 @@ impl Provider {
             sets: Vec::new(),
             versions: MetaDataVersions::new(),
             overrides: PublicationOverrides::new(),
+            configs: Vec::new(),
+            config_values: StoredConfigValues::new(),
+            config_instance: 0,
             unsaved: Unsaved::default(),
             pending: Pending::default(),
             connected: false,
@@ -486,6 +528,7 @@ impl Provider {
             .ok_or_else(|| ProviderError::UnknownAsset(il.to_string()))?;
         self.assets.remove(i);
         self.sets.retain(|s| &s.source != il);
+        self.configs.retain(|c| &c.source != il);
         self.pending.list = self.config.get;
         Ok(())
     }
@@ -716,9 +759,9 @@ impl Provider {
     /// The connection is established (CONNACK): the Birth and the Health of
     /// the application (REQ-LIFE-001, REQ-LIFE-015), then MAM and Health of
     /// every asset, from Level 2 the Profile of every source and the
-    /// PublicationList, then the Metadata of every DataSet not OFF_0 and
-    /// the Data of every published DataSet with a value set – the current
-    /// state, nothing queued; every Interval starts anew.
+    /// PublicationList, then every Config, the Metadata of every DataSet
+    /// not OFF_0 and the Data of every published DataSet with a value set –
+    /// the current state, nothing queued; every Interval starts anew.
     pub fn on_connected(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
         self.connected = true;
         let mut out = self.lifecycle.on_connected(now, unix_ms);
@@ -735,6 +778,9 @@ impl Provider {
         };
         for s in &mut self.sets {
             s.restart();
+        }
+        for c in &mut self.configs {
+            c.pending = true;
         }
         out.extend(self.changes(now, unix_ms));
         out
@@ -844,6 +890,14 @@ impl Provider {
                 let items = self.profile_items(source);
                 self.series(items, req, Some(&get.message_id), limit, unix_ms)
             }
+            Resource::Config => {
+                let context = match topic.filter() {
+                    Some(Filter::ContextName(c)) => Some(c.as_str()),
+                    _ => None,
+                };
+                let items = self.config_items(source, context);
+                self.series(items, req, Some(&get.message_id), limit, unix_ms)
+            }
             Resource::Data => {
                 let tag = match topic.filter() {
                     Some(Filter::Tag(t)) => Some(t.as_str()),
@@ -895,6 +949,7 @@ impl Provider {
                 .assets
                 .iter()
                 .any(|a| a.dirty.mam || a.dirty.health || a.dirty.profile)
+            || self.configs.iter().any(|c| c.pending)
             || self
                 .sets
                 .iter()
@@ -932,9 +987,10 @@ impl Provider {
     }
 
     /// The pending publications of assets, Profiles and PublicationList,
-    /// then Metadata and Data.
+    /// then Config, Metadata and Data.
     fn changes(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
         let mut out = self.resource_changes(unix_ms);
+        out.extend(self.config_changes(unix_ms));
         out.extend(self.meta_data_changes(unix_ms));
         out.extend(self.data_changes(now, unix_ms));
         out
@@ -1278,7 +1334,8 @@ impl Provider {
     /// each published on its Source topic and answered on `Get`
     /// (ON_REQUEST_SOURCE_10, REQ-RES-PUBLIST-012/026), its Status events
     /// Good, Uncertain and Bad (FILTER_4, published only on their topic),
-    /// then its Data DataSets with their Metadata in the order of addition.
+    /// its Config DataSets (ON_REQUEST_FILTER_9), then its Data DataSets
+    /// with their Metadata, each in the order of addition.
     fn list_items(
         &self,
         source: Option<&IdentificationLink>,
@@ -1334,6 +1391,7 @@ impl Provider {
                     entry,
                 ));
             }
+            out.extend(self.config_list_items(&il, filter, id));
             for s in self.sets.iter().filter(|s| s.source == il) {
                 for e in s.entries(id) {
                     let p = e.payload();

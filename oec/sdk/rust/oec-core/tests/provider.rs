@@ -146,6 +146,7 @@ fn assert_subscriptions(p: &Provider) {
         [
             "Get/MAM",
             "Get/Health",
+            "Get/Config",
             "Get/Data",
             "Get/Metadata",
             "Get/Profile",
@@ -239,6 +240,7 @@ fn connect_publishes_the_state_of_every_source() {
         json!([
             "MAM",
             "Health",
+            "Config",
             "Data",
             "Metadata",
             "Event",
