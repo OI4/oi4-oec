@@ -5,7 +5,7 @@
 //! process, reconnect with a new Will and a new Birth after a broker
 //! restart, refused logins, a wrong CA, TLS 1.2 and 1.3, the packet size
 //! limits of SF-105 and the explicit bootstrap (replaces the smoke test of
-//! C-050).
+//! C-050); since C-053 the Level 2 provider side (assets, `Get` answers).
 //!
 //! Opt-in: the tests pass at once unless `OEC_INTEROP=1` is set, so the
 //! gate needs no container engine. Run them with `oec/dev/interop.sh`
@@ -842,5 +842,99 @@ fn max_packet_size_limits_the_payload() {
         assert_eq!(got.map(|p| p.payload.len()), delivered.then_some(size));
         probe.ping().unwrap();
     }
+    probe.disconnect();
+}
+
+/// Level 2 provider side (P4 increment 6a, ADR-0026 §12): the application
+/// and an asset publish MAM, Health and Profile, then the PublicationList;
+/// a `Get` through Mosquitto is answered with `ReplyTo` = the MessageId of
+/// the request (REQ-RES-PUBLIST-027, REQ-MSG-*); an asset Health change is
+/// published at once.
+#[test]
+fn level_2_assets_and_get_answers() {
+    let Some(dev) = dev() else { return };
+    let mut probe = dev.probe("oec-probe-provider", true);
+    let broker = Broker::new("localhost")
+        .port(dev.port)
+        .ca_pem(dev.file("broker/ca.pem"))
+        .credentials(&dev.user, &dev.password);
+    let states = States::default();
+    let on = states.clone();
+    let app = App::builder(Level::L2, ServiceType::Utility, product())
+        .bootstrap(Bootstrap::Explicit(broker))
+        .serial_number("oec-provider")
+        .reference_designation(false)
+        .keep_alive(Duration::from_secs(5))
+        .on_connection(move |s| on.0.lock().unwrap().push(s))
+        .build()
+        .unwrap();
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-1"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    let encoded = |il: &str| {
+        oec_core::il::IdentificationLink::parse(il)
+            .unwrap()
+            .encode()
+    };
+    let me = encoded(app.identification_link().as_str());
+    let it = encoded(pump.identification_link().as_str());
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = thread::spawn(move || app.run());
+
+    let mut topics = Vec::new();
+    while topics.len() < 7 {
+        topics.push(probe.of("oec-provider", WAIT).topic);
+    }
+    assert_eq!(
+        topics,
+        [
+            format!("{prefix}Pub/MAM/{me}"),
+            format!("{prefix}Pub/Health/{me}"),
+            format!("{prefix}Pub/MAM/{it}"),
+            format!("{prefix}Pub/Health/{it}"),
+            format!("{prefix}Pub/Profile/{it}"),
+            format!("{prefix}Pub/Profile/{me}"),
+            format!("{prefix}Pub/PublicationList"),
+        ]
+    );
+    states.wait_for(ConnectionState::Online);
+
+    let request = "1700000000000-Aggregation/vendor.com/Client/C-1/1";
+    probe
+        .send(&Packet::Publish(Publish {
+            topic: format!("{prefix}Get/PublicationList"),
+            payload: serde_json::to_vec(&serde_json::json!({
+                "MessageId": request,
+                "MessageType": "ua-data",
+                "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
+                // the PublicationList DataSetClassId: a valid request for D7
+                "DataSetClassId": "217434d6-6e1e-4230-b907-f52bc9ffe152",
+                "ReplyTo": "",
+                "Messages": []
+            }))
+            .unwrap(),
+            delivery: Delivery::AtMostOnce,
+            retain: false,
+        }))
+        .unwrap();
+    let answer = probe
+        .next(WAIT, |p| p.topic == format!("{prefix}Pub/PublicationList"))
+        .expect("no answer to the Get");
+    let v = json(&answer.payload);
+    assert_eq!(v["ReplyTo"], request);
+    assert_eq!(v["Messages"].as_array().unwrap().len(), 6);
+
+    pump.set_health(HealthState::MaintenanceRequired, Some(70));
+    let p = probe
+        .next(WAIT, |p| p.topic == format!("{prefix}Pub/Health/{it}"))
+        .expect("no asset Health");
+    assert_eq!(health(&p), ("MAINTENANCE_REQUIRED_4".to_owned(), 70));
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
     probe.disconnect();
 }
