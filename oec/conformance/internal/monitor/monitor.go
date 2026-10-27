@@ -740,8 +740,8 @@ func (e *Engine) regularMAM(p *part, m Message, d dsm) {
 
 // heartbeat is REQ-TOP-017 for the Health of the component itself: the
 // gap between two publications (or the Birth and the first Health) is at
-// most heartbeat + tolerance (SF-106: the heartbeat applies to the
-// component's own Health).
+// most heartbeat + tolerance (MG 7.5.1 since SF-106: the heartbeat applies
+// to the component's own Health; it is optional for subordinate assets).
 func (e *Engine) heartbeat(p *part, m Message) {
 	const test, req = "T7-MON-05", "REQ-TOP-017"
 	p.healthSelf = true

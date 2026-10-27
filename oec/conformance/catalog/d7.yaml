@@ -21,7 +21,7 @@
 #         peer         – D7 simulates a peer component that the CUT talks to
 # status: planned (P3) | implemented (P5)
 tool: oec-check
-baseline: "59e3ae3"
+baseline: "9044929"
 tests:
   # --- monitor: passive rules -------------------------------------------
   - id: T7-MON-01
@@ -58,7 +58,7 @@ tests:
     level: 1
     reqs: [REQ-TOP-017, REQ-RES-HEALTH-004, REQ-LIFE-014]
     status: implemented
-    notes: Heartbeat tolerance and the minimum observation time are parameters of the run (default 2 × 60 s + 5 s).
+    notes: The heartbeat applies to the Health of the component itself and is restarted by any own Health or the Birth (MG 7.5.1, SF-106). Heartbeat tolerance and the minimum observation time are parameters of the run (default 2 × 60 s + 5 s).
   - id: T7-MON-06
     title: MessageIds are unique
     mode: monitor
