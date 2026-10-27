@@ -112,6 +112,46 @@ fn connect_uses_the_defaults_of_mg_6_3_1() {
 }
 
 #[test]
+fn renewed_credentials_apply_to_the_next_connect() {
+    let mut config = SessionConfig::new("client");
+    config.credentials = Some(Credentials {
+        username: "old".into(),
+        password: Some(b"old-secret".to_vec()),
+    });
+    let mut s = connected(config, t(0));
+    let renewed = Some(Credentials {
+        username: "new".into(),
+        password: Some(b"new-secret".to_vec()),
+    });
+    s.set_credentials(renewed.clone()).unwrap();
+    assert_eq!(s.config().credentials, renewed);
+    assert_eq!(s.state(), SessionState::Connected);
+    assert!(
+        sent(&mut s).is_empty(),
+        "no packet for the current connection"
+    );
+    s.connection_lost();
+    events(&mut s);
+    s.connect(will(), t(1)).unwrap();
+    let c = the_connect(&sent(&mut s));
+    assert_eq!(c.username.as_deref(), Some("new"));
+    assert_eq!(c.password.as_deref(), Some(&b"new-secret"[..]));
+    // a client certificate needs no credentials
+    s.set_credentials(None).unwrap();
+    assert_eq!(s.config().credentials, None);
+    // credentials that do not fit into CONNECT are refused, the old stay
+    let too_long = Some(Credentials {
+        username: "u".repeat(usize::from(u16::MAX) + 1),
+        password: None,
+    });
+    assert!(matches!(
+        s.set_credentials(too_long),
+        Err(SessionError::Codec(_))
+    ));
+    assert_eq!(s.config().credentials, None);
+}
+
+#[test]
 fn config_is_validated() {
     let mut c = SessionConfig::new("");
     assert!(Session::new(c.clone()).is_ok());

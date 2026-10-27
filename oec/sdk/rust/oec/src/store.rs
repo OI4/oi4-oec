@@ -77,12 +77,12 @@ impl Store for FileStore {
     fn save(&self, key: &str, value: &[u8]) -> io::Result<()> {
         let path = self.path(key)?;
         let dir = path.parent().unwrap_or(&self.dir);
-        fs::create_dir_all(dir)?;
+        create_dirs(dir)?;
         let name = path.file_name().unwrap_or_default().to_string_lossy();
         // segments never start with '.', so the temporary name is no key
         let tmp = dir.join(format!(".{name}.tmp"));
         {
-            let mut f = fs::File::create(&tmp)?;
+            let mut f = create_file(&tmp)?;
             f.write_all(value)?;
             f.sync_all()?;
         }
@@ -91,6 +91,25 @@ impl Store for FileStore {
         fs::File::open(dir)?.sync_all()?;
         Ok(())
     }
+}
+
+/// Directories the store creates are accessible to the owner only (Unix
+/// mode 0700): values may be sensitive (GL-ADR-021).
+fn create_dirs(dir: &Path) -> io::Result<()> {
+    let mut builder = fs::DirBuilder::new();
+    builder.recursive(true);
+    #[cfg(unix)]
+    std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
+    builder.create(dir)
+}
+
+/// A new or truncated file readable by the owner only (Unix mode 0600),
+/// also if an interrupted save left one with other permissions.
+fn create_file(path: &Path) -> io::Result<fs::File> {
+    let f = fs::File::create(path)?;
+    #[cfg(unix)]
+    f.set_permissions(std::os::unix::fs::PermissionsExt::from_mode(0o600))?;
+    Ok(f)
 }
 
 /// Volatile store (tests, Level 1/2 without persistence). Not persistent:
@@ -172,6 +191,27 @@ mod tests {
         assert!(d.join("app/revision-counter").is_file());
         assert!(!d.join("app/.revision-counter.tmp").exists());
         assert!(s.is_persistent());
+        std::fs::remove_dir_all(d).unwrap();
+    }
+
+    /// Sensitive Config values are stored in clear text (GL-ADR-021): only
+    /// the owner may read what the store creates.
+    #[cfg(unix)]
+    #[test]
+    fn file_store_is_owner_only() {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = |p: &std::path::Path| std::fs::metadata(p).unwrap().permissions().mode() & 0o777;
+        let d = dir("owner-only");
+        let s = FileStore::new(&d);
+        s.save("app/config", b"{}").unwrap();
+        assert_eq!(mode(&d), 0o700);
+        assert_eq!(mode(&d.join("app")), 0o700);
+        assert_eq!(mode(&d.join("app/config")), 0o600);
+        // a file of an earlier version with wider permissions
+        std::fs::set_permissions(d.join("app/config"), std::fs::Permissions::from_mode(0o644))
+            .unwrap();
+        s.save("app/config", b"{}").unwrap();
+        assert_eq!(mode(&d.join("app/config")), 0o600);
         std::fs::remove_dir_all(d).unwrap();
     }
 

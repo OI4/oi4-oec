@@ -29,7 +29,7 @@
 //! `Set Data` ([`data::DataSet::on_set`]). **C-056 (increment 7b):** Config
 //! DataSets ([`config`], [`asset::Asset::add_config`]) with `Get`/`Set
 //! Config`, masking of sensitive values (GL-ADR-021), persisted values and
-//! the secrets of the container storage re-read before every connect
+//! the secrets of the container storage re-read before every reconnect
 //! (GL-ADR-022). ReferenceDesignation, the Syslog bridge, generic events
 //! and the consumer follow with increments 7c and 8; until then their
 //! contract is the P3 sketch `oec/sdk/rust/sketch` (ADR-0020 §1).

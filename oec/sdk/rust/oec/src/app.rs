@@ -43,7 +43,7 @@ const META_DATA_VERSIONS: &str = "app/metadata-versions";
 const PUBLICATIONS: &str = "app/publications";
 /// Store key of the Config values set by `Set Config` or
 /// [`ConfigHandle::set`] (REQ-RES-CONFIG-022, ADR-0026 §15). Sensitive
-/// values are stored in clear text: protect the store directory.
+/// values are stored in clear text; [`FileStore`] creates owner-only files.
 const CONFIG_VALUES: &str = "app/config";
 
 /// Where connection settings and secrets come from (ADR-0020 §5).
@@ -59,8 +59,11 @@ pub enum Bootstrap {
     /// `/etc/hostname`; REQ-CNT-021) as serial number, certificate name and
     /// MQTT ClientId (REQ-MQTT-013), and a file store below
     /// `/etc/oi4/app/oec` if the platform provides the application specific
-    /// volume (REQ-CNT-010/011). `root` prefixes all paths (tests, dev
-    /// environment); default `/`.
+    /// volume (REQ-CNT-010/011). Before every reconnect the means of
+    /// authentication are read again, so renewed secrets and certificates
+    /// apply without a restart; unusable ones keep the last good ones
+    /// (GL-ADR-022). `root` prefixes all paths (tests, dev environment);
+    /// default `/`.
     ContainerStorage {
         /// Prefix of all container paths.
         root: PathBuf,
@@ -267,6 +270,16 @@ pub struct ConnectionSettings {
     keep_alive: Duration,
     max_packet_size: usize,
     publish_limit: usize,
+    secrets: Option<SecretSource>,
+}
+
+/// Where the means of authentication of a container are re-read before
+/// every reconnect (GL-ADR-022): the root of the container storage and the
+/// container name that selects the certificate.
+#[derive(Debug, Clone)]
+struct SecretSource {
+    root: PathBuf,
+    name: String,
 }
 
 impl ConnectionSettings {
@@ -310,6 +323,26 @@ impl ConnectionSettings {
     /// [`Self::max_packet_size`] (REQ-PAG-005).
     pub fn publish_limit(&self) -> usize {
         self.publish_limit
+    }
+
+    /// The settings with the means of authentication read again from the
+    /// secret storage `/run/secrets/oi4` and the certificate storage
+    /// (GL-ADR-022: the platform may renew them while the application
+    /// runs). `None` for [`Bootstrap::Explicit`].
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Bootstrap`] as at [`AppBuilder::build`]; the message names
+    /// files, never secrets.
+    pub(crate) fn reload_auth(&self) -> Result<Option<ConnectionSettings>> {
+        let Some(source) = &self.secrets else {
+            return Ok(None);
+        };
+        let auth = container::auth(&source.root, &source.name)?;
+        Ok(Some(ConnectionSettings {
+            auth,
+            ..self.clone()
+        }))
     }
 }
 
@@ -474,6 +507,7 @@ impl AppBuilder {
                 keep_alive,
                 max_packet_size: resolved.max_packet_size,
                 publish_limit,
+                secrets: resolved.secrets,
             },
             reference_designation,
             syslog: self.syslog,
@@ -512,6 +546,10 @@ impl AppBuilder {
                 };
                 let resolved = Resolved {
                     serial_number: self.serial_number.clone().unwrap_or_else(|| c.name.clone()),
+                    secrets: Some(SecretSource {
+                        root: root.clone(),
+                        name: c.name.clone(),
+                    }),
                     client_id: Some(c.name),
                     host: c.broker.address,
                     port: c.broker.secure_port,
@@ -539,6 +577,7 @@ impl AppBuilder {
                     ca,
                     max_packet_size,
                     auth,
+                    secrets: None,
                 };
                 Ok((resolved, Arc::new(MemoryStore::new())))
             }
@@ -595,6 +634,7 @@ struct Resolved {
     ca: PathBuf,
     max_packet_size: usize,
     auth: Auth,
+    secrets: Option<SecretSource>,
 }
 
 /// Whole seconds 1 … 65535 (the MQTT Keep Alive field, REQ-MQTT-014); 0

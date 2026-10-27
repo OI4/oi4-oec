@@ -869,6 +869,63 @@ fn container_app(root: &Root, states: &States) -> oec::app::AppBuilder {
         .on_connection(move |s| states.0.lock().unwrap().push(s))
 }
 
+/// Drops connection `n` and returns the CONNECT of the reconnect.
+fn reconnect(tb: &TestBroker, n: usize) -> Connect {
+    tb.drop_connection(n);
+    tb.until_closed(n);
+    let (m, c) = tb.connect();
+    assert_eq!(m, n + 1);
+    c
+}
+
+/// The platform renews the secret storage while the application runs
+/// (GL-ADR-022): every reconnect reads `/run/secrets/oi4` again; unusable
+/// secrets keep the last good ones; a private key with the certificate of
+/// the application wins over the credentials (REQ-MQTT-010).
+#[test]
+fn renewed_secrets_apply_on_reconnect() {
+    let pki = pki();
+    let tb = TestBroker::start(&pki, Behavior::default());
+    let root = container(&pki, tb.port, "rt-renew");
+    root.remove("run/secrets/oi4/private_key.pem")
+        .write("run/secrets/oi4/credentials", "dXNlcjpvbmU=\n");
+    let states = States::default();
+    let app = container_app(&root, &states).build().unwrap();
+    let handle = app.handle();
+    let run = spawn(app);
+    let password = |c: &Connect| c.password.clone().map(|p| String::from_utf8(p).unwrap());
+
+    let (_, c) = tb.connect();
+    assert_eq!(
+        (c.username.as_deref(), password(&c).as_deref()),
+        (Some("user"), Some("one"))
+    );
+    root.write("run/secrets/oi4/credentials", "dXNlcjp0d28=\n");
+    let c = reconnect(&tb, 0);
+    assert_eq!(
+        (c.username.as_deref(), password(&c).as_deref()),
+        (Some("user"), Some("two"))
+    );
+    // unusable: the last good credentials stay
+    root.write("run/secrets/oi4/credentials", "not base64");
+    let c = reconnect(&tb, 1);
+    assert_eq!(password(&c).as_deref(), Some("two"));
+    root.remove("run/secrets/oi4/credentials");
+    let c = reconnect(&tb, 2);
+    assert_eq!(password(&c).as_deref(), Some("two"));
+    // a private key with the certificate wins over the credentials
+    root.write("run/secrets/oi4/credentials", "dXNlcjp0d28=\n")
+        .write(
+            "run/secrets/oi4/private_key.pem",
+            &pki.client_key.serialize_pem(),
+        );
+    let c = reconnect(&tb, 3);
+    assert_eq!((c.username, c.password), (None, None));
+    states.wait_for(ConnectionState::Online, 5);
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+}
+
 /// `shutdown` before `run`: no connection, `run` returns at once.
 #[test]
 fn shutdown_before_run() {

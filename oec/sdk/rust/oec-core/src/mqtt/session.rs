@@ -383,6 +383,24 @@ impl Session {
         &self.config
     }
 
+    /// Replaces User Name and Password, e.g. after the platform renewed
+    /// the secret storage (GL-ADR-022). They apply to the next CONNECT;
+    /// the current connection is not touched.
+    ///
+    /// # Errors
+    ///
+    /// See [`SessionConfig::validate`]; the previous credentials stay.
+    pub fn set_credentials(
+        &mut self,
+        credentials: Option<Credentials>,
+    ) -> Result<(), SessionError> {
+        let mut config = self.config.clone();
+        config.credentials = credentials;
+        config.validate()?;
+        self.config = config;
+        Ok(())
+    }
+
     /// The state.
     pub fn state(&self) -> SessionState {
         self.state

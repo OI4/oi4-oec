@@ -61,7 +61,7 @@ pub(crate) async fn run(app: App) -> Result<()> {
         handle.set_state(ConnectionState::Closed);
         return Ok(());
     }
-    let settings = app.connection().clone();
+    let mut settings = app.connection().clone();
     let name = transport::server_name(settings.host())?;
     let mut tls = transport::client_config(&settings)?;
     let mut session = Session::new(session_config(&settings))
@@ -137,8 +137,9 @@ pub(crate) async fn run(app: App) -> Result<()> {
         if let Either::Left(()) = race(shutdown_requested(&mut shutdown), sleep(delay)).await {
             break;
         }
-        // Certificates may have been renewed: reload them, keep the last
-        // good ones if that fails.
+        // The platform may have renewed secrets and certificates
+        // (GL-ADR-022): reload them, keep the last good ones if that fails.
+        renew_auth(&mut settings, &mut session);
         match transport::client_config(&settings) {
             Ok(config) => tls = config,
             Err(e) => log::warn!("{e}; keeping the previous TLS settings"),
@@ -146,6 +147,28 @@ pub(crate) async fn run(app: App) -> Result<()> {
     }
     handle.set_state(ConnectionState::Closed);
     Ok(())
+}
+
+/// Re-reads the means of authentication of the container storage; on a
+/// failure the previous ones stay. Logs files and outcomes, never secrets.
+fn renew_auth(settings: &mut ConnectionSettings, session: &mut Session) {
+    let renewed = match settings.reload_auth() {
+        Ok(Some(renewed)) => renewed,
+        Ok(None) => return,
+        Err(e) => {
+            log::warn!("{e}; keeping the previous means of authentication");
+            return;
+        }
+    };
+    if renewed.auth() == settings.auth() {
+        return;
+    }
+    if let Err(e) = session.set_credentials(session_config(&renewed).credentials) {
+        log::warn!("renewed credentials refused: {e}; keeping the previous ones");
+        return;
+    }
+    log::info!("the means of authentication were renewed (GL-ADR-022)");
+    *settings = renewed;
 }
 
 /// One connection, from CONNECT to its end.

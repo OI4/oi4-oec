@@ -172,7 +172,7 @@ fn ca(root: &Path) -> Result<PathBuf> {
 
 /// The means of authentication of the secret storage (REQ-CNT-008,
 /// REQ-CNT-009); a client certificate wins over credentials (REQ-MQTT-010).
-fn auth(root: &Path, name: &str) -> Result<Auth> {
+pub(crate) fn auth(root: &Path, name: &str) -> Result<Auth> {
     let secrets = root.join("run/secrets/oi4");
     let credentials = read_optional(&secrets.join("credentials"))?
         .map(|raw| credentials(&raw))
