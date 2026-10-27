@@ -15,6 +15,7 @@ use oec_core::resource::{DetailObject, Health};
 
 use crate::Result;
 use crate::app::AppHandle;
+use crate::config::{ConfigDef, ConfigHandle};
 use crate::data::{DataSet, DataSetDef};
 use crate::identity::{IdentificationLink, Mam, Product};
 
@@ -197,6 +198,26 @@ impl Asset {
     /// or a removed asset; [`crate::Error::Io`] if the store fails.
     pub fn add_data(&self, def: DataSetDef) -> Result<DataSet> {
         self.handle.add_data(&self.il, def)
+    }
+
+    /// Declares a Config DataSet (context) of this asset (MG 8.3.3,
+    /// REQ-RES-CONFIG-001). The SDK assigns its DataSetWriterId
+    /// (REQ-RES-PUBLIST-006), lists it in the PublicationList with Mode
+    /// `ON_REQUEST_FILTER_9` and the context as Filter, publishes it masked
+    /// on `Pub/Config/<Source>/<Filter>` at once and after every change
+    /// (REQ-RES-CONFIG-022/024) and answers `Get Config` and `Set Config`
+    /// from Level 2 on (REQ-RES-CONFIG-016 … 023, [`ConfigHandle::on_set`]).
+    /// Values set earlier (persisted in the store) replace the defaults if
+    /// the object still exists and the value is still valid.
+    ///
+    /// # Errors
+    ///
+    /// [`crate::Error::Invalid`] for an invalid definition (see
+    /// [`ConfigDef::values`]), a context already used by this asset, a
+    /// Config larger than the MaxPacketSize or a removed asset;
+    /// [`crate::Error::Io`] if the store fails.
+    pub fn add_config(&self, def: ConfigDef) -> Result<ConfigHandle> {
+        self.handle.add_config(&self.il, def)
     }
 
     /// Removes a represented asset: its MAM, Health and Profile are no

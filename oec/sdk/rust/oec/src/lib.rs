@@ -7,7 +7,7 @@
 //! re-exports or wraps its types and adds the I/O: bootstrap from the
 //! container storage, persistence and the MQTT connection over TLS.
 //!
-//! **State of P4 (C-050 … C-054, increments 4, 5, 6a and 6b):** [`app::App::builder`] with
+//! **State of P4 (C-050 … C-056, increments 4, 5, 6a, 6b, 7a and 7b):** [`app::App::builder`] with
 //! [`app::Bootstrap`] (container storage contract or explicit broker),
 //! identity ([`identity`]), persistence ([`store`]), the Config model with
 //! string-keyed typed getters ([`config`], Q-022) and the errors ([`Error`]).
@@ -24,8 +24,14 @@
 //! ADR-0020 §7). **C-054 (increment 6b):** Data DataSets ([`data`],
 //! [`asset::Asset::add_data`]) with their Metadata, the UUIDv5
 //! DataSetClassId, publish modes, intervals and Precisions as a dead band,
-//! `Get Data` / `Get Metadata`. Events, Config writes, `Set PublicationList`
-//! and the consumer follow with increments 7 and 8; until then their
+//! `Get Data` / `Get Metadata`. **C-055 (increment 7a):** the write side –
+//! `Set`/`Del` with Status events and `ReplyTo`, `Set PublicationList`,
+//! `Set Data` ([`data::DataSet::on_set`]). **C-056 (increment 7b):** Config
+//! DataSets ([`config`], [`asset::Asset::add_config`]) with `Get`/`Set
+//! Config`, masking of sensitive values (GL-ADR-021), persisted values and
+//! the secrets of the container storage re-read before every connect
+//! (GL-ADR-022). ReferenceDesignation, the Syslog bridge, generic events
+//! and the consumer follow with increments 7c and 8; until then their
 //! contract is the P3 sketch `oec/sdk/rust/sketch` (ADR-0020 §1).
 //!
 //! **Cargo features:** `crypto-aws-lc-rs` (default) or `crypto-ring` pick the

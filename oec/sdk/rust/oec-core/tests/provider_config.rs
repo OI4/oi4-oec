@@ -481,12 +481,37 @@ fn definitions_are_checked() {
     ));
 }
 
+/// A removed Config DataSet is no longer answered or listed; the values
+/// set stay persisted for a Config DataSet added anew.
+#[test]
+fn a_removed_config_is_gone() {
+    let (mut p, src) = provider();
+    let req = set(&mut p, &src, CTX, &ip("10.0.0.1")).unwrap();
+    p.complete_set_config(&req, Ok(()), MS + 2);
+    p.remove_config(&src, CTX).unwrap();
+    assert!(matches!(
+        p.remove_config(&src, CTX),
+        Err(ProviderError::UnknownConfig { .. })
+    ));
+    let out = p.poll(Duration::from_millis(3), MS + 3);
+    assert_eq!(topics(&out), [format!("{}/Pub/PublicationList", base())]);
+    let none = get(&mut p, "Config");
+    assert_eq!(json_of(&none[0])["Messages"], json!([]));
+    assert_eq!(
+        set(&mut p, &src, CTX, &ip("10.0.0.2")),
+        Err(bad(StatusCode::BAD_NOT_FOUND))
+    );
+    p.add_config(&src, spec(CTX, device_config()), MS).unwrap();
+    assert_eq!(value_of(&p, &src, "device1", "ip_address"), "10.0.0.1");
+}
+
 /// Level 1: the Config is published, but no `Get` or `Set` is served.
 #[test]
 fn level_1_publishes_config_without_requests() {
     let mut p = provider_with(false, 262_144, StoredConfigValues::new());
     let src = il(&app());
     p.add_config(&src, spec(CTX, device_config()), MS).unwrap();
+    assert!(!p.serves_requests());
     assert!(p.subscriptions().is_empty());
     let out = p.on_connected(Duration::ZERO, MS);
     assert!(topics(&out).contains(&config_topic("Pub", &src, CTX)));

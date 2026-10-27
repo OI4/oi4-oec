@@ -283,6 +283,7 @@ fn on_event(
             let out = match answer {
                 Ok(Handled::Publish(out)) => out,
                 Ok(Handled::SetData(request)) => handle.complete_set_data(&request),
+                Ok(Handled::SetConfig(request)) => handle.complete_set_config(&request),
                 Ok(other) => {
                     log::debug!("message on {} not handled: {other:?}", m.topic);
                     Vec::new()

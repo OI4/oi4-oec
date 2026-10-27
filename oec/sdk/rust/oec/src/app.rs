@@ -16,12 +16,14 @@ use std::time::Duration;
 use oec_core::lifecycle::{Lifecycle, Publication};
 use oec_core::message::DataSetWriterId;
 use oec_core::provider::{
-    MetaDataVersions, Provider, ProviderConfig, PublicationOverrides, SetDataRequest, WriterIds,
+    MetaDataVersions, Provider, ProviderConfig, PublicationOverrides, SetConfigRequest,
+    SetDataRequest, StoredConfigValues, WriterIds,
 };
 use oec_core::resource::Health;
 use tokio::sync::{Notify, watch};
 
 use crate::asset::{Asset, AssetDef};
+use crate::config::{ConfigDef, ConfigHandle, ConfigSetHandler, ConfigValues};
 use crate::container::{self, MAX_PACKET_SIZE, MIN_PACKET_SIZE};
 use crate::data::{DataSet, DataSetDef, SetData, SetHandler, Value};
 use crate::event::SyslogLevel;
@@ -39,6 +41,10 @@ const META_DATA_VERSIONS: &str = "app/metadata-versions";
 /// Store key of the settings changed by `Set PublicationList`
 /// (REQ-RES-PUBLIST-016, ADR-0026 §14).
 const PUBLICATIONS: &str = "app/publications";
+/// Store key of the Config values set by `Set Config` or
+/// [`ConfigHandle::set`] (REQ-RES-CONFIG-022, ADR-0026 §15). Sensitive
+/// values are stored in clear text: protect the store directory.
+const CONFIG_VALUES: &str = "app/config";
 
 /// Where connection settings and secrets come from (ADR-0020 §5).
 #[derive(Debug, Clone)]
@@ -656,7 +662,7 @@ fn revision_counter(store: &dyn Store, key: &str) -> Result<i32> {
 /// The provider of the application (ADR-0026 §12): its lifecycle with the
 /// fixed DataSetWriterIds of Birth and Health (ADR-0026 §9.4/§9.5), `Get`,
 /// `Set` and `Del` from Level 2, the persisted DataSetWriterIds, Metadata
-/// versions and settings of `Set PublicationList`.
+/// versions, settings of `Set PublicationList` and Config values.
 fn provider(
     level: Level,
     service_type: ServiceType,
@@ -704,6 +710,15 @@ fn provider(
         })?,
         None => PublicationOverrides::new(),
     };
+    let config_values = match store.load(CONFIG_VALUES)? {
+        Some(json) => StoredConfigValues::from_json(&json).map_err(|e| {
+            Error::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("store key {CONFIG_VALUES}: {e} (REQ-RES-CONFIG-022)"),
+            ))
+        })?,
+        None => StoredConfigValues::new(),
+    };
     let config = ProviderConfig {
         get: level >= Level::L2,
         max_packet_size,
@@ -711,7 +726,8 @@ fn provider(
     };
     let mut provider = Provider::new(lifecycle, config, writers)?
         .with_meta_data_versions(versions)
-        .with_publication_overrides(overrides);
+        .with_publication_overrides(overrides)
+        .with_config_values(config_values);
     if let Some(json) = provider.take_writer_ids() {
         store.save(WRITER_IDS, &json)?;
     }
@@ -873,6 +889,8 @@ pub(crate) struct Registry {
     nameplate: HashSet<IdentificationLink>,
     /// The `Set Data` handlers by Source and Tag.
     set_handlers: HashMap<(IdentificationLink, String), Arc<SetHandler>>,
+    /// The `Set Config` handlers by Source and context.
+    config_handlers: HashMap<(IdentificationLink, String), Arc<ConfigSetHandler>>,
 }
 
 /// Cheap, cloneable handle (`Send + Sync`), usable from any thread or task.
@@ -899,6 +917,7 @@ impl AppHandle {
                     provider,
                     nameplate: HashSet::new(),
                     set_handlers: HashMap::new(),
+                    config_handlers: HashMap::new(),
                 }),
                 changed: Notify::new(),
             }),
@@ -1052,6 +1071,16 @@ impl AppHandle {
     /// See [`Asset::bump_revision_counter`].
     pub(crate) fn bump_revision_counter(&self, il: &IdentificationLink) -> Result<()> {
         let mut registry = self.registry();
+        self.bump_locked(&mut registry, il)?;
+        drop(registry);
+        self.shared.changed.notify_one();
+        Ok(())
+    }
+
+    /// Increments and persists the RevisionCounter of `il` and sets its MAM
+    /// (published by the runtime); a counter from the VendorNameplate is
+    /// only logged.
+    fn bump_locked(&self, registry: &mut Registry, il: &IdentificationLink) -> Result<()> {
         if registry.nameplate.contains(il) {
             log::warn!(
                 "the RevisionCounter of {il} comes from its VendorNameplate and is not \
@@ -1083,8 +1112,6 @@ impl AppHandle {
             .store
             .save(&key, mam.revision_counter.to_string().as_bytes())?;
         registry.provider.set_mam(&il.0, mam)?;
-        drop(registry);
-        self.shared.changed.notify_one();
         Ok(())
     }
 
@@ -1122,8 +1149,8 @@ impl AppHandle {
         })
     }
 
-    /// Persists changed DataSetWriterIds, Metadata versions and settings
-    /// of `Set PublicationList`.
+    /// Persists changed DataSetWriterIds, Metadata versions, settings of
+    /// `Set PublicationList` and Config values.
     fn save(registry: &mut Registry, store: &dyn Store) -> Result<()> {
         if let Some(json) = registry.provider.take_writer_ids() {
             store.save(WRITER_IDS, &json)?;
@@ -1134,11 +1161,15 @@ impl AppHandle {
         if let Some(json) = registry.provider.take_publication_overrides() {
             store.save(PUBLICATIONS, &json)?;
         }
+        if let Some(json) = registry.provider.take_config_values() {
+            store.save(CONFIG_VALUES, &json)?;
+        }
         Ok(())
     }
 
     /// Persists what the runtime changed (the first sending of a Metadata
-    /// version, a `Set PublicationList`); a failing store is logged.
+    /// version, a `Set PublicationList`, a `Set Config`); a failing store
+    /// is logged.
     pub(crate) fn save_changes(&self, registry: &mut Registry) {
         if let Err(e) = Self::save(registry, self.shared.store.as_ref()) {
             log::warn!("store: {e}");
@@ -1211,6 +1242,144 @@ impl AppHandle {
         out
     }
 
+    /// See [`Asset::add_config`]: the DataSetWriterId is persisted before
+    /// the Config is published.
+    pub(crate) fn add_config(
+        &self,
+        il: &IdentificationLink,
+        def: ConfigDef,
+    ) -> Result<ConfigHandle> {
+        let spec = def.resolve()?;
+        let context = spec.context.clone();
+        let store = self.shared.store.as_ref();
+        let mut registry = self.registry();
+        registry
+            .provider
+            .add_config(&il.0, spec, runtime::unix_ms())?;
+        if let Err(e) = Self::save(&mut registry, store) {
+            let _ = registry.provider.remove_config(&il.0, &context);
+            return Err(e);
+        }
+        drop(registry);
+        self.shared.changed.notify_one();
+        Ok(ConfigHandle {
+            handle: self.clone(),
+            source: il.clone(),
+            context,
+        })
+    }
+
+    /// See [`ConfigHandle::values`].
+    pub(crate) fn config_values(
+        &self,
+        il: &IdentificationLink,
+        context: &str,
+    ) -> Option<ConfigValues> {
+        let registry = self.registry();
+        let config = registry.provider.config(&il.0, context)?;
+        Some(ConfigValues::new(config.clone(), Vec::new()))
+    }
+
+    /// See [`ConfigHandle::on_set`].
+    pub(crate) fn on_set_config(
+        &self,
+        il: &IdentificationLink,
+        context: &str,
+        handler: Arc<ConfigSetHandler>,
+    ) -> Result<()> {
+        let mut registry = self.registry();
+        if !registry.provider.serves_requests() {
+            return Err(Error::Invalid(
+                "Set Config is served from Level 2 on (no Set subscribed)".to_owned(),
+            ));
+        }
+        if registry.provider.config(&il.0, context).is_none() {
+            return Err(Error::Invalid(format!("no Config {context:?} of {il}")));
+        }
+        registry
+            .config_handlers
+            .insert((il.clone(), context.to_owned()), handler);
+        Ok(())
+    }
+
+    /// See [`ConfigHandle::set`].
+    pub(crate) fn set_config(
+        &self,
+        il: &IdentificationLink,
+        context: &str,
+        changes: &[(String, String, String)],
+    ) -> Result<()> {
+        let store = self.shared.store.as_ref();
+        let mut registry = self.registry();
+        let modified = registry
+            .provider
+            .set_config(&il.0, context, changes, runtime::unix_ms())?;
+        if modified {
+            Self::save(&mut registry, store)?;
+            self.bump_locked(&mut registry, il)?;
+            drop(registry);
+            self.shared.changed.notify_one();
+        }
+        Ok(())
+    }
+
+    /// A `Set Config` the provider checked: the handler decides outside the
+    /// lock (without one the values are applied), then the provider
+    /// answers; a change increments the RevisionCounter (REQ-RES-MAM-018,
+    /// ADR-0026 §15).
+    pub(crate) fn complete_set_config(&self, request: &SetConfigRequest) -> Vec<Publication> {
+        let il = IdentificationLink(request.source().clone());
+        let (handler, changed) = {
+            let registry = self.registry();
+            let current = registry.provider.config(&il.0, request.context());
+            let changed = request
+                .changes()
+                .iter()
+                .filter(|(g, n, v)| {
+                    current
+                        .and_then(|c| c.groups.get(g))
+                        .and_then(|group| group.objects.get(n))
+                        .is_none_or(|o| &o.value != v)
+                })
+                .map(|(g, n, _)| (g.clone(), n.clone()))
+                .collect();
+            let key = (il.clone(), request.context().to_owned());
+            (registry.config_handlers.get(&key).cloned(), changed)
+        };
+        let decision = handler.map_or(Ok(()), |h| {
+            let proposed = ConfigValues::new(request.proposed().clone(), changed);
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| h(&proposed))).unwrap_or_else(
+                |_| {
+                    log::error!("the Set Config handler of {:?} panicked", request.context());
+                    Err(crate::status::StatusCode::BadInternalError)
+                },
+            )
+        });
+        let mut registry = self.registry();
+        let (out, modified) = registry.provider.complete_set_config(
+            request,
+            decision.map_err(crate::status::StatusCode::to_core),
+            runtime::unix_ms(),
+        );
+        self.save_changes(&mut registry);
+        if modified && let Err(e) = self.bump_locked(&mut registry, &il) {
+            log::warn!("RevisionCounter of {il}: {e}");
+        }
+        out
+    }
+
+    /// See [`ConfigHandle::remove`].
+    pub(crate) fn remove_config(&self, il: &IdentificationLink, context: &str) -> Result<()> {
+        let mut registry = self.registry();
+        registry.provider.remove_config(&il.0, context)?;
+        registry
+            .config_handlers
+            .remove(&(il.clone(), context.to_owned()));
+        drop(registry);
+        self.shared.changed.notify_one();
+        Ok(())
+    }
+
     /// See [`DataSet::remove`].
     pub(crate) fn remove_data(&self, il: &IdentificationLink, tag: &str) -> Result<()> {
         let mut registry = self.registry();
@@ -1227,6 +1396,9 @@ impl AppHandle {
         registry.provider.remove_asset(&il.0)?;
         registry.nameplate.remove(il);
         registry.set_handlers.retain(|(source, _), _| source != il);
+        registry
+            .config_handlers
+            .retain(|(source, _), _| source != il);
         drop(registry);
         self.shared.changed.notify_one();
         Ok(())

@@ -1,16 +1,24 @@
-//! Config resource (MG 8.3.3): definition by the owner and the validated
-//! values with string-keyed typed getters (ADR-0020 §10, Q-022).
+//! Config resource (MG 8.3.3): definition by the owner, the validated
+//! values with string-keyed typed getters (ADR-0020 §10, Q-022) and the
+//! [`ConfigHandle`] of a Config DataSet (ADR-0026 §15).
 //!
-//! P4 increment 4 covers the definition, its validation
-//! ([`ConfigDef::values`]) and the getters. Publication, `Set Config`
-//! handling and the `ConfigHandle` of the sketch follow with increment 7.
+//! The SDK publishes the Config masked (REQ-RES-CONFIG-024, GL-ADR-021),
+//! answers `Get Config` and checks every `Set Config` before the
+//! application decides about it ([`ConfigHandle::on_set`]); accepted
+//! values are applied at once, persisted and published again
+//! (REQ-RES-CONFIG-019 … 025). Values are never logged.
 
 use std::collections::BTreeMap;
-use std::str::FromStr;
+use std::fmt;
 
-use oec_core::message::{ByteString, DateTime, LocalizedText};
-use oec_core::resource::{self, Config, Group, Validation};
+use oec_core::message::LocalizedText;
+use oec_core::provider::ConfigSpec;
+use oec_core::provider::config::check_definition;
+use oec_core::resource::{self, Config, Group, SENSITIVE_MASK, Validation};
 
+use crate::app::AppHandle;
+use crate::identity::IdentificationLink;
+use crate::status::StatusCode;
 use crate::{Error, Result};
 
 /// The five Config types (REQ-RES-CONFIG-006); values are strings on the
@@ -19,7 +27,7 @@ pub use oec_core::resource::ConfigType;
 
 /// Definition of one configuration object. Names follow
 /// `^[A-Za-z_][A-Za-z0-9_-]*$` (REQ-RES-CONFIG-004), checked by
-/// [`ConfigDef::values`].
+/// [`ConfigDef::values`] and [`crate::asset::Asset::add_config`].
 #[derive(Debug, Clone)]
 pub struct ConfigObject {
     name: String,
@@ -127,8 +135,10 @@ impl ConfigObject {
         self
     }
 
-    /// `Validation.Pattern` (REQ-RES-CONFIG-008). Published as given; the
-    /// SDK checks values against it from P4 increment 7 on (A-21).
+    /// `Validation.Pattern` (REQ-RES-CONFIG-008): a value matches it
+    /// anywhere (unanchored; use `^…$` for the whole value). Syntax of the
+    /// Rust `regex` crate (RE2-like, Unicode classes); a Pattern that does
+    /// not compile makes the definition invalid.
     #[must_use]
     pub fn pattern(mut self, regex: &str) -> Self {
         self.pattern = Some(regex.to_owned());
@@ -143,19 +153,13 @@ impl ConfigObject {
     }
 
     fn resolve(&self, group: &str) -> Result<resource::ConfigObject> {
-        let at = || format!("{group}/{}", self.name);
-        if !valid_name(&self.name) || matches!(self.name.as_str(), "Name" | "Description") {
-            return Err(Error::Invalid(format!(
-                "ConfigName {:?} in group {group:?}: letters, digits, \"-\" and \"_\", not \
-                 starting with a digit or \"-\", not \"Name\" or \"Description\" \
-                 (REQ-RES-CONFIG-004)",
-                self.name
-            )));
-        }
         let number = |v: Option<f64>, key: &str| -> Result<Option<serde_json::Number>> {
             v.map(|f| {
                 serde_json::Number::from_f64(f).ok_or_else(|| {
-                    Error::Invalid(format!("{}: Validation {key} {f} is no number", at()))
+                    Error::Invalid(format!(
+                        "{group}/{}: Validation {key} is no number",
+                        self.name
+                    ))
                 })
             })
             .transpose()
@@ -172,7 +176,7 @@ impl ConfigObject {
             || validation.max.is_some()
             || validation.pattern.is_some()
             || validation.values.is_some();
-        let object = resource::ConfigObject {
+        Ok(resource::ConfigObject {
             kind: self.kind,
             value: self.default.clone(),
             default_value: Some(self.default.clone()),
@@ -182,10 +186,7 @@ impl ConfigObject {
             name: LocalizedText::from(self.label.as_deref().unwrap_or(&self.name)),
             description: None,
             validation: has_validation.then_some(validation),
-        };
-        check_value(&object, &self.default)
-            .map_err(|e| Error::Invalid(format!("{}: default {:?} {e}", at(), self.default)))?;
-        Ok(object)
+        })
     }
 }
 
@@ -194,17 +195,28 @@ impl ConfigObject {
 #[derive(Debug, Clone)]
 pub struct ConfigDef {
     context: String,
+    label: Option<String>,
     groups: Vec<(String, String, Vec<ConfigObject>)>,
 }
 
 impl ConfigDef {
     /// `context` is the Filter of the topic and the WriterGroupName
-    /// (REQ-RES-CONFIG-015, REQ-TOP-022).
+    /// (REQ-RES-CONFIG-015, REQ-TOP-022); a `/` in it is topic-encoded
+    /// (REQ-TOP-019).
     pub fn new(context: &str) -> Self {
         Self {
             context: context.to_owned(),
+            label: None,
             groups: Vec::new(),
         }
+    }
+
+    /// Display name of the context (`Context.Name`, LocalizedText in
+    /// `en-US`, REQ-RES-CONFIG-002); default: the context name.
+    #[must_use]
+    pub fn label(mut self, text: &str) -> Self {
+        self.label = Some(text.to_owned());
+        self
     }
 
     /// Adds a group (REQ-RES-CONFIG-013); the group of common objects is
@@ -232,22 +244,26 @@ impl ConfigDef {
     /// Validates the definition and returns its initial values (the
     /// defaults): the context is a valid Filter (REQ-RES-CONFIG-015,
     /// REQ-TOP-019), names follow REQ-RES-CONFIG-004 and are unique, every
-    /// default has the form of its Type (REQ-RES-CONFIG-007) and satisfies
-    /// its Validation except Pattern (REQ-RES-CONFIG-008, A-21).
+    /// Pattern compiles, Min/Max are given for Type Number only with
+    /// Min ≤ Max, and every default has the form of its Type
+    /// (REQ-RES-CONFIG-007) and satisfies its Validation
+    /// (REQ-RES-CONFIG-008).
     ///
     /// # Errors
     ///
-    /// [`Error::Invalid`] naming the first violation.
+    /// [`Error::Invalid`] naming the first violation, never a value.
     pub fn values(&self) -> Result<ConfigValues> {
+        Ok(ConfigValues::new(
+            self.clone().resolve()?.config,
+            Vec::new(),
+        ))
+    }
+
+    /// The checked definition for the provider.
+    pub(crate) fn resolve(self) -> Result<ConfigSpec> {
         oec_core::topic::Filter::context_name(&self.context)?;
         let mut groups = BTreeMap::new();
         for (name, label, objects) in &self.groups {
-            if !valid_name(name) || name == "Context" {
-                return Err(Error::Invalid(format!(
-                    "GroupName {name:?}: letters, digits, \"-\" and \"_\", not starting with \
-                     a digit or \"-\", not \"Context\" (REQ-RES-CONFIG-004)"
-                )));
-            }
             let mut resolved = BTreeMap::new();
             for o in objects {
                 if resolved.insert(o.name.clone(), o.resolve(name)?).is_some() {
@@ -269,24 +285,34 @@ impl ConfigDef {
                 )));
             }
         }
-        Ok(ConfigValues {
-            config: Config {
-                context: None,
-                groups,
-            },
-            changed: Vec::new(),
+        let config = Config {
+            context: Some(resource::Context {
+                name: LocalizedText::from(self.label.as_deref().unwrap_or(&self.context)),
+                description: None,
+            }),
+            groups,
+        };
+        check_definition(&config).map_err(Error::Invalid)?;
+        Ok(ConfigSpec {
+            context: self.context,
+            config,
         })
     }
 }
 
-/// A consistent snapshot of the current (or proposed) values.
-#[derive(Debug, Clone)]
+/// A consistent snapshot of the current (or proposed) values. Values are in
+/// clear text; `Debug` shows sensitive values masked.
+#[derive(Clone)]
 pub struct ConfigValues {
     config: Config,
     changed: Vec<(String, String)>,
 }
 
 impl ConfigValues {
+    pub(crate) fn new(config: Config, changed: Vec<(String, String)>) -> Self {
+        Self { config, changed }
+    }
+
     fn object(&self, group: &str, name: &str) -> Option<&resource::ConfigObject> {
         self.config.groups.get(group)?.objects.get(name)
     }
@@ -319,114 +345,135 @@ impl ConfigValues {
     }
 
     /// `(group, name)` of the objects that differ from the current values;
-    /// empty for the initial values.
+    /// empty for the current values.
     pub fn changed(&self) -> impl Iterator<Item = (&str, &str)> {
         self.changed.iter().map(|(g, n)| (g.as_str(), n.as_str()))
     }
 }
 
-/// `GroupName`/`ConfigName` characters (REQ-RES-CONFIG-004).
-fn valid_name(s: &str) -> bool {
-    s.bytes()
-        .next()
-        .is_some_and(|c| c.is_ascii_alphabetic() || c == b'_')
-        && s.bytes()
-            .all(|c| c.is_ascii_alphanumeric() || matches!(c, b'_' | b'-'))
+impl fmt::Debug for ConfigValues {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let values = self.config.groups.iter().flat_map(|(g, group)| {
+            group.objects.iter().map(move |(n, o)| {
+                let shown = if o.sensitive == Some(true) && !o.value.is_empty() {
+                    SENSITIVE_MASK
+                } else {
+                    o.value.as_str()
+                };
+                (format!("{g}/{n}"), shown)
+            })
+        });
+        f.debug_struct("ConfigValues")
+            .field("values", &values.collect::<BTreeMap<_, _>>())
+            .field("changed", &self.changed)
+            .finish()
+    }
 }
 
-/// A non-empty value has the form of its Type (REQ-RES-CONFIG-007) and
-/// satisfies the Validation (REQ-RES-CONFIG-008); Pattern is not checked
-/// yet (A-21). Returns the reason otherwise.
-fn check_value(o: &resource::ConfigObject, value: &str) -> std::result::Result<(), String> {
-    if value.is_empty() {
-        return Ok(());
-    }
-    let typed = match o.kind {
-        ConfigType::Boolean => matches!(value, "true" | "false"),
-        ConfigType::Number => json_number(value),
-        ConfigType::DateTime => DateTime::from_str(value).is_ok(),
-        ConfigType::ByteString => ByteString::from_str(value).is_ok(),
-        ConfigType::String => true,
-    };
-    if !typed {
-        return Err(format!(
-            "is no {o:?} value (REQ-RES-CONFIG-007)",
-            o = o.kind
-        ));
-    }
-    let Some(v) = &o.validation else {
-        return Ok(());
-    };
-    if let Some(n) = v.length
-        && value.chars().count() > n as usize
-    {
-        return Err(format!(
-            "is longer than {n} characters (REQ-RES-CONFIG-008)"
-        ));
-    }
-    if o.kind == ConfigType::Number {
-        let x: f64 = value.parse().unwrap_or(f64::NAN);
-        let below = v
-            .min
-            .as_ref()
-            .and_then(serde_json::Number::as_f64)
-            .is_some_and(|m| x < m);
-        let above = v
-            .max
-            .as_ref()
-            .and_then(serde_json::Number::as_f64)
-            .is_some_and(|m| x > m);
-        if below || above {
-            return Err("is outside Min … Max (REQ-RES-CONFIG-008)".to_owned());
-        }
-    }
-    if let Some(values) = &v.values
-        && !values.iter().any(|a| a == value)
-    {
-        return Err(format!("is not one of {values:?} (REQ-RES-CONFIG-008)"));
-    }
-    Ok(())
+/// The decision about a `Set Config` (see [`ConfigHandle::on_set`]).
+pub(crate) type ConfigSetHandler =
+    dyn Fn(&ConfigValues) -> core::result::Result<(), StatusCode> + Send + Sync;
+
+/// Handle of a Config DataSet (`Clone + Send + Sync`), usable before and
+/// while the application runs.
+#[derive(Clone)]
+pub struct ConfigHandle {
+    pub(crate) handle: AppHandle,
+    pub(crate) source: IdentificationLink,
+    pub(crate) context: String,
 }
 
-/// JSON number syntax (RFC 8259 6): `-? (0 | [1-9][0-9]*) (.[0-9]+)? ([eE][+-]?[0-9]+)?`.
-fn json_number(s: &str) -> bool {
-    let b = s.as_bytes();
-    let mut i = usize::from(b.first() == Some(&b'-'));
-    let digits = |i: &mut usize| {
-        let start = *i;
-        while b.get(*i).is_some_and(u8::is_ascii_digit) {
-            *i += 1;
-        }
-        *i - start
-    };
-    match b.get(i) {
-        Some(b'0') => i += 1,
-        Some(b'1'..=b'9') => {
-            digits(&mut i);
-        }
-        _ => return false,
+impl ConfigHandle {
+    /// The current values; empty (every getter `None`) after
+    /// [`ConfigHandle::remove`].
+    pub fn values(&self) -> ConfigValues {
+        self.handle
+            .config_values(&self.source, &self.context)
+            .unwrap_or_else(|| ConfigValues::new(Config::default(), Vec::new()))
     }
-    if b.get(i) == Some(&b'.') {
-        i += 1;
-        if digits(&mut i) == 0 {
-            return false;
-        }
+
+    /// The context name (Filter).
+    pub fn context(&self) -> &str {
+        &self.context
     }
-    if matches!(b.get(i), Some(b'e' | b'E')) {
-        i += 1;
-        if matches!(b.get(i), Some(b'+' | b'-')) {
-            i += 1;
-        }
-        if digits(&mut i) == 0 {
-            return false;
-        }
+
+    /// The `Source`: the application itself or a represented asset.
+    pub fn source(&self) -> &IdentificationLink {
+        &self.source
     }
-    i == b.len()
+
+    /// Called with the proposed values of a `Set Config` (Level 2 on) that
+    /// the SDK has already validated: known groups/objects only
+    /// (REQ-RES-CONFIG-005), read-only properties unchanged, mandatory
+    /// objects present (REQ-RES-CONFIG-011), Type (REQ-RES-CONFIG-007) and
+    /// Validation (REQ-RES-CONFIG-008), masks of sensitive objects
+    /// resolved (REQ-RES-CONFIG-025). On `Ok` the SDK applies all values at
+    /// once, persists them, increments the RevisionCounter if a value
+    /// changed (REQ-RES-MAM-018), publishes the Config with the ReplyTo of
+    /// the `Set` (REQ-RES-CONFIG-022) and a Status event Good; on `Err`
+    /// nothing is applied (REQ-RES-CONFIG-023) and a Status event with that
+    /// code is sent (REQ-RES-CONFIG-021). Without handler the values are
+    /// applied. The handler runs outside the SDK's locks; a panic is
+    /// answered with `BadInternalError`. A later call replaces the
+    /// handler.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] at Level 1 (no `Set` is subscribed) or for a
+    /// removed Config DataSet.
+    pub fn on_set(
+        &self,
+        f: impl Fn(&ConfigValues) -> core::result::Result<(), StatusCode> + Send + Sync + 'static,
+    ) -> Result<()> {
+        self.handle
+            .on_set_config(&self.source, &self.context, std::sync::Arc::new(f))
+    }
+
+    /// Changes a value from the application side (e.g. a local UI): the
+    /// same checks as for a `Set Config`, `""` unsets it; a change is
+    /// persisted, increments the RevisionCounter (REQ-RES-MAM-018) and is
+    /// published at once. No Status event, no call of the
+    /// [`ConfigHandle::on_set`] handler.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] for an unknown object, a value that does not pass
+    /// the checks (the message names the object, never the value) or a
+    /// removed Config DataSet; then nothing is set. [`Error::Io`] if the
+    /// store fails.
+    pub fn set(&self, group: &str, name: &str, value: &str) -> Result<()> {
+        self.handle.set_config(
+            &self.source,
+            &self.context,
+            &[(group.to_owned(), name.to_owned(), value.to_owned())],
+        )
+    }
+
+    /// Removes the Config DataSet: it is no longer published or answered
+    /// and the PublicationList is published again (REQ-RES-PUBLIST-017).
+    /// Its DataSetWriterId stays reserved and its persisted values are
+    /// kept for a Config DataSet of the same context added later.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] if it is already removed.
+    pub fn remove(self) -> Result<()> {
+        self.handle.remove_config(&self.source, &self.context)
+    }
+}
+
+impl fmt::Debug for ConfigHandle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ConfigHandle")
+            .field("source", &self.source)
+            .field("context", &self.context)
+            .finish_non_exhaustive()
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{ConfigDef, ConfigObject, ConfigType, json_number, valid_name};
+    use super::{ConfigDef, ConfigObject, ConfigType};
     use crate::Error;
 
     fn def() -> ConfigDef {
@@ -488,6 +535,11 @@ mod tests {
         assert!(invalid(one(ConfigObject::number("n", 5.0).max(1.0))));
         assert!(invalid(one(ConfigObject::string("s", "abc").max_length(2))));
         assert!(invalid(one(ConfigObject::string("s", "x").one_of(&["a"]))));
+        assert!(invalid(one(ConfigObject::string("s", "").pattern("("))));
+        assert!(invalid(one(
+            ConfigObject::string("s", "x").pattern("^[0-9]+$")
+        )));
+        assert!(invalid(one(ConfigObject::string("s", "").min(1.0))));
         assert!(invalid(one(ConfigObject::new(
             "b",
             ConfigType::Boolean,
@@ -521,28 +573,43 @@ mod tests {
             ConfigType::Number,
             ""
         ))));
+        assert!(!invalid(one(
+            ConfigObject::string("s", "42").pattern("^[0-9]+$")
+        )));
+        assert!(!invalid(ConfigDef::new("a/b").label("A B")));
     }
 
+    /// Sensitive values are masked in `Debug`.
     #[test]
-    fn names() {
-        for ok in ["a", "_", "eth0", "ip_address", "a-b", "Z9"] {
-            assert!(valid_name(ok), "{ok}");
-        }
-        for bad in ["", "0a", "-a", "a b", "a.b", "ä"] {
-            assert!(!valid_name(bad), "{bad}");
-        }
+    fn debug_masks_sensitive_values() {
+        let def = ConfigDef::new("c").group(
+            "g",
+            "G",
+            [
+                ConfigObject::string("secret", "s3cr3t").sensitive(),
+                ConfigObject::string("plain", "visible"),
+            ],
+        );
+        let shown = format!("{:?}", def.values().unwrap());
+        assert!(!shown.contains("s3cr3t"), "{shown}");
+        assert!(
+            shown.contains("********") && shown.contains("visible"),
+            "{shown}"
+        );
     }
 
+    /// Error messages never contain a value.
     #[test]
-    fn json_numbers() {
-        for ok in ["0", "-0", "1", "60", "1.5", "-1.25e-3", "1E+9", "1e400"] {
-            assert!(json_number(ok), "{ok}");
-        }
-        for bad in [
-            "", "-", "01", "1.", ".5", "+1", "1e", "0x10", "NaN", "inf", " 1",
-        ] {
-            assert!(!json_number(bad), "{bad}");
-        }
+    fn errors_never_show_values() {
+        let e = ConfigDef::new("c")
+            .group(
+                "g",
+                "G",
+                [ConfigObject::string("s", "s3cr3t").one_of(&["a"])],
+            )
+            .values()
+            .unwrap_err();
+        assert!(!e.to_string().contains("s3cr3t"), "{e}");
     }
 
     /// The resolved Config validates against the Config DataSet schema.
@@ -554,7 +621,7 @@ mod tests {
         let entry = validator
             .schema("resources/config.schema.json#/$defs/Config")
             .expect("Config schema embedded");
-        let doc = serde_json::to_value(&def().values().unwrap().config).unwrap();
+        let doc = serde_json::to_value(&def().resolve().unwrap().config).unwrap();
         validator.validate(&entry, Flavor::Strict, &doc).unwrap();
     }
 }

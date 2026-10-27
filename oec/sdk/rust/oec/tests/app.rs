@@ -756,3 +756,164 @@ fn set_handlers_and_publication_settings() {
         Err(oec::Error::Io(e)) if e.kind() == std::io::ErrorKind::InvalidData
     ));
 }
+
+/// The Config of the service: an interval, a sensitive API key and a mode.
+fn service_config() -> ConfigDef {
+    ConfigDef::new("service").label("Service").group(
+        "common",
+        "Common settings",
+        [
+            ConfigObject::number("interval", 60.0)
+                .unit("s")
+                .min(1.0)
+                .max(3600.0)
+                .mandatory(),
+            ConfigObject::string("api_key", "").sensitive(),
+            ConfigObject::string("mode", "fast").one_of(&["fast", "slow"]),
+        ],
+    )
+}
+
+/// Config DataSets (C-056, P4 increment 7b): declaration, values set from
+/// the application side (checked, all or none, the RevisionCounter
+/// incremented per change, REQ-RES-MAM-018), persisted across a restart
+/// (REQ-RES-CONFIG-022); a corrupt table is an error.
+#[test]
+fn config_is_declared_set_and_persisted() {
+    let root = Root::new("config-store");
+    let store = || FileStore::new(root.path("store"));
+    let app = device(Level::L2, explicit())
+        .store(store())
+        .build()
+        .unwrap();
+    let config = app.this().add_config(service_config()).unwrap();
+    assert_eq!(
+        (config.context(), config.source()),
+        ("service", app.identification_link())
+    );
+    assert_eq!(config.values().number("common", "interval"), Some(60.0));
+    assert_eq!(app.mam().revision_counter, 0);
+
+    config.set("common", "interval", "20").unwrap();
+    config.set("common", "api_key", "s3cr3t").unwrap();
+    config.set("common", "api_key", "s3cr3t").unwrap(); // no change
+    assert_eq!(config.values().number("common", "interval"), Some(20.0));
+    assert_eq!(config.values().string("common", "api_key"), Some("s3cr3t"));
+    assert_eq!(app.mam().revision_counter, 2);
+    assert!(!format!("{:?}", config.values()).contains("s3cr3t"));
+
+    // refused: nothing set, no value in the message
+    for (name, value) in [
+        ("interval", "9999"),
+        ("interval", "twenty"),
+        ("mode", "medium"),
+        ("unknown", "x"),
+    ] {
+        match config.set("common", name, value) {
+            Err(oec::Error::Invalid(e)) => assert!(!e.contains(value), "{e}"),
+            other => panic!("{name}: {other:?}"),
+        }
+    }
+    assert!(matches!(
+        config.set("common", "api_key", "********"),
+        Err(oec::Error::Invalid(_))
+    ));
+    assert_eq!(config.values().number("common", "interval"), Some(20.0));
+    assert_eq!(app.mam().revision_counter, 2);
+
+    // a context once per source; another source may use it
+    assert!(matches!(
+        app.this().add_config(service_config()),
+        Err(oec::Error::Invalid(_))
+    ));
+    let pump = app.add_asset(pump_def()).unwrap();
+    let pump_config = pump.add_config(service_config()).unwrap();
+    assert_eq!(
+        pump_config.values().number("common", "interval"),
+        Some(60.0)
+    );
+    pump_config.clone().remove().unwrap();
+    assert_eq!(pump_config.values().number("common", "interval"), None);
+    assert!(matches!(
+        pump_config.clone().remove(),
+        Err(oec::Error::Invalid(_))
+    ));
+    assert!(matches!(
+        pump_config.set("common", "interval", "5"),
+        Err(oec::Error::Invalid(_))
+    ));
+    drop(app);
+
+    // restarted: the values set apply, the defaults otherwise
+    let app = device(Level::L2, explicit())
+        .store(store())
+        .build()
+        .unwrap();
+    assert_eq!(app.mam().revision_counter, 2);
+    let config = app.this().add_config(service_config()).unwrap();
+    let values = config.values();
+    assert_eq!(values.number("common", "interval"), Some(20.0));
+    assert_eq!(values.string("common", "api_key"), Some("s3cr3t"));
+    assert_eq!(values.string("common", "mode"), Some("fast"));
+    // a value no longer valid under a changed definition: the default
+    drop(app);
+    let app = device(Level::L2, explicit())
+        .store(store())
+        .build()
+        .unwrap();
+    let narrower = ConfigDef::new("service").group(
+        "common",
+        "Common settings",
+        [ConfigObject::number("interval", 60.0).min(30.0)],
+    );
+    let config = app.this().add_config(narrower).unwrap();
+    assert_eq!(config.values().number("common", "interval"), Some(60.0));
+    drop(app);
+
+    // a corrupt table is an error
+    root.write("store/app/config", "{\"Version\":1}");
+    assert!(matches!(
+        device(Level::L2, explicit()).store(store()).build(),
+        Err(oec::Error::Io(e)) if e.kind() == std::io::ErrorKind::InvalidData
+    ));
+}
+
+/// Refused Config definitions and `ConfigHandle::on_set`: refused at Level
+/// 1 (no `Set` subscribed) and for a removed Config DataSet.
+#[test]
+fn invalid_configs_and_set_handlers() {
+    let app = device(Level::L2, explicit())
+        .reference_designation(false)
+        .build()
+        .unwrap();
+    let invalid = |r: oec::Result<oec::config::ConfigHandle>| {
+        assert!(matches!(r, Err(oec::Error::Invalid(_))), "{r:?}");
+    };
+    let one = |o: ConfigObject| ConfigDef::new("c").group("g", "G", [o]);
+    invalid(app.this().add_config(ConfigDef::new("")));
+    invalid(app.this().add_config(one(ConfigObject::string("Name", ""))));
+    invalid(
+        app.this()
+            .add_config(one(ConfigObject::string("s", "").pattern("("))),
+    );
+    invalid(
+        app.this()
+            .add_config(one(ConfigObject::number("n", 5.0).max(1.0))),
+    );
+    invalid(
+        app.this()
+            .add_config(one(ConfigObject::string("s", "").min(1.0))),
+    );
+    let ok = |_: &ConfigValues| Ok(());
+    let config = app.this().add_config(service_config()).unwrap();
+    config.on_set(ok).unwrap();
+    config.clone().remove().unwrap();
+    assert!(matches!(config.on_set(ok), Err(oec::Error::Invalid(_))));
+
+    let app = device(Level::L1, explicit())
+        .reference_designation(false)
+        .build()
+        .unwrap();
+    let config = app.this().add_config(service_config()).unwrap();
+    assert!(matches!(config.on_set(ok), Err(oec::Error::Invalid(_))));
+}

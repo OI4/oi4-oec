@@ -391,6 +391,12 @@ impl Provider {
         self.lifecycle.app_id()
     }
 
+    /// Whether requests (`Get`, `Set`, `Del`) are served: Level 2 on
+    /// ([`ProviderConfig::get`]).
+    pub fn serves_requests(&self) -> bool {
+        self.config.get
+    }
+
     /// The table of DataSetWriterIds.
     pub fn writer_ids(&self) -> &WriterIds {
         &self.writers

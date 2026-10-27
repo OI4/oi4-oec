@@ -1019,7 +1019,7 @@ fn level_2_publishes_its_sources_and_answers_get() {
     assert_eq!(v["Messages"][0]["Payload"]["HardwareRevision"], "undefined");
 
     // a Get of a resource that is not served is not subscribed: ignored
-    tb.send(n, get(format!("{prefix}Get/Config/{it}")));
+    tb.send(n, get(format!("{prefix}Get/SubscriptionList/{it}")));
     tb.send(n, get(format!("{prefix}Get/Profile/{me}")));
     let answer = publication(&tb);
     assert_eq!(answer.topic, format!("{prefix}Pub/Profile/{me}"));
@@ -1637,4 +1637,202 @@ fn set_data_is_decided_by_the_handler() {
 
     handle.shutdown();
     run.join().unwrap().unwrap();
+}
+
+// ------------------------------------------------- Config (C-056)
+
+/// The Config of the service: an interval with an own rule of the
+/// application (multiples of 10), a sensitive API key.
+fn service_config(app: &App, calls: &Arc<Mutex<Vec<Vec<String>>>>) -> oec::config::ConfigHandle {
+    let config = app
+        .this()
+        .add_config(
+            ConfigDef::new("service").group(
+                "common",
+                "Common settings",
+                [
+                    ConfigObject::number("interval", 60.0)
+                        .unit("s")
+                        .min(10.0)
+                        .max(3600.0)
+                        .mandatory(),
+                    ConfigObject::string("api_key", "").sensitive(),
+                ],
+            ),
+        )
+        .unwrap();
+    let seen = calls.clone();
+    config
+        .on_set(move |proposed| {
+            let changed = proposed.changed().map(|(g, n)| format!("{g}/{n}"));
+            seen.lock().unwrap().push(changed.collect());
+            match proposed.number("common", "interval") {
+                Some(i) if i % 10.0 != 0.0 => Err(StatusCode::BadOutOfRange),
+                _ => Ok(()),
+            }
+        })
+        .unwrap();
+    config
+}
+
+/// The Payload of a `Set Config` of the group `common`.
+fn common(interval: &str, api_key: Option<&str>) -> Value {
+    let mut group = serde_json::json!({"interval": {"Value": interval}});
+    if let Some(key) = api_key {
+        group["api_key"] = serde_json::json!({"Value": key});
+    }
+    serde_json::json!({ "common": group })
+}
+
+/// A running Level 2 app with the service Config.
+struct ConfigRun {
+    tb: TestBroker,
+    n: usize,
+    prefix: String,
+    me: String,
+    config: oec::config::ConfigHandle,
+    handle: AppHandle,
+    run: thread::JoinHandle<oec::Result<()>>,
+}
+
+impl ConfigRun {
+    /// Runs the app on `store` until Online.
+    fn start(
+        pki: &Pki,
+        root: &Root,
+        store: &oec::store::FileStore,
+        calls: &Arc<Mutex<Vec<Vec<String>>>>,
+    ) -> Self {
+        let tb = TestBroker::start(pki, Behavior::default());
+        let states = States::default();
+        let app = builder_at(Level::L2, broker(root, pki, tb.port), &states)
+            .store(store.clone())
+            .build()
+            .unwrap();
+        let config = service_config(&app, calls);
+        let me = encoded(app.identification_link().as_str());
+        let prefix = format!("Oi4v2/Utility/{me}/");
+        let handle = app.handle();
+        let run = spawn(app);
+        let (n, _) = tb.connect();
+        publications_until(&tb, &format!("{prefix}Pub/PublicationList"));
+        states.wait_for(ConnectionState::Online, 1);
+        Self {
+            tb,
+            n,
+            prefix,
+            me,
+            config,
+            handle,
+            run,
+        }
+    }
+
+    fn stop(self) {
+        self.handle.shutdown();
+        self.run.join().unwrap().unwrap();
+    }
+}
+
+/// Refused and accepted `Set Config` of [`config_is_got_set_and_persisted`].
+fn decided_sets(r: &ConfigRun, calls: &Arc<Mutex<Vec<Vec<String>>>>) {
+    let (tb, n, prefix, me) = (&r.tb, r.n, r.prefix.as_str(), r.me.as_str());
+    let il = r.config.source().as_str();
+    let set_topic = format!("{prefix}Set/Config/{me}/service");
+    // the application's own rule: refused, nothing applied
+    tb.send(n, set(set_topic.clone(), il, &common("25", None)));
+    let bad = status_event(tb, prefix, me, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadOutOfRange.code());
+    // checked by the SDK: the handler is not called
+    tb.send(n, set(set_topic.clone(), il, &common("twenty", None)));
+    let bad = status_event(tb, prefix, me, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadTypeMismatch.code());
+    tb.send(
+        n,
+        set(set_topic.clone(), il, &serde_json::json!({"common": {}})),
+    );
+    let bad = status_event(tb, prefix, me, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadInvalidArgument.code());
+    // the mask keeps the API key
+    tb.send(n, set(set_topic, il, &common("30", Some("********"))));
+    assert_eq!(status_event(tb, prefix, me, "Good")["Number"], 0);
+    assert_eq!(
+        *calls.lock().unwrap(),
+        [
+            vec!["common/api_key".to_owned(), "common/interval".to_owned()],
+            vec!["common/interval".to_owned()],
+            vec!["common/interval".to_owned()],
+        ]
+    );
+    let values = r.config.values();
+    assert_eq!(values.number("common", "interval"), Some(30.0));
+    assert_eq!(values.string("common", "api_key"), Some("s3cr3t"));
+}
+
+/// `Get`/`Set Config` (REQ-RES-CONFIG-016 … 025, REQ-RES-MAM-018): the
+/// handler decides about the checked values; on `Ok` the Config with the
+/// ReplyTo, sensitive values masked, then Good and the MAM with the
+/// incremented RevisionCounter; the SDK refuses a value of another Type
+/// without calling the handler; the mask keeps the API key; a change from
+/// the application side is published; the values survive a restart.
+#[test]
+fn config_is_got_set_and_persisted() {
+    let (pki, root) = (pki(), Root::new("rt-config"));
+    let store = oec::store::FileStore::new(root.path("store"));
+    let calls = Arc::new(Mutex::new(Vec::new()));
+    let r = ConfigRun::start(&pki, &root, &store, &calls);
+    let (prefix, me) = (r.prefix.clone(), r.me.clone());
+    let (tb, n, il) = (&r.tb, r.n, r.config.source().as_str());
+    let pub_topic = format!("{prefix}Pub/Config/{me}/service");
+
+    tb.send(n, get(format!("{prefix}Get/Config/{me}/service")));
+    let got = answer_on(tb, &pub_topic)["Messages"][0].clone();
+    assert_eq!(got["WriterGroupName"], "service");
+    assert_eq!(got["Payload"]["common"]["interval"]["Value"], "60");
+
+    tb.send(
+        n,
+        set(
+            format!("{prefix}Set/Config/{me}/service"),
+            il,
+            &common("20", Some("s3cr3t")),
+        ),
+    );
+    let answer = answer_on(tb, &pub_topic);
+    let payload = &answer["Messages"][0]["Payload"]["common"];
+    assert_eq!(payload["interval"]["Value"], "20");
+    assert_eq!(payload["api_key"]["Value"], "********");
+    assert!(!answer.to_string().contains("s3cr3t"));
+    assert_eq!(status_event(tb, &prefix, &me, "Good")["Number"], 0);
+    let mam = next_on(tb, &format!("{prefix}Pub/MAM/{me}"), &mut Vec::new());
+    assert_eq!(data_payload(&mam)["RevisionCounter"], 1);
+    assert_eq!(
+        r.config.values().string("common", "api_key"),
+        Some("s3cr3t")
+    );
+
+    decided_sets(&r, &calls);
+
+    // from the application side: published at once, no ReplyTo
+    r.config.set("common", "interval", "40").unwrap();
+    let p = json(&next_on(tb, &pub_topic, &mut Vec::new()).payload);
+    assert_eq!(
+        p["Messages"][0]["Payload"]["common"]["interval"]["Value"],
+        "40"
+    );
+    assert_ne!(p["ReplyTo"], GET_ID, "{p}");
+    r.stop();
+
+    // restarted on the same store
+    let r = ConfigRun::start(&pki, &root, &store, &calls);
+    assert_eq!(r.me, me);
+    r.tb.send(r.n, get(format!("{prefix}Get/Config/{me}/service")));
+    let got = answer_on(&r.tb, &pub_topic)["Messages"][0]["Payload"]["common"].clone();
+    assert_eq!(got["interval"]["Value"], "40");
+    assert_eq!(got["api_key"]["Value"], "********");
+    assert_eq!(
+        r.config.values().string("common", "api_key"),
+        Some("s3cr3t")
+    );
+    r.stop();
 }

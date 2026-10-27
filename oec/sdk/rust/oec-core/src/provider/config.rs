@@ -747,6 +747,29 @@ impl Provider {
         Ok(writer)
     }
 
+    /// Removes a Config DataSet: it is no longer published or answered and
+    /// the PublicationList is published again; its DataSetWriterId stays
+    /// reserved and its persisted values are kept.
+    ///
+    /// # Errors
+    ///
+    /// [`ProviderError::UnknownConfig`].
+    pub fn remove_config(
+        &mut self,
+        source: &IdentificationLink,
+        context: &str,
+    ) -> Result<(), ProviderError> {
+        let i = self
+            .find_config(source, context)
+            .ok_or_else(|| ProviderError::UnknownConfig {
+                source: source.to_string(),
+                context: context.to_owned(),
+            })?;
+        self.configs.remove(i);
+        self.pending.list = self.config.get;
+        Ok(())
+    }
+
     /// The current Config of a Config DataSet with its values in clear
     /// text.
     pub fn config(&self, source: &IdentificationLink, context: &str) -> Option<&Config> {
