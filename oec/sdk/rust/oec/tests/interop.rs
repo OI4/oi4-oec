@@ -1041,10 +1041,14 @@ fn level_2_data_sets_and_metadata() {
     );
     let v = json(&oee_first.unwrap().payload);
     assert_eq!(v["Messages"][0]["Payload"]["Availability"], 97.5);
-    assert!(v["DataSetClassId"].as_str().is_some_and(|c| c.len() == 36));
+    let class = v["DataSetClassId"].as_str().unwrap().to_owned();
+    assert_eq!(class.len(), 36);
     states.wait_for(ConnectionState::Online);
 
-    let request = "1700000000000-Aggregation/vendor.com/Client/C-1/1";
+    let (request, meta_request) = (
+        "1700000000000-Aggregation/vendor.com/Client/C-1/1",
+        "1700000000001-Aggregation/vendor.com/Client/C-1/1",
+    );
     get(
         &mut probe,
         format!("{prefix}Get/Data/{it}/oee"),
@@ -1052,7 +1056,7 @@ fn level_2_data_sets_and_metadata() {
             "MessageId": request,
             "MessageType": "ua-data",
             "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
-            "DataSetClassId": "",
+            "DataSetClassId": class,
             "ReplyTo": "",
             "Messages": []
         }),
@@ -1065,7 +1069,7 @@ fn level_2_data_sets_and_metadata() {
         &mut probe,
         format!("{prefix}Get/Metadata/{it}/oee"),
         &serde_json::json!({
-            "MessageId": request,
+            "MessageId": meta_request,
             "MessageType": "ua-metadata",
             "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
             "DataSetWriterId": 10,
@@ -1080,7 +1084,7 @@ fn level_2_data_sets_and_metadata() {
         .next(WAIT, |p| p.topic == oee_meta)
         .expect("no answer to Get Metadata");
     let v = json(&answer.payload);
-    assert_eq!(v["ReplyTo"], request);
+    assert_eq!(v["ReplyTo"], meta_request);
     assert_eq!(v["MetaData"]["Fields"][0]["Name"], "Availability");
 
     handle.shutdown();
