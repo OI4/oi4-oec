@@ -1,17 +1,24 @@
 //! Application: level selection, bootstrap, identity and the runtime
 //! (ADR-0020 §2 … §5, §10): [`AppBuilder::build`] resolves everything that
 //! needs no connection; [`App::run`] / [`App::run_async`] connect over TLS
-//! and drive the sans-IO session and lifecycle of `oec-core` (P4 increment
-//! 5b, C-050); [`AppHandle`] and [`ConnectionState`] observe and stop it.
+//! and drive the sans-IO session and provider of `oec-core` (P4 increment
+//! 5b, C-050; 6a, C-053); [`AppHandle`] registers assets, sets their state
+//! and observes and stops the application ([`ConnectionState`]).
 
+use std::collections::HashSet;
 use std::fmt;
 use std::future::Future;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, PoisonError};
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 use std::time::Duration;
 
-use tokio::sync::watch;
+use oec_core::lifecycle::Lifecycle;
+use oec_core::message::DataSetWriterId;
+use oec_core::provider::{Provider, ProviderConfig, WriterIds};
+use oec_core::resource::Health;
+use tokio::sync::{Notify, watch};
 
+use crate::asset::{Asset, AssetDef};
 use crate::container::{self, MAX_PACKET_SIZE, MIN_PACKET_SIZE};
 use crate::event::SyslogLevel;
 use crate::identity::{IdentificationLink, Mam, Product};
@@ -20,6 +27,8 @@ use crate::{Error, Level, Result, ServiceType, runtime};
 
 /// Store key of the RevisionCounter of the application (REQ-RES-MAM-018).
 const REVISION_COUNTER: &str = "app/revision-counter";
+/// Store key of the DataSetWriterIds (REQ-RES-PUBLIST-006, ADR-0026 §12).
+const WRITER_IDS: &str = "app/writer-ids";
 
 /// Where connection settings and secrets come from (ADR-0020 §5).
 #[derive(Debug, Clone)]
@@ -419,15 +428,24 @@ impl AppBuilder {
         let store = self.store.unwrap_or(default_store);
         let reference_designation =
             reference_designation(self.level, self.reference_designation, store.as_ref())?;
-        let revision_counter = revision_counter(store.as_ref())?;
+        let revision_counter = revision_counter(store.as_ref(), REVISION_COUNTER)?;
         let mam = self.product.mam(
-            self.service_type,
+            Some(self.service_type),
             &resolved.serial_number,
             &il,
             revision_counter,
         )?;
         let publish_limit = publish_limit(self.max_packet_size, resolved.max_packet_size)?;
         let client_id = resolved.client_id.unwrap_or_else(|| derived_client_id(&il));
+        let provider = provider(
+            self.level,
+            self.service_type,
+            &il,
+            mam,
+            resolved.max_packet_size,
+            publish_limit,
+            store.as_ref(),
+        )?;
         Ok(App {
             level: self.level,
             service_type: self.service_type,
@@ -441,12 +459,9 @@ impl AppBuilder {
                 max_packet_size: resolved.max_packet_size,
                 publish_limit,
             },
-            identification_link: il,
-            mam,
-            store,
             reference_designation,
             syslog: self.syslog,
-            handle: AppHandle::new(self.on_connection),
+            handle: AppHandle::new(self.on_connection, il, store, provider),
         })
     }
 
@@ -594,15 +609,27 @@ fn client_id(id: &str) -> Result<String> {
 /// hex: unique per Identification Link in practice, stable across
 /// reconnects and restarts (REQ-MQTT-013), 19 characters of `0-9a-z`.
 fn derived_client_id(il: &IdentificationLink) -> String {
-    let hash = il.as_str().bytes().fold(0xcbf2_9ce4_8422_2325_u64, |h, b| {
-        (h ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
-    });
-    format!("oec{hash:016x}")
+    format!("oec{:016x}", fnv1a64(il.as_str()))
 }
 
-/// The persisted RevisionCounter (REQ-RES-MAM-018), 0 if none.
-fn revision_counter(store: &dyn Store) -> Result<i32> {
-    let Some(raw) = store.load(REVISION_COUNTER)? else {
+/// FNV-1a, 64 bit: short, stable names derived from an Identification Link
+/// (ClientId, store keys).
+fn fnv1a64(s: &str) -> u64 {
+    s.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |h, b| {
+        (h ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
+    })
+}
+
+/// Store key of the RevisionCounter of a represented asset: an
+/// Identification Link may have 255 characters and characters a store key
+/// cannot hold, so the key uses its FNV-1a hash (ADR-0026 §12).
+fn asset_revision_counter_key(il: &IdentificationLink) -> String {
+    format!("assets/{:016x}/revision-counter", fnv1a64(il.as_str()))
+}
+
+/// The persisted RevisionCounter at `key` (REQ-RES-MAM-018), 0 if none.
+fn revision_counter(store: &dyn Store, key: &str) -> Result<i32> {
+    let Some(raw) = store.load(key)? else {
         return Ok(0);
     };
     std::str::from_utf8(&raw)
@@ -611,9 +638,53 @@ fn revision_counter(store: &dyn Store) -> Result<i32> {
         .ok_or_else(|| {
             Error::Io(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
-                format!("store key {REVISION_COUNTER} holds no integer (REQ-RES-MAM-018)"),
+                format!("store key {key} holds no integer (REQ-RES-MAM-018)"),
             ))
         })
+}
+
+/// The provider of the application (ADR-0026 §12): its lifecycle with the
+/// fixed DataSetWriterIds of Birth and Health (ADR-0026 §9.4/§9.5), `Get`
+/// from Level 2, the persisted DataSetWriterIds.
+fn provider(
+    level: Level,
+    service_type: ServiceType,
+    il: &IdentificationLink,
+    mam: Mam,
+    max_packet_size: usize,
+    publish_limit: usize,
+    store: &dyn Store,
+) -> Result<Provider> {
+    let writer = |id| {
+        DataSetWriterId::new(id).map_err(|e| Error::Invalid(format!("DataSetWriterId {id}: {e}")))
+    };
+    let lifecycle = Lifecycle::new(
+        service_type,
+        il.0.clone(),
+        mam,
+        writer(runtime::MAM_WRITER)?,
+        writer(runtime::HEALTH_WRITER)?,
+    )
+    .map_err(|e| Error::Invalid(format!("lifecycle: {e}")))?;
+    let writers = match store.load(WRITER_IDS)? {
+        Some(json) => WriterIds::from_json(&json).map_err(|e| {
+            Error::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("store key {WRITER_IDS}: {e} (REQ-RES-PUBLIST-006)"),
+            ))
+        })?,
+        None => WriterIds::new(),
+    };
+    let config = ProviderConfig {
+        get: level >= Level::L2,
+        max_packet_size,
+        publish_limit,
+    };
+    let mut provider = Provider::new(lifecycle, config, writers)?;
+    if let Some(json) = provider.take_writer_ids() {
+        store.save(WRITER_IDS, &json)?;
+    }
+    Ok(provider)
 }
 
 /// An OEC application: the resolved identity, MAM and connection settings
@@ -622,10 +693,7 @@ fn revision_counter(store: &dyn Store) -> Result<i32> {
 pub struct App {
     level: Level,
     service_type: ServiceType,
-    identification_link: IdentificationLink,
-    mam: Mam,
     connection: ConnectionSettings,
-    store: Arc<dyn Store>,
     reference_designation: bool,
     syslog: SyslogLevel,
     handle: AppHandle,
@@ -661,16 +729,6 @@ impl App {
         self.service_type
     }
 
-    /// The Identification Link, the AppId of the topics (REQ-IL-001).
-    pub fn identification_link(&self) -> &IdentificationLink {
-        &self.identification_link
-    }
-
-    /// The MAM of the application (REQ-RES-MAM-001 … 024).
-    pub fn mam(&self) -> &Mam {
-        &self.mam
-    }
-
     /// The resolved connection settings.
     pub fn connection(&self) -> &ConnectionSettings {
         &self.connection
@@ -689,8 +747,10 @@ impl App {
     /// Connects and runs until SIGINT/SIGTERM (Windows: Ctrl-C, Close,
     /// Shutdown) or [`AppHandle::shutdown`]: TLS connect with Will
     /// (REQ-LIFE-008, REQ-LIFE-016), Birth (REQ-LIFE-001/015), Health at
-    /// start, on change and every 60 s (REQ-TOP-017), the bus behavior of
-    /// the level, reconnect, Close on shutdown (REQ-LIFE-005). Blocking;
+    /// start, on change and every 60 s (REQ-TOP-017), the MAM and Health of
+    /// the represented assets, from Level 2 Profile, PublicationList and the
+    /// answers to `Get` (REQ-CMP-008), reconnect, Close on shutdown
+    /// (REQ-LIFE-005). Blocking;
     /// starts its own runtime (a tokio `current_thread` runtime on the
     /// calling thread).
     ///
@@ -767,6 +827,19 @@ struct Shared {
     state: Mutex<ConnectionState>,
     on_connection: Option<Callback>,
     shutdown: watch::Sender<bool>,
+    app_id: IdentificationLink,
+    store: Arc<dyn Store>,
+    registry: Mutex<Registry>,
+    /// Wakes the runtime after a change of the registry.
+    changed: Notify,
+}
+
+/// The sources of the application; locked briefly, never across an await.
+pub(crate) struct Registry {
+    pub(crate) provider: Provider,
+    /// Assets whose RevisionCounter comes from the VendorNameplate
+    /// (REQ-RES-MAM-018).
+    nameplate: HashSet<IdentificationLink>,
 }
 
 /// Cheap, cloneable handle (`Send + Sync`), usable from any thread or task.
@@ -776,14 +849,108 @@ pub struct AppHandle {
 }
 
 impl AppHandle {
-    fn new(on_connection: Option<Callback>) -> Self {
+    fn new(
+        on_connection: Option<Callback>,
+        app_id: IdentificationLink,
+        store: Arc<dyn Store>,
+        provider: Provider,
+    ) -> Self {
         Self {
             shared: Arc::new(Shared {
                 state: Mutex::new(ConnectionState::Closed),
                 on_connection,
                 shutdown: watch::Sender::new(false),
+                app_id,
+                store,
+                registry: Mutex::new(Registry {
+                    provider,
+                    nameplate: HashSet::new(),
+                }),
+                changed: Notify::new(),
             }),
         }
+    }
+
+    /// The Identification Link, the AppId of the topics (REQ-IL-001).
+    pub fn identification_link(&self) -> &IdentificationLink {
+        &self.shared.app_id
+    }
+
+    /// The current MAM of the application (REQ-RES-MAM-001 … 024).
+    pub fn mam(&self) -> Mam {
+        self.registry().provider.lifecycle().mam().clone()
+    }
+
+    /// The application itself as asset (`Source` = AppId).
+    pub fn this(&self) -> Asset {
+        Asset {
+            handle: self.clone(),
+            il: self.shared.app_id.clone(),
+        }
+    }
+
+    /// Adds a represented entity, e.g. a device without an MQTT client of
+    /// its own: the application publishes and answers on its behalf with
+    /// its own level (REQ-CMP-006, REQ-CMP-007, REQ-CMP-045). Its MAM
+    /// (REQ-RES-MAM-019) and its Health (NORMAL_0, score 100, until set) are
+    /// published, from Level 2 also its Profile and the PublicationList
+    /// (REQ-RES-PUBLIST-017). Its DataSetWriterIds are persisted and stay
+    /// the same after a restart (REQ-RES-PUBLIST-006).
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] for an invalid MAM (REQ-RES-MAM-004/012), the
+    /// application itself or an asset that is already registered,
+    /// [`Error::Io`] if the store fails.
+    pub fn add_asset(&self, def: AssetDef) -> Result<Asset> {
+        let il = match def.il {
+            Some(il) => il,
+            None => def.product.oi4_identifier(&def.serial_number)?,
+        };
+        let store = self.shared.store.as_ref();
+        let counter = match def.revision_counter {
+            Some(value) => value,
+            None => revision_counter(store, &asset_revision_counter_key(&il))?,
+        };
+        let mam = def.product.mam(None, &def.serial_number, &il, counter)?;
+        let mut registry = self.registry();
+        registry.provider.add_asset(mam)?;
+        if let Some(json) = registry.provider.take_writer_ids()
+            && let Err(e) = store.save(WRITER_IDS, &json)
+        {
+            let _ = registry.provider.remove_asset(&il.0);
+            return Err(e.into());
+        }
+        if def.revision_counter.is_some() {
+            registry.nameplate.insert(il.clone());
+        }
+        drop(registry);
+        self.shared.changed.notify_one();
+        Ok(Asset {
+            handle: self.clone(),
+            il,
+        })
+    }
+
+    /// The application itself or a represented asset.
+    pub fn asset(&self, il: &IdentificationLink) -> Option<Asset> {
+        let known = il == &self.shared.app_id || self.registry().provider.mam(&il.0).is_some();
+        known.then(|| Asset {
+            handle: self.clone(),
+            il: il.clone(),
+        })
+    }
+
+    /// The represented assets, in the order of registration.
+    pub fn assets(&self) -> Vec<Asset> {
+        self.registry()
+            .provider
+            .assets()
+            .map(|il| Asset {
+                handle: self.clone(),
+                il: IdentificationLink(il.clone()),
+            })
+            .collect()
     }
 
     /// The current connection state.
@@ -823,11 +990,95 @@ impl AppHandle {
     pub(crate) fn subscribe(&self) -> watch::Receiver<bool> {
         self.shared.shutdown.subscribe()
     }
+
+    /// The sources, locked.
+    pub(crate) fn registry(&self) -> MutexGuard<'_, Registry> {
+        self.shared
+            .registry
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+    }
+
+    /// Resolves after a change of the registry (a stored permit if none
+    /// waited).
+    pub(crate) async fn changed(&self) {
+        self.shared.changed.notified().await;
+    }
+
+    /// See [`Asset::set_health`]: an invalid value is logged and ignored.
+    pub(crate) fn set_health(&self, il: &IdentificationLink, health: Health) {
+        let changed = self.registry().provider.set_health(&il.0, health);
+        match changed {
+            Ok(true) => self.shared.changed.notify_one(),
+            Ok(false) => {}
+            Err(e) => log::warn!("Health of {il} ignored: {e}"),
+        }
+    }
+
+    /// See [`Asset::bump_revision_counter`].
+    pub(crate) fn bump_revision_counter(&self, il: &IdentificationLink) -> Result<()> {
+        let mut registry = self.registry();
+        if registry.nameplate.contains(il) {
+            log::warn!(
+                "the RevisionCounter of {il} comes from its VendorNameplate and is not \
+                 incremented (REQ-RES-MAM-018)"
+            );
+            return Ok(());
+        }
+        let this = il == &self.shared.app_id;
+        let mut mam = if this {
+            registry.provider.lifecycle().mam().clone()
+        } else {
+            registry
+                .provider
+                .mam(&il.0)
+                .cloned()
+                .ok_or_else(|| Error::Invalid(format!("no asset {il}")))?
+        };
+        mam.revision_counter = mam.revision_counter.checked_add(1).ok_or_else(|| {
+            Error::Invalid(format!(
+                "the RevisionCounter of {il} is at its maximum (REQ-RES-MAM-018)"
+            ))
+        })?;
+        let key = if this {
+            REVISION_COUNTER.to_owned()
+        } else {
+            asset_revision_counter_key(il)
+        };
+        self.shared
+            .store
+            .save(&key, mam.revision_counter.to_string().as_bytes())?;
+        registry.provider.set_mam(&il.0, mam)?;
+        drop(registry);
+        self.shared.changed.notify_one();
+        Ok(())
+    }
+
+    /// See [`Asset::mam`].
+    pub(crate) fn asset_mam(&self, il: &IdentificationLink) -> Option<Mam> {
+        let registry = self.registry();
+        if il == &self.shared.app_id {
+            Some(registry.provider.lifecycle().mam().clone())
+        } else {
+            registry.provider.mam(&il.0).cloned()
+        }
+    }
+
+    /// See [`Asset::remove`].
+    pub(crate) fn remove_asset(&self, il: &IdentificationLink) -> Result<()> {
+        let mut registry = self.registry();
+        registry.provider.remove_asset(&il.0)?;
+        registry.nameplate.remove(il);
+        drop(registry);
+        self.shared.changed.notify_one();
+        Ok(())
+    }
 }
 
 impl fmt::Debug for AppHandle {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("AppHandle")
+            .field("identification_link", &self.shared.app_id)
             .field("state", &self.state())
             .field("shutdown", &*self.shared.shutdown.borrow())
             .finish_non_exhaustive()
@@ -839,10 +1090,12 @@ impl fmt::Debug for App {
         f.debug_struct("App")
             .field("level", &self.level)
             .field("service_type", &self.service_type)
-            .field("identification_link", &self.identification_link)
-            .field("mam", &self.mam)
+            .field("identification_link", self.identification_link())
             .field("connection", &self.connection)
-            .field("persistent_store", &self.store.is_persistent())
+            .field(
+                "persistent_store",
+                &self.handle.shared.store.is_persistent(),
+            )
             .field("reference_designation", &self.reference_designation)
             .field("syslog", &self.syslog)
             .field("handle", &self.handle)

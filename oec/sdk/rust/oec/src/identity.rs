@@ -12,7 +12,8 @@ use crate::{Result, ServiceType};
 pub use oec_core::message::LocalizedText;
 
 /// The MAM DataSet (MG 5, REQ-RES-MAM-001) as resolved by
-/// [`crate::app::AppBuilder::build`] ([`crate::app::App::mam`]).
+/// [`crate::app::AppBuilder::build`] ([`crate::app::AppHandle::mam`],
+/// [`crate::asset::Asset::mam`]).
 pub use oec_core::resource::Mam;
 
 /// A validated Identification Link (IEC 61406-1, MG 4.1).
@@ -114,7 +115,7 @@ pub struct Product {
     code: String,
     manufacturer: Option<LocalizedText>,
     description: Option<LocalizedText>,
-    hardware_revision: String,
+    hardware_revision: Option<String>,
     software_revision: String,
     device_revision: String,
     device_manual: String,
@@ -125,12 +126,14 @@ pub struct Product {
 impl Product {
     /// The three type-level elements of the Oi4Identifier and the MAM
     /// (REQ-IL-022, REQ-IL-024, REQ-RES-MAM-004, REQ-RES-MAM-007).
-    /// Defaults for an application: `Manufacturer` = `manufacturer_uri`,
-    /// `HardwareRevision` = `""` (software-only asset, REQ-RES-MAM-008),
-    /// `SoftwareRevision` = `"undefined"` (REQ-RES-MAM-010), `DeviceRevision`
-    /// = `""` (as in the MG 9.1.1/B1.1.1 examples; MG 5 gives no default),
-    /// `DeviceManual` = `""` (REQ-RES-MAM-012), `DeviceClass` =
-    /// `Oi4.<ServiceType>` (REQ-RES-MAM-014).
+    /// Defaults: `Manufacturer` = `manufacturer_uri`, `HardwareRevision` =
+    /// `""` for the application (software-only asset) and `"undefined"` for
+    /// a represented asset (physical asset with unknown hardware revision,
+    /// REQ-RES-MAM-008), `SoftwareRevision` = `"undefined"`
+    /// (REQ-RES-MAM-010), `DeviceRevision` = `""` (as in the MG 9.1.1/B1.1.1
+    /// examples; MG 5 gives no default), `DeviceManual` = `""`
+    /// (REQ-RES-MAM-012), `DeviceClass` = `Oi4.<ServiceType>` for the
+    /// application (REQ-RES-MAM-014) and `""` for a represented asset.
     pub fn new(
         manufacturer_uri: &str,
         model: impl Into<LocalizedText>,
@@ -142,7 +145,7 @@ impl Product {
             code: product_code.to_owned(),
             manufacturer: None,
             description: None,
-            hardware_revision: String::new(),
+            hardware_revision: None,
             software_revision: "undefined".to_owned(),
             device_revision: String::new(),
             device_manual: String::new(),
@@ -165,10 +168,11 @@ impl Product {
         self
     }
 
-    /// `HardwareRevision` (REQ-RES-MAM-008).
+    /// `HardwareRevision` (REQ-RES-MAM-008), kept as given (also `""` for
+    /// a software-only represented asset).
     #[must_use]
     pub fn hardware_revision(mut self, revision: &str) -> Self {
-        revision.clone_into(&mut self.hardware_revision);
+        self.hardware_revision = Some(revision.to_owned());
         self
     }
 
@@ -195,8 +199,8 @@ impl Product {
         self
     }
 
-    /// Overrides the derived DeviceClass (devices; applications keep
-    /// `Oi4.<ServiceType>`, REQ-RES-MAM-014).
+    /// Overrides the default DeviceClass: `Oi4.<ServiceType>` for the
+    /// application (REQ-RES-MAM-014), `""` for a represented asset.
     #[must_use]
     pub fn device_class(mut self, class: &str) -> Self {
         self.device_class = Some(class.to_owned());
@@ -225,10 +229,11 @@ impl Product {
             .build()
     }
 
-    /// The MAM of the application (REQ-RES-MAM-001 … 024).
+    /// The MAM of the application (`service_type` given) or of a
+    /// represented asset (`None`) (REQ-RES-MAM-001 … 024).
     pub(crate) fn mam(
         &self,
-        service_type: ServiceType,
+        service_type: Option<ServiceType>,
         serial_number: &str,
         il: &IdentificationLink,
         revision_counter: i32,
@@ -256,14 +261,20 @@ impl Product {
             manufacturer_uri,
             model: self.model.clone(),
             product_code: self.code.clone(),
-            hardware_revision: self.hardware_revision.clone(),
+            hardware_revision: self.hardware_revision.clone().unwrap_or_else(|| {
+                if service_type.is_some() {
+                    String::new()
+                } else {
+                    "undefined".to_owned()
+                }
+            }),
             software_revision: self.software_revision.clone(),
             device_revision: self.device_revision.clone(),
             device_manual: self.device_manual.clone(),
             device_class: self
                 .device_class
                 .clone()
-                .unwrap_or_else(|| format!("Oi4.{service_type}")),
+                .unwrap_or_else(|| service_type.map_or_else(String::new, |t| format!("Oi4.{t}"))),
             serial_number: serial_number.to_owned(),
             product_instance_uri: il.as_str().to_owned(),
             revision_counter,
@@ -330,7 +341,9 @@ mod tests {
         let p = Product::new("Example.com", "Hello OEC", "HELLO-1");
         let il = p.oi4_identifier("hello-1").unwrap();
         assert_eq!(il.as_str(), "example.com/Hello,20OEC/HELLO-1/hello-1");
-        let mam = p.mam(ServiceType::Utility, "hello-1", &il, 3).unwrap();
+        let mam = p
+            .mam(Some(ServiceType::Utility), "hello-1", &il, 3)
+            .unwrap();
         assert_eq!(mam.manufacturer.text, "example.com");
         assert_eq!(mam.manufacturer.locale, "en-US");
         assert_eq!(mam.manufacturer_uri, "example.com");
@@ -338,6 +351,25 @@ mod tests {
         assert_eq!(mam.device_class, "Oi4.Utility");
         assert_eq!(mam.product_instance_uri, il.as_str());
         assert_eq!(mam.revision_counter, 3);
+        assert_eq!(mam.hardware_revision, "");
+    }
+
+    #[test]
+    fn asset_mam_defaults() {
+        let p = Product::new("sensor-maker.com", "TS-100", "TS-100-A");
+        let il = p.oi4_identifier("4711").unwrap();
+        let mam = p.mam(None, "4711", &il, 0).unwrap();
+        assert_eq!(mam.hardware_revision, "undefined");
+        assert_eq!(mam.device_class, "");
+        let mam = p
+            .clone()
+            .hardware_revision("")
+            .device_class("Sensor")
+            .mam(None, "4711", &il, -1)
+            .unwrap();
+        assert_eq!(mam.hardware_revision, "");
+        assert_eq!(mam.device_class, "Sensor");
+        assert_eq!(mam.revision_counter, -1);
     }
 
     #[test]
@@ -353,7 +385,7 @@ mod tests {
         ));
         // an explicit Identification Link does not need the en-US Model
         let il = IdentificationLink::parse("https://example.com/w/1").unwrap();
-        assert!(p.mam(ServiceType::Utility, "1", &il, 0).is_ok());
+        assert!(p.mam(Some(ServiceType::Utility), "1", &il, 0).is_ok());
     }
 
     #[test]

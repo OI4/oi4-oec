@@ -7,7 +7,7 @@
 //! re-exports or wraps its types and adds the I/O: bootstrap from the
 //! container storage, persistence and the MQTT connection over TLS.
 //!
-//! **State of P4 (C-050, increments 4 and 5):** [`app::App::builder`] with
+//! **State of P4 (C-050 … C-053, increments 4, 5 and 6a):** [`app::App::builder`] with
 //! [`app::Bootstrap`] (container storage contract or explicit broker),
 //! identity ([`identity`]), persistence ([`store`]), the Config model with
 //! string-keyed typed getters ([`config`], Q-022) and the errors ([`Error`]).
@@ -16,7 +16,13 @@
 //! connect over TLS (tokio + rustls, ADR-0023), publish Birth, Health and
 //! Close and register a new Will per connect (MG 6.3), reconnect with backoff
 //! and report the [`app::ConnectionState`]; [`app::AppHandle`] stops them.
-//! Assets, DataSets, events and the consumer follow with increments 6 … 8;
+//! **C-053 (increment 6a):** the provider side – subordinate assets
+//! ([`asset`], [`app::AppHandle::add_asset`]) with MAM and Health per
+//! `Source`, `Profile` and `PublicationList` with stable DataSetWriterIds,
+//! automatic `Get` answers (L2+), pagination and `MaxPacketSize`; changes
+//! while offline are published as state after the next connect (no queue,
+//! ADR-0020 §7). Data DataSets, publish modes and intervals (increment 6b),
+//! events, Config writes and the consumer follow with increments 6b … 8;
 //! until then their contract is the P3 sketch `oec/sdk/rust/sketch`
 //! (ADR-0020 §1).
 //!
@@ -44,6 +50,7 @@
 //! The REQ ids in the doc comments are the traceability links of ADR-0020.
 
 pub mod app;
+pub mod asset;
 pub mod config;
 pub mod event;
 pub mod identity;
@@ -122,6 +129,12 @@ impl From<oec_core::il::IlError> for Error {
     }
 }
 
+impl From<oec_core::provider::ProviderError> for Error {
+    fn from(e: oec_core::provider::ProviderError) -> Self {
+        Self::Invalid(e.to_string())
+    }
+}
+
 impl From<oec_core::topic::TopicError> for Error {
     fn from(e: oec_core::topic::TopicError) -> Self {
         Self::Invalid(format!("{e} [{}]", e.code()))
@@ -135,6 +148,7 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 /// the sketch prelude grows with increments 6 … 8).
 pub mod prelude {
     pub use crate::app::{App, AppHandle, Bootstrap, Broker};
+    pub use crate::asset::{Asset, AssetDef, HealthDetail, HealthState};
     pub use crate::config::{ConfigDef, ConfigObject, ConfigValues};
     pub use crate::event::SyslogLevel;
     pub use crate::identity::{IdentificationLink, Oi4Identifier, Product};

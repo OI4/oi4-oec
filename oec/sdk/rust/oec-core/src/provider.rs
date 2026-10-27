@@ -37,10 +37,12 @@ pub struct ProviderConfig {
     /// Answer `Get` and serve Profile and PublicationList: Level 2 and
     /// higher (ADR-0020 §3).
     pub get: bool,
-    /// The largest payload of a publication: the MaxPacketSize of the
-    /// Message Bus (REQ-PAG-005, SF-105); larger publications are
-    /// paginated.
+    /// The largest payload of an answer to `Get`: the MaxPacketSize of the
+    /// Message Bus (REQ-PAG-005, SF-105); larger answers are paginated.
     pub max_packet_size: usize,
+    /// The largest payload of a publication not triggered by `Get`, at most
+    /// `max_packet_size`; larger publications are paginated (REQ-PAG-007).
+    pub publish_limit: usize,
 }
 
 /// A change the provider refuses.
@@ -496,18 +498,19 @@ impl Provider {
         )
         .map_err(Ignored::Topic)?;
         let req = get.pagination.as_ref();
+        let limit = self.config.max_packet_size;
         let payloads = match resource {
             Resource::Mam => {
                 let items = self.mam_items(source);
-                self.series(items, req, Some(&get.message_id), unix_ms)
+                self.series(items, req, Some(&get.message_id), limit, unix_ms)
             }
             Resource::Health => {
                 let items = self.health_items(source);
-                self.series(items, req, Some(&get.message_id), unix_ms)
+                self.series(items, req, Some(&get.message_id), limit, unix_ms)
             }
             Resource::Profile => {
                 let items = self.profile_items(source);
-                self.series(items, req, Some(&get.message_id), unix_ms)
+                self.series(items, req, Some(&get.message_id), limit, unix_ms)
             }
             _ => {
                 let filter = match topic.filter() {
@@ -515,7 +518,7 @@ impl Provider {
                     _ => None,
                 };
                 let items = self.list_items(source, filter);
-                self.series(items, req, Some(&get.message_id), unix_ms)
+                self.series(items, req, Some(&get.message_id), limit, unix_ms)
             }
         };
         Ok(payloads
@@ -602,7 +605,8 @@ impl Provider {
             None,
         )
         .expect("Pub of a served resource with an asset Source is a valid topic");
-        self.series(items, None, None, unix_ms)
+        let limit = self.config.publish_limit.min(self.config.max_packet_size);
+        self.series(items, None, None, limit, unix_ms)
             .into_iter()
             .map(|payload| Publication {
                 topic: topic.clone(),
@@ -616,6 +620,7 @@ impl Provider {
         items: Vec<DataSetMessage<P>>,
         request: Option<&PaginationRequest>,
         reply_to: Option<&MessageId>,
+        limit: usize,
         unix_ms: u64,
     ) -> Vec<Vec<u8>> {
         let publisher: PublisherId = self.lifecycle.publisher_id().clone();
@@ -624,7 +629,7 @@ impl Provider {
             publisher: &publisher,
             app: &app,
             reply_to,
-            limit: self.config.max_packet_size,
+            limit,
         };
         let lifecycle = &mut self.lifecycle;
         pagination::series(items, request, &env, &mut || {

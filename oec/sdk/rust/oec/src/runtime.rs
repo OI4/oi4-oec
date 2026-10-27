@@ -1,23 +1,26 @@
-//! The runtime of an [`App`] (ADR-0020 §2/§5, ADR-0026 §9/§10): drives the
-//! sans-IO `oec_core::mqtt::Session` and `oec_core::lifecycle::Lifecycle`
-//! over the TLS transport, with timers, reconnect/backoff and the graceful
-//! close.
+//! The runtime of an [`App`] (ADR-0020 §2/§5, ADR-0026 §9/§10/§12): drives
+//! the sans-IO `oec_core::mqtt::Session` and `oec_core::provider::Provider`
+//! (with its `Lifecycle`) over the TLS transport, with timers,
+//! reconnect/backoff and the graceful close.
 //!
 //! One connection: TCP + TLS, CONNECT with a new Will (REQ-LIFE-008,
-//! REQ-LIFE-016), after CONNACK the Birth first and then the Health
-//! (REQ-LIFE-001, REQ-LIFE-015, REQ-TOP-017), the Health heartbeat and keep
-//! alive while connected. A lost connection is closed without DISCONNECT,
-//! so the broker publishes the Will, and the runtime reconnects with
-//! backoff. Shutdown publishes the Close, then DISCONNECT (REQ-LIFE-005,
-//! MG 6.3.4).
+//! REQ-LIFE-016), after CONNACK the Birth first, then the Health and the
+//! state of every source (REQ-LIFE-001, REQ-LIFE-015, REQ-TOP-017), the
+//! Health heartbeat, changes at once, answers to `Get` from Level 2 and
+//! keep alive while connected. The subscriptions for `Get` are sent with
+//! the CONNECT and restored by the session after a reconnect; SUBSCRIBE is
+//! no publication, so the Birth stays the first message (REQ-LIFE-015). A
+//! lost connection is closed without DISCONNECT, so the broker publishes
+//! the Will, and the runtime reconnects with backoff. Offline nothing is
+//! queued (ADR-0020 §7). Shutdown publishes the Close, then DISCONNECT
+//! (REQ-LIFE-005, MG 6.3.4).
 
 use std::future::pending;
 use std::num::NonZeroU16;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use oec_core::lifecycle::{Lifecycle, Publication};
-use oec_core::message::DataSetWriterId;
+use oec_core::lifecycle::Publication;
 use oec_core::mqtt::{CloseReason, Credentials, Event, QoS, Session, SessionConfig, SessionState};
 use tokio::sync::watch;
 use tokio::time::{Instant, sleep, sleep_until, timeout};
@@ -60,10 +63,22 @@ pub(crate) async fn run(app: App) -> Result<()> {
     let settings = app.connection().clone();
     let name = transport::server_name(settings.host())?;
     let mut tls = transport::client_config(&settings)?;
-    let mut lifecycle = lifecycle(&app)?;
     let mut session = Session::new(session_config(&settings))
         .map_err(|e| Error::Invalid(format!("MQTT session: {e}")))?;
     let clock = Clock::new();
+    let filters: Vec<(String, QoS)> = handle
+        .registry()
+        .provider
+        .subscriptions()
+        .iter()
+        .map(|f| (f.to_string(), QoS::AtMostOnce))
+        .collect();
+    if !filters.is_empty() {
+        // Held back until CONNACK, restored after every reconnect.
+        session
+            .subscribe(filters, clock.now())
+            .map_err(|e| Error::Invalid(format!("MQTT SUBSCRIBE: {e}")))?;
+    }
     let mut backoff = Backoff::new(settings.client_id());
     let mut connected_before = false;
     handle.set_state(ConnectionState::Connecting);
@@ -92,7 +107,6 @@ pub(crate) async fn run(app: App) -> Result<()> {
                 drive(
                     stream,
                     &mut session,
-                    &mut lifecycle,
                     &handle,
                     &mut shutdown,
                     &clock,
@@ -138,42 +152,31 @@ pub(crate) async fn run(app: App) -> Result<()> {
 async fn drive(
     mut stream: Stream,
     session: &mut Session,
-    lifecycle: &mut Lifecycle,
     handle: &AppHandle,
     shutdown: &mut watch::Receiver<bool>,
     clock: &Clock,
     backoff: &mut Backoff,
     connected_before: &mut bool,
 ) -> Result<Outcome> {
-    session
-        .connect(lifecycle.will(unix_ms()), clock.now())
-        .map_err(|e| Error::Invalid(format!("MQTT CONNECT: {e}")))?;
+    let will = handle.registry().provider.will(unix_ms());
+    let connected = session.connect(will, clock.now());
+    if let Err(e) = connected {
+        return Err(Error::Invalid(format!("MQTT CONNECT: {e}")));
+    }
     let keep_alive = Duration::from_secs(u64::from(session.config().keep_alive.get()));
     let mut buf = vec![0; READ_BUFFER];
     loop {
         while let Some(event) = session.poll_event() {
-            match event {
-                Event::Connected { session_present } => {
-                    // Clean Session is always set (REQ-MQTT-015) and the
-                    // session refuses Session Present with it, so no
-                    // resent message can precede the Birth (REQ-LIFE-015).
-                    debug_assert!(!session_present);
-                    backoff.reset();
-                    *connected_before = true;
-                    let now = clock.now();
-                    for p in lifecycle.on_connected(now, unix_ms()) {
-                        publish(session, p, now);
-                    }
-                    handle.set_state(ConnectionState::Online);
-                }
-                Event::Closed(reason) => return Ok(Outcome::Lost(reason)),
-                Event::Message(p) => log::debug!("message on {} ignored", p.topic),
-                other => log::debug!("MQTT: {other:?}"),
+            if let Some(outcome) =
+                on_event(event, session, handle, clock, backoff, connected_before)
+            {
+                return Ok(outcome);
             }
         }
         if session.state() == SessionState::Connected {
             let now = clock.now();
-            for p in lifecycle.poll(now, unix_ms()) {
+            let out = handle.registry().provider.poll(now, unix_ms());
+            for p in out {
                 publish(session, p, now);
             }
         }
@@ -195,7 +198,7 @@ async fn drive(
         }
         let deadline = match session.poll_timeout() {
             Some(t) if session.state() == SessionState::Connected => {
-                Some(t.min(lifecycle.poll_timeout()))
+                Some(t.min(handle.registry().provider.poll_timeout()))
             }
             t => t,
         };
@@ -205,6 +208,8 @@ async fn drive(
                 None => pending().await,
             }
         };
+        // A change through the API wakes the loop; `poll` publishes it.
+        let timer = race(timer, handle.changed());
         let wake = race(
             shutdown_requested(shutdown),
             race(timer, transport::read(&mut stream, &mut buf)),
@@ -212,10 +217,11 @@ async fn drive(
         .await;
         match wake {
             Either::Left(()) => {
-                close(&mut stream, session, lifecycle, clock).await;
+                close(&mut stream, session, handle, clock).await;
                 return Ok(Outcome::Shutdown);
             }
-            Either::Right(Either::Left(())) => session.handle_timeout(clock.now()),
+            Either::Right(Either::Left(Either::Left(()))) => session.handle_timeout(clock.now()),
+            Either::Right(Either::Left(Either::Right(()))) => {}
             Either::Right(Either::Right(Ok(0))) => session.connection_lost(),
             Either::Right(Either::Right(Ok(n))) => session.handle_input(&buf[..n], clock.now()),
             Either::Right(Either::Right(Err(e))) => {
@@ -226,18 +232,62 @@ async fn drive(
     }
 }
 
+/// Handles one session event; `Some` ends the connection.
+fn on_event(
+    event: Event,
+    session: &mut Session,
+    handle: &AppHandle,
+    clock: &Clock,
+    backoff: &mut Backoff,
+    connected_before: &mut bool,
+) -> Option<Outcome> {
+    match event {
+        Event::Connected { session_present } => {
+            // Clean Session is always set (REQ-MQTT-015) and the session
+            // refuses Session Present with it, so no resent message can
+            // precede the Birth (REQ-LIFE-015).
+            debug_assert!(!session_present);
+            backoff.reset();
+            *connected_before = true;
+            let now = clock.now();
+            let out = handle.registry().provider.on_connected(now, unix_ms());
+            for p in out {
+                publish(session, p, now);
+            }
+            handle.set_state(ConnectionState::Online);
+        }
+        Event::Closed(reason) => {
+            handle.registry().provider.on_disconnected();
+            return Some(Outcome::Lost(reason));
+        }
+        Event::Message(m) => {
+            let answer = handle
+                .registry()
+                .provider
+                .handle_message(&m.topic, &m.payload, unix_ms());
+            match answer {
+                Ok(out) => {
+                    let now = clock.now();
+                    for p in out {
+                        publish(session, p, now);
+                    }
+                }
+                Err(reason) => log::debug!("message on {} ignored: {reason}", m.topic),
+            }
+        }
+        other => log::debug!("MQTT: {other:?}"),
+    }
+    None
+}
+
 /// Graceful close: the Close message if connected (REQ-LIFE-005 … 007),
 /// then DISCONNECT, so the broker discards the Will (MG 6.3.4), then the
 /// TLS close_notify.
-async fn close(
-    stream: &mut Stream,
-    session: &mut Session,
-    lifecycle: &mut Lifecycle,
-    clock: &Clock,
-) {
+async fn close(stream: &mut Stream, session: &mut Session, handle: &AppHandle, clock: &Clock) {
     let now = clock.now();
     if session.state() == SessionState::Connected {
-        publish(session, lifecycle.close(unix_ms()), now);
+        let close = handle.registry().provider.close(unix_ms());
+        publish(session, close, now);
     }
     if session.state() != SessionState::Disconnected {
         let _ = session.disconnect(now);
@@ -256,7 +306,7 @@ async fn close(
     while session.poll_event().is_some() {}
 }
 
-/// Queues a lifecycle publication with QoS 0 (REQ-MQTT-017).
+/// Queues a publication with QoS 0 (REQ-MQTT-017).
 fn publish(session: &mut Session, p: Publication, now: Duration) {
     if let Err(e) = session.publish(p.topic.to_string(), p.payload, QoS::AtMostOnce, now) {
         log::error!("publishing on {} failed: {e}", p.topic);
@@ -266,21 +316,6 @@ fn publish(session: &mut Session, p: Publication, now: Duration) {
 async fn shutdown_requested(rx: &mut watch::Receiver<bool>) {
     // An error means the sender is gone: nobody can ask any more, stop too.
     let _ = rx.wait_for(|requested| *requested).await;
-}
-
-/// The lifecycle of the application about itself (ADR-0026 §9.4/§9.5).
-fn lifecycle(app: &App) -> Result<Lifecycle> {
-    let writer = |id| {
-        DataSetWriterId::new(id).map_err(|e| Error::Invalid(format!("DataSetWriterId {id}: {e}")))
-    };
-    Lifecycle::new(
-        app.service_type(),
-        app.identification_link().0.clone(),
-        app.mam().clone(),
-        writer(MAM_WRITER)?,
-        writer(HEALTH_WRITER)?,
-    )
-    .map_err(|e| Error::Invalid(format!("lifecycle: {e}")))
 }
 
 /// [`ConnectionSettings`] → [`SessionConfig`]: ClientId (REQ-MQTT-013),

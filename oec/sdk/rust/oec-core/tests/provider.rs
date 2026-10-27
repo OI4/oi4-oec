@@ -54,6 +54,7 @@ fn provider(get: bool, writers: WriterIds) -> Provider {
     let config = ProviderConfig {
         get,
         max_packet_size: 262_144,
+        publish_limit: 262_144,
     };
     Provider::new(lifecycle, config, writers).unwrap()
 }
@@ -455,7 +456,8 @@ fn large_publications_are_paginated() {
     .unwrap();
     let config = ProviderConfig {
         get: true,
-        max_packet_size: 4096,
+        max_packet_size: 8192,
+        publish_limit: 4096,
     };
     let mut p = Provider::new(lifecycle, config, WriterIds::new()).unwrap();
     for n in 0..30 {
@@ -476,10 +478,12 @@ fn large_publications_are_paginated() {
         assert_eq!(pagination(&v)["TotalCount"], 93);
     }
     assert_eq!(total, 93);
+    // a Get answer may use the MaxPacketSize of the bus
     let out = p
         .handle_message(&topic("Get", "MAM"), &get(GET_ID, &json!([])), MS + 1)
         .unwrap();
-    assert!(out.len() > 1 && out.iter().all(|o| o.payload.len() <= 4096));
+    assert!(out.len() > 1 && out.iter().all(|o| o.payload.len() <= 8192));
+    assert!(out.iter().any(|o| o.payload.len() > 4096));
 }
 
 proptest! {

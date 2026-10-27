@@ -234,6 +234,137 @@ fn revision_counter_from_the_store() {
     ));
 }
 
+fn pump_def() -> AssetDef {
+    AssetDef::with_oi4_identifier(
+        Product::new("vendor.com", "Pump", "P-1").manufacturer("Vendor"),
+        "0815",
+    )
+    .unwrap()
+}
+
+/// Represented assets (REQ-CMP-045): registration, lookup, MAM defaults of
+/// an asset (REQ-RES-MAM-008), removal and the refused registrations.
+#[test]
+fn assets() {
+    let app = device(Level::L2, explicit())
+        .reference_designation(false)
+        .build()
+        .unwrap();
+    let this = app.this();
+    assert!(this.is_this());
+    assert_eq!(this.identification_link(), app.identification_link());
+    assert!(app.assets().is_empty());
+
+    let pump = app.add_asset(pump_def()).unwrap();
+    assert_eq!(
+        pump.identification_link().as_str(),
+        "vendor.com/Pump/P-1/0815"
+    );
+    assert!(!pump.is_this());
+    let mam = pump.mam().unwrap();
+    assert_eq!(
+        (
+            mam.hardware_revision.as_str(),
+            mam.device_class.as_str(),
+            mam.serial_number.as_str(),
+            mam.product_instance_uri.as_str(),
+            mam.revision_counter
+        ),
+        ("undefined", "", "0815", "vendor.com/Pump/P-1/0815", 0)
+    );
+    assert_eq!(app.assets().len(), 1);
+    assert!(app.asset(pump.identification_link()).is_some());
+    assert!(app.asset(app.identification_link()).unwrap().is_this());
+
+    // twice, or the application itself
+    assert!(matches!(
+        app.add_asset(pump_def()),
+        Err(oec::Error::Invalid(_))
+    ));
+    let me = AssetDef::new(app.identification_link().clone(), product(), "SN-1");
+    assert!(matches!(app.add_asset(me), Err(oec::Error::Invalid(_))));
+    // invalid MAM: DeviceManual without host (REQ-RES-MAM-012)
+    let bad = AssetDef::with_oi4_identifier(
+        Product::new("vendor.com", "Valve", "V-1").device_manual("manual.pdf"),
+        "1",
+    )
+    .unwrap();
+    assert!(matches!(app.add_asset(bad), Err(oec::Error::Invalid(_))));
+
+    // invalid Health values are ignored, not panics
+    this.set_health(HealthState::Normal, Some(0));
+    pump.set_health(HealthState::Normal, Some(101));
+    pump.set_health_details(vec![
+        HealthDetail::new(HealthState::OffSpec),
+        HealthDetail::new(HealthState::Failure),
+    ]);
+
+    assert!(matches!(this.clone().remove(), Err(oec::Error::Invalid(_))));
+    let il = pump.identification_link().clone();
+    pump.clone().remove().unwrap();
+    assert!(pump.mam().is_none());
+    assert!(app.asset(&il).is_none());
+    assert!(matches!(pump.remove(), Err(oec::Error::Invalid(_))));
+    assert!(app.assets().is_empty());
+}
+
+/// RevisionCounter of the application and of an asset: incremented,
+/// persisted and read again (REQ-RES-MAM-018); a counter from the
+/// VendorNameplate stays unchanged. The DataSetWriterIds are persisted
+/// (REQ-RES-PUBLIST-006).
+#[test]
+fn revision_counters_and_writer_ids_are_persisted() {
+    let root = Root::new("asset-store");
+    let store = || FileStore::new(root.path("store"));
+    let app = device(Level::L2, explicit())
+        .store(store())
+        .build()
+        .unwrap();
+    let writer_ids = store().load("app/writer-ids").unwrap().unwrap();
+    let pump = app.add_asset(pump_def()).unwrap();
+    pump.bump_revision_counter().unwrap();
+    pump.bump_revision_counter().unwrap();
+    app.this().bump_revision_counter().unwrap();
+    assert_eq!(pump.mam().unwrap().revision_counter, 2);
+    assert_eq!(app.mam().revision_counter, 1);
+    let with_pump = store().load("app/writer-ids").unwrap().unwrap();
+    assert_ne!(writer_ids, with_pump);
+
+    let nameplate = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Valve", "V-1"), "1")
+                .unwrap()
+                .revision_counter(-1),
+        )
+        .unwrap();
+    nameplate.bump_revision_counter().unwrap();
+    assert_eq!(nameplate.mam().unwrap().revision_counter, -1);
+    drop(app);
+
+    let app = device(Level::L2, explicit())
+        .store(store())
+        .build()
+        .unwrap();
+    assert_eq!(app.mam().revision_counter, 1);
+    let pump = app.add_asset(pump_def()).unwrap();
+    assert_eq!(pump.mam().unwrap().revision_counter, 2);
+    // the same ids again: the table did not change
+    let table = store().load("app/writer-ids").unwrap().unwrap();
+    let valve = &b"vendor.com/Valve/V-1/1"[..];
+    assert!(table.windows(valve.len()).any(|w| w == valve));
+    assert!(
+        String::from_utf8(table)
+            .unwrap()
+            .contains("vendor.com/Pump/P-1/0815")
+    );
+    // a corrupt table is an error, not a silent renumbering
+    root.write("store/app/writer-ids", "{}");
+    assert!(matches!(
+        device(Level::L2, explicit()).store(store()).build(),
+        Err(oec::Error::Io(e)) if e.kind() == std::io::ErrorKind::InvalidData
+    ));
+}
+
 #[test]
 fn explicit_broker() {
     let app = device(Level::L1, explicit()).build().unwrap();
@@ -437,6 +568,9 @@ fn mam_matches_schema() {
         device(Level::L1, explicit()).build().unwrap(),
     ] {
         let doc = serde_json::to_value(app.mam()).unwrap();
+        validator.validate(&entry, Flavor::Strict, &doc).unwrap();
+        let asset = app.add_asset(pump_def()).unwrap();
+        let doc = serde_json::to_value(asset.mam().unwrap()).unwrap();
         validator.validate(&entry, Flavor::Strict, &doc).unwrap();
     }
 }

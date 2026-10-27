@@ -5,7 +5,7 @@
 
 mod common;
 
-use std::io::{Read, Write};
+use std::io::{ErrorKind, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
 use std::sync::{Arc, Mutex};
@@ -139,10 +139,14 @@ impl Default for Behavior {
     }
 }
 
+/// Packets the test sends to a client: `(connection, packet)`.
+type Outbox = Arc<Mutex<Vec<(usize, Packet)>>>;
+
 struct TestBroker {
     port: u16,
     seen: Receiver<Seen>,
     sockets: Arc<Mutex<Vec<TcpStream>>>,
+    outbox: Outbox,
 }
 
 impl TestBroker {
@@ -175,20 +179,28 @@ impl TestBroker {
         let port = listener.local_addr().unwrap().port();
         let (tx, seen) = channel();
         let sockets = Arc::new(Mutex::new(Vec::new()));
+        let outbox = Outbox::default();
         let accepted = Arc::clone(&sockets);
+        let queued = Arc::clone(&outbox);
         thread::spawn(move || {
             for (n, tcp) in listener.incoming().enumerate() {
                 let Ok(tcp) = tcp else { return };
                 accepted.lock().unwrap().push(tcp.try_clone().unwrap());
-                let (config, tx) = (Arc::clone(&config), tx.clone());
-                thread::spawn(move || serve(n, tcp, &config, behavior, &tx));
+                let (config, tx, queued) = (Arc::clone(&config), tx.clone(), Arc::clone(&queued));
+                thread::spawn(move || serve(n, tcp, &config, behavior, &tx, &queued));
             }
         });
         Self {
             port,
             seen,
             sockets,
+            outbox,
         }
+    }
+
+    /// Sends `packet` to the client of connection `n` (e.g. a `Get`).
+    fn send(&self, n: usize, packet: Packet) {
+        self.outbox.lock().unwrap().push((n, packet));
     }
 
     /// Next event, failing the test after [`WAIT`].
@@ -243,13 +255,39 @@ impl TestBroker {
     }
 }
 
-fn serve(n: usize, tcp: TcpStream, config: &Arc<ServerConfig>, b: Behavior, tx: &Sender<Seen>) {
+fn serve(
+    n: usize,
+    tcp: TcpStream,
+    config: &Arc<ServerConfig>,
+    b: Behavior,
+    tx: &Sender<Seen>,
+    outbox: &Outbox,
+) {
+    // A short read timeout lets the loop send the packets of the outbox.
+    tcp.set_read_timeout(Some(Duration::from_millis(10)))
+        .unwrap();
     let mut tls = StreamOwned::new(ServerConnection::new(Arc::clone(config)).unwrap(), tcp);
     let mut decoder = Decoder::new(1 << 20);
     let mut buf = [0; 4096];
     let mut handshaken = false;
     loop {
         let read = match tls.read(&mut buf) {
+            Err(e) if matches!(e.kind(), ErrorKind::WouldBlock | ErrorKind::TimedOut) => {
+                let mine: Vec<Packet> = {
+                    let mut queued = outbox.lock().unwrap();
+                    let (mine, rest) = queued.drain(..).partition(|(m, _)| *m == n);
+                    *queued = rest;
+                    mine.into_iter().map(|(_, p)| p).collect()
+                };
+                for p in mine {
+                    let mut out = Vec::new();
+                    encode(&p, &mut out).unwrap();
+                    if tls.write_all(&out).and_then(|()| tls.flush()).is_err() {
+                        break;
+                    }
+                }
+                continue;
+            }
             Ok(0) | Err(_) => break,
             Ok(read) => read,
         };
@@ -324,8 +362,13 @@ impl States {
 }
 
 fn builder(broker: Broker, states: &States) -> oec::app::AppBuilder {
+    builder_at(Level::L1, broker, states)
+}
+
+fn builder_at(level: Level, broker: Broker, states: &States) -> oec::app::AppBuilder {
     let states = states.clone();
-    App::builder(Level::L1, ServiceType::Utility, product())
+    App::builder(level, ServiceType::Utility, product())
+        .reference_designation(false)
         .bootstrap(Bootstrap::Explicit(broker))
         .serial_number("SN-1")
         .client_id("app-1")
@@ -362,6 +405,87 @@ fn health(payload: &[u8]) -> (String, u64) {
 
 fn message_id(payload: &[u8]) -> String {
     json(payload)["MessageId"].as_str().unwrap().to_owned()
+}
+
+/// The topic form of an Identification Link (REQ-IL-002 … 004).
+fn encoded(il: &str) -> String {
+    oec_core::il::IdentificationLink::parse(il)
+        .unwrap()
+        .encode()
+}
+
+/// The next PUBLISH, skipping PINGREQ and SUBSCRIBE.
+fn publication(tb: &TestBroker) -> Publish {
+    loop {
+        match tb.packet() {
+            (_, Packet::Publish(p)) => return p,
+            (_, Packet::PingReq | Packet::Subscribe(_)) => {}
+            other => panic!("expected PUBLISH, got {other:?}"),
+        }
+    }
+}
+
+/// The PUBLISHes up to and including the next one on `topic`.
+fn publications_until(tb: &TestBroker, topic: &str) -> Vec<Publish> {
+    let mut out = Vec::new();
+    loop {
+        let p = publication(tb);
+        let done = p.topic == topic;
+        out.push(p);
+        if done {
+            return out;
+        }
+    }
+}
+
+/// `(Resource, Source)` → DataSetWriterId of a series of publications.
+fn writer_ids(ps: &[Publish]) -> Vec<u64> {
+    let mut ids: Vec<u64> = ps
+        .iter()
+        .filter(|p| !p.topic.contains("/Pub/PublicationList"))
+        .flat_map(|p| {
+            json(&p.payload)["Messages"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|m| m["DataSetWriterId"].as_u64().unwrap())
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    ids.sort_unstable();
+    ids
+}
+
+/// The DataSetWriterIds listed in a PublicationList publication.
+fn listed_ids(p: &Publish) -> Vec<u64> {
+    let mut ids: Vec<u64> = json(&p.payload)["Messages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|m| m["Payload"]["DataSetWriterId"].as_u64().unwrap())
+        .collect();
+    ids.sort_unstable();
+    ids
+}
+
+const GET_ID: &str = "1700000000000-Aggregation/vendor.com/Client/C-1/1";
+
+/// A `Get` NetworkMessage from a consumer, QoS 0.
+fn get(topic: String) -> Packet {
+    Packet::Publish(Publish {
+        topic,
+        payload: serde_json::to_vec(&serde_json::json!({
+            "MessageId": GET_ID,
+            "MessageType": "ua-data",
+            "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
+            "DataSetClassId": "",
+            "ReplyTo": "",
+            "Messages": []
+        }))
+        .unwrap(),
+        delivery: Delivery::AtMostOnce,
+        retain: false,
+    })
 }
 
 // ---------------------------------------------------------------- tests
@@ -774,4 +898,240 @@ fn unreachable_broker_keeps_connecting() {
 fn handle_is_clone_send_sync() {
     fn check<T: Clone + Send + Sync + 'static>() {}
     check::<oec::app::AppHandle>();
+}
+
+/// Level 2 (ADR-0026 §12): the `Get` subscriptions, after the Birth the
+/// state of every source – the app, then each asset with MAM, Health and
+/// Profile, the Profile of the app, the PublicationList with the ids of
+/// these publications (REQ-RES-PUBLIST-006) – and the answer to a `Get`
+/// with ReplyTo (REQ-CMP-008, REQ-RES-MAM-*).
+#[test]
+fn level_2_publishes_its_sources_and_answers_get() {
+    let (pki, root) = (pki(), Root::new("rt-provider"));
+    let tb = TestBroker::start(&pki, Behavior::default());
+    let states = States::default();
+    let app = builder_at(Level::L2, broker(&root, &pki, tb.port), &states)
+        .build()
+        .unwrap();
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-1"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    let (me, it) = (
+        encoded(app.identification_link().as_str()),
+        encoded(pump.identification_link().as_str()),
+    );
+    let handle = app.handle();
+    let run = spawn(app);
+
+    let (n, _) = tb.connect();
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let mut subscribed = None;
+    let mut seen = Vec::new();
+    while seen.len() < 7 {
+        match tb.packet() {
+            (_, Packet::Subscribe(s)) => subscribed = Some(s),
+            (_, Packet::Publish(p)) => seen.push(p),
+            (_, Packet::PingReq) => {}
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+    let mut filters: Vec<String> = subscribed
+        .expect("SUBSCRIBE")
+        .filters
+        .into_iter()
+        .map(|(f, _)| f)
+        .collect();
+    filters.sort();
+    assert_eq!(
+        filters,
+        ["Health", "MAM", "Profile", "PublicationList"].map(|r| format!("{prefix}Get/{r}/#"))
+    );
+    let topics: Vec<&str> = seen.iter().map(|p| p.topic.as_str()).collect();
+    assert_eq!(
+        topics,
+        [
+            format!("{prefix}Pub/MAM/{me}"),
+            format!("{prefix}Pub/Health/{me}"),
+            format!("{prefix}Pub/MAM/{it}"),
+            format!("{prefix}Pub/Health/{it}"),
+            format!("{prefix}Pub/Profile/{it}"),
+            format!("{prefix}Pub/Profile/{me}"),
+            format!("{prefix}Pub/PublicationList"),
+        ]
+    );
+    assert_eq!(writer_ids(&seen), listed_ids(&seen[6]));
+    states.wait_for(ConnectionState::Online, 1);
+
+    tb.send(n, get(format!("{prefix}Get/MAM/{it}")));
+    let answer = publication(&tb);
+    assert_eq!(answer.topic, format!("{prefix}Pub/MAM/{it}"));
+    let v = json(&answer.payload);
+    assert_eq!(v["ReplyTo"], GET_ID);
+    assert_eq!(
+        v["Messages"][0]["DataSetWriterName"],
+        "vendor.com/Pump/P-1/0815"
+    );
+    assert_eq!(v["Messages"][0]["Payload"]["HardwareRevision"], "undefined");
+
+    // a Get of a resource that is not served is not subscribed: ignored
+    tb.send(n, get(format!("{prefix}Get/Data/{it}")));
+    tb.send(n, get(format!("{prefix}Get/Profile/{me}")));
+    let answer = publication(&tb);
+    assert_eq!(answer.topic, format!("{prefix}Pub/Profile/{me}"));
+    let resources = &json(&answer.payload)["Messages"][0]["Payload"]["Resources"];
+    assert_eq!(
+        resources,
+        &serde_json::json!(["MAM", "Health", "Profile", "PublicationList"])
+    );
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+}
+
+/// Changes through the API are published at once while connected
+/// (REQ-TOP-017, REQ-RES-HEALTH-004, REQ-RES-MAM-018,
+/// REQ-RES-PUBLIST-017); invalid values publish nothing.
+#[test]
+fn asset_changes_are_published_at_once() {
+    let (pki, root) = (pki(), Root::new("rt-asset-changes"));
+    let tb = TestBroker::start(&pki, Behavior::default());
+    let states = States::default();
+    let app = builder_at(Level::L2, broker(&root, &pki, tb.port), &states)
+        .build()
+        .unwrap();
+    let me = encoded(app.identification_link().as_str());
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let list = format!("{prefix}Pub/PublicationList");
+    let handle = app.handle();
+    let run = spawn(app);
+    tb.connect();
+    let first = publications_until(&tb, &list);
+    assert_eq!(listed_ids(first.last().unwrap()).len(), 3);
+    states.wait_for(ConnectionState::Online, 1);
+
+    let pump = handle
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-1"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    let it = encoded(pump.identification_link().as_str());
+    let added = publications_until(&tb, &list);
+    let topics: Vec<&str> = added.iter().map(|p| p.topic.as_str()).collect();
+    assert_eq!(
+        topics,
+        [
+            format!("{prefix}Pub/MAM/{it}"),
+            format!("{prefix}Pub/Health/{it}"),
+            format!("{prefix}Pub/Profile/{it}"),
+            list.clone(),
+        ]
+    );
+    assert_eq!(health(&added[1].payload), ("NORMAL_0".to_owned(), 100));
+    assert_eq!(listed_ids(&added[3]).len(), 6);
+
+    // invalid: ignored; the next publication is the valid change
+    handle.this().set_health(HealthState::Normal, Some(0));
+    pump.set_health(HealthState::MaintenanceRequired, Some(80));
+    let h = publication(&tb);
+    assert_eq!(h.topic, format!("{prefix}Pub/Health/{it}"));
+    assert_eq!(
+        health(&h.payload),
+        ("MAINTENANCE_REQUIRED_4".to_owned(), 80)
+    );
+
+    pump.set_health_details(vec![
+        HealthDetail::new(HealthState::OffSpec),
+        HealthDetail {
+            description: Some("bearing".to_owned()),
+            ..HealthDetail::new(HealthState::Failure)
+        },
+    ]);
+    let h = json(&publication(&tb).payload);
+    let p = &h["Messages"][0]["Payload"];
+    assert_eq!(p["Health"], "FAILURE_1");
+    assert_eq!(p["Details"].as_array().unwrap().len(), 2);
+    assert!(p.get("HealthScore").is_none());
+
+    pump.bump_revision_counter().unwrap();
+    let m = publication(&tb);
+    assert_eq!(m.topic, format!("{prefix}Pub/MAM/{it}"));
+    assert_eq!(
+        json(&m.payload)["Messages"][0]["Payload"]["RevisionCounter"],
+        1
+    );
+
+    pump.remove().unwrap();
+    let removed = publication(&tb);
+    assert_eq!(removed.topic, list);
+    assert_eq!(listed_ids(&removed), listed_ids(first.last().unwrap()));
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+}
+
+/// Offline nothing is queued (ADR-0020 §7): changes while disconnected are
+/// published once, as the current state, after the reconnect.
+#[test]
+fn offline_changes_are_published_as_state_after_reconnect() {
+    let (pki, root) = (pki(), Root::new("rt-offline"));
+    let tb = TestBroker::start(&pki, Behavior::default());
+    let states = States::default();
+    let app = builder_at(Level::L1, broker(&root, &pki, tb.port), &states)
+        .build()
+        .unwrap();
+    let me = encoded(app.identification_link().as_str());
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-1"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    let it = encoded(pump.identification_link().as_str());
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = spawn(app);
+    tb.connect();
+    // Level 1: no SUBSCRIBE, MAM and Health of the app and the asset
+    let topics: Vec<String> = (0..4).map(|_| tb.publish().1.topic).collect();
+    assert_eq!(
+        topics,
+        [
+            format!("{prefix}Pub/MAM/{me}"),
+            format!("{prefix}Pub/Health/{me}"),
+            format!("{prefix}Pub/MAM/{it}"),
+            format!("{prefix}Pub/Health/{it}"),
+        ]
+    );
+    states.wait_for(ConnectionState::Online, 1);
+    tb.drop_connection(0);
+    tb.until_closed(0);
+    states.wait_for(ConnectionState::Reconnecting, 1);
+
+    for (h, score) in [
+        (HealthState::OffSpec, 50),
+        (HealthState::MaintenanceRequired, 70),
+    ] {
+        pump.set_health(h, Some(score));
+    }
+    tb.connect();
+    let after: Vec<Publish> = (0..4).map(|_| tb.publish().1).collect();
+    assert_eq!(after[3].topic, format!("{prefix}Pub/Health/{it}"));
+    assert_eq!(
+        health(&after[3].payload),
+        ("MAINTENANCE_REQUIRED_4".to_owned(), 70)
+    );
+    handle.shutdown();
+    let rest = tb.until_closed(1);
+    assert!(
+        rest.iter()
+            .filter(|p| matches!(p, Packet::Publish(p) if p.topic.contains(&it)))
+            .count()
+            == 0,
+        "{rest:?}"
+    );
+    run.join().unwrap().unwrap();
 }
