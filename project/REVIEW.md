@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-055 (P4 increment 7a: write side, part 1; A-87 … A-97 for information; guideline `9044929`, register `a8f5176`). **Open for the PO: D-1 (SF-107) and D-2 (SF-108) to decide.**_
+_Last updated: 2026-10-27, C-056 (P4 increment 7b: the Config resource; A-98 … A-108 for information; guideline `9044929`, register `a8f5176`). **Open for the PO: D-1 (SF-107) and D-2 (SF-108) to decide.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -59,10 +59,16 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Tests: core and runtime tests in the gate (incl. the guideline vectors V-PAY-061/062 of MG B1.1.4); opt-in interop 11 green; a one-off D7 `oec-check monitor` run against the SDK: 9 pass, 0 fail, 4 skip.
   - **Two findings to decide: D-1 = SF-107** (how a requester sees that a DataSet is writable) and **D-2 = SF-108** (which Source the Status event for a request to an unknown asset carries; this caused one of the D7 skips). No reviewed item changed, no new test data, no new dependency; A-87 … A-97 are for information. Worth a look: **A-87** (cycle cut), **A-91** (unknown Source), **A-95** (`Set Data` rules).
   - C-056 (increment 7b, Config) runs in a new agent; `prompt.md` is filled.
+- C-056 (P4 increment 7b, not split):
+  - `oec-core`: Config DataSets in the provider (`provider::config`) – the definition check, the value checks incl. Pattern (new dependency `regex`), masking of sensitive values in every publication, `Get Config` and `Set Config` from Level 2 with partial updates and the status codes of 7a, the table of set values.
+  - `oec`: the API `oec::config` (`ConfigDef`, `ConfigValues`, `ConfigHandle` with `on_set` returning `Result`, `set`, `remove`) and `Asset::add_config`; values persisted under `app/config`; the RevisionCounter goes up with every change; the means of authentication under `/run/secrets/oi4` are read again before every reconnect (GL-ADR-022); the file store is owner-only (0700/0600). The sketch is aligned (ADR-0020 amendment C-056).
+  - Tests: core and runtime tests in the gate (incl. the guideline vectors V-PAY-098 … 102/114 of MG B1.1.3); opt-in interop 12 green; a one-off D7 `oec-check monitor` run against the SDK: 10 pass, 0 fail, 3 skip, after fixing a D7 bug found by that run (T7-MON-10 took a MAM published on change for a second Birth; test first, reviewed fixtures unchanged).
+  - No new finding, no reviewed item changed, no new test data, so there is nothing new to review. **D-1 (SF-107) and D-2 (SF-108) are still open.** A-98 … A-108 are for information. Worth a look: **A-103** (masking), **A-104** (sensitive values at rest), **A-105** (secret reload), **A-106** (regex dialect).
+  - C-057 (increment 7c) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `9044929` (re-baseline, no content change).
 
-Logs: [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -90,7 +96,7 @@ Logs: [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_
 | A-18 | Container storage contract details (hostname, integer-only `broker.json` numbers, CA required, certificate before credentials) | info (agent) | C-048 | – | – |
 | A-19 | Explicit bootstrap: serial number required, default ClientId from the IL hash, no authentication → `LevelNotMet` | info (agent) | C-048 | – | – |
 | A-20 | New `reference_designation(bool)`, `Store::is_persistent()`, `MemoryStore::new()` | info (agent) | C-048 | – | – |
-| A-21 | Config definition and string-keyed getters without runtime; Pattern checked from increment 7 | info (agent) | C-048 | – | – |
+| A-21 | Config definition and string-keyed getters without runtime; Pattern checked from increment 7 (done in C-056, A-106) | info (agent) | C-048 | – | – |
 | A-22 | Store keys and atomic save; keep alive 1 … 65535 s; publish limit clamped; `Secret` redacted | info (agent) | C-048 | – | – |
 | A-23 | Dependencies thiserror 2 and log 0.4 only, own base64 decoder, no deny exception | info (agent) | C-048 | – | – |
 | A-24 | Cycle cut: C-048 not split, increment 5 split into 5a (C-049) and 5b (C-050); `run`/`run_async` stay in the sketch | info (agent) | C-048 | – | – |
@@ -161,12 +167,23 @@ Logs: [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_
 | A-89 | Requests and levels: `Set`/`Del` from Level 2 only; invalid payloads ignored; exactly one resource DataSetMessage | info (agent) | C-055 | – | – |
 | A-90 | Status events: topic, envelope, ids, Description/SymbolicId; Event in the Profile, Status entries in the PublicationList | info (agent) | C-055 | – | – |
 | A-91 | Unknown Source: `BadNotFound` under the requested Source with bounded transient ids (SF-108 pending) | info (agent) | C-055 | – | – |
-| A-92 | Writes not served yet (Config, SubscriptionList, ReferenceDesignation, every `Del`) → `BadNotFound`; `Set Metadata` → `BadNotWritable` | info (agent) | C-055 | – | – |
+| A-92 | Writes not served yet (Config, SubscriptionList, ReferenceDesignation, every `Del`) → `BadNotFound`; `Set Metadata` → `BadNotWritable` (Config served since C-056) | info (agent) | C-055 | – | – |
 | A-93 | `Set PublicationList`: identification, checks and status codes, answers | info (agent) | C-055 | – | – |
 | A-94 | Publication settings persisted under `app/publications`, applied only within the current `Writable` | info (agent) | C-055 | – | – |
 | A-95 | `Set Data`: checks, the handler decides, unknown fields ignored, panic → `BadInternalError` | info (agent) | C-055 | – | – |
 | A-96 | API (ADR-0020 amendment C-055): `on_set` returns `Result`, `SetData::fields`; sketch aligned | info (agent) | C-055 | – | – |
 | A-97 | Tests (core, runtime, app, interop 11 green, D7 9/0/4); interop probes send schema-valid requests; no new dependency | info (agent) | C-055 | – | – |
+| A-98 | Cycle cut: 7b not split; order 7b → 7c → 8 → 10 unchanged | info (agent) | C-056 | – | – |
+| A-99 | Module `provider::config`; `Handled::SetConfig` with a two-phase `Set Config`, handler outside the lock | info (agent) | C-056 | – | – |
+| A-100 | Config published masked at add/connect/change; `Get`/`Set Config` and Profile entry from Level 2; PublicationList entry `ON_REQUEST_FILTER_9` | info (agent) | C-056 | – | – |
+| A-101 | `Set Config`: partial update, checks and status codes, empty `Value` unsets, unknown members ignored | info (agent) | C-056 | – | – |
+| A-102 | Answer order Pub Config → Status Good (MG B1.1.3, informative, shows the reverse) | info (agent) | C-056 | – | – |
+| A-103 | Masking: `********` in every publication, the mask in a `Set` keeps the value, no values in `Debug`/errors, the handler sees clear values | info (agent) | C-056 | – | – |
+| A-104 | Persistence of set values under `app/config`, applied only while valid; RevisionCounter + 1 per change; `FileStore` 0700/0600 | info (agent) | C-056 | – | – |
+| A-105 | Secrets: the means of authentication re-read before every reconnect, last good values on error; Config values not in `/run/secrets/oi4` | info (agent) | C-056 | – | – |
+| A-106 | Pattern with Rust `regex` (Unicode, unanchored); new dependency `regex`, `cargo deny` without exception; A-21 resolved | info (agent) | C-056 | – | – |
+| A-107 | API (ADR-0020 amendment C-056): `ConfigHandle::on_set` returns `Result`, `ConfigDef::{label, context}`, `ConfigHandle::{context, source, remove}`; sketch aligned | info (agent) | C-056 | – | – |
+| A-108 | Tests (core, runtime, app, interop 12 green); D7 `monitor` 10/0/3 after a D7 fix of T7-MON-10 | info (agent) | C-056 | – | – |
 
 ## Decisions and review items
 
@@ -608,6 +625,25 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - one-off D7 `oec-check monitor` (external call, Q-009): the first run found 5 schema-invalid requests of the test probe itself (fixed: interop probes send schema-valid requests); rerun 9 pass, 0 fail, 4 skip (T7-MON-03 connect not seen, 05 needs ≥ 125 s, 07 no RequestIds, 04 because of SF-108); capture not committed;
   - no new dependency; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception.
 
-## Next (C-056)
+### A-98 … A-108 – P4 increment 7b (C-056, agent)
 
-1. P4 increment 7b – the Config resource: `ConfigDef`/`ConfigHandle`/`on_set` after sketch `config.rs`, `Get`/`Set Config` with validation and partial updates, masking of sensitive values (GL-ADR-021), secrets under `/run/secrets/oi4` (GL-ADR-022), persistence; on the write path of 7a. If D-2 is decided as proposed: re-baseline first, then the SF-108 change in the SDK. Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/sdk/rust/oec-core/src/provider/config.rs`, `provider.rs`, `provider/write.rs`, `mqtt/session.rs`; `oec/sdk/rust/oec/src/{config.rs, asset.rs, app.rs, runtime.rs, store.rs, container.rs}`; the tests; the sketch (`sketch/src/config.rs`, `examples/config.rs`); the D7 monitor (`oec/conformance/internal/monitor`); ADR-0020 amendment C-056, ADR-0026 amendment C-056 §15, ADR-0023 amendment C-056; [C-056 log](log/2026-10-27_C-056_config.md).
+- **A-98 Cycle cut:** 7b is not split. Config, its masking and the secret reload use one mechanism (the write path of 7a) and one persistence pattern (the tables of 6a/7a); splitting off the masking would leave a Config that leaks sensitive values. About 2000 lines of code and 1450 lines of tests. Order 7b → 7c → 8 → 10 unchanged.
+- **A-99 Module and phases:** `oec_core::provider::config` holds the definition and value checks, the masking, the `Set Config` check and the table of set values. A valid `Set Config` returns `Handled::SetConfig`; the runtime asks the `on_set` handler outside every lock and calls `complete_set_config` (as `Set Data` in 7a).
+- **A-100 Publication and levels:** every Config DataSet is published on `Pub/Config/<Source>/<Filter>` (Filter = context name) when added, at every connect and after every change, always masked. At Level 1 it is published, but `Get`/`Set Config` are not served and `on_set` is refused. From Level 2 `Get Config` (selection by Source and Filter, paginated) and `Set Config` are served and the Profile lists `Config`. The PublicationList gets one entry per Config (`ON_REQUEST_FILTER_9`, Filter = context, `Config` `NONE_0`, its own DataSetWriterId).
+- **A-101 `Set Config`:** a partial update (at least one object; the mandatory objects of every group sent must be present); read-only properties may be repeated unchanged. The first violation in the order of the JSON members is answered: unknown context, group or object → `BadNotFound`; no or several DataSetMessages, `Value` missing, mandatory object missing → `BadInvalidArgument`; not a JSON object → `BadDecodingError`; `Value` no string, other `Type`, `Value` not of its Type → `BadTypeMismatch`; another read-only property changed → `BadNotWritable`; outside the Validation or the Config beyond the MaxPacketSize → `BadOutOfRange`. An empty `Value` unsets the object (MG 9.1.3); unknown members are ignored (REQ-MSG-046); `Del Config` is not subscribed (MG has no `Del` for Config). Then the handler decides (`Ok`, or `Err(code)` → Status with that code; a panic → `BadInternalError`).
+- **A-102 Answer order:** after an accepted `Set` the masked Config with `ReplyTo`, then the Status event Good, as for `Set Data`. The informative MG B1.1.3 shows the Status first; REQ-RES-CONFIG-022 orders nothing, so this is no finding.
+- **A-103 Masking (GL-ADR-021):** every publication replaces a non-empty Value/DefaultValue of a sensitive object with `********` (an empty one stays empty). The mask in a `Set` keeps the value and is no change; `ConfigHandle::set` refuses the mask as a value. `Debug` output and error messages of the SDK never contain values. The `on_set` handler sees the proposed values in clear (the application needs them).
+- **A-104 Persistence:** only values that were set (by `Set Config` or `ConfigHandle::set`) are stored, under `app/config` (`{"Version":1,"Entries":[…]}`); a corrupt table → `Error::Io` (`InvalidData`) at `build()`. At `add_config` a stored value is used only if its object still exists and the value still passes the checks. Every effective change increments and persists the RevisionCounter of the source and republishes its MAM (REQ-RES-MAM-018; a counter from the VendorNameplate is not changed). The `FileStore` creates directories 0700 and files 0600 on Unix: sensitive values are stored in clear, protected by the file modes (the guideline asks for no encryption at rest; a platform may encrypt the data volume).
+- **A-105 Secrets (GL-ADR-022):** with a container storage the runtime reads `/run/secrets/oi4` (credentials, private key, passphrase) and the client certificate again before every reconnect, because the platform may renew them while the application runs. Changed → used for the next CONNECT and TLS; unreadable or refused → the last good values stay, with a warning that names no value. An explicit `Broker` is not re-read. Sensitive Config values are not written to `/run/secrets/oi4`: GL-ADR-022 reserves it for the platform's means of authentication.
+- **A-106 Pattern:** checked with the Rust crate `regex` (Unicode classes, unanchored match, linear time); a pattern that does not compile is refused when the Config is added. D7 uses Go RE2 (`\d` there means ASCII digits only); MG 8.3.3.1 itself says regex dialects differ, so this is no finding. `regex` (+ regex-automata, regex-syntax, memchr; MIT/Apache-2.0, memchr Unlicense/MIT) is a new runtime dependency of `oec-core`, already in `Cargo.lock` through jsonschema; `cargo deny` without exception. A-21 is resolved.
+- **A-107 API (ADR-0020 amendment C-056):** `ConfigHandle::on_set` returns `Result<()>` (refused at Level 1 and for a removed Config; the sketch returned `()`), additions `ConfigDef::{label, context}` and `ConfigHandle::{context, source, remove}`; the prelude is unchanged; the sketch is aligned.
+- **A-108 Tests:**
+  - `oec-core`: 16 Config tests (`tests/provider_config.rs`, incl. the guideline vectors V-PAY-098 … 102/114 of MG B1.1.3, every status code and a strict-schema test of every answer), 8 unit tests in `provider::config`, `Session::set_credentials`;
+  - `oec`: `config_is_got_set_and_persisted` and `renewed_secrets_apply_on_reconnect` against the in-process TLS broker, app tests `config_is_declared_set_and_persisted` and `invalid_configs_and_set_handlers`, `file_store_is_owner_only`;
+  - opt-in interop `level_2_config` against Mosquitto: `interop.sh` 12 passed, 1 ignored;
+  - one-off D7 `oec-check monitor` (external call, Q-009): run 1 9 pass, 1 info, 3 skip – T7-MON-10 took the MAM republished after the Config change for a second Birth; fixed in D7 with a test first (`TestMAMOnChange`), the reviewed fixtures unchanged; run 2 10 pass, 0 fail, 3 skip (T7-MON-03 the probe has no Birth, 05 needs ≥ 125 s, 07 no RequestIds); capture not committed.
+
+## Next (C-057)
+
+1. P4 increment 7c – ReferenceDesignation (`Get`/`Set`/`Del`, `Asset::on_reference_designation`, persisted), the Syslog bridge of the application and Generic events, on the Event writer of 7a. If D-2 is decided as proposed: guideline change and re-baseline first, then the SF-108 change in the SDK. Runs in a new agent (start prompt in `prompt.md`).
