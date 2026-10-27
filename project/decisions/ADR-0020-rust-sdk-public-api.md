@@ -283,3 +283,29 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
    - A represented asset starts with Health NORMAL_0 / 100. Its MAM defaults differ from the application's (§4): `HardwareRevision` `"undefined"` (a physical asset without known revision, REQ-RES-MAM-008) and `DeviceClass` `""`, unless the `Product` sets them.
    - `add_asset` refuses the AppId, an IL registered twice and a `Product` whose MAM is invalid (`Error::Invalid`). It works before and during `run`; a change is published at once when connected, otherwise with the next connection (ADR-0026 §12: state, no queue).
    - `remove` keeps the DataSetWriterIds of the asset reserved (REQ-RES-PUBLIST-006), so a re-added asset gets its old ids.
+
+## Amendment C-054 (2026-10-27) – P4 increment 6b: Data DataSets, Metadata, publish modes (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details and REQ tracing: `log/2026-10-27_C-054_data-sets-metadata.md`, REVIEW A-75 … A-86. Provider semantics: ADR-0026 §13.
+
+### A. What moved from the sketch into `oec`
+
+Module `oec::data` (also in the prelude): `BuiltinType`, `Value`, `Field::{new, double, unit, description}`, `Mode` (`OFF`, `ON_REQUEST`, `APPLICATION`, `SOURCE`, `FILTER`, `|`), `Writable`, `Publication::{default_data, mode, interval, precision, writable}`, `DataSetDef::{new, oi4pv, field, class_id, description, publication}`, `DataSet::{update, remove}` and `Asset::add_data`. The SDK now publishes Data and Metadata per PublicationList entry and answers `Get Data` / `Get Metadata` (§6, §7). Still in the sketch and still the contract: `DataSet::on_set` and `SetData` (increment 7, write side), `Publication::writable` is stored and listed in the PublicationList entry `Config`, but a `Set PublicationList` is applied only with increment 7; `ConfigHandle`, events, ReferenceDesignation and the consumer (increments 7 and 8).
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `Field::range(low, high)` | The `EURange` property of the Metadata (REQ-RES-META-003); without it a consumer cannot scale a value. |
+| `DataSet::{tag, source, values}` | Read back the Tag, the `Source` and the current values (in field order, once every field has one); needed by applications that keep only the handle. |
+| `Mode::union` (`const fn`) | `Mode::ON_REQUEST | Mode::FILTER` is not usable in `const` items; `union` is. |
+| `Value::{UInt64, Bytes, LocalizedText}`, `From` for all integer widths, `f32`, `String`, `Vec<u8>`/`&[u8]`, `LocalizedText` | Every `BuiltinType` of the sketch gets a typed value. |
+
+### C. Changes of sketch items (need this amendment)
+
+1. **`DataSet::update` returns `Result<()>`** (sketch: `()`). An unknown field, a value that does not fit its field (type or range of the integer type) or a removed DataSet is `Error::Invalid`; the update is all or none. Silently dropping a wrong value would hide a programming error and publish stale state; the call stays synchronous and non-blocking.
+2. **`Value::Json` (escape hatch) is dropped**; `Value` is `#[non_exhaustive]` with typed variants for every `BuiltinType` instead. Pre-encoded JSON could not be checked against the field type, and the strict sender rule (§5 of the design rules) would not hold. A later addition is possible without breaking the API.
+3. **`DataSetDef::oi4pv(pv)` renames the field to `Pv`** (REQ-RES-DATA-002): the name of the given `Field` is ignored, its type, unit, description and range are kept. The sketch example `oi4pv(Field::double("Pv"))` is unchanged.
+4. **A DataSet is published and answered once every field has a value.** A DataSetMessage of a Data DataSet carries all fields of its Metadata (REQ-RES-DATA-007 with REQ-RES-META-003); until then `Get Data` with its Tag returns an empty list. The sketch example `device_source.rs` sets `Pv` and `Sv1` before the polling loop.
+5. **`DataSetDef::class_id` is checked at `add_data`** (not a UUID → `Error::Invalid`), as builders do not fail (ADR-0020 §1).
+6. **`Publication::interval`** accepts whole milliseconds up to `u32::MAX` (the PublicationList `Interval` is a UInt32 in ms, REQ-RES-PUBLIST-013); other durations are `Error::Invalid` at `add_data`.
