@@ -1337,6 +1337,11 @@ fn level_2_config() {
     let run = thread::spawn(move || app.run());
     states.wait_for(ConnectionState::Online);
     let topic = format!("{prefix}Pub/Config/{me}/service");
+    // Online follows CONNACK; the SUBSCRIBE precedes the first publication
+    // on the same connection, so the broker knows it once this arrives.
+    probe
+        .next(WAIT, |p| p.topic == topic)
+        .expect("no Pub Config at connect");
 
     let id = "1700000000010-Aggregation/vendor.com/Client/C-1/1";
     get(
