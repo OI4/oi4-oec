@@ -689,10 +689,11 @@ pub fn coerce(ty: BuiltinType, v: Value) -> Result<Value, String> {
             if !(low..=high).contains(&i) {
                 return Err(format!("{i} is outside the range of {ty}"));
             }
-            Ok(if low < 0 {
-                Value::Int64(i64::try_from(i).expect("in range"))
-            } else {
-                Value::UInt64(u64::try_from(i).expect("in range"))
+            Ok(match ty {
+                BuiltinType::Int64 => Value::Int64(i64::try_from(i).expect("in range")),
+                BuiltinType::UInt64 => Value::UInt64(u64::try_from(i).expect("in range")),
+                _ if low < 0 => Value::Int32(i32::try_from(i).expect("in range")),
+                _ => Value::UInt32(u32::try_from(i).expect("in range")),
             })
         }
     }
@@ -791,7 +792,8 @@ mod tests {
     #[test]
     fn values_are_converted_to_the_field_type() {
         use BuiltinType as T;
-        assert_eq!(coerce(T::Byte, Value::Int32(255)), Ok(Value::UInt64(255)));
+        assert_eq!(coerce(T::Byte, Value::Int32(255)), Ok(Value::UInt32(255)));
+        assert_eq!(coerce(T::Int16, Value::UInt64(7)), Ok(Value::Int32(7)));
         assert!(coerce(T::Byte, Value::Int32(256)).is_err());
         assert!(coerce(T::UInt32, Value::Int32(-1)).is_err());
         assert_eq!(coerce(T::Int64, Value::UInt32(7)), Ok(Value::Int64(7)));
