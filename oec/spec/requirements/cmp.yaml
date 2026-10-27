@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "9044929"
+baseline: "2e32a6b"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -829,20 +829,33 @@ requirements:
       An entity answers a Set or Del addressing an object it does not have or
       does not offer for modification with an Event of the category Status and
       the level Bad (e.g. BadNotFound or BadNotWritable, MG 8.3.6.1) –
-      mandatory from Level 2 on, recommended at Level 1.
+      mandatory from Level 2 on, recommended at Level 1. If the Source of the
+      Set or Del addresses an asset that the entity neither is nor
+      represents, the Event is published with the Source of the entity
+      itself (AppId).
     keyword: MUST
     domain: messaging
     levels: {L1: SHOULD, L2: MUST, L3: MUST}
     applies_to: [application, device]
     condition: The entity offers the method Set or Del.
     scope: [MG 8.3.6.1]
-    refs: [MG 9.1, SF-037]
+    refs: [MG 9.1, SF-037, SF-108]
     quotes:
       - ref: MG 9.1
         text: From Level 2 on, a Set or Del addressing an object, which the entity does not have or does not offer for modification, must be answered with an Event of the category Status and the level Bad
+      - ref: MG 9.1
+        text: The same applies to the status Event of a Set or Del whose Source addresses such an asset.
     verification: [d7-test]
-    inventory: [MG-9.1-ebe69434]
-    status: reviewed
+    inventory: [MG-9.1-ebe69434, MG-9.1-2e6777c7]
+    status: draft
+    notes: >-
+      SF-108, decided by the PO in the C-056 review (2026-10-27) as proposed
+      and implemented on PO order in 2e32a6b: if the Source of the Set or Del
+      addresses an asset that the entity neither is nor represents, the
+      status Event is published with the Source of the entity itself
+      (AppId), Pub/Event/<AppId>/Status/Bad; the requester finds it through
+      the ReplyTo. The quoted sentence refers to the Get rule of
+      REQ-CMP-047 (same inventory item).
 
   - id: REQ-CMP-044
     title: Get of Metadata without Data – no Metadata, optional Event Status Bad
@@ -925,27 +938,38 @@ requirements:
 
   # --- Added in C-036 addendum 2 (SF-099) -------------------------------------
   - id: REQ-CMP-047
-    title: Get for an unknown asset – no Pub, Event Status Bad recommended
+    title: Get for an unknown asset – no Pub, Event Status Bad under the own AppId recommended
     statement: >-
       An entity does not answer a Get whose Source addresses an asset that the
       entity neither is nor represents on the related Pub topic. It should
       answer such a Get with an Event of the category Status and the level
-      Bad (BadNotFound, MG 8.3.6.1).
+      Bad (BadNotFound, MG 8.3.6.1). Because the entity does not represent the
+      addressed asset, this Event is published with the Source of the entity
+      itself (AppId): Pub/Event/<AppId>/Status/Bad; the requester finds it
+      through the ReplyTo.
     keyword: SHOULD
     domain: messaging
     levels: {L1: SHOULD, L2: SHOULD, L3: SHOULD}
     applies_to: [application, device]
     condition: The entity receives a Get whose Source is neither its own identifier nor that of an entity it represents.
     scope: [MG 8.3.6.1, MG 1.3]
-    refs: [MG 9.1, SF-099]
+    refs: [MG 9.1, SF-099, SF-108]
     quotes:
       - ref: MG 9.1
         text: A Get whose Source addresses an asset that the entity neither is nor represents is not answered on the related Pub topic. The entity should answer such a Get with an Event of the category Status and the level Bad (BadNotFound, see 8.3.6.1 Status).
+      - ref: MG 9.1
+        text: Because the entity does not represent the addressed asset, this Event is published with the Source of the entity itself (AppId); the requester finds it through the ReplyTo.
     verification: [d7-test]
-    inventory: [MG-9.1-144b2f9a]
-    status: reviewed
+    inventory: [MG-9.1-2e6777c7]
+    status: draft
     notes: >-
       SF-099, decided by the PO in the C-036 review (2026-10-25, revised
       against the proposal) and implemented on PO order in a42a132. A Get of
       a known Source without content is REQ-CMP-041 (empty list); a Get of
-      Metadata without Data is REQ-CMP-044.
+      Metadata without Data is REQ-CMP-044. SF-108, decided by the PO in the
+      C-056 review (2026-10-27) as proposed and implemented on PO order in
+      2e32a6b: the Status event carries a Source the entity is or
+      represents, so a subscriber does not take the addressed asset for a
+      subordinate asset without MAM and Health (MG 1.3, REQ-CMP-006/007);
+      the DataSetWriterName of the Event is the AppId. The same rule for Set
+      and Del is part of REQ-CMP-043.

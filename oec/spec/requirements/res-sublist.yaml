@@ -5,12 +5,14 @@
 # entries (REQ-MSG-021 exception, SF-067 (a)); WriterGroupName of the
 # entries: REQ-MSG-025 (GL-ADR-018), Filter structure: REQ-TOP-022. The
 # Status event after a Set/Del is REQ-RES-SUBLIST-013 (content: RES-EVENT).
+# Own Set subscriptions of writable Data/Config DataSets: REQ-RES-SUBLIST-016
+# (SF-107, C-056 review).
 # Checked by tools/internal/payload (C-028).
 # Drafted in C-028, reviewed in the C-028 review; SF-080 (entry identity,
 # TopicPath of the B1.1.9 example, Interval wording, publication after Del,
 # Config) resolved in the guideline (baseline b2f0fe7).
 area: RES-SUBLIST
-baseline: "9044929"
+baseline: "2e32a6b"
 requirements:
   # --- DataSet content (MG 8.3.9) ---------------------------------------------
   - id: REQ-RES-SUBLIST-001
@@ -395,3 +397,37 @@ requirements:
       REQ-BUS-007 (nothing after the deletion of a whole object) and
       REQ-BUS-008 (the changed resource after a partial deletion); MG 9.1.9
       since SF-080 (d).
+  - id: REQ-RES-SUBLIST-016
+    title: Writable Data and Config DataSets are listed with their Set subscription
+    statement: >-
+      An application that supports SubscriptionList lists every DataSet of the
+      resources Data or Config that can be changed with Set with the
+      subscription of its Set topic (TopicPath
+      Oi4v2/<ServiceType>/<AppId>/Set/<Resource>/<Source>/<Tag>, Config
+      NONE_0). It does not list other subscriptions to topics of its own
+      AppId (e.g. Get or Del).
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [application]
+    condition: The application supports SubscriptionList and accepts Set for a Data or Config DataSet.
+    refs: [MG 9.1.9, MG 8.3.9, SF-107]
+    quotes:
+      - ref: MG 9.1.9
+        text: A DataSet of the resources Data or Config that can be changed with Set is listed with the subscription of its Set topic (e.g. Oi4v2/<ServiceType>/<AppId>/Set/Data/<Source>/<Tag>, Config NONE_0).
+      - ref: MG 9.1.9
+        text: Other subscriptions to topics of the own AppId are not listed.
+    verification: [d7-test]
+    inventory: [MG-9.1.9-aedf208f]
+    status: draft
+    notes: >-
+      SF-107, decided by the PO in the C-056 review (2026-10-27) as proposed
+      and implemented on PO order in 580f1c6 (MG 9.1.9; B1.1.3 and B1.1.4:
+      "Check the SubscriptionList to find out about accessibility."). The
+      entry follows the general entry rules: WriterGroupName Data/<Tag> or
+      Config/<Tag> (REQ-MSG-025), DataSetWriterName = Source
+      (REQ-RES-SUBLIST-001), no wildcard in the TopicPath; Config NONE_0
+      means the entry can neither be changed nor deleted (REQ-RES-SUBLIST-004).
+      The Config of a PublicationList entry keeps its meaning (publication
+      settings only, REQ-RES-PUBLIST-*). The Tag of a Config DataSet is its
+      context (Filter). Support of SubscriptionList: REQ-CMP-039.

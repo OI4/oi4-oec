@@ -21,7 +21,7 @@
 #         peer         – D7 simulates a peer component that the CUT talks to
 # status: planned (P3) | implemented (P5)
 tool: oec-check
-baseline: "9044929"
+baseline: "2e32a6b"
 tests:
   # --- monitor: passive rules -------------------------------------------
   - id: T7-MON-01
@@ -304,9 +304,9 @@ tests:
     title: Set and Del are answered with Status events and publications
     mode: test
     level: 1
-    reqs: [REQ-BUS-006, REQ-CMP-016, REQ-CMP-023, REQ-CMP-038, REQ-MQTT-019, REQ-MSG-015, REQ-RES-EVENT-005, REQ-TOP-014, REQ-TOP-015]
+    reqs: [REQ-BUS-006, REQ-CMP-016, REQ-CMP-023, REQ-CMP-038, REQ-MQTT-019, REQ-MSG-015, REQ-RES-EVENT-005, REQ-RES-SUBLIST-016, REQ-TOP-014, REQ-TOP-015]
     status: planned
-    notes: Runs for every object the CUT offers for modification (from Profile and Config); the Set writes the current value back where possible, so the CUT state is unchanged.
+    notes: Runs for every object the CUT offers for modification (from Profile, Config and the own Set subscriptions in its SubscriptionList); the Set writes the current value back where possible, so the CUT state is unchanged. A Data or Config DataSet that accepts the Set must be listed with its Set subscription, a listed one must not answer BadNotWritable (REQ-RES-SUBLIST-016, SF-107).
   - id: T7-SET-02
     title: Set or Del on an unknown or non-modifiable object
     mode: test
