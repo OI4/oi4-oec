@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach deinem Review von C-051 und Nachtrag 2 (P4 läuft). **Für dich ist nichts offen** (R-1 angenommen, REQ-CNT-003 steht auf `reviewed`)._
+_Stand: 26.10.2026, nach C-052 (P5-Einschub: D7 `oec-check monitor`). **Für dich offen: D-1 (SF-106, entscheiden) und R-1 (aufgezeichnete Testdaten, reviewen).**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,13 +24,67 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-C-051 hat die **Entwicklungsumgebung** gebracht: einen echten Mosquitto-Broker in Docker mit TLS, selbst erzeugte Test-Zertifikate und Beispiel-Ordner für `/etc/oi4`. Dagegen laufen jetzt die **Interop-Tests** des SDK (8 grün, kein Fehler im SDK).
+C-052 war der **P5-Einschub**: Das Prüftool D7 (`oec-check`) kann jetzt nicht nur einzelne Nachrichten offline prüfen (`validate`), sondern auch **mithören** (`monitor`).
+- **Live:** D7 meldet sich wie eine weitere App am Broker an (TLS, Passwort oder Client-Zertifikat, auch direkt aus einem `/etc/oi4`-Ordner), hört alle OEC-Nachrichten mit und bewertet sie. Mit `--record` schreibt es dabei alles in eine Datei.
+- **Offline:** Mit `--replay` spielt D7 so eine Datei später wieder ab und kommt zum selben Ergebnis. Das braucht kein Netzwerk; so laufen auch unsere automatischen Tests.
+- Geprüft wird jede Nachricht wie bei `validate`, dazu Regeln über mehrere Nachrichten hinweg, z. B. „nach einem Will kommt zuerst eine Birth“, „Health spätestens alle 60 Sekunden“, „keine MessageId doppelt“. 13 der 19 geplanten Mithör-Prüfungen sind fertig, 6 kommen mit `test` (A-58).
+- Gegen den echten Mosquitto aus C-051 lief es einmal grün, mit beiden Anmeldearten.
+- Nichts Reviewtes wurde geändert, das Schema bleibt `2.0.1-dev` @ `59e3ae3`, die Lücken bleiben bei 0.
 
-Deine Entscheidung zu D-1 (SF-105, „Vorschlag komplett“) und dein „R-1 akzeptiert“ sind umgesetzt, siehe unten „Was aus deinem letzten Review (C-051) geworden ist“. **Für dich ist gerade nichts offen.**
+**Für dich offen sind zwei Punkte:**
 
-Die Punkte A-1 … A-50 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten.
+### D-1 – SF-106: Gilt der 60-Sekunden-Herzschlag für jedes Asset? (entscheiden)
 
-Die Lücken bleiben bei 0. Das Schema bleibt `2.0.1-dev`, hat jetzt aber die Baseline `59e3ae3`; am Inhalt ändert sich nichts.
+**Wo es auffiel:** beim Bau der D7-Prüfung „Health alle 60 Sekunden“ (REQ-TOP-017).
+
+**Was die Guideline sagt:**
+- MG 7.5.1: Health wird beim Start gesendet, bei jeder Änderung und „alle 60 Sekunden als eine Art Herzschlag“. Dort steht „die Anwendung“.
+- MG 1.3 und MG 9.1.2: Eine App veröffentlicht Health „für sich selbst und alle untergeordneten Assets“, also ein eigenes Health je Asset.
+
+**Das Problem, an einem Beispiel:** Ein Connector bindet 500 Sensoren an.
+- (a) Muss er für jeden der 500 Sensoren jede Minute ein Health schicken? Das wären 500 Nachrichten pro Minute, ohne neue Information. Ob die Verbindung lebt, zeigt schon der Will. Oder gilt der Herzschlag nur für das Health der App selbst?
+- (b) Zählt ein Health, das wegen einer Änderung oder auf Anfrage kam, auch als Herzschlag (die 60 Sekunden beginnen dann neu)? Oder ist es ein fester Takt?
+- (c) Wie genau ist „60 Sekunden“? Ein Prüftool braucht eine Toleranz, weil Netz und Rechner nie auf die Millisekunde genau sind.
+
+**Mein Vorschlag (empfohlen):**
+- (a) Der Herzschlag gilt nur für das Health der App selbst. Ein Asset sendet sein Health beim Start (bzw. wenn es auftaucht) und bei jeder Änderung; regelmäßig wiederholen darf es, muss es aber nicht. Vorgeschlagener Satz für MG 7.5.1 (Englisch, steht im Register): „… The `Health` of the application itself (`Source` = `AppId`) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional.“
+- (b) „Mindestens alle 60 Sekunden“: Jedes Health der App setzt die Uhr zurück.
+- (c) Die Guideline nennt keine Toleranz; das Prüftool legt seine eigene fest und schreibt sie dazu (D7: 5 Sekunden, einstellbar mit `--tolerance`).
+
+**Andere Möglichkeiten:** (d) Herzschlag für jedes Asset (dann prüft D7 jedes einzelne Health); (e) Text lassen, wie er ist (jedes Tool und jedes SDK rät weiter).
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ändere MG 7.5.1 in der Guideline und baseline neu.
+- REQ-TOP-017 folgt dem neuen Text und kommt als `draft` noch einmal zu dir.
+- D7 prüft heute schon so. Das SDK schickt den Herzschlag ohnehin für jedes Asset und erfüllt damit beide Lesarten; dort ändert sich nichts.
+
+### R-1 – Aufgezeichnete Testdaten für `monitor` (reviewen, G-3.9)
+
+**Was das ist:** 18 kleine Aufzeichnungen („Captures“) von Bus-Verkehr in `oec/conformance/testdata/captures/`. Jede Zeile ist eine MQTT-Nachricht mit Topic, Inhalt, Empfangszeit, QoS und Retain-Flag. In `index.yaml` steht zu jeder Datei, welches Ergebnis D7 liefern **muss** und welche REQ verletzt ist. Die Nachrichten sind aus reviewten Payload-Vektoren abgeleitet; ein Test schlägt Alarm, wenn eine Datei von ihrem Szenario abweicht.
+
+**Zwei „gute“ Aufzeichnungen** (alles muss bestehen):
+- `lifecycle-pass`: zwei Apps von der Birth bis zum Close, über gut 2 Minuten mit Herzschlag;
+- `reconnect-pass`: eine App bricht ab, der Broker verschickt ihren Will, sie kommt mit einer neuen Birth zurück.
+
+**16 „schlechte“ Aufzeichnungen**, je mit genau dem Fehler, den eine Prüfung finden soll. Beispiele:
+- `will-then-publish`: nach dem Will sendet die App etwas anderes als eine Birth;
+- `heartbeat-gap`: das Health der App bleibt länger als 65 Sekunden aus (hängt an D-1);
+- `close-then-publish`: nach dem Close kommt noch eine Nachricht;
+- `message-id-duplicate`: dieselbe MessageId zweimal;
+- `retain-qos`: eine Nachricht mit Retain-Flag (Fehler) und mit QoS 1 (nur Warnung, weil QoS 0 nur ein SHOULD ist);
+- `identity-conflict`: zwei Apps mit demselben Identification Link; das ist nur ein **Hinweis** (info), kein Fehler, weil D7 es nicht sicher wissen kann.
+
+Die vollständige Liste mit den erwarteten REQ-Nummern steht in `REVIEW.md` bei R-1.
+
+**Worauf du achten solltest:** Ist jedes Szenario wirklich ein Verstoß gegen die genannte REQ (und nur gegen diese)? Sind die beiden guten Aufzeichnungen wirklich in Ordnung? Besonders: wie D7 einen Will erkennt (A-57), die Herzschlag-Regel (hängt an D-1) und dass der Identitäts-Konflikt nur ein Hinweis ist.
+
+**Wenn du zustimmst:** Die Einträge in `index.yaml` gehen auf `reviewed`.
+
+---
+
+Die Punkte A-1 … A-62 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-052 (A-51 … A-62) stehen unten.
+
+Aus C-051 zur Erinnerung: Deine Entscheidung zu D-1 (SF-105, „Vorschlag komplett“) und dein „R-1 akzeptiert“ sind umgesetzt, siehe unten „Was aus deinem letzten Review (C-051) geworden ist“.
 
 **Nachtrag 1 (deine Anweisung):** In den Guardrails steht jetzt die neue Regel **G-3.10**. Am Ende jedes Zyklus entscheide ich, ob der nächste Zyklus mit einem neuen Agenten oder mit demselben weiterläuft, und schreibe den Grund ins Log.
 - Einen **neuen Agenten** nehme ich in der Regel, wenn mein Kontext schon zusammengefasst wurde oder groß ist, oder wenn ein neues Inkrement, eine neue Phase oder ein neues Deliverable beginnt.
@@ -38,7 +92,20 @@ Die Lücken bleiben bei 0. Das Schema bleibt `2.0.1-dev`, hat jetzt aber die Bas
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-052
+
+- **Mithören (`monitor`):** D7 meldet sich wie eine weitere App am Broker an, abonniert alle OEC-Topics und bewertet, was die anderen senden. Es sendet selbst nichts. Was dabei nicht sichtbar ist (z. B. *wie* sich eine App anmeldet), kann erst der spätere Proxy-Modus prüfen.
+- **Capture (Aufzeichnung):** eine Textdatei mit einer Nachricht pro Zeile (Topic, Inhalt, Empfangszeit, QoS, Retain). Oben steht ein Kopf (womit und wann aufgezeichnet), unten ein Abschluss (Ende, Anzahl). `validate` kann so eine Datei auch lesen.
+- **Replay (Abspielen):** D7 liest eine Aufzeichnung und bewertet sie so, als käme sie gerade live. Dasselbe Capture liefert immer dasselbe Ergebnis.
+- **Fixture:** eine Aufzeichnung als Testdatum mit dem erwarteten Ergebnis. Unsere 18 Fixtures sind R-1.
+- **Teilnehmer:** eine App auf dem Bus, erkannt an ihrer PublisherId. Der Bericht fasst die Ergebnisse je Teilnehmer zusammen.
+- **Verdict (Urteil):** das Ergebnis je Prüfung: bestanden, Fehler, Warnung, Hinweis (info) oder übersprungen. Wie schwer ein Verstoß wiegt, folgt aus dem Schlüsselwort der REQ (MUST, SHOULD …) und dem geprüften Level.
+- **Exit-Code 4 (nicht beurteilbar):** D7 konnte eine MUST-Regel nicht prüfen, z. B. weil der Lauf zu kurz war: Für den Herzschlag braucht es mindestens 2 × 60 + 5 Sekunden. Das ist kein Fehler der App, aber auch kein „bestanden“. Mit `--allow-skip` wird daraus 0.
+- **paho:** eine verbreitete, freie MQTT-Bibliothek für Go von der Eclipse Foundation (Lizenz EDL-1.0, in ADR-0025 erlaubt). D7 nutzt sie für die Verbindung zum Broker. Das SDK benutzt sie nicht.
+- **govulncheck:** ein Werkzeug der Go-Entwickler, das die benutzten Bibliotheken gegen eine Liste bekannter Sicherheitslücken prüft, ähnlich wie cargo-deny bei Rust.
+- **`--insecure`:** schaltet die Prüfung des Broker-Zertifikats ab. Nur für Tests gedacht. D7 warnt dann laut und schreibt es in den Bericht, damit so ein Ergebnis nie als echtes durchgeht.
 
 ### Begriffe aus C-051
 
@@ -195,14 +262,45 @@ Neu aus deinem Review von C-051:
   - Größere Nachrichten prüft er nicht (Teil (c)).
   - Bisher hat D8 REQ-CNT-003 nur am Host geprüft, also nur den Inhalt von `broker.json`.
 
+Neu aus C-052 (D7 `monitor`):
+- **A-51 (neu) – Zyklusschnitt:** C-052 wurde nicht geteilt. Aufzeichnen, Abspielen und die Prüfregeln sind klein im Vergleich zu `validate`; für den Live-Teil fehlte nur die MQTT-Anbindung, der Broker war aus C-051 schon da.
+- **A-52 (neu) – Bibliothek paho:**
+  - D7 verbindet sich über paho v1.5.1 (Lizenz EDL-1.0, in ADR-0025 vorgesehen). Die Version ist fest eingetragen.
+  - Mit paho kommen drei kleine Go-Bibliotheken (x/net, x/sync, gorilla/websocket), alle unter BSD-Lizenz.
+  - Go-Version jetzt 1.27.3, weil x/net sie verlangt.
+  - govulncheck findet keine bekannte Lücke. Es läuft von Hand vor jeder Bibliotheks-Änderung, nicht in der normalen Prüfung, weil es dafür Internet braucht.
+- **A-53 (neu) – eigener Test-Broker:** Für die automatischen Tests habe ich einen kleinen Broker im Testcode geschrieben (etwa 400 Zeilen), statt eine weitere Bibliothek (mochi) zu holen. Er kann genau das, was die Tests brauchen, z. B. den Will verschicken, wenn eine Verbindung abreißt.
+- **A-54 (neu) – Verbindung und Sicherheit:**
+  - Nur verschlüsselt (`mqtts://`), nur TLS 1.2 und 1.3.
+  - Das Broker-Zertifikat wird gegen die CA aus `--ca` bzw. aus dem `/etc/oi4`-Ordner geprüft. Ohne CA-Datei nimmt D7 die CAs des Betriebssystems. Das ist anders als beim SDK (A-34): D7 ist ein Werkzeug, das man auch gegen einen Broker mit gekauftem Zertifikat richten können soll.
+  - Anmeldung mit Passwort oder Client-Zertifikat; verschlüsselte Schlüssel (PKCS#8, wie im Dev-Ordner) entschlüsselt D7 selbst.
+  - Kein automatischer Neuaufbau: Bricht die Verbindung ab, endet der Lauf mit einem Fehler im Bericht. Sonst hätte die Aufzeichnung eine unbemerkte Lücke.
+  - `--insecure` nur ausdrücklich, mit Warnung und Vermerk im Bericht.
+  - Passwörter und Passphrasen nur aus Dateien, nie auf der Kommandozeile.
+- **A-55 (neu) – Aufzeichnungsformat Version 1:** Kopf, eine Zeile je Nachricht, Abschluss (siehe „Capture“). Nicht-JSON-Inhalte stehen Base64-kodiert drin. Der Leser ist streng: Springt die Zeit zurück oder steht nach dem Abschluss noch etwas, lehnt er die Datei ab.
+- **A-56 (neu) – Urteile:** Eine Prüfung, die für eine App gar nicht zutrifft (z. B. „Antwort auf Anfrage“, wenn keine Anfrage kam), verschlechtert das Ergebnis nicht. Kann eine MUST-Regel nicht beurteilt werden, endet D7 mit Exit-Code 4.
+- **A-57 (neu) – Prüfregeln im Einzelnen:**
+  - **Will erkennen:** Der Broker verschickt den Will, aber im Topic sieht er aus wie ein normales Health. D7 erkennt ihn an der Zeit in seiner MessageId: Der Will wird beim Anmelden vorbereitet, ist also nicht neuer als die letzte Birth (REQ-LIFE-016).
+  - **Herzschlag** so, wie ich es in SF-106 vorschlage (D-1).
+  - REQ-RES-HEALTH-004 lässt sich durch Mithören nicht beurteilen und wird übersprungen.
+  - Identitäts-Konflikt (T7-MON-10) nur als Hinweis.
+  - Welche QoS eine App benutzt, sieht D7 an der QoS, mit der der Broker die Nachricht zustellt (D7 abonniert mit QoS 1).
+- **A-58 (neu) – Sechs Prüfungen verschoben:** T7-MON-09 und 13 bis 17 brauchen ein Modell der PublicationList und der Config einer App (was soll sie wann senden?). Das entsteht ohnehin für `test`; bis dahin bleiben sie „geplant“.
+- **A-59 (neu) – Testdaten als Aufzeichnungen:** Die Fixtures (R-1) sind Aufzeichnungen plus `index.yaml`. Ein Test verlangt für jede fertige Prüfung mindestens eine gute und eine schlechte Aufzeichnung.
+- **A-60 (neu) – Bedienung:**
+  - `--level` ist standardmäßig 3, weil eine volle Konformitätsaussage Level 3 ist (REQ-CMP-011); niedrigere Level muss man ausdrücklich angeben.
+  - `--duration` standardmäßig 5 Minuten.
+  - `--app` wählt die zu prüfende App; `--config` liest die Einstellungen aus einer YAML-Datei.
+  - Neu: `--key-passphrase-file` und `--client-id`.
+- **A-61 (neu) – Berichte:** Text, JSON und JUnit-XML (für CI). Das JSON-Schema für den Bericht kommt erst mit `test`, damit ein Schema beide Befehle abdeckt.
+- **A-62 (neu) – Live-Test nur auf Wunsch:** `oec/conformance/live.sh` startet den Dev-Broker, lässt D7 zweimal mithören (einmal mit Client-Zertifikat, einmal mit Passwort) und eine simulierte App Birth, Abbruch mit Will und Neuaufbau durchspielen. Ohne Docker meldet es „übersprungen“. Ergebnis am 26.10.: grün in 6 Sekunden; beide sahen 5 Nachrichten, 2 Births und 1 Will. Exit-Code 4 ist dabei richtig, weil 6 Sekunden für den Herzschlag zu kurz sind.
+
 ---
 
-### Was als Nächstes passiert (C-052)
+### Was als Nächstes passiert (C-053)
 
-1. **P5-Einschub – D7** (das Compliance-Tool in Go):
-   - eine eigene MQTT-Anbindung (`internal/mqttwire`);
-   - Aufzeichnen und Abspielen von Nachrichten (`internal/capture`, `monitor --replay`);
-   - danach `monitor` live gegen den Dev-Broker aus C-051.
+1. Wenn du D-1/R-1 vorher beantwortest, setze ich das als Nachtrag zu C-052 um (bei D-1 „wie vorgeschlagen“: MG 7.5.1 ändern, neu baselinen, REQ-TOP-017 kommt als `draft` zu dir).
+2. **P4 Inkrement 6** – das SDK beantwortet Anfragen selbst: Ressourcen-Verzeichnis, automatische Antworten auf `Get`, `Profile` und `PublicationList` erzeugen, Sende-Modi und Intervalle, Seitenaufteilung großer Antworten, `MaxPacketSize`, Warteschlange bei Verbindungsabbruch.
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---

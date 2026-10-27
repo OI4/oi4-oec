@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, after the C-051 review and its addendum 2 (guideline `59e3ae3`, register `d220c48`); P4 in progress. **Nothing open for the PO** (R-1 accepted, REQ-CNT-003 `reviewed`)._
+_Last updated: 2026-10-26, C-052 (P5 interleave: D7 `oec-check monitor`; guideline `59e3ae3`, register `71a65ef`). **Open for the PO: D-1 (SF-106, decide) and R-1 (capture fixtures, review).**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -27,15 +27,26 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-051 (P4 increment 9): dev environment `oec/dev` – Mosquitto 2.1.2 pinned by digest (TLS 1.2/1.3, a password-file listener and a client-certificate listener), a dev PKI generator in Go (standard library), two sample container storages; opt-in interop tests of increment 5 against it via `oec/dev/interop.sh` (8 green, the gate stays without Docker); the C-050 smoke test is replaced. No SDK defect, no new dependency, no reviewed item changed, no new vector. **One finding: SF-105** (`MaxPacketSize` is a payload limit, brokers limit whole packets) → **D-1** to decide. A-42 … A-49 are for information. The P5 interleave (C-052) runs in a new agent; `prompt.md` is filled.
 - C-051 review: your answer to D-1 ("Vorschlag komplett", after a first reply "option b" that I asked you to clarify) is applied: RIG 4.1.1 in `59e3ae3`, **SF-105 resolved** (`d220c48`), re-baseline on `59e3ae3` (1401 inventory items). REQ-CNT-003 follows the new text and is back to `draft` (R-1). D8 T8-BUS-01 also covers REQ-CNT-003 (A-50).
 - C-051 addendum 2: you accepted R-1; REQ-CNT-003 is `reviewed` (`41c9f44`). No drafts, no open finding.
+- C-052 (P5 interleave, one cycle): D7 `oec-check monitor` in `oec/conformance`.
+  - Live over MQTT 3.1.1/TLS (`internal/mqttwire` on `eclipse/paho.mqtt.golang` v1.5.1, EDL-1.0) with `--record`, and offline with `--replay` of JSONL captures (`internal/capture`).
+  - 13 of 19 monitor tests are `implemented`; text/JSON/JUnit reports; exit code 4 when a MUST cannot be judged.
+  - The opt-in `oec/conformance/live.sh` is green against the dev broker (Mosquitto 2.1.2, client certificate and credentials, Birth/Will/reconnect).
+  - No reviewed item changed, schema unchanged.
+  - **One finding: SF-106** (scope of the 60 s Health heartbeat) → **D-1** to decide.
+  - **R-1:** 18 capture fixtures with expected verdicts (`draft`) to review.
+  - A-51 … A-62 are for information.
+  - C-053 (P4 increment 6) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `59e3ae3` (re-baseline, no content change).
 
-Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
+| D-1 | SF-106: scope of the 60-second Health heartbeat (MG 7.5.1) | decide | C-052 | as proposed (heartbeat only for the Health of the component itself, "at least every 60 s") | ☐ |
+| R-1 | 18 capture fixtures of `oec-check monitor` and their expected verdicts (`testdata/captures/index.yaml`) | review (G-3.9) | C-052 | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -86,8 +97,60 @@ Logs: [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026
 | A-48 | Smoke test (`OEC_SMOKE_*`) replaced by `explicit_broker`; no new dependency, ADR-0023 unchanged | info (agent) | C-051 | – | – |
 | A-49 | Cycle cut: C-051 not split; next the P5 interleave (C-052), then increments 6–8 and 10 | info (agent) | C-051 | – | – |
 | A-50 | D8 T8-BUS-01 also covers REQ-CNT-003: a payload of exactly `MaxPacketSize` on a long topic is accepted | info (agent) | C-051 review | – | – |
+| A-51 | Cycle cut: C-052 not split (capture, mqttwire, `monitor --replay` and live in one cycle) | info (agent) | C-052 | – | – |
+| A-52 | Dependency paho v1.5.1 (EDL-1.0) pinned; indirect x/net, x/sync, gorilla/websocket (BSD); go1.27.3; govulncheck clean, run by hand | info (agent) | C-052 | – | – |
+| A-53 | Own in-process TLS test broker `mqtttest` on the paho codec instead of mochi | info (agent) | C-052 | – | – |
+| A-54 | TLS: `mqtts://` only, TLS 1.2/1.3, encrypted PKCS#8 (PBES2), no auto-reconnect, `--insecure` explicit and recorded, secrets only from files | info (agent) | C-052 | – | – |
+| A-55 | Capture format v1: header, records, trailer; `payload_base64` for non-JSON; strict reader | info (agent) | C-052 | – | – |
+| A-56 | Verdicts: a not-applicable skip does not worsen a test; a MUST that cannot be judged → exit 4 | info (agent) | C-052 | – | – |
+| A-57 | Rule decisions: Will detection by MessageId (REQ-LIFE-016), heartbeat as SF-106 proposes, HEALTH-004 not observable, T7-MON-10 info, QoS from the delivered QoS | info (agent) | C-052 | – | – |
+| A-58 | T7-MON-09, 13 … 17 deferred to `test` (PublicationList/Config state model) | info (agent) | C-052 | – | – |
+| A-59 | Monitor fixtures as generated captures + `index.yaml`; positive and negative per implemented test enforced | info (agent) | C-052 | – | – |
+| A-60 | CLI: `--level` default 3, `--duration` 5 min, `--app`, `--config` YAML, MaxPacketSize precedence, `--key-passphrase-file`, `--client-id` | info (agent) | C-052 | – | – |
+| A-61 | Monitor report JSON version 1, text, JUnit; `report.schema.json` deferred to `test` | info (agent) | C-052 | – | – |
+| A-62 | Opt-in live test `oec/conformance/live.sh` (`OEC_LIVE=1`); the gate needs no Docker or network; run once green | info (agent) | C-052 | – | – |
 
 ## Decisions and review items
+
+### D-1 – SF-106: scope of the 60-second Health heartbeat (MG 7.5.1)
+
+- **Found:** while implementing the D7 monitor rule of REQ-TOP-017 (T7-MON-05, C-052); register entry `71a65ef`, details in the register and in the [C-052 log](log/2026-10-26_C-052_d7-monitor.md).
+- **What the guideline says:**
+  - MG 7.5.1 (note under `Health`): "`Health` must be published once when the application is initialized, when the value of `Health` changes, and every 60 seconds as a kind of heartbeat."
+  - MG 1.3 (compliance table) and MG 9.1.2: `Health` "for itself and all subordinate assets" (one `Pub/Health/<Source>` per asset).
+- **The problem:**
+  - (a) The note speaks of "the application". It is open whether the heartbeat also applies to the `Health` of every subordinate asset (`Source` ≠ `AppId`). For a connector with many assets that means n messages per minute without new liveness information; the liveness of the connection is already given by the Will (MG 9.2).
+  - (b) It is open whether any publication of the own `Health` (on change, or as the answer to a `Get/Health`) restarts the 60 s, or whether the heartbeat is a fixed period.
+  - (c) 60 s has no tolerance; a monitor needs one (network and scheduling jitter).
+- **Proposed interpretation (recommended):**
+  - (a) the heartbeat applies to the `Health` of the component itself (`Source` = `AppId`); a subordinate asset publishes its `Health` at initialization (or when it appears) and on change, a periodic publication is allowed but not required. Proposed text for the note in MG 7.5.1: "`Health` must be published once when the application is initialized and whenever the value of `Health` changes. The `Health` of the application itself (`Source` = `AppId`) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional."
+  - (b) any publication of the own `Health` restarts the 60 s ("at least every 60 seconds").
+  - (c) no tolerance in the guideline; the test tool documents its own (D7: 5 s, `--tolerance`).
+- **Alternatives:** (d) the heartbeat applies to every asset (each `Health` at least every 60 s; D7 then checks every `Source`); (e) leave the text as it is (tools and SDKs keep guessing).
+- **Impact if decided as proposed:**
+  - guideline text MG 7.5.1 by your order, re-baseline;
+  - REQ-TOP-017 statement, quote and notes follow the text (→ `draft`, back to you as R-x);
+  - D7 T7-MON-05 already judges this way; the SDK (`HealthBeat` per asset, C-049) meets both readings and stays unchanged.
+- **PO:** ☐ as proposed ☐ (d) ☐ (e) ☐ other: …
+
+### R-1 – capture fixtures of `oec-check monitor` (G-3.9)
+
+- **Where:** `oec/conformance/testdata/captures/` – 18 JSONL captures and `index.yaml` with the expected verdicts (all `draft`).
+- **What they are:** recorded bus traffic (one MQTT message per line: topic, payload, receive time, QoS, retain) that `oec-check monitor --replay` judges. They are generated from scenarios in `internal/monitor/fixtures_test.go`; the payloads are derived from reviewed payload vectors. A test fails if a file differs from its scenario.
+- **Positive (every implemented test passes):** `lifecycle-pass` (two components from Birth to Close over 128 s), `reconnect-pass` (Will after 20 s, reconnect with a new Birth; the heartbeat cannot be judged in 30 s → skip).
+- **Negative (expected outcome and REQ ids):**
+  - T7-MON-01 `invalid-message` (REQ-RES-HEALTH-001); `publisher-mismatch` (T7-MON-01 REQ-MSG-006/007, T7-MON-02 REQ-TOP-006/010);
+  - T7-MON-03 `will-then-publish` (REQ-CMP-003, REQ-LIFE-001); `birth-mam-differs` (REQ-LIFE-003, also T7-MON-08 REQ-MSG-021);
+  - T7-MON-04/05 `no-health` (REQ-CMP-007, REQ-TOP-017); T7-MON-05 `heartbeat-gap` (REQ-TOP-017, judged as SF-106 proposes), `close-then-publish` (REQ-LIFE-014);
+  - T7-MON-06 `message-id-duplicate` (REQ-MSG-008); T7-MON-07 `request-id-pending` (REQ-ACT-011);
+  - T7-MON-08 `writer-id-conflict` (REQ-MSG-021/033, REQ-RES-PUBLIST-005);
+  - T7-MON-10 `identity-conflict` (REQ-IL-010/012 as **info**: a heuristic, never a failure);
+  - T7-MON-11 `empty-pub` (REQ-CMP-042); T7-MON-12 `retain-qos` (REQ-CMP-009 fail, REQ-MQTT-017 warn as a SHOULD);
+  - T7-MON-18 `packet-size` (REQ-PAG-005), `pagination-broken` (REQ-PAG-004/005);
+  - T7-MON-19 `debug-event` (REQ-TOP-024).
+- **Please check:** is each scenario a real violation of the named REQ (and only that), and are the positive captures really compliant? In particular: the Will detection by MessageId (A-57), the heartbeat rule (depends on D-1), and T7-MON-10 as info only.
+- **If accepted:** status `reviewed` in `index.yaml`. If D-1 is decided otherwise, `heartbeat-gap`/`lifecycle-pass` and T7-MON-05 follow the decision.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -387,6 +450,36 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - T8-BUS-01 now also publishes a payload of exactly `MaxPacketSize` on a long topic. It expects that the message is delivered and the connection stays open.
 - Larger payloads are not checked (SF-105 (c)). The test is `planned` (P5b).
 
-## Next (C-052)
+### A-51 … A-62 – P5 interleave (C-052, agent)
 
-1. P5 interleave – D7 (Go, `oec/conformance`): `internal/mqttwire`, `internal/capture`, `monitor --replay`, then `monitor` live against the dev broker `oec/dev`. Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/conformance` (`internal/capture`, `internal/mqttwire`, `internal/mqttwire/mqtttest`, `internal/verdict`, `internal/monitor`, `internal/report/monitor.go`, `cmd/oec-check/monitor.go`, `live.sh`), ADR-0025 amendment C-052, `oec/conformance/DESIGN.md` "As built (C-052)"; details in the [C-052 log](log/2026-10-26_C-052_d7-monitor.md).
+- **A-51 Cycle cut:** one cycle, not split. Capture and the monitor engine are small next to `validate`; the live part needed only the client and the dev broker of C-051.
+- **A-52 Dependency:**
+  - `github.com/eclipse/paho.mqtt.golang` v1.5.1 (EDL-1.0, as ADR-0025 allows) pinned in `go.mod`/`go.sum`; indirect `golang.org/x/net` v0.61.0, `golang.org/x/sync` v0.24.0, `github.com/gorilla/websocket` v1.5.3 (BSD).
+  - Toolchain go1.27.3 (required by x/net).
+  - govulncheck: no vulnerabilities. It is run by hand before a dependency change (like `cargo deny` updates), because it needs the vulnerability database and the gate is offline.
+- **A-53 Test broker:** an own in-process TLS broker `mqtttest` (about 400 lines of test code on the paho codec) instead of `mochi-mqtt/server`: no new dependency, Will on a dropped connection, `Subscribers()` for waits without sleeps.
+- **A-54 TLS and keys:**
+  - only `mqtts://`, TLS 1.2/1.3; the broker is verified against the CA file (`--ca` or the storage), without one against the system roots;
+  - client certificate and/or credentials; encrypted PKCS#8 keys (PBES2, PBKDF2 with SHA-1/256/384/512, AES-CBC) decrypted in the module;
+  - no auto-reconnect: a lost connection ends the run with a report error instead of hiding a gap;
+  - `--insecure` only explicit, warned on stderr and recorded in the report (G-4.5);
+  - secrets only from files (`--password-file`, `--key-passphrase-file`, container storage).
+- **A-55 Capture format v1:** a header (format version, tool, schemas and baseline, broker, `insecure`, subscription, MaxPacketSize, start), one record per message `{"topic","payload"|"payload_base64","size","received","qos","retain"}`, a trailer; the reader is strict (no time going back, nothing after the trailer). `validate` reads captures, too.
+- **A-56 Verdicts:** severity from the REQ keyword × level; a not-applicable skip does not worsen a test; a MUST that cannot be judged (inconclusive) gives exit 4 unless `--allow-skip`.
+- **A-57 Rule decisions:**
+  - Will detection: a Health about the component whose MessageId time is not newer than its last Birth (REQ-LIFE-016: the Will is prepared at connect).
+  - Heartbeat only for the Health about the component itself, restarted by any own Health or the Birth; 60 s + 5 s; a run shorter than 125 s is inconclusive (pending D-1).
+  - REQ-RES-HEALTH-004 cannot be observed on the bus → not-applicable skip.
+  - T7-MON-10 (IL uniqueness) is a heuristic → info.
+  - T7-MON-12 derives the publisher QoS from the delivered QoS (D7 subscribes with QoS 1).
+- **A-58 Deferred:** T7-MON-09, 13 … 17 need the PublicationList/Config state model that `test` builds anyway; they stay `planned`.
+- **A-59 Fixtures:** generated captures + `index.yaml` instead of `internal/sim`; a test requires a positive and a negative fixture per implemented monitor test and that the catalog status equals the engine (→ R-1).
+- **A-60 CLI:** `--level` default 3 (REQ-CMP-011: a full claim is L3), `--duration` default 5 min, `--app` by AppId or PublisherId, `--config` YAML (the command line wins), MaxPacketSize from flag > storage/capture header > 262144, `--bus-storage` as in DESIGN.md, new `--key-passphrase-file` and `--client-id`.
+- **A-61 Reports:** monitor JSON report version 1, text, JUnit (one testcase per monitor test, planned ones `skipped`); `report.schema.json` is deferred to `test`, so one schema covers both commands.
+- **A-62 Live tests:** opt-in `oec/conformance/live.sh` (`OEC_LIVE=1`, pattern of `oec/dev/interop.sh`), in the module that owns the test; the gate needs no Docker or network. Run once green on 2026-10-26: both roots (client certificate with encrypted key on 8884, credentials on 8883) saw 5 records, 2 Births and 1 Will, exit 4 (6 s cannot judge the heartbeat), 6.09 s.
+
+## Next (C-053)
+
+1. If you answer D-1/R-1 first: applied as a C-052 review addendum (for D-1 as proposed: guideline text MG 7.5.1 by your order, re-baseline, REQ-TOP-017 → R-x).
+2. P4 increment 6 – provider side in `oec` (resources registry, automatic `Get` answers, `Profile`/`PublicationList` generation, publish modes, pagination, `MaxPacketSize`, offline queue). Runs in a new agent (start prompt in `prompt.md`).
