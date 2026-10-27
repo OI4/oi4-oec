@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-26, C-052 (P5 interleave: D7 `oec-check monitor`; guideline `59e3ae3`, register `71a65ef`). **Open for the PO: D-1 (SF-106, decide) and R-1 (capture fixtures, review).**_
+_Last updated: 2026-10-27, C-052 review (D-1 and R-1 applied; guideline `9044929`, register `b94e803`). **Open for the PO: R-2 (REQ-TOP-017 after SF-106, review).**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -36,8 +36,11 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **R-1:** 18 capture fixtures with expected verdicts (`draft`) to review.
   - A-51 … A-62 are for information.
   - C-053 (P4 increment 6) runs in a new agent; `prompt.md` is filled.
+- C-052 review: your answer ("Ich stimme D-1 und R-1 zu") is applied.
+  - D-1: MG 7.5.1 in `9044929` as proposed, **SF-106 resolved** (`b94e803`), re-baseline on `9044929` (1402 inventory items). REQ-TOP-017 follows the new text and is back to `draft` (**R-2**). D7 T7-MON-05 and the SDK already match, nothing changes there.
+  - R-1: the 18 capture fixtures are `reviewed`.
 
-Coverage stays at 0 gaps; schema `2.0.1-dev` @ `59e3ae3` (re-baseline, no content change).
+Coverage stays at 0 gaps; schema `2.0.1-dev` @ `9044929` (re-baseline, no content change).
 
 Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
@@ -45,8 +48,7 @@ Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | SF-106: scope of the 60-second Health heartbeat (MG 7.5.1) | decide | C-052 | as proposed (heartbeat only for the Health of the component itself, "at least every 60 s") | ☐ |
-| R-1 | 18 capture fixtures of `oec-check monitor` and their expected verdicts (`testdata/captures/index.yaml`) | review (G-3.9) | C-052 | accept | ☐ |
+| R-2 | REQ-TOP-017 after SF-106 (statement, quotes and notes follow MG 7.5.1 in `9044929`) | review (G-3.9 / changed reviewed item) | C-052 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -112,47 +114,25 @@ Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_
 
 ## Decisions and review items
 
-### D-1 – SF-106: scope of the 60-second Health heartbeat (MG 7.5.1)
+### R-2 – REQ-TOP-017 after SF-106
 
-- **Found:** while implementing the D7 monitor rule of REQ-TOP-017 (T7-MON-05, C-052); register entry `71a65ef`, details in the register and in the [C-052 log](log/2026-10-26_C-052_d7-monitor.md).
-- **What the guideline says:**
-  - MG 7.5.1 (note under `Health`): "`Health` must be published once when the application is initialized, when the value of `Health` changes, and every 60 seconds as a kind of heartbeat."
-  - MG 1.3 (compliance table) and MG 9.1.2: `Health` "for itself and all subordinate assets" (one `Pub/Health/<Source>` per asset).
-- **The problem:**
-  - (a) The note speaks of "the application". It is open whether the heartbeat also applies to the `Health` of every subordinate asset (`Source` ≠ `AppId`). For a connector with many assets that means n messages per minute without new liveness information; the liveness of the connection is already given by the Will (MG 9.2).
-  - (b) It is open whether any publication of the own `Health` (on change, or as the answer to a `Get/Health`) restarts the 60 s, or whether the heartbeat is a fixed period.
-  - (c) 60 s has no tolerance; a monitor needs one (network and scheduling jitter).
-- **Proposed interpretation (recommended):**
-  - (a) the heartbeat applies to the `Health` of the component itself (`Source` = `AppId`); a subordinate asset publishes its `Health` at initialization (or when it appears) and on change, a periodic publication is allowed but not required. Proposed text for the note in MG 7.5.1: "`Health` must be published once when the application is initialized and whenever the value of `Health` changes. The `Health` of the application itself (`Source` = `AppId`) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional."
-  - (b) any publication of the own `Health` restarts the 60 s ("at least every 60 seconds").
-  - (c) no tolerance in the guideline; the test tool documents its own (D7: 5 s, `--tolerance`).
-- **Alternatives:** (d) the heartbeat applies to every asset (each `Health` at least every 60 s; D7 then checks every `Source`); (e) leave the text as it is (tools and SDKs keep guessing).
-- **Impact if decided as proposed:**
-  - guideline text MG 7.5.1 by your order, re-baseline;
-  - REQ-TOP-017 statement, quote and notes follow the text (→ `draft`, back to you as R-x);
-  - D7 T7-MON-05 already judges this way; the SDK (`HealthBeat` per asset, C-049) meets both readings and stays unchanged.
-- **PO:** ☐ as proposed ☐ (d) ☐ (e) ☐ other: …
-
-### R-1 – capture fixtures of `oec-check monitor` (G-3.9)
-
-- **Where:** `oec/conformance/testdata/captures/` – 18 JSONL captures and `index.yaml` with the expected verdicts (all `draft`).
-- **What they are:** recorded bus traffic (one MQTT message per line: topic, payload, receive time, QoS, retain) that `oec-check monitor --replay` judges. They are generated from scenarios in `internal/monitor/fixtures_test.go`; the payloads are derived from reviewed payload vectors. A test fails if a file differs from its scenario.
-- **Positive (every implemented test passes):** `lifecycle-pass` (two components from Birth to Close over 128 s), `reconnect-pass` (Will after 20 s, reconnect with a new Birth; the heartbeat cannot be judged in 30 s → skip).
-- **Negative (expected outcome and REQ ids):**
-  - T7-MON-01 `invalid-message` (REQ-RES-HEALTH-001); `publisher-mismatch` (T7-MON-01 REQ-MSG-006/007, T7-MON-02 REQ-TOP-006/010);
-  - T7-MON-03 `will-then-publish` (REQ-CMP-003, REQ-LIFE-001); `birth-mam-differs` (REQ-LIFE-003, also T7-MON-08 REQ-MSG-021);
-  - T7-MON-04/05 `no-health` (REQ-CMP-007, REQ-TOP-017); T7-MON-05 `heartbeat-gap` (REQ-TOP-017, judged as SF-106 proposes), `close-then-publish` (REQ-LIFE-014);
-  - T7-MON-06 `message-id-duplicate` (REQ-MSG-008); T7-MON-07 `request-id-pending` (REQ-ACT-011);
-  - T7-MON-08 `writer-id-conflict` (REQ-MSG-021/033, REQ-RES-PUBLIST-005);
-  - T7-MON-10 `identity-conflict` (REQ-IL-010/012 as **info**: a heuristic, never a failure);
-  - T7-MON-11 `empty-pub` (REQ-CMP-042); T7-MON-12 `retain-qos` (REQ-CMP-009 fail, REQ-MQTT-017 warn as a SHOULD);
-  - T7-MON-18 `packet-size` (REQ-PAG-005), `pagination-broken` (REQ-PAG-004/005);
-  - T7-MON-19 `debug-event` (REQ-TOP-024).
-- **Please check:** is each scenario a real violation of the named REQ (and only that), and are the positive captures really compliant? In particular: the Will detection by MessageId (A-57), the heartbeat rule (depends on D-1), and T7-MON-10 as info only.
-- **If accepted:** status `reviewed` in `index.yaml`. If D-1 is decided otherwise, `heartbeat-gap`/`lifecycle-pass` and T7-MON-05 follow the decision.
+- **Why:** you decided SF-106 as proposed (D-1 of C-052); the text of MG 7.5.1 changed in `9044929`, so the reviewed REQ-TOP-017 follows it and is back to `draft` (not a mechanical remap: the statement changes).
+- **Before (`reviewed`):** "Health is published once when the application is initialized, whenever the value of Health changes, and every 60 seconds as heartbeat." (one quote, inventory MG-7.5.1-40b7ae71)
+- **Now (`draft`):**
+  - title: "Health is published at start, on change, and for the application itself at least every 60 seconds";
+  - statement: "Health is published once when the application is initialized and whenever the value of Health changes. The Health of the application itself (Source = AppId) is additionally published at least every 60 seconds as heartbeat; for subordinate assets a periodic publication is optional." (MUST, L1–L3, `d7-monitor`);
+  - quotes (MG 7.5.1): "Health must be published once when the application is initialized and whenever the value of Health changes." and "The Health of the application itself (Source = AppId) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional.";
+  - refs `MG 7.5.1`, `SF-106`; inventory MG-7.5.1-1c8fe8e7, MG-7.5.1-5426cf3c;
+  - notes: "at least every 60 seconds" means any own Health (on change, or as the answer to a `Get`) restarts the period; the guideline gives no tolerance, D7 documents its own (T7-MON-05: 5 s); the optional periodic Health of a subordinate asset is not checked.
+- **Please check:** does the statement say exactly what MG 7.5.1 says now?
+- **If accepted:** `spectool review REQ-TOP-017` → `reviewed`.
 - **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
+
+Answered in the C-052 review (2026-10-27) and applied in C-052 addendum 1:
+- D-1 – SF-106 (scope of the 60 s Health heartbeat): ☑ as proposed → guideline `9044929` (MG 7.5.1), SF-106 resolved (`b94e803`), re-baseline, REQ-TOP-017 → R-2.
+- R-1 – 18 capture fixtures of `oec-check monitor`: ☑ accepted → `reviewed` in `testdata/captures/index.yaml`.
 
 Answered after the C-051 review (2026-10-26) and applied in C-051 addendum 2:
 - R-1 – REQ-CNT-003 after SF-105: ☑ accepted → `reviewed` (`41c9f44`).
@@ -469,7 +449,7 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-56 Verdicts:** severity from the REQ keyword × level; a not-applicable skip does not worsen a test; a MUST that cannot be judged (inconclusive) gives exit 4 unless `--allow-skip`.
 - **A-57 Rule decisions:**
   - Will detection: a Health about the component whose MessageId time is not newer than its last Birth (REQ-LIFE-016: the Will is prepared at connect).
-  - Heartbeat only for the Health about the component itself, restarted by any own Health or the Birth; 60 s + 5 s; a run shorter than 125 s is inconclusive (pending D-1).
+  - Heartbeat only for the Health about the component itself, restarted by any own Health or the Birth; 60 s + 5 s; a run shorter than 125 s is inconclusive (as SF-106 decided in the C-052 review).
   - REQ-RES-HEALTH-004 cannot be observed on the bus → not-applicable skip.
   - T7-MON-10 (IL uniqueness) is a heuristic → info.
   - T7-MON-12 derives the publisher QoS from the delivered QoS (D7 subscribes with QoS 1).
@@ -481,5 +461,5 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-053)
 
-1. If you answer D-1/R-1 first: applied as a C-052 review addendum (for D-1 as proposed: guideline text MG 7.5.1 by your order, re-baseline, REQ-TOP-017 → R-x).
+1. If you answer R-2 first: applied as addendum 2 of the C-052 log (`spectool review REQ-TOP-017`).
 2. P4 increment 6 – provider side in `oec` (resources registry, automatic `Get` answers, `Profile`/`PublicationList` generation, publish modes, pagination, `MaxPacketSize`, offline queue). Runs in a new agent (start prompt in `prompt.md`).

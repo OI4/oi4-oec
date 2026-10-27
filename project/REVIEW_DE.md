@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 26.10.2026, nach C-052 (P5-Einschub: D7 `oec-check monitor`). **Für dich offen: D-1 (SF-106, entscheiden) und R-1 (aufgezeichnete Testdaten, reviewen).**_
+_Stand: 27.10.2026, nach deinem Review von C-052 (D-1 und R-1 umgesetzt). **Für dich offen: R-2 (REQ-TOP-017 nach SF-106, reviewen).**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -29,62 +29,32 @@ C-052 war der **P5-Einschub**: Das Prüftool D7 (`oec-check`) kann jetzt nicht n
 - **Offline:** Mit `--replay` spielt D7 so eine Datei später wieder ab und kommt zum selben Ergebnis. Das braucht kein Netzwerk; so laufen auch unsere automatischen Tests.
 - Geprüft wird jede Nachricht wie bei `validate`, dazu Regeln über mehrere Nachrichten hinweg, z. B. „nach einem Will kommt zuerst eine Birth“, „Health spätestens alle 60 Sekunden“, „keine MessageId doppelt“. 13 der 19 geplanten Mithör-Prüfungen sind fertig, 6 kommen mit `test` (A-58).
 - Gegen den echten Mosquitto aus C-051 lief es einmal grün, mit beiden Anmeldearten.
-- Nichts Reviewtes wurde geändert, das Schema bleibt `2.0.1-dev` @ `59e3ae3`, die Lücken bleiben bei 0.
+- Im Zyklus selbst wurde nichts Reviewtes geändert. Nach deinem Review ist das Schema `2.0.1-dev` @ `9044929` (nur neue Baseline, kein neuer Inhalt), die Lücken bleiben bei 0.
 
-**Für dich offen sind zwei Punkte:**
+**Für dich offen ist ein Punkt:**
 
-### D-1 – SF-106: Gilt der 60-Sekunden-Herzschlag für jedes Asset? (entscheiden)
+### R-2 – REQ-TOP-017 nach SF-106 (reviewen)
 
-**Wo es auffiel:** beim Bau der D7-Prüfung „Health alle 60 Sekunden“ (REQ-TOP-017).
+**Warum:** Du hast SF-106 so entschieden, wie ich es vorgeschlagen hatte (D-1). Damit hat sich der Text von MG 7.5.1 geändert (`9044929`). REQ-TOP-017 ist die Regel, die genau diesen Satz abbildet. Sie war schon `reviewed`; weil sich ihre Aussage ändert (nicht nur eine Stelle verschoben), steht sie wieder auf `draft` und kommt zu dir.
 
-**Was die Guideline sagt:**
-- MG 7.5.1: Health wird beim Start gesendet, bei jeder Änderung und „alle 60 Sekunden als eine Art Herzschlag“. Dort steht „die Anwendung“.
-- MG 1.3 und MG 9.1.2: Eine App veröffentlicht Health „für sich selbst und alle untergeordneten Assets“, also ein eigenes Health je Asset.
+**Vorher:** „Health wird beim Start gesendet, bei jeder Änderung und alle 60 Sekunden als Herzschlag.“
 
-**Das Problem, an einem Beispiel:** Ein Connector bindet 500 Sensoren an.
-- (a) Muss er für jeden der 500 Sensoren jede Minute ein Health schicken? Das wären 500 Nachrichten pro Minute, ohne neue Information. Ob die Verbindung lebt, zeigt schon der Will. Oder gilt der Herzschlag nur für das Health der App selbst?
-- (b) Zählt ein Health, das wegen einer Änderung oder auf Anfrage kam, auch als Herzschlag (die 60 Sekunden beginnen dann neu)? Oder ist es ein fester Takt?
-- (c) Wie genau ist „60 Sekunden“? Ein Prüftool braucht eine Toleranz, weil Netz und Rechner nie auf die Millisekunde genau sind.
+**Jetzt (Englisch, wie in der Datei):**
+- Titel: „Health is published at start, on change, and for the application itself at least every 60 seconds“.
+- Aussage: „Health is published once when the application is initialized and whenever the value of Health changes. The Health of the application itself (Source = AppId) is additionally published at least every 60 seconds as heartbeat; for subordinate assets a periodic publication is optional.“
+- Auf Deutsch: Health kommt beim Start und bei jeder Änderung. Das Health **der App selbst** kommt zusätzlich **mindestens** alle 60 Sekunden; für die Assets darunter ist das freiwillig.
+- Die zwei Zitate sind wörtlich die zwei neuen Sätze aus MG 7.5.1; Verweise: MG 7.5.1 und SF-106.
+- In den Notizen steht: Jedes Health der App setzt die 60 Sekunden neu („mindestens“). Die Guideline nennt keine Toleranz; D7 nimmt 5 Sekunden. Das freiwillige Health der Assets prüft D7 nicht.
 
-**Mein Vorschlag (empfohlen):**
-- (a) Der Herzschlag gilt nur für das Health der App selbst. Ein Asset sendet sein Health beim Start (bzw. wenn es auftaucht) und bei jeder Änderung; regelmäßig wiederholen darf es, muss es aber nicht. Vorgeschlagener Satz für MG 7.5.1 (Englisch, steht im Register): „… The `Health` of the application itself (`Source` = `AppId`) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional.“
-- (b) „Mindestens alle 60 Sekunden“: Jedes Health der App setzt die Uhr zurück.
-- (c) Die Guideline nennt keine Toleranz; das Prüftool legt seine eigene fest und schreibt sie dazu (D7: 5 Sekunden, einstellbar mit `--tolerance`).
+**Worauf du achten solltest:** Sagt die Regel genau das, was jetzt in MG 7.5.1 steht, nicht mehr und nicht weniger?
 
-**Andere Möglichkeiten:** (d) Herzschlag für jedes Asset (dann prüft D7 jedes einzelne Health); (e) Text lassen, wie er ist (jedes Tool und jedes SDK rät weiter).
-
-**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
-- Ich ändere MG 7.5.1 in der Guideline und baseline neu.
-- REQ-TOP-017 folgt dem neuen Text und kommt als `draft` noch einmal zu dir.
-- D7 prüft heute schon so. Das SDK schickt den Herzschlag ohnehin für jedes Asset und erfüllt damit beide Lesarten; dort ändert sich nichts.
-
-### R-1 – Aufgezeichnete Testdaten für `monitor` (reviewen, G-3.9)
-
-**Was das ist:** 18 kleine Aufzeichnungen („Captures“) von Bus-Verkehr in `oec/conformance/testdata/captures/`. Jede Zeile ist eine MQTT-Nachricht mit Topic, Inhalt, Empfangszeit, QoS und Retain-Flag. In `index.yaml` steht zu jeder Datei, welches Ergebnis D7 liefern **muss** und welche REQ verletzt ist. Die Nachrichten sind aus reviewten Payload-Vektoren abgeleitet; ein Test schlägt Alarm, wenn eine Datei von ihrem Szenario abweicht.
-
-**Zwei „gute“ Aufzeichnungen** (alles muss bestehen):
-- `lifecycle-pass`: zwei Apps von der Birth bis zum Close, über gut 2 Minuten mit Herzschlag;
-- `reconnect-pass`: eine App bricht ab, der Broker verschickt ihren Will, sie kommt mit einer neuen Birth zurück.
-
-**16 „schlechte“ Aufzeichnungen**, je mit genau dem Fehler, den eine Prüfung finden soll. Beispiele:
-- `will-then-publish`: nach dem Will sendet die App etwas anderes als eine Birth;
-- `heartbeat-gap`: das Health der App bleibt länger als 65 Sekunden aus (hängt an D-1);
-- `close-then-publish`: nach dem Close kommt noch eine Nachricht;
-- `message-id-duplicate`: dieselbe MessageId zweimal;
-- `retain-qos`: eine Nachricht mit Retain-Flag (Fehler) und mit QoS 1 (nur Warnung, weil QoS 0 nur ein SHOULD ist);
-- `identity-conflict`: zwei Apps mit demselben Identification Link; das ist nur ein **Hinweis** (info), kein Fehler, weil D7 es nicht sicher wissen kann.
-
-Die vollständige Liste mit den erwarteten REQ-Nummern steht in `REVIEW.md` bei R-1.
-
-**Worauf du achten solltest:** Ist jedes Szenario wirklich ein Verstoß gegen die genannte REQ (und nur gegen diese)? Sind die beiden guten Aufzeichnungen wirklich in Ordnung? Besonders: wie D7 einen Will erkennt (A-57), die Herzschlag-Regel (hängt an D-1) und dass der Identitäts-Konflikt nur ein Hinweis ist.
-
-**Wenn du zustimmst:** Die Einträge in `index.yaml` gehen auf `reviewed`.
+**Wenn du zustimmst:** REQ-TOP-017 geht auf `reviewed`. An D7 und am SDK ändert sich nichts, beide verhalten sich schon so.
 
 ---
 
 Die Punkte A-1 … A-62 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-052 (A-51 … A-62) stehen unten.
 
-Aus C-051 zur Erinnerung: Deine Entscheidung zu D-1 (SF-105, „Vorschlag komplett“) und dein „R-1 akzeptiert“ sind umgesetzt, siehe unten „Was aus deinem letzten Review (C-051) geworden ist“.
+Aus C-052: Deine Zustimmung zu D-1 (SF-106) und R-1 (Testdaten) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
 
 **Nachtrag 1 (deine Anweisung):** In den Guardrails steht jetzt die neue Regel **G-3.10**. Am Ende jedes Zyklus entscheide ich, ob der nächste Zyklus mit einem neuen Agenten oder mit demselben weiterläuft, und schreibe den Grund ins Log.
 - Einen **neuen Agenten** nehme ich in der Regel, wenn mein Kontext schon zusammengefasst wurde oder groß ist, oder wenn ein neues Inkrement, eine neue Phase oder ein neues Deliverable beginnt.
@@ -281,7 +251,7 @@ Neu aus C-052 (D7 `monitor`):
 - **A-56 (neu) – Urteile:** Eine Prüfung, die für eine App gar nicht zutrifft (z. B. „Antwort auf Anfrage“, wenn keine Anfrage kam), verschlechtert das Ergebnis nicht. Kann eine MUST-Regel nicht beurteilt werden, endet D7 mit Exit-Code 4.
 - **A-57 (neu) – Prüfregeln im Einzelnen:**
   - **Will erkennen:** Der Broker verschickt den Will, aber im Topic sieht er aus wie ein normales Health. D7 erkennt ihn an der Zeit in seiner MessageId: Der Will wird beim Anmelden vorbereitet, ist also nicht neuer als die letzte Birth (REQ-LIFE-016).
-  - **Herzschlag** so, wie ich es in SF-106 vorschlage (D-1).
+  - **Herzschlag** so, wie ich es in SF-106 vorgeschlagen und du es entschieden hast (D-1).
   - REQ-RES-HEALTH-004 lässt sich durch Mithören nicht beurteilen und wird übersprungen.
   - Identitäts-Konflikt (T7-MON-10) nur als Hinweis.
   - Welche QoS eine App benutzt, sieht D7 an der QoS, mit der der Broker die Nachricht zustellt (D7 abonniert mit QoS 1).
@@ -299,7 +269,7 @@ Neu aus C-052 (D7 `monitor`):
 
 ### Was als Nächstes passiert (C-053)
 
-1. Wenn du D-1/R-1 vorher beantwortest, setze ich das als Nachtrag zu C-052 um (bei D-1 „wie vorgeschlagen“: MG 7.5.1 ändern, neu baselinen, REQ-TOP-017 kommt als `draft` zu dir).
+1. Wenn du R-2 vorher beantwortest, setze ich das als Nachtrag 2 zu C-052 um (REQ-TOP-017 → `reviewed`).
 2. **P4 Inkrement 6** – das SDK beantwortet Anfragen selbst: Ressourcen-Verzeichnis, automatische Antworten auf `Get`, `Profile` und `PublicationList` erzeugen, Sende-Modi und Intervalle, Seitenaufteilung großer Antworten, `MaxPacketSize`, Warteschlange bei Verbindungsabbruch.
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
@@ -380,7 +350,68 @@ Neu aus C-052 (D7 `monitor`):
 
 ---
 
-## Was aus deinem letzten Review (C-051) geworden ist
+## Was aus deinem letzten Review (C-052) geworden ist
+
+Du hast geschrieben: „Ich stimme D-1 und R-1 zu, bzw. habe das Review abgeschlossen“. Daraus wurde Nachtrag 1 zu C-052:
+- **Guideline-Text:** In MG 7.5.1 (Hinweis zu `Health`) steht jetzt dein entschiedener Text (`9044929`): Health kommt beim Start und bei jeder Änderung; das Health der App selbst (`Source` = `AppId`) zusätzlich mindestens alle 60 Sekunden als Herzschlag; für untergeordnete Assets ist das freiwillig.
+- **Register:** SF-106 ist „resolved“ (`b94e803`). Es gibt kein offenes Finding mehr; das nächste heißt SF-107.
+- **Neu-Baseline auf `9044929`:** Die Zahl der Guideline-Stellen steigt von 1401 auf 1402, weil aus dem einen Satz zwei wurden. Beide gehören zu REQ-TOP-017; die steht deshalb wieder auf `draft` (R-2 oben).
+- **Schema:** Version `2.0.1-dev` mit Baseline `9044929`, am Inhalt ändert sich nichts.
+- **D7 und SDK:** D7 (T7-MON-05) prüfte schon so, das SDK schickt den Herzschlag ohnehin für jedes Asset. Daran ändert sich nichts.
+- **R-1 – Testdaten:** Die 18 Aufzeichnungen stehen jetzt in `index.yaml` auf `reviewed`. Neue Aufzeichnungen beginnen weiter als `draft`.
+
+Zur Erinnerung, worum es ging:
+
+#### D-1 – SF-106: Gilt der 60-Sekunden-Herzschlag für jedes Asset? (entschieden: wie vorgeschlagen)
+
+**Wo es auffiel:** beim Bau der D7-Prüfung „Health alle 60 Sekunden“ (REQ-TOP-017).
+
+**Was die Guideline sagt:**
+- MG 7.5.1: Health wird beim Start gesendet, bei jeder Änderung und „alle 60 Sekunden als eine Art Herzschlag“. Dort steht „die Anwendung“.
+- MG 1.3 und MG 9.1.2: Eine App veröffentlicht Health „für sich selbst und alle untergeordneten Assets“, also ein eigenes Health je Asset.
+
+**Das Problem, an einem Beispiel:** Ein Connector bindet 500 Sensoren an.
+- (a) Muss er für jeden der 500 Sensoren jede Minute ein Health schicken? Das wären 500 Nachrichten pro Minute, ohne neue Information. Ob die Verbindung lebt, zeigt schon der Will. Oder gilt der Herzschlag nur für das Health der App selbst?
+- (b) Zählt ein Health, das wegen einer Änderung oder auf Anfrage kam, auch als Herzschlag (die 60 Sekunden beginnen dann neu)? Oder ist es ein fester Takt?
+- (c) Wie genau ist „60 Sekunden“? Ein Prüftool braucht eine Toleranz, weil Netz und Rechner nie auf die Millisekunde genau sind.
+
+**Mein Vorschlag (so entschieden):**
+- (a) Der Herzschlag gilt nur für das Health der App selbst. Ein Asset sendet sein Health beim Start (bzw. wenn es auftaucht) und bei jeder Änderung; regelmäßig wiederholen darf es, muss es aber nicht. Vorgeschlagener Satz für MG 7.5.1 (Englisch, steht im Register): „… The `Health` of the application itself (`Source` = `AppId`) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional.“
+- (b) „Mindestens alle 60 Sekunden“: Jedes Health der App setzt die Uhr zurück.
+- (c) Die Guideline nennt keine Toleranz; das Prüftool legt seine eigene fest und schreibt sie dazu (D7: 5 Sekunden, einstellbar mit `--tolerance`).
+
+**Andere Möglichkeiten:** (d) Herzschlag für jedes Asset (dann prüft D7 jedes einzelne Health); (e) Text lassen, wie er ist (jedes Tool und jedes SDK rät weiter).
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ändere MG 7.5.1 in der Guideline und baseline neu.
+- REQ-TOP-017 folgt dem neuen Text und kommt als `draft` noch einmal zu dir.
+- D7 prüft heute schon so. Das SDK schickt den Herzschlag ohnehin für jedes Asset und erfüllt damit beide Lesarten; dort ändert sich nichts.
+
+#### R-1 – Aufgezeichnete Testdaten für `monitor` (akzeptiert, G-3.9)
+
+**Was das ist:** 18 kleine Aufzeichnungen („Captures“) von Bus-Verkehr in `oec/conformance/testdata/captures/`. Jede Zeile ist eine MQTT-Nachricht mit Topic, Inhalt, Empfangszeit, QoS und Retain-Flag. In `index.yaml` steht zu jeder Datei, welches Ergebnis D7 liefern **muss** und welche REQ verletzt ist. Die Nachrichten sind aus reviewten Payload-Vektoren abgeleitet; ein Test schlägt Alarm, wenn eine Datei von ihrem Szenario abweicht.
+
+**Zwei „gute“ Aufzeichnungen** (alles muss bestehen):
+- `lifecycle-pass`: zwei Apps von der Birth bis zum Close, über gut 2 Minuten mit Herzschlag;
+- `reconnect-pass`: eine App bricht ab, der Broker verschickt ihren Will, sie kommt mit einer neuen Birth zurück.
+
+**16 „schlechte“ Aufzeichnungen**, je mit genau dem Fehler, den eine Prüfung finden soll. Beispiele:
+- `will-then-publish`: nach dem Will sendet die App etwas anderes als eine Birth;
+- `heartbeat-gap`: das Health der App bleibt länger als 65 Sekunden aus (hängt an D-1);
+- `close-then-publish`: nach dem Close kommt noch eine Nachricht;
+- `message-id-duplicate`: dieselbe MessageId zweimal;
+- `retain-qos`: eine Nachricht mit Retain-Flag (Fehler) und mit QoS 1 (nur Warnung, weil QoS 0 nur ein SHOULD ist);
+- `identity-conflict`: zwei Apps mit demselben Identification Link; das ist nur ein **Hinweis** (info), kein Fehler, weil D7 es nicht sicher wissen kann.
+
+Die vollständige Liste mit den erwarteten REQ-Nummern steht in `REVIEW.md` bei R-1.
+
+**Worauf du achten solltest:** Ist jedes Szenario wirklich ein Verstoß gegen die genannte REQ (und nur gegen diese)? Sind die beiden guten Aufzeichnungen wirklich in Ordnung? Besonders: wie D7 einen Will erkennt (A-57), die Herzschlag-Regel (hängt an D-1) und dass der Identitäts-Konflikt nur ein Hinweis ist.
+
+**Wenn du zustimmst:** Die Einträge in `index.yaml` gehen auf `reviewed`.
+
+---
+
+## Was aus dem Review davor (C-051) geworden ist
 
 Deine erste Antwort war „Option b, da sie präzise ist“. (b) war aber nur ein Teil meines Vorschlags. Darum habe ich nachgefragt und bis zu deiner Antwort nichts an der Guideline geändert. Deine Präzisierung lautete „Vorschlag komplett“, also (a) + (b) + (c). Daraus wurde Nachtrag 1 zu C-051:
 - **Guideline-Text:** In RIG 4.1.1, Karte `MaxPacketSize`, stehen jetzt zwei neue Sätze (`59e3ae3`):
