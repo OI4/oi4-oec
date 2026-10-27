@@ -38,7 +38,7 @@ fn main() -> oec::Result<()> {
     temperature.on_set(|req| match req.get("Sv1") {
         Some(Value::Double(sv)) if (-20.0..=80.0).contains(sv) => Ok(()),
         _ => Err(StatusCode::BadOutOfRange),
-    });
+    })?;
 
     // The DataSet is published once every field has a value.
     temperature.update([("Pv", 21.0), ("Sv1", 22.0)])?;

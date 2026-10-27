@@ -249,8 +249,9 @@ impl DataSetDef {
 }
 
 /// A received `Set Data`, already checked against the field definitions
-/// (unknown field or wrong type → `BadTypeMismatch` without calling the
-/// handler).
+/// (missing field → `BadInvalidArgument`, wrong type → `BadTypeMismatch`
+/// without calling the handler; unknown fields are ignored, tolerant reader
+/// REQ-MSG-046 – amendment C-055).
 #[derive(Debug)]
 pub struct SetData {
     _private: (),
@@ -308,8 +309,12 @@ impl DataSet {
     /// the values, publishes the changed DataSet (REQ-RES-DATA-012) and a
     /// Status event Good; on `Err` a Status event with the code
     /// (REQ-RES-DATA-011, REQ-RES-EVENT-005, REQ-TOP-014). Without handler
-    /// a `Set` is answered with `BadNotWritable` (REQ-CMP-043).
-    pub fn on_set(&self, f: impl Fn(&SetData) -> Result<(), StatusCode> + Send + Sync + 'static) {
+    /// a `Set` is answered with `BadNotWritable` (REQ-CMP-043). Returns
+    /// an error for a removed DataSet (amendment C-055).
+    pub fn on_set(
+        &self,
+        f: impl Fn(&SetData) -> core::result::Result<(), StatusCode> + Send + Sync + 'static,
+    ) -> Result<()> {
         unimplemented!()
     }
 
