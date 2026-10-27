@@ -13,8 +13,7 @@ use oec_core::lifecycle::{Lifecycle, Publication};
 use oec_core::message::DataSetWriterId;
 use oec_core::provider::data::{BuiltinType as T, DataSetSpec, FieldSpec, Mode, Value, Writable};
 use oec_core::provider::{
-    FOREIGN_SOURCES, Handled, Ignored, Provider, ProviderConfig, PublicationOverrides,
-    SetDataRequest, WriterIds,
+    Handled, Ignored, Provider, ProviderConfig, PublicationOverrides, SetDataRequest, WriterIds,
 };
 use oec_core::resource::Mam;
 use oec_core::status::StatusCode;
@@ -586,15 +585,16 @@ fn other_writes_are_answered_with_status_bad() {
             .unwrap();
         assert!(id < 100, "{id}");
     }
-    // a Source that is no asset (REQ-CMP-043)
+    // a Source that is no asset: the Status event under the AppId
+    // (REQ-CMP-043, SF-108)
     let other = il("vendor.com/Pump/P-1/0816");
     let out = write(&mut p, "Set", &format!("Data/{}/t", other.encode()), &any);
-    assert_eq!(status(&out)["Source"], other.as_str());
+    assert_eq!(status(&out)["Source"], APP);
     assert_eq!(
         topics(&out),
         [topic(
             "Pub",
-            &format!("Event/{}/Status/Bad", other.encode())
+            &format!("Event/{}/Status/Bad", il(APP).encode())
         )]
     );
     // Level 1: no Set
@@ -604,26 +604,32 @@ fn other_writes_are_answered_with_status_bad() {
 }
 
 #[test]
-fn status_events_for_foreign_sources_are_bounded() {
+fn status_events_for_foreign_sources_use_the_app_id() {
+    // SF-108: every request to a Source that is no asset is answered under
+    // the AppId with one DataSetWriterId, however many Sources are asked.
     let (mut p, _) = provider();
-    let ids: Vec<_> = (0..=FOREIGN_SOURCES)
+    let answers: Vec<_> = (0..100)
         .map(|n| {
             let src = il(&format!("vendor.com/Other/O-1/{n}"));
             let rest = format!("MAM/{}", src.encode());
-            p.handle_message(&topic("Get", &rest), &request(&json!([])), MS)
-                .map(|h| json_of(&publish(h)[0])["Messages"][0]["DataSetWriterId"].clone())
+            let out = publish(
+                p.handle_message(&topic("Get", &rest), &request(&json!([])), MS)
+                    .unwrap(),
+            );
+            assert_eq!(
+                topics(&out),
+                [topic(
+                    "Pub",
+                    &format!("Event/{}/Status/Bad", il(APP).encode())
+                )]
+            );
+            let m = json_of(&out[0])["Messages"][0].clone();
+            assert_eq!(m["DataSetWriterName"], APP);
+            m["DataSetWriterId"].clone()
         })
         .collect();
-    assert_eq!(ids[0], Ok(json!(65535)));
-    assert_eq!(
-        ids[FOREIGN_SOURCES - 1],
-        Ok(json!(65535 - FOREIGN_SOURCES + 1))
-    );
-    assert!(matches!(
-        ids[FOREIGN_SOURCES],
-        Err(Ignored::UnknownSource(_))
-    ));
-    // transient: not persisted
+    assert!(answers.iter().all(|id| *id == answers[0]), "{answers:?}");
+    // nothing about the foreign Sources is persisted
     let json = String::from_utf8(p.writer_ids().to_json()).unwrap();
     assert!(!json.contains("Other"), "{json}");
 }

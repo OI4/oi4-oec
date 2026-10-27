@@ -58,15 +58,9 @@ struct Wire {
 /// another key, also after its publication was removed, so a consumer never
 /// mixes up two publications (REQ-RES-PUBLIST-006); persist it with
 /// [`WriterIds::to_json`] after every change.
-///
-/// Besides, it holds transient ids for publications about Sources that are
-/// no asset of the application (the Status event `BadNotFound` of a request
-/// to an unknown Source, REQ-CMP-043, REQ-CMP-047): they are taken from the
-/// top of the range, never persisted and can differ after a restart.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct WriterIds {
     entries: Vec<Entry>,
-    transient: Vec<Entry>,
 }
 
 /// A DataSetWriterId that cannot be assigned, or a table that cannot be
@@ -148,11 +142,10 @@ impl WriterIds {
         .expect("the table always serializes")
     }
 
-    /// The id of `key`, if assigned (also transient).
+    /// The id of `key`, if assigned.
     pub fn get(&self, key: &WriterKey) -> Option<DataSetWriterId> {
         self.entries
             .iter()
-            .chain(&self.transient)
             .find(|e| &e.key == key)
             .map(|e| e.data_set_writer_id)
     }
@@ -160,31 +153,10 @@ impl WriterIds {
     fn used(&self, id: u16) -> bool {
         self.entries
             .iter()
-            .chain(&self.transient)
             .any(|e| e.data_set_writer_id.get() == id)
     }
 
-    /// The transient id of `key`: the highest free id, not persisted. At
-    /// most `bound` keys get one; `None` beyond or if no id is free.
-    pub fn assign_transient(&mut self, key: WriterKey, bound: usize) -> Option<DataSetWriterId> {
-        if let Some(id) = self.get(&key) {
-            return Some(id);
-        }
-        if self.transient.len() >= bound {
-            return None;
-        }
-        let id = (DataSetWriterId::FIRST.get()..=u16::MAX)
-            .rev()
-            .find(|n| !self.used(*n))?;
-        let id = DataSetWriterId::new(id).ok()?;
-        self.transient.push(Entry {
-            key,
-            data_set_writer_id: id,
-        });
-        Some(id)
-    }
-
-    /// Number of assigned ids (without the transient ones).
+    /// Number of assigned ids.
     pub fn len(&self) -> usize {
         self.entries.len()
     }
@@ -206,12 +178,6 @@ impl WriterIds {
     ///
     /// Never: the ids searched start at 10.
     pub fn assign(&mut self, key: WriterKey) -> Result<(DataSetWriterId, bool), WriterIdError> {
-        if let Some(i) = self.transient.iter().position(|e| e.key == key) {
-            let e = self.transient.remove(i);
-            let id = e.data_set_writer_id;
-            self.entries.push(e);
-            return Ok((id, true));
-        }
         if let Some(id) = self.get(&key) {
             return Ok((id, false));
         }
@@ -246,7 +212,7 @@ impl WriterIds {
     /// [`WriterIdError::Conflict`] if `key` has another id or `id` belongs
     /// to another key.
     pub fn pin(&mut self, key: WriterKey, id: DataSetWriterId) -> Result<bool, WriterIdError> {
-        for e in self.entries.iter().chain(&self.transient) {
+        for e in &self.entries {
             match (e.key == key, e.data_set_writer_id == id) {
                 (true, true) => return Ok(false),
                 (false, false) => {}
@@ -298,33 +264,6 @@ mod tests {
         t.pin(WriterKey::new(Resource::Mam, "x"), id(u16::MAX))
             .unwrap();
         let (n, _) = t.assign(WriterKey::new(Resource::Mam, "y")).unwrap();
-        assert_eq!(n.get(), 10);
-    }
-
-    #[test]
-    fn transient_ids_come_from_the_top_and_are_not_persisted() {
-        let mut t = WriterIds::new();
-        t.pin(WriterKey::new(Resource::Mam, "a"), id(10)).unwrap();
-        let foreign = |s: &str| WriterKey {
-            resource: Resource::Event,
-            source: s.to_owned(),
-            filter: "Status/Bad".to_owned(),
-        };
-        assert_eq!(t.assign_transient(foreign("x"), 2), Some(id(u16::MAX)));
-        assert_eq!(t.assign_transient(foreign("x"), 2), Some(id(u16::MAX)));
-        assert_eq!(t.assign_transient(foreign("y"), 2), Some(id(u16::MAX - 1)));
-        assert_eq!(t.assign_transient(foreign("z"), 2), None);
-        assert_eq!(t.len(), 1);
-        assert_eq!(WriterIds::from_json(&t.to_json()).unwrap().len(), 1);
-        // A transient key that becomes persistent keeps its id.
-        assert_eq!(t.assign(foreign("y")).unwrap(), (id(u16::MAX - 1), true));
-        assert_eq!(t.len(), 2);
-        // Persistent ids skip the transient ones.
-        let mut u = WriterIds::new();
-        u.pin(WriterKey::new(Resource::Mam, "a"), id(u16::MAX - 1))
-            .unwrap();
-        u.assign_transient(foreign("x"), 1).unwrap();
-        let (n, _) = u.assign(WriterKey::new(Resource::Health, "a")).unwrap();
         assert_eq!(n.get(), 10);
     }
 

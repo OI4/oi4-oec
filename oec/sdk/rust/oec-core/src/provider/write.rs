@@ -5,8 +5,8 @@
 //! REQ-RES-PUBLIST-024, REQ-RES-PUBLIST-025); `Set Data` of the DataSets
 //! the application accepts, decided by the application outside the
 //! provider (REQ-RES-DATA-009, REQ-RES-DATA-011, REQ-RES-DATA-012); and
-//! the Status event `BadNotFound` for a `Get` to an unknown Source
-//! (REQ-CMP-047). `Set Config` is checked in [`super::config`] and
+//! the Status event `BadNotFound` for a request to an unknown Source,
+//! published under the AppId (REQ-CMP-043, REQ-CMP-047, SF-108). `Set Config` is checked in [`super::config`] and
 //! decided by the application (P4 increment 7b).
 
 use std::collections::BTreeMap;
@@ -26,11 +26,6 @@ use crate::status::StatusCode;
 use crate::topic::{
     EventFilter, Filter, ListFilter, Method, Resource, StatusLevel, Subject, Topic,
 };
-
-/// At most this many Sources that are no asset of the application get a
-/// transient DataSetWriterId for the Status event `BadNotFound`; a request
-/// to a further unknown Source is not answered (ADR-0026 §14).
-pub const FOREIGN_SOURCES: usize = 64;
 
 /// The Filter `Status/<Level>` of the Status events.
 pub(super) fn status_filter(level: StatusLevel) -> Filter {
@@ -241,8 +236,8 @@ impl Provider {
     /// The Status event about a request to `source` on
     /// `Pub/Event/<Source>/Status/<Level>` (REQ-RES-EVENT-003 … 005): the
     /// StatusCode with Description and SymbolicId, if known, and the
-    /// ReplyTo. `None` if `source` is no asset and the bound of
-    /// [`FOREIGN_SOURCES`] is reached.
+    /// ReplyTo. `None` if `source` has no Status DataSetWriterId (no asset
+    /// or not from Level 2).
     pub(super) fn status_event(
         &mut self,
         source: &IdentificationLink,
@@ -252,10 +247,7 @@ impl Provider {
     ) -> Option<Publication> {
         let level = code.level();
         let key = status_key(source.as_str(), level);
-        let id = match self.writers.get(&key) {
-            Some(id) => id,
-            None => self.writers.assign_transient(key, FOREIGN_SOURCES)?,
-        };
+        let id = self.writers.get(&key)?;
         let details = code.symbolic_id().map(|s| {
             let mut m = Map::new();
             m.insert("SymbolicId".to_owned(), Json::String(s.to_owned()));
@@ -282,16 +274,13 @@ impl Provider {
     }
 
     /// The answer to a request to a Source that is no asset: the Status
-    /// event `BadNotFound` (REQ-CMP-043, REQ-CMP-047).
-    pub(super) fn unknown_source(
-        &mut self,
-        source: &IdentificationLink,
-        message_id: &MessageId,
-        unix_ms: u64,
-    ) -> Result<Handled, Ignored> {
-        self.status_event(source, StatusCode::BAD_NOT_FOUND, Some(message_id), unix_ms)
-            .map(|p| Handled::Publish(vec![p]))
-            .ok_or_else(|| Ignored::UnknownSource(source.clone()))
+    /// event `BadNotFound`, published under the AppId because the
+    /// application does not represent the addressed asset (REQ-CMP-043,
+    /// REQ-CMP-047, SF-108); the requester finds it through the ReplyTo.
+    pub(super) fn unknown_source(&mut self, message_id: &MessageId, unix_ms: u64) -> Handled {
+        let app = self.app_id().clone();
+        let answer = self.status_event(&app, StatusCode::BAD_NOT_FOUND, Some(message_id), unix_ms);
+        Handled::Publish(answer.into_iter().collect())
     }
 
     /// A `Set` or `Del` to this application (from Level 2): every request
@@ -309,7 +298,7 @@ impl Provider {
         let source = topic.source().cloned().expect("checked above");
         let wire = WriteWire::parse(payload)?;
         if !self.is_source(&source) {
-            return self.unknown_source(&source, &wire.message_id, unix_ms);
+            return Ok(self.unknown_source(&wire.message_id, unix_ms));
         }
         let result = match (topic.method(), resource) {
             (Method::Set, Resource::Data) => match self.set_data(topic, &source, &wire) {

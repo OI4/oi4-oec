@@ -420,7 +420,8 @@ fn get_is_answered_with_reply_to() {
         .unwrap();
     assert_eq!(json_of(&out[0])["Messages"], json!([]));
 
-    // an unknown Source: no Pub, the Status event BadNotFound (REQ-CMP-047)
+    // an unknown Source: no Pub, the Status event BadNotFound under the
+    // AppId (REQ-CMP-047, SF-108)
     let other = il("vendor.com/Pump/P-1/0816");
     let rest = format!("MAM/{}", other.encode());
     let out = p
@@ -430,12 +431,13 @@ fn get_is_answered_with_reply_to() {
         topics(&out),
         [topic(
             "Pub",
-            &format!("Event/{}/Status/Bad", other.encode())
+            &format!("Event/{}/Status/Bad", il(APP).encode())
         )]
     );
     let v = json_of(&out[0]);
     assert_eq!(v["ReplyTo"], GET_ID);
-    assert_eq!(v["Messages"][0]["DataSetWriterId"], 65535);
+    assert_eq!(v["Messages"][0]["DataSetWriterName"], APP);
+    assert!(v["Messages"][0]["DataSetWriterId"].as_u64().unwrap() < 100);
     assert_eq!(v["Messages"][0]["Payload"]["Number"], 0x803E_0000_u32);
     assert_eq!(
         v["Messages"][0]["Payload"]["Details"]["SymbolicId"],

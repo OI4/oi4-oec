@@ -1175,7 +1175,7 @@ fn write_app(dev: &Dev, states: &States) -> (App, Asset) {
 /// the handler's code (REQ-RES-DATA-011/012, REQ-RES-EVENT-005);
 /// `Set PublicationList` answered with the changed entry
 /// (REQ-RES-PUBLIST-025); a `Get` for an unknown Source with `BadNotFound`
-/// (REQ-CMP-047).
+/// under the AppId (REQ-CMP-047, SF-108).
 #[test]
 fn level_2_set_data_and_publication_list() {
     let Some(dev) = dev() else { return };
@@ -1264,9 +1264,10 @@ fn level_2_set_data_and_publication_list() {
             &serde_json::json!([]),
         ),
     );
+    // answered under the AppId (SF-108)
     let event = answer(
         &mut probe,
-        &format!("{prefix}Pub/Event/{unknown}/Status/Bad"),
+        &format!("{prefix}Pub/Event/{me}/Status/Bad"),
         id,
     );
     assert_eq!(

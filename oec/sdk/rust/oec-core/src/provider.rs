@@ -49,7 +49,7 @@ pub use overrides::{PublicationOverride, PublicationOverrides};
 use pagination::Envelope;
 use sets::{Set, date_time};
 pub use versions::{MetaDataVersions, VersionsError};
-pub use write::{FOREIGN_SOURCES, SetDataRequest};
+pub use write::SetDataRequest;
 pub use writers::{WriterIdError, WriterIds, WriterKey};
 
 /// The settings of a [`Provider`].
@@ -186,10 +186,6 @@ pub enum Ignored {
     /// The application does not serve this resource with `Get`, `Set` or
     /// `Del` (or not at Level 1).
     NotServed(Subject),
-    /// The Source is no asset of the application (REQ-CMP-047) and the
-    /// bound of [`FOREIGN_SOURCES`] for the Status event BadNotFound is
-    /// reached.
-    UnknownSource(IdentificationLink),
     /// The payload is no `Get`, `Set` or `Del` NetworkMessage with a valid
     /// MessageId.
     Payload(String),
@@ -204,11 +200,6 @@ impl fmt::Display for Ignored {
             Self::Topic(e) => write!(f, "no OEC topic: {e}"),
             Self::NotForUs => f.write_str("not a Get, Set or Del to this application"),
             Self::NotServed(s) => write!(f, "{s} is not served"),
-            Self::UnknownSource(il) => write!(
-                f,
-                "request for the Source {il}, which is no asset of the application, \
-                 beyond the bound of Status events (REQ-CMP-047)"
-            ),
             Self::Payload(e) => write!(f, "invalid payload: {e}"),
             Self::NoMetadata(e) => write!(f, "Get Metadata not answered (REQ-CMP-044): {e}"),
         }
@@ -864,7 +855,7 @@ impl Provider {
         if let Some(src) = topic.source()
             && !self.is_source(src)
         {
-            return self.unknown_source(src, &get.message_id, unix_ms);
+            return Ok(self.unknown_source(&get.message_id, unix_ms));
         }
         let source = topic.source();
         if resource == Resource::Metadata {

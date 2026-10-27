@@ -1604,7 +1604,8 @@ fn set_publication_list_is_answered_and_persisted() {
 /// decides; on `Ok` the DataSet with the ReplyTo and Good, on `Err` the
 /// Status event with that code; without handler `BadNotWritable`; a
 /// missing field `BadInvalidArgument` without calling the handler. A `Get`
-/// for an unknown Source: `BadNotFound` (REQ-CMP-047).
+/// for an unknown Source: `BadNotFound` under the AppId (REQ-CMP-047,
+/// SF-108).
 #[test]
 fn set_data_is_decided_by_the_handler() {
     let (pki, root) = (pki(), Root::new("rt-set-data"));
@@ -1687,9 +1688,10 @@ fn set_data_is_decided_by_the_handler() {
     let bad = status_event(&tb, &prefix, &it, "Bad");
     assert_eq!(bad["Number"], StatusCode::BadNotWritable.code());
 
+    // a Source that is no asset: answered under the AppId (SF-108)
     let unknown = encoded("vendor.com/Pump/P-1/4711");
     tb.send(n, get(format!("{prefix}Get/MAM/{unknown}")));
-    let bad = status_event(&tb, &prefix, &unknown, "Bad");
+    let bad = status_event(&tb, &prefix, &me, "Bad");
     assert_eq!(bad["Number"], StatusCode::BadNotFound.code());
 
     handle.shutdown();
