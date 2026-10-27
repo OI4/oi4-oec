@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-057 (P4 increment 7c: ReferenceDesignation, Generic events, Syslog bridge; A-110 … A-119 for information, worth a look: A-113, A-115, A-117). **Nothing open for the PO.**_
+_Last updated: 2026-10-27, C-058 (P4 increment 8a: the consumer core; A-120 … A-127 for information, worth a look: A-120, A-124, A-126). **Nothing open for the PO.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -77,10 +77,16 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Tests: core and runtime tests in the gate (incl. the guideline vectors V-PAY-041 … 046/053/054 of MG B1.1.10 and the event shapes of V-PAY-064/065), the Syslog test in its own binary; opt-in interop 13 green; a one-off D7 `oec-check monitor` run against the SDK: 9 pass, 0 fail, 4 skip.
   - No new finding, no reviewed item changed, no new test data, no new dependency: **nothing open.** A-110 … A-119 are for information. Worth a look: **A-113** (a ReferenceDesignation change increments the RevisionCounter – if you read MG 5 differently, it becomes SF-109), **A-115** (events are not queued offline), **A-117** (the `log` bridge; applications must not log secrets).
   - C-058 (increment 8, consumer side and SubscriptionList) runs in a new agent; `prompt.md` is filled.
+- C-058 (P4 increment 8a; increment 8 is split into 8a and 8b):
+  - `oec-core`: a sans-IO consumer (`consumer`) – subscriptions with reference-counted MQTT filters, requests published only after the broker acknowledged the subscriptions their answers arrive on, correlation over ReplyTo, paginated answers reassembled in page order, the Parent check of a Query answer (REQ-RES-REFDES-015), the Status event of `Set`/`Del`, and a directory of the applications on the bus (Birth, Close, Will, heartbeat).
+  - `oec`: the API `oec::consumer` – `Consumer::{subscribe, on_presence, apps, get, set, del}` with `_blocking` twins, `Target`, `Received`, `Presence`, `GetOptions`, `WriteOptions`; new errors `Error::Status` (a Bad answer) and `Error::NotConnected` (offline, nothing queued). The sketch is not aligned, because 8b deletes it; ADR-0020 amendment C-058 records the differences.
+  - Tests: core tests with the guideline request vectors and a proptest; runtime tests with two applications over a routing mode of the in-process test broker; opt-in interop 14 green (new `consumer_asks_a_provider`); a one-off D7 `oec-check monitor` run: 11 pass, 0 fail, 2 skip, the consumer's requests all schema-valid.
+  - No finding, no reviewed item changed, no new test data, no new dependency: **nothing open.** A-120 … A-127 are for information. Worth a look: **A-120** (cycle cut), **A-124** (no queue while offline), **A-126** (API differences against the sketch).
+  - C-059 (increment 8b: SubscriptionList, the Action `NewDataSetWriterId`, deletion of the sketch, example app) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `2e32a6b` (re-baseline, no content change).
 
-Logs: [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -205,6 +211,14 @@ Logs: [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-0
 | A-117 | `log` bridge: installed at `build()`, SDK/transport targets excluded, reentrancy guard, rate limit 50 + 10/s, MSG ≤ 1024 bytes; never log secrets | info (agent) | C-057 | – | – |
 | A-118 | API (ADR-0020 amendment C-057): `Result` returns, `GenericEvent` builder, `Asset::reference_designation`, `install_bridge`; sketch aligned | info (agent) | C-057 | – | – |
 | A-119 | Tests (core, runtime, own Syslog binary, interop 13 green); D7 `monitor` 9/0/4; no new dependency | info (agent) | C-057 | – | – |
+| A-120 | Cycle cut: increment 8 split into 8a (consumer core, C-058) and 8b (SubscriptionList, Action `NewDataSetWriterId`, sketch farewell, example app; C-059); 8a → 8b → 10 | info (agent) | C-058 | – | – |
+| A-121 | Requests published only after the SUBACK of their answer filters; a refused filter ends the request and is not resubscribed while in use | info (agent) | C-058 | – | – |
+| A-122 | Correlation: ReplyTo = MessageId on the responder's `Pub/` prefix only; requests without `MessageType` (as the guideline vectors) | info (agent) | C-058 | – | – |
+| A-123 | Presence: Birth/Close/Will/heartbeat rules; an application first seen by its heartbeat is asked for its MAM | info (agent) | C-058 | – | – |
+| A-124 | Nothing queued offline: `Error::NotConnected`; a lost connection ends pending requests | info (agent) | C-058 | – | – |
+| A-125 | Writer ids of `Set`/`Del` resolved (Data/Config by `Get`, ReferenceDesignation by the PublicationList), otherwise explicit | info (agent) | C-058 | – | – |
+| A-126 | API (ADR-0020 amendment C-058): option builders, `&Target`, typed `Received`, `Error::Status`/`NotConnected`, `get` needs an application; sketch not aligned | info (agent) | C-058 | – | – |
+| A-127 | Tests (core 14 incl. vectors and proptest, runtime 4 with a routing test broker, interop 14 green); D7 `monitor` 11/0/2; no new dependency | info (agent) | C-058 | – | – |
 
 ## Decisions and review items
 
@@ -682,6 +696,23 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - one-off D7 `oec-check monitor` (external call, Q-009): 9 pass, 0 fail, 4 skip (T7-MON-03 connected before observation, 05 needs ≥ 125 s, 07 no RequestIds, 18 MaxPacketSize not given); capture not committed;
   - no new dependency; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception.
 
-## Next (C-058)
+### A-120 … A-127 – P4 increment 8a (C-058, agent)
 
-1. P4 increment 8 – the consumer side (typed subscriptions, discovery helpers, `Get` with correlation and timeout, pagination reassembly) and the SubscriptionList with `Set`/`Del SubscriptionList` (A-92 ends; SF-107, REQ-RES-SUBLIST-016). At its end the sketch is deleted and its REQ walker moves into `oec`. Then 10 (`oec-ffi`). Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/sdk/rust/oec-core/src/consumer.rs`, `consumer/{received, request, directory}.rs`; `oec/sdk/rust/oec/src/{consumer.rs, app.rs, runtime.rs, lib.rs, status.rs}`; the tests `oec-core/tests/consumer.rs`, `oec/tests/{consumer, interop}.rs`, `oec/tests/testbroker/mod.rs`; ADR-0020/0023 amendment C-058, ADR-0026 amendment C-058 §17; [C-058 log](log/2026-10-27_C-058_consumer-core.md).
+- **A-120 Cycle cut:** increment 8 holds three review topics: the consumer core (a new protocol role with its own state machine), the SubscriptionList (a provider resource that lists the consumer's subscriptions, so it needs the core) and the farewell of the sketch (possible only once every sketch item exists in `oec`). The core alone is about 1500 lines of code and 1430 lines of tests. So: 8a = the consumer core (C-058), 8b = SubscriptionList with `Subscription::configurable`/`interval`, the Action `NewDataSetWriterId`, the deletion of the sketch with its REQ walker moved into `oec`, the gate scripts and the example app (C-059; its agent may cut the Action out as 8c). Order 8a → 8b → 10.
+- **A-121 SUBACK gating:** a request is published only after the broker acknowledged the subscriptions its answers arrive on (the responder's `Pub/<Resource>/#`; for `Set`/`Del` and Bad answers its `Pub/Event/+/Status/+`). Without it the first answer could be lost: there are no retained messages on the bus. A filter the broker refuses ends the waiting requests with `Error::Io(PermissionDenied)` and is not subscribed again while it is in use.
+- **A-122 Correlation:** an answer counts only with ReplyTo = the MessageId of the request (REQ-MSG-015), on the responder's own `Pub/` prefix and after the request was published; anything else is not an answer. The DataSetMessages of requests carry no `MessageType`, exactly like the guideline request vectors (REQ-MSG-029, MG B1); the core tests compare the requests with V-PAY-002/007/020/046/053/055/061/100.
+- **A-123 Presence:** Birth = a MAM of the application about itself without ReplyTo → online; Close = Health `NORMAL_0` with HealthScore 0 → offline (graceful); Will = Health `FAILURE_1` with HealthScore 0 → offline (ungraceful); any other Health of an application not yet known (the 60 s heartbeat, REQ-TOP-017) → online, and the SDK asks it once for its MAM. `Consumer::apps()` returns state, MAM and last Health per application.
+- **A-124 Offline:** requests are not queued (as publications are not, A-65): a request while offline fails with `Error::NotConnected`; a lost connection ends the pending requests with it; after `shutdown` → `Error::Closed`. Subscriptions survive a reconnect (the session subscribes them again).
+- **A-125 Writer ids:** a `Set`/`Del` carries one DataSetMessage with the DataSetWriterId of the addressed DataSet (REQ-BUS-010). The SDK finds it: Data/Config by a `Get` (exactly one answer – none → `BadNotFound`, several → `Error::Invalid`), ReferenceDesignation by the PublicationList entry of the Source (the object may not exist yet – found by a test); other list resources need `WriteOptions::data_set_writer_id`. A Metadata `Get` without id first asks the Data.
+- **A-126 API (ADR-0020 amendment C-058):** `GetOptions`/`WriteOptions` are builders; requests take `&Target` and options by reference; `set` takes `&WriteOptions` instead of a timeout, `del` an optional payload (SF-098); `get` needs a concrete application (`Target::any()` is for `subscribe`; discovery is `on_presence`/`apps()`); `Received` has typed accessors (`payload()` → `Payload`) instead of public fields; `Presence` carries the ServiceType and a typed MAM; new `Consumer::apps`, `set_blocking`/`del_blocking`, `Error::Status`, `Error::NotConnected`, `StatusCode::from_code`/`is_good`. The `_blocking` forms refuse to run on a tokio runtime thread (they would deadlock). The sketch is not aligned because 8b deletes it.
+- **A-127 Tests:**
+  - `oec-core/tests/consumer.rs` (14 tests): the request vectors, the request matrix, correlation, `BadNotFound`, Status events, pagination incl. a proptest over the arrival order of pages, the Query check, SUBACK gating and timeouts, refusal and close, presence, deliveries; the answers come from the real `Provider` and are checked against the strict schema;
+  - `oec/tests/consumer.rs` (4 tests) with two applications over the new routing mode of the in-process TLS test broker (forwards PUBLISH and the Will to matching subscriptions): `Get` incl. pages and Metadata, `Set Data`, ReferenceDesignation `Set`/Query/`Del`, presence incl. the Will, `NotConnected`/`Timeout`/`Invalid`/`Closed`; 10 runs in a row green, about 1 s each;
+  - opt-in interop `consumer_asks_a_provider` against Mosquitto: `interop.sh` 14 passed, 1 ignored;
+  - one-off D7 `oec-check monitor` (external call, Q-009): 11 pass, 0 fail, 2 skip (T7-MON-05 observation shorter than 125 s, T7-MON-07 no Action RequestIds), 0 invalid of 37 messages; capture not committed;
+  - no new dependency; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception.
+
+## Next (C-059)
+
+1. P4 increment 8b – the SubscriptionList with `Get`/`Set`/`Del SubscriptionList` (A-92 ends; SF-107, REQ-RES-SUBLIST-016), `Subscription::configurable`/`interval`, the Action `NewDataSetWriterId`; at its end the sketch is deleted and its REQ walker moves into `oec`; the SDK example app (provider + consumer) for D7 `test`. Then 10 (`oec-ffi`). Runs in a new agent (start prompt in `prompt.md`).

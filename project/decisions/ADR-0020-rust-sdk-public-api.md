@@ -379,3 +379,33 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
 3. **`GenericEvent`** is a builder `new(level, number).description(..).details_json(..)` (sketch: public fields without Level): the `<Level>` of the topic is required (MG 8.3.6.3, free level). `details_json` must be a JSON object; it is checked at emit.
 4. **`Asset::emit_event` returns `Result<()>`** (sketch: `()`): `Error::Invalid` for an empty Level, a Level with a character not allowed in a topic level, a 17th Level of a source, or Details that are no JSON object. A valid event is dropped silently (`Ok`) while offline or with 256 events waiting: events are not queued for later (MG 8.3.6, no retained or stored events). The first use of a Level registers its PublicationList entry even offline.
 5. **Syslog bridge** (`log` only; `tracing` users bridge via `tracing-log`): records of the targets `oec`, `oec_core`, `rustls`, `tokio`, `mio` are not bridged, and a thread-local guard stops feedback; Level mapping Error→Error, Warn→Warning, Info→Informational, Debug/Trace→Debug; `log::max_level` follows the switched Syslog levels; at most 50 events in a burst and 10/s, the number dropped is reported once as a Warning. Never log secrets: a log record is a public event on the bus (GL-ADR-021). A later `env_logger::init()` (or any `set_logger`) fails because the bridge is the logger (documented; use `install_bridge`).
+
+## Amendment C-058 (2026-10-27) – P4 increment 8a: the consumer core (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details and REQ tracing: `log/2026-10-27_C-058_consumer-core.md`, REVIEW A-120 … A-127. Consumer semantics: ADR-0026 §17. The sketch is **not** aligned: it is deleted in increment 8b; until then this amendment records the differences.
+
+### A. What moved from the sketch into `oec`
+
+Module `oec::consumer`: `Consumer::{subscribe, on_presence, get, get_blocking, set, del}`, `Target::{any, app, source, filter}`, `Resource` (re-exported from `oec_core::topic`), `Received`, `Presence`, `GetOptions`, `Subscription` (ends when dropped) and `AppHandle::consumer` (§6). `Consumer`, `Resource` and `Target` are in the prelude. Still in the sketch and still the contract: `Subscription::{configurable, interval}` (SubscriptionList) and `Consumer::new_data_set_writer_id` (Action `NewDataSetWriterId`) – increment 8b.
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `Consumer::apps()`, `AppInfo`, `AppState` | Discovery: the applications seen (presence, MAM, last Health) without keeping one's own table. |
+| `Consumer::{set_blocking, del_blocking}` | §1: a `_blocking` twin for every waiting request (the sketch had only `get_blocking`). |
+| `WriteOptions::{new, timeout, data_set_writer_id}` | Options of `set`/`del` (timeout, explicit DataSetWriterId of list resources). |
+| `GetOptions::{query, data_set_writer_id}` | Query of ReferenceDesignation (REQ-RES-REFDES-012 … 015); the Data writer id of a Metadata `Get` (REQ-RES-META-001). |
+| `consumer::{Payload, Query, Aspect, HealthState, AppState, DEFAULT_TIMEOUT}` | Typed payloads and the Query type, re-exported from `oec_core`; the default timeout (10 s) as a constant. |
+| `Error::Status(StatusCode)`, `Error::NotConnected` | A Bad Status event of the responder; a request while offline or a connection lost while waiting (nothing is queued, §7). |
+| `StatusCode::{from_code, is_good}` | Status codes received on the bus. |
+
+### C. Changes of sketch items (need this amendment)
+
+1. **`GetOptions` and `WriteOptions` are builders** (`GetOptions::new().timeout(..).per_page(..).locale(..)`) instead of public fields; `get`/`set`/`del` take `&Target` and `&GetOptions`/`&WriteOptions` by reference (a target is reused for many requests).
+2. **`set(resource, &target, payload_json, &WriteOptions)`** (sketch: a `Duration`); **`del(resource, &target, Option<&str>, &WriteOptions)`**: a `Del` carries the one DataSetMessage the resource defines (SF-098), none for `Del ReferenceDesignation`. The DataSetWriterId of the DataSetMessage is resolved by the SDK for Data, Config and ReferenceDesignation; other list resources need `WriteOptions::data_set_writer_id`.
+3. **`get` needs a concrete application** (`Target::app(..)`); `Target::any()` is for `subscribe` only (`Error::Invalid` otherwise). Discovery goes through `on_presence`/`apps()`.
+4. **`Received` is typed** with accessors (`payload()` → `Payload`, `payload_json()`, `source()`, `filter()`, `data_set_writer_id()`, `data_set_writer_name()`, `status()`, `reply_to()`, …) instead of public fields with `fields: Vec<(String, Value)>`. `source()` is the Source of the topic; an answer to a `Get` without Source arrives on a topic without Source, so the asset is `data_set_writer_name()`.
+5. **`Presence`** carries the ServiceType in every variant and the MAM as `Option<Box<Mam>>` (typed, `None` until known) instead of `mam_json`; it is `#[non_exhaustive]`.
+6. **`subscribe` and `on_presence`** take `&Target` and return `Result<Subscription>`; the callbacks run on the runtime task (must not block). A subscription the broker refuses is reported as `Error::Io(PermissionDenied)` to the requests that wait for it.
+7. **`_blocking` forms on a tokio runtime thread** return `Error::Invalid` (they would deadlock); use the async form there.

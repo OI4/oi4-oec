@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 27.10.2026, nach C-057 (P4 Inkrement 7c: ReferenceDesignation, eigene Ereignisse der App, Syslog-Brücke). **Für dich ist nichts offen.**_
+_Stand: 27.10.2026, nach C-058 (P4 Inkrement 8a: die Empfänger-Seite des SDK). **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,25 +24,26 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts. C-057 hat kein neues Finding, keine neuen Testdaten und nichts Reviewtes geändert. Es gibt keinen Entwurf und kein offenes Finding. Was aus D-1, D-2 und R-1 von C-056 geworden ist, steht unten in „Was aus deinem letzten Review (C-056) geworden ist“.
+Nichts. C-058 hat kein neues Finding, keine neuen Testdaten und nichts Reviewtes geändert. Es gibt keinen Entwurf und kein offenes Finding.
 
-### Zur Info: was C-057 gebaut hat
+### Zur Info: was C-058 gebaut hat
 
-C-057 war **P4 Inkrement 7c**: drei kleinere Bausteine auf dem Schreib-Weg und dem Event-Weg aus 7a. 7c passte in einen Zyklus, ich habe es nicht geteilt (A-110). Reihenfolge: ReferenceDesignation → eigene Ereignisse → Syslog-Brücke, weil die Brücke den Event-Weg der eigenen Ereignisse nutzt.
-- **ReferenceDesignation (Betriebsmittelkennzeichnung):** Ab Level 2 kann ein anderes Programm die Kennzeichnung eines Geräts (Funktion, Produkt, Einbauort nach IEC 81346) abfragen, setzen und löschen. Das SDK prüft die Anfrage, dann entscheidet der Handler der App (`on_reference_designation`), dann antwortet das SDK – wie bei `Set Data` und `Set Config`. Eine Abfrage kann auch „alle direkt untergeordneten Geräte“ meinen (Query). Die Kennzeichnung wird gespeichert und gilt nach einem Neustart weiter (A-111, A-112). Jede Änderung erhöht den Änderungszähler im Typenschild (**A-113**, siehe unten).
-- **Eigene Ereignisse (Generic Events):** Die App kann eigene Ereignisse senden, z. B. „Wartung fällig“ (`Asset::emit_event`). Für jede neue Art legt das SDK einen Eintrag in der PublicationList an. Ohne Verbindung wird ein Ereignis verworfen, nicht für später aufgehoben (**A-115**).
-- **Syslog-Brücke:** Was die App über die übliche Rust-Log-Schnittstelle (`log`) schreibt, geht als Syslog-Ereignis auf den Bus (`Pub/Event/<AppId>/Syslog/<Stufe>`). Ab „Notice“ ist das eingeschaltet, „Informational“ und „Debug“ sind aus; ein anderes Programm kann einzelne Stufen über die PublicationList an- und ausschalten, die Einstellung wird gespeichert (A-116). Damit sich nichts im Kreis dreht, gehen die Log-Meldungen des SDK selbst und der Netzwerk-Bibliotheken **nicht** auf den Bus. Bei sehr vielen Meldungen bremst das SDK (50 auf einmal, dann 10 pro Sekunde) und meldet einmal, wie viele es weggelassen hat. **Wichtig:** Das SDK kann in einem Log-Text kein Passwort erkennen – die App darf keine Geheimnisse loggen; das steht in der Doku (**A-117**).
-- **Geprüft:** Tests ohne Netzwerk (darunter die ReferenceDesignation-Beispiele aus Anhang B1.1.10 und die Event-Beispiele aus B1.1.6), Tests gegen den eingebauten Test-Broker, Interop gegen den echten Mosquitto (13 grün, 1 bewusst ausgelassen) und einmal D7: 9 bestanden, 0 durchgefallen, 4 übersprungen (Lauf zu kurz bzw. Situation kam nicht vor).
+C-058 war **P4 Inkrement 8a**. Inkrement 8 war zu groß für einen Zyklus, deshalb habe ich es geteilt (**A-120**): **8a** (dieser Zyklus) ist die Empfänger-Seite des SDK; **8b** (C-059) bringt die SubscriptionList, die Aktion `NewDataSetWriterId`, das Löschen der API-Skizze und eine kleine Beispiel-App. Reihenfolge danach: 8a → 8b → 10.
+- **Empfänger-Seite (Consumer):** Bisher konnte eine App mit dem SDK nur *antworten* (Provider). Jetzt kann sie auch *fragen und mithören*:
+  - **Abonnieren:** z. B. „alle Health-Meldungen aller Apps“ oder „die Daten von Gerät X“; die Nachrichten kommen schon ausgepackt in den Typen des SDK an.
+  - **Andere Apps finden:** Das SDK merkt sich, welche Apps auf dem Bus sind (Anmeldung mit dem Typenschild, sauberes Abmelden, Absturz über den „letzten Willen“ des Brokers, Lebenszeichen alle 60 s) und meldet Änderungen (`on_presence`, `apps()`).
+  - **Fragen (`Get`) und Ändern (`Set`/`Del`):** mit Zeitlimit, als `async` und als „blockierende“ Variante. Das SDK ordnet die Antwort über `ReplyTo` der Frage zu, setzt Antworten über mehrere Seiten wieder zusammen und prüft bei der Abfrage der Kinder einer ReferenceDesignation, ob die Antworten wirklich zum genannten Parent gehören (REQ-RES-REFDES-015). Eine „Bad“-Antwort kommt als Fehler `Error::Status` mit dem Statuscode an.
+- **Geprüft:** Tests ohne Netzwerk (darunter die Anfrage-Beispiele aus Anhang B1 und ein Zufallstest über die Reihenfolge der Seiten), Tests mit zwei Apps über den eingebauten Test-Broker, Interop gegen den echten Mosquitto (14 grün, 1 bewusst ausgelassen; neu: eine SDK-App fragt eine andere) und einmal D7: 11 bestanden, 0 durchgefallen, 2 übersprungen (Lauf kürzer als 125 s bzw. keine Aktionen – die kommen erst in 8b). Alle Anfragen des SDK waren gültig nach Schema.
 - Keine neue Bibliothek, nichts Reviewtes geändert, keine neuen Testdaten, kein neues Finding.
 
-Die Technik-Entscheidungen A-110 … A-119 sind nur zur Info (unten). Einen Blick wert:
-- **A-113:** Ändert jemand die ReferenceDesignation über den Bus, erhöht das SDK den Änderungszähler (RevisionCounter) im Typenschild – wie bei einer Config-Änderung. Die Guideline (MG 5) zählt „Konfigurationsdaten des Geräts nach OPC UA Part 100“; die Kennzeichnung nennt sie nicht ausdrücklich. Ich lese sie als Konfigurationsdaten. Siehst du das anders, mache ich daraus SF-109.
-- **A-115:** Ereignisse ohne Verbindung werden verworfen.
-- **A-117:** die Syslog-Brücke, v. a. „keine Geheimnisse loggen“.
+Die Technik-Entscheidungen A-120 … A-127 sind nur zur Info (unten). Einen Blick wert:
+- **A-120:** die Teilung von Inkrement 8 in 8a und 8b.
+- **A-124:** Ohne Verbindung wird eine Anfrage nicht für später aufgehoben, sondern schlägt sofort fehl (`Error::NotConnected`) – wie bei den Veröffentlichungen (A-65).
+- **A-126:** die Unterschiede zur API-Skizze; die Skizze passe ich nicht mehr an, weil sie in 8b gelöscht wird. Die Unterschiede stehen in ADR-0020 (Nachtrag C-058).
 
 ---
 
-Die Punkte A-1 … A-119 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-057 (A-110 … A-119) stehen unten.
+Die Punkte A-1 … A-127 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-058 (A-120 … A-127) stehen unten.
 
 Aus C-056: Deine Zustimmung zu D-1 (SF-107), D-2 (SF-108) und R-1 ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-056) geworden ist“.
 
@@ -54,7 +55,17 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-058
+
+- **Consumer (Empfänger):** eine App, die bei anderen Apps fragt oder ihnen zuhört. Das Gegenstück ist der **Provider**, der antwortet. Eine App kann beides sein.
+- **Korrelation:** die Zuordnung einer Antwort zu ihrer Frage. Die Antwort trägt in `ReplyTo` die Nachrichten-Nummer (`MessageId`) der Frage.
+- **SUBACK:** die Bestätigung des Brokers, dass ein Abo gilt. Erst danach schickt das SDK die Frage ab, sonst könnte die Antwort verloren gehen (der Bus hebt nichts auf).
+- **Paginierung:** Eine lange Antwort kommt in mehreren Seiten; das SDK setzt sie in der richtigen Reihenfolge wieder zusammen.
+- **Präsenz (Presence):** ob eine App gerade auf dem Bus ist. Anmeldung (Typenschild), Abmeldung (Health „normal“ mit 0) und Absturz (Health „Fehler“ mit 0 über den letzten Willen) erkennt das SDK.
+- **Letzter Wille (Last Will):** eine Nachricht, die der Broker im Namen einer App verschickt, wenn deren Verbindung unerwartet abreißt.
+- **blockierend:** eine Funktion, die wartet, bis die Antwort da ist, für Programme ohne `async`.
 
 ### Begriffe aus C-057
 
@@ -390,11 +401,21 @@ Neu aus C-057 (P4 Inkrement 7c):
 - **A-118 (neu) – Kleine Abweichungen von der API-Skizze:** einige Funktionen melden jetzt einen Fehler zurück (`Result`), eigene Ereignisse baut man mit `GenericEvent::new(…)`, neu sind `reference_designation()` und `install_bridge`. Die Skizze ist angepasst.
 - **A-119 (neu) – Tests:** neue Tests in `oec-core` und `oec`, die Syslog-Tests in einem eigenen Testprogramm (der Logger gilt für den ganzen Prozess), ein neuer Interop-Test (zusammen 13 grün), D7 9 bestanden / 0 durchgefallen / 4 übersprungen. Keine neue Bibliothek.
 
+Neu aus C-058 (P4 Inkrement 8a):
+- **A-120 (neu) – Zyklusschnitt:** Inkrement 8 hat drei Themen: die Empfänger-Seite (eine neue Rolle mit eigener Logik), die SubscriptionList (sie listet die Abos der Empfänger-Seite, braucht diese also) und das Löschen der Skizze (geht erst, wenn alles aus der Skizze im SDK steht). Allein die Empfänger-Seite sind rund 1500 Zeilen Code und 1430 Zeilen Tests. Deshalb 8a = Empfänger-Seite (C-058), 8b = SubscriptionList, Aktion `NewDataSetWriterId`, Skizze löschen, Beispiel-App (C-059; der nächste Agent darf die Aktion als 8c abtrennen).
+- **A-121 (neu) – Erst Abo, dann Frage:** Das SDK schickt eine Frage erst ab, wenn der Broker die Abos für die Antworten bestätigt hat. Lehnt der Broker ein Abo ab (fehlende Rechte), endet die Frage mit einem Fehler, und das SDK versucht das Abo nicht immer wieder.
+- **A-122 (neu) – Zuordnung:** Eine Antwort zählt nur, wenn `ReplyTo` passt, sie vom gefragten Programm kommt (dessen `Pub/`-Topic) und nach der Frage eintrifft. Die Fragen tragen kein `MessageType` im Datensatz – genau wie die Beispiele der Guideline; die Tests vergleichen sie mit den Anfrage-Vektoren.
+- **A-123 (neu) – Wer ist da:** Anmeldung = Typenschild ohne `ReplyTo`; Abmeldung = Health „normal“ mit 0; Absturz = Health „Fehler“ mit 0; ein Lebenszeichen einer unbekannten App → sie gilt als da, und das SDK fragt einmal nach ihrem Typenschild.
+- **A-124 (neu) – Ohne Verbindung:** keine Warteschlange; `Error::NotConnected`. Reißt die Verbindung ab, enden die offenen Fragen mit diesem Fehler. Abos bleiben über einen Neuaufbau der Verbindung erhalten.
+- **A-125 (neu) – Datensatz-Nummer bei `Set`/`Del`:** Die Guideline verlangt die Nummer des Datensatzes (DataSetWriterId). Das SDK findet sie selbst: bei Data/Config durch eine Frage, bei der ReferenceDesignation über die PublicationList (die Kennzeichnung gibt es vielleicht noch nicht – das hat ein Test gezeigt). Sonst gibt die App sie an.
+- **A-126 (neu) – Abweichungen von der API-Skizze:** Optionen werden mit „Baukasten“-Funktionen gebaut, `get` braucht eine bestimmte App (Geräte finden geht über `on_presence`/`apps()`), Antworten haben typisierte Zugriffe, neue Fehler `Error::Status` und `Error::NotConnected`. Die blockierenden Varianten verweigern den Aufruf aus einem `async`-Thread (sonst würde das Programm hängen). Die Skizze bleibt unverändert, weil 8b sie löscht; alles steht in ADR-0020.
+- **A-127 (neu) – Tests:** 14 Tests ohne Netzwerk (Antworten kommen vom echten Provider des SDK und werden gegen das Schema geprüft), 4 Tests mit zwei Apps über den Test-Broker (der kann jetzt Nachrichten zwischen Apps weiterleiten), ein neuer Interop-Test (zusammen 14 grün), D7 11 / 0 / 2. Keine neue Bibliothek.
+
 ---
 
-### Was als Nächstes passiert (C-058)
+### Was als Nächstes passiert (C-059)
 
-1. **P4 Inkrement 8** – die Empfänger-Seite des SDK: Abos mit Typen, Geräte finden, `Get` mit Antwort-Zuordnung und Zeitlimit, Zusammensetzen von Antworten über mehrere Seiten; dazu die SubscriptionList mit `Set`/`Del` (dort steht dann auch das `Set`-Abo der beschreibbaren Datensätze, SF-107). Am Ende von 8 wird die API-Skizze gelöscht.
+1. **P4 Inkrement 8b** – die SubscriptionList mit `Get`/`Set`/`Del` (damit endet A-92; dort steht dann auch das `Set`-Abo der beschreibbaren Datensätze, SF-107), die Aktion `NewDataSetWriterId`, das Löschen der API-Skizze (ihre Prüfung der REQ-Nummern zieht ins SDK um) und eine kleine Beispiel-App (Provider + Consumer) als Grundlage für D7 `test`.
    - Danach Inkrement 10 (C-Schnittstelle `oec-ffi`).
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
