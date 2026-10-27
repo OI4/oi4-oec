@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 27.10.2026, nach C-056 (P4 Inkrement 7b: die Config-Ressource – Einstellungen der App von außen lesen und ändern, geheime Werte maskiert, Secrets erneuert). **Für dich offen: D-1 (SF-107) und D-2 (SF-108) entscheiden.**_
+_Stand: 27.10.2026, nach deinem Review von C-056 (D-1 und D-2 wie vorgeschlagen umgesetzt, Nachtrag 1 zu C-056). **Für dich offen: R-1 (drei Regeln nach SF-107/108) reviewen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,6 +24,38 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
+Du hast geschrieben: „D-1 und D-2 sind reviewed und akzeptiert“. Beides ist umgesetzt (Nachtrag 1 zu C-056, Einzelheiten unten in „Was aus deinem letzten Review (C-056) geworden ist“):
+- **Guideline:** MG 9.1.9 und Anhang B1.1.3/B1.1.4 (`580f1c6`, SF-107) und MG 9.1 (`2e32a6b`, SF-108) haben jetzt deinen Text. Im Register sind beide „resolved“ (`d2dc9ca`); es gibt kein offenes Finding.
+- **Neu-Baseline auf `2e32a6b`:** 1403 Guideline-Stellen (vorher 1402), 441 Regeln, 0 Lücken. Schema bleibt `2.0.1-dev`, nur die Baseline ist neu.
+- **SDK:** Eine Anfrage zu einem fremden Gerät beantwortet die App jetzt unter ihrem eigenen Namen (`Pub/Event/<AppId>/Status/Bad`). Die vorübergehenden Nummern für fremde Geräte sind weg (A-109). D7 hört jetzt mit: Test T7-MON-04 besteht, obwohl ein fremdes Gerät angefragt wurde (in C-055 musste er noch passen).
+- **Nebenbei:** Ein Interop-Test hatte manchmal sein erstes `Get` geschickt, bevor der Broker das Abo der App kannte. Das war ein Fehler im Test, nicht im SDK. Jetzt wartet der Test auf die erste Config-Nachricht. Danach: zweimal 12 grün.
+
+**Für dich offen: R-1.** Drei Regeln folgen dem neuen Text und stehen deshalb auf `draft`.
+
+### R-1 – Drei Regeln nach SF-107/108 (reviewen, G-3.9)
+
+**Warum:** Du hast SF-107 und SF-108 wie vorgeschlagen entschieden. Damit hat sich der Text von MG 9.1 und MG 9.1.9 geändert. REQ-CMP-047 und REQ-CMP-043 waren schon `reviewed`; ihre Aussage ändert sich (nicht nur eine verschobene Stelle), deshalb stehen sie wieder auf `draft`. REQ-RES-SUBLIST-016 ist neu.
+
+**REQ-CMP-047** (Empfehlung, alle Level) – Anfrage (`Get`) zu einem fremden Gerät:
+- Vorher: „Keine Antwort auf dem `Pub`-Topic; empfohlen ist ein Status-Event `BadNotFound`.“
+- Jetzt zusätzlich (Englisch, wie in der Datei): „Because the entity does not represent the addressed asset, this Event is published with the Source of the entity itself (AppId): Pub/Event/<AppId>/Status/Bad; the requester finds it through the ReplyTo.“ Auf Deutsch: Das Event geht unter dem **eigenen Namen der App** raus; der Anfragende findet es über `ReplyTo`.
+- Titel entsprechend ergänzt, ein zweites Zitat (der neue Satz aus MG 9.1), Verweis auf SF-108, in den Notizen der Grund (kein fremder Absender, der wie ein vertretenes Gerät ohne Typenschild und Health aussieht).
+
+**REQ-CMP-043** (Pflicht ab Level 2, Empfehlung auf Level 1) – `Set`/`Del` auf etwas, das die App nicht hat:
+- Jetzt zusätzlich: „If the Source of the Set or Del addresses an asset that the entity neither is nor represents, the Event is published with the Source of the entity itself (AppId).“ Also dieselbe Regel auch für `Set` und `Del`.
+- Ein zweites Zitat („The same applies to the status Event of a Set or Del whose Source addresses such an asset.“), Verweis auf SF-108, eine Notiz.
+
+**REQ-RES-SUBLIST-016** (neu, Pflicht, alle Level, Prüfung durch D7 im Test T7-SET-01):
+- Titel: „Writable Data and Config DataSets are listed with their Set subscription“.
+- Aussage: Eine App mit SubscriptionList trägt jeden Data- oder Config-Datensatz, den man mit `Set` ändern kann, mit ihrem Abo auf das passende `Set`-Topic ein (`Oi4v2/<ServiceType>/<AppId>/Set/<Resource>/<Source>/<Tag>`, `Config` `NONE_0`). Andere eigene Abos (z. B. für `Get` oder `Del`) trägt sie nicht ein.
+- Zitate: die zwei neuen Sätze aus MG 9.1.9; Verweise MG 9.1.9, MG 8.3.9, SF-107. In den Notizen: die üblichen Regeln für Einträge (kein Platzhalter im Topic, `NONE_0` heißt „weder änderbar noch löschbar“), das Feld `Config` der PublicationList behält seine Bedeutung, bei Config ist der „Tag“ der Kontextname.
+
+**Bitte prüfen:** Sagen die drei Regeln genau das, was MG 9.1 und MG 9.1.9 jetzt sagen?
+
+**Wenn du zustimmst:** Ich setze alle drei auf `reviewed`.
+
+### Zur Info: was C-056 gebaut hat
+
 C-056 war **P4 Inkrement 7b**: die **Config-Ressource**. Eine App beschreibt ihre Einstellungen (z. B. Abfrage-Intervall, Server-Adresse, API-Schlüssel) in Gruppen, mit Typ, Grenzen und Pflichtfeldern. Das SDK kümmert sich um den Rest. 7b passte in einen Zyklus, ich habe es nicht geteilt (A-98).
 - **Lesen und Ändern von außen:** Die Config geht beim Start, nach jedem Verbindungsaufbau und nach jeder Änderung auf den Bus. Ab Level 2 kann ein anderes Programm sie mit `Get Config` abfragen und mit `Set Config` ändern – auch nur einzelne Werte. Das SDK prüft jede Änderung vollständig (gibt es die Einstellung, stimmt der Typ, liegt der Wert in den Grenzen, passt das Textmuster, fehlt ein Pflichtfeld?). Erst dann fragt es den Handler der App (`on_set`); die App hat das letzte Wort. Antwort: erst die neue Config, dann „Good“ – oder nur „Bad“ mit dem Grund (A-101).
 - **Geheime Werte (GL-ADR-021):** Ist eine Einstellung als geheim markiert (z. B. ein Passwort), steht auf dem Bus immer `********`, nie der echte Wert. Schickt jemand die Sternchen in einem `Set` zurück, bleibt der alte Wert erhalten. Auch in Log-Ausgaben und Fehlermeldungen des SDK steht nie ein Wert (A-103).
@@ -32,53 +64,15 @@ C-056 war **P4 Inkrement 7b**: die **Config-Ressource**. Eine App beschreibt ihr
 - **Geprüft:** Tests ohne Netzwerk (darunter die Config-Beispiele aus Anhang B1.1.3 der Guideline), Tests gegen den eingebauten Test-Broker, Interop gegen den echten Mosquitto (12 grün) und einmal D7: Beim ersten Lauf hat D7 einen **eigenen Fehler** gezeigt – es hielt das neu gesendete Typenschild nach einer Config-Änderung für einen zweiten Start der App. Das habe ich in D7 behoben (zuerst mit einem Test, die reviewten Testdaten sind unverändert). Danach: 10 bestanden, 0 durchgefallen, 3 übersprungen (Lauf zu kurz bzw. Situation kam nicht vor).
 - Neue Bibliothek: `regex` für die Textmuster (Lizenzprüfung ohne Ausnahme, A-106). Nichts Reviewtes geändert, keine neuen Testdaten, kein neues Finding.
 
-**Für dich offen: weiterhin die zwei Entscheidungen aus C-055 (D-1, D-2).** Beide sind Lücken in der Guideline. Nichts im SDK wartet darauf; 7c kann sofort starten. Die Technik-Entscheidungen A-98 … A-108 sind nur zur Info (unten). Einen Blick wert: **A-103** (Maskierung), **A-104** (geheime Werte auf der Platte nur durch Dateirechte geschützt), **A-105** (Secrets neu einlesen) und **A-106** (Regex-Dialekt).
-
-### D-1 – SF-107: Woran sieht man, dass ein Datensatz von außen beschreibbar ist? (entscheiden)
-
-**Wo es auffiel:** beim Bau von `Set Data` im SDK.
-
-**Was die Guideline sagt:**
-- Anhang B1.1.3 und B1.1.4 (nur informativ): „Nicht jeder Datensatz ist über den Bus beschreibbar. Prüfe `SubscriptionList` und/oder `PublicationList`, um das herauszufinden.“
-- Die PublicationList hat je Eintrag ein Feld `Config`. Es sagt aber nur, welche **Sende-Einstellungen** (Modus, Intervall, Totband) man ändern darf – nicht, ob man die **Werte** setzen darf.
-- Die SubscriptionList zeigt laut MG 9.1.9 „die tatsächlichen Abonnements“. Die Beispiele dort abonnieren aber nur Daten **anderer** Apps.
-
-**Das Problem, an einem Beispiel:** Ein Leitsystem will den Sollwert einer Pumpe setzen. Vorher möchte es wissen, ob der Datensatz „Sollwert“ überhaupt beschreibbar ist. Keine Regel der Guideline sagt, wo das steht. Heute bleibt nur: einfach schicken und auf `BadNotWritable` warten.
-
-**Mein Vorschlag (empfohlen):** Die **SubscriptionList** zeigt es. Eine App, die `Set Data` für einen Datensatz annimmt, trägt ihr eigenes Abo auf das passende `Set`-Topic dort ein, z. B. `Oi4v2/…/<AppId>/Set/Data/<Gerät>/sollwert`. Andere eigene Abos (z. B. für `Get`) werden nicht eingetragen, die beschreibt schon das Profile. Das Feld `Config` der PublicationList behält seine Bedeutung. Der englische Textvorschlag für MG 9.1.9 und B1.1.3/B1.1.4 steht im Register.
-
-**Andere Möglichkeiten:** (b) die PublicationList zeigt es (ein neues Merkmal; das ändert die Bedeutung von `Config` und das Schema); (c) keine Liste zeigt es, die Guideline sagt „schick das `Set`, `BadNotWritable` sagt dir Bescheid“ (nur Textänderung).
-
-**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
-- Ich ändere MG 9.1.9 und B1.1.3/B1.1.4 in der Guideline und baseline neu.
-- Die REQs zur SubscriptionList folgen dem Text und kommen als `draft` noch einmal zu dir.
-- Das SDK trägt die Abos ein, sobald die SubscriptionList kommt (Inkrement 8). An 7a ändert sich nichts.
-
-### D-2 – SF-108: Unter welchem Absender antwortet die App auf eine Anfrage zu einem fremden Gerät? (entscheiden)
-
-**Wo es auffiel:** beim einmaligen Mithören mit D7 gegen das SDK.
-
-**Was die Guideline sagt:**
-- MG 9.1: Fragt jemand nach einem Gerät, das die App weder ist noch vertritt, soll sie mit einem Status-Event `BadNotFound` antworten.
-- Die Antwort geht an `Pub/Event/<Source>/Status/…`. **Welche** `Source` (Absender) gemeint ist, steht nicht da.
-- MG 1.3: Für sich selbst und **jedes** vertretene Gerät muss eine App MAM (Typenschild) und Health senden.
-
-**Das Problem, an einem Beispiel:** Jemand fragt die App „Pumpen-Connector“ nach dem Gerät „Pumpe 4711“, das sie gar nicht kennt. Wörtlich gelesen antwortet sie unter dem Absender „Pumpe 4711“. Wer mithört, sieht jetzt: Der Connector sendet etwas für „Pumpe 4711“ – also vertritt er sie wohl? Dann fehlen aber Typenschild und Health für dieses Gerät. Genau das hat D7 bemerkt (Test T7-MON-04 konnte nicht entscheiden). Außerdem könnte jeder die App dazu bringen, unter beliebigen fremden Namen zu senden.
-
-**Mein Vorschlag (empfohlen):** Eine Status-Meldung trägt immer einen Absender, den die App ist oder vertritt. Für eine Anfrage zu einem fremden Gerät antwortet die App **unter ihrem eigenen Namen** (`AppId`): `Pub/Event/<AppId>/Status/Bad`. Der Anfragende findet die Antwort trotzdem, über `ReplyTo`. Alle anderen Anfragen behalten den Absender aus der Anfrage. Der englische Textvorschlag für MG 9.1 steht im Register.
-
-**Andere Möglichkeiten:** (b) der Absender bleibt das fremde Gerät, und die Guideline sagt dazu, dass ein Absender, der nur in solchen Status-Antworten vorkommt, kein vertretenes Gerät ist (dann muss D7 das berücksichtigen; das SDK bleibt); (c) Text lassen, wie er ist.
-
-**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
-- Ich ändere MG 9.1 in der Guideline und baseline neu.
-- Die Hinweise in REQ-CMP-047/043 folgen dem Text und kommen als `draft` noch einmal zu dir.
-- Das SDK ändere ich im nächsten Zyklus (kleine Änderung: Antwort unter der eigenen `AppId`). D7 bleibt, wie es ist.
+Die zwei Entscheidungen aus C-055 (D-1, D-2) hast du inzwischen getroffen (siehe oben). Die Technik-Entscheidungen A-98 … A-108 sind nur zur Info (unten). Einen Blick wert: **A-103** (Maskierung), **A-104** (geheime Werte auf der Platte nur durch Dateirechte geschützt), **A-105** (Secrets neu einlesen) und **A-106** (Regex-Dialekt).
 
 ---
 
-Die Punkte A-1 … A-108 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-056 (A-98 … A-108) stehen unten.
+Die Punkte A-1 … A-109 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-056 (A-98 … A-108) stehen unten.
 
-Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-017) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
+Aus C-056: Deine Zustimmung zu D-1 (SF-107) und D-2 (SF-108) ist umgesetzt, siehe oben und unten „Was aus deinem letzten Review (C-056) geworden ist“.
+
+Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-017) ist umgesetzt, siehe unten „Was aus dem Review davor (C-052) geworden ist“.
 
 **Nachtrag 1 (deine Anweisung):** In den Guardrails steht jetzt die neue Regel **G-3.10**. Am Ende jedes Zyklus entscheide ich, ob der nächste Zyklus mit einem neuen Agenten oder mit demselben weiterläuft, und schreibe den Grund ins Log.
 - Einen **neuen Agenten** nehme ich in der Regel, wenn mein Kontext schon zusammengefasst wurde oder groß ist, oder wenn ein neues Inkrement, eine neue Phase oder ein neues Deliverable beginnt.
@@ -375,7 +369,7 @@ Neu aus C-055 (P4 Inkrement 7a, die Schreib-Seite):
 - **A-88 – Aufbau:** Die Logik steckt in `oec-core` (Status-Codes, Schreib-Anfragen, gespeicherte Sende-Einstellungen). Bei `Set Data` fragt `oec-core` nicht selbst den Handler der App, sondern gibt die geprüfte Anfrage an die Laufzeit zurück; die fragt den Handler und gibt das Ergebnis zurück (zwei Schritte). So läuft im Kern nie fremder Code.
 - **A-89 – Ab welchem Level:** Änderungs-Anfragen nimmt das SDK erst ab Level 2 an. Level 1 bietet nichts Beschreibbares an; `on_set` meldet dort einen Fehler. Eine Anfrage, die kein gültiges JSON ist oder keine Nachrichtennummer hat, kann man nicht beantworten (kein `ReplyTo`) – sie wird ignoriert. Eine Anfrage muss genau einen Datensatz enthalten.
 - **A-90 – Form der Status-Meldung:** Topic `Pub/Event/<Absender>/Status/<Good|Uncertain|Bad>`, mit `ReplyTo`, Nummer und – für bekannte Codes – Name und Beschreibung. Jede Quelle bekommt feste Nummern (DataSetWriterIds) für ihre drei Status-Stufen; die PublicationList nennt sie, das Profile nennt `Event`.
-- **A-91 – Unbekannte Geräte:** `BadNotFound` geht heute unter dem Namen des angefragten (fremden) Geräts raus, so wie es wörtlich in der Guideline steht. Diese Antworten bekommen vorübergehende Nummern, höchstens 64 fremde Geräte je Lauf; danach antwortet das SDK nicht mehr (Schutz gegen Überflutung). Das ändert sich, wenn du D-2 wie vorgeschlagen entscheidest.
+- **A-91 – Unbekannte Geräte:** `BadNotFound` geht heute unter dem Namen des angefragten (fremden) Geräts raus, so wie es wörtlich in der Guideline steht. Diese Antworten bekommen vorübergehende Nummern, höchstens 64 fremde Geräte je Lauf; danach antwortet das SDK nicht mehr (Schutz gegen Überflutung). Seit deiner Entscheidung zu D-2 abgelöst durch A-109.
 - **A-92 – Was noch nicht geht:** `Set` auf Config, SubscriptionList, ReferenceDesignation und jedes `Del` → `BadNotFound`, bis 7b/7c/8 sie bringen (Config seit C-056 erledigt). `Set Metadata` → `BadNotWritable` (Metadaten folgen immer der Beschreibung in der App).
 - **A-93 – Regeln für `Set PublicationList`:** Der Eintrag wird über Ressource, Absender und Filter gefunden. Unbekannt → `BadNotFound`; nicht lesbar → `BadDecodingError`; eine Änderung, die `Config` nicht erlaubt (oder eines festen Felds) → `BadNotWritable`; ein ungültiges Totband → `BadInvalidArgument`; nichts geändert → trotzdem „Good“. Bei Erfolg: erst der geänderte Eintrag, dann „Good“. Die ganze Liste kommt nur neu, wenn ein Datensatz ein- oder ausgeschaltet wurde.
 - **A-94 – Speichern:** Die geänderten Einstellungen werden gespeichert (wie die Nummern und Versionen). Ist die Datei kaputt, startet die App mit Fehler. Beim Start gilt eine gespeicherte Einstellung nur, wenn die App sie noch erlaubt – ändert der Entwickler sein Programm, erbt es keine verbotene Einstellung.
@@ -397,12 +391,15 @@ Neu aus C-056 (P4 Inkrement 7b, die Config-Ressource):
 - **A-107 (neu) – Kleine Abweichungen von der API-Skizze:** `on_set` meldet einen Fehler zurück (z. B. auf Level 1), neu sind ein Anzeigename für die Config (`label`), `context()`, `source()` und `remove()`. Die Skizze ist angepasst.
 - **A-108 (neu) – Tests:** neue Tests in `oec-core` und `oec`, ein neuer Interop-Test (zusammen 12 grün), D7 10 bestanden / 0 durchgefallen / 3 übersprungen nach der Korrektur in D7 (siehe oben).
 
+Neu aus deinem Review von C-056:
+- **A-109 (neu) – SF-108 im SDK:** Eine Anfrage (`Get`, `Set`, `Del`) zu einem Gerät, das die App weder ist noch vertritt, beantwortet das SDK mit `BadNotFound` unter dem **eigenen Namen der App** (`Pub/Event/<AppId>/Status/Bad`, mit `ReplyTo`). Die vorübergehenden Nummern und die Grenze von 64 fremden Geräten sind weg: Es gibt keinen fremden Absender mehr, also auch nichts zu begrenzen. Zuerst die Tests geändert (sie schlugen fehl), dann den Code. Dazu ein Fehler im Interop-Test (erstes `Get` zu früh, siehe oben). D7 einmal mitgehört: 10 bestanden, 0 durchgefallen, 3 übersprungen; T7-MON-04 besteht jetzt.
+
 ---
 
 ### Was als Nächstes passiert (C-057)
 
 1. **P4 Inkrement 7c** – ReferenceDesignation (die Einbauort-Kennzeichnung eines Geräts, von außen les-, änder- und löschbar, gespeichert), die Weiterleitung der Log-Meldungen der App als Syslog-Events und eigene Ereignisse der App (Generic Events). Nutzt den Event-Weg aus 7a.
-   - Entscheidest du D-2 wie vorgeschlagen, ändere ich zuerst die Guideline, baseline neu und baue dann die Änderung ins SDK ein.
+   - SF-108 ist schon im SDK (A-109). Hast du R-1 bis dahin freigegeben, setzt der nächste Agent die drei Regeln zuerst auf `reviewed`.
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
@@ -482,7 +479,57 @@ Neu aus C-056 (P4 Inkrement 7b, die Config-Ressource):
 
 ---
 
-## Was aus deinem letzten Review (C-052) geworden ist
+## Was aus deinem letzten Review (C-056) geworden ist
+
+Du hast geschrieben: „D-1 und D-2 sind reviewed und akzeptiert“. Daraus wurde Nachtrag 1 zu C-056:
+- **D-1 (SF-107):** In MG 9.1.9 steht jetzt: Ein Data- oder Config-Datensatz, den man mit `Set` ändern kann, steht mit dem Abo seines `Set`-Topics in der SubscriptionList (`Config` `NONE_0`); andere Abos auf Topics der eigenen `AppId` stehen nicht drin. In B1.1.3/B1.1.4 heißt es jetzt nur noch: „Check the `SubscriptionList` to find out about accessibility.“ (`580f1c6`). Das SDK baut das mit der SubscriptionList (Inkrement 8) ein; die neue Regel REQ-RES-SUBLIST-016 ist Teil von R-1.
+- **D-2 (SF-108):** In MG 9.1 steht jetzt: Das Event zu einem Gerät, das die App nicht vertritt, geht unter der `AppId` raus; der Anfragende findet es über `ReplyTo`; dasselbe gilt für `Set` und `Del` (`2e32a6b`). Das SDK macht es schon so (A-109); REQ-CMP-047/043 sind Teil von R-1.
+- **Register:** SF-107 und SF-108 sind „resolved“ (`d2dc9ca`). Kein offenes Finding; das nächste heißt SF-109.
+
+Zur Erinnerung, worum es ging:
+
+#### D-1 – SF-107: Woran sieht man, dass ein Datensatz von außen beschreibbar ist? (entschieden: wie vorgeschlagen)
+
+**Wo es auffiel:** beim Bau von `Set Data` im SDK.
+
+**Was die Guideline sagt:**
+- Anhang B1.1.3 und B1.1.4 (nur informativ): „Nicht jeder Datensatz ist über den Bus beschreibbar. Prüfe `SubscriptionList` und/oder `PublicationList`, um das herauszufinden.“
+- Die PublicationList hat je Eintrag ein Feld `Config`. Es sagt aber nur, welche **Sende-Einstellungen** (Modus, Intervall, Totband) man ändern darf – nicht, ob man die **Werte** setzen darf.
+- Die SubscriptionList zeigt laut MG 9.1.9 „die tatsächlichen Abonnements“. Die Beispiele dort abonnieren aber nur Daten **anderer** Apps.
+
+**Das Problem, an einem Beispiel:** Ein Leitsystem will den Sollwert einer Pumpe setzen. Vorher möchte es wissen, ob der Datensatz „Sollwert“ überhaupt beschreibbar ist. Keine Regel der Guideline sagt, wo das steht. Heute bleibt nur: einfach schicken und auf `BadNotWritable` warten.
+
+**Mein Vorschlag (so entschieden):** Die **SubscriptionList** zeigt es. Eine App, die `Set Data` für einen Datensatz annimmt, trägt ihr eigenes Abo auf das passende `Set`-Topic dort ein, z. B. `Oi4v2/…/<AppId>/Set/Data/<Gerät>/sollwert`. Andere eigene Abos (z. B. für `Get`) werden nicht eingetragen, die beschreibt schon das Profile. Das Feld `Config` der PublicationList behält seine Bedeutung. Der englische Textvorschlag für MG 9.1.9 und B1.1.3/B1.1.4 steht im Register.
+
+**Andere Möglichkeiten:** (b) die PublicationList zeigt es (ein neues Merkmal; das ändert die Bedeutung von `Config` und das Schema); (c) keine Liste zeigt es, die Guideline sagt „schick das `Set`, `BadNotWritable` sagt dir Bescheid“ (nur Textänderung).
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ändere MG 9.1.9 und B1.1.3/B1.1.4 in der Guideline und baseline neu.
+- Die REQs zur SubscriptionList folgen dem Text und kommen als `draft` noch einmal zu dir.
+- Das SDK trägt die Abos ein, sobald die SubscriptionList kommt (Inkrement 8). An 7a ändert sich nichts.
+
+#### D-2 – SF-108: Unter welchem Absender antwortet die App auf eine Anfrage zu einem fremden Gerät? (entschieden: wie vorgeschlagen)
+
+**Wo es auffiel:** beim einmaligen Mithören mit D7 gegen das SDK.
+
+**Was die Guideline sagt:**
+- MG 9.1: Fragt jemand nach einem Gerät, das die App weder ist noch vertritt, soll sie mit einem Status-Event `BadNotFound` antworten.
+- Die Antwort geht an `Pub/Event/<Source>/Status/…`. **Welche** `Source` (Absender) gemeint ist, steht nicht da.
+- MG 1.3: Für sich selbst und **jedes** vertretene Gerät muss eine App MAM (Typenschild) und Health senden.
+
+**Das Problem, an einem Beispiel:** Jemand fragt die App „Pumpen-Connector“ nach dem Gerät „Pumpe 4711“, das sie gar nicht kennt. Wörtlich gelesen antwortet sie unter dem Absender „Pumpe 4711“. Wer mithört, sieht jetzt: Der Connector sendet etwas für „Pumpe 4711“ – also vertritt er sie wohl? Dann fehlen aber Typenschild und Health für dieses Gerät. Genau das hat D7 bemerkt (Test T7-MON-04 konnte nicht entscheiden). Außerdem könnte jeder die App dazu bringen, unter beliebigen fremden Namen zu senden.
+
+**Mein Vorschlag (so entschieden):** Eine Status-Meldung trägt immer einen Absender, den die App ist oder vertritt. Für eine Anfrage zu einem fremden Gerät antwortet die App **unter ihrem eigenen Namen** (`AppId`): `Pub/Event/<AppId>/Status/Bad`. Der Anfragende findet die Antwort trotzdem, über `ReplyTo`. Alle anderen Anfragen behalten den Absender aus der Anfrage. Der englische Textvorschlag für MG 9.1 steht im Register.
+
+**Andere Möglichkeiten:** (b) der Absender bleibt das fremde Gerät, und die Guideline sagt dazu, dass ein Absender, der nur in solchen Status-Antworten vorkommt, kein vertretenes Gerät ist (dann muss D7 das berücksichtigen; das SDK bleibt); (c) Text lassen, wie er ist.
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ändere MG 9.1 in der Guideline und baseline neu.
+- Die Hinweise in REQ-CMP-047/043 folgen dem Text und kommen als `draft` noch einmal zu dir.
+- Das SDK ändere ich im nächsten Zyklus (kleine Änderung: Antwort unter der eigenen `AppId`). D7 bleibt, wie es ist.
+
+
+## Was aus dem Review davor (C-052) geworden ist
 
 Du hast geschrieben: „Ich stimme D-1 und R-1 zu, bzw. habe das Review abgeschlossen“. Daraus wurde Nachtrag 1 zu C-052:
 - **Guideline-Text:** In MG 7.5.1 (Hinweis zu `Health`) steht jetzt dein entschiedener Text (`9044929`): Health kommt beim Start und bei jeder Änderung; das Health der App selbst (`Source` = `AppId`) zusätzlich mindestens alle 60 Sekunden als Herzschlag; für untergeordnete Assets ist das freiwillig.
