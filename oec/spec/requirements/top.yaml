@@ -3,7 +3,7 @@
 # topic/topic.abnf, the allowed forms per Method × Resource are listed in
 # matrix/method-resource.yaml; vectors in vectors/topic/.
 area: TOP
-baseline: "59e3ae3"
+baseline: "9044929"
 requirements:
   # --- Topic structure (MG 7) -----------------------------------------------
   - id: REQ-TOP-001
@@ -355,22 +355,33 @@ requirements:
 
   # --- Resource (MG 7.5.1) --------------------------------------------------
   - id: REQ-TOP-017
-    title: Health is published at start, on change and every 60 seconds
+    title: Health is published at start, on change, and for the application itself at least every 60 seconds
     statement: >-
-      Health is published once when the application is initialized, whenever
-      the value of Health changes, and every 60 seconds as heartbeat.
+      Health is published once when the application is initialized and
+      whenever the value of Health changes. The Health of the application
+      itself (Source = AppId) is additionally published at least every 60
+      seconds as heartbeat; for subordinate assets a periodic publication is
+      optional.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application, device]
-    refs: [MG 7.5.1]
+    refs: [MG 7.5.1, SF-106]
     quotes:
       - ref: MG 7.5.1
-        text: Health must be published once when the application is initialized, when the value of Health changes, and every 60 seconds as a kind of heartbeat.
+        text: Health must be published once when the application is initialized and whenever the value of Health changes.
+      - ref: MG 7.5.1
+        text: The Health of the application itself (Source = AppId) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional.
     verification: [d7-monitor]
-    inventory: [MG-7.5.1-40b7ae71]
-    status: reviewed
-    notes: Health content and tolerances belong to RES-HEALTH (C-027).
+    inventory: [MG-7.5.1-1c8fe8e7, MG-7.5.1-5426cf3c]
+    status: draft
+    notes: >-
+      SF-106 (C-052 review): "at least every 60 seconds" means that any
+      publication of the own Health (on change, or as the answer to a Get)
+      restarts the period; the guideline gives no tolerance, a test tool
+      documents its own (D7 T7-MON-05: 5 s). The optional periodic Health of a
+      subordinate asset is not checked. Health content and tolerances belong
+      to RES-HEALTH (C-027).
 
   # --- Source (MG 7.6) ------------------------------------------------------
   - id: REQ-TOP-018
