@@ -1,7 +1,9 @@
 package monitor
 
 import (
+	"encoding/json"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -70,6 +72,43 @@ func TestSecondBirth(t *testing.T) {
 	}
 	if res.Participants[0].Births != 2 {
 		t.Errorf("births %d", res.Participants[0].Births)
+	}
+}
+
+// TestMAMOnChange: a MAM about itself published on change with an
+// incremented RevisionCounter (REQ-RES-MAM-018, published without request,
+// REQ-RES-PUBLIST) is no second Birth; later MAMs are compared with it.
+func TestMAMOnChange(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.birth(0, compA)
+	rev, err := strconv.ParseInt(revision(compA.mam), 10, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	changed := map[string]any{}
+	for k, v := range compA.mam {
+		changed[k] = v
+	}
+	changed["RevisionCounter"] = json.Number(strconv.FormatInt(rev+1, 10))
+	topic := compA.base() + "/Pub/MAM/" + compA.self()
+	s.add(5, topic, network(compA, at(5), classMAM, "", dsMsg(compA.mamID, compA.il, "", changed)))
+	// an answer with the new RevisionCounter that differs from the changed MAM
+	other := map[string]any{}
+	for k, v := range changed {
+		other[k] = v
+	}
+	other["HardwareRevision"] = "other"
+	s.add(7, topic, network(compA, at(7), classMAM, "1639693510094-Aggregation/x/y/z/1", dsMsg(compA.mamID, compA.il, "", other)))
+	s.end = 10 * time.Second
+	res := run(t, s, DefaultOptions())
+	if n := len(find(res, "T7-MON-10", "REQ-IL-012", verdict.Note)); n != 0 {
+		t.Errorf("a MAM on change is no second Birth: %+v", res.Observations)
+	}
+	if res.Participants[0].Births != 1 {
+		t.Errorf("births %d", res.Participants[0].Births)
+	}
+	if n := len(find(res, "T7-MON-03", "REQ-LIFE-003", verdict.Violation)); n != 1 {
+		t.Errorf("want 1 violation against the changed MAM, got %d: %+v", n, res.Observations)
 	}
 }
 

@@ -593,6 +593,23 @@ func isBirth(p *part, t *topic.Parsed, msg map[string]any, ds []dsm) bool {
 	return rs == 1 && self
 }
 
+// onChange: while connected, an unsolicited Pub MAM about itself with
+// another RevisionCounter than the current MAM is the MAM published on
+// change (REQ-RES-MAM-018; MAM is published without request, REQ-RES-PUBLIST),
+// not a new Birth. A repeated MAM with the same RevisionCounter stays a
+// Birth (T7-MON-10).
+func onChange(p *part, ds []dsm) bool {
+	if p.state != "connected" || p.birthMAM == nil {
+		return false
+	}
+	for _, d := range ds {
+		if d.name == p.AppID {
+			return revision(d.payload) != p.birthRev
+		}
+	}
+	return false
+}
+
 // lifecycle is T7-MON-03 and the Close part of T7-MON-05: the Birth is the
 // first message after every connect; after a Close the component publishes
 // nothing but a new Birth (REQ-LIFE-014). A connect is visible after a Will
@@ -601,7 +618,7 @@ func isBirth(p *part, t *topic.Parsed, msg map[string]any, ds []dsm) bool {
 func (e *Engine) lifecycle(p *part, m Message, t *topic.Parsed, msg map[string]any, ds []dsm) bool {
 	const test = "T7-MON-03"
 	first := p.Messages == 1
-	birth := ds != nil && isBirth(p, t, msg, ds)
+	birth := ds != nil && isBirth(p, t, msg, ds) && !onChange(p, ds)
 	if birth {
 		if p.state == "connected" {
 			e.add("T7-MON-10", "REQ-IL-012", verdict.Note, ev(p, m, "", "a second Birth of %s without Will or Close in between: a second instance with the same Identification Link, or a reconnect whose Will was not published", p.ID))
@@ -735,8 +752,13 @@ func (e *Engine) regularMAM(p *part, m Message, d dsm) {
 	if d.idOK && d.id != p.birthID {
 		e.add(test, req, verdict.Violation, ev(p, m, d.ptr+"/DataSetWriterId", "the Pub MAM about itself uses DataSetWriterId %d, the Birth used %d", d.id, p.birthID))
 	}
-	if revision(d.payload) == p.birthRev && !reflect.DeepEqual(d.payload, p.birthMAM) {
+	switch rev := revision(d.payload); {
+	case rev == p.birthRev && !reflect.DeepEqual(d.payload, p.birthMAM):
 		e.add(test, req, verdict.Violation, ev(p, m, d.ptr+"/Payload", "the Pub MAM about itself differs from the Birth with the same RevisionCounter %s", p.birthRev))
+	case rev != p.birthRev:
+		// a changed configuration (REQ-RES-MAM-018): later MAMs are
+		// compared with this one
+		p.birthMAM, p.birthRev = d.payload, rev
 	}
 }
 
