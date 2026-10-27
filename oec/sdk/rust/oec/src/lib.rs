@@ -7,7 +7,7 @@
 //! re-exports or wraps its types and adds the I/O: bootstrap from the
 //! container storage, persistence and the MQTT connection over TLS.
 //!
-//! **State of P4 (C-050 … C-053, increments 4, 5 and 6a):** [`app::App::builder`] with
+//! **State of P4 (C-050 … C-054, increments 4, 5, 6a and 6b):** [`app::App::builder`] with
 //! [`app::Bootstrap`] (container storage contract or explicit broker),
 //! identity ([`identity`]), persistence ([`store`]), the Config model with
 //! string-keyed typed getters ([`config`], Q-022) and the errors ([`Error`]).
@@ -21,10 +21,12 @@
 //! `Source`, `Profile` and `PublicationList` with stable DataSetWriterIds,
 //! automatic `Get` answers (L2+), pagination and `MaxPacketSize`; changes
 //! while offline are published as state after the next connect (no queue,
-//! ADR-0020 §7). Data DataSets, publish modes and intervals (increment 6b),
-//! events, Config writes and the consumer follow with increments 6b … 8;
-//! until then their contract is the P3 sketch `oec/sdk/rust/sketch`
-//! (ADR-0020 §1).
+//! ADR-0020 §7). **C-054 (increment 6b):** Data DataSets ([`data`],
+//! [`asset::Asset::add_data`]) with their Metadata, the UUIDv5
+//! DataSetClassId, publish modes, intervals and Precisions as a dead band,
+//! `Get Data` / `Get Metadata`. Events, Config writes, `Set PublicationList`
+//! and the consumer follow with increments 7 and 8; until then their
+//! contract is the P3 sketch `oec/sdk/rust/sketch` (ADR-0020 §1).
 //!
 //! **Cargo features:** `crypto-aws-lc-rs` (default) or `crypto-ring` pick the
 //! crypto provider of rustls (`crypto-ring` wins if both are on);
