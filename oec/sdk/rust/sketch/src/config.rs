@@ -82,6 +82,12 @@ impl ConfigDef {
         unimplemented!()
     }
 
+    /// Display name of the context (`Context.Name`, REQ-RES-CONFIG-002);
+    /// default: the context name (amendment C-056).
+    pub fn label(self, text: &str) -> Self {
+        unimplemented!()
+    }
+
     /// Adds a group (REQ-RES-CONFIG-013); the group of common objects is
     /// named `common` by convention (REQ-RES-CONFIG-014).
     pub fn group(self, name: &str, label: &str, objects: impl IntoIterator<Item = ConfigObject>) -> Self {
@@ -133,13 +139,24 @@ impl ConfigHandle {
     /// (REQ-RES-CONFIG-022) and a Status event Good; on `Err` nothing is
     /// applied (REQ-RES-CONFIG-023) and a Status event Bad is sent
     /// (REQ-RES-CONFIG-021). Without handler the values are applied.
-    pub fn on_set(&self, f: impl Fn(&ConfigValues) -> Result<(), StatusCode> + Send + Sync + 'static) {
+    /// Returns an error at Level 1 (no `Set` subscribed) and for a removed
+    /// Config (amendment C-056, as `DataSet::on_set`).
+    pub fn on_set(
+        &self,
+        f: impl Fn(&ConfigValues) -> core::result::Result<(), StatusCode> + Send + Sync + 'static,
+    ) -> Result<()> {
         unimplemented!()
     }
 
     /// Changes values from the application side (e.g. a local UI); same
     /// validation and publication, no Status event.
     pub fn set(&self, group: &str, name: &str, value: &str) -> Result<()> {
+        unimplemented!()
+    }
+
+    /// Removes the Config DataSet (REQ-RES-PUBLIST-017); its persisted
+    /// values are kept (amendment C-056).
+    pub fn remove(self) -> Result<()> {
         unimplemented!()
     }
 }

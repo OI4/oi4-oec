@@ -29,7 +29,7 @@ fn main() -> oec::Result<()> {
             return Err(StatusCode::BadOutOfRange); // own rule beyond the Validation
         }
         Ok(())
-    });
+    })?;
 
     let poll = config.values().number("common", "PollInterval");
     println!("polling every {poll:?} s");
