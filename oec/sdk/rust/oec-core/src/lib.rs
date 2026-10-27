@@ -16,10 +16,12 @@
 //! | [`schema`] | embedded D1 schemas: version, baseline and (feature `strict-validation`) validation with REQ attribution | ADR-0019 |
 //! | [`mqtt`] | MQTT 3.1.1 codec (QoS 0/1, no Retain) and the client session as a state machine: connect with Will, Keep Alive, packet ids, QoS 1 acknowledgements, subscriptions, close | MG 6, RIG 4.1, ADR-0023 Q-026 |
 //! | [`lifecycle`] | Birth, Will, Close and the Health heartbeat (`Details[]` included) as state machines on the message model | MG 6.3, MG 9.1.2 |
+//! | [`provider`] | the provider side: sources (the application and its assets), MAM/Health/Profile/PublicationList per Source, stable DataSetWriterIds, `Get` answers with ReplyTo, pagination within the MaxPacketSize | MG 8.3.11, MG 9.1 |
 //!
 //! Every rule cites its requirement ids (`oec/spec/requirements/`); the
 //! shared test vectors (`oec/spec/export/`) are the acceptance test
-//! (`tests/vectors.rs`, `tests/payload.rs`, `tests/lifecycle.rs`); the
+//! (`tests/vectors.rs`, `tests/payload.rs`, `tests/lifecycle.rs`,
+//! `tests/provider.rs`); the
 //! codec and the session have scenario and property tests
 //! (`tests/mqtt_codec.rs`, `tests/session.rs`, `tests/proptest_mqtt.rs`).
 
@@ -94,6 +96,7 @@ pub mod il;
 pub mod lifecycle;
 pub mod message;
 pub mod mqtt;
+pub mod provider;
 pub mod resource;
 pub mod schema;
 pub mod topic;

@@ -226,6 +226,8 @@ pub struct Lifecycle {
     /// FAILURE_1/0 about itself was published while connected
     /// (REQ-LIFE-012); the next other Health needs a Birth (REQ-LIFE-017).
     unavailable: bool,
+    /// The MAM changed since the last Pub MAM about itself.
+    mam_changed: bool,
 }
 
 impl Lifecycle {
@@ -278,7 +280,41 @@ impl Lifecycle {
                 details: None,
             }),
             unavailable: false,
+            mam_changed: false,
         })
+    }
+
+    /// The DataSetWriterId of the MAM about itself.
+    pub fn mam_writer(&self) -> DataSetWriterId {
+        self.mam_writer
+    }
+
+    /// The DataSetWriterId of the Health about itself.
+    pub fn health_writer(&self) -> DataSetWriterId {
+        self.health_writer
+    }
+
+    /// Replaces the MAM, e.g. after a RevisionCounter increment
+    /// (REQ-RES-MAM-018); [`Self::poll`] publishes it at once. Returns
+    /// whether it changed.
+    ///
+    /// # Errors
+    ///
+    /// [`LifecycleError::NotSelf`] if the ProductInstanceUri is not the
+    /// AppId (REQ-LIFE-003).
+    pub fn set_mam(&mut self, mam: Mam) -> Result<bool, LifecycleError> {
+        if mam.product_instance_uri != self.app_id().as_str() {
+            return Err(LifecycleError::NotSelf {
+                app_id: self.app_id().to_string(),
+                product_instance_uri: mam.product_instance_uri,
+            });
+        }
+        if mam == self.mam {
+            return Ok(false);
+        }
+        self.mam = mam;
+        self.mam_changed = true;
+        Ok(true)
     }
 
     /// The AppId.
@@ -374,6 +410,7 @@ impl Lifecycle {
     /// (REQ-LIFE-001, REQ-LIFE-015), then the Health (REQ-TOP-017).
     pub fn on_connected(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
         self.unavailable = false;
+        self.mam_changed = false;
         self.beat.restart();
         let mut out = vec![self.birth(unix_ms)];
         out.extend(self.poll(now, unix_ms));
@@ -398,19 +435,28 @@ impl Lifecycle {
 
     /// The instant [`Self::poll`] has work (monotonic time).
     pub fn poll_timeout(&self) -> Duration {
-        self.beat.poll_timeout()
+        if self.mam_changed {
+            Duration::ZERO
+        } else {
+            self.beat.poll_timeout()
+        }
     }
 
-    /// The publications due at `now` while connected: the Health on change
-    /// or heartbeat, preceded by the Birth if the application recovers from
-    /// FAILURE_1/0 about itself (REQ-LIFE-017).
+    /// The publications due at `now` while connected: a changed MAM
+    /// ([`Self::set_mam`]), the Health on change or heartbeat, preceded by
+    /// the Birth if the application recovers from FAILURE_1/0 about itself
+    /// (REQ-LIFE-017).
     pub fn poll(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
-        let Some(health) = self.beat.poll(now).cloned() else {
-            return Vec::new();
-        };
         let mut out = Vec::with_capacity(2);
+        let mam_due = core::mem::take(&mut self.mam_changed);
+        let Some(health) = self.beat.poll(now).cloned() else {
+            if mam_due {
+                out.push(self.birth(unix_ms));
+            }
+            return out;
+        };
         let failure = is_failure(&health);
-        if self.unavailable && !failure {
+        if mam_due || (self.unavailable && !failure) {
             out.push(self.birth(unix_ms));
         }
         self.unavailable = failure;
