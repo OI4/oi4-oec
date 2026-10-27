@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-053 (P4 increment 6a: provider side, part 1; A-63 … A-74 for information; guideline `9044929`, register `b94e803`). **Nothing is open for the PO.**_
+_Last updated: 2026-10-27, C-054 (P4 increment 6b: provider side, part 2; A-75 … A-86 for information; guideline `9044929`, register `b94e803`). **Nothing is open for the PO.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -46,10 +46,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Tests: runtime tests against the in-process TLS broker; opt-in interop 9 green; a one-off D7 `oec-check monitor` run against the SDK: 10 pass, 0 fail, 3 skip (T7-MON-18 pagination passes).
   - No finding, no new dependency, no reviewed item changed, no new test data, so there is nothing to decide or review; A-63 … A-74 are for information. Worth a look: **A-65** (offline: state instead of a queue), **A-71** (unknown Source: Status event only with increment 7), **A-72** (sketch refinements).
   - C-054 (increment 6b) runs in a new agent; `prompt.md` is filled.
+- C-054 (P4 increment 6b, not split):
+  - `oec-core`: Data DataSets on the provider of 6a – Metadata derived from the field definitions with persisted ConfigurationVersions, the UUIDv5 DataSetClassId of Tag and field structure, the publish forms APPLICATION/SOURCE/FILTER, `Interval` > 0 cyclic, `Interval` 0 with the Precisions as a dead band, `Get Data`/`Get Metadata` (no Metadata for Data that is not announced, REQ-CMP-044), Profile and PublicationList with Data and Metadata.
+  - `oec`: the API `oec::data` (`DataSetDef`, `Field`, `Publication`, `Mode`, `Value`, `DataSet`) and `Asset::add_data`; the sketch is aligned (ADR-0020 amendment C-054).
+  - Tests: core and runtime tests in the gate (intervals without sleeping); opt-in interop 10 green; a one-off D7 `oec-check monitor` run against the SDK: 10 pass, 0 fail, 3 skip, after fixing a D7 bug found by that run (T7-MON-11 treated an unsolicited Metadata as "without content").
+  - New: uuid feature `v5` (+ sha1_smol, BSD-3-Clause) under `cargo deny` without exception.
+  - No finding, no reviewed item changed, no new test data, so there is nothing to decide or review; A-75 … A-86 are for information. Worth a look: **A-80** (a DataSet goes out only once every field has a value), **A-84** (sketch changes: `update` returns `Result`, no `Value::Json`), **A-85** (D7 fix).
+  - C-055 (increment 7) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `9044929` (re-baseline, no content change).
 
-Logs: [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -129,6 +136,18 @@ Logs: [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-1
 | A-72 | API: `AppHandle::assets`, `Asset::{mam, is_this}`, `HealthDetail::new`; `bump_revision_counter` returns `Result`; `mam()` owned on `AppHandle`; no asset heartbeat | info (agent) | C-053 | – | – |
 | A-73 | Interop test `level_2_assets_and_get_answers`; one-off D7 `monitor` run 10/0/3, capture not committed | info (agent) | C-053 | – | – |
 | A-74 | No new dependency; uuid `v5` expected in 6b | info (agent) | C-053 | – | – |
+| A-75 | Cycle cut: 6b in one cycle; `Set PublicationList` stays in increment 7; order 7 → 8 → 10 kept | info (agent) | C-054 | – | – |
+| A-76 | Modules `provider::{data, sets, versions}` in `oec-core`, `oec::data`; versions persisted under `app/metadata-versions` | info (agent) | C-054 | – | – |
+| A-77 | DataSetClassId = UUIDv5 of Tag and field structure (names, types, ValueRank) in an SDK namespace | info (agent) | C-054 | – | – |
+| A-78 | Metadata from the fields (EngineeringUnits with UnitId −1, EURange); ConfigurationVersion as VersionTime, Major with the structure, Minor with any change | info (agent) | C-054 | – | – |
+| A-79 | Metadata on its Filter topic at add, connect and version change, before the Data; `Get Metadata` only for announced Data (REQ-CMP-044) | info (agent) | C-054 | – | – |
+| A-80 | A DataSet is published and answered once every field has a value; values coerced to the field type | info (agent) | C-054 | – | – |
+| A-81 | Publish forms: FILTER alone, SOURCE/APPLICATION carry every member (state of the scope); `OFF_0` listed but never sent | info (agent) | C-054 | – | – |
+| A-82 | `Interval` > 0 cyclic without catch-up, `Interval` 0 with Precisions as dead band; injected time | info (agent) | C-054 | – | – |
+| A-83 | `Get Data` from the state (unknown Tag → empty list); Profile/PublicationList with Data and Metadata; `remove` keeps the ids reserved | info (agent) | C-054 | – | – |
+| A-84 | API: `Field::range`, `DataSet::{tag, source, values}`, `Mode::union`; `update` returns `Result`; `Value::Json` dropped | info (agent) | C-054 | – | – |
+| A-85 | Tests; interop `level_2_data_sets_and_metadata`; D7 `monitor` 10/0/3 after a D7 fix of T7-MON-11 | info (agent) | C-054 | – | – |
+| A-86 | uuid feature `v5` (+ sha1_smol, BSD-3-Clause), `cargo deny` without exception | info (agent) | C-054 | – | – |
 
 ## Decisions and review items
 
@@ -495,6 +514,31 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - one-off D7 `oec-check monitor` (external call, Q-009) during that test: 10 pass, 0 fail, 3 skip (exit 4: the heartbeat needs ≥ 125 s; T7-MON-03/07 concern only the probe). The capture is not committed: D7 fixtures are generated from scenarios, a recorded capture would need a new fixture kind (P5). So there is no new test data to review.
 - **A-74 Dependencies:** none new; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception. 6b will add the uuid feature `v5` (ADR-0023 amendment then).
 
-## Next (C-054)
+### A-75 … A-86 – P4 increment 6b (C-054, agent)
 
-1. P4 increment 6b – provider side, part 2: Data DataSets and Metadata, their PublicationList entries with the publish modes, intervals (cyclic publication), Precisions as a dead band, the UUIDv5 DataSetClassId, the Profile extended by Data/Metadata. Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/sdk/rust/oec-core/src/provider.rs`, `provider/{data.rs, sets.rs, versions.rs, pagination.rs}`, `oec/sdk/rust/oec/src/{data.rs, app.rs, asset.rs, runtime.rs}`, the tests, the sketch (`sketch/src/data.rs`), the D7 monitor (`oec/conformance/internal/monitor/monitor.go`); ADR-0020 amendment C-054, ADR-0026 §13, ADR-0023 amendment C-054; details in the [C-054 log](log/2026-10-27_C-054_data-sets-metadata.md).
+- **A-75 Cycle cut:** 6b fits one cycle (about 2400 lines of code, 1500 lines of tests; one topic: the Data path). `Set PublicationList` (REQ-RES-PUBLIST-016 …) stays in increment 7, because it needs `Set` handling and Status events; `Publication::writable` is already listed as the entry's `Config`. Order 7 → 8 → 10 kept; 7 is re-cut at its start (possibly 7a events/Status + `Set PublicationList`, 7b Config).
+- **A-76 Modules:** `provider::data` (types, DataSetClassId, Metadata, coercion, encoding, dead band), `provider::sets` (state of one DataSet), `provider::versions` (ConfigurationVersions) in `oec-core`; `oec::data` wraps them. The version table is stored under `app/metadata-versions` after every change; a corrupt table stops `build()` (as the writer table, A-68).
+- **A-77 DataSetClassId:** `UUIDv5(namespace, JSON [tag, [[name, builtInTypeId, valueRank], …]])`, namespace `UUIDv5(URL, "https://schemas.openindustry4.com/oec/v2/sdk/data-set-class")`. Stable over restarts and SDK versions, changes with the structure (REQ-MSG-013); unit, description and range do not change it. `DataSetDef::class_id` sets an explicit one.
+- **A-78 Metadata content and versions:** one FieldMetaData per field (BuiltInType, DataType, ValueRank −1, Description, FieldId = UUIDv5 of DataSetClassId and name), properties `EngineeringUnits` (UNECE namespace, **UnitId −1** = not given, DisplayName = the unit) and `EURange`. The guideline example uses a real UNECE UnitId (20529); a `Field::unit_id` can be added later without breaking the API. ConfigurationVersion: VersionTime (seconds since 2000); both parts change with the structure, Minor with any other change; the Timestamp of the Metadata is the first sending of its version. Data messages carry the full version as MetaDataVersion.
+- **A-79 Metadata publication:** on its Filter topic (fixed `ON_REQUEST_FILTER_9`) at `add_data`, after every connect and on a version change, always before the Data (REQ-RES-META-003), at every level. `Get Metadata` is answered only with Source and Tag of a DataSet that is not `OFF_0`; otherwise silence (REQ-CMP-044: Data not announced in the PublicationList). The Metadata size is checked against `MaxPacketSize` at `add_data`.
+- **A-80 Complete value sets:** a Data DataSetMessage carries all fields of its Metadata, so a DataSet is published and answered only once every field has a value; `update` is all or none. Values are converted to the field type (an integer fits every numeric type whose range holds it; Guid and LocalizedText from strings); Int64/UInt64 and NaN/±Infinity are JSON strings (OPC UA JSON). DataSetWriterName = Source, WriterGroupName = Tag, Timestamp = last value change.
+- **A-81 Publish forms:** FILTER publishes the DataSet alone on `Pub/Data/<Source>/<Tag>`; SOURCE and APPLICATION publish, when one member is due, every member with values on `Pub/Data/<Source>` or `Pub/Data` (the state of the scope), and the other members restart their dead band from these values. Mixed DataSetClassIds → none in the NetworkMessage. `OFF_0`: never sent or answered; the Data entry stays listed with `OFF_0`, the Metadata entry is omitted.
+- **A-82 Interval and dead band:** `Interval` > 0 publishes the state cyclically and ignores Precisions (REQ-RES-PUBLIST-014); missed cycles are not caught up; the first complete set and every connect publish at once. `Interval` 0 publishes a change when a numeric field moves by more than its Precision (no Precision: any change), non-numeric or non-finite changes always. The runtime injects monotonic time, so tests drive intervals without sleeping.
+- **A-83 `Get Data`, Profile, PublicationList:** `Get Data` answers the current state of the addressed scope, paginated, with `ReplyTo`; an unknown Tag gives an empty list (SF-099). The Profile lists Data and Metadata; Level 2 subscribes `Get/Data/#` and `Get/Metadata/#`. The PublicationList lists per DataSet Data (Mode, Interval, Precisions, Config) and Metadata (same DataSetWriterId). `remove` republishes the PublicationList and keeps the id and the version reserved.
+- **A-84 API (ADR-0020 amendment C-054):**
+  - additions `Field::range`, `DataSet::{tag, source, values}`, `Mode::union`, typed `Value` variants for every `BuiltinType`;
+  - `DataSet::update` returns `Result<()>` (sketch: `()`): an unknown field or a wrong type must not be dropped silently;
+  - `Value::Json` (escape hatch) dropped, `Value` is `non_exhaustive`: pre-encoded JSON cannot be checked against the field type;
+  - `oi4pv(pv)` names the field `Pv`; `class_id` and `interval` are checked at `add_data`;
+  - `on_set`/`SetData` stay in the sketch (increment 7).
+- **A-85 Tests:**
+  - `oec-core`: 12 data tests (modes, groups, interval, dead band, `Get`, versions, the pinned DataSetClassId, a strict-schema test of every generated payload) and 9 unit tests;
+  - `oec`: declaration, persistence and refused definitions (`tests/app.rs`); `data_sets_publish_their_state` against the in-process TLS broker;
+  - opt-in interop `level_2_data_sets_and_metadata` against Mosquitto: `interop.sh` 10 passed;
+  - one-off D7 `oec-check monitor` (external call, Q-009) during that test: first 2 failures, both not in the SDK: the test reused a MessageId for two `Get`s (test fixed), and **D7 T7-MON-11 reported an unsolicited Metadata as "without content"**, because it looked for DataSetMessages, while a ua-metadata message carries its content in `MetaData`. Fixed in D7 with a test first (`TestUnsolicitedMetadataHasContent`); the 18 reviewed fixtures and their verdicts are unchanged (they only had solicited Metadata). Rerun: 10 pass, 0 fail, 3 skip (exit 4 as in C-053). Capture not committed (A-73).
+- **A-86 Dependencies:** the uuid feature `v5` (SHA-1 name-based UUIDs) adds sha1_smol 1.0.1 (BSD-3-Clause, no dependencies); `Cargo.lock` 192 packages; `deny.toml` unchanged; `cargo deny` without exception.
+
+## Next (C-055)
+
+1. P4 increment 7 – write side: `Set`/`Del` with Status events, the Config resource, `Set PublicationList` (`Publication::writable`), Status `BadNotFound` for a `Get` of an unknown Source; cycle cut first. Runs in a new agent (start prompt in `prompt.md`).

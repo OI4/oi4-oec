@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 27.10.2026, nach C-053 (P4 Inkrement 6a: das SDK beantwortet Anfragen selbst). **Für dich ist nichts offen.**_
+_Stand: 27.10.2026, nach C-054 (P4 Inkrement 6b: eigene Daten der App mit Metadaten, Sende-Modi, Intervallen und Totband). **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,19 +24,21 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-C-053 war **P4 Inkrement 6a**: Das SDK kümmert sich jetzt selbst um die Standard-Ressourcen einer App und ihrer Geräte. Inkrement 6 habe ich geteilt (A-63); den zweiten Teil (6b: eigene Daten der App) macht C-054.
-- **Assets:** Eine App kann jetzt Geräte vertreten, die selbst kein MQTT können (z. B. eine Pumpe hinter einem Gateway). Sie meldet sie mit `add_asset` an. Für jedes dieser Geräte veröffentlicht das SDK automatisch MAM (Typenschild), Health (Zustand) und ab Level 2 das Profile (welche Ressourcen es gibt).
-- **PublicationList:** Ab Level 2 veröffentlicht das SDK die Liste aller Veröffentlichungen mit festen Nummern (DataSetWriterIds). Die Nummern werden gespeichert und bleiben auch nach einem Neustart gleich.
-- **Antworten auf `Get`:** Fragt jemand nach MAM, Health, Profile oder PublicationList, antwortet das SDK selbst, mit dem Verweis auf die Anfrage (`ReplyTo`). Ist die Antwort zu groß für eine Nachricht, teilt es sie in Seiten auf.
-- **Ohne Verbindung:** Das SDK sammelt keine alten Nachrichten. Nach dem Wiederverbinden sendet es einfach den aktuellen Stand (A-65).
-- **Geprüft:** automatische Tests ohne Netzwerk, Tests gegen unseren eingebauten Test-Broker, der Interop-Test gegen den echten Mosquitto (9 grün) und einmal unser eigenes Prüftool D7: 10 Prüfungen bestanden, keine durchgefallen, 3 übersprungen (z. B. braucht der Herzschlag-Test mindestens 2 Minuten).
-- Keine neue Bibliothek, kein Finding, nichts Reviewtes geändert, keine neuen Testdaten.
+C-054 war **P4 Inkrement 6b**: Eine App kann jetzt ihre eigenen Messwerte (Datensätze) veröffentlichen, für sich selbst und für ihre Geräte. Ich habe 6b nicht weiter geteilt (A-75).
+- **Datensätze:** Die App beschreibt einen Datensatz einmal (Name = Tag, Felder mit Typ, Einheit, Messbereich), z. B. „oee“ mit dem Feld „Availability“ in %. Danach setzt sie nur noch Werte (`update`). Wann gesendet wird, entscheidet das SDK nach der PublicationList („Zustand statt Nachrichten“).
+- **Metadaten:** Aus der Beschreibung baut das SDK automatisch die Metadaten (welche Felder, welcher Typ, welche Einheit) und schickt sie vor den ersten Daten. Sie haben eine Versionsnummer, die nur steigt, wenn sich die Beschreibung ändert; sie wird gespeichert und bleibt über Neustarts gleich.
+- **DataSetClassId:** Jede Datensatz-Art bekommt eine feste Kennung, die aus Tag und Feldern berechnet wird (UUIDv5). Gleiche Struktur = gleiche Kennung, auch nach einem Neustart; andere Felder = neue Kennung.
+- **Sende-Modi:** einzeln (Standard), alle Datensätze einer Quelle zusammen, alle der App zusammen, nur auf Anfrage oder gar nicht.
+- **Intervall und Totband:** Mit Intervall sendet das SDK regelmäßig (z. B. alle 200 ms). Ohne Intervall sendet es bei Änderung, auf Wunsch erst ab einer Mindeständerung je Feld (Totband, z. B. erst ab 0,5 %).
+- **Anfragen:** `Get Data` und `Get Metadata` beantwortet das SDK selbst mit dem aktuellen Stand. Metadaten gibt es nur für Daten, die in der PublicationList angekündigt sind.
+- **Geprüft:** Tests ohne Netzwerk (Intervalle laufen mit simulierter Zeit, ohne Warten), Tests gegen den eingebauten Test-Broker, Interop gegen den echten Mosquitto (10 grün) und einmal unser Prüftool D7: 10 bestanden, 0 durchgefallen, 3 übersprungen. Dabei hat D7 zuerst einen **Fehler in D7 selbst** gezeigt (A-85), den ich behoben habe.
+- Eine kleine Erweiterung einer vorhandenen Bibliothek (`uuid` mit `v5`, zieht `sha1_smol` mit BSD-3-Lizenz nach), sonst nichts Neues. Kein Finding, nichts Reviewtes geändert, keine neuen Testdaten.
 
-**Für dich ist nichts offen.** Die Technik-Entscheidungen A-63 … A-74 sind nur zur Info (unten). Einen Blick wert: **A-65** (kein Rückstau), **A-71** (unbekanntes Gerät: die Fehlermeldung kommt erst mit Inkrement 7) und **A-72** (kleine Abweichungen von der API-Skizze).
+**Für dich ist nichts offen.** Die Technik-Entscheidungen A-75 … A-86 sind nur zur Info (unten). Einen Blick wert: **A-80** (ein Datensatz geht erst raus, wenn alle Felder einen Wert haben), **A-84** (kleine Abweichungen von der API-Skizze) und **A-85** (Fehler in D7 gefunden und behoben).
 
 ---
 
-Die Punkte A-1 … A-74 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-053 (A-63 … A-74) stehen unten.
+Die Punkte A-1 … A-86 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-054 (A-75 … A-86) stehen unten.
 
 Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-017) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
 
@@ -46,7 +48,18 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-054
+
+- **Datensatz (Data DataSet):** eine Gruppe von Messwerten, die immer zusammen verschickt wird, z. B. Temperatur und Sollwert. Er hat einen Namen (Tag), der auch im Topic steht.
+- **`Oi4Pv`:** der genormte Datensatz für einen Prozesswert: das Feld `Pv` (Istwert) und optional `Sv1` … `Sv255` (z. B. Sollwerte).
+- **Metadaten (Metadata):** die Beschreibung eines Datensatzes: Feldnamen, Typen, Einheit, Messbereich. Ein Empfänger braucht sie, um die Werte zu verstehen.
+- **ConfigurationVersion:** die Versionsnummer der Metadaten. Jede Datennachricht nennt sie, damit ein Empfänger merkt, wenn sich die Beschreibung geändert hat.
+- **UUIDv5:** eine Kennung, die aus einem Text berechnet wird. Gleicher Text ergibt immer dieselbe Kennung, ein anderer Text eine andere. Wir berechnen sie aus Tag und Feldern.
+- **Intervall:** „sende alle n Millisekunden den aktuellen Stand“. 0 heißt „sende bei Änderung“.
+- **Totband (Precision):** „sende erst, wenn sich der Wert um mehr als x geändert hat“. Das spart Nachrichten bei rauschenden Messwerten. Mit Intervall gilt das Totband nicht.
+- **Sende-Modus `ON_REQUEST_FILTER_9`:** der Standard für Datensätze: jeder Datensatz einzeln auf seinem eigenen Topic und zusätzlich auf Anfrage.
 
 ### Begriffe aus C-053
 
@@ -282,11 +295,29 @@ Neu aus C-053 (P4 Inkrement 6a, das SDK als Anbieter):
 - **A-73 (neu) – Tests:** neue Tests in `oec-core` (darunter zwei Zufallstests) und in `oec`, drei davon gegen den eingebauten Test-Broker; ein neuer Interop-Test gegen Mosquitto (zusammen 9 grün). Einmalig habe ich D7 mithören lassen: 10 bestanden, 0 durchgefallen, 3 übersprungen. Die Aufzeichnung habe ich nicht eingecheckt: Die D7-Testdaten werden aus Szenarien erzeugt, und für echte Aufzeichnungen bräuchte D7 eine neue Art von Testdaten (Sache von P5). Deshalb gibt es diesmal keine Testdaten zum Review.
 - **A-74 (neu) – Keine neue Bibliothek.** In 6b kommt voraussichtlich eine Zusatzfunktion der schon vorhandenen Bibliothek `uuid` dazu (für die DataSetClassId).
 
+Neu aus C-054 (P4 Inkrement 6b, eigene Daten der App):
+- **A-75 (neu) – Zyklusschnitt:** 6b passte in einen Zyklus (rund 2400 Zeilen Code und 1500 Zeilen Tests, ein Thema: der Weg eines Messwerts bis auf den Bus). Das Ändern der PublicationList von außen (`Set PublicationList`) gehört zu Inkrement 7, weil dort `Set` und die Status-Meldungen gebaut werden. Reihenfolge 7 → 8 → 10 bleibt; 7 schneide ich zu Beginn von C-055 neu, falls es zu groß ist.
+- **A-76 (neu) – Aufbau:** Die Logik steckt wieder in `oec-core` (drei neue Teile: Datentypen und Berechnungen, Zustand je Datensatz, Versionsnummern), die API in `oec::data`. Die Versionsnummern werden wie die DataSetWriterIds gespeichert; ist die Datei kaputt, startet die App mit Fehler.
+- **A-77 (neu) – DataSetClassId:** berechnet aus Tag, Feldnamen und Feldtypen. Einheit, Beschreibung und Messbereich zählen nicht mit, denn sie ändern die Struktur nicht. Wer eine eigene Kennung braucht, kann sie angeben.
+- **A-78 (neu) – Inhalt der Metadaten:** je Feld Typ, Beschreibung, Einheit und Messbereich. Bei der Einheit setzen wir nur den Text (z. B. „%“) und die Kennnummer „unbekannt“ (−1). Das Beispiel in der Guideline nutzt eine echte UNECE-Nummer; die können wir später als Zusatz anbieten, ohne die API zu brechen. Versionsnummer: ändert sich die Struktur, steigen beide Teile, sonst nur der zweite.
+- **A-79 (neu) – Wann Metadaten gesendet werden:** beim Anlegen, nach jedem Verbinden und bei einer neuen Version, immer vor den Daten. Auf Anfrage nur für Datensätze, die in der PublicationList stehen und nicht abgeschaltet sind; sonst schweigt das SDK (so erlaubt es die Guideline).
+- **A-80 (neu) – Nur vollständige Datensätze:** Eine Datennachricht enthält immer alle Felder. Deshalb geht ein Datensatz erst raus, wenn jedes Feld einen Wert hat. `update` setzt alle angegebenen Werte oder keinen. Werte werden in den Feldtyp umgewandelt (z. B. die Zahl 5 in ein Byte-Feld); passt ein Wert nicht, gibt es einen Fehler.
+- **A-81 (neu) – Sende-Modi im Detail:** „einzeln“ schickt nur den geänderten Datensatz. „Je Quelle“ bzw. „ganze App“ schicken bei einer Änderung den aktuellen Stand aller Datensätze dieser Gruppe in einer Nachricht. „Aus“ (`OFF_0`) heißt: nie senden, nie antworten; der Datensatz steht trotzdem mit „aus“ in der PublicationList.
+- **A-82 (neu) – Intervall und Totband:** Mit Intervall sendet das SDK regelmäßig und holt verpasste Takte nicht nach; der erste vollständige Stand und jeder Neuverbindung gehen sofort raus. Ohne Intervall sendet es bei Änderung, mit Totband erst ab der Mindeständerung je Feld. Die Zeit kommt von außen, damit die Tests ohne Warten laufen.
+- **A-83 (neu) – Anfragen und Listen:** `Get Data` liefert den aktuellen Stand, aufgeteilt in Seiten, wenn nötig; ein unbekannter Tag ergibt eine leere Liste. Profile und PublicationList nennen jetzt auch Data und Metadata. Wird ein Datensatz entfernt, bleiben seine Nummer und seine Version reserviert.
+- **A-84 (neu) – Kleine Abweichungen von der API-Skizze:**
+  - Neu: Messbereich je Feld (`range`), am Datensatz `tag()`, `source()` und `values()`.
+  - `update` meldet jetzt einen Fehler zurück (falscher Feldname, falscher Typ), statt ihn zu verschlucken.
+  - Der „Roh-JSON“-Wert der Skizze entfällt, weil das SDK ihn nicht gegen den Feldtyp prüfen könnte; dafür gibt es für jeden Feldtyp einen passenden Werttyp.
+  - Schreibbare Datensätze (`on_set`) kommen mit Inkrement 7.
+- **A-85 (neu) – Tests und ein Fehler in D7:** neue Tests in `oec-core` und `oec`, ein neuer Interop-Test (zusammen 10 grün). Beim einmaligen Mithören mit D7 gab es zuerst 2 Fehlschläge, beide nicht im SDK: Mein Test hatte dieselbe Nachrichtennummer zweimal benutzt (behoben), und **D7 hielt unaufgeforderte Metadaten für „leer“**, weil es den Inhalt an der falschen Stelle suchte (bei Metadaten steht er in `MetaData`, nicht in `Messages`). Das habe ich in D7 behoben, zuerst mit einem Test, der den Fehler zeigt. Deine 18 reviewten Testaufzeichnungen und ihre Ergebnisse ändern sich dadurch nicht. Danach: 10 bestanden, 0 durchgefallen, 3 übersprungen.
+- **A-86 (neu) – Bibliothek:** `uuid` bekommt die Funktion `v5`; dafür kommt die kleine Bibliothek `sha1_smol` (BSD-3-Lizenz, ohne weitere Abhängigkeiten) dazu. SHA-1 dient hier nur zum Berechnen der Kennung, nicht der Sicherheit. Die Lizenzprüfung (`cargo deny`) läuft ohne Ausnahme.
+
 ---
 
-### Was als Nächstes passiert (C-054)
+### Was als Nächstes passiert (C-055)
 
-1. **P4 Inkrement 6b** – die eigenen Daten der App: Datensätze (`add_data`) mit Metadaten, ihre Einträge in der PublicationList mit Sende-Modi, Intervallen (regelmäßiges Senden) und Totbändern (erst ab einer Mindeständerung senden), die DataSetClassId als UUIDv5.
+1. **P4 Inkrement 7** – die Schreib-Seite: `Set`/`Del` mit Status-Meldungen, die Config-Ressource, `Set PublicationList` (Sende-Einstellungen von außen ändern, soweit die App es erlaubt) und die Fehlermeldung `BadNotFound` für Anfragen zu unbekannten Geräten. Zuerst prüfe ich, ob 7 geteilt werden muss.
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
