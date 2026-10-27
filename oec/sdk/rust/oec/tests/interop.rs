@@ -6,7 +6,8 @@
 //! restart, refused logins, a wrong CA, TLS 1.2 and 1.3, the packet size
 //! limits of SF-105 and the explicit bootstrap (replaces the smoke test of
 //! C-050); since C-053 the Level 2 provider side (assets, `Get` answers),
-//! since C-054 Data DataSets with Metadata and an Interval.
+//! since C-054 Data DataSets with Metadata and an Interval, since C-055
+//! the write side (`Set Data`, `Set PublicationList`, Status events).
 //!
 //! Opt-in: the tests pass at once unless `OEC_INTEROP=1` is set, so the
 //! gate needs no container engine. Run them with `oec/dev/interop.sh`
@@ -927,7 +928,8 @@ fn level_2_assets_and_get_answers() {
         .expect("no answer to the Get");
     let v = json(&answer.payload);
     assert_eq!(v["ReplyTo"], request);
-    assert_eq!(v["Messages"].as_array().unwrap().len(), 6);
+    // MAM, Health, Profile and the 3 Status events of each source (C-055)
+    assert_eq!(v["Messages"].as_array().unwrap().len(), 12);
 
     pump.set_health(HealthState::MaintenanceRequired, Some(70));
     let p = probe
@@ -940,7 +942,7 @@ fn level_2_assets_and_get_answers() {
     probe.disconnect();
 }
 
-/// A `Get` through the broker from the probe.
+/// A request (`Get`, `Set`) through the broker from the probe.
 fn get(probe: &mut Probe, topic: String, payload: &Value) {
     probe
         .send(&Packet::Publish(Publish {
@@ -1086,6 +1088,190 @@ fn level_2_data_sets_and_metadata() {
     let v = json(&answer.payload);
     assert_eq!(v["ReplyTo"], meta_request);
     assert_eq!(v["MetaData"]["Fields"][0]["Name"], "Availability");
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+    probe.disconnect();
+}
+
+/// The DataSetClassId of the PublicationList (REQ-MSG-010).
+const PUBLICATION_LIST: &str = "217434d6-6e1e-4230-b907-f52bc9ffe152";
+
+/// A request NetworkMessage of the probe with the DataSetClassId of the
+/// resource and `messages`.
+fn request(id: &str, class: &str, messages: &Value) -> Value {
+    serde_json::json!({
+        "MessageId": id,
+        "MessageType": "ua-data",
+        "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
+        "DataSetClassId": class,
+        "ReplyTo": "",
+        "Messages": messages.clone()
+    })
+}
+
+/// The first DataSetMessage of `answer` with `payload`: a valid `Set`
+/// DataSetMessage (WriterGroupName, DataSetWriterId of the provider).
+fn with_payload(answer: &Value, payload: &Value) -> Value {
+    let mut dsm = answer["Messages"][0].clone();
+    dsm["Payload"] = payload.clone();
+    serde_json::json!([dsm])
+}
+
+/// The next publication on `topic` answering `id`.
+fn answer(probe: &mut Probe, topic: &str, id: &str) -> Value {
+    let p = probe
+        .next(WAIT, |p| {
+            p.topic == topic && json(&p.payload)["ReplyTo"] == id
+        })
+        .unwrap_or_else(|| panic!("no answer to {id} on {topic}"));
+    json(&p.payload)
+}
+
+/// A Level 2 app with a pump whose DataSet `speed` is writable (Set Data
+/// within 0 … 3000, Set PublicationList of Mode and Interval).
+fn write_app(dev: &Dev, states: &States) -> (App, Asset) {
+    let broker = Broker::new("localhost")
+        .port(dev.port)
+        .ca_pem(dev.file("broker/ca.pem"))
+        .credentials(&dev.user, &dev.password);
+    let on = states.clone();
+    let app = App::builder(Level::L2, ServiceType::Utility, product())
+        .bootstrap(Bootstrap::Explicit(broker))
+        .serial_number("oec-write")
+        .reference_designation(false)
+        .keep_alive(Duration::from_secs(5))
+        .on_connection(move |s| on.0.lock().unwrap().push(s))
+        .build()
+        .unwrap();
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-3"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    let speed = pump
+        .add_data(
+            DataSetDef::new("speed")
+                .field(Field::double("Setpoint").range(0.0, 3000.0))
+                .publication(
+                    Publication::default_data().writable(oec::data::Writable::ModeAndInterval),
+                ),
+        )
+        .unwrap();
+    speed.update([("Setpoint", 1000.0)]).unwrap();
+    speed
+        .on_set(|s| match s.get("Setpoint") {
+            Some(oec::data::Value::Double(v)) if (0.0..=3000.0).contains(v) => Ok(()),
+            _ => Err(StatusCode::BadOutOfRange),
+        })
+        .unwrap();
+    (app, pump)
+}
+
+/// The write side through Mosquitto (P4 increment 7a): `Set Data` decided
+/// by the handler, answered with the DataSet and the Status event Good or
+/// the handler's code (REQ-RES-DATA-011/012, REQ-RES-EVENT-005);
+/// `Set PublicationList` answered with the changed entry
+/// (REQ-RES-PUBLIST-025); a `Get` for an unknown Source with `BadNotFound`
+/// (REQ-CMP-047).
+#[test]
+fn level_2_set_data_and_publication_list() {
+    let Some(dev) = dev() else { return };
+    let mut probe = dev.probe("oec-probe-write", true);
+    let states = States::default();
+    let (app, pump) = write_app(&dev, &states);
+    let encoded = |il: &str| {
+        oec_core::il::IdentificationLink::parse(il)
+            .unwrap()
+            .encode()
+    };
+    let me = encoded(app.identification_link().as_str());
+    let it = encoded(pump.identification_link().as_str());
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = thread::spawn(move || app.run());
+    states.wait_for(ConnectionState::Online);
+    let (good, bad) = (
+        format!("{prefix}Pub/Event/{it}/Status/Good"),
+        format!("{prefix}Pub/Event/{it}/Status/Bad"),
+    );
+
+    // the DataSetClassId and DataSetMessage of the DataSet (REQ-MSG-010/016)
+    let data = format!("{prefix}Pub/Data/{it}/speed");
+    let first = probe.next(WAIT, |p| p.topic == data).expect("no Pub Data");
+    let first = json(&first.payload);
+    let class = first["DataSetClassId"].as_str().unwrap().to_owned();
+
+    let id = "1700000000000-Aggregation/vendor.com/Client/C-1/1";
+    let set = serde_json::json!({"Setpoint": 1500.0});
+    get(
+        &mut probe,
+        format!("{prefix}Set/Data/{it}/speed"),
+        &request(id, &class, &with_payload(&first, &set)),
+    );
+    assert_eq!(answer(&mut probe, &data, id)["Messages"][0]["Payload"], set);
+    assert_eq!(
+        answer(&mut probe, &good, id)["Messages"][0]["Payload"]["Number"],
+        0
+    );
+
+    let id = "1700000000001-Aggregation/vendor.com/Client/C-1/1";
+    let set = serde_json::json!({"Setpoint": 5000.0});
+    get(
+        &mut probe,
+        format!("{prefix}Set/Data/{it}/speed"),
+        &request(id, &class, &with_payload(&first, &set)),
+    );
+    let event = answer(&mut probe, &bad, id);
+    assert_eq!(
+        event["Messages"][0]["Payload"]["Number"],
+        StatusCode::BadOutOfRange.code()
+    );
+
+    let rest = format!("PublicationList/{it}/Data/speed");
+    let id = "1700000000002-Aggregation/vendor.com/Client/C-1/1";
+    get(
+        &mut probe,
+        format!("{prefix}Get/{rest}"),
+        &request(id, PUBLICATION_LIST, &serde_json::json!([])),
+    );
+    let listed = answer(&mut probe, &format!("{prefix}Pub/{rest}"), id);
+    let mut entry = listed["Messages"][0]["Payload"].clone();
+    entry["Interval"] = serde_json::json!(60_000);
+    let id = "1700000000003-Aggregation/vendor.com/Client/C-1/1";
+    get(
+        &mut probe,
+        format!("{prefix}Set/{rest}"),
+        &request(id, PUBLICATION_LIST, &with_payload(&listed, &entry)),
+    );
+    let changed = answer(&mut probe, &format!("{prefix}Pub/{rest}"), id);
+    assert_eq!(changed["Messages"][0]["Payload"], entry);
+    assert_eq!(
+        answer(&mut probe, &good, id)["Messages"][0]["Payload"]["Number"],
+        0
+    );
+
+    let unknown = encoded("vendor.com/Pump/P-3/4711");
+    let id = "1700000000004-Aggregation/vendor.com/Client/C-1/1";
+    get(
+        &mut probe,
+        format!("{prefix}Get/MAM/{unknown}"),
+        &request(
+            id,
+            "360ca8f3-5e66-42a2-8f10-9cdf45f4bf58",
+            &serde_json::json!([]),
+        ),
+    );
+    let event = answer(
+        &mut probe,
+        &format!("{prefix}Pub/Event/{unknown}/Status/Bad"),
+        id,
+    );
+    assert_eq!(
+        event["Messages"][0]["Payload"]["Number"],
+        StatusCode::BadNotFound.code()
+    );
 
     handle.shutdown();
     run.join().unwrap().unwrap();
