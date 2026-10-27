@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-056 review addendum 2 (R-1 accepted: REQ-CMP-043, REQ-CMP-047 and REQ-RES-SUBLIST-016 `reviewed`, `ee9f0e9`; guideline `2e32a6b`; A-109 for information). **Nothing open for the PO.**_
+_Last updated: 2026-10-27, C-057 (P4 increment 7c: ReferenceDesignation, Generic events, Syslog bridge; A-110 … A-119 for information, worth a look: A-113, A-115, A-117). **Nothing open for the PO.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -71,10 +71,16 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - SDK (`8591929`, test first): the Status event for a request to an unknown Source is published under the `AppId` (A-91 replaced, **A-109**); the interop test `level_2_config` no longer races the SUBSCRIBE (`6afd879`); `oec/dev/interop.sh` 12 passed, 1 ignored; one-off D7 `monitor` 10 pass, 0 fail, 3 skip – T7-MON-04 now passes with an unknown Source asked.
   - SF-107 changes the SDK only with the SubscriptionList (increment 8). C-057 (7c) still runs in a new agent; `prompt.md` is updated.
 - C-056 review addendum 2: you accepted R-1 ("R-1 reviewed"); REQ-CMP-043, REQ-CMP-047 and REQ-RES-SUBLIST-016 are `reviewed` (`ee9f0e9`). No drafts, no open finding, nothing open.
+- C-057 (P4 increment 7c, not split; order ReferenceDesignation → Generic events → Syslog bridge):
+  - `oec-core`: `provider::refdes` – `Get`/`Set`/`Del ReferenceDesignation` from Level 2 on the write path of 7a (A-92 ends for it), `Get` with the Query of the direct children, the stored table; `provider::events` – Generic events (`CAT_GENERIC_99`) and Syslog events of the application with persisted DataSetWriterIds and PublicationList entries, Syslog Levels switchable by `Set PublicationList`.
+  - `oec`: `Asset::on_reference_designation`/`reference_designation`, `AppBuilder::reference_designation`, persisted under `app/reference-designations`, RevisionCounter + 1 per change; `GenericEvent` + `Asset::emit_event`; `AppBuilder::syslog` and the `log` bridge (`event::install_bridge`): SDK and transport records excluded, no feedback loop, rate limit, MSG ≤ 1024 bytes. The sketch is aligned (ADR-0020 amendment C-057).
+  - Tests: core and runtime tests in the gate (incl. the guideline vectors V-PAY-041 … 046/053/054 of MG B1.1.10 and the event shapes of V-PAY-064/065), the Syslog test in its own binary; opt-in interop 13 green; a one-off D7 `oec-check monitor` run against the SDK: 9 pass, 0 fail, 4 skip.
+  - No new finding, no reviewed item changed, no new test data, no new dependency: **nothing open.** A-110 … A-119 are for information. Worth a look: **A-113** (a ReferenceDesignation change increments the RevisionCounter – if you read MG 5 differently, it becomes SF-109), **A-115** (events are not queued offline), **A-117** (the `log` bridge; applications must not log secrets).
+  - C-058 (increment 8, consumer side and SubscriptionList) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `2e32a6b` (re-baseline, no content change).
 
-Logs: [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -189,6 +195,16 @@ Logs: [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_writ
 | A-107 | API (ADR-0020 amendment C-056): `ConfigHandle::on_set` returns `Result`, `ConfigDef::{label, context}`, `ConfigHandle::{context, source, remove}`; sketch aligned | info (agent) | C-056 | – | – |
 | A-108 | Tests (core, runtime, app, interop 12 green); D7 `monitor` 10/0/3 after a D7 fix of T7-MON-10 | info (agent) | C-056 | – | – |
 | A-109 | SF-108 in the SDK: the Status event for an unknown Source under the `AppId`, transient ids dropped; interop race fixed | info (agent) | C-056 review | – | – |
+| A-110 | Cycle cut: 7c not split; order ReferenceDesignation → Generic events → Syslog bridge; 7c → 8 → 10 | info (agent) | C-057 | – | – |
+| A-111 | ReferenceDesignation from Level 2: `Get` with Query, `Set`/`Del` decided by the handler, identical `Set` without a write, `Del` of nothing → `BadNotFound`; not published on connect | info (agent) | C-057 | – | – |
+| A-112 | ReferenceDesignation persisted under `app/reference-designations`; corrupt → `Error::Io`; kept while its asset is removed | info (agent) | C-057 | – | – |
+| A-113 | A ReferenceDesignation change increments the RevisionCounter (MG 5, REQ-RES-MAM-018 – interpretation) | info (agent) | C-057 | – | – |
+| A-114 | A request completed after its asset was removed is answered under the `AppId` (RD, Config, Data) | info (agent) | C-057 | – | – |
+| A-115 | Generic events: ≤ 16 Levels per source, persisted writer ids and `FILTER_4` entries, Details a JSON object, dropped offline, allowed at Level 1 | info (agent) | C-057 | – | – |
+| A-116 | Syslog events: PRI as Number, `MSG`/`HEADER`; Informational/Debug `OFF_0` by default; switchable by `Set PublicationList`, persisted | info (agent) | C-057 | – | – |
+| A-117 | `log` bridge: installed at `build()`, SDK/transport targets excluded, reentrancy guard, rate limit 50 + 10/s, MSG ≤ 1024 bytes; never log secrets | info (agent) | C-057 | – | – |
+| A-118 | API (ADR-0020 amendment C-057): `Result` returns, `GenericEvent` builder, `Asset::reference_designation`, `install_bridge`; sketch aligned | info (agent) | C-057 | – | – |
+| A-119 | Tests (core, runtime, own Syslog binary, interop 13 green); D7 `monitor` 9/0/4; no new dependency | info (agent) | C-057 | – | – |
 
 ## Decisions and review items
 
@@ -633,6 +649,39 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **Interop:** in one full `interop.sh` run, `level_2_config` sent its first `Get` before the broker knew the application's SUBSCRIBE (`Online` follows CONNACK); the test now waits for the first `Pub/Config` (`6afd879`). A test defect, not an SDK defect. Then 12 passed, 1 ignored (twice).
 - **D7:** one-off `oec-check monitor` (external call, Q-009) during `level_2_set_data_and_publication_list`: 10 pass, 0 fail, 3 skip (T7-MON-03, 05, 07 as before); T7-MON-04 passes although an unknown Source was asked (in C-055 it was skipped because of SF-108).
 
-## Next (C-057)
+### A-110 … A-119 – P4 increment 7c (C-057, agent)
 
-1. P4 increment 7c – ReferenceDesignation (`Get`/`Set`/`Del`, `Asset::on_reference_designation`, persisted), the Syslog bridge of the application and Generic events, on the Event writer of 7a. SF-108 is already in the SDK (A-109). Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/sdk/rust/oec-core/src/provider/{refdes.rs, events.rs}`, `provider.rs`, `provider/{write.rs, config.rs}`; `oec/sdk/rust/oec/src/{event.rs, asset.rs, app.rs, runtime.rs, lib.rs}`; the tests `oec-core/tests/{provider_refdes, provider_event, provider_write}.rs`, `oec/tests/{app, runtime, syslog, interop}.rs`, `oec/tests/testbroker/mod.rs`; the sketch (`sketch/src/{asset, event, app}.rs`); ADR-0020/0023 amendment C-057, ADR-0026 amendment C-057 §16; [C-057 log](log/2026-10-27_C-057_refdes-events.md).
+- **A-110 Cycle cut:** 7c is not split. ReferenceDesignation, Generic and Syslog events are small additions on two existing mechanisms (the write path of 7a and the Event writer with persisted ids). Built in the order ReferenceDesignation → Generic events → Syslog bridge, because the bridge uses the event path of the Generic events. About 1700 lines of code and 1850 lines of tests (incl. the shared test broker). Order 7c → 8 → 10 unchanged.
+- **A-111 ReferenceDesignation:**
+  - offered from Level 2 (`AppBuilder::reference_designation(true)` at Level 1 → `Error::Invalid` at `build()`); the Profile lists it after Metadata; one PublicationList entry per source (`ON_REQUEST_SOURCE_10`, WriterGroupName `ReferenceDesignation`); not published on connect (it is on request only);
+  - `Get` with or without Source, and with the Query of the direct children: the Parent IdentificationLink is compared character by character (REQ-RES-REFDES-014);
+  - `Set` replaces the object as a whole, `Del` removes it; both in two phases: the SDK checks, the `on_reference_designation` handler decides outside every lock (a panic → `BadInternalError`), the SDK answers (Pub with `ReplyTo` + Status Good, or Status Bad with the handler's code);
+  - a `Set` of the identical object is Good without a write; a `Del` without a stored object → `BadNotFound` without asking the handler; an invalid payload → `BadDecodingError`.
+  - A-92 ends for ReferenceDesignation; `Set`/`Del SubscriptionList` stay `BadNotFound` until increment 8.
+- **A-112 Persistence:** the table `{"Version":1,"Entries":[{"Source","ReferenceDesignation"}]}` under `app/reference-designations`; a table that cannot be read → `Error::Io` (`InvalidData`) at `build()`; a failing write is logged (the change stays in memory). An object stays stored while its asset is removed, so it is back when the asset is added again.
+- **A-113 RevisionCounter:** an accepted ReferenceDesignation change increments and persists the RevisionCounter of the source and republishes its MAM, as a Config change does (A-104). MG 5 counts the "configuration data of the asset as defined in OPC UA Part 100"; a reference designation set over the bus is engineering data of the asset, so the SDK counts it. The guideline does not name it explicitly. No finding, because the reading follows the text. If you read it differently, I make it SF-109.
+- **A-114 Late answers:** a `Set`/`Del` whose handler finishes after its asset was removed is answered under the `AppId` (as SF-108 does for unknown Sources). This holds for ReferenceDesignation, Config and Data.
+- **A-115 Generic events:**
+  - `Asset::emit_event(GenericEvent)`: category `CAT_GENERIC_99`, free Level (a valid topic level, at most 16 per source), Number, optional Description, Details as a JSON object;
+  - every Level gets a persisted DataSetWriterId and a PublicationList entry (`FILTER_4`) at first use, even offline;
+  - while offline, or with 256 events waiting, the event is dropped and the call still returns `Ok` (no queue for later: an event is about now);
+  - allowed at every Level; `ua-event` in the DataSetMessage, the NetworkMessage stays `ua-data` (REQ-MSG-029).
+- **A-116 Syslog events:** published on `Pub/Event/<AppId>/Syslog/<Level>`; Number = PRI (Facility 1 "user" × 8 + severity), no Description, Details `MSG` and `HEADER` (RFC 3164 header with HOSTNAME from the MAM and TAG = the application's name), MG B1.1.6. Eight PublicationList entries with Config `MODE_1`: Emergency … Notice on (`FILTER_4`), Informational and Debug `OFF_0` by default (REQ-TOP-024). `Set PublicationList` switches a Level between `FILTER_4` and `OFF_0` only (others → `BadNotWritable`, REQ-TOP-027); the result is persisted in `app/publications`.
+- **A-117 `log` bridge:**
+  - `AppBuilder::syslog(level)` installs one process-global `log::Log` at the first `build()` if no logger is set yet; `event::install_bridge(Some(local))` keeps a local logger as well. A later `env_logger::init()` panics (documented).
+  - Level mapping: Error → Error, Warn → Warning, Info → Informational, Debug/Trace → Debug. `event::syslog` publishes the other Syslog levels directly.
+  - No feedback loop: records of `oec`, `oec_core`, `rustls`, `tokio` and `mio` are not bridged, and a thread-local guard is held while a record is published. `log::max_level` follows the switched Levels.
+  - Rate limit: a burst of 50, then 10 per second; the number dropped is reported once as a Warning. MSG is `TAG[pid]: text`, cut to 1024 bytes on a character boundary.
+  - Secrets: the SDK cannot tell a secret in a log text. The docs say: never log secrets (GL-ADR-021); the SDK's own records are not bridged.
+- **A-118 API (ADR-0020 amendment C-057):** `Asset::on_reference_designation` and `Asset::emit_event` return `Result`; new `Asset::reference_designation`, `AppBuilder::reference_designation`, `GenericEvent::new(level, number).description(..).details_json(..)`, `event::{syslog, install_bridge, MAX_MESSAGE_BYTES}`; the prelude has `ReferenceDesignation` and `GenericEvent`. The sketch is aligned.
+- **A-119 Tests:**
+  - `oec-core`: `tests/provider_refdes.rs` (5 tests, incl. the guideline vectors V-PAY-041 … 046/053/054 and a strict-schema check of every answer), `tests/provider_event.rs` (5 tests, the shapes of V-PAY-064/065), `provider_write.rs` (late `Set Data` answer);
+  - `oec`: `reference_designation_is_set_got_deleted_and_persisted` and `generic_events_are_published_while_connected` against the in-process TLS broker, now in `tests/testbroker/mod.rs`; `tests/syslog.rs` as its own binary (the logger is process-global); unit tests in `event`;
+  - opt-in interop `level_2_reference_designation_and_generic_events` against Mosquitto: `interop.sh` 13 passed, 1 ignored (the Syslog bridge is not in the interop binary, because its logger is process-global);
+  - one-off D7 `oec-check monitor` (external call, Q-009): 9 pass, 0 fail, 4 skip (T7-MON-03 connected before observation, 05 needs ≥ 125 s, 07 no RequestIds, 18 MaxPacketSize not given); capture not committed;
+  - no new dependency; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception.
+
+## Next (C-058)
+
+1. P4 increment 8 – the consumer side (typed subscriptions, discovery helpers, `Get` with correlation and timeout, pagination reassembly) and the SubscriptionList with `Set`/`Del SubscriptionList` (A-92 ends; SF-107, REQ-RES-SUBLIST-016). At its end the sketch is deleted and its REQ walker moves into `oec`. Then 10 (`oec-ffi`). Runs in a new agent (start prompt in `prompt.md`).

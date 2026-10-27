@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 27.10.2026, nach deinem Review von C-056 (D-1, D-2 und R-1 umgesetzt, Nachträge 1 und 2 zu C-056). **Für dich ist nichts offen.**_
+_Stand: 27.10.2026, nach C-057 (P4 Inkrement 7c: ReferenceDesignation, eigene Ereignisse der App, Syslog-Brücke). **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,23 +24,25 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts. Du hast geschrieben: „R-1 reviewed“. Die drei Regeln REQ-CMP-043, REQ-CMP-047 und REQ-RES-SUBLIST-016 stehen jetzt auf `reviewed` (`ee9f0e9`, Nachtrag 2 zu C-056). Es gibt keinen Entwurf und kein offenes Finding. Was aus D-1, D-2 und R-1 geworden ist, steht unten in „Was aus deinem letzten Review (C-056) geworden ist“.
+Nichts. C-057 hat kein neues Finding, keine neuen Testdaten und nichts Reviewtes geändert. Es gibt keinen Entwurf und kein offenes Finding. Was aus D-1, D-2 und R-1 von C-056 geworden ist, steht unten in „Was aus deinem letzten Review (C-056) geworden ist“.
 
-### Zur Info: was C-056 gebaut hat
+### Zur Info: was C-057 gebaut hat
 
-C-056 war **P4 Inkrement 7b**: die **Config-Ressource**. Eine App beschreibt ihre Einstellungen (z. B. Abfrage-Intervall, Server-Adresse, API-Schlüssel) in Gruppen, mit Typ, Grenzen und Pflichtfeldern. Das SDK kümmert sich um den Rest. 7b passte in einen Zyklus, ich habe es nicht geteilt (A-98).
-- **Lesen und Ändern von außen:** Die Config geht beim Start, nach jedem Verbindungsaufbau und nach jeder Änderung auf den Bus. Ab Level 2 kann ein anderes Programm sie mit `Get Config` abfragen und mit `Set Config` ändern – auch nur einzelne Werte. Das SDK prüft jede Änderung vollständig (gibt es die Einstellung, stimmt der Typ, liegt der Wert in den Grenzen, passt das Textmuster, fehlt ein Pflichtfeld?). Erst dann fragt es den Handler der App (`on_set`); die App hat das letzte Wort. Antwort: erst die neue Config, dann „Good“ – oder nur „Bad“ mit dem Grund (A-101).
-- **Geheime Werte (GL-ADR-021):** Ist eine Einstellung als geheim markiert (z. B. ein Passwort), steht auf dem Bus immer `********`, nie der echte Wert. Schickt jemand die Sternchen in einem `Set` zurück, bleibt der alte Wert erhalten. Auch in Log-Ausgaben und Fehlermeldungen des SDK steht nie ein Wert (A-103).
-- **Speichern:** Geänderte Werte werden gespeichert und gelten auch nach einem Neustart, solange sie zur aktuellen Beschreibung passen. Die Speicherdateien darf nur noch der Besitzer lesen (A-104). Jede Änderung erhöht den Änderungszähler (RevisionCounter) im Typenschild.
-- **Secrets (GL-ADR-022):** Die Plattform darf Zugangsdaten und Schlüssel unter `/run/secrets/oi4` erneuern, während die App läuft. Das SDK liest sie jetzt vor jedem neuen Verbindungsaufbau neu ein. Sind die neuen Daten kaputt, nimmt es die letzten guten und warnt, ohne Inhalte zu zeigen (A-105).
-- **Geprüft:** Tests ohne Netzwerk (darunter die Config-Beispiele aus Anhang B1.1.3 der Guideline), Tests gegen den eingebauten Test-Broker, Interop gegen den echten Mosquitto (12 grün) und einmal D7: Beim ersten Lauf hat D7 einen **eigenen Fehler** gezeigt – es hielt das neu gesendete Typenschild nach einer Config-Änderung für einen zweiten Start der App. Das habe ich in D7 behoben (zuerst mit einem Test, die reviewten Testdaten sind unverändert). Danach: 10 bestanden, 0 durchgefallen, 3 übersprungen (Lauf zu kurz bzw. Situation kam nicht vor).
-- Neue Bibliothek: `regex` für die Textmuster (Lizenzprüfung ohne Ausnahme, A-106). Nichts Reviewtes geändert, keine neuen Testdaten, kein neues Finding.
+C-057 war **P4 Inkrement 7c**: drei kleinere Bausteine auf dem Schreib-Weg und dem Event-Weg aus 7a. 7c passte in einen Zyklus, ich habe es nicht geteilt (A-110). Reihenfolge: ReferenceDesignation → eigene Ereignisse → Syslog-Brücke, weil die Brücke den Event-Weg der eigenen Ereignisse nutzt.
+- **ReferenceDesignation (Betriebsmittelkennzeichnung):** Ab Level 2 kann ein anderes Programm die Kennzeichnung eines Geräts (Funktion, Produkt, Einbauort nach IEC 81346) abfragen, setzen und löschen. Das SDK prüft die Anfrage, dann entscheidet der Handler der App (`on_reference_designation`), dann antwortet das SDK – wie bei `Set Data` und `Set Config`. Eine Abfrage kann auch „alle direkt untergeordneten Geräte“ meinen (Query). Die Kennzeichnung wird gespeichert und gilt nach einem Neustart weiter (A-111, A-112). Jede Änderung erhöht den Änderungszähler im Typenschild (**A-113**, siehe unten).
+- **Eigene Ereignisse (Generic Events):** Die App kann eigene Ereignisse senden, z. B. „Wartung fällig“ (`Asset::emit_event`). Für jede neue Art legt das SDK einen Eintrag in der PublicationList an. Ohne Verbindung wird ein Ereignis verworfen, nicht für später aufgehoben (**A-115**).
+- **Syslog-Brücke:** Was die App über die übliche Rust-Log-Schnittstelle (`log`) schreibt, geht als Syslog-Ereignis auf den Bus (`Pub/Event/<AppId>/Syslog/<Stufe>`). Ab „Notice“ ist das eingeschaltet, „Informational“ und „Debug“ sind aus; ein anderes Programm kann einzelne Stufen über die PublicationList an- und ausschalten, die Einstellung wird gespeichert (A-116). Damit sich nichts im Kreis dreht, gehen die Log-Meldungen des SDK selbst und der Netzwerk-Bibliotheken **nicht** auf den Bus. Bei sehr vielen Meldungen bremst das SDK (50 auf einmal, dann 10 pro Sekunde) und meldet einmal, wie viele es weggelassen hat. **Wichtig:** Das SDK kann in einem Log-Text kein Passwort erkennen – die App darf keine Geheimnisse loggen; das steht in der Doku (**A-117**).
+- **Geprüft:** Tests ohne Netzwerk (darunter die ReferenceDesignation-Beispiele aus Anhang B1.1.10 und die Event-Beispiele aus B1.1.6), Tests gegen den eingebauten Test-Broker, Interop gegen den echten Mosquitto (13 grün, 1 bewusst ausgelassen) und einmal D7: 9 bestanden, 0 durchgefallen, 4 übersprungen (Lauf zu kurz bzw. Situation kam nicht vor).
+- Keine neue Bibliothek, nichts Reviewtes geändert, keine neuen Testdaten, kein neues Finding.
 
-Die zwei Entscheidungen aus C-055 (D-1, D-2) und R-1 hast du inzwischen erledigt (siehe unten). Die Technik-Entscheidungen A-98 … A-108 sind nur zur Info (unten). Einen Blick wert: **A-103** (Maskierung), **A-104** (geheime Werte auf der Platte nur durch Dateirechte geschützt), **A-105** (Secrets neu einlesen) und **A-106** (Regex-Dialekt).
+Die Technik-Entscheidungen A-110 … A-119 sind nur zur Info (unten). Einen Blick wert:
+- **A-113:** Ändert jemand die ReferenceDesignation über den Bus, erhöht das SDK den Änderungszähler (RevisionCounter) im Typenschild – wie bei einer Config-Änderung. Die Guideline (MG 5) zählt „Konfigurationsdaten des Geräts nach OPC UA Part 100“; die Kennzeichnung nennt sie nicht ausdrücklich. Ich lese sie als Konfigurationsdaten. Siehst du das anders, mache ich daraus SF-109.
+- **A-115:** Ereignisse ohne Verbindung werden verworfen.
+- **A-117:** die Syslog-Brücke, v. a. „keine Geheimnisse loggen“.
 
 ---
 
-Die Punkte A-1 … A-109 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-056 (A-98 … A-108) stehen unten.
+Die Punkte A-1 … A-119 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-057 (A-110 … A-119) stehen unten.
 
 Aus C-056: Deine Zustimmung zu D-1 (SF-107), D-2 (SF-108) und R-1 ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-056) geworden ist“.
 
@@ -52,7 +54,17 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-057
+
+- **ReferenceDesignation (Betriebsmittelkennzeichnung):** wo ein Gerät in der Anlage sitzt und wozu es dient, nach IEC 81346 – aufgeteilt in Funktion, Produkt und Einbauort, jeweils mit einem Verweis auf das übergeordnete Gerät (Parent).
+- **Query (Abfrage der Kinder):** ein `Get ReferenceDesignation`, das nicht ein Gerät meint, sondern alle Geräte, deren übergeordnetes Gerät das genannte ist.
+- **Syslog:** das klassische Format für Log-Meldungen mit acht Stufen von „Emergency“ bis „Debug“. Die Guideline überträgt Syslog-Meldungen als Events (`Pub/Event/<Quelle>/Syslog/<Stufe>`).
+- **Generic Event (eigenes Ereignis):** ein Ereignis, dessen Bedeutung die App selbst festlegt (Kategorie `CAT_GENERIC_99`), z. B. „Filter tauschen“. Die App muss die Nummern und Details dokumentieren.
+- **Brücke (Bridge):** das Stück SDK, das die normale Rust-Log-Schnittstelle (`log`) mit dem Bus verbindet, damit die App nichts Besonderes tun muss.
+- **Drosselung (Rate Limit):** eine Obergrenze, wie viele Meldungen pro Sekunde auf den Bus gehen, damit eine „redselige“ App den Bus nicht flutet.
+- **Rückkopplung:** Ein Log-Eintrag würde beim Senden einen neuen Log-Eintrag erzeugen, der wieder gesendet wird – endlos. Das SDK verhindert das.
 
 ### Begriffe aus C-056
 
@@ -366,12 +378,24 @@ Neu aus C-056 (P4 Inkrement 7b, die Config-Ressource):
 Neu aus deinem Review von C-056:
 - **A-109 (neu) – SF-108 im SDK:** Eine Anfrage (`Get`, `Set`, `Del`) zu einem Gerät, das die App weder ist noch vertritt, beantwortet das SDK mit `BadNotFound` unter dem **eigenen Namen der App** (`Pub/Event/<AppId>/Status/Bad`, mit `ReplyTo`). Die vorübergehenden Nummern und die Grenze von 64 fremden Geräten sind weg: Es gibt keinen fremden Absender mehr, also auch nichts zu begrenzen. Zuerst die Tests geändert (sie schlugen fehl), dann den Code. Dazu ein Fehler im Interop-Test (erstes `Get` zu früh, siehe oben). D7 einmal mitgehört: 10 bestanden, 0 durchgefallen, 3 übersprungen; T7-MON-04 besteht jetzt.
 
+Neu aus C-057 (P4 Inkrement 7c):
+- **A-110 (neu) – Zyklusschnitt:** 7c passte in einen Zyklus (rund 1700 Zeilen Code und 1850 Zeilen Tests). Reihenfolge innerhalb: ReferenceDesignation → eigene Ereignisse → Syslog-Brücke. Danach bleibt es bei 8 → 10.
+- **A-111 (neu) – ReferenceDesignation:** ab Level 2; Abfrage für ein Gerät, für alle oder für die direkt untergeordneten (Query, Vergleich Zeichen für Zeichen). Setzen ersetzt die ganze Kennzeichnung, Löschen entfernt sie; der Handler der App entscheidet, ein Absturz des Handlers wird zu `BadInternalError`. Dasselbe noch einmal setzen → „Good“ ohne Speichern; Löschen, wo nichts ist → `BadNotFound`; kaputte Nachricht → `BadDecodingError`. Wird beim Verbindungsaufbau nicht gesendet, nur auf Anfrage. Für `Set`/`Del SubscriptionList` bleibt es bis Inkrement 8 bei `BadNotFound`.
+- **A-112 (neu) – Speichern:** in `app/reference-designations`; eine kaputte Datei → die App startet mit Fehler. Wird ein Gerät entfernt, bleibt seine Kennzeichnung gespeichert und ist wieder da, wenn es zurückkommt.
+- **A-113 (neu) – Änderungszähler:** siehe oben; das ist eine Auslegung von MG 5, kein Finding. Auf Wunsch SF-109.
+- **A-114 (neu) – Späte Antworten:** Wird ein Gerät entfernt, während sein Handler noch über eine Anfrage entscheidet, antwortet das SDK unter dem Namen der App (wie bei SF-108). Gilt für ReferenceDesignation, Config und Data.
+- **A-115 (neu) – Eigene Ereignisse:** höchstens 16 Arten pro Gerät; Details müssen ein JSON-Objekt sein; ohne Verbindung oder bei 256 wartenden Ereignissen wird verworfen (die App bekommt trotzdem „Ok“, weil ein Ereignis von „jetzt“ handelt); auch auf Level 1 erlaubt.
+- **A-116 (neu) – Syslog-Events:** Nummer = Syslog-Priorität (Facility „user“ × 8 + Stufe), Details `MSG` und `HEADER` wie im Beispiel B1.1.6. Acht Einträge in der PublicationList; Informational und Debug sind aus (Regel der Guideline), alle anderen an. Umschalten nur zwischen an und aus; gespeichert.
+- **A-117 (neu) – Log-Brücke:** wird beim ersten `build()` eingerichtet, wenn die App noch keinen Logger hat; wer einen eigenen behalten will, nimmt `install_bridge`. Fehler → Error, Warnung → Warning, Info → Informational, Debug/Trace → Debug. SDK- und Netzwerk-Meldungen bleiben lokal, damit es keine Rückkopplung gibt. Drosselung 50 auf einmal, dann 10 pro Sekunde; Text höchstens 1024 Byte. **Keine Geheimnisse loggen** (GL-ADR-021).
+- **A-118 (neu) – Kleine Abweichungen von der API-Skizze:** einige Funktionen melden jetzt einen Fehler zurück (`Result`), eigene Ereignisse baut man mit `GenericEvent::new(…)`, neu sind `reference_designation()` und `install_bridge`. Die Skizze ist angepasst.
+- **A-119 (neu) – Tests:** neue Tests in `oec-core` und `oec`, die Syslog-Tests in einem eigenen Testprogramm (der Logger gilt für den ganzen Prozess), ein neuer Interop-Test (zusammen 13 grün), D7 9 bestanden / 0 durchgefallen / 4 übersprungen. Keine neue Bibliothek.
+
 ---
 
-### Was als Nächstes passiert (C-057)
+### Was als Nächstes passiert (C-058)
 
-1. **P4 Inkrement 7c** – ReferenceDesignation (die Einbauort-Kennzeichnung eines Geräts, von außen les-, änder- und löschbar, gespeichert), die Weiterleitung der Log-Meldungen der App als Syslog-Events und eigene Ereignisse der App (Generic Events). Nutzt den Event-Weg aus 7a.
-   - SF-108 ist schon im SDK (A-109), R-1 ist erledigt. SF-107 kommt erst mit der SubscriptionList (Inkrement 8).
+1. **P4 Inkrement 8** – die Empfänger-Seite des SDK: Abos mit Typen, Geräte finden, `Get` mit Antwort-Zuordnung und Zeitlimit, Zusammensetzen von Antworten über mehrere Seiten; dazu die SubscriptionList mit `Set`/`Del` (dort steht dann auch das `Set`-Abo der beschreibbaren Datensätze, SF-107). Am Ende von 8 wird die API-Skizze gelöscht.
+   - Danach Inkrement 10 (C-Schnittstelle `oec-ffi`).
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
