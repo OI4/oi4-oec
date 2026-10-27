@@ -3,6 +3,7 @@
 use std::ops::BitOr;
 use std::time::Duration;
 
+use crate::identity::{IdentificationLink, LocalizedText};
 use crate::status::StatusCode;
 use crate::Result;
 
@@ -29,20 +30,27 @@ pub enum BuiltinType {
     LocalizedText,
 }
 
-/// A field value. `From` conversions exist for the Rust primitives.
+/// A field value. `From` conversions exist for the Rust primitives,
+/// `String`/`&str`, byte vectors and [`LocalizedText`]; a value is
+/// converted to the type of its field when set (amendment C-054: the
+/// `Json` escape hatch is replaced by typed variants).
 #[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
 pub enum Value {
     Boolean(bool),
     Int32(i32),
     Int64(i64),
     UInt32(u32),
+    UInt64(u64),
     Float(f32),
     Double(f64),
+    /// A String, or a Guid in its string form.
     String(String),
     /// Unix time in ms; encoded as ISO 8601 DateTime.
     DateTime(i64),
-    /// Any other built-in type, already encoded as OPC UA JSON (escape hatch).
-    Json(String),
+    /// A ByteString.
+    Bytes(Vec<u8>),
+    LocalizedText(LocalizedText),
 }
 
 impl From<bool> for Value {
@@ -91,6 +99,12 @@ impl Field {
     pub fn description(self, text: &str) -> Self {
         unimplemented!()
     }
+
+    /// Range of the values (`EURange` property of the Metadata,
+    /// amendment C-054).
+    pub fn range(self, low: f64, high: f64) -> Self {
+        unimplemented!()
+    }
 }
 
 /// Publication `Mode` of a PublicationList entry (MG 8.3.8). The four
@@ -123,6 +137,16 @@ impl Mode {
     pub const SOURCE: Mode = Mode { on_request: false, application: false, source: true, filter: false };
     /// Alone on `Pub/<Resource>/<Source>/<Filter>` (REQ-RES-PUBLIST-011).
     pub const FILTER: Mode = Mode { on_request: false, application: false, source: false, filter: true };
+
+    /// `self | other` in `const` contexts (amendment C-054).
+    pub const fn union(self, other: Mode) -> Mode {
+        Mode {
+            on_request: self.on_request || other.on_request,
+            application: self.application || other.application,
+            source: self.source || other.source,
+            filter: self.filter || other.filter,
+        }
+    }
 }
 
 impl BitOr for Mode {
@@ -249,15 +273,34 @@ pub struct DataSet {
 }
 
 impl DataSet {
-    /// Updates field values (state). Synchronous and non-blocking. Whether
-    /// and when a message is sent follows the PublicationList entry; the
-    /// last state answers `Get Data` (REQ-RES-DATA-007), a series of pages
-    /// is built from one snapshot (REQ-PAG-007).
-    pub fn update<K, V>(&self, values: impl IntoIterator<Item = (K, V)>)
+    /// The Tag (topic Filter, amendment C-054).
+    pub fn tag(&self) -> &str {
+        unimplemented!()
+    }
+
+    /// The `Source`: the application itself or a represented asset
+    /// (amendment C-054).
+    pub fn source(&self) -> &IdentificationLink {
+        unimplemented!()
+    }
+
+    /// Updates field values (state), all or none. Synchronous and
+    /// non-blocking. Whether and when a message is sent follows the
+    /// PublicationList entry; the last state answers `Get Data`
+    /// (REQ-RES-DATA-007), a series of pages is built from one snapshot
+    /// (REQ-PAG-007). An unknown field or a value that does not fit its
+    /// field is an error (amendment C-054: returns `Result`).
+    pub fn update<K, V>(&self, values: impl IntoIterator<Item = (K, V)>) -> Result<()>
     where
         K: AsRef<str>,
         V: Into<Value>,
     {
+        unimplemented!()
+    }
+
+    /// The current values in field order, once every field has one
+    /// (amendment C-054).
+    pub fn values(&self) -> Option<Vec<Value>> {
         unimplemented!()
     }
 

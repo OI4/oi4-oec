@@ -58,7 +58,7 @@ impl Oi4Identifier {
 
 /// OPC UA LocalizedText (REQ-MSG-040). `&str` converts to locale `en-US`
 /// (REQ-RES-MAM-024: the Model used for the Oi4Identifier exists in en-US).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalizedText {
     pub locale: String,
     pub text: String,

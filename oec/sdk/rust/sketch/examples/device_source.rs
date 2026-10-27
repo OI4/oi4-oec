@@ -40,11 +40,16 @@ fn main() -> oec::Result<()> {
         _ => Err(StatusCode::BadOutOfRange),
     });
 
-    // Field bus polling in a plain thread: update() is sync and non-blocking.
+    // The DataSet is published once every field has a value.
+    temperature.update([("Pv", 21.0), ("Sv1", 22.0)])?;
+
+    // Field bus polling in a plain thread: update() is sync and non-blocking;
+    // it fails only for an unknown field, a wrong type or a removed DataSet.
     let pv = temperature.clone();
-    std::thread::spawn(move || loop {
-        pv.update([("Pv", 21.5)]);
-        std::thread::sleep(Duration::from_secs(1));
+    std::thread::spawn(move || {
+        while pv.update([("Pv", 21.5)]).is_ok() {
+            std::thread::sleep(Duration::from_secs(1));
+        }
     });
 
     app.run()
