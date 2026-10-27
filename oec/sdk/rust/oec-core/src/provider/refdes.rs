@@ -17,7 +17,7 @@ use crate::il::IdentificationLink;
 use crate::lifecycle::Publication;
 use crate::message::{DataSetMessage, DataSetWriterId, DecodeError, MessageId};
 use crate::resource::{
-    Aspect, PublicationEntry, PublicationMode, ReferenceDesignation, ReferenceDesignationQuery,
+    PublicationEntry, PublicationMode, ReferenceDesignation, ReferenceDesignationQuery,
 };
 use crate::status::StatusCode;
 use crate::topic::{ListFilter, Method, Resource};
@@ -159,29 +159,6 @@ impl ReferenceDesignationRequest {
     pub fn message_id(&self) -> &MessageId {
         &self.message_id
     }
-}
-
-/// Whether `rd` is a direct child of `query.parent`: the Parent of the
-/// requested aspect, without one of any aspect, has an IdentificationLink
-/// equal to it, compared character by character (REQ-RES-REFDES-014,
-/// REQ-IL-015).
-fn matches(rd: &ReferenceDesignation, query: &ReferenceDesignationQuery) -> bool {
-    let aspects = match query.aspect {
-        Some(Aspect::Function) => [rd.function.as_ref(), None, None],
-        Some(Aspect::Product) => [rd.product.as_ref(), None, None],
-        Some(Aspect::Location) => [rd.location.as_ref(), None, None],
-        None => [
-            rd.function.as_ref(),
-            rd.product.as_ref(),
-            rd.location.as_ref(),
-        ],
-    };
-    aspects.into_iter().flatten().any(|d| {
-        d.parent
-            .as_ref()
-            .and_then(|p| p.identification_link.as_deref())
-            == Some(query.parent.as_str())
-    })
 }
 
 impl Provider {
@@ -330,7 +307,7 @@ impl Provider {
             .into_iter()
             .filter_map(|il| {
                 let rd = self.reference_designation(&il)?;
-                if query.is_some_and(|q| !matches(rd, q)) {
+                if query.is_some_and(|q| !q.matches(rd)) {
                     return None;
                 }
                 let id = self.writer(Resource::ReferenceDesignation, &il);
@@ -380,6 +357,7 @@ pub(super) fn query_of(messages: &[Json]) -> Option<&Map<String, Json>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::resource::Aspect;
 
     fn rd(parent: &str) -> ReferenceDesignation {
         serde_json::from_value(serde_json::json!({
@@ -428,10 +406,10 @@ mod tests {
             aspect,
         };
         let child = rd("x.com/L/C/1");
-        assert!(matches(&child, &q(None)));
-        assert!(matches(&child, &q(Some(Aspect::Function))));
-        assert!(!matches(&child, &q(Some(Aspect::Location))));
-        assert!(!matches(&rd("x.com/L/C/10"), &q(None)));
-        assert!(!matches(&ReferenceDesignation::default(), &q(None)));
+        assert!(q(None).matches(&child));
+        assert!(q(Some(Aspect::Function)).matches(&child));
+        assert!(!q(Some(Aspect::Location)).matches(&child));
+        assert!(!q(None).matches(&rd("x.com/L/C/10")));
+        assert!(!q(None).matches(&ReferenceDesignation::default()));
     }
 }

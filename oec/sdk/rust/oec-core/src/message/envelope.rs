@@ -676,6 +676,11 @@ impl<P: DataSet> DataNetworkMessage<P> {
         &self.messages
     }
 
+    /// Messages (REQ-MSG-005), taken out of the NetworkMessage.
+    pub fn into_messages(self) -> Vec<DataSetEntry<P>> {
+        self.messages
+    }
+
     /// The DataSetMessages of the resource, without helper DataSets.
     pub fn payloads(&self) -> impl Iterator<Item = &DataSetMessage<P>> {
         self.messages.iter().filter_map(|m| match m {

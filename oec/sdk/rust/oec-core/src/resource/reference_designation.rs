@@ -71,6 +71,34 @@ pub struct ReferenceDesignationQuery {
     pub aspect: Option<Aspect>,
 }
 
+impl ReferenceDesignationQuery {
+    /// Whether `rd` is a direct child of [`Self::parent`]: the Parent of the
+    /// requested aspect, without one of any aspect, has an
+    /// IdentificationLink equal to it, compared character by character
+    /// (REQ-RES-REFDES-014, REQ-IL-015). The responder selects with it;
+    /// the requester checks the answer with it, as a responder without
+    /// support for the Query answers with all objects (REQ-RES-REFDES-015,
+    /// REQ-QRY-004).
+    pub fn matches(&self, rd: &ReferenceDesignation) -> bool {
+        let aspects = match self.aspect {
+            Some(Aspect::Function) => [rd.function.as_ref(), None, None],
+            Some(Aspect::Product) => [rd.product.as_ref(), None, None],
+            Some(Aspect::Location) => [rd.location.as_ref(), None, None],
+            None => [
+                rd.function.as_ref(),
+                rd.product.as_ref(),
+                rd.location.as_ref(),
+            ],
+        };
+        aspects.into_iter().flatten().any(|d| {
+            d.parent
+                .as_ref()
+                .and_then(|p| p.identification_link.as_deref())
+                == Some(self.parent.as_str())
+        })
+    }
+}
+
 impl TryFrom<&Query> for ReferenceDesignationQuery {
     type Error = DecodeError;
 

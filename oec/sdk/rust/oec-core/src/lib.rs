@@ -17,6 +17,7 @@
 //! | [`mqtt`] | MQTT 3.1.1 codec (QoS 0/1, no Retain) and the client session as a state machine: connect with Will, Keep Alive, packet ids, QoS 1 acknowledgements, subscriptions, close | MG 6, RIG 4.1, ADR-0023 Q-026 |
 //! | [`lifecycle`] | Birth, Will, Close and the Health heartbeat (`Details[]` included) as state machines on the message model | MG 6.3, MG 9.1.2 |
 //! | [`provider`] | the provider side: sources (the application and its assets), MAM/Health/Profile/PublicationList per Source, stable DataSetWriterIds, `Get` answers with ReplyTo, pagination within the MaxPacketSize | MG 8.3.11, MG 9.1 |
+//! | [`consumer`] | the consumer side: subscriptions with typed decoding, the directory of applications (Birth, Close, Will, heartbeat), `Get` with ReplyTo correlation, reassembly of paginated answers, Query check and timeouts, `Set`/`Del` with their Status event | MG 6.3, MG 8.3, MG 9.1 |
 //!
 //! Every rule cites its requirement ids (`oec/spec/requirements/`); the
 //! shared test vectors (`oec/spec/export/`) are the acceptance test
@@ -92,6 +93,7 @@ macro_rules! element {
 }
 
 mod base64url;
+pub mod consumer;
 pub mod il;
 pub mod lifecycle;
 pub mod message;

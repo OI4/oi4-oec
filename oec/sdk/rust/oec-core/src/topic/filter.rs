@@ -188,6 +188,27 @@ impl Filter {
         Ok(Self::ContextName(value.to_owned()))
     }
 
+    /// The Filter of `kind` from its decoded value: a Tag or a
+    /// Context.Name as it is (one level), an Event or list Filter split
+    /// at `/` into its levels, each written as on the topic.
+    ///
+    /// # Errors
+    ///
+    /// [`TopicError::Grammar`] if a value is empty, contains U+0000 or the
+    /// levels do not form a Filter of `kind`.
+    pub fn of_kind(kind: FilterKind, value: &str) -> Result<Self, TopicError> {
+        let filter = match kind {
+            FilterKind::Tag => Self::Tag(value.to_owned()),
+            FilterKind::ContextName => Self::ContextName(value.to_owned()),
+            FilterKind::Event | FilterKind::List => {
+                let levels: Vec<&str> = value.split('/').collect();
+                Self::parse(kind, &levels)?
+            }
+        };
+        filter.validate()?;
+        Ok(filter)
+    }
+
     /// Kind of the Filter.
     pub fn kind(&self) -> FilterKind {
         match self {
