@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 27.10.2026, nach deinem Review von C-056 (D-1 und D-2 wie vorgeschlagen umgesetzt, Nachtrag 1 zu C-056). **Für dich offen: R-1 (drei Regeln nach SF-107/108) reviewen.**_
+_Stand: 27.10.2026, nach deinem Review von C-056 (D-1, D-2 und R-1 umgesetzt, Nachträge 1 und 2 zu C-056). **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,35 +24,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Du hast geschrieben: „D-1 und D-2 sind reviewed und akzeptiert“. Beides ist umgesetzt (Nachtrag 1 zu C-056, Einzelheiten unten in „Was aus deinem letzten Review (C-056) geworden ist“):
-- **Guideline:** MG 9.1.9 und Anhang B1.1.3/B1.1.4 (`580f1c6`, SF-107) und MG 9.1 (`2e32a6b`, SF-108) haben jetzt deinen Text. Im Register sind beide „resolved“ (`d2dc9ca`); es gibt kein offenes Finding.
-- **Neu-Baseline auf `2e32a6b`:** 1403 Guideline-Stellen (vorher 1402), 441 Regeln, 0 Lücken. Schema bleibt `2.0.1-dev`, nur die Baseline ist neu.
-- **SDK:** Eine Anfrage zu einem fremden Gerät beantwortet die App jetzt unter ihrem eigenen Namen (`Pub/Event/<AppId>/Status/Bad`). Die vorübergehenden Nummern für fremde Geräte sind weg (A-109). D7 hört jetzt mit: Test T7-MON-04 besteht, obwohl ein fremdes Gerät angefragt wurde (in C-055 musste er noch passen).
-- **Nebenbei:** Ein Interop-Test hatte manchmal sein erstes `Get` geschickt, bevor der Broker das Abo der App kannte. Das war ein Fehler im Test, nicht im SDK. Jetzt wartet der Test auf die erste Config-Nachricht. Danach: zweimal 12 grün.
-
-**Für dich offen: R-1.** Drei Regeln folgen dem neuen Text und stehen deshalb auf `draft`.
-
-### R-1 – Drei Regeln nach SF-107/108 (reviewen, G-3.9)
-
-**Warum:** Du hast SF-107 und SF-108 wie vorgeschlagen entschieden. Damit hat sich der Text von MG 9.1 und MG 9.1.9 geändert. REQ-CMP-047 und REQ-CMP-043 waren schon `reviewed`; ihre Aussage ändert sich (nicht nur eine verschobene Stelle), deshalb stehen sie wieder auf `draft`. REQ-RES-SUBLIST-016 ist neu.
-
-**REQ-CMP-047** (Empfehlung, alle Level) – Anfrage (`Get`) zu einem fremden Gerät:
-- Vorher: „Keine Antwort auf dem `Pub`-Topic; empfohlen ist ein Status-Event `BadNotFound`.“
-- Jetzt zusätzlich (Englisch, wie in der Datei): „Because the entity does not represent the addressed asset, this Event is published with the Source of the entity itself (AppId): Pub/Event/<AppId>/Status/Bad; the requester finds it through the ReplyTo.“ Auf Deutsch: Das Event geht unter dem **eigenen Namen der App** raus; der Anfragende findet es über `ReplyTo`.
-- Titel entsprechend ergänzt, ein zweites Zitat (der neue Satz aus MG 9.1), Verweis auf SF-108, in den Notizen der Grund (kein fremder Absender, der wie ein vertretenes Gerät ohne Typenschild und Health aussieht).
-
-**REQ-CMP-043** (Pflicht ab Level 2, Empfehlung auf Level 1) – `Set`/`Del` auf etwas, das die App nicht hat:
-- Jetzt zusätzlich: „If the Source of the Set or Del addresses an asset that the entity neither is nor represents, the Event is published with the Source of the entity itself (AppId).“ Also dieselbe Regel auch für `Set` und `Del`.
-- Ein zweites Zitat („The same applies to the status Event of a Set or Del whose Source addresses such an asset.“), Verweis auf SF-108, eine Notiz.
-
-**REQ-RES-SUBLIST-016** (neu, Pflicht, alle Level, Prüfung durch D7 im Test T7-SET-01):
-- Titel: „Writable Data and Config DataSets are listed with their Set subscription“.
-- Aussage: Eine App mit SubscriptionList trägt jeden Data- oder Config-Datensatz, den man mit `Set` ändern kann, mit ihrem Abo auf das passende `Set`-Topic ein (`Oi4v2/<ServiceType>/<AppId>/Set/<Resource>/<Source>/<Tag>`, `Config` `NONE_0`). Andere eigene Abos (z. B. für `Get` oder `Del`) trägt sie nicht ein.
-- Zitate: die zwei neuen Sätze aus MG 9.1.9; Verweise MG 9.1.9, MG 8.3.9, SF-107. In den Notizen: die üblichen Regeln für Einträge (kein Platzhalter im Topic, `NONE_0` heißt „weder änderbar noch löschbar“), das Feld `Config` der PublicationList behält seine Bedeutung, bei Config ist der „Tag“ der Kontextname.
-
-**Bitte prüfen:** Sagen die drei Regeln genau das, was MG 9.1 und MG 9.1.9 jetzt sagen?
-
-**Wenn du zustimmst:** Ich setze alle drei auf `reviewed`.
+Nichts. Du hast geschrieben: „R-1 reviewed“. Die drei Regeln REQ-CMP-043, REQ-CMP-047 und REQ-RES-SUBLIST-016 stehen jetzt auf `reviewed` (`ee9f0e9`, Nachtrag 2 zu C-056). Es gibt keinen Entwurf und kein offenes Finding. Was aus D-1, D-2 und R-1 geworden ist, steht unten in „Was aus deinem letzten Review (C-056) geworden ist“.
 
 ### Zur Info: was C-056 gebaut hat
 
@@ -64,13 +36,13 @@ C-056 war **P4 Inkrement 7b**: die **Config-Ressource**. Eine App beschreibt ihr
 - **Geprüft:** Tests ohne Netzwerk (darunter die Config-Beispiele aus Anhang B1.1.3 der Guideline), Tests gegen den eingebauten Test-Broker, Interop gegen den echten Mosquitto (12 grün) und einmal D7: Beim ersten Lauf hat D7 einen **eigenen Fehler** gezeigt – es hielt das neu gesendete Typenschild nach einer Config-Änderung für einen zweiten Start der App. Das habe ich in D7 behoben (zuerst mit einem Test, die reviewten Testdaten sind unverändert). Danach: 10 bestanden, 0 durchgefallen, 3 übersprungen (Lauf zu kurz bzw. Situation kam nicht vor).
 - Neue Bibliothek: `regex` für die Textmuster (Lizenzprüfung ohne Ausnahme, A-106). Nichts Reviewtes geändert, keine neuen Testdaten, kein neues Finding.
 
-Die zwei Entscheidungen aus C-055 (D-1, D-2) hast du inzwischen getroffen (siehe oben). Die Technik-Entscheidungen A-98 … A-108 sind nur zur Info (unten). Einen Blick wert: **A-103** (Maskierung), **A-104** (geheime Werte auf der Platte nur durch Dateirechte geschützt), **A-105** (Secrets neu einlesen) und **A-106** (Regex-Dialekt).
+Die zwei Entscheidungen aus C-055 (D-1, D-2) und R-1 hast du inzwischen erledigt (siehe unten). Die Technik-Entscheidungen A-98 … A-108 sind nur zur Info (unten). Einen Blick wert: **A-103** (Maskierung), **A-104** (geheime Werte auf der Platte nur durch Dateirechte geschützt), **A-105** (Secrets neu einlesen) und **A-106** (Regex-Dialekt).
 
 ---
 
 Die Punkte A-1 … A-109 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-056 (A-98 … A-108) stehen unten.
 
-Aus C-056: Deine Zustimmung zu D-1 (SF-107) und D-2 (SF-108) ist umgesetzt, siehe oben und unten „Was aus deinem letzten Review (C-056) geworden ist“.
+Aus C-056: Deine Zustimmung zu D-1 (SF-107), D-2 (SF-108) und R-1 ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-056) geworden ist“.
 
 Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-017) ist umgesetzt, siehe unten „Was aus dem Review davor (C-052) geworden ist“.
 
@@ -399,7 +371,7 @@ Neu aus deinem Review von C-056:
 ### Was als Nächstes passiert (C-057)
 
 1. **P4 Inkrement 7c** – ReferenceDesignation (die Einbauort-Kennzeichnung eines Geräts, von außen les-, änder- und löschbar, gespeichert), die Weiterleitung der Log-Meldungen der App als Syslog-Events und eigene Ereignisse der App (Generic Events). Nutzt den Event-Weg aus 7a.
-   - SF-108 ist schon im SDK (A-109). Hast du R-1 bis dahin freigegeben, setzt der nächste Agent die drei Regeln zuerst auf `reviewed`.
+   - SF-108 ist schon im SDK (A-109), R-1 ist erledigt. SF-107 kommt erst mit der SubscriptionList (Inkrement 8).
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
@@ -485,6 +457,12 @@ Du hast geschrieben: „D-1 und D-2 sind reviewed und akzeptiert“. Daraus wurd
 - **D-1 (SF-107):** In MG 9.1.9 steht jetzt: Ein Data- oder Config-Datensatz, den man mit `Set` ändern kann, steht mit dem Abo seines `Set`-Topics in der SubscriptionList (`Config` `NONE_0`); andere Abos auf Topics der eigenen `AppId` stehen nicht drin. In B1.1.3/B1.1.4 heißt es jetzt nur noch: „Check the `SubscriptionList` to find out about accessibility.“ (`580f1c6`). Das SDK baut das mit der SubscriptionList (Inkrement 8) ein; die neue Regel REQ-RES-SUBLIST-016 ist Teil von R-1.
 - **D-2 (SF-108):** In MG 9.1 steht jetzt: Das Event zu einem Gerät, das die App nicht vertritt, geht unter der `AppId` raus; der Anfragende findet es über `ReplyTo`; dasselbe gilt für `Set` und `Del` (`2e32a6b`). Das SDK macht es schon so (A-109); REQ-CMP-047/043 sind Teil von R-1.
 - **Register:** SF-107 und SF-108 sind „resolved“ (`d2dc9ca`). Kein offenes Finding; das nächste heißt SF-109.
+- **Neu-Baseline auf `2e32a6b`:** 1403 Guideline-Stellen (vorher 1402), 441 Regeln, 0 Lücken. Schema bleibt `2.0.1-dev`, nur die Baseline ist neu.
+- **SDK:** Eine Anfrage zu einem fremden Gerät beantwortet die App jetzt unter ihrem eigenen Namen (`Pub/Event/<AppId>/Status/Bad`). Die vorübergehenden Nummern für fremde Geräte sind weg (A-109). D7 hört jetzt mit: Test T7-MON-04 besteht, obwohl ein fremdes Gerät angefragt wurde (in C-055 musste er noch passen).
+- **Nebenbei:** Ein Interop-Test hatte manchmal sein erstes `Get` geschickt, bevor der Broker das Abo der App kannte. Das war ein Fehler im Test, nicht im SDK. Jetzt wartet der Test auf die erste Config-Nachricht. Danach: zweimal 12 grün.
+
+Danach hast du geschrieben: „R-1 reviewed“. Daraus wurde Nachtrag 2 zu C-056:
+- **R-1:** REQ-CMP-043, REQ-CMP-047 und REQ-RES-SUBLIST-016 stehen auf `reviewed` (`ee9f0e9`). Es gibt keinen Entwurf mehr.
 
 Zur Erinnerung, worum es ging:
 
@@ -528,6 +506,30 @@ Zur Erinnerung, worum es ging:
 - Die Hinweise in REQ-CMP-047/043 folgen dem Text und kommen als `draft` noch einmal zu dir.
 - Das SDK ändere ich im nächsten Zyklus (kleine Änderung: Antwort unter der eigenen `AppId`). D7 bleibt, wie es ist.
 
+
+#### R-1 – Drei Regeln nach SF-107/108 (akzeptiert, G-3.9)
+
+**Warum:** Du hast SF-107 und SF-108 wie vorgeschlagen entschieden. Damit hat sich der Text von MG 9.1 und MG 9.1.9 geändert. REQ-CMP-047 und REQ-CMP-043 waren schon `reviewed`; ihre Aussage ändert sich (nicht nur eine verschobene Stelle), deshalb stehen sie wieder auf `draft`. REQ-RES-SUBLIST-016 ist neu.
+
+**REQ-CMP-047** (Empfehlung, alle Level) – Anfrage (`Get`) zu einem fremden Gerät:
+- Vorher: „Keine Antwort auf dem `Pub`-Topic; empfohlen ist ein Status-Event `BadNotFound`.“
+- Jetzt zusätzlich (Englisch, wie in der Datei): „Because the entity does not represent the addressed asset, this Event is published with the Source of the entity itself (AppId): Pub/Event/<AppId>/Status/Bad; the requester finds it through the ReplyTo.“ Auf Deutsch: Das Event geht unter dem **eigenen Namen der App** raus; der Anfragende findet es über `ReplyTo`.
+- Titel entsprechend ergänzt, ein zweites Zitat (der neue Satz aus MG 9.1), Verweis auf SF-108, in den Notizen der Grund (kein fremder Absender, der wie ein vertretenes Gerät ohne Typenschild und Health aussieht).
+
+**REQ-CMP-043** (Pflicht ab Level 2, Empfehlung auf Level 1) – `Set`/`Del` auf etwas, das die App nicht hat:
+- Jetzt zusätzlich: „If the Source of the Set or Del addresses an asset that the entity neither is nor represents, the Event is published with the Source of the entity itself (AppId).“ Also dieselbe Regel auch für `Set` und `Del`.
+- Ein zweites Zitat („The same applies to the status Event of a Set or Del whose Source addresses such an asset.“), Verweis auf SF-108, eine Notiz.
+
+**REQ-RES-SUBLIST-016** (neu, Pflicht, alle Level, Prüfung durch D7 im Test T7-SET-01):
+- Titel: „Writable Data and Config DataSets are listed with their Set subscription“.
+- Aussage: Eine App mit SubscriptionList trägt jeden Data- oder Config-Datensatz, den man mit `Set` ändern kann, mit ihrem Abo auf das passende `Set`-Topic ein (`Oi4v2/<ServiceType>/<AppId>/Set/<Resource>/<Source>/<Tag>`, `Config` `NONE_0`). Andere eigene Abos (z. B. für `Get` oder `Del`) trägt sie nicht ein.
+- Zitate: die zwei neuen Sätze aus MG 9.1.9; Verweise MG 9.1.9, MG 8.3.9, SF-107. In den Notizen: die üblichen Regeln für Einträge (kein Platzhalter im Topic, `NONE_0` heißt „weder änderbar noch löschbar“), das Feld `Config` der PublicationList behält seine Bedeutung, bei Config ist der „Tag“ der Kontextname.
+
+**Geprüft wurde:** Sagen die drei Regeln genau das, was MG 9.1 und MG 9.1.9 jetzt sagen?
+
+**Ergebnis:** Du hast zugestimmt; alle drei stehen auf `reviewed` (`ee9f0e9`).
+
+---
 
 ## Was aus dem Review davor (C-052) geworden ist
 

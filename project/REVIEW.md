@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-056 review (D-1 and D-2 applied; guideline `2e32a6b`, register `d2dc9ca`; A-109 for information). **Open for the PO: R-1 (REQ-CMP-043, REQ-CMP-047 and the new REQ-RES-SUBLIST-016 after SF-107/108, review).**_
+_Last updated: 2026-10-27, C-056 review addendum 2 (R-1 accepted: REQ-CMP-043, REQ-CMP-047 and REQ-RES-SUBLIST-016 `reviewed`, `ee9f0e9`; guideline `2e32a6b`; A-109 for information). **Nothing open for the PO.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -70,6 +70,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - REQ-CMP-047 and REQ-CMP-043 follow the new MG 9.1 text, the new REQ-RES-SUBLIST-016 states MG 9.1.9 (D7 T7-SET-01); all three are `draft` (**R-1**).
   - SDK (`8591929`, test first): the Status event for a request to an unknown Source is published under the `AppId` (A-91 replaced, **A-109**); the interop test `level_2_config` no longer races the SUBSCRIBE (`6afd879`); `oec/dev/interop.sh` 12 passed, 1 ignored; one-off D7 `monitor` 10 pass, 0 fail, 3 skip – T7-MON-04 now passes with an unknown Source asked.
   - SF-107 changes the SDK only with the SubscriptionList (increment 8). C-057 (7c) still runs in a new agent; `prompt.md` is updated.
+- C-056 review addendum 2: you accepted R-1 ("R-1 reviewed"); REQ-CMP-043, REQ-CMP-047 and REQ-RES-SUBLIST-016 are `reviewed` (`ee9f0e9`). No drafts, no open finding, nothing open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `2e32a6b` (re-baseline, no content change).
 
@@ -79,7 +80,6 @@ Logs: [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_writ
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| R-1 | REQ-CMP-043, REQ-CMP-047 (MG 9.1 after SF-108) and the new REQ-RES-SUBLIST-016 (MG 9.1.9 after SF-107) | review (G-3.9 / changed reviewed items) | C-056 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -192,25 +192,12 @@ Logs: [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_writ
 
 ## Decisions and review items
 
-### R-1 – REQ-CMP-043, REQ-CMP-047 and REQ-RES-SUBLIST-016 after SF-107/108
-
-- **Why:** you decided SF-107 and SF-108 as proposed (D-1/D-2 of C-056); MG 9.1.9 (`580f1c6`) and MG 9.1 (`2e32a6b`) changed. The reviewed REQ-CMP-043/047 follow the new text (not a mechanical remap: the statements change); REQ-RES-SUBLIST-016 is new. All three are `draft`.
-- **REQ-CMP-047** (SHOULD, L1–L3, `d7-test`):
-  - title: "Get for an unknown asset – no Pub, Event Status Bad under the own AppId recommended";
-  - statement, appended: "Because the entity does not represent the addressed asset, this Event is published with the Source of the entity itself (AppId): Pub/Event/<AppId>/Status/Bad; the requester finds it through the ReplyTo.";
-  - a second quote (the new MG 9.1 sentence), refs + `SF-108`, inventory MG-9.1-2e6777c7 (replaces MG-9.1-144b2f9a); notes: why (no foreign Source that looks like a subordinate asset without MAM/Health), DataSetWriterName = AppId.
-- **REQ-CMP-043** (MUST from L2, SHOULD at L1, `d7-test`):
-  - statement, appended: "If the Source of the Set or Del addresses an asset that the entity neither is nor represents, the Event is published with the Source of the entity itself (AppId).";
-  - a second quote ("The same applies to the status Event of a Set or Del whose Source addresses such an asset."), refs + `SF-108`, inventory + MG-9.1-2e6777c7; a note.
-- **REQ-RES-SUBLIST-016** (new, MUST, L1–L3, application, `d7-test`, D7 T7-SET-01):
-  - title: "Writable Data and Config DataSets are listed with their Set subscription";
-  - statement: "An application that supports SubscriptionList lists every DataSet of the resources Data or Config that can be changed with Set with the subscription of its Set topic (TopicPath Oi4v2/<ServiceType>/<AppId>/Set/<Resource>/<Source>/<Tag>, Config NONE_0). It does not list other subscriptions to topics of its own AppId (e.g. Get or Del).";
-  - quotes: the two new MG 9.1.9 sentences; refs `MG 9.1.9`, `MG 8.3.9`, `SF-107`; inventory MG-9.1.9-aedf208f; notes: entry rules (WriterGroupName per REQ-MSG-025, DataSetWriterName = Source, no wildcard, `NONE_0` = neither changeable nor deletable), the PublicationList `Config` keeps its meaning, the Tag of a Config DataSet is its context.
-- **Please check:** do the statements say exactly what MG 9.1 and MG 9.1.9 say now?
-- **If accepted:** `spectool review REQ-CMP-043 REQ-CMP-047 REQ-RES-SUBLIST-016` → `reviewed`.
-- **PO:** ☐ accepted ☐ remarks: …
+Nothing open.
 
 ### Answered earlier
+
+Answered after the C-056 review (2026-10-27) and applied in C-056 addendum 2:
+- R-1 – REQ-CMP-043, REQ-CMP-047 (MG 9.1 after SF-108) and the new REQ-RES-SUBLIST-016 (MG 9.1.9 after SF-107): ☑ accepted → `reviewed` (`ee9f0e9`).
 
 Answered in the C-056 review (2026-10-27) and applied in C-056 addendum 1:
 - D-1 – SF-107 (how a requester finds out whether a DataSet is writable): ☑ as proposed → guideline `580f1c6` (MG 9.1.9, B1.1.3/B1.1.4), SF-107 resolved (`d2dc9ca`), re-baseline, new REQ-RES-SUBLIST-016 → R-1.
@@ -648,5 +635,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-057)
 
-1. If you answer R-1 first: applied as addendum 2 of the C-056 log (`spectool review REQ-CMP-043 REQ-CMP-047 REQ-RES-SUBLIST-016`); otherwise the C-057 agent applies it first.
-2. P4 increment 7c – ReferenceDesignation (`Get`/`Set`/`Del`, `Asset::on_reference_designation`, persisted), the Syslog bridge of the application and Generic events, on the Event writer of 7a. SF-108 is already in the SDK (A-109). Runs in a new agent (start prompt in `prompt.md`).
+1. P4 increment 7c – ReferenceDesignation (`Get`/`Set`/`Del`, `Asset::on_reference_designation`, persisted), the Syslog bridge of the application and Generic events, on the Event writer of 7a. SF-108 is already in the SDK (A-109). Runs in a new agent (start prompt in `prompt.md`).
