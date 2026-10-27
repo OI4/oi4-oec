@@ -52,14 +52,31 @@ pub struct HealthDetail {
     pub description: Option<String>,
 }
 
-/// ReferenceDesignation of an asset (MG 8.3.10). Set/Del and persistence
-/// are handled by the SDK (REQ-RES-REFDES-002 … 010); the application can
-/// observe or veto changes with [`Asset::on_reference_designation`].
-#[derive(Debug, Clone, Default)]
+/// The parent of a designation (MG 8.3.10, REQ-RES-REFDES-001).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DesignationParent {
+    pub value: String,
+    pub local: Option<String>,
+    pub identification_link: Option<String>,
+}
+
+/// One aspect of a reference designation (MG 8.3.10).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Designation {
+    pub value: String,
+    pub local: Option<String>,
+    pub parent: Option<DesignationParent>,
+}
+
+/// ReferenceDesignation of an asset (MG 8.3.10). Get/Set/Del and
+/// persistence are handled by the SDK (REQ-RES-REFDES-002 … 010); the
+/// application can veto changes with [`Asset::on_reference_designation`]
+/// (crate: ADR-0020 amendment C-057).
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ReferenceDesignation {
-    pub function: Option<String>,
-    pub product: Option<String>,
-    pub location: Option<String>,
+    pub function: Option<Designation>,
+    pub product: Option<Designation>,
+    pub location: Option<Designation>,
 }
 
 /// Handle of an asset (`Clone + Send + Sync`).
@@ -102,8 +119,12 @@ impl Asset {
         unimplemented!()
     }
 
-    /// Publishes a Generic event (`CAT_GENERIC_99`, REQ-RES-EVENT-009).
-    pub fn emit_event(&self, event: GenericEvent) {
+    /// Publishes a Generic event (`CAT_GENERIC_99`, REQ-RES-EVENT-009) on
+    /// `Pub/Event/<Source>/Generic/<Level>`; a new Level gets its
+    /// PublicationList entry. Offline the event is dropped (events are not
+    /// queued). `Error::Invalid` for an invalid Level or Details that are
+    /// no JSON object.
+    pub fn emit_event(&self, event: GenericEvent) -> Result<()> {
         unimplemented!()
     }
 
@@ -116,10 +137,17 @@ impl Asset {
 
     /// Called before a `Set`/`Del ReferenceDesignation` is applied. `None`
     /// means `Del`. Returning an error rejects it with a Status event Bad.
+    /// `Error::Invalid` if the application does not offer the
+    /// ReferenceDesignation (`AppBuilder::reference_designation`).
     pub fn on_reference_designation(
         &self,
         f: impl Fn(Option<&ReferenceDesignation>) -> Result<(), StatusCode> + Send + Sync + 'static,
-    ) {
+    ) -> Result<()> {
+        unimplemented!()
+    }
+
+    /// The stored ReferenceDesignation, `None` without one.
+    pub fn reference_designation(&self) -> Option<ReferenceDesignation> {
         unimplemented!()
     }
 

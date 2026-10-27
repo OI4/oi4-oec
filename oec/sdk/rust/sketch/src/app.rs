@@ -141,8 +141,16 @@ impl AppBuilder {
 
     /// Lowest Syslog level that is published (default `Notice`; `Debug`
     /// and `Informational` are off by default, REQ-TOP-024, REQ-TOP-027).
-    /// The SDK installs a `log`/`tracing` bridge (ADR-0020 §6).
+    /// The SDK installs a `log` bridge (ADR-0020 §6, amendment C-057):
+    /// application logs become events on the Message Bus, so never log
+    /// secrets (GL-ADR-021).
     pub fn syslog(self, level: SyslogLevel) -> Self {
+        unimplemented!()
+    }
+
+    /// Whether the ReferenceDesignation is offered (REQ-CMP-020; default
+    /// on from Level 2; `Error::Invalid` at `build` for Level 1).
+    pub fn reference_designation(self, offered: bool) -> Self {
         unimplemented!()
     }
 
