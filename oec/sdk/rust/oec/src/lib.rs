@@ -60,6 +60,7 @@
 pub mod app;
 pub mod asset;
 pub mod config;
+pub mod consumer;
 pub mod data;
 pub mod event;
 pub mod identity;
@@ -122,6 +123,14 @@ pub enum Error {
     /// No answer within the timeout (consumer side, REQ-ACT-009).
     #[error("timeout")]
     Timeout,
+    /// The responder answered a request with a Status event Bad
+    /// (REQ-CMP-047), e.g. `BadNotFound` for an unknown asset.
+    #[error("status {0:?}")]
+    Status(status::StatusCode),
+    /// A request while the application is offline: nothing is queued
+    /// (ADR-0020 §7); or the connection was lost before the answer.
+    #[error("not connected")]
+    NotConnected,
     /// The application was shut down.
     #[error("closed")]
     Closed,
@@ -153,12 +162,12 @@ impl From<oec_core::topic::TopicError> for Error {
 /// Result type of the SDK API.
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
-/// Everything a typical application needs (the items of increments 4 …
-/// 7; the sketch prelude grows with increment 8).
+/// Everything a typical application needs.
 pub mod prelude {
     pub use crate::app::{App, AppHandle, Bootstrap, Broker};
     pub use crate::asset::{Asset, AssetDef, HealthDetail, HealthState, ReferenceDesignation};
     pub use crate::config::{ConfigDef, ConfigObject, ConfigValues};
+    pub use crate::consumer::{Consumer, Resource, Target};
     pub use crate::data::{BuiltinType, DataSet, DataSetDef, Field, Mode, Publication, Value};
     pub use crate::event::{GenericEvent, SyslogLevel};
     pub use crate::identity::{IdentificationLink, Oi4Identifier, Product};

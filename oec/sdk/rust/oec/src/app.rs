@@ -26,6 +26,7 @@ use tokio::sync::{Notify, watch};
 
 use crate::asset::{Asset, AssetDef, ReferenceDesignationHandler};
 use crate::config::{ConfigDef, ConfigHandle, ConfigSetHandler, ConfigValues};
+use crate::consumer::{self, Consumer};
 use crate::container::{self, MAX_PACKET_SIZE, MIN_PACKET_SIZE};
 use crate::data::{DataSet, DataSetDef, SetData, SetHandler, Value};
 use crate::event::{self, GenericEvent, MAX_MESSAGE_BYTES, SyslogLevel};
@@ -509,7 +510,7 @@ impl AppBuilder {
             self.syslog,
             store.as_ref(),
         )?;
-        let handle = AppHandle::new(self.on_connection, il, store, provider);
+        let handle = AppHandle::new(self.on_connection, il, self.service_type, store, provider);
         event::register(&handle);
         Ok(App {
             level: self.level,
@@ -959,6 +960,8 @@ struct Shared {
     registry: Mutex<Registry>,
     /// Wakes the runtime after a change of the registry.
     changed: Notify,
+    /// The consumer side; lock order: this, then `registry`.
+    consumer: Mutex<consumer::State>,
 }
 
 /// The sources of the application; locked briefly, never across an await.
@@ -1038,9 +1041,11 @@ impl AppHandle {
     fn new(
         on_connection: Option<Callback>,
         app_id: IdentificationLink,
+        service_type: ServiceType,
         store: Arc<dyn Store>,
         provider: Provider,
     ) -> Self {
+        let consumer = Mutex::new(consumer::State::new(service_type, &app_id));
         Self {
             shared: Arc::new(Shared {
                 state: Mutex::new(ConnectionState::Closed),
@@ -1057,6 +1062,7 @@ impl AppHandle {
                     syslog_limit: RateLimit::new(Instant::now()),
                 }),
                 changed: Notify::new(),
+                consumer,
             }),
         }
     }
@@ -1147,6 +1153,12 @@ impl AppHandle {
             .collect()
     }
 
+    /// The consumer side: subscriptions, presence and requests to other
+    /// applications ([`crate::consumer`]).
+    pub fn consumer(&self) -> Consumer {
+        Consumer::new(self.clone())
+    }
+
     /// The current connection state.
     pub fn state(&self) -> ConnectionState {
         *self
@@ -1191,6 +1203,19 @@ impl AppHandle {
             .registry
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
+    }
+
+    /// The consumer state, locked.
+    pub(crate) fn consumer_state(&self) -> MutexGuard<'_, consumer::State> {
+        self.shared
+            .consumer
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+    }
+
+    /// Wakes the runtime (e.g. a new request or subscription).
+    pub(crate) fn wake(&self) {
+        self.shared.changed.notify_one();
     }
 
     /// Resolves after a change of the registry (a stored permit if none

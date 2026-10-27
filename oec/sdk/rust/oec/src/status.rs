@@ -47,6 +47,28 @@ impl StatusCode {
         }
     }
 
+    /// The StatusCode of a numeric OPC UA StatusCode, e.g. of a received
+    /// Status event; unknown codes become [`Self::Other`].
+    pub const fn from_code(code: u32) -> Self {
+        match code {
+            0 => Self::Good,
+            0x8000_0000 => Self::Bad,
+            0x803E_0000 => Self::BadNotFound,
+            0x803B_0000 => Self::BadNotWritable,
+            0x8074_0000 => Self::BadTypeMismatch,
+            0x803C_0000 => Self::BadOutOfRange,
+            0x80AB_0000 => Self::BadInvalidArgument,
+            0x801F_0000 => Self::BadUserAccessDenied,
+            0x8002_0000 => Self::BadInternalError,
+            other => Self::Other(other),
+        }
+    }
+
+    /// Whether it is Good (severity bits 00, REQ-RES-EVENT-004).
+    pub const fn is_good(self) -> bool {
+        self.code() & 0xC000_0000 == 0
+    }
+
     pub(crate) const fn to_core(self) -> oec_core::status::StatusCode {
         oec_core::status::StatusCode(self.code())
     }
@@ -61,5 +83,21 @@ mod tests {
         assert_eq!(StatusCode::Good.code(), 0);
         assert_eq!(StatusCode::BadNotFound.code(), 0x803E_0000);
         assert_eq!(StatusCode::Other(0x8034_0000).code(), 0x8034_0000);
+        for c in [
+            StatusCode::Good,
+            StatusCode::Bad,
+            StatusCode::BadNotFound,
+            StatusCode::BadNotWritable,
+            StatusCode::BadTypeMismatch,
+            StatusCode::BadOutOfRange,
+            StatusCode::BadInvalidArgument,
+            StatusCode::BadUserAccessDenied,
+            StatusCode::BadInternalError,
+            StatusCode::Other(0x8034_0000),
+        ] {
+            assert_eq!(StatusCode::from_code(c.code()), c);
+        }
+        assert!(StatusCode::Good.is_good());
+        assert!(!StatusCode::BadNotFound.is_good());
     }
 }

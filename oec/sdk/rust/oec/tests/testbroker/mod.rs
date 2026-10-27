@@ -12,7 +12,7 @@ use std::thread;
 use std::time::Duration;
 
 use oec_core::mqtt::{
-    ConnAck, Connect, ConnectReturnCode, Decoder, Delivery, Packet, Publish, SubAck,
+    ConnAck, Connect, ConnectReturnCode, Decoder, Delivery, LastWill, Packet, Publish, SubAck,
     SubscribeReturnCode, encode,
 };
 use pkcs8::der::Decode;
@@ -136,6 +136,58 @@ impl Default for Behavior {
 /// Packets the test sends to a client: `(connection, packet)`.
 pub(crate) type Outbox = Arc<Mutex<Vec<(usize, Packet)>>>;
 
+/// The subscriptions of the routing broker: `(connection, filter)`.
+type Routes = Arc<Mutex<Vec<(usize, String)>>>;
+
+/// Whether `topic` matches the MQTT topic filter `filter` (MQTT 4.7).
+pub(crate) fn matches(filter: &str, topic: &str) -> bool {
+    let mut levels = topic.split('/');
+    for f in filter.split('/') {
+        match (f, levels.next()) {
+            ("#", _) => return true,
+            ("+", Some(_)) => {}
+            (f, Some(l)) if f == l => {}
+            _ => return false,
+        }
+    }
+    levels.next().is_none()
+}
+
+/// Queues `p` for every connection subscribed to its topic.
+fn route(routes: &Routes, outbox: &Outbox, topic: &str, payload: &[u8]) {
+    let targets: Vec<usize> = {
+        let routes = routes.lock().unwrap();
+        let mut t: Vec<usize> = routes
+            .iter()
+            .filter(|(_, f)| matches(f, topic))
+            .map(|(n, _)| *n)
+            .collect();
+        t.sort_unstable();
+        t.dedup();
+        t
+    };
+    let mut queued = outbox.lock().unwrap();
+    for n in targets {
+        queued.push((
+            n,
+            Packet::Publish(Publish {
+                topic: topic.to_owned(),
+                payload: payload.to_vec(),
+                delivery: Delivery::AtMostOnce,
+                retain: false,
+            }),
+        ));
+    }
+}
+
+/// What a connection shares with the broker.
+pub(crate) struct Shared {
+    tx: Sender<Seen>,
+    outbox: Outbox,
+    routes: Routes,
+    route: bool,
+}
+
 pub(crate) struct TestBroker {
     pub(crate) port: u16,
     pub(crate) seen: Receiver<Seen>,
@@ -145,6 +197,17 @@ pub(crate) struct TestBroker {
 
 impl TestBroker {
     pub(crate) fn start(pki: &Pki, behavior: Behavior) -> Self {
+        Self::launch(pki, behavior, false)
+    }
+
+    /// A broker that routes: every PUBLISH (QoS 0, no retain) goes to the
+    /// connections with a matching subscription, the Will to them on a
+    /// close without DISCONNECT (tests with two applications).
+    pub(crate) fn routing(pki: &Pki) -> Self {
+        Self::launch(pki, Behavior::default(), true)
+    }
+
+    fn launch(pki: &Pki, behavior: Behavior, route: bool) -> Self {
         let chain = vec![CertificateDer::from_pem_slice(pki.server_cert.as_bytes()).unwrap()];
         let key = PrivateKeyDer::from_pem_slice(pki.server_key.as_bytes()).unwrap();
         let versions: &[&rustls::SupportedProtocolVersion] = if behavior.tls12_only {
@@ -176,12 +239,19 @@ impl TestBroker {
         let outbox = Outbox::default();
         let accepted = Arc::clone(&sockets);
         let queued = Arc::clone(&outbox);
+        let routes = Routes::default();
         thread::spawn(move || {
             for (n, tcp) in listener.incoming().enumerate() {
                 let Ok(tcp) = tcp else { return };
                 accepted.lock().unwrap().push(tcp.try_clone().unwrap());
-                let (config, tx, queued) = (Arc::clone(&config), tx.clone(), Arc::clone(&queued));
-                thread::spawn(move || serve(n, tcp, &config, behavior, &tx, &queued));
+                let config = Arc::clone(&config);
+                let shared = Shared {
+                    tx: tx.clone(),
+                    outbox: Arc::clone(&queued),
+                    routes: Arc::clone(&routes),
+                    route,
+                };
+                thread::spawn(move || serve(n, tcp, &config, behavior, &shared));
             }
         });
         Self {
@@ -254,9 +324,29 @@ pub(crate) fn serve(
     tcp: TcpStream,
     config: &Arc<ServerConfig>,
     b: Behavior,
-    tx: &Sender<Seen>,
-    outbox: &Outbox,
+    shared: &Shared,
 ) {
+    let will = connection(n, tcp, config, b, shared);
+    if shared.route {
+        shared.routes.lock().unwrap().retain(|(m, _)| *m != n);
+        if let Some(w) = will {
+            route(&shared.routes, &shared.outbox, &w.topic, &w.payload);
+        }
+    }
+    let _ = shared.tx.send(Seen::Closed(n));
+}
+
+/// Serves connection `n`; returns the Will unless it ended with
+/// DISCONNECT.
+fn connection(
+    n: usize,
+    tcp: TcpStream,
+    config: &Arc<ServerConfig>,
+    b: Behavior,
+    shared: &Shared,
+) -> Option<LastWill> {
+    let (tx, outbox) = (&shared.tx, &shared.outbox);
+    let mut will = None;
     // A short read timeout lets the loop send the packets of the outbox.
     tcp.set_read_timeout(Some(Duration::from_millis(10)))
         .unwrap();
@@ -310,8 +400,12 @@ pub(crate) fn serve(
                     packet_id: s.packet_id,
                     codes: vec![SubscribeReturnCode::Success(s.filters[0].1); s.filters.len()],
                 })),
+                Packet::Unsubscribe(u) => Some(Packet::UnsubAck(u.packet_id)),
                 _ => None,
             };
+            if shared.route {
+                route_packet(n, &packet, shared, &mut will);
+            }
             let disconnect = matches!(packet, Packet::Disconnect);
             let _ = tx.send(Seen::Packet(n, packet));
             if let Some(reply) = reply {
@@ -322,10 +416,31 @@ pub(crate) fn serve(
                 }
             }
             if disconnect {
-                let _ = tx.send(Seen::Closed(n));
-                return;
+                return None;
             }
         }
     }
-    let _ = tx.send(Seen::Closed(n));
+    will
+}
+
+/// The routing of one packet of connection `n`.
+fn route_packet(n: usize, packet: &Packet, shared: &Shared, will: &mut Option<LastWill>) {
+    match packet {
+        Packet::Connect(c) => will.clone_from(&c.will),
+        Packet::Subscribe(s) => {
+            let mut routes = shared.routes.lock().unwrap();
+            for (f, _) in &s.filters {
+                if !routes.iter().any(|(m, g)| *m == n && g == f) {
+                    routes.push((n, f.clone()));
+                }
+            }
+        }
+        Packet::Unsubscribe(u) => shared
+            .routes
+            .lock()
+            .unwrap()
+            .retain(|(m, f)| *m != n || !u.filters.contains(f)),
+        Packet::Publish(p) => route(&shared.routes, &shared.outbox, &p.topic, &p.payload),
+        _ => {}
+    }
 }

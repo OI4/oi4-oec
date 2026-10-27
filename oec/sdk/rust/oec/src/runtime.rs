@@ -21,12 +21,15 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use oec_core::lifecycle::Publication;
-use oec_core::mqtt::{CloseReason, Credentials, Event, QoS, Session, SessionConfig, SessionState};
+use oec_core::mqtt::{
+    CloseReason, Credentials, Event, QoS, Session, SessionConfig, SessionState, SubscribeReturnCode,
+};
 use oec_core::provider::Handled;
 use tokio::sync::watch;
 use tokio::time::{Instant, sleep, sleep_until, timeout};
 
 use crate::app::{App, AppHandle, Auth, ConnectionSettings, ConnectionState};
+use crate::consumer;
 use crate::transport::{self, Either, Stream, race};
 use crate::{Error, Result};
 
@@ -58,6 +61,7 @@ pub(crate) async fn run(app: App) -> Result<()> {
     let handle = app.handle();
     let mut shutdown = handle.subscribe();
     if *shutdown.borrow() {
+        consumer::on_disconnected(&handle, true);
         handle.set_state(ConnectionState::Closed);
         return Ok(());
     }
@@ -145,6 +149,7 @@ pub(crate) async fn run(app: App) -> Result<()> {
             Err(e) => log::warn!("{e}; keeping the previous TLS settings"),
         }
     }
+    consumer::on_disconnected(&handle, true);
     handle.set_state(ConnectionState::Closed);
     Ok(())
 }
@@ -197,6 +202,7 @@ async fn drive(
                 return Ok(outcome);
             }
         }
+        let mut consumer_deadline = None;
         if session.state() == SessionState::Connected {
             let now = clock.now();
             let out = {
@@ -208,6 +214,7 @@ async fn drive(
             for p in out {
                 publish(session, p, now);
             }
+            consumer_deadline = drive_consumer(session, handle, now);
         }
         if session.has_transmit() {
             let bytes = session.take_transmit();
@@ -227,7 +234,8 @@ async fn drive(
         }
         let deadline = match session.poll_timeout() {
             Some(t) if session.state() == SessionState::Connected => {
-                Some(t.min(handle.registry().provider.poll_timeout()))
+                let t = t.min(handle.registry().provider.poll_timeout());
+                Some(consumer_deadline.map_or(t, |c: Duration| t.min(c)))
             }
             t => t,
         };
@@ -261,6 +269,44 @@ async fn drive(
     }
 }
 
+/// The consumer's part of a loop: its subscriptions, its requests and
+/// the time of its next deadline (on the clock of the session).
+fn drive_consumer(session: &mut Session, handle: &AppHandle, now: Duration) -> Option<Duration> {
+    let step = consumer::poll(handle);
+    if !step.changes.subscribe.is_empty() {
+        let filters = step
+            .changes
+            .subscribe
+            .iter()
+            .map(|f| (f.clone(), QoS::AtMostOnce))
+            .collect();
+        if let Err(e) = session.subscribe(filters, now) {
+            log::warn!("MQTT SUBSCRIBE: {e}");
+            let refused: Vec<_> = step
+                .changes
+                .subscribe
+                .into_iter()
+                .map(|f| (f, SubscribeReturnCode::Failure))
+                .collect();
+            consumer::on_subscribed(handle, &refused);
+            // the refused requests end in the next loop
+            handle.wake();
+        }
+    }
+    if !step.changes.unsubscribe.is_empty()
+        && let Err(e) = session.unsubscribe(step.changes.unsubscribe, now)
+    {
+        log::warn!("MQTT UNSUBSCRIBE: {e}");
+    }
+    for p in step.outbound {
+        publish(session, p, now);
+    }
+    step.deadline.map(|d| {
+        let ms = d.saturating_sub(unix_ms());
+        now + Duration::from_millis(ms)
+    })
+}
+
 /// Handles one session event; `Some` ends the connection.
 fn on_event(
     event: Event,
@@ -288,10 +334,13 @@ fn on_event(
             for p in out {
                 publish(session, p, now);
             }
+            // requests from now on, after the Birth (REQ-LIFE-015)
+            consumer::on_connected(handle);
             handle.set_state(ConnectionState::Online);
         }
         Event::Closed(reason) => {
             handle.registry().provider.on_disconnected();
+            consumer::on_disconnected(handle, false);
             return Some(Outcome::Lost(reason));
         }
         Event::Message(m) => {
@@ -325,7 +374,9 @@ fn on_event(
             for p in out {
                 publish(session, p, now);
             }
+            consumer::on_message(handle, &m.topic, &m.payload);
         }
+        Event::Subscribed { results, .. } => consumer::on_subscribed(handle, &results),
         other => log::debug!("MQTT: {other:?}"),
     }
     None
@@ -336,6 +387,7 @@ fn on_event(
 /// TLS close_notify.
 async fn close(stream: &mut Stream, session: &mut Session, handle: &AppHandle, clock: &Clock) {
     let now = clock.now();
+    consumer::on_disconnected(handle, true);
     if session.state() == SessionState::Connected {
         let close = handle.registry().provider.close(unix_ms());
         publish(session, close, now);
