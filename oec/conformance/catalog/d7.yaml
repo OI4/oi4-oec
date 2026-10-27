@@ -29,55 +29,55 @@ tests:
     mode: monitor
     level: 1
     reqs: [REQ-TOP-002, REQ-TOP-003]
-    status: planned
+    status: implemented
     notes: Every observed message runs through the four layers of `validate`.
   - id: T7-MON-02
     title: Pub topics carry the publisher's ServiceType and AppId
     mode: monitor
     level: 1
     reqs: [REQ-TOP-006, REQ-TOP-010]
-    status: planned
+    status: implemented
     notes: The ServiceType/AppId of a Pub topic belong to the component whose Birth carried that AppId; the PublisherId names the same component.
   - id: T7-MON-03
     title: Birth message on every connection
     mode: monitor
     level: 1
     reqs: [REQ-CMP-003, REQ-LIFE-001, REQ-LIFE-002, REQ-LIFE-003]
-    status: planned
+    status: implemented
     notes: After a Will or Close the next message of the component is a Birth; the Birth equals the regular Pub MAM about itself and uses its DataSetWriterId.
   - id: T7-MON-04
     title: MAM and Health for the component and every subordinate asset
     mode: monitor
     level: 1
     reqs: [REQ-CMP-006, REQ-CMP-007, REQ-CMP-014, REQ-CMP-045]
-    status: planned
+    status: implemented
     notes: Every Source seen in a Pub of the component has MAM and Health; represented entities never publish a Birth, Will or Close of their own.
   - id: T7-MON-05
     title: Health at start, on change and every 60 seconds
     mode: monitor
     level: 1
     reqs: [REQ-TOP-017, REQ-RES-HEALTH-004, REQ-LIFE-014]
-    status: planned
+    status: implemented
     notes: Heartbeat tolerance and the minimum observation time are parameters of the run (default 2 × 60 s + 5 s).
   - id: T7-MON-06
     title: MessageIds are unique
     mode: monitor
     level: 1
     reqs: [REQ-MSG-008, REQ-ACT-004]
-    status: planned
+    status: implemented
   - id: T7-MON-07
     title: RequestIds are unique among pending requests
     mode: monitor
     level: 1
     reqs: [REQ-ACT-011]
-    status: planned
+    status: implemented
     notes: Applies when the CUT sends Calls.
   - id: T7-MON-08
     title: DataSetWriterIds are consistent
     mode: monitor
     level: 1
     reqs: [REQ-MSG-021, REQ-MSG-033, REQ-RES-PUBLIST-005]
-    status: planned
+    status: implemented
   - id: T7-MON-09
     title: DataSetClassId is stable per structure
     mode: monitor
@@ -90,20 +90,20 @@ tests:
     mode: monitor
     level: 1
     reqs: [REQ-IL-010, REQ-IL-012]
-    status: planned
+    status: implemented
     notes: Heuristic – two live Birth/Health streams or two different MAM for one Identification Link. A unique IL cannot be proven by observation (manual part of the REQs).
   - id: T7-MON-11
     title: No unsolicited publication without content
     mode: monitor
     level: 1
     reqs: [REQ-CMP-042]
-    status: planned
+    status: implemented
   - id: T7-MON-12
     title: MQTT client behavior visible to a subscriber
     mode: monitor
     level: 1
     reqs: [REQ-CMP-009, REQ-MQTT-017]
-    status: planned
+    status: implemented
     notes: D7 subscribes with QoS 1, so the delivered QoS shows the publisher's QoS (MQTT 3.1.1 delivers min(publish, subscribe)). ClientId, keep alive and clean session are only visible in proxy mode (T7-CON-01).
   - id: T7-MON-13
     title: Data and Event publications
@@ -142,14 +142,14 @@ tests:
     mode: monitor
     level: 1
     reqs: [REQ-PAG-004, REQ-PAG-005]
-    status: planned
+    status: implemented
     notes: MaxPacketSize from `broker.json` of the bus storage or `--max-packet-size`.
   - id: T7-MON-19
     title: No Syslog Debug by default
     mode: monitor
     level: 1
     reqs: [REQ-TOP-024]
-    status: planned
+    status: implemented
     notes: Checked from the Birth until the first Set of a log level.
 
   # --- test: connection (proxy mode) ------------------------------------

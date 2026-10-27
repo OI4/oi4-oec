@@ -110,3 +110,18 @@ func TestJudgeNotesAndEvidenceLimit(t *testing.T) {
 		t.Errorf("nothing observed: %+v", r)
 	}
 }
+
+func TestTestOutcomeIgnoresNotApplicable(t *testing.T) {
+	tests := []Test{{ID: "T", Status: "implemented", Level: 1, Reqs: []string{"REQ-A", "REQ-B"}}}
+	pass := []Observation{{Test: "T", Req: "REQ-A", Kind: Checked}}
+	if r := Build(tests, pass, reqs(), 1)[0]; r.Outcome != Pass || r.Reqs[1].Outcome != Skip {
+		t.Errorf("a not applicable requirement keeps pass: %+v", r)
+	}
+	incon := append(pass, Observation{Test: "T", Req: "REQ-B", Kind: Skipped, Inconclusive: true})
+	if r := Build(tests, incon, reqs(), 2)[0]; r.Outcome != Skip || !r.Reqs[1].Inconclusive {
+		t.Errorf("an inconclusive MUST requirement makes the test skip: %+v", r)
+	}
+	if r := Build(tests, nil, reqs(), 1)[0]; r.Outcome != Skip {
+		t.Errorf("nothing observed: %+v", r)
+	}
+}

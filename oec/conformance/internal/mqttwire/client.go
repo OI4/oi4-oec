@@ -159,7 +159,7 @@ func Dial(ctx context.Context, c Config) (*Client, error) {
 	}
 	cl := &Client{lost: make(chan error, 1)}
 	o := paho.NewClientOptions().
-		AddBroker("tls://"+addr).
+		AddBroker("tls://" + addr).
 		SetProtocolVersion(4).
 		SetClientID(c.ClientID).
 		SetCleanSession(true).

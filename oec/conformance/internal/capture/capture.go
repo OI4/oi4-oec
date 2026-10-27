@@ -31,18 +31,20 @@ const (
 
 // Header is the first line of a capture.
 type Header struct {
-	Format       string    `json:"format"`
-	Version      int       `json:"version"`
-	Tool         string    `json:"tool,omitempty"`
-	ToolVersion  string    `json:"tool_version,omitempty"`
-	Schemas      string    `json:"schemas,omitempty"`
-	Baseline     string    `json:"baseline,omitempty"`
-	Broker       string    `json:"broker,omitempty"`
-	Insecure     bool      `json:"insecure,omitempty"` // broker certificate not verified (--insecure)
-	Subscription string    `json:"subscription,omitempty"`
-	SubscribeQoS int       `json:"subscribe_qos"`
-	Started      time.Time `json:"started"`
-	Note         string    `json:"note,omitempty"`
+	Format       string `json:"format"`
+	Version      int    `json:"version"`
+	Tool         string `json:"tool,omitempty"`
+	ToolVersion  string `json:"tool_version,omitempty"`
+	Schemas      string `json:"schemas,omitempty"`
+	Baseline     string `json:"baseline,omitempty"`
+	Broker       string `json:"broker,omitempty"`
+	Insecure     bool   `json:"insecure,omitempty"` // broker certificate not verified (--insecure)
+	Subscription string `json:"subscription,omitempty"`
+	SubscribeQoS int    `json:"subscribe_qos"`
+	// MaxPacketSize of the Message Bus (broker.json, RIG 4.1.1), 0 if unknown.
+	MaxPacketSize int       `json:"max_packet_size,omitempty"`
+	Started       time.Time `json:"started"`
+	Note          string    `json:"note,omitempty"`
 }
 
 // Record is one received message.

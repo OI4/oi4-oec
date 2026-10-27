@@ -209,14 +209,20 @@ func Build(tests []Test, obs []Observation, reqs Requirements, level int) []Test
 				}
 				tr.Reqs = append(tr.Reqs, judge(id, mine, reqs, level))
 			}
+			// The test outcome is the worst of its judged requirements
+			// (§5.2); a requirement that is not applicable (skip, not
+			// inconclusive) does not make a test worse than pass.
 			tr.Outcome = Pass
 			skips := 0
 			for _, r := range tr.Reqs {
-				if Worse(r.Outcome, tr.Outcome) {
-					tr.Outcome = r.Outcome
-				}
 				if r.Outcome == Skip {
 					skips++
+					if !r.Inconclusive {
+						continue
+					}
+				}
+				if Worse(r.Outcome, tr.Outcome) {
+					tr.Outcome = r.Outcome
 				}
 			}
 			if skips == len(tr.Reqs) {
