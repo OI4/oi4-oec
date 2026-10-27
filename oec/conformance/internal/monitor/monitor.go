@@ -541,7 +541,8 @@ func (e *Engine) pub(p *part, m Message, t *topic.Parsed, msg map[string]any) {
 	unsolicited := str(msg, "ReplyTo") == ""
 	e.check(p, "T7-MON-04", "REQ-CMP-014")
 	birth := e.lifecycle(p, m, t, msg, ds)
-	e.content(p, m, t, ds, unsolicited, birth)
+	_, meta := msg["MetaData"].(map[string]any)
+	e.content(p, m, t, ds, unsolicited, birth, t.Resource == "Metadata" && meta)
 	e.writerIDs(p, m, t, msg, ds)
 	e.paginate(p, m, ds)
 	e.identity(p, m, t, ds)
@@ -692,12 +693,13 @@ func revision(m map[string]any) string {
 }
 
 // content is T7-MON-04, T7-MON-05 (heartbeat), T7-MON-11 and the regular
-// MAM part of T7-MON-03.
-func (e *Engine) content(p *part, m Message, t *topic.Parsed, ds []dsm, unsolicited, birth bool) {
+// MAM part of T7-MON-03. A Pub Metadata carries its content in MetaData
+// (meta), not in DataSetMessages.
+func (e *Engine) content(p *part, m Message, t *topic.Parsed, ds []dsm, unsolicited, birth, meta bool) {
 	rs := e.resourceDSMs(ds)
 	if unsolicited {
 		e.check(p, "T7-MON-11", "REQ-CMP-042")
-		if len(rs) == 0 {
+		if len(rs) == 0 && !meta {
 			e.add("T7-MON-11", "REQ-CMP-042", verdict.Violation, ev(p, m, "/Messages", "an unsolicited Pub %s without content (no DataSetMessage of the resource)", t.Resource))
 		}
 	}

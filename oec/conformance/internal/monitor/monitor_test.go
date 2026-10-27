@@ -147,3 +147,21 @@ func TestDeterministic(t *testing.T) {
 		t.Errorf("participants %+v", a.Participants)
 	}
 }
+
+// A Pub Metadata carries its content in MetaData, not in Messages: an
+// unsolicited one is content (REQ-CMP-042, found against the SDK in C-054).
+func TestUnsolicitedMetadataHasContent(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.start()
+	s.fromVector(2, "V-PAY-021", "", nil)
+	s.end = 5 * time.Second
+	res := run(t, s, DefaultOptions())
+	if o := find(res, "T7-MON-11", "REQ-CMP-042", verdict.Violation); len(o) != 0 {
+		t.Errorf("an unsolicited Pub Metadata has content: %+v", o)
+	}
+	for _, o := range res.Observations {
+		if o.Test == "T7-MON-01" && o.Kind == verdict.Violation {
+			t.Errorf("the scenario is valid: %+v", o)
+		}
+	}
+}
