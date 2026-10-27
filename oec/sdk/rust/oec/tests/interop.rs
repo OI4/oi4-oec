@@ -5,7 +5,8 @@
 //! process, reconnect with a new Will and a new Birth after a broker
 //! restart, refused logins, a wrong CA, TLS 1.2 and 1.3, the packet size
 //! limits of SF-105 and the explicit bootstrap (replaces the smoke test of
-//! C-050); since C-053 the Level 2 provider side (assets, `Get` answers).
+//! C-050); since C-053 the Level 2 provider side (assets, `Get` answers),
+//! since C-054 Data DataSets with Metadata and an Interval.
 //!
 //! Opt-in: the tests pass at once unless `OEC_INTEROP=1` is set, so the
 //! gate needs no container engine. Run them with `oec/dev/interop.sh`
@@ -933,6 +934,154 @@ fn level_2_assets_and_get_answers() {
         .next(WAIT, |p| p.topic == format!("{prefix}Pub/Health/{it}"))
         .expect("no asset Health");
     assert_eq!(health(&p), ("MAINTENANCE_REQUIRED_4".to_owned(), 70));
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+    probe.disconnect();
+}
+
+/// A `Get` through the broker from the probe.
+fn get(probe: &mut Probe, topic: String, payload: &Value) {
+    probe
+        .send(&Packet::Publish(Publish {
+            topic,
+            payload: serde_json::to_vec(payload).unwrap(),
+            delivery: Delivery::AtMostOnce,
+            retain: false,
+        }))
+        .unwrap();
+}
+
+/// A pump with the DataSet `oee` (FILTER, a Precision) and the app's
+/// `Oi4Pv` (SOURCE, Interval 200 ms), both with values.
+fn data_sets(app: &App) -> (Asset, DataSet, DataSet) {
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-2"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    let oee = pump
+        .add_data(
+            DataSetDef::new("oee")
+                .field(Field::double("Availability").unit("%").range(0.0, 100.0))
+                .publication(Publication::default_data().precision("Availability", 0.5)),
+        )
+        .unwrap();
+    oee.update([("Availability", 97.5)]).unwrap();
+    let pv = app
+        .this()
+        .add_data(
+            DataSetDef::oi4pv(Field::double("T")).publication(
+                Publication::default_data()
+                    .mode(Mode::ON_REQUEST | Mode::SOURCE)
+                    .interval(Duration::from_millis(200)),
+            ),
+        )
+        .unwrap();
+    pv.update([("Pv", 20.5)]).unwrap();
+    (pump, oee, pv)
+}
+
+/// Data DataSets through Mosquitto (P4 increment 6b): the Metadata of
+/// each DataSet before its Data (REQ-RES-META-003), the Data of the app's
+/// `Oi4Pv` every Interval (REQ-RES-PUBLIST-013), the pump's DataSet on its
+/// Filter topic with its DataSetClassId (REQ-MSG-011/013), and `Get Data` /
+/// `Get Metadata` answered with `ReplyTo` (REQ-RES-DATA-007,
+/// REQ-RES-META-002).
+#[test]
+fn level_2_data_sets_and_metadata() {
+    let Some(dev) = dev() else { return };
+    let mut probe = dev.probe("oec-probe-data", true);
+    let broker = Broker::new("localhost")
+        .port(dev.port)
+        .ca_pem(dev.file("broker/ca.pem"))
+        .credentials(&dev.user, &dev.password);
+    let states = States::default();
+    let on = states.clone();
+    let app = App::builder(Level::L2, ServiceType::Utility, product())
+        .bootstrap(Bootstrap::Explicit(broker))
+        .serial_number("oec-data")
+        .reference_designation(false)
+        .keep_alive(Duration::from_secs(5))
+        .on_connection(move |s| on.0.lock().unwrap().push(s))
+        .build()
+        .unwrap();
+    let (pump, _oee, _pv) = data_sets(&app);
+    let encoded = |il: &str| {
+        oec_core::il::IdentificationLink::parse(il)
+            .unwrap()
+            .encode()
+    };
+    let me = encoded(app.identification_link().as_str());
+    let it = encoded(pump.identification_link().as_str());
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = thread::spawn(move || app.run());
+
+    let (oee_meta, oee_data, pv_data) = (
+        format!("{prefix}Pub/Metadata/{it}/oee"),
+        format!("{prefix}Pub/Data/{it}/oee"),
+        format!("{prefix}Pub/Data/{me}"),
+    );
+    let mut topics = Vec::new();
+    let mut oee_first = None;
+    while oee_first.is_none() || topics.iter().filter(|t| **t == pv_data).count() < 3 {
+        let p = probe.of("oec-data", WAIT);
+        if p.topic == oee_data && oee_first.is_none() {
+            oee_first = Some(p.clone());
+        }
+        topics.push(p.topic);
+    }
+    let position = |t: &str| topics.iter().position(|x| x == t).unwrap();
+    assert!(position(&oee_meta) < position(&oee_data), "{topics:?}");
+    assert!(
+        position(&format!("{prefix}Pub/Metadata/{me}/Oi4Pv")) < position(&pv_data),
+        "{topics:?}"
+    );
+    let v = json(&oee_first.unwrap().payload);
+    assert_eq!(v["Messages"][0]["Payload"]["Availability"], 97.5);
+    assert!(v["DataSetClassId"].as_str().is_some_and(|c| c.len() == 36));
+    states.wait_for(ConnectionState::Online);
+
+    let request = "1700000000000-Aggregation/vendor.com/Client/C-1/1";
+    get(
+        &mut probe,
+        format!("{prefix}Get/Data/{it}/oee"),
+        &serde_json::json!({
+            "MessageId": request,
+            "MessageType": "ua-data",
+            "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
+            "DataSetClassId": "",
+            "ReplyTo": "",
+            "Messages": []
+        }),
+    );
+    let answer = probe
+        .next(WAIT, |p| p.topic == oee_data)
+        .expect("no answer to Get Data");
+    assert_eq!(json(&answer.payload)["ReplyTo"], request);
+    get(
+        &mut probe,
+        format!("{prefix}Get/Metadata/{it}/oee"),
+        &serde_json::json!({
+            "MessageId": request,
+            "MessageType": "ua-metadata",
+            "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
+            "DataSetWriterId": 10,
+            "WriterGroupName": "oee",
+            "DataSetWriterName": pump.identification_link().as_str(),
+            "Timestamp": "2023-11-14T22:13:20.000Z",
+            "ReplyTo": "",
+            "MetaData": {}
+        }),
+    );
+    let answer = probe
+        .next(WAIT, |p| p.topic == oee_meta)
+        .expect("no answer to Get Metadata");
+    let v = json(&answer.payload);
+    assert_eq!(v["ReplyTo"], request);
+    assert_eq!(v["MetaData"]["Fields"][0]["Name"], "Availability");
 
     handle.shutdown();
     run.join().unwrap().unwrap();
