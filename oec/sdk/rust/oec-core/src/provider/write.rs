@@ -514,8 +514,12 @@ impl Provider {
         lf: &ListFilter,
         setting: Setting,
     ) -> Result<(), StatusCode> {
-        let (Resource::Data, Some(Filter::Tag(tag))) = (lf.resource(), lf.filter()) else {
-            return Err(StatusCode::BAD_NOT_WRITABLE);
+        let tag = match (lf.resource(), lf.filter()) {
+            (Resource::Data, Some(Filter::Tag(tag))) => tag,
+            (Resource::Event, Some(Filter::Event(EventFilter::Syslog(level)))) => {
+                return self.reconfigure_syslog(source, *level, setting.mode);
+            }
+            _ => return Err(StatusCode::BAD_NOT_WRITABLE),
         };
         let i = self
             .find_set(source, tag)

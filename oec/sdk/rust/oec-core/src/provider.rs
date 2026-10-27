@@ -19,6 +19,7 @@
 
 pub mod config;
 pub mod data;
+mod events;
 pub mod overrides;
 pub mod pagination;
 mod refdes;
@@ -49,6 +50,9 @@ use crate::topic::{
 use config::ConfigEntry;
 pub use config::{ConfigSpec, SetConfigRequest, StoredConfigValues};
 use data::{DataSetSpec, Value as FieldValue};
+pub use events::{
+    GenericEvent, MAX_GENERIC_LEVELS, MAX_QUEUED_EVENTS, syslog_header, syslog_hostname, syslog_tag,
+};
 pub use overrides::{PublicationOverride, PublicationOverrides};
 use pagination::Envelope;
 pub use refdes::{ReferenceDesignationRequest, StoredReferenceDesignations};
@@ -127,6 +131,8 @@ pub enum ProviderError {
         /// The context name.
         context: String,
     },
+    /// An event is refused.
+    Event(String),
 }
 
 impl fmt::Display for ProviderError {
@@ -156,6 +162,7 @@ impl fmt::Display for ProviderError {
             Self::UnknownConfig { source, context } => {
                 write!(f, "the source {source:?} has no Config {context:?}")
             }
+            Self::Event(e) => write!(f, "invalid event: {e}"),
         }
     }
 }
@@ -325,6 +332,7 @@ pub struct Provider {
     config_values: StoredConfigValues,
     config_instance: u64,
     refdes: Option<StoredReferenceDesignations>,
+    events: events::Events,
     unsaved: Unsaved,
     pending: Pending,
     connected: bool,
@@ -356,6 +364,7 @@ impl Provider {
             config_values: StoredConfigValues::new(),
             config_instance: 0,
             refdes: None,
+            events: events::Events::default(),
             unsaved: Unsaved::default(),
             pending: Pending::default(),
             connected: false,
@@ -540,6 +549,7 @@ impl Provider {
         self.assets.remove(i);
         self.sets.retain(|s| &s.source != il);
         self.configs.retain(|c| &c.source != il);
+        self.events.remove(il);
         self.pending.list = self.config.get;
         Ok(())
     }
@@ -759,12 +769,14 @@ impl Provider {
     /// The Close (see [`Lifecycle::close`]); the provider is offline after.
     pub fn close(&mut self, unix_ms: u64) -> Publication {
         self.connected = false;
+        self.events.clear();
         self.lifecycle.close(unix_ms)
     }
 
     /// The connection is lost: changes wait for [`Self::on_connected`].
     pub fn on_disconnected(&mut self) {
         self.connected = false;
+        self.events.clear();
     }
 
     /// The connection is established (CONNACK): the Birth and the Health of
@@ -984,6 +996,7 @@ impl Provider {
                 .iter()
                 .any(|a| a.dirty.mam || a.dirty.health || a.dirty.profile)
             || self.configs.iter().any(|c| c.pending)
+            || self.events.pending()
             || self
                 .sets
                 .iter()
@@ -1024,6 +1037,7 @@ impl Provider {
     /// then Config, Metadata and Data.
     fn changes(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
         let mut out = self.resource_changes(unix_ms);
+        out.extend(self.event_changes());
         out.extend(self.config_changes(unix_ms));
         out.extend(self.meta_data_changes(unix_ms));
         out.extend(self.data_changes(now, unix_ms));
@@ -1376,10 +1390,12 @@ impl Provider {
 
     /// The PublicationList entries: per source MAM, Health and Profile,
     /// each published on its Source topic and answered on `Get`
-    /// (ON_REQUEST_SOURCE_10, REQ-RES-PUBLIST-012/026), its Status events
-    /// Good, Uncertain and Bad (FILTER_4, published only on their topic),
-    /// its Config DataSets (ON_REQUEST_FILTER_9), then its Data DataSets
-    /// with their Metadata, each in the order of addition.
+    /// (ON_REQUEST_SOURCE_10, REQ-RES-PUBLIST-012/026), the
+    /// ReferenceDesignation if offered (ON_REQUEST_SOURCE_10), its Status
+    /// events Good, Uncertain and Bad (FILTER_4, published only on their
+    /// topic), its Syslog (the application) and Generic events, its Config
+    /// DataSets (ON_REQUEST_FILTER_9), then its Data DataSets with their
+    /// Metadata, each in the order of addition.
     fn list_items(
         &self,
         source: Option<&IdentificationLink>,
@@ -1436,6 +1452,7 @@ impl Provider {
                     entry,
                 ));
             }
+            out.extend(self.event_list_items(&il, filter, id));
             out.extend(self.config_list_items(&il, filter, id));
             for s in self.sets.iter().filter(|s| s.source == il) {
                 for e in s.entries(id) {
