@@ -122,3 +122,7 @@ Applied in P4 increment 5b within this ADR (libraries within the dependency rule
 - **Build:** aws-lc-sys builds its C code with `cc` (no CMake needed on macOS/Linux; checked on macOS arm64). Windows x86-64 needs NASM or the `prebuilt-nasm` feature of aws-lc-sys; ARMv7 uses `crypto-ring` (Q-008). Decided with the CI (§2 "Cross builds").
 - **Not used:** `rustls-native-certs`/`webpki-roots` (trust only from the storage, ADR-0020 amendment C-050), `rustls-pemfile` (unmaintained), `signal-hook`, `tokio-util`, `futures`.
 
+
+## Amendment C-053 (2026-10-27) – no new dependency in increment 6a (agent, G-3.4 b)
+
+P4 increment 6a (provider side, ADR-0026 §12) adds no crate and no feature: the provider, the pagination and the writer-id table use `serde_json` and the standard library; the store-key hash is the FNV-1a function already in `oec`. `Cargo.lock` and `deny.toml` are unchanged; `cargo deny check` passes without exception. Expected in increment 6b: the `v5` feature of `uuid` for the publisher-defined DataSetClassId (ADR-0020 §6); it will be recorded here when it is added.

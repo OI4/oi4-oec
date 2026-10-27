@@ -74,7 +74,9 @@ impl Asset {
     }
 
     /// Sets Health and HealthScore; publishes on change (REQ-TOP-017).
-    /// The heartbeat every 60 s is automatic.
+    /// The heartbeat every 60 s is automatic for the application itself
+    /// (`this()`); subordinate assets have none (SF-106, ADR-0020
+    /// amendment C-053).
     pub fn set_health(&self, health: HealthState, score: Option<u8>) {
         unimplemented!()
     }

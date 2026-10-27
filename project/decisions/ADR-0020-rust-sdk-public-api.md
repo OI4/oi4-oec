@@ -252,3 +252,34 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
    - `run`/`run_async` fail only before the first connection: `Error::Bootstrap` for unusable TLS material (CA, client certificate, key, passphrase), `Error::Invalid` for a host that is no TLS server name, `Error::Io` if the runtime cannot start. A lost or refused connection is not an error: the SDK reconnects with backoff (ADR-0026 §10).
    - `Error::Bootstrap` also covers the TLS material of the connection settings, not only the container storage (§14 lists the variant; its doc is widened).
 
+
+## Amendment C-053 (2026-10-27) – P4 increment 6a: assets, `Get` answers, Profile and PublicationList (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details and REQ tracing: `log/2026-10-27_C-053_provider-registry-get.md`, REVIEW A-63 … A-74. Provider semantics: ADR-0026 §12.
+
+### A. What moved from the sketch into `oec`
+
+`AppHandle::{this, add_asset, asset}`, `AssetDef` (`new`, `with_oi4_identifier`, `revision_counter`), `Asset::{identification_link, set_health, set_health_details, bump_revision_counter, remove}`, `HealthState` and `HealthDetail` (module `oec::asset`, also in the prelude). The SDK now serves MAM, Health and Profile of every source (the application and its represented assets) and the PublicationList, and answers `Get` of these four resources from Level 2 (§3, §6, §8). DataSets, Metadata, publish modes and intervals (§7 beyond the built-in resources), `ConfigHandle`, events, ReferenceDesignation and the consumer stay in the sketch until increments 6b, 7 and 8 and are still the contract.
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `AppHandle::assets() -> Vec<Asset>` | The represented assets in the order of registration; needed to iterate without knowing the ILs. |
+| `Asset::mam() -> Option<Mam>` | Read the published MAM (also the generated Oi4Identifier of `with_oi4_identifier`); `None` after `remove`. |
+| `Asset::is_this() -> bool` | Tells the application itself from a represented asset (e.g. `remove` is refused for it). |
+| `HealthDetail::new(HealthState)` | Short constructor; the fields stay public as in the sketch. |
+| `HealthState::severity` (re-export of the `oec-core` enum) | The order of the aggregation (A-28) is visible and testable. |
+| `impl From<ProviderError> for Error` (→ `Error::Invalid`) | Errors of the sans-IO provider keep their message (ADR-0026 §8.1). |
+
+### C. Changes of sketch or C-048 items (need this amendment)
+
+1. **`Asset::bump_revision_counter` returns `Result<()>`** (sketch: `()`). The counter is persisted (REQ-RES-MAM-018); a failing store must not be hidden, and a removed asset or a counter at `i32::MAX` is an error. A counter taken from the VendorNameplate (`AssetDef::revision_counter`) is not changed; the call logs a warning and returns `Ok(())`.
+2. **`App::mam` and `App::identification_link` moved to `AppHandle`** (C-048 additions). `App` derefs to `AppHandle`, so `app.mam()` keeps compiling. `mam()` now returns an owned `Mam` (was `&Mam`), because the MAM lives behind the shared state of the handle and changes at runtime (RevisionCounter).
+3. **No heartbeat for represented assets.** The sketch said "The heartbeat every 60 s is automatic" for every `Asset`. After SF-106 (MG 7.5.1, `9044929`) the 60 s heartbeat applies to the Health of the application itself only and is optional for subordinate assets; the SDK sends none for them (fewer messages, REQ-TOP-017). The sketch doc is updated.
+4. **`Get` for an unknown Source** (§6): the SDK does not answer on the Pub topic (REQ-CMP-047, the MUST part). The Status event `BadNotFound` (the SHOULD part) comes with the event machinery of increment 7; until then the request is logged at `debug`. §6 stays the target.
+5. **Precision, no change of the described semantics:**
+   - `set_health` clears the `Details`; `set_health_details` sets Health to the most severe detail (A-28) and omits the HealthScore; no details means NORMAL_0 without `Details`. Invalid values (score above 100; NORMAL_0 with score 0 for the application itself, which is the Close of REQ-LIFE-014) and calls on a removed asset are logged and ignored, as the sketch signature `-> ()` implies.
+   - A represented asset starts with Health NORMAL_0 / 100. Its MAM defaults differ from the application's (§4): `HardwareRevision` `"undefined"` (a physical asset without known revision, REQ-RES-MAM-008) and `DeviceClass` `""`, unless the `Product` sets them.
+   - `add_asset` refuses the AppId, an IL registered twice and a `Product` whose MAM is invalid (`Error::Invalid`). It works before and during `run`; a change is published at once when connected, otherwise with the next connection (ADR-0026 §12: state, no queue).
+   - `remove` keeps the DataSetWriterIds of the asset reserved (REQ-RES-PUBLIST-006), so a re-added asset gets its old ids.

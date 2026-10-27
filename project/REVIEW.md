@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-052 addendum 2 (R-2 applied: REQ-TOP-017 `reviewed`; guideline `9044929`, register `b94e803`). **Nothing is open for the PO.**_
+_Last updated: 2026-10-27, C-053 (P4 increment 6a: provider side, part 1; A-63 … A-74 for information; guideline `9044929`, register `b94e803`). **Nothing is open for the PO.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -40,10 +40,16 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - D-1: MG 7.5.1 in `9044929` as proposed, **SF-106 resolved** (`b94e803`), re-baseline on `9044929` (1402 inventory items). REQ-TOP-017 follows the new text and is back to `draft` (**R-2**). D7 T7-MON-05 and the SDK already match, nothing changes there.
   - R-1: the 18 capture fixtures are `reviewed`.
 - C-052 addendum 2: you accepted R-2; REQ-TOP-017 is `reviewed` (`8d7538b`). No drafts, no open finding.
+- C-053 (P4 increment 6a; increment 6 is split into 6a and 6b):
+  - `oec-core`: a sans-IO provider for the sources of an application (itself and its represented assets): MAM, Health and Profile per Source, the PublicationList with persisted DataSetWriterIds, `Get` answers for these four resources from Level 2, pagination against `MaxPacketSize`.
+  - `oec`: the asset API (`AssetDef`, `Asset`, `HealthDetail`, `AppHandle::{this, add_asset, asset, assets}`) on the runtime; offline changes are published as the current state after the reconnect, nothing is queued.
+  - Tests: runtime tests against the in-process TLS broker; opt-in interop 9 green; a one-off D7 `oec-check monitor` run against the SDK: 10 pass, 0 fail, 3 skip (T7-MON-18 pagination passes).
+  - No finding, no new dependency, no reviewed item changed, no new test data, so there is nothing to decide or review; A-63 … A-74 are for information. Worth a look: **A-65** (offline: state instead of a queue), **A-71** (unknown Source: Status event only with increment 7), **A-72** (sketch refinements).
+  - C-054 (increment 6b) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `9044929` (re-baseline, no content change).
 
-Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -111,6 +117,18 @@ Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_
 | A-60 | CLI: `--level` default 3, `--duration` 5 min, `--app`, `--config` YAML, MaxPacketSize precedence, `--key-passphrase-file`, `--client-id` | info (agent) | C-052 | – | – |
 | A-61 | Monitor report JSON version 1, text, JUnit; `report.schema.json` deferred to `test` | info (agent) | C-052 | – | – |
 | A-62 | Opt-in live test `oec/conformance/live.sh` (`OEC_LIVE=1`); the gate needs no Docker or network; run once green | info (agent) | C-052 | – | – |
+| A-63 | Cycle cut: increment 6 split into 6a (C-053: sources, built-in resources, `Get`, pagination) and 6b (C-054: DataSets, publish modes, intervals, dead band); order 6 → 7 → 8 → 10 kept | info (agent) | C-053 | – | – |
+| A-64 | Sans-IO provider in `oec-core` (`provider`, `pagination`, `writers`), held by `oec` behind the shared state | info (agent) | C-053 | – | – |
+| A-65 | Offline: state, no queue; the full state of every source on every connect | info (agent) | C-053 | – | – |
+| A-66 | Order on connect: Birth → app Health → per asset MAM/Health/Profile → app Profile → PublicationList; heartbeat only for the application (SF-106) | info (agent) | C-053 | – | – |
+| A-67 | Profile `[MAM, Health, Profile, PublicationList]`; PublicationList entries MAM/Health/Profile per source with `ON_REQUEST_SOURCE_10`, not listing itself | info (agent) | C-053 | – | – |
+| A-68 | DataSetWriterIds persisted under `app/writer-ids`, never reused; a corrupt table is an error, no silent renumbering | info (agent) | C-053 | – | – |
+| A-69 | Asset defaults (HardwareRevision `"undefined"`, DeviceClass `""`, Health NORMAL_0/100); RevisionCounter SDK-managed or from the nameplate; FNV-hashed store keys | info (agent) | C-053 | – | – |
+| A-70 | Limits: `Get` answers against the bus `MaxPacketSize`, unsolicited publications against the own lower limit; page-plan rules | info (agent) | C-053 | – | – |
+| A-71 | `Get` for an unknown Source: no answer now (MUST of REQ-CMP-047), Status `BadNotFound` (SHOULD) with increment 7 | info (agent) | C-053 | – | – |
+| A-72 | API: `AppHandle::assets`, `Asset::{mam, is_this}`, `HealthDetail::new`; `bump_revision_counter` returns `Result`; `mam()` owned on `AppHandle`; no asset heartbeat | info (agent) | C-053 | – | – |
+| A-73 | Interop test `level_2_assets_and_get_answers`; one-off D7 `monitor` run 10/0/3, capture not committed | info (agent) | C-053 | – | – |
+| A-74 | No new dependency; uuid `v5` expected in 6b | info (agent) | C-053 | – | – |
 
 ## Decisions and review items
 
@@ -450,6 +468,33 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-61 Reports:** monitor JSON report version 1, text, JUnit (one testcase per monitor test, planned ones `skipped`); `report.schema.json` is deferred to `test`, so one schema covers both commands.
 - **A-62 Live tests:** opt-in `oec/conformance/live.sh` (`OEC_LIVE=1`, pattern of `oec/dev/interop.sh`), in the module that owns the test; the gate needs no Docker or network. Run once green on 2026-10-26: both roots (client certificate with encrypted key on 8884, credentials on 8883) saw 5 records, 2 Births and 1 Will, exit 4 (6 s cannot judge the heartbeat), 6.09 s.
 
-## Next (C-053)
+### A-63 … A-74 – P4 increment 6a (C-053, agent)
 
-1. P4 increment 6 – provider side in `oec` (resources registry, automatic `Get` answers, `Profile`/`PublicationList` generation, publish modes, pagination, `MaxPacketSize`, offline queue). Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/sdk/rust/oec-core/src/provider.rs`, `provider/pagination.rs`, `provider/writers.rs`, `oec/sdk/rust/oec/src/{asset.rs, app.rs, runtime.rs, identity.rs}`, the tests; ADR-0020 amendment C-053, ADR-0026 §12, ADR-0023 amendment C-053; details in the [C-053 log](log/2026-10-27_C-053_provider-registry-get.md).
+- **A-63 Cycle cut:** increment 6 is split. 6a (this cycle) is about 3200 lines with tests and complete for an application without DataSets; 6b (C-054) adds Data DataSets, Metadata, publish modes, intervals, Precisions and the UUIDv5 DataSetClassId on top, without changing 6a. The order 6 → 7 → 8 → 10 stays: 7 and 8 need the PublicationList and `Get` path of 6.
+- **A-64 Sans-IO provider:** `oec_core::provider::Provider` owns the lifecycle of C-049 and the registry of sources; the runtime only feeds it (connect, timer, messages) and publishes what it returns. Pagination and the writer table are pure modules with their own tests, so the gate tests all of it without network.
+- **A-65 Offline:** nothing is queued (ADR-0020 §7 "state, not messages"). A change while offline only marks the source; after the reconnect the current state of every source is published. A consumer never gets a backlog of outdated states, and memory does not grow while offline. This closes the offline-queue risk of C-050.
+- **A-66 Order:** Birth → Health of the application → per asset (in the order of registration) MAM, Health and, from Level 2, Profile → Profile of the application → PublicationList. Only the application has the 60 s heartbeat (SF-106); assets publish on change and on connect.
+- **A-67 Profile and PublicationList** (Level 2+): the Profile lists `MAM, Health, Profile, PublicationList`; the PublicationList has per source the entries MAM, Health and Profile with `ON_REQUEST_SOURCE_10` (REQ-RES-PUBLIST-026: combined default), without Interval/Precisions/Config; it does not list itself. All its DataSetMessages share one DataSetWriterId (D7 T7-MON-08). Level 1 serves neither and subscribes no `Get`.
+- **A-68 DataSetWriterIds:** MAM 10 and Health 11 of the application (lifecycle); every other publication (resource, Source, Filter) gets the next free id up to 65535. The table is stored under `app/writer-ids` after every change and an id is never reused, also after `remove` (REQ-RES-PUBLIST-006). A corrupt table stops `build()` with `Error::Io` instead of renumbering, because consumers rely on the ids.
+- **A-69 Assets:**
+  - MAM defaults HardwareRevision `"undefined"` (REQ-RES-MAM-008: a physical asset with unknown revision) and DeviceClass `""`, unless the `Product` sets them; Health NORMAL_0 / 100 until set.
+  - RevisionCounter: managed by the SDK (persisted, starting at 0, `bump_revision_counter`) or taken from the VendorNameplate (`AssetDef::revision_counter`, fixed; −1 = none).
+  - Store key `assets/<FNV-1a 64 of the IL>/revision-counter`: an IL has up to 255 characters, some outside the key alphabet (open since C-048). A hash collision is negligible and accepted.
+- **A-70 Limits and pagination:** `Get` answers are paginated against the `MaxPacketSize` of the Message Bus, unsolicited publications against the application's own lower limit if set (REQ-PAG-005). Without PaginationRequest: one message if it fits, else all pages with the largest PerPage that fits (REQ-PAG-007); a requested PerPage is honored or lowered (REQ-PAG-004); Page 0 = all pages (REQ-PAG-002). D7 T7-MON-18 accepts the result.
+- **A-71 Unknown Source:** a `Get` for a Source the application does not represent gets no answer on the Pub topic (MUST of REQ-CMP-047). The recommended Status event `BadNotFound` (SHOULD) needs the event machinery of increment 7 and comes there (ADR-0020 §6 stays the target).
+- **A-72 API (ADR-0020 amendment C-053):**
+  - additions `AppHandle::assets`, `Asset::mam`, `Asset::is_this`, `HealthDetail::new`;
+  - `bump_revision_counter` returns `Result<()>` (sketch: `()`), because the persisted counter can fail;
+  - `mam()`/`identification_link()` moved from `App` to `AppHandle` (`App` derefs to it), `mam()` returns an owned value;
+  - no heartbeat for represented assets (SF-106; the sketch said "automatic" for every asset).
+- **A-73 Tests:**
+  - `oec-core`: 10 provider tests (2 property tests: page plan; every generated payload passes the strict schema) and 8 unit tests;
+  - `oec`: asset and persistence tests; 3 runtime tests against the in-process TLS broker (Level 2 sources and `Get` answers, changes at once, offline changes as state after a reconnect);
+  - opt-in interop `level_2_assets_and_get_answers` against Mosquitto: `interop.sh` 9 passed;
+  - one-off D7 `oec-check monitor` (external call, Q-009) during that test: 10 pass, 0 fail, 3 skip (exit 4: the heartbeat needs ≥ 125 s; T7-MON-03/07 concern only the probe). The capture is not committed: D7 fixtures are generated from scenarios, a recorded capture would need a new fixture kind (P5). So there is no new test data to review.
+- **A-74 Dependencies:** none new; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception. 6b will add the uuid feature `v5` (ADR-0023 amendment then).
+
+## Next (C-054)
+
+1. P4 increment 6b – provider side, part 2: Data DataSets and Metadata, their PublicationList entries with the publish modes, intervals (cyclic publication), Precisions as a dead band, the UUIDv5 DataSetClassId, the Profile extended by Data/Metadata. Runs in a new agent (start prompt in `prompt.md`).

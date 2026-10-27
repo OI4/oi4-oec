@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 27.10.2026, nach C-052 Nachtrag 2 (D-1, R-1 und R-2 umgesetzt). **Für dich ist nichts offen.**_
+_Stand: 27.10.2026, nach C-053 (P4 Inkrement 6a: das SDK beantwortet Anfragen selbst). **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,18 +24,19 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-C-052 war der **P5-Einschub**: Das Prüftool D7 (`oec-check`) kann jetzt nicht nur einzelne Nachrichten offline prüfen (`validate`), sondern auch **mithören** (`monitor`).
-- **Live:** D7 meldet sich wie eine weitere App am Broker an (TLS, Passwort oder Client-Zertifikat, auch direkt aus einem `/etc/oi4`-Ordner), hört alle OEC-Nachrichten mit und bewertet sie. Mit `--record` schreibt es dabei alles in eine Datei.
-- **Offline:** Mit `--replay` spielt D7 so eine Datei später wieder ab und kommt zum selben Ergebnis. Das braucht kein Netzwerk; so laufen auch unsere automatischen Tests.
-- Geprüft wird jede Nachricht wie bei `validate`, dazu Regeln über mehrere Nachrichten hinweg, z. B. „nach einem Will kommt zuerst eine Birth“, „Health spätestens alle 60 Sekunden“, „keine MessageId doppelt“. 13 der 19 geplanten Mithör-Prüfungen sind fertig, 6 kommen mit `test` (A-58).
-- Gegen den echten Mosquitto aus C-051 lief es einmal grün, mit beiden Anmeldearten.
-- Im Zyklus selbst wurde nichts Reviewtes geändert. Nach deinem Review ist das Schema `2.0.1-dev` @ `9044929` (nur neue Baseline, kein neuer Inhalt), die Lücken bleiben bei 0.
+C-053 war **P4 Inkrement 6a**: Das SDK kümmert sich jetzt selbst um die Standard-Ressourcen einer App und ihrer Geräte. Inkrement 6 habe ich geteilt (A-63); den zweiten Teil (6b: eigene Daten der App) macht C-054.
+- **Assets:** Eine App kann jetzt Geräte vertreten, die selbst kein MQTT können (z. B. eine Pumpe hinter einem Gateway). Sie meldet sie mit `add_asset` an. Für jedes dieser Geräte veröffentlicht das SDK automatisch MAM (Typenschild), Health (Zustand) und ab Level 2 das Profile (welche Ressourcen es gibt).
+- **PublicationList:** Ab Level 2 veröffentlicht das SDK die Liste aller Veröffentlichungen mit festen Nummern (DataSetWriterIds). Die Nummern werden gespeichert und bleiben auch nach einem Neustart gleich.
+- **Antworten auf `Get`:** Fragt jemand nach MAM, Health, Profile oder PublicationList, antwortet das SDK selbst, mit dem Verweis auf die Anfrage (`ReplyTo`). Ist die Antwort zu groß für eine Nachricht, teilt es sie in Seiten auf.
+- **Ohne Verbindung:** Das SDK sammelt keine alten Nachrichten. Nach dem Wiederverbinden sendet es einfach den aktuellen Stand (A-65).
+- **Geprüft:** automatische Tests ohne Netzwerk, Tests gegen unseren eingebauten Test-Broker, der Interop-Test gegen den echten Mosquitto (9 grün) und einmal unser eigenes Prüftool D7: 10 Prüfungen bestanden, keine durchgefallen, 3 übersprungen (z. B. braucht der Herzschlag-Test mindestens 2 Minuten).
+- Keine neue Bibliothek, kein Finding, nichts Reviewtes geändert, keine neuen Testdaten.
 
-**Für dich ist nichts offen.** Dein „R-2 ist reviewed“ ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
+**Für dich ist nichts offen.** Die Technik-Entscheidungen A-63 … A-74 sind nur zur Info (unten). Einen Blick wert: **A-65** (kein Rückstau), **A-71** (unbekanntes Gerät: die Fehlermeldung kommt erst mit Inkrement 7) und **A-72** (kleine Abweichungen von der API-Skizze).
 
 ---
 
-Die Punkte A-1 … A-62 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-052 (A-51 … A-62) stehen unten.
+Die Punkte A-1 … A-74 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-053 (A-63 … A-74) stehen unten.
 
 Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-017) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
 
@@ -45,7 +46,19 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-053
+
+- **Asset (vertretenes Gerät):** ein Gerät ohne eigenen MQTT-Zugang, für das eine App spricht, z. B. Sensoren hinter einem Gateway. Es hat eine eigene Identification Link (IL) und erscheint in den Topics als `Source`.
+- **Source:** das Ende eines Topics, das sagt, *über wen* eine Nachricht ist: die App selbst oder eines ihrer Assets.
+- **Profile:** die Liste der Ressourcen, die eine App bzw. ein Asset anbietet (z. B. MAM, Health, Profile, PublicationList).
+- **PublicationList:** das „Sendeprogramm“ einer App: welche Nachricht über wen mit welcher Nummer (DataSetWriterId) und wann (`Mode`) verschickt wird.
+- **DataSetWriterId:** eine Nummer pro Veröffentlichung. Empfänger erkennen daran, welche Nachricht zu welcher Quelle gehört. Deshalb darf sie sich nie ändern und nie für etwas anderes wiederverwendet werden.
+- **`ON_REQUEST_SOURCE_10`:** der Sende-Modus „bei Änderung über das Source-Topic und auf Anfrage“. So stehen MAM, Health und Profile in der Liste.
+- **Paginierung (Seiten):** Passt eine Antwort nicht in eine MQTT-Nachricht (`MaxPacketSize`), wird sie in nummerierte Seiten aufgeteilt. Wer fragt, kann eine Seitengröße und eine Seite wünschen.
+- **sans-IO:** Programmteile, die nur rechnen und entscheiden, aber selbst nichts senden oder lesen. Sie lassen sich ohne Netzwerk vollständig testen; das Senden macht ein dünner Teil darüber.
+- **FNV-1a:** ein einfaches, schnelles Prüfsummen-Verfahren. Wir machen damit aus einer langen IL einen kurzen Dateinamen für den Speicher.
 
 ### Begriffe aus C-052
 
@@ -248,11 +261,32 @@ Neu aus C-052 (D7 `monitor`):
 - **A-61 (neu) – Berichte:** Text, JSON und JUnit-XML (für CI). Das JSON-Schema für den Bericht kommt erst mit `test`, damit ein Schema beide Befehle abdeckt.
 - **A-62 (neu) – Live-Test nur auf Wunsch:** `oec/conformance/live.sh` startet den Dev-Broker, lässt D7 zweimal mithören (einmal mit Client-Zertifikat, einmal mit Passwort) und eine simulierte App Birth, Abbruch mit Will und Neuaufbau durchspielen. Ohne Docker meldet es „übersprungen“. Ergebnis am 26.10.: grün in 6 Sekunden; beide sahen 5 Nachrichten, 2 Births und 1 Will. Exit-Code 4 ist dabei richtig, weil 6 Sekunden für den Herzschlag zu kurz sind.
 
+Neu aus C-053 (P4 Inkrement 6a, das SDK als Anbieter):
+- **A-63 (neu) – Zyklusschnitt:** Inkrement 6 ist geteilt. 6a (dieser Zyklus) bringt die Standard-Ressourcen, die Antworten auf `Get` und die Seitenaufteilung, schon rund 3200 Zeilen mit Tests. 6b (C-054) bringt die eigenen Daten der App, Sende-Modi, Intervalle und Totbänder. Die Reihenfolge 6 → 7 → 8 → 10 bleibt, weil 7 und 8 auf der PublicationList und den `Get`-Antworten aus 6 aufbauen.
+- **A-64 (neu) – Aufbau:** Die ganze Logik (wer, was, wann, in welcher Reihenfolge) steckt in `oec-core` und sendet selbst nichts. Der Laufzeit-Teil in `oec` füttert sie nur und verschickt, was sie liefert. Deshalb lässt sich fast alles ohne Netzwerk testen.
+- **A-65 (neu) – Ohne Verbindung kein Rückstau:** Ändert sich etwas, während die Verbindung weg ist, merkt sich das SDK nur „hat sich geändert“. Nach dem Wiederverbinden sendet es den aktuellen Stand jeder Quelle. Empfänger bekommen also keine Flut veralteter Zwischenstände, und der Speicher wächst nicht. Das schließt das offene Risiko aus C-050.
+- **A-66 (neu) – Reihenfolge beim Verbinden:** Birth → Health der App → je Asset MAM, Health und (ab Level 2) Profile → Profile der App → PublicationList. Den 60-Sekunden-Herzschlag hat nur die App selbst, so wie du es bei SF-106 entschieden hast.
+- **A-67 (neu) – Inhalt von Profile und PublicationList** (ab Level 2): Das Profile nennt MAM, Health, Profile und PublicationList. Die PublicationList enthält je Quelle MAM, Health und Profile mit dem Modus `ON_REQUEST_SOURCE_10`, sich selbst aber nicht. Level 1 hat beides nicht und beantwortet kein `Get`.
+- **A-68 (neu) – Feste Nummern:** Die DataSetWriterIds werden gespeichert und nie wiederverwendet, auch nicht nach dem Entfernen eines Assets. Ist die gespeicherte Tabelle kaputt, startet die App mit einer Fehlermeldung, statt still neu zu nummerieren. Sonst würden Empfänger Nachrichten falsch zuordnen.
+- **A-69 (neu) – Voreinstellungen für Assets:**
+  - Im Typenschild steht als Hardware-Revision `"undefined"` (die Guideline verlangt das für Geräte mit unbekannter Revision), die DeviceClass bleibt leer, solange die App nichts anderes angibt. Health startet mit „normal, 100“.
+  - Den RevisionCounter zählt entweder das SDK (gespeichert, Start bei 0) oder er kommt fest vom Typenschild des Geräts.
+  - Gespeichert wird er unter einem kurzen Namen aus der Prüfsumme der IL, weil eine IL bis zu 255 Zeichen lang sein kann und Zeichen enthält, die im Dateinamen nicht gehen (offen seit C-048).
+- **A-70 (neu) – Größengrenzen:** Antworten auf `Get` dürfen so groß werden, wie der Bus erlaubt (`MaxPacketSize`). Für alles, was die App von sich aus sendet, gilt eine eigene, kleinere Grenze, wenn die App eine gesetzt hat. Was nicht passt, wird in Seiten geteilt. Unser Prüftool D7 hat die Seitenaufteilung akzeptiert.
+- **A-71 (neu) – Anfrage zu einem unbekannten Gerät:** Fragt jemand nach einem Gerät, das die App nicht vertritt, antwortet das SDK nicht (das ist Pflicht). Die empfohlene Fehlermeldung (Status-Event `BadNotFound`) kommt erst mit Inkrement 7, weil dort die Events gebaut werden.
+- **A-72 (neu) – Kleine Abweichungen von der API-Skizze:**
+  - Neu: `assets()` (alle Assets), `mam()` und `is_this()` an einem Asset, `HealthDetail::new`.
+  - `bump_revision_counter` meldet jetzt einen Fehler zurück, wenn das Speichern scheitert (in der Skizze ohne Rückgabe).
+  - `mam()` hängt jetzt am Handle der App und liefert eine Kopie, weil sich das Typenschild zur Laufzeit ändern kann.
+  - Kein Herzschlag für Assets (nach SF-106; die Skizze sagte noch „automatisch für alle“).
+- **A-73 (neu) – Tests:** neue Tests in `oec-core` (darunter zwei Zufallstests) und in `oec`, drei davon gegen den eingebauten Test-Broker; ein neuer Interop-Test gegen Mosquitto (zusammen 9 grün). Einmalig habe ich D7 mithören lassen: 10 bestanden, 0 durchgefallen, 3 übersprungen. Die Aufzeichnung habe ich nicht eingecheckt: Die D7-Testdaten werden aus Szenarien erzeugt, und für echte Aufzeichnungen bräuchte D7 eine neue Art von Testdaten (Sache von P5). Deshalb gibt es diesmal keine Testdaten zum Review.
+- **A-74 (neu) – Keine neue Bibliothek.** In 6b kommt voraussichtlich eine Zusatzfunktion der schon vorhandenen Bibliothek `uuid` dazu (für die DataSetClassId).
+
 ---
 
-### Was als Nächstes passiert (C-053)
+### Was als Nächstes passiert (C-054)
 
-1. **P4 Inkrement 6** – das SDK beantwortet Anfragen selbst: Ressourcen-Verzeichnis, automatische Antworten auf `Get`, `Profile` und `PublicationList` erzeugen, Sende-Modi und Intervalle, Seitenaufteilung großer Antworten, `MaxPacketSize`, Warteschlange bei Verbindungsabbruch.
+1. **P4 Inkrement 6b** – die eigenen Daten der App: Datensätze (`add_data`) mit Metadaten, ihre Einträge in der PublicationList mit Sende-Modi, Intervallen (regelmäßiges Senden) und Totbändern (erst ab einer Mindeständerung senden), die DataSetClassId als UUIDv5.
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
