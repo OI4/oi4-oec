@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 27.10.2026, nach C-054 (P4 Inkrement 6b: eigene Daten der App mit Metadaten, Sende-Modi, Intervallen und Totband). **Für dich ist nichts offen.**_
+_Stand: 27.10.2026, nach C-055 (P4 Inkrement 7a: die Schreib-Seite, Teil 1 – Anfragen von außen beantworten, Sende-Einstellungen und Werte von außen ändern). **Für dich offen: D-1 (SF-107) und D-2 (SF-108) entscheiden.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,21 +24,60 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-C-054 war **P4 Inkrement 6b**: Eine App kann jetzt ihre eigenen Messwerte (Datensätze) veröffentlichen, für sich selbst und für ihre Geräte. Ich habe 6b nicht weiter geteilt (A-75).
-- **Datensätze:** Die App beschreibt einen Datensatz einmal (Name = Tag, Felder mit Typ, Einheit, Messbereich), z. B. „oee“ mit dem Feld „Availability“ in %. Danach setzt sie nur noch Werte (`update`). Wann gesendet wird, entscheidet das SDK nach der PublicationList („Zustand statt Nachrichten“).
-- **Metadaten:** Aus der Beschreibung baut das SDK automatisch die Metadaten (welche Felder, welcher Typ, welche Einheit) und schickt sie vor den ersten Daten. Sie haben eine Versionsnummer, die nur steigt, wenn sich die Beschreibung ändert; sie wird gespeichert und bleibt über Neustarts gleich.
-- **DataSetClassId:** Jede Datensatz-Art bekommt eine feste Kennung, die aus Tag und Feldern berechnet wird (UUIDv5). Gleiche Struktur = gleiche Kennung, auch nach einem Neustart; andere Felder = neue Kennung.
-- **Sende-Modi:** einzeln (Standard), alle Datensätze einer Quelle zusammen, alle der App zusammen, nur auf Anfrage oder gar nicht.
-- **Intervall und Totband:** Mit Intervall sendet das SDK regelmäßig (z. B. alle 200 ms). Ohne Intervall sendet es bei Änderung, auf Wunsch erst ab einer Mindeständerung je Feld (Totband, z. B. erst ab 0,5 %).
-- **Anfragen:** `Get Data` und `Get Metadata` beantwortet das SDK selbst mit dem aktuellen Stand. Metadaten gibt es nur für Daten, die in der PublicationList angekündigt sind.
-- **Geprüft:** Tests ohne Netzwerk (Intervalle laufen mit simulierter Zeit, ohne Warten), Tests gegen den eingebauten Test-Broker, Interop gegen den echten Mosquitto (10 grün) und einmal unser Prüftool D7: 10 bestanden, 0 durchgefallen, 3 übersprungen. Dabei hat D7 zuerst einen **Fehler in D7 selbst** gezeigt (A-85), den ich behoben habe.
-- Eine kleine Erweiterung einer vorhandenen Bibliothek (`uuid` mit `v5`, zieht `sha1_smol` mit BSD-3-Lizenz nach), sonst nichts Neues. Kein Finding, nichts Reviewtes geändert, keine neuen Testdaten.
+C-055 war **P4 Inkrement 7a**: Die App kann jetzt Anfragen beantworten, die etwas ändern wollen. Inkrement 7 war für einen Zyklus zu groß, ich habe es geteilt (A-87): 7a (jetzt), 7b (Config mit Maskierung und Secrets, als Nächstes), 7c (ReferenceDesignation, Syslog- und Generic-Events). Die SubscriptionList wandert zu Inkrement 8 (Empfänger-Seite).
+- **Status-Meldungen:** Jede Änderungs-Anfrage (`Set`/`Del`) bekommt eine Antwort als Status-Event: „Good“ (hat geklappt) oder „Bad“ mit Grund (z. B. `BadNotWritable` = darf man nicht ändern). Über `ReplyTo` sieht der Anfragende, welche Antwort zu seiner Anfrage gehört. Das macht das SDK automatisch; die App muss nichts tun.
+- **Unbekannte Geräte:** Fragt jemand nach einem Gerät, das die App gar nicht hat, antwortet das SDK mit `BadNotFound` (so empfiehlt es die Guideline). Dazu gibt es eine Frage an dich (D-2).
+- **Sende-Einstellungen von außen ändern (`Set PublicationList`):** Ein anderes Programm kann z. B. das Intervall oder den Sende-Modus eines Datensatzes ändern – aber nur, soweit die App es bei der Beschreibung erlaubt hat. Die neue Einstellung wird gespeichert und gilt auch nach einem Neustart.
+- **Werte von außen setzen (`Set Data`):** Die App meldet für einen Datensatz einen Handler an (`on_set`). Das SDK prüft die Anfrage (gibt es den Datensatz, fehlen Felder, stimmen die Typen?), dann entscheidet der Handler: „ja“ → das SDK übernimmt die Werte, schickt sie und meldet „Good“; „nein“ → das SDK meldet „Bad“ mit dem Grund der App.
+- **Was noch fehlt:** Änderungen an Config, SubscriptionList und ReferenceDesignation sowie jedes `Del` beantwortet das SDK vorerst mit `BadNotFound`, bis 7b/7c/8 sie bringen.
+- **Geprüft:** Tests ohne Netzwerk (darunter das Beispiel aus der Guideline, Anhang B1.1.4, mit genau der dort gezeigten Antwort), Tests gegen den eingebauten Test-Broker, Interop gegen den echten Mosquitto (11 grün) und einmal unser Prüftool D7: 9 bestanden, 0 durchgefallen, 4 übersprungen. Ein Übersprung kommt von der Frage D-2. Beim ersten D7-Lauf hat D7 Fehler in meinem **Test** gefunden (meine Test-Anfragen waren nicht schema-gültig); behoben.
+- Keine neue Bibliothek, nichts Reviewtes geändert, keine neuen Testdaten.
 
-**Für dich ist nichts offen.** Die Technik-Entscheidungen A-75 … A-86 sind nur zur Info (unten). Einen Blick wert: **A-80** (ein Datensatz geht erst raus, wenn alle Felder einen Wert haben), **A-84** (kleine Abweichungen von der API-Skizze) und **A-85** (Fehler in D7 gefunden und behoben).
+**Für dich offen: zwei Entscheidungen (D-1, D-2).** Beide sind Lücken in der Guideline, die mir beim Bauen aufgefallen sind. Nichts im SDK wartet darauf; 7b kann sofort starten. Die Technik-Entscheidungen A-87 … A-97 sind nur zur Info (unten). Einen Blick wert: **A-87** (Zyklusschnitt), **A-91** (unbekannte Geräte) und **A-95** (Regeln für `Set Data`).
+
+### D-1 – SF-107: Woran sieht man, dass ein Datensatz von außen beschreibbar ist? (entscheiden)
+
+**Wo es auffiel:** beim Bau von `Set Data` im SDK.
+
+**Was die Guideline sagt:**
+- Anhang B1.1.3 und B1.1.4 (nur informativ): „Nicht jeder Datensatz ist über den Bus beschreibbar. Prüfe `SubscriptionList` und/oder `PublicationList`, um das herauszufinden.“
+- Die PublicationList hat je Eintrag ein Feld `Config`. Es sagt aber nur, welche **Sende-Einstellungen** (Modus, Intervall, Totband) man ändern darf – nicht, ob man die **Werte** setzen darf.
+- Die SubscriptionList zeigt laut MG 9.1.9 „die tatsächlichen Abonnements“. Die Beispiele dort abonnieren aber nur Daten **anderer** Apps.
+
+**Das Problem, an einem Beispiel:** Ein Leitsystem will den Sollwert einer Pumpe setzen. Vorher möchte es wissen, ob der Datensatz „Sollwert“ überhaupt beschreibbar ist. Keine Regel der Guideline sagt, wo das steht. Heute bleibt nur: einfach schicken und auf `BadNotWritable` warten.
+
+**Mein Vorschlag (empfohlen):** Die **SubscriptionList** zeigt es. Eine App, die `Set Data` für einen Datensatz annimmt, trägt ihr eigenes Abo auf das passende `Set`-Topic dort ein, z. B. `Oi4v2/…/<AppId>/Set/Data/<Gerät>/sollwert`. Andere eigene Abos (z. B. für `Get`) werden nicht eingetragen, die beschreibt schon das Profile. Das Feld `Config` der PublicationList behält seine Bedeutung. Der englische Textvorschlag für MG 9.1.9 und B1.1.3/B1.1.4 steht im Register.
+
+**Andere Möglichkeiten:** (b) die PublicationList zeigt es (ein neues Merkmal; das ändert die Bedeutung von `Config` und das Schema); (c) keine Liste zeigt es, die Guideline sagt „schick das `Set`, `BadNotWritable` sagt dir Bescheid“ (nur Textänderung).
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ändere MG 9.1.9 und B1.1.3/B1.1.4 in der Guideline und baseline neu.
+- Die REQs zur SubscriptionList folgen dem Text und kommen als `draft` noch einmal zu dir.
+- Das SDK trägt die Abos ein, sobald die SubscriptionList kommt (Inkrement 8). An 7a ändert sich nichts.
+
+### D-2 – SF-108: Unter welchem Absender antwortet die App auf eine Anfrage zu einem fremden Gerät? (entscheiden)
+
+**Wo es auffiel:** beim einmaligen Mithören mit D7 gegen das SDK.
+
+**Was die Guideline sagt:**
+- MG 9.1: Fragt jemand nach einem Gerät, das die App weder ist noch vertritt, soll sie mit einem Status-Event `BadNotFound` antworten.
+- Die Antwort geht an `Pub/Event/<Source>/Status/…`. **Welche** `Source` (Absender) gemeint ist, steht nicht da.
+- MG 1.3: Für sich selbst und **jedes** vertretene Gerät muss eine App MAM (Typenschild) und Health senden.
+
+**Das Problem, an einem Beispiel:** Jemand fragt die App „Pumpen-Connector“ nach dem Gerät „Pumpe 4711“, das sie gar nicht kennt. Wörtlich gelesen antwortet sie unter dem Absender „Pumpe 4711“. Wer mithört, sieht jetzt: Der Connector sendet etwas für „Pumpe 4711“ – also vertritt er sie wohl? Dann fehlen aber Typenschild und Health für dieses Gerät. Genau das hat D7 bemerkt (Test T7-MON-04 konnte nicht entscheiden). Außerdem könnte jeder die App dazu bringen, unter beliebigen fremden Namen zu senden.
+
+**Mein Vorschlag (empfohlen):** Eine Status-Meldung trägt immer einen Absender, den die App ist oder vertritt. Für eine Anfrage zu einem fremden Gerät antwortet die App **unter ihrem eigenen Namen** (`AppId`): `Pub/Event/<AppId>/Status/Bad`. Der Anfragende findet die Antwort trotzdem, über `ReplyTo`. Alle anderen Anfragen behalten den Absender aus der Anfrage. Der englische Textvorschlag für MG 9.1 steht im Register.
+
+**Andere Möglichkeiten:** (b) der Absender bleibt das fremde Gerät, und die Guideline sagt dazu, dass ein Absender, der nur in solchen Status-Antworten vorkommt, kein vertretenes Gerät ist (dann muss D7 das berücksichtigen; das SDK bleibt); (c) Text lassen, wie er ist.
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ändere MG 9.1 in der Guideline und baseline neu.
+- Die Hinweise in REQ-CMP-047/043 folgen dem Text und kommen als `draft` noch einmal zu dir.
+- Das SDK ändere ich im nächsten Zyklus (kleine Änderung: Antwort unter der eigenen `AppId`). D7 bleibt, wie es ist.
 
 ---
 
-Die Punkte A-1 … A-86 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-054 (A-75 … A-86) stehen unten.
+Die Punkte A-1 … A-97 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-055 (A-87 … A-97) stehen unten.
 
 Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-017) ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-052) geworden ist“.
 
@@ -48,7 +87,16 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-055
+
+- **`Set` / `Del`:** Anfragen, die etwas ändern (setzen) bzw. löschen wollen. `Get` fragt nur ab.
+- **Status-Event:** die Antwort auf eine `Set`/`Del`-Anfrage: „Good“, „Uncertain“ oder „Bad“, mit einer Nummer und einem Namen für den Grund (z. B. `BadNotFound` = gibt es nicht, `BadNotWritable` = darf man nicht ändern, `BadTypeMismatch` = falscher Typ).
+- **`ReplyTo`:** die Nummer der Anfrage, die in der Antwort steht. So weiß der Anfragende, welche Antwort zu ihm gehört.
+- **`Set PublicationList`:** von außen die Sende-Einstellungen eines Datensatzes ändern (Modus, Intervall, Totband), soweit die App es erlaubt.
+- **`Set Data` / `on_set`:** von außen die Werte eines Datensatzes setzen. Die App entscheidet in ihrem Handler `on_set`, ob sie die Werte annimmt.
+- **SubscriptionList:** die Liste der Abos einer App (was sie empfängt). Kommt mit Inkrement 8.
 
 ### Begriffe aus C-054
 
@@ -313,11 +361,26 @@ Neu aus C-054 (P4 Inkrement 6b, eigene Daten der App):
 - **A-85 (neu) – Tests und ein Fehler in D7:** neue Tests in `oec-core` und `oec`, ein neuer Interop-Test (zusammen 10 grün). Beim einmaligen Mithören mit D7 gab es zuerst 2 Fehlschläge, beide nicht im SDK: Mein Test hatte dieselbe Nachrichtennummer zweimal benutzt (behoben), und **D7 hielt unaufgeforderte Metadaten für „leer“**, weil es den Inhalt an der falschen Stelle suchte (bei Metadaten steht er in `MetaData`, nicht in `Messages`). Das habe ich in D7 behoben, zuerst mit einem Test, der den Fehler zeigt. Deine 18 reviewten Testaufzeichnungen und ihre Ergebnisse ändern sich dadurch nicht. Danach: 10 bestanden, 0 durchgefallen, 3 übersprungen.
 - **A-86 (neu) – Bibliothek:** `uuid` bekommt die Funktion `v5`; dafür kommt die kleine Bibliothek `sha1_smol` (BSD-3-Lizenz, ohne weitere Abhängigkeiten) dazu. SHA-1 dient hier nur zum Berechnen der Kennung, nicht der Sicherheit. Die Lizenzprüfung (`cargo deny`) läuft ohne Ausnahme.
 
+
+Neu aus C-055 (P4 Inkrement 7a, die Schreib-Seite):
+- **A-87 (neu) – Zyklusschnitt:** 7 ist geteilt. 7a (jetzt) ist ein Mechanismus: Anfrage prüfen, mit einer Status-Meldung antworten, über `ReplyTo` zuordnen; schon so rund 1500 Zeilen Code und 1330 Zeilen Tests. 7b (Config) ist ein eigenes, sicherheitsrelevantes Thema (Maskierung von Passwörtern, Secrets) und nutzt den Weg aus 7a unverändert. 7c (ReferenceDesignation, Syslog- und Generic-Events) sind kleine Ergänzungen. Die SubscriptionList gehört zur Empfänger-Seite (8). Reihenfolge 7a → 7b → 7c → 8 → 10.
+- **A-88 (neu) – Aufbau:** Die Logik steckt in `oec-core` (Status-Codes, Schreib-Anfragen, gespeicherte Sende-Einstellungen). Bei `Set Data` fragt `oec-core` nicht selbst den Handler der App, sondern gibt die geprüfte Anfrage an die Laufzeit zurück; die fragt den Handler und gibt das Ergebnis zurück (zwei Schritte). So läuft im Kern nie fremder Code.
+- **A-89 (neu) – Ab welchem Level:** Änderungs-Anfragen nimmt das SDK erst ab Level 2 an. Level 1 bietet nichts Beschreibbares an; `on_set` meldet dort einen Fehler. Eine Anfrage, die kein gültiges JSON ist oder keine Nachrichtennummer hat, kann man nicht beantworten (kein `ReplyTo`) – sie wird ignoriert. Eine Anfrage muss genau einen Datensatz enthalten.
+- **A-90 (neu) – Form der Status-Meldung:** Topic `Pub/Event/<Absender>/Status/<Good|Uncertain|Bad>`, mit `ReplyTo`, Nummer und – für bekannte Codes – Name und Beschreibung. Jede Quelle bekommt feste Nummern (DataSetWriterIds) für ihre drei Status-Stufen; die PublicationList nennt sie, das Profile nennt `Event`.
+- **A-91 (neu) – Unbekannte Geräte:** `BadNotFound` geht heute unter dem Namen des angefragten (fremden) Geräts raus, so wie es wörtlich in der Guideline steht. Diese Antworten bekommen vorübergehende Nummern, höchstens 64 fremde Geräte je Lauf; danach antwortet das SDK nicht mehr (Schutz gegen Überflutung). Das ändert sich, wenn du D-2 wie vorgeschlagen entscheidest.
+- **A-92 (neu) – Was noch nicht geht:** `Set` auf Config, SubscriptionList, ReferenceDesignation und jedes `Del` → `BadNotFound`, bis 7b/7c/8 sie bringen. `Set Metadata` → `BadNotWritable` (Metadaten folgen immer der Beschreibung in der App).
+- **A-93 (neu) – Regeln für `Set PublicationList`:** Der Eintrag wird über Ressource, Absender und Filter gefunden. Unbekannt → `BadNotFound`; nicht lesbar → `BadDecodingError`; eine Änderung, die `Config` nicht erlaubt (oder eines festen Felds) → `BadNotWritable`; ein ungültiges Totband → `BadInvalidArgument`; nichts geändert → trotzdem „Good“. Bei Erfolg: erst der geänderte Eintrag, dann „Good“. Die ganze Liste kommt nur neu, wenn ein Datensatz ein- oder ausgeschaltet wurde.
+- **A-94 (neu) – Speichern:** Die geänderten Einstellungen werden gespeichert (wie die Nummern und Versionen). Ist die Datei kaputt, startet die App mit Fehler. Beim Start gilt eine gespeicherte Einstellung nur, wenn die App sie noch erlaubt – ändert der Entwickler sein Programm, erbt es keine verbotene Einstellung.
+- **A-95 (neu) – Regeln für `Set Data`:** unbekannter oder abgeschalteter Datensatz → `BadNotFound`; kein Handler → `BadNotWritable`; Feld fehlt → `BadInvalidArgument`; falscher Typ → `BadTypeMismatch`; unbekannte Felder werden ignoriert (so verlangt es die Guideline für Empfänger). Dann entscheidet der Handler der App (siehe oben). Stürzt der Handler ab, meldet das SDK `BadInternalError`. Der Handler muss kurz sein, weil er auf dem Bus-Takt läuft (steht in der Doku).
+- **A-96 (neu) – Kleine Abweichungen von der API-Skizze:** `on_set` meldet jetzt einen Fehler zurück (z. B. auf Level 1), `SetData` kann alle Felder aufzählen. Die Skizze ist angepasst.
+- **A-97 (neu) – Tests:** neue Tests in `oec-core` und `oec`, ein neuer Interop-Test (zusammen 11 grün). D7 fand beim ersten Mithören 5 ungültige Anfragen – alle von meinem Test, nicht vom SDK; behoben. Danach 9 bestanden, 0 durchgefallen, 4 übersprungen (einer wegen D-2, drei, weil der Lauf zu kurz war oder die Situation nicht vorkam). Keine neue Bibliothek.
+
 ---
 
-### Was als Nächstes passiert (C-055)
+### Was als Nächstes passiert (C-056)
 
-1. **P4 Inkrement 7** – die Schreib-Seite: `Set`/`Del` mit Status-Meldungen, die Config-Ressource, `Set PublicationList` (Sende-Einstellungen von außen ändern, soweit die App es erlaubt) und die Fehlermeldung `BadNotFound` für Anfragen zu unbekannten Geräten. Zuerst prüfe ich, ob 7 geteilt werden muss.
+1. **P4 Inkrement 7b** – die Config-Ressource: Einstellungen der App, die man von außen lesen und ändern kann, mit Prüfung, Maskierung geheimer Werte (GL-ADR-021, z. B. Passwörter werden nie im Klartext gesendet) und Secrets unter `/run/secrets/oi4` (GL-ADR-022). Nutzt den Weg aus 7a.
+   - Entscheidest du D-2 wie vorgeschlagen, baue ich die Änderung im selben Zyklus ein (vorher neu baselinen).
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---

@@ -130,3 +130,7 @@ P4 increment 6a (provider side, ADR-0026 §12) adds no crate and no feature: the
 ## Amendment C-054 (2026-10-27) – uuid feature `v5` (agent, G-3.4 b)
 
 P4 increment 6b enables the feature `v5` of `uuid` (workspace dependency, used by `oec-core` and `oec`) for the publisher-defined DataSetClassId (ADR-0020 §6, REQ-MSG-013; ADR-0026 §13.3). It pulls in **sha1_smol 1.0.1** (BSD-3-Clause, no dependencies of its own), which is within the license allowlist of §2. SHA-1 is used only as the name-based UUID function of RFC 9562 §5.5, not for security. `Cargo.lock`: 192 packages (was 191); `deny.toml` unchanged; `cargo deny check` passes with **no exception and no `ignore` entry**. No other crate or feature was added in 6b: the dead band, the cyclic publication and the MetaDataVersions use `serde_json` and the standard library.
+
+## Amendment C-055 (2026-10-27) – no new dependency in increment 7a (agent, G-3.4 b)
+
+P4 increment 7a (write side, ADR-0026 §14) adds no crate and no feature: Status codes, request parsing, the `Set PublicationList` overrides and `Set Data` use `serde`, `serde_json` and the standard library. `Cargo.lock` and `deny.toml` are unchanged; `cargo deny check` passes without exception. Increment 7b (Config with secrets under `/run/secrets/oi4`) is expected to need none either; if it does, it will be recorded here.

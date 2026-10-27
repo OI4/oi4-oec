@@ -309,3 +309,25 @@ Module `oec::data` (also in the prelude): `BuiltinType`, `Value`, `Field::{new, 
 4. **A DataSet is published and answered once every field has a value.** A DataSetMessage of a Data DataSet carries all fields of its Metadata (REQ-RES-DATA-007 with REQ-RES-META-003); until then `Get Data` with its Tag returns an empty list. The sketch example `device_source.rs` sets `Pv` and `Sv1` before the polling loop.
 5. **`DataSetDef::class_id` is checked at `add_data`** (not a UUID → `Error::Invalid`), as builders do not fail (ADR-0020 §1).
 6. **`Publication::interval`** accepts whole milliseconds up to `u32::MAX` (the PublicationList `Interval` is a UInt32 in ms, REQ-RES-PUBLIST-013); other durations are `Error::Invalid` at `add_data`.
+
+## Amendment C-055 (2026-10-27) – P4 increment 7a: writable DataSets and the write side (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details and REQ tracing: `log/2026-10-27_C-055_write-side.md`, REVIEW A-87 … A-97. Provider semantics: ADR-0026 §14.
+
+### A. What moved from the sketch into `oec`
+
+`SetData::{get, fields}` and `DataSet::on_set` (module `oec::data`, in the prelude). The SDK now answers every `Set`/`Del` addressed to the application with a Status event (§9), applies `Set PublicationList` within `Publication::writable` and persists the result (§7), and answers a `Get` to an unknown Source with the Status event `BadNotFound` (REQ-CMP-047). Still in the sketch and still the contract: `ConfigDef`/`ConfigHandle`/`on_set` of Config (increment 7b), events of the application, ReferenceDesignation (increment 7c), the consumer and the SubscriptionList (increment 8).
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `SetData::fields()` | Iterate all requested values in definition order; the sketch had only `get`. |
+| `StatusCode` → core mapping (crate-internal) | The handler's code is sent as given; Description and SymbolicId only for the codes the SDK knows. |
+
+### C. Changes of sketch items (need this amendment)
+
+1. **`DataSet::on_set` returns `Result<()>`** (sketch: `()`): `Error::Invalid` for a removed DataSet and at Level 1, where the SDK does not subscribe `Set` (requests are served from Level 2 on, MG 9.1; REQ-CMP-043 applies to an entity that offers `Set`). A silently ignored handler would make the DataSet look writable to the developer. A further call replaces the handler.
+2. **`SetData` is checked tolerantly:** a missing field is `BadInvalidArgument`, a value that does not fit its field `BadTypeMismatch`, both without calling the handler; **unknown fields are ignored** (tolerant reader, REQ-MSG-046; the sketch said unknown field → `BadTypeMismatch`).
+3. **Handler outcome:** `Ok` → the SDK sets the values as state, publishes the DataSet with the `ReplyTo` of the `Set` (REQ-RES-DATA-012), then the Status event Good; `Err(code)` → only the Status event with that code, an `Err` with a Good code is sent as `Bad` (an Uncertain code is sent as it is); a panic → `BadInternalError`. The handler runs on the runtime task outside every SDK lock (documented: short and non-blocking).
+4. **`Publication::writable`** is now applied: a `Set PublicationList` may change exactly what it allows (`Mode`, `Interval`, `Precisions`); the result survives restarts (store key `app/publications`) as long as the definition still allows it.

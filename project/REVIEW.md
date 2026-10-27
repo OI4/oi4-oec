@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-054 (P4 increment 6b: provider side, part 2; A-75 … A-86 for information; guideline `9044929`, register `b94e803`). **Nothing is open for the PO.**_
+_Last updated: 2026-10-27, C-055 (P4 increment 7a: write side, part 1; A-87 … A-97 for information; guideline `9044929`, register `a8f5176`). **Open for the PO: D-1 (SF-107) and D-2 (SF-108) to decide.**_
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -53,15 +53,23 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - New: uuid feature `v5` (+ sha1_smol, BSD-3-Clause) under `cargo deny` without exception.
   - No finding, no reviewed item changed, no new test data, so there is nothing to decide or review; A-75 … A-86 are for information. Worth a look: **A-80** (a DataSet goes out only once every field has a value), **A-84** (sketch changes: `update` returns `Result`, no `Value::Json`), **A-85** (D7 fix).
   - C-055 (increment 7) runs in a new agent; `prompt.md` is filled.
+- C-055 (P4 increment 7a; increment 7 is split into 7a, 7b and 7c, the SubscriptionList moves to 8):
+  - `oec-core`: the write side of the provider – `Set`/`Del` subscribed from Level 2, every request answered with a Status event (`Pub/Event/<Source>/Status/<Level>`, `ReplyTo`), `BadNotFound` for requests to an unknown Source, `Set PublicationList` within `Publication::writable` (persisted), `Set Data` in two phases.
+  - `oec`: `DataSet::on_set` returns `Result`, `SetData::{get, fields}`; the handler decides, the SDK answers (Pub Data + Status Good, or Status Bad with the handler's code); settings persisted under `app/publications`; the sketch is aligned (ADR-0020 amendment C-055).
+  - Tests: core and runtime tests in the gate (incl. the guideline vectors V-PAY-061/062 of MG B1.1.4); opt-in interop 11 green; a one-off D7 `oec-check monitor` run against the SDK: 9 pass, 0 fail, 4 skip.
+  - **Two findings to decide: D-1 = SF-107** (how a requester sees that a DataSet is writable) and **D-2 = SF-108** (which Source the Status event for a request to an unknown asset carries; this caused one of the D7 skips). No reviewed item changed, no new test data, no new dependency; A-87 … A-97 are for information. Worth a look: **A-87** (cycle cut), **A-91** (unknown Source), **A-95** (`Set Data` rules).
+  - C-056 (increment 7b, Config) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `9044929` (re-baseline, no content change).
 
-Logs: [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
+| D-1 | SF-107: how a requester finds out whether a `Data` DataSet is writable (MG 9.1.9, B1.1.3/B1.1.4) | decide | C-055 | as proposed (the component lists its own `Set` subscription of every writable DataSet in the SubscriptionList) | ☐ |
+| D-2 | SF-108: `Source` of the Status event that answers a request to an asset the entity neither is nor represents (MG 9.1) | decide | C-055 | as proposed (the entity's own `Source` = `AppId`, correlated through `ReplyTo`) | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -148,10 +156,51 @@ Logs: [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-2
 | A-84 | API: `Field::range`, `DataSet::{tag, source, values}`, `Mode::union`; `update` returns `Result`; `Value::Json` dropped | info (agent) | C-054 | – | – |
 | A-85 | Tests; interop `level_2_data_sets_and_metadata`; D7 `monitor` 10/0/3 after a D7 fix of T7-MON-11 | info (agent) | C-054 | – | – |
 | A-86 | uuid feature `v5` (+ sha1_smol, BSD-3-Clause), `cargo deny` without exception | info (agent) | C-054 | – | – |
+| A-87 | Cycle cut: 7 split into 7a (this cycle), 7b (Config) and 7c (ReferenceDesignation, Syslog, Generic events); SubscriptionList → 8; order 7a → 7b → 7c → 8 → 10 | info (agent) | C-055 | – | – |
+| A-88 | Modules `status`, `provider::write`, `provider::overrides`; `Handled::{Publish, SetData}` with a two-phase `Set Data` | info (agent) | C-055 | – | – |
+| A-89 | Requests and levels: `Set`/`Del` from Level 2 only; invalid payloads ignored; exactly one resource DataSetMessage | info (agent) | C-055 | – | – |
+| A-90 | Status events: topic, envelope, ids, Description/SymbolicId; Event in the Profile, Status entries in the PublicationList | info (agent) | C-055 | – | – |
+| A-91 | Unknown Source: `BadNotFound` under the requested Source with bounded transient ids (SF-108 pending) | info (agent) | C-055 | – | – |
+| A-92 | Writes not served yet (Config, SubscriptionList, ReferenceDesignation, every `Del`) → `BadNotFound`; `Set Metadata` → `BadNotWritable` | info (agent) | C-055 | – | – |
+| A-93 | `Set PublicationList`: identification, checks and status codes, answers | info (agent) | C-055 | – | – |
+| A-94 | Publication settings persisted under `app/publications`, applied only within the current `Writable` | info (agent) | C-055 | – | – |
+| A-95 | `Set Data`: checks, the handler decides, unknown fields ignored, panic → `BadInternalError` | info (agent) | C-055 | – | – |
+| A-96 | API (ADR-0020 amendment C-055): `on_set` returns `Result`, `SetData::fields`; sketch aligned | info (agent) | C-055 | – | – |
+| A-97 | Tests (core, runtime, app, interop 11 green, D7 9/0/4); interop probes send schema-valid requests; no new dependency | info (agent) | C-055 | – | – |
 
 ## Decisions and review items
 
-Nothing is open for the PO.
+### D-1 – SF-107: how a requester finds out whether a `Data` DataSet is writable (MG 9.1.9, B1.1.3/B1.1.4)
+
+- **Found:** while implementing `Set Data` in the SDK (C-055); register entry `f80fa9c`, details in the register and in the [C-055 log](log/2026-10-27_C-055_write-side.md).
+- **What the guideline says:**
+  - B1.1.3 and B1.1.4 (informative): "Not every `DataSet` is writable over the Message Bus. Check `SubscriptionList` and/or `PublicationList` to find out about accessibility."
+  - MG 8.3.8/9.1.8: the `Config` of a PublicationList entry says which publication settings (`Mode`, `Interval`, `Precisions`) can be changed.
+  - MG 8.3.9/9.1.9: the SubscriptionList "represents the actual available/configured subscriptions"; the examples subscribe to topics of other components (`Oi4v2/+/+/Pub/Data/+/oee`).
+- **The problem:** no normative text says how either list shows that the *values* of a DataSet can be set. The PublicationList `Config` is about publication settings. For the SubscriptionList it is open whether a component lists its own `Set` subscriptions, and if so, whether its own `Get` subscriptions too. Today a requester can only find out by sending the `Set` and getting `BadNotWritable`.
+- **Proposed interpretation (recommended):** the SubscriptionList shows writability. A component that accepts `Set Data` (or `Set Config`) for a DataSet lists its own subscription of that `Set` topic as an entry: `TopicPath` `Oi4v2/<ServiceType>/<AppId>/Set/Data/<Source>/<Tag>` (no wildcard), `WriterGroupName` `Data/<Tag>`, `DataSetWriterName` = `Source`, `Config` `NONE_0`. Other own request subscriptions (`Get/…`, `Del/…`) are not listed. The PublicationList `Config` keeps its meaning. Proposed text, appended to MG 9.1.9 after the first paragraph: "A `DataSet` of the resources `Data` or `Config` that can be changed with `Set` is listed with the subscription of its `Set` topic (e.g. `Oi4v2/<ServiceType>/<AppId>/Set/Data/<Source>/<Tag>`, `Config` `NONE_0`). Other subscriptions to topics of the own `AppId` are not listed." B1.1.3/B1.1.4: "Check the `SubscriptionList` to find out about accessibility."
+- **Alternatives:** (b) the PublicationList shows it (a new `Config` flag or a rule such as "a `Data` entry with `Config` ≠ `NONE_0` is writable"; changes the meaning of `Config` and the schema); (c) no list shows it, B1.1.3/B1.1.4 say "send the `Set`; `BadNotWritable` tells you" (text change only).
+- **Impact if decided as proposed:**
+  - guideline text MG 9.1.9 and B1.1.3/B1.1.4 by your order, re-baseline;
+  - REQ-RES-SUBLIST-* follow the text (→ `draft`, back to you as R-x);
+  - the SDK lists the entries when the SubscriptionList comes (increment 8); nothing in 7a changes. D7 gets a check later (P5b).
+- **PO:** ☐ as proposed ☐ (b) ☐ (c) ☐ other: …
+
+### D-2 – SF-108: `Source` of the Status event for a request to an unknown asset (MG 9.1)
+
+- **Found:** in the one-off D7 `oec-check monitor` run against the SDK (C-055); register entry `a8f5176`, details in the register and in the [C-055 log](log/2026-10-27_C-055_write-side.md).
+- **What the guideline says:**
+  - MG 9.1 (Resources Without Content): a `Get` whose `Source` addresses an asset the entity "neither is nor represents" gets no `Pub` answer; it "should be answered with an `Event` of category `Status`, level `Bad` (`BadNotFound`)". A `Set`/`Del` to an object the entity does not have is answered so too (L2+).
+  - MG 9.1.3 … 9.1.10: the Status event goes to `Pub/Event/<Source>/Status/<StatusCode>` – without saying which `Source`.
+  - MG 1.3, MG 9.1.1/9.1.2: `MAM` and `Health` for the entity and every subordinate asset.
+- **The problem:** read literally (the `Source` of the request), the entity publishes under the `Source` of an asset it does not represent. A subscriber sees a new `Source` of this `AppId` and takes it for a subordinate asset without `MAM`/`Health`; D7 T7-MON-04 therefore reported "inconclusive" in this cycle. Any participant can also make an entity publish under arbitrary Sources, each with its own DataSetWriterId.
+- **Proposed interpretation (recommended):** a Status event always carries a `Source` the entity is or represents. For a request to an asset the entity neither is nor represents, the event is published with the entity's own `Source` (`AppId`): `Pub/Event/<AppId>/Status/Bad`; the requester finds it through the `ReplyTo`. All other requests keep the `Source` of the request. Proposed text, appended to the second bullet of MG 9.1 (Resources Without Content): "Because the entity does not represent the addressed asset, this `Event` is published with the `Source` of the entity itself (`AppId`); the requester finds it through the `ReplyTo`. The same applies to the status `Event` of a `Set` or `Del` whose `Source` addresses such an asset."
+- **Alternatives:** (b) keep the `Source` of the request and state that a `Source` which only appears in Status events with a `ReplyTo` is not a subordinate asset (D7 T7-MON-04 must then ignore such Sources; the SDK stays as it is); (c) leave the text as it is.
+- **Impact if decided as proposed:**
+  - guideline text MG 9.1 by your order, re-baseline;
+  - REQ-CMP-047/043 notes follow the text (→ `draft`, back to you as R-x);
+  - SDK: a small change in the next cycle (the event uses the application's own Status ids, the bounded transient ids are dropped, A-91); D7 stays unchanged.
+- **PO:** ☐ as proposed ☐ (b) ☐ (c) ☐ other: …
 
 ### Answered earlier
 
@@ -539,6 +588,26 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - one-off D7 `oec-check monitor` (external call, Q-009) during that test: first 2 failures, both not in the SDK: the test reused a MessageId for two `Get`s (test fixed), and **D7 T7-MON-11 reported an unsolicited Metadata as "without content"**, because it looked for DataSetMessages, while a ua-metadata message carries its content in `MetaData`. Fixed in D7 with a test first (`TestUnsolicitedMetadataHasContent`); the 18 reviewed fixtures and their verdicts are unchanged (they only had solicited Metadata). Rerun: 10 pass, 0 fail, 3 skip (exit 4 as in C-053). Capture not committed (A-73).
 - **A-86 Dependencies:** the uuid feature `v5` (SHA-1 name-based UUIDs) adds sha1_smol 1.0.1 (BSD-3-Clause, no dependencies); `Cargo.lock` 192 packages; `deny.toml` unchanged; `cargo deny` without exception.
 
-## Next (C-055)
+### A-87 … A-97 – P4 increment 7a (C-055, agent)
 
-1. P4 increment 7 – write side: `Set`/`Del` with Status events, the Config resource, `Set PublicationList` (`Publication::writable`), Status `BadNotFound` for a `Get` of an unknown Source; cycle cut first. Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/sdk/rust/oec-core/src/{status.rs, provider.rs}`, `provider/{write.rs, overrides.rs, writers.rs, sets.rs}`, `oec/sdk/rust/oec/src/{data.rs, app.rs, runtime.rs, status.rs}`, the tests, the sketch (`sketch/src/data.rs`, `examples/device_source.rs`); ADR-0020 amendment C-055, ADR-0026 amendment C-055 §14, ADR-0023 amendment C-055; [C-055 log](log/2026-10-27_C-055_write-side.md).
+- **A-87 Cycle cut:** increment 7 is split. 7a (this cycle: the request path, Status events, `BadNotFound` for unknown Sources, `Set PublicationList`, `Set Data`) is one mechanism – check a request, answer with a Status event, correlate with `ReplyTo` – and already about 1500 lines of code and 1330 lines of tests. 7b (Config with masking and secrets) is its own security-relevant topic on the unchanged write path; 7c (ReferenceDesignation, Syslog bridge, Generic events) are small additions on the Event writer of 7a. The SubscriptionList moves to 8, because it lists the subscriptions of the consumer. Order 7a → 7b → 7c → 8 → 10.
+- **A-88 Modules:** `oec_core::status` (status codes of MG 8.3.6.1 with level, Description and SymbolicId), `provider::write` (request parsing, Status events, `Set PublicationList`, `Set Data`), `provider::overrides` (stored publication settings). `Provider::handle_message` returns `Handled::Publish` or `Handled::SetData`; for the latter the runtime asks the handler and calls `complete_set_data`, so the sans-IO core never runs user code.
+- **A-89 Requests and levels:** from Level 2 the provider subscribes `Set/<R>/#` for Config, Data, Metadata, PublicationList, SubscriptionList and ReferenceDesignation and `Del/<R>/#` for SubscriptionList and ReferenceDesignation (14 request filters with the `Get` filters). Level 1 subscribes no request topic and offers nothing writable (REQ-CMP-043 applies to an entity that offers `Set`/`Del`); `on_set` returns an error there. A payload that is not JSON or has no valid MessageId cannot be answered (`ReplyTo`) and is ignored. A request carries exactly one resource DataSetMessage (helper DataSets 1 … 9 aside): none or several → `BadInvalidArgument`, not an object or no `Messages` → `BadDecodingError`.
+- **A-90 Status events:** `ua-data` on `Pub/Event/<Source>/Status/<Level>` with `ReplyTo`, DataSetWriterName = Source, WriterGroupName `Status/<Level>`; the payload carries the `Number` and, for known codes, Description and SymbolicId. Each own source gets persisted DataSetWriterIds for its three Status levels; the PublicationList lists them (`FILTER_4`, `Config` `NONE_0`) and the Profile lists `Event`.
+- **A-91 Unknown Source:** a `Get`, `Set` or `Del` to a Source the application neither is nor represents is answered with `BadNotFound` on `Pub/Event/<requested Source>/Status/Bad` (literal reading of MG 9.1; REQ-CMP-047). These events get transient DataSetWriterIds from 65535 downwards, at most 64 foreign Sources per run (beyond that no answer), not persisted and not in the PublicationList. **SF-108 (D-2)** proposes the `AppId` instead; if decided so, this changes in the next cycle.
+- **A-92 Writes not served yet:** `Set Config`, `Set SubscriptionList`, `Set ReferenceDesignation` and every `Del` → `BadNotFound` until 7b/7c/8 (the object is not there); `Set Metadata` → `BadNotWritable` for an announced DataSet (Metadata follows the definition), otherwise `BadNotFound`.
+- **A-93 `Set PublicationList`:** the entry is identified by Resource, Source and Filter (REQ-RES-PUBLIST-003); `Mode` is normalized before comparison. Unknown entry → `BadNotFound`; not decodable → `BadDecodingError`; a change the entry's `Config` forbids, or a change of a read-only property → `BadNotWritable`; an invalid Precision (unknown or non-numeric field, not a number ≥ 0) → `BadInvalidArgument`; unchanged → `Good` with the entry echoed. On success the changed entry is published on `Pub/PublicationList/<Source>/<Filter>` with `ReplyTo`, then the Status `Good`; the full list again only on an on/off toggle (then also the Metadata); the publication state restarts (next due at once).
+- **A-94 Persistence:** the applied settings are stored under `app/publications` (`{"Version":1,"Entries":[…]}`), next to the writer ids and Metadata versions; a corrupt table → `Error::Io` (`InvalidData`) at `build()`. At `add_data` a stored setting is applied only if it is still allowed by the current `Writable` and valid for the definition, so a changed program never inherits a forbidden setting.
+- **A-95 `Set Data`:** unknown Tag or `OFF_0` → `BadNotFound`; no handler → `BadNotWritable`; payload not an object → `BadDecodingError`; a field missing → `BadInvalidArgument`; a wrong type → `BadTypeMismatch`; unknown fields are ignored (tolerant reader, REQ-MSG-046). The handler gets `SetData` and decides: `Ok` → the new state is published as Pub Data with `ReplyTo`, then Status `Good`; `Err(code)` → only the Status event with that code (an `Err` with a Good code is sent as `Bad`, an Uncertain code as it is); a panic → `BadInternalError`. The handler runs on the runtime task outside the registry lock (a blocking handler delays the bus loop, documented).
+- **A-96 API (ADR-0020 amendment C-055):** `DataSet::on_set` returns `Result<()>` (refused for a removed DataSet and at Level 1; the sketch returned `()`); `SetData::{get, fields}`; `Writable` documents the applied `Set PublicationList`. The sketch is aligned.
+- **A-97 Tests and dependencies:**
+  - `oec-core`: 12 write tests (`tests/provider_write.rs`, incl. the guideline vectors V-PAY-061/062 of MG B1.1.4 and a strict-schema test of every answer), unit tests in `status`, `overrides` and `writers`;
+  - `oec`: runtime tests `set_publication_list_is_answered_and_persisted` and `set_data_is_decided_by_the_handler` against the in-process TLS broker, app test `set_handlers_and_publication_settings`;
+  - opt-in interop `level_2_set_data_and_publication_list` against Mosquitto: `interop.sh` 11 passed, 1 ignored;
+  - one-off D7 `oec-check monitor` (external call, Q-009): the first run found 5 schema-invalid requests of the test probe itself (fixed: interop probes send schema-valid requests); rerun 9 pass, 0 fail, 4 skip (T7-MON-03 connect not seen, 05 needs ≥ 125 s, 07 no RequestIds, 04 because of SF-108); capture not committed;
+  - no new dependency; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception.
+
+## Next (C-056)
+
+1. P4 increment 7b – the Config resource: `ConfigDef`/`ConfigHandle`/`on_set` after sketch `config.rs`, `Get`/`Set Config` with validation and partial updates, masking of sensitive values (GL-ADR-021), secrets under `/run/secrets/oi4` (GL-ADR-022), persistence; on the write path of 7a. If D-2 is decided as proposed: re-baseline first, then the SF-108 change in the SDK. Runs in a new agent (start prompt in `prompt.md`).
