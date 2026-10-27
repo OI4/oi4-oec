@@ -1,6 +1,6 @@
 //! The directory of the applications seen on the bus: Birth, Close and
 //! Will (MG 6.3, REQ-LIFE-*), refreshed by the Health heartbeat
-//! (REQ-RES-HEALTH-010, SF-106) and by MAM answers.
+//! (REQ-TOP-017, SF-106) and by MAM answers.
 
 use std::collections::BTreeMap;
 

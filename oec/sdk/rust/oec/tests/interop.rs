@@ -8,7 +8,8 @@
 //! C-050); since C-053 the Level 2 provider side (assets, `Get` answers),
 //! since C-054 Data DataSets with Metadata and an Interval, since C-055
 //! the write side (`Set Data`, `Set PublicationList`, Status events),
-//! since C-056 the Config (`Get`/`Set Config`, masking).
+//! since C-056 the Config (`Get`/`Set Config`, masking), since C-058 the
+//! consumer side (two SDK applications, one asks the other).
 //!
 //! Opt-in: the tests pass at once unless `OEC_INTEROP=1` is set, so the
 //! gate needs no container engine. Run them with `oec/dev/interop.sh`
@@ -1558,4 +1559,139 @@ fn level_2_reference_designation_and_generic_events() {
     handle.shutdown();
     run.join().unwrap().unwrap();
     probe.disconnect();
+}
+
+// ------------------------------------------------- consumer (C-058)
+
+/// The consumer side through Mosquitto (P4 increment 8a, ADR-0026 §17): a
+/// second SDK application sees the provider's Birth and Close, gets its
+/// MAM (also one per page), Health and Data, sets, queries and deletes a
+/// ReferenceDesignation (REQ-MSG-015, REQ-PAG-002/006, REQ-RES-REFDES-*,
+/// REQ-RES-EVENT-005).
+#[test]
+fn consumer_asks_a_provider() {
+    let Some(dev) = dev() else { return };
+    let broker = || {
+        Broker::new("localhost")
+            .port(dev.port)
+            .ca_pem(dev.file("broker/ca.pem"))
+            .credentials(&dev.user, &dev.password)
+    };
+    let (states, c_states) = (States::default(), States::default());
+    let (provider, pump) = refdes_app(&states, broker());
+    let child = provider
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-4"), "0816")
+                .unwrap(),
+        )
+        .unwrap();
+    let on = c_states.clone();
+    let c = App::builder(Level::L1, ServiceType::Utility, product())
+        .bootstrap(Bootstrap::Explicit(broker()))
+        .serial_number("oec-consumer")
+        .client_id("oec-consumer")
+        .keep_alive(Duration::from_secs(5))
+        .on_connection(move |s| on.0.lock().unwrap().push(s))
+        .build()
+        .unwrap();
+    let consumer = c.consumer();
+    let (tx, presence) = std::sync::mpsc::channel();
+    let _presence = consumer
+        .on_presence(move |p| {
+            let _ = tx.send(p.clone());
+        })
+        .unwrap();
+    let c_handle = c.handle();
+    let c_run = thread::spawn(move || c.run());
+    c_states.wait_for(ConnectionState::Online);
+
+    let target = Target::app(ServiceType::Utility, provider.identification_link().clone());
+    let p_il = provider.identification_link().clone();
+    let handle = provider.handle();
+    let run = thread::spawn(move || provider.run());
+    states.wait_for(ConnectionState::Online);
+    wait_presence(
+        &presence,
+        "Birth",
+        |p| matches!(p, oec::consumer::Presence::Online { app, .. } if *app == p_il),
+    );
+    consumer_requests(&consumer, &target, &pump, &child);
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+    wait_presence(
+        &presence,
+        "Close",
+        |p| matches!(p, oec::consumer::Presence::OfflineGraceful { app, .. } if *app == p_il),
+    );
+    c_handle.shutdown();
+    c_run.join().unwrap().unwrap();
+}
+
+fn wait_presence(
+    rx: &std::sync::mpsc::Receiver<oec::consumer::Presence>,
+    what: &str,
+    found: impl Fn(&oec::consumer::Presence) -> bool,
+) {
+    let end = Instant::now() + WAIT;
+    loop {
+        let left = end.saturating_duration_since(Instant::now());
+        let p = rx
+            .recv_timeout(left)
+            .unwrap_or_else(|e| panic!("{what}: {e}"));
+        if found(&p) {
+            return;
+        }
+    }
+}
+
+fn consumer_requests(consumer: &Consumer, target: &Target, pump: &Asset, child: &Asset) {
+    use oec::consumer::{GetOptions, Payload, Query, WriteOptions};
+    let all = consumer
+        .get_blocking(Resource::Mam, target, &GetOptions::new())
+        .unwrap();
+    assert_eq!(all.len(), 3, "{all:?}");
+    let paged = consumer
+        .get_blocking(Resource::Mam, target, &GetOptions::new().per_page(1))
+        .unwrap();
+    assert_eq!(paged.len(), 3);
+    let at_pump = target.clone().source(pump.identification_link().clone());
+    let health = consumer
+        .get_blocking(Resource::Health, &at_pump, &GetOptions::new())
+        .unwrap();
+    assert!(matches!(health[0].payload(), Payload::Health(_)));
+
+    let w = WriteOptions::new();
+    let at_child = target.clone().source(child.identification_link().clone());
+    let rd = format!(
+        r#"{{"Function": {{"Value": "=P1.M2", "Parent": {{"Value": "=P1", "IdentificationLink": "{}"}}}}}}"#,
+        pump.identification_link().as_str()
+    );
+    let set = consumer.set_blocking(Resource::ReferenceDesignation, &at_child, &rd, &w);
+    assert_eq!(set.unwrap(), StatusCode::Good);
+    let query = Query {
+        parent: pump.identification_link().as_str().to_owned(),
+        aspect: None,
+    };
+    let children = consumer
+        .get_blocking(
+            Resource::ReferenceDesignation,
+            target,
+            &GetOptions::new().query(query),
+        )
+        .unwrap();
+    assert_eq!(children.len(), 1);
+    assert_eq!(
+        &children[0].data_set_writer_name(),
+        child.identification_link()
+    );
+    let refused = consumer.set_blocking(
+        Resource::ReferenceDesignation,
+        &at_pump,
+        r#"{"Location": {"Value": "+forbidden"}}"#,
+        &w,
+    );
+    assert_eq!(refused.unwrap(), StatusCode::BadOutOfRange);
+    let del = consumer.del_blocking(Resource::ReferenceDesignation, &at_child, None, &w);
+    assert_eq!(del.unwrap(), StatusCode::Good);
 }

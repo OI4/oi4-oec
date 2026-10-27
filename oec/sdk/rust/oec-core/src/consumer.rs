@@ -3,7 +3,7 @@
 //! heartbeat), and requests – `Get` with correlation over ReplyTo
 //! (REQ-MSG-015), reassembly of paginated answers (MG 8.3.11), the check
 //! of a Query answer (REQ-RES-REFDES-015) and timeouts – plus `Set`/`Del`
-//! with their Status event (REQ-RES-EVENT-012).
+//! with their Status event (REQ-RES-EVENT-005).
 //!
 //! The consumer never touches the network: the runtime hands it received
 //! publications ([`Consumer::handle_message`]), the SUBACK results
@@ -72,8 +72,8 @@ pub enum Outcome {
     /// page order, filtered by the Query if one was sent.
     Answers(Vec<Received>),
     /// The StatusCode of the Status event: the result of a `Set` or `Del`
-    /// (REQ-RES-EVENT-012), or the Bad answer of a `Get` (e.g. BadNotFound
-    /// for an unknown Source, REQ-RES-EVENT-013).
+    /// (REQ-RES-EVENT-005), or the Bad answer of a `Get` (e.g. BadNotFound
+    /// for an unknown Source, REQ-CMP-047).
     Status(StatusCode),
     /// No (complete) answer before the deadline.
     Timeout,

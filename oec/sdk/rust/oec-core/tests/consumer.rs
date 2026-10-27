@@ -5,7 +5,7 @@
 //! answers reassembled (REQ-PAG-002 … 005), the Query answer checked
 //! (REQ-RES-REFDES-015, REQ-QRY-004), BadNotFound for an unknown Source
 //! (REQ-CMP-047), `Set`/`Del` ended by their Status event
-//! (REQ-RES-EVENT-012); the directory follows Birth, Close, Will and the
+//! (REQ-RES-EVENT-005); the directory follows Birth, Close, Will and the
 //! heartbeat (REQ-LIFE-*); requests wait for their SUBACK and time out.
 
 use std::time::Duration;
