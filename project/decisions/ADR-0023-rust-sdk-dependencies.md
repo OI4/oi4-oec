@@ -134,3 +134,10 @@ P4 increment 6b enables the feature `v5` of `uuid` (workspace dependency, used b
 ## Amendment C-055 (2026-10-27) – no new dependency in increment 7a (agent, G-3.4 b)
 
 P4 increment 7a (write side, ADR-0026 §14) adds no crate and no feature: Status codes, request parsing, the `Set PublicationList` overrides and `Set Data` use `serde`, `serde_json` and the standard library. `Cargo.lock` and `deny.toml` are unchanged; `cargo deny check` passes without exception. Increment 7b (Config with secrets under `/run/secrets/oi4`) is expected to need none either; if it does, it will be recorded here.
+
+## Amendment C-056 (2026-10-27) – regex for `Validation.Pattern` (agent, G-3.4 b)
+
+P4 increment 7b checks the `Pattern` of a Config object (REQ-RES-CONFIG-008; MG 8.3.3.1) and adds **regex 1.13.1** as a runtime dependency of `oec-core` (workspace dependency `regex = { version = "1", default-features = false, features = ["std", "unicode"] }`). It brings regex-automata 0.4.18, regex-syntax 0.8.11 and memchr 2.8.3 (regex*: MIT OR Apache-2.0; memchr: Unlicense OR MIT), all within the allowlist of §2. The `perf` features (aho-corasick, SIMD literal search) are off: patterns are short and only checked on a `Set`.
+- **Why regex:** I/O-free, the de-facto standard, linear-time matching (no backtracking, so a pattern cannot blow up), syntax close to the RE2 of D7 (`regexp`); it was already in `Cargo.lock` via jsonschema under `strict-validation`. Patterns come only from the owner's definition (Validation is read-only on the bus), never from a request.
+- **Tree:** `oec-core` 22 unique crates in the default build (was 18), `oec` 77 (was 73). `Cargo.lock`: 192 packages, unchanged. `deny.toml` unchanged; `cargo deny check` passes with **no exception and no `ignore` entry**.
+- Masking, persistence and the secret reload use `serde_json` and the standard library (`std::os::unix::fs` for file modes); no other crate or feature was added.

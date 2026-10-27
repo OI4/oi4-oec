@@ -331,3 +331,26 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
 2. **`SetData` is checked tolerantly:** a missing field is `BadInvalidArgument`, a value that does not fit its field `BadTypeMismatch`, both without calling the handler; **unknown fields are ignored** (tolerant reader, REQ-MSG-046; the sketch said unknown field → `BadTypeMismatch`).
 3. **Handler outcome:** `Ok` → the SDK sets the values as state, publishes the DataSet with the `ReplyTo` of the `Set` (REQ-RES-DATA-012), then the Status event Good; `Err(code)` → only the Status event with that code, an `Err` with a Good code is sent as `Bad` (an Uncertain code is sent as it is); a panic → `BadInternalError`. The handler runs on the runtime task outside every SDK lock (documented: short and non-blocking).
 4. **`Publication::writable`** is now applied: a `Set PublicationList` may change exactly what it allows (`Mode`, `Interval`, `Precisions`); the result survives restarts (store key `app/publications`) as long as the definition still allows it.
+
+## Amendment C-056 (2026-10-27) – P4 increment 7b: the Config resource (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details and REQ tracing: `log/2026-10-27_C-056_config.md`, REVIEW A-98 … A-108. Provider semantics: ADR-0026 §15.
+
+### A. What moved from the sketch into `oec`
+
+`ConfigObject`, `ConfigDef`, `ConfigValues` and `ConfigHandle::{values, on_set, set}` (module `oec::config`) and `Asset::add_config` (§10). The SDK publishes every Config DataSet, answers `Get Config` and `Set Config` from Level 2, validates a `Set` completely before the handler sees it, applies it atomically, persists it, increments the RevisionCounter, publishes the masked Config with `ReplyTo` and answers with a Status event (§9). Still in the sketch and still the contract: events of the application and ReferenceDesignation (increment 7c), the consumer and the SubscriptionList (increment 8).
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `ConfigDef::label` | `Context.Name` (LocalizedText, REQ-RES-CONFIG-002) as display name; default: the context name (as in MG B1.1.3). |
+| `ConfigHandle::{context, source, remove}` | Same shape as `DataSet::{tag, source, remove}`; `remove` withdraws the Config (REQ-RES-PUBLIST-017) and keeps its persisted values. |
+| `ConfigDef::context` | The Filter of the DataSet, for diagnostics and tests. |
+
+### C. Changes of sketch items (need this amendment)
+
+1. **`ConfigHandle::on_set` returns `Result<()>`** (sketch: `()`), as `DataSet::on_set` (amendment C-055): `Error::Invalid` at Level 1 (no `Set` subscribed) and for a removed Config. A further call replaces the handler. Without handler a valid `Set` is applied (sketch contract).
+2. **Handler outcome:** `Ok` → applied, persisted, published with `ReplyTo`, then Status Good; `Err(code)` → only the Status event with that code (a Good code is sent as `Bad`); a panic → `BadInternalError`. The handler runs on the runtime task outside every SDK lock and gets the proposed values in clear (the application needs them); `Debug` of `ConfigValues` masks sensitive values, and no error message of the SDK contains a value (G-4.5).
+3. **`ConfigHandle::set`** refuses the mask `********` as a value of a sensitive object (it would be indistinguishable from "unchanged" on the bus, GL-ADR-021) and every value its definition refuses; it publishes and bumps the RevisionCounter like a `Set`, without Status event.
+4. **`ConfigObject::pattern`** is checked from now on (A-21 resolved): Rust `regex` syntax with Unicode classes, unanchored match; a pattern that does not compile is refused when the definition is added.
