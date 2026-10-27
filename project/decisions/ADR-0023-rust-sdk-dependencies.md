@@ -141,3 +141,7 @@ P4 increment 7b checks the `Pattern` of a Config object (REQ-RES-CONFIG-008; MG 
 - **Why regex:** I/O-free, the de-facto standard, linear-time matching (no backtracking, so a pattern cannot blow up), syntax close to the RE2 of D7 (`regexp`); it was already in `Cargo.lock` via jsonschema under `strict-validation`. Patterns come only from the owner's definition (Validation is read-only on the bus), never from a request.
 - **Tree:** `oec-core` 22 unique crates in the default build (was 18), `oec` 77 (was 73). `Cargo.lock`: 192 packages, unchanged. `deny.toml` unchanged; `cargo deny check` passes with **no exception and no `ignore` entry**.
 - Masking, persistence and the secret reload use `serde_json` and the standard library (`std::os::unix::fs` for file modes); no other crate or feature was added.
+
+## Amendment C-057 (2026-10-27) – no new dependency in increment 7c (agent, G-3.4 b)
+
+P4 increment 7c (ReferenceDesignation, Syslog bridge, Generic events) adds **no crate and no feature**. The Syslog bridge implements `log::Log` of **log** (already a dependency of `oec`, ADR-0023 amendment C-050); the rate limit, the reentrancy guard and the HOSTNAME/TAG use the standard library; the ReferenceDesignation table and the Generic `Details` use `serde`/`serde_json`. `Cargo.lock` unchanged (192 packages); `cargo deny check` passes with **no exception and no `ignore` entry**.

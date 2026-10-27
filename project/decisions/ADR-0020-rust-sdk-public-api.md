@@ -354,3 +354,28 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
 2. **Handler outcome:** `Ok` → applied, persisted, published with `ReplyTo`, then Status Good; `Err(code)` → only the Status event with that code (a Good code is sent as `Bad`); a panic → `BadInternalError`. The handler runs on the runtime task outside every SDK lock and gets the proposed values in clear (the application needs them); `Debug` of `ConfigValues` masks sensitive values, and no error message of the SDK contains a value (G-4.5).
 3. **`ConfigHandle::set`** refuses the mask `********` as a value of a sensitive object (it would be indistinguishable from "unchanged" on the bus, GL-ADR-021) and every value its definition refuses; it publishes and bumps the RevisionCounter like a `Set`, without Status event.
 4. **`ConfigObject::pattern`** is checked from now on (A-21 resolved): Rust `regex` syntax with Unicode classes, unanchored match; a pattern that does not compile is refused when the definition is added.
+
+## Amendment C-057 (2026-10-27) – P4 increment 7c: ReferenceDesignation, Syslog bridge, Generic events (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details and REQ tracing: `log/2026-10-27_C-057_refdes-events.md`, REVIEW A-110 … A-119. Provider semantics: ADR-0026 §16. The sketch was aligned in the same cycle.
+
+### A. What moved from the sketch into `oec`
+
+`ReferenceDesignation` (with `Designation`, `DesignationParent`, re-exported from `oec_core`), `Asset::on_reference_designation`, `AppBuilder::reference_designation`, `Asset::emit_event`, `GenericEvent`, `AppBuilder::syslog`, `SyslogLevel` and `event::syslog` (§6, §11). The SDK serves `Get`/`Set`/`Del ReferenceDesignation` from Level 2, persists the objects and answers with a Status event; it publishes Generic events of the application and bridges the `log` crate to Syslog events. Still in the sketch and still the contract: the consumer and the SubscriptionList (increment 8).
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `Asset::reference_designation()` | Read the stored object (e.g. for a local display); the sketch had only the handler. |
+| `event::install_bridge(Option<Box<dyn log::Log>>)` | Keeps a local logger next to the bridge (one global logger per process); without it `build()` installs the bridge alone if no logger is set. |
+| `event::MAX_MESSAGE_BYTES` (1024) | The MSG of a Syslog event is cut to this size (UTF-8 safe); documents the limit. |
+| `GenericEvent::{level, number}` | Getters for diagnostics and tests. |
+
+### C. Changes of sketch items (need this amendment)
+
+1. **`ReferenceDesignation`** has the shape of MG 8.3.10 (`function`/`product`/`location` of `Designation { value, local, parent }`, `DesignationParent { value, local, identification_link }`); the sketch had flat strings.
+2. **`Asset::on_reference_designation` returns `Result<()>`** (sketch: `()`), as `on_set` (amendments C-055/C-056): `Error::Invalid` if the application does not offer the resource. `AppBuilder::reference_designation(true)` at Level 1 is `Error::Invalid` at `build()` (Level 1 serves no requests, REQ-CMP-008). Without handler every valid `Set`/`Del` is applied. Handler outcome as for `on_set`: `Ok` → applied, persisted, published with `ReplyTo` (Set), Status Good; `Err(code)` → only the Status event (a Good code is sent as `Bad`); a panic → `BadInternalError`. The handler runs outside every SDK lock.
+3. **`GenericEvent`** is a builder `new(level, number).description(..).details_json(..)` (sketch: public fields without Level): the `<Level>` of the topic is required (MG 8.3.6.3, free level). `details_json` must be a JSON object; it is checked at emit.
+4. **`Asset::emit_event` returns `Result<()>`** (sketch: `()`): `Error::Invalid` for an empty Level, a Level with a character not allowed in a topic level, a 17th Level of a source, or Details that are no JSON object. A valid event is dropped silently (`Ok`) while offline or with 256 events waiting: events are not queued for later (MG 8.3.6, no retained or stored events). The first use of a Level registers its PublicationList entry even offline.
+5. **Syslog bridge** (`log` only; `tracing` users bridge via `tracing-log`): records of the targets `oec`, `oec_core`, `rustls`, `tokio`, `mio` are not bridged, and a thread-local guard stops feedback; Level mapping Error→Error, Warn→Warning, Info→Informational, Debug/Trace→Debug; `log::max_level` follows the switched Syslog levels; at most 50 events in a burst and 10/s, the number dropped is reported once as a Warning. Never log secrets: a log record is a public event on the bus (GL-ADR-021). A later `env_logger::init()` (or any `set_logger`) fails because the bridge is the logger (documented; use `install_bridge`).
