@@ -4,337 +4,21 @@
 //! test with rcgen. Only loopback connections, no network.
 
 mod common;
+mod testbroker;
 
-use std::io::{ErrorKind, Read, Write};
-use std::net::{Shutdown, TcpListener, TcpStream};
-use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
+use std::net::TcpListener;
+use std::sync::mpsc::RecvTimeoutError;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
 use oec::app::ConnectionState;
 use oec::prelude::*;
-use oec_core::mqtt::{
-    ConnAck, Connect, ConnectReturnCode, Decoder, Delivery, Packet, Publish, SubAck,
-    SubscribeReturnCode, encode,
-};
-use pkcs8::der::Decode;
-use rcgen::{
-    BasicConstraints, CertificateParams, CertifiedIssuer, DnType, ExtendedKeyUsagePurpose, IsCa,
-    KeyPair, KeyUsagePurpose,
-};
-use rustls::server::WebPkiClientVerifier;
-use rustls::{RootCertStore, ServerConfig, ServerConnection, StreamOwned};
-use rustls_pki_types::pem::PemObject;
-use rustls_pki_types::{CertificateDer, PrivateKeyDer};
+use oec_core::mqtt::{Connect, ConnectReturnCode, Delivery, Packet, Publish};
 use serde_json::Value;
 
 use common::{Root, product};
-
-/// Upper bound for every wait of a test.
-const WAIT: Duration = Duration::from_secs(15);
-
-// ---------------------------------------------------------------- PKI
-
-/// A CA with a server certificate for `localhost`/127.0.0.1 and a client
-/// certificate (PEM).
-struct Pki {
-    ca: String,
-    server_cert: String,
-    server_key: String,
-    client_cert: String,
-    client_key: KeyPair,
-}
-
-fn pki() -> Pki {
-    let mut params = CertificateParams::new(Vec::<String>::new()).unwrap();
-    params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
-    params
-        .distinguished_name
-        .push(DnType::CommonName, "OEC test CA");
-    params.key_usages = vec![KeyUsagePurpose::KeyCertSign, KeyUsagePurpose::CrlSign];
-    let ca = CertifiedIssuer::self_signed(params, KeyPair::generate().unwrap()).unwrap();
-
-    let server_key = KeyPair::generate().unwrap();
-    let mut params = CertificateParams::new(vec!["localhost".into(), "127.0.0.1".into()]).unwrap();
-    params.extended_key_usages = vec![ExtendedKeyUsagePurpose::ServerAuth];
-    let server_cert = params.signed_by(&server_key, &ca).unwrap();
-
-    let client_key = KeyPair::generate().unwrap();
-    let mut params = CertificateParams::new(Vec::<String>::new()).unwrap();
-    params.distinguished_name.push(DnType::CommonName, "app-1");
-    params.extended_key_usages = vec![ExtendedKeyUsagePurpose::ClientAuth];
-    let client_cert = params.signed_by(&client_key, &ca).unwrap();
-
-    Pki {
-        ca: ca.pem(),
-        server_cert: server_cert.pem(),
-        server_key: server_key.serialize_pem(),
-        client_cert: client_cert.pem(),
-        client_key,
-    }
-}
-
-/// `key` as PKCS#8 `ENCRYPTED PRIVATE KEY` (PBES2: PBKDF2-SHA256 +
-/// AES-256-CBC), as written by `openssl pkcs8 -topk8 -v2 aes-256-cbc`.
-fn encrypted_pem(key: &KeyPair, passphrase: &str) -> String {
-    let der = key.serialize_der();
-    let info = pkcs8::PrivateKeyInfoRef::from_der(&der).unwrap();
-    let params = pkcs8::pkcs5::pbes2::Parameters::generate_pbkdf2_sha256_aes256cbc(
-        2048,
-        b"0123456789abcdef",
-        [7; 16],
-    )
-    .unwrap();
-    info.encrypt_with_params(params, passphrase)
-        .unwrap()
-        .to_pem("ENCRYPTED PRIVATE KEY", pkcs8::LineEnding::LF)
-        .unwrap()
-        .to_string()
-}
-
-/// The crypto provider of the SDK build (`crypto-ring` wins).
-fn provider() -> Arc<rustls::crypto::CryptoProvider> {
-    #[cfg(feature = "crypto-ring")]
-    let provider = rustls::crypto::ring::default_provider();
-    #[cfg(not(feature = "crypto-ring"))]
-    let provider = rustls::crypto::aws_lc_rs::default_provider();
-    Arc::new(provider)
-}
-
-// ---------------------------------------------------------------- broker
-
-/// What the test broker saw, per connection (numbered from 0).
-#[derive(Debug)]
-enum Seen {
-    /// TLS handshake done; whether the client presented a certificate.
-    Tls(usize, bool),
-    /// A packet from the client.
-    Packet(usize, Packet),
-    /// The connection ended (EOF, error or dropped by the test).
-    Closed(usize),
-}
-
-/// How the broker behaves.
-#[derive(Clone, Copy)]
-struct Behavior {
-    /// Answer of the first CONNECT; later ones are accepted.
-    first_connack: ConnectReturnCode,
-    /// Answer PINGREQ.
-    ping: bool,
-    /// Require a client certificate.
-    mutual_tls: bool,
-    /// Offer TLS 1.2 only.
-    tls12_only: bool,
-}
-
-impl Default for Behavior {
-    fn default() -> Self {
-        Self {
-            first_connack: ConnectReturnCode::Accepted,
-            ping: true,
-            mutual_tls: false,
-            tls12_only: false,
-        }
-    }
-}
-
-/// Packets the test sends to a client: `(connection, packet)`.
-type Outbox = Arc<Mutex<Vec<(usize, Packet)>>>;
-
-struct TestBroker {
-    port: u16,
-    seen: Receiver<Seen>,
-    sockets: Arc<Mutex<Vec<TcpStream>>>,
-    outbox: Outbox,
-}
-
-impl TestBroker {
-    fn start(pki: &Pki, behavior: Behavior) -> Self {
-        let chain = vec![CertificateDer::from_pem_slice(pki.server_cert.as_bytes()).unwrap()];
-        let key = PrivateKeyDer::from_pem_slice(pki.server_key.as_bytes()).unwrap();
-        let versions: &[&rustls::SupportedProtocolVersion] = if behavior.tls12_only {
-            &[&rustls::version::TLS12]
-        } else {
-            &[&rustls::version::TLS13, &rustls::version::TLS12]
-        };
-        let builder = ServerConfig::builder_with_provider(provider())
-            .with_protocol_versions(versions)
-            .unwrap();
-        let builder = if behavior.mutual_tls {
-            let mut roots = RootCertStore::empty();
-            roots
-                .add(CertificateDer::from_pem_slice(pki.ca.as_bytes()).unwrap())
-                .unwrap();
-            let verifier = WebPkiClientVerifier::builder_with_provider(roots.into(), provider())
-                .build()
-                .unwrap();
-            builder.with_client_cert_verifier(verifier)
-        } else {
-            builder.with_no_client_auth()
-        };
-        let config = Arc::new(builder.with_single_cert(chain, key).unwrap());
-
-        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-        let port = listener.local_addr().unwrap().port();
-        let (tx, seen) = channel();
-        let sockets = Arc::new(Mutex::new(Vec::new()));
-        let outbox = Outbox::default();
-        let accepted = Arc::clone(&sockets);
-        let queued = Arc::clone(&outbox);
-        thread::spawn(move || {
-            for (n, tcp) in listener.incoming().enumerate() {
-                let Ok(tcp) = tcp else { return };
-                accepted.lock().unwrap().push(tcp.try_clone().unwrap());
-                let (config, tx, queued) = (Arc::clone(&config), tx.clone(), Arc::clone(&queued));
-                thread::spawn(move || serve(n, tcp, &config, behavior, &tx, &queued));
-            }
-        });
-        Self {
-            port,
-            seen,
-            sockets,
-            outbox,
-        }
-    }
-
-    /// Sends `packet` to the client of connection `n` (e.g. a `Get`).
-    fn send(&self, n: usize, packet: Packet) {
-        self.outbox.lock().unwrap().push((n, packet));
-    }
-
-    /// Next event, failing the test after [`WAIT`].
-    fn next(&self) -> Seen {
-        match self.seen.recv_timeout(WAIT) {
-            Ok(s) => s,
-            Err(RecvTimeoutError::Timeout) => panic!("test broker: nothing within {WAIT:?}"),
-            Err(e) => panic!("test broker: {e}"),
-        }
-    }
-
-    /// The next packet (skipping TLS events), with its connection.
-    fn packet(&self) -> (usize, Packet) {
-        loop {
-            match self.next() {
-                Seen::Packet(n, p) => return (n, p),
-                Seen::Tls(..) => {}
-                Seen::Closed(n) => panic!("connection {n} closed, expected a packet"),
-            }
-        }
-    }
-
-    fn connect(&self) -> (usize, Connect) {
-        match self.packet() {
-            (n, Packet::Connect(c)) => (n, c),
-            other => panic!("expected CONNECT, got {other:?}"),
-        }
-    }
-
-    fn publish(&self) -> (usize, Publish) {
-        match self.packet() {
-            (n, Packet::Publish(p)) => (n, p),
-            other => panic!("expected PUBLISH, got {other:?}"),
-        }
-    }
-
-    /// Waits until connection `n` is closed, returning the packets before.
-    fn until_closed(&self, n: usize) -> Vec<Packet> {
-        let mut packets = Vec::new();
-        loop {
-            match self.next() {
-                Seen::Closed(m) if m == n => return packets,
-                Seen::Packet(m, p) if m == n => packets.push(p),
-                _ => {}
-            }
-        }
-    }
-
-    /// Drops connection `n` without DISCONNECT (broker restart, network).
-    fn drop_connection(&self, n: usize) {
-        let _ = self.sockets.lock().unwrap()[n].shutdown(Shutdown::Both);
-    }
-}
-
-fn serve(
-    n: usize,
-    tcp: TcpStream,
-    config: &Arc<ServerConfig>,
-    b: Behavior,
-    tx: &Sender<Seen>,
-    outbox: &Outbox,
-) {
-    // A short read timeout lets the loop send the packets of the outbox.
-    tcp.set_read_timeout(Some(Duration::from_millis(10)))
-        .unwrap();
-    let mut tls = StreamOwned::new(ServerConnection::new(Arc::clone(config)).unwrap(), tcp);
-    let mut decoder = Decoder::new(1 << 20);
-    let mut buf = [0; 4096];
-    let mut handshaken = false;
-    loop {
-        let read = match tls.read(&mut buf) {
-            Err(e) if matches!(e.kind(), ErrorKind::WouldBlock | ErrorKind::TimedOut) => {
-                let mine: Vec<Packet> = {
-                    let mut queued = outbox.lock().unwrap();
-                    let (mine, rest) = queued.drain(..).partition(|(m, _)| *m == n);
-                    *queued = rest;
-                    mine.into_iter().map(|(_, p)| p).collect()
-                };
-                for p in mine {
-                    let mut out = Vec::new();
-                    encode(&p, &mut out).unwrap();
-                    if tls.write_all(&out).and_then(|()| tls.flush()).is_err() {
-                        break;
-                    }
-                }
-                continue;
-            }
-            Ok(0) | Err(_) => break,
-            Ok(read) => read,
-        };
-        if !handshaken {
-            handshaken = true;
-            let client_cert = tls.conn.peer_certificates().is_some();
-            let _ = tx.send(Seen::Tls(n, client_cert));
-        }
-        decoder.feed(&buf[..read]);
-        while let Ok(Some(packet)) = decoder.next_packet() {
-            let reply = match &packet {
-                Packet::Connect(_) => Some(Packet::ConnAck(ConnAck {
-                    session_present: false,
-                    code: if n == 0 {
-                        b.first_connack
-                    } else {
-                        ConnectReturnCode::Accepted
-                    },
-                })),
-                Packet::PingReq if b.ping => Some(Packet::PingResp),
-                Packet::Publish(Publish {
-                    delivery: Delivery::AtLeastOnce { packet_id, .. },
-                    ..
-                }) => Some(Packet::PubAck(*packet_id)),
-                Packet::Subscribe(s) => Some(Packet::SubAck(SubAck {
-                    packet_id: s.packet_id,
-                    codes: vec![SubscribeReturnCode::Success(s.filters[0].1); s.filters.len()],
-                })),
-                _ => None,
-            };
-            let disconnect = matches!(packet, Packet::Disconnect);
-            let _ = tx.send(Seen::Packet(n, packet));
-            if let Some(reply) = reply {
-                let mut out = Vec::new();
-                encode(&reply, &mut out).unwrap();
-                if tls.write_all(&out).and_then(|()| tls.flush()).is_err() {
-                    break;
-                }
-            }
-            if disconnect {
-                let _ = tx.send(Seen::Closed(n));
-                return;
-            }
-        }
-    }
-    let _ = tx.send(Seen::Closed(n));
-}
+use testbroker::{Behavior, Pki, Seen, TestBroker, WAIT, encrypted_pem, pki};
 
 // ---------------------------------------------------------------- app
 
@@ -1060,8 +744,9 @@ fn level_2_publishes_its_sources_and_answers_get() {
         ]
     );
     assert_eq!(writer_ids(&seen), listed_ids(&seen[6]));
-    // the Status events of both sources are listed, not yet published
-    assert_eq!(listed_events(&seen[6]), 6);
+    // the Status events of both sources and the 8 Syslog levels of the
+    // application are listed, not yet published
+    assert_eq!(listed_events(&seen[6]), 14);
     states.wait_for(ConnectionState::Online, 1);
 
     tb.send(n, get(format!("{prefix}Get/MAM/{it}")));
@@ -1894,4 +1579,230 @@ fn config_is_got_set_and_persisted() {
         Some("s3cr3t")
     );
     r.stop();
+}
+
+/// A `Del` NetworkMessage from a consumer without DataSetMessage, QoS 0.
+fn del(topic: String) -> Packet {
+    Packet::Publish(Publish {
+        topic,
+        payload: serde_json::to_vec(&serde_json::json!({
+            "MessageId": GET_ID,
+            "MessageType": "ua-data",
+            "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
+            "ReplyTo": "",
+            "Messages": []
+        }))
+        .unwrap(),
+        delivery: Delivery::AtMostOnce,
+        retain: false,
+    })
+}
+
+/// A running Level 2 app that offers the ReferenceDesignation, with the
+/// pump and a handler of the pump that refuses the Location `+forbidden`.
+struct RefDesRun {
+    tb: TestBroker,
+    n: usize,
+    prefix: String,
+    it: String,
+    pump: Asset,
+    handle: AppHandle,
+    run: thread::JoinHandle<oec::Result<()>>,
+}
+
+impl RefDesRun {
+    fn start(pki: &Pki, root: &Root, store: &oec::store::FileStore) -> Self {
+        let tb = TestBroker::start(pki, Behavior::default());
+        let states = States::default();
+        let app = builder_at(Level::L2, broker(root, pki, tb.port), &states)
+            .reference_designation(true)
+            .store(store.clone())
+            .build()
+            .unwrap();
+        let pump = app
+            .add_asset(
+                AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-1"), "0815")
+                    .unwrap(),
+            )
+            .unwrap();
+        pump.on_reference_designation(|rd| match rd.and_then(|r| r.location.as_ref()) {
+            Some(l) if l.value == "+forbidden" => Err(StatusCode::BadOutOfRange),
+            _ => Ok(()),
+        })
+        .unwrap();
+        let me = encoded(app.identification_link().as_str());
+        let it = encoded(pump.identification_link().as_str());
+        let prefix = format!("Oi4v2/Utility/{me}/");
+        let handle = app.handle();
+        let run = spawn(app);
+        let (n, _) = tb.connect();
+        publications_until(&tb, &format!("{prefix}Pub/PublicationList"));
+        states.wait_for(ConnectionState::Online, 1);
+        Self {
+            tb,
+            n,
+            prefix,
+            it,
+            pump,
+            handle,
+            run,
+        }
+    }
+
+    fn stop(self) {
+        self.handle.shutdown();
+        self.run.join().unwrap().unwrap();
+    }
+}
+
+/// `Set`/`Get`/`Del ReferenceDesignation` (REQ-RES-REFDES-002 … 010,
+/// REQ-RES-MAM-018): the handler decides; on `Ok` the object with the
+/// ReplyTo, then Good and the MAM with the incremented RevisionCounter;
+/// `Del` answers Good without publication, a second `Del` `BadNotFound`;
+/// the object survives a restart.
+#[test]
+fn reference_designation_is_set_got_deleted_and_persisted() {
+    let (pki, root) = (pki(), Root::new("rt-refdes"));
+    let store = oec::store::FileStore::new(root.path("store"));
+    let r = RefDesRun::start(&pki, &root, &store);
+    let (tb, n, prefix, it) = (&r.tb, r.n, r.prefix.clone(), r.it.clone());
+    let il = r.pump.identification_link().as_str().to_owned();
+    let (set_t, pub_t) = (
+        format!("{prefix}Set/ReferenceDesignation/{it}"),
+        format!("{prefix}Pub/ReferenceDesignation/{it}"),
+    );
+    let rd = serde_json::json!({"Function": {"Value": "=P1.M1"}, "Location": {"Value": "+R1"}});
+    tb.send(n, set(set_t.clone(), &il, &rd));
+    let answer = answer_on(tb, &pub_t);
+    assert_eq!(answer["Messages"][0]["Payload"], rd);
+    assert_eq!(status_event(tb, &prefix, &it, "Good")["Number"], 0);
+    let mam = next_on(tb, &format!("{prefix}Pub/MAM/{it}"), &mut Vec::new());
+    assert_eq!(data_payload(&mam)["RevisionCounter"], 1);
+    assert_eq!(
+        r.pump
+            .reference_designation()
+            .unwrap()
+            .function
+            .unwrap()
+            .value,
+        "=P1.M1"
+    );
+
+    // refused by the handler: nothing applied
+    let refused = serde_json::json!({"Location": {"Value": "+forbidden"}});
+    tb.send(n, set(set_t.clone(), &il, &refused));
+    let bad = status_event(tb, &prefix, &it, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadOutOfRange.code());
+    tb.send(n, get(format!("{prefix}Get/ReferenceDesignation/{it}")));
+    assert_eq!(answer_on(tb, &pub_t)["Messages"][0]["Payload"], rd);
+    r.stop();
+
+    // restarted on the same store: still there; then deleted
+    let r = RefDesRun::start(&pki, &root, &store);
+    let (tb, n) = (&r.tb, r.n);
+    assert_eq!(r.it, it);
+    tb.send(n, get(format!("{prefix}Get/ReferenceDesignation/{it}")));
+    assert_eq!(answer_on(tb, &pub_t)["Messages"][0]["Payload"], rd);
+    tb.send(n, del(format!("{prefix}Del/ReferenceDesignation/{it}")));
+    assert_eq!(status_event(tb, &prefix, &it, "Good")["Number"], 0);
+    assert!(r.pump.reference_designation().is_none());
+    tb.send(n, del(format!("{prefix}Del/ReferenceDesignation/{it}")));
+    let bad = status_event(tb, &prefix, &it, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadNotFound.code());
+    r.stop();
+}
+
+/// The entry of `filter` in the PublicationList publication `list`.
+fn list_entry(list: &Publish, filter: &str) -> Value {
+    json(&list.payload)["Messages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|e| e["Payload"]["Filter"] == filter)
+        .cloned()
+        .unwrap_or_else(|| panic!("no PublicationList entry {filter}"))
+}
+
+/// Generic events (REQ-RES-EVENT-009, REQ-RES-PUBLIST-*): dropped offline
+/// (the Level is listed nevertheless), published on
+/// `Pub/Event/<Source>/Generic/<Level>` while connected; a new Level
+/// republishes the PublicationList with its entry.
+#[test]
+fn generic_events_are_published_while_connected() {
+    let (pki, root) = (pki(), Root::new("rt-generic"));
+    let tb = TestBroker::start(&pki, Behavior::default());
+    let states = States::default();
+    let app = builder_at(Level::L2, broker(&root, &pki, tb.port), &states)
+        .build()
+        .unwrap();
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-1"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    // offline: dropped, not queued
+    pump.emit_event(GenericEvent::new("Maintenance", 1))
+        .unwrap();
+    assert!(matches!(
+        pump.emit_event(GenericEvent::new("Maintenance", 2).details_json("[]")),
+        Err(oec::Error::Invalid(_))
+    ));
+    assert!(pump.emit_event(GenericEvent::new("", 2)).is_err());
+    let (me, it) = (
+        encoded(app.identification_link().as_str()),
+        encoded(pump.identification_link().as_str()),
+    );
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = spawn(app);
+    let (_, _) = tb.connect();
+    let list = publications_until(&tb, &format!("{prefix}Pub/PublicationList"));
+    assert!(!list.iter().any(|p| p.topic.contains("/Pub/Event/")));
+    let entry = list_entry(list.last().unwrap(), "Generic/Maintenance");
+    assert_eq!(entry["Payload"]["Mode"], "FILTER_4");
+    states.wait_for(ConnectionState::Online, 1);
+
+    pump.emit_event(
+        GenericEvent::new("Maintenance", 42)
+            .description("filter clogged")
+            .details_json(r#"{"Pressure": 3.5}"#),
+    )
+    .unwrap();
+    let event = next_on(
+        &tb,
+        &format!("{prefix}Pub/Event/{it}/Generic/Maintenance"),
+        &mut Vec::new(),
+    );
+    let m = &json(&event.payload)["Messages"][0];
+    assert_eq!(m["Payload"]["Category"], "CAT_GENERIC_99");
+    assert_eq!(m["Payload"]["Number"], 42);
+    assert_eq!(m["Payload"]["Description"], "filter clogged");
+    assert_eq!(m["Payload"]["Details"]["Pressure"], 3.5);
+    assert_eq!(entry["Payload"]["DataSetWriterId"], m["DataSetWriterId"]);
+
+    pump.emit_event(GenericEvent::new("Wear", 7)).unwrap();
+    let mut others = Vec::new();
+    next_on(
+        &tb,
+        &format!("{prefix}Pub/Event/{it}/Generic/Wear"),
+        &mut others,
+    );
+    let list = match others
+        .into_iter()
+        .rfind(|p| p.topic.ends_with("/Pub/PublicationList"))
+    {
+        Some(list) => list,
+        None => next_on(
+            &tb,
+            &format!("{prefix}Pub/PublicationList"),
+            &mut Vec::new(),
+        ),
+    };
+    assert_eq!(
+        list_entry(&list, "Generic/Wear")["Payload"]["Mode"],
+        "FILTER_4"
+    );
+    handle.shutdown();
+    run.join().unwrap().unwrap();
 }

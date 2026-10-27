@@ -486,13 +486,21 @@ fn levels() {
         .unwrap();
     assert!(app.reference_designation());
     assert!(Level::L1 < Level::L2 && Level::L2 < Level::L3);
-    // offering more than the level requires is allowed
-    let app = device(Level::L1, explicit())
+    // offering more than the level requires is allowed from Level 2; Level
+    // 1 serves no requests (REQ-CMP-008)
+    let app = device(Level::L2, explicit())
         .store(file_store())
         .reference_designation(true)
         .build()
         .unwrap();
     assert!(app.reference_designation());
+    assert!(matches!(
+        device(Level::L1, explicit())
+            .store(file_store())
+            .reference_designation(true)
+            .build(),
+        Err(oec::Error::Invalid(_))
+    ));
 }
 
 #[test]

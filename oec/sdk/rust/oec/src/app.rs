@@ -4,29 +4,31 @@
 //! and drive the sans-IO session and provider of `oec-core` (P4 increment
 //! 5b, C-050; 6a, C-053; 6b, C-054); [`AppHandle`] registers assets, sets
 //! their state and observes and stops the application
-//! ([`ConnectionState`]).
+//! ([`ConnectionState`]); ReferenceDesignation and the Syslog bridge
+//! follow with 7c (C-057).
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::future::Future;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
-use std::time::Duration;
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
+use std::time::{Duration, Instant};
 
 use oec_core::lifecycle::{Lifecycle, Publication};
 use oec_core::message::DataSetWriterId;
 use oec_core::provider::{
-    MetaDataVersions, Provider, ProviderConfig, PublicationOverrides, SetConfigRequest,
-    SetDataRequest, StoredConfigValues, WriterIds,
+    MetaDataVersions, Provider, ProviderConfig, PublicationOverrides, ReferenceDesignationRequest,
+    SetConfigRequest, SetDataRequest, StoredConfigValues, StoredReferenceDesignations, WriterIds,
+    syslog_header,
 };
-use oec_core::resource::Health;
+use oec_core::resource::{Health, ReferenceDesignation};
 use tokio::sync::{Notify, watch};
 
-use crate::asset::{Asset, AssetDef};
+use crate::asset::{Asset, AssetDef, ReferenceDesignationHandler};
 use crate::config::{ConfigDef, ConfigHandle, ConfigSetHandler, ConfigValues};
 use crate::container::{self, MAX_PACKET_SIZE, MIN_PACKET_SIZE};
 use crate::data::{DataSet, DataSetDef, SetData, SetHandler, Value};
-use crate::event::SyslogLevel;
+use crate::event::{self, GenericEvent, MAX_MESSAGE_BYTES, SyslogLevel};
 use crate::identity::{IdentificationLink, Mam, Product};
 use crate::store::{FileStore, MemoryStore, Store};
 use crate::{Error, Level, Result, ServiceType, runtime};
@@ -45,6 +47,9 @@ const PUBLICATIONS: &str = "app/publications";
 /// [`ConfigHandle::set`] (REQ-RES-CONFIG-022, ADR-0026 §15). Sensitive
 /// values are stored in clear text; [`FileStore`] creates owner-only files.
 const CONFIG_VALUES: &str = "app/config";
+/// Store key of the ReferenceDesignations set by `Set ReferenceDesignation`
+/// (REQ-RES-REFDES-002, ADR-0026 §16).
+const REFERENCE_DESIGNATIONS: &str = "app/reference-designations";
 
 /// Where connection settings and secrets come from (ADR-0020 §5).
 #[derive(Debug, Clone)]
@@ -430,8 +435,10 @@ impl AppBuilder {
     }
 
     /// Lowest Syslog level that is published (default `Notice`; `Debug`
-    /// and `Informational` are off by default, REQ-TOP-024, REQ-TOP-027).
-    /// The SDK installs a `log`/`tracing` bridge (ADR-0020 §6).
+    /// and `Informational` are off by default, REQ-TOP-024); from Level 2
+    /// each level is switched by `Set PublicationList` (REQ-TOP-027).
+    /// `build` installs the `log` bridge ([`crate::event`]): application
+    /// logs become events on the Message Bus.
     #[must_use]
     pub fn syslog(mut self, level: SyslogLevel) -> Self {
         self.syslog = level;
@@ -439,10 +446,11 @@ impl AppBuilder {
     }
 
     /// Whether the application offers the resource ReferenceDesignation
-    /// with `Get` and `Set` (REQ-CMP-020: Level 2 SHOULD, Level 3 MUST).
-    /// Default: off at Level 1, on at Level 2 and 3. An accepted
-    /// ReferenceDesignation is persisted (REQ-RES-REFDES-002), so it needs a
-    /// persistent [`Store`].
+    /// with `Get`, `Set` and `Del` (REQ-CMP-020: Level 2 SHOULD, Level 3
+    /// MUST). Default: off at Level 1, on at Level 2 and 3; Level 1 serves
+    /// no requests, so it cannot offer it. An accepted ReferenceDesignation
+    /// is persisted (REQ-RES-REFDES-002), so it needs a persistent
+    /// [`Store`] ([`crate::asset::Asset::on_reference_designation`]).
     #[must_use]
     pub fn reference_designation(mut self, offered: bool) -> Self {
         self.reference_designation = Some(offered);
@@ -466,7 +474,11 @@ impl AppBuilder {
     /// [`Error::Invalid`] for an invalid identity or setting,
     /// [`Error::LevelNotMet`] if the level cannot be kept,
     /// [`Error::Bootstrap`] for a missing or invalid container storage and
-    /// [`Error::Io`] for store and file failures.
+    /// [`Error::Io`] for store and file failures, including a store key
+    /// that holds no valid value.
+    ///
+    /// Installs the Syslog bridge ([`crate::event`]) unless a logger is
+    /// installed.
     pub fn build(self) -> Result<App> {
         let keep_alive = keep_alive(self.keep_alive)?;
         let (resolved, default_store) = self.resolve_bootstrap()?;
@@ -493,8 +505,12 @@ impl AppBuilder {
             mam,
             resolved.max_packet_size,
             publish_limit,
+            reference_designation,
+            self.syslog,
             store.as_ref(),
         )?;
+        let handle = AppHandle::new(self.on_connection, il, store, provider);
+        event::register(&handle);
         Ok(App {
             level: self.level,
             service_type: self.service_type,
@@ -511,7 +527,7 @@ impl AppBuilder {
             },
             reference_designation,
             syslog: self.syslog,
-            handle: AppHandle::new(self.on_connection, il, store, provider),
+            handle,
         })
     }
 
@@ -589,6 +605,13 @@ impl AppBuilder {
 /// Level 2 (SHOULD) and Level 3 (MUST, REQ-CMP-020); it needs a persistent
 /// store (REQ-RES-REFDES-002).
 fn reference_designation(level: Level, offered: Option<bool>, store: &dyn Store) -> Result<bool> {
+    if level == Level::L1 && offered == Some(true) {
+        return Err(Error::Invalid(
+            "Level 1 serves no requests (REQ-CMP-008), so it cannot offer the \
+             ReferenceDesignation; use Level 2"
+                .to_owned(),
+        ));
+    }
     let offered = offered.unwrap_or(level >= Level::L2);
     if level == Level::L3 && !offered {
         return Err(Error::LevelNotMet(
@@ -702,7 +725,9 @@ fn revision_counter(store: &dyn Store, key: &str) -> Result<i32> {
 /// The provider of the application (ADR-0026 §12): its lifecycle with the
 /// fixed DataSetWriterIds of Birth and Health (ADR-0026 §9.4/§9.5), `Get`,
 /// `Set` and `Del` from Level 2, the persisted DataSetWriterIds, Metadata
-/// versions, settings of `Set PublicationList` and Config values.
+/// versions, settings of `Set PublicationList`, Config values and
+/// ReferenceDesignations, and the Syslog events of the application.
+#[allow(clippy::too_many_arguments)]
 fn provider(
     level: Level,
     service_type: ServiceType,
@@ -710,6 +735,8 @@ fn provider(
     mam: Mam,
     max_packet_size: usize,
     publish_limit: usize,
+    reference_designation: bool,
+    syslog: SyslogLevel,
     store: &dyn Store,
 ) -> Result<Provider> {
     let writer = |id| {
@@ -767,7 +794,20 @@ fn provider(
     let mut provider = Provider::new(lifecycle, config, writers)?
         .with_meta_data_versions(versions)
         .with_publication_overrides(overrides)
-        .with_config_values(config_values);
+        .with_config_values(config_values)
+        .with_syslog(syslog)?;
+    if reference_designation {
+        let table = match store.load(REFERENCE_DESIGNATIONS)? {
+            Some(json) => StoredReferenceDesignations::from_json(&json).map_err(|e| {
+                Error::Io(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    format!("store key {REFERENCE_DESIGNATIONS}: {e} (REQ-RES-REFDES-002)"),
+                ))
+            })?,
+            None => StoredReferenceDesignations::new(),
+        };
+        provider = provider.with_reference_designations(table)?;
+    }
     if let Some(json) = provider.take_writer_ids() {
         store.save(WRITER_IDS, &json)?;
     }
@@ -931,12 +971,67 @@ pub(crate) struct Registry {
     set_handlers: HashMap<(IdentificationLink, String), Arc<SetHandler>>,
     /// The `Set Config` handlers by Source and context.
     config_handlers: HashMap<(IdentificationLink, String), Arc<ConfigSetHandler>>,
+    /// The `Set`/`Del ReferenceDesignation` handlers by Source.
+    refdes_handlers: HashMap<IdentificationLink, Arc<ReferenceDesignationHandler>>,
+    /// The rate limit of the Syslog events.
+    syslog_limit: RateLimit,
+}
+
+/// A token bucket: [`Self::BURST`] events at once, [`Self::PER_SECOND`] per
+/// second on average; counts what it drops.
+struct RateLimit {
+    /// Thousandths of a token.
+    milli_tokens: u64,
+    last: Instant,
+    dropped: u64,
+}
+
+impl RateLimit {
+    const BURST: u64 = 50;
+    const PER_SECOND: u64 = 10;
+
+    fn new(now: Instant) -> Self {
+        Self {
+            milli_tokens: Self::BURST * 1000,
+            last: now,
+            dropped: 0,
+        }
+    }
+
+    /// `Some(dropped)` with the number of events dropped since the last
+    /// one taken, `None` if this one is dropped.
+    fn take(&mut self, now: Instant) -> Option<u64> {
+        let ms =
+            u64::try_from(now.saturating_duration_since(self.last).as_millis()).unwrap_or(u64::MAX);
+        self.last = now;
+        self.milli_tokens = self
+            .milli_tokens
+            .saturating_add(ms.saturating_mul(Self::PER_SECOND))
+            .min(Self::BURST * 1000);
+        if self.milli_tokens >= 1000 {
+            self.milli_tokens -= 1000;
+            Some(std::mem::take(&mut self.dropped))
+        } else {
+            self.dropped += 1;
+            None
+        }
+    }
 }
 
 /// Cheap, cloneable handle (`Send + Sync`), usable from any thread or task.
 #[derive(Clone)]
 pub struct AppHandle {
     shared: Arc<Shared>,
+}
+
+/// An [`AppHandle`] that does not keep the application alive (the target
+/// of the Syslog bridge).
+pub(crate) struct WeakHandle(Weak<Shared>);
+
+impl WeakHandle {
+    pub(crate) fn upgrade(&self) -> Option<AppHandle> {
+        self.0.upgrade().map(|shared| AppHandle { shared })
+    }
 }
 
 impl AppHandle {
@@ -958,10 +1053,16 @@ impl AppHandle {
                     nameplate: HashSet::new(),
                     set_handlers: HashMap::new(),
                     config_handlers: HashMap::new(),
+                    refdes_handlers: HashMap::new(),
+                    syslog_limit: RateLimit::new(Instant::now()),
                 }),
                 changed: Notify::new(),
             }),
         }
+    }
+
+    pub(crate) fn downgrade(&self) -> WeakHandle {
+        WeakHandle(Arc::downgrade(&self.shared))
     }
 
     /// The Identification Link, the AppId of the topics (REQ-IL-001).
@@ -1190,7 +1291,7 @@ impl AppHandle {
     }
 
     /// Persists changed DataSetWriterIds, Metadata versions, settings of
-    /// `Set PublicationList` and Config values.
+    /// `Set PublicationList`, Config values and ReferenceDesignations.
     fn save(registry: &mut Registry, store: &dyn Store) -> Result<()> {
         if let Some(json) = registry.provider.take_writer_ids() {
             store.save(WRITER_IDS, &json)?;
@@ -1203,6 +1304,9 @@ impl AppHandle {
         }
         if let Some(json) = registry.provider.take_config_values() {
             store.save(CONFIG_VALUES, &json)?;
+        }
+        if let Some(json) = registry.provider.take_reference_designations() {
+            store.save(REFERENCE_DESIGNATIONS, &json)?;
         }
         Ok(())
     }
@@ -1420,6 +1524,138 @@ impl AppHandle {
         Ok(())
     }
 
+    /// See [`Asset::on_reference_designation`].
+    pub(crate) fn on_reference_designation(
+        &self,
+        il: &IdentificationLink,
+        handler: Arc<ReferenceDesignationHandler>,
+    ) -> Result<()> {
+        let mut registry = self.registry();
+        if !registry.provider.offers_reference_designation() {
+            return Err(Error::Invalid(
+                "the ReferenceDesignation is not offered (AppBuilder::reference_designation)"
+                    .to_owned(),
+            ));
+        }
+        if il != &self.shared.app_id && registry.provider.mam(&il.0).is_none() {
+            return Err(Error::Invalid(format!("no asset {il}")));
+        }
+        registry.refdes_handlers.insert(il.clone(), handler);
+        Ok(())
+    }
+
+    /// See [`Asset::reference_designation`].
+    pub(crate) fn reference_designation_of(
+        &self,
+        il: &IdentificationLink,
+    ) -> Option<ReferenceDesignation> {
+        self.registry()
+            .provider
+            .reference_designation(&il.0)
+            .cloned()
+    }
+
+    /// A `Set` or `Del ReferenceDesignation` the provider checked: the
+    /// handler decides outside the lock (without one it is accepted), then
+    /// the provider answers; the table is persisted (REQ-RES-REFDES-002)
+    /// and a change increments the RevisionCounter (REQ-RES-MAM-018,
+    /// ADR-0026 §16).
+    pub(crate) fn complete_reference_designation(
+        &self,
+        request: &ReferenceDesignationRequest,
+    ) -> Vec<Publication> {
+        let il = IdentificationLink(request.source().clone());
+        let (handler, before) = {
+            let registry = self.registry();
+            (
+                registry.refdes_handlers.get(&il).cloned(),
+                registry.provider.reference_designation(&il.0).cloned(),
+            )
+        };
+        let decision = handler.map_or(Ok(()), |h| {
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                h(request.reference_designation())
+            }))
+            .unwrap_or_else(|_| {
+                log::error!("the ReferenceDesignation handler of {il} panicked");
+                Err(crate::status::StatusCode::BadInternalError)
+            })
+        });
+        let mut registry = self.registry();
+        let out = registry.provider.complete_reference_designation(
+            request,
+            decision.map_err(crate::status::StatusCode::to_core),
+            runtime::unix_ms(),
+        );
+        self.save_changes(&mut registry);
+        let changed = registry.provider.reference_designation(&il.0) != before.as_ref();
+        if changed && let Err(e) = self.bump_locked(&mut registry, &il) {
+            log::warn!("RevisionCounter of {il}: {e}");
+        }
+        out
+    }
+
+    /// See [`Asset::emit_event`].
+    pub(crate) fn emit_event(&self, il: &IdentificationLink, event: GenericEvent) -> Result<()> {
+        let (level, core) = event.into_core()?;
+        let mut registry = self.registry();
+        registry
+            .provider
+            .emit_generic(&il.0, &level, core, runtime::unix_ms())?;
+        self.save_changes(&mut registry);
+        drop(registry);
+        self.shared.changed.notify_one();
+        Ok(())
+    }
+
+    /// Whether Syslog events of `level` are published now.
+    pub(crate) fn syslog_enabled(&self, level: SyslogLevel) -> bool {
+        self.registry().provider.syslog_enabled(level)
+    }
+
+    /// The most verbose Syslog level published now.
+    pub(crate) fn syslog_max_level(&self) -> Option<SyslogLevel> {
+        self.registry().provider.syslog_max_level()
+    }
+
+    /// Queues a Syslog event of the application (see [`crate::event`]):
+    /// `MSG` is `TAG[pid]: content` (RFC 3164 4.1.3), `HEADER` the
+    /// timestamp and hostname; dropped if the level is off, offline or
+    /// beyond the rate limit, whose count of dropped events follows as a
+    /// `Warning`.
+    pub(crate) fn emit_syslog(&self, level: SyslogLevel, content: &str) {
+        let unix_ms = runtime::unix_ms();
+        let mut registry = self.registry();
+        if !registry.provider.syslog_enabled(level) {
+            return;
+        }
+        let Some(dropped) = registry.syslog_limit.take(Instant::now()) else {
+            return;
+        };
+        let (hostname, tag) = registry.provider.syslog_identity();
+        let header = syslog_header(unix_ms, &hostname);
+        let pid = std::process::id();
+        let mut queued = false;
+        if dropped > 0 {
+            let msg = format!(
+                "{tag}[{pid}]: {dropped} log records dropped by the rate limit of the Syslog \
+                 bridge"
+            );
+            queued |= registry
+                .provider
+                .emit_syslog(SyslogLevel::Warning, &msg, &header, unix_ms);
+        }
+        let msg = format!(
+            "{tag}[{pid}]: {}",
+            event::truncate(content, MAX_MESSAGE_BYTES)
+        );
+        queued |= registry.provider.emit_syslog(level, &msg, &header, unix_ms);
+        drop(registry);
+        if queued {
+            self.shared.changed.notify_one();
+        }
+    }
+
     /// See [`DataSet::remove`].
     pub(crate) fn remove_data(&self, il: &IdentificationLink, tag: &str) -> Result<()> {
         let mut registry = self.registry();
@@ -1439,6 +1675,7 @@ impl AppHandle {
         registry
             .config_handlers
             .retain(|(source, _), _| source != il);
+        registry.refdes_handlers.remove(il);
         drop(registry);
         self.shared.changed.notify_one();
         Ok(())

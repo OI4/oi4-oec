@@ -307,6 +307,9 @@ fn on_event(
                 Ok(Handled::Publish(out)) => out,
                 Ok(Handled::SetData(request)) => handle.complete_set_data(&request),
                 Ok(Handled::SetConfig(request)) => handle.complete_set_config(&request),
+                Ok(Handled::SetReferenceDesignation(request)) => {
+                    handle.complete_reference_designation(&request)
+                }
                 Ok(other) => {
                     log::debug!("message on {} not handled: {other:?}", m.topic);
                     Vec::new()
@@ -316,6 +319,8 @@ fn on_event(
                     Vec::new()
                 }
             };
+            // a `Set PublicationList` may switch Syslog levels
+            crate::event::sync_max_level();
             let now = clock.now();
             for p in out {
                 publish(session, p, now);

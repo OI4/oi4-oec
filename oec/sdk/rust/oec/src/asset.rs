@@ -3,13 +3,17 @@
 //! `Source` with the resources MAM, Health and – from Level 2 – Profile and
 //! the entries of the PublicationList (P4 increment 6a, ADR-0020 amendment
 //! C-053, ADR-0026 §12), and their Data DataSets with Metadata
-//! ([`Asset::add_data`], increment 6b, C-054).
+//! ([`Asset::add_data`], increment 6b, C-054), their Config
+//! ([`Asset::add_config`], 7b, C-056), ReferenceDesignation
+//! ([`Asset::on_reference_designation`]) and Generic events
+//! ([`Asset::emit_event`], 7c, C-057).
 //!
 //! The SDK publishes the state, not every call (ADR-0020 §7): a change is
 //! published at once while connected; offline nothing is queued and the
 //! current state of every source is published after the next connect.
 
 use std::fmt;
+use std::sync::Arc;
 
 use oec_core::resource::{DetailObject, Health};
 
@@ -17,11 +21,22 @@ use crate::Result;
 use crate::app::AppHandle;
 use crate::config::{ConfigDef, ConfigHandle};
 use crate::data::{DataSet, DataSetDef};
+use crate::event::GenericEvent;
 use crate::identity::{IdentificationLink, Mam, Product};
+use crate::status::StatusCode;
 
 /// Health states (MG 9.1.2), ordered by severity for the aggregation of
 /// the `Details` (REQ-RES-HEALTH-002, [`HealthState::severity`]).
 pub use oec_core::resource::HealthState;
+
+/// The ReferenceDesignation of an asset (MG 9.1.10, REQ-RES-REFDES-001)
+/// with its aspects Function, Product and Location
+/// ([`Asset::on_reference_designation`]).
+pub use oec_core::resource::{Designation, DesignationParent, ReferenceDesignation};
+
+/// Decides a `Set` (`Some`) or `Del` (`None`) of a ReferenceDesignation.
+pub(crate) type ReferenceDesignationHandler =
+    dyn Fn(Option<&ReferenceDesignation>) -> std::result::Result<(), StatusCode> + Send + Sync;
 
 /// Definition of a represented entity, e.g. a field device without an MQTT
 /// client of its own (REQ-CMP-045); registered by
@@ -218,6 +233,53 @@ impl Asset {
     /// [`crate::Error::Io`] if the store fails.
     pub fn add_config(&self, def: ConfigDef) -> Result<ConfigHandle> {
         self.handle.add_config(&self.il, def)
+    }
+
+    /// Decides each `Set` (`Some`) and `Del` (`None`) of the
+    /// ReferenceDesignation of this asset (MG 8.3.10): `Ok` accepts it,
+    /// the SDK then persists it (REQ-RES-REFDES-002), increments the
+    /// RevisionCounter (REQ-RES-MAM-018), publishes it with the ReplyTo of
+    /// the request (REQ-RES-REFDES-010) and sends the Status event Good;
+    /// an `Err` rejects it with a Status event with that code. Without a
+    /// handler every valid change is accepted. Called on the thread of
+    /// the runtime, outside any lock; a panic answers `BadInternalError`.
+    /// `Get` (with or without Query) is answered by the SDK.
+    ///
+    /// # Errors
+    ///
+    /// [`crate::Error::Invalid`] if the ReferenceDesignation is not offered
+    /// ([`crate::app::AppBuilder::reference_designation`]) or the asset is
+    /// removed.
+    pub fn on_reference_designation(
+        &self,
+        f: impl Fn(Option<&ReferenceDesignation>) -> std::result::Result<(), StatusCode>
+        + Send
+        + Sync
+        + 'static,
+    ) -> Result<()> {
+        self.handle.on_reference_designation(&self.il, Arc::new(f))
+    }
+
+    /// The current ReferenceDesignation, `None` if none is set or it is
+    /// not offered.
+    pub fn reference_designation(&self) -> Option<ReferenceDesignation> {
+        self.handle.reference_designation_of(&self.il)
+    }
+
+    /// Publishes a Generic event of this asset on
+    /// `Pub/Event/<Source>/Generic/<Level>` (`CAT_GENERIC_99`,
+    /// REQ-RES-EVENT-009); a new Level gets its DataSetWriterId and, from
+    /// Level 2, its PublicationList entry. Offline, or with more than 256
+    /// events waiting, the event is dropped: events are not queued
+    /// (ADR-0020 §7).
+    ///
+    /// # Errors
+    ///
+    /// [`crate::Error::Invalid`] for a Level that is no valid topic level
+    /// (empty or with U+0000), Details that are no JSON object, a 17th
+    /// Level of this asset or a removed asset.
+    pub fn emit_event(&self, event: GenericEvent) -> Result<()> {
+        self.handle.emit_event(&self.il, event)
     }
 
     /// Removes a represented asset: its MAM, Health and Profile are no
