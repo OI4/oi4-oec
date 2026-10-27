@@ -20,7 +20,7 @@ Guideline baseline: `2e32a6b` · Area status: reviewed · Sections: MG 8.3.9, MG
 | [REQ-RES-SUBLIST-013](#req-res-sublist-013) | Status event after Set and Del SubscriptionList | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-SUBLIST-014](#req-res-sublist-014) | Changed entry is published after a successful Set | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-RES-SUBLIST-015](#req-res-sublist-015) | Remaining entries are published after a successful Del | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-RES-SUBLIST-016](#req-res-sublist-016) | Writable Data and Config DataSets are listed with their Set subscription | MUST | MUST | MUST | MUST | messaging | d7-test | draft |
+| [REQ-RES-SUBLIST-016](#req-res-sublist-016) | Writable Data and Config DataSets are listed with their Set subscription | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -385,7 +385,7 @@ An application that supports SubscriptionList lists every DataSet of the resourc
 - Condition: The application supports SubscriptionList and accepts Set for a Data or Config DataSet.
 - Refs: MG 9.1.9, MG 8.3.9, SF-107
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-9.1.9-aedf208f
 
 > A DataSet of the resources Data or Config that can be changed with Set is listed with the subscription of its Set topic (e.g. Oi4v2/&lt;ServiceType>/&lt;AppId>/Set/Data/&lt;Source>/&lt;Tag>, Config NONE_0).

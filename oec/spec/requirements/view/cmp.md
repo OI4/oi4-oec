@@ -49,11 +49,11 @@ Grading of the detailed requirements of the other areas per compliance level (um
 | [REQ-CMP-040](#req-cmp-040) | Common service NewDataSetWriterId | MUST | none | SHOULD | MUST | messaging | d7-test | reviewed |
 | [REQ-CMP-041](#req-cmp-041) | Get of a resource without content is answered with an empty list | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-CMP-042](#req-cmp-042) | No unsolicited publication of a resource without content | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-monitor | reviewed |
-| [REQ-CMP-043](#req-cmp-043) | Set or Del on an unknown or non-modifiable object is answered with Event Status Bad | MUST | SHOULD | MUST | MUST | messaging | d7-test | draft |
+| [REQ-CMP-043](#req-cmp-043) | Set or Del on an unknown or non-modifiable object is answered with Event Status Bad | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-CMP-044](#req-cmp-044) | Get of Metadata without Data – no Metadata, optional Event Status Bad | MAY | MAY | MAY | MAY | messaging | d7-test | reviewed |
 | [REQ-CMP-045](#req-cmp-045) | Represented entities match the level of the representing application | MUST | MUST | MUST | MUST | messaging | d7-test, d7-monitor | reviewed |
 | [REQ-CMP-046](#req-cmp-046) | Close message | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-CMP-047](#req-cmp-047) | Get for an unknown asset – no Pub, Event Status Bad under the own AppId recommended | SHOULD | SHOULD | SHOULD | SHOULD | messaging | d7-test | draft |
+| [REQ-CMP-047](#req-cmp-047) | Get for an unknown asset – no Pub, Event Status Bad under the own AppId recommended | SHOULD | SHOULD | SHOULD | SHOULD | messaging | d7-test | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -832,7 +832,7 @@ An entity answers a Set or Del addressing an object it does not have or does not
 - Scope: MG 8.3.6.1
 - Refs: MG 9.1, SF-037, SF-108
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-9.1-2e6777c7, MG-9.1-ebe69434
 
 > From Level 2 on, a Set or Del addressing an object, which the entity does not have or does not offer for modification, must be answered with an Event of the category Status and the level Bad
@@ -927,7 +927,7 @@ An entity does not answer a Get whose Source addresses an asset that the entity 
 - Scope: MG 8.3.6.1, MG 1.3
 - Refs: MG 9.1, SF-099, SF-108
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-9.1-2e6777c7
 
 > A Get whose Source addresses an asset that the entity neither is nor represents is not answered on the related Pub topic. The entity should answer such a Get with an Event of the category Status and the level Bad (BadNotFound, see 8.3.6.1 Status).

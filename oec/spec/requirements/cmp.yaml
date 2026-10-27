@@ -847,7 +847,7 @@ requirements:
         text: The same applies to the status Event of a Set or Del whose Source addresses such an asset.
     verification: [d7-test]
     inventory: [MG-9.1-ebe69434, MG-9.1-2e6777c7]
-    status: draft
+    status: reviewed
     notes: >-
       SF-108, decided by the PO in the C-056 review (2026-10-27) as proposed
       and implemented on PO order in 2e32a6b: if the Source of the Set or Del
@@ -961,7 +961,7 @@ requirements:
         text: Because the entity does not represent the addressed asset, this Event is published with the Source of the entity itself (AppId); the requester finds it through the ReplyTo.
     verification: [d7-test]
     inventory: [MG-9.1-2e6777c7]
-    status: draft
+    status: reviewed
     notes: >-
       SF-099, decided by the PO in the C-036 review (2026-10-25, revised
       against the proposal) and implemented on PO order in a42a132. A Get of
