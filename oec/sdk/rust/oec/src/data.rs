@@ -329,7 +329,8 @@ impl DataSet {
     ///
     /// # Errors
     ///
-    /// [`Error::Invalid`] for a removed DataSet.
+    /// [`Error::Invalid`] for a removed DataSet and at Level 1, where the
+    /// SDK subscribes no `Set` (requests are served from Level 2 on).
     pub fn on_set(
         &self,
         handler: impl Fn(&SetData) -> core::result::Result<(), StatusCode> + Send + Sync + 'static,

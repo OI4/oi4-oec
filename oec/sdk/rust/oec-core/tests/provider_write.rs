@@ -661,3 +661,15 @@ fn every_answer_passes_the_schema() {
             .unwrap_or_else(|e| panic!("{}: {e}\n{}", o.topic, json_of(&o)));
     }
 }
+
+/// Without `Get` (Level 1) the provider subscribes no `Set`: a `Set Data`
+/// handler is refused instead of never being called.
+#[test]
+fn set_data_needs_requests_served() {
+    let mut p = provider_of(ServiceType::Aggregation, APP, false, WriterIds::new());
+    let pump = p.add_asset(mam(PUMP)).unwrap();
+    p.add_data(&pump, temp("t", Mode::ON_REQUEST, Writable::Nothing), MS)
+        .unwrap();
+    assert!(p.accept_set_data(&pump, "t", true).is_err());
+    assert!(p.accept_set_data(&pump, "t", false).is_ok());
+}

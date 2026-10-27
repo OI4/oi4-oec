@@ -717,3 +717,42 @@ fn invalid_data_sets_are_refused() {
             .add_data(DataSetDef::oi4pv(Field::double("p")).field(Field::double("x"))),
     );
 }
+
+/// `DataSet::on_set` (C-055): refused at Level 1 (no `Set` subscribed) and
+/// for a removed DataSet; a corrupt table of `Set PublicationList`
+/// settings is an error.
+#[test]
+fn set_handlers_and_publication_settings() {
+    let ok = |_: &oec::data::SetData| Ok(());
+    let app = device(Level::L1, explicit())
+        .reference_designation(false)
+        .build()
+        .unwrap();
+    let oee = app
+        .add_asset(pump_def())
+        .unwrap()
+        .add_data(oee_def())
+        .unwrap();
+    assert!(matches!(oee.on_set(ok), Err(oec::Error::Invalid(_))));
+
+    let root = Root::new("publications-store");
+    let store = || FileStore::new(root.path("store"));
+    let app = device(Level::L2, explicit())
+        .store(store())
+        .build()
+        .unwrap();
+    let oee = app
+        .add_asset(pump_def())
+        .unwrap()
+        .add_data(oee_def())
+        .unwrap();
+    oee.on_set(ok).unwrap();
+    oee.clone().remove().unwrap();
+    assert!(matches!(oee.on_set(ok), Err(oec::Error::Invalid(_))));
+    drop(app);
+    root.write("store/app/publications", "{\"Version\":2,\"Entries\":[]}");
+    assert!(matches!(
+        device(Level::L2, explicit()).store(store()).build(),
+        Err(oec::Error::Io(e)) if e.kind() == std::io::ErrorKind::InvalidData
+    ));
+}

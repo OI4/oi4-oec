@@ -212,11 +212,15 @@ impl Provider {
     }
 
     /// Accepts `Set Data` for a DataSet (a handler decides) or not (the
-    /// default: `BadNotWritable`, REQ-CMP-043).
+    /// default: `BadNotWritable`, REQ-CMP-043). Requests are served from
+    /// Level 2 on ([`super::ProviderConfig::get`]); without them no `Set` is
+    /// subscribed and accepting is refused.
     ///
     /// # Errors
     ///
-    /// [`super::ProviderError::UnknownDataSet`].
+    /// [`super::ProviderError::UnknownDataSet`];
+    /// [`super::ProviderError::DataSet`] for `accept` without requests
+    /// served.
     pub fn accept_set_data(
         &mut self,
         source: &IdentificationLink,
@@ -224,6 +228,11 @@ impl Provider {
         accept: bool,
     ) -> Result<(), super::ProviderError> {
         let i = self.set_index(source, tag)?;
+        if accept && !self.config.get {
+            return Err(super::ProviderError::DataSet(
+                "Set Data is served from Level 2 on (no Set subscribed)".to_owned(),
+            ));
+        }
         self.sets[i].settable = accept;
         Ok(())
     }
