@@ -17,6 +17,28 @@ use oec_core::topic::{Resource, ServiceType};
 use proptest::prelude::*;
 use serde_json::{Value, json};
 
+/// `handle_message` for requests answered by publications.
+trait HandleGet {
+    fn handle_get(
+        &mut self,
+        topic: &str,
+        payload: &[u8],
+        ms: u64,
+    ) -> Result<Vec<Publication>, Ignored>;
+}
+
+impl HandleGet for Provider {
+    fn handle_get(
+        &mut self,
+        topic: &str,
+        payload: &[u8],
+        ms: u64,
+    ) -> Result<Vec<Publication>, Ignored> {
+        self.handle_message(topic, payload, ms)
+            .map(|h| h.into_publications().expect("answered by publications"))
+    }
+}
+
 const APP: &str = "vendor.com/Gateway/GW-1/SN-1";
 const MS: u64 = 1_700_000_000_000;
 
@@ -99,7 +121,7 @@ fn level_1_serves_no_get() {
             topic("Pub", &format!("Health/{}", il(APP).encode()))
         ]
     );
-    let r = p.handle_message(&topic("Get", "MAM"), &get(GET_ID, &json!([])), MS);
+    let r = p.handle_get(&topic("Get", "MAM"), &get(GET_ID, &json!([])), MS);
     assert!(matches!(r, Err(Ignored::NotServed(_))), "{r:?}");
     // assets still publish MAM and Health (REQ-CMP-007)
     p.add_asset(mam(PUMP)).unwrap();
@@ -113,24 +135,41 @@ fn level_1_serves_no_get() {
     );
 }
 
-#[test]
-fn connect_publishes_the_state_of_every_source() {
-    let mut p = provider(true, WriterIds::new());
+/// `Get` of the served resources, `Set` and `Del` of the resources they
+/// address, to this application.
+fn assert_subscriptions(p: &Provider) {
     assert_eq!(
         p.subscriptions()
             .iter()
             .map(ToString::to_string)
             .collect::<Vec<_>>(),
         [
-            "MAM",
-            "Health",
-            "Data",
-            "Metadata",
-            "Profile",
-            "PublicationList"
+            "Get/MAM",
+            "Get/Health",
+            "Get/Data",
+            "Get/Metadata",
+            "Get/Profile",
+            "Get/PublicationList",
+            "Set/Data",
+            "Set/Metadata",
+            "Set/Config",
+            "Set/PublicationList",
+            "Set/SubscriptionList",
+            "Set/ReferenceDesignation",
+            "Del/SubscriptionList",
+            "Del/ReferenceDesignation",
         ]
-        .map(|r| topic("Get", &format!("{r}/#")))
+        .map(|r| {
+            let (method, resource) = r.split_once('/').unwrap();
+            topic(method, &format!("{resource}/#"))
+        })
     );
+}
+
+#[test]
+fn connect_publishes_the_state_of_every_source() {
+    let mut p = provider(true, WriterIds::new());
+    assert_subscriptions(&p);
     // offline: nothing is published, nothing queued (ADR-0020 §7)
     let pump = p.add_asset(mam(PUMP)).unwrap();
     let off_spec = Health {
@@ -159,12 +198,20 @@ fn connect_publishes_the_state_of_every_source() {
     // (REQ-RES-PUBLIST-005), the PublicationList one id (T7-MON-08)
     let list = json_of(&out[6]);
     let entries = list["Messages"].as_array().unwrap();
-    assert_eq!(entries.len(), 6);
+    assert_eq!(entries.len(), 12);
     let mut named = BTreeMap::new();
     for e in entries {
         let pl = &e["Payload"];
         assert_eq!(e["DataSetWriterId"], entries[0]["DataSetWriterId"]);
         assert_eq!(e["DataSetWriterName"], pl["Source"]);
+        if pl["Resource"] == "Event" {
+            // the Status events: only on their topic (REQ-RES-EVENT-005)
+            let filter = pl["Filter"].as_str().unwrap();
+            assert!(filter.starts_with("Status/"), "{filter}");
+            assert_eq!(e["WriterGroupName"], format!("Event/{filter}"));
+            assert_eq!(pl["Mode"], "FILTER_4");
+            continue;
+        }
         assert_eq!(e["WriterGroupName"], pl["Resource"]);
         assert_eq!(pl["Mode"], "ON_REQUEST_SOURCE_10");
         named.insert(
@@ -194,6 +241,7 @@ fn connect_publishes_the_state_of_every_source() {
             "Health",
             "Data",
             "Metadata",
+            "Event",
             "Profile",
             "PublicationList"
         ])
@@ -246,7 +294,8 @@ fn changes_are_published_at_once() {
     p.remove_asset(&pump).unwrap();
     let out = p.poll(Duration::from_millis(4), MS + 4);
     assert_eq!(topics(&out), [topic("Pub", "PublicationList")]);
-    assert_eq!(json_of(&out[0])["Messages"].as_array().unwrap().len(), 3);
+    // MAM, Health, Profile and the three Status events of the application
+    assert_eq!(json_of(&out[0])["Messages"].as_array().unwrap().len(), 6);
 }
 
 #[test]
@@ -327,7 +376,7 @@ fn get_is_answered_with_reply_to() {
     // without Source: all sources, one NetworkMessage, Pub/<Resource>
     for res in ["MAM", "Health", "Profile"] {
         let out = p
-            .handle_message(&topic("Get", res), &get(GET_ID, &json!([])), MS + 1)
+            .handle_get(&topic("Get", res), &get(GET_ID, &json!([])), MS + 1)
             .unwrap();
         assert_eq!(topics(&out), [topic("Pub", res)]);
         let v = json_of(&out[0]);
@@ -343,7 +392,7 @@ fn get_is_answered_with_reply_to() {
     // with Source: that source on Pub/<Resource>/<Source>
     let rest = format!("MAM/{}", pump.encode());
     let out = p
-        .handle_message(&topic("Get", &rest), &get(GET_ID, &json!([])), MS + 2)
+        .handle_get(&topic("Get", &rest), &get(GET_ID, &json!([])), MS + 2)
         .unwrap();
     assert_eq!(topics(&out), [topic("Pub", &rest)]);
     assert_eq!(
@@ -354,7 +403,7 @@ fn get_is_answered_with_reply_to() {
     // PublicationList with Source and Filter: the addressed entry
     let rest = format!("PublicationList/{}/Health", pump.encode());
     let out = p
-        .handle_message(&topic("Get", &rest), &get(GET_ID, &json!([])), MS + 3)
+        .handle_get(&topic("Get", &rest), &get(GET_ID, &json!([])), MS + 3)
         .unwrap();
     assert_eq!(topics(&out), [topic("Pub", &rest)]);
     let v = json_of(&out[0]);
@@ -365,27 +414,44 @@ fn get_is_answered_with_reply_to() {
     // a Filter without content: Messages [] (REQ-CMP-041)
     let rest = format!("PublicationList/{}/Data/temp", pump.encode());
     let out = p
-        .handle_message(&topic("Get", &rest), &get(GET_ID, &json!([])), MS + 4)
+        .handle_get(&topic("Get", &rest), &get(GET_ID, &json!([])), MS + 4)
         .unwrap();
     assert_eq!(json_of(&out[0])["Messages"], json!([]));
 
-    // an unknown Source: no answer (REQ-CMP-047)
-    let rest = format!("MAM/{}", il("vendor.com/Pump/P-1/0816").encode());
-    let r = p.handle_message(&topic("Get", &rest), &get(GET_ID, &json!([])), MS + 5);
-    assert!(matches!(r, Err(Ignored::UnknownSource(_))), "{r:?}");
+    // an unknown Source: no Pub, the Status event BadNotFound (REQ-CMP-047)
+    let other = il("vendor.com/Pump/P-1/0816");
+    let rest = format!("MAM/{}", other.encode());
+    let out = p
+        .handle_get(&topic("Get", &rest), &get(GET_ID, &json!([])), MS + 5)
+        .unwrap();
+    assert_eq!(
+        topics(&out),
+        [topic(
+            "Pub",
+            &format!("Event/{}/Status/Bad", other.encode())
+        )]
+    );
+    let v = json_of(&out[0]);
+    assert_eq!(v["ReplyTo"], GET_ID);
+    assert_eq!(v["Messages"][0]["DataSetWriterId"], 65535);
+    assert_eq!(v["Messages"][0]["Payload"]["Number"], 0x803E_0000_u32);
+    assert_eq!(
+        v["Messages"][0]["Payload"]["Details"]["SymbolicId"],
+        "BadNotFound"
+    );
 
     // not for us, not a Get, bad payload
     let other = format!("Oi4v2/Aggregation/{}/Get/MAM", il(PUMP).encode());
     assert_eq!(
-        p.handle_message(&other, &get(GET_ID, &json!([])), MS),
+        p.handle_get(&other, &get(GET_ID, &json!([])), MS),
         Err(Ignored::NotForUs)
     );
     assert!(matches!(
-        p.handle_message(&topic("Get", "MAM"), b"{}", MS),
+        p.handle_get(&topic("Get", "MAM"), b"{}", MS),
         Err(Ignored::Payload(_))
     ));
     assert!(matches!(
-        p.handle_message("x/y", b"{}", MS),
+        p.handle_get("x/y", b"{}", MS),
         Err(Ignored::Topic(_))
     ));
 }
@@ -417,7 +483,7 @@ fn get_honours_the_pagination_request() {
     };
     // all pages: 5 MAM, 2 per page
     let out = p
-        .handle_message(&topic("Get", "MAM"), &req(2, 0), MS + 1)
+        .handle_get(&topic("Get", "MAM"), &req(2, 0), MS + 1)
         .unwrap();
     assert_eq!(out.len(), 3);
     let first = json_of(&out[0]);
@@ -444,7 +510,7 @@ fn get_honours_the_pagination_request() {
     }
     // one page: its own MessageId is the PaginationId (REQ-PAG-005)
     let out = p
-        .handle_message(&topic("Get", "MAM"), &req(2, 2), MS + 2)
+        .handle_get(&topic("Get", "MAM"), &req(2, 2), MS + 2)
         .unwrap();
     assert_eq!(out.len(), 1);
     let v = json_of(&out[0]);
@@ -452,7 +518,7 @@ fn get_honours_the_pagination_request() {
     assert_eq!(pagination(&v)["Page"], 2);
     // beyond the last page: empty, HasNext false
     let out = p
-        .handle_message(&topic("Get", "MAM"), &req(2, 9), MS + 3)
+        .handle_get(&topic("Get", "MAM"), &req(2, 9), MS + 3)
         .unwrap();
     let v = json_of(&out[0]);
     assert_eq!(v["Messages"].as_array().unwrap().len(), 1);
@@ -490,12 +556,13 @@ fn large_publications_are_paginated() {
         assert!(o.payload.len() <= 4096);
         let v = json_of(o);
         total += v["Messages"].as_array().unwrap().len() - 1;
-        assert_eq!(pagination(&v)["TotalCount"], 93);
+        assert_eq!(pagination(&v)["TotalCount"], 186);
     }
-    assert_eq!(total, 93);
+    // 31 sources with MAM, Health, Profile and three Status events
+    assert_eq!(total, 186);
     // a Get answer may use the MaxPacketSize of the bus
     let out = p
-        .handle_message(&topic("Get", "MAM"), &get(GET_ID, &json!([])), MS + 1)
+        .handle_get(&topic("Get", "MAM"), &get(GET_ID, &json!([])), MS + 1)
         .unwrap();
     assert!(out.len() > 1 && out.iter().all(|o| o.payload.len() <= 8192));
     assert!(out.iter().any(|o| o.payload.len() > 4096));
@@ -577,7 +644,7 @@ mod strict {
         .enumerate()
         {
             all.extend(
-                p.handle_message(
+                p.handle_get(
                     &topic("Get", rest),
                     &get(GET_ID, &json!([])),
                     MS + n as u64 + 1,

@@ -23,6 +23,28 @@ use oec_core::topic::ServiceType;
 use serde_json::{Value as Json, json};
 use uuid::Uuid;
 
+/// `handle_message` for requests answered by publications.
+trait HandleGet {
+    fn handle_get(
+        &mut self,
+        topic: &str,
+        payload: &[u8],
+        ms: u64,
+    ) -> Result<Vec<Publication>, Ignored>;
+}
+
+impl HandleGet for Provider {
+    fn handle_get(
+        &mut self,
+        topic: &str,
+        payload: &[u8],
+        ms: u64,
+    ) -> Result<Vec<Publication>, Ignored> {
+        self.handle_message(topic, payload, ms)
+            .map(|h| h.into_publications().expect("answered by publications"))
+    }
+}
+
 const APP: &str = "vendor.com/Gateway/GW-1/SN-1";
 const PUMP: &str = "vendor.com/Pump/P-1/0815";
 const MS: u64 = 1_700_000_000_000;
@@ -195,7 +217,7 @@ fn guideline_get_vectors_are_answered_like_the_guideline() {
     // Get Data/<Source>/oee → Pub Data/<Source>/oee
     let (get_topic, get_payload) = vector("V-PAY-055");
     let out = p
-        .handle_message(
+        .handle_get(
             &get_topic,
             &serde_json::to_vec(&get_payload).unwrap(),
             MS + 1,
@@ -219,7 +241,7 @@ fn guideline_get_vectors_are_answered_like_the_guideline() {
     let (get_topic, get_payload) = vector("V-PAY-020");
     let (meta_topic, _) = vector("V-PAY-021");
     let out = p
-        .handle_message(
+        .handle_get(
             &get_topic,
             &serde_json::to_vec(&get_payload).unwrap(),
             MS + 2,
@@ -388,7 +410,7 @@ fn get_data_and_get_metadata_follow_the_modes() {
 
     // Get Data: every DataSet not OFF (REQ-RES-PUBLIST-007/008)
     let out = p
-        .handle_message(
+        .handle_get(
             &topic("Get", &format!("Data/{pump_seg}")),
             &get(&json!([])),
             MS + 4,
@@ -401,7 +423,7 @@ fn get_data_and_get_metadata_follow_the_modes() {
     // different classes: no DataSetClassId (REQ-MSG-011)
     assert!(v.get("DataSetClassId").is_none_or(|c| c == ""), "{v}");
     let out = p
-        .handle_message(&topic("Get", "Data"), &get(&json!([])), MS + 4)
+        .handle_get(&topic("Get", "Data"), &get(&json!([])), MS + 4)
         .unwrap();
     assert_eq!(
         writer_group_names(&json_of(&out[0])),
@@ -409,20 +431,20 @@ fn get_data_and_get_metadata_follow_the_modes() {
     );
     // OFF: an empty answer (REQ-CMP-041), no Metadata (REQ-CMP-044)
     let out = p
-        .handle_message(
+        .handle_get(
             &topic("Get", &format!("Data/{pump_seg}/o")),
             &get(&json!([])),
             MS + 5,
         )
         .unwrap();
     assert_eq!(json_of(&out[0])["Messages"], json!([]));
-    let r = p.handle_message(
+    let r = p.handle_get(
         &topic("Get", &format!("Metadata/{pump_seg}/o")),
         &get_meta(PUMP, "o"),
         MS + 5,
     );
     assert!(matches!(r, Err(Ignored::NoMetadata(_))), "{r:?}");
-    let r = p.handle_message(
+    let r = p.handle_get(
         &topic("Get", &format!("Metadata/{pump_seg}/unknown")),
         &get_meta(PUMP, "unknown"),
         MS + 5,
@@ -430,7 +452,7 @@ fn get_data_and_get_metadata_follow_the_modes() {
     assert!(matches!(r, Err(Ignored::NoMetadata(_))), "{r:?}");
     // an unknown Tag of Data: empty (REQ-CMP-041)
     let out = p
-        .handle_message(
+        .handle_get(
             &topic("Get", &format!("Data/{pump_seg}/unknown")),
             &get(&json!([])),
             MS + 6,
@@ -473,6 +495,9 @@ fn the_publication_list_describes_data_and_metadata() {
             "MAM",
             "Health",
             "Profile",
+            "Event/Status/Good",
+            "Event/Status/Uncertain",
+            "Event/Status/Bad",
             "Data/oee",
             "Metadata/oee",
             "Data/t%25%2F1",
@@ -480,6 +505,11 @@ fn the_publication_list_describes_data_and_metadata() {
             "Data/off"
         ]
     );
+    // indices without the Status events
+    let entries: Vec<&Json> = entries
+        .into_iter()
+        .filter(|e| e["Payload"]["Resource"] != "Event")
+        .collect();
     let pl = |i: usize| entries[i]["Payload"].clone();
     assert_eq!(
         pl(3),
@@ -513,7 +543,7 @@ fn the_publication_list_describes_data_and_metadata() {
     let s = pump.encode();
     let ask = |p: &mut Provider, rest: &str| -> Vec<Json> {
         let out = p
-            .handle_message(&topic("Get", rest), &get(&json!([])), MS + 1)
+            .handle_get(&topic("Get", rest), &get(&json!([])), MS + 1)
             .unwrap();
         json_of(&out[0])["Messages"].as_array().unwrap().clone()
     };
@@ -634,7 +664,7 @@ fn level_1_publishes_metadata_and_data_without_get() {
         ]
     );
     assert!(p.subscriptions().is_empty());
-    let r = p.handle_message(&topic("Get", &format!("Data/{a}/t")), &get(&json!([])), MS);
+    let r = p.handle_get(&topic("Get", &format!("Data/{a}/t")), &get(&json!([])), MS);
     assert!(matches!(r, Err(Ignored::NotServed(_))), "{r:?}");
 }
 
@@ -968,14 +998,14 @@ mod strict {
         .enumerate()
         {
             all.extend(
-                p.handle_message(&topic("Get", rest), &get(&json!([])), MS + n as u64 + 1)
+                p.handle_get(&topic("Get", rest), &get(&json!([])), MS + n as u64 + 1)
                     .unwrap(),
             );
         }
         for (src, tag) in [(PUMP, "all-types"), (APP, OI4PV)] {
             let enc = il(src).encode();
             all.extend(
-                p.handle_message(
+                p.handle_get(
                     &topic("Get", &format!("Metadata/{enc}/{tag}")),
                     &get_meta(src, tag),
                     MS + 9,

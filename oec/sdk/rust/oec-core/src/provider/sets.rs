@@ -8,7 +8,7 @@ use serde_json::{Map, Number};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-use super::data::{DataSetSpec, Mode, Value, coerce, encode, exceeds_dead_band};
+use super::data::{DataSetSpec, Mode, PublicationSpec, Value, coerce, encode, exceeds_dead_band};
 use crate::il::IdentificationLink;
 use crate::message::{
     ConfigurationVersion, DataSetMessage, DataSetMetaData, DataSetVersion, DataSetWriterId,
@@ -41,6 +41,8 @@ pub(super) struct Set {
     /// The Metadata is due at the next poll.
     pub(super) meta_pending: bool,
     precisions: Vec<f64>,
+    /// The application accepts `Set Data` (a handler is registered).
+    pub(super) settable: bool,
 }
 
 impl Set {
@@ -52,17 +54,7 @@ impl Set {
         meta: DataSetMetaData,
         writer: DataSetWriterId,
     ) -> Self {
-        let precisions = spec
-            .fields
-            .iter()
-            .map(|f| {
-                spec.publication
-                    .precisions
-                    .get(&f.name)
-                    .copied()
-                    .unwrap_or(0.0)
-            })
-            .collect();
+        let precisions = Self::precisions_of(&spec);
         Self {
             values: vec![None; spec.fields.len()],
             source,
@@ -77,6 +69,47 @@ impl Set {
             next_due: None,
             meta_pending: true,
             precisions,
+            settable: false,
+        }
+    }
+
+    fn precisions_of(spec: &DataSetSpec) -> Vec<f64> {
+        spec.fields
+            .iter()
+            .map(|f| {
+                spec.publication
+                    .precisions
+                    .get(&f.name)
+                    .copied()
+                    .unwrap_or(0.0)
+            })
+            .collect()
+    }
+
+    /// Applies new publication settings (`Set PublicationList`): the
+    /// current state is due at once under the new settings and every cycle
+    /// starts anew; the Metadata is due if the DataSet was OFF_0. Returns
+    /// whether the DataSet appeared or disappeared on the Message Bus
+    /// (its Metadata entry comes or goes).
+    pub(super) fn reconfigure(&mut self, publication: PublicationSpec) -> bool {
+        let was_on = self.mode().is_on();
+        self.spec.publication = publication;
+        self.precisions = Self::precisions_of(&self.spec);
+        self.next_due = None;
+        self.pending = self.mode().publishes() && self.present();
+        let is_on = self.mode().is_on();
+        self.meta_pending |= is_on && !was_on;
+        was_on != is_on
+    }
+
+    /// The DataSet was published as the answer to a `Set Data` on its
+    /// FILTER_4 topic: with FILTER_4 as only form and Interval 0 that is
+    /// its publication on change.
+    pub(super) fn answered(&mut self) {
+        let m = self.mode();
+        if m.filter() && !m.application() && !m.source() && self.interval().is_none() {
+            self.pending = false;
+            self.sent = self.values();
         }
     }
 

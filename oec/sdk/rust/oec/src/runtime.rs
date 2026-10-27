@@ -22,6 +22,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use oec_core::lifecycle::Publication;
 use oec_core::mqtt::{CloseReason, Credentials, Event, QoS, Session, SessionConfig, SessionState};
+use oec_core::provider::Handled;
 use tokio::sync::watch;
 use tokio::time::{Instant, sleep, sleep_until, timeout};
 
@@ -279,14 +280,21 @@ fn on_event(
                 handle.save_changes(&mut registry);
                 answer
             };
-            match answer {
-                Ok(out) => {
-                    let now = clock.now();
-                    for p in out {
-                        publish(session, p, now);
-                    }
+            let out = match answer {
+                Ok(Handled::Publish(out)) => out,
+                Ok(Handled::SetData(request)) => handle.complete_set_data(&request),
+                Ok(other) => {
+                    log::debug!("message on {} not handled: {other:?}", m.topic);
+                    Vec::new()
                 }
-                Err(reason) => log::debug!("message on {} ignored: {reason}", m.topic),
+                Err(reason) => {
+                    log::debug!("message on {} ignored: {reason}", m.topic);
+                    Vec::new()
+                }
+            };
+            let now = clock.now();
+            for p in out {
+                publish(session, p, now);
             }
         }
         other => log::debug!("MQTT: {other:?}"),

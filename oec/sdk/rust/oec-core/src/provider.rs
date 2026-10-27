@@ -3,7 +3,9 @@
 //! (itself and its subordinate assets), their MAM, Health, Profile and
 //! Data DataSets with Metadata, the PublicationList with stable
 //! DataSetWriterIds, the publish modes, Intervals and Precisions of the
-//! Data, the answers to `Get` and pagination.
+//! Data, the answers to `Get` and pagination; and the write side (P4
+//! increment 7a, ADR-0026 §14): `Set` and `Del` with Status events,
+//! `Set PublicationList` and `Set Data`.
 //!
 //! It owns the [`Lifecycle`]. The runtime calls [`Provider::on_connected`]
 //! after CONNACK, [`Provider::poll`] at [`Provider::poll_timeout`] and on
@@ -15,9 +17,11 @@
 //! the current state of every source.
 
 pub mod data;
+pub mod overrides;
 pub mod pagination;
 mod sets;
 pub mod versions;
+mod write;
 pub mod writers;
 
 use core::fmt;
@@ -33,11 +37,15 @@ use crate::message::{
     PaginationRequest, PublisherId,
 };
 use crate::resource::{Data, Health, HealthState, Mam, Profile, PublicationEntry, PublicationMode};
-use crate::topic::{Filter, ListFilter, Method, Resource, Subject, Topic, TopicError, TopicFilter};
+use crate::topic::{
+    Filter, ListFilter, Method, Resource, StatusLevel, Subject, Topic, TopicError, TopicFilter,
+};
 use data::{DataSetSpec, Value as FieldValue};
+pub use overrides::{PublicationOverride, PublicationOverrides};
 use pagination::Envelope;
 use sets::{Set, date_time};
 pub use versions::{MetaDataVersions, VersionsError};
+pub use write::{FOREIGN_SOURCES, SetDataRequest};
 pub use writers::{WriterIdError, WriterIds, WriterKey};
 
 /// The settings of a [`Provider`].
@@ -144,15 +152,17 @@ impl From<TopicError> for ProviderError {
 pub enum Ignored {
     /// The topic is no OEC topic.
     Topic(TopicError),
-    /// Not a `Get` to this application.
+    /// Not a `Get`, `Set` or `Del` to this application.
     NotForUs,
-    /// The application does not serve this resource with `Get` (or not at
-    /// Level 1).
+    /// The application does not serve this resource with `Get`, `Set` or
+    /// `Del` (or not at Level 1).
     NotServed(Subject),
-    /// The Source is no asset of the application (REQ-CMP-047); the Status
-    /// event BadNotFound follows with P4 increment 7.
+    /// The Source is no asset of the application (REQ-CMP-047) and the
+    /// bound of [`FOREIGN_SOURCES`] for the Status event BadNotFound is
+    /// reached.
     UnknownSource(IdentificationLink),
-    /// The payload is no `Get` NetworkMessage with a valid MessageId.
+    /// The payload is no `Get`, `Set` or `Del` NetworkMessage with a valid
+    /// MessageId.
     Payload(String),
     /// A `Get` of Metadata without Source and Tag or for a DataSet the
     /// application does not provide; silence is conformant (REQ-CMP-044).
@@ -163,19 +173,20 @@ impl fmt::Display for Ignored {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Topic(e) => write!(f, "no OEC topic: {e}"),
-            Self::NotForUs => f.write_str("not a Get to this application"),
-            Self::NotServed(s) => write!(f, "Get {s} is not served"),
+            Self::NotForUs => f.write_str("not a Get, Set or Del to this application"),
+            Self::NotServed(s) => write!(f, "{s} is not served"),
             Self::UnknownSource(il) => write!(
                 f,
-                "Get for the Source {il}, which is no asset of the application (REQ-CMP-047)"
+                "request for the Source {il}, which is no asset of the application, \
+                 beyond the bound of Status events (REQ-CMP-047)"
             ),
-            Self::Payload(e) => write!(f, "invalid Get payload: {e}"),
+            Self::Payload(e) => write!(f, "invalid payload: {e}"),
             Self::NoMetadata(e) => write!(f, "Get Metadata not answered (REQ-CMP-044): {e}"),
         }
     }
 }
 
-/// The resources served by `Get`, in the order of the Profile.
+/// The resources served by `Get`.
 const SERVED: [Resource; 6] = [
     Resource::Mam,
     Resource::Health,
@@ -184,6 +195,63 @@ const SERVED: [Resource; 6] = [
     Resource::Profile,
     Resource::PublicationList,
 ];
+
+/// The resources in the Profile, in its order: those served by `Get` and
+/// the Status events (REQ-RES-EVENT-005).
+const PROFILE: [Resource; 7] = [
+    Resource::Mam,
+    Resource::Health,
+    Resource::Data,
+    Resource::Metadata,
+    Resource::Event,
+    Resource::Profile,
+    Resource::PublicationList,
+];
+
+/// The resources a `Set` addresses (MG 9.1); each `Set` gets a Status
+/// event, `BadNotFound` or `BadNotWritable` for those without writable
+/// content (REQ-CMP-043).
+const SET: [Resource; 6] = [
+    Resource::Data,
+    Resource::Metadata,
+    Resource::Config,
+    Resource::PublicationList,
+    Resource::SubscriptionList,
+    Resource::ReferenceDesignation,
+];
+
+/// The resources a `Del` addresses (MG 9.1).
+const DEL: [Resource; 2] = [Resource::SubscriptionList, Resource::ReferenceDesignation];
+
+/// What [`Provider::handle_message`] asks the runtime to do.
+#[derive(Debug, Clone, PartialEq)]
+#[non_exhaustive]
+pub enum Handled {
+    /// Publish these messages in order.
+    Publish(Vec<Publication>),
+    /// The application decides about this `Set Data`; then
+    /// [`Provider::complete_set_data`] answers.
+    SetData(SetDataRequest),
+}
+
+impl Handled {
+    /// The publications; `None` for a [`Handled::SetData`].
+    pub fn into_publications(self) -> Option<Vec<Publication>> {
+        match self {
+            Self::Publish(p) => Some(p),
+            Self::SetData(_) => None,
+        }
+    }
+}
+
+/// The tables changed since they were last taken for persistence.
+#[derive(Debug, Clone, Copy, Default)]
+#[allow(clippy::struct_field_names)]
+struct Unsaved {
+    writers: bool,
+    versions: bool,
+    overrides: bool,
+}
 
 #[derive(Debug, Clone, Copy, Default)]
 struct Dirty {
@@ -213,11 +281,11 @@ pub struct Provider {
     lifecycle: Lifecycle,
     config: ProviderConfig,
     writers: WriterIds,
-    writers_changed: bool,
     assets: Vec<Asset>,
     sets: Vec<Set>,
     versions: MetaDataVersions,
-    versions_changed: bool,
+    overrides: PublicationOverrides,
+    unsaved: Unsaved,
     pending: Pending,
     connected: bool,
 }
@@ -240,11 +308,11 @@ impl Provider {
             lifecycle,
             config,
             writers,
-            writers_changed: false,
             assets: Vec::new(),
             sets: Vec::new(),
             versions: MetaDataVersions::new(),
-            versions_changed: false,
+            overrides: PublicationOverrides::new(),
+            unsaved: Unsaved::default(),
             pending: Pending::default(),
             connected: false,
         };
@@ -254,11 +322,14 @@ impl Provider {
             (Resource::Health, p.lifecycle.health_writer()),
         ];
         for (resource, id) in pinned {
-            p.writers_changed |= p.writers.pin(WriterKey::new(resource, &app), id)?;
+            p.unsaved.writers |= p.writers.pin(WriterKey::new(resource, &app), id)?;
         }
         if config.get {
             p.assign(WriterKey::new(Resource::Profile, &app))?;
             p.assign(WriterKey::publication_list())?;
+            for &level in StatusLevel::ALL {
+                p.assign(write::status_key(&app, level))?;
+            }
         }
         Ok(p)
     }
@@ -286,7 +357,7 @@ impl Provider {
     /// The table as JSON if it changed since the last call; persist it, so
     /// the ids stay stable across restarts (REQ-RES-PUBLIST-006).
     pub fn take_writer_ids(&mut self) -> Option<Vec<u8>> {
-        core::mem::take(&mut self.writers_changed).then(|| self.writers.to_json())
+        core::mem::take(&mut self.unsaved.writers).then(|| self.writers.to_json())
     }
 
     /// The provider with the persisted ConfigurationVersions of the
@@ -306,11 +377,32 @@ impl Provider {
     /// The table of ConfigurationVersions as JSON if it changed since the
     /// last call; persist it.
     pub fn take_meta_data_versions(&mut self) -> Option<Vec<u8>> {
-        core::mem::take(&mut self.versions_changed).then(|| self.versions.to_json())
+        core::mem::take(&mut self.unsaved.versions).then(|| self.versions.to_json())
     }
 
-    /// The topic filters to subscribe: `Get` of every served resource to
-    /// this application (none at Level 1).
+    /// The provider with the persisted settings of `Set PublicationList`
+    /// (empty at the first start); [`Provider::add_data`] applies them
+    /// within what the `Config` of the DataSet allows.
+    #[must_use]
+    pub fn with_publication_overrides(mut self, overrides: PublicationOverrides) -> Self {
+        self.overrides = overrides;
+        self
+    }
+
+    /// The settings set by `Set PublicationList`.
+    pub fn publication_overrides(&self) -> &PublicationOverrides {
+        &self.overrides
+    }
+
+    /// The settings set by `Set PublicationList` as JSON if they changed
+    /// since the last call; persist them (REQ-RES-PUBLIST-016).
+    pub fn take_publication_overrides(&mut self) -> Option<Vec<u8>> {
+        core::mem::take(&mut self.unsaved.overrides).then(|| self.overrides.to_json())
+    }
+
+    /// The topic filters to subscribe: `Get` of every served resource,
+    /// `Set` and `Del` of every resource they address, to this application
+    /// (none at Level 1).
     ///
     /// # Panics
     ///
@@ -320,14 +412,17 @@ impl Provider {
             return Vec::new();
         }
         let st = self.lifecycle.publisher_id().service_type();
-        SERVED
-            .iter()
-            .map(|r| {
-                TopicFilter::builder(Method::Get, *r)
+        let get = SERVED.iter().map(|r| (Method::Get, *r));
+        let set = SET.iter().map(|r| (Method::Set, *r));
+        let del = DEL.iter().map(|r| (Method::Del, *r));
+        get.chain(set)
+            .chain(del)
+            .map(|(m, r)| {
+                TopicFilter::builder(m, r)
                     .service_type(st)
                     .app_id(self.app_id().clone())
                     .build()
-                    .expect("Get of the served resources has a valid filter")
+                    .expect("Get, Set and Del of these resources have valid filters")
             })
             .collect()
     }
@@ -350,12 +445,20 @@ impl Provider {
         if self.find(&il).is_some() {
             return Err(ProviderError::DuplicateAsset(il.into_string()));
         }
-        let mut resources = vec![Resource::Mam, Resource::Health];
+        let mut keys = vec![
+            WriterKey::new(Resource::Mam, il.as_str()),
+            WriterKey::new(Resource::Health, il.as_str()),
+        ];
         if self.config.get {
-            resources.push(Resource::Profile);
+            keys.push(WriterKey::new(Resource::Profile, il.as_str()));
+            keys.extend(
+                StatusLevel::ALL
+                    .iter()
+                    .map(|l| write::status_key(il.as_str(), *l)),
+            );
         }
-        for r in resources {
-            self.assign(WriterKey::new(r, il.as_str()))?;
+        for key in keys {
+            self.assign(key)?;
         }
         self.assets.push(Asset {
             il: il.clone(),
@@ -474,7 +577,10 @@ impl Provider {
     /// ConfigurationVersion that changes only with the Metadata
     /// (REQ-MSG-036). The DataSet is published once every field has a
     /// value; the Metadata at once while connected (unless the Mode is
-    /// OFF_0), and the PublicationList again.
+    /// OFF_0), and the PublicationList again. A persisted setting of
+    /// `Set PublicationList` (see [`Provider::with_publication_overrides`])
+    /// replaces Mode, Interval and Precisions of the definition as far as
+    /// its `Config` allows.
     ///
     /// # Errors
     ///
@@ -493,6 +599,7 @@ impl Provider {
         spec.check().map_err(ProviderError::DataSet)?;
         let tag = Filter::Tag(spec.tag.clone());
         self.topic(Resource::Data, Some(source), Some(tag.clone()))?;
+        let spec = self.overridden(source, &tag.to_string(), spec);
         if self.find_set(source, &spec.tag).is_some() {
             return Err(ProviderError::DuplicateDataSet {
                 source: source.to_string(),
@@ -520,7 +627,7 @@ impl Provider {
             filter: filter.clone(),
         })?;
         self.versions = versions;
-        self.versions_changed |= changed;
+        self.unsaved.versions |= changed;
         let mut set = Set::new(source.clone(), spec, filter, class_id, meta, writer);
         set.meta_pending = set.mode().is_on();
         self.sets.push(set);
@@ -677,25 +784,41 @@ impl Provider {
         topic: &str,
         payload: &[u8],
         unix_ms: u64,
-    ) -> Result<Vec<Publication>, Ignored> {
+    ) -> Result<Handled, Ignored> {
         let topic = Topic::parse(topic).map_err(Ignored::Topic)?;
-        if topic.method() != Method::Get || topic.app_id() != self.app_id() {
+        if topic.app_id() != self.app_id() {
             return Err(Ignored::NotForUs);
         }
+        match topic.method() {
+            Method::Get => self.handle_get(&topic, payload, unix_ms),
+            Method::Set | Method::Del => self.handle_write(&topic, payload, unix_ms),
+            _ => Err(Ignored::NotForUs),
+        }
+    }
+
+    // ------------------------------------------------------------ internals
+
+    fn handle_get(
+        &mut self,
+        topic: &Topic,
+        payload: &[u8],
+        unix_ms: u64,
+    ) -> Result<Handled, Ignored> {
         let resource = match topic.subject() {
             Subject::Resource(r) if self.config.get && SERVED.contains(&r) => r,
             s => return Err(Ignored::NotServed(s)),
         };
-        if let Some(src) = topic.source()
-            && src != self.app_id()
-            && self.find(src).is_none()
-        {
-            return Err(Ignored::UnknownSource(src.clone()));
-        }
         let get = GetWire::parse(payload)?;
+        if let Some(src) = topic.source()
+            && !self.is_source(src)
+        {
+            return self.unknown_source(src, &get.message_id, unix_ms);
+        }
         let source = topic.source();
         if resource == Resource::Metadata {
-            return self.answer_meta_data(&topic, &get, unix_ms);
+            return self
+                .answer_meta_data(topic, &get, unix_ms)
+                .map(Handled::Publish);
         }
         let reply = Topic::new(
             topic.service_type(),
@@ -738,16 +861,16 @@ impl Provider {
                 self.series(items, req, Some(&get.message_id), limit, unix_ms)
             }
         };
-        Ok(payloads
-            .into_iter()
-            .map(|payload| Publication {
-                topic: reply.clone(),
-                payload,
-            })
-            .collect())
+        Ok(Handled::Publish(
+            payloads
+                .into_iter()
+                .map(|payload| Publication {
+                    topic: reply.clone(),
+                    payload,
+                })
+                .collect(),
+        ))
     }
-
-    // ------------------------------------------------------------ internals
 
     fn find(&self, il: &IdentificationLink) -> Option<usize> {
         self.assets.iter().position(|a| &a.il == il)
@@ -755,7 +878,7 @@ impl Provider {
 
     fn assign(&mut self, key: WriterKey) -> Result<DataSetWriterId, WriterIdError> {
         let (id, new) = self.writers.assign(key)?;
-        self.writers_changed |= new;
+        self.unsaved.writers |= new;
         Ok(id)
     }
 
@@ -974,7 +1097,7 @@ impl Provider {
         let (first, changed) = self
             .versions
             .first_sent(s.source.as_str(), &s.filter, unix_ms);
-        self.versions_changed |= changed;
+        self.unsaved.versions |= changed;
         let s = &self.sets[i];
         let msg = MetaDataNetworkMessage {
             message_id: self.lifecycle.next_message_id(unix_ms),
@@ -1145,7 +1268,7 @@ impl Provider {
             .into_iter()
             .map(|il| {
                 let id = self.writer(Resource::Profile, &il);
-                let resources = SERVED.iter().map(|r| Subject::Resource(*r)).collect();
+                let resources = PROFILE.iter().map(|r| Subject::Resource(*r)).collect();
                 DataSetMessage::new(id, il, "", Profile { resources })
             })
             .collect()
@@ -1153,8 +1276,9 @@ impl Provider {
 
     /// The PublicationList entries: per source MAM, Health and Profile,
     /// each published on its Source topic and answered on `Get`
-    /// (ON_REQUEST_SOURCE_10, REQ-RES-PUBLIST-012/026), then its Data
-    /// DataSets with their Metadata in the order of addition.
+    /// (ON_REQUEST_SOURCE_10, REQ-RES-PUBLIST-012/026), its Status events
+    /// Good, Uncertain and Bad (FILTER_4, published only on their topic),
+    /// then its Data DataSets with their Metadata in the order of addition.
     fn list_items(
         &self,
         source: Option<&IdentificationLink>,
@@ -1181,6 +1305,34 @@ impl Provider {
                     config: None,
                 };
                 out.push(DataSetMessage::new(id, il.clone(), r.as_str(), entry));
+            }
+            for &level in StatusLevel::ALL {
+                let f = write::status_filter(level);
+                if filter.is_some_and(|lf| {
+                    lf.resource() != Resource::Event || lf.filter().is_some_and(|t| t != &f)
+                }) {
+                    continue;
+                }
+                let key = write::status_key(il.as_str(), level);
+                let entry = PublicationEntry {
+                    resource: Resource::Event,
+                    source: il.as_str().to_owned(),
+                    filter: Some(f.to_string()),
+                    data_set_writer_id: self
+                        .writers
+                        .get(&key)
+                        .expect("every source has DataSetWriterIds for its Status events"),
+                    mode: Some(PublicationMode::Filter),
+                    interval: None,
+                    precisions: None,
+                    config: None,
+                };
+                out.push(DataSetMessage::new(
+                    id,
+                    il.clone(),
+                    format!("Event/{f}"),
+                    entry,
+                ));
             }
             for s in self.sets.iter().filter(|s| s.source == il) {
                 for e in s.entries(id) {

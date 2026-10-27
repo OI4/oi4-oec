@@ -462,10 +462,51 @@ fn listed_ids(p: &Publish) -> Vec<u64> {
         .as_array()
         .unwrap()
         .iter()
+        .filter(|m| m["Payload"]["Resource"] != "Event")
         .map(|m| m["Payload"]["DataSetWriterId"].as_u64().unwrap())
         .collect();
     ids.sort_unstable();
     ids
+}
+
+/// The sorted filters a Level 2 application subscribes below `prefix`.
+fn served_filters(prefix: &str) -> Vec<String> {
+    ["ReferenceDesignation", "SubscriptionList"]
+        .map(|r| format!("{prefix}Del/{r}/#"))
+        .into_iter()
+        .chain(
+            [
+                "Data",
+                "Health",
+                "MAM",
+                "Metadata",
+                "Profile",
+                "PublicationList",
+            ]
+            .map(|r| format!("{prefix}Get/{r}/#")),
+        )
+        .chain(
+            [
+                "Config",
+                "Data",
+                "Metadata",
+                "PublicationList",
+                "ReferenceDesignation",
+                "SubscriptionList",
+            ]
+            .map(|r| format!("{prefix}Set/{r}/#")),
+        )
+        .collect()
+}
+
+/// The number of Event entries of a PublicationList publication.
+fn listed_events(p: &Publish) -> usize {
+    json(&p.payload)["Messages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|m| m["Payload"]["Resource"] == "Event")
+        .count()
 }
 
 const GET_ID: &str = "1700000000000-Aggregation/vendor.com/Client/C-1/1";
@@ -900,7 +941,8 @@ fn handle_is_clone_send_sync() {
     check::<oec::app::AppHandle>();
 }
 
-/// Level 2 (ADR-0026 §12): the `Get` subscriptions, after the Birth the
+/// Level 2 (ADR-0026 §12/§14): the `Get`, `Set` and `Del` subscriptions,
+/// after the Birth the
 /// state of every source – the app, then each asset with MAM, Health and
 /// Profile, the Profile of the app, the PublicationList with the ids of
 /// these publications (REQ-RES-PUBLIST-006) – and the answer to a `Get`
@@ -945,18 +987,7 @@ fn level_2_publishes_its_sources_and_answers_get() {
         .map(|(f, _)| f)
         .collect();
     filters.sort();
-    assert_eq!(
-        filters,
-        [
-            "Data",
-            "Health",
-            "MAM",
-            "Metadata",
-            "Profile",
-            "PublicationList"
-        ]
-        .map(|r| format!("{prefix}Get/{r}/#"))
-    );
+    assert_eq!(filters, served_filters(&prefix));
     let topics: Vec<&str> = seen.iter().map(|p| p.topic.as_str()).collect();
     assert_eq!(
         topics,
@@ -971,6 +1002,8 @@ fn level_2_publishes_its_sources_and_answers_get() {
         ]
     );
     assert_eq!(writer_ids(&seen), listed_ids(&seen[6]));
+    // the Status events of both sources are listed, not yet published
+    assert_eq!(listed_events(&seen[6]), 6);
     states.wait_for(ConnectionState::Online, 1);
 
     tb.send(n, get(format!("{prefix}Get/MAM/{it}")));
@@ -997,6 +1030,7 @@ fn level_2_publishes_its_sources_and_answers_get() {
             "Health",
             "Data",
             "Metadata",
+            "Event",
             "Profile",
             "PublicationList"
         ])
@@ -1357,6 +1391,247 @@ fn data_sets_publish_their_state() {
         json(&list.payload)["Messages"].as_array().unwrap().len(),
         entries - 2
     );
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+}
+
+// ------------------------------------------------- write side (C-055)
+
+/// A `Set` NetworkMessage from a consumer with one DataSetMessage for
+/// `source`, QoS 0.
+fn set(topic: String, source: &str, payload: &Value) -> Packet {
+    Packet::Publish(Publish {
+        topic,
+        payload: serde_json::to_vec(&serde_json::json!({
+            "MessageId": GET_ID,
+            "MessageType": "ua-data",
+            "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
+            "DataSetClassId": "",
+            "ReplyTo": "",
+            "Messages": [{
+                "DataSetWriterId": 20,
+                "DataSetWriterName": source,
+                "Payload": payload
+            }]
+        }))
+        .unwrap(),
+        delivery: Delivery::AtMostOnce,
+        retain: false,
+    })
+}
+
+/// The next publication on `topic` that answers the request [`GET_ID`].
+fn answer_on(tb: &TestBroker, topic: &str) -> Value {
+    loop {
+        let v = json(&next_on(tb, topic, &mut Vec::new()).payload);
+        if v["ReplyTo"] == GET_ID {
+            return v;
+        }
+    }
+}
+
+/// The Payload of a Status event on `prefix` + `Pub/Event/<source>/Status/<level>`
+/// answering the request [`GET_ID`].
+fn status_event(tb: &TestBroker, prefix: &str, source: &str, level: &str) -> Value {
+    let topic = format!("{prefix}Pub/Event/{source}/Status/{level}");
+    answer_on(tb, &topic)["Messages"][0]["Payload"].clone()
+}
+
+/// The pump with the DataSet `oee`, writable Mode and Interval.
+fn writable_pump(app: &App) -> (Asset, DataSet) {
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-1"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    let oee = pump
+        .add_data(
+            DataSetDef::new("oee")
+                .field(Field::double("Availability"))
+                .field(Field::new("Count", BuiltinType::UInt32))
+                .publication(
+                    Publication::default_data().writable(oec::data::Writable::ModeAndInterval),
+                ),
+        )
+        .unwrap();
+    oee.update([
+        ("Availability", oec::data::Value::from(97.5)),
+        ("Count", 1u32.into()),
+    ])
+    .unwrap();
+    (pump, oee)
+}
+
+/// Runs a Level 2 app with the writable pump on `store` until Online and
+/// returns the PublicationList entry of `oee` and the running app.
+fn run_with_store(
+    pki: &Pki,
+    root: &Root,
+    store: &oec::store::FileStore,
+) -> (
+    TestBroker,
+    usize,
+    String,
+    String,
+    AppHandle,
+    thread::JoinHandle<oec::Result<()>>,
+) {
+    let tb = TestBroker::start(pki, Behavior::default());
+    let states = States::default();
+    let app = builder_at(Level::L2, broker(root, pki, tb.port), &states)
+        .store(store.clone())
+        .build()
+        .unwrap();
+    let (pump, _) = writable_pump(&app);
+    let (me, it) = (
+        encoded(app.identification_link().as_str()),
+        encoded(pump.identification_link().as_str()),
+    );
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = spawn(app);
+    let (n, _) = tb.connect();
+    publications_until(&tb, &format!("{prefix}Pub/PublicationList"));
+    states.wait_for(ConnectionState::Online, 1);
+    (tb, n, prefix, it, handle, run)
+}
+
+/// `Set PublicationList` (REQ-RES-PUBLIST-016/024/025): the changed entry
+/// with ReplyTo and the Status event Good, the change persisted in the
+/// store and applied after a restart; a read-only element is answered with
+/// `BadNotWritable`.
+#[test]
+fn set_publication_list_is_answered_and_persisted() {
+    let (pki, root) = (pki(), Root::new("rt-set-publist"));
+    let store = oec::store::FileStore::new(root.path("store"));
+    let (tb, n, prefix, it, handle, run) = run_with_store(&pki, &root, &store);
+    let rest = format!("PublicationList/{it}/Data/oee");
+    tb.send(n, get(format!("{prefix}Get/{rest}")));
+    let pub_topic = format!("{prefix}Pub/{rest}");
+    let mut e = answer_on(&tb, &pub_topic)["Messages"][0]["Payload"].clone();
+    assert_ne!(e["Interval"], 3_600_000);
+    e["Interval"] = serde_json::json!(3_600_000);
+    e["Precisions"] = serde_json::json!({"Availability": 0.5});
+    let pump_il = "vendor.com/Pump/P-1/0815";
+    tb.send(n, set(format!("{prefix}Set/{rest}"), pump_il, &e));
+    let answer = answer_on(&tb, &pub_topic);
+    assert_eq!(answer["Messages"][0]["Payload"], e);
+    let good = status_event(&tb, &prefix, &it, "Good");
+    assert_eq!(good["Number"], 0);
+
+    // read only: the DataSetWriterId
+    let mut forbidden = e.clone();
+    forbidden["DataSetWriterId"] = serde_json::json!(999);
+    tb.send(n, set(format!("{prefix}Set/{rest}"), pump_il, &forbidden));
+    let bad = status_event(&tb, &prefix, &it, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadNotWritable.code());
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+    drop(tb);
+
+    // restarted on the same store: the changed settings apply
+    let (tb, n, prefix, it2, handle, run) = run_with_store(&pki, &root, &store);
+    assert_eq!(it2, it);
+    tb.send(n, get(format!("{prefix}Get/{rest}")));
+    let after = answer_on(&tb, &pub_topic)["Messages"][0]["Payload"].clone();
+    assert_eq!(after, e);
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+}
+
+/// `Set Data` (REQ-RES-DATA-009/011/012, REQ-CMP-043): the handler
+/// decides; on `Ok` the DataSet with the ReplyTo and Good, on `Err` the
+/// Status event with that code; without handler `BadNotWritable`; a
+/// missing field `BadInvalidArgument` without calling the handler. A `Get`
+/// for an unknown Source: `BadNotFound` (REQ-CMP-047).
+#[test]
+fn set_data_is_decided_by_the_handler() {
+    let (pki, root) = (pki(), Root::new("rt-set-data"));
+    let tb = TestBroker::start(&pki, Behavior::default());
+    let states = States::default();
+    let app = builder_at(Level::L2, broker(&root, &pki, tb.port), &states)
+        .build()
+        .unwrap();
+    let (pump, oee) = writable_pump(&app);
+    let calls = Arc::new(Mutex::new(Vec::new()));
+    let seen = calls.clone();
+    oee.on_set(move |s| {
+        let fields: Vec<String> = s.fields().map(|(n, _)| n.to_owned()).collect();
+        seen.lock().unwrap().push(fields);
+        match s.get("Count") {
+            Some(oec::data::Value::UInt32(c)) if *c <= 100 => Ok(()),
+            _ => Err(StatusCode::BadOutOfRange),
+        }
+    })
+    .unwrap();
+    pump.add_data(DataSetDef::new("idle").field(Field::double("X")))
+        .unwrap();
+    let (me, it) = (
+        encoded(app.identification_link().as_str()),
+        encoded(pump.identification_link().as_str()),
+    );
+    let pump_il = pump.identification_link().as_str().to_owned();
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = spawn(app);
+    let (n, _) = tb.connect();
+    publications_until(&tb, &format!("{prefix}Pub/PublicationList"));
+    states.wait_for(ConnectionState::Online, 1);
+
+    let data = format!("{prefix}Pub/Data/{it}/oee");
+    let request = serde_json::json!({"Availability": 50.0, "Count": 7, "Unknown": true});
+    tb.send(
+        n,
+        set(format!("{prefix}Set/Data/{it}/oee"), &pump_il, &request),
+    );
+    let answer = answer_on(&tb, &data);
+    assert_eq!(
+        answer["Messages"][0]["Payload"],
+        serde_json::json!({"Availability": 50.0, "Count": 7})
+    );
+    assert_eq!(status_event(&tb, &prefix, &it, "Good")["Number"], 0);
+    assert_eq!(
+        oee.values().unwrap(),
+        [oec::data::Value::from(50.0), 7u32.into()]
+    );
+
+    let request = serde_json::json!({"Availability": 50.0, "Count": 101});
+    tb.send(
+        n,
+        set(format!("{prefix}Set/Data/{it}/oee"), &pump_il, &request),
+    );
+    let bad = status_event(&tb, &prefix, &it, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadOutOfRange.code());
+    assert_eq!(oee.values().unwrap()[1], 7u32.into());
+
+    // checked by the SDK: the handler is not called
+    let request = serde_json::json!({"Availability": 50.0});
+    tb.send(
+        n,
+        set(format!("{prefix}Set/Data/{it}/oee"), &pump_il, &request),
+    );
+    let bad = status_event(&tb, &prefix, &it, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadInvalidArgument.code());
+    assert_eq!(calls.lock().unwrap().len(), 2);
+    assert_eq!(calls.lock().unwrap()[0], ["Availability", "Count"]);
+
+    tb.send(
+        n,
+        set(
+            format!("{prefix}Set/Data/{it}/idle"),
+            &pump_il,
+            &serde_json::json!({"X": 1.0}),
+        ),
+    );
+    let bad = status_event(&tb, &prefix, &it, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadNotWritable.code());
+
+    let unknown = encoded("vendor.com/Pump/P-1/4711");
+    tb.send(n, get(format!("{prefix}Get/MAM/{unknown}")));
+    let bad = status_event(&tb, &prefix, &unknown, "Bad");
+    assert_eq!(bad["Number"], StatusCode::BadNotFound.code());
 
     handle.shutdown();
     run.join().unwrap().unwrap();

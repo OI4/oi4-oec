@@ -351,6 +351,16 @@ impl Writable {
             Self::ModeAndInterval => Some(PublicationConfig::ModeAndInterval),
         }
     }
+
+    /// A `Set PublicationList` may change the Mode.
+    pub const fn mode(self) -> bool {
+        matches!(self, Self::Mode | Self::ModeAndInterval)
+    }
+
+    /// A `Set PublicationList` may change Interval and Precisions.
+    pub const fn interval(self) -> bool {
+        matches!(self, Self::Interval | Self::ModeAndInterval)
+    }
 }
 
 /// One field of a DataSet; it becomes a FieldMetaData (REQ-MSG-037).
@@ -736,6 +746,65 @@ fn float(v: f64, shortest: impl Fn() -> Option<f64>) -> Json {
     }
 }
 
+/// Reads the JSON value of a field of type `ty` (the inverse of [`encode`],
+/// for `Set Data`): Int64 and UInt64 as string or number, Float and Double
+/// as number or `NaN`/`Infinity`/`-Infinity`, DateTime as RFC 3339 string,
+/// ByteString as base64, LocalizedText as object or string.
+///
+/// # Errors
+///
+/// The JSON value does not fit the type.
+pub fn decode(ty: BuiltinType, json: &Json) -> Result<Value, String> {
+    let mismatch = || Err(format!("{json} is no {ty} value"));
+    let v = match (ty, json) {
+        (BuiltinType::Boolean, Json::Bool(b)) => Value::Boolean(*b),
+        (BuiltinType::Float | BuiltinType::Double, Json::Number(n)) => match n.as_f64() {
+            Some(f) => Value::Double(f),
+            None => return mismatch(),
+        },
+        (BuiltinType::Float | BuiltinType::Double, Json::String(s)) => match s.as_str() {
+            "NaN" => Value::Double(f64::NAN),
+            "Infinity" => Value::Double(f64::INFINITY),
+            "-Infinity" => Value::Double(f64::NEG_INFINITY),
+            _ => return mismatch(),
+        },
+        (BuiltinType::String | BuiltinType::Guid, Json::String(s)) => Value::String(s.clone()),
+        (BuiltinType::DateTime, Json::String(s)) => {
+            let at = s
+                .parse::<DateTime>()
+                .map_err(|e| format!("{json} is no DateTime: {e}"))?
+                .at();
+            let ms = at.unix_timestamp_nanos().div_euclid(1_000_000);
+            Value::DateTime(i64::try_from(ms).map_err(|_| format!("{json} is out of range"))?)
+        }
+        (BuiltinType::ByteString, Json::String(s)) => Value::Bytes(
+            s.parse::<ByteString>()
+                .map_err(|e| format!("{json} is no ByteString: {e}"))?
+                .to_bytes(),
+        ),
+        (BuiltinType::LocalizedText, Json::String(s)) => {
+            Value::LocalizedText(LocalizedText::from(s.as_str()))
+        }
+        (BuiltinType::LocalizedText, Json::Object(_)) => Value::LocalizedText(
+            serde_json::from_value(json.clone())
+                .map_err(|e| format!("{json} is no LocalizedText: {e}"))?,
+        ),
+        (_, Json::Number(n)) if ty.int_range().is_some() => match (n.as_i64(), n.as_u64()) {
+            (Some(i), _) => Value::Int64(i),
+            (None, Some(u)) => Value::UInt64(u),
+            _ => return mismatch(),
+        },
+        (BuiltinType::Int64, Json::String(s)) => {
+            Value::Int64(s.parse().map_err(|_| format!("{json} is no Int64"))?)
+        }
+        (BuiltinType::UInt64, Json::String(s)) => {
+            Value::UInt64(s.parse().map_err(|_| format!("{json} is no UInt64"))?)
+        }
+        _ => return mismatch(),
+    };
+    coerce(ty, v)
+}
+
 /// Whether a new value set is published at Interval 0
 /// (REQ-RES-PUBLIST-013, REQ-RES-PUBLIST-015): a field changed, a numeric
 /// field with a Precision > 0 by at least the Precision from `last`.
@@ -838,6 +907,59 @@ mod tests {
             encode(T::LocalizedText, &Value::LocalizedText("x".into())),
             json!({"Locale": "en-US", "Text": "x"})
         );
+    }
+
+    #[test]
+    fn values_decode_from_opc_ua_json() {
+        use BuiltinType as T;
+        let cases = [
+            (T::Boolean, Value::Boolean(true)),
+            (T::SByte, Value::Int32(-5)),
+            (T::UInt16, Value::UInt32(7)),
+            (T::Int64, Value::Int64(i64::MIN)),
+            (T::UInt64, Value::UInt64(u64::MAX)),
+            (T::Float, Value::Float(0.1)),
+            (T::Double, Value::Double(f64::NEG_INFINITY)),
+            (T::String, Value::String("x".to_owned())),
+            (T::DateTime, Value::DateTime(1_639_693_510_094)),
+            (T::DateTime, Value::DateTime(-1)),
+            (
+                T::Guid,
+                Value::String("543ae05e-b6d9-4161-a0a3-350a0fac5976".to_owned()),
+            ),
+            (T::ByteString, Value::Bytes(b"OEC".to_vec())),
+            (
+                T::LocalizedText,
+                Value::LocalizedText(LocalizedText::new("de-DE", "x")),
+            ),
+        ];
+        for (ty, v) in cases {
+            assert_eq!(decode(ty, &encode(ty, &v)), Ok(v.clone()), "{ty}");
+        }
+        assert!(matches!(
+            decode(T::Double, &json!("NaN")),
+            Ok(Value::Double(d)) if d.is_nan()
+        ));
+        assert_eq!(decode(T::Int64, &json!(-5)), Ok(Value::Int64(-5)));
+        assert_eq!(
+            decode(T::LocalizedText, &json!("x")),
+            Ok(Value::LocalizedText("x".into()))
+        );
+        for (ty, bad) in [
+            (T::Boolean, json!(1)),
+            (T::Byte, json!(256)),
+            (T::Int32, json!(1.5)),
+            (T::Int64, json!("1.5")),
+            (T::Double, json!("1")),
+            (T::String, json!(1)),
+            (T::DateTime, json!("yesterday")),
+            (T::Guid, json!("no-guid")),
+            (T::ByteString, json!("!")),
+            (T::LocalizedText, json!({"Text": 1})),
+            (T::Double, Json::Null),
+        ] {
+            assert!(decode(ty, &bad).is_err(), "{ty} {bad}");
+        }
     }
 
     #[test]

@@ -46,6 +46,10 @@ impl StatusCode {
             Self::Other(code) => code,
         }
     }
+
+    pub(crate) const fn to_core(self) -> oec_core::status::StatusCode {
+        oec_core::status::StatusCode(self.code())
+    }
 }
 
 #[cfg(test)]

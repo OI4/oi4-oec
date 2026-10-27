@@ -99,4 +99,5 @@ pub mod mqtt;
 pub mod provider;
 pub mod resource;
 pub mod schema;
+pub mod status;
 pub mod topic;

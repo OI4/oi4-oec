@@ -10,6 +10,13 @@
 //! change beyond the Precisions (REQ-MQTT-019, REQ-RES-PUBLIST-015). The
 //! last state answers `Get Data` (REQ-RES-DATA-007); offline nothing is
 //! queued and the current state is published after the next connect.
+//!
+//! A DataSet with a handler ([`DataSet::on_set`]) accepts `Set Data`: the
+//! SDK checks the request against the field definitions, the handler
+//! decides, the SDK applies the values and answers (REQ-RES-DATA-011/012).
+//! The settings a `Set PublicationList` changes within
+//! [`Publication::writable`] are persisted and survive a restart
+//! (REQ-RES-PUBLIST-016, P4 increment 7a).
 
 use std::fmt;
 use std::time::Duration;
@@ -19,6 +26,7 @@ use uuid::Uuid;
 
 use crate::app::AppHandle;
 use crate::identity::IdentificationLink;
+use crate::status::StatusCode;
 use crate::{Error, Result};
 
 /// OPC UA built-in types of DataSet fields (REQ-MSG-037); the SDK derives
@@ -36,7 +44,8 @@ pub use oec_core::provider::data::Mode;
 /// it, a string to a Guid).
 pub use oec_core::provider::data::Value;
 /// What a `Set PublicationList` may change (`Config`,
-/// REQ-RES-PUBLIST-016); applied with increment 7.
+/// REQ-RES-PUBLIST-016); every other change is answered with
+/// `BadNotWritable`.
 pub use oec_core::provider::data::Writable;
 
 /// Definition of one DataSet field; it becomes a `FieldMetaData` of the
@@ -131,7 +140,9 @@ impl Publication {
         self
     }
 
-    /// What a `Set PublicationList` may change (`Config`).
+    /// What a `Set PublicationList` may change (`Config`). A change is
+    /// persisted and replaces the settings of this definition after a
+    /// restart, as far as `writable` still allows it.
     #[must_use]
     pub fn writable(mut self, writable: Writable) -> Self {
         self.spec.writable = writable;
@@ -230,6 +241,32 @@ impl DataSetDef {
     }
 }
 
+/// A received `Set Data`, already checked against the field definitions:
+/// it carries every field, converted to its type. A DataSet that is not
+/// addressed, has no handler, misses a field or has a value that does not
+/// fit is answered by the SDK without calling the handler (`BadNotFound`,
+/// `BadNotWritable`, `BadInvalidArgument`, `BadTypeMismatch`); unknown
+/// fields are ignored (tolerant reader, REQ-MSG-046).
+#[derive(Debug, Clone)]
+pub struct SetData {
+    pub(crate) values: Vec<(String, Value)>,
+}
+
+impl SetData {
+    /// The requested value of a field.
+    pub fn get(&self, field: &str) -> Option<&Value> {
+        self.values.iter().find(|(n, _)| n == field).map(|(_, v)| v)
+    }
+
+    /// All fields with their requested values in definition order.
+    pub fn fields(&self) -> impl Iterator<Item = (&str, &Value)> {
+        self.values.iter().map(|(n, v)| (n.as_str(), v))
+    }
+}
+
+/// The decision about a `Set Data` (see [`DataSet::on_set`]).
+pub(crate) type SetHandler = dyn Fn(&SetData) -> core::result::Result<(), StatusCode> + Send + Sync;
+
 /// Handle of a Data DataSet (`Clone + Send + Sync`), usable before and
 /// while the application runs.
 #[derive(Clone)]
@@ -276,6 +313,29 @@ impl DataSet {
     /// The current values in field order, once every field has one.
     pub fn values(&self) -> Option<Vec<Value>> {
         self.handle.data_values(&self.source, &self.tag)
+    }
+
+    /// Makes the DataSet writable (`Set Data`, MG 9.1.4). The handler
+    /// decides about a checked request ([`SetData`]): on `Ok` the SDK
+    /// applies the values as state, publishes the DataSet with the ReplyTo
+    /// of the `Set` (REQ-RES-DATA-012) and the Status event Good; on `Err`
+    /// only the Status event with that code (REQ-RES-DATA-011,
+    /// REQ-RES-EVENT-005), an `Err` with a Good code as `Bad`. Without a
+    /// handler a `Set` is answered with `BadNotWritable` (REQ-CMP-043). A
+    /// further call replaces the handler.
+    ///
+    /// The handler runs on the runtime task: keep it short and
+    /// non-blocking; a panic is answered with `BadInternalError`.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] for a removed DataSet.
+    pub fn on_set(
+        &self,
+        handler: impl Fn(&SetData) -> core::result::Result<(), StatusCode> + Send + Sync + 'static,
+    ) -> Result<()> {
+        self.handle
+            .on_set_data(&self.source, &self.tag, std::sync::Arc::new(handler))
     }
 
     /// Removes the DataSet: it is no longer published or answered and the

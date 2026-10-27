@@ -6,22 +6,24 @@
 //! their state and observes and stops the application
 //! ([`ConnectionState`]).
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::future::Future;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 use std::time::Duration;
 
-use oec_core::lifecycle::Lifecycle;
+use oec_core::lifecycle::{Lifecycle, Publication};
 use oec_core::message::DataSetWriterId;
-use oec_core::provider::{MetaDataVersions, Provider, ProviderConfig, WriterIds};
+use oec_core::provider::{
+    MetaDataVersions, Provider, ProviderConfig, PublicationOverrides, SetDataRequest, WriterIds,
+};
 use oec_core::resource::Health;
 use tokio::sync::{Notify, watch};
 
 use crate::asset::{Asset, AssetDef};
 use crate::container::{self, MAX_PACKET_SIZE, MIN_PACKET_SIZE};
-use crate::data::{DataSet, DataSetDef, Value};
+use crate::data::{DataSet, DataSetDef, SetData, SetHandler, Value};
 use crate::event::SyslogLevel;
 use crate::identity::{IdentificationLink, Mam, Product};
 use crate::store::{FileStore, MemoryStore, Store};
@@ -34,6 +36,9 @@ const WRITER_IDS: &str = "app/writer-ids";
 /// Store key of the ConfigurationVersions of the Metadata and the first
 /// sending of each version (REQ-MSG-032/036, ADR-0026 §12.6).
 const META_DATA_VERSIONS: &str = "app/metadata-versions";
+/// Store key of the settings changed by `Set PublicationList`
+/// (REQ-RES-PUBLIST-016, ADR-0026 §14).
+const PUBLICATIONS: &str = "app/publications";
 
 /// Where connection settings and secrets come from (ADR-0020 §5).
 #[derive(Debug, Clone)]
@@ -649,8 +654,9 @@ fn revision_counter(store: &dyn Store, key: &str) -> Result<i32> {
 }
 
 /// The provider of the application (ADR-0026 §12): its lifecycle with the
-/// fixed DataSetWriterIds of Birth and Health (ADR-0026 §9.4/§9.5), `Get`
-/// from Level 2, the persisted DataSetWriterIds and Metadata versions.
+/// fixed DataSetWriterIds of Birth and Health (ADR-0026 §9.4/§9.5), `Get`,
+/// `Set` and `Del` from Level 2, the persisted DataSetWriterIds, Metadata
+/// versions and settings of `Set PublicationList`.
 fn provider(
     level: Level,
     service_type: ServiceType,
@@ -689,12 +695,23 @@ fn provider(
         })?,
         None => MetaDataVersions::new(),
     };
+    let overrides = match store.load(PUBLICATIONS)? {
+        Some(json) => PublicationOverrides::from_json(&json).map_err(|e| {
+            Error::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("store key {PUBLICATIONS}: {e} (REQ-RES-PUBLIST-016)"),
+            ))
+        })?,
+        None => PublicationOverrides::new(),
+    };
     let config = ProviderConfig {
         get: level >= Level::L2,
         max_packet_size,
         publish_limit,
     };
-    let mut provider = Provider::new(lifecycle, config, writers)?.with_meta_data_versions(versions);
+    let mut provider = Provider::new(lifecycle, config, writers)?
+        .with_meta_data_versions(versions)
+        .with_publication_overrides(overrides);
     if let Some(json) = provider.take_writer_ids() {
         store.save(WRITER_IDS, &json)?;
     }
@@ -854,6 +871,8 @@ pub(crate) struct Registry {
     /// Assets whose RevisionCounter comes from the VendorNameplate
     /// (REQ-RES-MAM-018).
     nameplate: HashSet<IdentificationLink>,
+    /// The `Set Data` handlers by Source and Tag.
+    set_handlers: HashMap<(IdentificationLink, String), Arc<SetHandler>>,
 }
 
 /// Cheap, cloneable handle (`Send + Sync`), usable from any thread or task.
@@ -879,6 +898,7 @@ impl AppHandle {
                 registry: Mutex::new(Registry {
                     provider,
                     nameplate: HashSet::new(),
+                    set_handlers: HashMap::new(),
                 }),
                 changed: Notify::new(),
             }),
@@ -1102,7 +1122,8 @@ impl AppHandle {
         })
     }
 
-    /// Persists changed DataSetWriterIds and Metadata versions.
+    /// Persists changed DataSetWriterIds, Metadata versions and settings
+    /// of `Set PublicationList`.
     fn save(registry: &mut Registry, store: &dyn Store) -> Result<()> {
         if let Some(json) = registry.provider.take_writer_ids() {
             store.save(WRITER_IDS, &json)?;
@@ -1110,11 +1131,14 @@ impl AppHandle {
         if let Some(json) = registry.provider.take_meta_data_versions() {
             store.save(META_DATA_VERSIONS, &json)?;
         }
+        if let Some(json) = registry.provider.take_publication_overrides() {
+            store.save(PUBLICATIONS, &json)?;
+        }
         Ok(())
     }
 
     /// Persists what the runtime changed (the first sending of a Metadata
-    /// version); a failing store is logged.
+    /// version, a `Set PublicationList`); a failing store is logged.
     pub(crate) fn save_changes(&self, registry: &mut Registry) {
         if let Err(e) = Self::save(registry, self.shared.store.as_ref()) {
             log::warn!("store: {e}");
@@ -1143,9 +1167,56 @@ impl AppHandle {
         self.registry().provider.data_values(&il.0, tag)
     }
 
+    /// See [`DataSet::on_set`].
+    pub(crate) fn on_set_data(
+        &self,
+        il: &IdentificationLink,
+        tag: &str,
+        handler: Arc<SetHandler>,
+    ) -> Result<()> {
+        let mut registry = self.registry();
+        registry.provider.accept_set_data(&il.0, tag, true)?;
+        registry
+            .set_handlers
+            .insert((il.clone(), tag.to_owned()), handler);
+        Ok(())
+    }
+
+    /// A `Set Data` the provider checked: the handler decides outside the
+    /// lock, then the provider answers (ADR-0026 §14).
+    pub(crate) fn complete_set_data(&self, request: &SetDataRequest) -> Vec<Publication> {
+        let key = (
+            IdentificationLink(request.source().clone()),
+            request.tag().to_owned(),
+        );
+        let handler = self.registry().set_handlers.get(&key).cloned();
+        let decision = handler.map_or(Err(crate::status::StatusCode::BadNotWritable), |h| {
+            let set = SetData {
+                values: request.values().to_vec(),
+            };
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| h(&set))).unwrap_or_else(
+                |_| {
+                    log::error!("the Set Data handler of {:?} panicked", request.tag());
+                    Err(crate::status::StatusCode::BadInternalError)
+                },
+            )
+        });
+        let mut registry = self.registry();
+        let out = registry.provider.complete_set_data(
+            request,
+            decision.map_err(crate::status::StatusCode::to_core),
+            runtime::unix_ms(),
+        );
+        self.save_changes(&mut registry);
+        out
+    }
+
     /// See [`DataSet::remove`].
     pub(crate) fn remove_data(&self, il: &IdentificationLink, tag: &str) -> Result<()> {
-        self.registry().provider.remove_data(&il.0, tag)?;
+        let mut registry = self.registry();
+        registry.provider.remove_data(&il.0, tag)?;
+        registry.set_handlers.remove(&(il.clone(), tag.to_owned()));
+        drop(registry);
         self.shared.changed.notify_one();
         Ok(())
     }
@@ -1155,6 +1226,7 @@ impl AppHandle {
         let mut registry = self.registry();
         registry.provider.remove_asset(&il.0)?;
         registry.nameplate.remove(il);
+        registry.set_handlers.retain(|(source, _), _| source != il);
         drop(registry);
         self.shared.changed.notify_one();
         Ok(())
