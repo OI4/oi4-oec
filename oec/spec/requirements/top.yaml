@@ -374,7 +374,7 @@ requirements:
         text: The Health of the application itself (Source = AppId) must additionally be published at least every 60 seconds as a kind of heartbeat; for subordinate assets, a periodic publication is optional.
     verification: [d7-monitor]
     inventory: [MG-7.5.1-1c8fe8e7, MG-7.5.1-5426cf3c]
-    status: draft
+    status: reviewed
     notes: >-
       SF-106 (C-052 review): "at least every 60 seconds" means that any
       publication of the own Health (on change, or as the answer to a Get)

@@ -21,7 +21,7 @@ Guideline baseline: `9044929` · Area status: reviewed · Sections: MG 7
 | [REQ-TOP-014](#req-top-014) | Set causes an Event Status | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-TOP-015](#req-top-015) | Del causes an Event Status | MUST | SHOULD | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-TOP-016](#req-top-016) | Reply topic corresponds to the Call topic | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-TOP-017](#req-top-017) | Health is published at start, on change, and for the application itself at least every 60 seconds | MUST | MUST | MUST | MUST | messaging | d7-monitor | draft |
+| [REQ-TOP-017](#req-top-017) | Health is published at start, on change, and for the application itself at least every 60 seconds | MUST | MUST | MUST | MUST | messaging | d7-monitor | reviewed |
 | [REQ-TOP-018](#req-top-018) | Source is the encoded Identification Link of the described asset | MUST | MUST | MUST | MUST | messaging | d7-validate, d7-test | reviewed |
 | [REQ-TOP-019](#req-top-019) | Filter levels are Topic encoded Strings | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-TOP-020](#req-top-020) | No white space in Filter levels | SHOULD NOT | SHOULD NOT | SHOULD NOT | SHOULD NOT | messaging | d7-validate | reviewed |
@@ -375,7 +375,7 @@ Health is published once when the application is initialized and whenever the va
 - Domain: messaging · Applies to: application, device
 - Refs: MG 7.5.1, SF-106
 - Verification: d7-monitor
-- Status: draft
+- Status: reviewed
 - Inventory: MG-7.5.1-1c8fe8e7, MG-7.5.1-5426cf3c
 
 > Health must be published once when the application is initialized and whenever the value of Health changes.
