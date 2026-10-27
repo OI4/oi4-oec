@@ -929,8 +929,9 @@ fn level_2_assets_and_get_answers() {
         .expect("no answer to the Get");
     let v = json(&answer.payload);
     assert_eq!(v["ReplyTo"], request);
-    // MAM, Health, Profile and the 3 Status events of each source (C-055)
-    assert_eq!(v["Messages"].as_array().unwrap().len(), 12);
+    // MAM, Health, Profile and the 3 Status events of each source (C-055),
+    // the 8 Syslog levels of the app (C-057)
+    assert_eq!(v["Messages"].as_array().unwrap().len(), 20);
 
     pump.set_health(HealthState::MaintenanceRequired, Some(70));
     let p = probe
@@ -1392,6 +1393,167 @@ fn level_2_config() {
     let values = config.values();
     assert_eq!(values.number("common", "interval"), Some(30.0));
     assert_eq!(values.string("common", "api_key"), Some("s3cr3t"));
+
+    handle.shutdown();
+    run.join().unwrap().unwrap();
+    probe.disconnect();
+}
+
+/// The DataSetClassId of the ReferenceDesignation (REQ-MSG-010).
+const REFERENCE_DESIGNATION: &str = "27a75019-164a-496d-a38b-90e8a55c2cfa";
+
+/// A Level 2 app with the ReferenceDesignation on a persistent store and a
+/// pump whose handler refuses the Location `+forbidden`.
+fn refdes_app(states: &States, broker: Broker) -> (App, Asset) {
+    let store = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("interop-refdes-store");
+    let _ = std::fs::remove_dir_all(&store);
+    let on = states.clone();
+    let app = App::builder(Level::L2, ServiceType::Utility, product())
+        .bootstrap(Bootstrap::Explicit(broker))
+        .serial_number("oec-refdes")
+        .reference_designation(true)
+        .store(oec::store::FileStore::new(store))
+        .keep_alive(Duration::from_secs(5))
+        .on_connection(move |s| on.0.lock().unwrap().push(s))
+        .build()
+        .unwrap();
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-4"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    pump.on_reference_designation(|rd| match rd.and_then(|r| r.location.as_ref()) {
+        Some(l) if l.value == "+forbidden" => Err(StatusCode::BadOutOfRange),
+        _ => Ok(()),
+    })
+    .unwrap();
+    (app, pump)
+}
+
+/// A Generic event of `pump` on `events` + `/Generic/Maintenance`
+/// (REQ-RES-EVENT-009).
+fn generic_event(probe: &mut Probe, pump: &Asset, events: &str) {
+    pump.emit_event(
+        GenericEvent::new("Maintenance", 42)
+            .description("filter clogged")
+            .details_json(r#"{"Pressure": 3.5}"#),
+    )
+    .unwrap();
+    let topic = format!("{events}/Generic/Maintenance");
+    let event = probe
+        .next(WAIT, |p| p.topic == topic)
+        .expect("no Generic event");
+    let m = &json(&event.payload)["Messages"][0];
+    assert_eq!(m["MessageType"], "ua-event");
+    assert_eq!(m["Payload"]["Category"], "CAT_GENERIC_99");
+    assert_eq!(m["Payload"]["Number"], 42);
+}
+
+/// The ReferenceDesignation and Generic events through Mosquitto (P4
+/// increment 7c): `Set` answered with the object and Good, the handler's
+/// refusal with its code, `Get` with the object, `Del` with Good and a
+/// second `Del` with `BadNotFound` (REQ-RES-REFDES-*, REQ-RES-EVENT-005);
+/// a Generic event on `Pub/Event/<Source>/Generic/<Level>`
+/// (REQ-RES-EVENT-009).
+#[test]
+fn level_2_reference_designation_and_generic_events() {
+    let Some(dev) = dev() else { return };
+    let mut probe = dev.probe("oec-probe-refdes", true);
+    let states = States::default();
+    let broker = Broker::new("localhost")
+        .port(dev.port)
+        .ca_pem(dev.file("broker/ca.pem"))
+        .credentials(&dev.user, &dev.password);
+    let (app, pump) = refdes_app(&states, broker);
+    let encoded = |il: &str| {
+        oec_core::il::IdentificationLink::parse(il)
+            .unwrap()
+            .encode()
+    };
+    let me = encoded(app.identification_link().as_str());
+    let it = encoded(pump.identification_link().as_str());
+    let il = pump.identification_link().as_str().to_owned();
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = thread::spawn(move || app.run());
+    states.wait_for(ConnectionState::Online);
+    // the SUBSCRIBE precedes the first publication on the same connection
+    let mam = format!("{prefix}Pub/MAM/{it}");
+    probe.next(WAIT, |p| p.topic == mam).expect("no Pub MAM");
+    let (rd_topic, good, bad) = (
+        format!("{prefix}Pub/ReferenceDesignation/{it}"),
+        format!("{prefix}Pub/Event/{it}/Status/Good"),
+        format!("{prefix}Pub/Event/{it}/Status/Bad"),
+    );
+    let dsm = |payload: &Value| {
+        serde_json::json!([{
+            "DataSetWriterId": 20,
+            "WriterGroupName": "",
+            "DataSetWriterName": il,
+            "Payload": payload
+        }])
+    };
+
+    let rd = serde_json::json!({"Function": {"Value": "=P1.M1"}, "Location": {"Value": "+R1"}});
+    let id = "1700000000020-Aggregation/vendor.com/Client/C-1/1";
+    get(
+        &mut probe,
+        format!("{prefix}Set/ReferenceDesignation/{it}"),
+        &request(id, REFERENCE_DESIGNATION, &dsm(&rd)),
+    );
+    let set = answer(&mut probe, &rd_topic, id);
+    assert_eq!(set["DataSetClassId"], REFERENCE_DESIGNATION);
+    assert_eq!(set["Messages"][0]["Payload"], rd);
+    assert_eq!(
+        answer(&mut probe, &good, id)["Messages"][0]["Payload"]["Number"],
+        0
+    );
+
+    let id = "1700000000021-Aggregation/vendor.com/Client/C-1/1";
+    let refused = serde_json::json!({"Location": {"Value": "+forbidden"}});
+    get(
+        &mut probe,
+        format!("{prefix}Set/ReferenceDesignation/{it}"),
+        &request(id, REFERENCE_DESIGNATION, &dsm(&refused)),
+    );
+    assert_eq!(
+        answer(&mut probe, &bad, id)["Messages"][0]["Payload"]["Number"],
+        StatusCode::BadOutOfRange.code()
+    );
+
+    let id = "1700000000022-Aggregation/vendor.com/Client/C-1/1";
+    get(
+        &mut probe,
+        format!("{prefix}Get/ReferenceDesignation/{it}"),
+        &request(id, REFERENCE_DESIGNATION, &serde_json::json!([])),
+    );
+    assert_eq!(
+        answer(&mut probe, &rd_topic, id)["Messages"][0]["Payload"],
+        rd
+    );
+
+    for (id, code) in [
+        ("1700000000023-Aggregation/vendor.com/Client/C-1/1", None),
+        (
+            "1700000000024-Aggregation/vendor.com/Client/C-1/1",
+            Some(StatusCode::BadNotFound),
+        ),
+    ] {
+        get(
+            &mut probe,
+            format!("{prefix}Del/ReferenceDesignation/{it}"),
+            &request(id, REFERENCE_DESIGNATION, &serde_json::json!([])),
+        );
+        let (topic, number) = code.map_or((&good, 0), |c| (&bad, c.code()));
+        assert_eq!(
+            answer(&mut probe, topic, id)["Messages"][0]["Payload"]["Number"],
+            number
+        );
+    }
+    assert!(pump.reference_designation().is_none());
+
+    generic_event(&mut probe, &pump, &format!("{prefix}Pub/Event/{it}"));
 
     handle.shutdown();
     run.join().unwrap().unwrap();
