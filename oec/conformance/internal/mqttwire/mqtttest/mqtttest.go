@@ -357,6 +357,19 @@ func (b *Broker) route(p *packets.PublishPacket) {
 	}
 }
 
+// Subscribers counts the connections subscribed with exactly this filter.
+func (b *Broker) Subscribers(filter string) int {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	n := 0
+	for c := range b.conns {
+		if _, ok := c.subs[filter]; ok {
+			n++
+		}
+	}
+	return n
+}
+
 // Match reports whether an MQTT topic filter matches a topic.
 func Match(filter, topic string) bool {
 	f, t := strings.Split(filter, "/"), strings.Split(topic, "/")

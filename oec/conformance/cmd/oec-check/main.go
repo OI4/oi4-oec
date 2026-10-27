@@ -1,9 +1,13 @@
 // Command oec-check is the application and messaging compliance CLI of OEC
 // v2.0 (deliverable D7). The command validate checks messages offline
-// against the embedded baseline (ADR-0019 §5).
+// against the embedded baseline (ADR-0019 §5); the command monitor observes
+// a Message Bus or replays a capture and judges the catalog tests of mode
+// monitor (DESIGN.md §3.2).
 //
-// Exit codes: 0 every message is valid (warnings allowed), 1 at least one
-// message violates a requirement, 2 usage or input error, 3 internal error.
+// Exit codes (DESIGN.md §5.3): 0 pass (warnings allowed), 1 at least one
+// requirement violated, 2 usage or input error, 3 internal error or broker
+// not reachable, 4 inconclusive (monitor: a mandatory requirement could not
+// be judged; --allow-skip turns it into 0).
 package main
 
 import (
@@ -19,6 +23,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/OI4/oec/conformance/internal/capture"
 	"github.com/OI4/oec/conformance/internal/report"
 	"github.com/OI4/oec/conformance/internal/validate"
 )
@@ -33,6 +38,9 @@ const (
 	exitInvalid  = 1
 	exitUsage    = 2
 	exitInternal = 3
+	// exitInconclusive: monitor could not judge a mandatory requirement
+	// (verdict.Exit).
+	exitInconclusive = 4
 )
 
 func main() {
@@ -43,15 +51,31 @@ const usage = `usage:
   oec-check validate --topic TOPIC [flags] [PAYLOAD.json | -]
   oec-check validate --object DataSetMetaDataType [flags] [OBJECT.json | -]
   oec-check validate [flags] MESSAGE.json | MESSAGES.jsonl | DIR ...
+  oec-check monitor --replay CAPTURE.jsonl [flags]
+  oec-check monitor --broker mqtts://HOST[:PORT] [connection flags] [flags]
+  oec-check monitor --bus-storage ROOT [flags]
   oec-check version
 
 A message file is a JSON object {"topic": "...", "payload": {...}} with the
 optional keys "role" (birth, close, will), "object" and "tolerant"; a file may
 hold several messages (JSONL or concatenated objects); a directory is searched for *.json and
 *.jsonl files. Without a file, the payload or the messages are read from
-standard input.
+standard input. A capture of monitor --record is also accepted (one message
+per record).
 
-Exit codes: 0 valid, 1 invalid, 2 usage or input error, 3 internal error.
+monitor subscribes to Oi4v2/# with QoS 1 (TLS 1.2/1.3 only) and judges the
+monitor tests of the D7 catalog; --replay judges a capture offline.
+  connection: --ca FILE, --username U --password-file FILE, --cert FILE
+              --key FILE [--key-passphrase-file FILE], --bus-storage ROOT,
+              --client-id ID, --insecure (dev only, marked in the report)
+  run:        --duration 5m, --record CAPTURE.jsonl, --heartbeat 60s,
+              --tolerance 5s, --max-packet-size N
+  verdict:    --app APPID, --level 1|2|3 (default 3), --allow-skip
+  output:     --format text|json|junit, --report FORMAT=PATH (repeatable),
+              --config FILE.yaml (flag values; flags override)
+
+Exit codes: 0 valid/pass, 1 invalid/fail, 2 usage or input error,
+3 internal error or broker not reachable, 4 inconclusive (monitor).
 `
 
 func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
@@ -62,6 +86,8 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	switch args[0] {
 	case "validate":
 		return runValidate(args[1:], stdin, stdout, stderr)
+	case "monitor":
+		return runMonitor(args[1:], stdout, stderr)
 	case "version":
 		v, err := validate.New()
 		if err != nil {
@@ -219,6 +245,9 @@ func walk(dir string) ([]string, error) {
 // messages decodes a message file: a stream of message objects – one
 // object, JSONL or concatenated objects.
 func messages(name string, data []byte, tolerant bool) ([]source, error) {
+	if capture.IsCapture(data) {
+		return captureMessages(name, data, tolerant)
+	}
 	dec := json.NewDecoder(bytes.NewReader(data))
 	dec.DisallowUnknownFields()
 	var out []source
