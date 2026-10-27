@@ -89,3 +89,16 @@ The inputs:
 - **Exit code 1 for skipped MUST tests.** Rejected: it mixes "violates the spec" with "could not be checked". **Exit code 0 with warnings** was also rejected: a CI run would claim compliance it did not check.
 - **`eclipse/paho.golang`.** Rejected: MQTT 5 only. **An own Go MQTT codec**: not needed, because the `packets` package of paho.mqtt.golang already exposes the codec.
 - **The Docker SDK (`github.com/docker/docker/client`).** Rejected: a large dependency tree for a few read-only endpoints, and Podman compatibility is no better.
+
+## Amendment C-052 (2026-10-26) – P5 interleave: mqttwire, capture, monitor (agent, G-3.4 b)
+
+Decided by the agent within this ADR; the PO can overrule. Details: `log/2026-10-26_C-052_d7-monitor.md`, REVIEW A-51 … A-62; the "As built (C-052)" notes in `oec/conformance/DESIGN.md`.
+
+1. **Delivered.** `internal/mqttwire` (client), `internal/capture`, `internal/verdict`, `internal/monitor`, the monitor report and `oec-check monitor`, live and `--replay`. 13 of the 19 monitor tests are `implemented` (T7-MON-01 … 08, 10, 11, 12, 18, 19). T7-MON-09 and 13 … 17 stay `planned`; they need the PublicationList/Config state model that `test` builds anyway. The proxy endpoint, `test`, `list`, `explain` and `internal/sim` remain P5.
+2. **Library (decision 7).** `eclipse/paho.mqtt.golang` **v1.5.1** under EDL-1.0, pinned in `go.mod`/`go.sum`. Indirect: `golang.org/x/net` v0.61.0, `golang.org/x/sync`, `gorilla/websocket` (all BSD-3-Clause). Toolchain go1.27.3. `govulncheck ./...` is clean.
+3. **Test broker.** Instead of `mochi-mqtt/server` there is a test-only in-process TLS broker, `internal/mqttwire/mqtttest`, on the same paho `packets` codec. It needs no new dependency and no network beyond loopback. The dev-env Mosquitto (ADR-0026 §11) is used opt-in by `oec/conformance/live.sh`.
+4. **TLS and keys.** Only `mqtts://` is accepted, with TLS 1.2/1.3 only. Credentials and/or a client certificate can be used. Encrypted PKCS#8 keys (PBES2, PBKDF2 and AES-CBC) are decrypted in the module (no new dependency). Connection settings can come from the RIG container storage (`--bus-storage`). `--insecure` is explicit, warned about, and recorded in the capture and the report (G-4.5). There is no auto-reconnect: a lost connection ends the observation and is reported.
+5. **Capture format v1.** JSONL file: a header, one record per message, and an optional trailer (DESIGN.md §3.2). It is a superset of the `validate` message file, and `validate` reads captures.
+6. **Verdicts (decision 4).** A REQ skipped as not applicable does not make a test worse than `pass`. A test is `skip` only when all its REQs are skipped. An inconclusive skip of a MUST leads to exit code 4.
+7. **Self-test (decision 9).** For `monitor`, the positive and negative fixtures are generated **captures** with expected verdicts (`testdata/captures/index.yaml`, test data under G-3.9). They are not `internal/sim` faults. `internal/sim` stays the self-test of `test`.
+8. **JSON report.** The monitor report has version 1 (`"report": 1`). `report.schema.json` (decision 6) follows with `test`, once the format covers both commands.
