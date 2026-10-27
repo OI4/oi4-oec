@@ -831,6 +831,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-rustls",
+ "uuid",
 ]
 
 [[package]]

@@ -574,3 +574,146 @@ fn mam_matches_schema() {
         validator.validate(&entry, Flavor::Strict, &doc).unwrap();
     }
 }
+
+fn oee_def() -> DataSetDef {
+    DataSetDef::new("oee")
+        .description("Overall equipment effectiveness")
+        .field(Field::double("Availability").unit("%").range(0.0, 100.0))
+        .field(Field::new("Count", BuiltinType::UInt32))
+        .publication(
+            Publication::default_data()
+                .mode(Mode::ON_REQUEST | Mode::SOURCE)
+                .precision("Availability", 0.5),
+        )
+}
+
+/// Data DataSets (P4 increment 6b): declaration, state, removal and the
+/// refused definitions and values; the Metadata versions are persisted and
+/// unchanged by a restart with the same structure (REQ-MSG-036).
+#[test]
+fn data_sets_are_declared_and_persisted() {
+    let root = Root::new("data-store");
+    let store = || FileStore::new(root.path("store"));
+    let app = device(Level::L2, explicit())
+        .store(store())
+        .build()
+        .unwrap();
+    let pump = app.add_asset(pump_def()).unwrap();
+    let oee = pump.add_data(oee_def()).unwrap();
+    assert_eq!(
+        (oee.tag(), oee.source()),
+        ("oee", pump.identification_link())
+    );
+    let pv = app
+        .this()
+        .add_data(DataSetDef::oi4pv(Field::double("Temperature").unit("°C")))
+        .unwrap();
+    assert_eq!(pv.tag(), "Oi4Pv");
+    let versions = store().load("app/metadata-versions").unwrap().unwrap();
+
+    // a DataSet has values once every field has one; all or none is set
+    assert_eq!(oee.values(), None);
+    oee.update([("Availability", 97.5)]).unwrap();
+    assert_eq!(oee.values(), None);
+    assert!(matches!(
+        oee.update([("Count", Value::from(1)), ("Unknown", Value::from(2))]),
+        Err(oec::Error::Invalid(_))
+    ));
+    assert!(matches!(
+        oee.update([("Count", -1)]),
+        Err(oec::Error::Invalid(_))
+    ));
+    oee.update([("Count", 7)]).unwrap();
+    assert_eq!(
+        oee.values(),
+        Some(vec![Value::Double(97.5), Value::UInt32(7)])
+    );
+
+    // removed: no values, no updates; the asset's removal drops its DataSets
+    pv.clone().remove().unwrap();
+    assert_eq!(pv.values(), None);
+    assert!(matches!(
+        pv.update([("Pv", 1.0)]),
+        Err(oec::Error::Invalid(_))
+    ));
+    assert!(matches!(pv.remove(), Err(oec::Error::Invalid(_))));
+    pump.clone().remove().unwrap();
+    assert!(matches!(
+        oee.update([("Count", 8)]),
+        Err(oec::Error::Invalid(_))
+    ));
+    drop(app);
+
+    // a restart with the same structure: the same versions
+    let app = device(Level::L2, explicit())
+        .store(store())
+        .build()
+        .unwrap();
+    let pump = app.add_asset(pump_def()).unwrap();
+    pump.add_data(oee_def()).unwrap();
+    app.this()
+        .add_data(DataSetDef::oi4pv(Field::double("Temperature").unit("°C")))
+        .unwrap();
+    assert_eq!(
+        store().load("app/metadata-versions").unwrap().unwrap(),
+        versions
+    );
+    // another structure: a new version
+    app.this()
+        .add_data(DataSetDef::new("oee").field(Field::double("Availability")))
+        .unwrap();
+    assert_ne!(
+        store().load("app/metadata-versions").unwrap().unwrap(),
+        versions
+    );
+    drop(app);
+    // a corrupt table is an error
+    root.write("store/app/metadata-versions", "[]");
+    assert!(matches!(
+        device(Level::L2, explicit()).store(store()).build(),
+        Err(oec::Error::Io(e)) if e.kind() == std::io::ErrorKind::InvalidData
+    ));
+}
+
+/// Refused Data DataSet definitions: a Tag twice, no field, an empty Tag,
+/// no UUID as DataSetClassId, an Interval of no whole ms, a Precision of an
+/// unknown field, an Oi4Pv field other than Sv1 … Sv255.
+#[test]
+fn invalid_data_sets_are_refused() {
+    let app = device(Level::L2, explicit())
+        .reference_designation(false)
+        .build()
+        .unwrap();
+    let pump = app.add_asset(pump_def()).unwrap();
+    pump.add_data(oee_def()).unwrap();
+    let invalid =
+        |r: oec::Result<DataSet>| assert!(matches!(r, Err(oec::Error::Invalid(_))), "{r:?}");
+    invalid(pump.add_data(oee_def()));
+    invalid(pump.add_data(DataSetDef::new("empty")));
+    invalid(pump.add_data(DataSetDef::new("").field(Field::double("x"))));
+    invalid(
+        pump.add_data(
+            DataSetDef::new("c")
+                .field(Field::double("x"))
+                .class_id("no-uuid"),
+        ),
+    );
+    invalid(
+        pump.add_data(
+            DataSetDef::new("d")
+                .field(Field::double("x"))
+                .publication(Publication::default_data().interval(Duration::from_micros(1500))),
+        ),
+    );
+    invalid(
+        pump.add_data(
+            DataSetDef::new("e")
+                .field(Field::double("x"))
+                .publication(Publication::default_data().precision("y", 1.0)),
+        ),
+    );
+    invalid(
+        app.this()
+            .add_data(DataSetDef::oi4pv(Field::double("p")).field(Field::double("x"))),
+    );
+}

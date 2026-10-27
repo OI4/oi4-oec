@@ -52,6 +52,7 @@
 pub mod app;
 pub mod asset;
 pub mod config;
+pub mod data;
 pub mod event;
 pub mod identity;
 pub mod status;
@@ -144,12 +145,13 @@ impl From<oec_core::topic::TopicError> for Error {
 /// Result type of the SDK API.
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
-/// Everything a typical application needs (the items of increments 4 and 5;
-/// the sketch prelude grows with increments 6 … 8).
+/// Everything a typical application needs (the items of increments 4 … 6;
+/// the sketch prelude grows with increments 7 and 8).
 pub mod prelude {
     pub use crate::app::{App, AppHandle, Bootstrap, Broker};
     pub use crate::asset::{Asset, AssetDef, HealthDetail, HealthState};
     pub use crate::config::{ConfigDef, ConfigObject, ConfigValues};
+    pub use crate::data::{BuiltinType, DataSet, DataSetDef, Field, Mode, Publication, Value};
     pub use crate::event::SyslogLevel;
     pub use crate::identity::{IdentificationLink, Oi4Identifier, Product};
     pub use crate::status::StatusCode;

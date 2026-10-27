@@ -2,8 +2,9 @@
 //! (ADR-0020 §2 … §5, §10): [`AppBuilder::build`] resolves everything that
 //! needs no connection; [`App::run`] / [`App::run_async`] connect over TLS
 //! and drive the sans-IO session and provider of `oec-core` (P4 increment
-//! 5b, C-050; 6a, C-053); [`AppHandle`] registers assets, sets their state
-//! and observes and stops the application ([`ConnectionState`]).
+//! 5b, C-050; 6a, C-053; 6b, C-054); [`AppHandle`] registers assets, sets
+//! their state and observes and stops the application
+//! ([`ConnectionState`]).
 
 use std::collections::HashSet;
 use std::fmt;
@@ -14,12 +15,13 @@ use std::time::Duration;
 
 use oec_core::lifecycle::Lifecycle;
 use oec_core::message::DataSetWriterId;
-use oec_core::provider::{Provider, ProviderConfig, WriterIds};
+use oec_core::provider::{MetaDataVersions, Provider, ProviderConfig, WriterIds};
 use oec_core::resource::Health;
 use tokio::sync::{Notify, watch};
 
 use crate::asset::{Asset, AssetDef};
 use crate::container::{self, MAX_PACKET_SIZE, MIN_PACKET_SIZE};
+use crate::data::{DataSet, DataSetDef, Value};
 use crate::event::SyslogLevel;
 use crate::identity::{IdentificationLink, Mam, Product};
 use crate::store::{FileStore, MemoryStore, Store};
@@ -29,6 +31,9 @@ use crate::{Error, Level, Result, ServiceType, runtime};
 const REVISION_COUNTER: &str = "app/revision-counter";
 /// Store key of the DataSetWriterIds (REQ-RES-PUBLIST-006, ADR-0026 §12).
 const WRITER_IDS: &str = "app/writer-ids";
+/// Store key of the ConfigurationVersions of the Metadata and the first
+/// sending of each version (REQ-MSG-032/036, ADR-0026 §12.6).
+const META_DATA_VERSIONS: &str = "app/metadata-versions";
 
 /// Where connection settings and secrets come from (ADR-0020 §5).
 #[derive(Debug, Clone)]
@@ -645,7 +650,7 @@ fn revision_counter(store: &dyn Store, key: &str) -> Result<i32> {
 
 /// The provider of the application (ADR-0026 §12): its lifecycle with the
 /// fixed DataSetWriterIds of Birth and Health (ADR-0026 §9.4/§9.5), `Get`
-/// from Level 2, the persisted DataSetWriterIds.
+/// from Level 2, the persisted DataSetWriterIds and Metadata versions.
 fn provider(
     level: Level,
     service_type: ServiceType,
@@ -675,12 +680,21 @@ fn provider(
         })?,
         None => WriterIds::new(),
     };
+    let versions = match store.load(META_DATA_VERSIONS)? {
+        Some(json) => MetaDataVersions::from_json(&json).map_err(|e| {
+            Error::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("store key {META_DATA_VERSIONS}: {e} (REQ-MSG-036)"),
+            ))
+        })?,
+        None => MetaDataVersions::new(),
+    };
     let config = ProviderConfig {
         get: level >= Level::L2,
         max_packet_size,
         publish_limit,
     };
-    let mut provider = Provider::new(lifecycle, config, writers)?;
+    let mut provider = Provider::new(lifecycle, config, writers)?.with_meta_data_versions(versions);
     if let Some(json) = provider.take_writer_ids() {
         store.save(WRITER_IDS, &json)?;
     }
@@ -1062,6 +1076,78 @@ impl AppHandle {
         } else {
             registry.provider.mam(&il.0).cloned()
         }
+    }
+
+    /// See [`Asset::add_data`]: the DataSetWriterId and the Metadata
+    /// version are persisted before the DataSet is published.
+    pub(crate) fn add_data(&self, il: &IdentificationLink, def: DataSetDef) -> Result<DataSet> {
+        let spec = def.resolve()?;
+        let tag = spec.tag.clone();
+        let store = self.shared.store.as_ref();
+        let mut registry = self.registry();
+        registry
+            .provider
+            .add_data(&il.0, spec, runtime::unix_ms())?;
+        let saved = Self::save(&mut registry, store);
+        if let Err(e) = saved {
+            let _ = registry.provider.remove_data(&il.0, &tag);
+            return Err(e);
+        }
+        drop(registry);
+        self.shared.changed.notify_one();
+        Ok(DataSet {
+            handle: self.clone(),
+            source: il.clone(),
+            tag,
+        })
+    }
+
+    /// Persists changed DataSetWriterIds and Metadata versions.
+    fn save(registry: &mut Registry, store: &dyn Store) -> Result<()> {
+        if let Some(json) = registry.provider.take_writer_ids() {
+            store.save(WRITER_IDS, &json)?;
+        }
+        if let Some(json) = registry.provider.take_meta_data_versions() {
+            store.save(META_DATA_VERSIONS, &json)?;
+        }
+        Ok(())
+    }
+
+    /// Persists what the runtime changed (the first sending of a Metadata
+    /// version); a failing store is logged.
+    pub(crate) fn save_changes(&self, registry: &mut Registry) {
+        if let Err(e) = Self::save(registry, self.shared.store.as_ref()) {
+            log::warn!("store: {e}");
+        }
+    }
+
+    /// See [`DataSet::update`].
+    pub(crate) fn update_data(
+        &self,
+        il: &IdentificationLink,
+        tag: &str,
+        values: Vec<(String, Value)>,
+    ) -> Result<()> {
+        let changed =
+            self.registry()
+                .provider
+                .update_data(&il.0, tag, values, runtime::unix_ms())?;
+        if changed {
+            self.shared.changed.notify_one();
+        }
+        Ok(())
+    }
+
+    /// See [`DataSet::values`].
+    pub(crate) fn data_values(&self, il: &IdentificationLink, tag: &str) -> Option<Vec<Value>> {
+        self.registry().provider.data_values(&il.0, tag)
+    }
+
+    /// See [`DataSet::remove`].
+    pub(crate) fn remove_data(&self, il: &IdentificationLink, tag: &str) -> Result<()> {
+        self.registry().provider.remove_data(&il.0, tag)?;
+        self.shared.changed.notify_one();
+        Ok(())
     }
 
     /// See [`Asset::remove`].

@@ -175,7 +175,12 @@ async fn drive(
         }
         if session.state() == SessionState::Connected {
             let now = clock.now();
-            let out = handle.registry().provider.poll(now, unix_ms());
+            let out = {
+                let mut registry = handle.registry();
+                let out = registry.provider.poll(now, unix_ms());
+                handle.save_changes(&mut registry);
+                out
+            };
             for p in out {
                 publish(session, p, now);
             }
@@ -250,7 +255,12 @@ fn on_event(
             backoff.reset();
             *connected_before = true;
             let now = clock.now();
-            let out = handle.registry().provider.on_connected(now, unix_ms());
+            let out = {
+                let mut registry = handle.registry();
+                let out = registry.provider.on_connected(now, unix_ms());
+                handle.save_changes(&mut registry);
+                out
+            };
             for p in out {
                 publish(session, p, now);
             }
@@ -261,10 +271,14 @@ fn on_event(
             return Some(Outcome::Lost(reason));
         }
         Event::Message(m) => {
-            let answer = handle
-                .registry()
-                .provider
-                .handle_message(&m.topic, &m.payload, unix_ms());
+            let answer = {
+                let mut registry = handle.registry();
+                let answer = registry
+                    .provider
+                    .handle_message(&m.topic, &m.payload, unix_ms());
+                handle.save_changes(&mut registry);
+                answer
+            };
             match answer {
                 Ok(out) => {
                     let now = clock.now();
@@ -365,7 +379,7 @@ impl Clock {
 }
 
 /// Wall clock in Unix milliseconds for the MessageIds (REQ-MSG-007).
-fn unix_ms() -> u64 {
+pub(crate) fn unix_ms() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_or(0, |d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX))

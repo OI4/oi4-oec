@@ -947,7 +947,15 @@ fn level_2_publishes_its_sources_and_answers_get() {
     filters.sort();
     assert_eq!(
         filters,
-        ["Health", "MAM", "Profile", "PublicationList"].map(|r| format!("{prefix}Get/{r}/#"))
+        [
+            "Data",
+            "Health",
+            "MAM",
+            "Metadata",
+            "Profile",
+            "PublicationList"
+        ]
+        .map(|r| format!("{prefix}Get/{r}/#"))
     );
     let topics: Vec<&str> = seen.iter().map(|p| p.topic.as_str()).collect();
     assert_eq!(
@@ -977,14 +985,21 @@ fn level_2_publishes_its_sources_and_answers_get() {
     assert_eq!(v["Messages"][0]["Payload"]["HardwareRevision"], "undefined");
 
     // a Get of a resource that is not served is not subscribed: ignored
-    tb.send(n, get(format!("{prefix}Get/Data/{it}")));
+    tb.send(n, get(format!("{prefix}Get/Config/{it}")));
     tb.send(n, get(format!("{prefix}Get/Profile/{me}")));
     let answer = publication(&tb);
     assert_eq!(answer.topic, format!("{prefix}Pub/Profile/{me}"));
     let resources = &json(&answer.payload)["Messages"][0]["Payload"]["Resources"];
     assert_eq!(
         resources,
-        &serde_json::json!(["MAM", "Health", "Profile", "PublicationList"])
+        &serde_json::json!([
+            "MAM",
+            "Health",
+            "Data",
+            "Metadata",
+            "Profile",
+            "PublicationList"
+        ])
     );
 
     handle.shutdown();
@@ -1133,5 +1148,216 @@ fn offline_changes_are_published_as_state_after_reconnect() {
             == 0,
         "{rest:?}"
     );
+    run.join().unwrap().unwrap();
+}
+
+/// A `Get Metadata` for Source and Tag (REQ-RES-META-002).
+fn get_meta(topic: String, source: &str, tag: &str) -> Packet {
+    Packet::Publish(Publish {
+        topic,
+        payload: serde_json::to_vec(&serde_json::json!({
+            "MessageId": GET_ID,
+            "MessageType": "ua-metadata",
+            "PublisherId": "Aggregation/vendor.com/Client/C-1/1",
+            "DataSetWriterId": 10,
+            "WriterGroupName": tag,
+            "DataSetWriterName": source,
+            "Timestamp": "2023-11-14T22:13:20.000Z",
+            "ReplyTo": "",
+            "MetaData": {}
+        }))
+        .unwrap(),
+        delivery: Delivery::AtMostOnce,
+        retain: false,
+    })
+}
+
+/// The next PUBLISH on `topic`, collecting the others.
+fn next_on(tb: &TestBroker, topic: &str, others: &mut Vec<Publish>) -> Publish {
+    loop {
+        let p = publication(tb);
+        if p.topic == topic {
+            return p;
+        }
+        others.push(p);
+    }
+}
+
+/// The DataSet of a Data publication.
+fn data_payload(p: &Publish) -> Value {
+    json(&p.payload)["Messages"][0]["Payload"].clone()
+}
+
+/// A pump with the DataSet `oee` (Interval 0, a Precision) and the app's
+/// `Oi4Pv` (SOURCE, `interval`), both with values.
+fn data_sets(app: &App, interval: Duration) -> (Asset, DataSet, DataSet) {
+    let pump = app
+        .add_asset(
+            AssetDef::with_oi4_identifier(Product::new("vendor.com", "Pump", "P-1"), "0815")
+                .unwrap(),
+        )
+        .unwrap();
+    let oee = pump
+        .add_data(
+            DataSetDef::new("oee")
+                .field(Field::double("Availability").unit("%"))
+                .field(Field::new("Count", BuiltinType::UInt32))
+                .publication(Publication::default_data().precision("Availability", 0.5)),
+        )
+        .unwrap();
+    oee.update([
+        ("Availability", oec::data::Value::from(97.5)),
+        ("Count", 1u32.into()),
+    ])
+    .unwrap();
+    let pv = app
+        .this()
+        .add_data(
+            DataSetDef::oi4pv(Field::double("T")).publication(
+                Publication::default_data()
+                    .mode(Mode::ON_REQUEST | Mode::SOURCE)
+                    .interval(interval),
+            ),
+        )
+        .unwrap();
+    pv.update([("Pv", 20.0)]).unwrap();
+    (pump, oee, pv)
+}
+
+/// `(Resource, Mode)` of the Data and Metadata entries of a
+/// PublicationList publication.
+fn data_entries(list: &Publish) -> Vec<(String, String)> {
+    json(&list.payload)["Messages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|m| &m["Payload"])
+        .filter(|e| e["Resource"] == "Data" || e["Resource"] == "Metadata")
+        .map(|e| {
+            (
+                e["Resource"].as_str().unwrap().to_owned(),
+                e["Mode"].as_str().unwrap().to_owned(),
+            )
+        })
+        .collect()
+}
+
+/// Data DataSets (P4 increment 6b): the Metadata before the Data
+/// (REQ-RES-META-003), the PublicationList entries (REQ-RES-PUBLIST-001 …
+/// 012), an Interval publishing cyclically (REQ-RES-PUBLIST-013/014), the
+/// Precisions as dead band at Interval 0 (REQ-RES-PUBLIST-015,
+/// REQ-MQTT-019), `Get Data`/`Get Metadata` (REQ-RES-DATA-007,
+/// REQ-RES-META-002) and the removal (REQ-RES-PUBLIST-017).
+#[test]
+fn data_sets_publish_their_state() {
+    const INTERVAL: Duration = Duration::from_millis(50);
+    let (pki, root) = (pki(), Root::new("rt-data"));
+    let tb = TestBroker::start(&pki, Behavior::default());
+    let states = States::default();
+    let app = builder_at(Level::L2, broker(&root, &pki, tb.port), &states)
+        .build()
+        .unwrap();
+    let (pump, oee, _pv) = data_sets(&app, INTERVAL);
+    let (me, it) = (
+        encoded(app.identification_link().as_str()),
+        encoded(pump.identification_link().as_str()),
+    );
+    let prefix = format!("Oi4v2/Utility/{me}/");
+    let handle = app.handle();
+    let run = spawn(app);
+    let (n, _) = tb.connect();
+
+    // the state after the connect: Metadata before Data
+    let (pv_topic, oee_topic) = (
+        format!("{prefix}Pub/Data/{me}"),
+        format!("{prefix}Pub/Data/{it}/oee"),
+    );
+    let mut seen = Vec::new();
+    let first_pv = next_on(&tb, &pv_topic, &mut seen);
+    let first_oee = if seen.iter().any(|p| p.topic == oee_topic) {
+        seen.iter().find(|p| p.topic == oee_topic).unwrap().clone()
+    } else {
+        next_on(&tb, &oee_topic, &mut seen)
+    };
+    let topics: Vec<&str> = seen.iter().map(|p| p.topic.as_str()).collect();
+    for meta in [
+        format!("{prefix}Pub/Metadata/{me}/Oi4Pv"),
+        format!("{prefix}Pub/Metadata/{it}/oee"),
+    ] {
+        assert!(topics.contains(&meta.as_str()), "{meta} not in {topics:?}");
+    }
+    assert_eq!(data_payload(&first_pv), serde_json::json!({"Pv": 20.0}));
+    assert_eq!(
+        data_payload(&first_oee),
+        serde_json::json!({"Availability": 97.5, "Count": 1})
+    );
+    let list = seen
+        .iter()
+        .find(|p| p.topic == format!("{prefix}Pub/PublicationList"))
+        .expect("PublicationList");
+    let entries = json(&list.payload)["Messages"].as_array().unwrap().len();
+    assert_eq!(
+        data_entries(list),
+        [
+            ("Data", "ON_REQUEST_SOURCE_10"),
+            ("Metadata", "ON_REQUEST_FILTER_9"),
+            ("Data", "ON_REQUEST_FILTER_9"),
+            ("Metadata", "ON_REQUEST_FILTER_9"),
+        ]
+        .map(|(r, m)| (r.to_owned(), m.to_owned()))
+    );
+    states.wait_for(ConnectionState::Online, 1);
+
+    // the Interval: cyclic, unchanged values included
+    let start = Instant::now();
+    for _ in 0..3 {
+        let p = next_on(&tb, &pv_topic, &mut Vec::new());
+        assert_eq!(data_payload(&p), serde_json::json!({"Pv": 20.0}));
+    }
+    assert!(start.elapsed() >= INTERVAL * 2, "{:?}", start.elapsed());
+
+    // the dead band: 97.7 is within 0.5 of 97.5, 98.2 is not
+    oee.update([("Availability", 97.7)]).unwrap();
+    oee.update([("Availability", 98.2)]).unwrap();
+    let p = next_on(&tb, &oee_topic, &mut Vec::new());
+    assert_eq!(data_payload(&p)["Availability"], 98.2);
+
+    // Get Data and Get Metadata of the pump's DataSet
+    tb.send(n, get(format!("{prefix}Get/Data/{it}/oee")));
+    let answer = next_on(&tb, &oee_topic, &mut Vec::new());
+    assert_eq!(json(&answer.payload)["ReplyTo"], GET_ID);
+    assert_eq!(data_payload(&answer)["Availability"], 98.2);
+    let meta_topic = format!("{prefix}Pub/Metadata/{it}/oee");
+    tb.send(
+        n,
+        get_meta(
+            format!("{prefix}Get/Metadata/{it}/oee"),
+            pump.identification_link().as_str(),
+            "oee",
+        ),
+    );
+    let answer = json(&next_on(&tb, &meta_topic, &mut Vec::new()).payload);
+    assert_eq!(answer["ReplyTo"], GET_ID);
+    let fields: Vec<&str> = answer["MetaData"]["Fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|f| f["Name"].as_str().unwrap())
+        .collect();
+    assert_eq!(fields, ["Availability", "Count"]);
+
+    // removed: the PublicationList without its entries
+    oee.remove().unwrap();
+    let list = next_on(
+        &tb,
+        &format!("{prefix}Pub/PublicationList"),
+        &mut Vec::new(),
+    );
+    assert_eq!(
+        json(&list.payload)["Messages"].as_array().unwrap().len(),
+        entries - 2
+    );
+
+    handle.shutdown();
     run.join().unwrap().unwrap();
 }

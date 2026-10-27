@@ -24,6 +24,7 @@ oec-core.workspace = true
 thiserror.workspace = true
 log.workspace = true
 serde_json.workspace = true
+uuid.workspace = true
 tokio.workspace = true
 rustls.workspace = true
 tokio-rustls.workspace = true

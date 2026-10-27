@@ -2,7 +2,8 @@
 //! entities it represents ([`crate::app::AppHandle::add_asset`]), each a
 //! `Source` with the resources MAM, Health and – from Level 2 – Profile and
 //! the entries of the PublicationList (P4 increment 6a, ADR-0020 amendment
-//! C-053, ADR-0026 §12).
+//! C-053, ADR-0026 §12), and their Data DataSets with Metadata
+//! ([`Asset::add_data`], increment 6b, C-054).
 //!
 //! The SDK publishes the state, not every call (ADR-0020 §7): a change is
 //! published at once while connected; offline nothing is queued and the
@@ -14,6 +15,7 @@ use oec_core::resource::{DetailObject, Health};
 
 use crate::Result;
 use crate::app::AppHandle;
+use crate::data::{DataSet, DataSetDef};
 use crate::identity::{IdentificationLink, Mam, Product};
 
 /// Health states (MG 9.1.2), ordered by severity for the aggregation of
@@ -178,9 +180,29 @@ impl Asset {
         self.handle.bump_revision_counter(&self.il)
     }
 
+    /// Declares a Data DataSet of this asset. The SDK assigns its
+    /// DataSetWriterId (REQ-MSG-020, REQ-RES-PUBLIST-006), creates its
+    /// PublicationList entries for Data and Metadata (REQ-RES-PUBLIST-001
+    /// … 015), derives its Metadata (REQ-RES-META-002/003) with a
+    /// ConfigurationVersion that is persisted and changes only with the
+    /// Metadata (REQ-MSG-032/036), publishes the Metadata unless the Mode
+    /// is `OFF` and answers `Get Data` and `Get Metadata`
+    /// (REQ-RES-DATA-007, REQ-CMP-044).
+    ///
+    /// # Errors
+    ///
+    /// [`crate::Error::Invalid`] for an invalid definition (Tag, field
+    /// names and types, Oi4Pv fields, Precisions, DataSetClassId), a Tag
+    /// already used by this asset, Metadata larger than the MaxPacketSize
+    /// or a removed asset; [`crate::Error::Io`] if the store fails.
+    pub fn add_data(&self, def: DataSetDef) -> Result<DataSet> {
+        self.handle.add_data(&self.il, def)
+    }
+
     /// Removes a represented asset: its MAM, Health and Profile are no
     /// longer served and the PublicationList is republished without its
-    /// entries (REQ-RES-PUBLIST-017). Its DataSetWriterIds stay reserved.
+    /// entries (REQ-RES-PUBLIST-017), as are its Data DataSets. Its
+    /// DataSetWriterIds stay reserved.
     ///
     /// # Errors
     ///
