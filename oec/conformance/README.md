@@ -66,7 +66,7 @@ Exit codes: `0` no failure, `1` at least one `fail`, `2` usage error, `3` intern
 | `internal/verdict` | verdict model: severity from REQ keyword × level, test aggregation, exit code |
 | `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` |
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
-| `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (draft, G-3.9) |
+| `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (reviewed in the C-052 review, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
 ## Tests

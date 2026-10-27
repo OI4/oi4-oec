@@ -12,7 +12,7 @@
 # status: draft | reviewed
 captures:
   - file: lifecycle-pass.jsonl
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -20,7 +20,7 @@ captures:
       128 s. Every implemented monitor test passes; REQ-RES-HEALTH-004 is not
       observable and REQ-CMP-045 has no represented entity on the bus.
   - file: reconnect-pass.jsonl
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -28,72 +28,72 @@ captures:
       published by the broker after 20 s; A reconnects with a new Birth.
       T7-MON-03 passes; the heartbeat cannot be judged in 30 s (skip).
   - file: invalid-message.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-01: {outcome: fail, reqs: [REQ-RES-HEALTH-001]}
   - file: publisher-mismatch.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-01: {outcome: fail, reqs: [REQ-MSG-006, REQ-MSG-007]}
       T7-MON-02: {outcome: fail, reqs: [REQ-TOP-006, REQ-TOP-010]}
   - file: will-then-publish.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-03: {outcome: fail, reqs: [REQ-CMP-003, REQ-LIFE-001]}
   - file: birth-mam-differs.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-03: {outcome: fail, reqs: [REQ-LIFE-003]}
       T7-MON-08: {outcome: fail, reqs: [REQ-MSG-021]}
   - file: no-health.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-04: {outcome: fail, reqs: [REQ-CMP-007]}
       T7-MON-05: {outcome: fail, reqs: [REQ-TOP-017]}
   - file: heartbeat-gap.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-05: {outcome: fail, reqs: [REQ-TOP-017]}
   - file: close-then-publish.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-05: {outcome: fail, reqs: [REQ-LIFE-014]}
   - file: message-id-duplicate.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-06: {outcome: fail, reqs: [REQ-MSG-008]}
   - file: request-id-pending.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-07: {outcome: fail, reqs: [REQ-ACT-011]}
   - file: writer-id-conflict.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-08: {outcome: fail, reqs: [REQ-MSG-021, REQ-MSG-033, REQ-RES-PUBLIST-005]}
   - file: identity-conflict.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-10: {outcome: info, reqs: [REQ-IL-010, REQ-IL-012]}
     notes: >-
       T7-MON-10 is a heuristic: its findings are hints (info), never failures.
   - file: empty-pub.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-11: {outcome: fail, reqs: [REQ-CMP-042]}
   - file: retain-qos.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-12: {outcome: fail, reqs: [REQ-CMP-009]}
     notes: REQ-MQTT-017 (QoS 0) is a SHOULD and gives warn.
   - file: packet-size.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-18: {outcome: fail, reqs: [REQ-PAG-005]}
   - file: pagination-broken.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-18: {outcome: fail, reqs: [REQ-PAG-004, REQ-PAG-005]}
   - file: debug-event.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-19: {outcome: fail, reqs: [REQ-TOP-024]}
