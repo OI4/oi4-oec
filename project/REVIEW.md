@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-063 review (you accepted R-1 and R-2: the 14 sim fixtures and the capture fixture `pagination-broken` are `reviewed`). **Nothing is open for you.** A-164 … A-175 for information, worth a look: A-166, A-167, A-168._
+_Last updated: 2026-10-28, C-064 (P5 increment 3: the write tests T7-SET-01 … 09, 11, 12 of `oec-check test`). **Open for you: R-1 (14 sim fixtures, review).** A-176 … A-190 for information, worth a look: A-177, A-178, A-180, A-188, A-189._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -130,10 +130,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Against `demo.rs` (level 2): first 20 pass, 1 fail – a defect of D7 (T7-GET-07 expected a content where "ignored" means "answered like without"), fixed with a new positive fixture; then **21 pass, 0 fail, 3 skip, exit 0**, 82 requests all answered. The SDK was not changed.
   - ADR-0025 amendment C-063; no SF, no new dependency. A-164 … A-175 for information.
 - C-063 review: you accepted R-1 and R-2; the 14 sim fixtures in `testdata/sim/index.yaml` and the capture fixture `pagination-broken` are `reviewed`. Nothing is open.
+- C-064 (P5 increment 3):
+  - **T7-SET-01 … 09, 11, 12 `implemented`** – the write side: Set and Del of Config, Data, Metadata, PublicationList, ReferenceDesignation and SubscriptionList, each answered with a Status event with the `ReplyTo` and, after a successful Set, the publication; rejected changes (unknown object, read-only property, `NONE_0` entries); Del of a whole object and of a part; the log level. T7-SET-10 (restart) stays in increment 6.
+  - **D7 restores the component:** it writes back what the component published, deletes only what it created and undoes every change it provoked. Before the first and after the last write test it reads Config, PublicationList, ReferenceDesignation and SubscriptionList and compares them; the result is reported (`restore`), it is not a verdict.
+  - The simulated component is writable; 13 new faults (2 conforming variants, 11 faults); with `none`, 14 sim fixtures are `draft` → **R-1**.
+  - Found test-first and fixed: an invalid Status DataSetWriterId of the sim, invalid stimuli of D7, destructive requests without a known state, subscriptions left behind; after a code review three more (no write-back of a masked value at level 1, a ReferenceDesignation is deleted only after its write-back was accepted, a restore note when a run ends during the write tests).
+  - Against `demo.rs` (level 2): **30 pass, 0 fail, 5 skip, exit 0**, 136 requests all answered, state restored (three runs). The SDK was not changed.
+  - ADR-0025 amendment C-064; no SF, no new dependency. A-176 … A-190 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
-Logs: [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -314,10 +321,48 @@ Logs: [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-06
 | A-173 | Tester-violation contract: exactly the deliberate stimuli without a fault, a part of them with one | info (agent) | C-063 | – | – |
 | A-174 | Fixture answer timeout 3 s, run context 2 min | info (agent) | C-063 | – | – |
 | A-175 | Increment 2 not split; no SF raised (Config Filter vs. `Context.Name` checked) | info (agent) | C-063 | – | – |
+| R-1 | 14 sim fixtures of `oec-check test` (13 new, `none` with the write outcomes) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-064 | accept | ☐ |
+| A-176 | Increment 3 not split; SET-10 stays in increment 6 | info (agent) | C-064 | – | – |
+| A-177 | Restore model: Get without Source of Config, PublicationList, ReferenceDesignation, SubscriptionList before/after; Data and disk not compared | info (agent) | C-064 | – | – |
+| A-178 | The restore result is reported (report key `restore`, text line, stderr warning), not judged | info (agent) | C-064 | – | – |
+| A-179 | Writes are write-backs; Config with the mask; Data only where a Set subscription is listed | info (agent) | C-064 | – | – |
+| A-180 | Bounded destructive requests: only own subscriptions deleted, ReferenceDesignation only with known state, `NONE_0` changes undone, Modes set back | info (agent) | C-064 | – | – |
+| A-181 | "Nothing published" (REQ-BUS-007) = nothing until the Status event plus the grace time | info (agent) | C-064 | – | – |
+| A-182 | SET-03 runs last and reuses the reactions of the other write tests | info (agent) | C-064 | – | – |
+| A-183 | SET-01 judges REQ-RES-SUBLIST-016/CMP-016 after the catalog note | info (agent) | C-064 | – | – |
+| A-184 | Stimuli: prefix `d7`/`D7`, RefDes DataSetWriterId from the PublicationList, one deliberately invalid Number | info (agent) | C-064 | – | – |
+| A-185 | Status event recognition: category Status, `ReplyTo`, level from the severity bits, Source per SF-108 | info (agent) | C-064 | – | – |
+| A-186 | Sim: write side, `Changed()`, one Status DataSetWriterId per Source and level, content additions | info (agent) | C-064 | – | – |
+| A-187 | Fixture contract checks the restore (D7 against `sim.Changed()`) | info (agent) | C-064 | – | – |
+| A-188 | No write-back of a masked sensitive Config value at level 1 (REQ-RES-CONFIG-025 only SHOULD) | info (agent) | C-064 | – | – |
+| A-189 | A ReferenceDesignation is deleted only after its write-back Set got Status Good | info (agent) | C-064 | – | – |
+| A-190 | A run that ends during the write tests reports the restore as not checked (warning) | info (agent) | C-064 | – | – |
 
 ## Decisions and review items
 
-No open item.
+### R-1 – sim fixtures of `oec-check test`, increment 3 (G-3.9)
+
+- **Where:** `oec/conformance/testdata/sim/index.yaml` – 14 entries `draft`: 13 new faults of the simulated component and `none` (reviewed in the C-063 review), which got the outcomes of the write tests. The other 18 entries are unchanged and stay `reviewed`.
+- **What they are:** as in C-062/C-063 – `internal/probe/sim_test.go` runs `oec-check test` (monitor + active tests, level 3) against the simulated component with one fault and compares outcome and exact REQ ids per test. New: every run must leave the simulated component in its start state, and D7's restore check must agree.
+- **Positive (conforming):**
+  - `none` – now also T7-SET-01 … 09, 11, 12 pass with every REQ judged; the state is restored.
+  - `T7-SET-09/set-rejected` – the component rejects every Set ReferenceDesignation (BadNotWritable) but would accept a Del. D7 deletes nothing it could not restore: REQ-RES-REFDES-010 and the Del of SET-03 are skipped; every test passes.
+  - `T7-SET-11/no-create` – the component does not create SubscriptionList entries (BadNotSupported, like the demo, SF-111): REQ-BUS-008 and REQ-RES-SUBLIST-015 skipped; every test passes.
+- **Negative (fault → expected outcome):**
+  - `T7-SET-01/sublist` (the writable Config DataSet is not listed with its Set subscription): T7-SET-01 fail REQ-RES-SUBLIST-016;
+  - `T7-SET-02/unknown-source` (Status Bad for an unknown asset under the Source of the request instead of the AppId): T7-SET-02 fail REQ-CMP-043;
+  - `T7-SET-03/metadata` (Set Metadata answered with BadNotSupported): T7-SET-03 fail REQ-CMP-033; T7-SET-07 fail REQ-RES-META-006;
+  - `T7-SET-04/del-publishes` (an empty list is published after the Del of a whole object): T7-SET-04 fail REQ-BUS-007;
+  - `T7-SET-05/read-only` (a changed Name of a configuration object is accepted): T7-SET-05 fail REQ-RES-CONFIG-023;
+  - `T7-SET-06/no-pub` (Status Good after Set Data, but no publication): T7-SET-06 fail REQ-RES-DATA-012; T7-SET-01 fail REQ-BUS-006, REQ-MQTT-019;
+  - `T7-SET-07/no-event` (Set Metadata without Status event): T7-SET-07 fail REQ-RES-META-006; T7-SET-03 fail REQ-CMP-033 (no reaction at all for the asset);
+  - `T7-SET-08/read-only` (a Mode change of a `NONE_0` PublicationList entry is accepted): T7-SET-08 fail REQ-RES-PUBLIST-016;
+  - `T7-SET-09/del-silent` (Del ReferenceDesignation without Status event): T7-SET-09 fail REQ-RES-REFDES-009; T7-SET-03 fail REQ-CMP-033;
+  - `T7-SET-11/none-writable` (an Interval change of a `NONE_0` SubscriptionList entry is accepted): T7-SET-11 fail REQ-RES-SUBLIST-004;
+  - `T7-SET-12/fixed-level` (every Syslog entry has Config `NONE_0`): T7-SET-12 **warn** REQ-TOP-027 (SHOULD).
+- **Please check:** is each fault a real violation of the named REQ, and are the three positives really compliant? In particular: the side effects on T7-SET-03 (REQ-CMP-033) when a component gives no reaction at all; T7-SET-01 failing REQ-BUS-006/MQTT-019 for `no-pub`; and that `set-rejected` (a ReferenceDesignation that cannot be written back) passes.
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -911,6 +956,26 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-174 Timeouts:** the fixture runs wait 3 s for an answer (was 2 s) and 2 min per run (was 1 min); 19 fixtures run in parallel, about 43 s.
 - **A-175 Cut and findings:** increment 2 was done in one cycle. No SF: the Filter of Config (WriterGroupName, REQ-TOP-022) and `Context.Name` (REQ-RES-CONFIG-015) were checked and are consistent after SF-085.
 
-## Next (C-064)
+### A-176 … A-190 – P5 increment 3 (C-064, agent)
 
-1. P5 increment 3: the write side T7-SET-01 … 09, 11, 12 with restore and the state model; in a new session (start prompt in `prompt.md`).
+- **Where:** `oec/conformance/internal/probe/{set, probe}.go`, `internal/sim/{sim, write}.go`, `internal/report/monitor.go`, `cmd/oec-check/test.go`, `testdata/sim/index.yaml`, `catalog/d7.yaml`; ADR-0025 amendment C-064; DESIGN.md §3.3/§10 "As built (C-064)"; log `log/2026-10-28_C-064_d7-set-tests.md`.
+- **A-176 Cut:** increment 3 was done in one cycle; T7-SET-10 (survives a restart) needs the restart hook and stays in increment 6.
+- **A-177 Restore model:** before the first and after the last write test D7 reads Config, PublicationList, ReferenceDesignation and SubscriptionList with Get without Source and compares them. Data is excluded (its values change by themselves); what the component stores on disk is not compared.
+- **A-178 Reported, not judged:** the restore result is a statement about D7, not about the component: report key `restore` (report version 1 unchanged), a "restore:" line in the text report, and a warning on stderr with the changed lines.
+- **A-179 Write-backs:** a Set sends what the component published; Config as the full DataSet including the mask of sensitive values; Data only where a Set subscription is listed.
+- **A-180 Bounded destructive requests:** only SubscriptionList entries D7 created are deleted; a ReferenceDesignation only with a known state (and see A-189) and restored with Set; `NONE_0` entries get only a change that must be rejected, undone if accepted; changed Modes are set back.
+- **A-181 "Nothing published":** REQ-BUS-007 is judged until the Status event plus the grace time.
+- **A-182 SET-03:** runs after the other write tests, reuses their reactions and stimulates only missing combinations; supported = any reaction with the `ReplyTo` except BadNotSupported.
+- **A-183 SET-01 and REQ-RES-SUBLIST-016/CMP-016:** Good → checked; BadNotWritable/BadNotSupported → violation; other outcomes → skip (catalog note).
+- **A-184 Stimuli:** unknown objects carry `d7`/`D7`; a created ReferenceDesignation takes its DataSetWriterId from the PublicationList (else 10); SET-05 sends one deliberately invalid Number (tester violation REQ-RES-CONFIG-007).
+- **A-185 Status event:** the Event of the category Status whose `ReplyTo` is the MessageId of the request; level from the severity bits of the StatusCode; Source = Source of the request, or the AppId for an asset the entity neither is nor represents (SF-108).
+- **A-186 Sim:** write side and `Changed()`; one Status DataSetWriterId per Source and level (REQ-MSG-021; the Get-path Bad event moves from 623 to 625); a sensitive Config object, two Syslog entries and the Set subscriptions added; only the application's Data is writable.
+- **A-187 Contract:** every fixture run has a restore result that agrees with `sim.Changed()`; without a fault the state is restored; `Changed()` is empty after every run.
+- **A-188 Masked values at level 1:** REQ-RES-CONFIG-025 (the mask in a Set leaves the secret unchanged) is only SHOULD at level 1. There D7 does not write a Config DataSet with a masked value at all (the component could store the mask, and the restore check cannot see it) and skips CONFIG-025. The restore note says that sensitive values cannot be compared.
+- **A-189 ReferenceDesignation Del:** only after a write-back Set of the object got Status Good; otherwise SET-09 skips REQ-RES-REFDES-010, SET-04 uses its own subscription, SET-03 skips the Del (new conforming fixture `T7-SET-09/set-rejected`).
+- **A-190 Interrupted run:** if the run ends during the write tests (error, broker lost, interrupt), the restore is reported as not checked with a note naming the test, and `oec-check test` warns; no recovery attempt.
+
+## Next (C-065)
+
+1. Your review of R-1.
+2. P5 increment 4: T7-ACT-01 … 04 and T7-MON-09/13 … 17 on the state model of C-064; in a new session (start prompt in `prompt.md`).
