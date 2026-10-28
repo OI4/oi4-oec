@@ -1,6 +1,6 @@
 # `oec/conformance/` – D7/D8 compliance CLIs
 
-> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062), every `Get` test and T7-ADR-02/03 (C-063, amendment C-063).** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
+> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062), every `Get` test and T7-ADR-02/03 (C-063, amendment C-063), the write tests T7-SET-01 … 09, 11, 12 with restore (C-064, amendment C-064).** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
 
 ## `oec-check validate`
 
@@ -51,7 +51,7 @@ Exit codes: `0` no failure, `1` at least one `fail`, `2` usage error, `3` intern
 
 ## `oec-check test`
 
-Tests one running component (CUT) actively (DESIGN.md §3.3): D7 sends `Get` requests as the not-announced tester `Utility/oi4.org/oec-check/D7/<random>` and judges the answers; the monitor rules run on the same subscription. Implemented: T7-GET-01 (Get MAM/Health with `ReplyTo`, all Sources), T7-GET-02 (Profile lists exactly the served resources of the level), T7-GET-05 (empty list, unknown Source → Event Status Bad), T7-GET-09 (unknown keys ignored); since C-063 also T7-GET-03 (every resource with and without Source and Filter, PublicationList entries, Data ⇒ Metadata), T7-GET-04 (every represented entity fulfills the level), T7-GET-06 (pagination on request; by size passively, T7-MON-18), T7-GET-07 (Query of ReferenceDesignation), T7-GET-08 (Locale), T7-ADR-02 (no answer in the namespace `Oi4`) and T7-ADR-03 (exact Identification Links). The other active tests follow the P5 plan (ROADMAP).
+Tests one running component (CUT) actively (DESIGN.md §3.3): D7 sends `Get`, `Set` and `Del` requests as the not-announced tester `Utility/oi4.org/oec-check/D7/<random>` and judges the answers; the monitor rules run on the same subscription. Implemented: T7-GET-01 (Get MAM/Health with `ReplyTo`, all Sources), T7-GET-02 (Profile lists exactly the served resources of the level), T7-GET-05 (empty list, unknown Source → Event Status Bad), T7-GET-09 (unknown keys ignored); since C-063 also T7-GET-03 (every resource with and without Source and Filter, PublicationList entries, Data ⇒ Metadata), T7-GET-04 (every represented entity fulfills the level), T7-GET-06 (pagination on request; by size passively, T7-MON-18), T7-GET-07 (Query of ReferenceDesignation), T7-GET-08 (Locale), T7-ADR-02 (no answer in the namespace `Oi4`) and T7-ADR-03 (exact Identification Links); since C-064 the write tests T7-SET-01 … 09, 11, 12 (`Set`/`Del` ⇒ Status event with `ReplyTo` and publication; Config, Data, Metadata, PublicationList, ReferenceDesignation, SubscriptionList, log level). The other active tests follow the P5 plan (ROADMAP).
 
 ```sh
 # against the SDK example app (oec/sdk/rust/oec/examples/demo.rs) on the dev broker;
@@ -64,7 +64,8 @@ go run ./cmd/oec-check test --broker mqtts://localhost:8883 --ca ../dev/generate
 - `--app [ServiceType/]AppId` is required; with a bare AppId, D7 asks on every ServiceType. The connection, verdict and output flags are those of `monitor`; `--record` writes a capture that `monitor --replay` reads.
 - Run: `--timeout` (default 10s: waiting time for an answer, and the silence that counts as "no answer"), `--tests ID|GLOB,…` (repeatable; the others are skipped as "not selected"), `--tester-il IL`.
 - A test run is short: passive requirements that need a long observation (heartbeat, connect, MaxPacketSize) are skipped with the reason "test run: …"; a level claim needs a `monitor` run of at least 125 s as well.
-- The report is the monitor report with `"mode": "test"` plus `tester` and `requests`. Exit codes as for `monitor`.
+- **`test` changes the CUT.** The write tests write back what the CUT published, delete only what D7 created and undo every change they provoke. Before the first and after the last write test D7 reads Config, PublicationList, ReferenceDesignation and SubscriptionList; if they differ, `test` warns on stderr and lists the differences (report key `restore`); it also warns if the run ended during the write tests. A ReferenceDesignation is deleted only after its write-back was accepted; at level 1 a Config DataSet with a masked sensitive value is not written. Run it only against a component whose configuration may be written.
+- The report is the monitor report with `"mode": "test"` plus `tester`, `requests` and `restore`. Exit codes as for `monitor`.
 
 ## Layout
 
@@ -80,12 +81,12 @@ go run ./cmd/oec-check test --broker mqtts://localhost:8883 --ca ../dev/generate
 | `internal/mqttwire` | MQTT 3.1.1 client over TLS on `paho.mqtt.golang` v1.5.1 (EDL-1.0), PKCS#8 PBES2 keys, container storage reader |
 | `internal/mqttwire/mqtttest` | test-only in-process TLS broker and throw-away PKI (gate without network) |
 | `internal/monitor` | stateful monitor engine: participants, rules T7-MON-xx |
-| `internal/probe` | active test runner of `test`: discovery, requests with `ReplyTo` correlation, tests T7-GET-xx, verdict of a test run |
+| `internal/probe` | active test runner of `test`: discovery, requests with `ReplyTo` correlation, tests T7-GET-xx/ADR-xx/SET-xx, state snapshot and restore check, verdict of a test run |
 | `internal/sim` | test-only simulated CUT with fault injection (DESIGN.md §10) |
 | `internal/verdict` | verdict model: severity from REQ keyword × level, test aggregation, exit code |
 | `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` and `test` |
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
-| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062/C-063, reviewed in the C-062 and C-063 reviews, G-3.9) |
+| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062/C-063, reviewed in the C-062 and C-063 reviews; C-064 entries draft, G-3.9) |
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (reviewed in the C-052 review, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
