@@ -86,11 +86,14 @@ type monitorFlags struct {
 	timeout                             time.Duration // test
 	testerIL                            string        // test
 	tests                               patterns      // test
+	proxyListen, proxyCA, proxyCAKey    string        // test
+	proxyNames                          string        // test
+	proxyWait                           time.Duration // test
 }
 
 // newMonitorFlags registers the flags of monitor or test: the connection,
 // verdict and output flags are shared; --replay and --duration belong to
-// monitor, --timeout, --tester-il and --tests to test.
+// monitor, --timeout, --tester-il, --tests and the --proxy-* flags to test.
 func newMonitorFlags(name string, stderr io.Writer) *monitorFlags {
 	f := &monitorFlags{name: name, fl: flag.NewFlagSet(name, flag.ContinueOnError)}
 	fl := f.fl
@@ -104,6 +107,11 @@ func newMonitorFlags(name string, stderr io.Writer) *monitorFlags {
 		fl.DurationVar(&f.timeout, "timeout", 10*time.Second, "waiting time for an answer of the component under test")
 		fl.StringVar(&f.testerIL, "tester-il", "", "Identification Link of oec-check in the requests (default: Utility/oi4.org/oec-check/D7/<random>)")
 		fl.Var(&f.tests, "tests", "test ids or patterns (path.Match) to run, comma separated; repeatable (default: all)")
+		fl.StringVar(&f.proxyListen, "proxy-listen", "", "proxy attachment: host:port where the component under test connects instead of the broker")
+		fl.StringVar(&f.proxyCA, "proxy-ca", "", "CA certificate (PEM) the component under test trusts; D7 issues the proxy certificates with it")
+		fl.StringVar(&f.proxyCAKey, "proxy-ca-key", "", "private key of --proxy-ca (PEM)")
+		fl.StringVar(&f.proxyNames, "proxy-name", "", "host names and IP addresses of the proxy certificate, comma separated (default: localhost,127.0.0.1,::1)")
+		fl.DurationVar(&f.proxyWait, "proxy-wait", 2*time.Minute, "waiting time for the component under test to connect through the proxy and to reconnect")
 	}
 	fl.StringVar(&f.record, "record", "", "write the observed messages to a capture (JSONL)")
 	fl.StringVar(&f.app, "app", "", "component under test: AppId (Identification Link) or <ServiceType>/<AppId>")

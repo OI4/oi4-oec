@@ -17,6 +17,7 @@ import (
 	"github.com/OI4/oec/conformance/internal/monitor"
 	"github.com/OI4/oec/conformance/internal/mqttwire"
 	"github.com/OI4/oec/conformance/internal/mqttwire/mqtttest"
+	"github.com/OI4/oec/conformance/internal/proxy"
 	"github.com/OI4/oec/conformance/internal/sim"
 	"github.com/OI4/oec/conformance/internal/validate"
 	"github.com/OI4/oec/conformance/internal/verdict"
@@ -29,7 +30,10 @@ type simIndex struct {
 		Fault    string `yaml:"fault"`
 		Status   string `yaml:"status"`
 		Positive bool   `yaml:"positive"`
-		Expect   map[string]struct {
+		// Tests limits the run to these tests (patterns); empty: every
+		// test.
+		Tests  []string `yaml:"tests"`
+		Expect map[string]struct {
 			Outcome verdict.Outcome `yaml:"outcome"`
 			Reqs    []string        `yaml:"reqs"`
 		} `yaml:"expect"`
@@ -60,18 +64,43 @@ const simTimeout = 3 * time.Second
 
 // runSim runs oec-check test (monitor + runner) against the simulated CUT
 // with the fault on a fresh test broker.
-func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, level int) ([]verdict.TestResult, Session) {
+func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, level int, tests []string) ([]verdict.TestResult, Session) {
 	t.Helper()
-	return runSimWith(t, v, reqs, fault, Options{Level: level})
+	return runSimWith(t, v, reqs, fault, Options{Level: level, Tests: tests}, true)
 }
 
-// runSimWith is runSim with the Level and the test selection of opt.
-func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, opt Options) ([]verdict.TestResult, Session) {
+// Credentials of the test broker; it also accepts a CONNECT without
+// credentials (the fault T7-CON-03/anonymous).
+const simUser, simPassword = "oec", "secret"
+
+// runSimWith is runSim with the Level and the test selection of opt; with
+// viaProxy the simulated CUT connects through the proxy attachment
+// (DESIGN.md §3.4), D7 itself directly.
+func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, opt Options, viaProxy bool) ([]verdict.TestResult, Session) {
 	t.Helper()
 	level := opt.Level
 	pki := mqtttest.NewPKI(t)
-	b := mqtttest.NewBroker(t, pki, "", "", false)
-	cfg := mqttwire.Config{Broker: b.URL(), CAFile: pki.CAFile}
+	b := mqtttest.NewBroker(t, pki, simUser, simPassword, false)
+	b.AllowAnonymous()
+	cfg := mqttwire.Config{Broker: b.URL(), CAFile: pki.CAFile, Username: simUser, Password: []byte(simPassword)}
+	cutCfg := cfg
+	var px *proxy.Proxy
+	if viaProxy {
+		host, addr, err := mqttwire.BrokerAddress(b.URL())
+		if err != nil {
+			t.Fatal(err)
+		}
+		up, err := mqttwire.TLSConfig(cfg, host)
+		if err != nil {
+			t.Fatal(err)
+		}
+		px, err = proxy.New(proxy.Config{Listen: "127.0.0.1:0", Upstream: addr, UpstreamTLS: up, CA: pki.CA, CAKey: pki.CAKey, HandshakeTimeout: simTimeout})
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer px.Close()
+		cutCfg.Broker = "mqtts://localhost:" + px.Addr()[strings.LastIndex(px.Addr(), ":")+1:]
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 
@@ -84,11 +113,11 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 	var c *sim.Sim
 	start := func(ctx context.Context) error {
 		var err error
-		c, err = sim.Start(ctx, cfg, fault)
+		c, err = sim.Start(ctx, cutCfg, fault)
 		return err
 	}
 	app := sim.ServiceType + "/" + sim.AppID
-	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start, Tests: opt.Tests}, reqs, observe)
+	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start, Tests: opt.Tests, Proxy: px, ProxyWait: 10 * simTimeout}, reqs, observe)
 	var changed []string
 	if c != nil {
 		var cerr error
@@ -109,7 +138,12 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 	for _, l := range changed {
 		t.Errorf("not restored: %s", l)
 	}
+	writing := false
+	for _, id := range Implemented {
+		writing = writing || (strings.HasPrefix(id, "T7-SET-") || isActionTest(id)) && Selected(opt.Tests, id)
+	}
 	switch rs := s.Probe.Restore; {
+	case rs == nil && !writing:
 	case rs == nil:
 		t.Error("no restore check")
 	case rs.Checked && rs.Restored != (len(changed) == 0), fault == sim.None && !rs.Restored:
@@ -193,9 +227,14 @@ func TestSimFixtures(t *testing.T) {
 				if fx.Fault == "none" {
 					fault = sim.None
 				}
-				res, s := runSim(t, v, reqs, fault, 3)
+				res, s := runSim(t, v, reqs, fault, 3, fx.Tests)
 				results[i].ran = true
 				t.Logf("%d requests", len(s.Probe.Requests))
+				for id := range fx.Expect {
+					if !slices.ContainsFunc(res, func(tr verdict.TestResult) bool { return tr.ID == id && tr.Status == "implemented" }) {
+						t.Errorf("%s: expected, but no implemented test result", id)
+					}
+				}
 				for _, tr := range res {
 					if tr.Status != "implemented" {
 						continue
@@ -291,7 +330,7 @@ func TestSimMaskLevel1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	res, s := runSimWith(t, v, reqs, sim.None, Options{Level: 1, Tests: []string{"T7-SET-01", "T7-SET-05"}})
+	res, s := runSimWith(t, v, reqs, sim.None, Options{Level: 1, Tests: []string{"T7-SET-01", "T7-SET-05"}}, false)
 	for _, q := range s.Probe.Requests {
 		// Oi4v2/<ServiceType>/<AppId>/Set/Config/<Source>/<Filter>
 		p := strings.Split(q.Topic, "/")
@@ -368,7 +407,7 @@ func TestSimActionRequests(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, s := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: []string{"T7-ACT-01", "T7-ACT-04"}})
+	_, s := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: []string{"T7-ACT-01", "T7-ACT-04"}}, false)
 	calls := map[string]int{}
 	for i, q := range s.Probe.Requests {
 		if i > 0 && q.Sent.Before(s.Probe.Requests[i-1].Sent) {
@@ -383,5 +422,36 @@ func TestSimActionRequests(t *testing.T) {
 	}
 	if calls["T7-ACT-01"] != 2 || calls["T7-ACT-04"] != 1 {
 		t.Errorf("calls per test %v, want T7-ACT-01: 2, T7-ACT-04: 1", calls)
+	}
+}
+
+// TestSimNoProxy: without the proxy attachment the connection and life
+// cycle tests are skipped, the run is inconclusive (exit 4, DESIGN.md
+// §3.4).
+func TestSimNoProxy(t *testing.T) {
+	v, err := validate.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	reqs, err := verdict.LoadRequirements()
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, _ := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: []string{"T7-CON-*", "T7-LIFE-*"}}, false)
+	for _, tr := range res {
+		if !isLifecycleTest(tr.ID) {
+			continue
+		}
+		if tr.Outcome != verdict.Skip {
+			t.Errorf("%s: %s, want skip", tr.ID, tr.Outcome)
+		}
+		for _, r := range tr.Reqs {
+			if r.Outcome != verdict.Skip || (r.Inconclusive != verdict.Mandatory(r.Obligation)) {
+				t.Errorf("%s %s: %s inconclusive %t (%s)", tr.ID, r.Req, r.Outcome, r.Inconclusive, r.Obligation)
+			}
+		}
+	}
+	if got := verdict.Exit(res, false); got != verdict.ExitInconclusive {
+		t.Errorf("exit %d, want %d", got, verdict.ExitInconclusive)
 	}
 }

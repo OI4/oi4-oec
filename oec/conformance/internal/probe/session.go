@@ -55,6 +55,10 @@ func RunBus(ctx context.Context, cfg mqttwire.Config, opt Options, reqs verdict.
 	if Selected(opt.Tests, "T7-ADR-02") {
 		v1Err = cl.Subscribe(rctx, V1Namespace+"/#", 1, func(m mqttwire.Message) { msgs <- m })
 	}
+	// The CUT connects through the proxy once D7 sees the bus.
+	if opt.Proxy != nil {
+		opt.Proxy.Serve()
+	}
 	if opt.Subscribed != nil {
 		if err := opt.Subscribed(rctx); err != nil {
 			return s, err
@@ -77,7 +81,7 @@ func RunBus(ctx context.Context, cfg mqttwire.Config, opt Options, reqs verdict.
 				return
 			}
 		}
-		runner.Deliver(Message{Topic: m.Topic, Payload: m.Payload, Received: m.Received})
+		runner.Deliver(Message{Topic: m.Topic, Payload: m.Payload, Received: m.Received, Retain: m.Retain})
 	}
 	done := make(chan struct{})
 	consumed := make(chan struct{})

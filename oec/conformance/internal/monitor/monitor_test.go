@@ -76,6 +76,42 @@ func TestSecondBirth(t *testing.T) {
 	}
 }
 
+// TestLateBirth: after a Will the component reconnects, publishes a Health
+// and then its Birth. REQ-LIFE-001 is fulfilled (the order is REQ-LIFE-015,
+// T7-LIFE-02); the late Birth is no second Birth (C-066).
+func TestLateBirth(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.birth(0, compA)
+	s.will(5, compA, 0)
+	s.health(6, compA, "NORMAL_0", 100)
+	s.birth(7, compA)
+	s.end = 10 * time.Second
+	res := run(t, s, DefaultOptions())
+	if v := find(res, "T7-MON-03", "REQ-LIFE-001", verdict.Violation); len(v) != 0 {
+		t.Errorf("unexpected violation: %+v", v)
+	}
+	if v := find(res, "T7-MON-10", "REQ-IL-012", verdict.Note); len(v) != 0 {
+		t.Errorf("unexpected second Birth note: %+v", v)
+	}
+	if res.Participants[0].Births != 2 {
+		t.Errorf("births %d", res.Participants[0].Births)
+	}
+}
+
+// TestRecoveryBirth: a Health FAILURE_1/0 while connected (not a Will) and
+// the Birth again on recovery (REQ-LIFE-017) is no second Birth.
+func TestRecoveryBirth(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.birth(0, compA)
+	s.health(3, compA, "FAILURE_1", 0)
+	s.birth(5, compA)
+	s.end = 10 * time.Second
+	res := run(t, s, DefaultOptions())
+	if v := find(res, "T7-MON-10", "REQ-IL-012", verdict.Note); len(v) != 0 {
+		t.Errorf("unexpected second Birth note: %+v", v)
+	}
+}
+
 // TestMAMOnChange: a MAM about itself published on change with an
 // incremented RevisionCounter (REQ-RES-MAM-018, published without request,
 // REQ-RES-PUBLIST) is no second Birth; later MAMs are compared with it.

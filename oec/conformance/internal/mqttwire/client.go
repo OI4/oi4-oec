@@ -3,8 +3,7 @@
 // under EDL-1.0) with TLS 1.2/1.3 only – broker verification against a CA
 // file, login with credentials or a client certificate (also an encrypted
 // PKCS#8 key) – and the reader of a container storage (RIG 4.1). The proxy
-// endpoint on the paho packet codec follows with the attachment modes of
-// `test` (DESIGN.md §3.4).
+// attachment of `test` (DESIGN.md §3.4) is internal/proxy.
 package mqttwire
 
 import (
@@ -45,6 +44,11 @@ type Config struct {
 	KeepAlive      time.Duration // default 60 s (REQ-MQTT-014)
 	ConnectTimeout time.Duration // default 10 s
 	Will           *Message      // registered in CONNECT (simulated components)
+	// Deviations of simulated components (T7-CON-01, T7-CON-02): the
+	// protocol level of the CONNECT (default 4, MQTT 3.1.1; 3 is MQTT 3.1)
+	// and the lowest TLS version offered (default TLS 1.2).
+	ProtocolVersion uint
+	MinTLSVersion   uint16
 }
 
 // Message is one PUBLISH.
@@ -85,6 +89,9 @@ func BrokerAddress(broker string) (host, addr string, err error) {
 // certificate if given.
 func TLSConfig(c Config, serverName string) (*tls.Config, error) {
 	tc := &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13, ServerName: serverName, InsecureSkipVerify: c.Insecure}
+	if c.MinTLSVersion != 0 {
+		tc.MinVersion = c.MinTLSVersion
+	}
 	if c.CAFile != "" {
 		pemData, err := os.ReadFile(c.CAFile)
 		if err != nil {
@@ -157,10 +164,13 @@ func Dial(ctx context.Context, c Config) (*Client, error) {
 	if c.ConnectTimeout == 0 {
 		c.ConnectTimeout = 10 * time.Second
 	}
+	if c.ProtocolVersion == 0 {
+		c.ProtocolVersion = 4
+	}
 	cl := &Client{lost: make(chan error, 1)}
 	o := paho.NewClientOptions().
 		AddBroker("tls://" + addr).
-		SetProtocolVersion(4).
+		SetProtocolVersion(c.ProtocolVersion).
 		SetClientID(c.ClientID).
 		SetCleanSession(true).
 		SetKeepAlive(c.KeepAlive).

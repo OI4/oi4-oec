@@ -11,6 +11,7 @@ import (
 
 	"github.com/OI4/oec/conformance/internal/monitor"
 	"github.com/OI4/oec/conformance/internal/probe"
+	"github.com/OI4/oec/conformance/internal/proxy"
 	"github.com/OI4/oec/conformance/internal/verdict"
 )
 
@@ -29,7 +30,7 @@ type Monitor struct {
 	Catalog        string                  `json:"catalog"` // baseline of the test catalog
 	Command        []string                `json:"command"`
 	Mode           string                  `json:"mode"`       // live | replay | test
-	Attachment     string                  `json:"attachment"` // bus
+	Attachment     string                  `json:"attachment"` // bus | proxy
 	Capture        string                  `json:"capture,omitempty"`
 	Broker         string                  `json:"broker,omitempty"`
 	Insecure       bool                    `json:"insecure,omitempty"` // broker certificate not verified
@@ -42,9 +43,11 @@ type Monitor struct {
 	Messages       int                     `json:"messages"`
 	Namespace      int                     `json:"namespace"` // messages in the Oi4v2 namespace
 	Participants   []monitor.Participant   `json:"participants"`
-	Tester         string                  `json:"tester,omitempty"`   // test: PublisherId of D7 in the requests
-	Requests       []probe.Request         `json:"requests,omitempty"` // test: the stimuli in order
-	Restore        *probe.Restore          `json:"restore,omitempty"`  // test: the state of the CUT after the write tests
+	Tester         string                  `json:"tester,omitempty"`       // test: PublisherId of D7 in the requests
+	Requests       []probe.Request         `json:"requests,omitempty"`     // test: the stimuli in order
+	Restore        *probe.Restore          `json:"restore,omitempty"`      // test: the state of the CUT after the write tests
+	ProxyListen    string                  `json:"proxy_listen,omitempty"` // test, proxy attachment: address of the proxy
+	Connections    []proxy.Conn            `json:"connections,omitempty"`  // test, proxy attachment: the connection attempts of the CUT (no payloads, no password)
 	Tests          []verdict.TestResult    `json:"tests"`
 	Summary        map[verdict.Outcome]int `json:"summary"`
 	Error          string                  `json:"error,omitempty"` // why the observation stopped early
@@ -126,6 +129,29 @@ func (r *Monitor) Text(w io.Writer) error {
 		fmt.Fprintf(&b, "tester %s: %d request(s), %d answered\n", r.Tester, len(r.Requests), answered)
 		if rs := r.Restore; rs != nil {
 			b.WriteString(rs.Summary() + "\n")
+		}
+		if r.Attachment == "proxy" {
+			fmt.Fprintf(&b, "proxy %s: %d connection attempt(s)\n", r.ProxyListen, len(r.Connections))
+			for _, c := range r.Connections {
+				fmt.Fprintf(&b, "  #%d %s", c.ID, c.Phase)
+				if c.TLSVersion != "" {
+					fmt.Fprintf(&b, " %s", c.TLSVersion)
+				}
+				if c.HandshakeErr != "" {
+					fmt.Fprintf(&b, " handshake failed (%s)", c.HandshakeErr)
+				}
+				if c.Connect != nil {
+					fmt.Fprintf(&b, " CONNECT %s/%d ClientId %q", c.Connect.ProtocolName, c.Connect.Level, c.Connect.ClientID)
+				}
+				if c.Connack >= 0 {
+					fmt.Fprintf(&b, " CONNACK %d", c.Connack)
+				}
+				fmt.Fprintf(&b, ", %d publish(es)", len(c.Publishes))
+				if c.Dropped {
+					b.WriteString(", dropped")
+				}
+				b.WriteString("\n")
+			}
 		}
 	}
 	b.WriteString("participants:\n")

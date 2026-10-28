@@ -83,6 +83,11 @@ monitor and --record, plus:
   run:        --timeout 10s (waiting time for an answer), --tests ID|GLOB,...
               (repeatable; default all), --tester-il IL (default
               Utility/oi4.org/oec-check/D7/<random>)
+  proxy:      --proxy-listen HOST:PORT --proxy-ca FILE --proxy-ca-key FILE
+              [--proxy-name NAME,...] [--proxy-wait 2m]: the component under
+              test connects to D7 (it trusts --proxy-ca), D7 relays to the
+              broker and judges the connection and lifecycle tests (T7-CON-*,
+              T7-LIFE-*); without the proxy they are skipped (inconclusive)
 
 Exit codes: 0 valid/pass, 1 invalid/fail, 2 usage or input error,
 3 internal error or broker not reachable, 4 inconclusive (monitor, test).

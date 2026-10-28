@@ -19,12 +19,14 @@ import (
 	"time"
 
 	"github.com/OI4/oec/conformance/catalog"
+	"github.com/OI4/oec/conformance/internal/proxy"
 	"github.com/OI4/oec/conformance/internal/verdict"
 )
 
 // Implemented lists the test-mode catalog tests the runner judges (d7.yaml
 // status implemented), in run order.
-var Implemented = []string{"T7-ADR-02", "T7-ADR-03", "T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04",
+var Implemented = []string{"T7-CON-01", "T7-CON-02", "T7-CON-03", "T7-CON-04", "T7-LIFE-01", "T7-LIFE-02", "T7-LIFE-03",
+	"T7-ADR-02", "T7-ADR-03", "T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04",
 	"T7-GET-05", "T7-GET-06", "T7-GET-07", "T7-GET-08", "T7-GET-09", "T7-SET-01", "T7-SET-02", "T7-SET-03", "T7-SET-04",
 	"T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-09", "T7-SET-11", "T7-SET-12",
 	"T7-ACT-01", "T7-ACT-02", "T7-ACT-03", "T7-ACT-04"}
@@ -92,6 +94,17 @@ type Options struct {
 	// first request (tests start the simulated CUT here, so the monitor
 	// sees its Birth message).
 	Subscribed func(context.Context) error
+
+	// Proxy is the proxy attachment (DESIGN.md §3.4); nil: bus attachment,
+	// the connection and life cycle tests are inconclusive. RunBus starts
+	// it after the subscription.
+	Proxy *proxy.Proxy
+	// ProxyWait is the time the CUT has to connect through the proxy, at
+	// the start and after the drop (default 2 min).
+	ProxyWait time.Duration
+	// Tolerance is the allowed difference between the time in the
+	// MessageId of a Will and its CONNECT (REQ-LIFE-016, default 5 s).
+	Tolerance time.Duration
 }
 
 // Request is one stimulus of the run (report).
@@ -147,6 +160,9 @@ type Runner struct {
 	calls       []*call
 	actions     []*actMsg // received on a Reply topic of the CUT
 	provided    []provided
+	retained    []*netMsg // delivered with Retain, from the CUT (T7-CON-04 without proxy)
+	dropped     time.Time // the proxy dropped the connection of the CUT
+	busWill     *netMsg   // Health FAILURE_1 of the CUT about itself after dropped
 }
 
 // New creates a runner; the tester identity is fixed here.
@@ -162,6 +178,12 @@ func New(opt Options, reqs verdict.Requirements, pub PublishFunc) *Runner {
 	}
 	if opt.TesterIL == "" {
 		opt.TesterIL = TesterIL()
+	}
+	if opt.ProxyWait <= 0 {
+		opt.ProxyWait = 2 * time.Minute
+	}
+	if opt.Tolerance <= 0 {
+		opt.Tolerance = 5 * time.Second
 	}
 	r := &Runner{opt: opt, reqs: reqs, pub: pub, seen: map[string]bool{}, tester: "Utility/" + opt.TesterIL, cites: map[string][]string{},
 		used: map[int64]bool{}}
@@ -212,6 +234,7 @@ type Message struct {
 	Topic    string
 	Payload  []byte
 	Received time.Time
+	Retain   bool // delivered as a retained message
 }
 
 type dsm struct {
@@ -376,6 +399,14 @@ func (r *Runner) Deliver(m Message) {
 	if r.app != "" && n.app == r.app && strings.HasSuffix(n.publisherID, "/"+r.app) {
 		r.seen[n.st] = true
 		r.noteUsed(n)
+		if m.Retain {
+			r.retained = append(r.retained, n)
+		}
+		if !r.dropped.IsZero() && r.busWill == nil && n.resource == "Health" && strings.HasSuffix(n.topic, "/"+enc(r.app)) {
+			if state, _, _, ok := health(n); ok && state == "FAILURE_1" {
+				r.busWill = n
+			}
+		}
 	}
 	for _, x := range r.exchanges {
 		switch {
@@ -641,6 +672,11 @@ func (r *Runner) reply(test string, x *exchange, missing ...string) []*netMsg {
 
 // Run discovers the CUT and runs the selected tests.
 func (r *Runner) Run(ctx context.Context) (Result, error) {
+	if r.opt.Proxy != nil {
+		if err := r.awaitProxy(ctx); err != nil {
+			return r.result(), err
+		}
+	}
 	if err := r.discover(ctx); err != nil {
 		return r.result(), err
 	}
@@ -679,7 +715,7 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 		return r.result(), err
 	}
 	for _, id := range Implemented {
-		if !r.Selected(id) || id == "T7-SET-03" {
+		if !r.Selected(id) || id == "T7-SET-03" || isLifecycleTest(id) {
 			continue
 		}
 		// The Action tests run in the write window: the ids the CUT
@@ -709,6 +745,13 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 	if writing {
 		if err := r.checkRestore(ctx); err != nil {
 			return interrupted("restore check", err)
+		}
+	}
+	// The connection and life cycle tests drop the connection of the CUT:
+	// after every other test.
+	if r.lifecycleSelected() {
+		if err := r.lifecycle(ctx); err != nil {
+			return r.result(), err
 		}
 	}
 	// T7-ADR-02 watches the namespace Oi4 during the whole run.

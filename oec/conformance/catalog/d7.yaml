@@ -44,7 +44,7 @@ tests:
     level: 1
     reqs: [REQ-CMP-003, REQ-LIFE-001, REQ-LIFE-002, REQ-LIFE-003]
     status: implemented
-    notes: After a Will or Close the next message of the component is a Birth; the Birth equals the regular Pub MAM about itself and uses its DataSetWriterId.
+    notes: After a Close the next message of the component is a Birth; after a Will a Birth follows on the new connection (that it comes first is REQ-LIFE-015, T7-LIFE-02; C-066); the Birth equals the regular Pub MAM about itself and uses its DataSetWriterId.
   - id: T7-MON-04
     title: MAM and Health for the component and every subordinate asset
     mode: monitor
@@ -91,7 +91,7 @@ tests:
     level: 1
     reqs: [REQ-IL-010, REQ-IL-012]
     status: implemented
-    notes: Heuristic – two live Birth/Health streams or two different MAM for one Identification Link. A unique IL cannot be proven by observation (manual part of the REQs).
+    notes: Heuristic – two live Birth/Health streams or two different MAM for one Identification Link. A unique IL cannot be proven by observation (manual part of the REQs). A late Birth after a Will and the Birth after a reported FAILURE_1/0 (REQ-LIFE-017) are no second Birth (C-066).
   - id: T7-MON-11
     title: No unsolicited publication without content
     mode: monitor
@@ -118,7 +118,7 @@ tests:
     level: 1
     reqs: [REQ-MQTT-019, REQ-RES-PUBLIST-008, REQ-RES-PUBLIST-009, REQ-RES-PUBLIST-010, REQ-RES-PUBLIST-011, REQ-RES-PUBLIST-013, REQ-RES-PUBLIST-014, REQ-RES-PUBLIST-015]
     status: planned
-    notes: The rules are checked against the last published PublicationList (Mode, Interval, Precisions); interval tolerance is a parameter of the run. Cut to C-066 (C-065, G-3.4 b).
+    notes: The rules are checked against the last published PublicationList (Mode, Interval, Precisions); interval tolerance is a parameter of the run. Cut to C-066 (C-065, G-3.4 b), then to C-067 (C-066, G-3.4 b).
   - id: T7-MON-15
     title: PublicationList and SubscriptionList are republished on change
     mode: monitor
@@ -162,7 +162,7 @@ tests:
     level: 1
     needs: [proxy]
     reqs: [REQ-CMP-001, REQ-CMP-009, REQ-MQTT-001]
-    status: planned
+    status: implemented
     notes: Protocol level ≥ 4, ClientId, keep alive, clean session, as seen in the CONNECT packet.
   - id: T7-CON-02
     title: TLS 1.2 or higher only and broker certificate verified
@@ -170,7 +170,7 @@ tests:
     level: 1
     needs: [proxy]
     reqs: [REQ-CMP-002, REQ-MQTT-005, REQ-MQTT-008]
-    status: planned
+    status: implemented
     notes: The proxy offers TLS 1.1 only, then a certificate of an untrusted CA, then a wrong host name; the CUT must not complete an MQTT CONNECT in any of them.
   - id: T7-CON-03
     title: Client authenticates to the broker
@@ -178,14 +178,14 @@ tests:
     level: 1
     needs: [proxy]
     reqs: [REQ-MQTT-009]
-    status: planned
+    status: implemented
   - id: T7-CON-04
     title: No retained messages
     mode: test
     level: 1
     needs: [proxy]
     reqs: [REQ-MQTT-018]
-    status: planned
+    status: implemented
     notes: Without proxy, D7 reports retained deliveries on its own subscribe as evidence (a finding, but no pass).
 
   # --- test: lifecycle ---------------------------------------------------
@@ -195,7 +195,7 @@ tests:
     level: 1
     needs: [proxy]
     reqs: [REQ-CMP-003, REQ-LIFE-008, REQ-LIFE-010, REQ-LIFE-016]
-    status: planned
+    status: implemented
     notes: The Will of each CONNECT; its MessageId timestamp is the connect time (tolerance a parameter).
   - id: T7-LIFE-02
     title: Birth first after every connect and after recovery
@@ -203,7 +203,7 @@ tests:
     level: 1
     needs: [proxy]
     reqs: [REQ-LIFE-001, REQ-LIFE-015, REQ-LIFE-017]
-    status: planned
+    status: implemented
     notes: The proxy drops the connection; the CUT reconnects and publishes its Birth before anything else.
   - id: T7-LIFE-03
     title: Will published on abnormal disconnect
@@ -211,7 +211,7 @@ tests:
     level: 1
     needs: [proxy]
     reqs: [REQ-LIFE-009]
-    status: planned
+    status: implemented
   - id: T7-LIFE-04
     title: Close message before a graceful disconnect
     mode: test

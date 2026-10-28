@@ -39,7 +39,11 @@ type PKI struct {
 	ClientCert, ClientKey string // unencrypted PKCS#8
 	ClientKeyEncrypted    string // PKCS#8 PBES2 (PBKDF2-SHA256, AES-256-CBC)
 	Passphrase            string
-	ca                    *x509.Certificate
+	// CA and CAKey issue the certificates; the proxy attachment of
+	// oec-check test signs its server certificates with them in tests.
+	CA        *x509.Certificate
+	CAKey     *ecdsa.PrivateKey
+	CAKeyFile string // PKCS#8 key of CA (PEM)
 }
 
 func key(t testing.TB) *ecdsa.PrivateKey {
@@ -81,23 +85,30 @@ func NewPKI(t testing.TB) *PKI {
 	}
 	caKey := key(t)
 	var caDER []byte
-	p.ca, caDER = mk(1, "oec test CA", true, &caKey.PublicKey, nil, caKey, nil)
+	p.CA, caDER = mk(1, "oec test CA", true, &caKey.PublicKey, nil, caKey, nil)
+	p.CAKey = caKey
 	p.CAFile = filepath.Join(dir, "ca.pem")
 	write(t, p.CAFile, "CERTIFICATE", caDER)
+	caKeyDER, err := x509.MarshalPKCS8PrivateKey(caKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p.CAKeyFile = filepath.Join(dir, "ca.key")
+	write(t, p.CAKeyFile, "PRIVATE KEY", caKeyDER)
 	otherKey := key(t)
 	_, otherDER := mk(2, "other CA", true, &otherKey.PublicKey, nil, otherKey, nil)
 	p.OtherCAFile = filepath.Join(dir, "other-ca.pem")
 	write(t, p.OtherCAFile, "CERTIFICATE", otherDER)
 
 	bk := key(t)
-	_, bDER := mk(3, "localhost", false, &bk.PublicKey, p.ca, caKey, func(c *x509.Certificate) {
+	_, bDER := mk(3, "localhost", false, &bk.PublicKey, p.CA, caKey, func(c *x509.Certificate) {
 		c.DNSNames, c.IPAddresses = []string{"localhost"}, []net.IP{net.IPv4(127, 0, 0, 1)}
 		c.ExtKeyUsage, c.KeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}, x509.KeyUsageDigitalSignature
 	})
 	p.BrokerCert = tls.Certificate{Certificate: [][]byte{bDER}, PrivateKey: bk}
 
 	ck := key(t)
-	_, cDER := mk(4, "oec-test-client", false, &ck.PublicKey, p.ca, caKey, func(c *x509.Certificate) {
+	_, cDER := mk(4, "oec-test-client", false, &ck.PublicKey, p.CA, caKey, func(c *x509.Certificate) {
 		c.ExtKeyUsage, c.KeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}, x509.KeyUsageDigitalSignature
 	})
 	p.ClientCert = filepath.Join(dir, "client.pem")
@@ -159,8 +170,9 @@ func EncryptPKCS8(t testing.TB, der []byte, passphrase string) []byte {
 	return out
 }
 
-// Broker is a minimal MQTT 3.1.1 broker: CONNECT with a password or a client
-// certificate, SUBSCRIBE (QoS 0/1, filters with + and #), PUBLISH (QoS 0/1,
+// Broker is a minimal MQTT 3.1.1 broker (it also accepts the protocol level
+// 3 of MQTT 3.1, as common brokers do): CONNECT with a password or a client
+// certificate (or without credentials after AllowAnonymous), SUBSCRIBE (QoS 0/1, filters with + and #), PUBLISH (QoS 0/1,
 // delivered in order with min(publish, subscribe) QoS and the retain flag
 // 0), PING, DISCONNECT and the Will on a lost connection. No retained
 // messages, no QoS 2, no sessions.
@@ -171,6 +183,7 @@ type Broker struct {
 	ln       net.Listener
 	mu       sync.Mutex
 	conns    map[*conn]bool
+	anon     bool
 	wg       sync.WaitGroup
 }
 
@@ -186,7 +199,7 @@ type conn struct {
 // pair or – if requireCert – only clients with a certificate of the PKI.
 func NewBroker(t testing.TB, p *PKI, user, password string, requireCert bool) *Broker {
 	pool := x509.NewCertPool()
-	pool.AddCert(p.ca)
+	pool.AddCert(p.CA)
 	tc := &tls.Config{MinVersion: tls.VersionTLS12, Certificates: []tls.Certificate{p.BrokerCert}, ClientCAs: pool}
 	if requireCert {
 		tc.ClientAuth = tls.RequireAndVerifyClientCert
@@ -200,6 +213,14 @@ func NewBroker(t testing.TB, p *PKI, user, password string, requireCert bool) *B
 	go b.accept(requireCert)
 	t.Cleanup(b.Close)
 	return b
+}
+
+// AllowAnonymous makes the broker also accept a CONNECT without user name
+// and password (a component that does not authenticate, T7-CON-03).
+func (b *Broker) AllowAnonymous() {
+	b.mu.Lock()
+	b.anon = true
+	b.mu.Unlock()
 }
 
 // URL returns mqtts://localhost:<port> (the broker certificate names
@@ -265,10 +286,13 @@ func (b *Broker) serve(c *conn, requireCert bool) {
 		return
 	}
 	ack := packets.NewControlPacket(packets.Connack).(*packets.ConnackPacket)
+	b.mu.Lock()
+	anon := b.anon && !cp.UsernameFlag && !cp.PasswordFlag
+	b.mu.Unlock()
 	switch {
-	case cp.ProtocolVersion != 4:
+	case cp.ProtocolVersion != 4 && cp.ProtocolVersion != 3:
 		ack.ReturnCode = packets.ErrRefusedBadProtocolVersion
-	case !requireCert && (cp.Username != b.Username || string(cp.Password) != b.Password):
+	case !requireCert && !anon && (cp.Username != b.Username || string(cp.Password) != b.Password):
 		ack.ReturnCode = packets.ErrRefusedNotAuthorised
 	}
 	c.out <- ack

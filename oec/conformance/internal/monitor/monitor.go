@@ -155,7 +155,9 @@ type part struct {
 	seen       bool
 	state      string // "", "connected", "will", "close"
 	endLine    int
-	birthTS    int64 // MessageId timestamp of the current Birth
+	birthTS    int64             // MessageId timestamp of the current Birth
+	late       *verdict.Evidence // first message after a Will without a Birth before it
+	recovering bool              // a Health FAILURE_1/0 about itself while connected
 	birthID    int64
 	birthMAM   any
 	birthRev   string
@@ -690,7 +692,7 @@ func (e *Engine) lifecycle(p *part, m Message, t *topic.Parsed, msg map[string]a
 	first := p.Messages == 1
 	birth := ds != nil && isBirth(p, t, msg, ds) && !onChange(p, ds)
 	if birth {
-		if p.state == "connected" {
+		if p.state == "connected" && p.late == nil && !p.recovering {
 			e.add("T7-MON-10", "REQ-IL-012", verdict.Note, ev(p, m, "", "a second Birth of %s without Will or Close in between: a second instance with the same Identification Link, or a reconnect whose Will was not published", p.ID))
 		}
 		e.birth(p, m, t, msg, ds)
@@ -707,9 +709,14 @@ func (e *Engine) lifecycle(p *part, m Message, t *topic.Parsed, msg map[string]a
 		if t.Method == "Pub" && t.Resource == "MAM" {
 			e.add(test, "REQ-LIFE-002", verdict.Violation, ev(p, m, "", "%s; a Birth is the Pub MAM about the component itself (Source = AppId)", detail))
 		}
-		e.add(test, req, verdict.Violation, ev(p, m, "", "%s", detail))
 		if req == "REQ-LIFE-001" {
-			e.add(test, "REQ-CMP-003", verdict.Violation, ev(p, m, "", "%s", detail))
+			// A late Birth still fulfils REQ-LIFE-001; that it comes first is
+			// REQ-LIFE-015 (SHOULD, T7-LIFE-02). The violation is reported when
+			// the connection ends or the observation ends without a Birth.
+			x := ev(p, m, "", "%s", detail)
+			p.late = &x
+		} else {
+			e.add(test, req, verdict.Violation, ev(p, m, "", "%s", detail))
 		}
 		p.state = "connected"
 	case "":
@@ -723,6 +730,7 @@ func (e *Engine) lifecycle(p *part, m Message, t *topic.Parsed, msg map[string]a
 	role, d := selfHealth(p, t, ds)
 	switch role {
 	case "close":
+		e.noBirth(p)
 		p.Closes++
 		p.state, p.endLine = "close", m.Line
 		e.check(p, "T7-MON-05", "REQ-LIFE-014")
@@ -731,6 +739,14 @@ func (e *Engine) lifecycle(p *part, m Message, t *topic.Parsed, msg map[string]a
 		at := ts(str(msg, "MessageId"))
 		switch {
 		case p.birthTS > 0 && at >= 0 && at <= p.birthTS:
+			e.noBirth(p)
+			p.Wills++
+			p.state, p.endLine = "will", m.Line
+			e.endConnection(p)
+		case p.birthTS > 0:
+			p.recovering = true
+		case p.late != nil:
+			e.noBirth(p)
 			p.Wills++
 			p.state, p.endLine = "will", m.Line
 			e.endConnection(p)
@@ -739,6 +755,19 @@ func (e *Engine) lifecycle(p *part, m Message, t *topic.Parsed, msg map[string]a
 		}
 	}
 	return false
+}
+
+// noBirth reports a connection after a Will that ended, or an observation
+// that ended, without a Birth (REQ-LIFE-001, REQ-CMP-003).
+func (e *Engine) noBirth(p *part) {
+	if p.late == nil {
+		return
+	}
+	x := *p.late
+	x.Detail += "; no Birth followed on this connection"
+	e.add("T7-MON-03", "REQ-LIFE-001", verdict.Violation, x)
+	e.add("T7-MON-03", "REQ-CMP-003", verdict.Violation, x)
+	p.late = nil
 }
 
 func (e *Engine) endConnection(p *part) {
@@ -751,6 +780,7 @@ func (e *Engine) endConnection(p *part) {
 
 func (e *Engine) birth(p *part, m Message, t *topic.Parsed, msg map[string]any, ds []dsm) {
 	const test = "T7-MON-03"
+	p.late, p.recovering = nil, false
 	p.Births++
 	p.state = "connected"
 	p.setSeen = false
@@ -1032,6 +1062,7 @@ func (e *Engine) Finish(end time.Time) Result {
 
 func (e *Engine) finishLifecycle(p *part) {
 	const test = "T7-MON-03"
+	e.noBirth(p)
 	if p.Births > 0 || p.Messages == 0 {
 		return
 	}

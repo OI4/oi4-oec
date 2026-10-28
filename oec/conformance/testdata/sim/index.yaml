@@ -31,8 +31,18 @@
 # application or the asset with a new DataSetWriterId from 6000 on (Ttl
 # 60 s, kept outside the content model), a request for an unknown Source
 # with BadNotFound and ignores requests it cannot decode or address.
+# Since C-066 the CUT connects through the proxy attachment of D7
+# (DESIGN.md §3.4; D7 itself connects directly): MQTT 3.1.1 over TLS 1.2+
+# with user name and password, a Will (Health FAILURE_1/0 about itself,
+# QoS 0, created anew for every CONNECT with the time of the connect in its
+# MessageId) and the Birth first. After the drop of the proxy it reconnects
+# (every 50 ms) and publishes its Birth again. The test broker requires the
+# credentials but also accepts an anonymous CONNECT (for the fault
+# T7-CON-03/anonymous).
 # internal/probe/sim_test.go runs `oec-check test` (monitor + runner,
-# level 3) against every entry over the in-process TLS test broker.
+# level 3) against every entry over the in-process TLS test broker. An
+# entry may restrict the run to `tests` (patterns of --tests) to keep it
+# short; the tests not selected are skipped.
 #
 # Reviewed by the PO in the C-062 review (2026-10-28, R-1); the entries
 # added or changed in C-063 were reviewed in the C-063 review (2026-10-28,
@@ -47,17 +57,20 @@
 #         other requirements of the test pass or are not applicable).
 #         Every implemented test (monitor and test) not listed passes or is
 #         skipped.
+# tests:  optional selection (--tests patterns); default all
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: reviewed
+    status: draft
     positive: true
     expect: {}
     notes: >-
       The conforming CUT. Every implemented test passes except T7-ADR-02,
       which is skipped (the CUT publishes nothing under Oi4); the monitor
-      tests pass or are skipped (a test run is shorter than the heartbeat
-      and does not see the connect: plain skip, not inconclusive).
+      tests pass or are skipped (a test run is shorter than the heartbeat:
+      plain skip, not inconclusive). Since C-066 through the proxy: T7-CON-01
+      … 04 and T7-LIFE-01 … 03 pass (T7-LIFE-02 skips REQ-LIFE-017, the CUT
+      reports no FAILURE_1/0 while connected); back to draft (C-066).
       REQ-QRY-003 is skipped (the CUT supports the Query) and REQ-CMP-044
       is not stimulated (MAY). Changed in C-063: the new tests T7-GET-03,
       -04, -06, -07, -08 and T7-ADR-02, -03 run against it. Changed in
@@ -402,3 +415,130 @@ fixtures:
     notes: >-
       A request for an unknown Source is not answered instead of with
       BadNotFound and an empty Payload (REQ-ACT-024).
+  - fault: T7-CON-01/mqtt31
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-CON-01: {outcome: fail, reqs: [REQ-CMP-001, REQ-MQTT-001]}
+    notes: >-
+      The CUT connects with MQTT 3.1 (protocol name MQIsdp, level 3) instead
+      of MQTT 3.1.1 (REQ-MQTT-001, REQ-CMP-001).
+  - fault: T7-CON-01/client-id
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-CON-01: {outcome: fail, reqs: [REQ-CMP-009]}
+    notes: >-
+      The CUT uses a new random ClientId on every connection instead of a
+      stable ClientId (REQ-CMP-009, MUST at level 3; SHOULD at level 1 and
+      2, there a warn).
+  - fault: T7-CON-02/tls11
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-CON-02: {outcome: fail, reqs: [REQ-CMP-002, REQ-MQTT-005]}
+    notes: >-
+      The CUT accepts TLS 1.0 and 1.1 (MinVersion TLS 1.0): it completes the
+      CONNECT when the proxy offers TLS 1.1 only (REQ-MQTT-005, REQ-
+      CMP-002).
+  - fault: T7-CON-02/no-verify
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-CON-02: {outcome: fail, reqs: [REQ-CMP-002, REQ-MQTT-008]}
+    notes: >-
+      The CUT does not verify the broker certificate: it completes the
+      CONNECT with the certificate of an untrusted CA and with a certificate
+      for a wrong host name (REQ-MQTT-008, REQ-CMP-002).
+  - fault: T7-CON-03/anonymous
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-CON-03: {outcome: fail, reqs: [REQ-MQTT-009]}
+    notes: >-
+      The CUT connects without user name, password and client certificate;
+      the test broker accepts it (REQ-MQTT-009).
+  - fault: T7-CON-04/retain
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-CON-04: {outcome: fail, reqs: [REQ-MQTT-018]}
+    notes: >-
+      The CUT publishes its Birth (Pub MAM about itself) with the retain
+      flag (REQ-MQTT-018, MUST NOT at level 3), seen in the PUBLISH packet
+      on the proxy.
+  - fault: T7-LIFE-01/no-will
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-LIFE-01: {outcome: fail, reqs: [REQ-CMP-003, REQ-LIFE-008]}
+      T7-MON-10: {outcome: info, reqs: [REQ-IL-012]}
+    notes: >-
+      The CUT registers no Will in its CONNECT (REQ-CMP-003, REQ-LIFE-008).
+      After the drop it reconnects and publishes a new Birth without a Will
+      in between: T7-MON-10 notes a second Birth (info). T7-LIFE-03 has no
+      Will to check (skip).
+  - fault: T7-LIFE-01/stale-will
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-LIFE-01: {outcome: fail, reqs: [REQ-LIFE-016]}
+    notes: >-
+      The CUT registers the fixed Will of MG B1.1.2 (MessageId of 2021) on
+      every connection instead of creating it anew with the time of the
+      connect (REQ-LIFE-016).
+  - fault: T7-LIFE-01/timestamp
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-LIFE-01: {outcome: warn, reqs: [REQ-LIFE-010]}
+    notes: >-
+      The DataSetMessage of the Will carries a Timestamp (REQ-LIFE-010,
+      SHOULD NOT: warn).
+  - fault: T7-LIFE-02/no-birth
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-LIFE-02: {outcome: fail, reqs: [REQ-LIFE-001]}
+      T7-MON-03: {outcome: fail, reqs: [REQ-CMP-003, REQ-LIFE-001]}
+    notes: >-
+      The CUT publishes no Birth after the reconnect (REQ-LIFE-001); the
+      monitor sees the Health after the Will without a Birth on that
+      connection (T7-MON-03, REQ-LIFE-001 and REQ-CMP-003).
+  - fault: T7-LIFE-02/health-first
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-LIFE-02: {outcome: warn, reqs: [REQ-LIFE-015]}
+    notes: >-
+      The CUT publishes its Health before the Birth after the reconnect
+      (REQ-LIFE-015, SHOULD: warn). The late Birth still fulfils REQ-
+      LIFE-001 (T7-MON-03 passes since the C-066 change of the monitor).
+  - fault: T7-LIFE-02/no-rebirth
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-LIFE-02: {outcome: fail, reqs: [REQ-LIFE-017]}
+    notes: >-
+      The CUT reports Health FAILURE_1/0 about itself while connected and
+      recovers to NORMAL_0 without a new Birth (REQ-LIFE-017).
+  - fault: T7-LIFE-02/recovery
+    status: draft
+    positive: true
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    notes: >-
+      The conforming variant of no-rebirth: after FAILURE_1/0 while
+      connected the CUT publishes its Birth again, then the normal Health.
+      T7-LIFE-02 judges REQ-LIFE-017 (pass); T7-MON-10 does not count the
+      recovery Birth as a second Birth (C-066).
+  - fault: T7-LIFE-03/writer-id
+    status: draft
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    expect:
+      T7-LIFE-03: {outcome: fail, reqs: [REQ-LIFE-009]}
+      T7-MON-08: {outcome: fail, reqs: [REQ-MSG-021]}
+    notes: >-
+      The Will uses DataSetWriterId 3999 instead of the DataSetWriterId of
+      the Health of the application (REQ-LIFE-009); T7-MON-08 sees the
+      Health with another DataSetWriterId for the same DataSet (REQ-
+      MSG-021).

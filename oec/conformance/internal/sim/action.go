@@ -125,5 +125,5 @@ func (s *Sim) respond(ctx context.Context, reply, requestor string, correlation 
 	if err != nil {
 		return
 	}
-	_ = s.cl.Publish(ctx, mqttwire.Message{Topic: reply, Payload: payload})
+	_ = s.client().Publish(ctx, mqttwire.Message{Topic: reply, Payload: payload})
 }

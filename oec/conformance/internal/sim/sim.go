@@ -7,6 +7,7 @@ package sim
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -56,13 +57,30 @@ const (
 	SublistNone   Fault = "T7-SET-11/none-writable"  // a Set SubscriptionList may change a NONE_0 entry
 	NoCreate      Fault = "T7-SET-11/no-create"      // variant, conforming: a Set SubscriptionList does not create entries (BadNotSupported)
 	FixedLevel    Fault = "T7-SET-12/fixed-level"    // the Syslog levels of the PublicationList are NONE_0
+
+	// Connection and life cycle (C-066): through the proxy attachment.
+	MQTT31       Fault = "T7-CON-01/mqtt31"        // CONNECT with the protocol level 3 (MQTT 3.1)
+	ClientIDs    Fault = "T7-CON-01/client-id"     // a new random ClientId on every connection
+	TLS11        Fault = "T7-CON-02/tls11"         // also offers TLS 1.0 and 1.1
+	NoVerify     Fault = "T7-CON-02/no-verify"     // does not verify the certificate of the broker
+	Anonymous    Fault = "T7-CON-03/anonymous"     // connects without user name and password (and without a client certificate)
+	Retained     Fault = "T7-CON-04/retain"        // publishes its Birth with Retain
+	NoWill       Fault = "T7-LIFE-01/no-will"      // registers no Will
+	StaleWill    Fault = "T7-LIFE-01/stale-will"   // registers the fixed Will of MG B1.1.2 (MessageId of 2021) on every connection
+	WillTime     Fault = "T7-LIFE-01/timestamp"    // the Will carries a Timestamp
+	NoRebirth    Fault = "T7-LIFE-02/no-birth"     // no Birth after a reconnect
+	HealthFirst  Fault = "T7-LIFE-02/health-first" // the first message of a connection is its Health, the MAM follows
+	FailNoBirth  Fault = "T7-LIFE-02/no-rebirth"   // reports FAILURE_1/0 and recovers to NORMAL_0 without a new Birth
+	FailRecovery Fault = "T7-LIFE-02/recovery"     // variant, conforming: reports FAILURE_1/0 and recovers with a new Birth
+	WillWriter   Fault = "T7-LIFE-03/writer-id"    // the Will uses another DataSetWriterId than the Health
 )
 
 // Faults lists every fault.
 var Faults = []Fault{ReplyTo, AllAssets, Unanswered, Missing, EmptyList, UnknownSource, UnknownKey,
 	DualVersion, Mixed, Case, NoMetadata, FilterIgnored, AssetLevel, PerPage, QueryIgnored, QuerySource, NoRefDes, WrongLocale,
 	NotListed, SetUnknown, SetMetadata, DelPublishes, ConfigName, DataNoPub, MetaNoEvent, PublistMode, DelSilent, RefDesFixed, SublistNone, NoCreate, FixedLevel,
-	NoCorrelation, Progress, Reissue, AnswersUnknown, NoReply}
+	NoCorrelation, Progress, Reissue, AnswersUnknown, NoReply,
+	MQTT31, ClientIDs, TLS11, NoVerify, Anonymous, Retained, NoWill, StaleWill, WillTime, NoRebirth, HealthFirst, FailNoBirth, FailRecovery, WillWriter}
 
 // ServiceType, AppID and Asset identify the simulated CUT: the OT connector
 // of the guideline examples (MG B1.1) with one subordinate asset.
@@ -92,7 +110,8 @@ type model struct {
 	dsms     map[string]map[string][]map[string]any // resource → Source → DataSetMessages; "MAM/de-DE": MAM in German
 	profiles map[string][]string                    // Source → Resources
 	meta     map[string]map[string]any              // Source "|" Tag → Metadata NetworkMessage
-	will     []byte
+	will     []byte                                 // the Will of MG B1.1.2 (V-PAY-025)
+	willDoc  map[string]any                         // the same, decoded: a fresh MessageId per connection
 }
 
 // known top-level keys of a NetworkMessage (MG 8.2.1).
@@ -218,12 +237,17 @@ func load() (*model, error) {
 	if m.will, err = json.Marshal(will); err != nil {
 		return nil, err
 	}
+	m.willDoc = will
 	return m, nil
 }
 
 // Sim is a running simulated CUT.
 type Sim struct {
-	cl    *mqttwire.Client
+	cfg   mqttwire.Config
+	clMu  sync.Mutex
+	cl    *mqttwire.Client // the current connection; client() reads it
+	conns int              // connections so far
+	loop  chan struct{}    // closed when the reconnect loop ends
 	m     *model
 	fault Fault
 	state sync.Mutex // the content model: written by Set and Del, read by Changed
@@ -299,19 +323,28 @@ func build(fault Fault) (*model, error) {
 
 // Start connects the simulated CUT with its Will, subscribes to its Get,
 // Set, Del and Call topics and publishes the Birth message and its Health.
+// When the connection is lost, it reconnects with a fresh Will and
+// publishes its Birth again (MG 6.3.5) until Close.
 func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) {
 	m, err := build(fault)
 	if err != nil {
 		return nil, err
 	}
-	s := &Sim{m: m, fault: fault, gets: make(chan mqttwire.Message, 256), stop: make(chan struct{}), done: make(chan struct{})}
-	cfg.Will = &mqttwire.Message{Topic: topic("Pub", "Health", AppID, ""), Payload: m.will, QoS: 1}
+	s := &Sim{m: m, fault: fault, gets: make(chan mqttwire.Message, 256), stop: make(chan struct{}), done: make(chan struct{}), loop: make(chan struct{})}
 	if cfg.ClientID == "" {
 		cfg.ClientID = mqttwire.ClientID("oec-sim")
 	}
-	if s.cl, err = mqttwire.Dial(ctx, cfg); err != nil {
-		return nil, err
+	switch fault {
+	case MQTT31:
+		cfg.ProtocolVersion = 3
+	case TLS11:
+		cfg.MinTLSVersion = tls.VersionTLS10
+	case NoVerify:
+		cfg.Insecure = true
+	case Anonymous:
+		cfg.Username, cfg.Password, cfg.CertFile, cfg.KeyFile = "", nil, "", ""
 	}
+	s.cfg = cfg
 	// Answers are published from a worker, not from the receive callback
 	// (paho delivers in order and must not block on own publications).
 	go func() {
@@ -325,6 +358,79 @@ func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) 
 			}
 		}
 	}()
+	if err := s.connect(ctx); err != nil {
+		close(s.stop)
+		close(s.loop)
+		<-s.done
+		return nil, err
+	}
+	if fault == FailNoBirth || fault == FailRecovery {
+		if err := s.fail(ctx); err != nil {
+			s.Close()
+			return nil, err
+		}
+	}
+	go s.keep()
+	return s, nil
+}
+
+func (s *Sim) client() *mqttwire.Client {
+	s.clMu.Lock()
+	defer s.clMu.Unlock()
+	return s.cl
+}
+
+// willPayload is the Will of the connection: the Health of the application
+// with FAILURE_1/0, created at connect (MG 6.3.5, REQ-LIFE-016).
+func (s *Sim) willPayload() ([]byte, error) {
+	if s.fault == StaleWill {
+		return s.m.will, nil
+	}
+	doc := map[string]any{}
+	for k, v := range s.m.willDoc {
+		doc[k] = v
+	}
+	doc["MessageId"] = s.nextID()
+	list, _ := doc["Messages"].([]any)
+	d := map[string]any{}
+	if len(list) == 1 {
+		src, _ := list[0].(map[string]any)
+		for k, v := range src {
+			d[k] = v
+		}
+	}
+	switch s.fault {
+	case WillTime:
+		d["Timestamp"] = time.Now().UTC().Format(time.RFC3339Nano)
+	case WillWriter:
+		d["DataSetWriterId"] = 3999.0
+	}
+	doc["Messages"] = []any{d}
+	return json.Marshal(doc)
+}
+
+// connect establishes one connection: Will, subscriptions and Birth.
+func (s *Sim) connect(ctx context.Context) error {
+	cfg := s.cfg
+	if s.fault != NoWill {
+		will, err := s.willPayload()
+		if err != nil {
+			return err
+		}
+		cfg.Will = &mqttwire.Message{Topic: topic("Pub", "Health", AppID, ""), Payload: will}
+	}
+	if s.fault == ClientIDs {
+		cfg.ClientID = mqttwire.ClientID("oec-sim")
+	}
+	cl, err := mqttwire.Dial(ctx, cfg)
+	if err != nil {
+		return err
+	}
+	s.clMu.Lock()
+	s.cl = cl
+	n := s.conns
+	s.conns++
+	s.clMu.Unlock()
 	receive := func(m mqttwire.Message) {
 		select {
 		case s.gets <- m:
@@ -332,40 +438,99 @@ func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) 
 		}
 	}
 	for _, method := range []string{"Get", "Set", "Del", "Call"} {
-		if err := s.cl.Subscribe(ctx, topic(method, "#", "", ""), 1, receive); err != nil {
-			s.Close()
-			return nil, err
+		if err := cl.Subscribe(ctx, topic(method, "#", "", ""), 1, receive); err != nil {
+			cl.Kill()
+			return err
 		}
 	}
-	for _, res := range []string{"MAM", "Health"} {
+	birth := []string{"MAM", "Health"}
+	switch {
+	case s.fault == NoRebirth && n > 0:
+		birth = []string{"Health"}
+	case s.fault == HealthFirst:
+		birth = []string{"Health", "MAM"}
+	}
+	for _, res := range birth {
 		if err := s.publish(ctx, res, AppID, "", "", s.m.dsms[res][AppID]); err != nil {
-			s.Close()
-			return nil, err
+			cl.Kill()
+			return err
 		}
 	}
-	if fault == DualVersion || fault == Mixed {
+	if s.fault == DualVersion || s.fault == Mixed {
 		if err := s.publishV1(ctx, ""); err != nil {
-			s.Close()
-			return nil, err
+			cl.Kill()
+			return err
 		}
 	}
-	return s, nil
+	return nil
+}
+
+// health publishes the Health of the application with the given state.
+func (s *Sim) health(ctx context.Context, state string, score float64) error {
+	h := s.m.dsms["Health"][AppID][0]
+	d := map[string]any{}
+	for k, v := range h {
+		d[k] = v
+	}
+	d["Payload"] = map[string]any{"Health": state, "HealthScore": score}
+	return s.publish(ctx, "Health", AppID, "", "", []map[string]any{d})
+}
+
+// fail reports FAILURE_1/0 and recovers (FailNoBirth, FailRecovery): with
+// a new Birth only for FailRecovery (REQ-LIFE-017).
+func (s *Sim) fail(ctx context.Context) error {
+	if err := s.health(ctx, "FAILURE_1", 0); err != nil {
+		return err
+	}
+	if s.fault == FailRecovery {
+		if err := s.publish(ctx, "MAM", AppID, "", "", s.m.dsms["MAM"][AppID]); err != nil {
+			return err
+		}
+	}
+	return s.publish(ctx, "Health", AppID, "", "", s.m.dsms["Health"][AppID])
+}
+
+// keep reconnects after a lost connection until Close.
+func (s *Sim) keep() {
+	defer close(s.loop)
+	for {
+		select {
+		case <-s.client().Lost():
+		case <-s.stop:
+			return
+		}
+		for {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			err := s.connect(ctx)
+			cancel()
+			if err == nil {
+				break
+			}
+			select {
+			case <-time.After(50 * time.Millisecond):
+			case <-s.stop:
+				return
+			}
+		}
+	}
+}
+
+// Connections returns the number of connections so far.
+func (s *Sim) Connections() int {
+	s.clMu.Lock()
+	defer s.clMu.Unlock()
+	return s.conns
 }
 
 // Close stops answering, publishes the Close message and disconnects.
 func (s *Sim) Close() {
 	close(s.stop)
+	<-s.loop
 	<-s.done
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	h := s.m.dsms["Health"][AppID][0]
-	closing := map[string]any{}
-	for k, v := range h {
-		closing[k] = v
-	}
-	closing["Payload"] = map[string]any{"Health": "NORMAL_0", "HealthScore": 0.0}
-	_ = s.publish(ctx, "Health", AppID, "", "", []map[string]any{closing})
-	s.cl.Close()
+	_ = s.health(ctx, "NORMAL_0", 0)
+	s.client().Close()
 }
 
 func (s *Sim) nextID() string {
@@ -393,7 +558,7 @@ func (s *Sim) publishV1(ctx context.Context, correlation string) error {
 	if err != nil {
 		return err
 	}
-	return s.cl.Publish(ctx, mqttwire.Message{Topic: V1Topic, Payload: payload})
+	return s.client().Publish(ctx, mqttwire.Message{Topic: V1Topic, Payload: payload})
 }
 
 func (s *Sim) publish(ctx context.Context, res, source, filter, replyTo string, dsms []map[string]any) error {
@@ -417,7 +582,9 @@ func (s *Sim) publishID(ctx context.Context, id, res, source, filter, replyTo st
 	if err != nil {
 		return err
 	}
-	return s.cl.Publish(ctx, mqttwire.Message{Topic: topic("Pub", res, source, filter), Payload: payload})
+	// Retained: the Birth (MAM of the application, no answer) is retained.
+	retain := s.fault == Retained && res == "MAM" && source == AppID && replyTo == ""
+	return s.client().Publish(ctx, mqttwire.Message{Topic: topic("Pub", res, source, filter), Payload: payload, Retain: retain})
 }
 
 func contains(s []string, x string) bool {
@@ -558,7 +725,7 @@ func (s *Sim) metadata(ctx context.Context, source, tag, replyTo string) {
 	if err != nil {
 		return
 	}
-	_ = s.cl.Publish(ctx, mqttwire.Message{Topic: topic("Pub", "Metadata", source, tag), Payload: payload})
+	_ = s.client().Publish(ctx, mqttwire.Message{Topic: topic("Pub", "Metadata", source, tag), Payload: payload})
 }
 
 // handle answers one Get, Set, Del or Call.
