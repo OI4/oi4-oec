@@ -165,3 +165,13 @@ No behaviour change: the SDK already implemented both proposals (C-060). The doc
 Unchanged: **P4 increment 10 (`oec-ffi`)** in a **new agent** (G-3.10: this addendum is a short follow-up of the same topic; increment 10 starts a new crate and my context was compacted several times). `prompt.md` is updated: baseline `eb7889c` (head `4fac7d2`), SF-001 … 113 resolved, 1406 items, 442 REQs, R-1 (REQ-ACT-017/023/024) open – apply first if answered; the item "apply the PO decisions" reduced to that.
 
 Next free ids: SF-114; REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029; V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129; ADR-0027, Q-031, A-145 (REQ-ACT-025 is the next ACT id).
+
+## Addendum 2 – PO review: R-1 (2026-10-28)
+
+The PO wrote "R-1 akzeptiert".
+
+- `spectool review REQ-ACT-017,REQ-ACT-023,REQ-ACT-024` → `reviewed`; `lint`, `render`, `coverage` OK (442 REQs, 158 `schema`/`d7-validate` REQs with 0 gaps). No REQ drafts left, no vector or test-data drafts.
+- No change to the SDK, schema, catalogs or vectors.
+- Checks: `oec/check.sh` – all checks passed.
+- For the PO: nothing open (no D-x, no R-x).
+- Next: unchanged – **P4 increment 10 (`oec-ffi`)** in a **new agent** (G-3.10); `prompt.md` updated (no open review item, no drafts).

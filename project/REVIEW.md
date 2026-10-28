@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-060 review (you accepted D-1/D-2 = SF-112/113 and R-1 of C-059; guideline `eb7889c`, no open finding). **Open: R-1 = REQ-ACT-017, -023 and the new REQ-ACT-024** (follow SF-112/113). A-137 … A-144 for information._
+_Last updated: 2026-10-28, C-060 review addendum 2 (you accepted R-1 = REQ-ACT-017, -023, -024 → `reviewed`). **Nothing open for the PO.** A-137 … A-144 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -106,6 +106,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Guideline `eb7889c`: MG 8.4.1 (the `Set` that creates a `DataSet` carries the provided id; a listed id stays) and MG 9.2.1 (unknown Source → `BadNotFound`, empty Payload); register `4fac7d2`, SF-001 … 113 resolved, no open finding.
   - Re-baseline: 1406 items, 442 REQs, 0 gaps; **new REQ-ACT-024**, notes on REQ-ACT-017/023 → **R-1**. Schema `2.0.1-dev` @ `eb7889c` (no content change), D7 test T7-ACT-04 (`planned`) for REQ-ACT-024.
   - SDK: no behaviour change (it already did both); cites REQ-ACT-024.
+- C-060 review addendum 2: you accepted R-1 → REQ-ACT-017, -023, -024 `reviewed`; 0 drafts, nothing open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
@@ -115,7 +116,6 @@ Logs: [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| R-1 | REQ-ACT-017, REQ-ACT-023 and the new REQ-ACT-024 after SF-112/SF-113 (MG 8.4.1/9.2.1 `eb7889c`) | review | C-060 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -263,16 +263,10 @@ Logs: [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-
 
 ## Decisions and review items
 
-### R-1 – REQ-ACT-017, -023, -024 after SF-112/SF-113 (MG 8.4.1, 9.2.1)
-
-- **Why:** your decisions D-1/D-2 changed MG 8.4.1 and MG 9.2.1 (`eb7889c`); two reviewed REQs get notes and are back to `draft`, one REQ is new. View: `oec/spec/requirements/view/act.md`.
-- **REQ-ACT-017** (MUST NOT, responder; D7 `test` T7-ACT-03): statement unchanged; new note: "cannot address" refers to the DataSetWriterId and ActionTargetId of the Action, not to the Source of the topic – a request for an unknown Source is answered with `BadNotFound` (REQ-ACT-024, SF-113).
-- **REQ-ACT-023** (MUST, requester + responder; D7 `test` T7-ACT-02): statement unchanged; refs + SF-112; new quote (the MG 8.4.1 sentence); note extended: the creating `Set` carries the provided id; a `DataSet` already listed in the `PublicationList` keeps its listed id and the provided one lapses after `Ttl`; an id not used within `Ttl` is not handed out again as long as never-used ones are left ("so far unused", REQ-ACT-022, REQ-MSG-020).
-- **REQ-ACT-024 (new)** (MUST, responder; D7 `test` T7-ACT-04, `planned`): "A Responder that neither is nor represents the Source of a NewDataSetWriterId request answers it with the final ActionResponse (ActionState 2) with the Status BadNotFound (0x803E0000) and an empty Payload." Inventory MG-9.2.1-07feb514. A new REQ rather than a change of REQ-ACT-017, because it is a positive MUST next to a MUST NOT.
-- **Impact:** none on the SDK (it already behaves like this, now cites REQ-ACT-024), the schema or the vectors; the D7 catalog has the new test T7-ACT-04.
-- **PO:** ☐ accepted ☐ changes: …
-
 ### Answered earlier
+
+Answered after the C-060 review (2026-10-28) and applied in C-060 addendum 2:
+- R-1 – REQ-ACT-017, -023 and the new REQ-ACT-024 after SF-112/SF-113: ☑ accepted → `reviewed`.
 
 Answered in the C-060 review (2026-10-28) and applied in C-060 addendum 1:
 - D-1 – SF-112 (what a provided `DataSetWriterId` is for; reuse): ☑ as proposed → guideline `eb7889c` (MG 8.4.1), SF-112 resolved (`4fac7d2`), re-baseline, REQ-ACT-023 → R-1.
@@ -804,5 +798,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-061)
 
-1. Apply your answer to R-1 (REQ-ACT-017, -023, -024; `spectool review`).
-2. P4 increment 10 – `oec-ffi` (the C ABI on `oec`, generated `oec.h` checked against the contract, plus the Action; C examples as tests, also under AddressSanitizer). Runs in a new agent (start prompt in `prompt.md`).
+1. P4 increment 10 – `oec-ffi` (the C ABI on `oec`, generated `oec.h` checked against the contract, plus the Action; C examples as tests, also under AddressSanitizer). Runs in a new agent (start prompt in `prompt.md`).

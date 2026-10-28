@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, nach dem Review von C-060 (du hast D-1 = SF-112, D-2 = SF-113 und R-1 aus C-059 wie vorgeschlagen angenommen; alles ist eingetragen). **Für dich offen: ein Review (R-1 = REQ-ACT-017, -023 und die neue REQ-ACT-024).**_
+_Stand: 28.10.2026, nach deiner Antwort „R-1 akzeptiert“ (REQ-ACT-017, -023, -024 sind `reviewed`). **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Dein Review zu C-060 ist eingetragen** (D-1, D-2 und R-1 aus C-059, siehe unten „Was aus deinem letzten Review (C-060) geworden ist“). Daraus ist ein neues R-1 entstanden (unten).
+**Dein Review zu C-060 ist eingetragen** (D-1, D-2 und R-1 aus C-059, siehe unten „Was aus deinem letzten Review (C-060) geworden ist“). Das daraus entstandene R-1 (REQ-ACT-017, -023, -024) hast du akzeptiert; die drei Regeln sind `reviewed`. **Für dich ist nichts offen.**
 
 Zur Erinnerung – C-060 war **P4 Inkrement 8c**. Ich habe es nicht weiter geteilt (**A-137**). Reihenfolge jetzt: 8c → 10 (C-Schnittstelle `oec-ffi`).
 - **Die Aktion `NewDataSetWriterId` (MG 9.2):** Eine App kann eine andere App fragen: „Gib mir eine neue, freie Datensatz-Nummer (DataSetWriterId) für eine Ressource.“ Gebraucht wird das, wenn ein IT-Programm in einem OT-Connector etwas Neues anlegen will (z. B. eine ReferenceDesignation für ein Gerät).
@@ -36,18 +36,6 @@ Zur Erinnerung – C-060 war **P4 Inkrement 8c**. Ich habe es nicht weiter getei
 - Keine neue Bibliothek, nichts Reviewtes geändert, keine neuen Testdaten.
 
 Die Technik-Entscheidungen A-137 … A-144 sind nur zur Info (unten). Einen Blick wert: **A-139** (Reservierung), **A-142** (Form der Funktion) und **A-143** (Abschied von der Skizze).
-
-### R-1 – Drei Regeln zur Aktion folgen deinen Entscheidungen (reviewen)
-
-**Warum:** Deine Entscheidungen D-1/D-2 haben MG 8.4.1 und MG 9.2.1 geändert (Guideline `eb7889c`). Zwei Regeln, die du schon abgenommen hattest, haben eine Notiz bekommen und stehen deshalb wieder auf `draft`; eine Regel ist neu. Lesbar in `oec/spec/requirements/view/act.md`.
-
-- **REQ-ACT-017** (die antwortende App; „eine Anfrage, die nicht zugeordnet werden kann, wird nicht beantwortet“): Der Regeltext bleibt. Neu ist die Notiz: „Nicht zugeordnet“ meint die technische Adresse der Aktion (Nummern 8/1), nicht das Gerät im Topic. Eine Frage nach einem unbekannten Gerät wird mit `BadNotFound` beantwortet (REQ-ACT-024). (D-2)
-- **REQ-ACT-023** (Fragender und antwortende App; „die geholte Nummer gilt `Ttl` Sekunden“): Der Regeltext bleibt. Neu sind der Verweis auf SF-112, der neue Satz aus MG 8.4.1 als Zitat und die Notiz: Das `Set`, das den Datensatz anlegt, trägt die geholte Nummer. Zeigt die App für den Datensatz schon eine Nummer in ihrer `PublicationList`, gilt diese, und die geholte verfällt nach `Ttl`. Eine ungenutzte geholte Nummer wird nicht wieder vergeben, solange es noch nie benutzte gibt. (D-1)
-- **REQ-ACT-024 (neu)** (die antwortende App; MUST): „Ist oder vertritt die App die `<Source>` einer `NewDataSetWriterId`-Frage nicht, antwortet sie mit der abschließenden Antwort (`ActionState` 2) mit dem Status `BadNotFound` und leerem Inhalt.“ Ich habe dafür eine neue Regel angelegt, statt REQ-ACT-017 zu ändern: -017 ist ein Verbot („nicht antworten“), -024 ein Gebot („mit Fehler antworten“). Getrennt lässt sich beides sauberer prüfen. Dazu gibt es im D7-Katalog den geplanten Test T7-ACT-04. (D-2)
-
-**Auswirkung:** keine aufs SDK (es macht beides schon so und nennt jetzt REQ-ACT-024), aufs Schema oder auf die Testdaten.
-
-**Was du tun musst:** „R-1 akzeptiert“ oder Änderungswünsche.
 
 ### Zu deiner Frage: Ja, der Zweck der SubscriptionList ist verständlich
 
@@ -461,8 +449,7 @@ Neu aus C-060 (P4 Inkrement 8c):
 
 ### Was als Nächstes passiert (C-061)
 
-1. **Deine Antwort eintragen:** R-1 (REQ-ACT-017, -023, -024).
-2. **P4 Inkrement 10 – `oec-ffi`:** die C-Schnittstelle auf dem SDK nach dem Vertrag `oec.h`, dazu die Aktion; die C-Beispiele laufen als Tests (auch mit AddressSanitizer).
+1. **P4 Inkrement 10 – `oec-ffi`:** die C-Schnittstelle auf dem SDK nach dem Vertrag `oec.h`, dazu die Aktion; die C-Beispiele laufen als Tests (auch mit AddressSanitizer).
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
@@ -550,7 +537,7 @@ Du hast geschrieben: „Ich habe alle Punkte reviewed und akzeptiere deine Vorsc
   - D-2 (SF-113, MG 9.2.1): „Ist oder vertritt die Anwendung die `<Source>` nicht, antwortet sie mit der abschließenden `ActionResponse` mit dem `Status` `BadNotFound` und leerem `Payload`.“
 - **Register:** SF-112 und SF-113 sind „resolved“ (`4fac7d2`). Kein offenes Finding; das nächste heißt SF-114.
 - **Neu-Baseline auf `eb7889c`:** 1406 Guideline-Stellen (vorher 1405; der Satz aus D-2 ist neu, der aus D-1 enthält kein Schlüsselwort wie „muss“ und zählt deshalb nicht als eigene Stelle), 442 Regeln, 0 Lücken. Schema bleibt `2.0.1-dev`, nur die Baseline ist neu. D7/D8-Kataloge auf `eb7889c`.
-- **Regeln:** REQ-ACT-017 und -023 bekommen Notizen, REQ-ACT-024 ist neu → R-1 (oben).
+- **Regeln:** REQ-ACT-017 und -023 bekommen Notizen, REQ-ACT-024 ist neu → R-1, von dir akzeptiert (Nachtrag 2) → `reviewed`.
 - **R-1 aus C-059 (REQ-RES-SUBLIST-004, -010, -016):** akzeptiert → `reviewed`.
 - **SDK:** keine Verhaltensänderung; es hat beides schon so umgesetzt.
 
@@ -592,6 +579,18 @@ Dazu ein Satz in MG 8.4.1: „Das `Set`, das den `DataSet` anlegt, trägt diese 
 - **REQ-RES-SUBLIST-016** (die App): Nicht eingetragen werden die eigenen **Anfrage**-Abos (`Get`, `Del`) und die **kurzen Abos für Antworten**. Die `Pub`-Abos auf die eigene `AppId` (wie in B1.1.9) bleiben drin. Der Titel ist kürzer geworden (das Feld hat höchstens 100 Zeichen). (D-1, D-2)
 
 **Auswirkung:** keine auf das SDK (es macht es schon so), das Schema oder die Testdaten. Beim künftigen D7-Test T7-SET-11 steht jetzt eine Notiz: Lehnt die App das Anlegen ab, ist das kein Fehler.
+
+**Was du tun musst:** „R-1 akzeptiert“ oder Änderungswünsche.
+
+#### R-1 – Drei Regeln zur Aktion folgen deinen Entscheidungen (akzeptiert)
+
+**Warum:** Deine Entscheidungen D-1/D-2 haben MG 8.4.1 und MG 9.2.1 geändert (Guideline `eb7889c`). Zwei Regeln, die du schon abgenommen hattest, haben eine Notiz bekommen und stehen deshalb wieder auf `draft`; eine Regel ist neu. Lesbar in `oec/spec/requirements/view/act.md`.
+
+- **REQ-ACT-017** (die antwortende App; „eine Anfrage, die nicht zugeordnet werden kann, wird nicht beantwortet“): Der Regeltext bleibt. Neu ist die Notiz: „Nicht zugeordnet“ meint die technische Adresse der Aktion (Nummern 8/1), nicht das Gerät im Topic. Eine Frage nach einem unbekannten Gerät wird mit `BadNotFound` beantwortet (REQ-ACT-024). (D-2)
+- **REQ-ACT-023** (Fragender und antwortende App; „die geholte Nummer gilt `Ttl` Sekunden“): Der Regeltext bleibt. Neu sind der Verweis auf SF-112, der neue Satz aus MG 8.4.1 als Zitat und die Notiz: Das `Set`, das den Datensatz anlegt, trägt die geholte Nummer. Zeigt die App für den Datensatz schon eine Nummer in ihrer `PublicationList`, gilt diese, und die geholte verfällt nach `Ttl`. Eine ungenutzte geholte Nummer wird nicht wieder vergeben, solange es noch nie benutzte gibt. (D-1)
+- **REQ-ACT-024 (neu)** (die antwortende App; MUST): „Ist oder vertritt die App die `<Source>` einer `NewDataSetWriterId`-Frage nicht, antwortet sie mit der abschließenden Antwort (`ActionState` 2) mit dem Status `BadNotFound` und leerem Inhalt.“ Ich habe dafür eine neue Regel angelegt, statt REQ-ACT-017 zu ändern: -017 ist ein Verbot („nicht antworten“), -024 ein Gebot („mit Fehler antworten“). Getrennt lässt sich beides sauberer prüfen. Dazu gibt es im D7-Katalog den geplanten Test T7-ACT-04. (D-2)
+
+**Auswirkung:** keine aufs SDK (es macht beides schon so und nennt jetzt REQ-ACT-024), aufs Schema oder auf die Testdaten.
 
 **Was du tun musst:** „R-1 akzeptiert“ oder Änderungswünsche.
 
