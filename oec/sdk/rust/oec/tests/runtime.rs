@@ -155,9 +155,10 @@ fn listed_ids(p: &Publish) -> Vec<u64> {
 
 /// The sorted filters a Level 2 application subscribes below `prefix`.
 fn served_filters(prefix: &str) -> Vec<String> {
-    ["ReferenceDesignation", "SubscriptionList"]
-        .map(|r| format!("{prefix}Del/{r}/#"))
+    ["NewDataSetWriterId", "NewDataSetWriterId/+"]
+        .map(|r| format!("{prefix}Call/{r}"))
         .into_iter()
+        .chain(["ReferenceDesignation", "SubscriptionList"].map(|r| format!("{prefix}Del/{r}/#")))
         .chain(
             [
                 "Config",
@@ -782,7 +783,8 @@ fn level_2_publishes_its_sources_and_answers_get() {
             "Event",
             "Profile",
             "PublicationList",
-            "SubscriptionList"
+            "SubscriptionList",
+            "NewDataSetWriterId"
         ])
     );
 

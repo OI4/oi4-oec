@@ -11,13 +11,18 @@ pub struct StatusCode(pub u32);
 
 /// The StatusCodes the provider uses, with symbolic id and description
 /// (OPC UA Part 6 A.2, `StatusCode.csv`).
-const KNOWN: [(StatusCode, &str, &str); 11] = [
+const KNOWN: [(StatusCode, &str, &str); 12] = [
     (StatusCode::GOOD, "Good", "The operation succeeded."),
     (StatusCode::BAD, "Bad", "The operation failed."),
     (
         StatusCode::BAD_INTERNAL_ERROR,
         "BadInternalError",
         "An internal error occurred as a result of a programming or configuration error.",
+    ),
+    (
+        StatusCode::BAD_RESOURCE_UNAVAILABLE,
+        "BadResourceUnavailable",
+        "An operating system resource is not available.",
     ),
     (
         StatusCode::BAD_DECODING_ERROR,
@@ -68,6 +73,8 @@ impl StatusCode {
     pub const BAD: Self = Self(0x8000_0000);
     /// `BadInternalError` (0x80020000).
     pub const BAD_INTERNAL_ERROR: Self = Self(0x8002_0000);
+    /// `BadResourceUnavailable` (0x80040000).
+    pub const BAD_RESOURCE_UNAVAILABLE: Self = Self(0x8004_0000);
     /// `BadDecodingError` (0x80070000).
     pub const BAD_DECODING_ERROR: Self = Self(0x8007_0000);
     /// `BadUserAccessDenied` (0x801F0000).

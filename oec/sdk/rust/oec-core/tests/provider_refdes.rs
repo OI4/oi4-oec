@@ -386,7 +386,8 @@ fn profile_and_publication_list_name_the_resource() {
             "ReferenceDesignation",
             "Event",
             "Profile",
-            "PublicationList"
+            "PublicationList",
+            "NewDataSetWriterId"
         ])
     );
     let list = json_of(out.last().unwrap());

@@ -136,35 +136,39 @@ fn level_1_serves_no_get() {
 }
 
 /// `Get` of the served resources, `Set` and `Del` of the resources they
-/// address, to this application.
+/// address and `Call NewDataSetWriterId`, to this application.
 fn assert_subscriptions(p: &Provider) {
+    let mut expected: Vec<String> = [
+        "Get/MAM",
+        "Get/Health",
+        "Get/Config",
+        "Get/Data",
+        "Get/Metadata",
+        "Get/Profile",
+        "Get/PublicationList",
+        "Get/SubscriptionList",
+        "Set/Data",
+        "Set/Metadata",
+        "Set/Config",
+        "Set/PublicationList",
+        "Set/SubscriptionList",
+        "Set/ReferenceDesignation",
+        "Del/SubscriptionList",
+        "Del/ReferenceDesignation",
+    ]
+    .map(|r| {
+        let (method, resource) = r.split_once('/').unwrap();
+        topic(method, &format!("{resource}/#"))
+    })
+    .into();
+    expected.push(topic("Call", "NewDataSetWriterId"));
+    expected.push(topic("Call", "NewDataSetWriterId/+"));
     assert_eq!(
         p.subscriptions()
             .iter()
             .map(ToString::to_string)
             .collect::<Vec<_>>(),
-        [
-            "Get/MAM",
-            "Get/Health",
-            "Get/Config",
-            "Get/Data",
-            "Get/Metadata",
-            "Get/Profile",
-            "Get/PublicationList",
-            "Get/SubscriptionList",
-            "Set/Data",
-            "Set/Metadata",
-            "Set/Config",
-            "Set/PublicationList",
-            "Set/SubscriptionList",
-            "Set/ReferenceDesignation",
-            "Del/SubscriptionList",
-            "Del/ReferenceDesignation",
-        ]
-        .map(|r| {
-            let (method, resource) = r.split_once('/').unwrap();
-            topic(method, &format!("{resource}/#"))
-        })
+        expected
     );
 }
 
@@ -247,7 +251,8 @@ fn connect_publishes_the_state_of_every_source() {
             "Event",
             "Profile",
             "PublicationList",
-            "SubscriptionList"
+            "SubscriptionList",
+            "NewDataSetWriterId"
         ])
     );
     // the Health set while offline

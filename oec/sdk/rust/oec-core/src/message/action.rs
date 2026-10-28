@@ -25,6 +25,11 @@ pub trait ActionPayload: Serialize + DeserializeOwned {
     const COMMON: Option<(u16, u16)> = None;
 }
 
+/// Fields not decoded yet: a responder reads the Payload of each
+/// ActionRequest on its own, so that a field that breaks a constraint
+/// fails only its request (REQ-ACT-014).
+impl ActionPayload for Value {}
+
 /// TimeoutHint: Duration in milliseconds, greater than 0 (REQ-ACT-002,
 /// REQ-ACT-008, REQ-ACT-009).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]

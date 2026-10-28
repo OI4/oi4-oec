@@ -17,6 +17,7 @@
 //! changes only mark the state, and [`Provider::on_connected`] publishes
 //! the current state of every source.
 
+mod action;
 pub mod config;
 pub mod data;
 mod events;
@@ -46,8 +47,10 @@ use crate::resource::{
     ReferenceDesignationQuery,
 };
 use crate::topic::{
-    Filter, ListFilter, Method, Resource, StatusLevel, Subject, Topic, TopicError, TopicFilter,
+    Filter, ListFilter, Method, Resource, Service, StatusLevel, Subject, Topic, TopicError,
+    TopicFilter,
 };
+pub use action::WRITER_ID_TTL_SECONDS;
 use config::ConfigEntry;
 pub use config::{ConfigSpec, SetConfigRequest, StoredConfigValues};
 use data::{DataSetSpec, Value as FieldValue};
@@ -195,13 +198,14 @@ impl From<TopicError> for ProviderError {
 pub enum Ignored {
     /// The topic is no OEC topic.
     Topic(TopicError),
-    /// Not a `Get`, `Set` or `Del` to this application.
+    /// Not a `Get`, `Set`, `Del` or `Call` to this application.
     NotForUs,
     /// The application does not serve this resource with `Get`, `Set` or
     /// `Del` (or not at Level 1).
     NotServed(Subject),
     /// The payload is no `Get`, `Set` or `Del` NetworkMessage with a valid
-    /// MessageId.
+    /// MessageId, or no `ua-action-request` this application answers
+    /// (REQ-ACT-017).
     Payload(String),
     /// A `Get` of Metadata without Source and Tag or for a DataSet the
     /// application does not provide; silence is conformant (REQ-CMP-044).
@@ -212,7 +216,7 @@ impl fmt::Display for Ignored {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Topic(e) => write!(f, "no OEC topic: {e}"),
-            Self::NotForUs => f.write_str("not a Get, Set or Del to this application"),
+            Self::NotForUs => f.write_str("not a Get, Set, Del or Call to this application"),
             Self::NotServed(s) => write!(f, "{s} is not served"),
             Self::Payload(e) => write!(f, "invalid payload: {e}"),
             Self::NoMetadata(e) => write!(f, "Get Metadata not answered (REQ-CMP-044): {e}"),
@@ -234,7 +238,8 @@ const SERVED: [Resource; 8] = [
 
 /// The resources in the Profile, in its order: those served by `Get` and
 /// the Status events (REQ-RES-EVENT-005); the SubscriptionList only in the
-/// Profile of the application, which holds every subscription.
+/// Profile of the application, which holds every subscription. The
+/// common service NewDataSetWriterId follows (MG 8.3.7, REQ-CMP-040).
 const PROFILE: [Resource; 9] = [
     Resource::Mam,
     Resource::Health,
@@ -479,8 +484,9 @@ impl Provider {
     }
 
     /// The topic filters to subscribe: `Get` of every served resource,
-    /// `Set` and `Del` of every resource they address, to this application
-    /// (none at Level 1).
+    /// `Set` and `Del` of every resource they address and `Call` of
+    /// NewDataSetWriterId with and without Source (REQ-CMP-040,
+    /// REQ-ACT-020), to this application (none at Level 1).
     ///
     /// # Panics
     ///
@@ -493,7 +499,8 @@ impl Provider {
         let get = self.served().into_iter().map(|r| (Method::Get, r));
         let set = SET.iter().map(|r| (Method::Set, *r));
         let del = DEL.iter().map(|r| (Method::Del, *r));
-        get.chain(set)
+        let mut out: Vec<TopicFilter> = get
+            .chain(set)
             .chain(del)
             .map(|(m, r)| {
                 TopicFilter::builder(m, r)
@@ -502,7 +509,22 @@ impl Provider {
                     .build()
                     .expect("Get, Set and Del of these resources have valid filters")
             })
-            .collect()
+            .collect();
+        for any_source in [false, true] {
+            let b = TopicFilter::builder(Method::Call, Service::NewDataSetWriterId)
+                .service_type(st)
+                .app_id(self.app_id().clone());
+            let b = if any_source {
+                b.any_source()
+            } else {
+                b.without_source()
+            };
+            out.push(
+                b.build()
+                    .expect("Call NewDataSetWriterId has valid filters"),
+            );
+        }
+        out
     }
 
     /// Registers a subordinate asset with its MAM (REQ-CMP-007); its Health
@@ -882,6 +904,7 @@ impl Provider {
         match topic.method() {
             Method::Get => self.handle_get(&topic, payload, unix_ms),
             Method::Set | Method::Del => self.handle_write(&topic, payload, unix_ms),
+            Method::Call => self.handle_call(&topic, payload, unix_ms),
             _ => Err(Ignored::NotForUs),
         }
     }
@@ -1418,6 +1441,9 @@ impl Provider {
                         core::iter::once(*r).chain(refdes)
                     })
                     .map(Subject::Resource)
+                    .chain(core::iter::once(Subject::Service(
+                        Service::NewDataSetWriterId,
+                    )))
                     .collect();
                 DataSetMessage::new(id, il, "", Profile { resources })
             })
