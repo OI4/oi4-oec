@@ -26,7 +26,8 @@ import (
 // status implemented), in run order.
 var Implemented = []string{"T7-ADR-02", "T7-ADR-03", "T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04",
 	"T7-GET-05", "T7-GET-06", "T7-GET-07", "T7-GET-08", "T7-GET-09", "T7-SET-01", "T7-SET-02", "T7-SET-03", "T7-SET-04",
-	"T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-09", "T7-SET-11", "T7-SET-12"}
+	"T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-09", "T7-SET-11", "T7-SET-12",
+	"T7-ACT-01", "T7-ACT-02", "T7-ACT-03", "T7-ACT-04"}
 
 // Tests returns the test-mode tests of the D7 catalog for verdict.Build.
 func Tests() ([]verdict.Test, error) {
@@ -141,6 +142,11 @@ type Runner struct {
 	mamAll      []string            // Sources of the answer to Get MAM without Source
 	before      *state              // state before the first write test
 	restore     *Restore
+	used        map[int64]bool // DataSetWriterIds the CUT publishes or lists in its PublicationList
+	rid         int64          // last RequestId of D7
+	calls       []*call
+	actions     []*actMsg // received on a Reply topic of the CUT
+	provided    []provided
 }
 
 // New creates a runner; the tester identity is fixed here.
@@ -157,7 +163,8 @@ func New(opt Options, reqs verdict.Requirements, pub PublishFunc) *Runner {
 	if opt.TesterIL == "" {
 		opt.TesterIL = TesterIL()
 	}
-	r := &Runner{opt: opt, reqs: reqs, pub: pub, seen: map[string]bool{}, tester: "Utility/" + opt.TesterIL, cites: map[string][]string{}}
+	r := &Runner{opt: opt, reqs: reqs, pub: pub, seen: map[string]bool{}, tester: "Utility/" + opt.TesterIL, cites: map[string][]string{},
+		used: map[int64]bool{}}
 	r.st, r.app = SplitApp(opt.App)
 	if tests, err := Tests(); err == nil {
 		for _, t := range tests {
@@ -353,6 +360,14 @@ func (r *Runner) Deliver(m Message) {
 		return
 	}
 	n := parse(m)
+	if n != nil && n.method == "Reply" && r.app != "" && n.app == r.app {
+		if a := parseAction(m); a != nil {
+			r.mu.Lock()
+			r.actions = append(r.actions, a)
+			r.mu.Unlock()
+		}
+		return
+	}
 	if n == nil || n.method != "Pub" {
 		return
 	}
@@ -360,6 +375,7 @@ func (r *Runner) Deliver(m Message) {
 	defer r.mu.Unlock()
 	if r.app != "" && n.app == r.app && strings.HasSuffix(n.publisherID, "/"+r.app) {
 		r.seen[n.st] = true
+		r.noteUsed(n)
 	}
 	for _, x := range r.exchanges {
 		switch {
@@ -638,6 +654,7 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 		"T7-SET-01": r.set01, "T7-SET-02": r.set02, "T7-SET-03": r.set03, "T7-SET-04": r.set04, "T7-SET-05": r.set05,
 		"T7-SET-06": r.set06, "T7-SET-07": r.set07, "T7-SET-08": r.set08, "T7-SET-09": r.set09, "T7-SET-11": r.set11,
 		"T7-SET-12": r.set12,
+		"T7-ACT-01": r.act01, "T7-ACT-02": r.act02, "T7-ACT-03": r.act03, "T7-ACT-04": r.act04,
 	}
 	// The resource tests need the Profile T7-GET-02 reads.
 	if !r.Selected("T7-GET-02") {
@@ -665,7 +682,9 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 		if !r.Selected(id) || id == "T7-SET-03" {
 			continue
 		}
-		if strings.HasPrefix(id, "T7-SET-") && !writing {
+		// The Action tests run in the write window: the ids the CUT
+		// reserves must not change the compared state.
+		if (strings.HasPrefix(id, "T7-SET-") || isActionTest(id)) && !writing {
 			writing = true
 			if err := r.prepareWrite(ctx); err != nil {
 				return r.result(), err

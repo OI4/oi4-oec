@@ -121,10 +121,11 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 	// query parameter of T7-GET-07 (REQ-MSG-001), the Query on Get MAM
 	// (REQ-QRY-001) and the Query on Get ReferenceDesignation with Source
 	// (REQ-RES-REFDES-013) of T7-GET-07, the Value of a Number that is no
-	// number of T7-SET-05 (REQ-RES-CONFIG-007). Against a faulty CUT a test
+	// number of T7-SET-05 (REQ-RES-CONFIG-007), the unknown DataSetWriterId
+	// and ActionTargetId of T7-ACT-03 (REQ-ACT-019). Against a faulty CUT a test
 	// may stop before its stimuli, and a selection of tests sends a part
 	// of them.
-	want := []string{"REQ-MSG-001", "REQ-MSG-001", "REQ-QRY-001", "REQ-RES-CONFIG-007", "REQ-RES-REFDES-013"}
+	want := []string{"REQ-ACT-019", "REQ-ACT-019", "REQ-MSG-001", "REQ-MSG-001", "REQ-QRY-001", "REQ-RES-CONFIG-007", "REQ-RES-REFDES-013"}
 	var own []string
 	for _, o := range mon.Observations {
 		if o.Participant == s.Probe.Tester && o.Kind == verdict.Violation {
@@ -134,7 +135,7 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 	}
 	sort.Strings(own)
 	if fault == "none" && len(opt.Tests) == 0 && !slices.Equal(own, want) || !subset(own, want) {
-		t.Errorf("violations of the requests of D7 %v, want %v (the deliberate stimuli of T7-GET-07, T7-GET-09 and T7-SET-05)", own, want)
+		t.Errorf("violations of the requests of D7 %v, want %v (the deliberate stimuli of T7-GET-07, T7-GET-09, T7-SET-05 and T7-ACT-03)", own, want)
 	}
 	res, _, err := Judge(app, level, nil, mon, s, reqs)
 	if err != nil {

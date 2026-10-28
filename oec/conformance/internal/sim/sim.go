@@ -61,7 +61,8 @@ const (
 // Faults lists every fault.
 var Faults = []Fault{ReplyTo, AllAssets, Unanswered, Missing, EmptyList, UnknownSource, UnknownKey,
 	DualVersion, Mixed, Case, NoMetadata, FilterIgnored, AssetLevel, PerPage, QueryIgnored, QuerySource, NoRefDes, WrongLocale,
-	NotListed, SetUnknown, SetMetadata, DelPublishes, ConfigName, DataNoPub, MetaNoEvent, PublistMode, DelSilent, RefDesFixed, SublistNone, NoCreate, FixedLevel}
+	NotListed, SetUnknown, SetMetadata, DelPublishes, ConfigName, DataNoPub, MetaNoEvent, PublistMode, DelSilent, RefDesFixed, SublistNone, NoCreate, FixedLevel,
+	NoCorrelation, Progress, Reissue, AnswersUnknown, NoReply}
 
 // ServiceType, AppID and Asset identify the simulated CUT: the OT connector
 // of the guideline examples (MG B1.1) with one subordinate asset.
@@ -228,9 +229,11 @@ type Sim struct {
 	state sync.Mutex // the content model: written by Set and Del, read by Changed
 	mu    sync.Mutex
 	last  int64
-	gets  chan mqttwire.Message
-	stop  chan struct{}
-	done  chan struct{}
+	// reserved counts the DataSetWriterIds NewDataSetWriterId provided
+	reserved int
+	gets     chan mqttwire.Message
+	stop     chan struct{}
+	done     chan struct{}
 }
 
 func enc(il string) string { return base64.RawURLEncoding.EncodeToString([]byte(il)) }
@@ -295,7 +298,7 @@ func build(fault Fault) (*model, error) {
 }
 
 // Start connects the simulated CUT with its Will, subscribes to its Get,
-// Set and Del topics and publishes the Birth message and its Health.
+// Set, Del and Call topics and publishes the Birth message and its Health.
 func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) {
 	m, err := build(fault)
 	if err != nil {
@@ -328,7 +331,7 @@ func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) 
 		case <-s.stop:
 		}
 	}
-	for _, method := range []string{"Get", "Set", "Del"} {
+	for _, method := range []string{"Get", "Set", "Del", "Call"} {
 		if err := s.cl.Subscribe(ctx, topic(method, "#", "", ""), 1, receive); err != nil {
 			s.Close()
 			return nil, err
@@ -558,7 +561,7 @@ func (s *Sim) metadata(ctx context.Context, source, tag, replyTo string) {
 	_ = s.cl.Publish(ctx, mqttwire.Message{Topic: topic("Pub", "Metadata", source, tag), Payload: payload})
 }
 
-// handle answers one Get, Set or Del.
+// handle answers one Get, Set, Del or Call.
 func (s *Sim) handle(msg mqttwire.Message) {
 	lv := strings.Split(msg.Topic, "/")
 	if len(lv) < 5 {
@@ -572,6 +575,10 @@ func (s *Sim) handle(msg mqttwire.Message) {
 	defer s.state.Unlock()
 	if lv[3] == "Set" || lv[3] == "Del" {
 		s.write(lv, doc)
+		return
+	}
+	if lv[3] == "Call" {
+		s.call(lv, doc)
 		return
 	}
 	if lv[3] != "Get" {

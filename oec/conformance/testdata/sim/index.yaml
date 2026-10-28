@@ -26,6 +26,11 @@
 # writable. The Get faults affect only the Get path. Each run of the
 # simulation keeps its own state; sim.Changed lists what differs from the
 # start state (empty after every fixture run).
+# Since C-065 the CUT is the Responder of NewDataSetWriterId (Call topic
+# with and without Source, MG 9.2.1): it answers a valid request for the
+# application or the asset with a new DataSetWriterId from 6000 on (Ttl
+# 60 s, kept outside the content model), a request for an unknown Source
+# with BadNotFound and ignores requests it cannot decode or address.
 # internal/probe/sim_test.go runs `oec-check test` (monitor + runner,
 # level 3) against every entry over the in-process TLS test broker.
 #
@@ -352,3 +357,48 @@ fixtures:
     notes: >-
       Every Syslog entry of the PublicationList has Config NONE_0: the log
       level is not configurable (REQ-TOP-027, SHOULD).
+  - fault: T7-ACT-01/no-correlation
+    status: draft
+    expect:
+      T7-ACT-01: {outcome: fail, reqs: [REQ-ACT-007]}
+    notes: >-
+      The ua-action-response omits the CorrelationData of the request
+      (REQ-ACT-007).
+  - fault: T7-ACT-01/progress
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      Variant, conforming: before the final response (ActionState 2) the CUT
+      publishes an intermediate ua-action-response with ActionState 1 to the
+      ResponseAddress (REQ-ACT-016, MAY); like every Good response it
+      carries the response fields (the same DataSetWriterId and Ttl as the
+      final one, REQ-ACT-012). Every test passes.
+  - fault: T7-ACT-02/reissue
+    status: draft
+    expect:
+      T7-ACT-01: {outcome: fail, reqs: [REQ-ACT-022]}
+      T7-ACT-02: {outcome: fail, reqs: [REQ-ACT-023]}
+    notes: >-
+      Every NewDataSetWriterId request gets the DataSetWriterId 6000,
+      although it is still reserved (Ttl 60 s): the second id of T7-ACT-01
+      is not new (REQ-ACT-022), T7-ACT-02 gets it again within its Ttl
+      (REQ-ACT-023).
+  - fault: T7-ACT-03/answers-unknown
+    status: draft
+    expect:
+      T7-ACT-03: {outcome: fail, reqs: [REQ-ACT-017]}
+      T7-MON-01: {outcome: fail, reqs: [REQ-ACT-019]}
+    notes: >-
+      The requests with the unknown DataSetWriterId 4 and the unknown
+      ActionTargetId 2 are answered with BadNotFound instead of not at all
+      (REQ-ACT-017); the undecodable request stays unanswered. The responses
+      echo DataSetWriterId 4 and ActionTargetId 2, which the schema of a
+      NewDataSetWriterId response rejects (T7-MON-01, REQ-ACT-019).
+  - fault: T7-ACT-04/no-reply
+    status: draft
+    expect:
+      T7-ACT-04: {outcome: fail, reqs: [REQ-ACT-024]}
+    notes: >-
+      A request for an unknown Source is not answered instead of with
+      BadNotFound and an empty Payload (REQ-ACT-024).

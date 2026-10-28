@@ -384,25 +384,27 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-ACT-001, REQ-ACT-006, REQ-ACT-007, REQ-ACT-012, REQ-ACT-014, REQ-ACT-015, REQ-ACT-016, REQ-ACT-020, REQ-ACT-022, REQ-CMP-034, REQ-CMP-040, REQ-TOP-016]
-    status: planned
+    status: implemented
   - id: T7-ACT-02
     title: Provided DataSetWriterId is valid for Ttl seconds
     mode: test
     level: 1
     reqs: [REQ-ACT-023]
-    status: planned
+    status: implemented
+    notes: D7 asks for more ids within the Ttl and checks that a provided id is not provided again. That the CUT accepts the reserved id for an object it creates within the Ttl needs a create, which D7 does not do (T7-SET-11); this part is checked manually.
   - id: T7-ACT-03
     title: No response to undecodable, unaddressable or rejected requests
     mode: test
     level: 1
     reqs: [REQ-ACT-017]
-    status: planned
+    status: implemented
+    notes: D7 sends a request with an unknown DataSetWriterId, one with an unknown ActionTargetId and an undecodable one, and waits for the timeout; any response to them fails. Skipped when the CUT does not answer a valid control request.
   - id: T7-ACT-04
     title: NewDataSetWriterId for an unknown Source is answered with BadNotFound
     mode: test
     level: 1
     reqs: [REQ-ACT-024]
-    status: planned
+    status: implemented
 
 manual:
   - req: REQ-CMP-011
