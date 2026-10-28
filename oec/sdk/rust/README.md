@@ -76,7 +76,7 @@ It runs `cargo fmt --check`, then `cargo clippy --all-targets -D warnings`, `car
 3. The publication schedule changes immediately.
 
 **Action NewDataSetWriterId (Level 2+, C-060)**
-1. `Call` on the own Call topic: the app or a known asset as `Source`, else `BadNotFound` (SF-113); a request that cannot be decoded or addressed is not answered (REQ-ACT-017).
+1. `Call` on the own Call topic: the app or a known asset as `Source`, else `BadNotFound` (REQ-ACT-024); a request that cannot be decoded or addressed is not answered (REQ-ACT-017).
 2. A new DataSetWriterId (REQ-ACT-022) is reserved in the persisted writer table for its Ttl of 60 s (REQ-ACT-023); it is never assigned or provided again (SF-112).
 3. The `Reply` on the ResponseAddress carries the CorrelationData and the RequestId of the request (REQ-ACT-007) and `ActionState` Done.
 

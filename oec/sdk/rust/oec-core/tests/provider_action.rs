@@ -221,7 +221,7 @@ fn reservations_survive_restarts() {
 }
 
 /// A Source the application represents is answered; an unknown Source
-/// gets BadNotFound with an empty Payload (SF-113).
+/// gets BadNotFound with an empty Payload (REQ-ACT-024).
 #[test]
 fn the_source_must_be_known() {
     let mut p = provider();

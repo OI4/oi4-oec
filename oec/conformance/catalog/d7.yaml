@@ -21,7 +21,7 @@
 #         peer         – D7 simulates a peer component that the CUT talks to
 # status: planned (P3) | implemented (P5)
 tool: oec-check
-baseline: "57ebe91"
+baseline: "eb7889c"
 tests:
   # --- monitor: passive rules -------------------------------------------
   - id: T7-MON-01
@@ -394,6 +394,12 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-ACT-017]
+    status: planned
+  - id: T7-ACT-04
+    title: NewDataSetWriterId for an unknown Source is answered with BadNotFound
+    mode: test
+    level: 1
+    reqs: [REQ-ACT-024]
     status: planned
 
 manual:

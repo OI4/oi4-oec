@@ -73,7 +73,7 @@ impl Provider {
     }
 
     /// The final response to one ActionRequest: a reserved id, or
-    /// BadNotFound for an unknown Source (SF-113), BadInvalidArgument for
+    /// BadNotFound for an unknown Source (REQ-ACT-024), BadInvalidArgument for
     /// an invalid Payload (REQ-ACT-014), BadResourceUnavailable if no id
     /// can be reserved now.
     fn new_data_set_writer_id(
