@@ -7,7 +7,7 @@
 //! re-exports or wraps its types and adds the I/O: bootstrap from the
 //! container storage, persistence and the MQTT connection over TLS.
 //!
-//! **State of P4 (C-050 … C-056, increments 4, 5, 6a, 6b, 7a and 7b):** [`app::App::builder`] with
+//! **State of P4 (C-048 … C-060, increments 4 … 8c):** [`app::App::builder`] with
 //! [`app::Bootstrap`] (container storage contract or explicit broker),
 //! identity ([`identity`]), persistence ([`store`]), the Config model with
 //! string-keyed typed getters ([`config`], Q-022) and the errors ([`Error`]).
@@ -30,9 +30,17 @@
 //! DataSets ([`config`], [`asset::Asset::add_config`]) with `Get`/`Set
 //! Config`, masking of sensitive values (GL-ADR-021), persisted values and
 //! the secrets of the container storage re-read before every reconnect
-//! (GL-ADR-022). ReferenceDesignation, the Syslog bridge, generic events
-//! and the consumer follow with increments 7c and 8; until then their
-//! contract is the P3 sketch `oec/sdk/rust/sketch` (ADR-0020 §1).
+//! (GL-ADR-022). **C-057 (increment 7c):** ReferenceDesignation
+//! ([`asset::Asset::on_reference_designation`]), generic events and the
+//! Syslog bridge ([`event`]). **C-058, C-059 (increments 8a, 8b):** the
+//! consumer ([`consumer`]: `Get`/`Set`/`Del` with correlation and
+//! pagination, subscriptions, presence) and the SubscriptionList.
+//! **C-060 (increment 8c):** the Action NewDataSetWriterId – answered from
+//! Level 2 with an id reserved for 60 s, called with
+//! [`consumer::Consumer::new_data_set_writer_id`]. The P3 sketch is
+//! deleted; its examples are `examples/{hello, config, device_source,
+//! consumer}.rs` next to the demo application `examples/demo.rs`. The C
+//! ABI follows with increment 10 (ADR-0021).
 //!
 //! **Cargo features:** `crypto-aws-lc-rs` (default) or `crypto-ring` pick the
 //! crypto provider of rustls (`crypto-ring` wins if both are on);
@@ -89,7 +97,9 @@ pub use oec_core::topic::ServiceType;
 pub enum Level {
     /// MQTT + TLS + auth, Birth/Will, Pub MAM + Health (REQ-CMP-001 … 007).
     L1,
-    /// L1 + `Get`, `Set`/`Del` where offered, Status events (REQ-CMP-008 … 023).
+    /// L1 + `Get`, `Set`/`Del` where offered, Status events (REQ-CMP-008 …
+    /// 023) and, recommended at this level, `Call`/`Reply` +
+    /// `NewDataSetWriterId` (REQ-CMP-040).
     L2,
     /// All resources, `Set`/`Del` wherever defined, `Call`/`Reply` +
     /// `NewDataSetWriterId`, full MQTT client behavior (REQ-CMP-033 … 040).

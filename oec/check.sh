@@ -1,6 +1,7 @@
 #!/bin/sh
 # Local CI of the monorepo (ADR-0019 amendment C-041): the P2 gate, extended
-# by the P3 sketches in C-042.
+# by the P3 sketches in C-042 and the Rust SDK in P4 (the Rust API sketch was
+# deleted in C-060).
 #   1. spec/tools: gofmt, vet, tests and the spectool checks, including the
 #      coverage gate (every schema/d7-validate REQ has a reviewed positive and
 #      negative vector, every allowed matrix row has its entry schema);
@@ -8,9 +9,10 @@
 #   3. spectool crosscheck: oracle vs schema on every case of schema/dist;
 #   4. conformance: gofmt, vet, tests;
 #   5. sdk/check.sh: the Rust SDK workspace (fmt, clippy, tests against the
-#      shared vectors, doc, cargo-deny; ADR-0026, from C-046) and the P3 API
-#      sketches (Rust API, C headers) compile and every REQ id cited under
-#      oec/sdk/ is active (ADR-0020 … 0022, from C-042);
+#      shared vectors, doc, cargo-deny; ADR-0026, from C-046; every REQ id
+#      cited under oec/sdk/ is active, oec/tests/citations.rs) and the C
+#      headers of P3 (oec.h of oec-ffi, oecm.h of D9) compile as C17
+#      (ADR-0021, ADR-0022, from C-042);
 #   6. dev: gofmt, vet, tests of the dev PKI generator and the lint of the
 #      Mosquitto and compose configuration (C-051). No container engine: the
 #      interop tests against the broker are opt-in (oec/dev/interop.sh).
@@ -52,7 +54,7 @@ step "conformance: gofmt, vet, test"
 cd "$root/conformance"
 gocheck
 
-step "sdk/check.sh (Rust SDK, P3 sketches)"
+step "sdk/check.sh (Rust SDK, C headers)"
 "$root/sdk/check.sh"
 
 step "dev: gofmt, vet, test (dev PKI, broker configuration)"

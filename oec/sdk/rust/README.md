@@ -1,16 +1,15 @@
 # Rust SDK D2 – Cargo workspace (P4, from C-046)
 
-Workspace of the Rust SDK D2 (ADR-0011, ADR-0023, ADR-0026). The public API is the one decided in ADR-0020 (sketch in `sketch/`); the crates below grow with the P4 increments of `project/ROADMAP.md`.
+Workspace of the Rust SDK D2 (ADR-0011, ADR-0023, ADR-0026). The public API is the one decided in ADR-0020 (with its amendments up to C-060); the crates below grow with the P4 increments of `project/ROADMAP.md`. The P3 API sketch was deleted at the end of increment 8 (C-060, ADR-0026 §1): its examples are in `oec/examples/`, its C header in `oec-ffi/`, its REQ walker in `oec/tests/citations.rs`, its overview below.
 
 | Path | Content | State |
 |---|---|---|
-| `oec-core/` | sans-IO protocol logic: Identification Link, dnp-encoding, Oi4Identifier (`il`), topic elements, allowed forms, Filter, topic parsing/building, subscription filters (`topic`); typed messages with fixed content masks and Action correlation (`message`), resource payloads (`resource`), embedded D1 schemas with optional validation (`schema`, feature `strict-validation`); MQTT 3.1.1 codec and client session as a sans-IO state machine (`mqtt`); Birth/Will/Close and Health heartbeat (`lifecycle`); the provider (`provider`): sources, MAM/Health/Profile/PublicationList, DataSetWriterIds, `Get` answers, pagination, Data DataSets with Metadata, UUIDv5 DataSetClassId, MetaDataVersions, publish modes, intervals and dead band | increments 1–2 (C-046), 3 (C-047), 5a (C-049), 6a (C-053), 6b (C-054) |
-| `oec/` | public API of ADR-0020, wraps or re-exports `oec-core`: `Level`, `Error`, `App`/`AppBuilder` with `Bootstrap` (container storage contract with `root` prefix, or explicit `Broker`), identity and MAM (`identity`), `Store` (`FileStore`, `MemoryStore`), Config definition and typed getters (`config`), `StatusCode`; `build()` validates identity, bootstrap and level without connecting. Runtime: TLS transport (tokio + rustls, trust only from the CA of the storage or the `Broker`, client certificate or credentials, PKCS#8 keys with passphrase), `App::run` (own `current_thread` runtime, SIGINT/SIGTERM), `App::run_async`, `AppHandle` (shutdown, `ConnectionState`), `on_connection`, reconnect with backoff; drives `oec_core::mqtt::Session` and `oec_core::lifecycle::Lifecycle` (Birth, Health, heartbeat, Close, Will); assets (`asset`) and Data DataSets (`data`) on the `oec_core::provider`, writer ids and MetaDataVersions persisted | increments 4 (C-048), 5b (C-050), 6a (C-053), 6b (C-054) |
-| `oec-ffi/` | C ABI (ADR-0021) | P4 increment 10 |
-| `sketch/` | P3 API sketch (not product code); the items not yet in `oec` are still the contract; deleted when the last piece has moved | frozen, shrinking |
+| `oec-core/` | sans-IO protocol logic: Identification Link, dnp-encoding, Oi4Identifier (`il`), topic elements, allowed forms, Filter, topic parsing/building, subscription filters (`topic`); typed messages with fixed content masks and Action correlation (`message`), resource payloads (`resource`), embedded D1 schemas with optional validation (`schema`, feature `strict-validation`); MQTT 3.1.1 codec and client session as a sans-IO state machine (`mqtt`); Birth/Will/Close and Health heartbeat (`lifecycle`); the provider (`provider`): sources, MAM/Health/Profile/PublicationList, DataSetWriterIds, `Get` answers, pagination, Data DataSets with Metadata, UUIDv5 DataSetClassId, MetaDataVersions, publish modes, intervals and dead band, `Set`/`Del` with Status events, Config, ReferenceDesignation, SubscriptionList, the responder of the Action NewDataSetWriterId with reservations in the writer table; the consumer (`consumer`): requests with answer correlation, pagination, presence, subscriptions and the requester of NewDataSetWriterId | increments 1–2 (C-046), 3 (C-047), 5a (C-049), 6a (C-053), 6b (C-054), 7a–7c (C-055 … C-057), 8a–8c (C-058 … C-060) |
+| `oec/` | public API of ADR-0020, wraps or re-exports `oec-core`: `Level`, `Error`, `App`/`AppBuilder` with `Bootstrap` (container storage contract with `root` prefix, or explicit `Broker`), identity and MAM (`identity`), `Store` (`FileStore`, `MemoryStore`), Config definition and typed getters (`config`), `StatusCode`; `build()` validates identity, bootstrap and level without connecting. Runtime: TLS transport (tokio + rustls, trust only from the CA of the storage or the `Broker`, client certificate or credentials, PKCS#8 keys with passphrase), `App::run` (own `current_thread` runtime, SIGINT/SIGTERM), `App::run_async`, `AppHandle` (shutdown, `ConnectionState`), `on_connection`, reconnect with backoff; drives `oec_core::mqtt::Session` and `oec_core::lifecycle::Lifecycle` (Birth, Health, heartbeat, Close, Will); assets (`asset`) and Data DataSets (`data`) on the `oec_core::provider`, writer ids and MetaDataVersions persisted; Config, ReferenceDesignation, generic events and the Syslog bridge (`event`), the consumer (`consumer`: `get`/`set`/`del`, subscriptions, presence, `new_data_set_writer_id`); examples `hello`, `config`, `device_source`, `consumer` and the demo application `demo` (application under test of D7 `test`) | increments 4 (C-048), 5b (C-050), 6a (C-053), 6b (C-054), 7a–7c (C-055 … C-057), 8a–8c (C-058 … C-060) |
+| `oec-ffi/` | C ABI (ADR-0021): the hand-written contract `include/oec.h` and the C examples `examples/{hello,logger}.c` of P3 (compiled as C17, syntax only); the crate follows | P4 increment 10 |
 | `spike/` | P3 spikes `schema-embed`, `mqtt-codec` (not product code) | frozen |
 
-`sketch/` and `spike/` are stand-alone crates outside the workspace (`exclude`), with their own lock files.
+`spike/` holds stand-alone crates outside the workspace (`exclude`), with their own lock files.
 
 ## Rules
 
@@ -21,9 +20,9 @@ Workspace of the Rust SDK D2 (ADR-0011, ADR-0023, ADR-0026). The public API is t
 - `oec` adds thiserror, log, tokio (`rt`, `net`, `time`, `sync`, `signal`), rustls 0.23 (`std`, `tls12`), tokio-rustls 0.26, rustls-pki-types and pkcs8 (decryption of PKCS#8 keys with passphrase) (ADR-0023, amendment C-050) and forwards the feature `strict-validation` to `oec-core`. The MQTT codec of Q-026 is `oec_core::mqtt` (sans-IO, C-049); `oec` drives it over TLS (C-050).
 - Crypto provider of rustls: cargo feature `crypto-aws-lc-rs` (default, aws-lc-rs with post-quantum key exchange preferred) or `crypto-ring` (ring, e.g. for ARMv7: `--no-default-features --features crypto-ring`). With both, ring wins; with neither, the build fails with a `compile_error!`.
 - `oec` has one dev-dependency: rcgen (test PKI of the runtime tests). `oec/tests/runtime.rs` runs the runtime against an in-process TLS test broker built on the `oec-core` codec (lifecycle order, Will on drop, reconnect, keep-alive timeout, refused CONNECT, untrusted broker, client certificate over TLS 1.2, encrypted key, shutdown, `run_async`). No network access beyond loopback.
-- Interop tests against Mosquitto 2.1.2 of the dev environment (`oec/tests/interop.rs`, C-051, ADR-0026 amendment C-051): credentials and client certificate, Birth → Health → Close → DISCONNECT, the Will of a killed child process, reconnect after a broker restart, refused logins, wrong CA, TLS 1.2/1.3, packet limits (SF-105), explicit bootstrap, L2 assets and `Get` answers (C-053), Data DataSets with Metadata and an Interval (C-054). Opt-in: run `oec/dev/interop.sh` (needs a container engine, pulls the pinned image); without `OEC_INTEROP=1` the tests pass at once, so the gate needs neither Docker nor network. See [`oec/dev/README.md`](../../dev/README.md). They replace the `OEC_SMOKE_*` smoke test of C-050.
+- Interop tests against Mosquitto 2.1.2 of the dev environment (`oec/tests/interop.rs`, C-051, ADR-0026 amendment C-051): credentials and client certificate, Birth → Health → Close → DISCONNECT, the Will of a killed child process, reconnect after a broker restart, refused logins, wrong CA, TLS 1.2/1.3, packet limits (SF-105), explicit bootstrap, L2 assets and `Get` answers (C-053), Data DataSets with Metadata and an Interval (C-054), `Set` and Config (C-055, C-056), ReferenceDesignation and generic events (C-057), the consumer and the SubscriptionList (C-058, C-059) and the Action NewDataSetWriterId (C-060). Opt-in: run `oec/dev/interop.sh` (needs a container engine, pulls the pinned image); without `OEC_INTEROP=1` the tests pass at once, so the gate needs neither Docker nor network. See [`oec/dev/README.md`](../../dev/README.md). They replace the `OEC_SMOKE_*` smoke test of C-050.
 - `oec-core/build.rs` embeds the schema tree `oec/schema/v2` (strict sources, with `strict-validation`) and reports `Version`/`Baseline` of `oec/schema/schema.go` as `oec_core::schema::{VERSION, BASELINE}` (ADR-0023 amendment C-047).
-- Every rule cites its REQ ids in a doc comment; the walker in `sketch/tests/sketch.rs` checks that every cited id exists and is not deprecated.
+- Every rule cites its REQ ids in a doc comment; the walker in `oec/tests/citations.rs` checks that every id cited in a `.rs`, `.h`, `.c` or `.md` file under `oec/sdk/` exists and is not deprecated (moved from the sketch in C-060).
 - Acceptance test: the shared test vectors of the spec baseline, read from the JSON export `oec/spec/export/` (generated by `spectool render`), see `oec-core/tests/vectors.rs` (IL, dnp, Oi4Identifier, topic, matrix), `oec-core/tests/payload.rs` (all payload vectors; with `strict-validation` the verdicts equal the schema gate) `oec-core/tests/lifecycle.rs` (Will, Birth and Close equal V-PAY-025/023/024; with `strict-validation` every generated lifecycle payload passes the strict schema) and `oec/tests/broker.rs` (all `broker.json` vectors end to end through the container bootstrap; with `strict-validation` the verdicts equal `platform/broker.schema.json`).
 - Supply chain: `Cargo.lock` is committed; `deny.toml` is the cargo-deny policy of ADR-0023 §2.
 
@@ -34,3 +33,78 @@ oec/sdk/check.sh   # part of oec/check.sh (step 5)
 ```
 
 It runs `cargo fmt --check`, then `cargo clippy --all-targets -D warnings`, `cargo test` and `cargo doc` (warnings are errors) once with default features and once with `--features strict-validation`, `cargo clippy -p oec --no-default-features --features crypto-ring`, then `cargo deny check`, all `--offline --locked` except the advisory DB fetch of cargo-deny (fallback: cached DB). cargo-deny is installed with `cargo install cargo-deny --locked`.
+
+## API overview (from the P3 sketch)
+
+| Module of `oec` | Main items | Topic of the guideline |
+|---|---|---|
+| `app` | `App`, `AppBuilder`, `AppHandle`, `Bootstrap`, `Broker`, `ConnectionState` | MG 6 MQTT, MG 9.2 lifecycle, RIG 4 storage |
+| `identity` | `IdentificationLink`, `Oi4Identifier`, `Product`, `LocalizedText` | MG 4, MG 5 |
+| `asset` | `AssetDef`, `Asset`, `HealthState`, `HealthDetail`, `ReferenceDesignation` | MG 1.3 represented entities, MG 8.3.2, MG 8.3.10 |
+| `data` | `DataSetDef`, `Field`, `Value`, `Publication`, `Mode`, `Writable`, `DataSet` | MG 8.2, MG 8.3.8, MG 9.1.4/9.1.5/9.1.8 |
+| `config` | `ConfigDef`, `ConfigObject`, `ConfigValues`, `ConfigHandle` | MG 8.3.3, MG 9.1.3 |
+| `event` | `SyslogLevel`, `GenericEvent`, `syslog` | MG 8.3.6, MG 9.1.6 |
+| `consumer` | `Consumer`, `Target`, `Received`, `Presence`, `GetOptions`, `WriteOptions`, `ActionOptions`, `Subscription` | MG 7, MG 8.3.9, MG 9.1.9, MG 9.2, MG 9.3 |
+| `status` | `StatusCode` | MG 8.3.6.1 |
+| `store` | `Store`, `FileStore`, `MemoryStore` | RIG 4.1 application storage |
+
+### Flows (what the SDK does without application code)
+
+**Start (`App::run`)**
+1. `build()`: validate the identity (REQ-IL-008), the level and the store (ADR-0020 §3). In a container, read `broker.json`, CA and credentials (REQ-CNT-004, REQ-CNT-009).
+2. Connect with TLS (REQ-MQTT-005) and a new Will with the current MessageId (REQ-LIFE-008, REQ-LIFE-016).
+3. Subscribe to the own `Get`/`Set`/`Del`/`Call` topics of the level (REQ-CMP-008).
+4. Birth first (REQ-LIFE-001, REQ-LIFE-015), then Health and the MAM/Health of all assets (REQ-CMP-006, REQ-CMP-007), then the publishing entries of the PublicationList.
+5. Health heartbeat every 60 s (REQ-TOP-017); cyclic publications per Interval (REQ-RES-PUBLIST-013).
+
+**`Get` with pagination**
+1. Parse topic and payload (tolerant reader, REQ-MSG-046) and resolve Source/Filter.
+2. Unknown Source: no `Pub`, Status event `BadNotFound` (REQ-CMP-047). Empty resource: empty list (REQ-CMP-041).
+3. Take a snapshot of the addressed DataSets (REQ-PAG-007), apply Locale/Query and cut pages by MaxPacketSize and PerPage (REQ-PAG-002, REQ-PAG-005).
+4. Publish each page with `ReplyTo` = MessageId of the request (REQ-MSG-015).
+
+**`Set` of a DataSet**
+1. Address check: unknown → `BadNotFound`, not writable → `BadNotWritable` (REQ-CMP-043).
+2. Type check against the field definitions → `BadTypeMismatch`.
+3. Application handler `on_set` → `Ok` or a `StatusCode`.
+4. On `Good`: store the new values and publish the changed DataSet (REQ-RES-DATA-012).
+5. Always: Status event with `ReplyTo` (REQ-RES-EVENT-005, REQ-TOP-014).
+
+**`Set` of the PublicationList** – the same pipeline:
+1. Only fields allowed by the entry `Config` change (REQ-RES-PUBLIST-016).
+2. The new entry is persisted and republished (REQ-RES-PUBLIST-025).
+3. The publication schedule changes immediately.
+
+**Action NewDataSetWriterId (Level 2+, C-060)**
+1. `Call` on the own Call topic: the app or a known asset as `Source`, else `BadNotFound` (SF-113); a request that cannot be decoded or addressed is not answered (REQ-ACT-017).
+2. A new DataSetWriterId (REQ-ACT-022) is reserved in the persisted writer table for its Ttl of 60 s (REQ-ACT-023); it is never assigned or provided again (SF-112).
+3. The `Reply` on the ResponseAddress carries the CorrelationData and the RequestId of the request (REQ-ACT-007) and `ActionState` Done.
+
+**Connection loss**
+1. `ConnectionState::Reconnecting`.
+2. Reconnect with backoff and a new Will (REQ-LIFE-016).
+3. Birth again, then the current state (REQ-LIFE-001).
+
+Updates in between only change the state store; the newest state is published after the reconnect.
+
+**Shutdown (SIGTERM, `AppHandle::shutdown`)**
+1. Close message (REQ-LIFE-005).
+2. Disconnect.
+3. `run()` returns `Ok`.
+
+### Defaults
+
+| Item | Default | Source |
+|---|---|---|
+| Bootstrap | container storage under `/` | ADR-0020 §5 |
+| Store | `FileStore` in `/etc/oi4/app/oec` (container), required when ReferenceDesignation is offered | REQ-CNT-010, REQ-RES-REFDES-002 |
+| Keep alive | 60 s | REQ-MQTT-014 |
+| ClientId | container name; outside a container derived from the Identification Link (`oec` + FNV-1a 64 hex) | REQ-MQTT-013, REQ-CNT-021 |
+| Data Mode / Interval | `ON_REQUEST_FILTER_9` / 0 (on change) | ADR-0020 §7 |
+| MAM, Health, Profile, ReferenceDesignation Mode | `ON_REQUEST_SOURCE_10` | ADR-0020 §7, REQ-RES-PUBLIST-026 |
+| Lowest published Syslog level | `Notice` | REQ-TOP-024 |
+| DataSetWriterIds | from 10 | REQ-MSG-020 |
+| Ttl of a DataSetWriterId provided by NewDataSetWriterId | 60 s | REQ-ACT-023, ADR-0026 §19 |
+| Action timeout of the consumer (TimeoutHint) | `DEFAULT_TIMEOUT` of `oec::consumer` | REQ-ACT-009 |
+| SoftwareRevision / HardwareRevision / DeviceRevision of an app | `"undefined"` / `""` / `""` | REQ-RES-MAM-010, REQ-RES-MAM-008 (examples of MG 5) |
+| DeviceClass of an app | `Oi4.<ServiceType>` | REQ-RES-MAM-014 |

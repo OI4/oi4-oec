@@ -1,8 +1,8 @@
-// A Level 3 OT connector that represents a field device (asset without own
-// MQTT client), publishes its process value and reacts to `Set Data`.
+//! A Level 3 OT connector that represents a field device (asset without own
+//! MQTT client), publishes its process value and reacts to `Set Data`.
 use std::time::Duration;
 
-use oec::data::Writable;
+use oec::data::{Value, Writable};
 use oec::prelude::*;
 
 fn main() -> oec::Result<()> {
@@ -22,7 +22,7 @@ fn main() -> oec::Result<()> {
     sensor.set_health(HealthState::Normal, Some(100));
 
     // Oi4Pv DataSet: published on change of at least 0.1 °C; consumers may
-    // change Mode, Interval and Precisions via Set PublicationList.
+    // change Mode and Interval via Set PublicationList.
     let temperature = sensor.add_data(
         DataSetDef::oi4pv(Field::double("Pv").unit("°C").description("Temperature"))
             .field(Field::double("Sv1").unit("°C").description("Setpoint"))
@@ -43,8 +43,9 @@ fn main() -> oec::Result<()> {
     // The DataSet is published once every field has a value.
     temperature.update([("Pv", 21.0), ("Sv1", 22.0)])?;
 
-    // Field bus polling in a plain thread: update() is sync and non-blocking;
-    // it fails only for an unknown field, a wrong type or a removed DataSet.
+    // Field bus polling in a plain thread: update() is sync and
+    // non-blocking; it fails only for an unknown field, a wrong type or a
+    // removed DataSet.
     let pv = temperature.clone();
     std::thread::spawn(move || {
         while pv.update([("Pv", 21.5)]).is_ok() {

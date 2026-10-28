@@ -1,5 +1,5 @@
 #!/bin/sh
-# Checks of the SDKs (ADR-0026 proposed) and of the P3 sketches (ADR-0020 … 0022):
+# Checks of the SDKs (ADR-0026) and of the remaining P3 sketches (ADR-0021, 0022):
 #   0. rust (Cargo workspace of D2: oec-core from C-046, oec from C-048):
 #      rustfmt, clippy (pedantic, warnings are errors), tests including the
 #      shared test vectors of oec/spec/export (IL, topic, payload,
@@ -17,12 +17,15 @@
 #      advisory DB; without network it falls back to the cached DB (a real
 #      violation fails both runs). Needs cargo-deny
 #      (cargo install cargo-deny --locked).
-#   1. rust/sketch: the public Rust API sketch of D2 compiles with all DX
-#      examples; tests: hello world ≤ 20 lines, every REQ id cited under
-#      oec/sdk/ exists and is not deprecated;
-#   2. the C headers oec.h (D2 C ABI) and oecm.h (D9) and their examples
-#      compile as C17 without warnings (syntax only – no implementation);
-#   3. spikes (C-043, ADR-0023): rust/spike/schema-embed embeds oec/schema/v2
+#      The examples of oec (oec/examples: hello, config, device_source,
+#      consumer, demo) are built by clippy --all-targets; oec/tests/citations.rs
+#      checks hello world ≤ 20 lines and that every REQ id cited under
+#      oec/sdk/ exists and is not deprecated (moved from the P3 API sketch,
+#      deleted in C-060, ADR-0026 §1);
+#   1. the C headers oec.h (D2 C ABI, rust/oec-ffi until increment 10
+#      generates it) and oecm.h (D9) and their examples compile as C17
+#      without warnings (syntax only – no implementation);
+#   2. spikes (C-043, ADR-0023): rust/spike/schema-embed embeds oec/schema/v2
 #      at compile time and reproduces every strict verdict of
 #      oec/schema/dist/cases.json (needs schema/check.sh first, as in
 #      oec/check.sh); rust/spike/mqtt-codec is the sans-IO MQTT 3.1.1 codec
@@ -51,14 +54,10 @@ cargo deny --log-level error check || {
 	cargo deny --log-level error --frozen check
 }
 
-echo "rust/sketch: cargo test"
-cd "$root/rust/sketch"
-cargo test --offline --locked --quiet
-
-echo "rust/sketch/c: oec.h + examples (C17)"
-for f in "$root"/rust/sketch/c/examples/*.c; do
+echo "rust/oec-ffi: oec.h + examples (C17)"
+for f in "$root"/rust/oec-ffi/examples/*.c; do
 	# shellcheck disable=SC2086
-	"$cc" $cflags -I "$root/rust/sketch/c/include" "$f"
+	"$cc" $cflags -I "$root/rust/oec-ffi/include" "$f"
 done
 
 echo "micro/sketch: oecm.h + examples (C17)"

@@ -1,6 +1,6 @@
 # D9 API sketch (P3, C-042) – not product code
 
-Compile-checked sketch of the micro SDK API (D9, C17, ESP32 reference port). The decisions are in ADR-0022; the comparison with the C ABI of D2 (`oec/sdk/rust/sketch/c/include/oec.h`) is in ADR-0021. This folder is replaced by the real core in P4b.
+Compile-checked sketch of the micro SDK API (D9, C17, ESP32 reference port). The decisions are in ADR-0022; the comparison with the C ABI of D2 (`oec/sdk/rust/oec-ffi/include/oec.h`, moved there from the deleted Rust API sketch in C-060) is in ADR-0021. This folder is replaced by the real core in P4b.
 
 | Path | Content |
 |---|---|

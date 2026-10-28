@@ -1,5 +1,5 @@
-// Hello World: a Level 1 OEC application in a container (DX goal: ≤ 20 lines).
-// Birth, Will, Close, Health heartbeat and the MAM come from the SDK.
+//! Hello World: a Level 1 OEC application in a container (DX goal: ≤ 20
+//! lines). Birth, Will, Close, Health heartbeat and the MAM come from the SDK.
 use oec::prelude::*;
 
 fn main() -> oec::Result<()> {

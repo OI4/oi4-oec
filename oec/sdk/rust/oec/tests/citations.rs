@@ -1,4 +1,6 @@
-//! Checks of the API sketch (ADR-0020): the DX promise and the REQ tracing.
+//! Checks of the SDK sources and documents (ADR-0020; moved from the P3 API
+//! sketch in C-060, ADR-0026 §1): the DX promise of the hello world and the
+//! REQ tracing.
 
 use std::collections::HashMap;
 use std::fs;
@@ -30,17 +32,22 @@ fn catalog() -> HashMap<String, bool> {
             if let Some(id) = line.strip_prefix("  - id: ") {
                 current = Some(id.trim().to_owned());
                 reqs.insert(id.trim().to_owned(), false);
-            } else if let Some(status) = line.strip_prefix("    status: ") {
-                if let Some(id) = &current {
-                    reqs.insert(id.clone(), status.trim() == "deprecated");
-                }
+            } else if let Some(status) = line.strip_prefix("    status: ")
+                && let Some(id) = &current
+            {
+                reqs.insert(id.clone(), status.trim() == "deprecated");
             }
         }
     }
-    assert!(reqs.len() > 400, "requirements catalog not found at {}", dir.display());
+    assert!(
+        reqs.len() > 400,
+        "requirements catalog not found at {}",
+        dir.display()
+    );
     reqs
 }
 
+/// The `.rs`, `.h`, `.c` and `.md` files below `dir`, without `target`.
 fn walk(dir: &Path, files: &mut Vec<PathBuf>) {
     for entry in fs::read_dir(dir).unwrap() {
         let path = entry.unwrap().path();
@@ -68,7 +75,10 @@ fn req_ids(text: &str) -> Vec<String> {
         while end < bytes.len() && (bytes[end].is_ascii_uppercase() || bytes[end] == b'-') {
             end += 1;
         }
-        let digits = bytes[end..].iter().take_while(|b| b.is_ascii_digit()).count();
+        let digits = bytes[end..]
+            .iter()
+            .take_while(|b| b.is_ascii_digit())
+            .count();
         if digits == 3 && bytes[end - 1] == b'-' {
             ids.push(text[start..end + 3].to_owned());
         }
@@ -77,8 +87,16 @@ fn req_ids(text: &str) -> Vec<String> {
     ids
 }
 
-/// Every REQ id cited anywhere in `oec/sdk/` (sketches, headers, design
-/// documents) exists in the catalog and is not deprecated.
+#[test]
+fn req_ids_are_complete_ids_only() {
+    assert_eq!(
+        req_ids("REQ-ACT-011, REQ-RES-PUBLIST-006 … 008, REQ-CMP-*, REQ-X-1234"),
+        ["REQ-ACT-011", "REQ-RES-PUBLIST-006"]
+    );
+}
+
+/// Every REQ id cited anywhere in `oec/sdk/` (code, examples, headers,
+/// design documents) exists in the catalog and is not deprecated.
 #[test]
 fn cited_req_ids_exist_and_are_active() {
     let reqs = catalog();
@@ -96,6 +114,6 @@ fn cited_req_ids_exist_and_are_active() {
             }
         }
     }
-    assert!(cited > 100, "only {cited} REQ citations found");
+    assert!(cited > 1000, "only {cited} REQ citations found");
     assert!(bad.is_empty(), "{}", bad.join("\n"));
 }
