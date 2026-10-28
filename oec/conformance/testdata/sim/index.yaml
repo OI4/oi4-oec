@@ -12,6 +12,8 @@
 # `oec-check test` (monitor + runner, level 3) against every entry over the
 # in-process TLS test broker.
 #
+# Reviewed by the PO in the C-062 review (2026-10-28, R-1).
+#
 # This index is test data with verdict (G-3.9): it states the expected
 # outcome of the tests and goes to the PO for review.
 #
@@ -23,7 +25,7 @@
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -31,7 +33,7 @@ fixtures:
       tests pass or are skipped (a test run is shorter than the heartbeat
       and does not see the connect: plain skip, not inconclusive).
   - fault: T7-GET-01/reply-to
-    status: draft
+    status: reviewed
     expect:
       T7-GET-01: {outcome: fail, reqs: [REQ-BUS-003, REQ-CMP-015, REQ-CMP-017, REQ-MSG-015]}
       T7-GET-02: {outcome: fail, reqs: [REQ-CMP-018]}
@@ -48,7 +50,7 @@ fixtures:
       MAM about itself with empty ReplyTo, MG 6.3.3) without Will or Close in
       between (T7-MON-10, REQ-IL-012 info: a second instance or a lost Will).
   - fault: T7-GET-01/all-assets
-    status: draft
+    status: reviewed
     expect:
       T7-GET-01: {outcome: fail, reqs: [REQ-RES-HEALTH-006]}
     notes: >-
@@ -56,14 +58,14 @@ fixtures:
       application only; the subordinate asset, whose MAM is in the answer to
       Get MAM, is missing (REQ-RES-HEALTH-006: all assets).
   - fault: T7-GET-02/unanswered
-    status: draft
+    status: reviewed
     expect:
       T7-GET-02: {outcome: fail, reqs: [REQ-RES-PROFILE-002]}
     notes: >-
       The Profile lists SubscriptionList, but Get SubscriptionList/<AppId>
       is not answered (REQ-RES-PROFILE-002: exactly the served resources).
   - fault: T7-GET-02/missing
-    status: draft
+    status: reviewed
     expect:
       T7-GET-02: {outcome: fail, reqs: [REQ-CMP-021, REQ-RES-PROFILE-002]}
     notes: >-
@@ -71,14 +73,14 @@ fixtures:
       Config (REQ-CMP-035), so the Profile also lacks a resource of the
       level (REQ-CMP-021).
   - fault: T7-GET-05/empty-list
-    status: draft
+    status: reviewed
     expect:
       T7-GET-05: {outcome: fail, reqs: [REQ-CMP-041]}
     notes: >-
       Get Data/<AppId>/<Filter> with a Filter that matches nothing is not
       answered instead of with an empty Messages list (REQ-CMP-041).
   - fault: T7-GET-05/unknown-source
-    status: draft
+    status: reviewed
     expect:
       T7-GET-05: {outcome: warn, reqs: [REQ-CMP-047]}
     notes: >-
@@ -86,7 +88,7 @@ fixtures:
       Source of the request instead of no Pub and an Event Status Bad
       (REQ-CMP-047, SHOULD).
   - fault: T7-GET-09/unknown-key
-    status: draft
+    status: reviewed
     expect:
       T7-GET-09: {outcome: warn, reqs: [REQ-MSG-046]}
     notes: >-

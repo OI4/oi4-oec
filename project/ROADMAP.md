@@ -285,7 +285,7 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 
 | Cycle | Increment | Content | New dependencies (ADR-0013/0025) |
 |---|---|---|---|
-| **C-062** ✅ | 1 | `internal/probe`, `internal/sim`, `oec-check test` (bus attachment), T7-GET-01/02/05/09 with 1 positive + 7 negative sim fixtures (draft, R-1), run against `demo.rs` (14 pass, 3 skip, exit 0); ADR-0025 amendment C-062 | none |
+| **C-062** ✅ | 1 | `internal/probe`, `internal/sim`, `oec-check test` (bus attachment), T7-GET-01/02/05/09 with 1 positive + 7 negative sim fixtures (reviewed in the C-062 review, R-1), run against `demo.rs` (14 pass, 3 skip, exit 0); ADR-0025 amendment C-062 | none |
 | C-063 | 2 | T7-GET-03/04/06/07/08, ADR-02/03 | none planned |
 | C-064 | 3 | T7-SET-* except SET-10, state model | none planned |
 | C-065 | 4 | T7-ACT-*, T7-MON-09/13 … 17 | none planned |

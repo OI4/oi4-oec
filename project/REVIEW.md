@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-062 (P5 started: plan and cycle cut, increment 1 = D7 `oec-check test` engine with T7-GET-01/02/05/09). **Open for you: R-1 (8 sim fixtures of `oec-check test`, review).** A-153 … A-163 for information, worth a look: A-154, A-155, A-159._
+_Last updated: 2026-10-28, C-062 review (you accepted R-1: the 8 sim fixtures of `oec-check test` are `reviewed`). **Nothing is open for you.** A-153 … A-163 for information, worth a look: A-154, A-155, A-159._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -122,6 +122,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Found test-first and fixed: D7's own requests used QoS 1 instead of the default QoS 0 (REQ-MQTT-017).
   - Against the SDK example app `demo.rs` (level 2, copy of a dev root, dev broker): **14 pass, 0 fail, 3 skip, exit 0**, 18 requests all answered.
   - ADR-0025 amendment C-062; no SF, no reviewed item changed, no new dependency. A-153 … A-163 for information.
+- C-062 review: you accepted R-1; the 8 sim fixtures in `testdata/sim/index.yaml` are `reviewed`. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
@@ -283,7 +284,6 @@ Logs: [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-
 | A-150 | Threads and handles: callback thread, no blocking calls/`run`/`free` inside callbacks, child handles valid until the app is freed, `oec_app_start` errors not reported | info (agent) | C-061 | – | – |
 | A-151 | Additions (`oec_set`, `oec_del`, `oec_new_data_set_writer_id`, …), what C does not get yet, packaging | info (agent) | C-061 | – | – |
 | A-152 | Tests: C programs against the in-process broker, shared + static under ASan/UBSan, stress, LSan/cross builds on Linux once; ADR-0026 §20 | info (agent) | C-061 | – | – |
-| R-1 | 8 sim fixtures of `oec-check test` and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-062 | accept | ☐ |
 | A-153 | One subscription feeds the monitor engine (and recorder), then the runner; a test run is replayable | info (agent) | C-062 | – | – |
 | A-154 | D7 requests with QoS 0 (REQ-MQTT-017); valid except the deliberate unknown key of T7-GET-09 | info (agent) | C-062 | – | – |
 | A-155 | Tester `Utility/oi4.org/oec-check/D7/<12 hex>`, new per run, not announced, `--tester-il` | info (agent) | C-062 | – | – |
@@ -298,24 +298,12 @@ Logs: [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-
 
 ## Decisions and review items
 
-### R-1 – sim fixtures of `oec-check test` (G-3.9)
-
-- **Where:** `oec/conformance/testdata/sim/index.yaml` – 8 entries (all `draft`): one per fault of the simulated component `internal/sim`, plus the fault-free run.
-- **What they are:** `internal/probe/sim_test.go` starts the simulated component (the OT connector of the guideline examples, MG B1.1, with one subordinate asset; its content comes from reviewed payload vectors) with one fault, runs `oec-check test` (monitor + active tests, level 3) against it over the in-process TLS broker, and compares the verdict with the entry: outcome and exact REQ ids per test.
-- **Positive:** `none` – the conforming component; T7-GET-01, 02, 05, 09 pass, the monitor tests pass or are skipped.
-- **Negative (fault → expected outcome):**
-  - `T7-GET-01/reply-to` (every answer has an empty `ReplyTo`): T7-GET-01 fail REQ-BUS-003, CMP-015, CMP-017, MSG-015; T7-GET-02 fail REQ-CMP-018; T7-GET-05 warn REQ-CMP-047; T7-MON-10 info REQ-IL-012 (each uncorrelated answer to Get MAM looks like another Birth);
-  - `T7-GET-01/all-assets` (Get Health without Source omits the subordinate asset): T7-GET-01 fail REQ-RES-HEALTH-006;
-  - `T7-GET-02/unanswered` (SubscriptionList listed in the Profile but not answered): T7-GET-02 fail REQ-RES-PROFILE-002;
-  - `T7-GET-02/missing` (Config answered but not in the Profile, level 3 requires it): T7-GET-02 fail REQ-CMP-021, RES-PROFILE-002;
-  - `T7-GET-05/empty-list` (a Get without content is not answered): T7-GET-05 fail REQ-CMP-041;
-  - `T7-GET-05/unknown-source` (empty Pub instead of Event Status Bad for an unknown asset): T7-GET-05 warn REQ-CMP-047 (SHOULD);
-  - `T7-GET-09/unknown-key` (a Get with an unknown key is dropped): T7-GET-09 warn REQ-MSG-046 (SHOULD).
-- **Please check:** is each fault a real violation of the named REQ (and only that), and is the fault-free component really compliant? In particular: the T7-MON-10 info for the ReplyTo fault, and that T7-GET-05/09 only warn (SHOULD).
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
+No open item.
 
 ### Answered earlier
+
+Answered in the C-062 review (2026-10-28) and applied in C-062 addendum 1:
+- R-1 – 8 sim fixtures of `oec-check test` (`testdata/sim/index.yaml`: the fault-free run and 7 faults of T7-GET-01/02/05/09): ☑ accepted → `reviewed`.
 
 Answered in the C-061 review (2026-10-28) and applied in C-061 addendum 1:
 - D-1 – P4 exit and the next phase: ☑ (a) → P4 closed; criterion 3 (D7 `test` against `oec/sdk/rust/oec/examples/demo.rs`) carried into the P5 exit, criterion 5 (platform matrix: Windows MSVC, native amd64/Windows runs) into the P9 CI; next phase **P5**. The criteria and the evidence are in the C-061 log (P4 exit table).
@@ -886,5 +874,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-063)
 
-1. Your review of R-1.
-2. P5 increment 2: T7-GET-03 (Data ⇒ Metadata), GET-04, GET-06 (pagination, `MaxPacketSize`), GET-07 (Query), GET-08 (Locale), T7-ADR-02/03; in a new session (start prompt in `prompt.md`).
+1. P5 increment 2: T7-GET-03 (Data ⇒ Metadata), GET-04, GET-06 (pagination, `MaxPacketSize`), GET-07 (Query), GET-08 (Locale), T7-ADR-02/03; in a new session (start prompt in `prompt.md`).

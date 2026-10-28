@@ -85,7 +85,7 @@ go run ./cmd/oec-check test --broker mqtts://localhost:8883 --ca ../dev/generate
 | `internal/verdict` | verdict model: severity from REQ keyword × level, test aggregation, exit code |
 | `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` and `test` |
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
-| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (draft, C-062, G-3.9) |
+| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062, reviewed in the C-062 review, G-3.9) |
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (reviewed in the C-052 review, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
