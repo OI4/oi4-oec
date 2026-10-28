@@ -123,6 +123,11 @@ impl Dev {
         let to = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join(format!("interop-{test}"));
         let _ = std::fs::remove_dir_all(&to);
         copy_dir(&self.generated.join("roots").join(name), &to);
+        // an empty application volume: `examples/demo.rs` persists its store
+        // into the generated root (C-060)
+        let volume = to.join("etc/oi4/app");
+        let _ = std::fs::remove_dir_all(&volume);
+        std::fs::create_dir_all(&volume).unwrap();
         to
     }
 
@@ -1624,6 +1629,7 @@ fn consumer_asks_a_provider() {
     );
     consumer_requests(&consumer, &target, &pump, &child);
     subscription_list(&consumer, &target.clone().source(p_il.clone()));
+    new_writer_ids(&consumer, &target, &pump);
 
     handle.shutdown();
     run.join().unwrap().unwrap();
@@ -1702,6 +1708,31 @@ fn consumer_requests(consumer: &Consumer, target: &Target, pump: &Asset, child: 
     assert_eq!(refused.unwrap(), StatusCode::BadOutOfRange);
     let del = consumer.del_blocking(Resource::ReferenceDesignation, &at_child, None, &w);
     assert_eq!(del.unwrap(), StatusCode::Good);
+}
+
+/// The Action NewDataSetWriterId through the broker (`Call`/`Reply`,
+/// MG 9.2.1): two ids for the application and its pump, BadNotFound for an
+/// unknown asset (SF-113).
+fn new_writer_ids(consumer: &Consumer, target: &Target, pump: &Asset) {
+    use oec::consumer::ActionOptions;
+    let o = ActionOptions::new();
+    let app = consumer
+        .new_data_set_writer_id_blocking(Resource::Data, target, &o)
+        .unwrap();
+    let at_pump = target.clone().source(pump.identification_link().clone());
+    let asset = consumer
+        .new_data_set_writer_id_blocking(Resource::Data, &at_pump, &o)
+        .unwrap();
+    assert!(app.data_set_writer_id >= 10, "{app:?}");
+    assert_ne!(app.data_set_writer_id, asset.data_set_writer_id);
+    assert_eq!(asset.ttl, Duration::from_secs(60));
+    let unknown = target
+        .clone()
+        .source(IdentificationLink::parse("vendor.com/Pump/P-4/none").unwrap());
+    assert!(matches!(
+        consumer.new_data_set_writer_id_blocking(Resource::Data, &unknown, &o),
+        Err(oec::Error::Status(StatusCode::BadNotFound))
+    ));
 }
 
 /// `Get`, `Set` (Interval) and `Del` of the configurable `oee` entry in the
