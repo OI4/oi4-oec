@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-064 (P5 increment 3: the write tests T7-SET-01 … 09, 11, 12 of `oec-check test`). **Open for you: R-1 (14 sim fixtures, review).** A-176 … A-190 for information, worth a look: A-177, A-178, A-180, A-188, A-189._
+_Last updated: 2026-10-28, C-064 review (you accepted R-1: the 14 sim fixtures of the write tests are `reviewed`). **Nothing is open for you.** A-176 … A-190 for information, worth a look: A-177, A-178, A-180, A-188, A-189._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -133,10 +133,11 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-064 (P5 increment 3):
   - **T7-SET-01 … 09, 11, 12 `implemented`** – the write side: Set and Del of Config, Data, Metadata, PublicationList, ReferenceDesignation and SubscriptionList, each answered with a Status event with the `ReplyTo` and, after a successful Set, the publication; rejected changes (unknown object, read-only property, `NONE_0` entries); Del of a whole object and of a part; the log level. T7-SET-10 (restart) stays in increment 6.
   - **D7 restores the component:** it writes back what the component published, deletes only what it created and undoes every change it provoked. Before the first and after the last write test it reads Config, PublicationList, ReferenceDesignation and SubscriptionList and compares them; the result is reported (`restore`), it is not a verdict.
-  - The simulated component is writable; 13 new faults (2 conforming variants, 11 faults); with `none`, 14 sim fixtures are `draft` → **R-1**.
+  - The simulated component is writable; 13 new faults (2 conforming variants, 11 faults); with `none`, 14 sim fixtures went to you as R-1 (accepted in the C-064 review).
   - Found test-first and fixed: an invalid Status DataSetWriterId of the sim, invalid stimuli of D7, destructive requests without a known state, subscriptions left behind; after a code review three more (no write-back of a masked value at level 1, a ReferenceDesignation is deleted only after its write-back was accepted, a restore note when a run ends during the write tests).
   - Against `demo.rs` (level 2): **30 pass, 0 fail, 5 skip, exit 0**, 136 requests all answered, state restored (three runs). The SDK was not changed.
   - ADR-0025 amendment C-064; no SF, no new dependency. A-176 … A-190 for information.
+- C-064 review: you accepted R-1; the 14 sim fixtures in `testdata/sim/index.yaml` are `reviewed`. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
@@ -321,7 +322,6 @@ Logs: [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-06
 | A-173 | Tester-violation contract: exactly the deliberate stimuli without a fault, a part of them with one | info (agent) | C-063 | – | – |
 | A-174 | Fixture answer timeout 3 s, run context 2 min | info (agent) | C-063 | – | – |
 | A-175 | Increment 2 not split; no SF raised (Config Filter vs. `Context.Name` checked) | info (agent) | C-063 | – | – |
-| R-1 | 14 sim fixtures of `oec-check test` (13 new, `none` with the write outcomes) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-064 | accept | ☐ |
 | A-176 | Increment 3 not split; SET-10 stays in increment 6 | info (agent) | C-064 | – | – |
 | A-177 | Restore model: Get without Source of Config, PublicationList, ReferenceDesignation, SubscriptionList before/after; Data and disk not compared | info (agent) | C-064 | – | – |
 | A-178 | The restore result is reported (report key `restore`, text line, stderr warning), not judged | info (agent) | C-064 | – | – |
@@ -340,31 +340,12 @@ Logs: [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-06
 
 ## Decisions and review items
 
-### R-1 – sim fixtures of `oec-check test`, increment 3 (G-3.9)
-
-- **Where:** `oec/conformance/testdata/sim/index.yaml` – 14 entries `draft`: 13 new faults of the simulated component and `none` (reviewed in the C-063 review), which got the outcomes of the write tests. The other 18 entries are unchanged and stay `reviewed`.
-- **What they are:** as in C-062/C-063 – `internal/probe/sim_test.go` runs `oec-check test` (monitor + active tests, level 3) against the simulated component with one fault and compares outcome and exact REQ ids per test. New: every run must leave the simulated component in its start state, and D7's restore check must agree.
-- **Positive (conforming):**
-  - `none` – now also T7-SET-01 … 09, 11, 12 pass with every REQ judged; the state is restored.
-  - `T7-SET-09/set-rejected` – the component rejects every Set ReferenceDesignation (BadNotWritable) but would accept a Del. D7 deletes nothing it could not restore: REQ-RES-REFDES-010 and the Del of SET-03 are skipped; every test passes.
-  - `T7-SET-11/no-create` – the component does not create SubscriptionList entries (BadNotSupported, like the demo, SF-111): REQ-BUS-008 and REQ-RES-SUBLIST-015 skipped; every test passes.
-- **Negative (fault → expected outcome):**
-  - `T7-SET-01/sublist` (the writable Config DataSet is not listed with its Set subscription): T7-SET-01 fail REQ-RES-SUBLIST-016;
-  - `T7-SET-02/unknown-source` (Status Bad for an unknown asset under the Source of the request instead of the AppId): T7-SET-02 fail REQ-CMP-043;
-  - `T7-SET-03/metadata` (Set Metadata answered with BadNotSupported): T7-SET-03 fail REQ-CMP-033; T7-SET-07 fail REQ-RES-META-006;
-  - `T7-SET-04/del-publishes` (an empty list is published after the Del of a whole object): T7-SET-04 fail REQ-BUS-007;
-  - `T7-SET-05/read-only` (a changed Name of a configuration object is accepted): T7-SET-05 fail REQ-RES-CONFIG-023;
-  - `T7-SET-06/no-pub` (Status Good after Set Data, but no publication): T7-SET-06 fail REQ-RES-DATA-012; T7-SET-01 fail REQ-BUS-006, REQ-MQTT-019;
-  - `T7-SET-07/no-event` (Set Metadata without Status event): T7-SET-07 fail REQ-RES-META-006; T7-SET-03 fail REQ-CMP-033 (no reaction at all for the asset);
-  - `T7-SET-08/read-only` (a Mode change of a `NONE_0` PublicationList entry is accepted): T7-SET-08 fail REQ-RES-PUBLIST-016;
-  - `T7-SET-09/del-silent` (Del ReferenceDesignation without Status event): T7-SET-09 fail REQ-RES-REFDES-009; T7-SET-03 fail REQ-CMP-033;
-  - `T7-SET-11/none-writable` (an Interval change of a `NONE_0` SubscriptionList entry is accepted): T7-SET-11 fail REQ-RES-SUBLIST-004;
-  - `T7-SET-12/fixed-level` (every Syslog entry has Config `NONE_0`): T7-SET-12 **warn** REQ-TOP-027 (SHOULD).
-- **Please check:** is each fault a real violation of the named REQ, and are the three positives really compliant? In particular: the side effects on T7-SET-03 (REQ-CMP-033) when a component gives no reaction at all; T7-SET-01 failing REQ-BUS-006/MQTT-019 for `no-pub`; and that `set-rejected` (a ReferenceDesignation that cannot be written back) passes.
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
+No open item.
 
 ### Answered earlier
+
+Answered in the C-064 review (2026-10-28) and applied in C-064 addendum 1:
+- R-1 – 14 sim fixtures of `oec-check test` (`testdata/sim/index.yaml`: 13 new faults and conforming variants of T7-SET-01 … 09, 11, 12, `none` with the write outcomes): ☑ accepted → `reviewed`.
 
 Answered in the C-063 review (2026-10-28) and applied in C-063 addendum 1:
 - R-1 – 14 sim fixtures of `oec-check test` (`testdata/sim/index.yaml`: 11 new faults and conforming variants of T7-GET-03/04/06/07/08 and T7-ADR-02/03, 3 entries with added outcomes): ☑ accepted → `reviewed`.
@@ -977,5 +958,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-065)
 
-1. Your review of R-1.
-2. P5 increment 4: T7-ACT-01 … 04 and T7-MON-09/13 … 17 on the state model of C-064; in a new session (start prompt in `prompt.md`).
+1. P5 increment 4: T7-ACT-01 … 04 and T7-MON-09/13 … 17 on the state model of C-064; in a new session (start prompt in `prompt.md`).

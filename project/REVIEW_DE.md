@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, C-064: **P5 Inkrement 3** – die Schreib-Tests (`Set`/`Del`) von `oec-check test` sind fertig. **Für dich offen: R-1 (14 Testfälle gegen die simulierte App prüfen).** A-176 … A-190 nur zur Info._
+_Stand: 28.10.2026, C-064: **P5 Inkrement 3** – die Schreib-Tests (`Set`/`Del`) von `oec-check test` sind fertig. Deine Antwort „R-1 akzeptiert“ ist eingetragen. **Für dich ist nichts offen.** A-176 … A-190 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,39 +24,13 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### R-1 – 14 Testfälle gegen die simulierte App (bitte prüfen)
-
-**Wo:** `oec/conformance/testdata/sim/index.yaml`, die Einträge mit `status: draft`.
-
-**Worum es geht:** Wie in C-062/C-063 startet ein Selbsttest die simulierte App mit genau einem eingebauten Fehler und lässt `oec-check test` auf Level 3 gegen sie laufen. Im Eintrag steht, welches Ergebnis herauskommen muss – je Test „bestanden“, „Warnung“ oder „durchgefallen“ und genau welche Regeln (REQs). Neu: Nach jedem Lauf muss die simulierte App wieder genau so eingestellt sein wie vorher, und D7 muss das selbst richtig erkennen. Du prüfst: **Ist der eingebaute Fehler wirklich ein Verstoß gegen die genannte Regel, und sind die Fälle ohne Fehler wirklich erlaubt?**
-
-**Ohne Fehler (muss bestehen):**
-- `none` – die fehlerfreie App (schon geprüft, aber jetzt laufen auch die Schreib-Tests gegen sie, daher wieder `draft`). Alle Schreib-Tests bestehen, jede Regel wird beurteilt, danach ist alles wie vorher.
-- `T7-SET-09/set-rejected` – die App lässt sich die ReferenceDesignation nicht überschreiben (Antwort „nicht schreibbar“), würde sie aber löschen lassen. D7 löscht nur, was es danach wiederherstellen kann – hier also nichts. Die Lösch-Regel (REQ-RES-REFDES-010) wird übersprungen. Erlaubt.
-- `T7-SET-11/no-create` – die App legt keine neuen Abonnements an (Antwort „nicht unterstützt“, wie die Demo-App; das ist laut SF-111 freiwillig). Die zugehörigen Regeln werden übersprungen. Erlaubt.
-
-**Mit Fehler (muss durchfallen):**
-- `T7-SET-01/sublist` – eine Konfiguration lässt sich ändern, steht aber nicht als änderbar in der SubscriptionList (REQ-RES-SUBLIST-016).
-- `T7-SET-02/unknown-source` – Schreiben an ein unbekanntes Gerät: die Fehlermeldung kommt unter der Kennung des unbekannten Geräts statt unter der der App (REQ-CMP-043, SF-108).
-- `T7-SET-03/metadata` – Metadaten lassen sich gar nicht schreiben („nicht unterstützt“); Level 3 verlangt das (REQ-CMP-033). Nebenwirkung: T7-SET-07 fällt mit REQ-RES-META-006 durch.
-- `T7-SET-04/del-publishes` – nach dem Löschen eines ganzen Objekts schickt die App trotzdem noch eine (leere) Nachricht dazu (REQ-BUS-007).
-- `T7-SET-05/read-only` – die App lässt sich den Namen eines Konfig-Eintrags ändern, der nur lesbar ist (REQ-RES-CONFIG-023).
-- `T7-SET-06/no-pub` – die App meldet „Daten geändert“, schickt die geänderten Daten aber nicht (REQ-RES-DATA-012; auch T7-SET-01 mit REQ-BUS-006, REQ-MQTT-019).
-- `T7-SET-07/no-event` – die App ändert Metadaten, schickt aber keine Status-Meldung (REQ-RES-META-006). Nebenwirkung: beim Gerät reagiert sie gar nicht, deshalb kann D7 nicht sehen, dass es unterstützt wird (REQ-CMP-033).
-- `T7-SET-08/read-only` – die App lässt sich einen fest eingestellten Eintrag der PublicationList (`NONE_0`) ändern (REQ-RES-PUBLIST-016).
-- `T7-SET-09/del-silent` – die App löscht die ReferenceDesignation ohne Status-Meldung (REQ-RES-REFDES-009; Nebenwirkung REQ-CMP-033).
-- `T7-SET-11/none-writable` – die App lässt sich ein fest eingestelltes Abonnement (`NONE_0`) ändern (REQ-RES-SUBLIST-004).
-- `T7-SET-12/fixed-level` – die Log-Stufe lässt sich nicht umstellen. Das ist nur eine Empfehlung (SHOULD), daher **Warnung**, nicht durchgefallen (REQ-TOP-027).
-
-**Besonders anschauen:** die Nebenwirkungen auf T7-SET-03 (wenn die App gar nicht reagiert, gilt das als „nicht unterstützt“), T7-SET-01 bei `no-pub`, und ob `set-rejected` wirklich bestehen soll.
-
-**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1 akzeptiert“.
+**Nichts.** Deine Antwort „R-1 akzeptiert“ ist eingetragen: Die 14 Testfälle der Schreib-Tests gegen die simulierte App (`oec/conformance/testdata/sim/index.yaml`) haben jetzt den Status `reviewed`.
 
 ### Zur Info: was C-064 gebaut hat
 
 - **Die Schreib-Tests sind fertig** (T7-SET-01 … 09, 11, 12): D7 schreibt Konfiguration, Daten, Metadaten, PublicationList, ReferenceDesignation und SubscriptionList. Es prüft, dass die App jede Änderung mit einer Status-Meldung beantwortet und nach einer erfolgreichen Änderung den neuen Stand schickt. Verbotene Änderungen (unbekannte Einträge, nur lesbare Felder, fest eingestellte Einträge) müssen abgelehnt werden. Dazu kommen das Löschen und die umschaltbare Log-Stufe. T7-SET-10 (nach einem Neustart noch da) kommt mit Inkrement 6.
 - **D7 räumt hinterher auf:** Es schreibt nur zurück, was die App selbst geschickt hat, löscht nur, was es selbst angelegt hat, und macht jede Änderung rückgängig. Vor dem ersten und nach dem letzten Schreib-Test liest D7 den Stand der App und vergleicht. Das Ergebnis steht im Bericht (`restore`); weicht etwas ab, gibt es eine Warnung. Es ist keine Bewertung der App.
-- **Die simulierte App ist jetzt beschreibbar**, mit 13 neuen eingebauten Fehlern → R-1.
+- **Die simulierte App ist jetzt beschreibbar**, mit 13 neuen eingebauten Fehlern (von dir als R-1 akzeptiert).
 - **Gefunden und behoben** (Test zuerst): Fehler in D7 und in der simulierten App. Nach einer Code-Durchsicht kamen drei weitere dazu:
   - Auf Level 1 schreibt D7 eine Konfiguration mit verdecktem Passwort (`********`) nicht mehr zurück. Dort ist nur empfohlen, dass die App das verdeckte Passwort richtig behandelt. Sonst könnte das echte Passwort überschrieben werden, ohne dass man es sieht.
   - D7 löscht eine ReferenceDesignation nur, wenn die App vorher das Zurückschreiben angenommen hat.
@@ -615,8 +589,7 @@ Neu aus C-064 (P5 Inkrement 3):
 
 ### Was als Nächstes passiert (C-065)
 
-1. **Dein Review von R-1.**
-2. **P5 Inkrement 4:** die Aktion `NewDataSetWriterId` (T7-ACT-01 … 04) und die restlichen passiven Regeln (T7-MON-09, 13 … 17).
+1. **P5 Inkrement 4:** die Aktion `NewDataSetWriterId` (T7-ACT-01 … 04) und die restlichen passiven Regeln (T7-MON-09, 13 … 17).
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

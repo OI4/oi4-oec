@@ -31,7 +31,8 @@
 #
 # Reviewed by the PO in the C-062 review (2026-10-28, R-1); the entries
 # added or changed in C-063 were reviewed in the C-063 review (2026-10-28,
-# R-1). The entries added or changed in C-064 are drafts.
+# R-1); the entries added or changed in C-064 were reviewed in the C-064
+# review (2026-10-28, R-1).
 #
 # This index is test data with verdict (G-3.9): it states the expected
 # outcome of the tests and goes to the PO for review.
@@ -44,7 +45,7 @@
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -241,7 +242,7 @@ fixtures:
       A Get with Locale de-DE is answered with LocalizedText in fr-FR,
       neither the requested locale nor the default (REQ-LOC-002).
   - fault: T7-SET-01/sublist
-    status: draft
+    status: reviewed
     expect:
       T7-SET-01: {outcome: fail, reqs: [REQ-RES-SUBLIST-016]}
     notes: >-
@@ -249,14 +250,14 @@ fixtures:
       DataSet, which accepts the Set (REQ-RES-SUBLIST-016: a DataSet that can
       be changed with Set is listed with its Set subscription).
   - fault: T7-SET-02/unknown-source
-    status: draft
+    status: reviewed
     expect:
       T7-SET-02: {outcome: fail, reqs: [REQ-CMP-043]}
     notes: >-
       A Set to an unknown asset is answered with Status Bad under the Source
       of the request instead of the AppId (REQ-CMP-043, SF-108).
   - fault: T7-SET-03/metadata
-    status: draft
+    status: reviewed
     expect:
       T7-SET-03: {outcome: fail, reqs: [REQ-CMP-033]}
       T7-SET-07: {outcome: fail, reqs: [REQ-RES-META-006]}
@@ -266,7 +267,7 @@ fixtures:
       the Status event is Bad, so REQ-RES-META-006 (Status Good after a
       successful Set) fails and REQ-RES-META-007 is skipped.
   - fault: T7-SET-04/del-publishes
-    status: draft
+    status: reviewed
     expect:
       T7-SET-04: {outcome: fail, reqs: [REQ-BUS-007]}
     notes: >-
@@ -274,7 +275,7 @@ fixtures:
       subscription of a Filter) the CUT publishes an empty list on the Pub
       topic of the object (REQ-BUS-007).
   - fault: T7-SET-05/read-only
-    status: draft
+    status: reviewed
     expect:
       T7-SET-05: {outcome: fail, reqs: [REQ-RES-CONFIG-023]}
     notes: >-
@@ -282,7 +283,7 @@ fixtures:
       property, REQ-RES-CONFIG-023: the Set is rejected). D7 writes the
       original DataSet back afterwards.
   - fault: T7-SET-06/no-pub
-    status: draft
+    status: reviewed
     expect:
       T7-SET-01: {outcome: fail, reqs: [REQ-BUS-006, REQ-MQTT-019]}
       T7-SET-06: {outcome: fail, reqs: [REQ-RES-DATA-012]}
@@ -290,7 +291,7 @@ fixtures:
       A successful Set Data is answered with Status Good, but the changed
       DataSet is not published (REQ-RES-DATA-012, REQ-BUS-006, REQ-MQTT-019).
   - fault: T7-SET-07/no-event
-    status: draft
+    status: reviewed
     expect:
       T7-SET-03: {outcome: fail, reqs: [REQ-CMP-033]}
       T7-SET-07: {outcome: fail, reqs: [REQ-RES-META-006]}
@@ -300,14 +301,14 @@ fixtures:
       fails (unknown DataSet) gets no reaction at all, so D7 cannot see
       that the asset supports it (REQ-CMP-033).
   - fault: T7-SET-08/read-only
-    status: draft
+    status: reviewed
     expect:
       T7-SET-08: {outcome: fail, reqs: [REQ-RES-PUBLIST-016]}
     notes: >-
       Set PublicationList accepts a Mode change of an entry with Config
       NONE_0 (REQ-RES-PUBLIST-016). D7 writes the original entry back.
   - fault: T7-SET-09/del-silent
-    status: draft
+    status: reviewed
     expect:
       T7-SET-03: {outcome: fail, reqs: [REQ-CMP-033]}
       T7-SET-09: {outcome: fail, reqs: [REQ-RES-REFDES-009]}
@@ -317,7 +318,7 @@ fixtures:
       ReferenceDesignation is supported (REQ-CMP-033). D7 restores the object
       with Set.
   - fault: T7-SET-09/set-rejected
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -329,14 +330,14 @@ fixtures:
       T7-SET-03 skips the Del ReferenceDesignation of the application and
       of the asset; every test passes.
   - fault: T7-SET-11/none-writable
-    status: draft
+    status: reviewed
     expect:
       T7-SET-11: {outcome: fail, reqs: [REQ-RES-SUBLIST-004]}
     notes: >-
       Set SubscriptionList accepts an Interval change of an entry with Config
       NONE_0 (REQ-RES-SUBLIST-004). D7 writes the original entry back.
   - fault: T7-SET-11/no-create
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -345,7 +346,7 @@ fixtures:
       SF-111). REQ-BUS-008 and REQ-RES-SUBLIST-015 are skipped; T7-SET-04
       judges REQ-BUS-007 on the ReferenceDesignation only.
   - fault: T7-SET-12/fixed-level
-    status: draft
+    status: reviewed
     expect:
       T7-SET-12: {outcome: warn, reqs: [REQ-TOP-027]}
     notes: >-
