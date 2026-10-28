@@ -231,13 +231,14 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-TOP-004]
-    status: planned
+    status: implemented
+    notes: D7 sends its requests under Oi4v2 only and watches Oi4/# (best effort); without Oi4 traffic of the CUT the test is skipped. A message under Oi4 that carries the MessageId of a request of D7 answers an Oi4v2 request in the other version.
   - id: T7-ADR-03
     title: Identification Links in requests and answers
     mode: test
     level: 1
     reqs: [REQ-IL-001, REQ-IL-013, REQ-IL-015, REQ-TOP-018]
-    status: planned
+    status: implemented
     notes: Get with the exact IL of each asset is answered on that Source; a Get with an IL that differs only in case is not answered as the same asset.
 
   # --- test: Get ---------------------------------------------------------
@@ -259,14 +260,14 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-CMP-008, REQ-CMP-019, REQ-CMP-020, REQ-CMP-035, REQ-CMP-036, REQ-CMP-037, REQ-CMP-039, REQ-RES-CONFIG-017, REQ-RES-DATA-007, REQ-RES-META-002, REQ-RES-PUBLIST-020, REQ-RES-PUBLIST-027, REQ-RES-REFDES-004, REQ-RES-SUBLIST-008]
-    status: planned
+    status: implemented
     notes: Each resource is required from the level of its CMP row; at level 2 a missing resource of CMP-035 … CMP-039 is a warning (recommended, REQ-CMP-010). Every PublicationList entry of a requestable resource with a Mode other than OFF_0 is requested with Get, with or without ON_REQUEST in its Mode (REQ-RES-PUBLIST-027, SF-101).
   - id: T7-GET-04
     title: Every represented entity fulfills the level
     mode: test
     level: 1
     reqs: [REQ-CMP-010, REQ-CMP-024, REQ-CMP-045]
-    status: planned
+    status: implemented
     notes: The Get tests repeat for every Source the CUT represents.
   - id: T7-GET-05
     title: Get without content, unknown asset, Metadata without Data
@@ -279,19 +280,20 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-PAG-002, REQ-PAG-005]
-    status: planned
+    status: implemented
+    notes: Pagination on request with PerPage 1 (pages 1, n+1, 0); the pagination by size is not stimulated, T7-MON-18 judges MaxPacketSize on all traffic.
   - id: T7-GET-07
     title: Query
     mode: test
     level: 1
     reqs: [REQ-QRY-001, REQ-QRY-002, REQ-QRY-003, REQ-RES-REFDES-011, REQ-RES-REFDES-013, REQ-RES-REFDES-014]
-    status: planned
+    status: implemented
   - id: T7-GET-08
     title: Locale
     mode: test
     level: 1
     reqs: [REQ-LOC-002]
-    status: planned
+    status: implemented
   - id: T7-GET-09
     title: Unknown keys in requests are ignored
     mode: test

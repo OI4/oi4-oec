@@ -1,18 +1,24 @@
 # Fixtures of `oec-check test` against the simulated component under test
-# (DESIGN.md §10, C-062).
+# (DESIGN.md §10, C-062; extended in C-063).
 #
 # The simulated CUT is internal/sim: the OT connector of the guideline
 # examples (MG B1.1, AppId provider.com/FieldDataService/FDS-001/1200-0345)
 # with the subordinate asset groe.mca/DeviceModelB/AC33.447/20443. Its
-# content is taken from reviewed payload vectors (MAM V-PAY-023/006, Health
-# V-PAY-003, Profile V-PAY-032, Config V-PAY-092, Data V-PAY-059,
-# PublicationList V-PAY-038, ReferenceDesignation V-PAY-043,
-# SubscriptionList V-PAY-070, Will V-PAY-025); it answers Get requests and
-# can carry one fault (sim.Fault). internal/probe/sim_test.go runs
-# `oec-check test` (monitor + runner, level 3) against every entry over the
-# in-process TLS test broker.
+# content is taken from reviewed payload vectors (MAM V-PAY-023/006, the
+# German MAM V-PAY-047, Health V-PAY-003, Profile V-PAY-032, Config
+# V-PAY-092, Data V-PAY-059, Metadata V-PAY-021, PublicationList V-PAY-038,
+# ReferenceDesignation V-PAY-043 and V-PAY-054 (asset), SubscriptionList
+# V-PAY-070, Will V-PAY-025); it answers Get requests (with Filter,
+# PaginationRequest, Query of ReferenceDesignation and Locale) and can
+# carry one fault (sim.Fault). Deviations from the vectors (C-063): the
+# asset has its own Profile, Config, Data and ReferenceDesignation (level
+# 3); the Config Filter is "Networksettings" (V-PAY-092: "Network
+# settings", a whitespace REQ-TOP-020 advises against).
+# internal/probe/sim_test.go runs `oec-check test` (monitor + runner,
+# level 3) against every entry over the in-process TLS test broker.
 #
-# Reviewed by the PO in the C-062 review (2026-10-28, R-1).
+# Reviewed by the PO in the C-062 review (2026-10-28, R-1); the entries
+# added or changed in C-063 are draft again.
 #
 # This index is test data with verdict (G-3.9): it states the expected
 # outcome of the tests and goes to the PO for review.
@@ -25,19 +31,26 @@
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: reviewed
+    status: draft
     positive: true
     expect: {}
     notes: >-
-      The conforming CUT. T7-GET-01, -02, -05 and -09 pass; the monitor
+      The conforming CUT. Every implemented test passes except T7-ADR-02,
+      which is skipped (the CUT publishes nothing under Oi4); the monitor
       tests pass or are skipped (a test run is shorter than the heartbeat
       and does not see the connect: plain skip, not inconclusive).
+      REQ-QRY-003 is skipped (the CUT supports the Query) and REQ-CMP-044
+      is not stimulated (MAY). Changed in C-063: the new tests T7-GET-03,
+      -04, -06, -07, -08 and T7-ADR-02, -03 run against it.
   - fault: T7-GET-01/reply-to
-    status: reviewed
+    status: draft
     expect:
       T7-GET-01: {outcome: fail, reqs: [REQ-BUS-003, REQ-CMP-015, REQ-CMP-017, REQ-MSG-015]}
       T7-GET-02: {outcome: fail, reqs: [REQ-CMP-018]}
+      T7-GET-03: {outcome: fail, reqs: [REQ-CMP-019, REQ-CMP-020, REQ-CMP-035, REQ-CMP-036, REQ-CMP-039]}
+      T7-GET-04: {outcome: fail, reqs: [REQ-CMP-010, REQ-CMP-024]}
       T7-GET-05: {outcome: warn, reqs: [REQ-CMP-047]}
+      T7-MON-03: {outcome: fail, reqs: [REQ-LIFE-003]}
       T7-MON-10: {outcome: info, reqs: [REQ-IL-012]}
     notes: >-
       Every answer carries an empty ReplyTo instead of the MessageId of the
@@ -49,6 +62,13 @@ fixtures:
       monitor reads each answer to Get MAM/<AppId> as a further Birth (a Pub
       MAM about itself with empty ReplyTo, MG 6.3.3) without Will or Close in
       between (T7-MON-10, REQ-IL-012 info: a second instance or a lost Will).
+      Added in C-063 (back to draft): no resource the level requires is
+      answered (T7-GET-03: PublicationList, ReferenceDesignation, Config,
+      Data, SubscriptionList, REQ-CMP-019 … 039; T7-GET-04: the application
+      itself, REQ-CMP-024, REQ-CMP-010), and the German answer to the Get MAM
+      with Locale of T7-GET-08 cannot be told from a regular Pub MAM, which
+      differs from the Birth (T7-MON-03, REQ-LIFE-003). T7-GET-06, -07, -08
+      and T7-ADR-03 are skipped (no answer).
   - fault: T7-GET-01/all-assets
     status: reviewed
     expect:
@@ -58,12 +78,18 @@ fixtures:
       application only; the subordinate asset, whose MAM is in the answer to
       Get MAM, is missing (REQ-RES-HEALTH-006: all assets).
   - fault: T7-GET-02/unanswered
-    status: reviewed
+    status: draft
     expect:
       T7-GET-02: {outcome: fail, reqs: [REQ-RES-PROFILE-002]}
+      T7-GET-03: {outcome: fail, reqs: [REQ-CMP-008, REQ-CMP-039, REQ-RES-SUBLIST-008]}
+      T7-GET-04: {outcome: fail, reqs: [REQ-CMP-010, REQ-CMP-024]}
     notes: >-
       The Profile lists SubscriptionList, but Get SubscriptionList/<AppId>
       is not answered (REQ-RES-PROFILE-002: exactly the served resources).
+      Added in C-063 (back to draft): a listed resource is not answered
+      (REQ-CMP-008), level 3 requires SubscriptionList (REQ-CMP-039,
+      REQ-RES-SUBLIST-008), and the application itself lacks it
+      (T7-GET-04: REQ-CMP-024, REQ-CMP-010).
   - fault: T7-GET-02/missing
     status: reviewed
     expect:
@@ -94,3 +120,94 @@ fixtures:
     notes: >-
       A Get with an unknown top-level key is dropped, the same Get without
       it is answered (REQ-MSG-046, SHOULD).
+  - fault: T7-ADR-02/dual-version
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      Variant, conforming: the CUT also supports version 1 and publishes its
+      Birth under the namespace Oi4 (Oi4/OTConnector/<AppId>/pub/mam/<AppId>,
+      an illustrative topic of the CUT, not validated). The Oi4v2 requests of
+      D7 are answered in Oi4v2 only, so T7-ADR-02 passes (REQ-TOP-004).
+  - fault: T7-ADR-02/mixed
+    status: draft
+    expect:
+      T7-ADR-02: {outcome: fail, reqs: [REQ-TOP-004]}
+    notes: >-
+      Like dual-version, but every answer to Get MAM is repeated under Oi4
+      with the MessageId of the Oi4v2 request as CorrelationId: a request
+      received under Oi4v2 is answered under Oi4 (REQ-TOP-004).
+  - fault: T7-ADR-03/case
+    status: draft
+    expect:
+      T7-ADR-03: {outcome: fail, reqs: [REQ-IL-015]}
+      T7-MON-01: {outcome: fail, reqs: [REQ-MSG-023]}
+    notes: >-
+      The application compares the Source of a Get case-insensitively: Get
+      MAM for groe.mca/DeviceModelB/Ac33.447/20443 (the asset with one
+      letter in another case) is answered with the MAM of
+      groe.mca/DeviceModelB/AC33.447/20443 (REQ-IL-015: compared character
+      by character). The monitor also sees the DataSetWriterName differ
+      from the Source of the topic (T7-MON-01, REQ-MSG-023).
+  - fault: T7-GET-03/metadata
+    status: draft
+    expect:
+      T7-GET-03: {outcome: fail, reqs: [REQ-CMP-008, REQ-CMP-037, REQ-RES-META-002]}
+    notes: >-
+      Get Metadata for the Data oee (announced in the PublicationList) is not
+      answered: the Metadata listed in the Profile (REQ-CMP-008) and required
+      at level 3 (REQ-CMP-037) is missing, the Data has no requestable
+      Metadata (REQ-RES-META-002).
+  - fault: T7-GET-03/filter
+    status: draft
+    expect:
+      T7-GET-03: {outcome: fail, reqs: [REQ-RES-PUBLIST-020]}
+      T7-MON-01: {outcome: fail, reqs: [REQ-MSG-025]}
+    notes: >-
+      Get PublicationList/<AppId>/<Filter> is answered with all entries
+      instead of the entries of the Filter (REQ-RES-PUBLIST-020); the
+      monitor sees WriterGroupNames that differ from the Filter of the topic
+      (T7-MON-01, REQ-MSG-025).
+  - fault: T7-GET-04/asset-level
+    status: draft
+    expect:
+      T7-GET-04: {outcome: fail, reqs: [REQ-CMP-010, REQ-CMP-045]}
+    notes: >-
+      The subordinate asset does not provide Config (not in its Profile, Get
+      Config/<asset> not answered), which level 3 requires of every
+      represented entity (REQ-CMP-045, REQ-CMP-010). The application itself
+      fulfills the level.
+  - fault: T7-GET-06/per-page
+    status: draft
+    expect:
+      T7-GET-06: {outcome: fail, reqs: [REQ-PAG-002, REQ-PAG-005]}
+    notes: >-
+      A PaginationRequest is ignored: Get MAM with PerPage 1 is answered
+      with both MAMs in one NetworkMessage without Pagination
+      (REQ-PAG-002: page by page; REQ-PAG-005: more DataSetMessages than
+      PerPage are paginated).
+  - fault: T7-GET-07/ignored
+    status: draft
+    expect:
+      T7-GET-07: {outcome: fail, reqs: [REQ-RES-REFDES-011]}
+    notes: >-
+      The Query of ReferenceDesignation is ignored: Get ReferenceDesignation
+      with a Query for the children of a Parent is answered with all
+      entries (REQ-RES-REFDES-011, MUST at level 3; REQ-QRY-003 is fulfilled
+      by ignoring).
+  - fault: T7-GET-07/with-source
+    status: draft
+    expect:
+      T7-GET-07: {outcome: fail, reqs: [REQ-RES-REFDES-013]}
+    notes: >-
+      The Query is also evaluated on Get ReferenceDesignation/<AppId>: with a
+      Parent the application does not have, the answer is empty instead of
+      the entry of the AppId (REQ-RES-REFDES-013: a Query is only valid
+      without Source).
+  - fault: T7-GET-08/locale
+    status: draft
+    expect:
+      T7-GET-08: {outcome: fail, reqs: [REQ-LOC-002]}
+    notes: >-
+      A Get with Locale de-DE is answered with LocalizedText in fr-FR,
+      neither the requested locale nor the default (REQ-LOC-002).

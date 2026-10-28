@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/OI4/oec/conformance/internal/mqttwire"
@@ -14,6 +15,12 @@ import (
 // namespace, like monitor, to correlate answers and to feed the passive
 // checks (DESIGN.md §3.3).
 const Subscription = "Oi4v2/#"
+
+// V1Namespace is the namespace element of version 1 (MG 7.1). With
+// T7-ADR-02 selected, D7 also subscribes to V1Namespace/# (best effort) to
+// see answers in the wrong version; these messages go to the runner only,
+// not to the monitor or the recording (both judge version 2).
+const V1Namespace = "Oi4"
 
 // Session is the outcome of one test run on a bus.
 type Session struct {
@@ -44,6 +51,10 @@ func RunBus(ctx context.Context, cfg mqttwire.Config, opt Options, reqs verdict.
 	if err := cl.Subscribe(rctx, Subscription, 1, func(m mqttwire.Message) { msgs <- m }); err != nil {
 		return s, err
 	}
+	var v1Err error
+	if Selected(opt.Tests, "T7-ADR-02") {
+		v1Err = cl.Subscribe(rctx, V1Namespace+"/#", 1, func(m mqttwire.Message) { msgs <- m })
+	}
 	if opt.Subscribed != nil {
 		if err := opt.Subscribed(rctx); err != nil {
 			return s, err
@@ -52,13 +63,14 @@ func RunBus(ctx context.Context, cfg mqttwire.Config, opt Options, reqs verdict.
 	runner := New(opt, reqs, func(ctx context.Context, topic string, payload []byte) error {
 		return cl.Publish(ctx, mqttwire.Message{Topic: topic, Payload: payload})
 	})
+	runner.v1Refused = v1Err
 
 	var observeErr error
 	handle := func(m mqttwire.Message) {
 		if observeErr != nil {
 			return
 		}
-		if observe != nil {
+		if observe != nil && !strings.HasPrefix(m.Topic, V1Namespace+"/") {
 			if err := observe(m); err != nil {
 				observeErr = err
 				stop(err)

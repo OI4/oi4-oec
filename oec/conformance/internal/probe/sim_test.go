@@ -88,8 +88,13 @@ func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, faul
 		t.Fatal(s.Cause)
 	}
 	mon := e.Finish(time.Now().UTC())
-	// D7's own requests conform, except the Get of T7-GET-09 with the
-	// unknown key, which strict validation rejects (REQ-MSG-001).
+	// D7's own requests conform, except the deliberate stimuli that strict
+	// validation rejects: the unknown key of T7-GET-09 and the undefined
+	// query parameter of T7-GET-07 (REQ-MSG-001), the Query on Get MAM
+	// (REQ-QRY-001) and the Query on Get ReferenceDesignation with Source
+	// (REQ-RES-REFDES-013) of T7-GET-07. Against a faulty CUT a test may
+	// stop before its stimuli: then a part of them.
+	want := []string{"REQ-MSG-001", "REQ-MSG-001", "REQ-QRY-001", "REQ-RES-REFDES-013"}
 	var own []string
 	for _, o := range mon.Observations {
 		if o.Participant == s.Probe.Tester && o.Kind == verdict.Violation {
@@ -97,14 +102,26 @@ func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, faul
 			t.Logf("tester: %s %s %s %s", o.Test, o.Req, o.Topic, o.Detail)
 		}
 	}
-	if !slices.Equal(own, []string{"REQ-MSG-001"}) {
-		t.Errorf("violations of the requests of D7 %v, want [REQ-MSG-001] (the unknown key of T7-GET-09)", own)
+	sort.Strings(own)
+	if fault == "none" && !slices.Equal(own, want) || !subset(own, want) {
+		t.Errorf("violations of the requests of D7 %v, want %v (the deliberate stimuli of T7-GET-07 and T7-GET-09)", own, want)
 	}
 	res, _, err := Judge(app, level, nil, mon, s, reqs)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return res, s
+}
+
+// subset reports whether the sorted a is a sub-multiset of the sorted b.
+func subset(a, b []string) bool {
+	i := 0
+	for _, x := range b {
+		if i < len(a) && a[i] == x {
+			i++
+		}
+	}
+	return i == len(a)
 }
 
 // TestSimFixtures runs every entry of testdata/sim/index.yaml and compares

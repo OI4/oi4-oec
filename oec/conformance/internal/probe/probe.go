@@ -24,7 +24,8 @@ import (
 
 // Implemented lists the test-mode catalog tests the runner judges (d7.yaml
 // status implemented), in run order.
-var Implemented = []string{"T7-GET-01", "T7-GET-02", "T7-GET-05", "T7-GET-09"}
+var Implemented = []string{"T7-ADR-02", "T7-ADR-03", "T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04",
+	"T7-GET-05", "T7-GET-06", "T7-GET-07", "T7-GET-08", "T7-GET-09"}
 
 // Tests returns the test-mode tests of the D7 catalog for verdict.Build.
 func Tests() ([]verdict.Test, error) {
@@ -133,6 +134,9 @@ type Runner struct {
 	hasProfile  bool
 	obs         []verdict.Observation
 	cites       map[string][]string // catalog REQs of the tests
+	v1          []Message           // received under the namespace Oi4 (T7-ADR-02)
+	v1Refused   error               // the subscription to Oi4/# was refused
+	mamAll      []string            // Sources of the answer to Get MAM without Source
 }
 
 // New creates a runner; the tester identity is fixed here.
@@ -201,8 +205,17 @@ type Message struct {
 
 type dsm struct {
 	id      int64
-	name    string
+	name    string // DataSetWriterName
+	group   string // WriterGroupName
 	payload any
+}
+
+// pagination is the Pagination helper DataSet of a NetworkMessage
+// (MG 8.3.11.2).
+type pagination struct {
+	total, perPage, page int64
+	hasNext              bool
+	id                   string
 }
 
 // helper reports a helper DataSet (DataSetWriterId 0 … 9, MG 8.3.11).
@@ -212,8 +225,11 @@ type netMsg struct {
 	topic, method, resource         string
 	st, app                         string
 	messageID, replyTo, publisherID string
-	msgs                            []dsm
+	msgType                         string
+	msgs                            []dsm // for ua-metadata: one entry with the MetaData as payload
 	paged                           bool
+	pag                             *pagination
+	size                            int
 	received                        time.Time
 }
 
@@ -228,10 +244,21 @@ func parse(m Message) *netMsg {
 	if json.Unmarshal(m.Payload, &doc) != nil {
 		return nil
 	}
-	n := &netMsg{topic: m.Topic, st: lv[1], app: dec(lv[2]), method: lv[3], resource: lv[4], received: m.Received}
+	n := &netMsg{topic: m.Topic, st: lv[1], app: dec(lv[2]), method: lv[3], resource: lv[4], received: m.Received, size: len(m.Payload)}
 	n.messageID, _ = doc["MessageId"].(string)
 	n.replyTo, _ = doc["ReplyTo"].(string)
 	n.publisherID, _ = doc["PublisherId"].(string)
+	n.msgType, _ = doc["MessageType"].(string)
+	if n.msgType == "ua-metadata" {
+		d := dsm{id: -1, payload: doc["MetaData"]}
+		if f, ok := doc["DataSetWriterId"].(float64); ok {
+			d.id = int64(f)
+		}
+		d.name, _ = doc["DataSetWriterName"].(string)
+		d.group, _ = doc["WriterGroupName"].(string)
+		n.msgs = append(n.msgs, d)
+		return n
+	}
 	list, _ := doc["Messages"].([]any)
 	for _, x := range list {
 		o, _ := x.(map[string]any)
@@ -240,12 +267,24 @@ func parse(m Message) *netMsg {
 			d.id = int64(f)
 		}
 		d.name, _ = o["DataSetWriterName"].(string)
+		d.group, _ = o["WriterGroupName"].(string)
 		if d.id == 2 {
 			n.paged = true
+			p, _ := d.payload.(map[string]any)
+			pg := &pagination{}
+			pg.total, pg.perPage, pg.page = num(p["TotalCount"]), num(p["PerPage"]), num(p["Page"])
+			pg.hasNext, _ = p["HasNext"].(bool)
+			pg.id, _ = p["PaginationId"].(string)
+			n.pag = pg
 		}
 		n.msgs = append(n.msgs, d)
 	}
 	return n
+}
+
+func num(v any) int64 {
+	f, _ := v.(float64)
+	return int64(f)
 }
 
 // content returns the DataSetMessages without helpers.
@@ -301,6 +340,12 @@ var cyclic = map[string]bool{"Health": true, "Data": true, "Event": true}
 
 // Deliver hands a received message to the runner.
 func (r *Runner) Deliver(m Message) {
+	if strings.HasPrefix(m.Topic, V1Namespace+"/") {
+		r.mu.Lock()
+		r.v1 = append(r.v1, m)
+		r.mu.Unlock()
+		return
+	}
 	n := parse(m)
 	if n == nil || n.method != "Pub" {
 		return
@@ -366,6 +411,62 @@ func (r *Runner) get(ctx context.Context, test, st, resource, source, filter str
 		return nil, fmt.Errorf("publish %s: %w", x.topic, err)
 	}
 	return x, nil
+}
+
+// helper builds a helper DataSetMessage of D7 (MG 8.3.11 … 8.3.13): the
+// DataSetWriterName of a request helper is the requester (REQ-MSG-019).
+func (r *Runner) helper(id int, group string, payload map[string]any) map[string]any {
+	return map[string]any{"DataSetWriterId": id, "WriterGroupName": group, "DataSetWriterName": r.opt.TesterIL, "Payload": payload}
+}
+
+// getWith sends a Get whose Messages are the given helper DataSets.
+func (r *Runner) getWith(ctx context.Context, test, resource, source, filter string, helpers ...map[string]any) (*exchange, error) {
+	list := []any{}
+	for _, h := range helpers {
+		list = append(list, h)
+	}
+	return r.get(ctx, test, r.st, resource, source, filter, map[string]any{"Messages": list})
+}
+
+// getMeta sends a Get Metadata for one Data DataSet (MG 9.1.5): a
+// ua-metadata message with the empty MetaData (REQ-RES-META-001).
+func (r *Runner) getMeta(ctx context.Context, test, source, tag string, writer int64) (*exchange, error) {
+	id := r.nextID()
+	doc := map[string]any{"MessageId": id, "MessageType": "ua-metadata", "PublisherId": r.tester, "DataSetWriterId": writer,
+		"WriterGroupName": tag, "DataSetWriterName": source, "Timestamp": time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
+		"ReplyTo": "", "MetaData": map[string]any{}}
+	payload, err := json.Marshal(doc)
+	if err != nil {
+		return nil, err
+	}
+	x := &exchange{test: test, id: id, resource: "Metadata", source: source, sent: time.Now(),
+		topic: Topic(r.st, r.app, "Get", "Metadata", source, tag), answerTopic: Topic(r.st, r.app, "Pub", "Metadata", source, tag)}
+	r.mu.Lock()
+	r.exchanges = append(r.exchanges, x)
+	r.mu.Unlock()
+	if err := r.pub(ctx, x.topic, payload); err != nil {
+		return nil, fmt.Errorf("publish %s: %w", x.topic, err)
+	}
+	return x, nil
+}
+
+// until returns when done reports true (plus the grace time) or the
+// timeout ended.
+func (r *Runner) until(ctx context.Context, done func() bool) error {
+	deadline := time.Now().Add(r.opt.Timeout)
+	tick := time.NewTicker(10 * time.Millisecond)
+	defer tick.Stop()
+	for time.Now().Before(deadline) {
+		if done() {
+			return sleep(ctx, r.opt.Grace)
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-tick.C:
+		}
+	}
+	return nil
 }
 
 // wait returns when every exchange of want has an answer (plus the grace
@@ -525,12 +626,19 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 		return r.result(), nil
 	}
 	tests := map[string]func(context.Context) error{
-		"T7-GET-01": r.get01, "T7-GET-02": r.get02, "T7-GET-05": r.get05, "T7-GET-09": r.get09,
+		"T7-ADR-02": r.adr02, "T7-ADR-03": r.adr03,
+		"T7-GET-01": r.get01, "T7-GET-02": r.get02, "T7-GET-03": r.get03, "T7-GET-04": r.get04, "T7-GET-05": r.get05,
+		"T7-GET-06": r.get06, "T7-GET-07": r.get07, "T7-GET-08": r.get08, "T7-GET-09": r.get09,
 	}
-	// T7-GET-05 needs the Profile T7-GET-02 reads.
-	if r.Selected("T7-GET-05") && !r.Selected("T7-GET-02") {
-		if err := r.readProfile(ctx, ""); err != nil {
-			return r.result(), err
+	// The resource tests need the Profile T7-GET-02 reads.
+	if !r.Selected("T7-GET-02") {
+		for _, id := range []string{"T7-GET-03", "T7-GET-04", "T7-GET-05", "T7-GET-07", "T7-GET-08"} {
+			if r.Selected(id) {
+				if err := r.readProfile(ctx, ""); err != nil {
+					return r.result(), err
+				}
+				break
+			}
 		}
 	}
 	for _, id := range Implemented {
@@ -540,6 +648,13 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 		if err := tests[id](ctx); err != nil {
 			return r.result(), err
 		}
+	}
+	// T7-ADR-02 watches the namespace Oi4 during the whole run.
+	if r.Selected("T7-ADR-02") {
+		if err := sleep(ctx, r.opt.Grace); err != nil {
+			return r.result(), err
+		}
+		r.judgeADR02()
 	}
 	return r.result(), nil
 }
