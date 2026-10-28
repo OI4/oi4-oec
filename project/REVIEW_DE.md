@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, C-062: **P5 hat begonnen** – Plan und Zyklusschnitt in der ROADMAP, erstes Inkrement `oec-check test`. Deine Antwort „R-1 akzeptiert“ ist eingetragen. **Für dich ist nichts offen.** A-153 … A-163 nur zur Info._
+_Stand: 28.10.2026, C-063: **P5 Inkrement 2** – alle Lese-Tests (`Get`) von `oec-check test` sind fertig. **Für dich offen: R-1 (14 Testfälle gegen die simulierte App prüfen) und R-2 (ein korrigierter Aufzeichnungs-Testfall).** A-164 … A-175 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,68 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** Deine Antwort „R-1 akzeptiert“ ist eingetragen: Die 8 Testfälle gegen die simulierte App (`oec/conformance/testdata/sim/index.yaml`) haben jetzt den Status `reviewed`.
+Zwei Prüfaufträge (G-3.9), keine Entscheidung. Du kannst z. B. antworten: „R-1 und R-2 akzeptiert“.
+
+### R-1 – 14 Testfälle gegen die simulierte App (bitte prüfen)
+
+**Wo:** `oec/conformance/testdata/sim/index.yaml`, die Einträge mit `status: draft`.
+
+**Worum es geht:** Wie in C-062 startet ein Selbsttest die simulierte App (den OT-Connector aus den Guideline-Beispielen) mit genau einem eingebauten Fehler und lässt `oec-check test` auf Level 3 gegen sie laufen. Im Eintrag steht, welches Ergebnis herauskommen muss – je Test „bestanden“ oder „durchgefallen“ und genau welche Regeln (REQs). Du prüfst: **Ist der eingebaute Fehler wirklich ein Verstoß gegen genau diese Regeln, und ist die App ohne Fehler wirklich regelkonform?**
+
+**Ohne Fehler (muss bestehen):**
+- `none` – die fehlerfreie App. Neu bestehen auch die Tests von C-063. T7-ADR-02 wird übersprungen, weil die App nichts unter der alten Version `Oi4` sendet.
+- `T7-ADR-02/dual-version` – die App spricht zusätzlich die alte Version 1 (`Oi4`), beantwortet die Fragen in Version 2 aber nur in Version 2. Das ist erlaubt.
+- `T7-GET-07/empty` – die App kennt ReferenceDesignation, hat aber keinen einzigen Eintrag (so wie die Demo-App). Ob die Query richtig funktioniert, lässt sich dann nicht beurteilen → übersprungen. Erlaubt.
+
+**Mit Fehler (muss durchfallen):**
+- `T7-ADR-02/mixed` – Antworten kommen zusätzlich unter `Oi4`: Versionen gemischt (REQ-TOP-004).
+- `T7-ADR-03/case` – die App achtet bei der Geräte-Kennung nicht auf Groß-/Kleinschreibung (REQ-IL-015). Nebenwirkung: die passive Regel sieht einen falschen Absendernamen (REQ-MSG-023).
+- `T7-GET-03/metadata` – die App beantwortet die Frage nach den Metadaten eines Datensatzes nicht (REQ-CMP-008, CMP-037, RES-META-002).
+- `T7-GET-03/filter` – die App ignoriert den Filter bei der PublicationList und liefert alles (REQ-RES-PUBLIST-020). Nebenwirkung: falscher Gruppenname (REQ-MSG-025).
+- `T7-GET-04/asset-level` – das untergeordnete Gerät hat keine Konfiguration (Config), Level 3 verlangt sie für jedes Gerät (REQ-CMP-010, CMP-045).
+- `T7-GET-06/per-page` – die App ignoriert die Bitte, die Antwort seitenweise zu schicken (REQ-PAG-002, PAG-005).
+- `T7-GET-07/ignored` – die App ignoriert die Query nach den Kindern eines Elternobjekts; auf Level 3 ist sie Pflicht (REQ-RES-REFDES-011).
+- `T7-GET-07/with-source` – die App wertet die Query auch dann aus, wenn sie ignoriert werden muss (Frage mit Absender-Kennung, REQ-RES-REFDES-013).
+- `T7-GET-08/locale` – Frage auf Deutsch, Antwort mit Texten auf Französisch (REQ-LOC-002).
+
+**Zwei schon geprüfte Fälle mit neuen Ergebnissen** (die neuen Tests schlagen dort ebenfalls an, daher wieder `draft`):
+- `T7-GET-01/reply-to` (Antworten ohne Zuordnung): zusätzlich fallen T7-GET-03 und GET-04 durch, und T7-MON-03: die nicht zugeordnete deutsche MAM-Antwort sieht für die passive Regel wie eine zweite, abweichende Anmeldung (Birth) aus (REQ-LIFE-003).
+- `T7-GET-02/unanswered` (SubscriptionList wird nicht beantwortet): zusätzlich fallen T7-GET-03 und GET-04 durch.
+
+**Besonders anschauen:** das T7-MON-03-Ergebnis beim ReplyTo-Fehler, die Nebenwirkungen bei `case` und `filter` und dass eine App ohne ReferenceDesignation-Einträge T7-GET-07 besteht.
+
+### R-2 – ein korrigierter Aufzeichnungs-Testfall (bitte prüfen)
+
+**Wo:** `oec/conformance/testdata/captures/pagination-broken.jsonl` und sein Eintrag in `testdata/captures/index.yaml` (von dir im C-052-Review akzeptiert, jetzt wieder `draft`).
+
+**Warum geändert:** In der Aufzeichnung fragte jemand nach **Seite 1**. Für eine bestimmte Seite wird laut Guideline nur diese eine Seite geschickt (REQ-PAG-002); dass danach keine weitere Seite kam, war also richtig. Der Testfall verließ sich auf einen Fehler der passiven Regel, den ich in C-063 behoben habe (A-171).
+
+**Jetzt:** Beide Fragen bitten um **alle Seiten** (Seite 0). Die erste Antwort lässt Seite 2 von 3 aus (REQ-PAG-004), die zweite hört nach Seite 1 auf, obwohl „es kommt noch mehr“ gemeldet ist (REQ-PAG-005). Das erwartete Ergebnis ist dasselbe wie vorher.
+
+### Zur Info: was C-063 gebaut hat
+
+- **Alle Lese-Tests fertig:**
+  - T7-GET-03: jede Ressource mit und ohne Kennung und mit Filter; die Einträge der PublicationList; zu jedem Datensatz die Metadaten.
+  - T7-GET-04: jedes Gerät erfüllt das Level.
+  - T7-GET-06: seitenweise Antworten.
+  - T7-GET-07: die Query.
+  - T7-GET-08: die Sprache.
+  - T7-ADR-02: keine Antworten in der alten Version.
+  - T7-ADR-03: exakte Geräte-Kennungen.
+- **Zwei Fehlalarme der passiven Regeln behoben** (Test zuerst):
+  - Eine Antwort auf Deutsch wurde mit der englischen Anmeldung verglichen.
+  - Die Antwort auf die Frage nach einer einzelnen Seite galt als „unvollständig“.
+  - Der zweite Fehlalarm betraf einen Aufzeichnungs-Testfall → R-2.
+- **Lauf gegen die Beispiel-App `demo.rs`** (Level 2):
+  - Erst 20 bestanden, 1 durchgefallen. Der Fehler lag bei D7, nicht in der App: „Query ignorieren“ heißt „gleiche Antwort wie ohne Query“. D7 hatte aber einen bestimmten Inhalt erwartet, und die Demo hat gar keine ReferenceDesignation-Einträge.
+  - Behoben, dazu der neue Testfall `T7-GET-07/empty`.
+  - Danach **21 bestanden, 0 durchgefallen, 3 übersprungen**, alle 82 Fragen beantwortet. Am SDK musste nichts geändert werden.
+- Kein Finding, keine neue Bibliothek.
+
+Die Technik-Entscheidungen A-164 … A-175 sind nur zur Info (unten). Einen Blick wert:
+- **A-166:** Aufteilen nach Größe kann D7 nicht auslösen; das prüft die passive Regel T7-MON-18.
+- **A-167:** T7-ADR-02 kann eine App nicht zwingen, Version 1 zu sprechen. Ohne Verkehr in Version 1 wird der Test übersprungen.
+- **A-168:** „Ignorieren“ heißt „antwortet wie ohne“.
 
 ### Zur Info: was C-062 gebaut hat
 
@@ -513,11 +574,26 @@ Neu aus C-062 (P5 Inkrement 1):
 - **A-162 (neu) – Aufruf:** `--app` ist Pflicht und muss eine gültige Kennung sein, d. h. mit kodierten Sonderzeichen (`OEC Demo` → `OEC,20Demo`); die Fehlermeldung sagt das.
 - **A-163 (neu) – Einzelheiten und Zuschnitt:** wie GET-05 die leere Liste und das unbekannte Gerät provoziert, GET-01 fragt höchstens 20 Geräte; der P5-Zyklusschnitt.
 
+Neu aus C-063 (P5 Inkrement 2):
+- **A-164 (neu) – Begrenzte Fragen:** höchstens 5 Filter je Ressource, 50 Einträge der PublicationList, 20 untergeordnete Geräte. Eine große App wird stichprobenartig geprüft, nicht vollständig.
+- **A-165 (neu) – Metadaten:** D7 fragt Metadaten nur zu den Datensätzen, die in der PublicationList stehen. Metadaten ohne Datensatz (REQ-CMP-044) sind freiwillig und werden nicht abgefragt.
+- **A-166 (neu) – Aufteilen nach Größe:** D7 kann den Inhalt der App nicht größer machen als `MaxPacketSize`. GET-06 prüft das Aufteilen auf Bitte, die Größe jeder Nachricht prüft die passive Regel T7-MON-18.
+- **A-167 (neu) – Versionen:** D7 spricht nur Version 2 und hört bei Version 1 (`Oi4`) nur mit. Kommt dort eine Antwort auf eine Frage von D7 → durchgefallen; kommt dort gar nichts → übersprungen. Eine App, die beide Versionen kann und während des Laufs unter `Oi4` schweigt, besteht.
+- **A-168 (neu) – „Ignorieren“:** heißt „antwortet wie auf dieselbe Frage ohne den Zusatz“. Das gilt für die Query mit Absender-Kennung, die Query bei MAM, unbekannte Query-Felder und unbekannte Felder. Ohne ReferenceDesignation-Einträge wird die Query nicht beurteilt.
+- **A-169 (neu) – Sprache:** Auf eine Frage auf Deutsch darf die Antwort Deutsch, Englisch (Standardsprache) oder sprachneutral sein. Ob die App Deutsch kann, sieht man von außen nicht.
+- **A-170 (neu) – Fehlalarm Sprache:** Eine Antwort auf eine Frage mit Sprache wird nicht mehr mit der Anmeldung (Birth) verglichen.
+- **A-171 (neu) – Fehlalarm Seite:** Die Antwort auf die Frage nach einer bestimmten Seite gilt als vollständig. Deshalb wurde der Testfall `pagination-broken` korrigiert (R-2).
+- **A-172 (neu) – Inhalt der simulierten App:** Es kamen drei geprüfte Beispielnachrichten dazu (Metadaten, MAM auf Deutsch, ReferenceDesignation des Geräts). Der Konfig-Gruppenname wird ohne Leerzeichen als Filter benutzt, damit keine Warnung entsteht.
+- **A-173 (neu) – Selbstprüfung der Fragen von D7:** Ohne Fehler sind genau die absichtlich „falschen“ Fragen beanstandet (unbekannte Felder, Query bei MAM, Query mit Absender-Kennung). Mit Fehler ist es ein Teil davon, weil ein Test früher abbrechen kann.
+- **A-174 (neu) – Wartezeiten im Selbsttest:** 3 s statt 2 s je Antwort, damit 19 parallele Testfälle auch auf einem ausgelasteten Rechner stabil sind.
+- **A-175 (neu) – Zuschnitt und Findings:** Inkrement 2 wurde in einem Zyklus erledigt. Kein Finding: Ich habe geprüft, ob der Filter der Config und der Name der Config-Gruppe auseinanderfallen können. Nach SF-085 passen beide zusammen.
+
 ---
 
-### Was als Nächstes passiert (C-063)
+### Was als Nächstes passiert (C-064)
 
-1. **P5 Inkrement 2:** die restlichen Lese-Tests – T7-GET-03 (zu jedem Datensatz die Metadaten), GET-04, GET-06 (Aufteilen großer Antworten, `MaxPacketSize`), GET-07 (Query), GET-08 (Sprache), T7-ADR-02/03.
+1. **Dein Review von R-1 und R-2** (blockiert C-064 nicht).
+2. **P5 Inkrement 3:** die Schreib-Tests – T7-SET-01 … 09, 11, 12 (`Set`/`Del` mit Status-Ereignis, danach Wiederherstellen des alten Zustands).
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

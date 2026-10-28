@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-062 review (you accepted R-1: the 8 sim fixtures of `oec-check test` are `reviewed`). **Nothing is open for you.** A-153 … A-163 for information, worth a look: A-154, A-155, A-159._
+_Last updated: 2026-10-28, C-063 (P5 increment 2: every `Get` test and T7-ADR-02/03 of `oec-check test`). **Open for you: R-1 (14 sim fixtures, review) and R-2 (the corrected capture fixture `pagination-broken`, review).** A-164 … A-175 for information, worth a look: A-166, A-167, A-168._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -123,10 +123,16 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Against the SDK example app `demo.rs` (level 2, copy of a dev root, dev broker): **14 pass, 0 fail, 3 skip, exit 0**, 18 requests all answered.
   - ADR-0025 amendment C-062; no SF, no reviewed item changed, no new dependency. A-153 … A-163 for information.
 - C-062 review: you accepted R-1; the 8 sim fixtures in `testdata/sim/index.yaml` are `reviewed`. Nothing is open.
+- C-063 (P5 increment 2):
+  - **T7-GET-03, 04, 06, 07, 08 and T7-ADR-02, 03 `implemented`** – every `Get` test of the catalog: every resource with and without Source and Filter, PublicationList entries and Data ⇒ Metadata; every represented entity fulfills the level; pagination on request (by size passively, T7-MON-18); the Query of ReferenceDesignation; the Locale; no answers in the namespace `Oi4`; exact Identification Links.
+  - 11 new faults of the simulated component (2 conforming variants, 9 faults); with the 3 fixtures that got outcomes of the new tests, 14 sim fixtures are `draft` → **R-1**.
+  - Found test-first and fixed: two false positives of the monitor engine (REQ-LIFE-003 on an answer to a Get with a Locale, REQ-PAG-005 on the answer to a Get for one page). The capture fixture `pagination-broken` relied on the second one; it is corrected and `draft` again → **R-2**.
+  - Against `demo.rs` (level 2): first 20 pass, 1 fail – a defect of D7 (T7-GET-07 expected a content where "ignored" means "answered like without"), fixed with a new positive fixture; then **21 pass, 0 fail, 3 skip, exit 0**, 82 requests all answered. The SDK was not changed.
+  - ADR-0025 amendment C-063; no SF, no new dependency. A-164 … A-175 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
-Logs: [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -295,10 +301,55 @@ Logs: [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-
 | A-161 | `--tests` with ids or globs; non-selected tests skip | info (agent) | C-062 | – | – |
 | A-162 | `--app` checked as IL (dnp-encoded, hint in the error); no `--replay`/`--duration` for `test` | info (agent) | C-062 | – | – |
 | A-163 | Probes of GET-05 (empty-list filter, unknown Source), GET-01 max. 20 Sources, level-1 skips; the P5 cycle cut | info (agent) | C-062 | – | – |
+| A-164 | Bounded stimuli: max. 5 Filters per resource, 50 PublicationList entries, 20 subordinate Sources | info (agent) | C-063 | – | – |
+| A-165 | Get Metadata only for the Data announced in the PublicationList; REQ-CMP-044 (MAY) not stimulated | info (agent) | C-063 | – | – |
+| A-166 | Pagination by size judged passively (T7-MON-18); GET-06 stimulates pagination on request only | info (agent) | C-063 | – | – |
+| A-167 | T7-ADR-02 listens to `Oi4/#` best effort, skip without `Oi4` traffic | info (agent) | C-063 | – | – |
+| A-168 | "Ignored" = answered like the same Get without it; Query not judged without ReferenceDesignation objects; choice of the Parent | info (agent) | C-063 | – | – |
+| A-169 | GET-08 accepts `de-DE`, `en-US` and the invariant locale | info (agent) | C-063 | – | – |
+| A-170 | Monitor: answers to a Get with a Locale are not compared with the Birth (REQ-LIFE-003) | info (agent) | C-063 | – | – |
+| A-171 | Monitor: the answer to a Get for one page is a series of its own (REQ-PAG-002/005); capture `pagination-broken` corrected (R-2) | info (agent) | C-063 | – | – |
+| A-172 | Sim content: V-PAY-021/047/054, Config Filter without blanks, ua-metadata keys | info (agent) | C-063 | – | – |
+| A-173 | Tester-violation contract: exactly the deliberate stimuli without a fault, a part of them with one | info (agent) | C-063 | – | – |
+| A-174 | Fixture answer timeout 3 s, run context 2 min | info (agent) | C-063 | – | – |
+| A-175 | Increment 2 not split; no SF raised (Config Filter vs. `Context.Name` checked) | info (agent) | C-063 | – | – |
+| R-1 | 14 sim fixtures of `oec-check test` (11 new, 3 with added outcomes) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-063 | accept | ☐ |
+| R-2 | Capture fixture `pagination-broken` (stimulus corrected, same verdict; `testdata/captures/index.yaml`) | review (G-3.9) | C-063 | accept | ☐ |
 
 ## Decisions and review items
 
-No open item.
+### R-1 – sim fixtures of `oec-check test`, increment 2 (G-3.9)
+
+- **Where:** `oec/conformance/testdata/sim/index.yaml` – 14 entries `draft`: 11 new faults of the simulated component and 3 entries reviewed in C-062 that got the outcomes of the new tests. The other 5 entries are unchanged and stay `reviewed`.
+- **What they are:** as in C-062 – `internal/probe/sim_test.go` runs `oec-check test` (monitor + active tests, level 3) against the simulated component with one fault and compares outcome and exact REQ ids per test.
+- **Positive (conforming):**
+  - `none` – now also T7-GET-03, 04, 06, 07, 08 and T7-ADR-03 pass; T7-ADR-02 is skipped (nothing under `Oi4`); REQ-QRY-003 skipped (the Query is supported).
+  - `T7-ADR-02/dual-version` – the component also publishes its Birth under `Oi4` (version 1), but answers the `Oi4v2` requests only in `Oi4v2`: T7-ADR-02 pass.
+  - `T7-GET-07/empty` – ReferenceDesignation is supported but has no object (like the demo): the Query cannot be judged (REQ-RES-REFDES-011/014, QRY-002/003 skipped); REQ-RES-REFDES-013 and QRY-001 pass.
+- **Negative (fault → expected outcome):**
+  - `T7-ADR-02/mixed` (answers to Get MAM repeated under `Oi4`): T7-ADR-02 fail REQ-TOP-004;
+  - `T7-ADR-03/case` (the Source is compared case-insensitively): T7-ADR-03 fail REQ-IL-015; T7-MON-01 fail REQ-MSG-023 (the DataSetWriterName differs from the Source of the topic);
+  - `T7-GET-03/metadata` (Get Metadata not answered): T7-GET-03 fail REQ-CMP-008, CMP-037, RES-META-002;
+  - `T7-GET-03/filter` (the Filter of Get PublicationList ignored): T7-GET-03 fail REQ-RES-PUBLIST-020; T7-MON-01 fail REQ-MSG-025 (WriterGroupName differs from the Filter);
+  - `T7-GET-04/asset-level` (the subordinate asset has no Config, level 3): T7-GET-04 fail REQ-CMP-010, CMP-045;
+  - `T7-GET-06/per-page` (PaginationRequest ignored): T7-GET-06 fail REQ-PAG-002, PAG-005;
+  - `T7-GET-07/ignored` (the Query ignored, all objects returned): T7-GET-07 fail REQ-RES-REFDES-011 (MUST at level 3);
+  - `T7-GET-07/with-source` (the Query also evaluated with Source): T7-GET-07 fail REQ-RES-REFDES-013;
+  - `T7-GET-08/locale` (LocalizedText in `fr-FR` for the Locale `de-DE`): T7-GET-08 fail REQ-LOC-002.
+- **Added outcomes (were `reviewed`):**
+  - `T7-GET-01/reply-to` (empty `ReplyTo`) now also: T7-GET-03 fail REQ-CMP-019, 020, 035, 036, 039; T7-GET-04 fail REQ-CMP-010, 024; T7-MON-03 fail REQ-LIFE-003 (the uncorrelated German MAM of T7-GET-08 looks like a second, different Birth);
+  - `T7-GET-02/unanswered` (SubscriptionList not answered) now also: T7-GET-03 fail REQ-CMP-008, 039, RES-SUBLIST-008; T7-GET-04 fail REQ-CMP-010, 024.
+- **Please check:** is each fault a real violation of the named REQ, and are the three positives really compliant? In particular: the T7-MON-03 fail with the ReplyTo fault, the T7-MON-01 side effects of `case` and `filter`, and that a component without ReferenceDesignation objects passes T7-GET-07.
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
+
+### R-2 – capture fixture `pagination-broken` corrected (G-3.9)
+
+- **Where:** `oec/conformance/testdata/captures/pagination-broken.jsonl` and its entry in `testdata/captures/index.yaml` (reviewed in the C-052 review, now `draft`).
+- **Why changed:** the two Gets MAM in the capture requested `Page` 1. For a requested page only that page is published (REQ-PAG-002), so the second answer (page 1, HasNext true) was conforming; the expected REQ-PAG-005 failure rested on a false positive of the monitor, which C-063 fixed (A-171).
+- **Now:** both Gets request all pages (`Page` 0, PerPage 1). The first answer skips page 2 of 3 (REQ-PAG-004), the second ends after page 1 with HasNext true (REQ-PAG-005). Expected verdict unchanged: T7-MON-18 fail REQ-PAG-004, PAG-005.
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -872,6 +923,23 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-162 CLI:** `--app [ServiceType/]AppId` is required and checked as an Identification Link, so the Oi4Identifier elements must be dnp-encoded (`OEC,20Demo`); the usage error says so. `--replay`/`--duration` are not flags of `test`; `--timeout`, `--tests`, `--tester-il` are new.
 - **A-163 Probes and the cut:** T7-GET-05 asks Data (else Config) with the filter `oecCheckNone<hex>` for the empty list and the unknown Source `oi4.org/oec-check/D7/unknown-<hex>`; REQ-CMP-044 (MAY) is not stimulated. T7-GET-01 asks at most 20 subordinate Sources. At level 1 an unanswered optional resource is a skip. Cycle cut: increment 1 carries the infrastructure and only four tests; the plan and reasons are in ROADMAP P5 and the log.
 
-## Next (C-063)
+### A-164 … A-175 – P5 increment 2 (C-063, agent)
 
-1. P5 increment 2: T7-GET-03 (Data ⇒ Metadata), GET-04, GET-06 (pagination, `MaxPacketSize`), GET-07 (Query), GET-08 (Locale), T7-ADR-02/03; in a new session (start prompt in `prompt.md`).
+- **Where:** `oec/conformance/internal/probe/{resources, helpers, adr, probe, session}.go`, `internal/sim/sim.go`, `internal/monitor/monitor.go`, `testdata/sim/index.yaml`, `testdata/captures/`, `catalog/d7.yaml`; ADR-0025 amendment C-063; DESIGN.md §3.3/§10 "As built (C-063)"; log `log/2026-10-28_C-063_d7-get-tests.md`.
+- **A-164 Bounded stimuli:** T7-GET-03 requests at most 5 Filters per resource (taken from the first answer) and 50 PublicationList entries; T7-GET-01/04 and ADR-03 at most 20 subordinate Sources. A large CUT is sampled, not exhausted.
+- **A-165 Metadata:** Get Metadata is requested for the Data the PublicationList announces (REQ-CMP-008/037, RES-META-002). Metadata without Data (REQ-CMP-044) is a MAY and not stimulated.
+- **A-166 Pagination by size:** D7 cannot make the CUT's content larger than `MaxPacketSize`; T7-GET-06 stimulates pagination on request (PerPage 1: page 1, a page beyond the end, page 0) and T7-MON-18 judges the size of every NetworkMessage passively.
+- **A-167 ADR-02:** D7 speaks only `Oi4v2` and listens to `Oi4/#` best effort. An `Oi4` message with the MessageId of a D7 request fails REQ-TOP-004; without any `Oi4` traffic the REQ is skipped (the CUT supports one version, condition of REQ-TOP-004). A dual-version CUT that stays silent under `Oi4` during the run passes.
+- **A-168 "Ignored":** a Query with Source, a Query on Get MAM, an undefined query parameter and an unknown key are judged against the answer to the same Get without them, not against an expected content. Without any ReferenceDesignation object the Query REQs (RES-REFDES-011/014, QRY-002/003) are skipped. The Parent is the first one with fewer children than objects, so a supported and an ignored Query differ.
+- **A-169 Locale:** the answer to a Get with `de-DE` may carry `de-DE`, the default language `en-US` or the invariant locale; whether the CUT has German texts is not observable.
+- **A-170 Monitor, Locale:** an answer to a Get with a Locale differs from the Birth by design; the monitor engine records the MessageIds of such Gets and does not compare their answers with the Birth (REQ-LIFE-003).
+- **A-171 Monitor, one page:** for a Get with `Page` > 0 only that page is published (REQ-PAG-002); the engine records the requested page and does not require such an answer to end the series (REQ-PAG-005). The capture `pagination-broken` relied on the old behaviour and is corrected (R-2).
+- **A-172 Sim content:** added from reviewed vectors V-PAY-021 (Metadata), V-PAY-047 (MAM in German), V-PAY-054 (ReferenceDesignation of the asset). The Config WriterGroupName "Network settings" (V-PAY-092) is used as "Networksettings", because a Filter with white space is a REQ-TOP-020 warning (A-4). The unknown-key fault knows the keys of `ua-metadata`.
+- **A-173 Contract:** the requests of D7 that strict validation rejects are exactly the deliberate stimuli without a fault (`REQ-MSG-001` ×2, `REQ-QRY-001`, `REQ-RES-REFDES-013`); with a fault a part of them, because a test may stop before its stimuli.
+- **A-174 Timeouts:** the fixture runs wait 3 s for an answer (was 2 s) and 2 min per run (was 1 min); 19 fixtures run in parallel, about 43 s.
+- **A-175 Cut and findings:** increment 2 was done in one cycle. No SF: the Filter of Config (WriterGroupName, REQ-TOP-022) and `Context.Name` (REQ-RES-CONFIG-015) were checked and are consistent after SF-085.
+
+## Next (C-064)
+
+1. Your review of R-1 and R-2.
+2. P5 increment 3: the write side T7-SET-01 … 09, 11, 12 with restore and the state model; in a new session (start prompt in `prompt.md`).
