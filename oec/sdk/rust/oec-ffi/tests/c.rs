@@ -4,10 +4,14 @@
 //! TLS test broker of `oec` – once linked to the shared library and once
 //! to the static library under AddressSanitizer and UBSan. Without
 //! sanitizer support in the toolchain the second variant is skipped unless
-//! `OEC_FFI_REQUIRE_SANITIZERS=1` (set by `oec/sdk/check.sh`).
+//! `OEC_FFI_REQUIRE_SANITIZERS=1` (set by `oec/sdk/check.sh`). On Linux
+//! LeakSanitizer runs as well. Unix only (a `cc` driver, `kill`, pthreads);
+//! the C tests on Windows (MSVC) come with the CI of P9.
 //!
 //! Do not run this test binary in parallel processes: the roots below
 //! `CARGO_TARGET_TMPDIR` are fixed per test.
+
+#![cfg(unix)]
 
 #[path = "../../oec/tests/testbroker/mod.rs"]
 mod testbroker;
@@ -50,6 +54,13 @@ const SANITIZE: &[&str] = &[
     "-fno-omit-frame-pointer",
     "-fno-sanitize-recover=all",
 ];
+
+/// LeakSanitizer where the toolchain has it (Linux); Apple's AddressSanitizer
+/// on arm64 does not.
+#[cfg(target_os = "linux")]
+const ASAN_OPTIONS: &str = "detect_leaks=1:halt_on_error=1";
+#[cfg(not(target_os = "linux"))]
+const ASAN_OPTIONS: &str = "detect_leaks=0:halt_on_error=1";
 
 /// The libraries the static library needs (`--print native-static-libs`).
 #[cfg(target_os = "macos")]
@@ -185,7 +196,7 @@ impl Program {
     fn start(exe: &Path, args: &[&str], root: Option<&Path>) -> Self {
         let mut cmd = Command::new(exe);
         cmd.args(args)
-            .env("ASAN_OPTIONS", "detect_leaks=0:halt_on_error=1")
+            .env("ASAN_OPTIONS", ASAN_OPTIONS)
             .env("UBSAN_OPTIONS", "print_stacktrace=1:halt_on_error=1")
             .stdout(Stdio::piped());
         if let Some(root) = root {
