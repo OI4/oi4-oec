@@ -449,8 +449,9 @@ impl WriteOptions {
 
     /// The DataSetWriterId of the DataSetMessage. Without it, a `Set` of
     /// Data, Config or ReferenceDesignation first gets the addressed
-    /// DataSet and uses its DataSetWriterId; an entry of a
-    /// PublicationList or SubscriptionList needs it.
+    /// DataSet and uses its DataSetWriterId, one of a SubscriptionList
+    /// that of the addressed entries; an entry of a PublicationList needs
+    /// it.
     #[must_use]
     pub fn data_set_writer_id(mut self, id: u16) -> Self {
         self.data_set_writer_id = Some(id);
@@ -547,6 +548,20 @@ pub(crate) fn on_disconnected(handle: &AppHandle, shutdown: bool) {
     st.dispatch();
 }
 
+/// Hands the changed subscriptions to the SubscriptionList of the provider
+/// and the settings of `Set` and `Del SubscriptionList` back to the
+/// consumer (MG 9.1.9); before every poll of the provider.
+pub(crate) fn sync(handle: &AppHandle) {
+    let mut st = handle.consumer_state();
+    let mut registry = handle.registry();
+    if let Some(subs) = st.core.take_subscriptions() {
+        registry.provider.set_consumer_subscriptions(subs);
+    }
+    if let Some(overrides) = registry.provider.take_filter_overrides() {
+        st.core.set_filter_overrides(overrides);
+    }
+}
+
 /// Expires due requests and takes what the session has to do.
 pub(crate) fn poll(handle: &AppHandle) -> Step {
     let mut st = handle.consumer_state();
@@ -622,12 +637,51 @@ fn guarded(f: impl FnOnce()) {
 // ---------------------------------------------------------- subscription
 
 /// A subscription ([`Consumer::subscribe`], [`Consumer::on_presence`]);
-/// ends when dropped. The SubscriptionList entry of a subscription follows
-/// with increment 8b (MG 9.1.9).
+/// ends when dropped. Each subscription is an entry of the SubscriptionList
+/// of an application of Level 2 or higher (MG 9.1.9, REQ-CMP-039), by
+/// default without Interval and not configurable (`NONE_0`);
+/// [`Self::interval`] and [`Self::configurable`] change that.
 #[must_use = "the subscription ends when dropped"]
 pub struct Subscription {
     handle: WeakHandle,
     id: SubscriptionId,
+}
+
+impl Subscription {
+    /// Processes the publications of a topic at most once per `interval`
+    /// (REQ-RES-SUBLIST-003): a publication within the Interval after the
+    /// last delivered one of the same topic is dropped. Zero (the default)
+    /// delivers every publication; milliseconds beyond `u32::MAX` are
+    /// capped. No effect on a presence subscription.
+    pub fn interval(self, interval: Duration) -> Self {
+        let ms = u32::try_from(interval.as_millis()).unwrap_or(u32::MAX);
+        self.configure(|_, configurable| (ms, configurable));
+        self
+    }
+
+    /// Lets other applications change the Interval of the subscription with
+    /// `Set SubscriptionList` and delete it with `Del SubscriptionList`
+    /// (`CONF_1`, REQ-RES-SUBLIST-004); a deleted subscription delivers
+    /// nothing until a `Set` lists it again. The settings are persisted with
+    /// the store of the application and apply to every subscription on the
+    /// same topic filter if all of them are configurable. No effect on a
+    /// presence subscription.
+    pub fn configurable(self) -> Self {
+        self.configure(|interval, _| (interval, true));
+        self
+    }
+
+    fn configure(&self, f: impl FnOnce(u32, bool) -> (u32, bool)) {
+        if let Some(handle) = self.handle.upgrade() {
+            {
+                let mut st = handle.consumer_state();
+                let (interval, configurable) = st.core.settings(self.id);
+                let (interval, configurable) = f(interval, configurable);
+                st.core.configure(self.id, interval, configurable);
+            }
+            handle.wake();
+        }
+    }
 }
 
 impl Drop for Subscription {
@@ -942,6 +996,9 @@ impl Consumer {
         target: &Target,
         options: &WriteOptions,
     ) -> Result<u16> {
+        if resource == Resource::SubscriptionList {
+            return self.resolve_sublist_writer(target, options).await;
+        }
         if !matches!(
             resource,
             Resource::Data | Resource::Config | Resource::ReferenceDesignation
@@ -965,6 +1022,25 @@ impl Consumer {
                 answers.len()
             ))),
         }
+    }
+
+    /// The DataSetWriterId of the SubscriptionList of the application of
+    /// `target`: one for all its entries (REQ-RES-SUBLIST-001), taken from
+    /// the answer to a `Get` of the addressed entries.
+    async fn resolve_sublist_writer(&self, target: &Target, options: &WriteOptions) -> Result<u16> {
+        let address = target.address(Method::Get, Resource::SubscriptionList)?;
+        let answers = self
+            .get_once(
+                Resource::SubscriptionList,
+                &address,
+                &GetParams::default(),
+                options.timeout,
+            )
+            .await?;
+        answers
+            .first()
+            .map(Received::data_set_writer_id)
+            .ok_or(Error::Status(StatusCode::BadNotFound))
     }
 
     /// The DataSetWriterId of the ReferenceDesignation of the asset of

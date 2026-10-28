@@ -18,8 +18,8 @@ use oec_core::lifecycle::{Lifecycle, Publication};
 use oec_core::message::DataSetWriterId;
 use oec_core::provider::{
     MetaDataVersions, Provider, ProviderConfig, PublicationOverrides, ReferenceDesignationRequest,
-    SetConfigRequest, SetDataRequest, StoredConfigValues, StoredReferenceDesignations, WriterIds,
-    syslog_header,
+    SetConfigRequest, SetDataRequest, StoredConfigValues, StoredReferenceDesignations,
+    SubscriptionOverrides, WriterIds, syslog_header,
 };
 use oec_core::resource::{Health, ReferenceDesignation};
 use tokio::sync::{Notify, watch};
@@ -51,6 +51,9 @@ const CONFIG_VALUES: &str = "app/config";
 /// Store key of the ReferenceDesignations set by `Set ReferenceDesignation`
 /// (REQ-RES-REFDES-002, ADR-0026 §16).
 const REFERENCE_DESIGNATIONS: &str = "app/reference-designations";
+/// Store key of the settings changed by `Set` and `Del SubscriptionList`
+/// (REQ-RES-SUBLIST-004, ADR-0026 §18).
+const SUBSCRIPTIONS: &str = "app/subscriptions";
 
 /// Where connection settings and secrets come from (ADR-0020 §5).
 #[derive(Debug, Clone)]
@@ -787,6 +790,15 @@ fn provider(
         })?,
         None => StoredConfigValues::new(),
     };
+    let subscriptions = match store.load(SUBSCRIPTIONS)? {
+        Some(json) => SubscriptionOverrides::from_json(&json).map_err(|e| {
+            Error::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("store key {SUBSCRIPTIONS}: {e} (REQ-RES-SUBLIST-004)"),
+            ))
+        })?,
+        None => SubscriptionOverrides::new(),
+    };
     let config = ProviderConfig {
         get: level >= Level::L2,
         max_packet_size,
@@ -796,6 +808,7 @@ fn provider(
         .with_meta_data_versions(versions)
         .with_publication_overrides(overrides)
         .with_config_values(config_values)
+        .with_subscription_overrides(subscriptions)
         .with_syslog(syslog)?;
     if reference_designation {
         let table = match store.load(REFERENCE_DESIGNATIONS)? {
@@ -1316,7 +1329,8 @@ impl AppHandle {
     }
 
     /// Persists changed DataSetWriterIds, Metadata versions, settings of
-    /// `Set PublicationList`, Config values and ReferenceDesignations.
+    /// `Set PublicationList`, Config values, ReferenceDesignations and
+    /// settings of `Set` and `Del SubscriptionList`.
     fn save(registry: &mut Registry, store: &dyn Store) -> Result<()> {
         if let Some(json) = registry.provider.take_writer_ids() {
             store.save(WRITER_IDS, &json)?;
@@ -1333,11 +1347,15 @@ impl AppHandle {
         if let Some(json) = registry.provider.take_reference_designations() {
             store.save(REFERENCE_DESIGNATIONS, &json)?;
         }
+        if let Some(json) = registry.provider.take_subscription_overrides() {
+            store.save(SUBSCRIPTIONS, &json)?;
+        }
         Ok(())
     }
 
     /// Persists what the runtime changed (the first sending of a Metadata
-    /// version, a `Set PublicationList`, a `Set Config`); a failing store
+    /// version, a `Set PublicationList`, a `Set Config`, a `Set` or `Del
+    /// SubscriptionList`); a failing store
     /// is logged.
     pub(crate) fn save_changes(&self, registry: &mut Registry) {
         if let Err(e) = Self::save(registry, self.shared.store.as_ref()) {

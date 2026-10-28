@@ -765,6 +765,24 @@ fn set_handlers_and_publication_settings() {
     ));
 }
 
+/// A corrupt table of `Set`/`Del SubscriptionList` settings is an error of
+/// `build()` (C-059, REQ-RES-SUBLIST-004); a valid one is accepted.
+#[test]
+fn a_corrupt_subscription_table_fails_the_build() {
+    let root = Root::new("subscriptions-store");
+    let store = || FileStore::new(root.path("store"));
+    root.write(
+        "store/app/subscriptions",
+        "{\"Version\":1,\"Entries\":[{\"TopicPath\":\"Oi4v2/+/+/Pub/Data/+/oee\",\"Deleted\":true}]}",
+    );
+    assert!(device(Level::L2, explicit()).store(store()).build().is_ok());
+    root.write("store/app/subscriptions", "{\"Version\":1,\"Entries\":7}");
+    assert!(matches!(
+        device(Level::L2, explicit()).store(store()).build(),
+        Err(oec::Error::Io(e)) if e.kind() == std::io::ErrorKind::InvalidData
+    ));
+}
+
 /// The Config of the service: an interval, a sensitive API key and a mode.
 fn service_config() -> ConfigDef {
     ConfigDef::new("service").label("Service").group(

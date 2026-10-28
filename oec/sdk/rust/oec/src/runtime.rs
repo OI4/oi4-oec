@@ -205,6 +205,7 @@ async fn drive(
         let mut consumer_deadline = None;
         if session.state() == SessionState::Connected {
             let now = clock.now();
+            consumer::sync(handle);
             let out = {
                 let mut registry = handle.registry();
                 let out = registry.provider.poll(now, unix_ms());
@@ -325,6 +326,7 @@ fn on_event(
             backoff.reset();
             *connected_before = true;
             let now = clock.now();
+            consumer::sync(handle);
             let out = {
                 let mut registry = handle.registry();
                 let out = registry.provider.on_connected(now, unix_ms());

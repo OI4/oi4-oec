@@ -13,6 +13,13 @@
 //! ([`Consumer::take_completions`]). A request is published only after the
 //! broker acknowledged the subscriptions its answer arrives on, so that no
 //! answer is lost (there are no retained messages on the bus).
+//!
+//! The lasting subscriptions are the entries of the SubscriptionList of the
+//! application (MG 9.1.9, [`Consumer::take_subscriptions`]); the runtime
+//! hands the settings of `Set` and `Del SubscriptionList` back
+//! ([`Consumer::set_filter_overrides`]): a deleted filter is no longer
+//! subscribed, and a subscription with an Interval delivers the
+//! publications of a topic at most once per Interval (REQ-RES-SUBLIST-003).
 
 mod directory;
 mod received;
@@ -29,6 +36,7 @@ use crate::il::IdentificationLink;
 use crate::lifecycle::Publication;
 use crate::message::{MessageId, Pagination, PublisherId};
 use crate::mqtt::SubscribeReturnCode;
+use crate::provider::{ConsumerSubscription, SubscriptionOverrides};
 use crate::resource::ReferenceDesignationQuery;
 use crate::status::StatusCode;
 use crate::topic::{
@@ -146,6 +154,10 @@ enum SubKind {
 struct Sub {
     kind: SubKind,
     filters: Vec<String>,
+    interval_ms: u32,
+    configurable: bool,
+    /// When a publication of a topic was last delivered (with an Interval).
+    last: HashMap<String, u64>,
 }
 
 #[derive(Debug)]
@@ -190,6 +202,8 @@ pub struct Consumer {
     outbound: Vec<Publication>,
     completions: Vec<Completion>,
     directory: directory::Directory,
+    overrides: SubscriptionOverrides,
+    subs_changed: bool,
 }
 
 impl Consumer {
@@ -211,6 +225,8 @@ impl Consumer {
             outbound: Vec::new(),
             completions: Vec::new(),
             directory: directory::Directory::default(),
+            overrides: SubscriptionOverrides::new(),
+            subs_changed: false,
         }
     }
 
@@ -238,7 +254,15 @@ impl Consumer {
         }
         let id = self.next_sub;
         self.next_sub += 1;
-        self.subs.insert(id, Sub { kind, filters });
+        let sub = Sub {
+            kind,
+            filters,
+            interval_ms: 0,
+            configurable: false,
+            last: HashMap::new(),
+        };
+        self.subs.insert(id, sub);
+        self.subs_changed = true;
         id
     }
 
@@ -246,7 +270,75 @@ impl Consumer {
     pub fn unsubscribe(&mut self, id: SubscriptionId) {
         if let Some(sub) = self.subs.remove(&id) {
             self.release(&sub.filters);
+            self.subs_changed = true;
         }
+    }
+
+    /// Sets the Interval (ms, 0 = every publication) and whether `Set` and
+    /// `Del SubscriptionList` may change or delete the subscription `id`
+    /// (`CONF_1`, REQ-RES-SUBLIST-004); unknown ids are ignored. A presence
+    /// subscription stays `NONE_0` without Interval.
+    pub fn configure(&mut self, id: SubscriptionId, interval_ms: u32, configurable: bool) {
+        let Some(sub) = self.subs.get_mut(&id) else {
+            return;
+        };
+        if matches!(sub.kind, SubKind::Presence) {
+            return;
+        }
+        if (sub.interval_ms, sub.configurable) != (interval_ms, configurable) {
+            sub.interval_ms = interval_ms;
+            sub.configurable = configurable;
+            self.subs_changed = true;
+        }
+    }
+
+    /// The Interval (ms) and whether the subscription `id` is configurable;
+    /// `(0, false)` for an unknown id.
+    pub fn settings(&self, id: SubscriptionId) -> (u32, bool) {
+        self.subs
+            .get(&id)
+            .map_or((0, false), |s| (s.interval_ms, s.configurable))
+    }
+
+    /// The lasting subscriptions, one per subscription and topic filter, if
+    /// they changed since the last call – the entries of the
+    /// SubscriptionList (MG 9.1.9). The answer subscriptions of requests
+    /// are transient and not part of it (SF-109).
+    pub fn take_subscriptions(&mut self) -> Option<Vec<ConsumerSubscription>> {
+        if !std::mem::take(&mut self.subs_changed) {
+            return None;
+        }
+        Some(
+            self.subs
+                .values()
+                .flat_map(|s| {
+                    s.filters.iter().map(|f| ConsumerSubscription {
+                        topic_path: f.clone(),
+                        interval_ms: s.interval_ms,
+                        configurable: s.configurable,
+                    })
+                })
+                .collect(),
+        )
+    }
+
+    /// The settings of `Set` and `Del SubscriptionList` for the
+    /// configurable topic filters: a deleted filter is unsubscribed and
+    /// delivers nothing; an Interval replaces that of the subscriptions on
+    /// the filter.
+    pub fn set_filter_overrides(&mut self, overrides: SubscriptionOverrides) {
+        self.overrides = overrides;
+    }
+
+    /// The Interval a publication on `topic` is delivered with to `sub`:
+    /// the smallest of its matching filters that are not deleted, `None`
+    /// if none matches.
+    fn interval(&self, sub: &Sub, topic: &str) -> Option<u32> {
+        sub.filters
+            .iter()
+            .filter(|f| !self.overrides.is_deleted(f) && mqtt_match(f, topic))
+            .map(|f| self.overrides.interval(f).unwrap_or(sub.interval_ms))
+            .min()
     }
 
     fn tracking(&self) -> bool {
@@ -277,10 +369,16 @@ impl Consumer {
     pub fn take_filter_changes(&mut self) -> FilterChanges {
         // A refused filter is not subscribed again while it is in use; once
         // released, its next use subscribes it anew.
+        // A deleted filter stays subscribed while a request waits for its
+        // answer on it.
+        let requests: BTreeSet<&String> = self.pending.values().flat_map(|p| &p.filters).collect();
         let wanted: BTreeSet<String> = self
             .filters
             .iter()
-            .filter(|(_, u)| u.state != FilterState::Failed)
+            .filter(|(f, u)| {
+                u.state != FilterState::Failed
+                    && (!self.overrides.is_deleted(f) || requests.contains(f))
+            })
             .map(|(f, _)| f.clone())
             .collect();
         let changes = FilterChanges {
@@ -561,14 +659,7 @@ impl Consumer {
         if parsed.method() != Method::Pub {
             return incoming;
         }
-        let subs: Vec<SubscriptionId> = self
-            .subs
-            .iter()
-            .filter(|(_, s)| {
-                matches!(s.kind, SubKind::Topics) && s.filters.iter().any(|f| mqtt_match(f, topic))
-            })
-            .map(|(id, _)| *id)
-            .collect();
+        let subs = self.due(topic, now_ms);
         let presence = self.tracking() && matches!(resource, Resource::Mam | Resource::Health);
         let answers = self.pending.values().any(|p| topic.starts_with(&p.prefix));
         if subs.is_empty() && !presence && !answers {
@@ -615,6 +706,34 @@ impl Consumer {
                 .collect();
         }
         incoming
+    }
+
+    /// The topic subscriptions a publication on `topic` is delivered to
+    /// now: a matching filter that is not deleted, and the Interval since
+    /// the last delivery of the topic passed (REQ-RES-SUBLIST-003).
+    fn due(&mut self, topic: &str, now_ms: u64) -> Vec<SubscriptionId> {
+        let intervals: Vec<(SubscriptionId, u32)> = self
+            .subs
+            .iter()
+            .filter(|(_, s)| matches!(s.kind, SubKind::Topics))
+            .filter_map(|(id, s)| Some((*id, self.interval(s, topic)?)))
+            .collect();
+        let mut due = Vec::new();
+        for (id, interval) in intervals {
+            let sub = self.subs.get_mut(&id).expect("listed above");
+            if interval == 0 {
+                sub.last.remove(topic);
+            } else {
+                if let Some(last) = sub.last.get(topic)
+                    && now_ms.saturating_sub(*last) < u64::from(interval)
+                {
+                    continue;
+                }
+                sub.last.insert(topic.to_owned(), now_ms);
+            }
+            due.push(id);
+        }
+        due
     }
 
     fn discover(
