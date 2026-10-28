@@ -13,7 +13,7 @@
 # TopicPath of the B1.1.9 example, Interval wording, publication after Del,
 # Config) resolved in the guideline (baseline b2f0fe7).
 area: RES-SUBLIST
-baseline: "57ebe91"
+baseline: "eb7889c"
 requirements:
   # --- DataSet content (MG 8.3.9) ---------------------------------------------
   - id: REQ-RES-SUBLIST-001
@@ -137,7 +137,7 @@ requirements:
         text: An application that does not support the creation of entries rejects such a Set with the status Event Bad (e.g. BadNotSupported).
     verification: [d7-test]
     inventory: [MG-8.3.9-ad2fe906, MG-9.1.9-a22afd5f, MG-9.1.9-a00d5bfe, MG-9.1.9-013e79f7]
-    status: draft
+    status: reviewed
     notes: >-
       MG 8.3.9 and 9.1.9 since SF-080 (e); same pattern as
       REQ-RES-PUBLIST-016 and REQ-CMP-043. Since the C-028 review the
@@ -289,7 +289,7 @@ requirements:
         text: The Set carries the complete entry. If the Source has not subscribed the TopicPath yet, the Set creates a new entry; otherwise it reconfigures the entry with this TopicPath (8.3.9 SubscriptionList).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.9-c60d1703, MG-9.1.9-a1f2a02e, MG-9.1.9-2c8de6d9]
-    status: draft
+    status: reviewed
     notes: >-
       "create new entry or set new behavior" (heading of MG 9.1.9); entry
       identity per MG 8.3.9 (since SF-080 (a)). Header per REQ-BUS-010.
@@ -437,7 +437,7 @@ requirements:
         text: Subscriptions that only exist for the time of a request (to receive its answer or status Event) are not listed.
     verification: [d7-test]
     inventory: [MG-9.1.9-aedf208f, MG-9.1.9-565c8491]
-    status: draft
+    status: reviewed
     notes: >-
       SF-107, decided by the PO in the C-056 review (2026-10-27) as proposed
       and implemented on PO order in 580f1c6 (MG 9.1.9; B1.1.3 and B1.1.4:

@@ -6,7 +6,7 @@
 # SF-051) were decided by the PO and resolved in the guideline in C-024; the
 # PO reviewed the area in the C-024 review (2026-10-19).
 area: ACT
-baseline: "57ebe91"
+baseline: "eb7889c"
 requirements:
   # --- Call/Reply with OPC UA PubSub Actions (MG 8.1, 8.1.3, 8.2.16) --------
   - id: REQ-ACT-001
@@ -407,7 +407,12 @@ requirements:
         text: If a request cannot be decoded or addressed (e.g. unknown DataSetWriterId or ActionTargetId), or is rejected for security reasons, the Responder must not send a response (Part 14-6.2.11.2).
     verification: [d7-test]
     inventory: [MG-8.2.20-0b675c28]
-    status: reviewed
+    status: draft
+    notes: >-
+      "Cannot address" refers to the DataSetWriterId and ActionTargetId of
+      the Action, not to the Source of the topic: a NewDataSetWriterId
+      request for a Source the application neither is nor represents is
+      answered with BadNotFound (REQ-ACT-024, SF-113).
 
   - id: REQ-ACT-018
     title: ActionMetaData of the common services need not be published
@@ -539,12 +544,43 @@ requirements:
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [requester, responder]
     condition: The component requests or provides the common service NewDataSetWriterId.
-    refs: [MG 8.4.1, SF-035]
+    refs: [MG 8.4.1, SF-035, SF-112]
     quotes:
       - ref: MG 8.4.1
         text: Ttl contains a value, which describes the time to live of the provided DataSetWriterId in seconds. Initial usage of the provided DataSetWriterId is only possible during this period of time.
+      - ref: MG 8.4.1
+        text: The Set that creates the DataSet carries this DataSetWriterId; for a DataSet the publisher already lists in its PublicationList, the listed DataSetWriterId is used and no new one is needed.
     verification: [d7-test]
-    status: reviewed
+    status: draft
     notes: >-
       Whether the Responder rejects a later initial use is not stated
-      explicitly; "only possible" is read as such (implicit, SF-035).
+      explicitly; "only possible" is read as such (implicit, SF-035). The Set
+      that creates a DataSet carries the provided DataSetWriterId; for a
+      DataSet already listed in the PublicationList the listed
+      DataSetWriterId stays and the provided one lapses after Ttl. A provided
+      DataSetWriterId that was not used within Ttl is not handed out again
+      as long as never-used ones are left ("so far unused", REQ-ACT-022,
+      REQ-MSG-020; SF-112).
+
+  - id: REQ-ACT-024
+    title: NewDataSetWriterId for an unknown Source is answered with BadNotFound
+    statement: >-
+      A Responder that neither is nor represents the Source of a
+      NewDataSetWriterId request answers it with the final ActionResponse
+      (ActionState 2) with the Status BadNotFound (0x803E0000) and an empty
+      Payload.
+    keyword: MUST
+    domain: messaging
+    levels: {L1: MUST, L2: MUST, L3: MUST}
+    applies_to: [responder]
+    condition: The component provides the common service NewDataSetWriterId.
+    refs: [MG 9.2.1, SF-113]
+    quotes:
+      - ref: MG 9.2.1
+        text: If the application neither is nor represents the <Source>, it answers with the final ActionResponse with the Status BadNotFound and an empty Payload.
+    verification: [d7-test]
+    inventory: [MG-9.2.1-07feb514]
+    status: draft
+    notes: >-
+      SF-113 (C-060 review). The request is addressed (DataSetWriterId 8,
+      ActionTargetId 1), so REQ-ACT-015 applies and REQ-ACT-017 does not.
