@@ -1,6 +1,6 @@
 # ADR-0020 – Public API of the Rust SDK (D2)
 
-- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042). Amendment C-048 (first part of the crate `oec`: additions, `MemoryStore::new()`, rules of `build()`) C-049 (no API change; `set_health_details` reads "equals" per REQ-RES-HEALTH-002) and C-050 (runtime moved to `oec`; explicit `Broker` needs a CA; `run_async` installs no signal handlers) by the agent (G-3.4 b).
+- Status: **accepted** (PO, C-045 review 2026-10-26; proposed in C-042). Amendment C-048 (first part of the crate `oec`: additions, `MemoryStore::new()`, rules of `build()`) C-049 (no API change; `set_health_details` reads "equals" per REQ-RES-HEALTH-002) and C-050 (runtime moved to `oec`; explicit `Broker` needs a CA; `run_async` installs no signal handlers) by the agent (G-3.4 b). Further amendments by the agent follow at the end of this file (up to C-060).
 - Date: 2026-10-26
 - Deciders: product owner (Thomas) – proposed by the agent in C-042
 - Related: ADR-0011 (S4 architecture), ADR-0016 (level targets), ADR-0019 §7 (schemas in D2), ADR-0021 (C ABI), ADR-0022 (D9 API), Q-021, Q-022, SF-101
@@ -429,3 +429,25 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
 ### C. Changes of sketch items
 
 None. The documented behaviour is narrower than the sketch's comment "the SDK re-subscribes": a `Set` changes the Interval of an existing configurable entry; a `Set` of a TopicPath the application has not subscribed is rejected with `BadNotSupported` (SF-111, open); a `Del` unsubscribes the filter until a `Set` restores it.
+
+## Amendment C-060 (2026-10-28) – P4 increment 8c: Action `NewDataSetWriterId`, sketch deleted (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details: `log/2026-10-28_C-060_new-data-set-writer-id.md`, REVIEW A-137 … A-144. Semantics: ADR-0026 §19. With this increment every public item of the sketch exists in `oec`; **the sketch is deleted** (§1). The contract of the public API is from now on the crate `oec` itself (its rustdoc, the examples and the tests); changes of documented semantics still need an amendment of this ADR.
+
+### A. What moved from the sketch into `oec`
+
+`Consumer::new_data_set_writer_id` (and `_blocking`), see C.
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| `ActionOptions::{new, timeout}` (default 10 s) | Same pattern as `GetOptions`/`WriteOptions` (amendment C-058); the timeout becomes the `TimeoutHint` (REQ-ACT-009). |
+| `ProvidedWriterId { data_set_writer_id: u16, ttl: Duration }` | Named fields instead of a tuple; plain `Copy` data with public fields. |
+| The responder | Not an API item: an application from Level 2 answers `NewDataSetWriterId` itself (REQ-CMP-040), reserving the id in its writer table (ADR-0026 §19). |
+
+### C. Changes of sketch items
+
+1. **`new_data_set_writer_id(resource, &Target, &ActionOptions) -> Result<ProvidedWriterId>`** instead of `(service_type, app, resource, timeout) -> Result<(u16, Duration)>`: the addressed application (and optionally the asset as Source) is a `Target` as for `get`/`set`/`del`; a `Target` without ServiceType and AppId or with a Filter → `Error::Invalid` (REQ-ACT-020); a Bad response → `Error::Status`; no response within the timeout → `Error::Timeout`.
+2. **Examples** (`oec/sdk/rust/oec/examples/{hello, config, device_source, consumer}.rs`, ported; `demo.rs` from C-059): the sketch's `consumer.rs` sent a broadcast `Get` to `Target::any()`; since C-058 (C.3) `get` needs a concrete application, so the ported example targets the OTConnector named on the command line and finds applications with `on_presence`. The other adaptations follow the amendments C-048 … C-058 (`&Target`, the `GetOptions` builder, explicit `Bootstrap`, `Presence` arms with `..`). `hello.rs` stays within 20 lines.
+3. **REQ tracing:** the walker of the sketch is `oec/sdk/rust/oec/tests/citations.rs` (same checks: hello world ≤ 20 lines, complete REQ ids, every REQ id cited under `oec/sdk/` exists and is not deprecated).

@@ -77,3 +77,9 @@ The contract was written as a **compile-checked header** `oec/sdk/rust/sketch/c/
 - **Exposing the async API** (futures/polling in C): rejected, as C users expect blocking calls and callbacks.
 - **Error codes only, without a message:** rejected. Messages such as "IL longer than 255 characters" are essential for DX.
 - **A C API without the Rust SDK** (the D9 core also for Linux): rejected by ADR-0011/0017. D9 is designed for devices, not for the full L3 provider feature set of applications.
+
+## Amendment C-060 (2026-10-28) – location of the contract header (agent, G-3.4 b)
+
+Decided by the agent (layout, G-3.4 b); the PO can overrule. The Rust API sketch was deleted in C-060 (ADR-0020 amendment C-060), so the C contract moved next to the crate that will implement it: **`oec/sdk/rust/oec-ffi/include/oec.h`** with the examples **`oec/sdk/rust/oec-ffi/examples/{hello,logger}.c`** (`git mv`, content unchanged except the header comment). `oec/sdk/check.sh` compiles them there as C17 with the same flags. Decision 1 stands: the header is the ABI contract until increment 10 generates `oec.h` from `oec-ffi`; the generated header must keep its names, signatures and contract comment.
+
+The Rust API gained `Consumer::new_data_set_writer_id` in C-060; the C contract has no counterpart yet (consumer side: `oec_get`, `oec_subscribe`). Increment 10 adds it as an addition (allowed by decision 1), with the same Target rules (ServiceType + AppId, no Filter).

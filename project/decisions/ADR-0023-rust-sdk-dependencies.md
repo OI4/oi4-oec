@@ -153,3 +153,7 @@ P4 increment 8a (the consumer core) adds **no crate and no feature**. The sans-I
 ## Amendment C-059 (2026-10-28) – no new dependency in increment 8b (agent, G-3.4 b)
 
 P4 increment 8b (SubscriptionList, `Subscription::configurable`/`interval`, example app `oec/examples/demo.rs`) adds **no crate and no feature**: the list, its overrides and their persistence use `serde`/`serde_json` and the standard library; the example uses only `oec` and the standard library (no `[dev-dependencies]` change). `Cargo.lock` unchanged (192 packages); `cargo deny check` passes with **no exception and no `ignore` entry**.
+
+## Amendment C-060 (2026-10-28) – no new dependency in increment 8c (agent, G-3.4 b)
+
+P4 increment 8c (the Action `NewDataSetWriterId`, the ported examples, the walker in `oec/tests/citations.rs`) adds **no crate and no feature**: responder, reservations and requester use `serde`/`serde_json`, `time` and the standard library; the example `consumer.rs` uses tokio (`rt`, `sync`, `time`), a normal dependency of `oec` with these features enabled since C-050. The deleted sketch had no dependencies; its lock file is gone with it. `Cargo.lock` unchanged (192 packages); `cargo deny check` passes with **no exception and no `ignore` entry**.

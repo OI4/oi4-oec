@@ -160,8 +160,8 @@ fn guideline_call_is_answered_like_the_guideline() {
     assert_eq!(got, expected);
 }
 
-/// The CorrelationData of the request is copied (REQ-ACT-004), and the
-/// RequestId is that of the ActionRequest (REQ-ACT-013).
+/// The CorrelationData of the request is copied (REQ-ACT-007), and the
+/// RequestId is that of the ActionRequest (REQ-ACT-012).
 #[test]
 fn correlation_data_and_request_id_are_copied() {
     let mut p = provider();

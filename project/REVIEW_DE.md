@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, nach dem Review zu C-059 (deine Entscheidungen zu D-1 … D-3 sind umgesetzt). **Für dich offen: ein Review (R-1 = REQ-RES-SUBLIST-004, -010, -016).** Kein offenes Finding._
+_Stand: 28.10.2026, nach C-060 (P4 Inkrement 8c: die Aktion `NewDataSetWriterId`, die API-Skizze ist gelöscht). **Für dich offen: zwei Findings zum Entscheiden (D-1 = SF-112, D-2 = SF-113) und weiterhin ein Review (R-1 = REQ-RES-SUBLIST-004, -010, -016 aus C-059).**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,21 +24,45 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-C-059 war **P4 Inkrement 8b**. Ich habe noch einmal geteilt (**A-128**): **8b** (dieser Zyklus) bringt die SubscriptionList und die Beispiel-App; **8c** (C-060) bringt die Aktion `NewDataSetWriterId` und danach das Löschen der API-Skizze. Reihenfolge: 8b → 8c → 10.
-- **SubscriptionList (MG 9.1.9):** Jede App ab Level 2 zeigt jetzt, welche Daten sie abonniert hat. Das SDK füllt die Liste selbst:
-  - aus den dauerhaften Abos der Empfänger-Seite (z. B. „die `oee`-Daten von Pumpe X“, mit dem eingestellten Intervall);
-  - dazu je beschreibbarem Datensatz (Data oder Config) das eigene Abo auf sein `Set`-Topic – so sieht ein anderes Programm, dass es dort Werte setzen darf (deine Entscheidung SF-107).
-  - Ändert sich die Liste, schickt das SDK sie von selbst neu.
-- **Von außen ändern (`Set`/`Del SubscriptionList`):** Ein anderes Programm kann bei einem einstellbaren Abo das Intervall ändern (`Set`) oder das Abo abschalten (`Del`). Die App bekommt dann seltener bzw. keine Daten mehr von diesem Topic. Die Änderung wird gespeichert und gilt auch nach einem Neustart. Jede Anfrage bekommt eine Antwort „Good“ oder „Bad“ mit Grund. Damit endet **A-92** (bisher wurde jedes solche `Set`/`Del` mit `BadNotFound` abgelehnt).
-- **Für App-Entwickler:** `Subscription::interval(…)` (höchstens eine Nachricht pro Intervall und Topic) und `Subscription::configurable()` (das Abo darf von außen geändert werden) – genau wie in der API-Skizze.
-- **Beispiel-App** `oec/sdk/rust/oec/examples/demo.rs`: eine kleine App, die Daten einer Pumpe anbietet *und* selbst Daten abonniert. Sie ist die Grundlage für den künftigen D7-Befehl `test`.
-- **Fehler gefunden und behoben:** Unter hoher Last ist ein Test aus C-058 gelegentlich hängen geblieben (4 von 20 Läufen). Ursache: Stellte eine App zwei Anfragen kurz hintereinander, konnte die zweite auf eine Bestätigung des Brokers warten, die nie kam, und lief in ihr Zeitlimit. Zuerst ein Test, der den Fehler zeigt, dann die Korrektur; danach 25 Läufe hintereinander grün.
-- **Geprüft:** Tests ohne Netzwerk (darunter die vier Beispiele aus Anhang B1.1.9, gegen das Schema geprüft), Tests mit zwei Apps über den eingebauten Test-Broker, Interop gegen den echten Mosquitto (14 grün, 1 bewusst ausgelassen) und einmal D7 gegen die Beispiel-App: 12 bestanden, 0 durchgefallen, 1 übersprungen (keine Aktionen – die kommen in 8c); alle 95 Nachrichten gültig nach Schema.
+C-060 war **P4 Inkrement 8c**. Ich habe es nicht weiter geteilt (**A-137**). Reihenfolge jetzt: 8c → 10 (C-Schnittstelle `oec-ffi`).
+- **Die Aktion `NewDataSetWriterId` (MG 9.2):** Eine App kann eine andere App fragen: „Gib mir eine neue, freie Datensatz-Nummer (DataSetWriterId) für eine Ressource.“ Gebraucht wird das, wenn ein IT-Programm in einem OT-Connector etwas Neues anlegen will (z. B. eine ReferenceDesignation für ein Gerät).
+  - **Antworten (jede App ab Level 2):** Das SDK beantwortet jede solche Frage sofort mit genau einer Antwort. Die neue Nummer ist 60 Sekunden für den Fragenden reserviert (`Ttl`) und wird danach nie wieder vergeben – auch nicht nach einem Neustart, denn die Reservierung steht in der gespeicherten Nummern-Tabelle. Mehr als 256 offene Reservierungen gleichzeitig lehnt das SDK ab (`BadResourceUnavailable`). Im Profil der App steht jetzt `NewDataSetWriterId`.
+  - **Fragen (für App-Entwickler):** `Consumer::new_data_set_writer_id(Ressource, Ziel-App, Optionen)` liefert die Nummer und ihre Gültigkeitsdauer. Die Form weicht etwas von der Skizze ab (gleiches `Target` wie bei `get`, Optionen mit Zeitlimit, Standard 10 s) – festgehalten in ADR-0020.
+- **Die API-Skizze ist gelöscht:** Ihre Beispiele (`hello`, `config`, `device_source`, `consumer`) liegen jetzt im SDK unter `oec/sdk/rust/oec/examples/` neben der Beispiel-App `demo.rs`. Der C-Vertrag `oec.h` und die C-Beispiele liegen jetzt in `oec/sdk/rust/oec-ffi/`, wo Inkrement 10 sie umsetzt. Die Prüfung „jede im Code genannte REQ gibt es und sie ist aktiv“ läuft jetzt im SDK (`oec/tests/citations.rs`). Die Prüfskripte sind angepasst.
+- **Geprüft:** Tests ohne Netzwerk (gegen die Guideline-Beispiele aus B1.2.1 und die Fehler-Vektoren), Tests mit zwei Apps über den eingebauten Test-Broker, 25 Läufe hintereinander unter Last grün, Interop gegen den echten Mosquitto (14 grün, 1 bewusst ausgelassen) und einmal D7 gegen die Beispiel-App: 13 bestanden, 0 durchgefallen – **der D7-Test für Aktionen (T7-MON-07) läuft jetzt** und ist grün; alle 101 Nachrichten gültig nach Schema.
+- **Fehler gefunden und behoben:** Der erste Interop-Lauf scheiterte, weil die Beispiel-App beim Ausprobieren ihre Daten in den erzeugten Test-Ordner geschrieben hatte. Der Test räumt sich den Ordner jetzt selbst leer (`Dev::root`). Außerdem nannte ein Testkommentar zwei falsche REQ-Nummern – korrigiert.
 - Keine neue Bibliothek, nichts Reviewtes geändert, keine neuen Testdaten.
 
-**Deine Entscheidungen zu D-1 … D-3 sind umgesetzt** (siehe unten „Was aus deinem letzten Review (C-059) geworden ist“). Das SDK musste dafür nicht geändert werden. Die Technik-Entscheidungen A-128 … A-136 sind nur zur Info (unten). Einen Blick wert: **A-128** (Zyklusschnitt), **A-131** (`BadNotSupported` statt ein neues Abo anzulegen) und **A-132** (wie das Intervall wirkt).
+Die Technik-Entscheidungen A-137 … A-144 sind nur zur Info (unten). Einen Blick wert: **A-139** (Reservierung), **A-142** (Form der Funktion) und **A-143** (Abschied von der Skizze).
 
-### R-1 – Drei Regeln zur SubscriptionList folgen dem neuen Text (reviewen)
+### D-1 – SF-112: Wofür ist eine per Aktion geholte Datensatz-Nummer da? (entscheiden)
+
+**Das Problem:** Die Guideline sagt nur, die Nummer sei „für das kommende `Set`“. Offen bleibt: (a) Was macht die App mit einem `Set`, das diese Nummer trägt? (b) Welche Nummer nimmt das `Set`, wenn die App für dieses Gerät schon eine Nummer anzeigt? Das ist häufig, denn nach MG 9.1.8 zeigt eine App die ReferenceDesignation jedes Geräts mit Nummer an, auch wenn sie leer ist. (c) Darf eine Nummer, die nach Ablauf der 60 Sekunden ungenutzt blieb, wieder vergeben werden?
+
+**Mein Vorschlag:**
+1. Ein `Set` trägt die Nummer, die die App für den Datensatz anzeigt. Nur wenn sie noch keine anzeigt, trägt es eine per Aktion geholte Nummer; der neue Datensatz behält sie.
+2. Zeigt die App schon eine Nummer an, gilt diese; die geholte verfällt einfach.
+3. Eine ungenutzte geholte Nummer wird nicht wieder vergeben, solange es noch nie benutzte gibt.
+
+Dazu ein Satz in MG 8.4.1: „Das `Set`, das den `DataSet` anlegt, trägt diese `DataSetWriterId`; für einen `DataSet`, den der Publisher schon in seiner `PublicationList` führt, wird die dort geführte `DataSetWriterId` verwendet und keine neue gebraucht.“
+
+**Auswirkung:** Keine aufs SDK, es macht es schon so. Die Regel REQ-ACT-023 bekommt eine Notiz und geht danach als R-x zu dir.
+
+**Was du tun musst:** „D-1 wie vorgeschlagen“ oder deine Lesart.
+
+### D-2 – SF-113: Antwortet eine App, wenn nach einem unbekannten Gerät gefragt wird? (entscheiden)
+
+**Das Problem:** Fragt jemand per `Get`/`Set`/`Del` nach einem Gerät, das die App nicht kennt, sagt die Guideline seit SF-099/SF-108: keine Daten, aber ein Status-Ereignis `BadNotFound`. Für die Aktion sagt sie nichts. Es gibt zwei Lesarten:
+- **(a) Keine Antwort:** Die Frage „kann nicht zugeordnet werden“ (REQ-ACT-017). Der Fragende wartet dann bis zu seinem Zeitlimit.
+- **(b) Eine Antwort mit Fehler:** Die Frage ist an die App adressiert und lesbar. Also verlangt REQ-ACT-015 genau eine abschließende Antwort, hier mit „Bad“.
+
+**Mein Vorschlag:** (b). Die App antwortet abschließend mit `BadNotFound` und leerem Inhalt. „Kann nicht zugeordnet werden“ in REQ-ACT-017 meint die technische Adresse der Aktion (Nummern 8/1), nicht das Gerät. Dazu ein Satz in MG 9.2.1: „Ist oder vertritt die Anwendung die `<Source>` nicht, antwortet sie mit der abschließenden `ActionResponse` mit dem `Status` `BadNotFound` und leerem `Payload`.“
+
+**Auswirkung:** Keine aufs SDK, es macht (b). Bei (a) ändern sich ein Zweig und zwei Tests. Die Regel REQ-ACT-017 bekommt eine Notiz und geht danach als R-x zu dir. D7 bleibt unverändert.
+
+**Was du tun musst:** „D-2 wie vorgeschlagen“ oder deine Lesart.
+
+### R-1 – Drei Regeln zur SubscriptionList folgen dem neuen Text (reviewen, noch offen aus C-059)
 
 **Warum:** Deine Entscheidungen haben MG 9.1.9 geändert (`57ebe91`). Drei Regeln, die du schon abgenommen hattest, folgen jetzt dem neuen Text und stehen deshalb wieder auf `draft`. Lesbar in `oec/spec/requirements/view/res-sublist.md`.
 
@@ -59,13 +83,13 @@ Was das SDK dafür heute kann und was nicht:
 - **Geht nicht:** Abonniert A alle 100 Geräte mit **einem** Platzhalter-Abo (`…/Pub/Data/#`), kann man es nicht auf ein Gerät **verengen**. Dafür bräuchte man ein `Set` mit einem neuen, engeren Topic, und das lehnt das SDK nach D-3 ab (`BadNotSupported`).
 - **Idee für später (meine Entscheidung, keine Guideline-Frage):** Das SDK könnte ein `Set` annehmen, dessen Topic in einem schon vorhandenen einstellbaren Abo der App enthalten ist („verengen“), oder der App einen Handler anbieten, mit dem sie neue Topics selbst annimmt. Das passt zu D-3 (Anlegen ist freiwillig). Ich habe es als Vorschlag für einen späteren Zyklus notiert, gebaut wird es jetzt nicht. Sag Bescheid, wenn du es früh haben willst.
 
-### Zur Info: was C-058 gebaut hat
+### Zur Info: was C-059 gebaut hat
 
-C-058 war **P4 Inkrement 8a**: die Empfänger-Seite des SDK (abonnieren, andere Apps finden, `Get`/`Set`/`Del` mit Zeitlimit). Details in den Punkten A-120 … A-127 unten.
+C-059 war **P4 Inkrement 8b**: die SubscriptionList (jede App ab Level 2 zeigt, was sie abonniert hat; von außen einstellbar) und die Beispiel-App `demo.rs`. Deine Entscheidungen zu D-1 … D-3 (SF-109 … SF-111) sind umgesetzt. Details in den Punkten A-128 … A-136 unten.
 
 ---
 
-Die Punkte A-1 … A-136 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-059 (A-128 … A-136) stehen unten.
+Die Punkte A-1 … A-144 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-060 (A-137 … A-144) stehen unten.
 
 Aus C-056: Deine Zustimmung zu D-1 (SF-107), D-2 (SF-108) und R-1 ist umgesetzt, siehe unten „Was aus dem Review C-056 geworden ist“.
 
@@ -77,7 +101,7 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
 
 ### Begriffe aus C-058
 
@@ -448,10 +472,22 @@ Neu aus C-059 (P4 Inkrement 8b):
 
 ---
 
-### Was als Nächstes passiert (C-060)
+Neu aus C-060 (P4 Inkrement 8c):
+- **A-137 (neu) – Zyklusschnitt:** nicht geteilt. Die Aktion baut auf Vorhandenem auf (Nachrichten-Modell seit C-047, Nummern-Tabelle seit C-053, Fragen mit Zeitlimit seit C-058); der Abschied von der Skizze ist reine Umzugsarbeit.
+- **A-138 (neu) – Antworten:** ab Level 2 jede Frage sofort mit genau einer abschließenden Antwort. Keine Antwort, wenn die Frage nicht lesbar ist, nicht an diese App geht oder die Antwort-Adresse nicht passt (so verlangt es die Guideline). Ein kaputter Eintrag lässt nur seine eigene Frage scheitern (`BadInvalidArgument`). Unbekanntes Gerät → `BadNotFound` (Vorschlag D-2). Mehrere Antworten passen in eine Nachricht bis zur Größengrenze.
+- **A-139 (neu) – Reservierung:** Die neue Nummer liegt über allen bisher vergebenen, ist 60 s reserviert, wird gespeichert und nie wieder vergeben (strenger als nötig, passt zu Vorschlag D-1). Höchstens 256 offene Reservierungen. Ein `Set` benutzt weiter die Nummer, die die App anzeigt.
+- **A-140 (neu) – Profil:** `NewDataSetWriterId` steht ab Level 2 im Profil der App und jedes Geräts (Level 2: „sollte“, Level 3: „muss“).
+- **A-141 (neu) – Fragen:** Die Erkennungsmarke der Antwort (CorrelationData) ist die Fragenummer; das Zeitlimit wird mitgeschickt; nur die abschließende Antwort auf die eigene Frage zählt; eine „gute“ Antwort ohne Nummer gilt als Fehler.
+- **A-142 (neu) – API:** `new_data_set_writer_id(Ressource, &Target, &ActionOptions) -> ProvidedWriterId`; Fehler wie bei `get` (`Error::Status`, `Error::Timeout`); Standard-Zeitlimit 10 s.
+- **A-143 (neu) – Abschied von der Skizze:** Beispiele ins SDK (das Konsumenten-Beispiel fragt jetzt einen bestimmten OT-Connector statt „alle“, weil `get` seit C-058 eine bestimmte App braucht), `oec.h` + C-Beispiele nach `oec-ffi/` (die Aktion kommt in C mit Inkrement 10), REQ-Prüfung im SDK, Skizze gelöscht.
+- **A-144 (neu) – Tests und Läufe:** 10 + 3 neue Tests ohne Netzwerk, 1 mit zwei Apps, 25 Läufe unter Last grün, Interop 14 grün (nach dem Fix am Test-Ordner), D7 13 / 0 mit T7-MON-07. Keine neue Bibliothek.
 
-1. **P4 Inkrement 8c** – die Aktion `NewDataSetWriterId` (eine App bittet eine andere um eine neue Datensatz-Nummer), danach der Abschied von der API-Skizze: ihre Beispiele ziehen ins SDK, ihre Prüfung der REQ-Nummern ebenso, die Skizze wird gelöscht. Hast du R-1 bis dahin beantwortet, trägt der neue Agent das zuerst ein.
-   - Danach Inkrement 10 (C-Schnittstelle `oec-ffi`).
+---
+
+### Was als Nächstes passiert (C-061)
+
+1. **Deine Antworten eintragen:** D-1/D-2 (SF-112/113: Guideline-Text, Register, Re-Baseline, Notizen an REQ-ACT-017/023 → R-x) und R-1.
+2. **P4 Inkrement 10 – `oec-ffi`:** die C-Schnittstelle auf dem SDK nach dem Vertrag `oec.h`, dazu die Aktion; die C-Beispiele laufen als Tests (auch mit AddressSanitizer).
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---

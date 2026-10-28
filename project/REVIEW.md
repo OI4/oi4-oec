@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-059 review (your decisions on D-1 … D-3 applied: SF-109 … SF-111 resolved in MG 9.1.9 `57ebe91`, re-baseline). **One item to review: R-1 = REQ-RES-SUBLIST-004, -010, -016** (follow the new text). No finding open. A-128 … A-136 for information, worth a look: A-128, A-131, A-132._
+_Last updated: 2026-10-28, C-060 (P4 increment 8c: the Action `NewDataSetWriterId`, sketch deleted). **Two findings to decide: D-1 = SF-112, D-2 = SF-113** (the SDK follows both proposals). **Still open: R-1 = REQ-RES-SUBLIST-004, -010, -016** (C-059 review). A-137 … A-144 for information, worth a look: A-139, A-142, A-143._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -94,15 +94,24 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - MG 9.1.9 in `57ebe91` as proposed: transient answer subscriptions are not listed (SF-109); only subscriptions to request topics of the own `AppId` are excluded, B1.1.9 stays (SF-110); an application that does not support the creation of entries rejects such a `Set` with `Bad`, e.g. `BadNotSupported` (SF-111). **SF-109 … SF-111 resolved** (register `7a2bda2`, no open finding). Re-baseline on `57ebe91` (1405 inventory items, 441 REQs, 0 gaps).
   - REQ-RES-SUBLIST-004, -010 and -016 follow the new text and are `draft` (**R-1**). Schema `2.0.1-dev` @ `57ebe91` without content change; D7/D8 catalogs on `57ebe91` (T7-SET-11 note: a rejected creation is no failure).
   - The SDK already did all three; nothing changes there. C-060 (8c) still runs in a new agent; `prompt.md` is updated.
+- C-060 (P4 increment 8c, not split):
+  - `oec-core`: the responder of the Action `NewDataSetWriterId` (`provider::action`) – from Level 2 every `ActionRequest` gets one final `ActionResponse` at once; the new id is reserved for 60 s (`Ttl`) in the persisted writer table and never handed out again; at most 256 open reservations; `NewDataSetWriterId` in the Profile. The requester in the consumer core (CorrelationData, RequestId, TimeoutHint, only the final response counts).
+  - `oec`: `Consumer::new_data_set_writer_id(resource, &Target, &ActionOptions) -> ProvidedWriterId` and `_blocking` (ADR-0020 amendment C-060: differs from the sketch's signature).
+  - **The sketch is gone:** its examples are in `oec/sdk/rust/oec/examples/` (next to `demo.rs`), the C contract `oec.h` and the C examples in `oec/sdk/rust/oec-ffi/`, the REQ walker in `oec/tests/citations.rs`; the gates are adapted.
+  - Tests: core and runtime tests in the gate (guideline vectors V-PAY-008/009, 185, 186, 197, 199, 200, 203); opt-in interop 14 green (after a fix of the test setup); a one-off D7 `oec-check monitor` run: 13 pass, 0 fail, **T7-MON-07 now passes** (the Action), 0 invalid of 101 messages.
+  - **Two findings to decide** (register `19c1a95`): **D-1 = SF-112** (what is a provided DataSetWriterId used for, and may it be handed out again?), **D-2 = SF-113** (does the application answer a `Call` for an unknown asset?). No reviewed item changed, no new test data, no new dependency. A-137 … A-144 are for information.
+  - Increment 10 (`oec-ffi`) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `57ebe91` (re-baseline, no content change).
 
-Logs: [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
+| D-1 | SF-112: what a `DataSetWriterId` provided by `NewDataSetWriterId` is used for; may an unused one be handed out again? | decide | C-060 | as proposed | ☐ |
+| D-2 | SF-113: answer to `Call/NewDataSetWriterId/<Source>` for an unknown Source (`BadNotFound` vs. no response) | decide | C-060 | as proposed | ☐ |
 | R-1 | REQ-RES-SUBLIST-004, -010, -016 after SF-109 … SF-111 (MG 9.1.9 `57ebe91`) | review | C-059 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
@@ -240,8 +249,30 @@ Logs: [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27
 | A-134 | API (ADR-0020 amendment C-059): `Subscription::interval`/`configurable` as in the sketch; writer id of `Set`/`Del SubscriptionList` resolved by a `Get` | info (agent) | C-059 | – | – |
 | A-135 | Example app `oec/examples/demo.rs` (provider + consumer, Level 2, `OEC_ROOT`, `OEC_DEMO_SECONDS`) – the application under test of D7 `test` | info (agent) | C-059 | – | – |
 | A-136 | Tests (core 7 + 3 + 1, runtime 2 + 1), answer-filter race of C-058 fixed (test first), interop 14 green, D7 `monitor` 12/0/1; no new dependency | info (agent) | C-059 | – | – |
+| A-137 | Cycle cut: 8c (Action `NewDataSetWriterId` + farewell of the sketch) in one cycle; 8c → 10 | info (agent) | C-060 | – | – |
+| A-138 | Responder: both Call filters from Level 2, one final response per ActionRequest at once, no response where REQ-ACT-005/006/017 say so, per-request Payload, `BadNotFound` for an unknown Source (SF-113), packed to the MaxPacketSize | info (agent) | C-060 | – | – |
+| A-139 | Reservations: Ttl 60 s, ids above every id handed out, never reused (SF-112), cap 256 → `BadResourceUnavailable`, persisted in the writer table; a `Set` keeps using the listed id | info (agent) | C-060 | – | – |
+| A-140 | Profile: `NewDataSetWriterId` from Level 2 for the application and every asset | info (agent) | C-060 | – | – |
+| A-141 | Requester: CorrelationData = RequestId (8 bytes), unique RequestIds, TimeoutHint = remaining time, only the final response of the own request; Good without fields → `BadDecodingError` | info (agent) | C-060 | – | – |
+| A-142 | API (ADR-0020 amendment C-060): `new_data_set_writer_id(resource, &Target, &ActionOptions) -> ProvidedWriterId`, default timeout 10 s | info (agent) | C-060 | – | – |
+| A-143 | Farewell of the sketch: examples ported (no broadcast `Get`), `oec.h` + C examples in `oec-ffi/` (C Action with increment 10), walker `oec/tests/citations.rs`, gates adapted | info (agent) | C-060 | – | – |
+| A-144 | Tests (core 10 + 3, runtime + 1), interop 14 green after the `Dev::root` fix, stress 25/25, D7 `monitor` 13/0 with T7-MON-07; no new dependency | info (agent) | C-060 | – | – |
 
 ## Decisions and review items
+
+### D-1 – SF-112: what a provided `DataSetWriterId` is for (MG 8.4.1, 9.2.1 vs. 8.2.3, 9.1.8)
+
+- **Finding:** MG 8.4.1 says the id from `NewDataSetWriterId` is "to use for the upcoming set request"; MG 9.2.1 names the use case (an IT connector creates a `ReferenceDesignation` in an OT connector). The guideline does not say (a) what the Responder does with a `Set` that carries the provided id, (b) which id a creating `Set` carries if the Responder already lists an id for that resource and Source (MG 8.2.3: "as published"; MG 9.1.8 lists the `ReferenceDesignation` of every asset with its id even without content), (c) whether an id that was not used within the `Ttl` may be handed out again.
+- **Proposed interpretation:** (1) A `Set` carries the id the Responder lists for the DataSet, or – only for a combination it does not list yet – an id provided within the `Ttl`; the created DataSet keeps that id. (2) If an id is already listed, the listed id stays; the provided id lapses after the `Ttl`. (3) An unused provided id is not handed out again as long as never-used ids are left (REQ-MSG-020). Addition to MG 8.4.1 after "…to use for the upcoming set request.": "The `Set` that creates the `DataSet` carries this `DataSetWriterId`; for a `DataSet` the publisher already lists in its `PublicationList`, the listed `DataSetWriterId` is used and no new one is needed."
+- **Impact:** SDK – none (it lists an id for everything it accepts a `Set` for and never reuses a provided id). Spec – REQ-ACT-023 gets a note (→ `draft`, R-x). D7 unchanged.
+- **PO:** ☐ as proposed ☐ other: …
+
+### D-2 – SF-113: `Call/NewDataSetWriterId/<Source>` for an unknown Source (MG 9.2.1, 8.1.3 vs. 9.1)
+
+- **Finding:** for `Get`/`Set`/`Del` with an unknown Source, MG 9.1 (SF-099, SF-108) says: no `Pub`, a Status event `BadNotFound` should be sent. For the Action the guideline says nothing. Reading (a): the request "cannot be addressed" (MG 8.1.3, REQ-ACT-017) → no response, the requester waits until its `TimeoutHint`. Reading (b): the request is addressed (topic of the `AppId`, DataSetWriterId 8, ActionTargetId 1) and decodable, so REQ-ACT-015 requires one final response, here with `Bad`.
+- **Proposed interpretation:** (b) – one final `ActionResponse` (`ActionState` 2) with `Status` `BadNotFound` and an empty `Payload`; "cannot address" in REQ-ACT-017 means DataSetWriterId/ActionTargetId, not the Source. Addition to MG 9.2.1 after "…A `Filter` is not used.": "If the application neither is nor represents the `<Source>`, it answers with the final `ActionResponse` with the `Status` `BadNotFound` and an empty `Payload`."
+- **Impact:** SDK – none (implements (b)); with (a) one branch and two tests change. Spec – REQ-ACT-017 gets a note (→ `draft`, R-x). D7 unchanged (T7-MON-07 checks only the form of a response).
+- **PO:** ☐ as proposed ☐ other: …
 
 ### R-1 – REQ-RES-SUBLIST-004, -010, -016 after SF-109 … SF-111 (MG 9.1.9)
 
@@ -765,6 +796,19 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - one-off D7 `oec-check monitor` (external call, Q-009; 140 s against the demo app and the interop consumer): 12 pass, 0 fail, 1 skip (T7-MON-07 no Action RequestIds), 0 invalid of 95 messages; capture not committed;
   - no new dependency; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception.
 
-## Next (C-060)
+### A-137 … A-144 – P4 increment 8c (C-060, agent)
 
-1. P4 increment 8c – the Action `NewDataSetWriterId` (responder in the provider, `Consumer::new_data_set_writer_id`), then the farewell of the sketch (examples ported, C header moved, REQ walker into `oec`, sketch deleted, gate scripts adapted); apply your decisions on D-1 … D-3. Then 10 (`oec-ffi`). Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/sdk/rust/oec-core/src/provider/{action, writers}.rs`, `provider.rs`, `status.rs`, `consumer.rs`; `oec/sdk/rust/oec/src/consumer.rs`, `oec/examples/`, `oec/tests/{consumer, interop, citations}.rs`; `oec/sdk/rust/oec-ffi/`; the tests `oec-core/tests/{provider_action, consumer}.rs`; ADR-0020/0021/0023 amendments C-060, ADR-0026 §19; [C-060 log](log/2026-10-28_C-060_new-data-set-writer-id.md).
+- **A-137 Cycle cut:** the typed Action model exists since C-047, the persisted writer table since C-053, the request machinery since C-058; new are one responder path, one reservation table and one request kind – one review topic. The farewell of the sketch is mechanical. Not split; 8c → 10.
+- **A-138 Responder:** from Level 2 the application subscribes `Call/NewDataSetWriterId` of its AppId with and without Source and answers every `ActionRequest` at once with one final response (no intermediate responses, so the `TimeoutHint` is always kept). No response if the request cannot be decoded or addressed, its PublisherId is not the application or its ResponseAddress is not the matching Reply topic (REQ-ACT-005/006/017). Each request's Payload is decoded on its own, so an invalid `Resource` fails only that request (`BadInvalidArgument`). Unknown Source → `BadNotFound` (SF-113 proposal). Several responses share one message up to the MaxPacketSize.
+- **A-139 Reservations:** the provided id is higher than every id handed out so far (after 65535 the lowest free one), reserved for 60 s, persisted in the writer table (`app/writer-ids`) so that a restart does not hand it out again, and never assigned or provided again – stricter than "only within the `Ttl`" (SF-112 (3)). At most 256 open reservations; then `BadResourceUnavailable`. The SDK does not bind a provided id to a new DataSet: it lists an id for everything it accepts a `Set` for, and a `Set` keeps using that id (SF-112 (1)/(2)).
+- **A-140 Profile:** `NewDataSetWriterId` is listed from Level 2 for the application and every asset (it answers for each Source it is or represents); REQ-CMP-040: L2 SHOULD, L3 MUST.
+- **A-141 Requester:** CorrelationData = the consumer's RequestId as 8 bytes; RequestId unique among the pending actions; TimeoutHint = the remaining time (≥ 1 ms); only the final response of the addressed Responder with the own RequestId and CorrelationData counts; a Good response without `DataSetWriterId`/`Ttl` → `BadDecodingError`.
+- **A-142 API:** `Consumer::new_data_set_writer_id(resource, &Target, &ActionOptions) -> Result<ProvidedWriterId>` instead of the sketch's `(service_type, app, resource, timeout) -> (u16, Duration)` – the same `Target` as for `get`; ServiceType and AppId required, no Filter (`Error::Invalid`); Bad → `Error::Status`; no response → `Error::Timeout`; default timeout 10 s.
+- **A-143 Farewell of the sketch:** examples `hello` (16 lines), `config`, `device_source`, `consumer` ported to `oec/examples/`. The sketch's consumer example sent a broadcast `Get` to `Target::any()`; since C-058 `get` needs a concrete application, so the ported example targets the OTConnector named on the command line. `oec.h` + `hello.c`/`logger.c` moved to `oec/sdk/rust/oec-ffi/` (still the contract; the C Action follows with increment 10). The REQ walker is `oec/tests/citations.rs`. The workspace excludes only the spikes; `oec/sdk/check.sh` has no sketch step.
+- **A-144 Tests and runs:** `oec-core/tests/provider_action.rs` (10, incl. the guideline vectors V-PAY-008/009, 185, 186, 197, 199, 200, 203), `oec-core/tests/consumer.rs` (+3), `oec/tests/consumer.rs` (+1, two applications; a Level 1 application does not answer); 25 runs in a row green under load; interop `consumer_asks_a_provider` with the Action – the first `interop.sh` run failed because the demo had written its store into the generated dev root, fixed in the test setup (`Dev::root`), then 14 passed, 1 ignored; one-off D7 `oec-check monitor` against the demo and the interop consumer: 13 pass, 0 fail, T7-MON-07 passes, 0 invalid of 101; no new dependency, `cargo deny` without exception.
+
+## Next (C-061)
+
+1. Apply your answers: D-1/D-2 (SF-112/113) – guideline text, register, re-baseline, notes on REQ-ACT-017/023 (→ R-x); R-1 (`spectool review`).
+2. P4 increment 10 – `oec-ffi` (the C ABI on `oec`, generated `oec.h` checked against the contract, plus the Action; C examples as tests, also under AddressSanitizer). Runs in a new agent (start prompt in `prompt.md`).
