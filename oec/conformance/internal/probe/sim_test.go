@@ -51,8 +51,10 @@ func loadSimIndex(t *testing.T) simIndex {
 }
 
 // simTimeout is the answer timeout of the fixture runs: long enough for a
-// loaded CI machine, short enough for the negative waits.
-const simTimeout = 2 * time.Second
+// loaded machine (25 fixtures run in parallel since C-063), short enough
+// for the negative waits. A wall-clock jump (sleep of the machine) during a
+// run fails the heartbeat check of T7-MON-05: rerun.
+const simTimeout = 3 * time.Second
 
 // runSim runs oec-check test (monitor + runner) against the simulated CUT
 // with the fault on a fresh test broker.
@@ -61,7 +63,7 @@ func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, faul
 	pki := mqtttest.NewPKI(t)
 	b := mqtttest.NewBroker(t, pki, "", "", false)
 	cfg := mqttwire.Config{Broker: b.URL(), CAFile: pki.CAFile}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 
 	started := time.Now().UTC()

@@ -280,6 +280,10 @@ func (r *Runner) get07(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	own, err := r.get(ctx, t, r.st, "ReferenceDesignation", r.app, "", nil)
+	if err != nil {
+		return err
+	}
 	mam, err := r.get(ctx, t, r.st, "MAM", "", "", nil)
 	if err != nil {
 		return err
@@ -288,7 +292,7 @@ func (r *Runner) get07(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if err := r.until(ctx, r.completeAll(q1, q2, q3, mam, mamQ)); err != nil {
+	if err := r.until(ctx, r.completeAll(q1, q2, q3, own, mam, mamQ)); err != nil {
 		return err
 	}
 	read := func(x *exchange) ([]string, bool) {
@@ -301,6 +305,10 @@ func (r *Runner) get07(ctx context.Context) error {
 	got1, ok1 := read(q1)
 	supported := false
 	switch {
+	case len(full) == 0:
+		for _, req := range []string{"REQ-RES-REFDES-011", "REQ-RES-REFDES-014", "REQ-QRY-002", "REQ-QRY-003"} {
+			r.skip(t, req, "the application has no object of ReferenceDesignation: the answer to a Query cannot be judged")
+		}
 	case !ok1:
 		r.violation(t, "REQ-RES-REFDES-014", q1, "Get ReferenceDesignation with the Query Parent %q (MessageId %s) is not answered completely within %s", parent, q1.id, r.opt.Timeout)
 		r.violation(t, "REQ-QRY-003", q1, "Get ReferenceDesignation with a Query is not answered (completely), the same Get without Query is")
@@ -336,10 +344,14 @@ func (r *Runner) get07(ctx context.Context) error {
 			r.violation(t, "REQ-QRY-002", q2, "the Query Parent %q with the undefined parameter %s is answered with %q instead of %q", parent, UnknownKey, got2, got1)
 		}
 	}
-	if got3, ok := read(q3); ok && same(got3, []string{r.app}) {
+	got3, ok3 := read(q3)
+	switch gotO, okO := read(own); {
+	case !okO:
+		r.skip(t, "REQ-RES-REFDES-013", "Get ReferenceDesignation/<AppId> without Query is not answered (T7-GET-03)")
+	case ok3 && same(got3, gotO):
 		r.checked(t, "REQ-RES-REFDES-013", q3)
-	} else {
-		r.violation(t, "REQ-RES-REFDES-013", q3, "Get ReferenceDesignation/<AppId> with a Query (MessageId %s) is answered with %q instead of the object of the application (the Query must be ignored)", q3.id, got3)
+	default:
+		r.violation(t, "REQ-RES-REFDES-013", q3, "Get ReferenceDesignation/<AppId> with a Query (MessageId %s) is answered with %q, the same Get without Query with %q (the Query must be ignored)", q3.id, got3, gotO)
 	}
 	gotM, okM := read(mam)
 	switch gotQ, okQ := read(mamQ); {

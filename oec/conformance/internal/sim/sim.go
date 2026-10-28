@@ -41,12 +41,13 @@ const (
 	PerPage       Fault = "T7-GET-06/per-page"       // a PaginationRequest is ignored
 	QueryIgnored  Fault = "T7-GET-07/ignored"        // the Query of ReferenceDesignation is not supported (ignored)
 	QuerySource   Fault = "T7-GET-07/with-source"    // the Query is evaluated on a Get with Source too
+	NoRefDes      Fault = "T7-GET-07/empty"          // variant, conforming: ReferenceDesignation is supported, but has no object
 	WrongLocale   Fault = "T7-GET-08/locale"         // a Get with a Locale is answered with LocalizedText in fr-FR
 )
 
 // Faults lists every fault.
 var Faults = []Fault{ReplyTo, AllAssets, Unanswered, Missing, EmptyList, UnknownSource, UnknownKey,
-	DualVersion, Mixed, Case, NoMetadata, FilterIgnored, AssetLevel, PerPage, QueryIgnored, QuerySource, WrongLocale}
+	DualVersion, Mixed, Case, NoMetadata, FilterIgnored, AssetLevel, PerPage, QueryIgnored, QuerySource, NoRefDes, WrongLocale}
 
 // ServiceType, AppID and Asset identify the simulated CUT: the OT connector
 // of the guideline examples (MG B1.1) with one subordinate asset.
@@ -221,6 +222,9 @@ func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) 
 	if fault == AssetLevel {
 		m.dsms["Profile"][Asset][0]["Payload"] = map[string]any{"Resources": []any{"MAM", "Health", "Profile", "Data", "Metadata", "Event", "ReferenceDesignation"}}
 		m.profiles[Asset] = []string{"MAM", "Health", "Profile", "Data", "Metadata", "Event", "ReferenceDesignation"}
+	}
+	if fault == NoRefDes {
+		m.dsms["ReferenceDesignation"] = map[string][]map[string]any{}
 	}
 	s := &Sim{m: m, fault: fault, gets: make(chan mqttwire.Message, 256), stop: make(chan struct{}), done: make(chan struct{})}
 	cfg.Will = &mqttwire.Message{Topic: topic("Pub", "Health", AppID, ""), Payload: m.will, QoS: 1}

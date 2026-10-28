@@ -202,8 +202,20 @@ fixtures:
     notes: >-
       The Query is also evaluated on Get ReferenceDesignation/<AppId>: with a
       Parent the application does not have, the answer is empty instead of
-      the entry of the AppId (REQ-RES-REFDES-013: a Query is only valid
-      without Source).
+      the entry of the AppId, the same Get without Query answers that entry
+      (REQ-RES-REFDES-013: a Query is only valid without Source; D7 compares
+      with the answer to the Get without Query since C-063, see T7-GET-07/empty).
+  - fault: T7-GET-07/empty
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      Variant, conforming: the Profile lists ReferenceDesignation, but no
+      entity has an object (every Get ReferenceDesignation is answered with
+      an empty list, like the Rust demo). The Query cannot be judged
+      (REQ-RES-REFDES-011, -014, REQ-QRY-002, -003 skipped); the Get with
+      Source and Query is answered like the same Get without Query
+      (REQ-RES-REFDES-013) and the Query on MAM is ignored (REQ-QRY-001).
   - fault: T7-GET-08/locale
     status: draft
     expect:
