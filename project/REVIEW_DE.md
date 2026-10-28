@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, C-061 (P4 Inkrement 10: die C-Schnittstelle `oec-ffi`; alle P4-Inkremente fertig). **Für dich ist eine Entscheidung offen: D-1 = Abschluss von P4 und die nächste Phase.** Keine Guideline-Frage, keine Testdaten zum Review._
+_Stand: 28.10.2026, C-061 mit deiner Antwort „D-1 (a)“: **P4 ist abgeschlossen**, weiter geht es mit **P5** (D7 `test`). **Für dich ist nichts offen.** A-145 … A-152 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,27 +24,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – Ist P4 fertig, und womit geht es weiter? (zu entscheiden)
-
-**Worum es geht:** Alle zehn Inkremente von P4 (das Rust-SDK und seine C-Schnittstelle) sind gebaut. Die ROADMAP nennt sechs Bedingungen für den Abschluss von P4. Ich habe sie einzeln geprüft (Belege im Log C-061):
-
-| # | Bedingung | Stand |
-|---|---|---|
-| 1 | Alles, was die API-Entscheidungen (ADR-0020/0021) versprechen, gibt es im SDK und in der C-Schnittstelle; Skizze gelöscht | **erfüllt** (eine Funktion ist bewusst ersetzt, siehe A-148) |
-| 2 | Alle gemeinsamen Testvektoren laufen im SDK | **erfüllt** |
-| 3 | Tests gegen den echten TLS-Broker | **fürs SDK erfüllt** (14 grün, die C-Beispiele einmal gegen Mosquitto); **offen: D7 `test`** gegen die Beispiel-App – D7 `test` ist Arbeit von P5 |
-| 4 | Die C-Beispiele laufen gegen `oec-ffi`, auch mit AddressSanitizer | **erfüllt** (im Prüfskript) |
-| 5 | Prüfskript grün; das SDK baut auf Linux, macOS und Windows (amd64 + arm64), ARMv7 so gut es geht | **Prüfskript grün; Plattformen teilweise:** getestet auf macOS arm64 und Linux arm64, gebaut (nicht getestet) für Linux amd64, Windows amd64 (GNU-Werkzeuge) und ARMv7. **Offen:** Windows mit dem Microsoft-Compiler (MSVC) und echte Testläufe auf amd64 und Windows – dafür braucht es eine CI mit solchen Rechnern (P9) |
-| 6 | Die Beispiel-Apps sind beschrieben und werden im Prüfskript gebaut | **erfüllt** |
-
-**Möglichkeiten:**
-- **(a)** P4 abschließen; Punkt 3 (D7 `test`) wandert in den Abschluss von P5, Punkt 5 (Plattformen) in die CI von P9. Weiter mit **P5** (D7 `test`: D7 prüft eine laufende App aktiv, dazu Proxy, `list`/`explain`).
-- **(b)** wie (a), aber weiter mit **P6** (Logger-Demo in C auf `oec-ffi`, Wetter-Demo in Rust); P5 danach.
-- **(c)** P4 offen lassen, bis 3 und 5 erfüllt sind (dafür braucht es aber erst P5 und eine CI).
-
-**Meine Empfehlung: (a).** P5 macht den letzten offenen Punkt von P4 grün, und die Demos aus P6 müssen am Ende sowieso D7 bestehen – dann ist D7 schon fertig. Die CI für Windows/amd64 hängt an der Veröffentlichung (deine Entscheidung) und gehört nach P9. P4b (Micro-SDK) bleibt nach deiner Reihenfolge aus C-045 hinter P5.
-
-Antwort z. B.: „D-1 (a)“.
+**Nichts.** Deine Antwort auf D-1 ist eingetragen, siehe unten „Was aus deinem letzten Review (C-061) geworden ist“.
 
 ### Zur Info: was C-061 gebaut hat
 
@@ -61,7 +41,7 @@ Die Technik-Entscheidungen A-145 … A-152 sind nur zur Info (unten). Einen Blic
 
 ### Zur Info: was C-060 gebaut hat
 
-Dein Review zu C-060 ist eingetragen (D-1, D-2 und R-1 aus C-059, siehe unten „Was aus deinem letzten Review (C-060) geworden ist“); das daraus entstandene R-1 (REQ-ACT-017, -023, -024) hast du akzeptiert.
+Dein Review zu C-060 ist eingetragen (D-1, D-2 und R-1 aus C-059, siehe unten „Was aus dem Review C-060 geworden ist“); das daraus entstandene R-1 (REQ-ACT-017, -023, -024) hast du akzeptiert.
 
 Zur Erinnerung – C-060 war **P4 Inkrement 8c**. Ich habe es nicht weiter geteilt (**A-137**). Reihenfolge jetzt: 8c → 10 (C-Schnittstelle `oec-ffi`).
 - **Die Aktion `NewDataSetWriterId` (MG 9.2):** Eine App kann eine andere App fragen: „Gib mir eine neue, freie Datensatz-Nummer (DataSetWriterId) für eine Ressource.“ Gebraucht wird das, wenn ein IT-Programm in einem OT-Connector etwas Neues anlegen will (z. B. eine ReferenceDesignation für ein Gerät).
@@ -510,8 +490,8 @@ Neu aus C-061 (P4 Inkrement 10):
 
 ### Was als Nächstes passiert (C-062)
 
-1. **Deine Entscheidung D-1** (P4 abschließen, nächste Phase). Danach P5 (D7 `test`, meine Empfehlung) oder P6 (Demos).
-   - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md` und beginnt mit deiner Antwort auf D-1.
+1. **P5 – D7 `test`:** D7 prüft eine laufende App aktiv (fragt sie, schickt ihr Befehle, auch absichtlich falsche). Zuerst Plan und Zuschnitt der Zyklen in der ROADMAP, dann das erste Inkrement.
+   - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
 ---
 
@@ -590,7 +570,41 @@ Neu aus C-061 (P4 Inkrement 10):
 
 ---
 
-## Was aus deinem letzten Review (C-060) geworden ist
+## Was aus deinem letzten Review (C-061) geworden ist
+
+Du hast geschrieben: „D-1 (a)“. Daraus wurde Nachtrag 1 zu C-061:
+- **P4 ist abgeschlossen** (ROADMAP: Überschrift von P4 und die Bewertung der Abschlussbedingungen; STATUS).
+- **Punkt 3** (D7 `test` gegen die Beispiel-App `demo.rs`) gehört jetzt zum Abschluss von **P5**; dort stand er schon als Bedingung.
+- **Punkt 5, Teil Plattformen** (Windows mit MSVC, echte Testläufe auf amd64 und Windows) wandert in die **CI von P9**.
+- **Nächste Phase: P5** (D7 `test`, dazu Proxy und `list`/`explain`). Sie beginnt in C-062 mit einem neuen Agenten.
+
+Zur Erinnerung, worum es ging:
+
+#### D-1 – Ist P4 fertig, und womit geht es weiter? (entschieden: (a))
+
+**Worum es geht:** Alle zehn Inkremente von P4 (das Rust-SDK und seine C-Schnittstelle) sind gebaut. Die ROADMAP nennt sechs Bedingungen für den Abschluss von P4. Ich habe sie einzeln geprüft (Belege im Log C-061):
+
+| # | Bedingung | Stand |
+|---|---|---|
+| 1 | Alles, was die API-Entscheidungen (ADR-0020/0021) versprechen, gibt es im SDK und in der C-Schnittstelle; Skizze gelöscht | **erfüllt** (eine Funktion ist bewusst ersetzt, siehe A-148) |
+| 2 | Alle gemeinsamen Testvektoren laufen im SDK | **erfüllt** |
+| 3 | Tests gegen den echten TLS-Broker | **fürs SDK erfüllt** (14 grün, die C-Beispiele einmal gegen Mosquitto); **offen: D7 `test`** gegen die Beispiel-App – D7 `test` ist Arbeit von P5 |
+| 4 | Die C-Beispiele laufen gegen `oec-ffi`, auch mit AddressSanitizer | **erfüllt** (im Prüfskript) |
+| 5 | Prüfskript grün; das SDK baut auf Linux, macOS und Windows (amd64 + arm64), ARMv7 so gut es geht | **Prüfskript grün; Plattformen teilweise:** getestet auf macOS arm64 und Linux arm64, gebaut (nicht getestet) für Linux amd64, Windows amd64 (GNU-Werkzeuge) und ARMv7. **Offen:** Windows mit dem Microsoft-Compiler (MSVC) und echte Testläufe auf amd64 und Windows – dafür braucht es eine CI mit solchen Rechnern (P9) |
+| 6 | Die Beispiel-Apps sind beschrieben und werden im Prüfskript gebaut | **erfüllt** |
+
+**Möglichkeiten:**
+- **(a)** P4 abschließen; Punkt 3 (D7 `test`) wandert in den Abschluss von P5, Punkt 5 (Plattformen) in die CI von P9. Weiter mit **P5** (D7 `test`: D7 prüft eine laufende App aktiv, dazu Proxy, `list`/`explain`).
+- **(b)** wie (a), aber weiter mit **P6** (Logger-Demo in C auf `oec-ffi`, Wetter-Demo in Rust); P5 danach.
+- **(c)** P4 offen lassen, bis 3 und 5 erfüllt sind (dafür braucht es aber erst P5 und eine CI).
+
+**Meine Empfehlung: (a).** P5 macht den letzten offenen Punkt von P4 grün, und die Demos aus P6 müssen am Ende sowieso D7 bestehen – dann ist D7 schon fertig. Die CI für Windows/amd64 hängt an der Veröffentlichung (deine Entscheidung) und gehört nach P9. P4b (Micro-SDK) bleibt nach deiner Reihenfolge aus C-045 hinter P5.
+
+Deine Antwort: „D-1 (a)“.
+
+---
+
+## Was aus dem Review C-060 geworden ist
 
 Du hast geschrieben: „Ich habe alle Punkte reviewed und akzeptiere deine Vorschläge.“ Daraus wurde Nachtrag 1 zu C-060:
 - **Guideline `eb7889c`, zwei Sätze:**

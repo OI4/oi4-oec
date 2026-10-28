@@ -176,7 +176,7 @@ Explicitly a discussion phase with the product owner (Q-001, Q-002, Q-008). Opti
 
 **Exit assessment (C-045):** all five criteria are met. 1: ADR-0020 … 0025 accepted, ADR-0017 amended (C-045), ADR-0011 … 0016 unchanged. 2: Q-021 … Q-030 decided; SF-101/102 decided and resolved in the guideline (SF-103, found while implementing SF-101, is editorial and does not block). 3 and 4: enforced by `oec/sdk/check.sh` and `catalog_test.go` in `oec/check.sh` (green). 5: ADR-0023/0024. P3 closed by the PO acceptance of D-1 … D-19 and R-1 … R-5 (2026-10-26).
 
-## P4 – SDK core implementation (D2) – in progress (C-046 … C-061; all increments done, exit pending the PO)
+## P4 – SDK core implementation (D2) ✅ (C-046 … C-061; closed in the C-061 review, D-1 (a): criterion 3 → P5 exit, platform matrix of criterion 5 → P9 CI)
 
 Incremental, each increment test-covered. Workspace layout, crate roles, test-vector contract and gates: ADR-0026 (`accepted (agent, G-3.4 b)`, C-046 addendum 1). Started in C-046 after the P3 exit; PO order: P4 first, P5 interleaved, P4b/P5b afterwards (C-045 review).
 
@@ -236,6 +236,8 @@ Why this cut: increments 1–2 have no runtime dependencies and one vector contr
 
 **Exit assessment (C-061):** 1, 2, 4, 6 met; 3 met except D7 `test` (P5); 5 met for the gate, the platform matrix partly (CI, P9). Proposal: close P4 with 3 (D7 `test`) and 5 (platform matrix) carried forward into P5 and P9; next P5 (recommended) or P6 – PO decision (G-3.4 a), see `log/2026-10-28_C-061_oec-ffi.md`.
 
+**Decision (C-061 review, D-1 (a), 2026-10-28):** P4 is closed. Criterion 3 (D7 `test` against `oec/sdk/rust/oec/examples/demo.rs`) is carried into the P5 exit, the platform part of criterion 5 (Windows MSVC, native runs on amd64 and Windows) into the P9 CI. Next phase: P5 (C-061 addendum 1).
+
 ## P4b – Micro SDK (D9)
 
 SDK for microcontroller-class smart devices without container (ADR-0016), written in **C17** with a platform abstraction layer; reference port ESP-IDF on **ESP32** (ADR-0017).
@@ -266,7 +268,7 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 - Connection: CLI flags/config file and optionally the container storage contract (`/etc/oi4/mqtt`, …); TLS + user/password or client certificate; explicit `--insecure` dev mode only.
 - Output: human-readable console report, machine-readable JSON and JUnit XML; meaningful exit codes for CI.
 - Distribution: single self-contained executable per OS/arch (Windows x64/arm64, macOS arm64/x64, Linux) and container image.
-- **Exit:** `test` passes against the SDK example app and fails on purpose-built faulty fixtures (every implemented catalog test has a positive and a negative fixture of the simulated CUT, DESIGN.md §10); runs in CI on Windows, macOS and Linux runners.
+- **Exit:** `test` passes against the SDK example app (`oec/sdk/rust/oec/examples/demo.rs`; this also closes P4 exit criterion 3, carried forward by D-1 (a) in the C-061 review) and fails on purpose-built faulty fixtures (every implemented catalog test has a positive and a negative fixture of the simulated CUT, DESIGN.md §10); runs in CI on Windows, macOS and Linux runners.
 
 ## P5b – Infrastructure compliance tool (D8)
 
@@ -308,6 +310,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 ## P9 – Hardening & release
 
 - CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF builds for `esp32` + `esp32s3`), SBOM/license report, security scan.
+- SDK platform matrix carried forward from P4 exit criterion 5 (D-1 (a), C-061 review): `oec` and `oec-ffi` built and tested natively on Linux/macOS/Windows amd64 + arm64 incl. Windows MSVC, ARMv7 Linux best effort.
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
 - Publication target: private GitHub repositories (working assumption, Q-011). CRA review before any *public* release (Q-011): SBOM, vulnerability handling process, security update policy, support period.
 - Guideline feedback package: all spec findings with proposed text changes for the work group.

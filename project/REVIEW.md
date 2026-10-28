@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-061 (P4 increment 10: the C ABI `oec-ffi`; all P4 increments done, exit criteria checked). **One item to decide: D-1 = P4 exit and the next phase** (recommended: close P4 with two items carried forward, then P5). No finding, no test data to review. A-145 … A-152 for information, worth a look: A-148, A-150, A-151._
+_Last updated: 2026-10-28, C-061 review (you decided D-1 = (a): **P4 is closed**, criterion 3 moves into the P5 exit, the platform part of criterion 5 into the P9 CI; next phase P5). **Nothing is open for you.** A-145 … A-152 for information, worth a look: A-148, A-150, A-151._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -114,6 +114,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **P4 exit criteria checked** (log): 1, 2, 4, 6 met; 3 met except D7 `test` (P5); 5: gate green, but Windows MSVC and native amd64/Windows runs need the CI (P9) → **D-1**.
   - No finding, no reviewed item changed, no new test data, no new dependency. A-145 … A-152 are for information.
   - The next cycle runs in a new agent; `prompt.md` is filled.
+- C-061 review: your answer ("D-1 (a)") is applied: **P4 is closed** (ROADMAP P4 heading and exit assessment, STATUS). Criterion 3 (D7 `test` against the SDK example app) is part of the P5 exit, the platform part of criterion 5 (Windows MSVC, native amd64/Windows runs) moves to the P9 CI. **Next phase: P5** (D7 `test`, proxy, `list`/`explain`), started by a new agent in C-062.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
@@ -123,7 +124,6 @@ Logs: [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | P4 exit and the next phase (P5 or P6) | decide | C-061 | close P4 with criteria 3 and 5 carried forward, then P5 | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -279,20 +279,12 @@ Logs: [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new
 
 ## Decisions and review items
 
-### D-1 – P4 exit and the next phase (G-3.4 a: phase order)
-
-- **State:** all P4 increments (1–10) are done (C-046 … C-061). The exit criteria (ROADMAP P4) one by one, with evidence in `log/2026-10-28_C-061_oec-ffi.md`:
-  1. every public item of ADR-0020/0021 exists in `oec`/`oec-ffi`, sketch deleted, walker in the workspace – **met** (one documented replacement: `oec_dataset_set_precision` → `Precision` in `fields_json`);
-  2. all shared vectors pass – **met** (gate);
-  3. integration tests against the dev TLS broker – **met for the SDK** (interop 14 green, the C examples once against Mosquitto); **open: D7 `test`** against the SDK example app – D7 `test` is P5 work;
-  4. C examples against `oec-ffi`, also under AddressSanitizer – **met** (gate);
-  5. gate green and builds on Linux/macOS/Windows amd64 + arm64, ARMv7 best effort – **gate green; platforms partly**: tested on macOS arm64 and Linux arm64, cross-built for Linux amd64, Windows amd64 (GNU) and ARMv7; **open:** Windows MSVC, native runs on amd64 and Windows – needs CI runners (P9);
-  6. example apps documented and compiled in the gate – **met**.
-- **Options:** (a) close P4; carry criterion 3 (D7 `test` against `oec/examples/demo.rs`) into the P5 exit and criterion 5 (platform matrix) into the P9 CI; next **P5** (D7 `test`, proxy, `list`/`explain`). (b) As (a), but next **P6** (logger demo in C on `oec-ffi`, weather demo in Rust); P5 after it. (c) Keep P4 open until 3 and 5 are met (this needs P5 and a CI first).
-- **Recommendation:** (a). P5 turns the last open P4 criterion green and gives the demos of P6 their conformance check (the P6 exit uses D7); the platform matrix needs CI runners, which belong to P9 and to the publication (your decision, ADR-0009/0012). P4b stays after P5 by your C-045 order.
-- **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ other: …
+No open item.
 
 ### Answered earlier
+
+Answered in the C-061 review (2026-10-28) and applied in C-061 addendum 1:
+- D-1 – P4 exit and the next phase: ☑ (a) → P4 closed; criterion 3 (D7 `test` against `oec/sdk/rust/oec/examples/demo.rs`) carried into the P5 exit, criterion 5 (platform matrix: Windows MSVC, native amd64/Windows runs) into the P9 CI; next phase **P5**. The criteria and the evidence are in the C-061 log (P4 exit table).
 
 Answered after the C-060 review (2026-10-28) and applied in C-060 addendum 2:
 - R-1 – REQ-ACT-017, -023 and the new REQ-ACT-024 after SF-112/SF-113: ☑ accepted → `reviewed`.
@@ -845,4 +837,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-062)
 
-1. Your decision D-1 (P4 exit, next phase). Then P5 (D7 `test`, recommended) or P6 (demos) in a new agent (start prompt in `prompt.md`).
+1. P5 – D7 `test` (active tests of one application, proxy, `list`/`explain`): plan and cycle cut in the ROADMAP, then the first increment; in a new agent (start prompt in `prompt.md`).
