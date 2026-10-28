@@ -1567,7 +1567,9 @@ fn level_2_reference_designation_and_generic_events() {
 /// second SDK application sees the provider's Birth and Close, gets its
 /// MAM (also one per page), Health and Data, sets, queries and deletes a
 /// ReferenceDesignation (REQ-MSG-015, REQ-PAG-002/006, REQ-RES-REFDES-*,
-/// REQ-RES-EVENT-005).
+/// REQ-RES-EVENT-005); since C-059 (P4 increment 8b, ADR-0026 §18) it also
+/// gets, sets and deletes the configurable subscription of the provider in
+/// its SubscriptionList (REQ-RES-SUBLIST-008/010/011).
 #[test]
 fn consumer_asks_a_provider() {
     let Some(dev) = dev() else { return };
@@ -1594,6 +1596,11 @@ fn consumer_asks_a_provider() {
         .on_connection(move |s| on.0.lock().unwrap().push(s))
         .build()
         .unwrap();
+    let _listed = provider
+        .consumer()
+        .subscribe(Resource::Data, &Target::any().filter("oee"), |_| {})
+        .unwrap()
+        .configurable();
     let consumer = c.consumer();
     let (tx, presence) = std::sync::mpsc::channel();
     let _presence = consumer
@@ -1616,6 +1623,7 @@ fn consumer_asks_a_provider() {
         |p| matches!(p, oec::consumer::Presence::Online { app, .. } if *app == p_il),
     );
     consumer_requests(&consumer, &target, &pump, &child);
+    subscription_list(&consumer, &target.clone().source(p_il.clone()));
 
     handle.shutdown();
     run.join().unwrap().unwrap();
@@ -1694,4 +1702,31 @@ fn consumer_requests(consumer: &Consumer, target: &Target, pump: &Asset, child: 
     assert_eq!(refused.unwrap(), StatusCode::BadOutOfRange);
     let del = consumer.del_blocking(Resource::ReferenceDesignation, &at_child, None, &w);
     assert_eq!(del.unwrap(), StatusCode::Good);
+}
+
+/// `Get`, `Set` (Interval) and `Del` of the configurable `oee` entry in the
+/// SubscriptionList of the application `target` (with Source = AppId).
+fn subscription_list(consumer: &Consumer, target: &Target) {
+    use oec::consumer::{GetOptions, WriteOptions};
+    const OEE: &str = "Oi4v2/+/+/Pub/Data/+/oee";
+    let at = target.clone().filter("Data/oee");
+    let entries = |c: &Consumer| -> Vec<Value> {
+        c.get_blocking(Resource::SubscriptionList, &at, &GetOptions::new())
+            .unwrap()
+            .iter()
+            .map(|r| serde_json::from_str(&r.payload_json()).unwrap())
+            .collect()
+    };
+    let listed = entries(consumer);
+    assert_eq!(listed.len(), 1, "{listed:?}");
+    assert_eq!(listed[0]["TopicPath"], OEE);
+    assert_eq!(listed[0]["Config"], "CONF_1");
+    let w = WriteOptions::new();
+    let entry = format!(r#"{{"TopicPath": "{OEE}", "Interval": 1000, "Config": "CONF_1"}}"#);
+    let set = consumer.set_blocking(Resource::SubscriptionList, &at, &entry, &w);
+    assert_eq!(set.unwrap(), StatusCode::Good);
+    assert_eq!(entries(consumer)[0]["Interval"], 1000);
+    let del = consumer.del_blocking(Resource::SubscriptionList, &at, Some(&entry), &w);
+    assert_eq!(del.unwrap(), StatusCode::Good);
+    assert!(entries(consumer).is_empty());
 }
