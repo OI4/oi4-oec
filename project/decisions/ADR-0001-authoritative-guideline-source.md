@@ -560,3 +560,12 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - `2e32a6b` SF-108 – MG 9.1 (Resources Without Content), appended to the second bullet: "Because the entity does not represent the addressed asset, this `Event` is published with the `Source` of the entity itself (`AppId`); the requester finds it through the `ReplyTo`. The same applies to the status `Event` of a `Set` or `Del` whose `Source` addresses such an asset."
 - Register commit `d2dc9ca`: SF-107 and SF-108 resolved, no open finding. Spec re-baselined: 1402 → 1403 inventory items (MG-9.1-144b2f9a replaced by MG-9.1-2e6777c7, mapped to REQ-CMP-047 and REQ-CMP-043; new MG-9.1.9-aedf208f, mapped to the new REQ-RES-SUBLIST-016; all three REQs `draft`), 441 REQs. Schema bundle stays `2.0.1-dev` with baseline `2e32a6b`, no content change. SF-001 … 108 resolved.
 
+
+## Amendment C-059 review (2026-10-28, guideline baseline `57ebe91`)
+
+- The previous baseline `2e32a6b` is recorded in amendment C-056 review; the register commit `b35b41e` (SF-109 … SF-111 opened in C-059) touches only `findings/` (no re-baseline).
+- The baseline is now `57ebe91` on branch `feature/spec-findings` (branch head is the register commit `7a2bda2`, only `findings/`). One local commit, decided by the PO in the C-059 review as proposed (D-1 … D-3), no GL-ADR – MG 9.1.9 (SubscriptionList):
+  - SF-110: the sentence after the SF-107 paragraph now reads "Other subscriptions of the application to request topics of its own `AppId` (e.g. `Get` or `Del`) are not listed." (the `Pub` subscriptions of the application to its own `AppId` stay listed, as in B1.1.9);
+  - SF-109: new sentence "Subscriptions that only exist for the time of a request (to receive its answer or status `Event`) are not listed.";
+  - SF-111: appended to the `Set` paragraph: "An application that does not support the creation of entries rejects such a `Set` with the status `Event` `Bad` (e.g. `BadNotSupported`)."
+- Register commit `7a2bda2`: SF-109 … SF-111 resolved, no open finding, next SF-112. Spec re-baselined: 1403 → 1405 inventory items (new MG-9.1.9-565c8491 mapped to REQ-RES-SUBLIST-016, new MG-9.1.9-013e79f7 mapped to REQ-RES-SUBLIST-004; REQ-RES-SUBLIST-004, -010 and -016 `draft`), 441 REQs, coverage 0 gaps. Schema `2.0.1-dev` with `schema.Baseline = 57ebe91` (no content change), D7/D8 catalogs on `57ebe91`.

@@ -100,7 +100,7 @@ No defect in the provider of 6–7, in D7 or in the schema.
 
 None (no REQ, vector, matrix, fixture or schema changed). If the PO decides SF-110 as proposed, REQ-RES-SUBLIST-016 follows the text (→ `draft`, R-x).
 
-## Spec findings (register `b35b41e`, all `open`, to decide: REVIEW D-1 … D-3)
+## Spec findings (register `b35b41e`, all `open`, to decide: REVIEW D-1 … D-3; resolved as proposed in addendum 1)
 
 - **SF-109** – are the transient answer subscriptions of a requester `SubscriptionList` entries? MG 9.1.9 does not say. Proposed: not listed (one sentence added to MG 9.1.9). The SDK does not list them.
 - **SF-110** – MG 9.1.9 (from SF-107): "Other subscriptions to topics of the own `AppId` are not listed", but B1.1.9/V-PAY-072 list the FDS app's subscription to its own `Pub/Data/<FDS>/oee`. The SF-107 proposal meant the request subscriptions (`Get`, `Del`, …). Proposed: "Other subscriptions of the application to request topics of its own `AppId` (e.g. `Get` or `Del`) are not listed." The SDK implements the proposal.
@@ -151,3 +151,46 @@ None (ADR-0023 amendment C-059). `Cargo.lock` unchanged (192 packages), `cargo d
 ## Next
 
 C-060 – P4 increment 8c: Action `NewDataSetWriterId` (responder in the provider, `Consumer::new_data_set_writer_id`), then the farewell of the sketch (examples ported, `sketch/c/oec.h` moved next to the future `oec-ffi`, REQ walker into `oec`, sketch deleted, `oec/sdk/check.sh`/`oec/check.sh` adapted); apply the PO decisions on SF-109 … SF-111. Then 10 (`oec-ffi`).
+
+## Addendum 1 – PO review: D-1 … D-3 (2026-10-28)
+
+**PO answer (chat):** "D-1 – SF-109: Subscriptions, die nur erstellt werden, damit man die Antwort eines Get bekommt (also das Pub) und die danach direkt wieder abgeräumt werden, brauchen nicht in der Subscription List eingetragen zu werden. Ich denke, das entspricht deiner Empfehlung." – "D-2 – SF-110, D-3 – SF-111: Dein Vorschlag ist akzeptiert." All three are decided **as proposed**.
+
+**Purpose of the SubscriptionList (PO background, recorded):** if service A talks to the OT service B, the SubscriptionList of A is meant to control which values A follows – e.g. only 1 of the 100 devices of B is of interest for A. Consequence for the SDK (no change now, for later): an `oec` app supports this today when it subscribes per device with `Subscription::configurable()` (`Del` switches a device off, `Set` changes the Interval); it cannot narrow one wildcard subscription (`…/Pub/Data/#`) to a single device, because that needs a `Set` with a new TopicPath, which the SDK rejects with `BadNotSupported` (SF-111, A-131). A possible later SDK option (agent decision, G-3.4 b, not scheduled): accept a `Set` whose TopicPath is covered by an existing configurable filter of the app (narrowing), or an opt-in handler with which the app accepts new TopicPaths. Both fit SF-111 (creation optional). Recorded here and in REVIEW_DE for the PO; no ROADMAP change.
+
+### Guideline (`oi4-oec-documentation`, branch `feature/spec-findings`)
+
+- `57ebe91` **SF-109/110/111** – MG 9.1.9 (`9-1-9-subscriptionlist.md`):
+  - SF-110: the sentence after the SF-107 paragraph now reads "Other subscriptions of the application to request topics of its own `AppId` (e.g. `Get` or `Del`) are not listed." – B1.1.9 and V-PAY-072 stay;
+  - SF-109: new sentence after it: "Subscriptions that only exist for the time of a request (to receive its answer or status `Event`) are not listed.";
+  - SF-111: appended to the `Set` paragraph: "An application that does not support the creation of entries rejects such a `Set` with the status `Event` `Bad` (e.g. `BadNotSupported`)."
+- `7a2bda2` register: SF-109 … 111 → Closed (resolved), no open finding, next SF-112.
+- `.yarn/install-state.gz` stays uncommitted.
+
+### Re-baseline on `57ebe91` (`d112921`, `324b2c1`)
+
+- `spectool rebaseline -rev 57ebe91` on a detached checkout of `57ebe91` (the branch head `7a2bda2` only touches `findings/`), then back to the branch.
+- Inventory 1403 → **1405**: new MG-9.1.9-565c8491 (SF-109 sentence) and MG-9.1.9-013e79f7 (SF-111 sentence); the reworded SF-110 sentence keeps its key.
+- **REQ-RES-SUBLIST-004** (statement extended by the rejection when creating entries is not supported, refs SF-111, quote, inventory + MG-9.1.9-013e79f7, notes), **REQ-RES-SUBLIST-010** (a new entry only if the application supports the creation, refs SF-111, notes) and **REQ-RES-SUBLIST-016** (own request topics and transient answer subscriptions not listed, refs SF-109/SF-110, quotes, inventory + MG-9.1.9-565c8491, title shortened to ≤ 100 characters as the catalog schema requires, notes) follow the text → `draft` (**R-1**).
+- 441 REQs; `spectool lint`, `render`, `coverage`: 158 `schema`/`d7-validate` REQs, 0 gaps, open = 0 in every area.
+- Schema stays `2.0.1-dev` with `Baseline = 57ebe91`, no content change (`Unreleased` entry in `oec/schema/CHANGELOG.md`). D7/D8 catalogs on `57ebe91`; D7 T7-SET-11 got a note: a `Set` with a TopicPath the CUT has not subscribed may be rejected with `Bad` (SF-111) and is then no failure.
+- ADR-0001 amendment C-059 review; AGENTS.md, GUARDRAILS G-1.2, STATUS follow (ROADMAP unchanged: no scope change).
+
+### SDK
+
+No behaviour change: the SDK already implemented all three proposals (answer filters are not listed, `Pub` subscriptions to the own `AppId` are listed, `Set` with an unknown TopicPath → `BadNotSupported`). The doc of `set_subscription_list` cites SF-111 (`324b2c1`). ADR-0026 §18 stays valid as written (it named the proposals).
+
+### Checks
+
+`oec/check.sh`: **all checks passed** (after `324b2c1`).
+
+### For the PO
+
+- **R-1 (review):** REQ-RES-SUBLIST-004, -010 and -016 (`draft`).
+- Nothing to decide; no open finding.
+
+### Next
+
+Unchanged: **C-060 – P4 increment 8c** in a **new agent** (G-3.10: this addendum is a short follow-up of the same topic; 8c starts a new increment and my context was compacted several times). `prompt.md` is updated: baseline `57ebe91` (head `7a2bda2`), SF-001 … 111 resolved, 1405 items, R-1 open (apply first if answered), the item "apply the PO decisions" removed.
+
+Next free ids: SF-112; REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029; V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129; ADR-0027, Q-031, A-137.

@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, nach C-059 (P4 Inkrement 8b: die SubscriptionList und die Beispiel-App). **Für dich offen: drei Entscheidungen (D-1 = SF-109, D-2 = SF-110, D-3 = SF-111).** Nichts zu reviewen._
+_Stand: 28.10.2026, nach dem Review zu C-059 (deine Entscheidungen zu D-1 … D-3 sind umgesetzt). **Für dich offen: ein Review (R-1 = REQ-RES-SUBLIST-004, -010, -016).** Kein offenes Finding._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -36,64 +36,28 @@ C-059 war **P4 Inkrement 8b**. Ich habe noch einmal geteilt (**A-128**): **8b** 
 - **Geprüft:** Tests ohne Netzwerk (darunter die vier Beispiele aus Anhang B1.1.9, gegen das Schema geprüft), Tests mit zwei Apps über den eingebauten Test-Broker, Interop gegen den echten Mosquitto (14 grün, 1 bewusst ausgelassen) und einmal D7 gegen die Beispiel-App: 12 bestanden, 0 durchgefallen, 1 übersprungen (keine Aktionen – die kommen in 8c); alle 95 Nachrichten gültig nach Schema.
 - Keine neue Bibliothek, nichts Reviewtes geändert, keine neuen Testdaten.
 
-**Für dich offen: drei Entscheidungen (D-1 … D-3).** Alle drei sind Lücken in MG 9.1.9, die mir beim Bauen aufgefallen sind. Das SDK macht es schon so wie vorgeschlagen; nichts wartet darauf, 8c kann sofort starten. Die Technik-Entscheidungen A-128 … A-136 sind nur zur Info (unten). Einen Blick wert: **A-128** (Zyklusschnitt), **A-131** (`BadNotSupported` statt ein neues Abo anzulegen) und **A-132** (wie das Intervall wirkt).
+**Deine Entscheidungen zu D-1 … D-3 sind umgesetzt** (siehe unten „Was aus deinem letzten Review (C-059) geworden ist“). Das SDK musste dafür nicht geändert werden. Die Technik-Entscheidungen A-128 … A-136 sind nur zur Info (unten). Einen Blick wert: **A-128** (Zyklusschnitt), **A-131** (`BadNotSupported` statt ein neues Abo anzulegen) und **A-132** (wie das Intervall wirkt).
 
-### D-1 – SF-109: Stehen die kurzen Abos für Antworten in der SubscriptionList? (entscheiden)
+### R-1 – Drei Regeln zur SubscriptionList folgen dem neuen Text (reviewen)
 
-**Wo es auffiel:** beim Bau der SubscriptionList im SDK.
+**Warum:** Deine Entscheidungen haben MG 9.1.9 geändert (`57ebe91`). Drei Regeln, die du schon abgenommen hattest, folgen jetzt dem neuen Text und stehen deshalb wieder auf `draft`. Lesbar in `oec/spec/requirements/view/res-sublist.md`.
 
-**Was die Guideline sagt:**
-- MG 9.1.9: Die SubscriptionList zeigt „die tatsächlich vorhandenen/eingestellten Abos“ einer App; bei jedem Hinzufügen oder Entfernen muss sie neu geschickt werden.
-- Wer eine Frage stellt (`Get`/`Set`/`Del`), abonniert kurz das Topic, auf dem die Antwort kommt, und meldet das Abo nach der Antwort wieder ab.
+- **REQ-RES-SUBLIST-004** (die App): Neu ist der Satz: Eine App, die keine neuen Einträge anlegen kann, lehnt ein `Set` mit einem noch nicht abonnierten Topic mit `Bad` ab (z. B. `BadNotSupported`). (D-3)
+- **REQ-RES-SUBLIST-010** (der Anfragende): „Ein noch nicht abonniertes Topic legt einen neuen Eintrag an“ gilt jetzt nur, **wenn die App das Anlegen unterstützt**; sonst wird das `Set` abgelehnt (Verweis auf -004). (D-3)
+- **REQ-RES-SUBLIST-016** (die App): Nicht eingetragen werden die eigenen **Anfrage**-Abos (`Get`, `Del`) und die **kurzen Abos für Antworten**. Die `Pub`-Abos auf die eigene `AppId` (wie in B1.1.9) bleiben drin. Der Titel ist kürzer geworden (das Feld hat höchstens 100 Zeichen). (D-1, D-2)
 
-**Das Problem, an einem Beispiel:** Ein Leitsystem fragt jede Sekunde den Zustand einer Pumpe ab. Würden die kurzen Antwort-Abos mitgezählt, müsste es seine SubscriptionList bei jeder Frage zweimal neu schicken (Abo dazu, Abo weg). Einstellen könnte man diese Einträge auch nicht sinnvoll. Die Guideline sagt nicht, ob sie gemeint sind.
+**Auswirkung:** keine auf das SDK (es macht es schon so), das Schema oder die Testdaten. Beim künftigen D7-Test T7-SET-11 steht jetzt eine Notiz: Lehnt die App das Anlegen ab, ist das kein Fehler.
 
-**Mein Vorschlag (empfohlen):** Nicht eintragen. Ein Satz in MG 9.1.9: „Abos, die nur für die Dauer einer Anfrage bestehen (um ihre Antwort oder ihr Status-Event zu empfangen), werden nicht eingetragen.“ Der englische Text steht im Register.
+**Was du tun musst:** „R-1 akzeptiert“ oder Änderungswünsche.
 
-**Andere Möglichkeit:** (b) für die Dauer der Anfrage eintragen (als nicht einstellbar).
+### Zu deiner Frage: Ja, der Zweck der SubscriptionList ist verständlich
 
-**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
-- Ich ergänze MG 9.1.9 und baseline neu.
-- Ein Hinweis in den REQs zur SubscriptionList folgt dem Text und kommt als `draft` noch einmal zu dir.
-- Das SDK macht es schon so; D7 ändert sich nicht.
+Du hast geschrieben: Wenn Service A mit dem OT-Service B spricht, soll man über die SubscriptionList von A steuern können, welche Werte A verfolgt, z. B. nur 1 von 100 Geräten bei B. So habe ich es verstanden und im Log festgehalten.
 
-### D-2 – SF-110: Der Satz „andere Abos auf Topics der eigenen AppId werden nicht eingetragen“ widerspricht dem Beispiel B1.1.9 (entscheiden)
-
-**Wo es auffiel:** beim Einbau deiner Entscheidung SF-107 ins SDK.
-
-**Was die Guideline sagt:**
-- MG 9.1.9 (Text aus SF-107): Ein beschreibbarer Datensatz steht mit dem Abo auf sein `Set`-Topic in der Liste. „Andere Abos auf Topics der eigenen `AppId` werden nicht eingetragen.“
-- Das Beispiel B1.1.9 (unser Vektor V-PAY-072) zeigt aber genau so ein Abo: Die App abonniert ihre **eigenen** `Pub/Data`-Daten (`…/<FDS>/Pub/Data/<FDS>/oee`) und trägt es ein.
-
-**Das Problem:** Wörtlich gelesen verbietet der Satz das Beispiel. Gemeint war bei SF-107 (C-055, D-1): Die eigenen *Anfrage*-Abos (`Get/…`, `Del/…`) werden nicht eingetragen – die beschreibt schon das Profile. Der Satz ist aber allgemeiner geworden.
-
-**Mein Vorschlag (empfohlen):** Nur die eigenen Anfrage-Abos fallen heraus; `Pub`-Abos werden immer eingetragen, egal von welcher `AppId`. Neuer Wortlaut: „Andere Abos der App auf Anfrage-Topics ihrer eigenen `AppId` (z. B. `Get` oder `Del`) werden nicht eingetragen.“ B1.1.9 bleibt, wie es ist.
-
-**Andere Möglichkeit:** (b) der Satz bleibt, und das Beispiel B1.1.9 und der Vektor V-PAY-072 bekommen ein Topic einer fremden App (dann kommen Beispiel und Vektor noch einmal zu dir).
-
-**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
-- Ich ändere den Satz in MG 9.1.9 und baseline neu.
-- REQ-RES-SUBLIST-016 folgt dem Text und kommt als `draft` noch einmal zu dir.
-- Das SDK macht es schon so; D7 ändert sich nicht.
-
-### D-3 – SF-111: Muss eine App bei `Set SubscriptionList` ein neues Abo anlegen? (entscheiden)
-
-**Wo es auffiel:** beim Bau von `Set SubscriptionList` im SDK.
-
-**Was die Guideline sagt:**
-- MG 9.1.9: „Hat die `Source` den `TopicPath` noch nicht abonniert, legt das `Set` einen neuen Eintrag an“ (Überschrift „neuen Eintrag anlegen oder Verhalten ändern“).
-- MG 8.3.9: Wie weit man Abos einstellen kann (anlegen / löschen / gar nicht), hängt „von der Implementierung und/oder technischen Erfordernissen“ ab.
-
-**Das Problem, an einem Beispiel:** Ein Programm schickt einer Wetter-App ein `Set` mit dem Topic der Pumpen-Daten einer anderen App. Die Wetter-App kann mit Pumpen-Daten nichts anfangen. Muss sie das Abo trotzdem anlegen? Und welche Antwort bekommt der Anfragende, wenn sie es nicht tut? Das SDK als Bibliothek kann ein fremdes Abo der App nicht sinnvoll unterschieben.
-
-**Mein Vorschlag (empfohlen):** Anlegen ist freiwillig („hängt von der Implementierung ab“). Wer es nicht unterstützt, lehnt das `Set` mit einem Status-Event `Bad` ab (z. B. `BadNotSupported`). Ein Satz dazu in MG 9.1.9; der englische Text steht im Register.
-
-**Andere Möglichkeit:** (b) Anlegen ist Pflicht für jede App. Dann braucht das SDK einen Handler, mit dem die App ein neues Topic annimmt oder ablehnt (eine kleine API-Ergänzung in 8c).
-
-**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
-- Ich ergänze MG 9.1.9 und baseline neu.
-- Ein Hinweis in REQ-RES-SUBLIST-010 („legt einen neuen Eintrag an“) folgt dem Text und kommt als `draft` noch einmal zu dir.
-- Das SDK antwortet schon mit `BadNotSupported`; D7 ändert sich nicht.
+Was das SDK dafür heute kann und was nicht:
+- **Geht:** Ein einstellbares Abo von A (`Subscription::configurable()`) kann von außen **abgeschaltet** (`Del`) oder **langsamer** gestellt werden (`Set` mit Intervall). Abonniert A die Geräte einzeln, kann man so 99 von 100 abschalten.
+- **Geht nicht:** Abonniert A alle 100 Geräte mit **einem** Platzhalter-Abo (`…/Pub/Data/#`), kann man es nicht auf ein Gerät **verengen**. Dafür bräuchte man ein `Set` mit einem neuen, engeren Topic, und das lehnt das SDK nach D-3 ab (`BadNotSupported`).
+- **Idee für später (meine Entscheidung, keine Guideline-Frage):** Das SDK könnte ein `Set` annehmen, dessen Topic in einem schon vorhandenen einstellbaren Abo der App enthalten ist („verengen“), oder der App einen Handler anbieten, mit dem sie neue Topics selbst annimmt. Das passt zu D-3 (Anlegen ist freiwillig). Ich habe es als Vorschlag für einen späteren Zyklus notiert, gebaut wird es jetzt nicht. Sag Bescheid, wenn du es früh haben willst.
 
 ### Zur Info: was C-058 gebaut hat
 
@@ -103,7 +67,7 @@ C-058 war **P4 Inkrement 8a**: die Empfänger-Seite des SDK (abonnieren, andere 
 
 Die Punkte A-1 … A-136 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-059 (A-128 … A-136) stehen unten.
 
-Aus C-056: Deine Zustimmung zu D-1 (SF-107), D-2 (SF-108) und R-1 ist umgesetzt, siehe unten „Was aus deinem letzten Review (C-056) geworden ist“.
+Aus C-056: Deine Zustimmung zu D-1 (SF-107), D-2 (SF-108) und R-1 ist umgesetzt, siehe unten „Was aus dem Review C-056 geworden ist“.
 
 Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-017) ist umgesetzt, siehe unten „Was aus dem Review davor (C-052) geworden ist“.
 
@@ -486,7 +450,7 @@ Neu aus C-059 (P4 Inkrement 8b):
 
 ### Was als Nächstes passiert (C-060)
 
-1. **P4 Inkrement 8c** – die Aktion `NewDataSetWriterId` (eine App bittet eine andere um eine neue Datensatz-Nummer), danach der Abschied von der API-Skizze: ihre Beispiele ziehen ins SDK, ihre Prüfung der REQ-Nummern ebenso, die Skizze wird gelöscht. Dazu setze ich deine Entscheidungen zu D-1 … D-3 um.
+1. **P4 Inkrement 8c** – die Aktion `NewDataSetWriterId` (eine App bittet eine andere um eine neue Datensatz-Nummer), danach der Abschied von der API-Skizze: ihre Beispiele ziehen ins SDK, ihre Prüfung der REQ-Nummern ebenso, die Skizze wird gelöscht. Hast du R-1 bis dahin beantwortet, trägt der neue Agent das zuerst ein.
    - Danach Inkrement 10 (C-Schnittstelle `oec-ffi`).
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
@@ -567,7 +531,80 @@ Neu aus C-059 (P4 Inkrement 8b):
 
 ---
 
-## Was aus deinem letzten Review (C-056) geworden ist
+## Was aus deinem letzten Review (C-059) geworden ist
+
+Du hast geschrieben: „D-1 … entspricht deiner Empfehlung“ und „D-2, D-3: Dein Vorschlag ist akzeptiert“. Daraus wurde Nachtrag 1 zu C-059:
+- **Guideline `57ebe91` (MG 9.1.9), drei Sätze:**
+  - D-1 (SF-109): Abos, die nur für die Dauer einer Anfrage bestehen (für die Antwort oder das Status-Event), werden nicht eingetragen.
+  - D-2 (SF-110): Nur die Abos auf **Anfrage**-Topics der eigenen `AppId` (z. B. `Get`, `Del`) fallen heraus; B1.1.9 bleibt, wie es ist.
+  - D-3 (SF-111): Eine App, die keine neuen Einträge anlegen kann, lehnt so ein `Set` mit `Bad` ab (z. B. `BadNotSupported`).
+- **Register:** SF-109 … SF-111 sind „resolved“ (`7a2bda2`). Kein offenes Finding; das nächste heißt SF-112.
+- **Neu-Baseline auf `57ebe91`:** 1405 Guideline-Stellen (vorher 1403; zwei neue Sätze), 441 Regeln, 0 Lücken. Schema bleibt `2.0.1-dev`, nur die Baseline ist neu. D7/D8-Kataloge auf `57ebe91`.
+- **Regeln:** REQ-RES-SUBLIST-004, -010 und -016 folgen dem Text → R-1 (oben).
+- **SDK:** keine Änderung; es hat alle drei Punkte schon so umgesetzt.
+
+Zur Erinnerung, worum es ging:
+
+#### D-1 – SF-109: Stehen die kurzen Abos für Antworten in der SubscriptionList? (entschieden: wie vorgeschlagen)
+
+**Wo es auffiel:** beim Bau der SubscriptionList im SDK.
+
+**Was die Guideline sagt:**
+- MG 9.1.9: Die SubscriptionList zeigt „die tatsächlich vorhandenen/eingestellten Abos“ einer App; bei jedem Hinzufügen oder Entfernen muss sie neu geschickt werden.
+- Wer eine Frage stellt (`Get`/`Set`/`Del`), abonniert kurz das Topic, auf dem die Antwort kommt, und meldet das Abo nach der Antwort wieder ab.
+
+**Das Problem, an einem Beispiel:** Ein Leitsystem fragt jede Sekunde den Zustand einer Pumpe ab. Würden die kurzen Antwort-Abos mitgezählt, müsste es seine SubscriptionList bei jeder Frage zweimal neu schicken (Abo dazu, Abo weg). Einstellen könnte man diese Einträge auch nicht sinnvoll. Die Guideline sagt nicht, ob sie gemeint sind.
+
+**Mein Vorschlag (empfohlen):** Nicht eintragen. Ein Satz in MG 9.1.9: „Abos, die nur für die Dauer einer Anfrage bestehen (um ihre Antwort oder ihr Status-Event zu empfangen), werden nicht eingetragen.“ Der englische Text steht im Register.
+
+**Andere Möglichkeit:** (b) für die Dauer der Anfrage eintragen (als nicht einstellbar).
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ergänze MG 9.1.9 und baseline neu.
+- Ein Hinweis in den REQs zur SubscriptionList folgt dem Text und kommt als `draft` noch einmal zu dir.
+- Das SDK macht es schon so; D7 ändert sich nicht.
+
+#### D-2 – SF-110: Der Satz „andere Abos auf Topics der eigenen AppId werden nicht eingetragen“ widerspricht dem Beispiel B1.1.9 (entschieden: wie vorgeschlagen)
+
+**Wo es auffiel:** beim Einbau deiner Entscheidung SF-107 ins SDK.
+
+**Was die Guideline sagt:**
+- MG 9.1.9 (Text aus SF-107): Ein beschreibbarer Datensatz steht mit dem Abo auf sein `Set`-Topic in der Liste. „Andere Abos auf Topics der eigenen `AppId` werden nicht eingetragen.“
+- Das Beispiel B1.1.9 (unser Vektor V-PAY-072) zeigt aber genau so ein Abo: Die App abonniert ihre **eigenen** `Pub/Data`-Daten (`…/<FDS>/Pub/Data/<FDS>/oee`) und trägt es ein.
+
+**Das Problem:** Wörtlich gelesen verbietet der Satz das Beispiel. Gemeint war bei SF-107 (C-055, D-1): Die eigenen *Anfrage*-Abos (`Get/…`, `Del/…`) werden nicht eingetragen – die beschreibt schon das Profile. Der Satz ist aber allgemeiner geworden.
+
+**Mein Vorschlag (empfohlen):** Nur die eigenen Anfrage-Abos fallen heraus; `Pub`-Abos werden immer eingetragen, egal von welcher `AppId`. Neuer Wortlaut: „Andere Abos der App auf Anfrage-Topics ihrer eigenen `AppId` (z. B. `Get` oder `Del`) werden nicht eingetragen.“ B1.1.9 bleibt, wie es ist.
+
+**Andere Möglichkeit:** (b) der Satz bleibt, und das Beispiel B1.1.9 und der Vektor V-PAY-072 bekommen ein Topic einer fremden App (dann kommen Beispiel und Vektor noch einmal zu dir).
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ändere den Satz in MG 9.1.9 und baseline neu.
+- REQ-RES-SUBLIST-016 folgt dem Text und kommt als `draft` noch einmal zu dir.
+- Das SDK macht es schon so; D7 ändert sich nicht.
+
+#### D-3 – SF-111: Muss eine App bei `Set SubscriptionList` ein neues Abo anlegen? (entschieden: wie vorgeschlagen)
+
+**Wo es auffiel:** beim Bau von `Set SubscriptionList` im SDK.
+
+**Was die Guideline sagt:**
+- MG 9.1.9: „Hat die `Source` den `TopicPath` noch nicht abonniert, legt das `Set` einen neuen Eintrag an“ (Überschrift „neuen Eintrag anlegen oder Verhalten ändern“).
+- MG 8.3.9: Wie weit man Abos einstellen kann (anlegen / löschen / gar nicht), hängt „von der Implementierung und/oder technischen Erfordernissen“ ab.
+
+**Das Problem, an einem Beispiel:** Ein Programm schickt einer Wetter-App ein `Set` mit dem Topic der Pumpen-Daten einer anderen App. Die Wetter-App kann mit Pumpen-Daten nichts anfangen. Muss sie das Abo trotzdem anlegen? Und welche Antwort bekommt der Anfragende, wenn sie es nicht tut? Das SDK als Bibliothek kann ein fremdes Abo der App nicht sinnvoll unterschieben.
+
+**Mein Vorschlag (empfohlen):** Anlegen ist freiwillig („hängt von der Implementierung ab“). Wer es nicht unterstützt, lehnt das `Set` mit einem Status-Event `Bad` ab (z. B. `BadNotSupported`). Ein Satz dazu in MG 9.1.9; der englische Text steht im Register.
+
+**Andere Möglichkeit:** (b) Anlegen ist Pflicht für jede App. Dann braucht das SDK einen Handler, mit dem die App ein neues Topic annimmt oder ablehnt (eine kleine API-Ergänzung in 8c).
+
+**Was passiert, wenn du „wie vorgeschlagen“ sagst:**
+- Ich ergänze MG 9.1.9 und baseline neu.
+- Ein Hinweis in REQ-RES-SUBLIST-010 („legt einen neuen Eintrag an“) folgt dem Text und kommt als `draft` noch einmal zu dir.
+- Das SDK antwortet schon mit `BadNotSupported`; D7 ändert sich nicht.
+
+---
+
+## Was aus dem Review C-056 geworden ist
 
 Du hast geschrieben: „D-1 und D-2 sind reviewed und akzeptiert“. Daraus wurde Nachtrag 1 zu C-056:
 - **D-1 (SF-107):** In MG 9.1.9 steht jetzt: Ein Data- oder Config-Datensatz, den man mit `Set` ändern kann, steht mit dem Abo seines `Set`-Topics in der SubscriptionList (`Config` `NONE_0`); andere Abos auf Topics der eigenen `AppId` stehen nicht drin. In B1.1.3/B1.1.4 heißt es jetzt nur noch: „Check the `SubscriptionList` to find out about accessibility.“ (`580f1c6`). Das SDK baut das mit der SubscriptionList (Inkrement 8) ein; die neue Regel REQ-RES-SUBLIST-016 ist Teil von R-1.

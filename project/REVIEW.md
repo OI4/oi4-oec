@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-059 (P4 increment 8b: the SubscriptionList and the example app). **Three findings to decide: D-1 = SF-109, D-2 = SF-110, D-3 = SF-111.** Nothing to review. A-128 … A-136 for information, worth a look: A-128, A-131, A-132._
+_Last updated: 2026-10-28, C-059 review (your decisions on D-1 … D-3 applied: SF-109 … SF-111 resolved in MG 9.1.9 `57ebe91`, re-baseline). **One item to review: R-1 = REQ-RES-SUBLIST-004, -010, -016** (follow the new text). No finding open. A-128 … A-136 for information, worth a look: A-128, A-131, A-132._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -90,8 +90,12 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Tests: core and runtime tests in the gate (incl. the guideline vectors V-PAY-072 … 075 of MG B1.1.9); opt-in interop 14 green; a one-off D7 `oec-check monitor` run against the demo app and the interop consumer: 12 pass, 0 fail, 1 skip (no Action yet), 0 invalid of 95 messages.
   - **Three findings to decide** (register `b35b41e`): **D-1 = SF-109** (are the short-lived answer subscriptions of requests listed?), **D-2 = SF-110** (MG 9.1.9 "other subscriptions to topics of the own AppId are not listed" vs. the example B1.1.9), **D-3 = SF-111** (must an application create a new entry on `Set`?). The SDK already follows the proposals. No reviewed item changed, no new test data, no new dependency. A-128 … A-136 are for information.
   - C-060 (increment 8c) runs in a new agent; `prompt.md` is filled.
+- C-059 review: your answer ("D-1 … entspricht deiner Empfehlung", "D-2, D-3 Dein Vorschlag ist akzeptiert") is applied.
+  - MG 9.1.9 in `57ebe91` as proposed: transient answer subscriptions are not listed (SF-109); only subscriptions to request topics of the own `AppId` are excluded, B1.1.9 stays (SF-110); an application that does not support the creation of entries rejects such a `Set` with `Bad`, e.g. `BadNotSupported` (SF-111). **SF-109 … SF-111 resolved** (register `7a2bda2`, no open finding). Re-baseline on `57ebe91` (1405 inventory items, 441 REQs, 0 gaps).
+  - REQ-RES-SUBLIST-004, -010 and -016 follow the new text and are `draft` (**R-1**). Schema `2.0.1-dev` @ `57ebe91` without content change; D7/D8 catalogs on `57ebe91` (T7-SET-11 note: a rejected creation is no failure).
+  - The SDK already did all three; nothing changes there. C-060 (8c) still runs in a new agent; `prompt.md` is updated.
 
-Coverage stays at 0 gaps; schema `2.0.1-dev` @ `2e32a6b` (re-baseline, no content change).
+Coverage stays at 0 gaps; schema `2.0.1-dev` @ `57ebe91` (re-baseline, no content change).
 
 Logs: [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
@@ -99,9 +103,7 @@ Logs: [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | SF-109: are the short-lived answer subscriptions of a requester SubscriptionList entries? (MG 9.1.9) | decide | C-059 | as proposed (not listed) | ☐ |
-| D-2 | SF-110: MG 9.1.9 "other subscriptions to topics of the own `AppId` are not listed" vs. B1.1.9 (own `Pub/Data` listed) | decide | C-059 | as proposed (only request subscriptions to the own `AppId` are excluded) | ☐ |
-| D-3 | SF-111: must an application create a new SubscriptionList entry on `Set`? (MG 9.1.9 vs. 8.3.9) | decide | C-059 | as proposed (optional; rejected with `Bad`, e.g. `BadNotSupported`) | ☐ |
+| R-1 | REQ-RES-SUBLIST-004, -010, -016 after SF-109 … SF-111 (MG 9.1.9 `57ebe91`) | review | C-059 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -241,37 +243,21 @@ Logs: [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27
 
 ## Decisions and review items
 
-### D-1 – SF-109: are the short-lived answer subscriptions of a requester `SubscriptionList` entries? (MG 9.1.9)
+### R-1 – REQ-RES-SUBLIST-004, -010, -016 after SF-109 … SF-111 (MG 9.1.9)
 
-- **Found:** while implementing the SubscriptionList in the SDK (C-059); register `b35b41e`, details in the [C-059 log](log/2026-10-28_C-059_subscription-list.md).
-- **What the guideline says:** MG 9.1.9: the SubscriptionList "represents the actual available/configured subscriptions in a single application"; every add/delete must (re)publish it. A requester subscribes to the answer topics of its `Get`/`Set`/`Del` (e.g. `…/<AppId of the responder>/Pub/Health/#`, `…/Pub/Event/+/Status/+`) only until the answer has arrived.
-- **The problem:** the text does not say whether these transient subscriptions are entries. Listing them would republish the list twice per request, and the entries could not be configured meaningfully.
-- **Proposed interpretation (recommended):** not listed. Proposed text, added to MG 9.1.9 after "Other subscriptions to topics of the own `AppId` are not listed.": "Subscriptions that only exist for the time of a request (to receive its answer or status `Event`) are not listed."
-- **Alternative:** (b) list them (with `NONE_0`) for the time of the request.
-- **Impact if decided as proposed:** guideline text by your order, re-baseline; a REQ-RES-SUBLIST note follows the text (→ `draft`, R-x); the SDK already does this; D7 unchanged.
-- **PO:** ☐ as proposed ☐ (b) ☐ other: …
-
-### D-2 – SF-110: MG 9.1.9 "other subscriptions to topics of the own `AppId` are not listed" vs. B1.1.9
-
-- **Found:** while implementing SF-107 in the SDK (C-059); register `b35b41e`.
-- **What the guideline says:** MG 9.1.9 (text of SF-107, `580f1c6`): "A `DataSet` of the resources `Data` or `Config` that can be changed with `Set` is listed with the subscription of its `Set` topic […]. Other subscriptions to topics of the own `AppId` are not listed." The example B1.1.9 (vector V-PAY-072) lists for the FDS app the entry `TopicPath` `Oi4v2/OTConnector/<FDS>/Pub/Data/<FDS>/oee` – a `Pub` subscription to a topic of its own `AppId`.
-- **The problem:** read literally, the sentence forbids the example. The SF-107 proposal (C-055 D-1) meant the own request subscriptions ("`Get/…`, `Del/…` are not listed"); the wording became broader.
-- **Proposed interpretation (recommended):** only request subscriptions to the own `AppId` are excluded; `Pub` subscriptions are listed whatever `AppId` the topic has. Proposed wording: "Other subscriptions of the application to request topics of its own `AppId` (e.g. `Get` or `Del`) are not listed." B1.1.9 stays.
-- **Alternatives:** (b) keep the sentence and change B1.1.9/V-PAY-072 to a topic of another `AppId` (example and vector change, R-x).
-- **Impact if decided as proposed:** guideline text by your order, re-baseline; REQ-RES-SUBLIST-016 follows the text (→ `draft`, R-x); the SDK already does this; D7 unchanged.
-- **PO:** ☐ as proposed ☐ (b) ☐ other: …
-
-### D-3 – SF-111: must an application create a new `SubscriptionList` entry on `Set`? (MG 9.1.9 vs. 8.3.9)
-
-- **Found:** while implementing `Set SubscriptionList` in the SDK (C-059); register `b35b41e`.
-- **What the guideline says:** MG 9.1.9: "If the `Source` has not subscribed the `TopicPath` yet, the `Set` creates a new entry" (heading "create new entry or set new behavior"); MG 8.3.9: "The configurability of subscriptions is limited to create/delete/not manipulable – depending on implementation and/or technical needs".
-- **The problem:** it is open whether every application must subscribe to any `TopicPath` another participant asks for, and which status a rejected creation gets. An application can only process data it was built for; a library (the SDK) cannot hand an unknown subscription to the application in a meaningful way.
-- **Proposed interpretation (recommended):** creating entries is optional ("depending on implementation"); an application that does not create the entry rejects the `Set` with the status `Event` `Bad` (e.g. `BadNotSupported`). Proposed text, added to MG 9.1.9 after "…otherwise it reconfigures the entry with this `TopicPath`": "An application that does not support the creation of entries rejects such a `Set` with the status `Event` `Bad` (e.g. `BadNotSupported`)."
-- **Alternatives:** (b) creation is mandatory for every application (the SDK then needs a handler with which the application accepts or refuses a new TopicPath – a small API addition in 8c).
-- **Impact if decided as proposed:** guideline text by your order, re-baseline; a REQ-RES-SUBLIST-010 note follows the text (→ `draft`, R-x); the SDK already answers `BadNotSupported`; D7 unchanged.
-- **PO:** ☐ as proposed ☐ (b) ☐ other: …
+- **Why:** your decisions D-1 … D-3 changed MG 9.1.9 (`57ebe91`); three reviewed REQs follow the new text and are back to `draft`. View: `oec/spec/requirements/view/res-sublist.md`.
+- **REQ-RES-SUBLIST-004** (MUST, application; D7 `test` T7-SET-11): statement extended by "An application that does not support the creation of entries rejects a Set whose TopicPath the Source has not subscribed yet with a status Event with StatusCode Bad (e.g. BadNotSupported)." (SF-111); new quote and inventory item MG-9.1.9-013e79f7.
+- **REQ-RES-SUBLIST-010** (MUST, requester; `schema` + `d7-validate`): "a TopicPath not yet subscribed by the Source creates a new entry **if the application supports the creation of entries (otherwise the Set is rejected, REQ-RES-SUBLIST-004)**" (SF-111).
+- **REQ-RES-SUBLIST-016** (MUST, application; D7 `test` T7-SET-01): "It does not list its other subscriptions to **request topics** of its own AppId (e.g. Get or Del), **nor subscriptions that only exist for the time of a request** (to receive its answer or status Event)." (SF-110, SF-109); title shortened to "Writable DataSets are listed with their Set subscription, own request and answer subscriptions not"; new quote and inventory item MG-9.1.9-565c8491.
+- **Impact:** none on the SDK (it already behaves like this), the schema or the vectors; D7 T7-SET-11 got a note that a rejected creation is no failure.
+- **PO:** ☐ accepted ☐ changes: …
 
 ### Answered earlier
+
+Answered in the C-059 review (2026-10-28) and applied in C-059 addendum 1:
+- D-1 – SF-109 (transient answer subscriptions of a requester): ☑ as proposed (not listed) → guideline `57ebe91` (MG 9.1.9), SF-109 resolved (`7a2bda2`), re-baseline, REQ-RES-SUBLIST-016 → R-1. Your note on the purpose (service A follows only selected values of OT service B, e.g. 1 of 100 devices) is recorded in the log.
+- D-2 – SF-110 (own `AppId` vs. B1.1.9): ☑ as proposed (only request subscriptions to the own `AppId` excluded, B1.1.9 stays) → guideline `57ebe91`, SF-110 resolved, REQ-RES-SUBLIST-016 → R-1.
+- D-3 – SF-111 (creation of entries via `Set`): ☑ as proposed (optional, otherwise `Bad`, e.g. `BadNotSupported`) → guideline `57ebe91`, SF-111 resolved, REQ-RES-SUBLIST-004/010 → R-1.
 
 Answered after the C-056 review (2026-10-27) and applied in C-056 addendum 2:
 - R-1 – REQ-CMP-043, REQ-CMP-047 (MG 9.1 after SF-108) and the new REQ-RES-SUBLIST-016 (MG 9.1.9 after SF-107): ☑ accepted → `reviewed` (`ee9f0e9`).
