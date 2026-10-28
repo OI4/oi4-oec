@@ -270,6 +270,31 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 - Distribution: single self-contained executable per OS/arch (Windows x64/arm64, macOS arm64/x64, Linux) and container image.
 - **Exit:** `test` passes against the SDK example app (`oec/sdk/rust/oec/examples/demo.rs`; this also closes P4 exit criterion 3, carried forward by D-1 (a) in the C-061 review) and fails on purpose-built faulty fixtures (every implemented catalog test has a positive and a negative fixture of the simulated CUT, DESIGN.md §10); runs in CI on Windows, macOS and Linux runners.
 
+**Plan (C-062, agent, G-3.4 b; reason in `log/2026-10-28_C-062_d7-test-engine.md`).** Started in C-062 after the P4 close (D-1 (a)). Increments, each test-first with the simulated CUT `internal/sim` (one fault per negative fixture, index `testdata/sim/index.yaml`, reviewed by the PO, G-3.9) and one run against `demo.rs` on a copy of a dev root:
+
+1. ✅ (C-062) `test` engine with the bus attachment: `internal/probe` (discovery of the CUT, requests with `ReplyTo` correlation, sequential tests, the monitor engine on the same subscription, verdict via ADR-0025 amendment C-062), the simulated CUT `internal/sim` with fault injection, `oec-check test` (flags of `monitor` + `--timeout`, `--tests`, `--tester-il`; text/JSON/JUnit; `--record`); T7-GET-01, 02, 05, 09 `implemented`.
+2. The rest of `Get`: T7-GET-03 (every supported resource incl. Data ⇒ Metadata), GET-04 (every represented entity fulfills the level), GET-06 (pagination on request and by size, `MaxPacketSize`), GET-07 (Query), GET-08 (Locale); T7-ADR-02, ADR-03.
+3. Write side: T7-SET-01 … 09, 11, 12 (`Set`/`Del` ⇒ Status event with `ReplyTo`, Config, Data, Metadata, PublicationList, ReferenceDesignation, SubscriptionList, log level), each with restore of the original state; the PublicationList/Config state model in the probe.
+4. Action and the deferred passive rules: T7-ACT-01 … 04 (`NewDataSetWriterId` correlation, Ttl, no answer to rejected requests); T7-MON-09, 13 … 17 on the state model of 3.
+5. Proxy attachment (`--proxy-listen`, Q-028): D7 as the CUT's MQTT endpoint; T7-CON-01 … 04, T7-LIFE-01 … 03.
+6. Restart hook and peer: `--restart-cmd`, peer simulation and `--announce` (Q-029); T7-LIFE-04, SET-10, ADR-01.
+7. `list`/`explain`, `report.schema.json` (report version 1 frozen), catalog coverage report; the README/DESIGN as-built pass.
+8. P5 exit run: every catalog test `implemented` or a documented `manual`; `test` at level 2 against `demo.rs` passes, every negative fixture fails; CI on Windows/macOS/Linux runners comes with P9 (as the SDK platform matrix, D-1 (a)), the exit records the local runs.
+
+**Order and cycle cut** (agent; reason in `log/2026-10-28_C-062_d7-test-engine.md`):
+
+| Cycle | Increment | Content | New dependencies (ADR-0013/0025) |
+|---|---|---|---|
+| **C-062** ✅ | 1 | `internal/probe`, `internal/sim`, `oec-check test` (bus attachment), T7-GET-01/02/05/09 with 1 positive + 7 negative sim fixtures (draft, R-1), run against `demo.rs` (14 pass, 3 skip, exit 0); ADR-0025 amendment C-062 | none |
+| C-063 | 2 | T7-GET-03/04/06/07/08, ADR-02/03 | none planned |
+| C-064 | 3 | T7-SET-* except SET-10, state model | none planned |
+| C-065 | 4 | T7-ACT-*, T7-MON-09/13 … 17 | none planned |
+| C-066 | 5 | proxy attachment, T7-CON-*, LIFE-01 … 03 | none planned (MQTT codec for the proxy: paho has no server side; own minimal relay on the standard library, decided in C-066) |
+| C-067 | 6 | restart hook, peer, `--announce`, LIFE-04, SET-10, ADR-01 | none planned |
+| C-068 | 7, 8 | `list`/`explain`, `report.schema.json`, coverage; P5 exit run | none planned |
+
+Why this cut: increment 1 carries all the infrastructure (engine, simulated CUT, CLI, verdict rules of a test run) and therefore only four tests – the smallest set that exercises discovery, correlation, positive and negative exchanges and the fixture contract. The `Get` tests (2) need no state change on the CUT; the write tests (3) change state and need a restore, so they come after the read side and bring the state model that the deferred monitor rules (4) need. Proxy (5) and restart hook/peer (6) are new attachment modes with their own infrastructure. `list`/`explain` and the report schema (7) freeze interfaces and come last, with the exit run (8). Dependencies: 3 → 4 (state model); 5 and 6 are independent of 2–4; 8 needs all.
+
 ## P5b – Infrastructure compliance tool (D8)
 
 Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance (Level 1/2/3)** of application containers and, as far as testable, the **platform requirements** of the RIG (scope confirmed, Q-017). Same conventions as D7: Windows/macOS/Linux, test cases reference REQ ids, profiles `level1..3`, console + JSON + JUnit output, exit codes.

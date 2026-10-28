@@ -1,6 +1,6 @@
 # `oec/conformance/` – D7/D8 compliance CLIs
 
-> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052).** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
+> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062).** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
 
 ## `oec-check validate`
 
@@ -49,6 +49,23 @@ go run ./cmd/oec-check monitor --replay run.jsonl --format json --report junit=m
 
 Exit codes: `0` no failure, `1` at least one `fail`, `2` usage error, `3` internal error or broker unreachable, `4` inconclusive – a MUST could not be judged (observation too short, CUT not seen); `--allow-skip` turns 4 into 0.
 
+## `oec-check test`
+
+Tests one running component (CUT) actively (DESIGN.md §3.3): D7 sends `Get` requests as the not-announced tester `Utility/oi4.org/oec-check/D7/<random>` and judges the answers; the monitor rules run on the same subscription. Implemented: T7-GET-01 (Get MAM/Health with `ReplyTo`, all Sources), T7-GET-02 (Profile lists exactly the served resources of the level), T7-GET-05 (empty list, unknown Source → Event Status Bad), T7-GET-09 (unknown keys ignored). The other active tests follow the P5 plan (ROADMAP).
+
+```sh
+# against the SDK example app (oec/sdk/rust/oec/examples/demo.rs) on the dev broker;
+# the elements of the Oi4Identifier are dnp-encoded ("OEC Demo" → "OEC,20Demo")
+go run ./cmd/oec-check test --broker mqtts://localhost:8883 --ca ../dev/generated/broker/ca.pem \
+    --username oec-probe --password-file ../dev/generated/probe/password \
+    --app 'OTConnector/example.com/OEC,20Demo/DEMO-1/oec-dev-app' --level 2 --record test.jsonl
+```
+
+- `--app [ServiceType/]AppId` is required; with a bare AppId, D7 asks on every ServiceType. The connection, verdict and output flags are those of `monitor`; `--record` writes a capture that `monitor --replay` reads.
+- Run: `--timeout` (default 10s: waiting time for an answer, and the silence that counts as "no answer"), `--tests ID|GLOB,…` (repeatable; the others are skipped as "not selected"), `--tester-il IL`.
+- A test run is short: passive requirements that need a long observation (heartbeat, connect, MaxPacketSize) are skipped with the reason "test run: …"; a level claim needs a `monitor` run of at least 125 s as well.
+- The report is the monitor report with `"mode": "test"` plus `tester` and `requests`. Exit codes as for `monitor`.
+
 ## Layout
 
 | Path | Content |
@@ -63,15 +80,18 @@ Exit codes: `0` no failure, `1` at least one `fail`, `2` usage error, `3` intern
 | `internal/mqttwire` | MQTT 3.1.1 client over TLS on `paho.mqtt.golang` v1.5.1 (EDL-1.0), PKCS#8 PBES2 keys, container storage reader |
 | `internal/mqttwire/mqtttest` | test-only in-process TLS broker and throw-away PKI (gate without network) |
 | `internal/monitor` | stateful monitor engine: participants, rules T7-MON-xx |
+| `internal/probe` | active test runner of `test`: discovery, requests with `ReplyTo` correlation, tests T7-GET-xx, verdict of a test run |
+| `internal/sim` | test-only simulated CUT with fault injection (DESIGN.md §10) |
 | `internal/verdict` | verdict model: severity from REQ keyword × level, test aggregation, exit code |
-| `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` |
+| `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` and `test` |
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
+| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (draft, C-062, G-3.9) |
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (reviewed in the C-052 review, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
 ## Tests
 
-`go test ./...` checks D7 against the vectors of the baseline: every topic, IL and dnp vector; every payload vector (valid → no finding, invalid → exactly its `violates`); the split between schema layer and rule layer of [`../schema/tests/rule-layer.yaml`](../schema/tests/rule-layer.yaml); R-4 probes; CLI exit codes; the test catalogs against the requirements catalog (`catalog/`); the MQTT client against the loopback test broker (passwords, client certificates, Will, lost connection); every monitor rule with a positive and a negative capture fixture; `monitor` live against the loopback broker and from captures. The Go toolchain is pinned in `go.mod` (`GOTOOLCHAIN=auto` with an older local Go).
+`go test ./...` checks D7 against the vectors of the baseline: every topic, IL and dnp vector; every payload vector (valid → no finding, invalid → exactly its `violates`); the split between schema layer and rule layer of [`../schema/tests/rule-layer.yaml`](../schema/tests/rule-layer.yaml); R-4 probes; CLI exit codes; the test catalogs against the requirements catalog (`catalog/`); the MQTT client against the loopback test broker (passwords, client certificates, Will, lost connection); every monitor rule with a positive and a negative capture fixture; `monitor` live against the loopback broker and from captures; every implemented `test` test with a positive and a negative run against the simulated CUT, and `oec-check test` against it. The Go toolchain is pinned in `go.mod` (`GOTOOLCHAIN=auto` with an older local Go).
 
 The module is pure Go without cgo; `GOOS=windows|linux|darwin go build ./cmd/oec-check` cross-compiles (checked in C-040 for windows/amd64, linux/amd64, linux/arm64 and darwin/arm64; tests run on macOS so far, CI on Linux/Windows comes with P4).
 

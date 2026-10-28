@@ -16,7 +16,7 @@ Inputs: ADR-0006 (independence, modes), ADR-0013/0014 (Go, one module, two binar
 
 | Package | Content | Phase |
 |---|---|---|
-| `cmd/oec-check` | D7 CLI: `validate`, `monitor`, `test`, `list`, `explain`, `version` | `validate` P2; `monitor` **C-052**; rest P5 |
+| `cmd/oec-check` | D7 CLI: `validate`, `monitor`, `test`, `list`, `explain`, `version` | `validate` P2; `monitor` **C-052**; `test` (bus) **C-062**; rest P5 |
 | `cmd/oec-infra` | D8 CLI: `image`, `run`, `container`, `host`, `bus`, `list`, `explain`, `version` | P5b |
 | `catalog` | test catalogs `d7.yaml`/`d8.yaml` (embedded), loader, coverage gate | **C-044** |
 | `internal/topic`, `ilink`, `schemas`, `rules`, `validate` | one-message layers of `validate` (unchanged) | P2 |
@@ -24,10 +24,10 @@ Inputs: ADR-0006 (independence, modes), ADR-0013/0014 (Go, one module, two binar
 | `internal/mqttwire/mqtttest` | test-only: in-process TLS broker on the paho `packets` codec and a throw-away PKI (§4) | **C-052** |
 | `internal/capture` | recording format (JSONL), recorder, replayer | **C-052** |
 | `internal/monitor` | stateful monitor engine: per-CUT state, rules T7-MON-xx | **C-052** (13 of 19) |
-| `internal/probe` | active test runner: stimuli, correlation (CorrelationId/RequestId), timeouts, verdicts T7-xxx | P5 |
+| `internal/probe` | active test runner: stimuli, correlation (`ReplyTo`; CorrelationId/RequestId for Actions), timeouts, verdicts T7-xxx | **C-062** (bus attachment, T7-GET-01/02/05/09); rest P5 |
 | `internal/verdict` | verdict model, severity from REQ keyword × level, applicability (§5) | **C-052** |
 | `internal/report` | text, JSON (`report.schema.json`), JUnit XML | monitor report **C-052**; schema file P5 |
-| `internal/sim` | simulated CUT with fault injection (§10) – test-only | P5 (for `test`; monitor fixtures are captures, §10) |
+| `internal/sim` | simulated CUT with fault injection (§10) – test-only | **C-062** (faults of the implemented `test` tests; monitor fixtures are captures, §10) |
 | `internal/oci`, `internal/engine`, `internal/sbom` | D8: image reader, read-only Docker/Podman Engine API client, minimal SPDX/CycloneDX reader | P5b |
 | `internal/testvec` | vector helper (unchanged) | P2 |
 
@@ -81,6 +81,16 @@ oec-check test --broker … --app <AppId> [--level 3] [--attach bus|proxy] \
 - Stimuli: `Get` (with paging, query, locale, unknown keys), `Set`/`Del` on every modifiable resource (with restore of the original content where possible), `Call NewDataSetWriterId`, malformed and unaddressable requests (T7-ACT-03). Responses are correlated by CorrelationId/RequestId with a timeout (`--timeout`, default 10 s).
 - **Side effects**: `test` changes the CUT's configuration. The tool restores the content it changed and lists every change it could not restore in the report. It refuses to run without `--app` (never against "all").
 - The monitor engine runs during `test`; its findings are part of the same report.
+
+**As built (C-062, ADR-0025 amendment C-062):**
+
+- `oec-check test --app [<ServiceType>/]<AppId> (--broker … | --bus-storage …) [--level N] [--timeout 10s] [--tests ID|GLOB,…] [--tester-il IL] [--record FILE] [--format …] [--report …] [--config FILE.yaml]`; the connection, verdict and output flags are those of `monitor` (§3.2, §8); `--replay` and `--duration` do not exist for `test`. Only the bus attachment; `--attach`, `--listen`, `--restart-cmd`, `--peer` and `--announce` come with the increments 5 and 6 of the P5 plan. The AppId is given as Identification Link, i.e. with the dnp-encoded Oi4Identifier elements (`OEC,20Demo`).
+- One subscription `Oi4v2/#` (QoS 1): every message goes to the monitor engine (and the recording), then to the runner `internal/probe`. A recorded test run replays with `monitor --replay`.
+- Discovery: `Get MAM/<AppId>` on the given ServiceType or on all seven; the first answer fixes the ServiceType; fallback: a publication of the AppId seen during discovery; not found → every REQ inconclusive (exit 4). The CUT is treated as an application. Responses to `Get` are correlated by `ReplyTo` = MessageId of the request. Requests are published with QoS 0 (REQ-MQTT-017 default) by the not-announced tester `Utility/oi4.org/oec-check/D7/<12 hex>` (§3.5).
+- Tests run sequentially in catalog order. A request that expects an answer waits until answered plus 250 ms (duplicates), one that expects no answer waits `--timeout`. Each active test judges only the REQs its catalog entry cites.
+- Implemented: T7-GET-01 (Get MAM and Health, with and without Source, for the application and up to 20 subordinate Sources), T7-GET-02 (every resource of the Profile of the application answers, the Profile lists the resources of the level), T7-GET-05 (Get without content → empty list; unknown Source → no Pub, Event Status Bad `BadNotFound`; REQ-CMP-044 is a MAY and not stimulated), T7-GET-09 (Get MAM with an unknown key answered like without it).
+- Verdict of a test run: passive REQs that the short run cannot judge (connect not observed, shorter than the heartbeat, MaxPacketSize unknown) are plain skips with the reason prefix "test run:", not inconclusive; a level claim needs a `monitor` run ≥ the minimum duration in addition (§6). Non-selected tests are skip "not selected (--tests)".
+- Report: the monitor report (version 1) with `"mode": "test"`, `tester` and `requests` (test, topic, MessageId, sent, replies).
 
 ### 3.4 Attachment modes (`needs` in the catalog)
 
@@ -190,7 +200,9 @@ The severity comes from the REQ, not from the test: `levels.L<n>` of the REQ at 
 - A simulated CUT in Go (MQTT client of the same codec) that implements the level 1–3 behavior from the spec and can inject one fault per catalog test (`sim.Fault("T7-SET-04")`).
 - Each implemented catalog test needs a positive run (sim without fault → pass) and a negative run (sim with fault → fail with the expected REQ ids). `catalog_test.go` gains this check when tests move to `implemented` (P5 exit: "every catalog test has a positive and a negative fixture").
 - Captures from the demo services (D3/D4) and the SDK interop tests (P4) are replayed as additional regression data – they enter as data files, not as code dependencies (Q-009).
-- **As built (C-052), monitor tests:** the positive and negative fixtures of the monitor rules are **captures** (`testdata/captures/*.jsonl`) built from reviewed payload vectors by a generator test (`go test ./internal/monitor -run TestFixtureFiles -update`; without `-update` the test fails if a file differs from its scenario), with the expected verdicts in `testdata/captures/index.yaml` (test → outcome and the exact REQ ids; status `reviewed` since the C-052 review, R-1; new fixtures start as `draft`, G-3.9). `replay_test.go` replays every fixture, checks the expected verdicts and that every implemented monitor test has a positive and a negative fixture, and that `monitor.Implemented` equals the catalog status. `internal/sim` stays the plan for `test` (active stimuli need a responding CUT). The live path is covered by a loopback test against `mqtttest` in the gate and by `oec/conformance/live.sh` (opt-in) against the dev-env Mosquitto.
+- **As built (C-052), monitor tests:** the positive and negative fixtures of the monitor rules are **captures** (`testdata/captures/*.jsonl`) built from reviewed payload vectors by a generator test (`go test ./internal/monitor -run TestFixtureFiles -update`; without `-update` the test fails if a file differs from its scenario), with the expected verdicts in `testdata/captures/index.yaml` (test → outcome and the exact REQ ids; status `reviewed` since the C-052 review, R-1; new fixtures start as `draft`, G-3.9). `replay_test.go` replays every fixture, checks the expected verdicts and that every implemented monitor test has a positive and a negative fixture, and that `monitor.Implemented` equals the catalog status. `internal/sim` is the self-test of `test` (active stimuli need a responding CUT). The live path is covered by a loopback test against `mqtttest` in the gate and by `oec/conformance/live.sh` (opt-in) against the dev-env Mosquitto.
+
+- **As built (C-062), `test`:** `internal/sim` is the OT connector of the guideline examples (MG B1.1) with one subordinate asset; its content comes from reviewed payload vectors, it answers `Get` for MAM, Health, Profile, Config, Data, PublicationList, ReferenceDesignation and SubscriptionList with `ReplyTo`, sends Birth/Close and a Will, and answers a request for an unknown Source with the Event Status Bad. A fault is named `<test>/<what>` (`sim.Faults`). `internal/probe/sim_test.go` runs `oec-check test` (monitor + runner, level 3) over `mqtttest` against every entry of `testdata/sim/index.yaml` (expected outcome and exact REQ ids per test; `draft` until the PO review, G-3.9), checks that every implemented test has a positive and a negative fixture, that every fault has an entry, that `probe.Implemented` equals the catalog status and that the requests of D7 are valid messages (except the deliberate unknown key of T7-GET-09). `cmd/oec-check/test_test.go` runs the CLI against the sim (exit 0 without, exit 1 with a fault).
 
 ## 11. Distribution
 
