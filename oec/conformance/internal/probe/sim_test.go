@@ -355,3 +355,33 @@ func TestSimInterruptedWrite(t *testing.T) {
 		t.Errorf("restore %+v, want not checked with a note on the interrupted write test", *rs)
 	}
 }
+
+// TestSimActionRequests: the report lists the NewDataSetWriterId calls of
+// D7 among its stimuli, in the order they were sent, with the number of
+// ActionResponses to each.
+func TestSimActionRequests(t *testing.T) {
+	v, err := validate.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	reqs, err := verdict.LoadRequirements()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, s := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: []string{"T7-ACT-01", "T7-ACT-04"}})
+	calls := map[string]int{}
+	for i, q := range s.Probe.Requests {
+		if i > 0 && q.Sent.Before(s.Probe.Requests[i-1].Sent) {
+			t.Errorf("request %d (%s) sent before request %d", i, q.Topic, i-1)
+		}
+		if strings.Contains(q.Topic, "/Call/NewDataSetWriterId") {
+			calls[q.Test]++
+			if q.Replies != 1 {
+				t.Errorf("%s %s: %d replies, want 1", q.Test, q.Topic, q.Replies)
+			}
+		}
+	}
+	if calls["T7-ACT-01"] != 2 || calls["T7-ACT-04"] != 1 {
+		t.Errorf("calls per test %v, want T7-ACT-01: 2, T7-ACT-04: 1", calls)
+	}
+}

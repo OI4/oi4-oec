@@ -100,7 +100,7 @@ type Request struct {
 	Topic     string    `json:"topic"`
 	MessageID string    `json:"message_id"`
 	Sent      time.Time `json:"sent"`
-	Replies   int       `json:"replies"` // messages with the MessageId as ReplyTo
+	Replies   int       `json:"replies"` // messages with the MessageId as ReplyTo; for a Call the ActionResponses with its RequestId
 }
 
 // Result of a run.
@@ -745,6 +745,10 @@ func (r *Runner) result() Result {
 	for _, x := range r.exchanges {
 		res.Requests = append(res.Requests, Request{Test: x.test, Topic: x.topic, MessageID: x.id, Sent: x.sent.UTC(), Replies: len(x.replies)})
 	}
+	for _, c := range r.calls {
+		res.Requests = append(res.Requests, Request{Test: c.test, Topic: c.topic, MessageID: c.id, Sent: c.sent.UTC(), Replies: len(r.responsesLocked(c))})
+	}
+	sort.SliceStable(res.Requests, func(i, j int) bool { return res.Requests[i].Sent.Before(res.Requests[j].Sent) })
 	return res
 }
 

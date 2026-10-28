@@ -176,6 +176,11 @@ type hit struct {
 func (r *Runner) responses(c *call) []hit {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.responsesLocked(c)
+}
+
+// responsesLocked is responses with r.mu held.
+func (r *Runner) responsesLocked(c *call) []hit {
 	var out []hit
 	for _, a := range r.actions {
 		if a.requestor != r.tester || a.received.Before(c.sent) {
