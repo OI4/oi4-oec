@@ -14,12 +14,24 @@
 # asset has its own Profile, Config, Data and ReferenceDesignation (level
 # 3); the Config Filter is "Networksettings" (V-PAY-092: "Network
 # settings", a whitespace REQ-TOP-020 advises against).
+# Since C-064 the CUT also answers Set and Del (Config, Data, Metadata,
+# PublicationList, ReferenceDesignation, SubscriptionList; Status event on
+# Pub/Event/<Source>/Status/<Level>, DataSetWriterId 623/625 Good/Bad for
+# the application – 623 from V-PAY-062 – and 4802/4804 for the asset).
+# Content added for the write tests: a sensitive Config object
+# Networksettings/network/password (published masked), the PublicationList
+# entries Event Syslog/Informational and Syslog/Debug (Mode OFF_0, Config
+# MODE_1) and the SubscriptionList Set subscriptions (Config NONE_0) of
+# Data/oee and Config/Networksettings; only the Data of the application is
+# writable. The Get faults affect only the Get path. Each run of the
+# simulation keeps its own state; sim.Changed lists what differs from the
+# start state (empty after every fixture run).
 # internal/probe/sim_test.go runs `oec-check test` (monitor + runner,
 # level 3) against every entry over the in-process TLS test broker.
 #
 # Reviewed by the PO in the C-062 review (2026-10-28, R-1); the entries
 # added or changed in C-063 were reviewed in the C-063 review (2026-10-28,
-# R-1).
+# R-1). The entries added or changed in C-064 are drafts.
 #
 # This index is test data with verdict (G-3.9): it states the expected
 # outcome of the tests and goes to the PO for review.
@@ -32,7 +44,7 @@
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: reviewed
+    status: draft
     positive: true
     expect: {}
     notes: >-
@@ -42,7 +54,11 @@ fixtures:
       and does not see the connect: plain skip, not inconclusive).
       REQ-QRY-003 is skipped (the CUT supports the Query) and REQ-CMP-044
       is not stimulated (MAY). Changed in C-063: the new tests T7-GET-03,
-      -04, -06, -07, -08 and T7-ADR-02, -03 run against it.
+      -04, -06, -07, -08 and T7-ADR-02, -03 run against it. Changed in
+      C-064: the write tests T7-SET-01 … 09, 11, 12 run against it and pass
+      with every requirement judged (none skipped); afterwards the state of
+      the CUT equals the start state (restore check of D7 and of the
+      simulation).
   - fault: T7-GET-01/reply-to
     status: reviewed
     expect:
@@ -224,3 +240,114 @@ fixtures:
     notes: >-
       A Get with Locale de-DE is answered with LocalizedText in fr-FR,
       neither the requested locale nor the default (REQ-LOC-002).
+  - fault: T7-SET-01/sublist
+    status: draft
+    expect:
+      T7-SET-01: {outcome: fail, reqs: [REQ-RES-SUBLIST-016]}
+    notes: >-
+      The SubscriptionList does not list the Set subscription of the Config
+      DataSet, which accepts the Set (REQ-RES-SUBLIST-016: a DataSet that can
+      be changed with Set is listed with its Set subscription).
+  - fault: T7-SET-02/unknown-source
+    status: draft
+    expect:
+      T7-SET-02: {outcome: fail, reqs: [REQ-CMP-043]}
+    notes: >-
+      A Set to an unknown asset is answered with Status Bad under the Source
+      of the request instead of the AppId (REQ-CMP-043, SF-108).
+  - fault: T7-SET-03/metadata
+    status: draft
+    expect:
+      T7-SET-03: {outcome: fail, reqs: [REQ-CMP-033]}
+      T7-SET-07: {outcome: fail, reqs: [REQ-RES-META-006]}
+    notes: >-
+      Set Metadata is answered with BadNotSupported (level 3 requires Set
+      Metadata for the application and the represented asset, REQ-CMP-033);
+      the Status event is Bad, so REQ-RES-META-006 (Status Good after a
+      successful Set) fails and REQ-RES-META-007 is skipped.
+  - fault: T7-SET-04/del-publishes
+    status: draft
+    expect:
+      T7-SET-04: {outcome: fail, reqs: [REQ-BUS-007]}
+    notes: >-
+      After the Del of a whole object (the ReferenceDesignation, the last
+      subscription of a Filter) the CUT publishes an empty list on the Pub
+      topic of the object (REQ-BUS-007).
+  - fault: T7-SET-05/read-only
+    status: draft
+    expect:
+      T7-SET-05: {outcome: fail, reqs: [REQ-RES-CONFIG-023]}
+    notes: >-
+      Set Config accepts a changed Name of a configuration object (read-only
+      property, REQ-RES-CONFIG-023: the Set is rejected). D7 writes the
+      original DataSet back afterwards.
+  - fault: T7-SET-06/no-pub
+    status: draft
+    expect:
+      T7-SET-01: {outcome: fail, reqs: [REQ-BUS-006, REQ-MQTT-019]}
+      T7-SET-06: {outcome: fail, reqs: [REQ-RES-DATA-012]}
+    notes: >-
+      A successful Set Data is answered with Status Good, but the changed
+      DataSet is not published (REQ-RES-DATA-012, REQ-BUS-006, REQ-MQTT-019).
+  - fault: T7-SET-07/no-event
+    status: draft
+    expect:
+      T7-SET-03: {outcome: fail, reqs: [REQ-CMP-033]}
+      T7-SET-07: {outcome: fail, reqs: [REQ-RES-META-006]}
+    notes: >-
+      Set Metadata changes the Metadata and publishes it, but sends no
+      Status event (REQ-RES-META-006). A Set Metadata of the asset that
+      fails (unknown DataSet) gets no reaction at all, so D7 cannot see
+      that the asset supports it (REQ-CMP-033).
+  - fault: T7-SET-08/read-only
+    status: draft
+    expect:
+      T7-SET-08: {outcome: fail, reqs: [REQ-RES-PUBLIST-016]}
+    notes: >-
+      Set PublicationList accepts a Mode change of an entry with Config
+      NONE_0 (REQ-RES-PUBLIST-016). D7 writes the original entry back.
+  - fault: T7-SET-09/del-silent
+    status: draft
+    expect:
+      T7-SET-03: {outcome: fail, reqs: [REQ-CMP-033]}
+      T7-SET-09: {outcome: fail, reqs: [REQ-RES-REFDES-009]}
+    notes: >-
+      Del ReferenceDesignation deletes the object, but sends no Status event
+      (REQ-RES-REFDES-009); without any reaction, D7 cannot see that Del
+      ReferenceDesignation is supported (REQ-CMP-033). D7 restores the object
+      with Set.
+  - fault: T7-SET-09/set-rejected
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      Variant, conforming: the CUT rejects every Set ReferenceDesignation
+      with BadNotWritable but accepts a Del. D7 deletes a ReferenceDesignation
+      only after its write-back Set was accepted (it restores the object with
+      that Set), so it deletes nothing here; REQ-RES-REFDES-010 is skipped,
+      T7-SET-04 judges REQ-BUS-007 on its own SubscriptionList entry, and
+      T7-SET-03 skips the Del ReferenceDesignation of the application and
+      of the asset; every test passes.
+  - fault: T7-SET-11/none-writable
+    status: draft
+    expect:
+      T7-SET-11: {outcome: fail, reqs: [REQ-RES-SUBLIST-004]}
+    notes: >-
+      Set SubscriptionList accepts an Interval change of an entry with Config
+      NONE_0 (REQ-RES-SUBLIST-004). D7 writes the original entry back.
+  - fault: T7-SET-11/no-create
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      Variant, conforming: the CUT does not create SubscriptionList entries
+      (Set of a new entry answered with BadNotSupported, like the Rust demo,
+      SF-111). REQ-BUS-008 and REQ-RES-SUBLIST-015 are skipped; T7-SET-04
+      judges REQ-BUS-007 on the ReferenceDesignation only.
+  - fault: T7-SET-12/fixed-level
+    status: draft
+    expect:
+      T7-SET-12: {outcome: warn, reqs: [REQ-TOP-027]}
+    notes: >-
+      Every Syslog entry of the PublicationList has Config NONE_0: the log
+      level is not configurable (REQ-TOP-027, SHOULD).

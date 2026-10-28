@@ -44,6 +44,7 @@ type Monitor struct {
 	Participants   []monitor.Participant   `json:"participants"`
 	Tester         string                  `json:"tester,omitempty"`   // test: PublisherId of D7 in the requests
 	Requests       []probe.Request         `json:"requests,omitempty"` // test: the stimuli in order
+	Restore        *probe.Restore          `json:"restore,omitempty"`  // test: the state of the CUT after the write tests
 	Tests          []verdict.TestResult    `json:"tests"`
 	Summary        map[verdict.Outcome]int `json:"summary"`
 	Error          string                  `json:"error,omitempty"` // why the observation stopped early
@@ -123,6 +124,9 @@ func (r *Monitor) Text(w io.Writer) error {
 			}
 		}
 		fmt.Fprintf(&b, "tester %s: %d request(s), %d answered\n", r.Tester, len(r.Requests), answered)
+		if rs := r.Restore; rs != nil {
+			b.WriteString(rs.Summary() + "\n")
+		}
 	}
 	b.WriteString("participants:\n")
 	if len(r.Participants) == 0 {

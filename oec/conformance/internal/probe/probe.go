@@ -25,7 +25,8 @@ import (
 // Implemented lists the test-mode catalog tests the runner judges (d7.yaml
 // status implemented), in run order.
 var Implemented = []string{"T7-ADR-02", "T7-ADR-03", "T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04",
-	"T7-GET-05", "T7-GET-06", "T7-GET-07", "T7-GET-08", "T7-GET-09"}
+	"T7-GET-05", "T7-GET-06", "T7-GET-07", "T7-GET-08", "T7-GET-09", "T7-SET-01", "T7-SET-02", "T7-SET-03", "T7-SET-04",
+	"T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-09", "T7-SET-11", "T7-SET-12"}
 
 // Tests returns the test-mode tests of the D7 catalog for verdict.Build.
 func Tests() ([]verdict.Test, error) {
@@ -109,6 +110,7 @@ type Result struct {
 	Tester       string // PublisherId of D7
 	Requests     []Request
 	Observations []verdict.Observation
+	Restore      *Restore // nil if no write test ran
 }
 
 // PublishFunc sends one request.
@@ -137,6 +139,8 @@ type Runner struct {
 	v1          []Message           // received under the namespace Oi4 (T7-ADR-02)
 	v1Refused   error               // the subscription to Oi4/# was refused
 	mamAll      []string            // Sources of the answer to Get MAM without Source
+	before      *state              // state before the first write test
+	restore     *Restore
 }
 
 // New creates a runner; the tester identity is fixed here.
@@ -301,10 +305,12 @@ func (n *netMsg) content() []dsm {
 type exchange struct {
 	test        string
 	id          string
+	method      string // Get, Set or Del
 	topic       string
 	answerTopic string
 	resource    string
 	source      string
+	filter      string
 	sent        time.Time
 	replies     []*netMsg // ReplyTo = MessageId of the request
 	others      []*netMsg // on the answer topic with another ReplyTo, after the request
@@ -402,7 +408,7 @@ func (r *Runner) get(ctx context.Context, test, st, resource, source, filter str
 	if err != nil {
 		return nil, err
 	}
-	x := &exchange{test: test, id: id, resource: resource, source: source, sent: time.Now(),
+	x := &exchange{test: test, id: id, method: "Get", resource: resource, source: source, filter: filter, sent: time.Now(),
 		topic: Topic(st, r.app, "Get", resource, source, filter), answerTopic: Topic(st, r.app, "Pub", resource, source, filter)}
 	r.mu.Lock()
 	r.exchanges = append(r.exchanges, x)
@@ -439,7 +445,7 @@ func (r *Runner) getMeta(ctx context.Context, test, source, tag string, writer i
 	if err != nil {
 		return nil, err
 	}
-	x := &exchange{test: test, id: id, resource: "Metadata", source: source, sent: time.Now(),
+	x := &exchange{test: test, id: id, method: "Get", resource: "Metadata", source: source, filter: tag, sent: time.Now(),
 		topic: Topic(r.st, r.app, "Get", "Metadata", source, tag), answerTopic: Topic(r.st, r.app, "Pub", "Metadata", source, tag)}
 	r.mu.Lock()
 	r.exchanges = append(r.exchanges, x)
@@ -629,6 +635,9 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 		"T7-ADR-02": r.adr02, "T7-ADR-03": r.adr03,
 		"T7-GET-01": r.get01, "T7-GET-02": r.get02, "T7-GET-03": r.get03, "T7-GET-04": r.get04, "T7-GET-05": r.get05,
 		"T7-GET-06": r.get06, "T7-GET-07": r.get07, "T7-GET-08": r.get08, "T7-GET-09": r.get09,
+		"T7-SET-01": r.set01, "T7-SET-02": r.set02, "T7-SET-03": r.set03, "T7-SET-04": r.set04, "T7-SET-05": r.set05,
+		"T7-SET-06": r.set06, "T7-SET-07": r.set07, "T7-SET-08": r.set08, "T7-SET-09": r.set09, "T7-SET-11": r.set11,
+		"T7-SET-12": r.set12,
 	}
 	// The resource tests need the Profile T7-GET-02 reads.
 	if !r.Selected("T7-GET-02") {
@@ -641,12 +650,46 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 			}
 		}
 	}
+	writing := false
+	// interrupted records that the run ended after the first write: the
+	// CUT may be left modified.
+	interrupted := func(id string, err error) (Result, error) {
+		if r.before != nil && r.restore == nil {
+			r.mu.Lock()
+			r.restore = &Restore{Note: "the run ended during the write tests (" + id + "): the CUT may be left modified"}
+			r.mu.Unlock()
+		}
+		return r.result(), err
+	}
 	for _, id := range Implemented {
-		if !r.Selected(id) {
+		if !r.Selected(id) || id == "T7-SET-03" {
 			continue
 		}
+		if strings.HasPrefix(id, "T7-SET-") && !writing {
+			writing = true
+			if err := r.prepareWrite(ctx); err != nil {
+				return r.result(), err
+			}
+		}
 		if err := tests[id](ctx); err != nil {
-			return r.result(), err
+			return interrupted(id, err)
+		}
+	}
+	// T7-SET-03 judges the reactions of the other write tests.
+	if r.Selected("T7-SET-03") {
+		if !writing {
+			writing = true
+			if err := r.prepareWrite(ctx); err != nil {
+				return r.result(), err
+			}
+		}
+		if err := r.set03(ctx); err != nil {
+			return interrupted("T7-SET-03", err)
+		}
+	}
+	if writing {
+		if err := r.checkRestore(ctx); err != nil {
+			return interrupted("restore check", err)
 		}
 	}
 	// T7-ADR-02 watches the namespace Oi4 during the whole run.
@@ -679,7 +722,7 @@ func Selected(patterns []string, id string) bool {
 func (r *Runner) result() Result {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	res := Result{ServiceType: r.st, AppID: r.app, Found: r.found, Tester: r.tester, Observations: r.obs}
+	res := Result{ServiceType: r.st, AppID: r.app, Found: r.found, Tester: r.tester, Observations: r.obs, Restore: r.restore}
 	for _, x := range r.exchanges {
 		res.Requests = append(res.Requests, Request{Test: x.test, Topic: x.topic, MessageID: x.id, Sent: x.sent.UTC(), Replies: len(x.replies)})
 	}

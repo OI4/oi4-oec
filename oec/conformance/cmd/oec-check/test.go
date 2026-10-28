@@ -128,7 +128,13 @@ func runTest(args []string, stdout, stderr io.Writer) int {
 	res := o.e.Finish(ended)
 	rep.Observed = rep.Ended.Sub(rep.Started).Round(time.Millisecond).String()
 	rep.Messages, rep.Namespace = res.Messages, res.Namespace
-	rep.Tester, rep.Requests = s.Probe.Tester, s.Probe.Requests
+	rep.Tester, rep.Requests, rep.Restore = s.Probe.Tester, s.Probe.Requests, s.Probe.Restore
+	if rs := s.Probe.Restore; rs != nil && !rs.Restored {
+		fmt.Fprintf(stderr, "%s: WARNING: %s\n", tool, rs.Summary())
+		for _, l := range rs.Changed {
+			fmt.Fprintf(stderr, "%s:   %s\n", tool, l)
+		}
+	}
 	if rep.Tests, rep.Participants, err = probe.Judge(f.app, f.level, f.tests, res, s, reqs); err != nil {
 		fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 		return exitInternal

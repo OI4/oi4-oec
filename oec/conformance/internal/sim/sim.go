@@ -43,11 +43,25 @@ const (
 	QuerySource   Fault = "T7-GET-07/with-source"    // the Query is evaluated on a Get with Source too
 	NoRefDes      Fault = "T7-GET-07/empty"          // variant, conforming: ReferenceDesignation is supported, but has no object
 	WrongLocale   Fault = "T7-GET-08/locale"         // a Get with a Locale is answered with LocalizedText in fr-FR
+	NotListed     Fault = "T7-SET-01/sublist"        // the Set subscription of the writable Config is not listed
+	SetUnknown    Fault = "T7-SET-02/unknown-source" // a Set or Del for an unknown asset gets its Status event under that Source
+	SetMetadata   Fault = "T7-SET-03/metadata"       // a Set Metadata is dropped
+	DelPublishes  Fault = "T7-SET-04/del-publishes"  // the Del of a ReferenceDesignation publishes an empty list
+	ConfigName    Fault = "T7-SET-05/read-only"      // a Set Config may change the Name of a configuration object
+	DataNoPub     Fault = "T7-SET-06/no-pub"         // a successful Set Data is not followed by the publication
+	MetaNoEvent   Fault = "T7-SET-07/no-event"       // a Set Metadata gets no Status event
+	PublistMode   Fault = "T7-SET-08/read-only"      // a Set PublicationList may change the Mode of a NONE_0 entry
+	DelSilent     Fault = "T7-SET-09/del-silent"     // a Del ReferenceDesignation gets no Status event
+	RefDesFixed   Fault = "T7-SET-09/set-rejected"   // variant, conforming: a Set ReferenceDesignation is rejected (BadNotWritable), a Del is accepted
+	SublistNone   Fault = "T7-SET-11/none-writable"  // a Set SubscriptionList may change a NONE_0 entry
+	NoCreate      Fault = "T7-SET-11/no-create"      // variant, conforming: a Set SubscriptionList does not create entries (BadNotSupported)
+	FixedLevel    Fault = "T7-SET-12/fixed-level"    // the Syslog levels of the PublicationList are NONE_0
 )
 
 // Faults lists every fault.
 var Faults = []Fault{ReplyTo, AllAssets, Unanswered, Missing, EmptyList, UnknownSource, UnknownKey,
-	DualVersion, Mixed, Case, NoMetadata, FilterIgnored, AssetLevel, PerPage, QueryIgnored, QuerySource, NoRefDes, WrongLocale}
+	DualVersion, Mixed, Case, NoMetadata, FilterIgnored, AssetLevel, PerPage, QueryIgnored, QuerySource, NoRefDes, WrongLocale,
+	NotListed, SetUnknown, SetMetadata, DelPublishes, ConfigName, DataNoPub, MetaNoEvent, PublistMode, DelSilent, RefDesFixed, SublistNone, NoCreate, FixedLevel}
 
 // ServiceType, AppID and Asset identify the simulated CUT: the OT connector
 // of the guideline examples (MG B1.1) with one subordinate asset.
@@ -57,8 +71,20 @@ const (
 	Asset       = "groe.mca/DeviceModelB/AC33.447/20443"
 )
 
-// BadNotFound is the StatusCode for an unknown asset (MG 8.3.6.1).
-const BadNotFound = 0x803E0000
+// StatusCodes of the Status events (MG 8.3.6.1).
+const (
+	Good               = 0
+	BadNotWritable     = 0x803B0000
+	BadOutOfRange      = 0x803C0000
+	BadNotSupported    = 0x803D0000
+	BadNotFound        = 0x803E0000
+	BadTypeMismatch    = 0x80740000
+	BadInvalidArgument = 0x80AB0000
+)
+
+// Mask replaces the value of a sensitive configuration object in every
+// publication (REQ-RES-CONFIG-024).
+const Mask = "********"
 
 type model struct {
 	classes  map[string]string                      // resource → DataSetClassId
@@ -142,6 +168,28 @@ func load() (*model, error) {
 			d["WriterGroupName"] = strings.ReplaceAll(g, " ", "")
 		}
 	}
+	// Write side (C-064): a sensitive configuration object (published
+	// masked, GL-ADR-021), the configurable Syslog levels Informational and
+	// Debug (REQ-TOP-027) and the Set subscriptions of the writable Data and
+	// Config DataSets (REQ-RES-SUBLIST-016).
+	for _, d := range m.dsms["Config"][AppID] {
+		p, _ := d["Payload"].(map[string]any)
+		g, _ := p["network"].(map[string]any)
+		if g == nil {
+			return nil, fmt.Errorf("sim: Config group network not found")
+		}
+		g["password"] = map[string]any{"Name": map[string]any{"Locale": "en-US", "Text": "Password"}, "Sensitive": true, "Type": "String", "Value": Mask}
+	}
+	for i, level := range []string{"Informational", "Debug"} {
+		m.dsms["PublicationList"][AppID] = append(m.dsms["PublicationList"][AppID], map[string]any{"DataSetWriterId": 161.0,
+			"WriterGroupName": "Event/Syslog/" + level, "DataSetWriterName": AppID, "Payload": map[string]any{"Resource": "Event",
+				"Source": AppID, "Filter": "Syslog/" + level, "DataSetWriterId": float64(626 + i), "Mode": "OFF_0", "Interval": 0.0, "Config": "MODE_1"}})
+	}
+	for _, sub := range []struct{ res, tag string }{{"Data", "oee"}, {"Config", "Networksettings"}} {
+		m.dsms["SubscriptionList"][AppID] = append(m.dsms["SubscriptionList"][AppID], map[string]any{"DataSetWriterId": 227.0,
+			"WriterGroupName": sub.res + "/" + sub.tag, "DataSetWriterName": AppID, "Payload": map[string]any{
+				"TopicPath": topic("Set", sub.res, AppID, sub.tag), "Interval": 0.0, "Config": "NONE_0"}})
+	}
 	if len(m.dsms["MAM"][Asset]) != 1 || len(m.dsms["Profile"][AppID]) != 1 {
 		return nil, fmt.Errorf("sim: content model incomplete")
 	}
@@ -177,6 +225,7 @@ type Sim struct {
 	cl    *mqttwire.Client
 	m     *model
 	fault Fault
+	state sync.Mutex // the content model: written by Set and Del, read by Changed
 	mu    sync.Mutex
 	last  int64
 	gets  chan mqttwire.Message
@@ -202,9 +251,8 @@ func topic(method, resource, source, filter string) string {
 	return t
 }
 
-// Start connects the simulated CUT with its Will, subscribes to its Get
-// topics and publishes the Birth message and its Health.
-func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) {
+// build loads the content model of a run with the changes of the fault.
+func build(fault Fault) (*model, error) {
 	m, err := load()
 	if err != nil {
 		return nil, err
@@ -225,6 +273,33 @@ func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) 
 	}
 	if fault == NoRefDes {
 		m.dsms["ReferenceDesignation"] = map[string][]map[string]any{}
+	}
+	if fault == FixedLevel {
+		for _, d := range m.dsms["PublicationList"][AppID] {
+			p, _ := d["Payload"].(map[string]any)
+			if f, _ := p["Filter"].(string); strings.HasPrefix(f, "Syslog/") {
+				p["Config"] = "NONE_0"
+			}
+		}
+	}
+	if fault == NotListed {
+		var keep []map[string]any
+		for _, d := range m.dsms["SubscriptionList"][AppID] {
+			if g, _ := d["WriterGroupName"].(string); !strings.HasPrefix(g, "Config/") {
+				keep = append(keep, d)
+			}
+		}
+		m.dsms["SubscriptionList"][AppID] = keep
+	}
+	return m, nil
+}
+
+// Start connects the simulated CUT with its Will, subscribes to its Get,
+// Set and Del topics and publishes the Birth message and its Health.
+func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) {
+	m, err := build(fault)
+	if err != nil {
+		return nil, err
 	}
 	s := &Sim{m: m, fault: fault, gets: make(chan mqttwire.Message, 256), stop: make(chan struct{}), done: make(chan struct{})}
 	cfg.Will = &mqttwire.Message{Topic: topic("Pub", "Health", AppID, ""), Payload: m.will, QoS: 1}
@@ -253,9 +328,11 @@ func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) 
 		case <-s.stop:
 		}
 	}
-	if err := s.cl.Subscribe(ctx, topic("Get", "#", "", ""), 1, receive); err != nil {
-		s.Close()
-		return nil, err
+	for _, method := range []string{"Get", "Set", "Del"} {
+		if err := s.cl.Subscribe(ctx, topic(method, "#", "", ""), 1, receive); err != nil {
+			s.Close()
+			return nil, err
+		}
 	}
 	for _, res := range []string{"MAM", "Health"} {
 		if err := s.publish(ctx, res, AppID, "", "", s.m.dsms[res][AppID]); err != nil {
@@ -481,14 +558,23 @@ func (s *Sim) metadata(ctx context.Context, source, tag, replyTo string) {
 	_ = s.cl.Publish(ctx, mqttwire.Message{Topic: topic("Pub", "Metadata", source, tag), Payload: payload})
 }
 
-// handle answers one Get.
+// handle answers one Get, Set or Del.
 func (s *Sim) handle(msg mqttwire.Message) {
 	lv := strings.Split(msg.Topic, "/")
-	if len(lv) < 5 || lv[3] != "Get" {
+	if len(lv) < 5 {
 		return
 	}
 	var doc map[string]any
 	if json.Unmarshal(msg.Payload, &doc) != nil {
+		return
+	}
+	s.state.Lock()
+	defer s.state.Unlock()
+	if lv[3] == "Set" || lv[3] == "Del" {
+		s.write(lv, doc)
+		return
+	}
+	if lv[3] != "Get" {
 		return
 	}
 	if s.fault == UnknownKey {
@@ -542,7 +628,11 @@ func (s *Sim) handle(msg mqttwire.Message) {
 			if s.fault == AllAssets && res == "Health" && src == Asset {
 				continue
 			}
-			all = append(all, bySource[src]...)
+			for _, d := range bySource[src] {
+				if !s.off(res, src, d) {
+					all = append(all, d)
+				}
+			}
 		}
 		if res == "ReferenceDesignation" && q.query && s.fault != QueryIgnored {
 			all = children(all, q.parent, q.aspect)
@@ -565,7 +655,7 @@ func (s *Sim) handle(msg mqttwire.Message) {
 			_ = s.publish(ctx, res, source, filter, replyTo, nil)
 			return
 		}
-		ev := map[string]any{"DataSetWriterId": 623.0, "WriterGroupName": "Status/Bad", "DataSetWriterName": AppID,
+		ev := map[string]any{"DataSetWriterId": statusWriter(AppID, "Bad"), "WriterGroupName": "Status/Bad", "DataSetWriterName": AppID,
 			"Payload": map[string]any{"Number": float64(BadNotFound), "Description": "The requested asset is unknown.",
 				"Category": "CAT_STATUS_1", "Details": map[string]any{"SymbolicId": "BadNotFound"}}}
 		_ = s.publish(ctx, "Event", AppID, "Status/Bad", replyTo, []map[string]any{ev})
@@ -577,6 +667,9 @@ func (s *Sim) handle(msg mqttwire.Message) {
 	var out []map[string]any
 	for _, d := range bySource[source] {
 		g, _ := d["WriterGroupName"].(string)
+		if s.off(res, source, d) {
+			continue
+		}
 		if filter == "" || g == filter || (s.fault == FilterIgnored && res == "PublicationList") {
 			out = append(out, d)
 		}

@@ -3,10 +3,12 @@ package probe
 import (
 	"bytes"
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"slices"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -60,6 +62,13 @@ const simTimeout = 3 * time.Second
 // with the fault on a fresh test broker.
 func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, level int) ([]verdict.TestResult, Session) {
 	t.Helper()
+	return runSimWith(t, v, reqs, fault, Options{Level: level})
+}
+
+// runSimWith is runSim with the Level and the test selection of opt.
+func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, opt Options) ([]verdict.TestResult, Session) {
+	t.Helper()
+	level := opt.Level
 	pki := mqtttest.NewPKI(t)
 	b := mqtttest.NewBroker(t, pki, "", "", false)
 	cfg := mqttwire.Config{Broker: b.URL(), CAFile: pki.CAFile}
@@ -79,9 +88,15 @@ func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, faul
 		return err
 	}
 	app := sim.ServiceType + "/" + sim.AppID
-	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start}, reqs, observe)
+	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start, Tests: opt.Tests}, reqs, observe)
+	var changed []string
 	if c != nil {
+		var cerr error
+		changed, cerr = c.Changed()
 		c.Close()
+		if cerr != nil {
+			t.Fatal(cerr)
+		}
 	}
 	if err != nil {
 		t.Fatal(err)
@@ -89,14 +104,27 @@ func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, faul
 	if s.Cause != nil {
 		t.Fatal(s.Cause)
 	}
+	// The write tests restore the state of the CUT (DESIGN.md §3.3), and
+	// the restore check of the runner sees what the CUT knows.
+	for _, l := range changed {
+		t.Errorf("not restored: %s", l)
+	}
+	switch rs := s.Probe.Restore; {
+	case rs == nil:
+		t.Error("no restore check")
+	case rs.Checked && rs.Restored != (len(changed) == 0), fault == sim.None && !rs.Restored:
+		t.Errorf("restore check %+v, the simulated CUT changed %v", *rs, changed)
+	}
 	mon := e.Finish(time.Now().UTC())
 	// D7's own requests conform, except the deliberate stimuli that strict
 	// validation rejects: the unknown key of T7-GET-09 and the undefined
 	// query parameter of T7-GET-07 (REQ-MSG-001), the Query on Get MAM
 	// (REQ-QRY-001) and the Query on Get ReferenceDesignation with Source
-	// (REQ-RES-REFDES-013) of T7-GET-07. Against a faulty CUT a test may
-	// stop before its stimuli: then a part of them.
-	want := []string{"REQ-MSG-001", "REQ-MSG-001", "REQ-QRY-001", "REQ-RES-REFDES-013"}
+	// (REQ-RES-REFDES-013) of T7-GET-07, the Value of a Number that is no
+	// number of T7-SET-05 (REQ-RES-CONFIG-007). Against a faulty CUT a test
+	// may stop before its stimuli, and a selection of tests sends a part
+	// of them.
+	want := []string{"REQ-MSG-001", "REQ-MSG-001", "REQ-QRY-001", "REQ-RES-CONFIG-007", "REQ-RES-REFDES-013"}
 	var own []string
 	for _, o := range mon.Observations {
 		if o.Participant == s.Probe.Tester && o.Kind == verdict.Violation {
@@ -105,8 +133,8 @@ func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, faul
 		}
 	}
 	sort.Strings(own)
-	if fault == "none" && !slices.Equal(own, want) || !subset(own, want) {
-		t.Errorf("violations of the requests of D7 %v, want %v (the deliberate stimuli of T7-GET-07 and T7-GET-09)", own, want)
+	if fault == "none" && len(opt.Tests) == 0 && !slices.Equal(own, want) || !subset(own, want) {
+		t.Errorf("violations of the requests of D7 %v, want %v (the deliberate stimuli of T7-GET-07, T7-GET-09 and T7-SET-05)", own, want)
 	}
 	res, _, err := Judge(app, level, nil, mon, s, reqs)
 	if err != nil {
@@ -246,5 +274,83 @@ func TestImplemented(t *testing.T) {
 	}
 	if !slices.Equal(got, Implemented) {
 		t.Errorf("catalog implemented %v, runner %v", got, Implemented)
+	}
+}
+
+// TestSimMaskLevel1: at level 1 the mask in a Set Config is only SHOULD
+// (REQ-RES-CONFIG-025): D7 does not write back a Config DataSet with a
+// masked sensitive value, since the CUT could store the mask and the
+// restore check cannot see it.
+func TestSimMaskLevel1(t *testing.T) {
+	v, err := validate.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	reqs, err := verdict.LoadRequirements()
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, s := runSimWith(t, v, reqs, sim.None, Options{Level: 1, Tests: []string{"T7-SET-01", "T7-SET-05"}})
+	for _, q := range s.Probe.Requests {
+		// Oi4v2/<ServiceType>/<AppId>/Set/Config/<Source>/<Filter>
+		p := strings.Split(q.Topic, "/")
+		if len(p) > 5 && p[3] == "Set" && p[4] == "Config" && p[5] == p[2] {
+			t.Errorf("%s: Set Config of the application, whose Config DataSets are all masked", q.Topic)
+		}
+	}
+	found := false
+	for _, tr := range res {
+		for _, r := range tr.Reqs {
+			if r.Req == "REQ-RES-CONFIG-025" {
+				found = true
+				if r.Outcome != verdict.Skip {
+					t.Errorf("%s %s: %s %s, want skip", tr.ID, r.Req, r.Outcome, r.Reason)
+				}
+			}
+		}
+	}
+	if !found {
+		t.Error("REQ-RES-CONFIG-025 not judged")
+	}
+}
+
+// TestSimInterruptedWrite: a run that ends during the write tests reports
+// that the CUT may be left modified (restore not checked).
+func TestSimInterruptedWrite(t *testing.T) {
+	reqs, err := verdict.LoadRequirements()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pki := mqtttest.NewPKI(t)
+	b := mqtttest.NewBroker(t, pki, "", "", false)
+	cfg := mqttwire.Config{Broker: b.URL(), CAFile: pki.CAFile}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	var c *sim.Sim
+	start := func(ctx context.Context) error {
+		var err error
+		c, err = sim.Start(ctx, cfg, sim.None)
+		return err
+	}
+	stop := errors.New("stop at the first Del")
+	observe := func(m mqttwire.Message) error {
+		if strings.Contains(m.Topic, "/Del/") {
+			return stop
+		}
+		return nil
+	}
+	app := sim.ServiceType + "/" + sim.AppID
+	s, err := RunBus(ctx, cfg, Options{App: app, Level: 3, Timeout: simTimeout, Subscribed: start, Tests: []string{"T7-SET-*"}}, reqs, observe)
+	if c != nil {
+		c.Close()
+	}
+	if !errors.Is(err, stop) {
+		t.Fatalf("RunBus: %v, want %v", err, stop)
+	}
+	switch rs := s.Probe.Restore; {
+	case rs == nil:
+		t.Error("no restore result")
+	case rs.Checked || rs.Restored || !strings.Contains(rs.Note, "T7-SET-"):
+		t.Errorf("restore %+v, want not checked with a note on the interrupted write test", *rs)
 	}
 }

@@ -307,56 +307,56 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-BUS-006, REQ-CMP-016, REQ-CMP-023, REQ-CMP-038, REQ-MQTT-019, REQ-MSG-015, REQ-RES-EVENT-005, REQ-RES-SUBLIST-016, REQ-TOP-014, REQ-TOP-015]
-    status: planned
+    status: implemented
     notes: Runs for every object the CUT offers for modification (from Profile, Config and the own Set subscriptions in its SubscriptionList); the Set writes the current value back where possible, so the CUT state is unchanged. A Data or Config DataSet that accepts the Set must be listed with its Set subscription, a listed one must not answer BadNotWritable (REQ-RES-SUBLIST-016, SF-107).
   - id: T7-SET-02
     title: Set or Del on an unknown or non-modifiable object
     mode: test
     level: 1
     reqs: [REQ-CMP-043]
-    status: planned
+    status: implemented
   - id: T7-SET-03
     title: Set and Del for all resources
     mode: test
     level: 3
     reqs: [REQ-CMP-033]
-    status: planned
+    status: implemented
   - id: T7-SET-04
     title: Del semantics
     mode: test
     level: 1
     reqs: [REQ-BUS-007, REQ-BUS-008]
-    status: planned
+    status: implemented
   - id: T7-SET-05
     title: Set Config
     mode: test
     level: 1
     reqs: [REQ-RES-CONFIG-005, REQ-RES-CONFIG-021, REQ-RES-CONFIG-022, REQ-RES-CONFIG-023, REQ-RES-CONFIG-024, REQ-RES-CONFIG-025]
-    status: planned
+    status: implemented
   - id: T7-SET-06
     title: Set Data
     mode: test
     level: 1
     reqs: [REQ-RES-DATA-011, REQ-RES-DATA-012]
-    status: planned
+    status: implemented
   - id: T7-SET-07
     title: Set Metadata
     mode: test
     level: 1
     reqs: [REQ-RES-META-006, REQ-RES-META-007]
-    status: planned
+    status: implemented
   - id: T7-SET-08
     title: Set PublicationList
     mode: test
     level: 1
     reqs: [REQ-RES-PUBLIST-007, REQ-RES-PUBLIST-016, REQ-RES-PUBLIST-024, REQ-RES-PUBLIST-025]
-    status: planned
+    status: implemented
   - id: T7-SET-09
     title: Set and Del ReferenceDesignation
     mode: test
     level: 1
     reqs: [REQ-RES-REFDES-009, REQ-RES-REFDES-010]
-    status: planned
+    status: implemented
   - id: T7-SET-10
     title: ReferenceDesignation survives a restart
     mode: test
@@ -369,14 +369,14 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-RES-SUBLIST-004, REQ-RES-SUBLIST-013, REQ-RES-SUBLIST-014, REQ-RES-SUBLIST-015]
-    status: planned
+    status: implemented
     notes: Sets and deletes only CONF_1 entries the CUT lists; a Set with a TopicPath the CUT has not subscribed may be rejected with Status Bad (e.g. BadNotSupported, SF-111) and is then not a failure.
   - id: T7-SET-12
     title: Log level is configurable
     mode: test
     level: 1
     reqs: [REQ-TOP-027]
-    status: planned
+    status: implemented
 
   # --- test: Actions -----------------------------------------------------
   - id: T7-ACT-01
