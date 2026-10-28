@@ -112,6 +112,49 @@ func TestMAMOnChange(t *testing.T) {
 	}
 }
 
+// TestLocalizedMAM: the answer to a Get with a Locale carries the
+// LocalizedText in the requested language (REQ-LOC-002); it is not the
+// regular Pub MAM that REQ-LIFE-003 compares with the Birth. The same
+// answer to a Get without Locale is.
+func TestLocalizedMAM(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.birth(0, compA)
+	id := s.req(2, "V-PAY-007", nil)
+	s.fromVector(3, "V-PAY-047", id, nil)
+	plain := s.req(4, "V-PAY-007", func(m map[string]any) { m["Messages"] = []any{} })
+	s.fromVector(5, "V-PAY-047", plain, nil)
+	s.end = 10 * time.Second
+	res := run(t, s, DefaultOptions())
+	if n := len(find(res, "T7-MON-03", "REQ-LIFE-003", verdict.Violation)); n != 1 {
+		t.Errorf("want 1 violation (the German MAM without Locale), got %d: %+v", n, find(res, "T7-MON-03", "REQ-LIFE-003", verdict.Violation))
+	}
+}
+
+// TestRequestedPage: the answer to a Get with a PaginationRequest for one
+// page (Page > 0) is that page alone (REQ-PAG-002); HasNext true without a
+// further page is no incomplete series. The same answer to a Get without
+// PaginationRequest is (REQ-PAG-005).
+func TestRequestedPage(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.birth(0, compA)
+	answer := func(sec float64, replyTo string) {
+		id := msgID(compA, at(sec))
+		pag := dsMsg(2, compA.il, "Pagination", map[string]any{"TotalCount": 2, "PerPage": 1, "Page": 1, "HasNext": true, "PaginationId": id})
+		s.add(sec, compA.base()+"/Pub/MAM", network(compA, at(sec), classMAM, replyTo, dsMsg(compA.mamID, compA.il, "", compA.mam), pag))
+	}
+	page := s.req(2, "V-PAY-007", func(m map[string]any) {
+		m["Messages"] = []any{dsMsg(1, compB.il, "PaginationRequest", map[string]any{"PerPage": 1, "Page": 1})}
+	})
+	answer(3, page)
+	plain := s.req(4, "V-PAY-007", func(m map[string]any) { m["Messages"] = []any{} })
+	answer(5, plain)
+	s.end = 30 * time.Second
+	res := run(t, s, DefaultOptions())
+	if o := find(res, "T7-MON-18", "REQ-PAG-005", verdict.Violation); len(o) != 1 || o[0].Line != 6 {
+		t.Errorf("want 1 violation (line 6, the answer to the Get without PaginationRequest): %+v", o)
+	}
+}
+
 func TestDebugAfterSet(t *testing.T) {
 	s := scenario(t, "x", "")
 	s.start()

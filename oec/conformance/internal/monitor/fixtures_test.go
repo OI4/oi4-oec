@@ -430,9 +430,15 @@ func fixtures(t *testing.T) map[string]*sc {
 	s.fromVector(1.1, "V-PAY-006", getMAM, nil)
 	add(s, 5)
 
-	s = scenario(t, "pagination-broken", "a paged MAM response skips page 2; a second one ends with HasNext true and no further page (T7-MON-18)")
+	// Both Gets request all pages (Page 0): with Page > 0 only the requested
+	// page is published (REQ-PAG-002), HasNext true would then end no series.
+	allPages := func(m map[string]any) {
+		pr := first(m)["Payload"].(map[string]any)
+		pr["PerPage"], pr["Page"] = json.Number("1"), json.Number("0")
+	}
+	s = scenario(t, "pagination-broken", "a paged MAM response to a Get for all pages skips page 2; a second one ends with HasNext true and no further page (T7-MON-18)")
 	s.start()
-	getMAM = s.req(1, "V-PAY-005", func(m map[string]any) { first(m)["Payload"].(map[string]any)["PerPage"] = json.Number("1") })
+	getMAM = s.req(1, "V-PAY-005", allPages)
 	page := func(sec float64, first float64, n int64, next bool) {
 		s.fromVector(sec, "V-PAY-006", getMAM, func(m map[string]any) {
 			arr := messages(m)
@@ -444,7 +450,7 @@ func fixtures(t *testing.T) map[string]*sc {
 	}
 	page(1.1, 1.1, 1, true)
 	page(1.2, 1.1, 3, false)
-	getMAM = s.req(2, "V-PAY-005", func(m map[string]any) { first(m)["Payload"].(map[string]any)["PerPage"] = json.Number("1") })
+	getMAM = s.req(2, "V-PAY-005", allPages)
 	page(2.1, 2.1, 1, true)
 	add(s, 10)
 

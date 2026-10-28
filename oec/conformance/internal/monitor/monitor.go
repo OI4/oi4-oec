@@ -179,6 +179,7 @@ type chain struct {
 	lastNext       bool
 	lastAt         time.Time
 	lastLine       int
+	single         bool // the answer to a Get for one page (REQ-PAG-002)
 }
 
 // Engine is the monitor engine. It is not safe for concurrent use.
@@ -193,6 +194,8 @@ type Engine struct {
 	chains   map[string]*chain
 	mams     map[string]mamRef
 	appTypes map[string]map[string]bool
+	locales  map[string]bool // MessageIds of the Gets with a Locale (REQ-LOC-002)
+	pages    map[string]bool // MessageIds of the Gets for one page (REQ-PAG-002)
 	messages int
 	ns       int
 }
@@ -205,7 +208,8 @@ type mamRef struct {
 // New returns an engine for an observation that started at start.
 func New(v *validate.Validator, opt Options, start time.Time) *Engine {
 	return &Engine{v: v, opt: opt, start: start, parts: map[string]*part{}, checked: map[string]bool{},
-		msgIDs: map[string]int{}, chains: map[string]*chain{}, mams: map[string]mamRef{}, appTypes: map[string]map[string]bool{}}
+		msgIDs: map[string]int{}, chains: map[string]*chain{}, mams: map[string]mamRef{}, appTypes: map[string]map[string]bool{},
+		locales: map[string]bool{}, pages: map[string]bool{}}
 }
 
 var messageTS = regexp.MustCompile(`^([0-9]+)-`)
@@ -359,9 +363,30 @@ func (e *Engine) Observe(m Message) error {
 		e.reply(p, m, t, msg)
 		e.lifecycle(p, m, t, msg, nil)
 	default:
+		if t.Method == "Get" {
+			e.request(msg)
+		}
 		e.lifecycle(p, m, t, msg, nil)
 	}
 	return nil
+}
+
+// request notes the helper DataSets of a Get that change its answer: a
+// Locale (DataSetWriterId 3, MG 8.3.12) and a PaginationRequest for one
+// page (DataSetWriterId 1 with Page > 0, MG 8.3.11).
+func (e *Engine) request(msg map[string]any) {
+	id := str(msg, "MessageId")
+	for _, d := range dsms(msg) {
+		switch {
+		case !d.idOK:
+		case d.id == 3:
+			e.locales[id] = true
+		case d.id == 1:
+			if page, ok := num(d.payload, "Page"); ok && page > 0 {
+				e.pages[id] = true
+			}
+		}
+	}
 }
 
 // sender attributes a message to the component that sent it: the topic
@@ -542,9 +567,9 @@ func (e *Engine) pub(p *part, m Message, t *topic.Parsed, msg map[string]any) {
 	e.check(p, "T7-MON-04", "REQ-CMP-014")
 	birth := e.lifecycle(p, m, t, msg, ds)
 	_, meta := msg["MetaData"].(map[string]any)
-	e.content(p, m, t, ds, unsolicited, birth, t.Resource == "Metadata" && meta)
+	e.content(p, m, t, ds, unsolicited, birth, t.Resource == "Metadata" && meta, e.locales[str(msg, "ReplyTo")])
 	e.writerIDs(p, m, t, msg, ds)
-	e.paginate(p, m, ds)
+	e.paginate(p, m, ds, e.pages[str(msg, "ReplyTo")])
 	e.identity(p, m, t, ds)
 	e.debug(p, m, t, unsolicited)
 }
@@ -711,8 +736,10 @@ func revision(m map[string]any) string {
 
 // content is T7-MON-04, T7-MON-05 (heartbeat), T7-MON-11 and the regular
 // MAM part of T7-MON-03. A Pub Metadata carries its content in MetaData
-// (meta), not in DataSetMessages.
-func (e *Engine) content(p *part, m Message, t *topic.Parsed, ds []dsm, unsolicited, birth, meta bool) {
+// (meta), not in DataSetMessages. The answer to a Get with a Locale
+// (localized) is no regular Pub MAM: its LocalizedText may be in the
+// requested language (REQ-LOC-002).
+func (e *Engine) content(p *part, m Message, t *topic.Parsed, ds []dsm, unsolicited, birth, meta, localized bool) {
 	rs := e.resourceDSMs(ds)
 	if unsolicited {
 		e.check(p, "T7-MON-11", "REQ-CMP-042")
@@ -735,7 +762,7 @@ func (e *Engine) content(p *part, m Message, t *topic.Parsed, ds []dsm, unsolici
 		switch t.Resource {
 		case "MAM":
 			s.mam = true
-			if d.name == p.AppID && p.birthMAM != nil && !birth {
+			if d.name == p.AppID && p.birthMAM != nil && !birth && !localized {
 				e.regularMAM(p, m, d)
 			}
 		case "Health":
@@ -840,7 +867,7 @@ func (e *Engine) entry(p *part, m Message, d dsm) {
 // paginate is T7-MON-18 for REQ-PAG-004: the pages of one series (one
 // PaginationId) go to the same topic, keep TotalCount and PerPage, count
 // from 1 without repetition and end with HasNext false.
-func (e *Engine) paginate(p *part, m Message, ds []dsm) {
+func (e *Engine) paginate(p *part, m Message, ds []dsm, single bool) {
 	const test, req = "T7-MON-18", "REQ-PAG-004"
 	for _, d := range ds {
 		if !d.idOK || d.id != 2 || d.payload == nil {
@@ -858,7 +885,7 @@ func (e *Engine) paginate(p *part, m Message, ds []dsm) {
 		k := p.ID + "|" + pid
 		c := e.chains[k]
 		if c == nil {
-			c = &chain{sender: p.ID, topic: m.Topic, total: total, perPage: per, pages: map[int64]int{}}
+			c = &chain{sender: p.ID, topic: m.Topic, total: total, perPage: per, pages: map[int64]int{}, single: single}
 			e.chains[k] = c
 		}
 		at := d.ptr + "/Payload"
@@ -1064,7 +1091,7 @@ func (e *Engine) finishChains(end time.Time) {
 	sort.Strings(keys)
 	for _, k := range keys {
 		c := e.chains[k]
-		if !c.lastNext {
+		if !c.lastNext || c.single {
 			continue
 		}
 		p := e.parts[c.sender]
