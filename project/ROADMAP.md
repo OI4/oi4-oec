@@ -275,8 +275,8 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 1. ✅ (C-062) `test` engine with the bus attachment: `internal/probe` (discovery of the CUT, requests with `ReplyTo` correlation, sequential tests, the monitor engine on the same subscription, verdict via ADR-0025 amendment C-062), the simulated CUT `internal/sim` with fault injection, `oec-check test` (flags of `monitor` + `--timeout`, `--tests`, `--tester-il`; text/JSON/JUnit; `--record`); T7-GET-01, 02, 05, 09 `implemented`.
 2. ✅ (C-063) The rest of `Get`: T7-GET-03 (every supported resource incl. Data ⇒ Metadata), GET-04 (every represented entity fulfills the level), GET-06 (pagination on request and by size, `MaxPacketSize`), GET-07 (Query), GET-08 (Locale); T7-ADR-02, ADR-03.
 3. ✅ (C-064) Write side: T7-SET-01 … 09, 11, 12 (`Set`/`Del` ⇒ Status event with `ReplyTo`, Config, Data, Metadata, PublicationList, ReferenceDesignation, SubscriptionList, log level), each with restore of the original state; the PublicationList/Config state model in the probe.
-4. Action and the deferred passive rules: T7-ACT-01 … 04 (`NewDataSetWriterId` correlation, Ttl, no answer to rejected requests); T7-MON-09, 13 … 17 on the state model of 3.
-5. Proxy attachment (`--proxy-listen`, Q-028): D7 as the CUT's MQTT endpoint; T7-CON-01 … 04, T7-LIFE-01 … 03.
+4. ✅ (C-065) Action and the deferred passive rules: T7-ACT-01 … 04 (`NewDataSetWriterId` correlation, Ttl, no answer to rejected requests); T7-MON-09, 13, 15, 16, 17 on the state model of 3 (T7-MON-14 moved to increment 5).
+5. Proxy attachment (`--proxy-listen`, Q-028): D7 as the CUT's MQTT endpoint; T7-CON-01 … 04, T7-LIFE-01 … 03; T7-MON-14 (PublicationList Mode/Interval/Precisions, cut from increment 4 in C-065).
 6. Restart hook and peer: `--restart-cmd`, peer simulation and `--announce` (Q-029); T7-LIFE-04, SET-10, ADR-01.
 7. `list`/`explain`, `report.schema.json` (report version 1 frozen), catalog coverage report; the README/DESIGN as-built pass.
 8. P5 exit run: every catalog test `implemented` or a documented `manual`; `test` at level 2 against `demo.rs` passes, every negative fixture fails; CI on Windows/macOS/Linux runners comes with P9 (as the SDK platform matrix, D-1 (a)), the exit records the local runs.
@@ -288,8 +288,8 @@ Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of app
 | **C-062** ✅ | 1 | `internal/probe`, `internal/sim`, `oec-check test` (bus attachment), T7-GET-01/02/05/09 with 1 positive + 7 negative sim fixtures (reviewed in the C-062 review, R-1), run against `demo.rs` (14 pass, 3 skip, exit 0); ADR-0025 amendment C-062 | none |
 | **C-063** ✅ | 2 | T7-GET-03/04/06/07/08, ADR-02/03 `implemented` with 11 new sim fixtures (2 positive, 9 negative; reviewed in the C-063 review, R-1), monitor false positives on localized and single-page answers fixed, run against `demo.rs` (21 pass, 3 skip, exit 0); size-driven pagination judged passively (T7-MON-18); ADR-0025 amendment C-063 | none |
 | **C-064** ✅ | 3 | T7-SET-01 … 09, 11, 12 `implemented` with 13 new sim fixtures (2 positive, 11 negative; reviewed in the C-064 review), writable sim with `Changed()`, state snapshot and restore check (report key `restore`), run against `demo.rs` (30 pass, 5 skip, exit 0, state restored); SET-10 stays in increment 6; ADR-0025 amendment C-064 | none |
-| C-065 | 4 | T7-ACT-*, T7-MON-09/13 … 17 | none planned |
-| C-066 | 5 | proxy attachment, T7-CON-*, LIFE-01 … 03 | none planned (MQTT codec for the proxy: paho has no server side; own minimal relay on the standard library, decided in C-066) |
+| **C-065** ✅ | 4 | T7-ACT-01 … 04 and T7-MON-09/13/15/16/17 `implemented` with 5 new sim fixtures (1 positive, 4 negative) and 6 new capture fixtures (1 positive, 5 negative; `draft`, C-065 review R-1), run against `demo.rs` (38 pass, 6 skip, exit 0, state restored); T7-MON-14 cut to C-066; ADR-0025 amendment C-065 | none |
+| C-066 | 5 | proxy attachment, T7-CON-*, LIFE-01 … 03, T7-MON-14 | none planned (MQTT codec for the proxy: paho has no server side; own minimal relay on the standard library, decided in C-066) |
 | C-067 | 6 | restart hook, peer, `--announce`, LIFE-04, SET-10, ADR-01 | none planned |
 | C-068 | 7, 8 | `list`/`explain`, `report.schema.json`, coverage; P5 exit run | none planned |
 

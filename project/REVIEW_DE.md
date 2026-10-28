@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, C-064: **P5 Inkrement 3** – die Schreib-Tests (`Set`/`Del`) von `oec-check test` sind fertig. Deine Antwort „R-1 akzeptiert“ ist eingetragen. **Für dich ist nichts offen.** A-176 … A-190 nur zur Info._
+_Stand: 28.10.2026, C-065: **P5 Inkrement 4** – die Aktion `NewDataSetWriterId` (T7-ACT-01 … 04) und fünf weitere passive Regeln (T7-MON-09, 13, 15, 16, 17) sind fertig. **Für dich offen: R-1 (5 Testfälle gegen die simulierte App) und R-2 (6 Aufzeichnungs-Testfälle), bitte prüfen.** A-191 … A-201 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,81 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** Deine Antwort „R-1 akzeptiert“ ist eingetragen: Die 14 Testfälle der Schreib-Tests gegen die simulierte App (`oec/conformance/testdata/sim/index.yaml`) haben jetzt den Status `reviewed`.
+### R-1 – 5 Testfälle gegen die simulierte App (bitte prüfen)
+
+**Wo:** `oec/conformance/testdata/sim/index.yaml`, die 5 Einträge mit `status: draft` (die Fehler `T7-ACT-…`).
+
+**Worum es geht:** Wie in C-062 … C-064 startet ein Selbsttest die simulierte App mit genau einem eingebauten Fehler und lässt `oec-check test` auf Level 3 gegen sie laufen. Im Eintrag steht, welches Ergebnis herauskommen muss, je Test und mit den genauen Regeln (REQs). Neu sind die Tests der Aktion `NewDataSetWriterId`: Eine App fragt damit bei einer anderen eine neue, freie Nummer für einen Datensatz an. Die Antwort enthält die Nummer und wie lange sie reserviert ist (`Ttl`). Du prüfst: **Ist der eingebaute Fehler wirklich ein Verstoß gegen die genannte Regel, und ist der Fall ohne Fehler wirklich erlaubt?**
+
+**Ohne Fehler (muss bestehen):**
+- `T7-ACT-01/progress` – die App schickt vor der endgültigen Antwort eine Zwischenmeldung („in Arbeit“). Das ist erlaubt (REQ-ACT-016, MAY). Auch die Zwischenmeldung enthält die Nummer und die `Ttl` (REQ-ACT-012). Alle Tests bestehen.
+
+**Mit Fehler (muss durchfallen):**
+- `T7-ACT-01/no-correlation` – die App gibt die Kennung `CorrelationData` der Anfrage in der Antwort nicht zurück (REQ-ACT-007).
+- `T7-ACT-02/reissue` – die App gibt immer dieselbe Nummer 6000 heraus, obwohl sie noch 60 Sekunden reserviert ist. Folge: schon in T7-ACT-01 ist die zweite Nummer nicht neu (REQ-ACT-022), und T7-ACT-02 bekommt sie innerhalb der Reservierung noch einmal (REQ-ACT-023).
+- `T7-ACT-03/answers-unknown` – Anfragen mit einer unbekannten Ziel-Nummer (DataSetWriterId 4 bzw. ActionTargetId 2) beantwortet die App mit „nicht gefunden“, statt gar nicht zu antworten (REQ-ACT-017). Nebenwirkung: Diese Antworten tragen die falschen Nummern 4 und 2 und sind damit selbst ungültig. Das fängt die passive Prüfung T7-MON-01 als Verstoß gegen REQ-ACT-019.
+- `T7-ACT-04/no-reply` – eine Anfrage für ein unbekanntes Gerät bleibt ohne Antwort. Richtig wäre „nicht gefunden“ (BadNotFound) ohne Inhalt (REQ-ACT-024, SF-113).
+
+**Besonders anschauen:** die jeweils zweite Folge bei `reissue` (T7-ACT-01) und bei `answers-unknown` (T7-MON-01).
+
+**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1 akzeptiert“.
+
+### R-2 – 6 Aufzeichnungs-Testfälle der passiven Regeln (bitte prüfen)
+
+**Wo:** `oec/conformance/testdata/captures/index.yaml`, die 6 Einträge mit `status: draft`, dazu die Aufzeichnungen (`.jsonl`).
+
+**Worum es geht:** Wie in C-052: Eine Aufzeichnung ist eine kleine, aus geprüften Beispielnachrichten gebaute Szene auf dem Bus. `oec-check monitor` spielt sie ab und muss das eingetragene Ergebnis liefern. Bewertet wird App A (auf Level 3); B ist eine andere App, die mit A spricht. Die Konfig-Gruppe aus dem Guideline-Beispiel B1.1.3 heißt dort „Overall device settings“. Hier heißt sie „device“, weil Leerzeichen im Filter eines Topics eine Warnung auslösen (REQ-TOP-020). Du prüfst: **Ist die Szene wirklich ein Verstoß gegen die genannte Regel, und ist die Szene ohne Fehler wirklich erlaubt?**
+
+**Ohne Fehler (muss bestehen):**
+- `configuration-pass`:
+  - A schickt Messdaten und die passenden Metadaten unter derselben Klassen-Kennung mit denselben Feldern (T7-MON-09).
+  - Ihr Profil nennt Daten und Ereignisse (T7-MON-13).
+  - Wie im Guideline-Beispiel B1.1.3 ändert B die Konfiguration von A und schickt dabei alle Pflichtfelder mit (T7-MON-17).
+  - A bestätigt, schickt die neue Konfiguration und ihr Typenschild mit dem Änderungszähler 2 statt 1 (T7-MON-16).
+  - B ändert je einen Eintrag der PublicationList und der SubscriptionList. A schickt beide Listen danach neu (T7-MON-15).
+
+**Mit Fehler (muss durchfallen):**
+- `class-id-unstable` – A schickt dieselben Messdaten erst unter einer zweiten Klassen-Kennung, dann unter der ersten mit einem zusätzlichen Feld. Eine Klassen-Kennung gehört aber zu genau einem Aufbau (REQ-MSG-013).
+- `no-data-event` – A hat Geräte unter sich, aber ihr Profil nennt weder Daten noch Ereignisse, und sie schickt auch keine. Auf Level 3 ist beides Pflicht (REQ-CMP-010, -036, -038). Bei B sieht man gar nichts davon. Das wird nicht bewertet, sondern übersprungen.
+- `list-not-republished` – B ändert die PublicationList, A bestätigt, schickt die Liste aber nicht neu (REQ-RES-PUBLIST-017).
+- `revision-not-counted` – wie B1.1.3, aber 6 Sekunden nach der bestätigten Änderung meldet A immer noch den alten Änderungszähler 1 (REQ-RES-MAM-018).
+- `set-config-mandatory-missing` – B ändert die Konfiguration von A, lässt aber das Pflichtfeld `protocol` weg (REQ-RES-CONFIG-011). Hier macht der **Absender B** den Fehler, nicht A.
+
+**Besonders anschauen:** `no-data-event` (Pflicht erst ab Level 3) und dass bei `set-config-mandatory-missing` der Fragende bewertet wird.
+
+**Die bisherigen 18 Aufzeichnungen** bleiben unverändert und `reviewed`. `lifecycle-pass` hat jetzt ein paar „bestanden“ mehr und besteht weiter; `reconnect-pass` bleibt „nicht entscheidbar“ wie bisher.
+
+**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1 und R-2 akzeptiert“.
+
+### Zur Info: was C-065 gebaut hat
+
+- **Die Aktions-Tests sind fertig** (T7-ACT-01 … 04). D7 fragt die App nach einer neuen Datensatz-Nummer und prüft:
+  - Die Antwort kommt genau einmal endgültig an die angegebene Adresse.
+  - Die Nummer ist neu und wird von der App nicht schon benutzt.
+  - Solange sie reserviert ist, wird sie nicht noch einmal vergeben.
+  - Auf unsinnige Anfragen antwortet die App gar nicht.
+  - Für ein unbekanntes Gerät antwortet sie „nicht gefunden“.
+  
+  D7 benutzt die Nummer nie. Deshalb ändert sich an der App nichts, und der Vergleich vorher/nachher bleibt gleich.
+- **Fünf weitere passive Regeln** (jetzt 18 von 19):
+  - eine Klassen-Kennung gehört zu genau einem Datensatz-Aufbau;
+  - Apps mit Geräten bieten Daten und Ereignisse an;
+  - nach einer Änderung wird die Liste neu geschickt;
+  - der Änderungszähler im Typenschild steigt;
+  - wer die Konfiguration ändert, schickt alle Pflichtfelder mit.
+  
+  **T7-MON-14** (ob die App so oft und so genau schickt, wie in der PublicationList steht) braucht ein eigenes Zeitmodell und kommt in C-066 (A-191).
+- **Gefunden und behoben** (Test zuerst): Im Bericht fehlten die Aktions-Anfragen von D7 in der Liste der Anfragen. Dazu kleinere Dinge an der simulierten App und den Testfällen (A-201).
+- **Lauf gegen die Beispiel-App `demo.rs`** (Level 2): **38 bestanden, 0 durchgefallen, 6 übersprungen.**
+  - 145 Anfragen, 142 beantwortet. Die 3 unbeantworteten sind die absichtlich unsinnigen Anfragen von T7-ACT-03, auf die die App richtig schweigt.
+  - Der Stand der App war danach wieder derselbe. Am SDK musste nichts geändert werden.
+  - T7-MON-17 wird übersprungen, weil die Demo selbst keine Konfiguration anderer Apps ändert.
+- Kein Finding, keine neue Bibliothek, kein geprüfter Testfall verändert.
+
+Die Technik-Entscheidungen A-191 … A-201 sind nur zur Info (unten). Einen Blick wert:
+- **A-191:** T7-MON-14 kommt erst in C-066.
+- **A-195:** was T7-ACT-02/03 nicht sehen können.
+- **A-199/A-200:** was der Änderungszähler und die Pflichtfelder in einem `test`-Lauf zeigen können.
 
 ### Zur Info: was C-064 gebaut hat
 
@@ -134,7 +208,7 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
 
 ### Begriffe aus C-061
 
@@ -585,11 +659,25 @@ Neu aus C-064 (P5 Inkrement 3):
 - **A-189 (neu) – ReferenceDesignation löschen:** nur, wenn das Zurückschreiben vorher geklappt hat (neuer erlaubter Testfall `set-rejected`).
 - **A-190 (neu) – Abbruch:** Bricht ein Lauf in den Schreib-Tests ab, meldet D7 „nicht geprüft, App evtl. verändert“ und warnt.
 
+Neu aus C-065 (P5 Inkrement 4):
+- **A-191 (neu) – Zuschnitt:** T7-MON-14 prüft über den ganzen Lauf, ob die App so oft und so genau schickt, wie in der PublicationList steht. Dafür braucht es ein eigenes Zeitmodell; der Test kommt in C-066. Der Rest von Inkrement 4 in einem Zyklus.
+- **A-192 (neu) – Die Anfrage:** D7 fragt auf `Call/NewDataSetWriterId` und nennt als Antwortadresse das passende `Reply`-Topic. Antworten erkennt D7 an seiner eigenen Kennung und der Anfrage-Nummer, egal auf welchem Antwort-Topic der App. So ist eine Antwort an der falschen Stelle ein Befund und nicht bloß „keine Antwort“.
+- **A-193 (neu) – Im Schreib-Fenster:** Die Aktions-Tests laufen nach den Schreib-Tests, vor dem Vergleich vorher/nachher. D7 benutzt die Nummer nie, also gibt es nichts aufzuräumen.
+- **A-194 (neu) – Muss die App antworten?** Ja, wenn ihr Profil den Dienst nennt oder das Level ihn vorschreibt (REQ-CMP-040). Sonst wird „keine Antwort“ übersprungen.
+- **A-195 (neu) – Grenzen:** Ob eine vergebene Nummer innerhalb der Reservierung tatsächlich benutzt wird, sieht D7 nicht, weil es keinen Datensatz anlegt (bleibt Handprüfung). T7-ACT-03 schickt absichtlich zwei ungültige Anfragen und bewertet das Schweigen nur, wenn die App eine gültige Anfrage daneben beantwortet.
+- **A-196 (neu) – „Aufbau“ eines Datensatzes:** die sortierten Feldnamen. Die Datentypen der Felder werden nicht verglichen.
+- **A-197 (neu) – Nichts zu sehen:** Hat eine App weder Profil noch Daten/Ereignisse geschickt, wird T7-MON-13 einfach übersprungen, nicht „nicht entscheidbar“. Sonst wäre der geprüfte Testfall `lifecycle-pass` plötzlich nicht mehr „bestanden“.
+- **A-198 (neu) – Liste neu geschickt:** zählt, wenn die Liste nach der Bestätigung innerhalb von 5 s kommt, ohne `ReplyTo` oder mit dem `ReplyTo` der Änderung. Nach dem Löschen aus der SubscriptionList wird das Ausbleiben nicht bewertet: Ist kein Eintrag mehr übrig, wird nichts geschickt, und das sieht man von außen nicht.
+- **A-199 (neu) – Änderungszähler:** darf nie sinken und nicht zwischen -1 (kein Zähler) und einer Zahl wechseln. Nach einer bestätigten Änderung eines Konfig-Werts muss er steigen, aber nicht genau um 1 (es können mehrere Änderungen dazwischen liegen). Passwörter und ReferenceDesignation zählen nicht mit (A-113 bleibt). D7 selbst ändert keine Werte wirklich; im `test`-Lauf wird deshalb nur geprüft, dass der Zähler nicht sinkt.
+- **A-200 (neu) – Pflichtfelder:** geprüft wird der Absender der Änderung, gegen die zuletzt geschickte Konfiguration der Ziel-App. Im `test`-Lauf zählt nur die App selbst, also nur ihre eigenen Änderungen an anderen Apps.
+- **A-201 (neu) – Kleinkram:** Konfig-Gruppe ohne Leerzeichen in drei Aufzeichnungen; die Zwischenmeldung der simulierten App enthält jetzt Nummer und `Ttl`; `answers-unknown` erwartet auch den Befund von T7-MON-01; der Bericht listet die Aktions-Anfragen mit.
+
 ---
 
-### Was als Nächstes passiert (C-065)
+### Was als Nächstes passiert (C-066)
 
-1. **P5 Inkrement 4:** die Aktion `NewDataSetWriterId` (T7-ACT-01 … 04) und die restlichen passiven Regeln (T7-MON-09, 13 … 17).
+1. **Dein Review** von R-1 und R-2.
+2. **P5 Inkrement 5:** D7 als „Zwischenstation“ (Proxy), über die sich die App mit dem Broker verbindet. So sieht D7 den Verbindungsaufbau selbst: T7-CON-01 … 04 (Verbindung, TLS, Anmeldung, keine gespeicherten Nachrichten), T7-LIFE-01 … 03 (letzter Wille, Anmeldung nach jedem Verbinden). Dazu T7-MON-14.
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

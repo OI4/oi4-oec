@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-064 review (you accepted R-1: the 14 sim fixtures of the write tests are `reviewed`). **Nothing is open for you.** A-176 … A-190 for information, worth a look: A-177, A-178, A-180, A-188, A-189._
+_Last updated: 2026-10-28, C-065 (P5 increment 4: the Action tests T7-ACT-01 … 04 and the monitor rules T7-MON-09, 13, 15, 16, 17). **Open for you: R-1 (5 sim fixtures) and R-2 (6 capture fixtures), review.** A-191 … A-201 for information, worth a look: A-191, A-195, A-199, A-200._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -138,10 +138,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Against `demo.rs` (level 2): **30 pass, 0 fail, 5 skip, exit 0**, 136 requests all answered, state restored (three runs). The SDK was not changed.
   - ADR-0025 amendment C-064; no SF, no new dependency. A-176 … A-190 for information.
 - C-064 review: you accepted R-1; the 14 sim fixtures in `testdata/sim/index.yaml` are `reviewed`. Nothing is open.
+- C-065 (P5 increment 4):
+  - **T7-ACT-01 … 04 `implemented`** – D7 calls `NewDataSetWriterId`: one final response on the ResponseAddress with the CorrelationData, a new id ≥ 10 with a Ttl that the component does not use; no id again while it is reserved; no answer to unaddressable or undecodable requests; BadNotFound with an empty Payload for an unknown Source. The calls run inside the write window; a provided id is never used, so the restore check is unaffected.
+  - **T7-MON-09, 13, 15, 16, 17 `implemented`** (18 of 19 monitor rules): one DataSetClassId per structure, Data/Event support of components with Sources, the list published again after a change, the RevisionCounter, the mandatory Config objects in a Set Config. **T7-MON-14 moves to C-066** (A-191).
+  - 5 new faults of the simulated component (1 conforming variant, 4 faults) → **R-1**; 6 new capture fixtures (1 positive, 5 negative) → **R-2**. No reviewed fixture changed its verdict.
+  - Found test-first and fixed: the report's list of requests left out the Action calls; besides, sim and fixture details (A-201).
+  - Against `demo.rs` (level 2): **38 pass, 0 fail, 6 skip, exit 0**, 145 requests (142 answered; the 3 others are the deliberately unanswerable calls of T7-ACT-03), state restored. The SDK was not changed.
+  - ADR-0025 amendment C-065; no SF, no new dependency. A-191 … A-201 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
-Logs: [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -337,10 +344,52 @@ Logs: [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-06
 | A-188 | No write-back of a masked sensitive Config value at level 1 (REQ-RES-CONFIG-025 only SHOULD) | info (agent) | C-064 | – | – |
 | A-189 | A ReferenceDesignation is deleted only after its write-back Set got Status Good | info (agent) | C-064 | – | – |
 | A-190 | A run that ends during the write tests reports the restore as not checked (warning) | info (agent) | C-064 | – | – |
+| R-1 | 5 sim fixtures of `oec-check test` (T7-ACT-01 … 04) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-065 | accept | ☐ |
+| R-2 | 6 capture fixtures of `oec-check monitor` (T7-MON-09/13/15/16/17) and their expected verdicts (`testdata/captures/index.yaml`) | review (G-3.9) | C-065 | accept | ☐ |
+| A-191 | Cut: T7-MON-14 moves to C-066 (increment 5) | info (agent) | C-065 | – | – |
+| A-192 | Action stimuli; responses matched by `RequestorId` and `RequestId` on any Reply topic | info (agent) | C-065 | – | – |
+| A-193 | The Action tests run inside the write window; provided ids are never used | info (agent) | C-065 | – | – |
+| A-194 | `NewDataSetWriterId` must be answered if the Profile offers it or REQ-CMP-040 is MUST at the level | info (agent) | C-065 | – | – |
+| A-195 | ACT-02 initial use stays manual; ACT-03 deliberate invalid requests and its reference call | info (agent) | C-065 | – | – |
+| A-196 | MON-09: structure = sorted field names per DataSet | info (agent) | C-065 | – | – |
+| A-197 | MON-13: without Profile and publication a plain skip | info (agent) | C-065 | – | – |
+| A-198 | MON-15: republication criteria; Del SubscriptionList not judged | info (agent) | C-065 | – | – |
+| A-199 | MON-16: growth not exactly +1; only value changes of non-sensitive Config objects; monotonicity only in `test` | info (agent) | C-065 | – | – |
+| A-200 | MON-17 judges the requester against the merged Pub Configs; in `test` only the CUT | info (agent) | C-065 | – | – |
+| A-201 | Fixture details (`retag`, sim progress, `answers-unknown`) and the Action calls in the report | info (agent) | C-065 | – | – |
 
 ## Decisions and review items
 
-No open item.
+### R-1 – sim fixtures of `oec-check test`, increment 4 (G-3.9)
+
+- **Where:** `oec/conformance/testdata/sim/index.yaml` – 5 new entries `draft` (the faults of T7-ACT-01 … 04). The other 32 entries are unchanged and stay `reviewed`: the Action tests pass on them.
+- **What they are:** as in C-062 … C-064 – `internal/probe/sim_test.go` runs `oec-check test` (monitor + active tests, level 3) against the simulated component with one fault and compares outcome and exact REQ ids per test; every run must leave the component in its start state.
+- **Positive (conforming):**
+  - `T7-ACT-01/progress` – before the final response (ActionState 2) the component publishes an intermediate response with ActionState 1 (REQ-ACT-016, MAY); like every Good response it carries the response fields (REQ-ACT-012). Every test passes.
+- **Negative (fault → expected outcome):**
+  - `T7-ACT-01/no-correlation` (the CorrelationData of the request is not echoed): T7-ACT-01 fail REQ-ACT-007;
+  - `T7-ACT-02/reissue` (every request gets the id 6000, which is still reserved, Ttl 60 s): T7-ACT-01 fail REQ-ACT-022 (the second id is not new); T7-ACT-02 fail REQ-ACT-023;
+  - `T7-ACT-03/answers-unknown` (requests with the unknown DataSetWriterId 4 and ActionTargetId 2 are answered with BadNotFound instead of not at all): T7-ACT-03 fail REQ-ACT-017; T7-MON-01 fail REQ-ACT-019 (the responses echo 4/2, which the schema of a NewDataSetWriterId response rejects);
+  - `T7-ACT-04/no-reply` (a request for an unknown Source is not answered): T7-ACT-04 fail REQ-ACT-024.
+- **Please check:** is each fault a real violation of the named REQ, and is `progress` really compliant? In particular: the second outcome of `reissue` (T7-ACT-01 REQ-ACT-022) and of `answers-unknown` (T7-MON-01 REQ-ACT-019).
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
+
+### R-2 – capture fixtures of the monitor rules T7-MON-09/13/15/16/17 (G-3.9)
+
+- **Where:** `oec/conformance/testdata/captures/index.yaml` – 6 new entries `draft` with their `.jsonl` captures. The 18 reviewed entries are unchanged; `lifecycle-pass` gains passes of the new rules and stays PASS, `reconnect-pass` stays INCONCLUSIVE.
+- **What they are:** as in C-052 – scenarios built from reviewed payload vectors, replayed by `monitor --replay` in `internal/monitor/fixtures_test.go`, compared per test with outcome and exact REQ ids. Component A is judged, B is a peer. The Config tag of MG B1.1.3 ("Overall device settings") is used as "device", because a topic Filter with blanks is a REQ-TOP-020 warning.
+- **Positive:**
+  - `configuration-pass` – A publishes Data `oee` and its Metadata under one DataSetClassId with the same fields (MON-09) and a Profile with Data and Event (MON-13). MG B1.1.3: B sends Set Config V-PAY-100 with the mandatory objects of the published Config V-PAY-099 (MON-17); A answers Status Good, publishes Config V-PAY-114 and its MAM with RevisionCounter 2 (Birth 1, MON-16). B sets a PublicationList and a SubscriptionList entry; A publishes each again with the `ReplyTo` of the Set (MON-15). The heartbeat cannot be judged in 15 s (skip).
+- **Negative (scenario → expected outcome):**
+  - `class-id-unstable` (Data `oee` under a second DataSetClassId with the same fields, then under the first with an additional field): T7-MON-09 fail REQ-MSG-013;
+  - `no-data-event` (A's Profile lists neither Data nor Event and A publishes neither; B shows nothing, skip): T7-MON-13 fail REQ-CMP-010, REQ-CMP-036, REQ-CMP-038;
+  - `list-not-republished` (Set PublicationList answered with Status Good, no republication within 5 s): T7-MON-15 fail REQ-RES-PUBLIST-017;
+  - `revision-not-counted` (MG B1.1.3; 5.9 s after Status Good A answers Get MAM with RevisionCounter 1, the value of its Birth): T7-MON-16 fail REQ-RES-MAM-018;
+  - `set-config-mandatory-missing` (B's Set Config V-PAY-100 without the mandatory object `protocol`): T7-MON-17 fail REQ-RES-CONFIG-011 – the requester B is in violation.
+- **Please check:** is each scenario a real violation of the named REQ, and is `configuration-pass` compliant? In particular: MON-13 on a Profile without Data and Event (the captures are judged at level 3, where Data and Event are MUST: REQ-CMP-036/038, with REQ-CMP-010 "complete Message Bus behavior"), and that MON-17 judges the requester.
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -956,6 +1005,22 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-189 ReferenceDesignation Del:** only after a write-back Set of the object got Status Good; otherwise SET-09 skips REQ-RES-REFDES-010, SET-04 uses its own subscription, SET-03 skips the Del (new conforming fixture `T7-SET-09/set-rejected`).
 - **A-190 Interrupted run:** if the run ends during the write tests (error, broker lost, interrupt), the restore is reported as not checked with a note naming the test, and `oec-check test` warns; no recovery attempt.
 
-## Next (C-065)
+### A-191 … A-201 – P5 increment 4 (C-065, agent)
 
-1. P5 increment 4: T7-ACT-01 … 04 and T7-MON-09/13 … 17 on the state model of C-064; in a new session (start prompt in `prompt.md`).
+- **Where:** `oec/conformance/internal/probe/{action, probe}.go`, `internal/sim/action.go`, `internal/monitor/{config, monitor}.go`, `testdata/sim/index.yaml`, `testdata/captures/`, `catalog/d7.yaml`; ADR-0025 amendment C-065; DESIGN.md §3.3/§10 "As built (C-065)"; log `log/2026-10-28_C-065_d7-action-monitor.md`.
+- **A-191 Cut:** T7-MON-14 (Mode, Interval and Precisions of the PublicationList, judged over the whole observation) needs a timing model none of the other rules needs; it moves to C-066 (increment 5). The rest of increment 4 in one cycle.
+- **A-192 Action stimuli:** `ua-action-request` on `Call/NewDataSetWriterId[/<Source>]` with ResponseAddress = the matching `Reply` topic, `RequestorId` = the tester, `TimeoutHint`, optional CorrelationData; DataSetWriterId 8, ActionTargetId 1, Payload `{"Resource": "Data"}`. Responses are matched by `RequestorId` and `RequestId` on any Reply topic of the component, so a wrong topic is a finding, not a timeout.
+- **A-193 Write window:** the Action tests run after the write tests, inside the restore window. A provided id is only reserved; D7 never uses it and creates nothing, so nothing must be restored (demo: restored).
+- **A-194 Must answer:** if the Profile lists `NewDataSetWriterId` or REQ-CMP-040 is MUST at the declared level; otherwise an unanswered call is a skip.
+- **A-195 Limits:** ACT-02 cannot see the initial use of a provided id within its Ttl (D7 creates no DataSet; manual part, catalog note). ACT-03 sends two schema-invalid requests on purpose (tester violation REQ-ACT-019) and judges silence only if a valid call beside them is answered.
+- **A-196 MON-09:** the structure of a DataSet is the sorted list of its field names (Metadata `Fields`, Data payload keys) per resource, DataSetWriterName and WriterGroupName; field types are not compared.
+- **A-197 MON-13:** without Profile and without publication the rule skips as "not observable", not inconclusive (`test` requests the Profile). Otherwise the reviewed `lifecycle-pass` would have become INCONCLUSIVE.
+- **A-198 MON-15:** after Status Good the list counts as published again on a Pub with an empty `ReplyTo` or the `ReplyTo` of the Set (the latter shows the MAY REQs PUBLIST-018/SUBLIST-006), within the tolerance (5 s). After a Del SubscriptionList the absence is not judged (REQ-RES-SUBLIST-015, remaining entries not observable).
+- **A-199 MON-16:** the RevisionCounter never decreases and does not change between -1 and a counter; after a Set Config with Status Good that changes a known non-sensitive Value, a later MAM must carry a larger counter – not exactly +1 (several changes may lie between). ReferenceDesignation changes are not counted (A-113 unchanged). D7 makes no value-changing Set Config, so a `test` run judges only monotonicity.
+- **A-200 MON-17:** the requester must include every mandatory object of each group it sends, judged against the Pub Configs of the addressed Source and WriterGroupName, merged per object. In `test` only the observations about the component count, so the tester's own Sets are not judged.
+- **A-201 Details:** `retag` uses the Config tag of MG B1.1.3 without blanks in three captures (REQ-TOP-020); the progress variant of the sim carries the response fields in the intermediate response (REQ-ACT-012); `answers-unknown` also expects T7-MON-01 REQ-ACT-019; the report's `requests` list the Action calls in the order sent, with their ActionResponses as `replies` (fixed test-first).
+
+## Next (C-066)
+
+1. Your review of R-1 and R-2.
+2. P5 increment 5: proxy attachment (`--proxy-listen`, Q-028), T7-CON-01 … 04, T7-LIFE-01 … 03 and T7-MON-14; in a new session (start prompt in `prompt.md`).
