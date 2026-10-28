@@ -307,6 +307,29 @@ func fixtures(t *testing.T) map[string]*sc {
 	s.close(127, compA)
 	add(s, 128)
 
+	s = scenario(t, "configuration-pass", "Data and DataSetMetaData of one class, the Profile, a Set Config with all mandatory objects (MG B1.1.3) followed by a MAM with a greater RevisionCounter, and a Set of the PublicationList and the SubscriptionList, each republished (T7-MON-09, 13, 15, 16, 17)")
+	s.start()
+	s.fromVector(2, "V-PAY-058", "", nil)
+	getMeta = s.req(2.1, "V-PAY-020", nil)
+	s.fromVector(2.2, "V-PAY-021", getMeta, nil)
+	getProfile := s.req(3, "V-PAY-030", nil)
+	s.fromVector(3.1, "V-PAY-032", getProfile, nil)
+	s.fromVector(3.5, "V-PAY-064", "", nil)
+	getConfig := s.req(4, "V-PAY-098", nil)
+	s.fromVector(4.1, "V-PAY-099", getConfig, nil)
+	setConfig := s.req(5, "V-PAY-100", nil)
+	s.fromVector(5.1, "V-PAY-076", setConfig, nil)
+	s.fromVector(5.2, "V-PAY-114", setConfig, nil)
+	s.mamRevision(5.3, compA, "2", "")
+	setPL := s.req(6, "V-PAY-040", nil)
+	s.fromVector(6.1, "V-PAY-078", setPL, nil)
+	s.fromVector(6.2, "V-PAY-037", setPL, nil)
+	setSL := s.req(7, "V-PAY-072", nil)
+	s.fromVector(7.1, "V-PAY-073", setSL, nil)
+	s.fromVector(7.2, "V-PAY-069", setSL, nil)
+	retag(s)
+	add(s, 15)
+
 	s = scenario(t, "reconnect-pass", "a component loses its connection (the broker publishes its Will, created at the connect) and reconnects with a new Birth")
 	s.birth(0, compA)
 	s.health(0.05, compA, "NORMAL_0", 100)
@@ -463,7 +486,75 @@ func fixtures(t *testing.T) map[string]*sc {
 	})
 	fixTopic(s, "Syslog/Notice", "Syslog/Debug")
 	add(s, 10)
+
+	s = scenario(t, "class-id-unstable", "Data oee under another DataSetClassId with the same fields, then under the first DataSetClassId with an additional field (T7-MON-09)")
+	s.start()
+	s.fromVector(5, "V-PAY-058", "", nil)
+	s.fromVector(6, "V-PAY-058", "", func(m map[string]any) { m["DataSetClassId"] = "6c2b07a4-1f0e-4d8e-9a54-0b6f3f1c2d10" })
+	s.fromVector(7, "V-PAY-058", "", func(m map[string]any) { first(m)["Payload"].(map[string]any)["Scrap"] = json.Number("2") })
+	add(s, 10)
+
+	s = scenario(t, "no-data-event", "the Profile of the component about itself lists neither Data nor Event, and the component publishes neither (T7-MON-13)")
+	s.start()
+	getProfile = s.req(3, "V-PAY-030", nil)
+	s.fromVector(3.1, "V-PAY-032", getProfile, func(m map[string]any) {
+		first(m)["Payload"].(map[string]any)["Resources"] = []any{"MAM", "Health", "Config", "Profile", "PublicationList", "ReferenceDesignation"}
+	})
+	add(s, 10)
+
+	s = scenario(t, "list-not-republished", "a Set PublicationList confirmed with Status Good; the PublicationList is not published again (T7-MON-15)")
+	s.start()
+	setPL = s.req(4, "V-PAY-040", nil)
+	s.fromVector(4.1, "V-PAY-078", setPL, nil)
+	add(s, 15)
+
+	s = scenario(t, "revision-not-counted", "a Set Config that changes values (MG B1.1.3) confirmed with Status Good; 6 s later the MAM about itself still carries the RevisionCounter of the Birth (T7-MON-16)")
+	s.start()
+	getConfig = s.req(4, "V-PAY-098", nil)
+	s.fromVector(4.1, "V-PAY-099", getConfig, nil)
+	setConfig = s.req(5, "V-PAY-100", nil)
+	s.fromVector(5.1, "V-PAY-076", setConfig, nil)
+	s.fromVector(5.2, "V-PAY-114", setConfig, nil)
+	getMAM = s.req(11, "V-PAY-026", nil)
+	s.mamRevision(11.1, compA, "1", getMAM)
+	retag(s)
+	add(s, 15)
+
+	s = scenario(t, "set-config-mandatory-missing", "B sends a Set Config whose group device1 lacks the mandatory object protocol of the Config A published (T7-MON-17)")
+	s.start()
+	getConfig = s.req(4, "V-PAY-098", nil)
+	s.fromVector(4.1, "V-PAY-099", getConfig, nil)
+	s.req(5, "V-PAY-100", func(m map[string]any) {
+		delete(first(m)["Payload"].(map[string]any)["device1"].(map[string]any), "protocol")
+	})
+	retag(s)
+	add(s, 10)
 	return out
+}
+
+// retag renames the Config tag "Overall device settings" of MG B1.1.3
+// (V-PAY-098 … 102, 114), whose whitespace a validator warns about
+// (REQ-TOP-020), to "device" in the topics and WriterGroupNames.
+func retag(s *sc) {
+	const from, to = "Overall device settings", "device"
+	for i := range s.records {
+		r := &s.records[i]
+		if strings.HasSuffix(r.Topic, "/"+from) {
+			r.Topic = strings.TrimSuffix(r.Topic, from) + to
+			r.Payload = bytes.ReplaceAll(r.Payload, []byte(`"WriterGroupName":"`+from+`"`), []byte(`"WriterGroupName":"`+to+`"`))
+		}
+	}
+}
+
+// mamRevision publishes the MAM of c about itself with another
+// RevisionCounter, unsolicited or as the answer to a Get (replyTo).
+func (s *sc) mamRevision(sec float64, c comp, rev, replyTo string) {
+	mam := map[string]any{}
+	for k, v := range c.mam {
+		mam[k] = v
+	}
+	mam["RevisionCounter"] = json.Number(rev)
+	s.add(sec, c.base()+"/Pub/MAM/"+c.self(), network(c, at(sec), classMAM, replyTo, dsMsg(c.mamID, c.il, "", mam)))
 }
 
 func fixTopic(s *sc, from, to string) {

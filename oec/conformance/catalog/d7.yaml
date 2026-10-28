@@ -83,8 +83,8 @@ tests:
     mode: monitor
     level: 1
     reqs: [REQ-MSG-013]
-    status: planned
-    notes: Compared across reconnects of the CUT; a restart across runs needs a recording of the earlier run (`--baseline-recording`).
+    status: implemented
+    notes: Publisher-defined DataSetClassIds are those of Data and of the DataSetMetaData; the structure is the set of field names (DataSetMessage payload keys, MetaData Fields). Compared within the observation, also across reconnects of the CUT; a restart across runs needs a recording of the earlier run (`--baseline-recording`, deferred).
   - id: T7-MON-10
     title: Identification Links are unique
     mode: monitor
@@ -110,33 +110,36 @@ tests:
     mode: monitor
     level: 2
     reqs: [REQ-CMP-010, REQ-CMP-036, REQ-CMP-038]
-    status: planned
+    status: implemented
+    notes: A resource is supported when the CUT publishes it or lists it in its Profile about itself (REQ-CMP-021; also without content, REQ-CMP-041 … 043). REQ-CMP-010 is judged here for Data and Event only. Judged for components that publish about a Source; without Profile and publication not observable (skip; test mode requests the Profile).
   - id: T7-MON-14
     title: Publication rules of the PublicationList
     mode: monitor
     level: 1
     reqs: [REQ-MQTT-019, REQ-RES-PUBLIST-008, REQ-RES-PUBLIST-009, REQ-RES-PUBLIST-010, REQ-RES-PUBLIST-011, REQ-RES-PUBLIST-013, REQ-RES-PUBLIST-014, REQ-RES-PUBLIST-015]
     status: planned
-    notes: The rules are checked against the last published PublicationList (Mode, Interval, Precisions); interval tolerance is a parameter of the run.
+    notes: The rules are checked against the last published PublicationList (Mode, Interval, Precisions); interval tolerance is a parameter of the run. Cut to C-066 (C-065, G-3.4 b).
   - id: T7-MON-15
     title: PublicationList and SubscriptionList are republished on change
     mode: monitor
     level: 1
     reqs: [REQ-RES-PUBLIST-017, REQ-RES-PUBLIST-018, REQ-RES-SUBLIST-005, REQ-RES-SUBLIST-006]
-    status: planned
+    status: implemented
+    notes: A change is a Set or Del of the list addressed to the CUT that the CUT confirms with Status/Good; a republication is a Pub of the list after the request with an empty ReplyTo or the ReplyTo of the request (the latter shows REQ-RES-PUBLIST-018/SUBLIST-006). A Del SubscriptionList without republication is not judged (no remaining entry, REQ-RES-SUBLIST-015). Changes made without a request on the bus are not observable.
   - id: T7-MON-16
     title: RevisionCounter counts configuration changes
     mode: monitor
     level: 1
     reqs: [REQ-RES-MAM-018]
-    status: planned
+    status: implemented
+    notes: The RevisionCounter of a Source never decreases and does not change between -1 and a counter. After a successful Set Config that changes a known, non-sensitive value of the last Pub Config, a later Pub MAM of the Source carries a greater RevisionCounter (inconclusive without such a MAM). Changes of the ReferenceDesignation and changes without a request on the bus are not counted; the increment by exactly one is not judged (several changes may lie between two MAM).
   - id: T7-MON-17
     title: Set Config contains the mandatory objects of its group
     mode: monitor
     level: 1
     reqs: [REQ-RES-CONFIG-011]
-    status: planned
-    notes: Applies to Set Config requests sent by the CUT, checked against the Config published by the destination.
+    status: implemented
+    notes: Applies to Set Config requests sent by the CUT, checked against the last Config the destination published for the same Source and WriterGroupName (Mandatory flags); inconclusive without such a Pub Config. A sensitive mandatory object may carry the mask (REQ-RES-CONFIG-025).
   - id: T7-MON-18
     title: Pagination and MaxPacketSize
     mode: monitor

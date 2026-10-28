@@ -27,7 +27,8 @@ import (
 // implemented).
 var Implemented = []string{
 	"T7-MON-01", "T7-MON-02", "T7-MON-03", "T7-MON-04", "T7-MON-05", "T7-MON-06",
-	"T7-MON-07", "T7-MON-08", "T7-MON-10", "T7-MON-11", "T7-MON-12", "T7-MON-18", "T7-MON-19",
+	"T7-MON-07", "T7-MON-08", "T7-MON-09", "T7-MON-10", "T7-MON-11", "T7-MON-12", "T7-MON-13",
+	"T7-MON-15", "T7-MON-16", "T7-MON-17", "T7-MON-18", "T7-MON-19",
 }
 
 // Tests returns the monitor tests of the D7 catalog for verdict.Build.
@@ -169,7 +170,47 @@ type part struct {
 	entries    map[key]entryRef
 	pending    map[int64]pending
 	setSeen    bool
+	// kept across reconnects (endConnection does not reset them)
+	classes     map[string]classRef // T7-MON-09: structure per DataSetClassId
+	dataSets    map[key]classRef    // T7-MON-09: DataSetClassId per Data DataSet
+	data, event bool                // T7-MON-13: Pub Data / Pub Event observed
+	profile     []string            // T7-MON-13: Resources of the last Profile about itself
+	profileSeen bool
+	revs        map[string]revRef     // T7-MON-16: last RevisionCounter per Source
+	configs     map[string]*configRef // T7-MON-16/17: last Pub Config per Source and WriterGroupName
+	changes     []*change             // T7-MON-15/16: Set and Del addressed to the component
 }
+
+type classRef struct {
+	class, structure string
+	line             int
+}
+
+type revRef struct {
+	rev  int64
+	line int
+}
+
+type configRef struct {
+	groups map[string]map[string]any
+	line   int
+}
+
+// change is a Set or Del addressed to a component that changes its
+// PublicationList or SubscriptionList (T7-MON-15) or a value of its Config
+// (T7-MON-16), identified by the MessageId of the request.
+type change struct {
+	id, method, resource string
+	line                 int
+	source               string // Config: the Source whose value changes
+	prevRev              int64  // Config: RevisionCounter before the change
+	status               string // Filter of the status event, e.g. Status/Good
+	goodAt               time.Time
+	republished          bool // list: published again after the request
+	resolved             bool // Config: judged with a later Pub MAM
+}
+
+func (c *change) good() bool { return c.status == "Status/Good" }
 
 type chain struct {
 	sender, topic  string
@@ -231,7 +272,8 @@ func (e *Engine) part(id string) *part {
 	if !ok {
 		st, il, _ := strings.Cut(id, "/")
 		p = &part{Participant: Participant{ID: id, ServiceType: st, AppID: il}, sources: map[string]*source{},
-			k2id: map[key]int64{}, id2k: map[int64]key{}, ids: map[key]map[int64]bool{}, entries: map[key]entryRef{}, pending: map[int64]pending{}}
+			k2id: map[key]int64{}, id2k: map[int64]key{}, ids: map[key]map[int64]bool{}, entries: map[key]entryRef{}, pending: map[int64]pending{},
+			classes: map[string]classRef{}, dataSets: map[key]classRef{}, revs: map[string]revRef{}, configs: map[string]*configRef{}}
 		e.parts[id] = p
 	}
 	return p
@@ -349,12 +391,12 @@ func (e *Engine) Observe(m Message) error {
 	switch t.Method {
 	case "Pub":
 		e.pub(p, m, t, msg)
-	case "Set":
-		if q := e.parts[t.ServiceType+"/"+t.AppIDIL]; q != nil {
+	case "Set", "Del":
+		q := e.part(t.ServiceType + "/" + t.AppIDIL)
+		if t.Method == "Set" {
 			q.setSeen = true
-		} else {
-			e.part(t.ServiceType + "/" + t.AppIDIL).setSeen = true
 		}
+		e.change(p, q, m, t, msg)
 		e.lifecycle(p, m, t, msg, nil)
 	case "Call":
 		e.call(p, m, msg)
@@ -572,6 +614,9 @@ func (e *Engine) pub(p *part, m Message, t *topic.Parsed, msg map[string]any) {
 	e.paginate(p, m, ds, e.pages[str(msg, "ReplyTo")])
 	e.identity(p, m, t, ds)
 	e.debug(p, m, t, unsolicited)
+	e.classIDs(p, m, t, msg, ds)
+	e.supported(p, t, ds)
+	e.changed(p, m, t, msg, ds)
 }
 
 func (e *Engine) resourceDSMs(ds []dsm) []dsm {
@@ -961,6 +1006,8 @@ func (e *Engine) Finish(end time.Time) Result {
 		e.finishSources(p, end, observed)
 		e.finishHeartbeat(p, end, observed)
 		e.finishWriterIDs(p)
+		e.finishSupported(p)
+		e.finishChanges(p, end)
 		e.check(p, "T7-MON-19", "REQ-TOP-024")
 		if len(e.appTypes[p.AppID]) > 1 {
 			var sts []string

@@ -19,6 +19,22 @@ captures:
       Two components (OTConnector A, ITConnector B) from Birth to Close over
       128 s. Every implemented monitor test passes; REQ-RES-HEALTH-004 is not
       observable and REQ-CMP-045 has no represented entity on the bus.
+  - file: configuration-pass.jsonl
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      A publishes Data oee and its DataSetMetaData under one DataSetClassId
+      with the same fields (T7-MON-09) and its Profile with Data and Event
+      plus a Syslog Event (T7-MON-13). MG B1.1.3: B sends Set Config
+      (V-PAY-100) with the mandatory objects aut0-r3fr3sh and protocol of
+      the published Config V-PAY-099 (T7-MON-17); A answers Status Good,
+      publishes the Config V-PAY-114 and its MAM with RevisionCounter 2
+      (Birth 1, T7-MON-16). B sets a PublicationList entry and a
+      SubscriptionList entry; A answers Status Good and publishes the entry
+      again with the ReplyTo of the Set (T7-MON-15, REQ-RES-PUBLIST-017/018,
+      REQ-RES-SUBLIST-005/006). New in C-065. The heartbeat cannot be
+      judged in 15 s (skip).
   - file: reconnect-pass.jsonl
     status: reviewed
     positive: true
@@ -105,3 +121,44 @@ captures:
     status: reviewed
     expect:
       T7-MON-19: {outcome: fail, reqs: [REQ-TOP-024]}
+  - file: class-id-unstable.jsonl
+    status: draft
+    expect:
+      T7-MON-09: {outcome: fail, reqs: [REQ-MSG-013]}
+    notes: >-
+      A publishes Data oee (V-PAY-058) under DataSetClassId 1badfd0b-…, then
+      with the same fields under another DataSetClassId, then under
+      1badfd0b-… with the additional field Scrap: two violations of
+      REQ-MSG-013. New in C-065.
+  - file: no-data-event.jsonl
+    status: draft
+    expect:
+      T7-MON-13: {outcome: fail, reqs: [REQ-CMP-010, REQ-CMP-036, REQ-CMP-038]}
+    notes: >-
+      A answers a Get Profile with a Profile about itself without Data and
+      Event (V-PAY-032 edited) and publishes neither. B publishes no Profile
+      and no Data/Event: its support is not observable (skip). New in C-065.
+  - file: list-not-republished.jsonl
+    status: draft
+    expect:
+      T7-MON-15: {outcome: fail, reqs: [REQ-RES-PUBLIST-017]}
+    notes: >-
+      B sets a PublicationList entry (V-PAY-040); A answers Status Good
+      (V-PAY-078) but does not publish its PublicationList again within the
+      tolerance of 5 s (observation ends 10.9 s later). New in C-065.
+  - file: revision-not-counted.jsonl
+    status: draft
+    expect:
+      T7-MON-16: {outcome: fail, reqs: [REQ-RES-MAM-018]}
+    notes: >-
+      MG B1.1.3 as in configuration-pass (the Set changes ip_address, port,
+      protocol, …); 5.9 s after Status Good A answers a Get MAM with
+      RevisionCounter 1, the value of its Birth. New in C-065.
+  - file: set-config-mandatory-missing.jsonl
+    status: draft
+    expect:
+      T7-MON-17: {outcome: fail, reqs: [REQ-RES-CONFIG-011]}
+    notes: >-
+      A publishes its Config V-PAY-099 (device1: aut0-r3fr3sh and protocol
+      mandatory); B sends V-PAY-100 without protocol. The violation is B's
+      (the requester). A does not answer (not judged). New in C-065.

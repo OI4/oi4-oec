@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -245,5 +246,85 @@ func TestUnsolicitedMetadataHasContent(t *testing.T) {
 		if o.Test == "T7-MON-01" && o.Kind == verdict.Violation {
 			t.Errorf("the scenario is valid: %+v", o)
 		}
+	}
+}
+
+// TestRevisionCounter: the RevisionCounter of an asset neither decreases
+// nor changes between -1 and a counter (REQ-RES-MAM-018).
+func TestRevisionCounter(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.start()
+	s.mamRevision(2, compA, "3", "")
+	s.mamRevision(3, compA, "2", "")
+	s.mamRevision(4, compA, "-1", "")
+	s.end = 10 * time.Second
+	res := run(t, s, DefaultOptions())
+	o := find(res, "T7-MON-16", "REQ-RES-MAM-018", verdict.Violation)
+	if len(o) != 2 || !strings.Contains(o[0].Evidence.Detail, "decreases") || !strings.Contains(o[1].Evidence.Detail, "-1") {
+		t.Errorf("want a decrease and a change to -1: %+v", o)
+	}
+}
+
+// TestDelSubscriptionList: a successful Del SubscriptionList need not be
+// followed by a publication (REQ-RES-SUBLIST-015); the rule skips without a
+// gap of the run.
+func TestDelSubscriptionList(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.start()
+	del := s.req(2, "V-PAY-074", nil)
+	s.fromVector(2.1, "V-PAY-073", del, nil)
+	s.end = 20 * time.Second
+	res := run(t, s, DefaultOptions())
+	if o := find(res, "T7-MON-15", "REQ-RES-SUBLIST-005", verdict.Violation); len(o) != 0 {
+		t.Errorf("no violation after a Del: %+v", o)
+	}
+	o := find(res, "T7-MON-15", "REQ-RES-SUBLIST-005", verdict.Skipped)
+	if len(o) != 1 || o[0].Inconclusive {
+		t.Errorf("want one conclusive skip: %+v", o)
+	}
+}
+
+// TestSetConfigUnchanged: a Set Config that repeats the published values
+// and masks the sensitive one changes nothing; no RevisionCounter is
+// expected (REQ-RES-MAM-018) and the mandatory objects are present
+// (REQ-RES-CONFIG-011).
+func TestSetConfigUnchanged(t *testing.T) {
+	s := scenario(t, "x", "")
+	s.start()
+	get := s.req(2, "V-PAY-098", nil)
+	s.fromVector(2.1, "V-PAY-099", get, nil)
+	pub := first(vec(t, "V-PAY-099"))["Payload"].(map[string]any)
+	set := s.req(3, "V-PAY-100", func(m map[string]any) {
+		payload := map[string]any{}
+		for g, gv := range pub {
+			group, ok := gv.(map[string]any)
+			if !ok {
+				continue
+			}
+			objs := map[string]any{}
+			for o, ov := range group {
+				if obj, ok := ov.(map[string]any); ok {
+					if v, ok := obj["Value"]; ok {
+						objs[o] = map[string]any{"Value": v}
+					}
+				}
+			}
+			if len(objs) > 0 {
+				payload[g] = objs
+			}
+		}
+		first(m)["Payload"] = payload
+	})
+	s.fromVector(3.1, "V-PAY-076", set, nil)
+	s.end = 20 * time.Second
+	res := run(t, s, DefaultOptions())
+	if o := find(res, "T7-MON-16", "REQ-RES-MAM-018", verdict.Skipped); len(o) != 0 {
+		t.Errorf("an unchanged Set Config expects no MAM: %+v", o)
+	}
+	if o := find(res, "T7-MON-17", "REQ-RES-CONFIG-011", verdict.Violation); len(o) != 0 {
+		t.Errorf("mandatory objects present: %+v", o)
+	}
+	if o := find(res, "T7-MON-17", "REQ-RES-CONFIG-011", verdict.Checked); len(o) == 0 {
+		t.Error("want a check")
 	}
 }
