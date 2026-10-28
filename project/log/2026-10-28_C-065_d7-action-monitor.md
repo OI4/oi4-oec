@@ -193,6 +193,8 @@ None. `go.mod` unchanged.
 - `1e836cc`: monitor rules T7-MON-09/13/15/16/17, capture fixtures (6 drafts), unit tests, catalog.
 - `933112a`: README, DESIGN, ADR-0025 amendment C-065.
 - `9958261`: report `requests` with the Action calls (test first), DESIGN note.
+- `e41b43a`: log, STATUS, ROADMAP, REVIEW, REVIEW_DE.
+- This commit: commit list in the log.
 
 ## Checks (final)
 
