@@ -251,7 +251,8 @@ fn records_are_mapped(r: &Run) {
 
 /// `Set PublicationList` switches `Informational` on (REQ-TOP-027): the
 /// bridge raises the `log` maximum level and publishes `Info`;
-/// [`oec::event::syslog`] publishes directly.
+/// [`oec::event::syslog`] and [`oec::app::AppHandle::emit_syslog`] publish
+/// directly; a level that is off is dropped.
 fn levels_are_switched(r: &Run) {
     r.switch("Informational", "FILTER_4");
     wait_until(|| log::max_level() == log::LevelFilter::Info);
@@ -262,6 +263,10 @@ fn levels_are_switched(r: &Run) {
     oec::event::syslog(SyslogLevel::Notice, "direct");
     let notice = r.next_event("Notice", &mut Vec::new());
     assert!(msg(&notice).ends_with(": direct"));
+    r.handle.emit_syslog(SyslogLevel::Debug, "off");
+    r.handle.emit_syslog(SyslogLevel::Notice, "of this app");
+    let notice = r.next_event("Notice", &mut Vec::new());
+    assert!(msg(&notice).ends_with(": of this app"));
     r.switch("Informational", "OFF_0");
     wait_until(|| log::max_level() == log::LevelFilter::Warn);
 }

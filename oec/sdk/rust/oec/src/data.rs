@@ -21,7 +21,7 @@
 use std::fmt;
 use std::time::Duration;
 
-use oec_core::provider::data::{DataSetSpec, FieldSpec, OI4PV, PublicationSpec};
+use oec_core::provider::data::{DataSetSpec, FieldSpec, OI4PV, PublicationSpec, decode, encode};
 use uuid::Uuid;
 
 use crate::app::AppHandle;
@@ -250,6 +250,7 @@ impl DataSetDef {
 #[derive(Debug, Clone)]
 pub struct SetData {
     pub(crate) values: Vec<(String, Value)>,
+    pub(crate) types: Vec<BuiltinType>,
 }
 
 impl SetData {
@@ -261,6 +262,19 @@ impl SetData {
     /// All fields with their requested values in definition order.
     pub fn fields(&self) -> impl Iterator<Item = (&str, &Value)> {
         self.values.iter().map(|(n, v)| (n.as_str(), v))
+    }
+
+    /// The requested values as a JSON object of the field values in their
+    /// OPC UA JSON form (REQ-MSG-031), as in the Payload of the DataSet:
+    /// `{"<field>": <value>, ...}`; e.g. for the C ABI (ADR-0021 §5).
+    pub fn to_json(&self) -> String {
+        let object: serde_json::Map<String, serde_json::Value> = self
+            .values
+            .iter()
+            .zip(&self.types)
+            .map(|((n, v), ty)| (n.clone(), encode(*ty, v)))
+            .collect();
+        serde_json::Value::Object(object).to_string()
     }
 }
 
@@ -307,6 +321,42 @@ impl DataSet {
             .into_iter()
             .map(|(k, v)| (k.as_ref().to_owned(), v.into()))
             .collect();
+        self.handle.update_data(&self.source, &self.tag, values)
+    }
+
+    /// [`DataSet::update`] with the values as a JSON object of field values
+    /// in their OPC UA JSON form (REQ-MSG-031), as in the Payload of the
+    /// DataSet: `{"Pv": 21.5}`, Int64/UInt64 as number or string,
+    /// DateTime as RFC 3339 string, ByteString as base64,
+    /// LocalizedText as object or string; e.g. for the C ABI (ADR-0021
+    /// §5).
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] for no JSON object, an unknown field, a value
+    /// that does not fit the type of its field or a removed DataSet; then
+    /// nothing is set.
+    pub fn update_json(&self, json: &str) -> Result<()> {
+        let object: serde_json::Map<String, serde_json::Value> = serde_json::from_str(json)
+            .map_err(|e| {
+                Error::Invalid(format!("values of {:?}: no JSON object: {e}", self.tag))
+            })?;
+        let fields = self
+            .handle
+            .data_fields(&self.source, &self.tag)
+            .ok_or_else(|| Error::Invalid(format!("DataSet {:?} is removed", self.tag)))?;
+        let mut values = Vec::with_capacity(object.len());
+        for (name, json) in &object {
+            let ty = fields
+                .iter()
+                .find_map(|(n, ty)| (n == name).then_some(*ty))
+                .ok_or_else(|| {
+                    Error::Invalid(format!("unknown field {name:?} of {:?}", self.tag))
+                })?;
+            let value =
+                decode(ty, json).map_err(|e| Error::Invalid(format!("field {name:?}: {e}")))?;
+            values.push((name.clone(), value));
+        }
         self.handle.update_data(&self.source, &self.tag, values)
     }
 

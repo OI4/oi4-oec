@@ -683,6 +683,57 @@ fn data_sets_are_declared_and_persisted() {
     ));
 }
 
+/// Values as JSON (ADR-0021 §5): the OPC UA JSON form of each field type,
+/// all or none; unknown fields, unfitting values, no JSON object and a
+/// removed DataSet are refused.
+#[test]
+fn data_set_values_as_json() {
+    let app = device(Level::L1, explicit()).build().unwrap();
+    let ds = app
+        .this()
+        .add_data(
+            DataSetDef::new("all")
+                .field(Field::new("I64", BuiltinType::Int64))
+                .field(Field::new("U16", BuiltinType::UInt16))
+                .field(Field::new("F", BuiltinType::Float))
+                .field(Field::new("T", BuiltinType::DateTime))
+                .field(Field::new("B", BuiltinType::ByteString))
+                .field(Field::new("L", BuiltinType::LocalizedText)),
+        )
+        .unwrap();
+    ds.update_json(
+        r#"{"I64": "-9007199254740993", "U16": 7, "F": "NaN",
+            "T": "1970-01-01T00:00:01Z", "B": "AQI=", "L": "Hallo"}"#,
+    )
+    .unwrap();
+    let values = ds.values().unwrap();
+    assert_eq!(values[0], Value::Int64(-9_007_199_254_740_993));
+    assert_eq!(values[1], Value::UInt32(7));
+    assert!(matches!(values[2], Value::Float(f) if f.is_nan()));
+    assert_eq!(values[3], Value::DateTime(1000));
+    assert_eq!(values[4], Value::Bytes(vec![1, 2]));
+    ds.update_json(r#"{"I64": 5}"#).unwrap();
+    assert_eq!(ds.values().unwrap()[0], Value::Int64(5));
+    for bad in [
+        "[]",
+        "{",
+        r#"{"U16": 70000}"#,
+        r#"{"Unknown": 1}"#,
+        r#"{"U16": 1, "T": "yesterday"}"#,
+    ] {
+        assert!(
+            matches!(ds.update_json(bad), Err(oec::Error::Invalid(_))),
+            "{bad}"
+        );
+    }
+    assert_eq!(ds.values().unwrap()[1], Value::UInt32(7), "all or none");
+    ds.clone().remove().unwrap();
+    assert!(matches!(
+        ds.update_json(r#"{"U16": 1}"#),
+        Err(oec::Error::Invalid(m)) if m.contains("removed")
+    ));
+}
+
 /// Refused Data DataSet definitions: a Tag twice, no field, an empty Tag,
 /// no UUID as DataSetClassId, an Interval of no whole ms, a Precision of an
 /// unknown field, an Oi4Pv field other than Sv1 … Sv255.

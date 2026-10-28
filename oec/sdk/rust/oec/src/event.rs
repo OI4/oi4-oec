@@ -133,8 +133,17 @@ pub fn syslog(level: SyslogLevel, message: &str) {
         return;
     };
     if let Some(handle) = target() {
-        handle.emit_syslog(level, message);
+        handle.queue_syslog(level, message);
     }
+}
+
+/// [`syslog`] for one application, e.g. of several in one process (the C
+/// ABI, ADR-0021); the same rules.
+pub(crate) fn syslog_of(handle: &AppHandle, level: SyslogLevel, message: &str) {
+    let Some(_guard) = Guard::enter() else {
+        return;
+    };
+    handle.queue_syslog(level, message);
 }
 
 /// Installs the bridge as the logger of the process, before
@@ -294,7 +303,7 @@ impl Log for Bridge {
             return;
         };
         if let Some(handle) = target() {
-            handle.emit_syslog(syslog_level(record.level()), &record.args().to_string());
+            handle.queue_syslog(syslog_level(record.level()), &record.args().to_string());
         }
     }
 

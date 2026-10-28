@@ -1181,6 +1181,14 @@ impl AppHandle {
             .unwrap_or_else(PoisonError::into_inner)
     }
 
+    /// Publishes a Syslog event of this application, as
+    /// [`crate::event::syslog`] does for the first one (level switched on,
+    /// rate limit, [`crate::event::MAX_MESSAGE_BYTES`]); dropped while
+    /// offline or if the level is off.
+    pub fn emit_syslog(&self, level: SyslogLevel, message: &str) {
+        event::syslog_of(self, level, message);
+    }
+
     /// Sends Close and stops [`App::run`] (REQ-LIFE-005). Idempotent; a
     /// shutdown before `run` makes it return at once without connecting.
     pub fn shutdown(&self) {
@@ -1380,6 +1388,16 @@ impl AppHandle {
         Ok(())
     }
 
+    /// The fields of a Data DataSet with their types (see
+    /// [`DataSet::update_json`]).
+    pub(crate) fn data_fields(
+        &self,
+        il: &IdentificationLink,
+        tag: &str,
+    ) -> Option<Vec<(String, crate::data::BuiltinType)>> {
+        self.registry().provider.data_fields(&il.0, tag)
+    }
+
     /// See [`DataSet::values`].
     pub(crate) fn data_values(&self, il: &IdentificationLink, tag: &str) -> Option<Vec<Value>> {
         self.registry().provider.data_values(&il.0, tag)
@@ -1407,10 +1425,23 @@ impl AppHandle {
             IdentificationLink(request.source().clone()),
             request.tag().to_owned(),
         );
-        let handler = self.registry().set_handlers.get(&key).cloned();
+        let (handler, fields) = {
+            let registry = self.registry();
+            (
+                registry.set_handlers.get(&key).cloned(),
+                registry
+                    .provider
+                    .data_fields(request.source(), request.tag()),
+            )
+        };
         let decision = handler.map_or(Err(crate::status::StatusCode::BadNotWritable), |h| {
             let set = SetData {
                 values: request.values().to_vec(),
+                types: fields
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(|(_, ty)| ty)
+                    .collect(),
             };
             std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| h(&set))).unwrap_or_else(
                 |_| {
@@ -1666,7 +1697,7 @@ impl AppHandle {
     /// timestamp and hostname; dropped if the level is off, offline or
     /// beyond the rate limit, whose count of dropped events follows as a
     /// `Warning`.
-    pub(crate) fn emit_syslog(&self, level: SyslogLevel, content: &str) {
+    pub(crate) fn queue_syslog(&self, level: SyslogLevel, content: &str) {
         let unix_ms = runtime::unix_ms();
         let mut registry = self.registry();
         if !registry.provider.syslog_enabled(level) {

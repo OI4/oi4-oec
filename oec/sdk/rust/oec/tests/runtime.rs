@@ -1311,7 +1311,8 @@ fn set_data_is_decided_by_the_handler() {
     let calls = Arc::new(Mutex::new(Vec::new()));
     let seen = calls.clone();
     oee.on_set(move |s| {
-        let fields: Vec<String> = s.fields().map(|(n, _)| n.to_owned()).collect();
+        let mut fields: Vec<String> = s.fields().map(|(n, _)| n.to_owned()).collect();
+        fields.push(s.to_json());
         seen.lock().unwrap().push(fields);
         match s.get("Count") {
             Some(oec::data::Value::UInt32(c)) if *c <= 100 => Ok(()),
@@ -1368,7 +1369,14 @@ fn set_data_is_decided_by_the_handler() {
     let bad = status_event(&tb, &prefix, &it, "Bad");
     assert_eq!(bad["Number"], StatusCode::BadInvalidArgument.code());
     assert_eq!(calls.lock().unwrap().len(), 2);
-    assert_eq!(calls.lock().unwrap()[0], ["Availability", "Count"]);
+    assert_eq!(
+        calls.lock().unwrap()[0],
+        [
+            "Availability",
+            "Count",
+            r#"{"Availability":50.0,"Count":7}"#
+        ]
+    );
 
     tb.send(
         n,

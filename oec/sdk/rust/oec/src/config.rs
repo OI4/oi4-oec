@@ -197,6 +197,7 @@ pub struct ConfigDef {
     context: String,
     label: Option<String>,
     groups: Vec<(String, String, Vec<ConfigObject>)>,
+    definition: Option<Config>,
 }
 
 impl ConfigDef {
@@ -208,7 +209,36 @@ impl ConfigDef {
             context: context.to_owned(),
             label: None,
             groups: Vec::new(),
+            definition: None,
         }
+    }
+
+    /// A definition given as JSON in the form of the Config DataSet as
+    /// published (MG 8.3.3, REQ-RES-CONFIG-002): an optional `Context` and
+    /// the groups with their objects, each with `Type`, `Value` (the
+    /// initial value) and `Name` and optionally `DefaultValue`, `Unit`,
+    /// `Mandatory`, `Sensitive`, `Description` and `Validation`; e.g. for
+    /// the C ABI (ADR-0021 §5). [`ConfigDef::label`] replaces its
+    /// `Context.Name` (default: the context name), [`ConfigDef::group`]
+    /// adds further groups. Checked as every definition by
+    /// [`ConfigDef::values`] and [`crate::asset::Asset::add_config`].
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] if `json` is no Config DataSet; the message names
+    /// the position, never a value.
+    pub fn from_json(context: &str, json: &str) -> Result<Self> {
+        let config: Config = serde_json::from_str(json).map_err(|e| {
+            Error::Invalid(format!(
+                "Config {context:?}: no Config DataSet (line {}, column {})",
+                e.line(),
+                e.column()
+            ))
+        })?;
+        Ok(Self {
+            definition: Some(config),
+            ..Self::new(context)
+        })
     }
 
     /// Display name of the context (`Context.Name`, LocalizedText in
@@ -262,7 +292,9 @@ impl ConfigDef {
     /// The checked definition for the provider.
     pub(crate) fn resolve(self) -> Result<ConfigSpec> {
         oec_core::topic::Filter::context_name(&self.context)?;
-        let mut groups = BTreeMap::new();
+        let (mut groups, given) = self
+            .definition
+            .map_or_else(|| (BTreeMap::new(), None), |c| (c.groups, c.context));
         for (name, label, objects) in &self.groups {
             let mut resolved = BTreeMap::new();
             for o in objects {
@@ -285,11 +317,19 @@ impl ConfigDef {
                 )));
             }
         }
-        let config = Config {
-            context: Some(resource::Context {
-                name: LocalizedText::from(self.label.as_deref().unwrap_or(&self.context)),
+        let context = match (self.label.as_deref(), given) {
+            (Some(label), given) => resource::Context {
+                name: LocalizedText::from(label),
+                description: given.and_then(|c| c.description),
+            },
+            (None, Some(given)) => given,
+            (None, None) => resource::Context {
+                name: LocalizedText::from(self.context.as_str()),
                 description: None,
-            }),
+            },
+        };
+        let config = Config {
+            context: Some(context),
             groups,
         };
         check_definition(&config).map_err(Error::Invalid)?;
@@ -342,6 +382,28 @@ impl ConfigValues {
             (ConfigType::Boolean, "false") => Some(false),
             _ => None,
         }
+    }
+
+    /// All values as a JSON object of the groups with their objects and
+    /// values in their string form (REQ-RES-CONFIG-007), unset ones as
+    /// `""`: `{"<group>": {"<name>": "<value>", ...}, ...}`; e.g. for the C
+    /// ABI (ADR-0021 §5). Sensitive values are in clear text: do not log
+    /// it.
+    pub fn to_json(&self) -> String {
+        let groups: BTreeMap<&str, BTreeMap<&str, &str>> = self
+            .config
+            .groups
+            .iter()
+            .map(|(g, group)| {
+                let objects = group
+                    .objects
+                    .iter()
+                    .map(|(n, o)| (n.as_str(), o.value.as_str()))
+                    .collect();
+                (g.as_str(), objects)
+            })
+            .collect();
+        serde_json::to_string(&groups).unwrap_or_default()
     }
 
     /// `(group, name)` of the objects that differ from the current values;
@@ -623,5 +685,80 @@ mod tests {
             .expect("Config schema embedded");
         let doc = serde_json::to_value(&def().resolve().unwrap().config).unwrap();
         validator.validate(&entry, Flavor::Strict, &doc).unwrap();
+    }
+
+    /// A definition as JSON (the Config DataSet as published, ADR-0021 §5)
+    /// resolves like the built one; `label` and `group` still apply.
+    #[test]
+    fn definition_from_json() {
+        let built = def().resolve().unwrap().config;
+        let json = serde_json::to_string(&built).unwrap();
+        let parsed = ConfigDef::from_json("weather", &json).unwrap();
+        assert_eq!(parsed.clone().resolve().unwrap().config, built);
+        let values = parsed.values().unwrap();
+        assert_eq!(values.string("common", "city"), Some("Berlin"));
+
+        // without Context: the context name; label wins; groups are added
+        let plain = r#"{"g": {"Name": {"Locale": "en-US", "Text": "G"},
+            "a": {"Type": "Number", "Value": "2", "Name": {"Locale": "en-US", "Text": "A"}}}}"#;
+        let config = ConfigDef::from_json("ctx", plain)
+            .unwrap()
+            .resolve()
+            .unwrap()
+            .config;
+        assert_eq!(config.context.unwrap().name.text, "ctx");
+        let config = ConfigDef::from_json("ctx", plain)
+            .unwrap()
+            .label("Context")
+            .group("h", "H", [ConfigObject::boolean("b", false)])
+            .resolve()
+            .unwrap()
+            .config;
+        assert_eq!(config.context.unwrap().name.text, "Context");
+        assert_eq!(
+            config.groups.keys().map(String::as_str).collect::<Vec<_>>(),
+            ["g", "h"]
+        );
+
+        // a group twice, no JSON, no Config DataSet, a Value of the wrong form
+        let twice = ConfigDef::from_json("ctx", plain).unwrap().group(
+            "g",
+            "G",
+            [ConfigObject::boolean("b", false)],
+        );
+        assert!(matches!(twice.values(), Err(Error::Invalid(m)) if m.contains("twice")));
+        for bad in [
+            "{",
+            "[]",
+            r#"{"g": {"Name": "G", "a": {"Type": "Number"}}}"#,
+            r#"{"g": {"Name": {"Locale": "en-US", "Text": "G"},
+                "a": {"Type": "Number", "Value": "x", "Name": {"Locale": "en-US", "Text": "A"}}}}"#,
+        ] {
+            let r = ConfigDef::from_json("ctx", bad).and_then(|d| d.values());
+            assert!(matches!(r, Err(Error::Invalid(_))), "{bad}");
+        }
+        // the error names no value
+        let secret = r#"{"g": {"Name": {"Locale": "en-US", "Text": "G"},
+            "a": {"Type": "Number", "Value": "s3cr3t", "Name": {"Locale": "en-US", "Text": "A"}}}}"#;
+        let Err(Error::Invalid(m)) = ConfigDef::from_json("ctx", secret).and_then(|d| d.values())
+        else {
+            panic!("accepted");
+        };
+        assert!(!m.contains("s3cr3t"), "{m}");
+    }
+
+    /// `to_json`: every value in its string form, unset as `""`, sensitive
+    /// ones in clear text.
+    #[test]
+    fn values_as_json() {
+        let json: serde_json::Value =
+            serde_json::from_str(&def().values().unwrap().to_json()).unwrap();
+        assert_eq!(
+            json,
+            serde_json::json!({"common": {
+                "interval": "60", "city": "Berlin", "metric": "true", "api_key": "",
+                "since": "2026-10-26T08:00:00Z", "mode": "fast"
+            }})
+        );
     }
 }

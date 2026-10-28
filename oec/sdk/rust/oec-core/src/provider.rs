@@ -802,6 +802,22 @@ impl Provider {
             .and_then(|i| self.sets[i].values())
     }
 
+    /// The fields of a Data DataSet with their types, in definition order.
+    pub fn data_fields(
+        &self,
+        source: &IdentificationLink,
+        tag: &str,
+    ) -> Option<Vec<(String, data::BuiltinType)>> {
+        self.find_set(source, tag).map(|i| {
+            self.sets[i]
+                .spec
+                .fields
+                .iter()
+                .map(|f| (f.name.clone(), f.ty))
+                .collect()
+        })
+    }
+
     /// The Will of the next CONNECT (see [`Lifecycle::will`]).
     pub fn will(&mut self, unix_ms: u64) -> crate::mqtt::LastWill {
         self.lifecycle.will(unix_ms)
