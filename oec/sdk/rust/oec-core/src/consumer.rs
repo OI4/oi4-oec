@@ -249,9 +249,7 @@ impl Consumer {
     }
 
     fn add_sub(&mut self, kind: SubKind, filters: Vec<String>) -> SubscriptionId {
-        for f in &filters {
-            self.filters.entry(f.clone()).or_default().users += 1;
-        }
+        self.acquire(&filters);
         let id = self.next_sub;
         self.next_sub += 1;
         let sub = Sub {
@@ -347,20 +345,25 @@ impl Consumer {
             .any(|s| matches!(s.kind, SubKind::Presence))
     }
 
+    /// A released filter keeps its state until the session unsubscribes
+    /// it ([`Consumer::take_filter_changes`]): used again before, it is
+    /// still subscribed and needs no new SUBACK.
     fn release(&mut self, filters: &[String]) {
         for f in filters {
             if let Some(u) = self.filters.get_mut(f) {
-                u.users -= 1;
-                if u.users == 0 {
-                    self.filters.remove(f);
-                }
+                u.users = u.users.saturating_sub(1);
             }
         }
     }
 
     fn acquire(&mut self, filters: &[String]) {
         for f in filters {
-            self.filters.entry(f.clone()).or_default().users += 1;
+            let u = self.filters.entry(f.clone()).or_default();
+            if u.users == 0 && u.state == FilterState::Failed {
+                // a refused filter released and used again is subscribed anew
+                u.state = FilterState::Pending;
+            }
+            u.users += 1;
         }
     }
 
@@ -376,7 +379,8 @@ impl Consumer {
             .filters
             .iter()
             .filter(|(f, u)| {
-                u.state != FilterState::Failed
+                u.users > 0
+                    && u.state != FilterState::Failed
                     && (!self.overrides.is_deleted(f) || requests.contains(f))
             })
             .map(|(f, _)| f.clone())
@@ -385,6 +389,13 @@ impl Consumer {
             subscribe: wanted.difference(&self.session).cloned().collect(),
             unsubscribe: self.session.difference(&wanted).cloned().collect(),
         };
+        self.filters.retain(|_, u| u.users > 0);
+        for f in &changes.unsubscribe {
+            // a filter subscribed again later waits for a new SUBACK
+            if let Some(u) = self.filters.get_mut(f) {
+                u.state = FilterState::Pending;
+            }
+        }
         self.session = wanted;
         changes
     }

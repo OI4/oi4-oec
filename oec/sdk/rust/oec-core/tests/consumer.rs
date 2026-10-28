@@ -987,3 +987,22 @@ proptest! {
         prop_assert_eq!(names(&answers(done[0].outcome.clone())), expected);
     }
 }
+
+#[test]
+fn an_answer_filter_used_again_before_its_unsubscribe_releases_the_request() {
+    let mut bus = Bus::new(provider());
+    bus.get(Resource::Health, &at(MOTOR, None), &GetParams::default());
+    ack(&mut bus.c);
+    for o in bus.c.take_outbound() {
+        let answers = bus.answer(&o);
+        bus.deliver(answers);
+    }
+    assert_eq!(bus.c.take_completions().len(), 1);
+    // the next request reuses the released filters before the session
+    // has unsubscribed them: they are still subscribed and acknowledged
+    bus.get(Resource::Health, &at(MOTOR, None), &GetParams::default());
+    let a = answers(bus.one());
+    assert_eq!(names(&a), [MOTOR]);
+    // unsubscribed once, after the second answer
+    assert_eq!(bus.unsubscribed.len(), 2, "{:?}", bus.unsubscribed);
+}
