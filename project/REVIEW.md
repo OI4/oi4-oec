@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-27, C-058 (P4 increment 8a: the consumer core; A-120 … A-127 for information, worth a look: A-120, A-124, A-126). **Nothing open for the PO.**_
+_Last updated: 2026-10-28, C-059 (P4 increment 8b: the SubscriptionList and the example app). **Three findings to decide: D-1 = SF-109, D-2 = SF-110, D-3 = SF-111.** Nothing to review. A-128 … A-136 for information, worth a look: A-128, A-131, A-132._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -83,15 +83,25 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Tests: core tests with the guideline request vectors and a proptest; runtime tests with two applications over a routing mode of the in-process test broker; opt-in interop 14 green (new `consumer_asks_a_provider`); a one-off D7 `oec-check monitor` run: 11 pass, 0 fail, 2 skip, the consumer's requests all schema-valid.
   - No finding, no reviewed item changed, no new test data, no new dependency: **nothing open.** A-120 … A-127 are for information. Worth a look: **A-120** (cycle cut), **A-124** (no queue while offline), **A-126** (API differences against the sketch).
   - C-059 (increment 8b: SubscriptionList, the Action `NewDataSetWriterId`, deletion of the sketch, example app) runs in a new agent; `prompt.md` is filled.
+- C-059 (P4 increment 8b; split once more: the Action `NewDataSetWriterId` and the farewell of the sketch move to 8c):
+  - `oec-core`: the SubscriptionList of the provider (`provider::sublist`) – one entry per lasting subscription of the consumer side and one `NONE_0` entry per DataSet that accepts `Set` (SF-107); `Get`, `Set` (Interval) and `Del` from Level 2 with Status events (**A-92 ends**); published again after every change; the changes are persisted and reach the consumer (Interval throttle, a deleted subscription is unsubscribed).
+  - `oec`: `Subscription::interval` and `Subscription::configurable` (as in the sketch); the store key `app/subscriptions`; the example app `oec/sdk/rust/oec/examples/demo.rs` (provider + consumer, the application under test of D7 `test`).
+  - A defect of C-058 found by the gate under load and fixed (test first): a request that reused an answer subscription just released waited until its timeout.
+  - Tests: core and runtime tests in the gate (incl. the guideline vectors V-PAY-072 … 075 of MG B1.1.9); opt-in interop 14 green; a one-off D7 `oec-check monitor` run against the demo app and the interop consumer: 12 pass, 0 fail, 1 skip (no Action yet), 0 invalid of 95 messages.
+  - **Three findings to decide** (register `b35b41e`): **D-1 = SF-109** (are the short-lived answer subscriptions of requests listed?), **D-2 = SF-110** (MG 9.1.9 "other subscriptions to topics of the own AppId are not listed" vs. the example B1.1.9), **D-3 = SF-111** (must an application create a new entry on `Set`?). The SDK already follows the proposals. No reviewed item changed, no new test data, no new dependency. A-128 … A-136 are for information.
+  - C-060 (increment 8c) runs in a new agent; `prompt.md` is filled.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `2e32a6b` (re-baseline, no content change).
 
-Logs: [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
+| D-1 | SF-109: are the short-lived answer subscriptions of a requester SubscriptionList entries? (MG 9.1.9) | decide | C-059 | as proposed (not listed) | ☐ |
+| D-2 | SF-110: MG 9.1.9 "other subscriptions to topics of the own `AppId` are not listed" vs. B1.1.9 (own `Pub/Data` listed) | decide | C-059 | as proposed (only request subscriptions to the own `AppId` are excluded) | ☐ |
+| D-3 | SF-111: must an application create a new SubscriptionList entry on `Set`? (MG 9.1.9 vs. 8.3.9) | decide | C-059 | as proposed (optional; rejected with `Bad`, e.g. `BadNotSupported`) | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -219,10 +229,47 @@ Logs: [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-0
 | A-125 | Writer ids of `Set`/`Del` resolved (Data/Config by `Get`, ReferenceDesignation by the PublicationList), otherwise explicit | info (agent) | C-058 | – | – |
 | A-126 | API (ADR-0020 amendment C-058): option builders, `&Target`, typed `Received`, `Error::Status`/`NotConnected`, `get` needs an application; sketch not aligned | info (agent) | C-058 | – | – |
 | A-127 | Tests (core 14 incl. vectors and proptest, runtime 4 with a routing test broker, interop 14 green); D7 `monitor` 11/0/2; no new dependency | info (agent) | C-058 | – | – |
+| A-128 | Cycle cut: 8b (SubscriptionList, example app; C-059) and 8c (Action `NewDataSetWriterId`, sketch farewell; C-060); 8b → 8c → 10 | info (agent) | C-059 | – | – |
+| A-129 | SubscriptionList entries: consumer filters (Interval = minimum, `CONF_1` only if all configurable), then the `NONE_0` `Set` entries (SF-107); one writer id; Level 2+; Profile of the application only; not in the PublicationList | info (agent) | C-059 | – | – |
+| A-130 | Republication of the whole list on every change; after a connect only if not empty | info (agent) | C-059 | – | – |
+| A-131 | `Set`/`Del SubscriptionList`: status codes; `Set` changes the Interval of a configurable entry; a TopicPath not subscribed → `BadNotSupported` (SF-111) | info (agent) | C-059 | – | – |
+| A-132 | Consumer: Interval throttle per subscription and topic (no trailing delivery); `Del` unsubscribes the filter; settings only on filters whose subscriptions are all configurable | info (agent) | C-059 | – | – |
+| A-133 | Persistence under `app/subscriptions`; corrupt → `Error::Io` at `build()` | info (agent) | C-059 | – | – |
+| A-134 | API (ADR-0020 amendment C-059): `Subscription::interval`/`configurable` as in the sketch; writer id of `Set`/`Del SubscriptionList` resolved by a `Get` | info (agent) | C-059 | – | – |
+| A-135 | Example app `oec/examples/demo.rs` (provider + consumer, Level 2, `OEC_ROOT`, `OEC_DEMO_SECONDS`) – the application under test of D7 `test` | info (agent) | C-059 | – | – |
+| A-136 | Tests (core 7 + 3 + 1, runtime 2 + 1), answer-filter race of C-058 fixed (test first), interop 14 green, D7 `monitor` 12/0/1; no new dependency | info (agent) | C-059 | – | – |
 
 ## Decisions and review items
 
-Nothing open.
+### D-1 – SF-109: are the short-lived answer subscriptions of a requester `SubscriptionList` entries? (MG 9.1.9)
+
+- **Found:** while implementing the SubscriptionList in the SDK (C-059); register `b35b41e`, details in the [C-059 log](log/2026-10-28_C-059_subscription-list.md).
+- **What the guideline says:** MG 9.1.9: the SubscriptionList "represents the actual available/configured subscriptions in a single application"; every add/delete must (re)publish it. A requester subscribes to the answer topics of its `Get`/`Set`/`Del` (e.g. `…/<AppId of the responder>/Pub/Health/#`, `…/Pub/Event/+/Status/+`) only until the answer has arrived.
+- **The problem:** the text does not say whether these transient subscriptions are entries. Listing them would republish the list twice per request, and the entries could not be configured meaningfully.
+- **Proposed interpretation (recommended):** not listed. Proposed text, added to MG 9.1.9 after "Other subscriptions to topics of the own `AppId` are not listed.": "Subscriptions that only exist for the time of a request (to receive its answer or status `Event`) are not listed."
+- **Alternative:** (b) list them (with `NONE_0`) for the time of the request.
+- **Impact if decided as proposed:** guideline text by your order, re-baseline; a REQ-RES-SUBLIST note follows the text (→ `draft`, R-x); the SDK already does this; D7 unchanged.
+- **PO:** ☐ as proposed ☐ (b) ☐ other: …
+
+### D-2 – SF-110: MG 9.1.9 "other subscriptions to topics of the own `AppId` are not listed" vs. B1.1.9
+
+- **Found:** while implementing SF-107 in the SDK (C-059); register `b35b41e`.
+- **What the guideline says:** MG 9.1.9 (text of SF-107, `580f1c6`): "A `DataSet` of the resources `Data` or `Config` that can be changed with `Set` is listed with the subscription of its `Set` topic […]. Other subscriptions to topics of the own `AppId` are not listed." The example B1.1.9 (vector V-PAY-072) lists for the FDS app the entry `TopicPath` `Oi4v2/OTConnector/<FDS>/Pub/Data/<FDS>/oee` – a `Pub` subscription to a topic of its own `AppId`.
+- **The problem:** read literally, the sentence forbids the example. The SF-107 proposal (C-055 D-1) meant the own request subscriptions ("`Get/…`, `Del/…` are not listed"); the wording became broader.
+- **Proposed interpretation (recommended):** only request subscriptions to the own `AppId` are excluded; `Pub` subscriptions are listed whatever `AppId` the topic has. Proposed wording: "Other subscriptions of the application to request topics of its own `AppId` (e.g. `Get` or `Del`) are not listed." B1.1.9 stays.
+- **Alternatives:** (b) keep the sentence and change B1.1.9/V-PAY-072 to a topic of another `AppId` (example and vector change, R-x).
+- **Impact if decided as proposed:** guideline text by your order, re-baseline; REQ-RES-SUBLIST-016 follows the text (→ `draft`, R-x); the SDK already does this; D7 unchanged.
+- **PO:** ☐ as proposed ☐ (b) ☐ other: …
+
+### D-3 – SF-111: must an application create a new `SubscriptionList` entry on `Set`? (MG 9.1.9 vs. 8.3.9)
+
+- **Found:** while implementing `Set SubscriptionList` in the SDK (C-059); register `b35b41e`.
+- **What the guideline says:** MG 9.1.9: "If the `Source` has not subscribed the `TopicPath` yet, the `Set` creates a new entry" (heading "create new entry or set new behavior"); MG 8.3.9: "The configurability of subscriptions is limited to create/delete/not manipulable – depending on implementation and/or technical needs".
+- **The problem:** it is open whether every application must subscribe to any `TopicPath` another participant asks for, and which status a rejected creation gets. An application can only process data it was built for; a library (the SDK) cannot hand an unknown subscription to the application in a meaningful way.
+- **Proposed interpretation (recommended):** creating entries is optional ("depending on implementation"); an application that does not create the entry rejects the `Set` with the status `Event` `Bad` (e.g. `BadNotSupported`). Proposed text, added to MG 9.1.9 after "…otherwise it reconfigures the entry with this `TopicPath`": "An application that does not support the creation of entries rejects such a `Set` with the status `Event` `Bad` (e.g. `BadNotSupported`)."
+- **Alternatives:** (b) creation is mandatory for every application (the SDK then needs a handler with which the application accepts or refuses a new TopicPath – a small API addition in 8c).
+- **Impact if decided as proposed:** guideline text by your order, re-baseline; a REQ-RES-SUBLIST-010 note follows the text (→ `draft`, R-x); the SDK already answers `BadNotSupported`; D7 unchanged.
+- **PO:** ☐ as proposed ☐ (b) ☐ other: …
 
 ### Answered earlier
 
@@ -713,6 +760,25 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - one-off D7 `oec-check monitor` (external call, Q-009): 11 pass, 0 fail, 2 skip (T7-MON-05 observation shorter than 125 s, T7-MON-07 no Action RequestIds), 0 invalid of 37 messages; capture not committed;
   - no new dependency; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception.
 
-## Next (C-059)
+### A-128 … A-136 – P4 increment 8b (C-059, agent)
 
-1. P4 increment 8b – the SubscriptionList with `Get`/`Set`/`Del SubscriptionList` (A-92 ends; SF-107, REQ-RES-SUBLIST-016), `Subscription::configurable`/`interval`, the Action `NewDataSetWriterId`; at its end the sketch is deleted and its REQ walker moves into `oec`; the SDK example app (provider + consumer) for D7 `test`. Then 10 (`oec-ffi`). Runs in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/sdk/rust/oec-core/src/provider/sublist.rs`, `provider.rs`, `provider/{write, writers}.rs`, `consumer.rs`; `oec/sdk/rust/oec/src/{consumer.rs, app.rs, runtime.rs}`, `oec/examples/demo.rs`; the tests `oec-core/tests/{provider_sublist, consumer_sublist, consumer}.rs`, `oec/tests/{sublist, app, interop}.rs`; ADR-0020/0023 amendment C-059, ADR-0026 amendment C-059 §18; [C-059 log](log/2026-10-28_C-059_subscription-list.md).
+- **A-128 Cycle cut:** 8b held two review topics of about the same size: the SubscriptionList (a provider resource on the write path that is fed by the consumer and feeds back into it) and the Action `NewDataSetWriterId` (a different message family: CompactEncoding `ActionNetworkMessage`, `Call`/`Reply`, `CorrelationData`, `TimeoutHint`, the reservation of ids in the writer table). The sketch can only go after the Action. So: 8b = SubscriptionList + example app (C-059), 8c = Action + farewell of the sketch (C-060). Order 8b → 8c → 10.
+- **A-129 Entries:** first one entry per topic filter of the lasting consumer subscriptions (sorted; Interval = the smallest of the subscriptions on the filter, omitted when 0; `CONF_1` only if every subscription on the filter is configurable), then one `NONE_0` entry per writable Config context and per Data DataSet that accepts `Set`, with its `Set` topic (SF-107). All entries share one DataSetWriterId (MG 9.1.9 note), DataSetWriterName = the AppId. The list exists from Level 2 (REQ-CMP-039): the Profile of the application lists it, those of the assets do not; the PublicationList does not list it. A `Get` with the Source of an asset gets an empty list. Answer subscriptions of requests are not listed (SF-109); a consumer subscription to a topic of the own AppId is (SF-110).
+- **A-130 Republication:** the whole list is published unsolicited whenever it differs from the last published one (REQ-RES-SUBLIST-005); after a connect only if not empty; a list that became empty is published once as empty.
+- **A-131 `Set`/`Del`:** no ListFilter or a Source other than the AppId → `BadNotFound`; undecodable → `BadDecodingError`; TopicPath outside the addressed group → `BadInvalidArgument`; `NONE_0` entry or a changed `Config` → `BadNotWritable`; **a TopicPath the application has not subscribed → `BadNotSupported`** (the SDK does not create subscriptions from outside; SF-111). `Set` stores the Interval (absent = 0) and publishes the entry with the `ReplyTo`; `Del` (with the entry as payload, V-PAY-074) unsubscribes the filter and publishes the remaining entries of the group; then Status Good. A deleted entry can be restored by a `Set` with its TopicPath.
+- **A-132 Consumer:** an Interval drops a publication of a topic that arrives within the Interval after the last delivered one of the same topic for the same subscription (no delivery of the last value at the end of the Interval; REQ-RES-SUBLIST-003 only says "processing interval"). A deleted filter is unsubscribed and delivers nothing, but stays subscribed while a pending request waits for its answer on it. `Set`/`Del` apply only to filters whose subscriptions are all configurable. Presence subscriptions are `NONE_0`.
+- **A-133 Persistence:** the changes by `Set`/`Del` are stored under `app/subscriptions` (only the changed entries) and survive a restart; a corrupt table makes `build()` fail with `Error::Io(InvalidData)`, as for the other tables.
+- **A-134 API:** `Subscription::interval(Duration)` and `Subscription::configurable()` with the sketch signatures (no own `#[must_use]`: the type has it). `Consumer::set`/`del` of `Resource::SubscriptionList` find the DataSetWriterId by a `Get` of the addressed entries; restoring a deleted entry needs `WriteOptions::data_set_writer_id`. The sketch stays the contract only for `Consumer::new_data_set_writer_id`.
+- **A-135 Example app** `oec/sdk/rust/oec/examples/demo.rs`: one Level 2 OTConnector that is provider (pump asset with a writable `oee` DataSet and a range check, Config `service`/`Period`, ReferenceDesignation) and consumer (presence, configurable `oee` subscription with 1 s Interval); container storage under `OEC_ROOT` (default `/`), `OEC_DEMO_SECONDS` for a graceful end; built by the gate (`clippy --all-targets`). It is the application under test of D7 `test`.
+- **A-136 Tests:**
+  - `oec-core/tests/provider_sublist.rs` (7): entries, filter, Profile, republication, the guideline vectors V-PAY-072 … 075 answered and schema-checked, every rejection, persistence; `consumer_sublist.rs` (3); `consumer.rs` (+1, see below);
+  - `oec/tests/sublist.rs` (2) with two applications over the routing test broker; `oec/tests/app.rs` (+1, corrupt table);
+  - **defect of C-058 fixed (test first):** a released answer filter lost its SUBACK state at once; a request that reused it before the UNSUBSCRIBE waited for a SUBACK that never came and timed out (4 of 20 runs under load). Now the state is kept until the session has unsubscribed the filter; 25 runs in a row green under load;
+  - opt-in interop `consumer_asks_a_provider` with `Get`/`Set`/`Del SubscriptionList` against Mosquitto: `interop.sh` 14 passed, 1 ignored;
+  - one-off D7 `oec-check monitor` (external call, Q-009; 140 s against the demo app and the interop consumer): 12 pass, 0 fail, 1 skip (T7-MON-07 no Action RequestIds), 0 invalid of 95 messages; capture not committed;
+  - no new dependency; `Cargo.lock` and `deny.toml` unchanged, `cargo deny` without exception.
+
+## Next (C-060)
+
+1. P4 increment 8c – the Action `NewDataSetWriterId` (responder in the provider, `Consumer::new_data_set_writer_id`), then the farewell of the sketch (examples ported, C header moved, REQ walker into `oec`, sketch deleted, gate scripts adapted); apply your decisions on D-1 … D-3. Then 10 (`oec-ffi`). Runs in a new agent (start prompt in `prompt.md`).

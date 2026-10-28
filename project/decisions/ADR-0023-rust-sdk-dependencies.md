@@ -149,3 +149,7 @@ P4 increment 7c (ReferenceDesignation, Syslog bridge, Generic events) adds **no 
 ## Amendment C-058 (2026-10-27) – no new dependency in increment 8a (agent, G-3.4 b)
 
 P4 increment 8a (the consumer core) adds **no crate and no feature**. The sans-IO consumer in `oec-core` uses `serde_json`, `time` and the standard library; the waiting in `oec` uses `tokio::sync::oneshot` (feature `sync` already enabled) and a thread park for the `_blocking` forms; the routing mode of the test broker uses the existing dev dependencies. `Cargo.lock` unchanged (192 packages); `cargo deny check` passes with **no exception and no `ignore` entry**.
+
+## Amendment C-059 (2026-10-28) – no new dependency in increment 8b (agent, G-3.4 b)
+
+P4 increment 8b (SubscriptionList, `Subscription::configurable`/`interval`, example app `oec/examples/demo.rs`) adds **no crate and no feature**: the list, its overrides and their persistence use `serde`/`serde_json` and the standard library; the example uses only `oec` and the standard library (no `[dev-dependencies]` change). `Cargo.lock` unchanged (192 packages); `cargo deny check` passes with **no exception and no `ignore` entry**.

@@ -409,3 +409,23 @@ Module `oec::consumer`: `Consumer::{subscribe, on_presence, get, get_blocking, s
 5. **`Presence`** carries the ServiceType in every variant and the MAM as `Option<Box<Mam>>` (typed, `None` until known) instead of `mam_json`; it is `#[non_exhaustive]`.
 6. **`subscribe` and `on_presence`** take `&Target` and return `Result<Subscription>`; the callbacks run on the runtime task (must not block). A subscription the broker refuses is reported as `Error::Io(PermissionDenied)` to the requests that wait for it.
 7. **`_blocking` forms on a tokio runtime thread** return `Error::Invalid` (they would deadlock); use the async form there.
+
+## Amendment C-059 (2026-10-28) – P4 increment 8b: SubscriptionList (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details: `log/2026-10-28_C-059_subscription-list.md`, REVIEW A-128 … A-136. Semantics: ADR-0026 §18. The sketch is still not aligned (it is deleted in increment 8c, ADR-0026 §18.1); it remains the contract only for `Consumer::new_data_set_writer_id`.
+
+### A. What moved from the sketch into `oec`
+
+`Subscription::interval(Duration)` (processing interval, REQ-RES-SUBLIST-003) and `Subscription::configurable()` (`CONF_1`, REQ-RES-SUBLIST-004), with the sketch's signatures (consuming builders on the returned `Subscription`). They carry no own `#[must_use]`: the type `Subscription` is already `#[must_use]` (clippy `double_must_use`).
+
+### B. Additions (allowed by §1)
+
+| Item | Why |
+|---|---|
+| Writer-id resolution of `Set`/`Del SubscriptionList` | `Consumer::set`/`del` of `Resource::SubscriptionList` without `WriteOptions::data_set_writer_id` ask the addressed entries first (one id for the whole list, MG 9.1.9 note). A deleted entry is not answered, so restoring it needs the explicit id. |
+| Store key `app/subscriptions` | The changes by `Set`/`Del SubscriptionList` survive a restart (§9 store); a corrupt table → `Error::Io` from `build()`. |
+| Example `oec/examples/demo.rs` | The SDK example app (provider + consumer) and the application under test of D7 `test`; environment `OEC_ROOT` (container storage root, default `/`) and `OEC_DEMO_SECONDS` (graceful end). |
+
+### C. Changes of sketch items
+
+None. The documented behaviour is narrower than the sketch's comment "the SDK re-subscribes": a `Set` changes the Interval of an existing configurable entry; a `Set` of a TopicPath the application has not subscribed is rejected with `BadNotSupported` (SF-111, open); a `Del` unsubscribes the filter until a `Set` restores it.
