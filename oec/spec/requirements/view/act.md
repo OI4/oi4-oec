@@ -21,14 +21,14 @@ Guideline baseline: `eb7889c` · Area status: reviewed · Sections: MG 8.2.16, M
 | [REQ-ACT-014](#req-act-014) | Status of the ActionResponse | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-test | reviewed |
 | [REQ-ACT-015](#req-act-015) | Sequence of an Action | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 | [REQ-ACT-016](#req-act-016) | Intermediate responses for long-running Actions | MAY | MAY | MAY | MAY | messaging | d7-test | reviewed |
-| [REQ-ACT-017](#req-act-017) | No response to undecodable, unaddressable or rejected requests | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-test | draft |
+| [REQ-ACT-017](#req-act-017) | No response to undecodable, unaddressable or rejected requests | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-test | reviewed |
 | [REQ-ACT-018](#req-act-018) | ActionMetaData of the common services need not be published | MAY | MAY | MAY | MAY | messaging | manual | reviewed |
 | [REQ-ACT-019](#req-act-019) | Reserved DataSetWriterId and ActionTargetId 1 for common services | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-ACT-020](#req-act-020) | Topics of NewDataSetWriterId | MUST | MUST | MUST | MUST | messaging | d7-validate, d7-test | reviewed |
 | [REQ-ACT-021](#req-act-021) | NewDataSetWriterId request field Resource | MUST | MUST | MUST | MUST | messaging | schema, d7-validate | reviewed |
 | [REQ-ACT-022](#req-act-022) | NewDataSetWriterId response fields DataSetWriterId and Ttl | MUST | MUST | MUST | MUST | messaging | schema, d7-validate, d7-test | reviewed |
-| [REQ-ACT-023](#req-act-023) | Provided DataSetWriterId is valid for Ttl seconds | MUST* | MUST | MUST | MUST | messaging | d7-test | draft |
-| [REQ-ACT-024](#req-act-024) | NewDataSetWriterId for an unknown Source is answered with BadNotFound | MUST | MUST | MUST | MUST | messaging | d7-test | draft |
+| [REQ-ACT-023](#req-act-023) | Provided DataSetWriterId is valid for Ttl seconds | MUST* | MUST | MUST | MUST | messaging | d7-test | reviewed |
+| [REQ-ACT-024](#req-act-024) | NewDataSetWriterId for an unknown Source is answered with BadNotFound | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -401,7 +401,7 @@ The Responder sends no response to a request that it cannot decode or address (e
 - Condition: The component uses the Methods Call and Reply.
 - Refs: MG 8.2.20
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-8.2.20-0b675c28
 
 > If a request cannot be decoded or addressed (e.g. unknown DataSetWriterId or ActionTargetId), or is rejected for security reasons, the Responder must not send a response (Part 14-6.2.11.2).
@@ -530,7 +530,7 @@ The DataSetWriterId provided by NewDataSetWriterId can be used for the first tim
 - Condition: The component requests or provides the common service NewDataSetWriterId.
 - Refs: MG 8.4.1, SF-035, SF-112
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 
 > Ttl contains a value, which describes the time to live of the provided DataSetWriterId in seconds. Initial usage of the provided DataSetWriterId is only possible during this period of time.
 > — MG 8.4.1
@@ -552,7 +552,7 @@ A Responder that neither is nor represents the Source of a NewDataSetWriterId re
 - Condition: The component provides the common service NewDataSetWriterId.
 - Refs: MG 9.2.1, SF-113
 - Verification: d7-test
-- Status: draft
+- Status: reviewed
 - Inventory: MG-9.2.1-07feb514
 
 > If the application neither is nor represents the &lt;Source>, it answers with the final ActionResponse with the Status BadNotFound and an empty Payload.

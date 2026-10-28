@@ -407,7 +407,7 @@ requirements:
         text: If a request cannot be decoded or addressed (e.g. unknown DataSetWriterId or ActionTargetId), or is rejected for security reasons, the Responder must not send a response (Part 14-6.2.11.2).
     verification: [d7-test]
     inventory: [MG-8.2.20-0b675c28]
-    status: draft
+    status: reviewed
     notes: >-
       "Cannot address" refers to the DataSetWriterId and ActionTargetId of
       the Action, not to the Source of the topic: a NewDataSetWriterId
@@ -551,7 +551,7 @@ requirements:
       - ref: MG 8.4.1
         text: The Set that creates the DataSet carries this DataSetWriterId; for a DataSet the publisher already lists in its PublicationList, the listed DataSetWriterId is used and no new one is needed.
     verification: [d7-test]
-    status: draft
+    status: reviewed
     notes: >-
       Whether the Responder rejects a later initial use is not stated
       explicitly; "only possible" is read as such (implicit, SF-035). The Set
@@ -580,7 +580,7 @@ requirements:
         text: If the application neither is nor represents the <Source>, it answers with the final ActionResponse with the Status BadNotFound and an empty Payload.
     verification: [d7-test]
     inventory: [MG-9.2.1-07feb514]
-    status: draft
+    status: reviewed
     notes: >-
       SF-113 (C-060 review). The request is addressed (DataSetWriterId 8,
       ActionTargetId 1), so REQ-ACT-015 applies and REQ-ACT-017 does not.
