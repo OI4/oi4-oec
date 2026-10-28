@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -51,7 +52,28 @@ func (r *reports) Set(v string) error {
 	return nil
 }
 
+// patterns is the repeatable flag --tests id|glob[,id|glob …].
+type patterns []string
+
+func (p *patterns) String() string { return strings.Join(*p, ",") }
+
+func (p *patterns) Set(v string) error {
+	for _, x := range strings.Split(v, ",") {
+		x = strings.TrimSpace(x)
+		if x == "" {
+			continue
+		}
+		if _, err := path.Match(x, ""); err != nil {
+			return fmt.Errorf("bad pattern %q", x)
+		}
+		*p = append(*p, x)
+	}
+	return nil
+}
+
+// monitorFlags are the flags of monitor and test (name).
 type monitorFlags struct {
+	name                                string
 	fl                                  *flag.FlagSet
 	replay, record, app, format, config string
 	broker, ca, cert, key, keyPassFile  string
@@ -61,22 +83,34 @@ type monitorFlags struct {
 	level, maxPacketSize                int
 	duration, heartbeat, tolerance      time.Duration
 	reports                             reports
+	timeout                             time.Duration // test
+	testerIL                            string        // test
+	tests                               patterns      // test
 }
 
-func newMonitorFlags(stderr io.Writer) *monitorFlags {
-	f := &monitorFlags{fl: flag.NewFlagSet("monitor", flag.ContinueOnError)}
+// newMonitorFlags registers the flags of monitor or test: the connection,
+// verdict and output flags are shared; --replay and --duration belong to
+// monitor, --timeout, --tester-il and --tests to test.
+func newMonitorFlags(name string, stderr io.Writer) *monitorFlags {
+	f := &monitorFlags{name: name, fl: flag.NewFlagSet(name, flag.ContinueOnError)}
 	fl := f.fl
 	fl.SetOutput(stderr)
 	fl.Usage = func() { fmt.Fprint(stderr, usage) }
 	fl.StringVar(&f.config, "config", "", "YAML file with flag values (keys = flag names); flags override it")
-	fl.StringVar(&f.replay, "replay", "", "judge a capture offline instead of a broker")
+	if name == "monitor" {
+		fl.StringVar(&f.replay, "replay", "", "judge a capture offline instead of a broker")
+		fl.DurationVar(&f.duration, "duration", defaultDuration, "observation time of a live run")
+	} else {
+		fl.DurationVar(&f.timeout, "timeout", 10*time.Second, "waiting time for an answer of the component under test")
+		fl.StringVar(&f.testerIL, "tester-il", "", "Identification Link of oec-check in the requests (default: Utility/oi4.org/oec-check/D7/<random>)")
+		fl.Var(&f.tests, "tests", "test ids or patterns (path.Match) to run, comma separated; repeatable (default: all)")
+	}
 	fl.StringVar(&f.record, "record", "", "write the observed messages to a capture (JSONL)")
 	fl.StringVar(&f.app, "app", "", "component under test: AppId (Identification Link) or <ServiceType>/<AppId>")
 	fl.IntVar(&f.level, "level", 3, "declared level 1, 2 or 3 (REQ-CMP-011: default 3)")
 	fl.StringVar(&f.format, "format", "text", "report format on standard output: text, json or junit")
 	fl.Var(&f.reports, "report", "additional report <format>=<path> (text, json, junit); repeatable")
 	fl.BoolVar(&f.allowSkip, "allow-skip", false, "exit 0 instead of 4 if a mandatory requirement could not be judged")
-	fl.DurationVar(&f.duration, "duration", defaultDuration, "observation time of a live run")
 	fl.DurationVar(&f.heartbeat, "heartbeat", 60*time.Second, "Health heartbeat (REQ-TOP-017)")
 	fl.DurationVar(&f.tolerance, "tolerance", 5*time.Second, "tolerance of the time-based rules")
 	fl.IntVar(&f.maxPacketSize, "max-packet-size", 0, "MaxPacketSize of the Message Bus (default: broker.json of --bus-storage or the capture header)")
@@ -182,7 +216,10 @@ func (f *monitorFlags) connection() (mqttwire.Config, int, error) {
 		return c, 0, errors.New("--password-file needs --username")
 	}
 	if c.Broker == "" {
-		return c, 0, errors.New("monitor needs --broker, --bus-storage or --replay")
+		if f.name == "monitor" {
+			return c, 0, errors.New("monitor needs --broker, --bus-storage or --replay")
+		}
+		return c, 0, fmt.Errorf("%s needs --broker or --bus-storage", f.name)
 	}
 	if _, _, err := mqttwire.BrokerAddress(c.Broker); err != nil {
 		return c, 0, err
@@ -194,12 +231,12 @@ func (f *monitorFlags) connection() (mqttwire.Config, int, error) {
 
 // command returns the command line without secrets (no secret is taken on
 // the command line; file paths stay).
-func command(args []string) []string {
-	return append([]string{tool, "monitor"}, args...)
+func command(name string, args []string) []string {
+	return append([]string{tool, name}, args...)
 }
 
 func runMonitor(args []string, stdout, stderr io.Writer) int {
-	f := newMonitorFlags(stderr)
+	f := newMonitorFlags("monitor", stderr)
 	if err := f.fl.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return exitValid
@@ -245,7 +282,7 @@ func runMonitor(args []string, stdout, stderr io.Writer) int {
 	opt := monitor.DefaultOptions()
 	opt.Heartbeat, opt.Tolerance, opt.MaxPacketSize = f.heartbeat, f.tolerance, f.maxPacketSize
 	rep := &report.Monitor{Report: report.MonitorVersion, Tool: tool, Version: version, Schemas: v.SchemaVersion(), Baseline: v.Baseline(),
-		Catalog: cat.Baseline, Command: command(args), Attachment: "bus", Level: f.level, App: f.app, SelfAssessment: true}
+		Catalog: cat.Baseline, Command: command("monitor", args), Attachment: "bus", Level: f.level, App: f.app, SelfAssessment: true}
 
 	var res monitor.Result
 	if f.replay != "" {
@@ -290,7 +327,7 @@ func runMonitor(args []string, stdout, stderr io.Writer) int {
 	rep.Messages, rep.Namespace = res.Messages, res.Namespace
 	obs, parts := res.Observations, res.Participants
 	if f.app != "" {
-		obs, parts = forApp(f.app, obs, parts)
+		obs, parts = monitor.ForApp(f.app, obs, parts)
 	}
 	rep.Participants = parts
 	if rep.Participants == nil {
@@ -307,12 +344,18 @@ func runMonitor(args []string, stdout, stderr io.Writer) int {
 		return exitInternal
 	}
 	if f.app != "" && len(parts) == 0 {
-		obs = notFound(tests, f.app)
+		obs = monitor.NotFound(tests, f.app)
 	}
 	rep.Tests = verdict.Build(tests, obs, reqs, f.level)
 	rep.Summary = verdict.Summary(rep.Tests)
 	rep.Exit = verdict.Exit(rep.Tests, f.allowSkip)
 
+	return writeReports(rep, f, stdout, stderr)
+}
+
+// writeReports writes the --report files and the report on standard output
+// and returns the exit code of the run.
+func writeReports(rep *report.Monitor, f *monitorFlags, stdout, stderr io.Writer) int {
 	write := func(format string, w io.Writer) error {
 		switch format {
 		case "json":
@@ -345,23 +388,12 @@ func runMonitor(args []string, stdout, stderr io.Writer) int {
 // or the connection is lost. A connection that cannot be set up is exit 3
 // (DESIGN.md §5.3).
 func live(ctx context.Context, v *validate.Validator, cfg mqttwire.Config, opt monitor.Options, f *monitorFlags, rep *report.Monitor, stderr io.Writer) (monitor.Result, int) {
-	var rec *capture.Writer
-	var recFile *os.File
 	started := time.Now().UTC()
-	if f.record != "" {
-		var err error
-		if recFile, err = os.Create(f.record); err != nil {
-			fmt.Fprintf(stderr, "%s: %v\n", tool, err)
-			return monitor.Result{}, exitUsage
-		}
-		defer recFile.Close()
-		h := capture.Header{Tool: tool, ToolVersion: version, Schemas: rep.Schemas, Baseline: rep.Baseline, Broker: cfg.Broker,
-			Insecure: cfg.Insecure, Subscription: subscription, SubscribeQoS: opt.SubscribeQoS, MaxPacketSize: opt.MaxPacketSize, Started: started}
-		if rec, err = capture.NewWriter(recFile, h); err != nil {
-			fmt.Fprintf(stderr, "%s: record: %v\n", tool, err)
-			return monitor.Result{}, exitInternal
-		}
+	o, code := newObserver(v, cfg, opt, f.record, rep, started, stderr)
+	if o == nil {
+		return monitor.Result{}, code
 	}
+	defer o.file.Close()
 	dctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	cl, err := mqttwire.Dial(dctx, cfg)
 	cancel()
@@ -371,7 +403,6 @@ func live(ctx context.Context, v *validate.Validator, cfg mqttwire.Config, opt m
 	}
 	defer cl.Close()
 	msgs := make(chan mqttwire.Message, 4096)
-	e := monitor.New(v, opt, started)
 	if err := cl.Subscribe(ctx, subscription, byte(opt.SubscribeQoS), func(m mqttwire.Message) { msgs <- m }); err != nil {
 		fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 		return monitor.Result{}, exitInternal
@@ -380,27 +411,11 @@ func live(ctx context.Context, v *validate.Validator, cfg mqttwire.Config, opt m
 	timer := time.NewTimer(f.duration)
 	defer timer.Stop()
 	var cause error
-	last, line := started, 1
-	observe := func(m mqttwire.Message) error {
-		if m.Received.Before(last) {
-			m.Received = last
-		}
-		last = m.Received.UTC()
-		r := capture.Record{Topic: m.Topic, Payload: m.Payload, Size: len(m.Payload), Received: last, QoS: m.QoS, Retain: m.Retain}
-		if rec != nil {
-			if err := rec.Write(r); err != nil {
-				return fmt.Errorf("record: %w", err)
-			}
-			line++
-			r.Line = line
-		}
-		return e.Observe(monitor.FromRecord(r))
-	}
 loop:
 	for {
 		select {
 		case m := <-msgs:
-			if err := observe(m); err != nil {
+			if err := o.observe(m); err != nil {
 				fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 				return monitor.Result{}, exitInternal
 			}
@@ -417,7 +432,7 @@ loop:
 	for drained := false; !drained; {
 		select {
 		case m := <-msgs:
-			if err := observe(m); err != nil {
+			if err := o.observe(m); err != nil {
 				fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 				return monitor.Result{}, exitInternal
 			}
@@ -425,55 +440,79 @@ loop:
 			drained = true
 		}
 	}
-	ended := time.Now().UTC()
-	if ended.Before(last) {
-		ended = last
+	ended, code := o.finish(time.Now().UTC(), cause, rep, stderr)
+	if code != 0 {
+		return monitor.Result{}, code
 	}
-	if rec != nil {
-		if err := rec.Close(ended, cause); err != nil {
+	return o.e.Finish(ended), 0
+}
+
+// observer feeds the received messages to the monitor engine and, with
+// --record, to a capture.
+type observer struct {
+	e    *monitor.Engine
+	rec  *capture.Writer
+	file *os.File // nil without --record (Close on nil is harmless)
+	last time.Time
+	line int
+}
+
+// newObserver starts the monitor engine and the recording. On error it
+// reports and returns nil and the exit code.
+func newObserver(v *validate.Validator, cfg mqttwire.Config, opt monitor.Options, record string, rep *report.Monitor, started time.Time, stderr io.Writer) (*observer, int) {
+	o := &observer{e: monitor.New(v, opt, started), last: started, line: 1}
+	rep.Started = started
+	if record == "" {
+		return o, 0
+	}
+	var err error
+	if o.file, err = os.Create(record); err != nil {
+		fmt.Fprintf(stderr, "%s: %v\n", tool, err)
+		return nil, exitUsage
+	}
+	h := capture.Header{Tool: tool, ToolVersion: version, Schemas: rep.Schemas, Baseline: rep.Baseline, Broker: cfg.Broker,
+		Insecure: cfg.Insecure, Subscription: subscription, SubscribeQoS: opt.SubscribeQoS, MaxPacketSize: opt.MaxPacketSize, Started: started}
+	if o.rec, err = capture.NewWriter(o.file, h); err != nil {
+		o.file.Close()
+		fmt.Fprintf(stderr, "%s: record: %v\n", tool, err)
+		return nil, exitInternal
+	}
+	return o, 0
+}
+
+func (o *observer) observe(m mqttwire.Message) error {
+	if m.Received.Before(o.last) {
+		m.Received = o.last
+	}
+	o.last = m.Received.UTC()
+	r := capture.Record{Topic: m.Topic, Payload: m.Payload, Size: len(m.Payload), Received: o.last, QoS: m.QoS, Retain: m.Retain}
+	if o.rec != nil {
+		if err := o.rec.Write(r); err != nil {
+			return fmt.Errorf("record: %w", err)
+		}
+		o.line++
+		r.Line = o.line
+	}
+	return o.e.Observe(monitor.FromRecord(r))
+}
+
+// finish closes the recording and notes the end of the run in the report.
+func (o *observer) finish(ended time.Time, cause error, rep *report.Monitor, stderr io.Writer) (time.Time, int) {
+	if ended.Before(o.last) {
+		ended = o.last
+	}
+	if o.rec != nil {
+		if err := o.rec.Close(ended, cause); err != nil {
 			fmt.Fprintf(stderr, "%s: record: %v\n", tool, err)
-			return monitor.Result{}, exitInternal
+			return ended, exitInternal
 		}
 	}
 	if cause != nil {
 		rep.Error = cause.Error()
 		fmt.Fprintf(stderr, "%s: observation stopped early: %v\n", tool, cause)
 	}
-	rep.Started, rep.Ended = started, ended
-	return e.Finish(ended), 0
-}
-
-// forApp keeps the participants and observations of the component under
-// test (DESIGN.md §3.2 --app): its AppId or its <ServiceType>/<AppId>.
-func forApp(app string, obs []verdict.Observation, parts []monitor.Participant) ([]verdict.Observation, []monitor.Participant) {
-	ids := map[string]bool{}
-	var keep []monitor.Participant
-	for _, p := range parts {
-		if p.AppID == app || p.ID == app {
-			ids[p.ID] = true
-			keep = append(keep, p)
-		}
-	}
-	var out []verdict.Observation
-	for _, o := range obs {
-		if ids[o.Participant] {
-			out = append(out, o)
-		}
-	}
-	return out, keep
-}
-
-// notFound makes every requirement of the implemented tests inconclusive:
-// the component under test did not appear (DESIGN.md §5.3, exit 4).
-func notFound(tests []verdict.Test, app string) []verdict.Observation {
-	var out []verdict.Observation
-	for _, t := range tests {
-		for _, r := range t.Reqs {
-			out = append(out, verdict.Observation{Test: t.ID, Req: r, Kind: verdict.Skipped, Inconclusive: true,
-				Evidence: verdict.Evidence{Detail: fmt.Sprintf("the component under test %q was not observed", app)}})
-		}
-	}
-	return out
+	rep.Ended = ended
+	return ended, 0
 }
 
 // captureMessages converts a capture for validate: one message per record.

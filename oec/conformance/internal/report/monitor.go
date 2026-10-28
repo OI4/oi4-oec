@@ -10,14 +10,16 @@ import (
 	"time"
 
 	"github.com/OI4/oec/conformance/internal/monitor"
+	"github.com/OI4/oec/conformance/internal/probe"
 	"github.com/OI4/oec/conformance/internal/verdict"
 )
 
 // MonitorVersion is the version of the JSON document of a monitor run.
 const MonitorVersion = 1
 
-// Monitor is the report of oec-check monitor (DESIGN.md §7): the run, the
-// participants seen on the bus and one verdict per catalog test.
+// Monitor is the report of oec-check monitor and test (DESIGN.md §7): the
+// run, the participants seen on the bus and one verdict per catalog test. A
+// test run (mode test) adds the identity of D7 and its requests.
 type Monitor struct {
 	Report         int                     `json:"report"` // MonitorVersion
 	Tool           string                  `json:"tool"`
@@ -26,7 +28,7 @@ type Monitor struct {
 	Baseline       string                  `json:"baseline"`
 	Catalog        string                  `json:"catalog"` // baseline of the test catalog
 	Command        []string                `json:"command"`
-	Mode           string                  `json:"mode"`       // live | replay
+	Mode           string                  `json:"mode"`       // live | replay | test
 	Attachment     string                  `json:"attachment"` // bus
 	Capture        string                  `json:"capture,omitempty"`
 	Broker         string                  `json:"broker,omitempty"`
@@ -40,6 +42,8 @@ type Monitor struct {
 	Messages       int                     `json:"messages"`
 	Namespace      int                     `json:"namespace"` // messages in the Oi4v2 namespace
 	Participants   []monitor.Participant   `json:"participants"`
+	Tester         string                  `json:"tester,omitempty"`   // test: PublisherId of D7 in the requests
+	Requests       []probe.Request         `json:"requests,omitempty"` // test: the stimuli in order
 	Tests          []verdict.TestResult    `json:"tests"`
 	Summary        map[verdict.Outcome]int `json:"summary"`
 	Error          string                  `json:"error,omitempty"` // why the observation stopped early
@@ -93,11 +97,14 @@ var exitText = map[int]string{0: "PASS", 1: "FAIL", 4: "INCONCLUSIVE"}
 // requirement that is not fulfilled.
 func (r *Monitor) Text(w io.Writer) error {
 	var b strings.Builder
-	src := r.Broker
+	src, cmd := r.Broker, "monitor"
 	if r.Mode == "replay" {
 		src = r.Capture
 	}
-	fmt.Fprintf(&b, "%s %s monitor (%s %s), level %d, schemas %s, baseline %s\n", r.Tool, r.Version, r.Mode, src, r.Level, r.Schemas, r.Baseline)
+	if r.Mode == "test" {
+		cmd = "test"
+	}
+	fmt.Fprintf(&b, "%s %s %s (%s %s), level %d, schemas %s, baseline %s\n", r.Tool, r.Version, cmd, r.Mode, src, r.Level, r.Schemas, r.Baseline)
 	if r.Insecure {
 		b.WriteString("WARNING: the broker certificate was not verified (--insecure, dev only)\n")
 	}
@@ -107,6 +114,15 @@ func (r *Monitor) Text(w io.Writer) error {
 	fmt.Fprintf(&b, "observed %s from %s: %d message(s), %d in the Oi4v2 namespace\n", r.Observed, r.Started.Format(time.RFC3339), r.Messages, r.Namespace)
 	if r.Error != "" {
 		fmt.Fprintf(&b, "stopped early: %s\n", r.Error)
+	}
+	if r.Mode == "test" {
+		answered := 0
+		for _, q := range r.Requests {
+			if q.Replies > 0 {
+				answered++
+			}
+		}
+		fmt.Fprintf(&b, "tester %s: %d request(s), %d answered\n", r.Tester, len(r.Requests), answered)
 	}
 	b.WriteString("participants:\n")
 	if len(r.Participants) == 0 {

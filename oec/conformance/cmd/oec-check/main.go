@@ -54,6 +54,8 @@ const usage = `usage:
   oec-check monitor --replay CAPTURE.jsonl [flags]
   oec-check monitor --broker mqtts://HOST[:PORT] [connection flags] [flags]
   oec-check monitor --bus-storage ROOT [flags]
+  oec-check test --app [SERVICETYPE/]APPID --broker mqtts://HOST[:PORT] [connection flags] [flags]
+  oec-check test --app [SERVICETYPE/]APPID --bus-storage ROOT [flags]
   oec-check version
 
 A message file is a JSON object {"topic": "...", "payload": {...}} with the
@@ -74,8 +76,16 @@ monitor tests of the D7 catalog; --replay judges a capture offline.
   output:     --format text|json|junit, --report FORMAT=PATH (repeatable),
               --config FILE.yaml (flag values; flags override)
 
+test sends requests to the component under test (--app) and judges the
+answers (implemented tests of the D7 catalog); the monitor tests run on the
+same subscription. It takes the connection, verdict and output flags of
+monitor and --record, plus:
+  run:        --timeout 10s (waiting time for an answer), --tests ID|GLOB,...
+              (repeatable; default all), --tester-il IL (default
+              Utility/oi4.org/oec-check/D7/<random>)
+
 Exit codes: 0 valid/pass, 1 invalid/fail, 2 usage or input error,
-3 internal error or broker not reachable, 4 inconclusive (monitor).
+3 internal error or broker not reachable, 4 inconclusive (monitor, test).
 `
 
 func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
@@ -88,6 +98,8 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return runValidate(args[1:], stdin, stdout, stderr)
 	case "monitor":
 		return runMonitor(args[1:], stdout, stderr)
+	case "test":
+		return runTest(args[1:], stdout, stderr)
 	case "version":
 		v, err := validate.New()
 		if err != nil {

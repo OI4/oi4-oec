@@ -246,13 +246,13 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-BUS-003, REQ-CMP-015, REQ-CMP-017, REQ-MSG-015, REQ-RES-HEALTH-006, REQ-RES-MAM-021]
-    status: planned
+    status: implemented
   - id: T7-GET-02
     title: Profile lists exactly the supported resources
     mode: test
     level: 1
     reqs: [REQ-CMP-018, REQ-CMP-021, REQ-RES-PROFILE-002, REQ-RES-PROFILE-004]
-    status: planned
+    status: implemented
     notes: Every resource of the Profile answers a Get; a Get of a resource missing from the Profile gets no Pub.
   - id: T7-GET-03
     title: Get of every supported resource
@@ -273,7 +273,7 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-CMP-041, REQ-CMP-044, REQ-CMP-047]
-    status: planned
+    status: implemented
   - id: T7-GET-06
     title: Pagination on request and by size
     mode: test
@@ -297,7 +297,7 @@ tests:
     mode: test
     level: 1
     reqs: [REQ-MSG-046]
-    status: planned
+    status: implemented
 
   # --- test: Set and Del -------------------------------------------------
   - id: T7-SET-01

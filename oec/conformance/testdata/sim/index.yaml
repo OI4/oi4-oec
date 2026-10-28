@@ -1,0 +1,94 @@
+# Fixtures of `oec-check test` against the simulated component under test
+# (DESIGN.md §10, C-062).
+#
+# The simulated CUT is internal/sim: the OT connector of the guideline
+# examples (MG B1.1, AppId provider.com/FieldDataService/FDS-001/1200-0345)
+# with the subordinate asset groe.mca/DeviceModelB/AC33.447/20443. Its
+# content is taken from reviewed payload vectors (MAM V-PAY-023/006, Health
+# V-PAY-003, Profile V-PAY-032, Config V-PAY-092, Data V-PAY-059,
+# PublicationList V-PAY-038, ReferenceDesignation V-PAY-043,
+# SubscriptionList V-PAY-070, Will V-PAY-025); it answers Get requests and
+# can carry one fault (sim.Fault). internal/probe/sim_test.go runs
+# `oec-check test` (monitor + runner, level 3) against every entry over the
+# in-process TLS test broker.
+#
+# This index is test data with verdict (G-3.9): it states the expected
+# outcome of the tests and goes to the PO for review.
+#
+# fault:  sim.Fault ("none" = the conforming CUT)
+# expect: test → outcome and the requirements that have this outcome (the
+#         other requirements of the test pass or are not applicable).
+#         Every implemented test (monitor and test) not listed passes or is
+#         skipped.
+# status: draft | reviewed
+fixtures:
+  - fault: none
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      The conforming CUT. T7-GET-01, -02, -05 and -09 pass; the monitor
+      tests pass or are skipped (a test run is shorter than the heartbeat
+      and does not see the connect: plain skip, not inconclusive).
+  - fault: T7-GET-01/reply-to
+    status: draft
+    expect:
+      T7-GET-01: {outcome: fail, reqs: [REQ-BUS-003, REQ-CMP-015, REQ-CMP-017, REQ-MSG-015]}
+      T7-GET-02: {outcome: fail, reqs: [REQ-CMP-018]}
+      T7-GET-05: {outcome: warn, reqs: [REQ-CMP-047]}
+      T7-MON-10: {outcome: info, reqs: [REQ-IL-012]}
+    notes: >-
+      Every answer carries an empty ReplyTo instead of the MessageId of the
+      Get (REQ-MSG-015): D7 cannot correlate any answer, so each Get counts
+      as unanswered (Get MAM/Health required at level 3, REQ-CMP-017; the
+      Profile, REQ-CMP-018), and the Event Status Bad for the unknown asset
+      is not recognized as the reaction (REQ-CMP-047, SHOULD). T7-GET-09 is
+      skipped: the Get MAM without unknown key is not answered either. The
+      monitor reads each answer to Get MAM/<AppId> as a further Birth (a Pub
+      MAM about itself with empty ReplyTo, MG 6.3.3) without Will or Close in
+      between (T7-MON-10, REQ-IL-012 info: a second instance or a lost Will).
+  - fault: T7-GET-01/all-assets
+    status: draft
+    expect:
+      T7-GET-01: {outcome: fail, reqs: [REQ-RES-HEALTH-006]}
+    notes: >-
+      Get Health without Source is answered with the Health of the
+      application only; the subordinate asset, whose MAM is in the answer to
+      Get MAM, is missing (REQ-RES-HEALTH-006: all assets).
+  - fault: T7-GET-02/unanswered
+    status: draft
+    expect:
+      T7-GET-02: {outcome: fail, reqs: [REQ-RES-PROFILE-002]}
+    notes: >-
+      The Profile lists SubscriptionList, but Get SubscriptionList/<AppId>
+      is not answered (REQ-RES-PROFILE-002: exactly the served resources).
+  - fault: T7-GET-02/missing
+    status: draft
+    expect:
+      T7-GET-02: {outcome: fail, reqs: [REQ-CMP-021, REQ-RES-PROFILE-002]}
+    notes: >-
+      Config is answered but not listed in the Profile; level 3 requires
+      Config (REQ-CMP-035), so the Profile also lacks a resource of the
+      level (REQ-CMP-021).
+  - fault: T7-GET-05/empty-list
+    status: draft
+    expect:
+      T7-GET-05: {outcome: fail, reqs: [REQ-CMP-041]}
+    notes: >-
+      Get Data/<AppId>/<Filter> with a Filter that matches nothing is not
+      answered instead of with an empty Messages list (REQ-CMP-041).
+  - fault: T7-GET-05/unknown-source
+    status: draft
+    expect:
+      T7-GET-05: {outcome: warn, reqs: [REQ-CMP-047]}
+    notes: >-
+      Get MAM for an unknown asset is answered with an empty Pub MAM on the
+      Source of the request instead of no Pub and an Event Status Bad
+      (REQ-CMP-047, SHOULD).
+  - fault: T7-GET-09/unknown-key
+    status: draft
+    expect:
+      T7-GET-09: {outcome: warn, reqs: [REQ-MSG-046]}
+    notes: >-
+      A Get with an unknown top-level key is dropped, the same Get without
+      it is answered (REQ-MSG-046, SHOULD).

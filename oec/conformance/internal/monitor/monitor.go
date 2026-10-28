@@ -1094,3 +1094,36 @@ func (e *Engine) finishRepresented(ids []string) {
 		}
 	}
 }
+
+// ForApp keeps the participants and observations of the component under
+// test (DESIGN.md §3.2 --app): its AppId or its <ServiceType>/<AppId>.
+func ForApp(app string, obs []verdict.Observation, parts []Participant) ([]verdict.Observation, []Participant) {
+	ids := map[string]bool{}
+	var keep []Participant
+	for _, p := range parts {
+		if p.AppID == app || p.ID == app {
+			ids[p.ID] = true
+			keep = append(keep, p)
+		}
+	}
+	var out []verdict.Observation
+	for _, o := range obs {
+		if ids[o.Participant] {
+			out = append(out, o)
+		}
+	}
+	return out, keep
+}
+
+// NotFound makes every requirement of the implemented tests inconclusive:
+// the component under test did not appear (DESIGN.md §5.3, exit 4).
+func NotFound(tests []verdict.Test, app string) []verdict.Observation {
+	var out []verdict.Observation
+	for _, t := range tests {
+		for _, r := range t.Reqs {
+			out = append(out, verdict.Observation{Test: t.ID, Req: r, Kind: verdict.Skipped, Inconclusive: true,
+				Evidence: verdict.Evidence{Detail: fmt.Sprintf("the component under test %q was not observed", app)}})
+		}
+	}
+	return out
+}
