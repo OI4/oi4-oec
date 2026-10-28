@@ -451,3 +451,17 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
 1. **`new_data_set_writer_id(resource, &Target, &ActionOptions) -> Result<ProvidedWriterId>`** instead of `(service_type, app, resource, timeout) -> Result<(u16, Duration)>`: the addressed application (and optionally the asset as Source) is a `Target` as for `get`/`set`/`del`; a `Target` without ServiceType and AppId or with a Filter → `Error::Invalid` (REQ-ACT-020); a Bad response → `Error::Status`; no response within the timeout → `Error::Timeout`.
 2. **Examples** (`oec/sdk/rust/oec/examples/{hello, config, device_source, consumer}.rs`, ported; `demo.rs` from C-059): the sketch's `consumer.rs` sent a broadcast `Get` to `Target::any()`; since C-058 (C.3) `get` needs a concrete application, so the ported example targets the OTConnector named on the command line and finds applications with `on_presence`. The other adaptations follow the amendments C-048 … C-058 (`&Target`, the `GetOptions` builder, explicit `Bootstrap`, `Presence` arms with `..`). `hello.rs` stays within 20 lines.
 3. **REQ tracing:** the walker of the sketch is `oec/sdk/rust/oec/tests/citations.rs` (same checks: hello world ≤ 20 lines, complete REQ ids, every REQ id cited under `oec/sdk/` exists and is not deprecated).
+
+## Amendment C-061 (2026-10-28) – P4 increment 10: additive API for the C ABI (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the PO can overrule. Details: `log/2026-10-28_C-061_oec-ffi.md`, REVIEW A-146. The C ABI `oec-ffi` (ADR-0021 amendment C-061) wraps this API 1:1; to carry JSON values (ADR-0021 §5, Q-023) and the Syslog function of the C contract it needs five additions. Nothing existing changes.
+
+| Item | Why |
+|---|---|
+| `ConfigDef::from_json(context, json) -> Result<ConfigDef>` | A Config definition in the form of the published Config DataSet (MG 8.3.3, REQ-RES-CONFIG-002) – the `definition_json` of `oec_asset_add_config`. Checked like every definition; error messages name the position, never a value (GL-ADR-021). |
+| `ConfigValues::to_json() -> String` | The values a Config `on_set` handler receives, as `{"<group>": {"<name>": "<value>"}}` (string form, REQ-RES-CONFIG-007) – the `json` of the C `oec_set_fn`. Sensitive values are in clear text (the application needs them); the rustdoc says not to log it. |
+| `DataSet::update_json(json) -> Result<()>` | `DataSet::update` with OPC UA JSON field values (REQ-MSG-031) – `oec_dataset_update`. All or nothing. |
+| `SetData::to_json() -> String` | The requested values of a `Set Data` as OPC UA JSON – the `json` of the C `oec_set_fn` of a DataSet. |
+| `AppHandle::emit_syslog(level, message)` | A Syslog event of this application without the process-wide `log` bridge (same level switch, rate limit and size limit as `oec::event::syslog`) – `oec_app_syslog`; with two apps in one process (tests, C programs) the `log` bridge would reach only the first one. |
+
+`oec-core` (no stability promise of its own) gains `Provider::data_fields` (field names and types of a Data DataSet), which `update_json`/`to_json` need.

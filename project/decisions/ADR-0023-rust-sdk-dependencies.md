@@ -157,3 +157,11 @@ P4 increment 8b (SubscriptionList, `Subscription::configurable`/`interval`, exam
 ## Amendment C-060 (2026-10-28) – no new dependency in increment 8c (agent, G-3.4 b)
 
 P4 increment 8c (the Action `NewDataSetWriterId`, the ported examples, the walker in `oec/tests/citations.rs`) adds **no crate and no feature**: responder, reservations and requester use `serde`/`serde_json`, `time` and the standard library; the example `consumer.rs` uses tokio (`rt`, `sync`, `time`), a normal dependency of `oec` with these features enabled since C-050. The deleted sketch had no dependencies; its lock file is gone with it. `Cargo.lock` unchanged (192 packages); `cargo deny check` passes with **no exception and no `ignore` entry**.
+
+## Amendment C-061 (2026-10-28) – increment 10: `oec-ffi` adds no crate; cbindgen pinned (agent, G-3.4 b)
+
+P4 increment 10 (the C ABI `oec-ffi`) adds **no crate and no feature**. Runtime dependencies of `oec-ffi`: `oec` (its crypto and `strict-validation` features are forwarded), `serde`, `serde_json` and `tokio` (the runtime of `oec_app_start`; the workspace features `rt`, `net`, `time`, `sync`, `signal` that `oec` already uses). Dev dependencies: `oec-core`, `rcgen`, `rustls`, `rustls-pki-types`, `pkcs8` – the ones of the in-process TLS test broker of `oec/tests`, which `oec-ffi/tests/c.rs` includes as a `#[path]` module. `Cargo.lock` grows by the package `oec-ffi` only (192 → 193 packages); `cargo deny check` passes with **no exception and no `ignore` entry**.
+
+**cbindgen** (decided as a CLI tool, table above): pinned to **0.29.4** (`cbindgen_version` in `oec/sdk/check.sh`); the gate fails if it is missing or reports another version, regenerates the header into a temporary file and fails on any difference to the committed `oec-ffi/include/oec.h`. Install: `cargo install cbindgen --version 0.29.4 --locked`. It is neither a build dependency nor linked; its MPL-2.0 license does not reach the generated header (our MIT code).
+
+**C compiler and sanitizers** (test tools, not dependencies): the system `cc` (or `$CC`) builds the C examples and the ABI test program; AddressSanitizer and UBSan come with the toolchain (Apple clang, gcc, clang); `OEC_FFI_REQUIRE_SANITIZERS=1` (default in `oec/sdk/check.sh`) makes a toolchain without them fail the gate instead of skipping.

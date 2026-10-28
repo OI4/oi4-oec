@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, nach deiner Antwort „R-1 akzeptiert“ (REQ-ACT-017, -023, -024 sind `reviewed`). **Für dich ist nichts offen.**_
+_Stand: 28.10.2026, C-061 (P4 Inkrement 10: die C-Schnittstelle `oec-ffi`; alle P4-Inkremente fertig). **Für dich ist eine Entscheidung offen: D-1 = Abschluss von P4 und die nächste Phase.** Keine Guideline-Frage, keine Testdaten zum Review._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,44 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Dein Review zu C-060 ist eingetragen** (D-1, D-2 und R-1 aus C-059, siehe unten „Was aus deinem letzten Review (C-060) geworden ist“). Das daraus entstandene R-1 (REQ-ACT-017, -023, -024) hast du akzeptiert; die drei Regeln sind `reviewed`. **Für dich ist nichts offen.**
+### D-1 – Ist P4 fertig, und womit geht es weiter? (zu entscheiden)
+
+**Worum es geht:** Alle zehn Inkremente von P4 (das Rust-SDK und seine C-Schnittstelle) sind gebaut. Die ROADMAP nennt sechs Bedingungen für den Abschluss von P4. Ich habe sie einzeln geprüft (Belege im Log C-061):
+
+| # | Bedingung | Stand |
+|---|---|---|
+| 1 | Alles, was die API-Entscheidungen (ADR-0020/0021) versprechen, gibt es im SDK und in der C-Schnittstelle; Skizze gelöscht | **erfüllt** (eine Funktion ist bewusst ersetzt, siehe A-148) |
+| 2 | Alle gemeinsamen Testvektoren laufen im SDK | **erfüllt** |
+| 3 | Tests gegen den echten TLS-Broker | **fürs SDK erfüllt** (14 grün, die C-Beispiele einmal gegen Mosquitto); **offen: D7 `test`** gegen die Beispiel-App – D7 `test` ist Arbeit von P5 |
+| 4 | Die C-Beispiele laufen gegen `oec-ffi`, auch mit AddressSanitizer | **erfüllt** (im Prüfskript) |
+| 5 | Prüfskript grün; das SDK baut auf Linux, macOS und Windows (amd64 + arm64), ARMv7 so gut es geht | **Prüfskript grün; Plattformen teilweise:** getestet auf macOS arm64 und Linux arm64, gebaut (nicht getestet) für Linux amd64, Windows amd64 (GNU-Werkzeuge) und ARMv7. **Offen:** Windows mit dem Microsoft-Compiler (MSVC) und echte Testläufe auf amd64 und Windows – dafür braucht es eine CI mit solchen Rechnern (P9) |
+| 6 | Die Beispiel-Apps sind beschrieben und werden im Prüfskript gebaut | **erfüllt** |
+
+**Möglichkeiten:**
+- **(a)** P4 abschließen; Punkt 3 (D7 `test`) wandert in den Abschluss von P5, Punkt 5 (Plattformen) in die CI von P9. Weiter mit **P5** (D7 `test`: D7 prüft eine laufende App aktiv, dazu Proxy, `list`/`explain`).
+- **(b)** wie (a), aber weiter mit **P6** (Logger-Demo in C auf `oec-ffi`, Wetter-Demo in Rust); P5 danach.
+- **(c)** P4 offen lassen, bis 3 und 5 erfüllt sind (dafür braucht es aber erst P5 und eine CI).
+
+**Meine Empfehlung: (a).** P5 macht den letzten offenen Punkt von P4 grün, und die Demos aus P6 müssen am Ende sowieso D7 bestehen – dann ist D7 schon fertig. Die CI für Windows/amd64 hängt an der Veröffentlichung (deine Entscheidung) und gehört nach P9. P4b (Micro-SDK) bleibt nach deiner Reihenfolge aus C-045 hinter P5.
+
+Antwort z. B.: „D-1 (a)“.
+
+### Zur Info: was C-061 gebaut hat
+
+C-061 war **P4 Inkrement 10**: die **C-Schnittstelle `oec-ffi`**. Ich habe es nicht geteilt (**A-145**).
+- **Was das ist:** Eine Bibliothek, mit der man das Rust-SDK aus C-Programmen benutzen kann – als „Shared Library“ (wird beim Start geladen, z. B. `liboec_ffi.dylib`) und als „Static Library“ (wird fest ins Programm eingebaut, `liboec_ffi.a`). Dazu gehört die Header-Datei `oec.h`, die einem C-Programm sagt, welche Funktionen es gibt. Die Logger-Demo (P6) wird in C darauf geschrieben.
+- **Umfang:** 46 C-Funktionen über das ganze SDK: App starten und stoppen, Geräte, Datensätze, Config, Ereignisse, Abos, `Get`/`Set`/`Del` an andere Apps und die Aktion `NewDataSetWriterId`.
+- **Der Header wird erzeugt, nicht von Hand geschrieben:** Das Werkzeug cbindgen (Version 0.29.4, fest vorgegeben) liest den Rust-Code und schreibt `oec.h`. Das Prüfskript erzeugt den Header jedes Mal neu und schlägt Alarm, wenn er vom eingecheckten abweicht – so können Code und Header nicht auseinanderlaufen.
+- **Der Vertrag aus P3 bleibt fast unverändert.** Die wenigen Änderungen stehen in ADR-0021 (Nachtrag C-061) und in A-147 … A-151; die wichtigsten: Bei Fragen an andere Apps gibt man jetzt den Service-Typ mit an (das Rust-SDK braucht ihn seit C-058), Ereignisse bekommen eine Stufe, und die Genauigkeit (Precision) eines Wertes steht in der Feldbeschreibung statt in einer eigenen Funktion.
+- **Sicherheit für C:** Ein Absturz im Rust-Teil (Panic) wird an der Grenze abgefangen und als Fehlercode gemeldet. Falsche Eingaben aus C (NULL, kaputter Text, ungültige Zahlen) geben einen Fehler statt eines Absturzes. Funktionen, die warten würden, sind aus einem Callback heraus gesperrt, damit sich das Programm nicht selbst blockiert.
+- **Geprüft:** Die beiden C-Beispiele und ein großes C-Testprogramm laufen im Prüfskript gegen den eingebauten Test-Broker – gegen beide Bibliotheksformen, und mit **AddressSanitizer** und **UBSan** (Werkzeuge des C-Compilers, die Speicherfehler und undefiniertes Verhalten sofort melden). Ein Lasttest mit 6 Threads × 150 Runden ist dabei. Einmal zusätzlich unter Linux mit **LeakSanitizer** (findet vergessenen Speicher) und Testbauten für Linux amd64, Windows und ARMv7. Interop 14 grün; die C-Beispiele einmal gegen den echten Mosquitto.
+- Keine neue Bibliothek, nichts Reviewtes geändert, keine neuen Testdaten, kein Finding.
+
+Die Technik-Entscheidungen A-145 … A-152 sind nur zur Info (unten). Einen Blick wert: **A-148** (Änderungen am C-Vertrag), **A-150** (Regeln für Callbacks) und **A-151** (was es in C noch nicht gibt).
+
+### Zur Info: was C-060 gebaut hat
+
+Dein Review zu C-060 ist eingetragen (D-1, D-2 und R-1 aus C-059, siehe unten „Was aus deinem letzten Review (C-060) geworden ist“); das daraus entstandene R-1 (REQ-ACT-017, -023, -024) hast du akzeptiert.
 
 Zur Erinnerung – C-060 war **P4 Inkrement 8c**. Ich habe es nicht weiter geteilt (**A-137**). Reihenfolge jetzt: 8c → 10 (C-Schnittstelle `oec-ffi`).
 - **Die Aktion `NewDataSetWriterId` (MG 9.2):** Eine App kann eine andere App fragen: „Gib mir eine neue, freie Datensatz-Nummer (DataSetWriterId) für eine Ressource.“ Gebraucht wird das, wenn ein IT-Programm in einem OT-Connector etwas Neues anlegen will (z. B. eine ReferenceDesignation für ein Gerät).
@@ -52,7 +89,7 @@ C-059 war **P4 Inkrement 8b**: die SubscriptionList (jede App ab Level 2 zeigt, 
 
 ---
 
-Die Punkte A-1 … A-144 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-060 (A-137 … A-144) stehen unten.
+Die Punkte A-1 … A-152 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-061 (A-145 … A-152) stehen unten.
 
 Aus C-056: Deine Zustimmung zu D-1 (SF-107), D-2 (SF-108) und R-1 ist umgesetzt, siehe unten „Was aus dem Review C-056 geworden ist“.
 
@@ -64,7 +101,19 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+
+### Begriffe aus C-061
+
+- **C-ABI / FFI:** die „Steckdose“, über die ein C-Programm Funktionen einer Rust-Bibliothek aufrufen kann (ABI = Binärschnittstelle, FFI = Aufruf über Sprachgrenzen).
+- **Header (`oec.h`):** die Datei, die einem C-Programm sagt, welche Funktionen, Typen und Konstanten es gibt.
+- **cbindgen:** ein Werkzeug, das den Header aus dem Rust-Code erzeugt.
+- **Shared / Static Library:** dieselbe Bibliothek einmal zum Nachladen beim Programmstart und einmal zum festen Einbauen ins Programm.
+- **Handle:** ein Zeiger, den das C-Programm vom SDK bekommt (z. B. für eine App oder einen Datensatz) und bei jedem Aufruf wieder mitgibt; was es bedeutet, weiß nur das SDK.
+- **Callback:** eine C-Funktion, die das SDK aufruft, wenn etwas passiert (z. B. eine Nachricht kommt).
+- **Panic:** ein Absturz im Rust-Code; er darf nicht nach C „durchschlagen“ und wird deshalb an der Grenze abgefangen.
+- **AddressSanitizer / UBSan / LeakSanitizer:** Prüfwerkzeuge des C-Compilers. Sie melden sofort Speicherfehler (z. B. doppelt freigegeben), undefiniertes Verhalten (z. B. Überlauf) bzw. vergessenen Speicher.
+- **MSVC:** der C-Compiler von Microsoft für Windows; die andere Windows-Variante ist GNU (mingw).
 
 ### Begriffe aus C-058
 
@@ -447,10 +496,22 @@ Neu aus C-060 (P4 Inkrement 8c):
 
 ---
 
-### Was als Nächstes passiert (C-061)
+Neu aus C-061 (P4 Inkrement 10):
+- **A-145 (neu) – Zyklusschnitt:** nicht geteilt. Das Rust-SDK ist seit C-060 vollständig; die C-Schnittstelle ist eine Übersetzungsschicht derselben Art für alles (Handles, Texte, JSON-Werte, Callbacks, Fehler). Die kleinen Ergänzungen am Rust-SDK kamen zuerst in einem eigenen Commit.
+- **A-146 (neu) – Ergänzungen am Rust-SDK:** Funktionen, die Werte als JSON annehmen bzw. ausgeben (Config-Definition, Config-Werte, Datensatz-Werte, Werte eines `Set`), und eine Syslog-Funktion pro App. Nichts Bestehendes geändert (ADR-0020, Nachtrag C-061).
+- **A-147 (neu) – Erzeugter Header:** cbindgen 0.29.4 fest vorgegeben, Header eingecheckt und im Prüfskript verglichen. Die Aufzählungen (z. B. Level, Health) sind Zahlen mit festen Namen statt C-„enums“: Ein ungültiger enum-Wert wäre in Rust undefiniertes Verhalten, eine ungültige Zahl dagegen gibt sauber einen Fehler. C-Code, der die Namen benutzt, ändert sich nicht.
+- **A-148 (neu) – Änderungen an Funktionen:** Abos und Fragen an andere Apps nennen den Service-Typ (bei Abos „egal“ möglich: `OEC_ST_ANY`); Ereignisse bekommen ihre Stufe (`level`); `oec_dataset_set_precision` entfällt – die Genauigkeit steht als `"Precision"` in der Feldbeschreibung, wie im Rust-SDK.
+- **A-149 (neu) – Fehler:** Die Fehlermeldung (`oec_last_error`) wird nur bei einem Fehler gesetzt und gilt pro Thread. Neu: „nicht verbunden“ (`OEC_ERR_NOT_CONNECTED`) und „die andere App hat mit Bad geantwortet“ (`OEC_ERR_STATUS`, der Code über `oec_last_status_code`). Ein abgefangener Absturz macht die App unbrauchbar (`OEC_ERR_PANIC`), statt das Programm mitzureißen.
+- **A-150 (neu) – Threads und Handles:** Callbacks laufen auf dem Thread, der die App laufen lässt, immer einer nach dem anderen. In einem Callback sind wartende Aufrufe, `oec_app_run` und `oec_app_free` gesperrt (sie würden auf sich selbst warten). Handles bleiben gültig, bis die App freigegeben wird – auch nach dem Entfernen eines Geräts oder Datensatzes; Aufrufe darauf geben dann einen Fehler statt eines Absturzes. Einschränkung: Startet man die App im Hintergrund (`oec_app_start`) und der Start scheitert, erfährt das C-Programm das nicht direkt (Risiko; `oec_app_run` meldet es).
+- **A-151 (neu) – Ergänzungen und Lücken:** neu in C: `oec_set`, `oec_del`, die Aktion `oec_new_data_set_writer_id`, Datensatz entfernen, Config-Wert aus der App setzen, Builder freigeben. Noch nicht in C (kann später dazukommen, die Logger-Demo braucht nichts davon): u. a. Anwesenheit anderer Apps, einstellbare Abos, ReferenceDesignation, Verbindungsstatus. Auslieferung: Bibliothek + Header; fertige Pakete kommen mit P9.
+- **A-152 (neu) – Tests:** 8 Rust-Tests der Schicht ohne Netzwerk; 3 C-Tests (hello, logger, das große Testprogramm) gegen beide Bibliotheksformen mit AddressSanitizer + UBSan, Pflicht im Prüfskript; Lasttest mit 6 Threads; einmal Linux mit LeakSanitizer und Testbauten für Linux amd64, Windows (GNU) und ARMv7; Interop 14 grün. Keine neue Bibliothek.
 
-1. **P4 Inkrement 10 – `oec-ffi`:** die C-Schnittstelle auf dem SDK nach dem Vertrag `oec.h`, dazu die Aktion; die C-Beispiele laufen als Tests (auch mit AddressSanitizer).
-   - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
+---
+
+### Was als Nächstes passiert (C-062)
+
+1. **Deine Entscheidung D-1** (P4 abschließen, nächste Phase). Danach P5 (D7 `test`, meine Empfehlung) oder P6 (Demos).
+   - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md` und beginnt mit deiner Antwort auf D-1.
 
 ---
 
