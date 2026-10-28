@@ -3,7 +3,8 @@
 //! heartbeat), and requests – `Get` with correlation over ReplyTo
 //! (REQ-MSG-015), reassembly of paginated answers (MG 8.3.11), the check
 //! of a Query answer (REQ-RES-REFDES-015) and timeouts – plus `Set`/`Del`
-//! with their Status event (REQ-RES-EVENT-005).
+//! with their Status event (REQ-RES-EVENT-005) and the Action
+//! NewDataSetWriterId with its final response (REQ-ACT-015).
 //!
 //! The consumer never touches the network: the runtime hands it received
 //! publications ([`Consumer::handle_message`]), the SUBACK results
@@ -34,13 +35,18 @@ pub use request::{Address, GetParams, WriteEntry};
 
 use crate::il::IdentificationLink;
 use crate::lifecycle::Publication;
-use crate::message::{MessageId, Pagination, PublisherId};
+use crate::message::{
+    ActionRequest, ActionRequestMessage, ActionResponseMessage, ActionState, ByteString, MessageId,
+    NewDataSetWriterIdRequest, NewDataSetWriterIdResponse, Pagination, PublisherId, TimeoutHint,
+    is_bad,
+};
 use crate::mqtt::SubscribeReturnCode;
 use crate::provider::{ConsumerSubscription, SubscriptionOverrides};
 use crate::resource::ReferenceDesignationQuery;
 use crate::status::StatusCode;
 use crate::topic::{
-    Method, NAMESPACE, Resource, ServiceType, Subject, Topic, TopicError, TopicFilter, mqtt_match,
+    Method, NAMESPACE, Resource, Service, ServiceType, Subject, Topic, TopicError, TopicFilter,
+    mqtt_match,
 };
 
 use request::Sender;
@@ -81,8 +87,12 @@ pub enum Outcome {
     Answers(Vec<Received>),
     /// The StatusCode of the Status event: the result of a `Set` or `Del`
     /// (REQ-RES-EVENT-005), or the Bad answer of a `Get` (e.g. BadNotFound
-    /// for an unknown Source, REQ-CMP-047).
+    /// for an unknown Source, REQ-CMP-047), or the Bad Status of the final
+    /// ActionResponse of an Action (REQ-ACT-014).
     Status(StatusCode),
+    /// The DataSetWriterId provided by NewDataSetWriterId and how long it
+    /// stays reserved (REQ-ACT-022, REQ-ACT-023).
+    WriterId(NewDataSetWriterIdResponse),
     /// No (complete) answer before the deadline.
     Timeout,
     /// The consumer was closed.
@@ -172,6 +182,10 @@ enum Kind {
     /// A `Get MAM` of an application first seen by its heartbeat; its
     /// answer feeds the directory, no completion.
     Discovery,
+    /// A `Call NewDataSetWriterId`; the final response is related by
+    /// PublisherId, RequestorId, CorrelationData and RequestId
+    /// (REQ-ACT-015).
+    Action(Box<ActionRequestMessage<NewDataSetWriterIdRequest>>),
 }
 
 #[derive(Debug)]
@@ -199,6 +213,7 @@ pub struct Consumer {
     pending: BTreeMap<RequestId, Pending>,
     by_message: HashMap<String, RequestId>,
     next_request: RequestId,
+    next_action: u16,
     outbound: Vec<Publication>,
     completions: Vec<Completion>,
     directory: directory::Directory,
@@ -222,6 +237,7 @@ impl Consumer {
             pending: BTreeMap::new(),
             by_message: HashMap::new(),
             next_request: 1,
+            next_action: 1,
             outbound: Vec::new(),
             completions: Vec::new(),
             directory: directory::Directory::default(),
@@ -533,6 +549,93 @@ impl Consumer {
         ))
     }
 
+    /// The Action NewDataSetWriterId of the application at `address` for
+    /// the asset of its Source (MG 8.4.1, REQ-ACT-020): a DataSetWriterId
+    /// for `resource`; ends with [`Outcome::WriterId`], or with the Bad
+    /// Status of the response ([`Outcome::Status`]). The TimeoutHint is the
+    /// time until `deadline_ms` (REQ-ACT-009).
+    ///
+    /// # Errors
+    ///
+    /// [`ConsumerError`] if `address` has a Filter (REQ-ACT-020).
+    pub fn new_data_set_writer_id(
+        &mut self,
+        resource: Resource,
+        address: &Address,
+        deadline_ms: u64,
+        now_ms: u64,
+        next_id: &mut dyn FnMut() -> MessageId,
+    ) -> Result<RequestId, ConsumerError> {
+        if address.filter.is_some() {
+            return Err(ConsumerError::Request(
+                "NewDataSetWriterId uses no Filter (REQ-ACT-020)".to_owned(),
+            ));
+        }
+        let topic = Topic::new(
+            address.service_type,
+            address.app.clone(),
+            Method::Call,
+            Service::NewDataSetWriterId,
+            address.source.clone(),
+            None,
+        )
+        .map_err(ConsumerError::Topic)?;
+        let message_id = next_id();
+        let timeout = u32::try_from(deadline_ms.saturating_sub(now_ms)).unwrap_or(u32::MAX);
+        let timeout = core::num::NonZeroU32::new(timeout).unwrap_or(core::num::NonZeroU32::MIN);
+        // the consumer RequestId is the CorrelationData (REQ-ACT-007)
+        let correlation = ByteString::from_bytes(&self.next_request.to_be_bytes());
+        let first = ActionRequest::common(
+            self.action_request_id(),
+            NewDataSetWriterIdRequest { resource },
+        );
+        let request = ActionRequestMessage::new(
+            &topic,
+            self.publisher.clone(),
+            message_id.clone(),
+            request::date_time(now_ms),
+            TimeoutHint::from_millis(timeout),
+            first,
+        )
+        .map_err(|e| ConsumerError::Request(e.to_string()))?
+        .with_correlation_data(correlation);
+        let payload =
+            serde_json::to_vec(&request).map_err(|e| ConsumerError::Request(e.to_string()))?;
+        let reply = request.response_address().to_string();
+        let filters = vec![reply.clone()];
+        let id = self.start(
+            Kind::Action(Box::new(request)),
+            address,
+            filters,
+            &message_id,
+            Publication { topic, payload },
+            deadline_ms,
+        );
+        if let Some(p) = self.pending.get_mut(&id) {
+            p.prefix = reply;
+        }
+        Ok(id)
+    }
+
+    /// A RequestId unique among the pending ActionRequests (REQ-ACT-011).
+    fn action_request_id(&mut self) -> u16 {
+        let used: BTreeSet<u16> = self
+            .pending
+            .values()
+            .filter_map(|p| match &p.kind {
+                Kind::Action(r) => r.messages().first().map(ActionRequest::request_id),
+                _ => None,
+            })
+            .collect();
+        loop {
+            let id = self.next_action;
+            self.next_action = self.next_action.wrapping_add(1);
+            if !used.contains(&id) {
+                return id;
+            }
+        }
+    }
+
     fn sender(&self, message_id: MessageId, unix_ms: u64) -> Sender<'_> {
         Sender {
             app: &self.app,
@@ -664,6 +767,10 @@ impl Consumer {
         let Ok(parsed) = Topic::parse(topic) else {
             return incoming;
         };
+        if parsed.method() == Method::Reply {
+            incoming.error = self.reply(topic, payload).err();
+            return incoming;
+        }
         let Subject::Resource(resource) = parsed.subject() else {
             return incoming;
         };
@@ -672,7 +779,10 @@ impl Consumer {
         }
         let subs = self.due(topic, now_ms);
         let presence = self.tracking() && matches!(resource, Resource::Mam | Resource::Health);
-        let answers = self.pending.values().any(|p| topic.starts_with(&p.prefix));
+        let answers = self
+            .pending
+            .values()
+            .any(|p| !matches!(p.kind, Kind::Action(_)) && topic.starts_with(&p.prefix));
         if subs.is_empty() && !presence && !answers {
             return incoming;
         }
@@ -782,6 +892,46 @@ impl Consumer {
             Publication { topic, payload },
             deadline,
         );
+    }
+
+    /// A `ua-action-response` on the ResponseAddress of a pending Action:
+    /// its final response for the ActionRequest ends the request; an
+    /// intermediate one (ActionState 1, REQ-ACT-016) and responses to other
+    /// requests are ignored.
+    fn reply(&mut self, topic: &str, payload: &[u8]) -> Result<(), String> {
+        if !self
+            .pending
+            .values()
+            .any(|p| matches!(p.kind, Kind::Action(_)) && p.outbound.is_none() && p.prefix == topic)
+        {
+            return Ok(());
+        }
+        let message: ActionResponseMessage<NewDataSetWriterIdResponse> =
+            serde_json::from_slice(payload).map_err(|e| format!("{topic}: {e}"))?;
+        let done = self.pending.iter().find_map(|(id, p)| {
+            let Kind::Action(request) = &p.kind else {
+                return None;
+            };
+            if p.outbound.is_some() || p.prefix != topic || !message.correlates(request) {
+                return None;
+            }
+            let first = request.messages().first()?;
+            let response = message
+                .messages()
+                .iter()
+                .find(|r| r.answers(first) && r.action_state() == ActionState::Done)?;
+            let outcome = match (response.status(), response.payload()) {
+                (Some(code), _) if is_bad(code.get()) => Outcome::Status(StatusCode(code.get())),
+                (_, Some(r)) => Outcome::WriterId(*r),
+                // a Good response without its fields
+                (_, None) => Outcome::Status(StatusCode::BAD_DECODING_ERROR),
+            };
+            Some((*id, outcome))
+        });
+        if let Some((id, outcome)) = done {
+            self.finish(id, outcome);
+        }
+        Ok(())
     }
 
     fn answer(

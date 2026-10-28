@@ -396,6 +396,14 @@ impl Bus {
             .unwrap()
     }
 
+    fn action(&mut self, resource: Resource, address: &Address) -> u64 {
+        let (ids, now) = (&mut self.ids, self.now);
+        let mut next = || ids.next_id(now);
+        self.c
+            .new_data_set_writer_id(resource, address, now + TIMEOUT, now, &mut next)
+            .unwrap()
+    }
+
     /// Delivers provider publications to the consumer.
     fn deliver(&mut self, ps: Vec<Publication>) -> Vec<oec_core::consumer::Incoming> {
         let (ids, now) = (&mut self.ids, self.now);
@@ -627,6 +635,153 @@ fn set_and_del_end_with_their_status_event() {
         Some(&e),
     );
     assert_eq!(bus.one(), Outcome::Status(StatusCode::BAD_NOT_FOUND));
+}
+
+/// The `Call NewDataSetWriterId` is that of MG B1.2.1 (V-PAY-008) with
+/// CorrelationData (REQ-ACT-007) and passes the strict schema.
+#[test]
+fn new_data_set_writer_id_request_is_the_guideline_vector() {
+    let (topic, expected) = vector("V-PAY-008");
+    let mut c = consumer();
+    let publisher = PublisherId::new(ServiceType::ITConnector, il(CONSUMER));
+    let mut next = || MessageId::new(MS, None, &publisher);
+    c.new_data_set_writer_id(
+        Resource::ReferenceDesignation,
+        &provider_at(),
+        MS + TIMEOUT,
+        MS,
+        &mut next,
+    )
+    .unwrap();
+    // nothing is published before the Reply topic is subscribed
+    assert!(c.take_outbound().is_empty());
+    let changes = c.take_filter_changes();
+    assert_eq!(
+        changes.subscribe,
+        [expected["ResponseAddress"].as_str().unwrap()]
+    );
+    c.on_subscribed(&ok(&changes.subscribe));
+    let out = c.take_outbound();
+    assert_eq!(out.len(), 1);
+    assert_eq!(out[0].topic.to_string(), topic);
+    validate(&topic, &out[0].payload);
+    let mut got = json_of(&out[0]);
+    assert!(got["CorrelationData"].is_string(), "{got}");
+    got.as_object_mut().unwrap().remove("CorrelationData");
+    assert_eq!(got, expected);
+    // a Filter is not used (REQ-ACT-020)
+    assert!(
+        c.new_data_set_writer_id(
+            Resource::Data,
+            &at(PROVIDER, Some(tag("oee"))),
+            MS + TIMEOUT,
+            MS,
+            &mut next
+        )
+        .is_err()
+    );
+}
+
+/// The real provider answers: the reserved id with its Ttl, BadNotFound
+/// for an unknown Source (SF-113); the Reply filter is released.
+#[test]
+fn new_data_set_writer_id_ends_with_the_provided_id() {
+    let mut bus = Bus::new(provider());
+    bus.action(Resource::Data, &provider_at());
+    let Outcome::WriterId(r) = bus.one() else {
+        panic!()
+    };
+    assert_eq!(r.ttl, oec_core::provider::WRITER_ID_TTL_SECONDS);
+    assert!(bus.p.writer_ids().is_reserved_at(r.data_set_writer_id, MS));
+    bus.action(Resource::Health, &at(MOTOR, None));
+    let Outcome::WriterId(m) = bus.one() else {
+        panic!()
+    };
+    assert_ne!(m.data_set_writer_id, r.data_set_writer_id);
+    bus.action(Resource::Data, &at("vendor.com/None/N-1/1", None));
+    assert_eq!(bus.one(), Outcome::Status(StatusCode::BAD_NOT_FOUND));
+    assert_eq!(bus.unsubscribed.len(), 3, "{:?}", bus.unsubscribed);
+    assert_eq!(bus.c.pending(), 0);
+}
+
+/// Only the final response to the own ActionRequest ends the request:
+/// an intermediate response (REQ-ACT-016), another CorrelationData or
+/// RequestId, or another Responder are ignored; without a final response
+/// the request times out (REQ-ACT-009). Concurrent requests get their
+/// own RequestId (REQ-ACT-011).
+#[test]
+fn only_the_final_response_ends_an_action() {
+    let mut c = consumer();
+    let mut ids = MessageIds::new(PublisherId::new(ServiceType::ITConnector, il(CONSUMER)));
+    let mut next = || ids.next_id(MS);
+    let first = c
+        .new_data_set_writer_id(Resource::Data, &provider_at(), MS + TIMEOUT, MS, &mut next)
+        .unwrap();
+    c.new_data_set_writer_id(Resource::Data, &provider_at(), MS + TIMEOUT, MS, &mut next)
+        .unwrap();
+    ack(&mut c);
+    let out = c.take_outbound();
+    assert_eq!(out.len(), 2);
+    let requests: Vec<Json> = out.iter().map(json_of).collect();
+    assert_ne!(
+        requests[0]["Messages"][0]["RequestId"],
+        requests[1]["Messages"][0]["RequestId"]
+    );
+    assert_ne!(
+        requests[0]["CorrelationData"],
+        requests[1]["CorrelationData"]
+    );
+    let reply = requests[0]["ResponseAddress"].as_str().unwrap().to_owned();
+    let response = |request: &Json, state: u8| {
+        json!({
+            "MessageId": format!("{MS}-OTConnector/{PROVIDER}"),
+            "MessageType": "ua-action-response",
+            "PublisherId": format!("OTConnector/{PROVIDER}"),
+            "Timestamp": "2021-12-16T22:25:10.094Z",
+            "RequestorId": request["RequestorId"],
+            "CorrelationData": request["CorrelationData"],
+            "Messages": [{
+                "DataSetWriterId": 8,
+                "ActionTargetId": 1,
+                "Status": {},
+                "RequestId": request["Messages"][0]["RequestId"],
+                "ActionState": state,
+                "Payload": {"DataSetWriterId": 4711, "Ttl": 10}
+            }]
+        })
+    };
+    let mut send = |c: &mut Consumer, m: &Json| {
+        let payload = serde_json::to_vec(m).unwrap();
+        validate(&reply, &payload);
+        let mut next = || ids.next_id(MS);
+        let incoming = c.handle_message(&reply, &payload, MS, &mut next);
+        assert_eq!(incoming.error, None);
+        c.take_completions()
+    };
+    assert!(
+        send(&mut c, &response(&requests[0], 1)).is_empty(),
+        "intermediate"
+    );
+    let mut other = response(&requests[0], 2);
+    other["CorrelationData"] = json!("AAAAAAAAAAA=");
+    assert!(send(&mut c, &other).is_empty(), "other CorrelationData");
+    let mut other = response(&requests[0], 2);
+    other["Messages"][0]["RequestId"] = requests[1]["Messages"][0]["RequestId"].clone();
+    assert!(send(&mut c, &other).is_empty(), "other RequestId");
+    let mut other = response(&requests[0], 2);
+    other["PublisherId"] = json!(format!("OTConnector/{MOTOR}"));
+    assert!(send(&mut c, &other).is_empty(), "other Responder");
+    let done = send(&mut c, &response(&requests[0], 2));
+    assert_eq!(done.len(), 1);
+    assert_eq!(done[0].id, first);
+    let Outcome::WriterId(r) = &done[0].outcome else {
+        panic!("{done:?}")
+    };
+    assert_eq!((r.data_set_writer_id.get(), r.ttl), (4711, 10));
+    // the second gets no answer
+    c.expire(MS + TIMEOUT);
+    assert_eq!(c.take_completions()[0].outcome, Outcome::Timeout);
+    assert_eq!(c.take_filter_changes().unsubscribe, [reply]);
 }
 
 fn assets(n: usize) -> Vec<String> {

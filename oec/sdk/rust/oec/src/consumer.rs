@@ -2,8 +2,9 @@
 //! typed subscriptions, the presence of the other applications and
 //! requests – `Get` with correlation over ReplyTo (REQ-MSG-015), all pages
 //! reassembled (REQ-PAG-002, REQ-PAG-006), a Query answer checked
-//! (REQ-RES-REFDES-015), a timeout – and `Set`/`Del` with their Status
-//! event (REQ-RES-EVENT-005).
+//! (REQ-RES-REFDES-015), a timeout – `Set`/`Del` with their Status
+//! event (REQ-RES-EVENT-005) and the Action NewDataSetWriterId
+//! (REQ-ACT-015, [`Consumer::new_data_set_writer_id`]).
 //!
 //! The protocol logic is the sans-IO `oec_core::consumer::Consumer`; this
 //! module adds the callbacks, the waiting (async and blocking) and the
@@ -457,6 +458,46 @@ impl WriteOptions {
         self.data_set_writer_id = Some(id);
         self
     }
+}
+
+/// Options of an Action ([`Consumer::new_data_set_writer_id`]).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ActionOptions {
+    timeout: Duration,
+}
+
+impl Default for ActionOptions {
+    fn default() -> Self {
+        Self {
+            timeout: DEFAULT_TIMEOUT,
+        }
+    }
+}
+
+impl ActionOptions {
+    /// Timeout [`DEFAULT_TIMEOUT`].
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// The time to wait for the final response; sent as TimeoutHint
+    /// (REQ-ACT-009).
+    #[must_use]
+    pub fn timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = timeout;
+        self
+    }
+}
+
+/// A DataSetWriterId provided by NewDataSetWriterId (REQ-ACT-022): the
+/// responder keeps it for this application's `Set` for `ttl`
+/// (REQ-ACT-023).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ProvidedWriterId {
+    /// The new DataSetWriterId of the responder.
+    pub data_set_writer_id: u16,
+    /// How long the responder keeps it.
+    pub ttl: Duration,
 }
 
 fn writer_id(id: u16) -> Result<DataSetWriterId> {
@@ -940,6 +981,68 @@ impl Consumer {
         options: &WriteOptions,
     ) -> Result<StatusCode> {
         block_on(self.del(resource, target, payload_json, options))?
+    }
+
+    /// Calls the Action NewDataSetWriterId of the application of `target`
+    /// for its asset `target.source` (none: the application itself) and
+    /// waits for its final response (MG 9.2.1, REQ-ACT-015): a new
+    /// DataSetWriterId of the responder for an entry of `resource` and how
+    /// long it is kept (REQ-ACT-022, REQ-ACT-023). TimeoutHint,
+    /// CorrelationData and RequestId are set by the SDK (REQ-ACT-009,
+    /// REQ-ACT-011).
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Status`] for a Bad Status of the response, e.g.
+    /// `BadNotFound` for an unknown asset; [`Error::Invalid`] for a target
+    /// with a Filter (REQ-ACT-020); otherwise as [`Self::get`].
+    pub async fn new_data_set_writer_id(
+        &self,
+        resource: Resource,
+        target: &Target,
+        options: &ActionOptions,
+    ) -> Result<ProvidedWriterId> {
+        let (Some(service_type), Some(app), None) =
+            (target.service_type, &target.app, &target.filter)
+        else {
+            return Err(Error::Invalid(
+                "NewDataSetWriterId needs the ServiceType and the AppId and uses no Filter"
+                    .to_owned(),
+            ));
+        };
+        let address = Address {
+            service_type,
+            app: app.0.clone(),
+            source: target.source.as_ref().map(|s| s.0.clone()),
+            filter: None,
+        };
+        let outcome = self
+            .request(options.timeout, move |c, next, now, deadline| {
+                c.new_data_set_writer_id(resource, &address, deadline, now, next)
+            })
+            .await?;
+        match outcome {
+            Outcome::WriterId(r) => Ok(ProvidedWriterId {
+                data_set_writer_id: r.data_set_writer_id.get(),
+                ttl: Duration::from_secs(u64::from(r.ttl)),
+            }),
+            Outcome::Status(code) => Err(Error::Status(StatusCode::from_code(code.0))),
+            other => Err(unexpected(other)),
+        }
+    }
+
+    /// [`Self::new_data_set_writer_id`] for threads outside the runtime.
+    ///
+    /// # Errors
+    ///
+    /// As [`Self::new_data_set_writer_id`] and [`Self::get_blocking`].
+    pub fn new_data_set_writer_id_blocking(
+        &self,
+        resource: Resource,
+        target: &Target,
+        options: &ActionOptions,
+    ) -> Result<ProvidedWriterId> {
+        block_on(self.new_data_set_writer_id(resource, target, options))?
     }
 
     async fn write(

@@ -9,7 +9,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use oec::app::{AppHandle, ConnectionState};
-use oec::consumer::{GetOptions, Payload, Presence, Query, WriteOptions};
+use oec::consumer::{ActionOptions, GetOptions, Payload, Presence, Query, WriteOptions};
 use oec::prelude::*;
 use oec_core::mqtt::Packet;
 use serde_json::Value;
@@ -295,6 +295,55 @@ fn one_app_writes_to_another() {
         Err(oec::Error::Invalid(_))
     ));
     reference_designation(&consumer, &target, &pump, &child);
+    stop(&ch, crun);
+    stop(&ph, prun);
+}
+
+/// NewDataSetWriterId of the other app for itself and its pump: two
+/// different reserved ids with the Ttl of the SDK; BadNotFound for an
+/// unknown asset (SF-113); a Level 1 app does not answer (REQ-CMP-040).
+#[test]
+fn one_app_gets_a_new_writer_id_from_another() {
+    let (pki, root) = (pki(), Root::new("cons-action"));
+    let tb = routing_broker(&pki);
+    let p = Provider::new(&root, &pki, &tb);
+    let target = Target::app(ServiceType::Utility, p.app.identification_link().clone());
+    let pump = p.pump.clone();
+    let c = app(Level::L1, "C-SN", &root, &pki, &tb);
+    let consumer = c.consumer();
+    let me = Target::app(ServiceType::Utility, c.identification_link().clone());
+    let (ph, prun) = spawn(p.app);
+    let (ch, crun) = spawn(c);
+    wait_online(&ph);
+    wait_online(&ch);
+
+    let o = ActionOptions::new();
+    let first = consumer
+        .new_data_set_writer_id_blocking(Resource::Data, &target, &o)
+        .unwrap();
+    assert_eq!(first.ttl, Duration::from_secs(60));
+    let at_pump = target.clone().source(pump.identification_link().clone());
+    let second = consumer
+        .new_data_set_writer_id_blocking(Resource::Config, &at_pump, &o)
+        .unwrap();
+    assert_ne!(first.data_set_writer_id, second.data_set_writer_id);
+    assert!(first.data_set_writer_id >= 10 && second.data_set_writer_id >= 10);
+    let unknown = target
+        .clone()
+        .source(IdentificationLink::parse("vendor.com/Pump/P-1/none").unwrap());
+    assert!(matches!(
+        consumer.new_data_set_writer_id_blocking(Resource::Data, &unknown, &o),
+        Err(oec::Error::Status(StatusCode::BadNotFound))
+    ));
+    assert!(matches!(
+        consumer.new_data_set_writer_id_blocking(Resource::Data, &target.clone().filter("oee"), &o),
+        Err(oec::Error::Invalid(_))
+    ));
+    let short = ActionOptions::new().timeout(Duration::from_millis(300));
+    assert!(matches!(
+        consumer.new_data_set_writer_id_blocking(Resource::Data, &me, &short),
+        Err(oec::Error::Timeout)
+    ));
     stop(&ch, crun);
     stop(&ph, prun);
 }
