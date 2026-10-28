@@ -21,7 +21,7 @@
 #         peer         – D7 simulates a peer component that the CUT talks to
 # status: planned (P3) | implemented (P5)
 tool: oec-check
-baseline: "2e32a6b"
+baseline: "57ebe91"
 tests:
   # --- monitor: passive rules -------------------------------------------
   - id: T7-MON-01
@@ -368,6 +368,7 @@ tests:
     level: 1
     reqs: [REQ-RES-SUBLIST-004, REQ-RES-SUBLIST-013, REQ-RES-SUBLIST-014, REQ-RES-SUBLIST-015]
     status: planned
+    notes: Sets and deletes only CONF_1 entries the CUT lists; a Set with a TopicPath the CUT has not subscribed may be rejected with Status Bad (e.g. BadNotSupported, SF-111) and is then not a failure.
   - id: T7-SET-12
     title: Log level is configurable
     mode: test

@@ -21,7 +21,7 @@
 #         host-access   – D8 runs on the platform host (or a probe container)
 #         credentials-2 – a second, unprivileged set of bus credentials
 tool: oec-infra
-baseline: "2e32a6b"
+baseline: "57ebe91"
 tests:
   # --- image: offline -----------------------------------------------------
   - id: T8-IMG-01

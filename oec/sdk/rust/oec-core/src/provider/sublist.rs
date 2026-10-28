@@ -471,7 +471,7 @@ impl Provider {
     /// configurable subscription of the consumer side is listed again. The
     /// Config is read only (`BadNotWritable`); an entry with `NONE_0` is
     /// neither changed (`BadNotWritable`) nor is a subscription created the
-    /// application does not hold (`BadNotSupported`). The setting is
+    /// application does not hold (`BadNotSupported`, SF-111). The setting is
     /// persisted and the entry published on
     /// `Pub/SubscriptionList/<Source>/<Filter>` with the ReplyTo.
     pub(super) fn set_subscription_list(
