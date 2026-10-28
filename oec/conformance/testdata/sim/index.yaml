@@ -18,7 +18,8 @@
 # level 3) against every entry over the in-process TLS test broker.
 #
 # Reviewed by the PO in the C-062 review (2026-10-28, R-1); the entries
-# added or changed in C-063 are draft again.
+# added or changed in C-063 were reviewed in the C-063 review (2026-10-28,
+# R-1).
 #
 # This index is test data with verdict (G-3.9): it states the expected
 # outcome of the tests and goes to the PO for review.
@@ -31,7 +32,7 @@
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -43,7 +44,7 @@ fixtures:
       is not stimulated (MAY). Changed in C-063: the new tests T7-GET-03,
       -04, -06, -07, -08 and T7-ADR-02, -03 run against it.
   - fault: T7-GET-01/reply-to
-    status: draft
+    status: reviewed
     expect:
       T7-GET-01: {outcome: fail, reqs: [REQ-BUS-003, REQ-CMP-015, REQ-CMP-017, REQ-MSG-015]}
       T7-GET-02: {outcome: fail, reqs: [REQ-CMP-018]}
@@ -78,7 +79,7 @@ fixtures:
       application only; the subordinate asset, whose MAM is in the answer to
       Get MAM, is missing (REQ-RES-HEALTH-006: all assets).
   - fault: T7-GET-02/unanswered
-    status: draft
+    status: reviewed
     expect:
       T7-GET-02: {outcome: fail, reqs: [REQ-RES-PROFILE-002]}
       T7-GET-03: {outcome: fail, reqs: [REQ-CMP-008, REQ-CMP-039, REQ-RES-SUBLIST-008]}
@@ -121,7 +122,7 @@ fixtures:
       A Get with an unknown top-level key is dropped, the same Get without
       it is answered (REQ-MSG-046, SHOULD).
   - fault: T7-ADR-02/dual-version
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -130,7 +131,7 @@ fixtures:
       an illustrative topic of the CUT, not validated). The Oi4v2 requests of
       D7 are answered in Oi4v2 only, so T7-ADR-02 passes (REQ-TOP-004).
   - fault: T7-ADR-02/mixed
-    status: draft
+    status: reviewed
     expect:
       T7-ADR-02: {outcome: fail, reqs: [REQ-TOP-004]}
     notes: >-
@@ -138,7 +139,7 @@ fixtures:
       with the MessageId of the Oi4v2 request as CorrelationId: a request
       received under Oi4v2 is answered under Oi4 (REQ-TOP-004).
   - fault: T7-ADR-03/case
-    status: draft
+    status: reviewed
     expect:
       T7-ADR-03: {outcome: fail, reqs: [REQ-IL-015]}
       T7-MON-01: {outcome: fail, reqs: [REQ-MSG-023]}
@@ -150,7 +151,7 @@ fixtures:
       by character). The monitor also sees the DataSetWriterName differ
       from the Source of the topic (T7-MON-01, REQ-MSG-023).
   - fault: T7-GET-03/metadata
-    status: draft
+    status: reviewed
     expect:
       T7-GET-03: {outcome: fail, reqs: [REQ-CMP-008, REQ-CMP-037, REQ-RES-META-002]}
     notes: >-
@@ -159,7 +160,7 @@ fixtures:
       at level 3 (REQ-CMP-037) is missing, the Data has no requestable
       Metadata (REQ-RES-META-002).
   - fault: T7-GET-03/filter
-    status: draft
+    status: reviewed
     expect:
       T7-GET-03: {outcome: fail, reqs: [REQ-RES-PUBLIST-020]}
       T7-MON-01: {outcome: fail, reqs: [REQ-MSG-025]}
@@ -169,7 +170,7 @@ fixtures:
       monitor sees WriterGroupNames that differ from the Filter of the topic
       (T7-MON-01, REQ-MSG-025).
   - fault: T7-GET-04/asset-level
-    status: draft
+    status: reviewed
     expect:
       T7-GET-04: {outcome: fail, reqs: [REQ-CMP-010, REQ-CMP-045]}
     notes: >-
@@ -178,7 +179,7 @@ fixtures:
       represented entity (REQ-CMP-045, REQ-CMP-010). The application itself
       fulfills the level.
   - fault: T7-GET-06/per-page
-    status: draft
+    status: reviewed
     expect:
       T7-GET-06: {outcome: fail, reqs: [REQ-PAG-002, REQ-PAG-005]}
     notes: >-
@@ -187,7 +188,7 @@ fixtures:
       (REQ-PAG-002: page by page; REQ-PAG-005: more DataSetMessages than
       PerPage are paginated).
   - fault: T7-GET-07/ignored
-    status: draft
+    status: reviewed
     expect:
       T7-GET-07: {outcome: fail, reqs: [REQ-RES-REFDES-011]}
     notes: >-
@@ -196,7 +197,7 @@ fixtures:
       entries (REQ-RES-REFDES-011, MUST at level 3; REQ-QRY-003 is fulfilled
       by ignoring).
   - fault: T7-GET-07/with-source
-    status: draft
+    status: reviewed
     expect:
       T7-GET-07: {outcome: fail, reqs: [REQ-RES-REFDES-013]}
     notes: >-
@@ -206,7 +207,7 @@ fixtures:
       (REQ-RES-REFDES-013: a Query is only valid without Source; D7 compares
       with the answer to the Get without Query since C-063, see T7-GET-07/empty).
   - fault: T7-GET-07/empty
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -217,7 +218,7 @@ fixtures:
       Source and Query is answered like the same Get without Query
       (REQ-RES-REFDES-013) and the Query on MAM is ignored (REQ-QRY-001).
   - fault: T7-GET-08/locale
-    status: draft
+    status: reviewed
     expect:
       T7-GET-08: {outcome: fail, reqs: [REQ-LOC-002]}
     notes: >-

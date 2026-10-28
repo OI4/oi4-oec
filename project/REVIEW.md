@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-063 (P5 increment 2: every `Get` test and T7-ADR-02/03 of `oec-check test`). **Open for you: R-1 (14 sim fixtures, review) and R-2 (the corrected capture fixture `pagination-broken`, review).** A-164 … A-175 for information, worth a look: A-166, A-167, A-168._
+_Last updated: 2026-10-28, C-063 review (you accepted R-1 and R-2: the 14 sim fixtures and the capture fixture `pagination-broken` are `reviewed`). **Nothing is open for you.** A-164 … A-175 for information, worth a look: A-166, A-167, A-168._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -129,6 +129,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Found test-first and fixed: two false positives of the monitor engine (REQ-LIFE-003 on an answer to a Get with a Locale, REQ-PAG-005 on the answer to a Get for one page). The capture fixture `pagination-broken` relied on the second one; it is corrected and `draft` again → **R-2**.
   - Against `demo.rs` (level 2): first 20 pass, 1 fail – a defect of D7 (T7-GET-07 expected a content where "ignored" means "answered like without"), fixed with a new positive fixture; then **21 pass, 0 fail, 3 skip, exit 0**, 82 requests all answered. The SDK was not changed.
   - ADR-0025 amendment C-063; no SF, no new dependency. A-164 … A-175 for information.
+- C-063 review: you accepted R-1 and R-2; the 14 sim fixtures in `testdata/sim/index.yaml` and the capture fixture `pagination-broken` are `reviewed`. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
@@ -313,45 +314,16 @@ Logs: [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-06
 | A-173 | Tester-violation contract: exactly the deliberate stimuli without a fault, a part of them with one | info (agent) | C-063 | – | – |
 | A-174 | Fixture answer timeout 3 s, run context 2 min | info (agent) | C-063 | – | – |
 | A-175 | Increment 2 not split; no SF raised (Config Filter vs. `Context.Name` checked) | info (agent) | C-063 | – | – |
-| R-1 | 14 sim fixtures of `oec-check test` (11 new, 3 with added outcomes) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-063 | accept | ☐ |
-| R-2 | Capture fixture `pagination-broken` (stimulus corrected, same verdict; `testdata/captures/index.yaml`) | review (G-3.9) | C-063 | accept | ☐ |
 
 ## Decisions and review items
 
-### R-1 – sim fixtures of `oec-check test`, increment 2 (G-3.9)
-
-- **Where:** `oec/conformance/testdata/sim/index.yaml` – 14 entries `draft`: 11 new faults of the simulated component and 3 entries reviewed in C-062 that got the outcomes of the new tests. The other 5 entries are unchanged and stay `reviewed`.
-- **What they are:** as in C-062 – `internal/probe/sim_test.go` runs `oec-check test` (monitor + active tests, level 3) against the simulated component with one fault and compares outcome and exact REQ ids per test.
-- **Positive (conforming):**
-  - `none` – now also T7-GET-03, 04, 06, 07, 08 and T7-ADR-03 pass; T7-ADR-02 is skipped (nothing under `Oi4`); REQ-QRY-003 skipped (the Query is supported).
-  - `T7-ADR-02/dual-version` – the component also publishes its Birth under `Oi4` (version 1), but answers the `Oi4v2` requests only in `Oi4v2`: T7-ADR-02 pass.
-  - `T7-GET-07/empty` – ReferenceDesignation is supported but has no object (like the demo): the Query cannot be judged (REQ-RES-REFDES-011/014, QRY-002/003 skipped); REQ-RES-REFDES-013 and QRY-001 pass.
-- **Negative (fault → expected outcome):**
-  - `T7-ADR-02/mixed` (answers to Get MAM repeated under `Oi4`): T7-ADR-02 fail REQ-TOP-004;
-  - `T7-ADR-03/case` (the Source is compared case-insensitively): T7-ADR-03 fail REQ-IL-015; T7-MON-01 fail REQ-MSG-023 (the DataSetWriterName differs from the Source of the topic);
-  - `T7-GET-03/metadata` (Get Metadata not answered): T7-GET-03 fail REQ-CMP-008, CMP-037, RES-META-002;
-  - `T7-GET-03/filter` (the Filter of Get PublicationList ignored): T7-GET-03 fail REQ-RES-PUBLIST-020; T7-MON-01 fail REQ-MSG-025 (WriterGroupName differs from the Filter);
-  - `T7-GET-04/asset-level` (the subordinate asset has no Config, level 3): T7-GET-04 fail REQ-CMP-010, CMP-045;
-  - `T7-GET-06/per-page` (PaginationRequest ignored): T7-GET-06 fail REQ-PAG-002, PAG-005;
-  - `T7-GET-07/ignored` (the Query ignored, all objects returned): T7-GET-07 fail REQ-RES-REFDES-011 (MUST at level 3);
-  - `T7-GET-07/with-source` (the Query also evaluated with Source): T7-GET-07 fail REQ-RES-REFDES-013;
-  - `T7-GET-08/locale` (LocalizedText in `fr-FR` for the Locale `de-DE`): T7-GET-08 fail REQ-LOC-002.
-- **Added outcomes (were `reviewed`):**
-  - `T7-GET-01/reply-to` (empty `ReplyTo`) now also: T7-GET-03 fail REQ-CMP-019, 020, 035, 036, 039; T7-GET-04 fail REQ-CMP-010, 024; T7-MON-03 fail REQ-LIFE-003 (the uncorrelated German MAM of T7-GET-08 looks like a second, different Birth);
-  - `T7-GET-02/unanswered` (SubscriptionList not answered) now also: T7-GET-03 fail REQ-CMP-008, 039, RES-SUBLIST-008; T7-GET-04 fail REQ-CMP-010, 024.
-- **Please check:** is each fault a real violation of the named REQ, and are the three positives really compliant? In particular: the T7-MON-03 fail with the ReplyTo fault, the T7-MON-01 side effects of `case` and `filter`, and that a component without ReferenceDesignation objects passes T7-GET-07.
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
-
-### R-2 – capture fixture `pagination-broken` corrected (G-3.9)
-
-- **Where:** `oec/conformance/testdata/captures/pagination-broken.jsonl` and its entry in `testdata/captures/index.yaml` (reviewed in the C-052 review, now `draft`).
-- **Why changed:** the two Gets MAM in the capture requested `Page` 1. For a requested page only that page is published (REQ-PAG-002), so the second answer (page 1, HasNext true) was conforming; the expected REQ-PAG-005 failure rested on a false positive of the monitor, which C-063 fixed (A-171).
-- **Now:** both Gets request all pages (`Page` 0, PerPage 1). The first answer skips page 2 of 3 (REQ-PAG-004), the second ends after page 1 with HasNext true (REQ-PAG-005). Expected verdict unchanged: T7-MON-18 fail REQ-PAG-004, PAG-005.
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
+No open item.
 
 ### Answered earlier
+
+Answered in the C-063 review (2026-10-28) and applied in C-063 addendum 1:
+- R-1 – 14 sim fixtures of `oec-check test` (`testdata/sim/index.yaml`: 11 new faults and conforming variants of T7-GET-03/04/06/07/08 and T7-ADR-02/03, 3 entries with added outcomes): ☑ accepted → `reviewed`.
+- R-2 – capture fixture `pagination-broken` (stimulus corrected to `Page` 0, same verdict): ☑ accepted → `reviewed`.
 
 Answered in the C-062 review (2026-10-28) and applied in C-062 addendum 1:
 - R-1 – 8 sim fixtures of `oec-check test` (`testdata/sim/index.yaml`: the fault-free run and 7 faults of T7-GET-01/02/05/09): ☑ accepted → `reviewed`.
@@ -941,5 +913,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-064)
 
-1. Your review of R-1 and R-2.
-2. P5 increment 3: the write side T7-SET-01 … 09, 11, 12 with restore and the state model; in a new session (start prompt in `prompt.md`).
+1. P5 increment 3: the write side T7-SET-01 … 09, 11, 12 with restore and the state model; in a new session (start prompt in `prompt.md`).

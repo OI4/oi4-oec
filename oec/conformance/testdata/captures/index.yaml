@@ -90,7 +90,7 @@ captures:
     expect:
       T7-MON-18: {outcome: fail, reqs: [REQ-PAG-005]}
   - file: pagination-broken.jsonl
-    status: draft
+    status: reviewed
     expect:
       T7-MON-18: {outcome: fail, reqs: [REQ-PAG-004, REQ-PAG-005]}
     notes: >-
@@ -99,7 +99,8 @@ captures:
       ends with page 1 and HasNext true, no further page follows
       (REQ-PAG-005). Changed in C-063 (back to draft): the Gets requested
       Page 1, for which only the requested page is published
-      (REQ-PAG-002), so the second answer was conforming.
+      (REQ-PAG-002), so the second answer was conforming. Reviewed again in
+      the C-063 review (R-2).
   - file: debug-event.jsonl
     status: reviewed
     expect:

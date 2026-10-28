@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, C-063: **P5 Inkrement 2** – alle Lese-Tests (`Get`) von `oec-check test` sind fertig. **Für dich offen: R-1 (14 Testfälle gegen die simulierte App prüfen) und R-2 (ein korrigierter Aufzeichnungs-Testfall).** A-164 … A-175 nur zur Info._
+_Stand: 28.10.2026, C-063: **P5 Inkrement 2** – alle Lese-Tests (`Get`) von `oec-check test` sind fertig. Deine Antwort „R-1 und R-2 akzeptiert“ ist eingetragen. **Für dich ist nichts offen.** A-164 … A-175 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,43 +24,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Zwei Prüfaufträge (G-3.9), keine Entscheidung. Du kannst z. B. antworten: „R-1 und R-2 akzeptiert“.
-
-### R-1 – 14 Testfälle gegen die simulierte App (bitte prüfen)
-
-**Wo:** `oec/conformance/testdata/sim/index.yaml`, die Einträge mit `status: draft`.
-
-**Worum es geht:** Wie in C-062 startet ein Selbsttest die simulierte App (den OT-Connector aus den Guideline-Beispielen) mit genau einem eingebauten Fehler und lässt `oec-check test` auf Level 3 gegen sie laufen. Im Eintrag steht, welches Ergebnis herauskommen muss – je Test „bestanden“ oder „durchgefallen“ und genau welche Regeln (REQs). Du prüfst: **Ist der eingebaute Fehler wirklich ein Verstoß gegen genau diese Regeln, und ist die App ohne Fehler wirklich regelkonform?**
-
-**Ohne Fehler (muss bestehen):**
-- `none` – die fehlerfreie App. Neu bestehen auch die Tests von C-063. T7-ADR-02 wird übersprungen, weil die App nichts unter der alten Version `Oi4` sendet.
-- `T7-ADR-02/dual-version` – die App spricht zusätzlich die alte Version 1 (`Oi4`), beantwortet die Fragen in Version 2 aber nur in Version 2. Das ist erlaubt.
-- `T7-GET-07/empty` – die App kennt ReferenceDesignation, hat aber keinen einzigen Eintrag (so wie die Demo-App). Ob die Query richtig funktioniert, lässt sich dann nicht beurteilen → übersprungen. Erlaubt.
-
-**Mit Fehler (muss durchfallen):**
-- `T7-ADR-02/mixed` – Antworten kommen zusätzlich unter `Oi4`: Versionen gemischt (REQ-TOP-004).
-- `T7-ADR-03/case` – die App achtet bei der Geräte-Kennung nicht auf Groß-/Kleinschreibung (REQ-IL-015). Nebenwirkung: die passive Regel sieht einen falschen Absendernamen (REQ-MSG-023).
-- `T7-GET-03/metadata` – die App beantwortet die Frage nach den Metadaten eines Datensatzes nicht (REQ-CMP-008, CMP-037, RES-META-002).
-- `T7-GET-03/filter` – die App ignoriert den Filter bei der PublicationList und liefert alles (REQ-RES-PUBLIST-020). Nebenwirkung: falscher Gruppenname (REQ-MSG-025).
-- `T7-GET-04/asset-level` – das untergeordnete Gerät hat keine Konfiguration (Config), Level 3 verlangt sie für jedes Gerät (REQ-CMP-010, CMP-045).
-- `T7-GET-06/per-page` – die App ignoriert die Bitte, die Antwort seitenweise zu schicken (REQ-PAG-002, PAG-005).
-- `T7-GET-07/ignored` – die App ignoriert die Query nach den Kindern eines Elternobjekts; auf Level 3 ist sie Pflicht (REQ-RES-REFDES-011).
-- `T7-GET-07/with-source` – die App wertet die Query auch dann aus, wenn sie ignoriert werden muss (Frage mit Absender-Kennung, REQ-RES-REFDES-013).
-- `T7-GET-08/locale` – Frage auf Deutsch, Antwort mit Texten auf Französisch (REQ-LOC-002).
-
-**Zwei schon geprüfte Fälle mit neuen Ergebnissen** (die neuen Tests schlagen dort ebenfalls an, daher wieder `draft`):
-- `T7-GET-01/reply-to` (Antworten ohne Zuordnung): zusätzlich fallen T7-GET-03 und GET-04 durch, und T7-MON-03: die nicht zugeordnete deutsche MAM-Antwort sieht für die passive Regel wie eine zweite, abweichende Anmeldung (Birth) aus (REQ-LIFE-003).
-- `T7-GET-02/unanswered` (SubscriptionList wird nicht beantwortet): zusätzlich fallen T7-GET-03 und GET-04 durch.
-
-**Besonders anschauen:** das T7-MON-03-Ergebnis beim ReplyTo-Fehler, die Nebenwirkungen bei `case` und `filter` und dass eine App ohne ReferenceDesignation-Einträge T7-GET-07 besteht.
-
-### R-2 – ein korrigierter Aufzeichnungs-Testfall (bitte prüfen)
-
-**Wo:** `oec/conformance/testdata/captures/pagination-broken.jsonl` und sein Eintrag in `testdata/captures/index.yaml` (von dir im C-052-Review akzeptiert, jetzt wieder `draft`).
-
-**Warum geändert:** In der Aufzeichnung fragte jemand nach **Seite 1**. Für eine bestimmte Seite wird laut Guideline nur diese eine Seite geschickt (REQ-PAG-002); dass danach keine weitere Seite kam, war also richtig. Der Testfall verließ sich auf einen Fehler der passiven Regel, den ich in C-063 behoben habe (A-171).
-
-**Jetzt:** Beide Fragen bitten um **alle Seiten** (Seite 0). Die erste Antwort lässt Seite 2 von 3 aus (REQ-PAG-004), die zweite hört nach Seite 1 auf, obwohl „es kommt noch mehr“ gemeldet ist (REQ-PAG-005). Das erwartete Ergebnis ist dasselbe wie vorher.
+**Nichts.** Deine Antwort „R-1 und R-2 akzeptiert“ ist eingetragen: Die 14 Testfälle gegen die simulierte App (`oec/conformance/testdata/sim/index.yaml`) und der Aufzeichnungs-Testfall `pagination-broken` (`testdata/captures/index.yaml`) haben jetzt den Status `reviewed`.
 
 ### Zur Info: was C-063 gebaut hat
 
@@ -592,8 +556,7 @@ Neu aus C-063 (P5 Inkrement 2):
 
 ### Was als Nächstes passiert (C-064)
 
-1. **Dein Review von R-1 und R-2** (blockiert C-064 nicht).
-2. **P5 Inkrement 3:** die Schreib-Tests – T7-SET-01 … 09, 11, 12 (`Set`/`Del` mit Status-Ereignis, danach Wiederherstellen des alten Zustands).
+1. **P5 Inkrement 3:** die Schreib-Tests – T7-SET-01 … 09, 11, 12 (`Set`/`Del` mit Status-Ereignis, danach Wiederherstellen des alten Zustands).
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---
