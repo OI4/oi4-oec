@@ -848,6 +848,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "oec-ffi"
+version = "0.1.0"
+dependencies = [
+ "oec",
+ "oec-core",
+ "pkcs8",
+ "rcgen",
+ "rustls",
+ "rustls-pki-types",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "oid-registry"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

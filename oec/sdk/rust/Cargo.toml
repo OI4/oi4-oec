@@ -1,11 +1,11 @@
 # Cargo workspace of the Rust SDK D2 (ADR-0011, ADR-0023, ADR-0026 proposed).
 # Members grow with the P4 increments: oec-core (sans-IO protocol logic, from
 # C-046), oec (runtime + public API, ADR-0020, from C-048) and oec-ffi (C ABI,
-# ADR-0021) later. The P3 spikes stay stand-alone crates with their own lock
+# ADR-0021, from C-061). The P3 spikes stay stand-alone crates with their own lock
 # files; the P3 API sketch was deleted in C-060 (ADR-0026 §1).
 [workspace]
 resolver = "3"
-members = ["oec-core", "oec"]
+members = ["oec-core", "oec", "oec-ffi"]
 exclude = ["spike"]
 
 [workspace.package]
