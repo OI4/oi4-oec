@@ -6,13 +6,14 @@
 # entries: REQ-MSG-025 (GL-ADR-018), Filter structure: REQ-TOP-022. The
 # Status event after a Set/Del is REQ-RES-SUBLIST-013 (content: RES-EVENT).
 # Own Set subscriptions of writable Data/Config DataSets: REQ-RES-SUBLIST-016
-# (SF-107, C-056 review).
+# (SF-107, C-056 review; SF-109/110, C-059 review). Creation of entries via
+# Set is optional (SF-111): REQ-RES-SUBLIST-004/010.
 # Checked by tools/internal/payload (C-028).
 # Drafted in C-028, reviewed in the C-028 review; SF-080 (entry identity,
 # TopicPath of the B1.1.9 example, Interval wording, publication after Del,
 # Config) resolved in the guideline (baseline b2f0fe7).
 area: RES-SUBLIST
-baseline: "2e32a6b"
+baseline: "57ebe91"
 requirements:
   # --- DataSet content (MG 8.3.9) ---------------------------------------------
   - id: REQ-RES-SUBLIST-001
@@ -112,13 +113,16 @@ requirements:
       configurable subscription. A Set or Del of an entry with NONE_0 is
       rejected with a status Event with StatusCode Bad (e.g. BadNotWritable),
       as is a Set that changes the Config of an entry: Config is read only
-      and set by the application; an entry created via Set is CONF_1.
+      and set by the application; an entry created via Set is CONF_1. An
+      application that does not support the creation of entries rejects a
+      Set whose TopicPath the Source has not subscribed yet with a status
+      Event with StatusCode Bad (e.g. BadNotSupported).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
     condition: The application offers Set or Del for SubscriptionList.
-    refs: [MG 8.3.9, MG 9.1.9, SF-080]
+    refs: [MG 8.3.9, MG 9.1.9, SF-080, SF-111]
     quotes:
       - ref: MG 8.3.9
         text: >-
@@ -129,15 +133,21 @@ requirements:
         text: If the Set addresses an entry with Config NONE_0 or changes the Config of an entry, the Set must be rejected and the status Event must have the StatusCode Bad (e.g. BadNotWritable).
       - ref: MG 9.1.9
         text: If the entry has Config NONE_0, the Del must be rejected and the status Event must have the StatusCode Bad (e.g. BadNotWritable).
+      - ref: MG 9.1.9
+        text: An application that does not support the creation of entries rejects such a Set with the status Event Bad (e.g. BadNotSupported).
     verification: [d7-test]
-    inventory: [MG-8.3.9-ad2fe906, MG-9.1.9-a22afd5f, MG-9.1.9-a00d5bfe]
-    status: reviewed
+    inventory: [MG-8.3.9-ad2fe906, MG-9.1.9-a22afd5f, MG-9.1.9-a00d5bfe, MG-9.1.9-013e79f7]
+    status: draft
     notes: >-
       MG 8.3.9 and 9.1.9 since SF-080 (e); same pattern as
       REQ-RES-PUBLIST-016 and REQ-CMP-043. Since the C-028 review the
       statement includes the rejection of a Config change and CONF_1 for
       entries created via Set (agent addition in the guideline), hence
-      draft.
+      draft. SF-111 (PO decision in the C-059 review, 57ebe91): creating
+      an entry via Set is optional ("depending on implementation", MG
+      8.3.9); an application that does not support it rejects the Set
+      (statement extended, hence draft). The OEC SDK does not create
+      entries and answers BadNotSupported.
 
   # --- Message Bus (MG 9.1.9) -------------------------------------------------
   - id: REQ-RES-SUBLIST-005
@@ -259,13 +269,15 @@ requirements:
       Set/SubscriptionList/<Source>/<ResourceType>[/<Tag>] and its
       NetworkMessage contains exactly one SubscriptionList DataSetMessage –
       the complete entry; a TopicPath not yet subscribed by the Source
-      creates a new entry, a known TopicPath reconfigures the entry; several
-      entries cannot be set at once.
+      creates a new entry if the application supports the creation of
+      entries (otherwise the Set is rejected, REQ-RES-SUBLIST-004), a known
+      TopicPath reconfigures the entry; several entries cannot be set at
+      once.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [requester]
-    refs: [MG 9.1.9, SF-079, SF-080]
+    refs: [MG 9.1.9, SF-079, SF-080, SF-111]
     quotes:
       - ref: MG 9.1.9
         text: In combination with the method Set, the payload contains a single DataSetMessages of type SubscriptionList. A topic with method Set must contain Resource, Source and Filter to be valid.
@@ -277,10 +289,13 @@ requirements:
         text: The Set carries the complete entry. If the Source has not subscribed the TopicPath yet, the Set creates a new entry; otherwise it reconfigures the entry with this TopicPath (8.3.9 SubscriptionList).
     verification: [schema, d7-validate]
     inventory: [MG-9.1.9-c60d1703, MG-9.1.9-a1f2a02e, MG-9.1.9-2c8de6d9]
-    status: reviewed
+    status: draft
     notes: >-
       "create new entry or set new behavior" (heading of MG 9.1.9); entry
       identity per MG 8.3.9 (since SF-080 (a)). Header per REQ-BUS-010.
+      SF-111 (PO decision in the C-059 review, 57ebe91): the creation of a
+      new entry depends on the application; a requester must expect a
+      rejection (statement follows the text, hence draft).
 
   - id: REQ-RES-SUBLIST-011
     title: Del SubscriptionList addresses exactly one entry
@@ -398,28 +413,31 @@ requirements:
       REQ-BUS-008 (the changed resource after a partial deletion); MG 9.1.9
       since SF-080 (d).
   - id: REQ-RES-SUBLIST-016
-    title: Writable Data and Config DataSets are listed with their Set subscription
+    title: Writable DataSets are listed with their Set subscription, own request and answer subscriptions not
     statement: >-
       An application that supports SubscriptionList lists every DataSet of the
       resources Data or Config that can be changed with Set with the
       subscription of its Set topic (TopicPath
       Oi4v2/<ServiceType>/<AppId>/Set/<Resource>/<Source>/<Tag>, Config
-      NONE_0). It does not list other subscriptions to topics of its own
-      AppId (e.g. Get or Del).
+      NONE_0). It does not list its other subscriptions to request topics of
+      its own AppId (e.g. Get or Del), nor subscriptions that only exist for
+      the time of a request (to receive its answer or status Event).
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [application]
     condition: The application supports SubscriptionList and accepts Set for a Data or Config DataSet.
-    refs: [MG 9.1.9, MG 8.3.9, SF-107]
+    refs: [MG 9.1.9, MG 8.3.9, SF-107, SF-109, SF-110]
     quotes:
       - ref: MG 9.1.9
         text: A DataSet of the resources Data or Config that can be changed with Set is listed with the subscription of its Set topic (e.g. Oi4v2/<ServiceType>/<AppId>/Set/Data/<Source>/<Tag>, Config NONE_0).
       - ref: MG 9.1.9
-        text: Other subscriptions to topics of the own AppId are not listed.
+        text: Other subscriptions of the application to request topics of its own AppId (e.g. Get or Del) are not listed.
+      - ref: MG 9.1.9
+        text: Subscriptions that only exist for the time of a request (to receive its answer or status Event) are not listed.
     verification: [d7-test]
-    inventory: [MG-9.1.9-aedf208f]
-    status: reviewed
+    inventory: [MG-9.1.9-aedf208f, MG-9.1.9-565c8491]
+    status: draft
     notes: >-
       SF-107, decided by the PO in the C-056 review (2026-10-27) as proposed
       and implemented on PO order in 580f1c6 (MG 9.1.9; B1.1.3 and B1.1.4:
@@ -431,3 +449,10 @@ requirements:
       The Config of a PublicationList entry keeps its meaning (publication
       settings only, REQ-RES-PUBLIST-*). The Tag of a Config DataSet is its
       context (Filter). Support of SubscriptionList: REQ-CMP-039.
+      SF-110 (PO decision in the C-059 review, 57ebe91): only the
+      application's own request subscriptions (Get, Set, Del, … on its own
+      AppId) other than the listed Set subscriptions are excluded; a Pub
+      subscription is listed whatever AppId its topic has (B1.1.9,
+      V-PAY-072). SF-109 (same review): subscriptions created only to
+      receive the answer of a request and removed right after it are not
+      listed. Statement extended, hence draft.

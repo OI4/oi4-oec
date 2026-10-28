@@ -241,7 +241,7 @@ Scope: every non-deprecated requirement whose verification contains `schema` or 
 | REQ-RES-SUBLIST-002 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071, V-PAY-072 … (5) | V-PAY-086 (rule) | covered |
 | REQ-RES-SUBLIST-007 | schema, d7-validate | reviewed | V-PAY-066, V-PAY-067, V-PAY-068 | V-PAY-238 | covered |
 | REQ-RES-SUBLIST-009 | schema, d7-validate | reviewed | V-PAY-069, V-PAY-070, V-PAY-071 | – | derived |
-| REQ-RES-SUBLIST-010 | schema, d7-validate | reviewed | V-PAY-072 | V-PAY-239 | covered |
+| REQ-RES-SUBLIST-010 | schema, d7-validate | draft | V-PAY-072 | V-PAY-239 | covered |
 | REQ-RES-SUBLIST-011 | schema, d7-validate | reviewed | V-PAY-074 | V-PAY-085 | covered |
 | REQ-TOP-001 | d7-validate | reviewed | V-TOP-001, V-TOP-002, V-TOP-003, V-TOP-004 … (97) | V-TOP-201 (R-1), V-TOP-202 (R-1), V-TOP-250 (R-1), V-TOP-251 (R-1) … (5) | covered |
 | REQ-TOP-002 | d7-validate, d7-monitor | reviewed | – | – | derived |

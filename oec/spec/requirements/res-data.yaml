@@ -9,7 +9,7 @@
 # Oi4Pv), SF-078 (templates of MG 9.1.4) and SF-079 (DataSetMessage of a Set
 # request) resolved in the guideline (baseline b2f0fe7).
 area: RES-DATA
-baseline: "2e32a6b"
+baseline: "57ebe91"
 requirements:
   # --- DataSet content (MG 8.3.4) ---------------------------------------------
   - id: REQ-RES-DATA-001
