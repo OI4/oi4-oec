@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, C-061 mit deiner Antwort „D-1 (a)“: **P4 ist abgeschlossen**, weiter geht es mit **P5** (D7 `test`). **Für dich ist nichts offen.** A-145 … A-152 nur zur Info._
+_Stand: 28.10.2026, C-062: **P5 hat begonnen** – Plan und Zyklusschnitt in der ROADMAP, erstes Inkrement `oec-check test`. **Offen für dich: R-1** (8 Testfälle gegen eine simulierte App, Review). A-153 … A-163 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,35 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** Deine Antwort auf D-1 ist eingetragen, siehe unten „Was aus deinem letzten Review (C-061) geworden ist“.
+### R-1 – Testfälle von `oec-check test` gegen die simulierte App (Review, G-3.9)
+
+**Worum geht es?** `oec-check test` prüft eine laufende App aktiv: D7 stellt ihr Fragen (`Get`) und bewertet die Antworten. Damit wir wissen, dass D7 richtig urteilt, gibt es eine **simulierte App** (`internal/sim`): den OT-Connector aus den Beispielen der Guideline (MG B1.1) mit einem untergeordneten Gerät; ihre Inhalte stammen aus bereits reviewten Testvektoren. In die simulierte App kann man gezielt **einen Fehler** einbauen. Die Datei `oec/conformance/testdata/sim/index.yaml` legt für jeden Fall fest, **welches Urteil D7 fällen muss** – das ist Testdaten mit Urteil, deshalb dein Review.
+
+**Die 8 Fälle:**
+- **ohne Fehler** (`none`): alle vier neuen Tests bestehen, die passiven Prüfungen bestehen oder werden übersprungen.
+- **`T7-GET-01/reply-to`** – jede Antwort hat ein leeres `ReplyTo` (das Feld, das sagt, auf welche Frage geantwortet wird). D7 kann keine Antwort zuordnen, also gilt jede Frage als unbeantwortet: **fail** bei REQ-BUS-003, CMP-015, CMP-017, MSG-015 (GET-01) und CMP-018 (GET-02); **warn** bei CMP-047 (GET-05, nur „sollte“). Zusätzlich ein **info**-Hinweis T7-MON-10 (REQ-IL-012): Der passive Monitor hält jede nicht zugeordnete MAM-Antwort für eine weitere „Geburt“ der App – ein Hinweis, kein Fehler.
+- **`T7-GET-01/all-assets`** – `Get Health` ohne Source liefert nur die App, das Gerät fehlt: **fail** REQ-RES-HEALTH-006.
+- **`T7-GET-02/unanswered`** – das Profil nennt SubscriptionList, die App beantwortet die Frage danach aber nicht: **fail** REQ-RES-PROFILE-002.
+- **`T7-GET-02/missing`** – die App beantwortet Config, nennt es aber nicht im Profil (und Level 3 verlangt Config): **fail** REQ-CMP-021 und RES-PROFILE-002.
+- **`T7-GET-05/empty-list`** – eine Frage ohne Treffer wird gar nicht beantwortet statt mit einer leeren Liste: **fail** REQ-CMP-041.
+- **`T7-GET-05/unknown-source`** – Frage nach einem unbekannten Gerät: leere Antwort statt „keine Antwort + Status-Ereignis Bad“: **warn** REQ-CMP-047 („sollte“).
+- **`T7-GET-09/unknown-key`** – eine Frage mit einem unbekannten Zusatzfeld wird verworfen statt beantwortet: **warn** REQ-MSG-046 („sollte“).
+
+**Bitte prüfen:** Ist jeder Fehler wirklich ein Verstoß gegen genau die genannten REQs, und ist die App ohne Fehler wirklich konform? Besonders: der Info-Hinweis T7-MON-10 beim ReplyTo-Fehler und dass GET-05/09 nur warnen.
+
+**Wenn du zustimmst:** Status `reviewed` in `index.yaml`. Antwort z. B.: „R-1 akzeptiert“.
+
+### Zur Info: was C-062 gebaut hat
+
+C-062 ist der **Start von P5**.
+- **Plan:** In der ROADMAP steht jetzt der Plan für P5 in 8 Inkrementen (C-062 … C-068): erst die restlichen Lese-Tests, dann die Schreib-Tests (`Set`/`Del`, mit Wiederherstellen des alten Zustands), dann die Aktion und die noch fehlenden passiven Regeln, dann der Proxy-Modus, Neustart/Peer, zuletzt `list`/`explain`, das Report-Schema und der Abschlusslauf. Der Zuschnitt ist meine Entscheidung (A-163).
+- **`oec-check test`:** D7 sucht die angegebene App, fragt sie als „Tester“ (eine eigene, nicht angemeldete Kennung) und ordnet die Antworten über `ReplyTo` zu. Gleichzeitig laufen die passiven Monitor-Regeln mit; ein aufgezeichneter Lauf lässt sich mit `monitor --replay` wieder abspielen.
+- **Vier Tests fertig:** T7-GET-01 (MAM und Health für alle Geräte), T7-GET-02 (das Profil nennt genau, was die App beantwortet), T7-GET-05 (leere Liste; unbekanntes Gerät → Status-Ereignis), T7-GET-09 (unbekannte Felder werden ignoriert).
+- **Gefunden und behoben:** D7 selbst hat seine Fragen mit QoS 1 geschickt; die Guideline sieht QoS 0 als Standard vor (REQ-MQTT-017). Der neue Selbsttest hat das gefunden (A-154).
+- **Echter Lauf gegen die Beispiel-App `demo.rs`** (Level 2, auf einer Kopie eines Dev-Ordners, Dev-Broker): **14 bestanden, 0 durchgefallen, 3 übersprungen**, alle 18 Fragen beantwortet.
+- Kein Finding, nichts Reviewtes geändert, keine neue Bibliothek.
+
+Die Technik-Entscheidungen A-153 … A-163 sind nur zur Info (unten). Einen Blick wert: **A-159** (ein `test`-Lauf allein reicht nicht für eine Level-Aussage, es braucht zusätzlich einen längeren `monitor`-Lauf), **A-155** (der Tester meldet sich nicht an) und **A-154** (QoS 0).
 
 ### Zur Info: was C-061 gebaut hat
 
@@ -488,10 +516,26 @@ Neu aus C-061 (P4 Inkrement 10):
 
 ---
 
-### Was als Nächstes passiert (C-062)
+Neu aus C-062 (P5 Inkrement 1):
+- **A-153 (neu) – ein Abo für alles:** Ein `test`-Lauf abonniert den Bus einmal; jede Nachricht geht an die passiven Regeln (und die Aufzeichnung), dann an die aktiven Tests. Deshalb lässt sich ein Testlauf wieder abspielen.
+- **A-154 (neu) – QoS 0:** D7 schickt seine Fragen mit QoS 0 (Standard laut REQ-MQTT-017). Die Fragen sind gültige Nachrichten, bis auf das absichtlich unbekannte Feld in T7-GET-09.
+- **A-155 (neu) – Tester-Kennung:** `Utility/oi4.org/oec-check/D7/<Zufall>`, je Lauf neu, ohne Anmeldung (keine Birth/MAM; Anmelden kommt mit `--announce` in Inkrement 6).
+- **A-156 (neu) – App finden:** Frage nach dem MAM auf dem angegebenen Service-Typ oder auf allen sieben; notfalls reicht eine gesehene Nachricht der App. Nicht gefunden → Exit 4 („nicht beurteilbar“).
+- **A-157 (neu) – Warten:** Tests nacheinander; nach einer Antwort 250 ms für Doppelte; wenn keine Antwort erwartet wird, wartet D7 die volle Zeit (`--timeout`, 10 s).
+- **A-158 (neu) – Zuständigkeit:** Jeder aktive Test urteilt nur über die REQs aus seinem Katalogeintrag.
+- **A-159 (neu) – Kurzer Lauf:** Was ein kurzer Lauf nicht beurteilen kann (Verbindungsaufbau nicht gesehen, kürzer als der Herzschlag), wird übersprungen („test run: …“) statt „nicht beurteilbar“. Für eine Level-Aussage braucht es zusätzlich einen `monitor`-Lauf von mindestens 125 s.
+- **A-160 (neu) – Bericht:** derselbe Bericht wie bei `monitor`, mit Modus `test`, Tester und der Liste der Fragen; das Report-Schema kommt in Inkrement 7.
+- **A-161 (neu) – Auswahl:** `--tests` nimmt Test-Ids oder Muster (`T7-GET-*`); nicht ausgewählte Tests werden übersprungen.
+- **A-162 (neu) – Aufruf:** `--app` ist Pflicht und muss eine gültige Kennung sein, d. h. mit kodierten Sonderzeichen (`OEC Demo` → `OEC,20Demo`); die Fehlermeldung sagt das.
+- **A-163 (neu) – Einzelheiten und Zuschnitt:** wie GET-05 die leere Liste und das unbekannte Gerät provoziert, GET-01 fragt höchstens 20 Geräte; der P5-Zyklusschnitt.
 
-1. **P5 – D7 `test`:** D7 prüft eine laufende App aktiv (fragt sie, schickt ihr Befehle, auch absichtlich falsche). Zuerst Plan und Zuschnitt der Zyklen in der ROADMAP, dann das erste Inkrement.
-   - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
+---
+
+### Was als Nächstes passiert (C-063)
+
+1. Dein Review von **R-1**.
+2. **P5 Inkrement 2:** die restlichen Lese-Tests – T7-GET-03 (zu jedem Datensatz die Metadaten), GET-04, GET-06 (Aufteilen großer Antworten, `MaxPacketSize`), GET-07 (Query), GET-08 (Sprache), T7-ADR-02/03.
+   - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---
 

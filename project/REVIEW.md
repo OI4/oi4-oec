@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-061 review (you decided D-1 = (a): **P4 is closed**, criterion 3 moves into the P5 exit, the platform part of criterion 5 into the P9 CI; next phase P5). **Nothing is open for you.** A-145 … A-152 for information, worth a look: A-148, A-150, A-151._
+_Last updated: 2026-10-28, C-062 (P5 started: plan and cycle cut, increment 1 = D7 `oec-check test` engine with T7-GET-01/02/05/09). **Open for you: R-1 (8 sim fixtures of `oec-check test`, review).** A-153 … A-163 for information, worth a look: A-154, A-155, A-159._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -115,10 +115,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - No finding, no reviewed item changed, no new test data, no new dependency. A-145 … A-152 are for information.
   - The next cycle runs in a new agent; `prompt.md` is filled.
 - C-061 review: your answer ("D-1 (a)") is applied: **P4 is closed** (ROADMAP P4 heading and exit assessment, STATUS). Criterion 3 (D7 `test` against the SDK example app) is part of the P5 exit, the platform part of criterion 5 (Windows MSVC, native amd64/Windows runs) moves to the P9 CI. **Next phase: P5** (D7 `test`, proxy, `list`/`explain`), started by a new agent in C-062.
+- C-062 (P5 start and increment 1):
+  - **P5 plan and cycle cut** in the ROADMAP: 8 increments in C-062 … C-068 (the rest of `Get`, the write side with the state model, the Action and the deferred monitor rules, proxy, restart hook/peer, `list`/`explain` + report schema, exit run).
+  - **`oec-check test`** (bus attachment): D7 finds the component under test, sends `Get` requests as a not-announced tester, correlates the answers by `ReplyTo` and judges them; the monitor rules run on the same subscription, a recorded run replays with `monitor --replay`. Engine `internal/probe`, simulated CUT `internal/sim` (MG B1.1 OT connector from reviewed vectors, with fault injection).
+  - **T7-GET-01, 02, 05, 09 `implemented`**: Get MAM/Health for all Sources; the Profile lists exactly the served resources of the level; empty list and unknown Source (Event Status Bad); unknown keys ignored. Each with a positive and a negative sim fixture → **R-1**.
+  - Found test-first and fixed: D7's own requests used QoS 1 instead of the default QoS 0 (REQ-MQTT-017).
+  - Against the SDK example app `demo.rs` (level 2, copy of a dev root, dev broker): **14 pass, 0 fail, 3 skip, exit 0**, 18 requests all answered.
+  - ADR-0025 amendment C-062; no SF, no reviewed item changed, no new dependency. A-153 … A-163 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
-Logs: [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -276,10 +283,37 @@ Logs: [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new
 | A-150 | Threads and handles: callback thread, no blocking calls/`run`/`free` inside callbacks, child handles valid until the app is freed, `oec_app_start` errors not reported | info (agent) | C-061 | – | – |
 | A-151 | Additions (`oec_set`, `oec_del`, `oec_new_data_set_writer_id`, …), what C does not get yet, packaging | info (agent) | C-061 | – | – |
 | A-152 | Tests: C programs against the in-process broker, shared + static under ASan/UBSan, stress, LSan/cross builds on Linux once; ADR-0026 §20 | info (agent) | C-061 | – | – |
+| R-1 | 8 sim fixtures of `oec-check test` and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-062 | accept | ☐ |
+| A-153 | One subscription feeds the monitor engine (and recorder), then the runner; a test run is replayable | info (agent) | C-062 | – | – |
+| A-154 | D7 requests with QoS 0 (REQ-MQTT-017); valid except the deliberate unknown key of T7-GET-09 | info (agent) | C-062 | – | – |
+| A-155 | Tester `Utility/oi4.org/oec-check/D7/<12 hex>`, new per run, not announced, `--tester-il` | info (agent) | C-062 | – | – |
+| A-156 | Discovery of the CUT (ServiceType given or all seven, fallback publication, not found → exit 4); CUT treated as an application | info (agent) | C-062 | – | – |
+| A-157 | Waiting: answered + 250 ms; "no answer" waits `--timeout` (10 s); sequential tests | info (agent) | C-062 | – | – |
+| A-158 | An active test judges only the REQs of its catalog entry | info (agent) | C-062 | – | – |
+| A-159 | Passive REQs a test run cannot judge are plain skips ("test run:"); a level claim needs a `monitor` run too | info (agent) | C-062 | – | – |
+| A-160 | Report version 1 with mode `test`, `tester`, `requests`; report schema in increment 7 | info (agent) | C-062 | – | – |
+| A-161 | `--tests` with ids or globs; non-selected tests skip | info (agent) | C-062 | – | – |
+| A-162 | `--app` checked as IL (dnp-encoded, hint in the error); no `--replay`/`--duration` for `test` | info (agent) | C-062 | – | – |
+| A-163 | Probes of GET-05 (empty-list filter, unknown Source), GET-01 max. 20 Sources, level-1 skips; the P5 cycle cut | info (agent) | C-062 | – | – |
 
 ## Decisions and review items
 
-No open item.
+### R-1 – sim fixtures of `oec-check test` (G-3.9)
+
+- **Where:** `oec/conformance/testdata/sim/index.yaml` – 8 entries (all `draft`): one per fault of the simulated component `internal/sim`, plus the fault-free run.
+- **What they are:** `internal/probe/sim_test.go` starts the simulated component (the OT connector of the guideline examples, MG B1.1, with one subordinate asset; its content comes from reviewed payload vectors) with one fault, runs `oec-check test` (monitor + active tests, level 3) against it over the in-process TLS broker, and compares the verdict with the entry: outcome and exact REQ ids per test.
+- **Positive:** `none` – the conforming component; T7-GET-01, 02, 05, 09 pass, the monitor tests pass or are skipped.
+- **Negative (fault → expected outcome):**
+  - `T7-GET-01/reply-to` (every answer has an empty `ReplyTo`): T7-GET-01 fail REQ-BUS-003, CMP-015, CMP-017, MSG-015; T7-GET-02 fail REQ-CMP-018; T7-GET-05 warn REQ-CMP-047; T7-MON-10 info REQ-IL-012 (each uncorrelated answer to Get MAM looks like another Birth);
+  - `T7-GET-01/all-assets` (Get Health without Source omits the subordinate asset): T7-GET-01 fail REQ-RES-HEALTH-006;
+  - `T7-GET-02/unanswered` (SubscriptionList listed in the Profile but not answered): T7-GET-02 fail REQ-RES-PROFILE-002;
+  - `T7-GET-02/missing` (Config answered but not in the Profile, level 3 requires it): T7-GET-02 fail REQ-CMP-021, RES-PROFILE-002;
+  - `T7-GET-05/empty-list` (a Get without content is not answered): T7-GET-05 fail REQ-CMP-041;
+  - `T7-GET-05/unknown-source` (empty Pub instead of Event Status Bad for an unknown asset): T7-GET-05 warn REQ-CMP-047 (SHOULD);
+  - `T7-GET-09/unknown-key` (a Get with an unknown key is dropped): T7-GET-09 warn REQ-MSG-046 (SHOULD).
+- **Please check:** is each fault a real violation of the named REQ (and only that), and is the fault-free component really compliant? In particular: the T7-MON-10 info for the ReplyTo fault, and that T7-GET-05/09 only warn (SHOULD).
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -835,6 +869,22 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
   - interop 14 green; the C logger and C hello once against Mosquitto;
   - no new dependency (`Cargo.lock` +`oec-ffi` only), `cargo deny` without exception.
 
-## Next (C-062)
+### A-153 … A-163 – P5 increment 1 (C-062, agent)
 
-1. P5 – D7 `test` (active tests of one application, proxy, `list`/`explain`): plan and cycle cut in the ROADMAP, then the first increment; in a new agent (start prompt in `prompt.md`).
+- **Where:** `oec/conformance/internal/probe/` (`probe.go`, `session.go`, `judge.go`, tests), `internal/sim/sim.go`, `testdata/sim/index.yaml`, `cmd/oec-check/{test, monitor, main}.go`, `internal/report/monitor.go`, `internal/monitor/monitor.go` (`ForApp`/`NotFound` moved there); ADR-0025 amendment C-062; DESIGN.md §3.3/§10 "As built (C-062)"; ROADMAP P5 plan; log `log/2026-10-28_C-062_d7-test-engine.md`.
+- **A-153 One subscription:** a test run subscribes once to `Oi4v2/#` (QoS 1). Every message goes to the monitor engine and the recorder, then to the runner. So the passive checks run during `test` and `monitor --replay` replays a recorded test run.
+- **A-154 QoS 0 requests:** the new tester-violation check found that D7 published its requests with QoS 1. REQ-MQTT-017 makes QoS 0 the default, so this was fixed test-first. The requests are valid messages, except the deliberate unknown key of T7-GET-09 (REQ-MSG-001).
+- **A-155 Tester:** `Utility/oi4.org/oec-check/D7/<12 hex digits>`, new per run, not announced (no Birth/MAM; announcing comes with `--announce`, increment 6, Q-029); `--tester-il` overrides.
+- **A-156 Discovery:** `Get MAM/<AppId>` on the given ServiceType or on all seven; the first answer fixes the ServiceType. Fallback: a publication of the AppId seen on the bus. Not found: every REQ inconclusive (exit 4). The CUT is treated as an application (it answers for itself and its subordinate assets).
+- **A-157 Waiting:** sequential tests; an answered request waits 250 ms more for duplicates; "no answer expected" waits the full `--timeout` (default 10 s).
+- **A-158 Scope of a test:** an active test judges only the REQs its catalog entry cites; other observations come from the monitor rules.
+- **A-159 Verdict of a test run:** passive REQs that a short run cannot judge (connect not seen, shorter than the heartbeat, MaxPacketSize unknown) are plain skips with "test run: …", not inconclusive, so `test` can exit 0. A level claim therefore needs a `monitor` run of at least 125 s as well (DESIGN.md §6).
+- **A-160 Report:** the monitor report version 1 with `"mode": "test"` plus `tester` and `requests` (topic, MessageId, sent, replies). `report.schema.json` freezes it in increment 7.
+- **A-161 Selection:** `--tests` takes ids or `path.Match` globs (comma-separated or repeated); a pattern that matches nothing is a usage error; non-selected tests are skip "not selected (--tests)".
+- **A-162 CLI:** `--app [ServiceType/]AppId` is required and checked as an Identification Link, so the Oi4Identifier elements must be dnp-encoded (`OEC,20Demo`); the usage error says so. `--replay`/`--duration` are not flags of `test`; `--timeout`, `--tests`, `--tester-il` are new.
+- **A-163 Probes and the cut:** T7-GET-05 asks Data (else Config) with the filter `oecCheckNone<hex>` for the empty list and the unknown Source `oi4.org/oec-check/D7/unknown-<hex>`; REQ-CMP-044 (MAY) is not stimulated. T7-GET-01 asks at most 20 subordinate Sources. At level 1 an unanswered optional resource is a skip. Cycle cut: increment 1 carries the infrastructure and only four tests; the plan and reasons are in ROADMAP P5 and the log.
+
+## Next (C-063)
+
+1. Your review of R-1.
+2. P5 increment 2: T7-GET-03 (Data ⇒ Metadata), GET-04, GET-06 (pagination, `MaxPacketSize`), GET-07 (Query), GET-08 (Locale), T7-ADR-02/03; in a new session (start prompt in `prompt.md`).
