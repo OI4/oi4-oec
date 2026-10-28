@@ -531,6 +531,16 @@ fixtures:
       connected the CUT publishes its Birth again, then the normal Health.
       T7-LIFE-02 judges REQ-LIFE-017 (pass); T7-MON-10 does not count the
       recovery Birth as a second Birth (C-066).
+  - fault: T7-LIFE-02/late-subscribe
+    status: draft
+    positive: true
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    notes: >-
+      Conforming variant: the CUT publishes its Birth and subscribes 300 ms
+      later, like the SDK demo (C-066 demo run). Through the proxy D7 waits
+      for the CUT's first SUBACK before its discovery Get; the order of
+      Birth and subscription is not judged. TestSimLateSubscribe checks
+      that every request, the discovery Get included, is answered.
   - fault: T7-LIFE-03/writer-id
     status: draft
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]

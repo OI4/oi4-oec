@@ -33,7 +33,6 @@ import (
 	"crypto/x509/pkix"
 	"errors"
 	"fmt"
-	"io"
 	"math/big"
 	"net"
 	"sync"
@@ -78,11 +77,12 @@ type Conn struct {
 	HandshakeErr string    `json:"handshake_error,omitempty"`
 	Connect      *Connect  `json:"connect,omitempty"`
 	ConnectTime  time.Time `json:"connect_time,omitzero"`
-	Err          string    `json:"error,omitempty"`    // malformed CONNECT, broker not reachable
-	Connack      int       `json:"connack"`            // CONNACK code of the broker; -1: none
-	Publishes    []Pub     `json:"publishes,omitzero"` // PUBLISH packets of the client
-	Disconnect   bool      `json:"disconnect"`         // the client sent DISCONNECT
-	Dropped      bool      `json:"dropped"`            // ended by Drop
+	Err          string    `json:"error,omitempty"`     // malformed CONNECT, broker not reachable
+	Connack      int       `json:"connack"`             // CONNACK code of the broker; -1: none
+	Publishes    []Pub     `json:"publishes,omitzero"`  // PUBLISH packets of the client
+	Subscribed   time.Time `json:"subscribed,omitzero"` // first SUBACK of the broker to the client
+	Disconnect   bool      `json:"disconnect"`          // the client sent DISCONNECT
+	Dropped      bool      `json:"dropped"`             // ended by Drop
 	Closed       time.Time `json:"closed,omitzero"`
 }
 
@@ -471,7 +471,7 @@ func (p *Proxy) upward(c *Conn, from, to net.Conn, level byte) {
 }
 
 // down relays the packets of the broker to the client; it records the
-// CONNACK code.
+// CONNACK code and the time of the first SUBACK.
 func (p *Proxy) down(c *Conn, from, to net.Conn) {
 	defer closeAll([2]net.Conn{from, to})
 	f, err := readFrame(from)
@@ -489,5 +489,21 @@ func (p *Proxy) down(c *Conn, from, to net.Conn) {
 	if _, err := to.Write(f.bytes()); err != nil {
 		return
 	}
-	_, _ = io.Copy(to, from)
+	for {
+		f, err := readFrame(from)
+		if err != nil {
+			return
+		}
+		if f.kind() == typeSuback {
+			now := time.Now().UTC()
+			p.update(func() {
+				if c.Subscribed.IsZero() {
+					c.Subscribed = now
+				}
+			})
+		}
+		if _, err := to.Write(f.bytes()); err != nil {
+			return
+		}
+	}
 }

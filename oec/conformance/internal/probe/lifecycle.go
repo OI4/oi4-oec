@@ -40,8 +40,9 @@ func (r *Runner) lifecycleSelected() bool {
 	return false
 }
 
-// awaitProxy waits until the CUT is connected through the proxy and has
-// published (its Birth), before the discovery.
+// awaitProxy waits until the CUT is connected through the proxy, has
+// published (its Birth) and has subscribed (the broker's first SUBACK), so
+// that the discovery Get does not overtake the CUT's subscriptions.
 func (r *Runner) awaitProxy(ctx context.Context) error {
 	p := r.opt.Proxy
 	wctx, cancel := context.WithTimeout(ctx, r.opt.ProxyWait)
@@ -63,7 +64,7 @@ func (r *Runner) awaitProxy(ctx context.Context) error {
 	defer cancel()
 	p.Wait(wctx, func(cs []proxy.Conn) bool {
 		for _, c := range cs {
-			if c.Relayed() && len(c.Publishes) > 0 {
+			if c.Relayed() && len(c.Publishes) > 0 && !c.Subscribed.IsZero() {
 				return true
 			}
 		}

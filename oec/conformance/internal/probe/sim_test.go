@@ -110,14 +110,31 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 		return e.Observe(monitor.Message{Topic: m.Topic, Payload: m.Payload, Size: len(m.Payload), Received: m.Received.UTC(), QoS: m.QoS, Retain: m.Retain})
 	}
 	// The CUT starts after the subscription, so the monitor sees its Birth.
+	// Through the proxy it starts independently of D7, like a real CUT:
+	// D7 waits for its connection (awaitProxy).
 	var c *sim.Sim
+	var cutStarted chan error
 	start := func(ctx context.Context) error {
-		var err error
-		c, err = sim.Start(ctx, cutCfg, fault)
-		return err
+		if !viaProxy {
+			var err error
+			c, err = sim.Start(ctx, cutCfg, fault)
+			return err
+		}
+		cutStarted = make(chan error, 1)
+		go func() {
+			var err error
+			c, err = sim.Start(ctx, cutCfg, fault)
+			cutStarted <- err
+		}()
+		return nil
 	}
 	app := sim.ServiceType + "/" + sim.AppID
 	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start, Tests: opt.Tests, Proxy: px, ProxyWait: 10 * simTimeout}, reqs, observe)
+	if cutStarted != nil {
+		if serr := <-cutStarted; serr != nil {
+			t.Fatal(serr)
+		}
+	}
 	var changed []string
 	if c != nil {
 		var cerr error
@@ -422,6 +439,29 @@ func TestSimActionRequests(t *testing.T) {
 	}
 	if calls["T7-ACT-01"] != 2 || calls["T7-ACT-04"] != 1 {
 		t.Errorf("calls per test %v, want T7-ACT-01: 2, T7-ACT-04: 1", calls)
+	}
+}
+
+// TestSimLateSubscribe: a CUT that subscribes only after its Birth (like
+// the SDK demo) answers every request, the discovery Get included: through
+// the proxy, D7 waits for the CUT's first SUBACK before the discovery.
+func TestSimLateSubscribe(t *testing.T) {
+	v, err := validate.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	reqs, err := verdict.LoadRequirements()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, s := runSimWith(t, v, reqs, sim.LateSub, Options{Level: 3, Tests: []string{"T7-GET-01"}}, true)
+	if len(s.Probe.Requests) == 0 {
+		t.Fatal("no requests")
+	}
+	for _, q := range s.Probe.Requests {
+		if q.Replies == 0 {
+			t.Errorf("%s %s (sent %s): not answered", q.Test, q.Topic, q.Sent.Format(time.RFC3339Nano))
+		}
 	}
 }
 

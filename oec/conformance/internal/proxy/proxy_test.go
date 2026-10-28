@@ -93,6 +93,13 @@ func TestRelay(t *testing.T) {
 		t.Fatalf("relayed %+v", m)
 	}
 	cs := wait(t, e.p, func(cs []proxy.Conn) bool { return len(cs) == 1 && len(cs[0].Publishes) == 1 })
+	if !cs[0].Subscribed.IsZero() {
+		t.Errorf("subscribed before any SUBSCRIBE: %v", cs[0].Subscribed)
+	}
+	if err := cl.Subscribe(ctx, "Oi4v2/x/#", 0, func(mqttwire.Message) {}); err != nil {
+		t.Fatal(err)
+	}
+	cs = wait(t, e.p, func(cs []proxy.Conn) bool { return !cs[0].Subscribed.IsZero() })
 	c := cs[0]
 	if !c.Relayed() || c.TLSVersion == "" || c.ClientCert || c.Connect.ClientID != "cut-1" || c.Connect.Level != 4 ||
 		c.Connect.ProtocolName != "MQTT" || !c.Connect.CleanSession || c.Connect.KeepAlive != 60 ||

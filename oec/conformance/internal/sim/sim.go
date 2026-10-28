@@ -59,20 +59,21 @@ const (
 	FixedLevel    Fault = "T7-SET-12/fixed-level"    // the Syslog levels of the PublicationList are NONE_0
 
 	// Connection and life cycle (C-066): through the proxy attachment.
-	MQTT31       Fault = "T7-CON-01/mqtt31"        // CONNECT with the protocol level 3 (MQTT 3.1)
-	ClientIDs    Fault = "T7-CON-01/client-id"     // a new random ClientId on every connection
-	TLS11        Fault = "T7-CON-02/tls11"         // also offers TLS 1.0 and 1.1
-	NoVerify     Fault = "T7-CON-02/no-verify"     // does not verify the certificate of the broker
-	Anonymous    Fault = "T7-CON-03/anonymous"     // connects without user name and password (and without a client certificate)
-	Retained     Fault = "T7-CON-04/retain"        // publishes its Birth with Retain
-	NoWill       Fault = "T7-LIFE-01/no-will"      // registers no Will
-	StaleWill    Fault = "T7-LIFE-01/stale-will"   // registers the fixed Will of MG B1.1.2 (MessageId of 2021) on every connection
-	WillTime     Fault = "T7-LIFE-01/timestamp"    // the Will carries a Timestamp
-	NoRebirth    Fault = "T7-LIFE-02/no-birth"     // no Birth after a reconnect
-	HealthFirst  Fault = "T7-LIFE-02/health-first" // the first message of a connection is its Health, the MAM follows
-	FailNoBirth  Fault = "T7-LIFE-02/no-rebirth"   // reports FAILURE_1/0 and recovers to NORMAL_0 without a new Birth
-	FailRecovery Fault = "T7-LIFE-02/recovery"     // variant, conforming: reports FAILURE_1/0 and recovers with a new Birth
-	WillWriter   Fault = "T7-LIFE-03/writer-id"    // the Will uses another DataSetWriterId than the Health
+	MQTT31       Fault = "T7-CON-01/mqtt31"          // CONNECT with the protocol level 3 (MQTT 3.1)
+	ClientIDs    Fault = "T7-CON-01/client-id"       // a new random ClientId on every connection
+	TLS11        Fault = "T7-CON-02/tls11"           // also offers TLS 1.0 and 1.1
+	NoVerify     Fault = "T7-CON-02/no-verify"       // does not verify the certificate of the broker
+	Anonymous    Fault = "T7-CON-03/anonymous"       // connects without user name and password (and without a client certificate)
+	Retained     Fault = "T7-CON-04/retain"          // publishes its Birth with Retain
+	NoWill       Fault = "T7-LIFE-01/no-will"        // registers no Will
+	StaleWill    Fault = "T7-LIFE-01/stale-will"     // registers the fixed Will of MG B1.1.2 (MessageId of 2021) on every connection
+	WillTime     Fault = "T7-LIFE-01/timestamp"      // the Will carries a Timestamp
+	NoRebirth    Fault = "T7-LIFE-02/no-birth"       // no Birth after a reconnect
+	HealthFirst  Fault = "T7-LIFE-02/health-first"   // the first message of a connection is its Health, the MAM follows
+	FailNoBirth  Fault = "T7-LIFE-02/no-rebirth"     // reports FAILURE_1/0 and recovers to NORMAL_0 without a new Birth
+	FailRecovery Fault = "T7-LIFE-02/recovery"       // variant, conforming: reports FAILURE_1/0 and recovers with a new Birth
+	LateSub      Fault = "T7-LIFE-02/late-subscribe" // variant, conforming: subscribes 300 ms after its Birth
+	WillWriter   Fault = "T7-LIFE-03/writer-id"      // the Will uses another DataSetWriterId than the Health
 )
 
 // Faults lists every fault.
@@ -80,7 +81,7 @@ var Faults = []Fault{ReplyTo, AllAssets, Unanswered, Missing, EmptyList, Unknown
 	DualVersion, Mixed, Case, NoMetadata, FilterIgnored, AssetLevel, PerPage, QueryIgnored, QuerySource, NoRefDes, WrongLocale,
 	NotListed, SetUnknown, SetMetadata, DelPublishes, ConfigName, DataNoPub, MetaNoEvent, PublistMode, DelSilent, RefDesFixed, SublistNone, NoCreate, FixedLevel,
 	NoCorrelation, Progress, Reissue, AnswersUnknown, NoReply,
-	MQTT31, ClientIDs, TLS11, NoVerify, Anonymous, Retained, NoWill, StaleWill, WillTime, NoRebirth, HealthFirst, FailNoBirth, FailRecovery, WillWriter}
+	MQTT31, ClientIDs, TLS11, NoVerify, Anonymous, Retained, NoWill, StaleWill, WillTime, NoRebirth, HealthFirst, FailNoBirth, FailRecovery, LateSub, WillWriter}
 
 // ServiceType, AppID and Asset identify the simulated CUT: the OT connector
 // of the guideline examples (MG B1.1) with one subordinate asset.
@@ -437,9 +438,17 @@ func (s *Sim) connect(ctx context.Context) error {
 		case <-s.stop:
 		}
 	}
-	for _, method := range []string{"Get", "Set", "Del", "Call"} {
-		if err := cl.Subscribe(ctx, topic(method, "#", "", ""), 1, receive); err != nil {
-			cl.Kill()
+	subscribe := func() error {
+		for _, method := range []string{"Get", "Set", "Del", "Call"} {
+			if err := cl.Subscribe(ctx, topic(method, "#", "", ""), 1, receive); err != nil {
+				cl.Kill()
+				return err
+			}
+		}
+		return nil
+	}
+	if s.fault != LateSub {
+		if err := subscribe(); err != nil {
 			return err
 		}
 	}
@@ -453,6 +462,17 @@ func (s *Sim) connect(ctx context.Context) error {
 	for _, res := range birth {
 		if err := s.publish(ctx, res, AppID, "", "", s.m.dsms[res][AppID]); err != nil {
 			cl.Kill()
+			return err
+		}
+	}
+	if s.fault == LateSub {
+		select {
+		case <-time.After(300 * time.Millisecond):
+		case <-ctx.Done():
+			cl.Kill()
+			return ctx.Err()
+		}
+		if err := subscribe(); err != nil {
 			return err
 		}
 	}

@@ -12,6 +12,7 @@ const (
 	typeConnect    = 1
 	typeConnack    = 2
 	typePublish    = 3
+	typeSuback     = 9
 	typeDisconnect = 14
 )
 
