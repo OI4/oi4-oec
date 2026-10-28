@@ -1,7 +1,7 @@
 #!/bin/sh
 # Local CI of the monorepo (ADR-0019 amendment C-041): the P2 gate, extended
 # by the P3 sketches in C-042 and the Rust SDK in P4 (the Rust API sketch was
-# deleted in C-060).
+# deleted in C-060, the C ABI oec-ffi added in C-061).
 #   1. spec/tools: gofmt, vet, tests and the spectool checks, including the
 #      coverage gate (every schema/d7-validate REQ has a reviewed positive and
 #      negative vector, every allowed matrix row has its entry schema);
@@ -10,9 +10,11 @@
 #   4. conformance: gofmt, vet, tests;
 #   5. sdk/check.sh: the Rust SDK workspace (fmt, clippy, tests against the
 #      shared vectors, doc, cargo-deny; ADR-0026, from C-046; every REQ id
-#      cited under oec/sdk/ is active, oec/tests/citations.rs) and the C
-#      headers of P3 (oec.h of oec-ffi, oecm.h of D9) compile as C17
-#      (ADR-0021, ADR-0022, from C-042);
+#      cited under oec/sdk/ is active, oec/tests/citations.rs), the C ABI
+#      oec-ffi (from C-061, ADR-0021: oec.h equals the cbindgen output, the
+#      C examples and the C test program run against the shared and the
+#      static library, the latter under AddressSanitizer + UBSan) and the
+#      D9 sketch oecm.h compiles as C17 (ADR-0022, from C-042);
 #   6. dev: gofmt, vet, tests of the dev PKI generator and the lint of the
 #      Mosquitto and compose configuration (C-051). No container engine: the
 #      interop tests against the broker are opt-in (oec/dev/interop.sh).
