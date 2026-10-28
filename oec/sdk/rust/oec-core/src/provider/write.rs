@@ -7,7 +7,8 @@
 //! provider (REQ-RES-DATA-009, REQ-RES-DATA-011, REQ-RES-DATA-012); and
 //! the Status event `BadNotFound` for a request to an unknown Source,
 //! published under the AppId (REQ-CMP-043, REQ-CMP-047, SF-108). `Set Config` is checked in [`super::config`] and
-//! decided by the application (P4 increment 7b).
+//! decided by the application (P4 increment 7b); `Set` and `Del
+//! SubscriptionList` are served in [`super::sublist`] (P4 increment 8b).
 
 use std::collections::BTreeMap;
 
@@ -230,6 +231,7 @@ impl Provider {
             ));
         }
         self.sets[i].settable = accept;
+        self.pending.sublist = self.config.get;
         Ok(())
     }
 
@@ -340,6 +342,12 @@ impl Provider {
                     Ok(request) => return Ok(Handled::SetReferenceDesignation(request)),
                     Err(code) => Err(code),
                 }
+            }
+            (Method::Set, Resource::SubscriptionList) => {
+                self.set_subscription_list(topic, &source, &wire, unix_ms)
+            }
+            (Method::Del, Resource::SubscriptionList) => {
+                self.del_subscription_list(topic, &source, &wire, unix_ms)
             }
             _ => Err(StatusCode::BAD_NOT_FOUND),
         };

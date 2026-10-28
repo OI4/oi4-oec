@@ -24,6 +24,7 @@ pub mod overrides;
 pub mod pagination;
 mod refdes;
 mod sets;
+pub mod sublist;
 pub mod versions;
 mod write;
 pub mod writers;
@@ -57,6 +58,7 @@ pub use overrides::{PublicationOverride, PublicationOverrides};
 use pagination::Envelope;
 pub use refdes::{ReferenceDesignationRequest, StoredReferenceDesignations};
 use sets::{Set, date_time};
+pub use sublist::{ConsumerSubscription, SubscriptionOverrides, SubscriptionSetting};
 pub use versions::{MetaDataVersions, VersionsError};
 pub use write::SetDataRequest;
 pub use writers::{WriterIdError, WriterIds, WriterKey};
@@ -219,7 +221,7 @@ impl fmt::Display for Ignored {
 }
 
 /// The resources served by `Get`.
-const SERVED: [Resource; 7] = [
+const SERVED: [Resource; 8] = [
     Resource::Mam,
     Resource::Health,
     Resource::Config,
@@ -227,11 +229,13 @@ const SERVED: [Resource; 7] = [
     Resource::Metadata,
     Resource::Profile,
     Resource::PublicationList,
+    Resource::SubscriptionList,
 ];
 
 /// The resources in the Profile, in its order: those served by `Get` and
-/// the Status events (REQ-RES-EVENT-005).
-const PROFILE: [Resource; 8] = [
+/// the Status events (REQ-RES-EVENT-005); the SubscriptionList only in the
+/// Profile of the application, which holds every subscription.
+const PROFILE: [Resource; 9] = [
     Resource::Mam,
     Resource::Health,
     Resource::Config,
@@ -240,6 +244,7 @@ const PROFILE: [Resource; 8] = [
     Resource::Event,
     Resource::Profile,
     Resource::PublicationList,
+    Resource::SubscriptionList,
 ];
 
 /// The resources a `Set` addresses (MG 9.1); each `Set` gets a Status
@@ -294,6 +299,7 @@ struct Unsaved {
     overrides: bool,
     config: bool,
     refdes: bool,
+    subscriptions: bool,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -308,6 +314,8 @@ struct Dirty {
 struct Pending {
     profile: bool,
     list: bool,
+    /// The SubscriptionList may have changed.
+    sublist: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -333,6 +341,12 @@ pub struct Provider {
     config_instance: u64,
     refdes: Option<StoredReferenceDesignations>,
     events: events::Events,
+    consumer_subs: Vec<ConsumerSubscription>,
+    sub_overrides: SubscriptionOverrides,
+    /// The settings last handed to the consumer side.
+    sub_sent: Option<SubscriptionOverrides>,
+    /// The entries last published; `None` after a connect.
+    sub_snapshot: Option<Vec<sublist::Listed>>,
     unsaved: Unsaved,
     pending: Pending,
     connected: bool,
@@ -365,6 +379,10 @@ impl Provider {
             config_instance: 0,
             refdes: None,
             events: events::Events::default(),
+            consumer_subs: Vec::new(),
+            sub_overrides: SubscriptionOverrides::new(),
+            sub_sent: None,
+            sub_snapshot: None,
             unsaved: Unsaved::default(),
             pending: Pending::default(),
             connected: false,
@@ -383,6 +401,7 @@ impl Provider {
             for &level in StatusLevel::ALL {
                 p.assign(write::status_key(&app, level))?;
             }
+            p.assign(WriterKey::subscription_list())?;
         }
         Ok(p)
     }
@@ -798,7 +817,9 @@ impl Provider {
         self.pending = Pending {
             profile: self.config.get,
             list: self.config.get,
+            sublist: self.config.get,
         };
+        self.sub_snapshot = None;
         for s in &mut self.sets {
             s.restart();
         }
@@ -942,6 +963,14 @@ impl Provider {
                 let items = self.refdes_items(source, query.as_ref());
                 self.series(items, req, Some(&get.message_id), limit, unix_ms)
             }
+            Resource::SubscriptionList => {
+                let filter = match topic.filter() {
+                    Some(Filter::List(f)) => Some(f),
+                    _ => None,
+                };
+                let items = self.sublist_items(source, filter);
+                self.series(items, req, Some(&get.message_id), limit, unix_ms)
+            }
             _ => {
                 let filter = match topic.filter() {
                     Some(Filter::List(f)) => Some(f),
@@ -991,6 +1020,7 @@ impl Provider {
     fn dirty(&self) -> bool {
         self.pending.profile
             || self.pending.list
+            || self.pending.sublist
             || self
                 .assets
                 .iter()
@@ -1264,9 +1294,13 @@ impl Provider {
             let items = self.profile_items(Some(&app));
             out.extend(self.publish(Resource::Profile, Some(&app), items, unix_ms));
         }
+        let sublist = core::mem::take(&mut self.pending.sublist) || self.pending.list;
         if core::mem::take(&mut self.pending.list) {
             let items = self.list_items(None, None);
             out.extend(self.publish(Resource::PublicationList, None, items, unix_ms));
+        }
+        if sublist && self.config.get {
+            out.extend(self.sublist_changes(unix_ms));
         }
         out
     }
@@ -1372,8 +1406,10 @@ impl Provider {
             .into_iter()
             .map(|il| {
                 let id = self.writer(Resource::Profile, &il);
+                let app = &il == self.app_id();
                 let resources = PROFILE
                     .iter()
+                    .filter(|r| app || **r != Resource::SubscriptionList)
                     .flat_map(|r| {
                         // the ReferenceDesignation if offered, after the
                         // Metadata

@@ -151,6 +151,7 @@ fn assert_subscriptions(p: &Provider) {
             "Get/Metadata",
             "Get/Profile",
             "Get/PublicationList",
+            "Get/SubscriptionList",
             "Set/Data",
             "Set/Metadata",
             "Set/Config",
@@ -245,7 +246,8 @@ fn connect_publishes_the_state_of_every_source() {
             "Metadata",
             "Event",
             "Profile",
-            "PublicationList"
+            "PublicationList",
+            "SubscriptionList"
         ])
     );
     // the Health set while offline

@@ -494,7 +494,15 @@ fn a_removed_config_is_gone() {
         Err(ProviderError::UnknownConfig { .. })
     ));
     let out = p.poll(Duration::from_millis(3), MS + 3);
-    assert_eq!(topics(&out), [format!("{}/Pub/PublicationList", base())]);
+    // the PublicationList and the SubscriptionList without its `Set`
+    // subscription (REQ-RES-SUBLIST-005, REQ-RES-SUBLIST-016)
+    assert_eq!(
+        topics(&out),
+        [
+            format!("{}/Pub/PublicationList", base()),
+            format!("{}/Pub/SubscriptionList", base())
+        ]
+    );
     let none = get(&mut p, "Config");
     assert_eq!(json_of(&none[0])["Messages"], json!([]));
     assert_eq!(

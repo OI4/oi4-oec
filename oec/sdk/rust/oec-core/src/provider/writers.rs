@@ -37,6 +37,11 @@ impl WriterKey {
     pub fn publication_list() -> Self {
         Self::new(Resource::PublicationList, "")
     }
+
+    /// The one key of all SubscriptionList DataSetMessages.
+    pub fn subscription_list() -> Self {
+        Self::new(Resource::SubscriptionList, "")
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

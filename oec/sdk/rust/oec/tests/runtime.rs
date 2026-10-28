@@ -167,6 +167,7 @@ fn served_filters(prefix: &str) -> Vec<String> {
                 "Metadata",
                 "Profile",
                 "PublicationList",
+                "SubscriptionList",
             ]
             .map(|r| format!("{prefix}Get/{r}/#")),
         )
@@ -760,8 +761,12 @@ fn level_2_publishes_its_sources_and_answers_get() {
     );
     assert_eq!(v["Messages"][0]["Payload"]["HardwareRevision"], "undefined");
 
-    // a Get of a resource that is not served is not subscribed: ignored
+    // an asset holds no subscription: the empty SubscriptionList
+    // (REQ-RES-SUBLIST-007, SF-099)
     tb.send(n, get(format!("{prefix}Get/SubscriptionList/{it}")));
+    let answer = publication(&tb);
+    assert_eq!(answer.topic, format!("{prefix}Pub/SubscriptionList/{it}"));
+    assert_eq!(json(&answer.payload)["Messages"], serde_json::json!([]));
     tb.send(n, get(format!("{prefix}Get/Profile/{me}")));
     let answer = publication(&tb);
     assert_eq!(answer.topic, format!("{prefix}Pub/Profile/{me}"));
@@ -776,7 +781,8 @@ fn level_2_publishes_its_sources_and_answers_get() {
             "Metadata",
             "Event",
             "Profile",
-            "PublicationList"
+            "PublicationList",
+            "SubscriptionList"
         ])
     );
 
