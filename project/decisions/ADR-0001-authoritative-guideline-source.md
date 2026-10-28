@@ -569,3 +569,11 @@ PO decision (2026-10-15): spec findings are kept **only** in the guideline repo,
   - SF-109: new sentence "Subscriptions that only exist for the time of a request (to receive its answer or status `Event`) are not listed.";
   - SF-111: appended to the `Set` paragraph: "An application that does not support the creation of entries rejects such a `Set` with the status `Event` `Bad` (e.g. `BadNotSupported`)."
 - Register commit `7a2bda2`: SF-109 … SF-111 resolved, no open finding, next SF-112. Spec re-baselined: 1403 → 1405 inventory items (new MG-9.1.9-565c8491 mapped to REQ-RES-SUBLIST-016, new MG-9.1.9-013e79f7 mapped to REQ-RES-SUBLIST-004; REQ-RES-SUBLIST-004, -010 and -016 `draft`), 441 REQs, coverage 0 gaps. Schema `2.0.1-dev` with `schema.Baseline = 57ebe91` (no content change), D7/D8 catalogs on `57ebe91`.
+
+## Amendment C-060 review (2026-10-28, guideline baseline `eb7889c`)
+
+- The previous baseline `57ebe91` is recorded in amendment C-059 review; the register commit `19c1a95` (SF-112, SF-113 opened in C-060) touches only `findings/` (no re-baseline).
+- The baseline is now `eb7889c` on branch `feature/spec-findings` (branch head is the register commit `4fac7d2`, only `findings/`). One local commit, decided by the PO in the C-060 review as proposed (D-1, D-2), no GL-ADR:
+  - SF-112, MG 8.4.1, appended to the response field `DataSetWriterId`: "The `Set` that creates the `DataSet` carries this `DataSetWriterId`; for a `DataSet` the publisher already lists in its `PublicationList`, the listed `DataSetWriterId` is used and no new one is needed.";
+  - SF-113, MG 9.2.1, appended after "A `Filter` is not used.": "If the application neither is nor represents the `<Source>`, it answers with the final `ActionResponse` with the `Status` `BadNotFound` and an empty `Payload`."
+- Register commit `4fac7d2`: SF-112, SF-113 resolved, no open finding, next SF-114. Spec re-baselined: 1405 → 1406 inventory items (new MG-9.2.1-07feb514 mapped to the new REQ-ACT-024; the MG 8.4.1 sentence carries no keyword and is no inventory item, REQ-ACT-023 quotes it); REQ-ACT-017, -023 and -024 `draft`; 442 REQs, coverage 0 gaps. Schema `2.0.1-dev` with `schema.Baseline = eb7889c` (no content change), D7/D8 catalogs on `eb7889c` (new D7 test T7-ACT-04 for REQ-ACT-024).

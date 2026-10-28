@@ -120,3 +120,48 @@ None new (ADR-0023 amendment C-060): the examples use tokio (`rt`, `sync`, `time
 2. Apply the PO's answers to D-1/D-2 (guideline text, register, re-baseline, REQ-ACT-017/023 notes → R-x) and R-1.
 
 Next free ids: SF-114; REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029; V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129; ADR-0027, Q-031, A-145.
+
+## Addendum 1 – PO review: D-1, D-2 and R-1 (2026-10-28)
+
+**PO answer (chat):** "Ich habe alle Punkte reviewed und akzeptiere deine Vorschläge." – D-1 (SF-112) and D-2 (SF-113) are decided **as proposed**; R-1 of the C-059 review (REQ-RES-SUBLIST-004, -010, -016) is accepted.
+
+### R-1 of the C-059 review
+
+`spectool review REQ-RES-SUBLIST-004,REQ-RES-SUBLIST-010,REQ-RES-SUBLIST-016` → `reviewed`; `lint`, `render`, `coverage` OK.
+
+### Guideline (`oi4-oec-documentation`, branch `feature/spec-findings`)
+
+- `eb7889c` **SF-112/113**:
+  - SF-112, MG 8.4.1 (`8-4-1-newdatasetwriterid.md`), appended to the response field `DataSetWriterId`: "The `Set` that creates the `DataSet` carries this `DataSetWriterId`; for a `DataSet` the publisher already lists in its `PublicationList`, the listed `DataSetWriterId` is used and no new one is needed." Part (3) of the proposal (no reuse while never-used ids are left) follows from "so far unused" and REQ-MSG-020; it is recorded in the register and in the note of REQ-ACT-023, no extra guideline sentence.
+  - SF-113, MG 9.2.1 (`9-2-1-newdatasetwriterid.md`), appended after "A `Filter` is not used.": "If the application neither is nor represents the `<Source>`, it answers with the final `ActionResponse` with the `Status` `BadNotFound` and an empty `Payload`."
+- `4fac7d2` register: SF-112, SF-113 → Closed (resolved), no open finding, next SF-114.
+- `.yarn/install-state.gz` stays uncommitted.
+
+### Re-baseline on `eb7889c`
+
+- `spectool rebaseline -rev eb7889c` on a detached checkout of `eb7889c` (the branch head `4fac7d2` only touches `findings/`), then back to the branch.
+- Inventory 1405 → **1406**: new MG-9.2.1-07feb514 (the SF-113 sentence). The SF-112 sentence has no keyword and is no inventory item; the existing MG 8.4.1 keys are unchanged.
+- **New REQ-ACT-024** "NewDataSetWriterId for an unknown Source is answered with BadNotFound" (responder, MUST, `d7-test`, inventory MG-9.2.1-07feb514). A new REQ instead of a change of REQ-ACT-017: the sentence is a positive MUST, REQ-ACT-017 is a MUST NOT (no response); mixing both in one statement would blur its verification.
+- **REQ-ACT-017**: note – "cannot address" means DataSetWriterId/ActionTargetId, not the Source (→ REQ-ACT-024, SF-113). **REQ-ACT-023**: refs + SF-112, quote of the new MG 8.4.1 sentence, note on the listed id and on no reuse. Both `reviewed` → `draft`.
+- 442 REQs; `spectool lint`, `render`, `coverage`: 158 `schema`/`d7-validate` REQs, 0 gaps, open = 0 in every area (ACT 74 items, 67 covered, 7 informative).
+- Schema stays `2.0.1-dev` with `Baseline = eb7889c`, no content change (`Unreleased` entry in `oec/schema/CHANGELOG.md`: a Bad `ActionResponse` with an empty `Payload` is already valid, REQ-ACT-012). D7/D8 catalogs on `eb7889c`; new D7 test **T7-ACT-04** (`planned`, test, level 1) for REQ-ACT-024 – the catalog check requires every `d7-test` REQ to be covered.
+- ADR-0001 amendment C-060 review; AGENTS.md, GUARDRAILS G-1.2, STATUS follow (ROADMAP unchanged: no scope change).
+
+### SDK
+
+No behaviour change: the SDK already implemented both proposals (C-060). The doc of the responder, the test `the_source_must_be_known` and `oec/sdk/rust/README.md` cite REQ-ACT-024 instead of SF-113. ADR-0026 §19 stays valid as written (it named the proposals).
+
+### Checks
+
+`oec/check.sh`: **all checks passed**.
+
+### For the PO
+
+- **R-1 (review):** REQ-ACT-017, REQ-ACT-023 (`draft`, notes after SF-112/113) and the new REQ-ACT-024 (`draft`). Readable in `oec/spec/requirements/view/act.md`.
+- Nothing to decide; no open finding.
+
+### Next
+
+Unchanged: **P4 increment 10 (`oec-ffi`)** in a **new agent** (G-3.10: this addendum is a short follow-up of the same topic; increment 10 starts a new crate and my context was compacted several times). `prompt.md` is updated: baseline `eb7889c` (head `4fac7d2`), SF-001 … 113 resolved, 1406 items, 442 REQs, R-1 (REQ-ACT-017/023/024) open – apply first if answered; the item "apply the PO decisions" reduced to that.
+
+Next free ids: SF-114; REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029; V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129; ADR-0027, Q-031, A-145 (REQ-ACT-025 is the next ACT id).

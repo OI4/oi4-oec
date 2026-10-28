@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, nach C-060 (P4 Inkrement 8c: die Aktion `NewDataSetWriterId`, die API-Skizze ist gelöscht). **Für dich offen: zwei Findings zum Entscheiden (D-1 = SF-112, D-2 = SF-113) und weiterhin ein Review (R-1 = REQ-RES-SUBLIST-004, -010, -016 aus C-059).**_
+_Stand: 28.10.2026, nach dem Review von C-060 (du hast D-1 = SF-112, D-2 = SF-113 und R-1 aus C-059 wie vorgeschlagen angenommen; alles ist eingetragen). **Für dich offen: ein Review (R-1 = REQ-ACT-017, -023 und die neue REQ-ACT-024).**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,9 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-C-060 war **P4 Inkrement 8c**. Ich habe es nicht weiter geteilt (**A-137**). Reihenfolge jetzt: 8c → 10 (C-Schnittstelle `oec-ffi`).
+**Dein Review zu C-060 ist eingetragen** (D-1, D-2 und R-1 aus C-059, siehe unten „Was aus deinem letzten Review (C-060) geworden ist“). Daraus ist ein neues R-1 entstanden (unten).
+
+Zur Erinnerung – C-060 war **P4 Inkrement 8c**. Ich habe es nicht weiter geteilt (**A-137**). Reihenfolge jetzt: 8c → 10 (C-Schnittstelle `oec-ffi`).
 - **Die Aktion `NewDataSetWriterId` (MG 9.2):** Eine App kann eine andere App fragen: „Gib mir eine neue, freie Datensatz-Nummer (DataSetWriterId) für eine Ressource.“ Gebraucht wird das, wenn ein IT-Programm in einem OT-Connector etwas Neues anlegen will (z. B. eine ReferenceDesignation für ein Gerät).
   - **Antworten (jede App ab Level 2):** Das SDK beantwortet jede solche Frage sofort mit genau einer Antwort. Die neue Nummer ist 60 Sekunden für den Fragenden reserviert (`Ttl`) und wird danach nie wieder vergeben – auch nicht nach einem Neustart, denn die Reservierung steht in der gespeicherten Nummern-Tabelle. Mehr als 256 offene Reservierungen gleichzeitig lehnt das SDK ab (`BadResourceUnavailable`). Im Profil der App steht jetzt `NewDataSetWriterId`.
   - **Fragen (für App-Entwickler):** `Consumer::new_data_set_writer_id(Ressource, Ziel-App, Optionen)` liefert die Nummer und ihre Gültigkeitsdauer. Die Form weicht etwas von der Skizze ab (gleiches `Target` wie bei `get`, Optionen mit Zeitlimit, Standard 10 s) – festgehalten in ADR-0020.
@@ -35,42 +37,15 @@ C-060 war **P4 Inkrement 8c**. Ich habe es nicht weiter geteilt (**A-137**). Rei
 
 Die Technik-Entscheidungen A-137 … A-144 sind nur zur Info (unten). Einen Blick wert: **A-139** (Reservierung), **A-142** (Form der Funktion) und **A-143** (Abschied von der Skizze).
 
-### D-1 – SF-112: Wofür ist eine per Aktion geholte Datensatz-Nummer da? (entscheiden)
+### R-1 – Drei Regeln zur Aktion folgen deinen Entscheidungen (reviewen)
 
-**Das Problem:** Die Guideline sagt nur, die Nummer sei „für das kommende `Set`“. Offen bleibt: (a) Was macht die App mit einem `Set`, das diese Nummer trägt? (b) Welche Nummer nimmt das `Set`, wenn die App für dieses Gerät schon eine Nummer anzeigt? Das ist häufig, denn nach MG 9.1.8 zeigt eine App die ReferenceDesignation jedes Geräts mit Nummer an, auch wenn sie leer ist. (c) Darf eine Nummer, die nach Ablauf der 60 Sekunden ungenutzt blieb, wieder vergeben werden?
+**Warum:** Deine Entscheidungen D-1/D-2 haben MG 8.4.1 und MG 9.2.1 geändert (Guideline `eb7889c`). Zwei Regeln, die du schon abgenommen hattest, haben eine Notiz bekommen und stehen deshalb wieder auf `draft`; eine Regel ist neu. Lesbar in `oec/spec/requirements/view/act.md`.
 
-**Mein Vorschlag:**
-1. Ein `Set` trägt die Nummer, die die App für den Datensatz anzeigt. Nur wenn sie noch keine anzeigt, trägt es eine per Aktion geholte Nummer; der neue Datensatz behält sie.
-2. Zeigt die App schon eine Nummer an, gilt diese; die geholte verfällt einfach.
-3. Eine ungenutzte geholte Nummer wird nicht wieder vergeben, solange es noch nie benutzte gibt.
+- **REQ-ACT-017** (die antwortende App; „eine Anfrage, die nicht zugeordnet werden kann, wird nicht beantwortet“): Der Regeltext bleibt. Neu ist die Notiz: „Nicht zugeordnet“ meint die technische Adresse der Aktion (Nummern 8/1), nicht das Gerät im Topic. Eine Frage nach einem unbekannten Gerät wird mit `BadNotFound` beantwortet (REQ-ACT-024). (D-2)
+- **REQ-ACT-023** (Fragender und antwortende App; „die geholte Nummer gilt `Ttl` Sekunden“): Der Regeltext bleibt. Neu sind der Verweis auf SF-112, der neue Satz aus MG 8.4.1 als Zitat und die Notiz: Das `Set`, das den Datensatz anlegt, trägt die geholte Nummer. Zeigt die App für den Datensatz schon eine Nummer in ihrer `PublicationList`, gilt diese, und die geholte verfällt nach `Ttl`. Eine ungenutzte geholte Nummer wird nicht wieder vergeben, solange es noch nie benutzte gibt. (D-1)
+- **REQ-ACT-024 (neu)** (die antwortende App; MUST): „Ist oder vertritt die App die `<Source>` einer `NewDataSetWriterId`-Frage nicht, antwortet sie mit der abschließenden Antwort (`ActionState` 2) mit dem Status `BadNotFound` und leerem Inhalt.“ Ich habe dafür eine neue Regel angelegt, statt REQ-ACT-017 zu ändern: -017 ist ein Verbot („nicht antworten“), -024 ein Gebot („mit Fehler antworten“). Getrennt lässt sich beides sauberer prüfen. Dazu gibt es im D7-Katalog den geplanten Test T7-ACT-04. (D-2)
 
-Dazu ein Satz in MG 8.4.1: „Das `Set`, das den `DataSet` anlegt, trägt diese `DataSetWriterId`; für einen `DataSet`, den der Publisher schon in seiner `PublicationList` führt, wird die dort geführte `DataSetWriterId` verwendet und keine neue gebraucht.“
-
-**Auswirkung:** Keine aufs SDK, es macht es schon so. Die Regel REQ-ACT-023 bekommt eine Notiz und geht danach als R-x zu dir.
-
-**Was du tun musst:** „D-1 wie vorgeschlagen“ oder deine Lesart.
-
-### D-2 – SF-113: Antwortet eine App, wenn nach einem unbekannten Gerät gefragt wird? (entscheiden)
-
-**Das Problem:** Fragt jemand per `Get`/`Set`/`Del` nach einem Gerät, das die App nicht kennt, sagt die Guideline seit SF-099/SF-108: keine Daten, aber ein Status-Ereignis `BadNotFound`. Für die Aktion sagt sie nichts. Es gibt zwei Lesarten:
-- **(a) Keine Antwort:** Die Frage „kann nicht zugeordnet werden“ (REQ-ACT-017). Der Fragende wartet dann bis zu seinem Zeitlimit.
-- **(b) Eine Antwort mit Fehler:** Die Frage ist an die App adressiert und lesbar. Also verlangt REQ-ACT-015 genau eine abschließende Antwort, hier mit „Bad“.
-
-**Mein Vorschlag:** (b). Die App antwortet abschließend mit `BadNotFound` und leerem Inhalt. „Kann nicht zugeordnet werden“ in REQ-ACT-017 meint die technische Adresse der Aktion (Nummern 8/1), nicht das Gerät. Dazu ein Satz in MG 9.2.1: „Ist oder vertritt die Anwendung die `<Source>` nicht, antwortet sie mit der abschließenden `ActionResponse` mit dem `Status` `BadNotFound` und leerem `Payload`.“
-
-**Auswirkung:** Keine aufs SDK, es macht (b). Bei (a) ändern sich ein Zweig und zwei Tests. Die Regel REQ-ACT-017 bekommt eine Notiz und geht danach als R-x zu dir. D7 bleibt unverändert.
-
-**Was du tun musst:** „D-2 wie vorgeschlagen“ oder deine Lesart.
-
-### R-1 – Drei Regeln zur SubscriptionList folgen dem neuen Text (reviewen, noch offen aus C-059)
-
-**Warum:** Deine Entscheidungen haben MG 9.1.9 geändert (`57ebe91`). Drei Regeln, die du schon abgenommen hattest, folgen jetzt dem neuen Text und stehen deshalb wieder auf `draft`. Lesbar in `oec/spec/requirements/view/res-sublist.md`.
-
-- **REQ-RES-SUBLIST-004** (die App): Neu ist der Satz: Eine App, die keine neuen Einträge anlegen kann, lehnt ein `Set` mit einem noch nicht abonnierten Topic mit `Bad` ab (z. B. `BadNotSupported`). (D-3)
-- **REQ-RES-SUBLIST-010** (der Anfragende): „Ein noch nicht abonniertes Topic legt einen neuen Eintrag an“ gilt jetzt nur, **wenn die App das Anlegen unterstützt**; sonst wird das `Set` abgelehnt (Verweis auf -004). (D-3)
-- **REQ-RES-SUBLIST-016** (die App): Nicht eingetragen werden die eigenen **Anfrage**-Abos (`Get`, `Del`) und die **kurzen Abos für Antworten**. Die `Pub`-Abos auf die eigene `AppId` (wie in B1.1.9) bleiben drin. Der Titel ist kürzer geworden (das Feld hat höchstens 100 Zeichen). (D-1, D-2)
-
-**Auswirkung:** keine auf das SDK (es macht es schon so), das Schema oder die Testdaten. Beim künftigen D7-Test T7-SET-11 steht jetzt eine Notiz: Lehnt die App das Anlegen ab, ist das kein Fehler.
+**Auswirkung:** keine aufs SDK (es macht beides schon so und nennt jetzt REQ-ACT-024), aufs Schema oder auf die Testdaten.
 
 **Was du tun musst:** „R-1 akzeptiert“ oder Änderungswünsche.
 
@@ -486,7 +461,7 @@ Neu aus C-060 (P4 Inkrement 8c):
 
 ### Was als Nächstes passiert (C-061)
 
-1. **Deine Antworten eintragen:** D-1/D-2 (SF-112/113: Guideline-Text, Register, Re-Baseline, Notizen an REQ-ACT-017/023 → R-x) und R-1.
+1. **Deine Antwort eintragen:** R-1 (REQ-ACT-017, -023, -024).
 2. **P4 Inkrement 10 – `oec-ffi`:** die C-Schnittstelle auf dem SDK nach dem Vertrag `oec.h`, dazu die Aktion; die C-Beispiele laufen als Tests (auch mit AddressSanitizer).
    - Läuft in einem **neuen Agenten**; der Start-Prompt steht in `prompt.md`.
 
@@ -567,7 +542,62 @@ Neu aus C-060 (P4 Inkrement 8c):
 
 ---
 
-## Was aus deinem letzten Review (C-059) geworden ist
+## Was aus deinem letzten Review (C-060) geworden ist
+
+Du hast geschrieben: „Ich habe alle Punkte reviewed und akzeptiere deine Vorschläge.“ Daraus wurde Nachtrag 1 zu C-060:
+- **Guideline `eb7889c`, zwei Sätze:**
+  - D-1 (SF-112, MG 8.4.1): „Das `Set`, das den `DataSet` anlegt, trägt diese `DataSetWriterId`; für einen `DataSet`, den der Publisher schon in seiner `PublicationList` führt, wird die dort geführte `DataSetWriterId` verwendet und keine neue gebraucht.“
+  - D-2 (SF-113, MG 9.2.1): „Ist oder vertritt die Anwendung die `<Source>` nicht, antwortet sie mit der abschließenden `ActionResponse` mit dem `Status` `BadNotFound` und leerem `Payload`.“
+- **Register:** SF-112 und SF-113 sind „resolved“ (`4fac7d2`). Kein offenes Finding; das nächste heißt SF-114.
+- **Neu-Baseline auf `eb7889c`:** 1406 Guideline-Stellen (vorher 1405; der Satz aus D-2 ist neu, der aus D-1 enthält kein Schlüsselwort wie „muss“ und zählt deshalb nicht als eigene Stelle), 442 Regeln, 0 Lücken. Schema bleibt `2.0.1-dev`, nur die Baseline ist neu. D7/D8-Kataloge auf `eb7889c`.
+- **Regeln:** REQ-ACT-017 und -023 bekommen Notizen, REQ-ACT-024 ist neu → R-1 (oben).
+- **R-1 aus C-059 (REQ-RES-SUBLIST-004, -010, -016):** akzeptiert → `reviewed`.
+- **SDK:** keine Verhaltensänderung; es hat beides schon so umgesetzt.
+
+Zur Erinnerung, worum es ging:
+
+#### D-1 – SF-112: Wofür ist eine per Aktion geholte Datensatz-Nummer da? (entschieden: wie vorgeschlagen)
+
+**Das Problem:** Die Guideline sagt nur, die Nummer sei „für das kommende `Set`“. Offen bleibt: (a) Was macht die App mit einem `Set`, das diese Nummer trägt? (b) Welche Nummer nimmt das `Set`, wenn die App für dieses Gerät schon eine Nummer anzeigt? Das ist häufig, denn nach MG 9.1.8 zeigt eine App die ReferenceDesignation jedes Geräts mit Nummer an, auch wenn sie leer ist. (c) Darf eine Nummer, die nach Ablauf der 60 Sekunden ungenutzt blieb, wieder vergeben werden?
+
+**Mein Vorschlag:**
+1. Ein `Set` trägt die Nummer, die die App für den Datensatz anzeigt. Nur wenn sie noch keine anzeigt, trägt es eine per Aktion geholte Nummer; der neue Datensatz behält sie.
+2. Zeigt die App schon eine Nummer an, gilt diese; die geholte verfällt einfach.
+3. Eine ungenutzte geholte Nummer wird nicht wieder vergeben, solange es noch nie benutzte gibt.
+
+Dazu ein Satz in MG 8.4.1: „Das `Set`, das den `DataSet` anlegt, trägt diese `DataSetWriterId`; für einen `DataSet`, den der Publisher schon in seiner `PublicationList` führt, wird die dort geführte `DataSetWriterId` verwendet und keine neue gebraucht.“
+
+**Auswirkung:** Keine aufs SDK, es macht es schon so. Die Regel REQ-ACT-023 bekommt eine Notiz und geht danach als R-x zu dir.
+
+**Was du tun musst:** „D-1 wie vorgeschlagen“ oder deine Lesart.
+
+#### D-2 – SF-113: Antwortet eine App, wenn nach einem unbekannten Gerät gefragt wird? (entschieden: wie vorgeschlagen)
+
+**Das Problem:** Fragt jemand per `Get`/`Set`/`Del` nach einem Gerät, das die App nicht kennt, sagt die Guideline seit SF-099/SF-108: keine Daten, aber ein Status-Ereignis `BadNotFound`. Für die Aktion sagt sie nichts. Es gibt zwei Lesarten:
+- **(a) Keine Antwort:** Die Frage „kann nicht zugeordnet werden“ (REQ-ACT-017). Der Fragende wartet dann bis zu seinem Zeitlimit.
+- **(b) Eine Antwort mit Fehler:** Die Frage ist an die App adressiert und lesbar. Also verlangt REQ-ACT-015 genau eine abschließende Antwort, hier mit „Bad“.
+
+**Mein Vorschlag:** (b). Die App antwortet abschließend mit `BadNotFound` und leerem Inhalt. „Kann nicht zugeordnet werden“ in REQ-ACT-017 meint die technische Adresse der Aktion (Nummern 8/1), nicht das Gerät. Dazu ein Satz in MG 9.2.1: „Ist oder vertritt die Anwendung die `<Source>` nicht, antwortet sie mit der abschließenden `ActionResponse` mit dem `Status` `BadNotFound` und leerem `Payload`.“
+
+**Auswirkung:** Keine aufs SDK, es macht (b). Bei (a) ändern sich ein Zweig und zwei Tests. Die Regel REQ-ACT-017 bekommt eine Notiz und geht danach als R-x zu dir. D7 bleibt unverändert.
+
+**Was du tun musst:** „D-2 wie vorgeschlagen“ oder deine Lesart.
+
+#### R-1 – Drei Regeln zur SubscriptionList folgen dem neuen Text (akzeptiert)
+
+**Warum:** Deine Entscheidungen haben MG 9.1.9 geändert (`57ebe91`). Drei Regeln, die du schon abgenommen hattest, folgen jetzt dem neuen Text und stehen deshalb wieder auf `draft`. Lesbar in `oec/spec/requirements/view/res-sublist.md`.
+
+- **REQ-RES-SUBLIST-004** (die App): Neu ist der Satz: Eine App, die keine neuen Einträge anlegen kann, lehnt ein `Set` mit einem noch nicht abonnierten Topic mit `Bad` ab (z. B. `BadNotSupported`). (D-3)
+- **REQ-RES-SUBLIST-010** (der Anfragende): „Ein noch nicht abonniertes Topic legt einen neuen Eintrag an“ gilt jetzt nur, **wenn die App das Anlegen unterstützt**; sonst wird das `Set` abgelehnt (Verweis auf -004). (D-3)
+- **REQ-RES-SUBLIST-016** (die App): Nicht eingetragen werden die eigenen **Anfrage**-Abos (`Get`, `Del`) und die **kurzen Abos für Antworten**. Die `Pub`-Abos auf die eigene `AppId` (wie in B1.1.9) bleiben drin. Der Titel ist kürzer geworden (das Feld hat höchstens 100 Zeichen). (D-1, D-2)
+
+**Auswirkung:** keine auf das SDK (es macht es schon so), das Schema oder die Testdaten. Beim künftigen D7-Test T7-SET-11 steht jetzt eine Notiz: Lehnt die App das Anlegen ab, ist das kein Fehler.
+
+**Was du tun musst:** „R-1 akzeptiert“ oder Änderungswünsche.
+
+---
+
+## Was aus dem Review C-059 geworden ist
 
 Du hast geschrieben: „D-1 … entspricht deiner Empfehlung“ und „D-2, D-3: Dein Vorschlag ist akzeptiert“. Daraus wurde Nachtrag 1 zu C-059:
 - **Guideline `57ebe91` (MG 9.1.9), drei Sätze:**

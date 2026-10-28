@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-060 (P4 increment 8c: the Action `NewDataSetWriterId`, sketch deleted). **Two findings to decide: D-1 = SF-112, D-2 = SF-113** (the SDK follows both proposals). **Still open: R-1 = REQ-RES-SUBLIST-004, -010, -016** (C-059 review). A-137 … A-144 for information, worth a look: A-139, A-142, A-143._
+_Last updated: 2026-10-28, C-060 review (you accepted D-1/D-2 = SF-112/113 and R-1 of C-059; guideline `eb7889c`, no open finding). **Open: R-1 = REQ-ACT-017, -023 and the new REQ-ACT-024** (follow SF-112/113). A-137 … A-144 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -101,8 +101,13 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Tests: core and runtime tests in the gate (guideline vectors V-PAY-008/009, 185, 186, 197, 199, 200, 203); opt-in interop 14 green (after a fix of the test setup); a one-off D7 `oec-check monitor` run: 13 pass, 0 fail, **T7-MON-07 now passes** (the Action), 0 invalid of 101 messages.
   - **Two findings to decide** (register `19c1a95`): **D-1 = SF-112** (what is a provided DataSetWriterId used for, and may it be handed out again?), **D-2 = SF-113** (does the application answer a `Call` for an unknown asset?). No reviewed item changed, no new test data, no new dependency. A-137 … A-144 are for information.
   - Increment 10 (`oec-ffi`) runs in a new agent; `prompt.md` is filled.
+- C-060 review (addendum 1): you accepted D-1, D-2 and R-1 of C-059.
+  - R-1 of C-059: REQ-RES-SUBLIST-004, -010, -016 `reviewed`.
+  - Guideline `eb7889c`: MG 8.4.1 (the `Set` that creates a `DataSet` carries the provided id; a listed id stays) and MG 9.2.1 (unknown Source → `BadNotFound`, empty Payload); register `4fac7d2`, SF-001 … 113 resolved, no open finding.
+  - Re-baseline: 1406 items, 442 REQs, 0 gaps; **new REQ-ACT-024**, notes on REQ-ACT-017/023 → **R-1**. Schema `2.0.1-dev` @ `eb7889c` (no content change), D7 test T7-ACT-04 (`planned`) for REQ-ACT-024.
+  - SDK: no behaviour change (it already did both); cites REQ-ACT-024.
 
-Coverage stays at 0 gaps; schema `2.0.1-dev` @ `57ebe91` (re-baseline, no content change).
+Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
 Logs: [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
@@ -110,9 +115,7 @@ Logs: [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-
 
 | # | Item | Kind | Source | Recommendation | PO |
 |---|------|------|--------|----------------|----|
-| D-1 | SF-112: what a `DataSetWriterId` provided by `NewDataSetWriterId` is used for; may an unused one be handed out again? | decide | C-060 | as proposed | ☐ |
-| D-2 | SF-113: answer to `Call/NewDataSetWriterId/<Source>` for an unknown Source (`BadNotFound` vs. no response) | decide | C-060 | as proposed | ☐ |
-| R-1 | REQ-RES-SUBLIST-004, -010, -016 after SF-109 … SF-111 (MG 9.1.9 `57ebe91`) | review | C-059 review | accept | ☐ |
+| R-1 | REQ-ACT-017, REQ-ACT-023 and the new REQ-ACT-024 after SF-112/SF-113 (MG 8.4.1/9.2.1 `eb7889c`) | review | C-060 review | accept | ☐ |
 | A-1 | ADR-0026: Rust workspace layout and crate roles | info (agent) | C-046 D-1 | accepted | – |
 | A-2 | JSON export `oec/spec/export/` as the SDK test-vector contract | info (agent) | C-046 D-2 | accepted | – |
 | A-3 | P4 cycle cut and order (increment 3 own cycle; increment 9 before 6–8) | info (agent) | C-046 D-3 | accepted | – |
@@ -260,30 +263,21 @@ Logs: [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-
 
 ## Decisions and review items
 
-### D-1 – SF-112: what a provided `DataSetWriterId` is for (MG 8.4.1, 9.2.1 vs. 8.2.3, 9.1.8)
+### R-1 – REQ-ACT-017, -023, -024 after SF-112/SF-113 (MG 8.4.1, 9.2.1)
 
-- **Finding:** MG 8.4.1 says the id from `NewDataSetWriterId` is "to use for the upcoming set request"; MG 9.2.1 names the use case (an IT connector creates a `ReferenceDesignation` in an OT connector). The guideline does not say (a) what the Responder does with a `Set` that carries the provided id, (b) which id a creating `Set` carries if the Responder already lists an id for that resource and Source (MG 8.2.3: "as published"; MG 9.1.8 lists the `ReferenceDesignation` of every asset with its id even without content), (c) whether an id that was not used within the `Ttl` may be handed out again.
-- **Proposed interpretation:** (1) A `Set` carries the id the Responder lists for the DataSet, or – only for a combination it does not list yet – an id provided within the `Ttl`; the created DataSet keeps that id. (2) If an id is already listed, the listed id stays; the provided id lapses after the `Ttl`. (3) An unused provided id is not handed out again as long as never-used ids are left (REQ-MSG-020). Addition to MG 8.4.1 after "…to use for the upcoming set request.": "The `Set` that creates the `DataSet` carries this `DataSetWriterId`; for a `DataSet` the publisher already lists in its `PublicationList`, the listed `DataSetWriterId` is used and no new one is needed."
-- **Impact:** SDK – none (it lists an id for everything it accepts a `Set` for and never reuses a provided id). Spec – REQ-ACT-023 gets a note (→ `draft`, R-x). D7 unchanged.
-- **PO:** ☐ as proposed ☐ other: …
-
-### D-2 – SF-113: `Call/NewDataSetWriterId/<Source>` for an unknown Source (MG 9.2.1, 8.1.3 vs. 9.1)
-
-- **Finding:** for `Get`/`Set`/`Del` with an unknown Source, MG 9.1 (SF-099, SF-108) says: no `Pub`, a Status event `BadNotFound` should be sent. For the Action the guideline says nothing. Reading (a): the request "cannot be addressed" (MG 8.1.3, REQ-ACT-017) → no response, the requester waits until its `TimeoutHint`. Reading (b): the request is addressed (topic of the `AppId`, DataSetWriterId 8, ActionTargetId 1) and decodable, so REQ-ACT-015 requires one final response, here with `Bad`.
-- **Proposed interpretation:** (b) – one final `ActionResponse` (`ActionState` 2) with `Status` `BadNotFound` and an empty `Payload`; "cannot address" in REQ-ACT-017 means DataSetWriterId/ActionTargetId, not the Source. Addition to MG 9.2.1 after "…A `Filter` is not used.": "If the application neither is nor represents the `<Source>`, it answers with the final `ActionResponse` with the `Status` `BadNotFound` and an empty `Payload`."
-- **Impact:** SDK – none (implements (b)); with (a) one branch and two tests change. Spec – REQ-ACT-017 gets a note (→ `draft`, R-x). D7 unchanged (T7-MON-07 checks only the form of a response).
-- **PO:** ☐ as proposed ☐ other: …
-
-### R-1 – REQ-RES-SUBLIST-004, -010, -016 after SF-109 … SF-111 (MG 9.1.9)
-
-- **Why:** your decisions D-1 … D-3 changed MG 9.1.9 (`57ebe91`); three reviewed REQs follow the new text and are back to `draft`. View: `oec/spec/requirements/view/res-sublist.md`.
-- **REQ-RES-SUBLIST-004** (MUST, application; D7 `test` T7-SET-11): statement extended by "An application that does not support the creation of entries rejects a Set whose TopicPath the Source has not subscribed yet with a status Event with StatusCode Bad (e.g. BadNotSupported)." (SF-111); new quote and inventory item MG-9.1.9-013e79f7.
-- **REQ-RES-SUBLIST-010** (MUST, requester; `schema` + `d7-validate`): "a TopicPath not yet subscribed by the Source creates a new entry **if the application supports the creation of entries (otherwise the Set is rejected, REQ-RES-SUBLIST-004)**" (SF-111).
-- **REQ-RES-SUBLIST-016** (MUST, application; D7 `test` T7-SET-01): "It does not list its other subscriptions to **request topics** of its own AppId (e.g. Get or Del), **nor subscriptions that only exist for the time of a request** (to receive its answer or status Event)." (SF-110, SF-109); title shortened to "Writable DataSets are listed with their Set subscription, own request and answer subscriptions not"; new quote and inventory item MG-9.1.9-565c8491.
-- **Impact:** none on the SDK (it already behaves like this), the schema or the vectors; D7 T7-SET-11 got a note that a rejected creation is no failure.
+- **Why:** your decisions D-1/D-2 changed MG 8.4.1 and MG 9.2.1 (`eb7889c`); two reviewed REQs get notes and are back to `draft`, one REQ is new. View: `oec/spec/requirements/view/act.md`.
+- **REQ-ACT-017** (MUST NOT, responder; D7 `test` T7-ACT-03): statement unchanged; new note: "cannot address" refers to the DataSetWriterId and ActionTargetId of the Action, not to the Source of the topic – a request for an unknown Source is answered with `BadNotFound` (REQ-ACT-024, SF-113).
+- **REQ-ACT-023** (MUST, requester + responder; D7 `test` T7-ACT-02): statement unchanged; refs + SF-112; new quote (the MG 8.4.1 sentence); note extended: the creating `Set` carries the provided id; a `DataSet` already listed in the `PublicationList` keeps its listed id and the provided one lapses after `Ttl`; an id not used within `Ttl` is not handed out again as long as never-used ones are left ("so far unused", REQ-ACT-022, REQ-MSG-020).
+- **REQ-ACT-024 (new)** (MUST, responder; D7 `test` T7-ACT-04, `planned`): "A Responder that neither is nor represents the Source of a NewDataSetWriterId request answers it with the final ActionResponse (ActionState 2) with the Status BadNotFound (0x803E0000) and an empty Payload." Inventory MG-9.2.1-07feb514. A new REQ rather than a change of REQ-ACT-017, because it is a positive MUST next to a MUST NOT.
+- **Impact:** none on the SDK (it already behaves like this, now cites REQ-ACT-024), the schema or the vectors; the D7 catalog has the new test T7-ACT-04.
 - **PO:** ☐ accepted ☐ changes: …
 
 ### Answered earlier
+
+Answered in the C-060 review (2026-10-28) and applied in C-060 addendum 1:
+- D-1 – SF-112 (what a provided `DataSetWriterId` is for; reuse): ☑ as proposed → guideline `eb7889c` (MG 8.4.1), SF-112 resolved (`4fac7d2`), re-baseline, REQ-ACT-023 → R-1.
+- D-2 – SF-113 (`NewDataSetWriterId` for an unknown Source): ☑ as proposed (`BadNotFound`, empty Payload) → guideline `eb7889c` (MG 9.2.1), SF-113 resolved, re-baseline, new REQ-ACT-024 and REQ-ACT-017 → R-1.
+- R-1 of the C-059 review – REQ-RES-SUBLIST-004, -010, -016 after SF-109 … SF-111: ☑ accepted → `reviewed`.
 
 Answered in the C-059 review (2026-10-28) and applied in C-059 addendum 1:
 - D-1 – SF-109 (transient answer subscriptions of a requester): ☑ as proposed (not listed) → guideline `57ebe91` (MG 9.1.9), SF-109 resolved (`7a2bda2`), re-baseline, REQ-RES-SUBLIST-016 → R-1. Your note on the purpose (service A follows only selected values of OT service B, e.g. 1 of 100 devices) is recorded in the log.
@@ -810,5 +804,5 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-061)
 
-1. Apply your answers: D-1/D-2 (SF-112/113) – guideline text, register, re-baseline, notes on REQ-ACT-017/023 (→ R-x); R-1 (`spectool review`).
+1. Apply your answer to R-1 (REQ-ACT-017, -023, -024; `spectool review`).
 2. P4 increment 10 – `oec-ffi` (the C ABI on `oec`, generated `oec.h` checked against the contract, plus the Action; C examples as tests, also under AddressSanitizer). Runs in a new agent (start prompt in `prompt.md`).
