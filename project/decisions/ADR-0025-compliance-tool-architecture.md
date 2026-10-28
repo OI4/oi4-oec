@@ -115,3 +115,14 @@ Decided by the agent within this ADR; the PO can overrule. Details: `log/2026-10
 6. **Verdict of a test run.** Each active test judges only the REQs its catalog entry cites. Passive requirements that a short test run cannot judge (connection not observed, observation shorter than the heartbeat, MaxPacketSize unknown) become plain skips with the reason prefix "test run:", not inconclusive ones. A level claim therefore needs a `monitor` run of at least the minimum duration in addition to `test` (DESIGN.md §6).
 7. **Report.** `test` writes the monitor report (version 1) with `"mode": "test"` and the additive members `tester` and `requests`. `report.schema.json` follows in increment 7.
 8. **Selection.** `--tests` takes test ids or `path.Match` patterns. Non-selected tests are reported as skip "not selected (--tests)".
+
+## Amendment C-063 (2026-10-28) – P5 increment 2: the rest of `Get` (agent, G-3.4 b)
+
+Decided by the agent within this ADR; the PO can overrule. Details: `log/2026-10-28_C-063_d7-get-tests.md`, REVIEW A-164 … A-175; the "As built (C-063)" notes in `oec/conformance/DESIGN.md`.
+
+1. **Delivered.** T7-GET-03, 04, 06, 07, 08 and T7-ADR-02, 03 are `implemented`, each with a positive and at least one negative sim fixture (11 new faults, `draft`, G-3.9). Every `Get` test of the catalog is now implemented.
+2. **Bounded stimuli.** T7-GET-03 requests at most 5 Filters per resource and 50 PublicationList entries; T7-GET-01/04 and ADR-03 at most 20 subordinate Sources. Get Metadata is requested only for the Data the PublicationList announces (REQ-CMP-044 is a MAY).
+3. **What a test run cannot stimulate is judged passively.** Pagination by size (`MaxPacketSize`) is left to T7-MON-18; T7-ADR-02 listens to `Oi4/#` best effort and skips without `Oi4` traffic (it cannot make the CUT speak version 1).
+4. **"Ignored" means "answered like without".** A Query on Get ReferenceDesignation/<AppId>, a Query on Get MAM and an undefined query parameter are judged against the answer to the same Get without it, not against an expected content.
+5. **Locale.** An answer to a Get with the Locale `de-DE` may carry `de-DE`, the default language `en-US` or the invariant locale; whether the CUT supports German is not observable.
+6. **The monitor engine reads the observed `Get` requests** (of D7 and of any other participant). An answer to a Get with a Locale is not compared with the Birth (REQ-LIFE-003), and an answer to a Get for one page (`Page` > 0, REQ-PAG-002) is not required to end the series (REQ-PAG-005). Both were false positives of the monitor during `test`; the capture fixture `pagination-broken` was corrected accordingly.

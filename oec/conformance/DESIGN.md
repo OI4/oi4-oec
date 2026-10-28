@@ -24,7 +24,7 @@ Inputs: ADR-0006 (independence, modes), ADR-0013/0014 (Go, one module, two binar
 | `internal/mqttwire/mqtttest` | test-only: in-process TLS broker on the paho `packets` codec and a throw-away PKI (§4) | **C-052** |
 | `internal/capture` | recording format (JSONL), recorder, replayer | **C-052** |
 | `internal/monitor` | stateful monitor engine: per-CUT state, rules T7-MON-xx | **C-052** (13 of 19) |
-| `internal/probe` | active test runner: stimuli, correlation (`ReplyTo`; CorrelationId/RequestId for Actions), timeouts, verdicts T7-xxx | **C-062** (bus attachment, T7-GET-01/02/05/09); rest P5 |
+| `internal/probe` | active test runner: stimuli, correlation (`ReplyTo`; CorrelationId/RequestId for Actions), timeouts, verdicts T7-xxx | **C-062** (bus attachment, T7-GET-01/02/05/09); **C-063** (T7-GET-03/04/06/07/08, ADR-02/03); rest P5 |
 | `internal/verdict` | verdict model, severity from REQ keyword × level, applicability (§5) | **C-052** |
 | `internal/report` | text, JSON (`report.schema.json`), JUnit XML | monitor report **C-052**; schema file P5 |
 | `internal/sim` | simulated CUT with fault injection (§10) – test-only | **C-062** (faults of the implemented `test` tests; monitor fixtures are captures, §10) |
@@ -91,6 +91,17 @@ oec-check test --broker … --app <AppId> [--level 3] [--attach bus|proxy] \
 - Implemented: T7-GET-01 (Get MAM and Health, with and without Source, for the application and up to 20 subordinate Sources), T7-GET-02 (every resource of the Profile of the application answers, the Profile lists the resources of the level), T7-GET-05 (Get without content → empty list; unknown Source → no Pub, Event Status Bad `BadNotFound`; REQ-CMP-044 is a MAY and not stimulated), T7-GET-09 (Get MAM with an unknown key answered like without it).
 - Verdict of a test run: passive REQs that the short run cannot judge (connect not observed, shorter than the heartbeat, MaxPacketSize unknown) are plain skips with the reason prefix "test run:", not inconclusive; a level claim needs a `monitor` run ≥ the minimum duration in addition (§6). Non-selected tests are skip "not selected (--tests)".
 - Report: the monitor report (version 1) with `"mode": "test"`, `tester` and `requests` (test, topic, MessageId, sent, replies).
+
+**As built (C-063, ADR-0025 amendment C-063):**
+
+- T7-GET-03: every resource of the Profile answers Get without Source, with the Source of the application and with up to 5 Filters taken from the first answer (the Filter answer is a subset with that Filter); every PublicationList entry (up to 50) of a requestable resource with a Mode other than `OFF_0` answers Get; Get Metadata is requested only for the Data announced in the PublicationList (REQ-CMP-044 is a MAY).
+- T7-GET-04: the application and every subordinate Source (up to 20) answer Get with their Source for every resource of the level; at level 2 the recommended resources are REQ-CMP-010.
+- T7-GET-06: Get MAM without PaginationRequest is the complete series; with `PerPage` 1 the pages 1, one beyond the end and 0 (all pages) are judged (REQ-PAG-002/005). Pagination by size cannot be stimulated; T7-MON-18 judges `MaxPacketSize` passively.
+- T7-GET-07: Query `Parent` of ReferenceDesignation (the first parent with fewer children than objects), the same with an undefined parameter, a Query on Get ReferenceDesignation/<AppId> (judged against the same Get without Query) and a Query on Get MAM (ignored). Without any ReferenceDesignation object the answer to a Query is not judged.
+- T7-GET-08: Get MAM and Get Config/<AppId> with the Locale `de-DE`; every LocalizedText of the answer is `de-DE`, `en-US` or invariant.
+- T7-ADR-02: watches `Oi4/#` best effort; a message under `Oi4` with the MessageId of a request of D7 fails REQ-TOP-004; without `Oi4` traffic the REQ is skipped.
+- T7-ADR-03: Get MAM with the exact IL of each asset answers exactly that IL; a case variant is not answered as the same asset.
+- Monitor engine during `test`: an answer to a Get with a Locale is not compared with the Birth (REQ-LIFE-003), an answer to a Get for one page (`Page` > 0) is a complete series of its own (REQ-PAG-005).
 
 ### 3.4 Attachment modes (`needs` in the catalog)
 
@@ -203,6 +214,7 @@ The severity comes from the REQ, not from the test: `levels.L<n>` of the REQ at 
 - **As built (C-052), monitor tests:** the positive and negative fixtures of the monitor rules are **captures** (`testdata/captures/*.jsonl`) built from reviewed payload vectors by a generator test (`go test ./internal/monitor -run TestFixtureFiles -update`; without `-update` the test fails if a file differs from its scenario), with the expected verdicts in `testdata/captures/index.yaml` (test → outcome and the exact REQ ids; status `reviewed` since the C-052 review, R-1; new fixtures start as `draft`, G-3.9). `replay_test.go` replays every fixture, checks the expected verdicts and that every implemented monitor test has a positive and a negative fixture, and that `monitor.Implemented` equals the catalog status. `internal/sim` is the self-test of `test` (active stimuli need a responding CUT). The live path is covered by a loopback test against `mqtttest` in the gate and by `oec/conformance/live.sh` (opt-in) against the dev-env Mosquitto.
 
 - **As built (C-062), `test`:** `internal/sim` is the OT connector of the guideline examples (MG B1.1) with one subordinate asset; its content comes from reviewed payload vectors, it answers `Get` for MAM, Health, Profile, Config, Data, PublicationList, ReferenceDesignation and SubscriptionList with `ReplyTo`, sends Birth/Close and a Will, and answers a request for an unknown Source with the Event Status Bad. A fault is named `<test>/<what>` (`sim.Faults`). `internal/probe/sim_test.go` runs `oec-check test` (monitor + runner, level 3) over `mqtttest` against every entry of `testdata/sim/index.yaml` (expected outcome and exact REQ ids per test; `reviewed` since the C-062 review, R-1; new entries start as `draft`, G-3.9), checks that every implemented test has a positive and a negative fixture, that every fault has an entry, that `probe.Implemented` equals the catalog status and that the requests of D7 are valid messages (except the deliberate unknown key of T7-GET-09). `cmd/oec-check/test_test.go` runs the CLI against the sim (exit 0 without, exit 1 with a fault).
+- **As built (C-063):** 18 faults; two of them are conforming variants (`T7-ADR-02/dual-version`, `T7-GET-07/empty`) and count as positive fixtures. The sim adds the vectors V-PAY-021 (Metadata), V-PAY-047 (MAM in German) and V-PAY-054 (ReferenceDesignation of the asset); the Config WriterGroupName is used without blanks as Filter (REQ-TOP-020). The tester violations are exactly the deliberate stimuli without a fault (`REQ-MSG-001` ×2, `REQ-QRY-001`, `REQ-RES-REFDES-013`) and a part of them with one (a test may stop early). Answer timeout of the fixture runs 3 s.
 
 ## 11. Distribution
 

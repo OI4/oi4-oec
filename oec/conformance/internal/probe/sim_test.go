@@ -51,7 +51,7 @@ func loadSimIndex(t *testing.T) simIndex {
 }
 
 // simTimeout is the answer timeout of the fixture runs: long enough for a
-// loaded machine (25 fixtures run in parallel since C-063), short enough
+// loaded machine (19 fixtures run in parallel in C-063), short enough
 // for the negative waits. A wall-clock jump (sleep of the machine) during a
 // run fails the heartbeat check of T7-MON-05: rerun.
 const simTimeout = 3 * time.Second
