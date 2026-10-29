@@ -47,7 +47,8 @@
 # Reviewed by the PO in the C-062 review (2026-10-28, R-1); the entries
 # added or changed in C-063 were reviewed in the C-063 review (2026-10-28,
 # R-1); the entries added or changed in C-064 were reviewed in the C-064
-# review (2026-10-28, R-1).
+# review (2026-10-28, R-1); the entries added or changed in C-065 … C-067
+# were reviewed in the C-067 review (2026-10-29, R-1, R-3, R-4).
 #
 # This index is test data with verdict (G-3.9): it states the expected
 # outcome of the tests and goes to the PO for review.
@@ -61,7 +62,7 @@
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -374,14 +375,14 @@ fixtures:
       Every Syslog entry of the PublicationList has Config NONE_0: the log
       level is not configurable (REQ-TOP-027, SHOULD).
   - fault: T7-ACT-01/no-correlation
-    status: draft
+    status: reviewed
     expect:
       T7-ACT-01: {outcome: fail, reqs: [REQ-ACT-007]}
     notes: >-
       The ua-action-response omits the CorrelationData of the request
       (REQ-ACT-007).
   - fault: T7-ACT-01/progress
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -391,7 +392,7 @@ fixtures:
       carries the response fields (the same DataSetWriterId and Ttl as the
       final one, REQ-ACT-012). Every test passes.
   - fault: T7-ACT-02/reissue
-    status: draft
+    status: reviewed
     expect:
       T7-ACT-01: {outcome: fail, reqs: [REQ-ACT-022]}
       T7-ACT-02: {outcome: fail, reqs: [REQ-ACT-023]}
@@ -401,7 +402,7 @@ fixtures:
       is not new (REQ-ACT-022), T7-ACT-02 gets it again within its Ttl
       (REQ-ACT-023).
   - fault: T7-ACT-03/answers-unknown
-    status: draft
+    status: reviewed
     expect:
       T7-ACT-03: {outcome: fail, reqs: [REQ-ACT-017]}
       T7-MON-01: {outcome: fail, reqs: [REQ-ACT-019]}
@@ -412,14 +413,14 @@ fixtures:
       echo DataSetWriterId 4 and ActionTargetId 2, which the schema of a
       NewDataSetWriterId response rejects (T7-MON-01, REQ-ACT-019).
   - fault: T7-ACT-04/no-reply
-    status: draft
+    status: reviewed
     expect:
       T7-ACT-04: {outcome: fail, reqs: [REQ-ACT-024]}
     notes: >-
       A request for an unknown Source is not answered instead of with
       BadNotFound and an empty Payload (REQ-ACT-024).
   - fault: T7-CON-01/mqtt31
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-CON-01: {outcome: fail, reqs: [REQ-CMP-001, REQ-MQTT-001]}
@@ -427,7 +428,7 @@ fixtures:
       The CUT connects with MQTT 3.1 (protocol name MQIsdp, level 3) instead
       of MQTT 3.1.1 (REQ-MQTT-001, REQ-CMP-001).
   - fault: T7-CON-01/client-id
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-CON-01: {outcome: fail, reqs: [REQ-CMP-009]}
@@ -436,7 +437,7 @@ fixtures:
       stable ClientId (REQ-CMP-009, MUST at level 3; SHOULD at level 1 and
       2, there a warn).
   - fault: T7-CON-02/tls11
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-CON-02: {outcome: fail, reqs: [REQ-CMP-002, REQ-MQTT-005]}
@@ -445,7 +446,7 @@ fixtures:
       CONNECT when the proxy offers TLS 1.1 only (REQ-MQTT-005, REQ-
       CMP-002).
   - fault: T7-CON-02/no-verify
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-CON-02: {outcome: fail, reqs: [REQ-CMP-002, REQ-MQTT-008]}
@@ -454,7 +455,7 @@ fixtures:
       CONNECT with the certificate of an untrusted CA and with a certificate
       for a wrong host name (REQ-MQTT-008, REQ-CMP-002).
   - fault: T7-CON-03/anonymous
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-CON-03: {outcome: fail, reqs: [REQ-MQTT-009]}
@@ -462,7 +463,7 @@ fixtures:
       The CUT connects without user name, password and client certificate;
       the test broker accepts it (REQ-MQTT-009).
   - fault: T7-CON-04/retain
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-CON-04: {outcome: fail, reqs: [REQ-MQTT-018]}
@@ -471,7 +472,7 @@ fixtures:
       flag (REQ-MQTT-018, MUST NOT at level 3), seen in the PUBLISH packet
       on the proxy.
   - fault: T7-LIFE-01/no-will
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-LIFE-01: {outcome: fail, reqs: [REQ-CMP-003, REQ-LIFE-008]}
@@ -482,7 +483,7 @@ fixtures:
       in between: T7-MON-10 notes a second Birth (info). T7-LIFE-03 has no
       Will to check (skip).
   - fault: T7-LIFE-01/stale-will
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-LIFE-01: {outcome: fail, reqs: [REQ-LIFE-016]}
@@ -491,7 +492,7 @@ fixtures:
       every connection instead of creating it anew with the time of the
       connect (REQ-LIFE-016).
   - fault: T7-LIFE-01/timestamp
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-LIFE-01: {outcome: warn, reqs: [REQ-LIFE-010]}
@@ -499,7 +500,7 @@ fixtures:
       The DataSetMessage of the Will carries a Timestamp (REQ-LIFE-010,
       SHOULD NOT: warn).
   - fault: T7-LIFE-02/no-birth
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-01, T7-LIFE-02, T7-LIFE-03]
     expect:
       T7-LIFE-02: {outcome: fail, reqs: [REQ-LIFE-001]}
@@ -512,7 +513,7 @@ fixtures:
       after the Close message (T7-MON-05, REQ-LIFE-014) instead of after
       the Will.
   - fault: T7-LIFE-02/health-first
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-01, T7-LIFE-02, T7-LIFE-03]
     expect:
       T7-LIFE-02: {outcome: warn, reqs: [REQ-LIFE-015]}
@@ -524,7 +525,7 @@ fixtures:
       after the Close message (T7-MON-05, REQ-LIFE-014) instead of after
       the Will.
   - fault: T7-LIFE-02/no-rebirth
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-LIFE-02: {outcome: fail, reqs: [REQ-LIFE-017]}
@@ -532,7 +533,7 @@ fixtures:
       The CUT reports Health FAILURE_1/0 about itself while connected and
       recovers to NORMAL_0 without a new Birth (REQ-LIFE-017).
   - fault: T7-LIFE-02/recovery
-    status: draft
+    status: reviewed
     positive: true
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     notes: >-
@@ -541,7 +542,7 @@ fixtures:
       T7-LIFE-02 judges REQ-LIFE-017 (pass); T7-MON-10 does not count the
       recovery Birth as a second Birth (C-066).
   - fault: T7-LIFE-02/late-subscribe
-    status: draft
+    status: reviewed
     positive: true
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     notes: >-
@@ -551,7 +552,7 @@ fixtures:
       Birth and subscription is not judged. TestSimLateSubscribe checks
       that every request, the discovery Get included, is answered.
   - fault: T7-LIFE-03/writer-id
-    status: draft
+    status: reviewed
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
     expect:
       T7-LIFE-03: {outcome: fail, reqs: [REQ-LIFE-009]}
@@ -562,7 +563,7 @@ fixtures:
       Health with another DataSetWriterId for the same DataSet (REQ-
       MSG-021).
   - fault: T7-LIFE-04/no-close
-    status: draft
+    status: reviewed
     tests: [T7-LIFE-04]
     expect:
       T7-LIFE-04: {outcome: fail, reqs: [REQ-CMP-046, REQ-LIFE-005]}
@@ -575,7 +576,7 @@ fixtures:
       reports the new Birth without Will or Close in between (REQ-IL-012,
       information).
   - fault: T7-LIFE-04/writer-id
-    status: draft
+    status: reviewed
     tests: [T7-LIFE-04]
     expect:
       T7-LIFE-04: {outcome: fail, reqs: [REQ-CMP-046, REQ-LIFE-007]}
@@ -588,7 +589,7 @@ fixtures:
       sees the Health with another DataSetWriterId for the same DataSet
       (REQ-MSG-021).
   - fault: T7-LIFE-04/abort
-    status: draft
+    status: reviewed
     positive: true
     tests: [T7-LIFE-04]
     expect:
@@ -600,7 +601,7 @@ fixtures:
       tell whether the CUT or the restart hook is at fault and skips the
       test as inconclusive.
   - fault: T7-SET-10/not-persisted
-    status: draft
+    status: reviewed
     tests: [T7-SET-10]
     expect:
       T7-SET-10: {outcome: fail, reqs: [REQ-RES-REFDES-002]}

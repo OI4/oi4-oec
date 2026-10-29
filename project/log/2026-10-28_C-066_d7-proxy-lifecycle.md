@@ -318,3 +318,10 @@ Next free ids:
 - REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029, REQ-ACT-025;
 - V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129;
 - ADR-0027, Q-031, A-215.
+
+## Addendum 1 – PO review: R-3 (2026-10-29)
+
+The PO answered "R-1, R-2, R-3, R-4 und R-5 – 6 akzeptiert" after C-067 (G-3.9).
+
+- R-3: the 16 sim fixtures of T7-CON-01 … 04 and T7-LIFE-01 … 03 (incl. `none`) in `oec/conformance/testdata/sim/index.yaml` → `reviewed`; the entries changed again in C-067 (`none`, `T7-LIFE-02/no-birth`, `/health-first`) are reviewed in their C-067 form.
+- Recorded together with R-1/R-2 of C-065 and R-4/R-5 of C-067; the list of changed files is in addendum 1 of `2026-10-29_C-067_d7-restart-publist.md`. No code, spec, schema or catalog change.

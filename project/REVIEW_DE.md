@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-067: **P5 Inkrement 6a** – Neustart der App auf Kommando (T7-LIFE-04, T7-SET-10) und die passive Regel T7-MON-14 (schickt die App so, wie ihre PublicationList es sagt) sind fertig. **Für dich offen: R-1 (5 Testfälle) und R-2 (6 Aufzeichnungen) aus C-065, R-3 (16 Testfälle) aus C-066, R-4 (4 Testfälle) und R-5 (6 Aufzeichnungen) aus C-067, bitte prüfen.** A-191 … A-221 nur zur Info._
+_Stand: 29.10.2026, C-067: **P5 Inkrement 6a** – Neustart der App auf Kommando (T7-LIFE-04, T7-SET-10) und die passive Regel T7-MON-14 (schickt die App so, wie ihre PublicationList es sagt) sind fertig. Deine Antwort „R-1, R-2, R-3, R-4 und R-5 akzeptiert“ ist eingetragen. **Für dich ist nichts offen.** A-191 … A-221 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,144 +24,14 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### R-1 – 5 Testfälle gegen die simulierte App (bitte prüfen)
+**Nichts.** Deine Antwort „R-1, R-2, R-3, R-4 und R-5 akzeptiert“ ist eingetragen. Alle Testfälle haben jetzt den Status `reviewed`:
+- R-1 (C-065): die 5 Testfälle zur Aktion `NewDataSetWriterId`;
+- R-2 (C-065): die 6 Aufzeichnungen zu T7-MON-09/13/15/16/17;
+- R-3 (C-066): die 16 Testfälle zu Verbindung und Lebenszyklus, mit `none`;
+- R-4 (C-067): die 4 Testfälle zum Neustart;
+- R-5 (C-067): die 6 Aufzeichnungen zu T7-MON-14, mit dem geänderten `lifecycle-pass`.
 
-**Wo:** `oec/conformance/testdata/sim/index.yaml`, die 5 Einträge mit `status: draft` (die Fehler `T7-ACT-…`).
-
-**Worum es geht:** Wie in C-062 … C-064 startet ein Selbsttest die simulierte App mit genau einem eingebauten Fehler und lässt `oec-check test` auf Level 3 gegen sie laufen. Im Eintrag steht, welches Ergebnis herauskommen muss, je Test und mit den genauen Regeln (REQs). Neu sind die Tests der Aktion `NewDataSetWriterId`: Eine App fragt damit bei einer anderen eine neue, freie Nummer für einen Datensatz an. Die Antwort enthält die Nummer und wie lange sie reserviert ist (`Ttl`). Du prüfst: **Ist der eingebaute Fehler wirklich ein Verstoß gegen die genannte Regel, und ist der Fall ohne Fehler wirklich erlaubt?**
-
-**Ohne Fehler (muss bestehen):**
-- `T7-ACT-01/progress` – die App schickt vor der endgültigen Antwort eine Zwischenmeldung („in Arbeit“). Das ist erlaubt (REQ-ACT-016, MAY). Auch die Zwischenmeldung enthält die Nummer und die `Ttl` (REQ-ACT-012). Alle Tests bestehen.
-
-**Mit Fehler (muss durchfallen):**
-- `T7-ACT-01/no-correlation` – die App gibt die Kennung `CorrelationData` der Anfrage in der Antwort nicht zurück (REQ-ACT-007).
-- `T7-ACT-02/reissue` – die App gibt immer dieselbe Nummer 6000 heraus, obwohl sie noch 60 Sekunden reserviert ist. Folge: schon in T7-ACT-01 ist die zweite Nummer nicht neu (REQ-ACT-022), und T7-ACT-02 bekommt sie innerhalb der Reservierung noch einmal (REQ-ACT-023).
-- `T7-ACT-03/answers-unknown` – Anfragen mit einer unbekannten Ziel-Nummer (DataSetWriterId 4 bzw. ActionTargetId 2) beantwortet die App mit „nicht gefunden“, statt gar nicht zu antworten (REQ-ACT-017). Nebenwirkung: Diese Antworten tragen die falschen Nummern 4 und 2 und sind damit selbst ungültig. Das fängt die passive Prüfung T7-MON-01 als Verstoß gegen REQ-ACT-019.
-- `T7-ACT-04/no-reply` – eine Anfrage für ein unbekanntes Gerät bleibt ohne Antwort. Richtig wäre „nicht gefunden“ (BadNotFound) ohne Inhalt (REQ-ACT-024, SF-113).
-
-**Besonders anschauen:** die jeweils zweite Folge bei `reissue` (T7-ACT-01) und bei `answers-unknown` (T7-MON-01).
-
-**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1 akzeptiert“.
-
-### R-2 – 6 Aufzeichnungs-Testfälle der passiven Regeln (bitte prüfen)
-
-**Wo:** `oec/conformance/testdata/captures/index.yaml`, die 6 Einträge mit `status: draft`, dazu die Aufzeichnungen (`.jsonl`).
-
-**Worum es geht:** Wie in C-052: Eine Aufzeichnung ist eine kleine, aus geprüften Beispielnachrichten gebaute Szene auf dem Bus. `oec-check monitor` spielt sie ab und muss das eingetragene Ergebnis liefern. Bewertet wird App A (auf Level 3); B ist eine andere App, die mit A spricht. Die Konfig-Gruppe aus dem Guideline-Beispiel B1.1.3 heißt dort „Overall device settings“. Hier heißt sie „device“, weil Leerzeichen im Filter eines Topics eine Warnung auslösen (REQ-TOP-020). Du prüfst: **Ist die Szene wirklich ein Verstoß gegen die genannte Regel, und ist die Szene ohne Fehler wirklich erlaubt?**
-
-**Ohne Fehler (muss bestehen):**
-- `configuration-pass`:
-  - A schickt Messdaten und die passenden Metadaten unter derselben Klassen-Kennung mit denselben Feldern (T7-MON-09).
-  - Ihr Profil nennt Daten und Ereignisse (T7-MON-13).
-  - Wie im Guideline-Beispiel B1.1.3 ändert B die Konfiguration von A und schickt dabei alle Pflichtfelder mit (T7-MON-17).
-  - A bestätigt, schickt die neue Konfiguration und ihr Typenschild mit dem Änderungszähler 2 statt 1 (T7-MON-16).
-  - B ändert je einen Eintrag der PublicationList und der SubscriptionList. A schickt beide Listen danach neu (T7-MON-15).
-
-**Mit Fehler (muss durchfallen):**
-- `class-id-unstable` – A schickt dieselben Messdaten erst unter einer zweiten Klassen-Kennung, dann unter der ersten mit einem zusätzlichen Feld. Eine Klassen-Kennung gehört aber zu genau einem Aufbau (REQ-MSG-013).
-- `no-data-event` – A hat Geräte unter sich, aber ihr Profil nennt weder Daten noch Ereignisse, und sie schickt auch keine. Auf Level 3 ist beides Pflicht (REQ-CMP-010, -036, -038). Bei B sieht man gar nichts davon. Das wird nicht bewertet, sondern übersprungen.
-- `list-not-republished` – B ändert die PublicationList, A bestätigt, schickt die Liste aber nicht neu (REQ-RES-PUBLIST-017).
-- `revision-not-counted` – wie B1.1.3, aber 6 Sekunden nach der bestätigten Änderung meldet A immer noch den alten Änderungszähler 1 (REQ-RES-MAM-018).
-- `set-config-mandatory-missing` – B ändert die Konfiguration von A, lässt aber das Pflichtfeld `protocol` weg (REQ-RES-CONFIG-011). Hier macht der **Absender B** den Fehler, nicht A.
-
-**Besonders anschauen:** `no-data-event` (Pflicht erst ab Level 3) und dass bei `set-config-mandatory-missing` der Fragende bewertet wird.
-
-**Die bisherigen 18 Aufzeichnungen** bleiben unverändert und `reviewed`. `lifecycle-pass` hat jetzt ein paar „bestanden“ mehr und besteht weiter; `reconnect-pass` bleibt „nicht entscheidbar“ wie bisher.
-
-**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1 und R-2 akzeptiert“.
-
-### R-3 – 16 Testfälle zu Verbindung und Lebenszyklus (bitte prüfen)
-
-**Wo:** `oec/conformance/testdata/sim/index.yaml`, die 15 neuen Einträge `T7-CON-…` und `T7-LIFE-…` sowie `none`, alle mit `status: draft`.
-
-**Worum es geht:** wie bei R-1 – die simulierte App läuft mit genau einem eingebauten Fehler, `oec-check test` (Level 3) muss das eingetragene Ergebnis liefern. Neu: Die App verbindet sich jetzt **über D7** mit dem Broker. D7 reicht alles weiter und sieht dabei, wie die App sich anmeldet. Am Ende stellt D7 die App auf die Probe: Es bietet nur das alte TLS 1.1 an, dann ein Zertifikat einer fremden Stelle, dann eines für einen falschen Rechnernamen – die App muss jedes Mal ablehnen. Danach trennt D7 die Verbindung hart. Der Broker verschickt dann den „letzten Willen“ der App (ihre Meldung „ich bin ausgefallen“), und die App muss sich neu verbinden und zuerst wieder ihr Typenschild (die „Geburtsmeldung“, Birth) schicken. Die neuen Einträge lassen nur die passiven Tests und die Verbindungs-Tests laufen, damit der Selbsttest kurz bleibt. Du prüfst: **Ist der Fehler wirklich ein Verstoß gegen die genannte Regel, und sind die Fälle ohne Fehler wirklich erlaubt?**
-
-**Geändert:** `none` (die App ohne Fehler) besteht jetzt auch alle Verbindungs-Tests. Nur die Regel „nach einem Ausfall zuerst wieder Birth“ (REQ-LIFE-017) wird übersprungen, weil diese App nie ausfällt. Deshalb wieder `draft`.
-
-**Ohne Fehler (muss bestehen):**
-- `T7-LIFE-02/recovery` – die App meldet „ausgefallen“, erholt sich und schickt zuerst wieder ihre Birth, dann „normal“ (REQ-LIFE-017 bestanden).
-- `T7-LIFE-02/late-subscribe` – die App schickt ihre Birth und abonniert ihre Topics erst 300 ms später, genau wie die SDK-Demo. Das ist erlaubt; D7 wartet auf das Abonnement, bevor es fragt, und jede Anfrage wird beantwortet.
-
-**Mit Fehler (muss durchfallen):**
-- `T7-CON-01/mqtt31` – die App spricht MQTT 3.1 statt 3.1.1 (REQ-MQTT-001, REQ-CMP-001).
-- `T7-CON-01/client-id` – die App nimmt bei jeder Verbindung einen neuen Zufallsnamen (ClientId) statt immer desselben (REQ-CMP-009; Pflicht auf Level 3, auf Level 1/2 nur Warnung).
-- `T7-CON-02/tls11` – die App akzeptiert das alte TLS 1.1 (REQ-MQTT-005, REQ-CMP-002).
-- `T7-CON-02/no-verify` – die App prüft das Zertifikat des Brokers nicht und verbindet sich auch mit der fremden Stelle und dem falschen Rechnernamen (REQ-MQTT-008, REQ-CMP-002).
-- `T7-CON-03/anonymous` – die App meldet sich ohne Benutzer, Passwort und Client-Zertifikat an (REQ-MQTT-009).
-- `T7-CON-04/retain` – die App schickt ihre Birth als „gespeicherte Nachricht“ (Retain), die der Broker für spätere Abonnenten aufhebt (REQ-MQTT-018, verboten).
-- `T7-LIFE-01/no-will` – die App hinterlegt keinen letzten Willen (REQ-CMP-003, REQ-LIFE-008). Nebenfolgen: T7-MON-10 sieht eine zweite Birth ohne Ausfallmeldung dazwischen (nur Hinweis, REQ-IL-012); T7-LIFE-03 hat keinen Willen zu prüfen (übersprungen).
-- `T7-LIFE-01/stale-will` – die App hinterlegt bei jeder Verbindung denselben festen Willen aus dem Guideline-Beispiel B1.1.2 (Nachrichten-Kennung von 2021), statt ihn jedes Mal neu zu erzeugen (REQ-LIFE-016).
-- `T7-LIFE-01/timestamp` – der Wille trägt einen Zeitstempel (REQ-LIFE-010, „sollte nicht“: Warnung).
-- `T7-LIFE-02/no-birth` – nach dem Neuverbinden keine Birth (REQ-LIFE-001). Auch T7-MON-03 sieht das (REQ-CMP-003, REQ-LIFE-001).
-- `T7-LIFE-02/health-first` – nach dem Neuverbinden kommt erst der Zustand (Health), dann die Birth (REQ-LIFE-015, „sollte“: Warnung).
-- `T7-LIFE-02/no-rebirth` – die App erholt sich nach „ausgefallen“ ohne neue Birth (REQ-LIFE-017).
-- `T7-LIFE-03/writer-id` – der Wille trägt eine andere Datensatz-Nummer (3999) als die normale Zustandsmeldung der App (REQ-LIFE-009). Auch T7-MON-08 sieht die zwei Nummern für denselben Datensatz (REQ-MSG-021).
-
-**Besonders anschauen:**
-- `stale-will`: „jedes Mal neu erzeugt“ prüft D7 an der Zeit in der Nachrichten-Kennung (A-208).
-- `client-id`: Pflicht erst ab Level 3.
-- die Nebenfolgen bei `no-will` und `writer-id`.
-
-**Die bisherigen 31 geprüften Testfälle** bleiben unverändert und `reviewed`. Sie laufen jetzt auch über D7; die Verbindungs-Tests bestehen dort, weil keiner ihrer Fehler die Verbindung betrifft.
-
-**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1, R-2 und R-3 akzeptiert“.
-
-### R-4 – 4 Testfälle zum Neustart (bitte prüfen)
-
-**Wo:** `oec/conformance/testdata/sim/index.yaml`, die 4 neuen Einträge `T7-LIFE-04/…` und `T7-SET-10/…` mit `status: draft`.
-
-**Worum es geht:** wie bei R-1 und R-3 – die simulierte App läuft mit genau einem eingebauten Fehler (über D7 als Zwischenstation), `oec-check test` (Level 3) muss das eingetragene Ergebnis liefern. Neu: D7 startet die App einmal neu, über ein Kommando, das der Tester angibt. Dabei prüft D7 zwei Dinge:
-- **T7-LIFE-04:** Bevor eine App sich geordnet abmeldet, schickt sie eine **Abschiedsmeldung** (Close message): ihre Zustandsmeldung „normal“ (`NORMAL_0`/0) auf ihrem eigenen Zustands-Topic, mit derselben Datensatz-Nummer wie sonst.
-- **T7-SET-10:** D7 ändert vor dem Neustart die **ReferenceDesignation** der App (ihre Kennzeichnung in der Anlage). Nach dem Neustart muss die Änderung noch da sein. Danach stellt D7 den alten Wert wieder her.
-
-Du prüfst: **Ist der Fehler wirklich ein Verstoß gegen die genannte Regel, und ist der Fall ohne Fehler zu Recht kein Verstoß?**
-
-**Ohne Fehler (darf nicht durchfallen):**
-- `T7-LIFE-04/abort` – der Neustart reißt die Verbindung ohne Abmeldung ab, der Broker verschickt den letzten Willen. Das ist keine geordnete Abmeldung, also gilt die Regel zur Abschiedsmeldung nicht. D7 kann nicht wissen, ob das Kommando des Testers oder die App schuld ist, und meldet „nicht entscheidbar“ statt „durchgefallen“.
-
-**Mit Fehler (muss durchfallen):**
-- `T7-LIFE-04/no-close` – die App meldet sich geordnet ab, schickt aber vorher keine Abschiedsmeldung (REQ-LIFE-005, über REQ-CMP-046). Nebenfolge: T7-MON-10 sieht eine neue Birth ohne Wille oder Abschied dazwischen (nur Hinweis, REQ-IL-012).
-- `T7-LIFE-04/writer-id` – die Abschiedsmeldung trägt die Datensatz-Nummer 3999 statt der Nummer der normalen Zustandsmeldung (REQ-LIFE-007). Auch T7-MON-08 sieht die zwei Nummern für denselben Datensatz (REQ-MSG-021).
-- `T7-SET-10/not-persisted` – die App bestätigt die geänderte ReferenceDesignation, hat sie nach dem Neustart aber vergessen (REQ-RES-REFDES-002).
-
-**Geändert (noch aus R-3, schon `draft`):**
-- `none` besteht jetzt zusätzlich T7-LIFE-04 und T7-SET-10.
-- `T7-LIFE-02/no-birth` und `/health-first` lassen jetzt nur T7-LIFE-01 … 03 laufen statt aller Lebenszyklus-Tests. Sonst würde die passive Prüfung das Neuverbinden nach dem Neustart bewerten statt nach dem Abbruch. Ihre Ergebnisse bleiben gleich.
-
-**Besonders anschauen:** `abort` („nicht entscheidbar“ statt „durchgefallen“) und die Nebenfolgen bei `no-close` und `writer-id`.
-
-**Die bisherigen 31 geprüften Testfälle** bleiben `reviewed`. Der Neustart läuft jetzt auch bei ihnen; T7-LIFE-04 und T7-SET-10 bestehen dort, weil keiner ihrer Fehler den Neustart betrifft.
-
-**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-4 akzeptiert“.
-
-### R-5 – 6 Aufzeichnungen zu T7-MON-14 (bitte prüfen)
-
-**Wo:** `oec/conformance/testdata/captures/index.yaml`, die 5 neuen Einträge `publist-…` und `lifecycle-pass`, alle mit `status: draft`, dazu die Aufzeichnungen (`.jsonl`).
-
-**Worum es geht:** wie bei R-2 – eine kleine, aus geprüften Beispielnachrichten gebaute Szene; bewertet wird App A, B stellt Fragen. Die neue Regel T7-MON-14 vergleicht während der ganzen Beobachtung, was A schickt, mit A's PublicationList:
-- **Mode:** über welche Topics ein Datensatz geschickt werden darf, und ob nur auf Anfrage (`ON_REQUEST_1`).
-- **Interval:** wie oft er mindestens kommen muss (plus 5 s Toleranz).
-- **Precisions:** ab welcher Änderung eines Werts neu geschickt werden soll.
-- Zeigt die Antwort auf eine Anfrage einen geänderten Wert, muss A diese Änderung auch von sich aus schicken.
-
-Du prüfst: **Ist die Szene wirklich ein Verstoß gegen die genannte Regel, und sind die Szenen ohne Fehler wirklich erlaubt?**
-
-**Ohne Fehler (muss bestehen):**
-- `publist-pass` – A hat vier Einträge (Typenschild und Zustand, Messdaten `oee` alle 2 s, Messdaten `temp` bei Änderungen ab 0,5, Messdaten `batch` nur auf Anfrage) und hält sich 32 s lang an alle.
-
-**Geändert:** `lifecycle-pass` (war `reviewed`) – A fragt jetzt B nach seiner PublicationList, und B antwortet. Ohne diese Liste kann T7-MON-14 B nicht beurteilen, und der Fall wäre nicht mehr „bestanden“, sondern „nicht entscheidbar“. Alle anderen Ergebnisse bleiben gleich. Deshalb wieder `draft`.
-
-**Mit Fehler (muss durchfallen):**
-- `publist-mode` – `oee` darf laut Mode nur über die Filter-Form geschickt werden, kommt aber über das Topic mit dem Gerät (REQ-RES-PUBLIST-011); `batch` ist „nur auf Anfrage“, kommt aber ungefragt (REQ-RES-PUBLIST-008).
-- `publist-interval` – `oee` soll alle 2 s kommen, bleibt aber 8 s aus (REQ-RES-PUBLIST-013, -014).
-- `publist-precision` – `temp` soll erst ab einer Änderung von 0,5 neu kommen, kommt aber schon bei 0,1 (REQ-RES-PUBLIST-015, „sollte“: Warnung).
-- `publist-change` – die Antwort auf eine Anfrage zeigt bei `temp` 22 statt der zuletzt geschickten 20; A schickt die Änderung aber nicht von sich aus (REQ-RES-PUBLIST-013, REQ-MQTT-019).
-
-**Besonders anschauen:**
-- `publist-mode`: Ich lese „der Mode erlaubt eine Form“ als „jede Veröffentlichung muss eine erlaubte Form benutzen“ (A-220).
-- `publist-change`: eine Änderung, die man in einer Antwort sieht, muss auch ungefragt kommen.
-
-**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-4 und R-5 akzeptiert“.
+Damit sind alle 56 Testfälle gegen die simulierte App (`oec/conformance/testdata/sim/index.yaml`) und alle 29 Aufzeichnungen (`oec/conformance/testdata/captures/index.yaml`) geprüft.
 
 ### Zur Info: was C-067 gebaut hat
 
@@ -827,8 +697,7 @@ Neu aus C-067 (P5 Inkrement 6a):
 
 ### Was als Nächstes passiert (C-068)
 
-1. **Dein Review** von R-1, R-2 (C-065), R-3 (C-066), R-4 und R-5 (C-067).
-2. **P5 Inkrement 6b:** eine simulierte zweite App (T7-ADR-01: Anfragen der App sind richtig adressiert) und `--announce` (D7 meldet sich selbst auf dem Bus, Q-029 (a)).
+1. **P5 Inkrement 6b:** eine simulierte zweite App (T7-ADR-01: Anfragen der App sind richtig adressiert) und `--announce` (D7 meldet sich selbst auf dem Bus, Q-029 (a)).
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

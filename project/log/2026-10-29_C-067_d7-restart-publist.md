@@ -230,3 +230,12 @@ Next free ids:
 - REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029, REQ-ACT-025;
 - V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129;
 - ADR-0027, Q-031, A-222.
+
+## Addendum 1 – PO review: R-1 … R-5 (2026-10-29)
+
+The PO answered "R-1, R-2, R-3, R-4 und R-5 – 6 akzeptiert" (G-3.9). Read as: all five review items accepted; "– 6" refers to the 6 capture fixtures of R-5.
+
+- `oec/conformance/testdata/sim/index.yaml`: the 25 `draft` entries (R-1 of C-065: 5, R-3 of C-066: 16, R-4 of C-067: 4) → `reviewed`, header note updated; all 56 sim fixtures are `reviewed`.
+- `oec/conformance/testdata/captures/index.yaml`: the 12 `draft` entries (R-2 of C-065: 6, R-5 of C-067: 6 incl. `lifecycle-pass`) → `reviewed`; all 29 capture fixtures are `reviewed`.
+- DESIGN.md §10, README, ROADMAP table (rows C-065 … C-067) follow. REVIEW/REVIEW_DE: R-1 … R-5 moved to "Answered earlier"; nothing is open for the PO. STATUS: last updated, next step, open questions, D7 row, history row "C-067 review". Addenda in the C-065 and C-066 logs.
+- No code, spec, schema or catalog change. Next free ids unchanged (A-222 …). `prompt.md` for C-068 no longer lists R-1 … R-5 as open.

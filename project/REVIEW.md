@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-067 (P5 increment 6a: the restart hook with T7-LIFE-04 and T7-SET-10, and the monitor rule T7-MON-14). **Open for you: R-1 (5 sim fixtures) and R-2 (6 capture fixtures) of C-065, R-3 (16 sim fixtures) of C-066, R-4 (4 sim fixtures) and R-5 (6 capture fixtures) of C-067, review.** A-191 … A-221 for information, worth a look: A-215, A-216, A-218, A-220._
+_Last updated: 2026-10-29, C-067 review (you accepted R-1 … R-5: the 25 sim fixtures and 12 capture fixtures of C-065 … C-067 are `reviewed`). **Nothing is open for you.** A-191 … A-221 for information, worth a look: A-215, A-216, A-218, A-220._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -141,14 +141,14 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-065 (P5 increment 4):
   - **T7-ACT-01 … 04 `implemented`** – D7 calls `NewDataSetWriterId`: one final response on the ResponseAddress with the CorrelationData, a new id ≥ 10 with a Ttl that the component does not use; no id again while it is reserved; no answer to unaddressable or undecodable requests; BadNotFound with an empty Payload for an unknown Source. The calls run inside the write window; a provided id is never used, so the restore check is unaffected.
   - **T7-MON-09, 13, 15, 16, 17 `implemented`** (18 of 19 monitor rules): one DataSetClassId per structure, Data/Event support of components with Sources, the list published again after a change, the RevisionCounter, the mandatory Config objects in a Set Config. **T7-MON-14 moves to C-066** (A-191).
-  - 5 new faults of the simulated component (1 conforming variant, 4 faults) → **R-1**; 6 new capture fixtures (1 positive, 5 negative) → **R-2**. No reviewed fixture changed its verdict.
+  - 5 new faults of the simulated component (1 conforming variant, 4 faults) → **R-1**; 6 new capture fixtures (1 positive, 5 negative) → **R-2** (both accepted in the C-067 review). No reviewed fixture changed its verdict.
   - Found test-first and fixed: the report's list of requests left out the Action calls; besides, sim and fixture details (A-201).
   - Against `demo.rs` (level 2): **38 pass, 0 fail, 6 skip, exit 0**, 145 requests (142 answered; the 3 others are the deliberately unanswerable calls of T7-ACT-03), state restored. The SDK was not changed.
   - ADR-0025 amendment C-065; no SF, no new dependency. A-191 … A-201 for information.
 - C-066 (P5 increment 5):
   - **Proxy attachment** `--proxy-listen`: the component connects to D7, D7 relays to the broker and sees the CONNECT, the Will, TLS and the login. An own small MQTT relay on the Go standard library (paho has no server side); no new dependency.
   - **T7-CON-01 … 04 and T7-LIFE-01 … 03 `implemented`**: MQTT 3.1.1 and a stable ClientId; TLS ≥ 1.2 and certificate verification (D7 offers TLS 1.1, an untrusted CA and a wrong host name – the component must refuse); login; no Retain; the Will on every connection (created anew); the Birth first after every connect and after a recovery; the Will published on an abnormal disconnect. Without the proxy these tests are skipped and the run is inconclusive (exit 4). **T7-MON-14 moves again, to C-067** (A-202).
-  - 15 new faults of the simulated component (2 conforming variants, 13 faults) and `none` (now also judges CON/LIFE) → **R-3**. Every sim fixture runs through the proxy; no other reviewed fixture changed.
+  - 15 new faults of the simulated component (2 conforming variants, 13 faults) and `none` (now also judges CON/LIFE) → **R-3** (accepted in the C-067 review). Every sim fixture runs through the proxy; no other reviewed fixture changed.
   - Found test-first and fixed: two false findings of the monitor (T7-MON-03 on a late Birth, T7-MON-10 on a Birth after recovery); the demo run found a D7 race – the discovery Get overtook the component's subscriptions; D7 now waits for them (A-205).
   - Against `demo.rs` through the proxy (level 2): **46 pass, 0 fail, 5 skip, exit 0**; the demo refused all three bad TLS offers, reconnected after the drop with its Birth first; 145 requests (142 answered, the 3 others are the deliberate T7-ACT-03 calls), state restored. The SDK was not changed.
   - ADR-0025 amendment C-066; no SF, no new dependency. A-202 … A-214 for information.
@@ -157,9 +157,10 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **T7-LIFE-04 and T7-SET-10 `implemented`**: the Close message before a graceful disconnect (the last Health before the DISCONNECT, `NORMAL_0`/0 on the application's Health topic with its DataSetWriterId); a changed ReferenceDesignation survives the restart (D7 sets it before, reads it after and restores it).
   - **T7-MON-14 `implemented`** (19 of 19 monitor rules): publications follow the PublicationList – the topic forms of the Mode, no unsolicited publication for `ON_REQUEST_1`, the Interval, the Precisions, and a change seen in a Get answer is published (A-220).
   - **Cut** (A-215): increment 6 is split; the peer simulation, `--announce` and T7-ADR-01 follow in C-068; `list`/`explain`, the report schema and the P5 exit run in C-069.
-  - 4 new faults of the simulated component (1 conforming variant, 3 faults) → **R-4**; 5 new capture fixtures (1 positive, 4 negative) and `lifecycle-pass` back to draft → **R-5**. The other reviewed fixtures keep their verdicts.
+  - 4 new faults of the simulated component (1 conforming variant, 3 faults) → **R-4**; 5 new capture fixtures (1 positive, 4 negative) and `lifecycle-pass` back to draft → **R-5** (both accepted in the C-067 review). The other reviewed fixtures keep their verdicts.
   - Against `demo.rs` through the proxy with the restart hook (level 2): **48 pass, 0 fail, 6 skip, exit 0**; LIFE-04 and MON-14 pass, SET-10 is not applicable (the demo has no ReferenceDesignation object); 146 requests (143 answered, the 3 others are the deliberate T7-ACT-03 calls), state restored. The SDK was not changed.
   - ADR-0025 amendment C-067; no SF, no new dependency. A-215 … A-221 for information.
+- C-067 review: you accepted R-1, R-2 (C-065), R-3 (C-066), R-4 and R-5 (C-067); all 56 sim fixtures in `testdata/sim/index.yaml` and all 29 capture fixtures in `testdata/captures/index.yaml` are `reviewed`. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
@@ -359,8 +360,6 @@ Logs: [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-2
 | A-188 | No write-back of a masked sensitive Config value at level 1 (REQ-RES-CONFIG-025 only SHOULD) | info (agent) | C-064 | – | – |
 | A-189 | A ReferenceDesignation is deleted only after its write-back Set got Status Good | info (agent) | C-064 | – | – |
 | A-190 | A run that ends during the write tests reports the restore as not checked (warning) | info (agent) | C-064 | – | – |
-| R-1 | 5 sim fixtures of `oec-check test` (T7-ACT-01 … 04) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-065 | accept | ☐ |
-| R-2 | 6 capture fixtures of `oec-check monitor` (T7-MON-09/13/15/16/17) and their expected verdicts (`testdata/captures/index.yaml`) | review (G-3.9) | C-065 | accept | ☐ |
 | A-191 | Cut: T7-MON-14 moves to C-066 (increment 5) | info (agent) | C-065 | – | – |
 | A-192 | Action stimuli; responses matched by `RequestorId` and `RequestId` on any Reply topic | info (agent) | C-065 | – | – |
 | A-193 | The Action tests run inside the write window; provided ids are never used | info (agent) | C-065 | – | – |
@@ -372,7 +371,6 @@ Logs: [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-2
 | A-199 | MON-16: growth not exactly +1; only value changes of non-sensitive Config objects; monotonicity only in `test` | info (agent) | C-065 | – | – |
 | A-200 | MON-17 judges the requester against the merged Pub Configs; in `test` only the CUT | info (agent) | C-065 | – | – |
 | A-201 | Fixture details (`retag`, sim progress, `answers-unknown`) and the Action calls in the report | info (agent) | C-065 | – | – |
-| R-3 | 16 sim fixtures of `oec-check test` (T7-CON-01 … 04, T7-LIFE-01 … 03, and `none`) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-066 | accept | ☐ |
 | A-202 | Cut: T7-MON-14 moves again, to C-067 (increment 6) | info (agent) | C-066 | – | – |
 | A-203 | Own MQTT relay on the Go standard library (no new dependency) | info (agent) | C-066 | – | – |
 | A-204 | Proxy certificates from a CA the component trusts; client certificates are not relayed | info (agent) | C-066 | – | – |
@@ -386,8 +384,6 @@ Logs: [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-2
 | A-212 | Sim: independent start, reconnect loop, Will QoS 0 per connection, `late-subscribe` | info (agent) | C-066 | – | – |
 | A-213 | Harness: all fixtures through the proxy, `tests` selection, missing result is an error, `none` back to draft | info (agent) | C-066 | – | – |
 | A-214 | Report: `attachment` "proxy", `proxy_listen`, `connections` | info (agent) | C-066 | – | – |
-| R-4 | 4 sim fixtures of `oec-check test` (T7-LIFE-04, T7-SET-10) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-067 | accept | ☐ |
-| R-5 | 6 capture fixtures of the monitor rule T7-MON-14 (5 new, `lifecycle-pass` changed) and their expected verdicts (`testdata/captures/index.yaml`) | review (G-3.9) | C-067 | accept | ☐ |
 | A-215 | Cut: increment 6 split – peer, `--announce`, T7-ADR-01 to C-068; increments 7/8 to C-069 | info (agent) | C-067 | – | – |
 | A-216 | Restart hook: a command given by the tester, run by the shell, bounded by `--restart-wait` | info (agent) | C-067 | – | – |
 | A-217 | Restart phase in the write window, before the restore check | info (agent) | C-067 | – | – |
@@ -398,95 +394,16 @@ Logs: [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-2
 
 ## Decisions and review items
 
-### R-1 – sim fixtures of `oec-check test`, increment 4 (G-3.9)
-
-- **Where:** `oec/conformance/testdata/sim/index.yaml` – 5 new entries `draft` (the faults of T7-ACT-01 … 04). The other 32 entries are unchanged and stay `reviewed`: the Action tests pass on them.
-- **What they are:** as in C-062 … C-064 – `internal/probe/sim_test.go` runs `oec-check test` (monitor + active tests, level 3) against the simulated component with one fault and compares outcome and exact REQ ids per test; every run must leave the component in its start state.
-- **Positive (conforming):**
-  - `T7-ACT-01/progress` – before the final response (ActionState 2) the component publishes an intermediate response with ActionState 1 (REQ-ACT-016, MAY); like every Good response it carries the response fields (REQ-ACT-012). Every test passes.
-- **Negative (fault → expected outcome):**
-  - `T7-ACT-01/no-correlation` (the CorrelationData of the request is not echoed): T7-ACT-01 fail REQ-ACT-007;
-  - `T7-ACT-02/reissue` (every request gets the id 6000, which is still reserved, Ttl 60 s): T7-ACT-01 fail REQ-ACT-022 (the second id is not new); T7-ACT-02 fail REQ-ACT-023;
-  - `T7-ACT-03/answers-unknown` (requests with the unknown DataSetWriterId 4 and ActionTargetId 2 are answered with BadNotFound instead of not at all): T7-ACT-03 fail REQ-ACT-017; T7-MON-01 fail REQ-ACT-019 (the responses echo 4/2, which the schema of a NewDataSetWriterId response rejects);
-  - `T7-ACT-04/no-reply` (a request for an unknown Source is not answered): T7-ACT-04 fail REQ-ACT-024.
-- **Please check:** is each fault a real violation of the named REQ, and is `progress` really compliant? In particular: the second outcome of `reissue` (T7-ACT-01 REQ-ACT-022) and of `answers-unknown` (T7-MON-01 REQ-ACT-019).
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
-
-### R-2 – capture fixtures of the monitor rules T7-MON-09/13/15/16/17 (G-3.9)
-
-- **Where:** `oec/conformance/testdata/captures/index.yaml` – 6 new entries `draft` with their `.jsonl` captures. The 18 reviewed entries are unchanged; `lifecycle-pass` gains passes of the new rules and stays PASS, `reconnect-pass` stays INCONCLUSIVE.
-- **What they are:** as in C-052 – scenarios built from reviewed payload vectors, replayed by `monitor --replay` in `internal/monitor/fixtures_test.go`, compared per test with outcome and exact REQ ids. Component A is judged, B is a peer. The Config tag of MG B1.1.3 ("Overall device settings") is used as "device", because a topic Filter with blanks is a REQ-TOP-020 warning.
-- **Positive:**
-  - `configuration-pass` – A publishes Data `oee` and its Metadata under one DataSetClassId with the same fields (MON-09) and a Profile with Data and Event (MON-13). MG B1.1.3: B sends Set Config V-PAY-100 with the mandatory objects of the published Config V-PAY-099 (MON-17); A answers Status Good, publishes Config V-PAY-114 and its MAM with RevisionCounter 2 (Birth 1, MON-16). B sets a PublicationList and a SubscriptionList entry; A publishes each again with the `ReplyTo` of the Set (MON-15). The heartbeat cannot be judged in 15 s (skip).
-- **Negative (scenario → expected outcome):**
-  - `class-id-unstable` (Data `oee` under a second DataSetClassId with the same fields, then under the first with an additional field): T7-MON-09 fail REQ-MSG-013;
-  - `no-data-event` (A's Profile lists neither Data nor Event and A publishes neither; B shows nothing, skip): T7-MON-13 fail REQ-CMP-010, REQ-CMP-036, REQ-CMP-038;
-  - `list-not-republished` (Set PublicationList answered with Status Good, no republication within 5 s): T7-MON-15 fail REQ-RES-PUBLIST-017;
-  - `revision-not-counted` (MG B1.1.3; 5.9 s after Status Good A answers Get MAM with RevisionCounter 1, the value of its Birth): T7-MON-16 fail REQ-RES-MAM-018;
-  - `set-config-mandatory-missing` (B's Set Config V-PAY-100 without the mandatory object `protocol`): T7-MON-17 fail REQ-RES-CONFIG-011 – the requester B is in violation.
-- **Please check:** is each scenario a real violation of the named REQ, and is `configuration-pass` compliant? In particular: MON-13 on a Profile without Data and Event (the captures are judged at level 3, where Data and Event are MUST: REQ-CMP-036/038, with REQ-CMP-010 "complete Message Bus behavior"), and that MON-17 judges the requester.
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
-
-### R-3 – sim fixtures of `oec-check test`, increment 5 (G-3.9)
-
-- **Where:** `oec/conformance/testdata/sim/index.yaml` – 15 new entries `draft` (the faults of T7-CON-01 … 04 and T7-LIFE-01 … 03) and `none`, back to `draft`. The other 31 reviewed entries are unchanged and stay `reviewed`; they now run through the proxy and the new tests pass on them.
-- **What they are:** as in C-062 … C-065 – `internal/probe/sim_test.go` runs `oec-check test` (level 3) against the simulated component with one fault and compares outcome and exact REQ ids per test. New: the simulated component connects through D7's proxy; D7 offers TLS 1.1 only, an untrusted CA and a wrong host name, then drops the connection, so the broker publishes the Will and the component reconnects. The new entries run only the monitor, CON and LIFE tests (`tests`) to keep the gate short.
-- **Changed:** `none` – the conforming component; since C-066 also CON-01 … 04 and LIFE-01 … 03 pass (LIFE-02 skips REQ-LIFE-017: the component reports no `FAILURE_1`/0).
-- **Positive (conforming):**
-  - `T7-LIFE-02/recovery` – reports Health `FAILURE_1`/0 while connected, then publishes its Birth again before the normal Health (REQ-LIFE-017 pass);
-  - `T7-LIFE-02/late-subscribe` – publishes its Birth and subscribes 300 ms later, like the SDK demo; every request is answered.
-- **Negative (fault → expected outcome):**
-  - `T7-CON-01/mqtt31` (MQTT 3.1, `MQIsdp` level 3): T7-CON-01 fail REQ-CMP-001, REQ-MQTT-001;
-  - `T7-CON-01/client-id` (a new random ClientId on every connection): T7-CON-01 fail REQ-CMP-009;
-  - `T7-CON-02/tls11` (accepts TLS 1.0/1.1): T7-CON-02 fail REQ-CMP-002, REQ-MQTT-005;
-  - `T7-CON-02/no-verify` (does not verify the broker certificate): T7-CON-02 fail REQ-CMP-002, REQ-MQTT-008;
-  - `T7-CON-03/anonymous` (no user name, password or client certificate): T7-CON-03 fail REQ-MQTT-009;
-  - `T7-CON-04/retain` (Birth with Retain): T7-CON-04 fail REQ-MQTT-018;
-  - `T7-LIFE-01/no-will` (no Will in the CONNECT): T7-LIFE-01 fail REQ-CMP-003, REQ-LIFE-008; T7-MON-10 info REQ-IL-012 (a second Birth without a Will in between); T7-LIFE-03 skip;
-  - `T7-LIFE-01/stale-will` (the fixed Will of MG B1.1.2 with its MessageId of 2021 on every connection): T7-LIFE-01 fail REQ-LIFE-016;
-  - `T7-LIFE-01/timestamp` (the Will carries a Timestamp): T7-LIFE-01 warn REQ-LIFE-010 (SHOULD NOT);
-  - `T7-LIFE-02/no-birth` (no Birth after the reconnect): T7-LIFE-02 fail REQ-LIFE-001; T7-MON-03 fail REQ-CMP-003, REQ-LIFE-001;
-  - `T7-LIFE-02/health-first` (Health before the Birth after the reconnect): T7-LIFE-02 warn REQ-LIFE-015 (SHOULD);
-  - `T7-LIFE-02/no-rebirth` (recovers from `FAILURE_1`/0 to `NORMAL_0` without a new Birth): T7-LIFE-02 fail REQ-LIFE-017;
-  - `T7-LIFE-03/writer-id` (the Will uses DataSetWriterId 3999, not that of its Health): T7-LIFE-03 fail REQ-LIFE-009; T7-MON-08 fail REQ-MSG-021.
-- **Please check:** is each fault a real violation of the named REQ, and are `recovery`, `late-subscribe` and `none` really compliant? In particular: `stale-will` (REQ-LIFE-016 "created anew" judged by the time in the MessageId, A-208), `client-id` (REQ-CMP-009 is MUST at level 3, SHOULD at levels 1/2) and the second outcomes of `no-will` and `writer-id`.
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
-
-### R-4 – sim fixtures of `oec-check test`, increment 6a (G-3.9)
-
-- **Where:** `oec/conformance/testdata/sim/index.yaml` – 4 new entries `draft` (the faults of T7-LIFE-04 and T7-SET-10). The 31 reviewed entries are unchanged and stay `reviewed`; the restart hook now runs on them too and LIFE-04/SET-10 pass on them (none of their faults is a restart fault).
-- **What they are:** as in C-062 … C-066 – `internal/probe/sim_test.go` runs `oec-check test` (level 3) through the proxy against the simulated component with one fault; new: D7's restart hook restarts the simulated component (Close message, DISCONNECT, reconnect with Birth). The new entries run only the selected test (`tests`) to keep the gate short.
-- **Changed draft entries of R-3:** `none` – since C-067 also LIFE-04 and SET-10 pass with every requirement judged; `T7-LIFE-02/no-birth` and `/health-first` run `T7-LIFE-01 … 03` instead of all LIFE tests: with the restart the monitor would judge the reconnect after the Close message instead of after the Will (their verdicts are unchanged).
-- **Positive (conforming variant):**
-  - `T7-LIFE-04/abort` – the restart breaks the connection without DISCONNECT (the broker publishes the Will): no graceful disconnect, so LIFE-04 is an inconclusive skip, not a failure – D7 cannot tell a faulty hook from a faulty component.
-- **Negative (fault → expected outcome):**
-  - `T7-LIFE-04/no-close` (graceful DISCONNECT without a Close message): T7-LIFE-04 fail REQ-CMP-046, REQ-LIFE-005 (REQ-LIFE-006/007 skip); T7-MON-10 info REQ-IL-012 (a new Birth without Will or Close in between);
-  - `T7-LIFE-04/writer-id` (the Close message uses DataSetWriterId 3999, not that of the Health, which D7 reads with Get Health after the restart): T7-LIFE-04 fail REQ-CMP-046, REQ-LIFE-007; T7-MON-08 fail REQ-MSG-021;
-  - `T7-SET-10/not-persisted` (accepts the Set ReferenceDesignation, forgets it on the restart): T7-SET-10 fail REQ-RES-REFDES-002.
-- **Please check:** is each fault a real violation of the named REQ, and is `abort` rightly inconclusive instead of a failure? In particular: the second outcomes of `no-close` (MON-10 information) and `writer-id` (MON-08).
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
-
-### R-5 – capture fixtures of the monitor rule T7-MON-14 (G-3.9)
-
-- **Where:** `oec/conformance/testdata/captures/index.yaml` – 5 new entries `draft` with their `.jsonl` captures, and `lifecycle-pass`, back to `draft`. The other reviewed entries and captures are unchanged.
-- **What they are:** as in C-052/C-065 – scenarios built from reviewed payload vectors, replayed by `monitor --replay`, compared per test with outcome and exact REQ ids. Component A is judged, B sends the Gets. Tolerance 5 s (the default).
-- **Changed:** `lifecycle-pass` – A sends Get PublicationList to B at 11 s and B answers with MAM and Health (`ON_REQUEST_APPLICATION_SOURCE_FILTER_15`, Interval 0). Without it T7-MON-14 is inconclusive for B, who publishes without a known PublicationList. Every implemented monitor test still passes.
-- **Positive:**
-  - `publist-pass` – A's PublicationList: MAM and Health `ON_REQUEST_APPLICATION_SOURCE_FILTER_15`; Data `oee` `ON_REQUEST_SOURCE_10` with Interval 2000 ms and Precisions; Data `temp` `APPLICATION_FILTER_6` with Interval 0 and Precision 0.5; Data `batch` `ON_REQUEST_1`. For 32 s A publishes `oee` every 2 s on `Pub/Data/<Source>`, `temp` on `Pub/Data/<Source>/temp` and `Pub/Data` after deviations ≥ 0.5 and right after a Get answer shows a changed value, `batch` only as a Get answer.
-- **Negative (scenario → expected outcome):**
-  - `publist-mode` (`oee` with Mode `FILTER_4` published on `Pub/Data/<Source>`; `batch` with `ON_REQUEST_1` published without a Get): T7-MON-14 fail REQ-RES-PUBLIST-008, REQ-RES-PUBLIST-011;
-  - `publist-interval` (`oee` with Interval 2000 ms and Precisions not published for 8 s): fail REQ-RES-PUBLIST-013, REQ-RES-PUBLIST-014;
-  - `publist-precision` (`temp` with Interval 0 and Precision 0.5 published after a deviation of 0.1): warn REQ-RES-PUBLIST-015 (SHOULD);
-  - `publist-change` (`temp` with Interval 0: a Get answer shows 22 after the published 20, and A does not publish the change within 5 s): fail REQ-MQTT-019, REQ-RES-PUBLIST-013.
-- **Please check:** is each scenario a real violation of the named REQ, and are `publist-pass` and the changed `lifecycle-pass` compliant? In particular: the reading of "the Mode enables a form" as "a publication must use an enabled form" (`publist-mode`, REQ-RES-PUBLIST-011), and `publist-change` (a change seen in a Get answer must also be published unsolicited, REQ-MQTT-019 publish on change).
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
+No open item.
 
 ### Answered earlier
+
+Answered in the C-067 review (2026-10-29) and applied in the addenda of the C-065, C-066 and C-067 logs:
+- R-1 of C-065 – 5 sim fixtures of `oec-check test` (`testdata/sim/index.yaml`: faults and the conforming variant of T7-ACT-01 … 04): ☑ accepted → `reviewed`.
+- R-2 of C-065 – 6 capture fixtures of the monitor rules T7-MON-09/13/15/16/17 (`configuration-pass` and 5 negatives): ☑ accepted → `reviewed`.
+- R-3 of C-066 – 16 sim fixtures of T7-CON-01 … 04 and T7-LIFE-01 … 03 incl. `none`: ☑ accepted → `reviewed`.
+- R-4 of C-067 – 4 sim fixtures of T7-LIFE-04 and T7-SET-10 (incl. the conforming variant `T7-LIFE-04/abort`): ☑ accepted → `reviewed`.
+- R-5 of C-067 – 6 capture fixtures of T7-MON-14 (`publist-pass` and 4 negatives, the changed `lifecycle-pass`): ☑ accepted → `reviewed`.
 
 Answered in the C-064 review (2026-10-28) and applied in C-064 addendum 1:
 - R-1 – 14 sim fixtures of `oec-check test` (`testdata/sim/index.yaml`: 13 new faults and conforming variants of T7-SET-01 … 09, 11, 12, `none` with the write outcomes): ☑ accepted → `reviewed`.
@@ -1144,5 +1061,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-068)
 
-1. Your review of R-1, R-2 (C-065), R-3 (C-066), R-4 and R-5 (C-067).
-2. P5 increment 6b: peer simulation and `--announce` (Q-029 (a)), T7-ADR-01; in a new session (start prompt in `prompt.md`).
+1. P5 increment 6b: peer simulation and `--announce` (Q-029 (a)), T7-ADR-01; in a new session (start prompt in `prompt.md`).
