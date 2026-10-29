@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, C-065: **P5 Inkrement 4** – die Aktion `NewDataSetWriterId` (T7-ACT-01 … 04) und fünf weitere passive Regeln (T7-MON-09, 13, 15, 16, 17) sind fertig. **Für dich offen: R-1 (5 Testfälle gegen die simulierte App) und R-2 (6 Aufzeichnungs-Testfälle), bitte prüfen.** A-191 … A-201 nur zur Info._
+_Stand: 28.10.2026, C-066: **P5 Inkrement 5** – D7 als Zwischenstation (Proxy) und die Tests zum Verbindungsaufbau und Lebenszyklus (T7-CON-01 … 04, T7-LIFE-01 … 03) sind fertig. **Für dich offen: R-1 (5 Testfälle) und R-2 (6 Aufzeichnungen) aus C-065 und R-3 (16 Testfälle gegen die simulierte App) aus C-066, bitte prüfen.** A-191 … A-214 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -69,6 +69,60 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 **Die bisherigen 18 Aufzeichnungen** bleiben unverändert und `reviewed`. `lifecycle-pass` hat jetzt ein paar „bestanden“ mehr und besteht weiter; `reconnect-pass` bleibt „nicht entscheidbar“ wie bisher.
 
 **Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1 und R-2 akzeptiert“.
+
+### R-3 – 16 Testfälle zu Verbindung und Lebenszyklus (bitte prüfen)
+
+**Wo:** `oec/conformance/testdata/sim/index.yaml`, die 15 neuen Einträge `T7-CON-…` und `T7-LIFE-…` sowie `none`, alle mit `status: draft`.
+
+**Worum es geht:** wie bei R-1 – die simulierte App läuft mit genau einem eingebauten Fehler, `oec-check test` (Level 3) muss das eingetragene Ergebnis liefern. Neu: Die App verbindet sich jetzt **über D7** mit dem Broker. D7 reicht alles weiter und sieht dabei, wie die App sich anmeldet. Am Ende stellt D7 die App auf die Probe: Es bietet nur das alte TLS 1.1 an, dann ein Zertifikat einer fremden Stelle, dann eines für einen falschen Rechnernamen – die App muss jedes Mal ablehnen. Danach trennt D7 die Verbindung hart. Der Broker verschickt dann den „letzten Willen“ der App (ihre Meldung „ich bin ausgefallen“), und die App muss sich neu verbinden und zuerst wieder ihr Typenschild (die „Geburtsmeldung“, Birth) schicken. Die neuen Einträge lassen nur die passiven Tests und die Verbindungs-Tests laufen, damit der Selbsttest kurz bleibt. Du prüfst: **Ist der Fehler wirklich ein Verstoß gegen die genannte Regel, und sind die Fälle ohne Fehler wirklich erlaubt?**
+
+**Geändert:** `none` (die App ohne Fehler) besteht jetzt auch alle Verbindungs-Tests. Nur die Regel „nach einem Ausfall zuerst wieder Birth“ (REQ-LIFE-017) wird übersprungen, weil diese App nie ausfällt. Deshalb wieder `draft`.
+
+**Ohne Fehler (muss bestehen):**
+- `T7-LIFE-02/recovery` – die App meldet „ausgefallen“, erholt sich und schickt zuerst wieder ihre Birth, dann „normal“ (REQ-LIFE-017 bestanden).
+- `T7-LIFE-02/late-subscribe` – die App schickt ihre Birth und abonniert ihre Topics erst 300 ms später, genau wie die SDK-Demo. Das ist erlaubt; D7 wartet auf das Abonnement, bevor es fragt, und jede Anfrage wird beantwortet.
+
+**Mit Fehler (muss durchfallen):**
+- `T7-CON-01/mqtt31` – die App spricht MQTT 3.1 statt 3.1.1 (REQ-MQTT-001, REQ-CMP-001).
+- `T7-CON-01/client-id` – die App nimmt bei jeder Verbindung einen neuen Zufallsnamen (ClientId) statt immer desselben (REQ-CMP-009; Pflicht auf Level 3, auf Level 1/2 nur Warnung).
+- `T7-CON-02/tls11` – die App akzeptiert das alte TLS 1.1 (REQ-MQTT-005, REQ-CMP-002).
+- `T7-CON-02/no-verify` – die App prüft das Zertifikat des Brokers nicht und verbindet sich auch mit der fremden Stelle und dem falschen Rechnernamen (REQ-MQTT-008, REQ-CMP-002).
+- `T7-CON-03/anonymous` – die App meldet sich ohne Benutzer, Passwort und Client-Zertifikat an (REQ-MQTT-009).
+- `T7-CON-04/retain` – die App schickt ihre Birth als „gespeicherte Nachricht“ (Retain), die der Broker für spätere Abonnenten aufhebt (REQ-MQTT-018, verboten).
+- `T7-LIFE-01/no-will` – die App hinterlegt keinen letzten Willen (REQ-CMP-003, REQ-LIFE-008). Nebenfolgen: T7-MON-10 sieht eine zweite Birth ohne Ausfallmeldung dazwischen (nur Hinweis, REQ-IL-012); T7-LIFE-03 hat keinen Willen zu prüfen (übersprungen).
+- `T7-LIFE-01/stale-will` – die App hinterlegt bei jeder Verbindung denselben festen Willen aus dem Guideline-Beispiel B1.1.2 (Nachrichten-Kennung von 2021), statt ihn jedes Mal neu zu erzeugen (REQ-LIFE-016).
+- `T7-LIFE-01/timestamp` – der Wille trägt einen Zeitstempel (REQ-LIFE-010, „sollte nicht“: Warnung).
+- `T7-LIFE-02/no-birth` – nach dem Neuverbinden keine Birth (REQ-LIFE-001). Auch T7-MON-03 sieht das (REQ-CMP-003, REQ-LIFE-001).
+- `T7-LIFE-02/health-first` – nach dem Neuverbinden kommt erst der Zustand (Health), dann die Birth (REQ-LIFE-015, „sollte“: Warnung).
+- `T7-LIFE-02/no-rebirth` – die App erholt sich nach „ausgefallen“ ohne neue Birth (REQ-LIFE-017).
+- `T7-LIFE-03/writer-id` – der Wille trägt eine andere Datensatz-Nummer (3999) als die normale Zustandsmeldung der App (REQ-LIFE-009). Auch T7-MON-08 sieht die zwei Nummern für denselben Datensatz (REQ-MSG-021).
+
+**Besonders anschauen:**
+- `stale-will`: „jedes Mal neu erzeugt“ prüft D7 an der Zeit in der Nachrichten-Kennung (A-208).
+- `client-id`: Pflicht erst ab Level 3.
+- die Nebenfolgen bei `no-will` und `writer-id`.
+
+**Die bisherigen 31 geprüften Testfälle** bleiben unverändert und `reviewed`. Sie laufen jetzt auch über D7; die Verbindungs-Tests bestehen dort, weil keiner ihrer Fehler die Verbindung betrifft.
+
+**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1, R-2 und R-3 akzeptiert“.
+
+### Zur Info: was C-066 gebaut hat
+
+- **D7 als Zwischenstation (Proxy):** Mit `--proxy-listen` verbindet sich die App nicht direkt mit dem Broker, sondern mit D7. D7 reicht alles unverändert weiter und sieht dabei die Anmeldung, den letzten Willen, die TLS-Version und Benutzer/Passwort (das Passwort steht nie im Bericht). Gebaut als kleines eigenes Programmstück ohne neue Bibliothek, weil die MQTT-Bibliothek nur die Client-Seite kann (A-203).
+  - Für die Zertifikate gibt der Tester die Zertifizierungsstelle an, der die App vertraut (A-204). Eine App, die sich **nur** mit einem Client-Zertifikat anmeldet, kann über die Zwischenstation noch nicht getestet werden.
+  - Ohne Zwischenstation werden die Verbindungs-Tests übersprungen, der Lauf ist dann „nicht entscheidbar“ (Exit 4).
+- **Sieben neue Tests:** T7-CON-01 … 04 (MQTT 3.1.1 und fester Client-Name, TLS ab 1.2 mit Zertifikatsprüfung, Anmeldung, keine gespeicherten Nachrichten) und T7-LIFE-01 … 03 (letzter Wille bei jeder Verbindung neu, Birth zuerst nach jedem Verbinden und nach einer Erholung, der Wille wird bei einem Abbruch wirklich verschickt).
+- **T7-MON-14 ist nochmal verschoben, nach C-067** (A-202): Die Zwischenstation hat den Zyklus gefüllt.
+- **Gefunden und behoben** (Test zuerst):
+  - Zwei falsche Befunde der passiven Prüfung: T7-MON-03 meldete eine Birth, die nach dem Zustand kommt, als fehlend; T7-MON-10 zählte die Birth nach einer Erholung als „zweite Birth“ (A-211). Die geprüften Aufzeichnungen bleiben dabei gleich.
+  - Der erste Lauf gegen die Demo fand einen Fehler in D7: Die Demo abonniert ihre Topics kurz nach der Birth, und D7 hatte seine erste Frage schon vorher geschickt – sie ging verloren. Jetzt wartet D7 auf das Abonnement (A-205).
+- **Lauf gegen die Beispiel-App `demo.rs`** über die Zwischenstation (Level 2): **46 bestanden, 0 durchgefallen, 5 übersprungen, Exit 0.**
+  - Die Demo hat alle drei schlechten TLS-Angebote abgelehnt, sich nach der Trennung nach etwa 6 s neu verbunden und zuerst ihre Birth geschickt.
+  - 145 Anfragen, 142 beantwortet (die 3 anderen sind wieder die absichtlich unsinnigen von T7-ACT-03).
+  - Der Stand der App war danach wieder derselbe. Am SDK musste nichts geändert werden.
+- Kein Finding, keine neue Bibliothek.
+
+Die Technik-Entscheidungen A-202 … A-214 sind nur zur Info (unten). Einen Blick wert: **A-202** (Zuschnitt), **A-204** (Zertifikate), **A-205** (Warten auf das Abonnement), **A-207/A-208** (wie Client-Name und „neu erzeugter“ Wille bewertet werden).
 
 ### Zur Info: was C-065 gebaut hat
 
@@ -672,12 +726,27 @@ Neu aus C-065 (P5 Inkrement 4):
 - **A-200 (neu) – Pflichtfelder:** geprüft wird der Absender der Änderung, gegen die zuletzt geschickte Konfiguration der Ziel-App. Im `test`-Lauf zählt nur die App selbst, also nur ihre eigenen Änderungen an anderen Apps.
 - **A-201 (neu) – Kleinkram:** Konfig-Gruppe ohne Leerzeichen in drei Aufzeichnungen; die Zwischenmeldung der simulierten App enthält jetzt Nummer und `Ttl`; `answers-unknown` erwartet auch den Befund von T7-MON-01; der Bericht listet die Aktions-Anfragen mit.
 
+Neu aus C-066 (P5 Inkrement 5):
+- **A-202 (neu) – Zuschnitt:** T7-MON-14 kommt erst in C-067; die Zwischenstation hat den Zyklus gefüllt.
+- **A-203 (neu) – Eigene Zwischenstation:** auf der Go-Standardbibliothek, ohne neue Bibliothek. Die MQTT-Bibliothek hat keine Server-Seite und liest Pakete zu großzügig; D7 muss sie aber genau sehen. Weitergereicht wird jedes Paket unverändert.
+- **A-204 (neu) – Zertifikate:** Der Tester gibt die Zertifizierungsstelle an, der die App vertraut (`--proxy-ca`, `--proxy-ca-key`; Testmaterial nur in einem Temp-Verzeichnis). Daraus stellt D7 die Zertifikate für die Zwischenstation und für den falschen Rechnernamen aus; dazu eine eigene fremde Stelle. Richtung Broker nimmt D7 seine eigenen TLS-Einstellungen und die Anmeldung der App. Ein Client-Zertifikat der App sieht D7, kann es aber nicht weiterreichen.
+- **A-205 (neu) – Warten vor der ersten Frage:** D7 wartet auf die Birth und das erste bestätigte Abonnement der App (höchstens `--timeout` nach der Anmeldung). Eine App darf nach ihrer Birth abonnieren (das SDK macht es so).
+- **A-206 (neu) – Reihenfolge:** Die Verbindungsprobe kommt zuletzt, nach allen anderen Tests: TLS 1.1, fremde Stelle, falscher Rechnername, harte Trennung, Warten auf das Neuverbinden (`--proxy-wait`, Standard 2 min). Kommt die App nicht so weit, ist das „nicht entscheidbar“.
+- **A-207 (neu) – Client-Name und Einstellungen:** Ein anderes Keep-Alive als 60 s oder „Clean Session“ aus sind nur Hinweise; ein leerer oder wechselnder Client-Name ist ein Verstoß.
+- **A-208 (neu) – „Neu erzeugter“ Wille (REQ-LIFE-016):** Die Zeit in der Nachrichten-Kennung des Willens liegt höchstens 5 s (`--tolerance`) neben der Anmeldung, und keine Kennung wiederholt sich. Eine Kennung ohne Zeit ist ein Verstoß.
+- **A-209 (neu) – Birth:** Das Typenschild der App über sich selbst ohne `ReplyTo`; es muss die erste Nachricht jeder Verbindung sein und rechtzeitig kommen. Nach „ausgefallen“ muss vor der nächsten anderen Zustandsmeldung eine neue Birth kommen; fällt die App nie aus, wird das einfach übersprungen.
+- **A-210 (neu) – Ohne Zwischenstation:** Verbindungs-Tests „nicht entscheidbar“, Exit 4 (außer mit `--allow-skip`). Eine gespeicherte Nachricht der App fällt trotzdem auf (T7-CON-04).
+- **A-211 (neu) – Passive Prüfung:** Eine fehlende Birth nach dem Willen meldet T7-MON-03 erst, wenn die Verbindung oder die Beobachtung ohne Birth endet (eine späte Birth bewertet T7-LIFE-02). T7-MON-10 zählt eine Birth nach einer Erholung nicht als zweite.
+- **A-212 (neu) – Simulierte App:** startet über die Zwischenstation unabhängig von D7, verbindet sich nach einer Trennung immer wieder neu, erzeugt den Willen je Verbindung mit QoS 0 (vorher 1); neue Variante `late-subscribe`.
+- **A-213 (neu) – Selbsttest:** alle Testfälle laufen über die Zwischenstation; ein Eintrag darf seine Tests auswählen (`tests`); fehlt ein erwartetes Ergebnis, ist das ein Fehler; `none` wieder `draft`.
+- **A-214 (neu) – Bericht:** neue Felder `attachment` „proxy“, `proxy_listen` und `connections` (jeder Verbindungsversuch mit Phase, TLS-Version, Anmeldung ohne Passwort, Antwort des Brokers, Nachrichten, Trennung). Die Version des Berichts bleibt 1 (nur ergänzt).
+
 ---
 
-### Was als Nächstes passiert (C-066)
+### Was als Nächstes passiert (C-067)
 
-1. **Dein Review** von R-1 und R-2.
-2. **P5 Inkrement 5:** D7 als „Zwischenstation“ (Proxy), über die sich die App mit dem Broker verbindet. So sieht D7 den Verbindungsaufbau selbst: T7-CON-01 … 04 (Verbindung, TLS, Anmeldung, keine gespeicherten Nachrichten), T7-LIFE-01 … 03 (letzter Wille, Anmeldung nach jedem Verbinden). Dazu T7-MON-14.
+1. **Dein Review** von R-1, R-2 (C-065) und R-3 (C-066).
+2. **P5 Inkrement 6:** ein Neustart der App auf Kommando (T7-SET-10: die ReferenceDesignation ist nach einem Neustart noch da; T7-LIFE-04: Abschiedsmeldung vor dem geordneten Trennen), eine simulierte zweite App (T7-ADR-01: Anfragen der App sind richtig adressiert), `--announce` (D7 meldet sich selbst auf dem Bus, Q-029) und T7-MON-14 (so oft und so genau wie in der PublicationList).
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

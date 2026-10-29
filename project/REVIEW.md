@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-28, C-065 (P5 increment 4: the Action tests T7-ACT-01 … 04 and the monitor rules T7-MON-09, 13, 15, 16, 17). **Open for you: R-1 (5 sim fixtures) and R-2 (6 capture fixtures), review.** A-191 … A-201 for information, worth a look: A-191, A-195, A-199, A-200._
+_Last updated: 2026-10-28, C-066 (P5 increment 5: the proxy attachment and the connection and lifecycle tests T7-CON-01 … 04, T7-LIFE-01 … 03). **Open for you: R-1 (5 sim fixtures) and R-2 (6 capture fixtures) of C-065, R-3 (16 sim fixtures) of C-066, review.** A-191 … A-214 for information, worth a look: A-202, A-204, A-205, A-207, A-208._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -145,10 +145,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Found test-first and fixed: the report's list of requests left out the Action calls; besides, sim and fixture details (A-201).
   - Against `demo.rs` (level 2): **38 pass, 0 fail, 6 skip, exit 0**, 145 requests (142 answered; the 3 others are the deliberately unanswerable calls of T7-ACT-03), state restored. The SDK was not changed.
   - ADR-0025 amendment C-065; no SF, no new dependency. A-191 … A-201 for information.
+- C-066 (P5 increment 5):
+  - **Proxy attachment** `--proxy-listen`: the component connects to D7, D7 relays to the broker and sees the CONNECT, the Will, TLS and the login. An own small MQTT relay on the Go standard library (paho has no server side); no new dependency.
+  - **T7-CON-01 … 04 and T7-LIFE-01 … 03 `implemented`**: MQTT 3.1.1 and a stable ClientId; TLS ≥ 1.2 and certificate verification (D7 offers TLS 1.1, an untrusted CA and a wrong host name – the component must refuse); login; no Retain; the Will on every connection (created anew); the Birth first after every connect and after a recovery; the Will published on an abnormal disconnect. Without the proxy these tests are skipped and the run is inconclusive (exit 4). **T7-MON-14 moves again, to C-067** (A-202).
+  - 15 new faults of the simulated component (2 conforming variants, 13 faults) and `none` (now also judges CON/LIFE) → **R-3**. Every sim fixture runs through the proxy; no other reviewed fixture changed.
+  - Found test-first and fixed: two false findings of the monitor (T7-MON-03 on a late Birth, T7-MON-10 on a Birth after recovery); the demo run found a D7 race – the discovery Get overtook the component's subscriptions; D7 now waits for them (A-205).
+  - Against `demo.rs` through the proxy (level 2): **46 pass, 0 fail, 5 skip, exit 0**; the demo refused all three bad TLS offers, reconnected after the drop with its Birth first; 145 requests (142 answered, the 3 others are the deliberate T7-ACT-03 calls), state restored. The SDK was not changed.
+  - ADR-0025 amendment C-066; no SF, no new dependency. A-202 … A-214 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
-Logs: [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -357,6 +364,20 @@ Logs: [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28
 | A-199 | MON-16: growth not exactly +1; only value changes of non-sensitive Config objects; monotonicity only in `test` | info (agent) | C-065 | – | – |
 | A-200 | MON-17 judges the requester against the merged Pub Configs; in `test` only the CUT | info (agent) | C-065 | – | – |
 | A-201 | Fixture details (`retag`, sim progress, `answers-unknown`) and the Action calls in the report | info (agent) | C-065 | – | – |
+| R-3 | 16 sim fixtures of `oec-check test` (T7-CON-01 … 04, T7-LIFE-01 … 03, and `none`) and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-066 | accept | ☐ |
+| A-202 | Cut: T7-MON-14 moves again, to C-067 (increment 6) | info (agent) | C-066 | – | – |
+| A-203 | Own MQTT relay on the Go standard library (no new dependency) | info (agent) | C-066 | – | – |
+| A-204 | Proxy certificates from a CA the component trusts; client certificates are not relayed | info (agent) | C-066 | – | – |
+| A-205 | D7 waits for the component's Birth and first SUBACK before its first Get | info (agent) | C-066 | – | – |
+| A-206 | Connection phase last: TLS 1.1, untrusted CA, wrong host, drop, reconnection | info (agent) | C-066 | – | – |
+| A-207 | CON-01: keep alive and clean session are notes; a changing ClientId is a violation | info (agent) | C-066 | – | – |
+| A-208 | LIFE-01: "created anew" = MessageId time within the tolerance of the CONNECT, no repeat | info (agent) | C-066 | – | – |
+| A-209 | LIFE-02: Birth first on every connection; recovery after FAILURE_1/0 | info (agent) | C-066 | – | – |
+| A-210 | Without proxy: CON/LIFE inconclusive skips (exit 4) | info (agent) | C-066 | – | – |
+| A-211 | Monitor: MON-03 late Birth, MON-10 recovery Birth | info (agent) | C-066 | – | – |
+| A-212 | Sim: independent start, reconnect loop, Will QoS 0 per connection, `late-subscribe` | info (agent) | C-066 | – | – |
+| A-213 | Harness: all fixtures through the proxy, `tests` selection, missing result is an error, `none` back to draft | info (agent) | C-066 | – | – |
+| A-214 | Report: `attachment` "proxy", `proxy_listen`, `connections` | info (agent) | C-066 | – | – |
 
 ## Decisions and review items
 
@@ -388,6 +409,32 @@ Logs: [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28
   - `revision-not-counted` (MG B1.1.3; 5.9 s after Status Good A answers Get MAM with RevisionCounter 1, the value of its Birth): T7-MON-16 fail REQ-RES-MAM-018;
   - `set-config-mandatory-missing` (B's Set Config V-PAY-100 without the mandatory object `protocol`): T7-MON-17 fail REQ-RES-CONFIG-011 – the requester B is in violation.
 - **Please check:** is each scenario a real violation of the named REQ, and is `configuration-pass` compliant? In particular: MON-13 on a Profile without Data and Event (the captures are judged at level 3, where Data and Event are MUST: REQ-CMP-036/038, with REQ-CMP-010 "complete Message Bus behavior"), and that MON-17 judges the requester.
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
+
+### R-3 – sim fixtures of `oec-check test`, increment 5 (G-3.9)
+
+- **Where:** `oec/conformance/testdata/sim/index.yaml` – 15 new entries `draft` (the faults of T7-CON-01 … 04 and T7-LIFE-01 … 03) and `none`, back to `draft`. The other 31 reviewed entries are unchanged and stay `reviewed`; they now run through the proxy and the new tests pass on them.
+- **What they are:** as in C-062 … C-065 – `internal/probe/sim_test.go` runs `oec-check test` (level 3) against the simulated component with one fault and compares outcome and exact REQ ids per test. New: the simulated component connects through D7's proxy; D7 offers TLS 1.1 only, an untrusted CA and a wrong host name, then drops the connection, so the broker publishes the Will and the component reconnects. The new entries run only the monitor, CON and LIFE tests (`tests`) to keep the gate short.
+- **Changed:** `none` – the conforming component; since C-066 also CON-01 … 04 and LIFE-01 … 03 pass (LIFE-02 skips REQ-LIFE-017: the component reports no `FAILURE_1`/0).
+- **Positive (conforming):**
+  - `T7-LIFE-02/recovery` – reports Health `FAILURE_1`/0 while connected, then publishes its Birth again before the normal Health (REQ-LIFE-017 pass);
+  - `T7-LIFE-02/late-subscribe` – publishes its Birth and subscribes 300 ms later, like the SDK demo; every request is answered.
+- **Negative (fault → expected outcome):**
+  - `T7-CON-01/mqtt31` (MQTT 3.1, `MQIsdp` level 3): T7-CON-01 fail REQ-CMP-001, REQ-MQTT-001;
+  - `T7-CON-01/client-id` (a new random ClientId on every connection): T7-CON-01 fail REQ-CMP-009;
+  - `T7-CON-02/tls11` (accepts TLS 1.0/1.1): T7-CON-02 fail REQ-CMP-002, REQ-MQTT-005;
+  - `T7-CON-02/no-verify` (does not verify the broker certificate): T7-CON-02 fail REQ-CMP-002, REQ-MQTT-008;
+  - `T7-CON-03/anonymous` (no user name, password or client certificate): T7-CON-03 fail REQ-MQTT-009;
+  - `T7-CON-04/retain` (Birth with Retain): T7-CON-04 fail REQ-MQTT-018;
+  - `T7-LIFE-01/no-will` (no Will in the CONNECT): T7-LIFE-01 fail REQ-CMP-003, REQ-LIFE-008; T7-MON-10 info REQ-IL-012 (a second Birth without a Will in between); T7-LIFE-03 skip;
+  - `T7-LIFE-01/stale-will` (the fixed Will of MG B1.1.2 with its MessageId of 2021 on every connection): T7-LIFE-01 fail REQ-LIFE-016;
+  - `T7-LIFE-01/timestamp` (the Will carries a Timestamp): T7-LIFE-01 warn REQ-LIFE-010 (SHOULD NOT);
+  - `T7-LIFE-02/no-birth` (no Birth after the reconnect): T7-LIFE-02 fail REQ-LIFE-001; T7-MON-03 fail REQ-CMP-003, REQ-LIFE-001;
+  - `T7-LIFE-02/health-first` (Health before the Birth after the reconnect): T7-LIFE-02 warn REQ-LIFE-015 (SHOULD);
+  - `T7-LIFE-02/no-rebirth` (recovers from `FAILURE_1`/0 to `NORMAL_0` without a new Birth): T7-LIFE-02 fail REQ-LIFE-017;
+  - `T7-LIFE-03/writer-id` (the Will uses DataSetWriterId 3999, not that of its Health): T7-LIFE-03 fail REQ-LIFE-009; T7-MON-08 fail REQ-MSG-021.
+- **Please check:** is each fault a real violation of the named REQ, and are `recovery`, `late-subscribe` and `none` really compliant? In particular: `stale-will` (REQ-LIFE-016 "created anew" judged by the time in the MessageId, A-208), `client-id` (REQ-CMP-009 is MUST at level 3, SHOULD at levels 1/2) and the second outcomes of `no-will` and `writer-id`.
 - **If accepted:** status `reviewed` in `index.yaml`.
 - **PO:** ☐ accepted ☐ remarks: …
 
@@ -1020,7 +1067,24 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-200 MON-17:** the requester must include every mandatory object of each group it sends, judged against the Pub Configs of the addressed Source and WriterGroupName, merged per object. In `test` only the observations about the component count, so the tester's own Sets are not judged.
 - **A-201 Details:** `retag` uses the Config tag of MG B1.1.3 without blanks in three captures (REQ-TOP-020); the progress variant of the sim carries the response fields in the intermediate response (REQ-ACT-012); `answers-unknown` also expects T7-MON-01 REQ-ACT-019; the report's `requests` list the Action calls in the order sent, with their ActionResponses as `replies` (fixed test-first).
 
-## Next (C-066)
+### A-202 … A-214 – P5 increment 5 (C-066, agent)
 
-1. Your review of R-1 and R-2.
-2. P5 increment 5: proxy attachment (`--proxy-listen`, Q-028), T7-CON-01 … 04, T7-LIFE-01 … 03 and T7-MON-14; in a new session (start prompt in `prompt.md`).
+- **Where:** `oec/conformance/internal/proxy/`, `internal/probe/{lifecycle, probe, session, sim_test}.go`, `internal/sim/sim.go`, `internal/monitor/monitor.go`, `cmd/oec-check/{proxy, test}.go`, `internal/report/monitor.go`, `testdata/sim/index.yaml`, `catalog/d7.yaml`; ADR-0025 amendment C-066; DESIGN.md §3.3, §3.4, §10 "As built (C-066)"; log `log/2026-10-28_C-066_d7-proxy-lifecycle.md`.
+- **A-202 Cut:** T7-MON-14 moves again, to C-067. The proxy filled the cycle; MON-14 (timing model of the PublicationList) is independent of it.
+- **A-203 Own relay:** `internal/proxy` on the Go standard library. paho has only a client side and decodes leniently; D7 must see the packets exactly. CONNECT and PUBLISH are decoded strictly, every frame is forwarded unchanged. No new dependency.
+- **A-204 Certificates:** the tester gives a CA the component trusts (`--proxy-ca`, `--proxy-ca-key`; test material in a temporary directory, never committed). D7 issues the relay and the wrong-host certificates from it and an untrusted CA of its own. Upstream the proxy uses D7's TLS settings and the component's CONNECT (its credentials). A client certificate of the component is seen, but cannot be relayed – a component that authenticates only with a client certificate cannot be tested through the proxy yet.
+- **A-205 Wait before discovery:** through the proxy D7 waits for the component's Birth and the broker's first SUBACK (at most CONNECT + `--timeout`) before its first Get. A conforming component may subscribe after its Birth (the SDK does); without the wait the discovery Get was lost (demo run 1).
+- **A-206 Connection phase last:** after all other tests (outside the write window): TLS 1.1 only, untrusted CA, wrong host name, then the drop without DISCONNECT and the wait for the reconnection with a Birth (`--proxy-wait`, default 2 min). A phase the component never reaches is an inconclusive skip.
+- **A-207 CON-01:** keep alive ≠ 60 s and clean session false are notes (MG 6.2.3 names defaults; REQ-CMP-009 grades them); an empty or changing ClientId is a violation.
+- **A-208 Will created anew (REQ-LIFE-016):** the time in the Will's MessageId lies within `--tolerance` (5 s) of the CONNECT, and no MessageId repeats; a MessageId without a time is a violation.
+- **A-209 LIFE-02:** a Birth is the Pub MAM about itself without `ReplyTo`; it must be the first PUBLISH of every connection (REQ-LIFE-015) and come within `--timeout` (REQ-LIFE-001). After a Health `FAILURE_1`/0 about itself the next other Health must follow a new Birth (REQ-LIFE-017); without such a failure a plain skip.
+- **A-210 Without proxy:** every CON/LIFE requirement is an inconclusive skip, the run ends with exit 4 (unless `--allow-skip`); a retained message of the component on D7's subscription is still a CON-04 finding.
+- **A-211 Monitor:** MON-03 reports a missing Birth after a Will only when the connection or the observation ends without one (a late Birth is REQ-LIFE-015, judged by LIFE-02); MON-10 does not count a Birth after recovery or a late Birth as a second Birth. Unit tests first; the reviewed captures keep their verdicts.
+- **A-212 Sim:** through the proxy the simulated component starts independently of D7 (like a real one), reconnects in a loop after a drop, creates its Will per connection with QoS 0 (it was QoS 1; REQ-MQTT-017 QoS 0 as default); variant `late-subscribe`.
+- **A-213 Harness:** every sim fixture runs through the proxy; an entry may select its tests (`tests`); an expected test without a result is an error; `none` judges CON/LIFE and is back to `draft`.
+- **A-214 Report:** `attachment` `"proxy"`, `proxy_listen` and `connections` (every attempt: phase, TLS version, CONNECT without password, CONNACK, PUBLISH topics and times, first SUBACK, drop); one text line per attempt; report version 1 unchanged (additive).
+
+## Next (C-067)
+
+1. Your review of R-1, R-2 (C-065) and R-3 (C-066).
+2. P5 increment 6: restart hook, peer simulation and `--announce` (Q-029), T7-LIFE-04, T7-SET-10, T7-ADR-01 and T7-MON-14; in a new session (start prompt in `prompt.md`).
