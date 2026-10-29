@@ -13,7 +13,7 @@
 # status: draft | reviewed
 images:
   - file: good.tar
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -26,7 +26,7 @@ images:
       inside the image, the text of LicenseRef-acme is embedded
       (hasExtractedLicensingInfos). Every image test passes.
   - file: cdx-docker.tar
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -38,7 +38,7 @@ images:
       and ISC.txt, and the name-only license "Vendor EULA" with embedded
       text. Every image test passes.
   - file: bad-digest.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-01: {outcome: fail, reqs: [REQ-CMP-027]}
@@ -51,7 +51,7 @@ images:
       digests); the file system of arm64 cannot be read, so T8-IMG-03 is
       skipped inconclusive (amd64 alone passes).
   - file: sha512.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-04: {outcome: warn, reqs: [REQ-CMP-030]}
@@ -60,7 +60,7 @@ images:
       diff_ids stay sha256). RIG 4.3 recommends SHA256: REQ-CMP-030 warns
       and never fails (note of REQ-CMP-030, SF-091 (f)).
   - file: single-arch.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-02: {outcome: warn, reqs: [REQ-APP-002]}
@@ -69,7 +69,7 @@ images:
       image index). Supported platform, but no multi-architecture image:
       REQ-APP-002 (SHOULD) warns.
   - file: unsupported-arch.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-02: {outcome: fail, reqs: [REQ-APP-001, REQ-CMP-032]}
@@ -86,7 +86,7 @@ images:
       No /opt/oi4/licenses at all. The license texts (REQ-CNT-014,
       REQ-LIC-002) cannot be checked without an SBOM and are skipped.
   - file: two-sboms.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-013]}
@@ -94,7 +94,7 @@ images:
       Both sbom.spdx.json and sbom.cdx.json: RIG 4.1.4 allows exactly one.
       The license texts are not checked.
   - file: missing-license-text.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-014, REQ-LIC-002]}
@@ -103,7 +103,7 @@ images:
       the expression MIT OR BSD-3-Clause; RIG 4.1.4 (SF-114) requires the
       text of every license named in the SBOM.
   - file: sbom-whiteout.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: fail, reqs: [REQ-CMP-028, REQ-CNT-013]}
@@ -112,7 +112,7 @@ images:
       sbom.spdx.json: the SBOM is in a layer but not in the file system of
       the image.
   - file: dangling-symlink.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-014, REQ-CNT-015, REQ-LIC-002]}
@@ -121,7 +121,7 @@ images:
       which is not in the image (a text only a host mount would supply):
       REQ-CNT-015 fails, and MIT has no text.
   - file: invalid-sbom.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: fail, reqs: [REQ-CMP-028, REQ-CNT-013]}
@@ -133,7 +133,7 @@ images:
       the C-070 review the file held SPDX 3.0, which SF-114 now accepts
       (see spdx3.tar).
   - file: sbom-volume.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: info, reqs: [REQ-CNT-015]}
@@ -142,7 +142,7 @@ images:
       becomes a mount point a platform could overlay from the host (RIG
       4.1.4 forbids that). A note only; the image content is complete.
   - file: spdx3.tar
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-
@@ -155,7 +155,7 @@ images:
       GPL-2.0-only WITH Classpath-exception-2.0 in the Expanded Licensing
       profile with both texts embedded. Every image test passes.
   - file: unknown-version.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: skip, reqs: [REQ-CNT-013, REQ-CNT-014, REQ-CNT-026, REQ-CNT-027, REQ-LIC-002]}
@@ -166,7 +166,7 @@ images:
       (REQ-CMP-028 passes), its content is not judged and T8-IMG-03 is
       skipped inconclusive (exit code 4).
   - file: no-license.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-026]}
@@ -175,7 +175,7 @@ images:
       licenseConcluded and licenseDeclared are NOASSERTION: a component
       whose license is not stated does not comply (RIG 4.1.4, SF-114).
   - file: no-version.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-013]}
@@ -184,7 +184,7 @@ images:
       lists every component with its name, its version and its licenses
       (RIG 4.1.4, SF-114).
   - file: exception-text.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-014, REQ-LIC-002]}
@@ -195,7 +195,7 @@ images:
       Classpath-exception-2.0.txt (RIG 4.1.4, SF-114: the text of every
       license and license exception).
   - file: no-identifier.tar
-    status: draft
+    status: reviewed
     positive: false
     expect:
       T8-IMG-03: {outcome: warn, reqs: [REQ-CNT-027]}

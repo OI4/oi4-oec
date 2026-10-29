@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-070-Review Nachtrag 3: D-1 (SF-114) ist umgesetzt – Guideline-Text RIG 4.1.4, Re-Baseline, neue SBOM-Regeln in D8. **Für dich offen: R-2** – vier Regeln und 18 Test-Images. Keine Entscheidung offen._
+_Stand: 29.10.2026, C-070-Review Nachtrag 4: R-2 akzeptiert – die vier SBOM-Regeln und alle 19 Test-Images stehen auf `reviewed`. **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,32 +24,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### R-2 – Regeln und Test-Images nach SF-114 (neu, C-070-Review)
-
-Ich zähle im C-070-Review weiter (R-1 ist erledigt), damit es keine Verwechslung gibt.
-
-**Warum:** Dein D-1 hat RIG 4.1.4 geändert (Guideline `a55f475`). Zwei Regeln, die du schon abgenommen hattest, haben einen neuen Text, zwei sind neu. Und weil jetzt jede Komponente in der SBOM eine Version (und möglichst eine Package-URL) braucht, habe ich die Test-Images angepasst – ihre Bytes ändern sich, also gehen sie wieder an dich.
-
-**Die vier Regeln** (lesbar in `oec/spec/requirements/view/cnt.md`):
-- **REQ-CNT-013** (muss): genau eine SBOM (`sbom.spdx.json` oder `sbom.cdx.json`), die **jede Software-Komponente mit Name, Version und Lizenzen** auflistet; die Version des Formats ist frei.
-- **REQ-CNT-014** (muss): der **Text jeder genannten Lizenz und jeder Ausnahme** (z. B. `Classpath-exception-2.0`) liegt bei, in der SBOM oder als `<Kennung>.txt`; eine Lizenz nur mit Namen hat ihren Text in der SBOM.
-- **REQ-CNT-026** (muss, neu): jede Lizenz ist **eindeutig benannt** (SPDX-Kennung, sonst `LicenseRef-…` oder Name). Eine Komponente ohne Lizenzangabe (`NOASSERTION` oder gar nichts) ist ein Fehler; `NONE` („keine Lizenz“) ist eine gültige Angabe.
-- **REQ-CNT-027** (sollte, neu): jede Komponente hat eine **eindeutige Kennung** wie Package-URL oder CPE; fehlt sie, gibt D8 nur eine Warnung.
-
-**Die Test-Images:**
-- **Nur die Bytes geändert** (jedes Paket hat jetzt Version und Kennung; das Ergebnis ist dasselbe wie in R-1): `good`, `cdx-docker` (gut); `bad-digest` (überspringt jetzt auch die zwei neuen Regeln), `sha512`, `single-arch`, `unsupported-arch`, `two-sboms`, `missing-license-text`, `sbom-whiteout`, `dangling-symlink`, `sbom-volume`. `no-sbom` ist unverändert und bleibt `reviewed`.
-- **Inhalt geändert:** `invalid-sbom` war ein SPDX-3.0-Image – das ist jetzt erlaubt. Neu steckt in `sbom.spdx.json` ein CycloneDX-Dokument, also gar keine SPDX-SBOM → **durchgefallen**.
-- **Neu:**
-  - `spdx3` (gut): SBOM im SPDX-3-Format (JSON-LD) mit drei Paketen, darunter `GPL-2.0-only WITH Classpath-exception-2.0`, alle Texte da → alles besteht;
-  - `unknown-version`: CycloneDX in einer künftigen Version 2.0, die D8 nicht lesen kann → **kein sicheres Urteil** (übersprungen, Exit 4), kein Fehler, weil die Versionen nicht eingeschränkt sind;
-  - `no-license`: ein Paket mit `NOASSERTION` → **durchgefallen** (REQ-CNT-026);
-  - `no-version`: ein Paket ohne Version → **durchgefallen** (REQ-CNT-013);
-  - `exception-text`: der Text der Ausnahme `Classpath-exception-2.0` fehlt → **durchgefallen** (REQ-CNT-014, REQ-LIC-002);
-  - `no-identifier`: ein Paket ohne Package-URL/CPE → **Warnung** (REQ-CNT-027).
-
-**Bitte prüfen:** Geben die vier Regeln RIG 4.1.4 richtig wieder? Sind `good`, `cdx-docker` und `spdx3` in Ordnung, und ist jeder Fehler wirklich ein Verstoß gegen die genannte Regel? Besonders: `unknown-version` (kein Urteil statt durchgefallen), `no-identifier` (nur Warnung) und der neue Inhalt von `invalid-sbom`.
-
-**Wenn ok:** Regeln und Images auf `reviewed`. Antwort z. B. „R-2 akzeptiert“.
+**Für dich ist nichts offen.** R-2 hast du akzeptiert (siehe unten).
 
 ### Zur Info: was C-070 gebaut hat
 
@@ -61,6 +36,8 @@ Ich zähle im C-070-Review weiter (R-1 ist erledigt), damit es keine Verwechslun
 - Keine neue Bibliothek, nichts Geprüftes geändert, D7 unverändert.
 
 ### Was aus deinem Review C-070 geworden ist (Kurzfassung)
+
+- **R-2:** akzeptiert („R-2 akzeptiert“). REQ-CNT-013, -014, -026, -027 und die 18 Test-Images stehen auf `reviewed`; damit sind alle 19 Test-Images von `oec-infra image` abgenommen. Kein Entwurf, kein Finding offen.
 
 - **R-1:** akzeptiert, die 13 Test-Images standen auf `reviewed`. Durch D-1 haben sich 12 davon geändert; sie sind jetzt Teil von R-2.
 - **D-1 (SF-114):** Deine erste Antwort (alle Lizenzen lizenzkonform nennen, „CRA und RED ready“, Versionen nicht einschränken, Texte rechtskonform) hat meinen Vorschlag geändert; den überarbeiteten Text hast du bestätigt („D-1 überarbeitet ok, einarbeiten“). Umgesetzt:
@@ -816,8 +793,7 @@ Neu aus dem C-070-Review (nach deinem D-1):
 
 ### Was als Nächstes passiert (C-071)
 
-1. Deine Antwort zu R-2 trage ich zuerst ein.
-2. **C-071:** das zweite Stück von D8, `oec-infra bus`: prüft den Broker (nur verschlüsselte Verbindungen, Zertifikat, dass fremde Anwendungen nicht überall schreiben dürfen, dass die OEC Registry da ist). Selbsttest gegen einen Test-Broker im Programm, freiwillig gegen unseren Entwicklungs-Broker. Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
+1. **C-071:** das zweite Stück von D8, `oec-infra bus`: prüft den Broker (nur verschlüsselte Verbindungen, Zertifikat, dass fremde Anwendungen nicht überall schreiben dürfen, dass die OEC Registry da ist). Selbsttest gegen einen Test-Broker im Programm, freiwillig gegen unseren Entwicklungs-Broker. Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---
 

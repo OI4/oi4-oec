@@ -17,8 +17,8 @@ Guideline baseline: `a55f475` · Area status: reviewed · Sections: RIG 2, RIG 4
 | [REQ-CNT-010](#req-cnt-010) | Application uses the OI4 application storage paths | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
 | [REQ-CNT-011](#req-cnt-011) | Application storages are mapped and owned by one container | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-012](#req-cnt-012) | Application detects manipulation of its stored data | MUST | none | SHOULD | MUST | service-container | manual | reviewed |
-| [REQ-CNT-013](#req-cnt-013) | SBOM in /opt/oi4/licenses | MUST | none | MUST | MUST | service-container | d8 | draft |
-| [REQ-CNT-014](#req-cnt-014) | License texts in the SBOM or as &lt;License-ID>.txt | MUST | none | MUST | MUST | service-container | d8 | draft |
+| [REQ-CNT-013](#req-cnt-013) | SBOM in /opt/oi4/licenses | MUST | none | MUST | MUST | service-container | d8 | reviewed |
+| [REQ-CNT-014](#req-cnt-014) | License texts in the SBOM or as &lt;License-ID>.txt | MUST | none | MUST | MUST | service-container | d8 | reviewed |
 | [REQ-CNT-015](#req-cnt-015) | SBOM and license texts are part of the image | MUST | none | MUST | MUST | service-container | d8 | reviewed |
 | [REQ-CNT-016](#req-cnt-016) | SBOM is created during the image build | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
 | [REQ-CNT-017](#req-cnt-017) | /opt/oi4/licenses is not overlaid by a host mount | MUST NOT | n/a | n/a | n/a | platform | d8 | reviewed |
@@ -30,8 +30,8 @@ Guideline baseline: `a55f475` · Area status: reviewed · Sections: RIG 2, RIG 4
 | [REQ-CNT-023](#req-cnt-023) | Bridge network preferred | SHOULD | none | SHOULD | SHOULD | service-container | d8, manual | reviewed |
 | [REQ-CNT-024](#req-cnt-024) | One secret storage per container | MUST NOT | n/a | n/a | n/a | platform | d8, manual | reviewed |
 | [REQ-CNT-025](#req-cnt-025) | Application may use its identity for other purposes | MAY | none | MAY | MAY | service-container | manual | reviewed |
-| [REQ-CNT-026](#req-cnt-026) | Every license in the SBOM named unambiguously | MUST | none | MUST | MUST | service-container | d8 | draft |
-| [REQ-CNT-027](#req-cnt-027) | Unique identifier per SBOM component | SHOULD | none | SHOULD | SHOULD | service-container | d8 | draft |
+| [REQ-CNT-026](#req-cnt-026) | Every license in the SBOM named unambiguously | MUST | none | MUST | MUST | service-container | d8 | reviewed |
+| [REQ-CNT-027](#req-cnt-027) | Unique identifier per SBOM component | SHOULD | none | SHOULD | SHOULD | service-container | d8 | reviewed |
 
 \* implicit: stated without keyword, treated as MUST by the interim rule of SF-035 (G-1.6).
 
@@ -349,7 +349,7 @@ A containerized application provides in the folder /opt/oi4/licenses a Software 
 - Domain: service-container · Applies to: container-image
 - Refs: RIG 4.1.4, RIG 4, RIG 1.3, RIG 5.2, GL-ADR-002, SF-114
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4-686e2ed9, RIG-4.1.4-0a58da0d, RIG-4.1.4-97a172ef, RIG-4.1.4-a09b5fa4, RIG-4.1.4-d208c6fb, RIG-4.1.4-e49f19d5, RIG-5.2-1b1e9b90
 
 > Instead, every Open Industry 4.0 Alliance-compliant application shall provide this information in the folder /opt/oi4/licenses.
@@ -380,7 +380,7 @@ The text of every license and license exception named in the SBOM is either part
 - Domain: service-container · Applies to: container-image
 - Refs: RIG 4.1.4, RIG 5.3, RIG 1.3, GL-ADR-002, SF-114
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.1.4-d4fbd2cb
 
 > The text of every license and license exception named in the SBOM shall either be part of the SBOM or be stored as separate text file /opt/oi4/licenses/&lt;License-ID>.txt.
@@ -638,7 +638,7 @@ Every license in the SBOM is named unambiguously: by its SPDX license identifier
 - Domain: service-container · Applies to: container-image
 - Refs: RIG 4.1.4, RIG 5.3, RIG 1.3, SF-114
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.1.4-d54aa58f
 
 > Each license shall be named unambiguously: by its SPDX license identifier (also within license expressions and for license exceptions after WITH), otherwise by a LicenseRef- identifier (SPDX) or by its name (CycloneDX).
@@ -660,7 +660,7 @@ Each component in the SBOM has a unique identifier, e.g. a package URL (purl) or
 - Domain: service-container · Applies to: container-image
 - Refs: RIG 4.1.4, SF-114
 - Verification: d8
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.1.4-9e252249
 
 > Give each component a unique identifier, e.g. a package URL (purl) or a CPE, to ease the tracking of vulnerabilities.

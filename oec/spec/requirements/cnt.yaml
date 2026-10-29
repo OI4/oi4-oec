@@ -408,7 +408,7 @@ requirements:
         text: The license and SBOM storage (4.1.4 Application Specific Storages) is mandatory from Level 2 on.
     verification: [d8]
     inventory: [RIG-4.1.4-0a58da0d, RIG-4.1.4-a09b5fa4, RIG-4.1.4-97a172ef, RIG-4.1.4-e49f19d5, RIG-4.1.4-d208c6fb, RIG-4-686e2ed9, RIG-5.2-1b1e9b90]
-    status: draft
+    status: reviewed
     notes: >-
       Detail of REQ-CMP-028 (reviewed umbrella). SF-114 (PO decision
       2026-10-29): the standards name the formats, every version is accepted
@@ -442,7 +442,7 @@ requirements:
         text: The text of a license named only by its name shall be part of the SBOM.
     verification: [d8]
     inventory: [RIG-4.1.4-d4fbd2cb]
-    status: draft
+    status: reviewed
     notes: >-
       SF-114 (PO decision 2026-10-29): a text for every named license is the
       testable rule that is always legally compliant (most licenses require
@@ -728,7 +728,7 @@ requirements:
         text: A component whose license is not stated (e.g. NOASSERTION) does not fulfil this requirement.
     verification: [d8]
     inventory: [RIG-4.1.4-d54aa58f]
-    status: draft
+    status: reviewed
     notes: >-
       SF-114 (PO decision 2026-10-29). The SPDX value NONE (no license
       applies) is a statement and complies; NOASSERTION or no license field
@@ -752,7 +752,7 @@ requirements:
         text: Give each component a unique identifier, e.g. a package URL (purl) or a CPE, to ease the tracking of vulnerabilities.
     verification: [d8]
     inventory: [RIG-4.1.4-9e252249]
-    status: draft
+    status: reviewed
     notes: >-
       SF-114 (PO decision 2026-10-29). D8 warns for components without a
       purl or CPE (SPDX externalRefs of type purl/cpe22Type/cpe23Type or the
