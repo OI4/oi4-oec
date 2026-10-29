@@ -1,0 +1,305 @@
+# Broker scenarios of `oec-infra bus` (DESIGN.md §9, §10; C-071).
+#
+# Each scenario is a test broker of internal/mqttwire/mqtttest (MQTT 3.1.1
+# over TLS 1.2+ with a test PKI created at run time) and – for T8-BUS-03 –
+# the simulated OEC Registry of internal/bus/registrytest; the setup of a
+# fault is in internal/bus/fixtures_test.go (scenario). The conforming
+# broker ("none") has:
+#   - users oec-probe (D8, privileged), app (--credentials-2, unprivileged)
+#     and registry; the certificate of localhost and 127.0.0.1 signed by the
+#     CA of the PKI (the --ca of the run);
+#   - TLS 1.2 and 1.3, no plain-text listener (the probed plain port is
+#     closed);
+#   - an ACL: the unprivileged user may publish only Pub and Get, and may
+#     neither subscribe to nor receive Set/Config; denied messages are
+#     dropped (a QoS 1 PUBLISH is still acknowledged, as Mosquitto does);
+#   - MaxPacketSize 262144 (the minimum of RIG 4.1.1): payloads up to
+#     262144 bytes, MQTT packets up to 262144 + 65544 bytes (SF-105);
+#   - a Registry (oi4.org/Registry/SIM/1, heartbeat every 100 ms) that
+#     collects MAM and Health, answers Get MAM/Health with and without
+#     Source and drops an asset after its Close message (Health NORMAL_0/0)
+#     or Will (Health FAILURE_1/0); D8 finds it on Oi4v2/Registry/+/Pub/#.
+# D8 runs with --timeout 1s. This index is test data with verdict (G-3.9):
+# it states the expected outcome of the bus tests at level 3 and goes to
+# the PO for review.
+#
+# fault:  the scenario ("none" = the conforming broker)
+# tests:  the tests of the run (patterns); empty: every bus test
+# expect: test → outcome and the requirements that have this outcome; the
+#         other requirements of the test have a better outcome or are not
+#         applicable. Every selected test not listed passes.
+# status: draft | reviewed
+scenarios:
+  - fault: none
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      The conforming broker with the Registry: every bus test passes.
+  - fault: T8-BUS-01/tls13-only
+    status: draft
+    positive: true
+    tests: [T8-BUS-01]
+    expect: {}
+    notes: >-
+      The broker accepts TLS 1.3 only. TLS 1.2 is not required (REQ-MQTT-006:
+      TLS 1.2 or higher): T8-BUS-01 passes.
+  - fault: T8-BUS-01/mtls
+    status: draft
+    positive: true
+    tests: [T8-BUS-01]
+    expect: {}
+    notes: >-
+      The broker requires a client certificate (as port 8884 of oec/dev);
+      D8 connects with the client certificate of the PKI and presents it in
+      its TLS probes too: T8-BUS-01 passes.
+  - fault: T8-BUS-01/mtls-tls11
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-006]}
+    notes: >-
+      The broker requires a client certificate and also accepts TLS 1.1:
+      REQ-MQTT-006 fails. Without a client certificate the TLS 1.1
+      handshake would fail for the missing certificate and hide the old
+      version (C-071).
+  - fault: T8-BUS-01/tls11
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-006]}
+    notes: >-
+      The broker also accepts TLS 1.1 (and 1.0): REQ-MQTT-006 fails.
+  - fault: T8-BUS-01/plain-listener
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-006]}
+    notes: >-
+      The broker has a second listener without TLS (the probed plain port)
+      that answers the anonymous CONNECT of D8 with a CONNACK: REQ-MQTT-006
+      fails.
+  - fault: T8-BUS-01/self-signed
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-007]}
+    notes: >-
+      The broker certificate signs itself: REQ-MQTT-007 fails. D8 does not
+      trust the broker and cannot connect, so REQ-MQTT-002 and REQ-CNT-003
+      are skipped inconclusive (the test fails anyway).
+  - fault: T8-BUS-01/other-ca
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-007]}
+    notes: >-
+      The broker certificate is signed by a CA other than the --ca of the
+      run (ca.pem / broker_ca.pem): REQ-MQTT-007 fails; REQ-MQTT-002 and
+      REQ-CNT-003 are skipped inconclusive.
+  - fault: T8-BUS-01/wrong-host
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-007]}
+    notes: >-
+      The broker certificate is signed by the CA but issued for
+      broker.invalid, not for the broker address localhost: REQ-MQTT-007
+      fails under the proposed interpretation of SF-115; REQ-MQTT-002 and
+      REQ-CNT-003 are skipped inconclusive.
+  - fault: T8-BUS-01/expired
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-007]}
+    notes: >-
+      The broker certificate expired a minute ago: REQ-MQTT-007 fails under
+      the proposed interpretation of SF-115; REQ-MQTT-002 and REQ-CNT-003
+      are skipped inconclusive.
+  - fault: T8-BUS-01/no-311
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-002]}
+    notes: >-
+      The broker accepts only MQTT 3.1 (protocol level 3) and refuses the
+      MQTT 3.1.1 CONNECT of D8 with return code 1: REQ-MQTT-002 fails;
+      REQ-CNT-003 is skipped inconclusive.
+  - fault: T8-BUS-01/packet-limit
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-CNT-003]}
+    notes: >-
+      The packet limit of the broker is two octets smaller than
+      MaxPacketSize + 65544: it closes the connection on the PUBLISH with a
+      payload of exactly MaxPacketSize on a topic of 65535 bytes (327687
+      octets; at this size the remaining length takes 3 of the 4 octets
+      SF-105 allows for, so a limit of one octet less is not observable).
+      REQ-CNT-003 fails (SF-105).
+  - fault: T8-BUS-01/payload-limit
+    status: draft
+    positive: false
+    tests: [T8-BUS-01]
+    expect:
+      T8-BUS-01: {outcome: fail, reqs: [REQ-CNT-003]}
+    notes: >-
+      The broker drops payloads larger than MaxPacketSize − 1 (it
+      acknowledges the PUBLISH): the probe message is not delivered.
+      REQ-CNT-003 fails.
+  - fault: T8-BUS-02/read-filtered
+    status: draft
+    positive: true
+    tests: [T8-BUS-02]
+    expect: {}
+    notes: >-
+      The ACL grants the subscription of the unprivileged client to
+      Set/Config but does not deliver Set/Config to it: T8-BUS-02 passes.
+  - fault: T8-BUS-02/disconnect
+    status: draft
+    positive: true
+    tests: [T8-BUS-02]
+    expect: {}
+    notes: >-
+      The broker closes the connection of the unprivileged client on every
+      denied PUBLISH (D8 reconnects for the next probe): T8-BUS-02 passes.
+  - fault: T8-BUS-02/open-acl
+    status: draft
+    positive: false
+    tests: [T8-BUS-02]
+    expect:
+      T8-BUS-02: {outcome: fail, reqs: [REQ-GEN-001, REQ-RES-CONFIG-020, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]}
+    notes: >-
+      No ACL: every Set, Del and Call of the unprivileged client is
+      delivered (all MUST requirements fail) and it receives Set/Config
+      (REQ-RES-CONFIG-026 warns, better than the test outcome).
+  - fault: T8-BUS-02/call-open
+    status: draft
+    positive: false
+    tests: [T8-BUS-02]
+    expect:
+      T8-BUS-02: {outcome: fail, reqs: [REQ-GEN-001]}
+    notes: >-
+      The ACL protects Set and Del but lets the unprivileged client call
+      NewDataSetWriterId: REQ-GEN-001 fails.
+  - fault: T8-BUS-02/del-open
+    status: draft
+    positive: false
+    tests: [T8-BUS-02]
+    expect:
+      T8-BUS-02: {outcome: fail, reqs: [REQ-GEN-001, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]}
+    notes: >-
+      The ACL protects Set and Call but not Del: Del ReferenceDesignation
+      and Del SubscriptionList arrive. REQ-GEN-001, REQ-RES-REFDES-008 and
+      REQ-RES-SUBLIST-012 fail.
+  - fault: T8-BUS-02/config-readable
+    status: draft
+    positive: false
+    tests: [T8-BUS-02]
+    expect:
+      T8-BUS-02: {outcome: warn, reqs: [REQ-RES-CONFIG-026]}
+    notes: >-
+      Write access is restricted, but the unprivileged client may subscribe
+      to and receives Set/Config: REQ-RES-CONFIG-026 (SHOULD) warns.
+  - fault: T8-BUS-02/no-credentials-2
+    status: draft
+    positive: false
+    tests: [T8-BUS-02]
+    expect:
+      T8-BUS-02: {outcome: skip, reqs: [REQ-GEN-001, REQ-RES-CONFIG-020, REQ-RES-CONFIG-026, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]}
+    notes: >-
+      The conforming broker, but the run names no unprivileged client
+      (--credentials-2): T8-BUS-02 is skipped, inconclusive for every MUST
+      requirement (exit 4 without --allow-skip).
+  - fault: T8-BUS-03/named
+    status: draft
+    positive: true
+    tests: [T8-BUS-03]
+    expect: {}
+    notes: >-
+      The conforming Registry, named by --registry instead of discovered:
+      T8-BUS-03 passes.
+  - fault: T8-BUS-03/no-registry
+    status: draft
+    positive: false
+    tests: [T8-BUS-03]
+    expect:
+      T8-BUS-03: {outcome: skip, reqs: [REQ-REG-001, REQ-REG-002]}
+    notes: >-
+      No Registry publishes within the discovery time (--registry-wait):
+      T8-BUS-03 is skipped inconclusive. Whether a platform must have a
+      Registry is REQ-PLT-008 (T8-HST-04), not this test.
+  - fault: T8-BUS-03/not-collected
+    status: draft
+    positive: false
+    tests: [T8-BUS-03]
+    expect:
+      T8-BUS-03: {outcome: fail, reqs: [REQ-REG-001]}
+    notes: >-
+      The Registry ignores the MAM and Health of the other assets: it answers
+      Get MAM and Get Health without the probe components and does not
+      answer the Get with their Source. REQ-REG-001 fails.
+  - fault: T8-BUS-03/no-answer
+    status: draft
+    positive: false
+    tests: [T8-BUS-03]
+    expect:
+      T8-BUS-03: {outcome: fail, reqs: [REQ-REG-002]}
+    notes: >-
+      The Registry publishes its heartbeat but answers no Get: REQ-REG-002
+      fails, REQ-REG-001 is skipped inconclusive.
+  - fault: T8-BUS-03/publisher
+    status: draft
+    positive: false
+    tests: [T8-BUS-03]
+    expect:
+      T8-BUS-03: {outcome: fail, reqs: [REQ-REG-002]}
+    notes: >-
+      The answers carry the PublisherId Utility/<Registry> instead of
+      Registry/<Registry>: REQ-REG-002 fails.
+  - fault: T8-BUS-03/writer-name
+    status: draft
+    positive: false
+    tests: [T8-BUS-03]
+    expect:
+      T8-BUS-03: {outcome: fail, reqs: [REQ-REG-002]}
+    notes: >-
+      The DataSetWriterName of the answers is the Identification Link of the
+      Registry instead of the described asset: REQ-REG-002 fails (D8
+      recognizes the MAM by its content, so REQ-REG-001 passes).
+  - fault: T8-BUS-03/stale-health
+    status: draft
+    positive: false
+    tests: [T8-BUS-03]
+    expect:
+      T8-BUS-03: {outcome: fail, reqs: [REQ-REG-002]}
+    notes: >-
+      The Registry returns the first Health of an asset (NORMAL_0/100), not
+      the last one received (NORMAL_0/99): REQ-REG-002 fails.
+  - fault: T8-BUS-03/keeps-closed
+    status: draft
+    positive: false
+    tests: [T8-BUS-03]
+    expect:
+      T8-BUS-03: {outcome: fail, reqs: [REQ-REG-002]}
+    notes: >-
+      The Registry ignores the Close message: the first probe component is
+      still returned after it closed. REQ-REG-002 fails.
+  - fault: T8-BUS-03/keeps-will
+    status: draft
+    positive: false
+    tests: [T8-BUS-03]
+    expect:
+      T8-BUS-03: {outcome: fail, reqs: [REQ-REG-002]}
+    notes: >-
+      The Registry ignores the Will: the second probe component is still
+      returned after its connection broke. REQ-REG-002 fails.

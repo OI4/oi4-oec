@@ -133,21 +133,51 @@ tests:
     title: Broker protocol, TLS and certificate
     mode: bus
     reqs: [REQ-MQTT-002, REQ-MQTT-006, REQ-MQTT-007, REQ-CNT-003]
-    status: planned
-    notes: MQTT 3.1.1 over TLS 1.2+ accepted; TLS 1.1 and a plain listener (e.g. 1883) refused; certificate chain to ca.pem / broker_ca.pem, not self-signed. A PUBLISH whose payload is exactly MaxPacketSize of broker.json, sent on a long topic, is accepted and delivered without a disconnect (RIG 4.1.1, SF-105); larger payloads are not checked.
+    status: implemented
+    notes: >-
+      As built (C-071): D8 connects with MQTT 3.1.1 over TLS (REQ-MQTT-002,
+      REQ-CNT-003) and probes TLS 1.2 and 1.3 (one of them accepted) and TLS
+      1.0/1.1 (refused) with raw handshakes that present the client
+      certificate of the run (REQ-MQTT-006); a plain-text MQTT listener on
+      --plain-port (default 1883) that accepts a CONNECT fails. The broker
+      certificate chains to ca.pem / broker_ca.pem (or --ca), is not
+      self-signed, names the broker host and is valid (REQ-MQTT-007; host
+      name and validity per SF-115, proposed). A PUBLISH of exactly
+      MaxPacketSize (broker.json, --max-packet-size, else 262144 with a note)
+      on a 65535-octet probe topic is delivered without a disconnect (RIG
+      4.1.1, SF-105); a MaxPacketSize above --max-probe-size is
+      inconclusive; larger payloads are not checked.
   - id: T8-BUS-02
     title: Write access and Actions restricted by ACL
     mode: bus
     needs: [credentials-2]
     reqs: [REQ-GEN-001, REQ-RES-CONFIG-020, REQ-RES-CONFIG-026, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]
-    status: planned
-    notes: The unprivileged client publishes Set/Del/Call to a probe topic of D8; the privileged D8 client must not receive them. Set/Config must also not be readable by the unprivileged client.
+    status: implemented
+    notes: >-
+      As built (C-071): the unprivileged client (--credentials-2 or
+      --bus-storage-2) publishes Set Config/Data/Metadata/PublicationList/
+      ReferenceDesignation/SubscriptionList, Del ReferenceDesignation/
+      SubscriptionList and Call NewDataSetWriterId to the probe AppId
+      of D8; the privileged D8 client must not receive them, while a positive
+      control shows that D8 receives its own requests on the same topics. The
+      unprivileged client must not read Set/Config (a refused subscription or
+      no delivery; SHOULD, warn). Both clients with the same identity are
+      inconclusive.
   - id: T8-BUS-03
     title: OEC Registry
     mode: bus
     reqs: [REQ-REG-001, REQ-REG-002]
-    status: planned
-    notes: D8 announces a probe component (Birth, MAM, Health) and expects it in the Registry's answer to Get MAM / Get Health.
+    status: implemented
+    notes: >-
+      As built (C-071): two probe components of D8 announce themselves
+      (Birth, Health, Will); the Registry (--registry or the first one seen
+      on Oi4v2/Registry/+/Pub/# within --registry-wait) must return their MAM
+      and last Health on Get MAM / Get Health, with and without Source, as
+      publisher and with the DataSetWriterName of the asset, and must no
+      longer return them after the Close message of the first and the Will
+      of the second. Without a Registry the test is inconclusive (oec/dev
+      until P7); the self-test uses a simulated Registry
+      (internal/bus/registrytest).
 
 manual:
   - req: REQ-CMP-012

@@ -94,6 +94,9 @@ var captureIndex []byte
 //go:embed testdata/images/index.yaml
 var imageIndex []byte
 
+//go:embed testdata/bus/index.yaml
+var busIndex []byte
+
 // Expect is the expected verdict of one test in a fixture: the outcome and
 // the requirements with this outcome.
 type Expect struct {
@@ -103,13 +106,13 @@ type Expect struct {
 
 // Fixture is one entry of a fixture index.
 type Fixture struct {
-	Kind     string            `yaml:"-"` // sim | capture | image
+	Kind     string            `yaml:"-"` // sim | capture | image | bus
 	Name     string            `yaml:"-"` // the fault (sim) or the file (capture)
 	Fault    string            `yaml:"fault"`
 	File     string            `yaml:"file"`
 	Status   string            `yaml:"status"`
 	Positive bool              `yaml:"positive"`
-	Tests    []string          `yaml:"tests"` // sim: the selected tests (patterns); empty: every test
+	Tests    []string          `yaml:"tests"` // sim, bus: the selected tests (patterns); empty: every test
 	Peer     bool              `yaml:"peer"`
 	Announce bool              `yaml:"announce"`
 	Expect   map[string]Expect `yaml:"expect"`
@@ -189,6 +192,26 @@ func ImageFixtures() ([]Fixture, error) {
 		f.Kind, f.Name = "image", f.File
 	}
 	return ix.Images, nil
+}
+
+// BusFixtures returns the entries of testdata/bus/index.yaml (the broker
+// scenarios of oec-infra bus) in order. They are not part of Fixtures:
+// internal/explain stays D7-only until P5b increment 6 (A-248).
+func BusFixtures() ([]Fixture, error) {
+	var ix struct {
+		Scenarios []Fixture `yaml:"scenarios"`
+	}
+	if err := decode(busIndex, &ix); err != nil {
+		return nil, fmt.Errorf("testdata/bus/index.yaml: %w", err)
+	}
+	for i := range ix.Scenarios {
+		f := &ix.Scenarios[i]
+		if f.Fault == "" || f.File != "" || f.Peer || f.Announce {
+			return nil, fmt.Errorf("testdata/bus/index.yaml: entry %d: a bus fixture names a fault and no file", i+1)
+		}
+		f.Kind, f.Name = "bus", f.Fault
+	}
+	return ix.Scenarios, nil
 }
 
 // Fixtures returns the sim fixtures followed by the capture fixtures.
