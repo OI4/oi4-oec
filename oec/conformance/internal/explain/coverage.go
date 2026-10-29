@@ -109,28 +109,30 @@ func Coverage(ix *Index) []byte {
 		}
 	}
 	p("\nFixtures: %d sim, %d capture; %d positive; %d of %d reviewed.\n", sims, caps, pos, rev, len(ix.Fixtures))
+	neg, posT := 0, 0
+	for _, t := range ix.Catalog.Tests {
+		c := ix.FixtureCounts(t)
+		if c.Negative() > 0 {
+			neg++
+		}
+		if c.Positive > 0 {
+			posT++
+		}
+	}
+	p("Tests with a negative fixture (fail, warn or info): %d of %d; with a positive fixture: %d of %d.\n", neg, len(ix.Catalog.Tests), posT, len(ix.Catalog.Tests))
 
 	p("\n## Tests\n\n")
-	p("Fixtures: `fail` – fixtures that expect the test to fail; `other` – fixtures that state another outcome (warn, info,\n")
-	p("skip); `positive` – positive fixtures that run the test without stating an outcome (pass or not applicable).\n\n")
-	p("| Test | Mode | Level | Needs | Status | Requirements | fail | other | positive |\n|---|---|---:|---|---|---|---:|---:|---:|\n")
+	p("Fixtures by the outcome their index states for the test: `fail`; `warn`/`info` (the verdict of a SHOULD or a\n")
+	p("heuristic rule); `skip`; `positive` – positive fixtures that run the test without stating an outcome (pass or not\n")
+	p("applicable). A negative fixture is one with fail, warn or info.\n\n")
+	p("| Test | Mode | Level | Needs | Status | Requirements | fail | warn/info | skip | positive |\n|---|---|---:|---|---|---|---:|---:|---:|---:|\n")
 	for _, t := range ix.Catalog.Tests {
-		fail, other, positive := 0, 0, 0
-		for _, f := range ix.TestFixtures(t) {
-			switch f.Outcome {
-			case "fail":
-				fail++
-			case PassOrNA:
-				positive++
-			default:
-				other++
-			}
-		}
+		c := ix.FixtureCounts(t)
 		n := strings.Join(t.Needs, ", ")
 		if n == "" {
 			n = "–"
 		}
-		p("| %s | %s | %d | %s | %s | %s | %d | %d | %d |\n", t.ID, t.Mode, t.Level, n, t.Status, strings.Join(t.Reqs, " "), fail, other, positive)
+		p("| %s | %s | %d | %s | %s | %s | %d | %d | %d | %d |\n", t.ID, t.Mode, t.Level, n, t.Status, strings.Join(t.Reqs, " "), c.Fail, c.WarnInfo, c.Skip, c.Positive)
 	}
 
 	p("\n## Manual requirements\n\n| Requirement | Reason |\n|---|---|\n")
@@ -148,6 +150,30 @@ func Coverage(ix *Index) []byte {
 		p("| %s | %s | %s | %s | %d |\n", id, r.Keyword, strings.Join(r.Verification, ", "), strings.Join(tests, " "), len(ix.ReqFixtures(id)))
 	}
 	return b.Bytes()
+}
+
+// FixtureCounts counts the fixtures of a test by outcome.
+type FixtureCounts struct{ Fail, WarnInfo, Skip, Positive int }
+
+// Negative is the number of fixtures with fail, warn or info.
+func (c FixtureCounts) Negative() int { return c.Fail + c.WarnInfo }
+
+// FixtureCounts counts the fixtures of the test (TestFixtures) by outcome.
+func (ix *Index) FixtureCounts(t catalog.Test) FixtureCounts {
+	var c FixtureCounts
+	for _, f := range ix.TestFixtures(t) {
+		switch f.Outcome {
+		case "fail":
+			c.Fail++
+		case "warn", "info":
+			c.WarnInfo++
+		case "skip":
+			c.Skip++
+		case PassOrNA:
+			c.Positive++
+		}
+	}
+	return c
 }
 
 func modeOf(kind string) string {

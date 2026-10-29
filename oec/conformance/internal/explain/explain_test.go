@@ -76,6 +76,21 @@ func TestIndex(t *testing.T) {
 	}
 }
 
+// TestFixtureCoverage: every implemented test has a negative fixture
+// (fail, warn or info) and a positive one (P5 exit criterion, DESIGN.md
+// §10).
+func TestFixtureCoverage(t *testing.T) {
+	ix := load(t)
+	for _, tc := range ix.Catalog.Tests {
+		if tc.Status != "implemented" {
+			continue
+		}
+		if c := ix.FixtureCounts(tc); c.Negative() == 0 || c.Positive == 0 {
+			t.Errorf("%s: %d negative and %d positive fixtures, want at least one of each", tc.ID, c.Negative(), c.Positive)
+		}
+	}
+}
+
 // TestCoverageReport keeps catalog/COVERAGE.md up to date (-update
 // rewrites it).
 func TestCoverageReport(t *testing.T) {
