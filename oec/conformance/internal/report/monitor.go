@@ -2,10 +2,8 @@ package report
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io"
-	"sort"
 	"strings"
 	"time"
 
@@ -65,10 +63,10 @@ func (r *Monitor) JSON(w io.Writer) error {
 
 var outcomeOrder = []verdict.Outcome{verdict.Pass, verdict.Info, verdict.Warn, verdict.Fail, verdict.Skip, verdict.Manual}
 
-func (r *Monitor) summaryLine() string {
+func summaryLine(summary map[verdict.Outcome]int) string {
 	var parts []string
 	for _, o := range outcomeOrder {
-		if n := r.Summary[o]; n > 0 {
+		if n := summary[o]; n > 0 {
 			parts = append(parts, fmt.Sprintf("%d %s", n, o))
 		}
 	}
@@ -88,6 +86,12 @@ func evidenceText(e verdict.Evidence) string {
 	}
 	if e.Pointer != "" {
 		at = append(at, e.Pointer)
+	}
+	if e.Image != "" {
+		at = append(at, e.Image)
+	}
+	if e.Path != "" {
+		at = append(at, e.Path)
 	}
 	s := e.Detail
 	if len(at) > 0 {
@@ -170,10 +174,19 @@ func (r *Monitor) Text(w io.Writer) error {
 		b.WriteString("\n")
 	}
 	b.WriteString("tests:\n")
-	for _, t := range r.Tests {
-		fmt.Fprintf(&b, "  %-5s %s  %s", t.Outcome, t.ID, t.Title)
+	writeTests(&b, r.Tests)
+	fmt.Fprintf(&b, "summary: %s; result %s (exit %d)\n", summaryLine(r.Summary), exitText[r.Exit], r.Exit)
+	_, err := io.WriteString(w, b.String())
+	return err
+}
+
+// writeTests writes one line per test and the evidence of every requirement
+// that is not fulfilled (text reports of oec-check and oec-infra).
+func writeTests(b *strings.Builder, tests []verdict.TestResult) {
+	for _, t := range tests {
+		fmt.Fprintf(b, "  %-5s %s  %s", t.Outcome, t.ID, t.Title)
 		if t.Reason != "" {
-			fmt.Fprintf(&b, " (%s)", t.Reason)
+			fmt.Fprintf(b, " (%s)", t.Reason)
 		}
 		b.WriteString("\n")
 		for _, q := range t.Reqs {
@@ -188,141 +201,27 @@ func (r *Monitor) Text(w io.Writer) error {
 			if id == "" {
 				id = "(no requirement)"
 			}
-			fmt.Fprintf(&b, "        %s %s (%s)", q.Outcome, id, ob)
+			fmt.Fprintf(b, "        %s %s (%s)", q.Outcome, id, ob)
 			if q.Inconclusive {
 				b.WriteString(" inconclusive")
 			}
 			if q.Reason != "" {
-				fmt.Fprintf(&b, ": %s", q.Reason)
+				fmt.Fprintf(b, ": %s", q.Reason)
 			}
 			b.WriteString("\n")
 			if q.Outcome == verdict.Skip {
 				continue
 			}
 			for _, e := range q.Evidence {
-				fmt.Fprintf(&b, "          - %s\n", evidenceText(e))
+				fmt.Fprintf(b, "          - %s\n", evidenceText(e))
 			}
 		}
 	}
-	fmt.Fprintf(&b, "summary: %s; result %s (exit %d)\n", r.summaryLine(), exitText[r.Exit], r.Exit)
-	_, err := io.WriteString(w, b.String())
-	return err
-}
-
-type junitProperty struct {
-	Name  string `xml:"name,attr"`
-	Value string `xml:"value,attr"`
-}
-
-type junitMessage struct {
-	Message string `xml:"message,attr,omitempty"`
-	Type    string `xml:"type,attr,omitempty"`
-	Text    string `xml:",chardata"`
-}
-
-type junitCase struct {
-	Name       string          `xml:"name,attr"`
-	Classname  string          `xml:"classname,attr"`
-	Properties []junitProperty `xml:"properties>property,omitempty"`
-	Failure    *junitMessage   `xml:"failure,omitempty"`
-	Skipped    *junitMessage   `xml:"skipped,omitempty"`
-	SystemOut  string          `xml:"system-out,omitempty"`
-}
-
-type junitSuite struct {
-	Name       string          `xml:"name,attr"`
-	Tests      int             `xml:"tests,attr"`
-	Failures   int             `xml:"failures,attr"`
-	Skipped    int             `xml:"skipped,attr"`
-	Timestamp  string          `xml:"timestamp,attr"`
-	Properties []junitProperty `xml:"properties>property,omitempty"`
-	Cases      []junitCase     `xml:"testcase"`
-}
-
-type junitSuites struct {
-	XMLName  xml.Name     `xml:"testsuites"`
-	Name     string       `xml:"name,attr"`
-	Tests    int          `xml:"tests,attr"`
-	Failures int          `xml:"failures,attr"`
-	Skipped  int          `xml:"skipped,attr"`
-	Suites   []junitSuite `xml:"testsuite"`
-}
-
-// group returns the catalog group of a test id (T7-MON-01 → MON).
-func group(id string) string {
-	parts := strings.Split(id, "-")
-	if len(parts) == 3 {
-		return parts[1]
-	}
-	return id
 }
 
 // JUnit writes the report as JUnit XML (DESIGN.md §7): one testsuite per
 // catalog group, one testcase per test, the requirements as properties;
 // fail → failure, skip/manual → skipped, warn/info as system-out.
 func (r *Monitor) JUnit(w io.Writer) error {
-	byGroup := map[string]*junitSuite{}
-	var names []string
-	for _, t := range r.Tests {
-		g := group(t.ID)
-		s := byGroup[g]
-		if s == nil {
-			s = &junitSuite{Name: r.Tool + "." + g, Timestamp: r.Started.UTC().Format(time.RFC3339),
-				Properties: []junitProperty{{"level", fmt.Sprint(r.Level)}, {"mode", r.Mode}, {"schemas", r.Schemas}, {"baseline", r.Baseline}}}
-			byGroup[g] = s
-			names = append(names, g)
-		}
-		c := junitCase{Name: t.ID + " " + t.Title, Classname: r.Tool + "." + g}
-		var out []string
-		for _, q := range t.Reqs {
-			c.Properties = append(c.Properties, junitProperty{"req", q.Req + "=" + string(q.Outcome)})
-			if q.Outcome == verdict.Pass || q.Outcome == verdict.Skip {
-				continue
-			}
-			for _, e := range q.Evidence {
-				out = append(out, fmt.Sprintf("%s %s: %s", q.Outcome, q.Req, evidenceText(e)))
-			}
-		}
-		text := strings.Join(out, "\n")
-		switch t.Outcome {
-		case verdict.Fail:
-			c.Failure = &junitMessage{Message: "requirement violated", Type: "fail", Text: text}
-			s.Failures++
-		case verdict.Skip, verdict.Manual:
-			c.Skipped = &junitMessage{Message: t.Reason}
-			if c.Skipped.Message == "" {
-				var rs []string
-				for _, q := range t.Reqs {
-					if q.Reason != "" {
-						rs = append(rs, q.Req+": "+q.Reason)
-					}
-				}
-				c.Skipped.Message = strings.Join(rs, "; ")
-			}
-			s.Skipped++
-		default:
-			c.SystemOut = text
-		}
-		s.Tests++
-		s.Cases = append(s.Cases, c)
-	}
-	sort.Strings(names)
-	doc := junitSuites{Name: r.Tool}
-	for _, g := range names {
-		s := byGroup[g]
-		doc.Tests += s.Tests
-		doc.Failures += s.Failures
-		doc.Skipped += s.Skipped
-		doc.Suites = append(doc.Suites, *s)
-	}
-	if _, err := io.WriteString(w, xml.Header); err != nil {
-		return err
-	}
-	enc := xml.NewEncoder(w)
-	enc.Indent("", "  ")
-	if err := enc.Encode(doc); err != nil {
-		return err
-	}
-	_, err := io.WriteString(w, "\n")
-	return err
+	return writeJUnit(w, r.Tool, r.Started, []junitProperty{{"level", fmt.Sprint(r.Level)}, {"mode", r.Mode}, {"schemas", r.Schemas}, {"baseline", r.Baseline}}, r.Tests)
 }
