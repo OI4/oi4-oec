@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"slices"
+	"strings"
 	"syscall"
 	"time"
 
@@ -56,6 +57,11 @@ func runTest(args []string, stdout, stderr io.Writer) int {
 	if f.testerIL != "" {
 		if v := ilink.Validate(f.testerIL); len(v) > 0 {
 			return usageErr("--tester-il: %s", v[0].Detail)
+		}
+		// The MAM of the announced tester takes the elements of the
+		// Oi4Identifier (MG 4.3).
+		if lv := strings.SplitN(f.testerIL, "/", 4); f.announce && (len(lv) < 4 || slices.Contains(lv, "")) {
+			return usageErr("--announce needs --tester-il as an Oi4Identifier <ManufacturerUri>/<Model>/<ProductCode>/<SerialNumber>")
 		}
 	}
 	if f.level < 1 || f.level > 3 {
@@ -142,7 +148,8 @@ func runTest(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "%s: proxy attachment on %s: the component under test connects there (waiting up to %s)\n", tool, px.Addr(), f.proxyWait)
 	}
 	s, err := probe.RunBus(ctx, cfg, probe.Options{App: f.app, Level: f.level, Timeout: f.timeout, TesterIL: f.testerIL, Tests: f.tests,
-		Proxy: px, ProxyWait: f.proxyWait, Tolerance: f.tolerance, Restart: restart, RestartWait: f.restartWait}, reqs, o.observe)
+		Proxy: px, ProxyWait: f.proxyWait, Tolerance: f.tolerance, Restart: restart, RestartWait: f.restartWait, Peer: f.peer, Announce: f.announce},
+		reqs, o.observe)
 	if err != nil {
 		fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 		return exitInternal
@@ -154,7 +161,7 @@ func runTest(args []string, stdout, stderr io.Writer) int {
 	res := o.e.Finish(ended)
 	rep.Observed = rep.Ended.Sub(rep.Started).Round(time.Millisecond).String()
 	rep.Messages, rep.Namespace = res.Messages, res.Namespace
-	rep.Tester, rep.Requests, rep.Restore = s.Probe.Tester, s.Probe.Requests, s.Probe.Restore
+	rep.Tester, rep.Requests, rep.Restore, rep.Announced = s.Probe.Tester, s.Probe.Requests, s.Probe.Restore, s.Probe.Announced
 	if px != nil {
 		rep.Connections = px.Conns()
 	}

@@ -91,12 +91,13 @@ type monitorFlags struct {
 	proxyWait                           time.Duration // test
 	restartCmd, stopCmd, startCmd       string        // test
 	restartWait                         time.Duration // test
+	peer, announce                      bool          // test
 }
 
 // newMonitorFlags registers the flags of monitor or test: the connection,
 // verdict and output flags are shared; --replay and --duration belong to
-// monitor, --timeout, --tester-il, --tests, the --proxy-* flags and the
-// restart hook flags to test.
+// monitor, --timeout, --tester-il, --tests, the --proxy-* flags, the
+// restart hook flags, --peer and --announce to test.
 func newMonitorFlags(name string, stderr io.Writer) *monitorFlags {
 	f := &monitorFlags{name: name, fl: flag.NewFlagSet(name, flag.ContinueOnError)}
 	fl := f.fl
@@ -119,6 +120,8 @@ func newMonitorFlags(name string, stderr io.Writer) *monitorFlags {
 		fl.StringVar(&f.stopCmd, "stop-cmd", "", "restart hook: shell command that stops the component under test gracefully (with --start-cmd)")
 		fl.StringVar(&f.startCmd, "start-cmd", "", "restart hook: shell command that starts the component under test (with --stop-cmd)")
 		fl.DurationVar(&f.restartWait, "restart-wait", 2*time.Minute, "waiting time for the component under test to come back after the restart hook")
+		fl.BoolVar(&f.peer, "peer", false, "peer attachment: announce a simulated second component (Utility/oi4.org/oec-check/Peer/<random>) the component under test may request (T7-ADR-01)")
+		fl.BoolVar(&f.announce, "announce", false, "announce oec-check as a component (Birth, Health, Close message, Will under the tester IL)")
 	}
 	fl.StringVar(&f.record, "record", "", "write the observed messages to a capture (JSONL)")
 	fl.StringVar(&f.app, "app", "", "component under test: AppId (Identification Link) or <ServiceType>/<AppId>")

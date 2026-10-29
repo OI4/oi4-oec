@@ -88,7 +88,7 @@ func TestTestLive(t *testing.T) {
 		code  int
 		want  string
 	}{
-		{sim.None, true, []string{"--level", "3"}, exitValid, "pass  T7-LIFE-02"},
+		{sim.None, true, []string{"--level", "3", "--peer", "--announce"}, exitValid, "pass  T7-ADR-01"},
 		{sim.ReplyTo, false, []string{"--level", "3", "--tests", "T7-GET-01"}, exitInvalid, "fail  T7-GET-01"},
 	} {
 		t.Run(string(c.fault), func(t *testing.T) {
@@ -147,6 +147,12 @@ func TestTestLive(t *testing.T) {
 					Test    string
 					Replies int
 				}
+				Announced []struct {
+					Role        string
+					PublisherID string `json:"publisher_id"`
+					Requests    int
+					Answered    int
+				}
 			}
 			if err := json.Unmarshal(raw, &rep); err != nil || rep.Mode != "test" || !strings.HasPrefix(rep.Tester, "Utility/oi4.org/oec-check/D7/") || len(rep.Requests) == 0 {
 				t.Errorf("report %+v %v", rep, err)
@@ -156,6 +162,14 @@ func TestTestLive(t *testing.T) {
 			}
 			if c.proxy && (!strings.Contains(out, "pass  T7-LIFE-04") || !strings.Contains(out, "pass  T7-SET-10") || !strings.Contains(errOut, "restart hook: touch")) {
 				t.Errorf("restart hook:\n%s%s", out, errOut)
+			}
+			if c.fault == sim.None && (len(rep.Announced) != 2 || rep.Announced[0].Role != "tester" || rep.Announced[0].PublisherID != rep.Tester ||
+				rep.Announced[1].Role != "peer" || !strings.HasPrefix(rep.Announced[1].PublisherID, "Utility/oi4.org/oec-check/Peer/") ||
+				rep.Announced[1].Requests == 0 || !strings.Contains(out, "announced peer Utility/oi4.org/oec-check/Peer/")) {
+				t.Errorf("--peer --announce: %+v\n%s", rep.Announced, out)
+			}
+			if c.fault == sim.ReplyTo && (len(rep.Announced) != 0 || !strings.Contains(out, "T7-ADR-01")) {
+				t.Errorf("announced without --peer, --announce: %+v", rep.Announced)
 			}
 			if strings.Contains(string(raw), "secret\"") {
 				t.Error("the password is in the report")
@@ -191,6 +205,8 @@ func TestTestUsage(t *testing.T) {
 		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--start-cmd", "true"},
 		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--restart-cmd", "true", "--restart-wait", "0s"},
 		{"monitor", "--broker", "mqtts://localhost", "--restart-cmd", "true"},
+		{"monitor", "--broker", "mqtts://localhost", "--peer"},
+		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--announce", "--tester-il", "a.com/M/P"},
 	} {
 		if code, out, errOut := exec(t, "", args...); code != exitUsage {
 			t.Errorf("%v: exit %d\n%s%s", args, code, out, errOut)

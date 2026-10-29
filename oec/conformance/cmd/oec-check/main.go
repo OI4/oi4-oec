@@ -92,6 +92,14 @@ monitor and --record, plus:
               [--restart-wait 2m]: shell commands that stop the component
               under test gracefully and start it again (T7-LIFE-04,
               T7-SET-10); without them these tests are skipped (inconclusive)
+  peer:       --peer: D7 announces a simulated second component
+              (Utility/oi4.org/oec-check/Peer/<random>: Birth, heartbeat,
+              Close message, Will) and answers its Get MAM, Health and
+              Profile; T7-ADR-01 judges the requests of the component under
+              test to it; without --peer T7-ADR-01 is skipped (inconclusive)
+  announce:   --announce: D7 announces itself the same way under the tester
+              IL (--tester-il must then be an Oi4Identifier); default: D7
+              is not announced
 
 Exit codes: 0 valid/pass, 1 invalid/fail, 2 usage or input error,
 3 internal error or broker not reachable, 4 inconclusive (monitor, test).
