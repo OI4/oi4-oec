@@ -187,7 +187,8 @@ None. `go.mod` is unchanged.
 
 - `10660b7`: probe (peer, announce, T7-ADR-01), sim consumer and 3 faults, harness, sim index, catalog; also the report field `announced` (`internal/report/monitor.go`).
 - `d5a6e70`: CLI flags `--peer`/`--announce`, report wiring, usage text, CLI tests.
-- docs commit: README, DESIGN, ADR-0025 amendment C-068, log, STATUS, ROADMAP, REVIEW, REVIEW_DE.
+- `d4af0ee`: README, DESIGN, ADR-0025 amendment C-068, log, STATUS, ROADMAP, OPEN-QUESTIONS (Q-029 implemented), REVIEW, REVIEW_DE.
+- this commit: the hash of the docs commit in this list.
 
 ## Checks (final)
 
