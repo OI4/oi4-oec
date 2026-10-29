@@ -43,6 +43,8 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 **Meine Empfehlung: (a).** Nach deiner Reihenfolge aus C-045 kommen P4b und P5b nach P4/P5. P5b zuerst, weil die Demos (P6) und die Registry (P7) am Ende auch D8 bestehen müssen. D8 nutzt dasselbe Go-Modul, denselben Katalog-Aufbau (`d8.yaml`, 17 Tests geplant), dieselbe Bewertung und denselben Bericht wie D7 – das ist jetzt alles frisch. P4b hängt von beidem nicht ab und kann danach kommen. Die CI gehört zur Veröffentlichung (deine Entscheidung) und damit nach P9.
 
+**Gut zu wissen zu (a):** Der Abschluss von P5b verlangt, dass „unsere Demo- und Registry-Images Level 3 bestehen“. Diese Container-Images gibt es noch nicht (sie entstehen in P6/P7). P5b kann D8 aber gegen eigens gebaute Images (gute und fehlerhafte) bauen und selbst testen; der Abschlusslauf gegen die echten Images käme dann mit P6/P7 – so wie der Lauf von D7 gegen die Demo auf P4 gewartet hat.
+
 Antwort z. B.: „D-1 (a)“.
 
 ### Zur Info: was C-069 gebaut hat

@@ -437,6 +437,7 @@ Logs: [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C
   4. runs in CI on Windows, macOS and Linux runners – **with P9** (as the SDK platform matrix, D-1 (a) of C-061): the gate runs natively on macOS arm64; cross builds for Windows/Linux/macOS × amd64/arm64 succeed. The container image of D7 is a release artifact and also comes with P9 (A-237).
 - **Options:** (a) close P5 (criterion 4 to the P9 CI); next **P5b** – D8 `oec-infra` (container and platform checks). (b) As (a), but next **P4b** – the micro SDK in C for the ESP32 (D9). (c) As (a), but next **P6** – the demos (weather in Rust, logger in C); their exit also needs D8, which would then stay open. (d) Keep P5 open until the CI exists.
 - **Recommendation:** (a). Your C-045 order puts P4b/P5b after P4/P5. P5b comes first because the exits of P6 and P7 need D8 (`level3` container compliance) and D8 reuses the module, catalog (`d8.yaml`, 17 tests planned), verdict model and report of D7 while they are fresh. P4b is independent of both and can follow; the CI belongs to P9 and the publication (your decision).
+- **Note on (a):** the P5b exit ("our demo and registry images pass `level3`") needs container images that do not exist yet (no image in the repo; they come with P6/P7). P5b can build and self-test D8 against purpose-built images (good and faulty); the exit run on the demo and registry images would then follow with P6/P7 – as the D7 run against the demo waited for P4.
 - **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ (d) ☐ other: …
 
 ### Answered earlier

@@ -112,7 +112,7 @@ The four exit criteria of the ROADMAP (P5) and the former P4 criterion 3; the sa
 | 3 | every catalog item `implemented` or a documented `manual` | **met** – 55/55 `implemented`; 4 `manual` REQs with reason; 0 uncovered `d7-monitor`/`d7-test` REQs (`catalog/COVERAGE.md`). |
 | 4 | CI on Windows, macOS and Linux runners | **carried forward to P9** (as the SDK platform matrix, D-1 (a) of the C-061 review) – recorded locally: the gate on macOS arm64, cross builds for all six targets. The container image comes with P9 too (A-237). |
 
-Proposal to the PO (REVIEW D-1): close P5 with criterion 4 carried to P9; next phase **P5b** (D8). Reason: the exits of P6 (demos) and P7 (registry) also need D8, and D8 reuses the D7 module, catalog structure, verdict model and report, which are fresh now; P4b (D9) depends on neither and can follow.
+Proposal to the PO (REVIEW D-1): close P5 with criterion 4 carried to P9; next phase **P5b** (D8). Reason: the exits of P6 (demos) and P7 (registry) also need D8, and D8 reuses the D7 module, catalog structure, verdict model and report, which are fresh now; P4b (D9) depends on neither and can follow. Caveat stated in D-1: the P5b exit ("our demo and registry images pass `level3`") needs the container images of P6/P7, which do not exist yet; P5b can build and self-test D8 against purpose-built images, and the exit run on the real images follows with P6/P7.
 
 ## Agent decisions (G-3.4 b, for information: REVIEW A-229 … A-238)
 
