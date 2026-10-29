@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-071-Review Nachtrag 1: R-1 akzeptiert – die 29 Broker-Szenarien von `oec-infra bus` stehen auf `reviewed`. **Für dich offen: D-1** (SF-115: muss das Broker-Zertifikat zur Broker-Adresse passen und gültig sein?). A-250 … A-258 nur zur Info._
+_Stand: 29.10.2026, C-071-Review Nachtrag 2: D-1 entschieden („D-1 wie vorgeschlagen“, SF-115 wie vorgeschlagen); Guideline-Text, Re-Baseline und D8 folgen in Nachtrag 3. R-1 hattest du schon akzeptiert._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 

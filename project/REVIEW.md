@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-071 review addendum 1: R-1 accepted – the 29 broker scenarios of `oec-infra bus` are `reviewed` (C-071 wrote 28; the list had 29 entries, the count is corrected). **Open for you: D-1** (SF-115: must the broker certificate be valid for the broker address and within its validity?). A-250 … A-258 for information._
+_Last updated: 2026-10-29, C-071 review addendum 2: you decided D-1 ("D-1 wie vorgeschlagen", SF-115 as proposed); the guideline text, the re-baseline and D8 follow in addendum 3. R-1 accepted earlier (addendum 1)._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
