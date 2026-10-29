@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-070-Review Nachtrag 4: R-2 akzeptiert – die vier SBOM-Regeln und alle 19 Test-Images stehen auf `reviewed`. **Für dich ist nichts offen.**_
+_Stand: 29.10.2026, C-071: das zweite Stück von P5b ist fertig – `oec-infra bus` prüft den Broker. **Für dich offen: D-1** (SF-115: muss das Broker-Zertifikat zur Broker-Adresse passen und gültig sein?) und **R-1** (28 Broker-Szenarien). A-250 … A-258 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,67 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Für dich ist nichts offen.** R-2 hast du akzeptiert (siehe unten).
+### D-1 – SF-115: Muss das Broker-Zertifikat zur Adresse des Brokers passen und noch gültig sein? (bitte entscheiden)
+
+**Worum geht es?** Jede Anwendung verbindet sich über TLS mit dem Broker. Der Broker zeigt dabei sein **Zertifikat**, eine Art Ausweis. Die Guideline (MG 6.2.2) verlangt auf der **Broker-Seite** nur: TLS 1.2 oder neuer, und das Zertifikat ist von einer Zertifizierungsstelle (CA) unterschrieben, nicht von sich selbst. Auf der **Client-Seite** steht dagegen: Jede Anwendung prüft das Zertifikat gegen die CA **und gegen die Adresse des Brokers** und benutzt keine Verbindung, die sie nicht prüfen kann.
+
+Die Lücke: Ein Broker, dessen Zertifikat zwar von der CA unterschrieben ist, aber für einen **anderen Rechnernamen** ausgestellt oder **abgelaufen** ist, verstößt nach dem Text gegen nichts – obwohl sich dann keine korrekte Anwendung mit ihm verbinden kann. D8 kann so nicht sagen, ob das ein Fehler der Plattform ist oder nur ein Problem des Prüflaufs.
+
+**Mein Vorschlag:** Auf der Broker-Seite von MG 6.2.2 ergänzen: „The broker certificate must be valid for the broker address provided in the Message Bus storage (`Address` of `broker.json`; a host name as DNS name or an IP address as IP address of the Subject Alternative Name) and within its period of validity.“ Also: Das Zertifikat muss für die Adresse gelten, die die Plattform in `broker.json` ankündigt, und darf nicht abgelaufen (oder noch nicht gültig) sein. Die Regel REQ-MQTT-007 wird entsprechend erweitert.
+
+**Was passiert danach?** D8 arbeitet schon nach dem Vorschlag (im Bericht steht „SF-115, proposed“). Stimmst du zu, trage ich den Text in die Guideline ein, ziehe die Baseline nach und nehme das „proposed“ heraus. Lehnst du ab, werden falscher Name und Ablauf nur noch **Hinweise**; die zwei Szenarien `wrong-host` und `expired` ändern sich dann und gehen wieder auf `draft`.
+
+**Antwort z. B.:** „D-1 wie vorgeschlagen“.
+
+### R-1 – 28 Broker-Szenarien für `oec-infra bus` (bitte prüfen)
+
+**Was ist das?** Jedes Szenario startet im Test einen kleinen Broker (`mqtttest`, mit TLS; die Test-Zertifikate entstehen erst beim Lauf) und eine nachgebaute OEC Registry (`registrytest`) – jeweils mit genau einem eingebauten Fehler. D8 prüft diesen Broker, und das Ergebnis muss genau dem in der Liste `oec/conformance/testdata/bus/index.yaml` entsprechen. Ein Test, der dort nicht steht, muss bestehen.
+
+**Die sechs guten Szenarien** (alles besteht):
+- `none`: korrekter Broker mit Registry;
+- `T8-BUS-01/tls13-only`: nur TLS 1.3 (die Regel sagt „1.2 oder neuer“, also in Ordnung);
+- `T8-BUS-01/mtls`: der Broker verlangt ein Client-Zertifikat (wie Port 8884 unseres Dev-Brokers);
+- `T8-BUS-02/read-filtered`: der fremde Client darf Set/Config zwar abonnieren, bekommt aber nichts zugestellt;
+- `T8-BUS-02/disconnect`: der Broker wirft den fremden Client bei jedem verbotenen Senden hinaus;
+- `T8-BUS-03/named`: die Registry wird per `--registry` genannt statt gesucht.
+
+**Die fehlerhaften Szenarien** (Fehler → erwartetes Ergebnis):
+- **T8-BUS-01 (TLS, Zertifikat, Paketgröße):**
+  - `tls11` und `mtls-tls11`: der Broker nimmt auch das alte TLS 1.1 an (einmal ohne, einmal mit Client-Zertifikat) → **durchgefallen** REQ-MQTT-006;
+  - `plain-listener`: ein zweiter Port ohne Verschlüsselung nimmt eine Anmeldung an → **durchgefallen** REQ-MQTT-006 (ein offener Port, der keine Anmeldung bestätigt, wäre nur ein Hinweis);
+  - `self-signed` (Zertifikat unterschreibt sich selbst) und `other-ca` (von einer fremden CA) → **durchgefallen** REQ-MQTT-007; D8 kann sich dann nicht verbinden, darum bleiben die übrigen Punkte ohne sicheres Urteil;
+  - `wrong-host` (Zertifikat für einen anderen Namen) und `expired` (seit einer Minute abgelaufen) → **durchgefallen** REQ-MQTT-007 – **hängt an D-1**;
+  - `no-311`: der Broker kann nur das ältere MQTT 3.1 → **durchgefallen** REQ-MQTT-002;
+  - `packet-limit`: die Paketgrenze des Brokers ist 2 Byte zu klein für eine Nachricht der Größe MaxPacketSize mit längstem Topic (SF-105) → **durchgefallen** REQ-CNT-003;
+  - `payload-limit`: der Broker verwirft Nutzdaten, die größer als MaxPacketSize − 1 sind → **durchgefallen** REQ-CNT-003.
+- **T8-BUS-02 (Zugriffsrechte; ein zweiter, nicht berechtigter Client versucht, Set/Del/Call an D8s eigene Probe-App zu schicken):**
+  - `open-acl`: keine Zugriffsregeln, alles kommt an → **durchgefallen** REQ-GEN-001 und die Regel jeder einzelnen Ressource (Config, Data, Metadata, PublicationList, ReferenceDesignation, SubscriptionList);
+  - `call-open`: nur der Call `NewDataSetWriterId` kommt durch → **durchgefallen** REQ-GEN-001;
+  - `del-open`: nur Del kommt durch → **durchgefallen** REQ-GEN-001, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012;
+  - `config-readable`: Schreiben ist gesperrt, aber Set/Config kann mitgelesen werden → nur **Warnung** REQ-RES-CONFIG-026 („sollte“);
+  - `no-credentials-2`: der Prüflauf hat keinen zweiten Client → **übersprungen**, kein sicheres Urteil.
+- **T8-BUS-03 (Registry; D8 meldet zwei Probe-Komponenten an und fragt die Registry nach ihnen):**
+  - `no-registry`: keine Registry da → **übersprungen**, kein sicheres Urteil (ob eine Plattform eine Registry haben muss, prüft später T8-HST-04);
+  - `not-collected`: die Registry sammelt die Typenschilder der anderen nicht → **durchgefallen** REQ-REG-001;
+  - `no-answer` (antwortet gar nicht), `publisher` (antwortet unter falscher Absender-Kennung `Utility/…` statt `Registry/…`), `writer-name` (antwortet unter ihrem eigenen Namen statt dem der beschriebenen Komponente), `stale-health` (liefert den ersten statt den letzten Gesundheitszustand), `keeps-closed` (vergisst eine abgemeldete Komponente nicht), `keeps-will` (vergisst eine abgestürzte Komponente nicht) → **durchgefallen** REQ-REG-002.
+
+**Bitte prüfen:** Ist jeder Fehler ein echter Verstoß gegen die genannte Regel, und sind die sechs guten Szenarien in Ordnung? Besonders: `plain-listener` (nur eine angenommene Anmeldung ist ein Verstoß), die Rechnung bei `packet-limit`/`payload-limit`, welche Regeln bei `open-acl` fallen, die Warnung bei `config-readable`, die zwei übersprungenen Fälle und `wrong-host`/`expired` mit D-1.
+
+**Antwort z. B.:** „R-1 akzeptiert“.
+
+### Zur Info: was C-071 gebaut hat
+
+- **`oec-infra bus`** (T8-BUS-01 … 03 fertig, jetzt 7 von 17 D8-Tests): verbindet sich wie `oec-check monitor` (Broker-Adresse oder `--bus-storage`, CA, Client-Zertifikat oder Benutzer/Passwort; ohne Zertifikatsprüfung nur mit ausdrücklichem `--insecure`).
+  - **T8-BUS-01:** probiert TLS 1.2 und 1.3 (eins muss gehen) und 1.0/1.1 (darf nicht gehen), sucht einen unverschlüsselten Port, prüft das Zertifikat gegen die CA, MQTT 3.1.1 und ob eine Nachricht der Größe `MaxPacketSize` aus `broker.json` durchkommt (SF-105).
+  - **T8-BUS-02:** ein zweiter, nicht berechtigter Client (`--credentials-2` oder `--bus-storage-2`) schickt Set, Del und Call – aber nur an D8s eigene Probe-App, nie an eine echte Anwendung. Nichts davon darf ankommen. Vorher prüft D8, dass dieselben Anfragen von ihm selbst ankommen (sonst wäre „kommt nicht an“ nichts wert).
+  - **T8-BUS-03:** D8 meldet zwei Probe-Komponenten an und fragt die OEC Registry nach ihrem Typenschild und Gesundheitszustand; nach Abmelden bzw. Absturz müssen sie verschwinden. Eine Registry gibt es erst mit P7, bis dahin ist das Ergebnis gegen unseren Dev-Broker „übersprungen“.
+- **Test-Broker erweitert** (`mqtttest`, nur Ergänzungen; die 55 D7-Tests laufen unverändert), dazu eine nachgebaute Registry mit sieben Fehlern; 28 Szenarien → R-1.
+- **Lauf gegen unseren Dev-Broker** (`oec/dev`, freiwillig, jetzt Teil von `live.sh`): T8-BUS-01 besteht auf beiden Ports (TLS 1.2 und 1.3, MaxPacketSize 262144), T8-BUS-02 **warnt** (siehe unten), T8-BUS-03 übersprungen (keine Registry).
+- **Der Dev-Broker hat jetzt Zugriffsregeln** (`oec/dev/mosquitto/acl`): nur der Prüf-Benutzer `oec-probe` darf Set, Del und Call schicken; alle dürfen mitlesen und Pub, Get und Reply schicken. Mosquitto kann die App-Kennung im Topic nicht an einen Benutzer binden, und Apps lesen ihre eigenen Set/Config-Nachrichten – darum die Warnung REQ-RES-CONFIG-026. Das ist eine Grenze unserer Entwicklungsumgebung, kein Fehler der Guideline (A-258).
+- **Zwei Fehler, die erst der Lauf gegen den Dev-Broker gezeigt hat, sind behoben** (zuerst ein Test, dann die Korrektur):
+  - D8 hat bei den TLS-Proben sein Client-Zertifikat nicht mitgeschickt. Auf Port 8884 (verlangt ein Client-Zertifikat) sah TLS 1.2 deshalb „abgelehnt“ aus, und eine Ablehnung von TLS 1.1 hätte fälschlich als „geprüft“ gelten können. Neue Szenarien `mtls` und `mtls-tls11`.
+  - In den Zugriffsregeln fehlte `Reply`: die Demo-Apps konnten ihre Antwort auf den Call nicht senden, D7 meldete T7-ACT-01/02/04 als durchgefallen. Danach: Demo-Lauf 39 bestanden, 16 übersprungen (brauchen die Zwischenstation), Interop-Test grün.
+- Keine neue Bibliothek, nichts Geprüftes geändert, D7 und `COVERAGE.md` unverändert. `host` (Rechner prüfen) kommt wie geplant in C-072.
 
 ### Zur Info: was C-070 gebaut hat
 

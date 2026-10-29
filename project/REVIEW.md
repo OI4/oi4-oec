@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-070 review addendum 4: R-2 accepted (REQ-CNT-013/014/026/027 and 18 image fixtures `reviewed`, all 19 image fixtures now `reviewed`). **Nothing is open for you.** No drafts, no open finding._
+_Last updated: 2026-10-29, C-071: P5b increment 2 `oec-infra bus` done. **Open for you: D-1** (SF-115: must the broker certificate be valid for the broker address and within its validity?) and **R-1** (28 broker scenarios of `oec-infra bus`). A-250 … A-258 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -192,10 +192,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - D8 T8-IMG-03 follows the decision (A-249): any SPDX/CycloneDX version, SPDX 3 JSON-LD readable, unreadable versions inconclusive, name/version/license per component, texts of license exceptions, identifier warns.
   - Image fixtures: 12 of the 13 reviewed ones changed bytes (versions and purls added) and are `draft` again, `invalid-sbom` has new content; 6 new ones → **R-2** (numbered on in the C-070 review because R-1 is answered).
 - C-070 review addendum 4: you accepted R-2 ("R-2 akzeptiert"); REQ-CNT-013/014/026/027 and all 19 image fixtures are `reviewed`. Nothing is open.
+- C-071 (P5b increment 2):
+  - **`oec-infra bus`** (T8-BUS-01 … 03 `implemented`, 7 of 17 D8 tests): connects like `oec-check monitor` (`--broker`/`--bus-storage`, CA, client certificate, user/password, `--insecure` only explicitly). T8-BUS-01 probes TLS 1.2/1.3 (one must work) and 1.0/1.1 (must fail), a plain-text listener, the certificate chain against the CA, MQTT 3.1.1 and the MaxPacketSize of `broker.json` (SF-105). T8-BUS-02 lets a second, unprivileged client (`--credentials-2`/`--bus-storage-2`) send Set, Del and Call to D8's own probe AppId – none may arrive; reading Set/Config warns. T8-BUS-03 announces two probe components and asks the OEC Registry for their MAM and Health, after Close and Will they must be gone.
+  - **28 broker scenarios** (6 positive) against the in-process test broker `mqtttest` (new options, additive, D7 gate unchanged) and a simulated Registry `registrytest` → **R-1**.
+  - **One finding: SF-115** (MG 6.2.2: broker certificate for the broker address and within its validity) → **D-1**; D8 implements the proposal until you decide.
+  - **Opt-in run against `oec/dev`** (now in `live.sh`, `TestBusDevBroker`): BUS-01 pass on 8883 and 8884 (TLS 1.2/1.3, MaxPacketSize 262144), BUS-02 warn REQ-RES-CONFIG-026 (a limitation of the dev broker, A-258), BUS-03 inconclusive (no Registry before P7). The dev broker got an ACL (`oec/dev/mosquitto/acl`).
+  - Two defects found by the live runs and fixed (test first): the TLS probes did not present the client certificate (TLS 1.2 looked refused on 8884); the dev ACL lacked `Reply` (D7 T7-ACT-01/02/04 failed against the demo). Interop and the D7 demo run are green again.
+  - No new dependency, no reviewed item changed, `COVERAGE.md` unchanged. `host` is not pulled forward (C-072). A-250 … A-258 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `a55f475` (re-baseline, no content change).
 
-Logs: [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -450,10 +457,44 @@ Logs: [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29
 | A-247 | P5b plan, cycle cut C-070 … C-075, precise exit | info (agent) | C-070 | – | – |
 | A-248 | DESIGN §9 corrections; `explain`/coverage for D8 in increment 6 | info (agent) | C-070 | – | – |
 | A-249 | SBOM rules after SF-114 (replace A-245): formats, components, texts, notes | info (agent) | C-070 review | – | – |
+| A-250 | Command `oec-infra bus`: connection flags as `oec-check monitor`, no `--client-id`, own probe AppId | info (agent) | C-071 | – | – |
+| A-251 | Second client `--credentials-2`/`--bus-storage-2`; without it T8-BUS-02 inconclusive | info (agent) | C-071 | – | – |
+| A-252 | T8-BUS-01 probes: TLS versions with the client certificate, plain-text listener, certificate chain | info (agent) | C-071 | – | – |
+| A-253 | MaxPacketSize probe (SF-105): one PUBLISH of MaxPacketSize on a 65535-octet topic | info (agent) | C-071 | – | – |
+| A-254 | T8-BUS-02 ACL probes with a positive control; readable Set/Config warns | info (agent) | C-071 | – | – |
+| A-255 | T8-BUS-03 Registry: discovery (65 s), two probe components, Close/Will; no Registry → inconclusive | info (agent) | C-071 | – | – |
+| A-256 | Self-test: `mqtttest` options (additive), `registrytest` (7 faults), 28 broker scenarios | info (agent) | C-071 | – | – |
+| A-257 | Report key `broker` (additive, report version 1 of `oec-infra`) | info (agent) | C-071 | – | – |
+| A-258 | Dev broker ACL (incl. `Reply`); REQ-RES-CONFIG-026 warns against `oec/dev` | info (agent) | C-071 | – | – |
 
 ## Decisions and review items
 
-_Nothing is open._
+### D-1 – SF-115: broker certificate for the broker address and within its validity (MG 6.2.2, G-3.4 a)
+
+- **Where:** register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, SF-115 (`b92dc61`); MG 6.2.2 (Broker side security settings); RIG 4.1.1 (`broker.json` `Address`); REQ-MQTT-007, REQ-MQTT-008; D8 T8-BUS-01.
+- **Problem:** the broker side of MG 6.2.2 requires TLS 1.2 or higher and a certificate signed by a CA, not self-signed (REQ-MQTT-006/007). Only the client side says the certificate is verified against the broker address, and a connection that cannot be verified is not used (REQ-MQTT-008). A broker whose certificate is signed by the CA but issued for another host name, or expired, is not forbidden by the text, although no conforming client can connect to it. D8 cannot say whether that is a fault of the platform or only of the run.
+- **Proposed interpretation:** add to the broker side of MG 6.2.2: "The broker certificate must be valid for the broker address provided in the Message Bus storage (`Address` of `broker.json`; a host name as DNS name or an IP address as IP address of the Subject Alternative Name) and within its period of validity." REQ-MQTT-007 is extended accordingly.
+- **Effect in the workspace:** `oec-infra bus` implements the proposal (findings marked "SF-115, proposed"); the scenarios `T8-BUS-01/wrong-host` and `T8-BUS-01/expired` (fail REQ-MQTT-007) depend on it. Accepted: guideline text, re-baseline, REQ-MQTT-007, the mark "proposed" removed. Rejected: both findings become notes, the two scenarios change and go back to `draft`.
+- **Recommendation:** as proposed.
+- **PO:** ☐ as proposed ☐ other: …
+
+### R-1 – broker scenarios of `oec-infra bus` (G-3.9)
+
+- **Where:** `oec/conformance/testdata/bus/index.yaml` – 28 new entries `draft`. Each scenario starts the in-process test broker `mqtttest` (TLS, test PKI created at run time) and the simulated Registry `registrytest` with one fault, runs `oec-infra bus` at level 3 and compares per test the outcome and the exact REQ ids; a test not listed passes.
+- **Positive (conforming):**
+  - `none` – the conforming broker with Registry: every bus test passes;
+  - `T8-BUS-01/tls13-only` – only TLS 1.3 (REQ-MQTT-006 says "1.2 or higher"): pass;
+  - `T8-BUS-01/mtls` – the broker requires a client certificate (like 8884 of `oec/dev`): pass;
+  - `T8-BUS-02/read-filtered` – the subscription to Set/Config is granted, but nothing is delivered: pass;
+  - `T8-BUS-02/disconnect` – the broker disconnects the unprivileged client on every denied PUBLISH: pass;
+  - `T8-BUS-03/named` – the Registry named by `--registry` instead of discovered: pass.
+- **Negative (fault → expected outcome):**
+  - T8-BUS-01: `tls11` and `mtls-tls11` (TLS 1.1 accepted, also with client certificate) → fail REQ-MQTT-006; `plain-listener` (a listener without TLS answers CONNECT with CONNACK) → fail REQ-MQTT-006; `self-signed`, `other-ca` → fail REQ-MQTT-007 (REQ-MQTT-002, REQ-CNT-003 inconclusive, D8 cannot connect); `wrong-host`, `expired` → fail REQ-MQTT-007 (**depend on D-1**); `no-311` (MQTT 3.1 only) → fail REQ-MQTT-002; `packet-limit` (packet limit 2 octets below MaxPacketSize + 65544) and `payload-limit` (payloads above MaxPacketSize − 1 dropped) → fail REQ-CNT-003 (SF-105);
+  - T8-BUS-02: `open-acl` (no ACL) → fail REQ-GEN-001 and the Set/Del requirement of every resource (CONFIG-020, DATA-010, META-005, PUBLIST-023, REFDES-008, SUBLIST-012); `call-open` → fail REQ-GEN-001; `del-open` → fail REQ-GEN-001, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012; `config-readable` → warn REQ-RES-CONFIG-026 (SHOULD); `no-credentials-2` (no second client) → skip, inconclusive;
+  - T8-BUS-03: `no-registry` → skip, inconclusive (whether a platform must have a Registry is T8-HST-04); `not-collected` → fail REQ-REG-001; `no-answer`, `publisher` (PublisherId `Utility/…`), `writer-name` (DataSetWriterName of the Registry instead of the asset), `stale-health` (first instead of last Health), `keeps-closed` (Close ignored), `keeps-will` (Will ignored) → fail REQ-REG-002.
+- **Please check:** is each fault a real violation of the named REQ and are the six positive scenarios compliant? In particular: `plain-listener` (a plain port only fails if it answers CONNECT; an open port without CONNACK is a note), `packet-limit`/`payload-limit` (SF-105 arithmetic), `open-acl` (which REQs fail per resource), `config-readable` (warn only), the two inconclusive skips, and `wrong-host`/`expired` with D-1.
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -1178,6 +1219,20 @@ Replaces A-245; ADR-0025 amendment "C-070 review".
 - **Notes (`info`):** references to other SPDX documents and SPDX 3 imports, a `VOLUME` over `/opt/oi4`, an empty component list.
 - **No new dependency:** SPDX 3 JSON-LD is read with `encoding/json`; the context is matched by URL, not expanded.
 
-## Next (C-071)
+### A-250 … A-258 – P5b increment 2 `bus` (C-071, agent)
 
-1. C-071: P5b increment 2 – `oec-infra bus` (T8-BUS-01 … 03: TLS listener and certificate, ACL with a second credential set, Registry MAM) against the in-process test broker, opt-in against the dev broker; in a new session (start prompt in `prompt.md`).
+ADR-0025 amendment C-071; DESIGN §9 "As built (C-071)".
+- **A-250 Command:** `oec-infra bus` takes the connection flags of `oec-check monitor` (`--broker`/`--bus-storage`, `--ca`, `--cert`/`--key`, `--username`/`--password-file`, `--insecure` only explicitly, `--config`); no `--client-id`, because D8 opens several connections. D8 publishes only on its own probe AppId `Utility/oi4.org/oec-infra/D8/<12 hex>` and its two probe components, so a run never writes to an application of the platform.
+- **A-251 Second client:** `--credentials-2 FILE` (format of `run/secrets/oi4/credentials`) or `--bus-storage-2 ROOT`; without it, or with the same identity, T8-BUS-02 is inconclusive (exit 4 without `--allow-skip`), not a usage error.
+- **A-252 T8-BUS-01:** raw TLS handshakes with the standard library for exactly 1.2 and exactly 1.3 (one must work) and 1.0 … 1.1 (must fail), all with the client certificate of the run; plain-text listener on `--plain-port` (default 1883) fails only with a CONNACK; chain against the CA of the run, self-signed fails.
+- **A-253 MaxPacketSize (SF-105):** one QoS 1 PUBLISH with a payload of exactly MaxPacketSize on a topic padded to 65535 octets must come back without disconnect; MaxPacketSize from `--max-packet-size`, `broker.json` or 262144 (note); above `--max-probe-size` (64 MiB) inconclusive.
+- **A-254 T8-BUS-02:** Set of six resources, Del of two, Call NewDataSetWriterId by the unprivileged client; a positive control (D8 receives its own requests) first; a denial may be silent, SUBACK 0x80 or a disconnect.
+- **A-255 T8-BUS-03:** Registry from `--registry` or discovered on `Oi4v2/Registry/+/Pub/#` within `--registry-wait` (65 s, one heartbeat of SF-106 plus slack); two probe components (Will, Birth, second Health), Get MAM/Health with and without Source, then Close and Will; no Registry → inconclusive, against `oec/dev` until P7.
+- **A-256 Self-test:** `mqtttest` gains options (TLS bounds, certificate variants, plain listener, ACL callback, payload/packet limits, protocol levels), `NewBroker` and the D7 gate unchanged; `registrytest` with seven faults; 28 scenarios, `draft`.
+- **A-257 Report:** `infra-report.schema.json` additive: `bus` in `command`/`mode`, key `broker` (url, probe, tls, certificate, max_packet_size, registry), evidence `topic`; report version stays 1.
+- **A-258 Dev broker ACL:** only `oec-probe` may publish Set, Del and Call; everyone reads `Oi4v2/#` and publishes Pub, Get and Reply. Mosquitto cannot bind the AppId level to a user and applications read their own Set/Config, so T8-BUS-02 warns REQ-RES-CONFIG-026 against `oec/dev` – a dev limitation, no SF.
+
+## Next (C-072)
+
+1. Your answers to D-1 and R-1 (recorded first, own commit).
+2. C-072: P5b increment 3 – `oec-infra host` (T8-HST-01, 02, 04: storage layout and permissions, `broker.json`, platform properties) on generated host roots, opt-in against `oec/dev`; in a new session (start prompt in `prompt.md`).
