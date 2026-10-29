@@ -1,6 +1,6 @@
 # `oec/conformance/` – D7/D8 compliance CLIs
 
-> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062), every `Get` test and T7-ADR-02/03 (C-063, amendment C-063), the write tests T7-SET-01 … 09, 11, 12 with restore (C-064, amendment C-064), the Action tests T7-ACT-01 … 04 and the monitor rules T7-MON-09, 13, 15, 16, 17 (18 of 19, C-065, amendment C-065), the proxy attachment with T7-CON-01 … 04 and T7-LIFE-01 … 03 (C-066, amendment C-066), the restart hook with T7-LIFE-04 and T7-SET-10 and the monitor rule T7-MON-14 (19 of 19, C-067, amendment C-067).** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
+> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062), every `Get` test and T7-ADR-02/03 (C-063, amendment C-063), the write tests T7-SET-01 … 09, 11, 12 with restore (C-064, amendment C-064), the Action tests T7-ACT-01 … 04 and the monitor rules T7-MON-09, 13, 15, 16, 17 (18 of 19, C-065, amendment C-065), the proxy attachment with T7-CON-01 … 04 and T7-LIFE-01 … 03 (C-066, amendment C-066), the restart hook with T7-LIFE-04 and T7-SET-10 and the monitor rule T7-MON-14 (19 of 19, C-067, amendment C-067), the peer simulation, `--announce` and T7-ADR-01 (C-068, amendment C-068) – all 54 D7 tests implemented.** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
 
 ## `oec-check validate`
 
@@ -85,7 +85,15 @@ go run ./cmd/oec-check test … --proxy-listen 127.0.0.1:18883 --proxy-ca /tmp/x
     --stop-cmd /tmp/x/stop.sh --start-cmd /tmp/x/start.sh
 ```
 
-- The report is the monitor report with `"mode": "test"` plus `tester`, `requests` and `restore`; with the proxy `attachment` is `"proxy"`, plus `proxy_listen` and `connections` (each attempt: phase, TLS version, CONNECT without password, CONNACK, PUBLISH topics and times, first SUBACK, drop). Exit codes as for `monitor`.
+- **Peer and `--announce`** (DESIGN.md §3.4, §3.5, Q-029): `--peer` announces a simulated second component `Utility/oi4.org/oec-check/Peer/<random>` on its own connection (Birth, a Health once the CUT is found, heartbeat every 30 s, Close message, Will) and answers its Get MAM, Health and Profile. T7-ADR-01 checks every request of the CUT to the peer: on the peer's request topic, with its ServiceType and AppId (REQ-BUS-002, REQ-TOP-006, REQ-TOP-010). If the CUT sends no request to the peer, the test is skipped; **without `--peer` it is skipped as inconclusive (exit 4)**. `--announce` announces D7 itself the same way under the tester IL (`--tester-il` must then be an Oi4Identifier); by default D7 is not announced.
+
+```sh
+# the full run against the demo: proxy, restart hook, peer, D7 announced
+go run ./cmd/oec-check test … --proxy-listen 127.0.0.1:18883 --proxy-ca /tmp/x/proxy-ca.pem --proxy-ca-key /tmp/x/proxy-ca.key \
+    --stop-cmd /tmp/x/stop.sh --start-cmd /tmp/x/start.sh --peer --announce
+```
+
+- The report is the monitor report with `"mode": "test"` plus `tester`, `requests`, `restore` and `announced` (each announced component: role, PublisherId, requests received and answered); with the proxy `attachment` is `"proxy"`, plus `proxy_listen` and `connections` (each attempt: phase, TLS version, CONNECT without password, CONNACK, PUBLISH topics and times, first SUBACK, drop). Exit codes as for `monitor`.
 
 ## Layout
 
@@ -101,13 +109,13 @@ go run ./cmd/oec-check test … --proxy-listen 127.0.0.1:18883 --proxy-ca /tmp/x
 | `internal/mqttwire` | MQTT 3.1.1 client over TLS on `paho.mqtt.golang` v1.5.1 (EDL-1.0), PKCS#8 PBES2 keys, container storage reader |
 | `internal/mqttwire/mqtttest` | test-only in-process TLS broker and throw-away PKI (gate without network) |
 | `internal/monitor` | stateful monitor engine: participants, rules T7-MON-xx |
-| `internal/probe` | active test runner of `test`: discovery, requests with `ReplyTo` correlation, tests T7-GET-xx/ADR-xx/SET-xx/ACT-xx/CON-xx/LIFE-xx, state snapshot and restore check, restart phase, verdict of a test run |
+| `internal/probe` | active test runner of `test`: discovery, requests with `ReplyTo` correlation, tests T7-GET-xx/ADR-xx/SET-xx/ACT-xx/CON-xx/LIFE-xx, state snapshot and restore check, restart phase, announced components (peer, `--announce`), verdict of a test run |
 | `internal/proxy` | proxy attachment: TLS listener with certificates from the proxy CA, minimal MQTT 3.1.1 relay (strict CONNECT/PUBLISH decoder), connection phases |
 | `internal/sim` | test-only simulated CUT with fault injection (DESIGN.md §10) |
 | `internal/verdict` | verdict model: severity from REQ keyword × level, test aggregation, exit code |
 | `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` and `test` |
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
-| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews, C-065 … C-067 in the C-067 review; new entries start as `draft`, G-3.9) |
+| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews, C-065 … C-067 in the C-067 review; C-068: 3 new entries and the changed `none` are `draft`; new entries start as `draft`, G-3.9) |
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (C-052 reviewed in the C-052 review, C-065 and C-067 in the C-067 review; new entries start as `draft`, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 

@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-067: **P5 Inkrement 6a** – Neustart der App auf Kommando (T7-LIFE-04, T7-SET-10) und die passive Regel T7-MON-14 (schickt die App so, wie ihre PublicationList es sagt) sind fertig. Deine Antwort „R-1, R-2, R-3, R-4 und R-5 akzeptiert“ ist eingetragen. **Für dich ist nichts offen.** A-191 … A-221 nur zur Info._
+_Stand: 29.10.2026, C-068: **P5 Inkrement 6b** – die simulierte zweite App (`--peer`), `--announce` (D7 meldet sich selbst auf dem Bus) und der Test T7-ADR-01 sind fertig; damit sind **alle 54 Tests von D7** gebaut. **Für dich offen: R-6 und R-7 (4 Testfälle prüfen).** A-191 … A-228 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,14 +24,52 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** Deine Antwort „R-1, R-2, R-3, R-4 und R-5 akzeptiert“ ist eingetragen. Alle Testfälle haben jetzt den Status `reviewed`:
-- R-1 (C-065): die 5 Testfälle zur Aktion `NewDataSetWriterId`;
-- R-2 (C-065): die 6 Aufzeichnungen zu T7-MON-09/13/15/16/17;
-- R-3 (C-066): die 16 Testfälle zu Verbindung und Lebenszyklus, mit `none`;
-- R-4 (C-067): die 4 Testfälle zum Neustart;
-- R-5 (C-067): die 6 Aufzeichnungen zu T7-MON-14, mit dem geänderten `lifecycle-pass`.
+### R-6 – der geänderte Testfall `none` (bitte prüfen)
 
-Damit sind alle 56 Testfälle gegen die simulierte App (`oec/conformance/testdata/sim/index.yaml`) und alle 29 Aufzeichnungen (`oec/conformance/testdata/captures/index.yaml`) geprüft.
+**Wo:** `oec/conformance/testdata/sim/index.yaml`, Eintrag `none` (war `reviewed`, jetzt wieder `draft`).
+
+**Worum es geht:** `none` ist die simulierte App ohne Fehler; bei ihr muss alles bestehen. Neu läuft sie mit der simulierten zweiten App (`peer: true`) und mit `--announce` (`announce: true`): D7 meldet die zweite App und sich selbst auf dem Bus an. Die simulierte App sieht deren Zustandsmeldung und fragt beide nach ihrem Typenschild (MAM) – auf dem richtigen Topic, also dem der jeweils anderen App. Beide antworten.
+
+**Was sich am Ergebnis ändert:** Alles bleibt wie von dir geprüft; dazu kommt **T7-ADR-01 bestanden** (REQ-BUS-002, REQ-TOP-006, REQ-TOP-010). Der Selbsttest prüft außerdem, dass die zweite App und D7 Anfragen bekommen und alle beantwortet haben und dass die zweite App selbst keinen Befund auslöst.
+
+**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-6 akzeptiert“.
+
+### R-7 – 3 neue Testfälle zu T7-ADR-01 (bitte prüfen)
+
+**Wo:** `oec/conformance/testdata/sim/index.yaml`, die 3 Einträge `T7-ADR-01/…` mit `status: draft`.
+
+**Worum es geht:** T7-ADR-01 prüft: Wenn die App eine **andere** App etwas fragt, muss die Anfrage auf dem Topic der gefragten App liegen – mit deren Dienst-Typ (ServiceType, REQ-TOP-006) und deren Kennung (AppId, REQ-TOP-010), also auf deren Get-/Set-/…-Topic (REQ-BUS-002). Damit es überhaupt eine andere App gibt, meldet D7 eine simulierte zweite App an (`peer: true`). Die simulierte App fragt – wie das SDK – jede neue App nach ihrem Typenschild. Die drei Einträge laufen nur T7-ADR-01, damit der Selbsttest kurz bleibt. Die anderen 55 Einträge bleiben unverändert; ohne zweite App ist T7-ADR-01 bei ihnen „nicht entscheidbar“ und gehört nicht zu ihrem erwarteten Ergebnis.
+
+**Ohne Fehler (muss bestehen bzw. übersprungen werden):**
+- `T7-ADR-01/silent` – die App fragt niemanden etwas. Die drei Regeln gelten nur für eine App, die fragt; der Test wird deshalb einfach übersprungen (nicht „nicht entscheidbar“, denn die zweite App war ja da).
+
+**Mit Fehler (muss durchfallen):**
+- `T7-ADR-01/own-app` – die App fragt die zweite App nach ihrem Typenschild, schickt die Frage aber auf ihr **eigenes** Topic und nennt die zweite App nur als Quelle (`Oi4v2/OTConnector/<eigene AppId>/Get/MAM/<zweite App>`). Dienst-Typ und Kennung sind die falschen: REQ-BUS-002, REQ-TOP-006, REQ-TOP-010.
+- `T7-ADR-01/service-type` – die Kennung der zweiten App stimmt, aber der Dienst-Typ ist der eigene (`OTConnector`) statt `Utility`: REQ-BUS-002, REQ-TOP-006 (REQ-TOP-010 besteht).
+
+**Besonders anschauen:** `own-app` zählt als Frage an die zweite App, weil sie dort als Quelle steht (A-226). Eine Frage mit falscher Kennung **und** ohne die zweite App als Quelle kann D7 keiner App zuordnen.
+
+**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-6 und R-7 akzeptiert“.
+
+### Zuletzt beantwortet (Review C-067)
+
+Deine Antwort „R-1, R-2, R-3, R-4 und R-5 akzeptiert“ ist eingetragen: die Testfälle aus C-065 … C-067 sind `reviewed`. Von den jetzt 59 Testfällen gegen die simulierte App sind 55 geprüft (offen nur R-6/R-7), alle 29 Aufzeichnungen sind geprüft.
+
+### Zur Info: was C-068 gebaut hat
+
+- **Simulierte zweite App (`--peer`):** D7 meldet eine zweite App an, `Utility` mit der Kennung `oi4.org/oec-check/Peer/<Zufall>`, über eine eigene Verbindung. Sie verhält sich wie eine einfache echte App: letzter Wille, Birth (Typenschild und Zustand), Zustandsmeldung alle 30 s, Abschiedsmeldung am Ende. Sie beantwortet Fragen nach Typenschild, Zustand und Profil (A-224).
+- **`--announce`** (deine Antwort (a) auf Q-029): D7 meldet sich selbst genauso an, unter seiner Tester-Kennung (`--tester-il` muss dann die Form `Hersteller/Modell/Produktcode/Seriennummer` haben). Ohne den Schalter bleibt D7 wie bisher unsichtbar (A-223).
+- **„Ich bin da“-Meldung (A-225):** Sobald D7 die zu prüfende App gefunden hat, schicken die angemeldeten Apps ihre Zustandsmeldung noch einmal. Über die Zwischenstation verbindet sich die App nämlich erst nach deren Birth und hätte sie sonst verpasst.
+- **T7-ADR-01:** prüft jede Frage der App an die zweite App (siehe R-7). Ohne `--peer` ist der Test „nicht entscheidbar“ – ein Lauf ohne `--peer` endet deshalb mit Exit 4, außer mit `--allow-skip` (A-226). Damit sind **alle 54 Tests von D7 gebaut**.
+- **Bericht:** neuer Abschnitt `announced` – je angemeldeter App die Rolle, die Kennung und wie viele Fragen sie bekam und beantwortete (A-228).
+- **Gefunden und behoben** (Test zuerst): nur im Selbsttest – die simulierte App abonnierte die Typenschilder anderer Apps vor ihren eigenen Anfrage-Topics. D7 hält das erste bestätigte Abonnement für „bereit“ und fragte zu früh. Jetzt kommen die neuen Abonnements zuletzt (A-227). D7 und SDK waren in Ordnung.
+- **Lauf gegen die Beispiel-App `demo.rs`** über die Zwischenstation, mit Neustart, `--peer` und `--announce` (Level 2): **49 bestanden, 0 durchgefallen, 6 übersprungen, Exit 0.**
+  - Die Demo fragte die zweite App und D7 2,4 s nach dem Start nach ihrem Typenschild, beide Male auf dem richtigen Topic; beide antworteten. T7-ADR-01 bestanden.
+  - Übersprungen wie in C-067 (unter anderem T7-SET-10, weil die Demo keine ReferenceDesignation hat).
+  - Der Stand der App war danach wieder derselbe. Am SDK musste nichts geändert werden.
+- Kein Finding, keine neue Bibliothek.
+
+Die Technik-Entscheidungen A-222 … A-228 sind nur zur Info (unten). Einen Blick wert: **A-226** (wann T7-ADR-01 bewertet und warum Läufe ohne `--peer` „nicht entscheidbar“ sind) und **A-225** („Ich bin da“-Meldung).
 
 ### Zur Info: was C-067 gebaut hat
 
@@ -693,11 +731,21 @@ Neu aus C-067 (P5 Inkrement 6a):
 - **A-220 (neu) – Was T7-MON-14 prüft:** die Einträge der zuletzt gesehenen PublicationList der App (ohne Mode gilt „nur auf Anfrage“). Ändert jemand die Liste, gilt bis zur nächsten veröffentlichten Liste nichts; kurz (Toleranz) nach einer Änderung oder Verbindung wird nichts bewertet; Birth, Wille und Abschied nie. Geprüft: ungefragt nur, wenn der Mode es erlaubt, und nur über erlaubte Topic-Formen; der Abstand höchstens Interval plus Toleranz; bei Interval 0 nicht schon bei kleineren Änderungen als die Precision („sollte“); eine in einer Antwort sichtbare Änderung muss auch ungefragt kommen. Nicht geprüft: `OFF_0` (das macht T7-SET-08), Abstände bei Ereignissen, ob jede erlaubte Form auch benutzt wird, Antworten in einer anderen Sprache. Schickt eine App, ohne dass ihre Liste bekannt ist, ist das „nicht entscheidbar“ (`test` fragt die Liste ab). Kein Finding nötig.
 - **A-221 (neu) – Selbsttest:** Der Neustart läuft bei allen Testfällen der simulierten App; `T7-LIFE-02/no-birth` und `/health-first` wählen nur T7-LIFE-01 … 03; `lifecycle-pass` bekommt die PublicationList von B (wieder `draft`); die Anfrage nach der PublicationList bekommt im Selbsttest ihre Klassen-Kennung.
 
+Neu aus C-068 (P5 Inkrement 6b):
+- **A-222 (neu) – Zuschnitt:** Inkrement 6b ist in C-068 ganz fertig. C-069 bleibt wie geplant (`list`/`explain`, Schema des Berichts, Abschlusslauf).
+- **A-223 (neu) – `--announce`:** D7 ist dann eine einfache App (Level 1, `Utility`) unter seiner Tester-Kennung, über seine Hauptverbindung; der letzte Wille steht in seiner Anmeldung. Birth, „Ich bin da“-Meldung, Zustand alle 30 s, Abschiedsmeldung; beantwortet Fragen nach Typenschild, Zustand und Profil. Ohne Schalter bleibt D7 unsichtbar (Q-029 (a)).
+- **A-224 (neu) – Zweite App:** `Utility/oi4.org/oec-check/Peer/<12 Zeichen Zufall>`, für jeden Lauf neu, mit eigener Verbindung und demselben Verhalten. Fragt man sie nach einem unbekannten Gerät, antwortet sie „nicht gefunden“ (Status Bad, REQ-CMP-047); eine Frage mit Filter bekommt eine leere Liste; andere Fragen ignoriert sie. Bricht ihre Verbindung ab, endet der Lauf mit einem Fehler.
+- **A-225 (neu) – „Ich bin da“-Meldung:** nach dem Finden der App schickt jede angemeldete App ihre Zustandsmeldung noch einmal, damit eine später verbundene App sie bemerkt – ohne gespeicherte Nachrichten (die sind verboten, REQ-MQTT-018).
+- **A-226 (neu) – T7-ADR-01:** Als Frage an die zweite App zählt eine Get/Set/Del/Call-Nachricht der App, deren Topic die Kennung der zweiten App enthält oder sie als Quelle nennt. Geprüft je Frage: Dienst-Typ, Kennung, Topic; je falschem Topic ein Befund; bewertet am Ende des Laufs (Fragen nach dem Neustart zählen mit). Ohne `--peer` „nicht entscheidbar“, mit zweiter App aber ohne Frage einfach übersprungen. Fragen an den angemeldeten D7 werden nur gezählt.
+- **A-227 (neu) – Simulierte App und Selbsttest:** Die simulierte App fragt wie das SDK jede neue App nach ihrem Typenschild; ihre Abonnements dafür kommen zuletzt. 3 neue Fehler; neue Felder `peer` und `announce` je Eintrag; der Selbsttest prüft die angemeldeten Apps. `none` läuft mit beiden und ist wieder `draft` (R-6).
+- **A-228 (neu) – Bericht:** neuer Abschnitt `announced` und eine Textzeile je angemeldeter App; die Version des Berichts bleibt 1 (nur ergänzt).
+
 ---
 
-### Was als Nächstes passiert (C-068)
+### Was als Nächstes passiert (C-069)
 
-1. **P5 Inkrement 6b:** eine simulierte zweite App (T7-ADR-01: Anfragen der App sind richtig adressiert) und `--announce` (D7 meldet sich selbst auf dem Bus, Q-029 (a)).
+1. **Dein Review** von R-6 und R-7.
+2. **P5 Inkremente 7/8:** `oec-check list`/`explain` (Katalog und Regeln nachschlagen), das Schema des Berichts, der Abschlusslauf von P5 gegen die Demo (mit `--peer` und `--announce`) und die Prüfung der Abschluss-Kriterien von P5.
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-067 review (you accepted R-1 … R-5: the 25 sim fixtures and 12 capture fixtures of C-065 … C-067 are `reviewed`). **Nothing is open for you.** A-191 … A-221 for information, worth a look: A-215, A-216, A-218, A-220._
+_Last updated: 2026-10-29, C-068 (P5 increment 6b: the peer simulation, `--announce` and T7-ADR-01). **Open for you: R-6 (the changed sim fixture `none`) and R-7 (3 new sim fixtures of T7-ADR-01), review.** A-191 … A-228 for information, worth a look: A-225, A-226._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -161,10 +161,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Against `demo.rs` through the proxy with the restart hook (level 2): **48 pass, 0 fail, 6 skip, exit 0**; LIFE-04 and MON-14 pass, SET-10 is not applicable (the demo has no ReferenceDesignation object); 146 requests (143 answered, the 3 others are the deliberate T7-ACT-03 calls), state restored. The SDK was not changed.
   - ADR-0025 amendment C-067; no SF, no new dependency. A-215 … A-221 for information.
 - C-067 review: you accepted R-1, R-2 (C-065), R-3 (C-066), R-4 and R-5 (C-067); all 56 sim fixtures in `testdata/sim/index.yaml` and all 29 capture fixtures in `testdata/captures/index.yaml` are `reviewed`. Nothing is open.
+- C-068 (P5 increment 6b):
+  - **Peer simulation** `--peer`: D7 announces a simulated second component, a Level-1 `Utility` `oi4.org/oec-check/Peer/<random>` on its own connection – Will, Birth (MAM, Health), a "present" Health once the component under test is found (A-225), a heartbeat every 30 s, the Close message at the end. It answers Get MAM, Health and Profile; an unknown Source gets Event Status Bad `BadNotFound`.
+  - **`--announce`** (your answer (a) to Q-029): D7 itself is announced the same way under its tester IL (`--tester-il` must then be an Oi4Identifier). Without the flag D7 stays unannounced as before.
+  - **T7-ADR-01 `implemented`** – all 54 D7 tests are implemented: every request of the component to the peer must use the peer's request topic (its ServiceType REQ-TOP-006, its AppId REQ-TOP-010, the Get/Set/… topic of the addressed component REQ-BUS-002). Without `--peer` the test is an inconclusive skip (exit 4 unless `--allow-skip`), with the peer but without a request a plain skip (A-226).
+  - The demo asks every application it sees for its MAM (SDK directory), so T7-ADR-01 is judged on it. The simulated component now does the same; 3 new sim fixtures (1 conforming variant, 2 faults) → **R-7**; `none` runs with peer and `--announce` and is back to draft → **R-6**. The other reviewed fixtures keep their verdicts.
+  - Against `demo.rs` through the proxy with the restart hook, `--peer` and `--announce` (level 2): **49 pass, 0 fail, 6 skip, exit 0**; T7-ADR-01 passes (the demo asked the peer and D7 for their MAM on the right topics, both answered); state restored. The SDK was not changed.
+  - ADR-0025 amendment C-068; no SF, no new dependency. A-222 … A-228 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
-Logs: [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -391,10 +398,38 @@ Logs: [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-2
 | A-219 | SET-10: changed object, not applicable without ReferenceDesignation or with Status Bad | info (agent) | C-067 | – | – |
 | A-220 | MON-14: time model, what it judges and what not | info (agent) | C-067 | – | – |
 | A-221 | Fixtures: restart for every sim fixture, LIFE-02 selections narrowed, `lifecycle-pass` with B's PublicationList | info (agent) | C-067 | – | – |
+| A-222 | Cut: increment 6b complete in C-068; C-069 unchanged | info (agent) | C-068 | – | – |
+| A-223 | `--announce`: D7 as a Level-1 Utility under its tester IL, on its main connection | info (agent) | C-068 | – | – |
+| A-224 | Peer: identity, connection, lifecycle and answers of the simulated second component | info (agent) | C-068 | – | – |
+| A-225 | "Present" Health after the component under test is found | info (agent) | C-068 | – | – |
+| A-226 | T7-ADR-01: which requests are judged, per-request checks, skips | info (agent) | C-068 | – | – |
+| A-227 | Sim as a consumer, 3 faults, harness checks, `none` with peer and announce | info (agent) | C-068 | – | – |
+| A-228 | Report: key `announced`, report version 1 | info (agent) | C-068 | – | – |
+| R-6 | Changed sim fixture `none` (runs with peer and `--announce`, T7-ADR-01 pass) (`testdata/sim/index.yaml`) | review (G-3.9) | C-068 | accept | ☐ |
+| R-7 | 3 new sim fixtures of T7-ADR-01 and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-068 | accept | ☐ |
 
 ## Decisions and review items
 
-No open item.
+### R-6 – changed sim fixture `none` (G-3.9)
+
+- **Where:** `oec/conformance/testdata/sim/index.yaml`, entry `none` (was `reviewed`, now `draft`).
+- **What changed:** it runs with `peer: true` and `announce: true`: D7 announces the peer and itself. The simulated component (now a consumer like the SDK directory) sees their Health and asks both for their MAM on the right topics (`Oi4v2/Utility/<peer>/Get/MAM/<peer>`, same for D7); both answer. Expected verdicts: as reviewed, plus **T7-ADR-01 pass** (REQ-BUS-002, REQ-TOP-006, REQ-TOP-010). The harness also checks that the peer and D7 each received requests and answered all of them, and that the peer caused no violation or warning.
+- **Please check:** is `none` still the conforming component, and is T7-ADR-01 pass right for it?
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
+
+### R-7 – sim fixtures of T7-ADR-01 (G-3.9)
+
+- **Where:** `oec/conformance/testdata/sim/index.yaml` – 3 new entries `draft`. The other 55 entries are unchanged; without `--peer` T7-ADR-01 is an inconclusive skip on them (the harness checks this) and is not part of their expected verdicts.
+- **What they are:** as in C-062 … C-067 – `internal/probe/sim_test.go` runs `oec-check test` (level 3) through the proxy against the simulated component with one fault and compares outcome and exact REQ ids. New: the entries run with `peer: true` (D7 announces the peer) and select only T7-ADR-01 (`tests`) to keep the gate short.
+- **Positive (conforming variant):**
+  - `T7-ADR-01/silent` – the component watches nothing and requests nothing of other components: plain skip of REQ-BUS-002, REQ-TOP-006 and REQ-TOP-010 (they bind a requester only; not inconclusive, because the peer was there).
+- **Negative (fault → expected outcome):**
+  - `T7-ADR-01/own-app` (asks the peer for its MAM on its own Get topic with the peer as Source, `Oi4v2/OTConnector/<own AppId>/Get/MAM/<peer>`): T7-ADR-01 fail REQ-BUS-002, REQ-TOP-006, REQ-TOP-010;
+  - `T7-ADR-01/service-type` (the peer's AppId, but its own ServiceType `OTConnector` instead of the peer's `Utility`): T7-ADR-01 fail REQ-BUS-002, REQ-TOP-006 (REQ-TOP-010 passes).
+- **Please check:** is each fault a real violation of the named REQ, and is `silent` rightly a plain skip? In particular: `own-app` counts as a request to the peer because the peer is its Source (A-226) – D7 cannot attribute a request with a wrong AppId and without the peer as Source.
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -1059,6 +1094,17 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-220 MON-14:** the rules are the entries of the last observed Pub PublicationList of the component (an absent Mode is `ON_REQUEST_1`). A Set/Del PublicationList addressed to it makes them uncertain until its next Pub PublicationList; within the tolerance after a changed entry or a connect nothing is judged; Birth, Will and Close are never judged. Mode: no unsolicited publication for `ON_REQUEST_1` (008, not MAM/Health); every publication uses a form its Mode enables (009 … 011). Interval > 0: the gap per form ≤ Interval + tolerance (013, plus 014 with Precisions), also at the end. Interval 0 with Precisions: a change only below a Precision is a SHOULD finding (015). Interval 0: a Get answer that shows a significant change must be followed by its unsolicited publication within the tolerance (013, REQ-MQTT-019). Not judged: `OFF_0` (T7-SET-08), Event intervals, forms that are never used (completeness), several DataSetMessages in the filter form, Get answers with a Locale. A component that publishes without an observed PublicationList is an inconclusive skip (`test` requests the list). No SF: the reading of "enables" matches the reviewed REQ-RES-PUBLIST-009 … 011.
 - **A-221 Fixtures:** the sim harness wires the restart hook to every sim fixture (LIFE-04 and SET-10 pass on the reviewed ones); `T7-LIFE-02/no-birth` and `/health-first` select LIFE-01 … 03 (the restart would move their MON-03 finding); `lifecycle-pass` gets B's PublicationList and is back to `draft` (R-5); the capture generator gives Get PublicationList its DataSetClassId (schema).
 
-## Next (C-068)
+### A-222 … A-228 – P5 increment 6b (C-068, agent)
 
-1. P5 increment 6b: peer simulation and `--announce` (Q-029 (a)), T7-ADR-01; in a new session (start prompt in `prompt.md`).
+- **A-222 Cut:** increment 6b is delivered completely in C-068 (`--announce`, `--peer`, T7-ADR-01); C-069 stays as planned (increments 7/8: `list`/`explain`, the report schema, the P5 exit run). ROADMAP table: C-068 ✅.
+- **A-223 `--announce`:** D7 is a Level-1 `Utility` under its tester IL on its main connection; its Will is set in D7's CONNECT. Birth (MAM, Health `NORMAL_0`/100), "present" Health, heartbeat every 30 s, Close message (`NORMAL_0`/0) at the end; it answers Get MAM, Health and Profile. `--tester-il` must then be an Oi4Identifier (4 elements): the MAM takes its elements from it. Default unchanged: unannounced (Q-029 (a)).
+- **A-224 Peer:** `Utility/oi4.org/oec-check/Peer/<12 hex>` (new per run) on its own MQTT connection (ClientId `oec-check-peer-…`), with the same lifecycle and answers as the announced tester. A Get for an unknown Source gets Event Status Bad `BadNotFound` and no Pub (REQ-CMP-047), a Get with a Filter an empty list, other resources are ignored. A lost peer connection ends the run with an error ("peer connection lost").
+- **A-225 "Present" Health:** once D7 has found the component under test, every announced component publishes its Health once more. A component that connected after their Births – always through the proxy, because it can connect only when D7 listens – sees them by this Health, without retained messages (which REQ-MQTT-018 forbids).
+- **A-226 T7-ADR-01:** a request to the peer is a Get/Set/Del/Call of the component under test (its PublisherId) whose topic carries the peer's AppId or the peer as Source. Each is checked against `Oi4v2/Utility/<peer>/<Method>/…`: ServiceType (REQ-TOP-006), AppId (REQ-TOP-010), both (REQ-BUS-002); one violation per distinct topic; judged at the end of the run (requests after the restart count). Without `--peer` an inconclusive skip (D7 cannot provoke the request; plain runs therefore end with exit 4 unless `--peer` or `--allow-skip`), with the peer but without requests a plain skip (the REQs bind requesters only). Requests to the announced tester are counted in the report, not judged.
+- **A-227 Sim and harness:** the simulated component is a consumer like the SDK directory: it subscribes to `Pub/MAM` and `Pub/Health` of all applications – after its request subscriptions, because D7 takes the first SUBACK as "ready" (found by `TestSimLateSubscribe`) – and asks every new application for its MAM. 3 faults (58 in total), index fields `peer` and `announce`; the harness checks the announced components (count, requests answered, no finding of the peer). `none` runs with both flags and is back to `draft` (R-6).
+- **A-228 Report:** key `announced` (per component: role `tester`/`peer`, `publisher_id`, `requests` received, `answered`) and one text line per component; report version stays 1 (only added).
+
+## Next (C-069)
+
+1. Your review of R-6 and R-7 (C-068).
+2. P5 increments 7/8: `oec-check list`/`explain`, the report schema, the P5 exit run (with `--peer` and `--announce`) and the check of the P5 exit criteria; in a new session (start prompt in `prompt.md`).
