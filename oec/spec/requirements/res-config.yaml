@@ -8,7 +8,7 @@
 # Drafted in C-029; SF-084 … SF-088 resolved in the guideline after the PO
 # review of C-029 (masking of sensitive values: GL-ADR-021).
 area: RES-CONFIG
-baseline: "a55f475"
+baseline: "b955783"
 requirements:
   # --- DataSet content (MG 8.3.3, 8.3.3.1, 8.3.3.2) ---------------------------
   - id: REQ-RES-CONFIG-001

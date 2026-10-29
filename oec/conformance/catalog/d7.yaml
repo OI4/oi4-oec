@@ -21,7 +21,7 @@
 #         peer         – D7 simulates a peer component that the CUT talks to
 # status: planned (P3) | implemented (P5)
 tool: oec-check
-baseline: "a55f475"
+baseline: "b955783"
 tests:
   # --- monitor: passive rules -------------------------------------------
   - id: T7-MON-01

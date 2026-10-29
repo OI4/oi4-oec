@@ -1,6 +1,6 @@
 # D7 catalog coverage
 
-Generated from `catalog/d7.yaml`, the requirements catalog of `oec/spec` (baseline `a55f475`) and the indexes of the
+Generated from `catalog/d7.yaml`, the requirements catalog of `oec/spec` (baseline `b955783`) and the indexes of the
 self-test fixtures (`testdata/sim/index.yaml`, `testdata/captures/index.yaml`) – do not edit; regenerate with
 `go test ./internal/explain -run TestCoverageReport -update` (the gate fails if this file is out of date).
 `oec-check list` and `oec-check explain` show the same data.
