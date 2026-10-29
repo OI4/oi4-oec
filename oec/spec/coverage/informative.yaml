@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "eb7889c"
+baseline: "a55f475"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-preface-ffb33878
@@ -451,6 +451,8 @@ items:
     reason: Lead-in of the Docker Compose example of the secret storage; the example is informative, the requirements are REQ-CNT-008/009/024.
   - key: RIG-4.1.4-aa30e0a7
     reason: '"may be necessary" states that some applications need own storages (possibility); their paths are REQ-CNT-010/011.'
+  - key: RIG-4.1.4-20f7aee1
+    reason: Note on the purpose of the SBOM (CRA Annex I Part II (1), RED (EU) 2022/30, EN 18031); "required here" refers to the SBOM requirements REQ-CNT-013/026/014, the note adds no requirement of its own (SF-114).
   - key: RIG-4.2-191ece10
     reason: Explanation why the unique container name can be reused ("can be used"); the uses are REQ-CNT-021.
   - key: RIG-4.2-f0a7baef

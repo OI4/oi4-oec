@@ -172,7 +172,7 @@ func TestReportSchemaCommand(t *testing.T) {
 		t.Errorf("report-schema x: exit %d", code)
 	}
 	code, out, _ = exec(t, "", "version")
-	if code != exitValid || !strings.Contains(out, "catalog eb7889c, report 1") {
+	if code != exitValid || !strings.Contains(out, "catalog a55f475, report 1") {
 		t.Errorf("version: %s", out)
 	}
 }

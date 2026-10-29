@@ -22,7 +22,7 @@
 #         host-access   – D8 runs on the platform host (or a probe container)
 #         credentials-2 – a second, unprivileged set of bus credentials
 tool: oec-infra
-baseline: "eb7889c"
+baseline: "a55f475"
 tests:
   # --- image: offline -----------------------------------------------------
   - id: T8-IMG-01
@@ -42,9 +42,9 @@ tests:
     title: SBOM and license texts in /opt/oi4/licenses
     mode: image
     level: 2
-    reqs: [REQ-CMP-028, REQ-CNT-013, REQ-CNT-014, REQ-CNT-015, REQ-LIC-002]
+    reqs: [REQ-CMP-028, REQ-CNT-013, REQ-CNT-014, REQ-CNT-015, REQ-CNT-026, REQ-CNT-027, REQ-LIC-002]
     status: implemented
-    notes: Exactly one of sbom.spdx.json / sbom.cdx.json (SPDX 2.2/2.3 or CycloneDX 1.x JSON, SF-114 proposed); every license embedded or present as <License-ID>.txt; the files are in the file system of every platform image (layers applied with whiteouts, symlinks resolved inside the image); a VOLUME on the folder is a note.
+    notes: Exactly one of sbom.spdx.json / sbom.cdx.json; the version of the format is not restricted (SF-114) – SPDX 2.x JSON, SPDX 3.x JSON-LD and CycloneDX 1.x JSON are read, another version is skipped inconclusive; every component with name and version (REQ-CNT-013) and a stated license, NOASSERTION is none (REQ-CNT-026), a purl or CPE (REQ-CNT-027, warns); every license and license exception embedded or present as <License-ID>.txt; the files are in the file system of every platform image (layers applied with whiteouts, symlinks resolved inside the image); a VOLUME on the folder is a note.
   - id: T8-IMG-04
     title: Image integrity
     mode: image

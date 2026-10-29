@@ -2,7 +2,7 @@
 # Every fenced code block of MG and RIG (including MG Appendix B) is reproduced
 # by a golden vector of its section, is a JSON fragment of a golden payload
 # vector, or is explained here. 'spectool coverage' reports open and stale keys.
-baseline: "eb7889c"
+baseline: "a55f475"
 items:
   - keys:
       - MG-1.2-eb4d0dc3

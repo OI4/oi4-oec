@@ -8,7 +8,7 @@
 # Drafted in C-030; secret storage (REQ-CNT-007 … 009, 024, 025) reworked with
 # GL-ADR-022 (C-030 addendum 1).
 area: CNT
-baseline: "eb7889c"
+baseline: "a55f475"
 requirements:
   # --- Message Bus storage (RIG 4.1.1) --------------------------------------
   - id: REQ-CNT-001
@@ -383,22 +383,23 @@ requirements:
   - id: REQ-CNT-013
     title: SBOM in /opt/oi4/licenses
     statement: >-
-      A containerized application provides a Software Bill of Materials
-      (SBOM) describing the licenses of all its software components in the
-      folder /opt/oi4/licenses: either SPDX (ISO/IEC 5962:2021) as
-      sbom.spdx.json or CycloneDX (ECMA-424) as sbom.cdx.json, each in the
-      JSON serialization of the format. Exactly one of these two files is
-      present.
+      A containerized application provides in the folder /opt/oi4/licenses a
+      Software Bill of Materials (SBOM) that lists all its software
+      components, each with its name, its version and its licenses: either
+      SPDX (ISO/IEC 5962:2021) as sbom.spdx.json or CycloneDX (ECMA-424) as
+      sbom.cdx.json, each in the JSON serialization of the format; the
+      version of the format is not restricted. Exactly one of these two
+      files is present.
     keyword: MUST
     domain: service-container
     levels: {L1: none, L2: MUST, L3: MUST}
     applies_to: [container-image]
-    refs: [RIG 4.1.4, RIG 4, RIG 1.3, RIG 5.2, GL-ADR-002]
+    refs: [RIG 4.1.4, RIG 4, RIG 1.3, RIG 5.2, GL-ADR-002, SF-114]
     quotes:
       - ref: RIG 4.1.4
         text: Instead, every Open Industry 4.0 Alliance-compliant application shall provide this information in the folder /opt/oi4/licenses.
       - ref: RIG 4.1.4
-        text: 'The licenses of all software components used in the application shall be described in a Software Bill of Materials (SBOM) in one of the following formats:'
+        text: 'The Software Bill of Materials (SBOM) shall list all software components used in the application, each with its name, its version and its licenses. It shall use one of the following formats; the version of the format is not restricted:'
       - ref: RIG 4.1.4
         text: 'The SBOM shall use the JSON serialization of the selected format and shall be stored with a canonical file name, so that it can be detected without further configuration:'
       - ref: RIG 4.1.4
@@ -406,30 +407,49 @@ requirements:
       - ref: RIG 4
         text: The license and SBOM storage (4.1.4 Application Specific Storages) is mandatory from Level 2 on.
     verification: [d8]
-    inventory: [RIG-4.1.4-0a58da0d, RIG-4.1.4-0b9c4e0b, RIG-4.1.4-97a172ef, RIG-4.1.4-e49f19d5, RIG-4.1.4-d208c6fb, RIG-4-686e2ed9, RIG-5.2-1b1e9b90]
-    status: reviewed
-    notes: Detail of REQ-CMP-028 (reviewed umbrella).
+    inventory: [RIG-4.1.4-0a58da0d, RIG-4.1.4-a09b5fa4, RIG-4.1.4-97a172ef, RIG-4.1.4-e49f19d5, RIG-4.1.4-d208c6fb, RIG-4-686e2ed9, RIG-5.2-1b1e9b90]
+    status: draft
+    notes: >-
+      Detail of REQ-CMP-028 (reviewed umbrella). SF-114 (PO decision
+      2026-10-29): the standards name the formats, every version is accepted
+      in the JSON serialization of that version (SPDX 3: JSON-LD); a checking
+      tool assesses the versions it can read and reports another version as
+      inconclusive, not as a failure. Name and version per component serve
+      the CRA (Annex I Part II (1)) and the component inventory under RED
+      (EU) 2022/30 / EN 18031 (RIG 4.1.4 note). A component without a name
+      or a version does not comply.
 
   - id: REQ-CNT-014
     title: License texts in the SBOM or as <License-ID>.txt
     statement: >-
-      Every license text is either part of the SBOM or stored as
-      /opt/oi4/licenses/<License-ID>.txt, where <License-ID> is the SPDX
-      license identifier of the license or the LicenseRef- identifier used in
-      the SBOM for a license without SPDX identifier.
+      The text of every license and license exception named in the SBOM is
+      either part of the SBOM or stored as /opt/oi4/licenses/<License-ID>.txt,
+      where <License-ID> is the SPDX license identifier of the license (or
+      exception) or the LicenseRef- identifier used in the SBOM for a license
+      without SPDX identifier. The text of a license named only by its name
+      is part of the SBOM.
     keyword: MUST
     domain: service-container
     levels: {L1: none, L2: MUST, L3: MUST}
     applies_to: [container-image]
-    refs: [RIG 4.1.4, RIG 1.3, GL-ADR-002]
+    refs: [RIG 4.1.4, RIG 5.3, RIG 1.3, GL-ADR-002, SF-114]
     quotes:
       - ref: RIG 4.1.4
-        text: The license texts shall either be part of the SBOM or be stored as separate text files /opt/oi4/licenses/<License-ID>.txt.
+        text: The text of every license and license exception named in the SBOM shall either be part of the SBOM or be stored as separate text file /opt/oi4/licenses/<License-ID>.txt.
       - ref: RIG 4.1.4
         text: This way, each license text is clearly assignable to the corresponding license in the SBOM.
+      - ref: RIG 4.1.4
+        text: The text of a license named only by its name shall be part of the SBOM.
     verification: [d8]
-    inventory: [RIG-4.1.4-9ffd2b93]
-    status: reviewed
+    inventory: [RIG-4.1.4-d4fbd2cb]
+    status: draft
+    notes: >-
+      SF-114 (PO decision 2026-10-29): a text for every named license is the
+      testable rule that is always legally compliant (most licenses require
+      their text to accompany the software). Every choice of an OR
+      expression is named and needs a text; NONE and NOASSERTION name no
+      license and need none. A license reference into another SPDX document
+      (DocumentRef-…) is not checked by D8.
 
   - id: REQ-CNT-015
     title: SBOM and license texts are part of the image
@@ -686,3 +706,54 @@ requirements:
       guideline does not require the platform to issue such certificates.
       Levels as the other application uses of the container storages
       (REQ-CNT-009).
+
+  # --- SBOM content (RIG 4.1.4, SF-114) --------------------------------------
+  - id: REQ-CNT-026
+    title: Every license in the SBOM named unambiguously
+    statement: >-
+      Every license in the SBOM is named unambiguously: by its SPDX license
+      identifier (also within license expressions and for license exceptions
+      after WITH), otherwise by a LicenseRef- identifier (SPDX) or by its
+      name (CycloneDX). Every component states its license; a component
+      whose license is not stated (e.g. NOASSERTION) does not comply.
+    keyword: MUST
+    domain: service-container
+    levels: {L1: none, L2: MUST, L3: MUST}
+    applies_to: [container-image]
+    refs: [RIG 4.1.4, RIG 5.3, RIG 1.3, SF-114]
+    quotes:
+      - ref: RIG 4.1.4
+        text: 'Each license shall be named unambiguously: by its SPDX license identifier (also within license expressions and for license exceptions after WITH), otherwise by a LicenseRef- identifier (SPDX) or by its name (CycloneDX).'
+      - ref: RIG 4.1.4
+        text: A component whose license is not stated (e.g. NOASSERTION) does not fulfil this requirement.
+    verification: [d8]
+    inventory: [RIG-4.1.4-d54aa58f]
+    status: draft
+    notes: >-
+      SF-114 (PO decision 2026-10-29). The SPDX value NONE (no license
+      applies) is a statement and complies; NOASSERTION or no license field
+      at all does not. Components are the SPDX packages and the CycloneDX
+      components (nested ones included); the described application itself
+      (CycloneDX metadata.component) is the subject of the SBOM, not one of
+      its components.
+
+  - id: REQ-CNT-027
+    title: Unique identifier per SBOM component
+    statement: >-
+      Each component in the SBOM has a unique identifier, e.g. a package URL
+      (purl) or a CPE, to ease the tracking of vulnerabilities.
+    keyword: SHOULD
+    domain: service-container
+    levels: {L1: none, L2: SHOULD, L3: SHOULD}
+    applies_to: [container-image]
+    refs: [RIG 4.1.4, SF-114]
+    quotes:
+      - ref: RIG 4.1.4
+        text: Give each component a unique identifier, e.g. a package URL (purl) or a CPE, to ease the tracking of vulnerabilities.
+    verification: [d8]
+    inventory: [RIG-4.1.4-9e252249]
+    status: draft
+    notes: >-
+      SF-114 (PO decision 2026-10-29). D8 warns for components without a
+      purl or CPE (SPDX externalRefs of type purl/cpe22Type/cpe23Type or the
+      SPDX 3 externalIdentifier; CycloneDX purl/cpe).

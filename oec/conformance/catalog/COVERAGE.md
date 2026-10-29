@@ -1,6 +1,6 @@
 # D7 catalog coverage
 
-Generated from `catalog/d7.yaml`, the requirements catalog of `oec/spec` (baseline `eb7889c`) and the indexes of the
+Generated from `catalog/d7.yaml`, the requirements catalog of `oec/spec` (baseline `a55f475`) and the indexes of the
 self-test fixtures (`testdata/sim/index.yaml`, `testdata/captures/index.yaml`) â€“ do not edit; regenerate with
 `go test ./internal/explain -run TestCoverageReport -update` (the gate fails if this file is out of date).
 `oec-check list` and `oec-check explain` show the same data.
@@ -25,7 +25,7 @@ self-test fixtures (`testdata/sim/index.yaml`, `testdata/captures/index.yaml`) â
 | `d7-test` | 122 | 118 | 4 | 0 | 0 |
 | `schema` | 116 | 0 | 0 | 116 | 0 |
 | `d7-validate` | 157 | 0 | 0 | 157 | 0 |
-| none of these (D8, manual or other tools) | 141 | | | | |
+| none of these (D8, manual or other tools) | 143 | | | | |
 
 Fixtures: 59 sim, 29 capture; 14 positive; 88 of 88 reviewed.
 Tests with a negative fixture (fail, warn or info): 55 of 55; with a positive fixture: 55 of 55.
