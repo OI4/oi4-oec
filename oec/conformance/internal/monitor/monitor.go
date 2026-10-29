@@ -28,7 +28,7 @@ import (
 var Implemented = []string{
 	"T7-MON-01", "T7-MON-02", "T7-MON-03", "T7-MON-04", "T7-MON-05", "T7-MON-06",
 	"T7-MON-07", "T7-MON-08", "T7-MON-09", "T7-MON-10", "T7-MON-11", "T7-MON-12", "T7-MON-13",
-	"T7-MON-15", "T7-MON-16", "T7-MON-17", "T7-MON-18", "T7-MON-19",
+	"T7-MON-14", "T7-MON-15", "T7-MON-16", "T7-MON-17", "T7-MON-18", "T7-MON-19",
 }
 
 // Tests returns the monitor tests of the D7 catalog for verdict.Build.
@@ -181,6 +181,7 @@ type part struct {
 	revs        map[string]revRef     // T7-MON-16: last RevisionCounter per Source
 	configs     map[string]*configRef // T7-MON-16/17: last Pub Config per Source and WriterGroupName
 	changes     []*change             // T7-MON-15/16: Set and Del addressed to the component
+	pl          publist               // T7-MON-14: rules of the PublicationList
 }
 
 type classRef struct {
@@ -399,6 +400,7 @@ func (e *Engine) Observe(m Message) error {
 			q.setSeen = true
 		}
 		e.change(p, q, m, t, msg)
+		e.publistChange(q, t)
 		e.lifecycle(p, m, t, msg, nil)
 	case "Call":
 		e.call(p, m, msg)
@@ -619,6 +621,7 @@ func (e *Engine) pub(p *part, m Message, t *topic.Parsed, msg map[string]any) {
 	e.classIDs(p, m, t, msg, ds)
 	e.supported(p, t, ds)
 	e.changed(p, m, t, msg, ds)
+	e.publistPub(p, m, t, msg, ds, birth)
 }
 
 func (e *Engine) resourceDSMs(ds []dsm) []dsm {
@@ -776,6 +779,7 @@ func (e *Engine) endConnection(p *part) {
 	p.k2id, p.id2k = map[key]int64{}, map[int64]key{}
 	p.pending = map[int64]pending{}
 	p.setSeen = false
+	e.publistEnd(p)
 }
 
 func (e *Engine) birth(p *part, m Message, t *topic.Parsed, msg map[string]any, ds []dsm) {
@@ -802,6 +806,7 @@ func (e *Engine) birth(p *part, m Message, t *topic.Parsed, msg map[string]any, 
 		}
 	}
 	p.lastHealth, p.healthLine = m.Received, m.Line
+	e.publistConnect(p, m.Received)
 }
 
 func revision(m map[string]any) string {
@@ -1038,6 +1043,7 @@ func (e *Engine) Finish(end time.Time) Result {
 		e.finishWriterIDs(p)
 		e.finishSupported(p)
 		e.finishChanges(p, end)
+		e.finishPublist(p, end)
 		e.check(p, "T7-MON-19", "REQ-TOP-024")
 		if len(e.appTypes[p.AppID]) > 1 {
 			var sts []string

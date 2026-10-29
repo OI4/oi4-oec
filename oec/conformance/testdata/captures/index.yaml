@@ -12,13 +12,18 @@
 # status: draft | reviewed
 captures:
   - file: lifecycle-pass.jsonl
-    status: reviewed
+    status: draft
     positive: true
     expect: {}
     notes: >-
       Two components (OTConnector A, ITConnector B) from Birth to Close over
       128 s. Every implemented monitor test passes; REQ-RES-HEALTH-004 is not
       observable and REQ-CMP-045 has no represented entity on the bus.
+      C-067 (T7-MON-14) - A sends Get PublicationList to B at 11 s and B
+      answers with MAM and Health in ON_REQUEST_APPLICATION_SOURCE_FILTER_15
+      and Interval 0, so the publication rules of B are known; without them
+      T7-MON-14 would be skipped inconclusive. The rules of A come from its
+      existing answer to Get PublicationList for Data oee.
   - file: configuration-pass.jsonl
     status: draft
     positive: true
@@ -162,3 +167,51 @@ captures:
       A publishes its Config V-PAY-099 (device1: aut0-r3fr3sh and protocol
       mandatory); B sends V-PAY-100 without protocol. The violation is B's
       (the requester). A does not answer (not judged). New in C-065.
+  - file: publist-pass.jsonl
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      T7-MON-14 (C-067). A publishes its PublicationList (MAM and Health
+      ON_REQUEST_APPLICATION_SOURCE_FILTER_15; Data oee ON_REQUEST_SOURCE_10
+      with Interval 2000 ms and Precisions; Data temp APPLICATION_FILTER_6
+      with Interval 0 and Precision 0.5; Data batch ON_REQUEST_1) and
+      follows it for 32 s: oee every 2 s on Pub/Data/<Source>, temp on
+      Pub/Data/<Source>/temp and Pub/Data after deviations of at least 0.5
+      and right after a Get shows a changed value, batch only as answer to
+      a Get. Only B's Gets (B publishes nothing). The heartbeat cannot be
+      judged in 32 s (skip).
+  - file: publist-mode.jsonl
+    status: draft
+    expect:
+      T7-MON-14: {outcome: fail, reqs: [REQ-RES-PUBLIST-008, REQ-RES-PUBLIST-011]}
+    notes: >-
+      Data oee has the Mode FILTER_4 but is published on Pub/Data/<Source>
+      (REQ-RES-PUBLIST-011); Data batch has the Mode ON_REQUEST_1 but is
+      published without a Get (REQ-RES-PUBLIST-008). New in C-067.
+  - file: publist-interval.jsonl
+    status: draft
+    expect:
+      T7-MON-14: {outcome: fail, reqs: [REQ-RES-PUBLIST-013, REQ-RES-PUBLIST-014]}
+    notes: >-
+      Data oee has the Interval 2000 ms and Precisions; between 6 s and 14 s
+      it is not published (8 s > 2 s + 5 s tolerance): REQ-RES-PUBLIST-013,
+      and REQ-RES-PUBLIST-014 because the Precisions do not suspend the
+      Interval. New in C-067.
+  - file: publist-precision.jsonl
+    status: draft
+    expect:
+      T7-MON-14: {outcome: warn, reqs: [REQ-RES-PUBLIST-015]}
+    notes: >-
+      Data temp has the Interval 0 and the Precision 0.5 for Temperature; it
+      is published again after a deviation of 0.1 (SHOULD at level 3: warn).
+      New in C-067.
+  - file: publist-change.jsonl
+    status: draft
+    expect:
+      T7-MON-14: {outcome: fail, reqs: [REQ-MQTT-019, REQ-RES-PUBLIST-013]}
+    notes: >-
+      Data temp has the Interval 0; the answer to a Get shows Temperature 22
+      after the published 20, and A does not publish the change within the
+      tolerance (5 s): REQ-RES-PUBLIST-013 and REQ-MQTT-019 (MUST at level
+      3). New in C-067.

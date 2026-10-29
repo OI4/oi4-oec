@@ -117,8 +117,8 @@ tests:
     mode: monitor
     level: 1
     reqs: [REQ-MQTT-019, REQ-RES-PUBLIST-008, REQ-RES-PUBLIST-009, REQ-RES-PUBLIST-010, REQ-RES-PUBLIST-011, REQ-RES-PUBLIST-013, REQ-RES-PUBLIST-014, REQ-RES-PUBLIST-015]
-    status: planned
-    notes: The rules are checked against the last published PublicationList (Mode, Interval, Precisions); interval tolerance is a parameter of the run. Cut to C-066 (C-065, G-3.4 b), then to C-067 (C-066, G-3.4 b).
+    status: implemented
+    notes: The rules are the entries of the last observed Pub PublicationList of the component (Mode, Interval, Precisions); a Set or Del PublicationList makes them uncertain until the next Pub PublicationList, and publications within the tolerance after a changed entry or a connect are not judged. Judged per unsolicited publication - the form against the Mode (REQ-RES-PUBLIST-008 … 011), the gap per form against Interval plus tolerance (013, 014), the deviation against the Precisions with Interval 0 (015); a Get answer that shows a changed content not published within the tolerance violates 013 and REQ-MQTT-019. Not judged - Birth, Will and Close, OFF_0 (T7-SET-08), Event intervals, forms that are never used (completeness) and Get answers with a Locale. Without an observed PublicationList skip (test mode requests it). Implemented in C-067 (A-216).
   - id: T7-MON-15
     title: PublicationList and SubscriptionList are republished on change
     mode: monitor

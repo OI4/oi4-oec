@@ -300,6 +300,9 @@ func fixtures(t *testing.T) map[string]*sc {
 	getPL := s.req(6, "V-PAY-034", nil)
 	s.fromVector(6.1, "V-PAY-037", getPL, nil)
 	s.fromVector(10, "V-PAY-064", "", nil)
+	getPLB := s.getAt(11, compA, compB, "PublicationList/"+compB.self())
+	s.publistOf(11.1, compB, getPLB, plEntry{"MAM", "", compB.mamID, "ON_REQUEST_APPLICATION_SOURCE_FILTER_15", 0, nil},
+		plEntry{"Health", "", compB.health, "ON_REQUEST_APPLICATION_SOURCE_FILTER_15", 0, nil})
 	s.heartbeats(compA, 0, 120, 0.05)
 	s.heartbeats(compB, 0, 120, 0.15)
 	sortRecords(s)
@@ -529,7 +532,146 @@ func fixtures(t *testing.T) map[string]*sc {
 	})
 	retag(s)
 	add(s, 10)
+
+	// T7-MON-14 (C-067): Data oee every 2 s with Precisions (Interval wins),
+	// Data temp on change with a Precision of 0.5, Data batch on request.
+	oee := plEntry{"Data", "oee", 93, "ON_REQUEST_SOURCE_10", 2000, map[string]any{"Availability": 5}}
+	temp := plEntry{"Data", "temp", 94, "APPLICATION_FILTER_6", 0, map[string]any{"Temperature": 0.5}}
+	batch := plEntry{"Data", "batch", 95, "ON_REQUEST_1", 0, nil}
+	selfEntries := []plEntry{{"MAM", "", compA.mamID, "ON_REQUEST_APPLICATION_SOURCE_FILTER_15", 0, nil},
+		{"Health", "", compA.health, "ON_REQUEST_APPLICATION_SOURCE_FILTER_15", 0, nil}}
+	s = scenario(t, "publist-pass", "A publishes its PublicationList and follows it for 32 s: Data oee (SOURCE_3, Interval 2 s, Precisions ignored) every 2 s, Data temp (APPLICATION_2 and FILTER_4, Interval 0, Precision 0.5) only on a deviation of at least 0.5, and immediately after a Get shows a change; Data batch (ON_REQUEST_1) only as answer to a Get (T7-MON-14)")
+	s.birth(0, compA)
+	s.health(0.05, compA, "NORMAL_0", 100)
+	s.publist(0.5, "", append(selfEntries, oee, temp, batch)...)
+	for x := 2.0; x <= 30; x += 2 {
+		s.data(x, "src", "oee", "", map[string]any{"Availability": 90 + int(x)%3, "PerformanceRate": 95, "QualityRate": 98, "Product": int(x)})
+	}
+	s.data(3.1, "filter", "temp", "", map[string]any{"Temperature": 20.0})
+	s.data(3.2, "app", "temp", "", map[string]any{"Temperature": 20.0})
+	s.data(8.1, "filter", "temp", "", map[string]any{"Temperature": 20.6})
+	s.data(8.2, "app", "temp", "", map[string]any{"Temperature": 20.6})
+	getTemp := s.get(10.1, "Data/"+compA.self()+"/temp")
+	s.data(10.2, "filter", "temp", getTemp, map[string]any{"Temperature": 21.5})
+	s.data(10.3, "filter", "temp", "", map[string]any{"Temperature": 21.5})
+	s.data(10.4, "app", "temp", "", map[string]any{"Temperature": 21.5})
+	getBatch := s.get(12.1, "Data/"+compA.self()+"/batch")
+	s.data(12.2, "filter", "batch", getBatch, map[string]any{"Batch": "B-1"})
+	getOee := s.get(14.1, "Data/"+compA.self()+"/oee")
+	s.data(14.2, "filter", "oee", getOee, map[string]any{"Availability": 99, "PerformanceRate": 95, "QualityRate": 98, "Product": 14})
+	s.heartbeats(compA, 0, 30, 0.05)
+	sortRecords(s)
+	add(s, 32)
+
+	s = scenario(t, "publist-mode", "Data oee has the Mode FILTER_4 but is published on Pub/Data/<Source> (SOURCE_3); Data batch has the Mode ON_REQUEST_1 but is published without a Get (T7-MON-14)")
+	s.birth(0, compA)
+	s.health(0.05, compA, "NORMAL_0", 100)
+	s.publist(0.5, "", append(selfEntries, plEntry{"Data", "oee", 93, "FILTER_4", 0, nil}, batch)...)
+	s.data(6, "src", "oee", "", map[string]any{"Availability": 90, "PerformanceRate": 95, "QualityRate": 98, "Product": 1})
+	s.data(7, "filter", "batch", "", map[string]any{"Batch": "B-1"})
+	add(s, 10)
+
+	s = scenario(t, "publist-interval", "Data oee has the Interval 2 s with Precisions; after 6 s it is published only after 8 s (more than the Interval plus 5 s tolerance) (T7-MON-14)")
+	s.birth(0, compA)
+	s.health(0.05, compA, "NORMAL_0", 100)
+	s.publist(0.5, "", append(selfEntries, oee)...)
+	for _, x := range []float64{2, 4, 6, 14, 16, 18} {
+		s.data(x, "src", "oee", "", map[string]any{"Availability": 90, "PerformanceRate": 95, "QualityRate": 98, "Product": int(x)})
+	}
+	add(s, 20)
+
+	s = scenario(t, "publist-precision", "Data temp has the Interval 0 and the Precision 0.5 for Temperature; it is published again after a deviation of 0.1 (T7-MON-14)")
+	s.birth(0, compA)
+	s.health(0.05, compA, "NORMAL_0", 100)
+	s.publist(0.5, "", append(selfEntries, plEntry{"Data", "temp", 94, "FILTER_4", 0, map[string]any{"Temperature": 0.5}})...)
+	s.data(6, "filter", "temp", "", map[string]any{"Temperature": 20.0})
+	s.data(7, "filter", "temp", "", map[string]any{"Temperature": 20.1})
+	add(s, 10)
+
+	s = scenario(t, "publist-change", "Data temp has the Interval 0; the answer to a Get shows a changed Temperature, but A does not publish the change (T7-MON-14)")
+	s.birth(0, compA)
+	s.health(0.05, compA, "NORMAL_0", 100)
+	s.publist(0.5, "", append(selfEntries, plEntry{"Data", "temp", 94, "ON_REQUEST_FILTER_9", 0, nil})...)
+	s.data(6, "filter", "temp", "", map[string]any{"Temperature": 20.0})
+	getTemp = s.get(8, "Data/"+compA.self()+"/temp")
+	s.data(8.1, "filter", "temp", getTemp, map[string]any{"Temperature": 22.0})
+	add(s, 20)
 	return out
+}
+
+// plEntry is a PublicationList entry of compA (T7-MON-14).
+type plEntry struct {
+	res, filter string
+	id          int64
+	mode        string
+	interval    int64
+	prec        map[string]any
+}
+
+const classPublist = "217434d6-6e1e-4230-b907-f52bc9ffe152"
+
+// publist publishes the PublicationList of compA about itself.
+func (s *sc) publist(sec float64, replyTo string, es ...plEntry) {
+	s.publistOf(sec, compA, replyTo, es...)
+}
+
+// publistOf publishes the PublicationList of c about itself.
+func (s *sc) publistOf(sec float64, c comp, replyTo string, es ...plEntry) {
+	var msgs []map[string]any
+	for _, e := range es {
+		p := map[string]any{"Resource": e.res, "Source": c.il, "DataSetWriterId": e.id, "Mode": e.mode, "Config": "MODE_AND_INTERVAL_3"}
+		group := e.res
+		if e.filter != "" {
+			p["Filter"], group = e.filter, e.res+"/"+e.filter
+		}
+		if e.interval > 0 {
+			p["Interval"] = e.interval
+		}
+		if e.prec != nil {
+			p["Precisions"] = e.prec
+		}
+		msgs = append(msgs, dsMsg(161, c.il, group, p))
+	}
+	s.add(sec, c.base()+"/Pub/PublicationList/"+c.self(), network(c, at(sec), classPublist, replyTo, msgs...))
+}
+
+// dataSets are the Data DataSets of compA in the T7-MON-14 scenarios.
+var dataSets = map[string]struct {
+	id    int64
+	class string
+}{
+	"oee":   {93, "1badfd0b-5a3c-4e8c-9fed-ea47fe25ce67"},
+	"temp":  {94, "5c6b9d0e-3f1a-4a7b-9c2d-8e4f6a1b2c3d"},
+	"batch": {95, "7a1e2d3c-4b5a-4f6e-8d7c-9b0a1e2f3d4c"},
+}
+
+// data publishes a Data DataSet of compA in the form app, src or filter,
+// unsolicited or as the answer to a Get (replyTo).
+func (s *sc) data(sec float64, form, filter, replyTo string, payload map[string]any) {
+	d := dataSets[filter]
+	tp := compA.base() + "/Pub/Data"
+	switch form {
+	case "src":
+		tp += "/" + compA.self()
+	case "filter":
+		tp += "/" + compA.self() + "/" + filter
+	}
+	m := dsMsg(d.id, compA.il, filter, payload)
+	m["Timestamp"] = at(sec).Format("2006-01-02T15:04:05.000Z")
+	s.add(sec, tp, network(compA, at(sec), d.class, replyTo, m))
+}
+
+// get sends a Get of compB to compA for path (<Resource>[/<Source>[/<Filter>]]).
+func (s *sc) get(sec float64, path string) string { return s.getAt(sec, compB, compA, path) }
+
+// getAt sends a Get of from to to.
+func (s *sc) getAt(sec float64, from, to comp, path string) string {
+	m := map[string]any{"MessageId": msgID(from, at(sec)), "MessageType": "ua-data", "PublisherId": from.pub(), "ReplyTo": "", "Messages": []any{}}
+	if strings.HasPrefix(path, "PublicationList/") {
+		m["DataSetClassId"] = classPublist
+	}
+	s.add(sec, to.base()+"/Get/"+path, m)
+	return m["MessageId"].(string)
 }
 
 // retag renames the Config tag "Overall device settings" of MG B1.1.3
