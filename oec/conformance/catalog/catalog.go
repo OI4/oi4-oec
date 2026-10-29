@@ -31,21 +31,21 @@ type Catalog struct {
 
 // Test is one planned or implemented test.
 type Test struct {
-	ID     string   `yaml:"id"`
-	Title  string   `yaml:"title"`
-	Mode   string   `yaml:"mode"`
-	Level  int      `yaml:"level"` // 0 = not graded (platform requirements only)
-	Needs  []string `yaml:"needs"`
-	Reqs   []string `yaml:"reqs"`
-	Status string   `yaml:"status"`
-	Notes  string   `yaml:"notes"`
+	ID     string   `yaml:"id" json:"id"`
+	Title  string   `yaml:"title" json:"title"`
+	Mode   string   `yaml:"mode" json:"mode"`
+	Level  int      `yaml:"level" json:"level"` // 0 = not graded (platform requirements only)
+	Needs  []string `yaml:"needs" json:"needs"`
+	Reqs   []string `yaml:"reqs" json:"reqs"`
+	Status string   `yaml:"status" json:"status"`
+	Notes  string   `yaml:"notes" json:"notes,omitempty"`
 }
 
 // Manual names a requirement of the tool's verification kind that no test
 // checks, with the reason.
 type Manual struct {
-	Req    string `yaml:"req"`
-	Reason string `yaml:"reason"`
+	Req    string `yaml:"req" json:"req"`
+	Reason string `yaml:"reason" json:"reason"`
 }
 
 // Load reads one embedded catalog (D7File or D8File), rejecting unknown keys.

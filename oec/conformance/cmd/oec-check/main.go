@@ -2,7 +2,11 @@
 // v2.0 (deliverable D7). The command validate checks messages offline
 // against the embedded baseline (ADR-0019 §5); the command monitor observes
 // a Message Bus or replays a capture and judges the catalog tests of mode
-// monitor (DESIGN.md §3.2).
+// monitor (DESIGN.md §3.2); the command test sends requests to one
+// component under test and judges the tests of mode test (DESIGN.md §3.3).
+// The commands list and explain show the catalog, the requirements and the
+// self-test fixtures; report-schema prints the JSON Schema of the report
+// (C-069).
 //
 // Exit codes (DESIGN.md §5.3): 0 pass (warnings allowed), 1 at least one
 // requirement violated, 2 usage or input error, 3 internal error or broker
@@ -23,6 +27,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/OI4/oec/conformance/catalog"
 	"github.com/OI4/oec/conformance/internal/capture"
 	"github.com/OI4/oec/conformance/internal/report"
 	"github.com/OI4/oec/conformance/internal/validate"
@@ -56,6 +61,11 @@ const usage = `usage:
   oec-check monitor --bus-storage ROOT [flags]
   oec-check test --app [SERVICETYPE/]APPID --broker mqtts://HOST[:PORT] [connection flags] [flags]
   oec-check test --app [SERVICETYPE/]APPID --bus-storage ROOT [flags]
+  oec-check list [--mode monitor|test] [--level 1|2|3] [--req REQ-…]
+                 [--needs proxy|restart-hook|peer|none]
+                 [--status planned|implemented] [--format text|json] [ID|GLOB ...]
+  oec-check explain [--format text|json] T7-…|REQ-…
+  oec-check report-schema
   oec-check version
 
 A message file is a JSON object {"topic": "...", "payload": {...}} with the
@@ -101,6 +111,13 @@ monitor and --record, plus:
               IL (--tester-il must then be an Oi4Identifier); default: D7
               is not announced
 
+list shows the tests of the D7 catalog with mode, level, needs, status and
+requirements; explain shows a test with its requirements, or a requirement
+(statement, source in the Messaging Guideline (MG) or the Runtime &
+Infrastructure Guideline (RIG), the tests that check it), with the expected
+verdicts of the self-test fixtures. report-schema prints the JSON Schema of
+the JSON report of monitor and test (report version 1).
+
 Exit codes: 0 valid/pass, 1 invalid/fail, 2 usage or input error,
 3 internal error or broker not reachable, 4 inconclusive (monitor, test).
 `
@@ -117,13 +134,25 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return runMonitor(args[1:], stdout, stderr)
 	case "test":
 		return runTest(args[1:], stdout, stderr)
+	case "list":
+		return runList(args[1:], stdout, stderr)
+	case "explain":
+		return runExplain(args[1:], stdout, stderr)
+	case "report-schema":
+		return runReportSchema(args[1:], stdout, stderr)
 	case "version":
 		v, err := validate.New()
 		if err != nil {
 			fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 			return exitInternal
 		}
-		fmt.Fprintf(stdout, "%s %s (schemas %s, baseline %s, %d schema files)\n", tool, version, v.SchemaVersion(), v.Baseline(), v.Schemas.Count())
+		cat, err := catalog.Load(catalog.D7File)
+		if err != nil {
+			fmt.Fprintf(stderr, "%s: %v\n", tool, err)
+			return exitInternal
+		}
+		fmt.Fprintf(stdout, "%s %s (schemas %s, baseline %s, %d schema files, catalog %s, report %d)\n", tool, version,
+			v.SchemaVersion(), v.Baseline(), v.Schemas.Count(), cat.Baseline, report.MonitorVersion)
 		return exitValid
 	case "help", "-h", "--help", "-help":
 		fmt.Fprint(stdout, usage)
