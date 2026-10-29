@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, Review C-068: Deine Antwort „R-6 und R-7 akzeptiert“ ist eingetragen. In C-068 sind die simulierte zweite App (`--peer`), `--announce` und der Test T7-ADR-01 fertig geworden; damit sind **alle 54 Tests von D7** gebaut. **Für dich ist nichts offen.** A-191 … A-228 nur zur Info._
+_Stand: 29.10.2026, nach C-069 (P5 Inkremente 7/8: `list`/`explain`, Schema des Berichts, Abdeckungsbericht und Abschlusslauf von P5). **Für dich offen: eine Entscheidung – D-1: P5 abschließen und die nächste Phase wählen.** A-229 … A-238 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,42 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** Deine Antwort „R-6 und R-7 akzeptiert“ ist eingetragen:
+### D-1 – Ist P5 fertig, und womit geht es weiter? (zu entscheiden)
+
+**Worum es geht:** Alle acht Inkremente von P5 (das Prüf-Tool D7 `oec-check`) sind gebaut. Die ROADMAP nennt vier Bedingungen für den Abschluss von P5. Ich habe sie einzeln geprüft (Belege im Log C-069):
+
+| # | Bedingung | Stand |
+|---|---|---|
+| 1 | `test` besteht gegen die Beispiel-App `demo.rs` | **erfüllt**: Level 2, über die Zwischenstation, mit Neustart, zweiter App und angemeldetem D7: 49 bestanden, 0 durchgefallen, 6 übersprungen (passen nicht zur Demo), Exit 0, Stand danach wie vorher. Damit ist auch der offene Punkt 3 aus P4 erledigt (deine Entscheidung D-1 (a) aus C-061). |
+| 2 | Absichtlich fehlerhafte Testfälle fallen durch; jeder Test hat einen guten und einen schlechten Testfall | **erfüllt**: 59 Testfälle gegen die simulierte App und 29 Aufzeichnungen, alle von dir geprüft; das Prüfskript kontrolliert jedes erwartete Ergebnis und seit C-069 auch „je Test ein guter und ein schlechter Testfall“ für alle 55 Tests. Bei drei Tests ist die Regel nur ein „sollte“ oder eine Vermutung (T7-GET-09, T7-SET-12, T7-MON-10): dort ergibt der schlechte Testfall eine **Warnung** bzw. einen **Hinweis**, kein „durchgefallen“ – so streng, wie die Regel ist (A-236). |
+| 3 | Jeder Eintrag im Katalog ist gebaut oder als „nur von Hand prüfbar“ begründet | **erfüllt**: 55 von 55 Tests gebaut, 4 Regeln mit Begründung „von Hand“; keine Regel ohne Prüfung. |
+| 4 | Läuft in einer CI auf Windows, macOS und Linux | **kommt mit P9** (wie beim SDK, deine Entscheidung D-1 (a) aus C-061): Das Prüfskript läuft hier auf dem Mac (arm64); gebaut für Windows, Linux und macOS je mit amd64 und arm64 – alles klappt. Auch das Container-Image von D7 gehört zur Veröffentlichung in P9 (A-237). |
+
+**Möglichkeiten:**
+- **(a)** P5 abschließen (Punkt 4 wandert in die CI von P9). Weiter mit **P5b** – D8 `oec-infra`, das Prüf-Tool für Container und Plattform.
+- **(b)** wie (a), aber weiter mit **P4b** – das Micro-SDK in C für den ESP32 (D9).
+- **(c)** wie (a), aber weiter mit **P6** – die Demos (Wetter in Rust, Logger in C). Deren Abschluss braucht aber auch D8; der bliebe dann offen.
+- **(d)** P5 offen lassen, bis es eine CI gibt.
+
+**Meine Empfehlung: (a).** Nach deiner Reihenfolge aus C-045 kommen P4b und P5b nach P4/P5. P5b zuerst, weil die Demos (P6) und die Registry (P7) am Ende auch D8 bestehen müssen. D8 nutzt dasselbe Go-Modul, denselben Katalog-Aufbau (`d8.yaml`, 17 Tests geplant), dieselbe Bewertung und denselben Bericht wie D7 – das ist jetzt alles frisch. P4b hängt von beidem nicht ab und kann danach kommen. Die CI gehört zur Veröffentlichung (deine Entscheidung) und damit nach P9.
+
+Antwort z. B.: „D-1 (a)“.
+
+### Zur Info: was C-069 gebaut hat
+
+- **`oec-check list`:** zeigt den Katalog – je Test Kennung, Art (mithören/aktiv), Level, Stand, was er braucht (Zwischenstation, Neustart, zweite App) und die Regeln. Filter z. B. „nur aktive Tests bis Level 1, die nichts Besonderes brauchen“: `list --mode test --level 1 --needs none`.
+- **`oec-check explain <Test oder Regel>`:** erklärt einen Test (seine Regeln mit „muss/sollte“, Level und Fundstelle in der Guideline, seine Testfälle mit dem erwarteten Ergebnis) oder eine Regel (Text, Fundstellen, Zitate, welche Tests sie prüfen). Alles steckt im Programm selbst, es braucht kein Netz (A-233).
+- **Schema des Berichts** (`report.schema.json`, `oec-check report-schema`): legt fest, wie der JSON-Bericht von `monitor` und `test` aussieht (Version 1, jetzt eingefroren). Das Prüfskript kontrolliert **jeden** Bericht, den es erzeugt, gegen das Schema (A-231). Dabei fiel ein kleiner Fehler in D7 auf: die erste Frage nach dem Profil hatte im Bericht keine Bezeichnung, jetzt `discovery` (A-232).
+- **Abdeckungsbericht** `oec/conformance/catalog/COVERAGE.md` (wird erzeugt und vom Prüfskript verglichen): welche Regel von welchem Test geprüft wird, je Test die Testfälle nach Ergebnis; keine Regel ohne Prüfung (A-234).
+- **Zählfehler korrigiert:** D7 hat **55** Tests, nicht 54. T7-ACT-04 kam mit der Re-Baseline nach deinem Review C-060 dazu; die Texte seitdem zählten falsch (A-235).
+- **Abschlusslauf gegen `demo.rs`** (wie in C-068): **49 bestanden, 0 durchgefallen, 6 übersprungen, Exit 0**; Stand danach wie vorher; der Bericht passt zum Schema; die Demo fragte die zweite App und D7 nach ihrem Typenschild. Am SDK musste nichts geändert werden.
+- Keine neuen oder geänderten Testfälle (also nichts zu prüfen), kein Finding, keine neue Bibliothek, keine Schema-Änderung (A-238).
+
+Die Technik-Entscheidungen A-229 … A-238 sind nur zur Info (unten). Einen Blick wert: **A-236** (warum drei Tests mit Warnung/Hinweis statt „durchgefallen“ zählen), **A-231** (was das Berichts-Schema festlegt) und **A-235** (Zählfehler).
+
+### Was aus dem Review C-068 geworden ist
+
+Deine Antwort „R-6 und R-7 akzeptiert“ ist eingetragen:
 - R-6 (C-068): der geänderte Testfall `none` (läuft mit der zweiten App und `--announce`, T7-ADR-01 besteht);
 - R-7 (C-068): die 3 neuen Testfälle zu T7-ADR-01 (`own-app`, `service-type`, `silent`).
 
@@ -204,7 +239,7 @@ C-059 war **P4 Inkrement 8b**: die SubscriptionList (jede App ab Level 2 zeigt, 
 
 ---
 
-Die Punkte A-1 … A-152 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-061 (A-145 … A-152) stehen unten.
+Die Punkte A-1 … A-238 in `REVIEW.md` sind nur zur Info. Das sind Technik-Entscheidungen, die ich nach deiner Regel (GUARDRAILS G-3.4 b) selbst treffe. Du kannst sie kippen, musst aber nicht antworten. Die neuen aus C-061 (A-145 … A-152) stehen unten.
 
 Aus C-056: Deine Zustimmung zu D-1 (SF-107), D-2 (SF-108) und R-1 ist umgesetzt, siehe unten „Was aus dem Review C-056 geworden ist“.
 
@@ -715,11 +750,23 @@ Neu aus C-068 (P5 Inkrement 6b):
 - **A-227 (neu) – Simulierte App und Selbsttest:** Die simulierte App fragt wie das SDK jede neue App nach ihrem Typenschild; ihre Abonnements dafür kommen zuletzt. 3 neue Fehler; neue Felder `peer` und `announce` je Eintrag; der Selbsttest prüft die angemeldeten Apps. `none` läuft mit beiden und ist wieder `draft` (R-6).
 - **A-228 (neu) – Bericht:** neuer Abschnitt `announced` und eine Textzeile je angemeldeter App; die Version des Berichts bleibt 1 (nur ergänzt).
 
+Neu aus C-069 (P5 Inkremente 7/8):
+- **A-229 (neu) – Zuschnitt:** Inkremente 7 und 8 zusammen in C-069, wie geplant; 7 bringt keine neuen Tests oder Testfälle, 8 ist ein Lauf nach dem Rezept aus C-068.
+- **A-230 (neu) – Wo das Schema liegt:** im obersten Go-Paket `conformance` des Moduls, zusammen mit dem Einlesen der Testfall-Listen. Nur von dort kann Go die Dateien unter `testdata/` einbetten, und nur so kann der Selbsttest gegen die simulierte App das Schema benutzen (sonst gäbe es einen Kreis von Abhängigkeiten).
+- **A-231 (neu) – Berichts-Schema:** JSON Schema 2020-12, Version 1 für `monitor` und `test`; unbekannte Schlüssel sind verboten; je nach Art des Laufs sind bestimmte Schlüssel Pflicht (z. B. `test` braucht `app` und `tester`, die Zwischenstation `proxy_listen`). Der Bericht von `validate` (aus P2) ist nicht dabei. Geprüft werden die Berichte aus den Kommandozeilen-Tests, aus jeder abgespielten Aufzeichnung und aus jedem Testfall gegen die simulierte App. Ändert sich ein Schlüssel oder seine Bedeutung, gibt es eine neue Version.
+- **A-232 (neu) – Bezeichnung der Fragen im Bericht:** jede Frage von D7 trägt die Test-Kennung oder eine Phase: `discovery` (Finden der App), `state` (Stand vorher/nachher), `restart` (nach dem Neustart). Die erste Frage nach dem Profil hatte keine Bezeichnung – jetzt `discovery`.
+- **A-233 (neu) – `list`/`explain`/`report-schema`:** nur aus den eingebauten Daten; `explain` zeigt die Testfälle mit dem Ergebnis, das in ihrer Liste steht (ob es wirklich so kommt, prüft der Selbsttest); gute Testfälle erscheinen als „besteht oder passt nicht“. Falsche Eingaben enden mit Exit 2. `version` nennt jetzt auch Katalog-Stand und Berichts-Version.
+- **A-234 (neu) – Abdeckungsbericht in D7:** Geplant war er im `spectool`. Die Werkzeuge in `oec/spec` dürfen aber nichts aus `conformance/` benutzen (ADR-0018), also erzeugt ihn D7 selbst. Zusätzlich prüft das Prüfskript jetzt: jeder gebaute Test hat einen schlechten (durchgefallen, Warnung oder Hinweis) und einen guten Testfall.
+- **A-235 (neu) – Zählfehler:** 55 Tests (19 mithören, 36 aktiv). In STATUS, ROADMAP, README und DESIGN korrigiert; alte Logs bleiben, wie sie sind.
+- **A-236 (neu) – Abschluss-Bedingung 2:** „jeder schlechte Testfall fällt durch“ heißt: er ergibt das Ergebnis, das zur Strenge der Regel passt. Bei „sollte“-Regeln (T7-GET-09, T7-SET-12) ist das eine Warnung, bei der Vermutung T7-MON-10 (dass eine Kennung eindeutig ist, kann man durch Mithören nicht beweisen) ein Hinweis. Alle anderen Tests haben einen Testfall mit „durchgefallen“.
+- **A-237 (neu) – CI und Container-Image:** kommen mit P9. Festgehalten: Prüfskript auf dem Mac (arm64) und erfolgreiche Builds für Windows, Linux und macOS je mit amd64 und arm64 (je etwa 14–16 MB).
+- **A-238 (neu) – Sonst:** keine neue Bibliothek (das Schema prüft der Validator, den `validate` schon hat), keine Änderung am JSON Schema (D1), SDK und Demo unverändert, kein Finding.
+
 ---
 
-### Was als Nächstes passiert (C-069)
+### Was als Nächstes passiert (C-070)
 
-1. **P5 Inkremente 7/8:** `oec-check list`/`explain` (Katalog und Regeln nachschlagen), das Schema des Berichts, der Abschlusslauf von P5 gegen die Demo (mit `--peer` und `--announce`) und die Prüfung der Abschluss-Kriterien von P5.
+1. **Deine Antwort auf D-1 eintragen** (ROADMAP, STATUS). Bei (a), (b) oder (c) plant der erste Zyklus die gewählte Phase (Plan und Zuschnitt in der ROADMAP, ggf. ADRs).
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

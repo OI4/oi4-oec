@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-068 review (you accepted R-6/R-7: `none` and the 3 sim fixtures of T7-ADR-01 are `reviewed`). **Nothing is open for you.** A-191 … A-228 for information, worth a look: A-225, A-226._
+_Last updated: 2026-10-29, C-069 (P5 increments 7/8: `list`/`explain`, the report schema, the coverage report and the P5 exit run). **One item to decide: D-1 – close P5 and choose the next phase.** A-229 … A-238 for information, worth a look: A-231, A-235, A-236._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -169,10 +169,18 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Against `demo.rs` through the proxy with the restart hook, `--peer` and `--announce` (level 2): **49 pass, 0 fail, 6 skip, exit 0**; T7-ADR-01 passes (the demo asked the peer and D7 for their MAM on the right topics, both answered); state restored. The SDK was not changed.
   - ADR-0025 amendment C-068; no SF, no new dependency. A-222 … A-228 for information.
 - C-068 review: you accepted R-6 and R-7; all 59 sim fixtures and all 29 capture fixtures are `reviewed`. Nothing is open.
+- C-069 (P5 increments 7/8, not split, A-229):
+  - **`oec-check list`** (the catalog: id, mode, level, status, needs, title, REQs; filters `--mode`, `--level`, `--req`, `--needs`, `--status`, id patterns; text or JSON), **`oec-check explain <test|REQ>`** (a test with its REQs, their keywords, levels and MG/RIG sources, and its fixtures with the expected outcome; a REQ with its statement, sources, quotes, verification, tests and fixtures) and **`oec-check report-schema`** – all from the data embedded in the binary (A-233).
+  - **`report.schema.json`** freezes report version 1 of `monitor` and `test` (incl. `requests`, `restore`, `connections`, `announced`). The gate validates every report it produces: CLI tests, every capture replay, every sim fixture run (A-231). It found one D7 defect: the preparatory Profile read had an empty request label, now `discovery` (A-232).
+  - **Coverage report** `oec/conformance/catalog/COVERAGE.md` (generated, checked by the gate): 55 tests, 0 uncovered `d7-monitor`/`d7-test` REQs, per test its fixtures by outcome; the gate now also enforces a negative and a positive fixture for every implemented test (A-234).
+  - **D7 has 55 tests, not 54**: T7-ACT-04 came with the `eb7889c` re-baseline in the C-060 review; the docs since C-062 counted 54. Corrected in STATUS, ROADMAP, README, DESIGN (A-235).
+  - **P5 exit run** against `demo.rs` (level 2, proxy, restart hook, `--peer`, `--announce`): **49 pass, 0 fail, 6 skip, exit 0**, state restored, the report valid against the schema; the demo asked the peer and D7 for their MAM. Cross builds for Windows/Linux/macOS × amd64/arm64 succeed. The SDK was not changed.
+  - **P5 exit** (ROADMAP P5 "Exit assessment"): criteria 1–3 met, 4 (CI on Windows/macOS/Linux) with P9 → **D-1**.
+  - No new or changed fixture (nothing to review), no SF, no new dependency (the schema uses the validator of `validate`). ADR-0025 amendment C-069; A-229 … A-238 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
-Logs: [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -406,10 +414,30 @@ Logs: [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_
 | A-226 | T7-ADR-01: which requests are judged, per-request checks, skips | info (agent) | C-068 | – | – |
 | A-227 | Sim as a consumer, 3 faults, harness checks, `none` with peer and announce | info (agent) | C-068 | – | – |
 | A-228 | Report: key `announced`, report version 1 | info (agent) | C-068 | – | – |
+| **D-1** | **P5 exit and the next phase** | **decide** | C-069 | (a) close P5, next P5b | ☐ |
+| A-229 | Cut: increments 7 and 8 in one cycle | info (agent) | C-069 | – | – |
+| A-230 | Module root package `conformance` for the report schema and the fixture indexes | info (agent) | C-069 | – | – |
+| A-231 | Report schema: scope, closed objects, validated in the gate | info (agent) | C-069 | – | – |
+| A-232 | Request labels: test id or phase; the Profile read of the discovery labelled `discovery` | info (agent) | C-069 | – | – |
+| A-233 | `list`/`explain`/`report-schema`: embedded data only, fixtures as stated, `version` extended | info (agent) | C-069 | – | – |
+| A-234 | Coverage report `catalog/COVERAGE.md` in the conformance module, not in `spectool` | info (agent) | C-069 | – | – |
+| A-235 | Test count corrected: 55 D7 tests | info (agent) | C-069 | – | – |
+| A-236 | Exit criterion 2: negative fixtures of SHOULD/heuristic rules expect `warn`/`info` | info (agent) | C-069 | – | – |
+| A-237 | Exit criterion 4 and distribution: local runs now, CI and container image with P9 | info (agent) | C-069 | – | – |
+| A-238 | No new dependency, no schema change, SDK unchanged | info (agent) | C-069 | – | – |
 
 ## Decisions and review items
 
-No open item.
+### D-1 – P5 exit and the next phase (G-3.4 a: phase order)
+
+- **State:** all P5 increments (1–8) are done (C-062 … C-069). The exit criteria (ROADMAP P5) one by one, with evidence in `log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md`:
+  1. `test` passes against the SDK example app `demo.rs` – **met**: level 2 through the proxy with restart hook, `--peer` and `--announce`, 49 pass, 0 fail, 6 skip (not applicable to the demo), exit 0, state restored. This also closes the former P4 criterion 3 (your D-1 (a) of the C-061 review);
+  2. it fails on purpose-built faulty fixtures; every implemented test has a positive and a negative fixture – **met**: 59 sim and 29 capture fixtures, all reviewed by you, all expected verdicts checked by the gate; since C-069 the gate also checks "a negative and a positive fixture" for all 55 tests. For three tests whose rule is a SHOULD or a heuristic (T7-GET-09, T7-SET-12, T7-MON-10) the negative fixture expects `warn` or `info`, not `fail` – the verdict of the obligation (A-236);
+  3. every catalog item `implemented` or a documented `manual` – **met**: 55 of 55 `implemented`, 4 `manual` entries with reason; 0 uncovered REQs;
+  4. runs in CI on Windows, macOS and Linux runners – **with P9** (as the SDK platform matrix, D-1 (a) of C-061): the gate runs natively on macOS arm64; cross builds for Windows/Linux/macOS × amd64/arm64 succeed. The container image of D7 is a release artifact and also comes with P9 (A-237).
+- **Options:** (a) close P5 (criterion 4 to the P9 CI); next **P5b** – D8 `oec-infra` (container and platform checks). (b) As (a), but next **P4b** – the micro SDK in C for the ESP32 (D9). (c) As (a), but next **P6** – the demos (weather in Rust, logger in C); their exit also needs D8, which would then stay open. (d) Keep P5 open until the CI exists.
+- **Recommendation:** (a). Your C-045 order puts P4b/P5b after P4/P5. P5b comes first because the exits of P6 and P7 need D8 (`level3` container compliance) and D8 reuses the module, catalog (`d8.yaml`, 17 tests planned), verdict model and report of D7 while they are fresh. P4b is independent of both and can follow; the CI belongs to P9 and the publication (your decision).
+- **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ (d) ☐ other: …
 
 ### Answered earlier
 
@@ -1088,6 +1116,19 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-227 Sim and harness:** the simulated component is a consumer like the SDK directory: it subscribes to `Pub/MAM` and `Pub/Health` of all applications – after its request subscriptions, because D7 takes the first SUBACK as "ready" (found by `TestSimLateSubscribe`) – and asks every new application for its MAM. 3 faults (58 in total), index fields `peer` and `announce`; the harness checks the announced components (count, requests answered, no finding of the peer). `none` runs with both flags and is back to `draft` (R-6).
 - **A-228 Report:** key `announced` (per component: role `tester`/`peer`, `publisher_id`, `requests` received, `answered`) and one text line per component; report version stays 1 (only added).
 
-## Next (C-069)
+### A-229 … A-238 – P5 increments 7/8 (C-069, agent)
 
-1. P5 increments 7/8: `oec-check list`/`explain`, the report schema, the P5 exit run (with `--peer` and `--announce`) and the check of the P5 exit criteria; in a new session (start prompt in `prompt.md`).
+- **A-229 Cut:** increments 7 and 8 in one cycle as planned; 7 adds no test and no fixture, 8 is one run with the C-068 recipe. ROADMAP table row C-069 ✅, exit assessment in ROADMAP P5.
+- **A-230 Root package:** `report.schema.json`, `ValidateReport` and the loaders of `testdata/sim/index.yaml` and `testdata/captures/index.yaml` live in the module root package `conformance` – `go:embed` cannot reach `testdata/` from a sub-package, and `internal/report` imports `probe`, so the sim tests in `probe` cannot use `report`. The root package imports no tool package.
+- **A-231 Report schema:** JSON Schema 2020-12, report version 1 of `monitor` and `test`, closed objects; conditional keys per mode (`test` needs `app` and `tester`; `replay` needs `capture` and has no `broker`; live/test need `broker`) and attachment (`proxy` needs `proxy_listen`, only then `connections`). `validate`'s own report (P2) is not covered. Validated in the gate: the CLI tests (`--format json`, `--report json=`), every capture replay at levels 1–3, and every sim fixture run (its report document is assembled in the test with the keys of `report.Monitor`, because of the import cycle of A-230; the CLI tests cover the real `report.Monitor`). A changed key or meaning is a new report version.
+- **A-232 Request labels:** the `test` of a request in the report is a test id or one of the phases `discovery`, `state` (snapshot for the restore check), `restart` (after the hook). The schema found that the Profile read during discovery had an empty label; it is now `discovery` (`internal/probe/probe.go`).
+- **A-233 `list`/`explain`/`report-schema`:** only embedded data (catalog, `spec.FS`, the fixture indexes); no network. `explain` shows the fixtures statically with the outcome their index states; a positive fixture is listed as "pass or not applicable"; a sim fixture without the peer is not shown for a test that needs the peer. Usage errors (unknown id, more than one id, unknown filter value) exit 2. `version` now also names the catalog baseline and the report version. JSON tags on the catalog types for `--format json`.
+- **A-234 Coverage report:** `oec/conformance/catalog/COVERAGE.md`, generated by `internal/explain` (`go test ./internal/explain -run TestCoverageReport -update`) and diffed by the gate. DESIGN §6 planned it in `spectool`; but the tools of `oec/spec` must not import `conformance/` (ADR-0018 §5), so it lives in D7. `TestFixtureCoverage` enforces a negative (fail, warn or info) and a positive fixture for every implemented test.
+- **A-235 Test count:** D7 has 55 tests (19 monitor, 36 test). T7-ACT-04 (unknown Source → `BadNotFound`, REQ-ACT-024) came with the `eb7889c` re-baseline in the C-060 review; the docs since then said 54. Corrected in the current-state texts (STATUS, ROADMAP, README, DESIGN); older logs stay as written.
+- **A-236 Exit criterion 2:** "every negative fixture fails" is read as "fails at the obligation of its rule": for a SHOULD (T7-GET-09 REQ-MSG-046, T7-SET-12 REQ-TOP-027) the negative fixture expects `warn`, for the heuristic T7-MON-10 (uniqueness of the IL is not provable by observation) `info`. All other tests have a `fail` fixture.
+- **A-237 Exit criterion 4 and distribution:** CI on Windows/macOS/Linux and the multi-arch container image come with P9 (release); C-069 records the native macOS arm64 gate and `CGO_ENABLED=0` cross builds for windows/linux/darwin × amd64/arm64 (go1.27.3, about 14–16 MB each).
+- **A-238 Dependencies and other parts:** no new dependency (the report schema uses `santhosh-tekuri/jsonschema/v6` of `validate`), no schema change (D1 stays `2.0.1-dev` @ `eb7889c`), the SDK and `demo.rs` unchanged, no SF.
+
+## Next (C-070)
+
+1. Apply your answer to D-1 (ROADMAP P5 heading and exit, STATUS); with (a)/(b)/(c) the first cycle of the chosen phase plans it (plan and cycle cut in the ROADMAP, ADRs as needed); in a new session (start prompt in `prompt.md`).

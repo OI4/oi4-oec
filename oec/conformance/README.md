@@ -1,6 +1,6 @@
 # `oec/conformance/` – D7/D8 compliance CLIs
 
-> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062), every `Get` test and T7-ADR-02/03 (C-063, amendment C-063), the write tests T7-SET-01 … 09, 11, 12 with restore (C-064, amendment C-064), the Action tests T7-ACT-01 … 04 and the monitor rules T7-MON-09, 13, 15, 16, 17 (18 of 19, C-065, amendment C-065), the proxy attachment with T7-CON-01 … 04 and T7-LIFE-01 … 03 (C-066, amendment C-066), the restart hook with T7-LIFE-04 and T7-SET-10 and the monitor rule T7-MON-14 (19 of 19, C-067, amendment C-067), the peer simulation, `--announce` and T7-ADR-01 (C-068, amendment C-068) – all 54 D7 tests implemented.** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
+> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062), every `Get` test and T7-ADR-02/03 (C-063, amendment C-063), the write tests T7-SET-01 … 09, 11, 12 with restore (C-064, amendment C-064), the Action tests T7-ACT-01 … 04 and the monitor rules T7-MON-09, 13, 15, 16, 17 (18 of 19, C-065, amendment C-065), the proxy attachment with T7-CON-01 … 04 and T7-LIFE-01 … 03 (C-066, amendment C-066), the restart hook with T7-LIFE-04 and T7-SET-10 and the monitor rule T7-MON-14 (19 of 19, C-067, amendment C-067), the peer simulation, `--announce` and T7-ADR-01 (C-068, amendment C-068) – all 55 D7 tests implemented; `list`, `explain`, `report-schema`, the frozen report schema version 1 and the catalog coverage report (C-069, amendment C-069).** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
 
 ## `oec-check validate`
 
@@ -95,11 +95,31 @@ go run ./cmd/oec-check test … --proxy-listen 127.0.0.1:18883 --proxy-ca /tmp/x
 
 - The report is the monitor report with `"mode": "test"` plus `tester`, `requests`, `restore` and `announced` (each announced component: role, PublisherId, requests received and answered); with the proxy `attachment` is `"proxy"`, plus `proxy_listen` and `connections` (each attempt: phase, TLS version, CONNECT without password, CONNACK, PUBLISH topics and times, first SUBACK, drop). Exit codes as for `monitor`.
 
+## `oec-check list`, `explain`, `report-schema`
+
+Views of the embedded test catalog ([`catalog/d7.yaml`](catalog/d7.yaml)), the requirements of `../spec/` and the fixture indexes; no network.
+
+```sh
+go run ./cmd/oec-check list                              # 55 tests: id, mode, level, status, needs, title, REQs
+go run ./cmd/oec-check list --mode test --level 1 --needs none
+go run ./cmd/oec-check list --req REQ-CMP-047 'T7-GET-*' --format json
+go run ./cmd/oec-check explain T7-ADR-01                 # notes, REQs with keyword, levels and MG/RIG sources, fixtures
+go run ./cmd/oec-check explain REQ-RES-CONFIG-025         # statement, sources, quotes, verification, tests, fixtures
+go run ./cmd/oec-check report-schema > report.schema.json
+```
+
+- `list` filters: `--mode monitor|test`, `--level N` (tests that apply at level N, i.e. level ≤ N), `--req`, `--needs proxy|restart-hook|peer|none`, `--status`, id patterns (`T7-SET-*`); flags may follow the patterns. Unfiltered it ends with the totals and the `manual` requirements.
+- `explain` takes one test or REQ id (case-insensitive); an unknown id is a usage error (exit 2). The fixtures are those of `testdata/sim/index.yaml` and `testdata/captures/index.yaml` with their stated outcome; positive fixtures are listed as "pass or not applicable".
+- `report-schema` prints [`report.schema.json`](report.schema.json) (JSON Schema 2020-12): report version 1 of `monitor` and `test`. Every report the gate produces (CLI tests, capture replays, sim fixture runs) is validated against it.
+- [`catalog/COVERAGE.md`](catalog/COVERAGE.md) is the generated coverage report (tests by status and need, REQs per verification kind and how they are checked, fixtures per test); regenerate with `go test ./internal/explain -run TestCoverageReport -update`.
+
 ## Layout
 
 | Path | Content |
 |---|---|
 | `cmd/oec-check` | CLI (D7) |
+| `.` (`conformance`) | `report.schema.json` with `ValidateReport` and the loaders of the fixture indexes (data outside the package directories, embedded) |
+| `internal/explain` | catalog view of `list`/`explain`, coverage report `catalog/COVERAGE.md` |
 | `internal/topic` | staged topic diagnosis over the generated patterns and the matrix |
 | `internal/ilink` | Identification Link checks, base64url elements, dnp encoding |
 | `internal/schemas` | schema set (strict + tolerant), REQ mapping of schema errors, R-4 probes |
@@ -117,12 +137,12 @@ go run ./cmd/oec-check test … --proxy-listen 127.0.0.1:18883 --proxy-ca /tmp/x
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
 | `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews, C-065 … C-067 in the C-067 review, C-068 in the C-068 review; new entries start as `draft`, G-3.9) |
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (C-052 reviewed in the C-052 review, C-065 and C-067 in the C-067 review; new entries start as `draft`, G-3.9) |
-| `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
+| `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `COVERAGE.md` (generated); `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
 ## Tests
 
-`go test ./...` checks D7 against the vectors of the baseline: every topic, IL and dnp vector; every payload vector (valid → no finding, invalid → exactly its `violates`); the split between schema layer and rule layer of [`../schema/tests/rule-layer.yaml`](../schema/tests/rule-layer.yaml); R-4 probes; CLI exit codes; the test catalogs against the requirements catalog (`catalog/`); the MQTT client against the loopback test broker (passwords, client certificates, Will, lost connection); every monitor rule with a positive and a negative capture fixture; `monitor` live against the loopback broker and from captures; every implemented `test` test with a positive and a negative run against the simulated CUT, and `oec-check test` against it. The Go toolchain is pinned in `go.mod` (`GOTOOLCHAIN=auto` with an older local Go).
+`go test ./...` checks D7 against the vectors of the baseline: every topic, IL and dnp vector; every payload vector (valid → no finding, invalid → exactly its `violates`); the split between schema layer and rule layer of [`../schema/tests/rule-layer.yaml`](../schema/tests/rule-layer.yaml); R-4 probes; CLI exit codes; the test catalogs against the requirements catalog (`catalog/`); the MQTT client against the loopback test broker (passwords, client certificates, Will, lost connection); every monitor rule with a positive and a negative capture fixture; `monitor` live against the loopback broker and from captures; every implemented `test` test with a positive and a negative run against the simulated CUT, and `oec-check test` against it; every report produced against `report.schema.json`; `list`/`explain` and the coverage report (positive and negative fixture for every implemented test). The Go toolchain is pinned in `go.mod` (`GOTOOLCHAIN=auto` with an older local Go).
 
-The module is pure Go without cgo; `GOOS=windows|linux|darwin go build ./cmd/oec-check` cross-compiles (checked in C-040 for windows/amd64, linux/amd64, linux/arm64 and darwin/arm64; tests run on macOS so far, CI on Linux/Windows comes with P4).
+The module is pure Go without cgo; `GOOS=windows|linux|darwin go build ./cmd/oec-check` cross-compiles (checked in C-040 for windows/amd64, linux/amd64, linux/arm64 and darwin/arm64, in C-069 for windows/linux/darwin × amd64/arm64; tests run on macOS so far, CI on Windows/macOS/Linux comes with P9, D-1 (a)).
 
 `./live.sh` (opt-in, needs Docker; not part of `oec/check.sh`) starts the dev broker of [`../dev/`](../dev/) and runs `TestMonitorDevBroker`: a simulated component publishes Birth, gets killed (the broker sends its Will) and reconnects, while `oec-check monitor` observes once with the client certificate of `oec-dev-cert` (port 8884) and once with the credentials of `oec-dev-app` (port 8883). `OEC_LIVE_OUT=DIR` keeps the captures, `OEC_LIVE_KEEP=1` the broker.
