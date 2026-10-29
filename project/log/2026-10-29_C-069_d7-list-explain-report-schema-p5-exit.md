@@ -152,7 +152,8 @@ None. `go.mod` is unchanged: the report schema is validated with `github.com/san
 - `4ce2f57`: report schema, root package `conformance`, report validation in CLI/replay/sim tests, `discovery` label, log start.
 - `3636ea0`: `internal/explain` (list, explain, coverage), `catalog/COVERAGE.md`, CLI `list`/`explain`/`report-schema`, `version`, catalog JSON tags.
 - `822b796`: coverage report per outcome, `TestFixtureCoverage`.
-- this commit: README, DESIGN, ADR-0025 amendment C-069, log, STATUS, ROADMAP, REVIEW, REVIEW_DE.
+- `7543e89`: README, DESIGN, ADR-0025 amendment C-069, log, STATUS, ROADMAP, REVIEW, REVIEW_DE.
+- this commit: the hash of the docs commit in this list.
 
 ## Checks (final)
 
