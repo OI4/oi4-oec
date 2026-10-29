@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-070 review: R-1 accepted (13 image fixtures `reviewed`). Your answer to D-1 is recorded; it changes the proposal, so **open for you: D-1 (revised)** – please confirm the exact RIG 4.1.4 wording for SF-114 (versions not restricted, licenses named unambiguously, CRA/RED-ready component list, a text for every license and exception)._
+_Last updated: 2026-10-29, C-070 review addendum 3: D-1 (SF-114) applied – RIG 4.1.4 `a55f475`, re-baseline, D8 SBOM rules. **Open for you: R-2** – the draft REQ-CNT-013/014/026/027 and 18 image fixtures. No decision is open._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -186,8 +186,13 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **One finding: SF-114** (RIG 4.1.4: SBOM versions and license texts) → **D-1**; D8 implements the proposal until you decide.
   - Opt-in try: `docker save` of Mosquitto on Docker 28 gives an oci-archive that `oec-infra image` reads (fails IMG-03, as expected for a non-OEC image). Cross builds ok. No new dependency, no reviewed item changed, D7 gate unchanged. A-239 … A-248 for information.
 - C-070 review (log addendum 1): **R-1 accepted**, the 13 image fixtures are `reviewed`. Your answer to **D-1** ("alle Lizenzen lizenzkonform genannt", "CRA und RED Ready", versions not restricted, texts "rechtskonform") changes the proposal: SF-114 has a revised proposal in the register (`6d53556`) with the exact RIG 4.1.4 wording → **D-1 (revised)** to confirm. D8 keeps the C-070 behaviour until then.
+- C-070 review addendum 2/3: your answer ("D-1 überarbeitet ok, einarbeiten") is applied.
+  - RIG 4.1.4 in `a55f475` with the revised wording, **SF-114 resolved** (`3a86b5e`), no open finding. Re-baseline on `a55f475`: 1409 inventory items, 444 REQs, 0 gaps; schema `2.0.1-dev` @ `a55f475` (no content change).
+  - REQ-CNT-013/014 follow the new text; new **REQ-CNT-026** (every license named unambiguously, MUST) and **REQ-CNT-027** (unique identifier per component, SHOULD); all four `draft`.
+  - D8 T8-IMG-03 follows the decision (A-249): any SPDX/CycloneDX version, SPDX 3 JSON-LD readable, unreadable versions inconclusive, name/version/license per component, texts of license exceptions, identifier warns.
+  - Image fixtures: 12 of the 13 reviewed ones changed bytes (versions and purls added) and are `draft` again, `invalid-sbom` has new content; 6 new ones → **R-2** (numbered on in the C-070 review because R-1 is answered).
 
-Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
+Coverage stays at 0 gaps; schema `2.0.1-dev` @ `a55f475` (re-baseline, no content change).
 
 Logs: [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
@@ -433,8 +438,6 @@ Logs: [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29
 | A-236 | Exit criterion 2: negative fixtures of SHOULD/heuristic rules expect `warn`/`info` | info (agent) | C-069 | – | – |
 | A-237 | Exit criterion 4 and distribution: local runs now, CI and container image with P9 | info (agent) | C-069 | – | – |
 | A-238 | No new dependency, no schema change, SDK unchanged | info (agent) | C-069 | – | – |
-| D-1 | SF-114 – RIG 4.1.4: SBOM versions, naming of licenses, texts, CRA/RED (revised after your answer) | confirm | C-070 | revised wording | ☑ revised wording 2026-10-29 |
-| R-1 | 13 image fixtures of `oec-infra image` (T8-IMG-01 … 04) | review | C-070 | accept | ☑ accepted 2026-10-29 |
 | A-239 | Standard-library OCI and SBOM readers, no `go-containerregistry` | info (agent) | C-070 | – | – |
 | A-240 | Input forms: OCI layout directory and oci-archive; no registry access | info (agent) | C-070 | – | – |
 | A-241 | Reading rules: Docker schema 2, attestations, zstd inconclusive | info (agent) | C-070 | – | – |
@@ -445,58 +448,42 @@ Logs: [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29
 | A-246 | Image fixtures generated and byte-compared; coverage rule | info (agent) | C-070 | – | – |
 | A-247 | P5b plan, cycle cut C-070 … C-075, precise exit | info (agent) | C-070 | – | – |
 | A-248 | DESIGN §9 corrections; `explain`/coverage for D8 in increment 6 | info (agent) | C-070 | – | – |
+| R-2 | REQ-CNT-013/014/026/027 after SF-114 and 18 image fixtures of `oec-infra image` | review | C-070 review | accept | ☐ |
+| A-249 | SBOM rules after SF-114 (replace A-245): formats, components, texts, notes | info (agent) | C-070 review | – | – |
 
 ## Decisions and review items
 
-### D-1 – SF-114: SBOM versions and license texts (RIG 4.1.4, G-3.4 a)
+### R-2 – REQs and image fixtures after SF-114 (G-3.9, C-070 review)
 
-- **Where:** register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, SF-114 (`c955d8a`); RIG 4.1.4 (License and SBOM Storage); REQ-CNT-013, REQ-CNT-014, REQ-LIC-002; D8 T8-IMG-03.
-- **Problem:**
-  - (a) RIG 4.1.4 names the formats "SPDX (ISO/IEC 5962:2021)" and "CycloneDX (ECMA-424)". Literally that is SPDX 2.2.1 and CycloneDX 1.6 only; the widespread SPDX 2.3 and CycloneDX 1.4/1.5 (defaults of common SBOM generators) and SPDX 3.0 would not comply. A checking tool needs a definite set of versions.
-  - (b) "The license texts shall either be part of the SBOM or be stored as separate text files `<License-ID>.txt`" does not say which identifiers of a license expression need a text: exception identifiers after `WITH` and the SPDX values `NONE`/`NOASSERTION` are no licenses.
-  - (c) A CycloneDX license given only by `name` has no identifier, so no file name can be derived.
-- **Proposed interpretation:**
-  - (a) Accepted are SPDX 2.2 and 2.3 JSON (`spdxVersion` `SPDX-2.2`/`SPDX-2.3`) and CycloneDX 1.x JSON (`bomFormat` `CycloneDX`, `specVersion` 1.x). SPDX 3.x not until the guideline names it. Addition to RIG 4.1.4 after the list of formats: "SPDX in version 2.2 or 2.3, CycloneDX in version 1.x."
-  - (b) Every license identifier the SBOM uses (SPDX id or `LicenseRef-`, also inside expressions) needs a text; `WITH` exceptions and `NONE`/`NOASSERTION` need none.
-  - (c) The text of a license without an identifier is part of the SBOM (CycloneDX `license.text`). Addition after "…clearly assignable to the corresponding license in the SBOM.": "Exception identifiers (`WITH`) need no separate text; the text of a license without an identifier is part of the SBOM."
-- **Effect in the workspace:** `oec-infra image` implements the proposal; the fixtures `invalid-sbom` (SPDX 3.0 → fail) and `missing-license-text` (one choice of `MIT OR BSD-3-Clause` without text → fail) depend on it. With the guideline change: re-baseline, notes of the REQs, these two fixtures follow the decision.
-- **Recommendation:** as proposed.
-- **PO (2026-10-29):** "uns ist nur wichtig, dass alle Lizenzen Lizenz Konform genannt werden, zudem soll das Ganze "CRA und RED Ready" sein. Die Versionen möchte ich nicht einschränken … Zu den Texten, es muss einfach rechtskonform sein." → not as proposed; revised below.
-- **Revised proposal (to confirm):**
-  - (a') **Versions not restricted:** SPDX and CycloneDX in every version, JSON serialization of that version (SPDX 3: JSON-LD). D8 assesses the versions it can read (SPDX 2.x and 3.x, CycloneDX 1.x); another version is inconclusive, not a failure.
-  - (b') **Licenses named license-conformant:** SPDX license identifier (also in expressions and for exceptions after `WITH`), otherwise `LicenseRef-` (SPDX) or the name (CycloneDX). Every component states its license; none or `NOASSERTION` fails, `NONE` (no license) is fine.
-  - (c') **Texts legally compliant:** the text of every license and exception named in the SBOM is provided (in the SBOM or as `<License-ID>.txt`); a name-only license carries its text in the SBOM. Most licenses require their text to accompany the software; a tool cannot decide per license whether the text is legally required, a text too many does no harm.
-  - (d') **CRA/RED ready:** the SBOM lists every software component with name and version (CRA Annex I Part II (1): commonly used, machine-readable, at least the top-level dependencies; RED DA (EU) 2022/30 / EN 18031 expect a component inventory); recommended: a purl or CPE per component.
-  - **Wording for RIG 4.1.4:** see the register SF-114 (`6d53556`): first bullet "The SBOM shall list all software components used in the application, each with its name, its version and its licenses. It shall use one of the following formats; the version of the format is not restricted:"; a new bullet on naming licenses unambiguously; the texts bullet for "every license and license exception"; a RECOMMENDED purl/CPE; the CRA note extended by RED and the provider's legal responsibility (RIG 5.3).
-  - **Effect:** re-baseline; REQ-CNT-013/014 and REQ-LIC-002 follow (→ `draft`, R-x); D8 reads SPDX 3, checks name/version/license per component and exception texts; `invalid-sbom` and `missing-license-text` reworked (→ `draft`), new fixtures for the new rules.
-- **PO:** ☑ revised wording ("D-1 überarbeitet ok, einarbeiten", 2026-10-29) ☐ other: …
+Numbered R-2 because R-1 of the C-070 review is answered.
 
-### R-1 – image fixtures of `oec-infra image` (G-3.9)
-
-- **Where:** `oec/conformance/testdata/images/index.yaml` – 13 new entries `draft` with their `.tar` files (OCI archives generated by `internal/image/fixtures_test.go`; the license texts are placeholders).
-- **What they are:** `oec-infra image` at level 3 on each archive, compared per test with outcome and exact REQ ids; a test not listed passes. The good image: an OCI image index with linux/amd64 and linux/arm64/v8 (plus a buildx attestation, not runnable), SPDX 2.3 SBOM in `/opt/oi4/licenses` with `Apache-2.0`, `MIT OR BSD-3-Clause` and `LicenseRef-acme` (texts as files, one as a symlink inside the image, one embedded).
-- **Positive (conforming):**
-  - `good` – every image test passes;
-  - `cdx-docker` – Docker schema-2 media types as `docker save` of a classic image writes them, linux/amd64 + linux/arm/v7, CycloneDX 1.6 with a name-only license "Vendor EULA" (text embedded) and `MIT OR ISC` with `MIT.txt`/`ISC.txt` – every image test passes.
-- **Negative (fault → expected outcome):**
-  - `bad-digest` (arm64 application layer content differs from its digest): T8-IMG-01 fail REQ-CMP-027; T8-IMG-04 warn REQ-CMP-030; T8-IMG-03 skip (inconclusive) on all five REQs – arm64 cannot be read;
-  - `sha512` (all descriptor digests sha512, valid OCI): T8-IMG-04 warn REQ-CMP-030 (RIG 4.3 only recommends SHA256);
-  - `single-arch` (one linux/amd64 image, no index): T8-IMG-02 warn REQ-APP-002;
-  - `unsupported-arch` (linux/386 and linux/riscv64 only): T8-IMG-02 fail REQ-APP-001, REQ-CMP-032;
-  - `no-sbom` (no `/opt/oi4/licenses`): T8-IMG-03 fail REQ-CMP-028, REQ-CNT-013 (texts not checkable, skipped);
-  - `two-sboms` (`sbom.spdx.json` and `sbom.cdx.json`): T8-IMG-03 fail REQ-CNT-013;
-  - `missing-license-text` (good without `BSD-3-Clause.txt`): T8-IMG-03 fail REQ-CNT-014, REQ-LIC-002 (SF-114 (b));
-  - `sbom-whiteout` (a later layer deletes the SBOM by a whiteout): T8-IMG-03 fail REQ-CMP-028, REQ-CNT-013;
-  - `dangling-symlink` (`MIT.txt` points to `/host/licenses/MIT.txt`, not in the image): T8-IMG-03 fail REQ-CNT-014, REQ-CNT-015, REQ-LIC-002;
-  - `invalid-sbom` (SPDX 3.0 JSON-LD): T8-IMG-03 fail REQ-CMP-028, REQ-CNT-013 (SF-114 (a));
-  - `sbom-volume` (`VOLUME /opt/oi4` in the image configs): T8-IMG-03 info REQ-CNT-015 – a note only, the content is complete.
-- **Please check:** is each fault a real violation of the named REQ and are `good`/`cdx-docker` compliant? In particular: `bad-digest` (IMG-03 inconclusive rather than fail), `sha512` and `single-arch` (warn, SHOULD), `sbom-volume` (info, not fail), and the two fixtures that depend on D-1.
-- **If accepted:** status `reviewed` in `index.yaml`.
+- **Where:**
+  - `oec/spec/requirements/cnt.yaml` (rendered in `oec/spec/requirements/view/cnt.md`): REQ-CNT-013, REQ-CNT-014, REQ-CNT-026 (new), REQ-CNT-027 (new), all `draft`;
+  - `oec/conformance/testdata/images/index.yaml`: 18 entries `draft` with their `.tar` files (generated by `internal/image/fixtures_test.go`; license texts are placeholders).
+- **REQs (RIG 4.1.4 at `a55f475`):**
+  - REQ-CNT-013 (MUST): exactly one SBOM (`sbom.spdx.json` or `sbom.cdx.json`) that lists every software component with name, version and licenses; the format version is not restricted.
+  - REQ-CNT-014 (MUST): the text of every license and license exception named in the SBOM, in the SBOM or as `<License-ID>.txt`; a license without an identifier has its text in the SBOM.
+  - REQ-CNT-026 (MUST, new): every license named unambiguously (SPDX id, also for exceptions; otherwise `LicenseRef-` or the name); a component without a stated license (`NOASSERTION` or nothing) does not comply, `NONE` does.
+  - REQ-CNT-027 (SHOULD, new): a unique identifier per component (e.g. purl, CPE); D8 warns.
+- **Fixtures – changed bytes only** (every package now has a version and a purl or CPE; verdict as accepted in R-1): `good`, `cdx-docker` (positive); `bad-digest` (now also skips REQ-CNT-026/027), `sha512`, `single-arch`, `unsupported-arch`, `two-sboms`, `missing-license-text`, `sbom-whiteout`, `dangling-symlink`, `sbom-volume`. `no-sbom` is unchanged and stays `reviewed`.
+- **Fixtures – changed content:**
+  - `invalid-sbom`: was SPDX 3.0 (now accepted, see `spdx3`); now `sbom.spdx.json` holds a CycloneDX document – no SPDX document → T8-IMG-03 fail REQ-CMP-028, REQ-CNT-013.
+- **Fixtures – new:**
+  - `spdx3` (positive): SPDX 3.0.1 JSON-LD with three packages (version, purl or CPE), `Apache-2.0`, `MIT AND LicenseRef-acme`, `GPL-2.0-only WITH Classpath-exception-2.0`, all texts present → every image test passes;
+  - `unknown-version`: CycloneDX `specVersion` 2.0 → T8-IMG-03 skip (inconclusive, exit 4) on REQ-CNT-013/014/026/027 and REQ-LIC-002; REQ-CMP-028 passes (versions are not restricted, so no violation);
+  - `no-license`: a package with `NOASSERTION` → fail REQ-CNT-026;
+  - `no-version`: a package without `versionInfo` → fail REQ-CNT-013;
+  - `exception-text`: `GPL-2.0-only WITH Classpath-exception-2.0` without the exception text → fail REQ-CNT-014, REQ-LIC-002;
+  - `no-identifier`: a package without purl or CPE → warn REQ-CNT-027.
+- **Please check:** do the four REQs state RIG 4.1.4 correctly; are `good`, `cdx-docker` and `spdx3` compliant; is each fault a real violation of the named REQ? In particular: `unknown-version` (inconclusive, not fail), `no-identifier` (warn, SHOULD), `invalid-sbom` (the new content).
+- **If accepted:** REQs and fixtures `reviewed`.
 - **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
-### Answered earlier
+Answered in the C-070 review (2026-10-29) and applied in C-070 addenda 1–3:
+- R-1 – 13 image fixtures of `oec-infra image` (T8-IMG-01 … 04): ☑ accepted → `reviewed` (addendum 1); 12 of them changed bytes with D-1 and are in R-2.
+- D-1 – SF-114 (RIG 4.1.4: SBOM versions, naming of licenses, texts, CRA/RED): first answer changed the proposal (versions not restricted, licenses named license-conformant, "CRA und RED Ready", texts legally compliant) → revised proposal (`6d53556`); ☑ revised wording ("D-1 überarbeitet ok, einarbeiten") → guideline `a55f475` (RIG 4.1.4), SF-114 resolved (`3a86b5e`), re-baseline, REQ-CNT-013/014/026/027 and the image fixtures → R-2; D8 rules A-249.
 
 Answered in the C-069 review (2026-10-29) and applied in C-069 addendum 1:
 - D-1 – P5 exit and the next phase: ☑ (a) → P5 closed; criteria 1–3 met, criterion 4 (CI on Windows/macOS/Linux runners) and the D7 container image carried into the P9 CI; next phase **P5b** (D8). The criteria and the evidence are in the C-069 log (P5 exit assessment). Caveat noted: the P5b exit on the demo and registry images follows with P6/P7.
@@ -1202,7 +1189,17 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 - **A-247 Plan:** P5b in six increments C-070 … C-075, exit as in ROADMAP P5b; demo/registry images → P6/P7 exits, CI → P9.
 - **A-248 Design:** DESIGN §9 corrected and "As built (C-070)" added; `internal/explain` and `COVERAGE.md` stay D7-only until increment 6, D8 then gets its own coverage file so the D7 `COVERAGE.md` stays unchanged.
 
+### A-249 – SBOM rules after SF-114 (C-070 review, agent)
+
+Replaces A-245; ADR-0025 amendment "C-070 review".
+- **Formats:** `sbom.spdx.json` is SPDX 2.x JSON or SPDX 3.x JSON-LD, `sbom.cdx.json` is CycloneDX. A version or construct D8 cannot read (SPDX other than 2.x/3.x, CycloneDX other than 1.x, unknown SPDX 3 license types) is no violation: REQ-CMP-028 passes, the content REQs are skipped inconclusive (exit 4). A file that is no SBOM of its format fails REQ-CMP-028/REQ-CNT-013.
+- **Components:** SPDX packages / `software_Package`, CycloneDX `components`; the CycloneDX `metadata.component` is the subject of the SBOM (its licenses need texts, but it needs no identifier); SPDX files and snippets are no components. Missing name or version → REQ-CNT-013 fail; `NOASSERTION` or no license → REQ-CNT-026 fail, `NONE` passes; no purl/CPE/SWID/other persistent id → REQ-CNT-027 warn.
+- **Texts:** every license id, `LicenseRef-`, exception after `WITH` and `AdditionRef-` needs a text (embedded or `<id>.txt`); a name-only license needs an embedded text.
+- **License ids:** checked for syntax, not against the SPDX license list (it changes over time; the guideline does not restrict versions).
+- **Notes (`info`):** references to other SPDX documents and SPDX 3 imports, a `VOLUME` over `/opt/oi4`, an empty component list.
+- **No new dependency:** SPDX 3 JSON-LD is read with `encoding/json`; the context is matched by URL, not expanded.
+
 ## Next (C-071)
 
-1. Your answers to D-1 and R-1 (recorded first, own commit).
+1. Your answer to R-2 (recorded first, own commit).
 2. C-071: P5b increment 2 – `oec-infra bus` (T8-BUS-01 … 03: TLS listener and certificate, ACL with a second credential set, Registry MAM) against the in-process test broker, opt-in against the dev broker; in a new session (start prompt in `prompt.md`).
