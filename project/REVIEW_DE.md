@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, Review C-069: Deine Antwort „D-1 (a)“ ist eingetragen – **P5 ist abgeschlossen**, die CI und das Container-Image von D7 kommen mit P9, **als Nächstes kommt P5b (D8)**. **Für dich ist nichts offen.** A-229 … A-238 nur zur Info._
+_Stand: 29.10.2026, C-070: P5b (D8 `oec-infra`) ist geplant, das erste Stück (`oec-infra image`) ist fertig. **Für dich offen: D-1** (SF-114: welche SBOM-Versionen gelten und welche Lizenzen einen Text brauchen) und **R-1** (13 Test-Images). A-239 … A-248 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,61 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**Nichts.** Deine Antwort „D-1 (a)“ ist eingetragen, siehe unten „Was aus deinem letzten Review (C-069) geworden ist“.
+### D-1 – SF-114: Welche SBOM-Versionen gelten, und welche Lizenzen brauchen einen Text? (bitte entscheiden)
+
+**Worum geht es?** Jedes OEC-Image muss in `/opt/oi4/licenses` eine **SBOM** mitbringen (eine maschinenlesbare Stückliste der Software mit ihren Lizenzen) und zu jeder Lizenz den **Lizenztext** (RIG 4.1.4). D8 prüft das jetzt (T8-IMG-03). Dabei sind drei Dinge in der Guideline nicht eindeutig:
+
+- **(a) Versionen:** Die RIG nennt „SPDX (ISO/IEC 5962:2021)“ und „CycloneDX (ECMA-424)“. Wörtlich genommen sind das genau SPDX 2.2.1 und CycloneDX 1.6. Die meisten Werkzeuge erzeugen heute aber SPDX 2.3 oder CycloneDX 1.4/1.5 – die wären dann nicht erlaubt. Und das neue SPDX 3.0 (ganz anderes Format) wäre unklar.
+- **(b) Welche Kennungen brauchen einen Text?** In einer SBOM stehen oft Ausdrücke wie `GPL-2.0 WITH Classpath-exception-2.0` oder `MIT OR BSD-3-Clause`. Braucht die Ausnahme hinter `WITH` einen eigenen Text? Und die Sonderwerte `NONE`/`NOASSERTION` („keine Lizenz“/„unbekannt“)?
+- **(c) Lizenz nur mit Namen:** CycloneDX erlaubt eine Lizenz nur mit Namen (z. B. „Vendor EULA“) ohne Kennung. Dann gibt es keinen Dateinamen `<Kennung>.txt`.
+
+**Mein Vorschlag:**
+- (a) Erlaubt sind SPDX 2.2 und 2.3 sowie CycloneDX 1.x, jeweils als JSON. SPDX 3 erst, wenn die Guideline es nennt. Ergänzung in RIG 4.1.4: „SPDX in version 2.2 or 2.3, CycloneDX in version 1.x.“
+- (b) Jede Lizenz-Kennung, die in der SBOM vorkommt, braucht einen Text – auch jede Wahl in einem `OR`-Ausdruck. Ausnahmen hinter `WITH` und `NONE`/`NOASSERTION` brauchen keinen.
+- (c) Bei einer Lizenz ohne Kennung steht der Text in der SBOM selbst.
+- Ergänzung nach „…clearly assignable to the corresponding license in the SBOM.“: „Exception identifiers (`WITH`) need no separate text; the text of a license without an identifier is part of the SBOM.“
+
+**Was passiert danach?** D8 arbeitet schon nach dem Vorschlag. Stimmst du zu, trage ich den Text in die Guideline ein und ziehe die Baseline nach. Entscheidest du anders, passe ich D8 und die zwei betroffenen Test-Images (`invalid-sbom`, `missing-license-text`) an.
+
+**Antwort z. B.:** „D-1 wie vorgeschlagen“.
+
+### R-1 – 13 Test-Images für `oec-infra image` (bitte prüfen)
+
+**Was ist das?** Kleine, künstliche Container-Images (als OCI-Archiv, je ein paar KB), die ein Test erzeugt. D8 prüft jedes davon, und das Ergebnis muss genau dem in der Liste `oec/conformance/testdata/images/index.yaml` entsprechen. Die Lizenztexte darin sind Platzhalter.
+
+**Die zwei guten Images** (alle Prüfungen bestehen):
+- `good`: läuft auf amd64 und arm64, SBOM im SPDX-Format mit drei Lizenzen, alle Texte vorhanden (einer als Verweis auf eine Datei im Image, einer direkt in der SBOM);
+- `cdx-docker`: so, wie `docker save` ältere Images schreibt, amd64 und arm/v7, SBOM im CycloneDX-Format, eine Lizenz nur mit Namen („Vendor EULA“), Text in der SBOM.
+
+**Die elf fehlerhaften Images** (Fehler → erwartetes Ergebnis):
+- `bad-digest`: eine Schicht des arm64-Images passt nicht zu ihrer Prüfsumme → T8-IMG-01 **durchgefallen**; T8-IMG-04 Warnung; die Lizenzprüfung T8-IMG-03 wird **übersprungen** (das arm64-Image ist nicht lesbar, also kein sicheres Urteil);
+- `sha512`: Prüfsummen mit SHA-512 statt SHA-256 → T8-IMG-04 **Warnung** (die RIG empfiehlt SHA-256 nur, „sollte“);
+- `single-arch`: nur amd64 → T8-IMG-02 **Warnung** (mehrere Architekturen sind nur empfohlen);
+- `unsupported-arch`: nur 386 und riscv64 → T8-IMG-02 **durchgefallen** (keine erlaubte Architektur);
+- `no-sbom`: kein Ordner `/opt/oi4/licenses` → T8-IMG-03 **durchgefallen**;
+- `two-sboms`: SPDX- und CycloneDX-SBOM gleichzeitig (erlaubt ist genau eine) → **durchgefallen**;
+- `missing-license-text`: ein Lizenztext fehlt (BSD-3-Clause aus „MIT OR BSD-3-Clause“) → **durchgefallen** (hängt an D-1 (b));
+- `sbom-whiteout`: die SBOM ist in einer Schicht, wird aber in einer späteren wieder gelöscht → **durchgefallen**;
+- `dangling-symlink`: `MIT.txt` verweist auf eine Datei, die nur der Host liefern würde → **durchgefallen** (Lizenztexte müssen im Image sein);
+- `invalid-sbom`: SBOM im neuen SPDX-3.0-Format → **durchgefallen** (hängt an D-1 (a));
+- `sbom-volume`: das Image erklärt `/opt/oi4` zum Volume, der Host könnte den Ordner also überdecken → nur ein **Hinweis**, der Inhalt selbst ist vollständig.
+
+**Bitte prüfen:** Ist jeder Fehler ein echter Verstoß gegen die genannte Regel, und sind die zwei guten Images in Ordnung? Besonders: `bad-digest` (Überspringen statt Durchfallen bei der Lizenzprüfung), die Warnungen bei `sha512`/`single-arch` und der Hinweis bei `sbom-volume`.
+
+**Antwort z. B.:** „R-1 akzeptiert“.
+
+### Zur Info: was C-070 gebaut hat
+
+- **Plan für P5b** (ROADMAP P5b): sechs Stücke in C-070 … C-075 – `image` (Images prüfen), `bus` (Broker prüfen), `host` (Rechner prüfen), Anbindung an Docker/Podman + `container` (laufende Container prüfen), `run` (ein Image probeweise starten), am Ende `list`/`explain`, eingefrorener Bericht und Abschlusslauf (A-247).
+- **Abschlussbedingungen genauer gefasst:** D8 wird gegen eigens gebaute gute und fehlerhafte Images getestet, ohne Netz und ohne Docker im Prüfskript; Läufe mit Docker und gegen unseren Entwicklungs-Broker sind freiwillig. „Unsere Demo- und Registry-Images bestehen Level 3“ wandert in die Abschlüsse von P6/P7 (dann gibt es die Images), die CI nach P9.
+- **Entwurf geprüft:** Gemeinsam mit D7 sind Katalog, Bewertung und Berichte. D8 bekommt ein **eigenes Berichts-Schema** (`infra-report.schema.json`), statt das eingefrorene von D7 zu ändern (A-244). Statt der geplanten Bibliothek `go-containerregistry` liest D8 Images mit Bordmitteln von Go; aus einer Registry lädt D8 nichts selbst (A-239, A-240).
+- **`oec-infra image`:** liest ein Image als OCI-Ordner oder OCI-Archiv (z. B. aus `docker save`), ohne Docker und ohne Netz, und prüft: Format und Prüfsummen (T8-IMG-01), Architekturen (T8-IMG-02), SBOM und Lizenztexte (T8-IMG-03), SHA-256 (T8-IMG-04). Bericht als Text, JSON oder JUnit. Die Berichte von D7 sind Byte für Byte gleich geblieben.
+- **Probe mit Docker** (freiwillig): `docker save` des Mosquitto-Images auf Docker 28 wird gelesen; es fällt bei der Lizenzprüfung durch, wie erwartet (kein OEC-Image). Builds für Windows, Linux, macOS je amd64/arm64 klappen (je 9–10 MB).
+- Keine neue Bibliothek, nichts Geprüftes geändert, D7 unverändert.
+
+### Was aus deinem letzten Review (C-069) geworden ist (Kurzfassung)
+
+Deine Antwort „D-1 (a)“ ist eingetragen: P5 ist abgeschlossen, P5b läuft (Details weiter unten).
 
 ### Zur Info: was C-069 gebaut hat
 
@@ -743,12 +797,24 @@ Neu aus C-069 (P5 Inkremente 7/8):
 - **A-237 (neu) – CI und Container-Image:** kommen mit P9. Festgehalten: Prüfskript auf dem Mac (arm64) und erfolgreiche Builds für Windows, Linux und macOS je mit amd64 und arm64 (je etwa 14–16 MB).
 - **A-238 (neu) – Sonst:** keine neue Bibliothek (das Schema prüft der Validator, den `validate` schon hat), keine Änderung am JSON Schema (D1), SDK und Demo unverändert, kein Finding.
 
+Neu aus C-070 (P5b Plan und Inkrement 1):
+- **A-239 (neu) – Bordmittel statt Bibliothek:** D8 liest Images und SBOMs mit der Standardbibliothek von Go. `go-containerregistry` hätte viel Registry- und Anmelde-Code mitgebracht, den D8 nicht braucht.
+- **A-240 (neu) – Eingabe:** ein OCI-Ordner oder ein OCI-Archiv. Eine Registry-Adresse, ein altes Docker-Archiv oder ein gepacktes Archiv lehnt D8 mit einem Hinweis ab (Exit 2): erst mit `docker save` (ab Docker 25), `skopeo` oder `podman save` holen.
+- **A-241 (neu) – Lese-Regeln:** das Docker-Format „Schema 2“ wird gelesen, das uralte „Schema 1“ nicht; Nachweis-Manifeste (Attestations) zählen nicht als Image; mit zstd gepackte Schichten kann D8 nicht lesen → kein Urteil (Exit 4).
+- **A-242 (neu) – Architekturen:** erlaubt sind linux auf amd64, arm64 und arm/v7 (RIG 5.1). Keine davon → durchgefallen; nur eine → Warnung.
+- **A-243 (neu) – Prüfsummen:** eine falsche Prüfsumme lässt T8-IMG-01 durchfallen; ein anderes Verfahren als SHA-256 gibt nur eine Warnung (T8-IMG-04); Signaturen prüft D8 nicht (keine Regel).
+- **A-244 (neu) – Bericht:** eigenes Schema `infra-report.schema.json`, Version 1, darf bis zum Abschluss von P5b nur wachsen, dann eingefroren. Gemeinsame Bausteine mit D7; die Berichte von D7 sind unverändert.
+- **A-245 (neu) – SBOM-Regeln:** wie im Vorschlag zu SF-114; Hinweise (keine Fehler) bei einem Volume über `/opt/oi4`, Paketen ohne Lizenzangabe und Verweisen auf fremde SBOM-Dokumente.
+- **A-246 (neu) – Test-Images:** ein Test erzeugt sie immer gleich und vergleicht sie Byte für Byte; jeder Test hat ein gutes und ein schlechtes Image; zusammen etwa 260 KB.
+- **A-247 (neu) – Plan:** sechs Stücke C-070 … C-075, Abschlussbedingungen wie oben.
+- **A-248 (neu) – Entwurf nachgezogen:** DESIGN §9 korrigiert; `list`/`explain` und der Abdeckungsbericht für D8 kommen mit dem letzten Stück, in einer eigenen Datei, damit der Bericht von D7 gleich bleibt.
+
 ---
 
-### Was als Nächstes passiert (C-070)
+### Was als Nächstes passiert (C-071)
 
-1. **P5b planen** (D8 `oec-infra`): Plan und Zuschnitt in der ROADMAP, die Abschlussbedingungen genauer fassen (Selbsttest gegen eigens gebaute gute und fehlerhafte Images; der Lauf gegen die Demo- und Registry-Images kommt mit P6/P7), den Entwurf von D8 (DESIGN §9, ADR-0025) mit dem fertigen D7 abgleichen; danach, wenn der Zyklus reicht, das erste Inkrement von D8, Test zuerst.
-   - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
+1. Deine Antworten zu D-1 und R-1 trage ich zuerst ein.
+2. **C-071:** das zweite Stück von D8, `oec-infra bus`: prüft den Broker (nur verschlüsselte Verbindungen, Zertifikat, dass fremde Anwendungen nicht überall schreiben dürfen, dass die OEC Registry da ist). Selbsttest gegen einen Test-Broker im Programm, freiwillig gegen unseren Entwicklungs-Broker. Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---
 
