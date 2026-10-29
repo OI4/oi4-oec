@@ -228,8 +228,15 @@ tests:
     level: 1
     needs: [peer]
     reqs: [REQ-BUS-002, REQ-TOP-006, REQ-TOP-010]
-    status: planned
-    notes: D7 announces a simulated peer (Birth, MAM, Health); applies when the CUT sends requests to it.
+    status: implemented
+    notes: >-
+      D7 announces a simulated peer (--peer: Utility, Birth MAM + Health,
+      heartbeat, Close message, Will; C-068) and publishes its Health once
+      the CUT is found. Every request of the CUT whose topic carries the
+      AppId of the peer, or the peer as Source, must be on the request topic
+      of the peer (ServiceType Utility, AppId of the peer). Applies when the
+      CUT sends requests to the peer (plain skip otherwise); without --peer
+      inconclusive.
   - id: T7-ADR-02
     title: Versions are not mixed
     mode: test

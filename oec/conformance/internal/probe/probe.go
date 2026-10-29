@@ -26,7 +26,7 @@ import (
 // Implemented lists the test-mode catalog tests the runner judges (d7.yaml
 // status implemented), in run order.
 var Implemented = []string{"T7-CON-01", "T7-CON-02", "T7-CON-03", "T7-CON-04", "T7-LIFE-01", "T7-LIFE-02", "T7-LIFE-03", "T7-LIFE-04",
-	"T7-ADR-02", "T7-ADR-03", "T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04",
+	"T7-ADR-01", "T7-ADR-02", "T7-ADR-03", "T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04",
 	"T7-GET-05", "T7-GET-06", "T7-GET-07", "T7-GET-08", "T7-GET-09", "T7-SET-01", "T7-SET-02", "T7-SET-03", "T7-SET-04",
 	"T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-09", "T7-SET-10", "T7-SET-11", "T7-SET-12",
 	"T7-ACT-01", "T7-ACT-02", "T7-ACT-03", "T7-ACT-04"}
@@ -113,6 +113,17 @@ type Options struct {
 	// RestartWait is the time the CUT has to come back after the restart
 	// hook returned (default 2 min).
 	RestartWait time.Duration
+
+	// Announce makes D7 a component on the bus (DESIGN.md §3.5, Q-029
+	// (a)): RunBus publishes Birth, Health and Close message under the
+	// tester IL and registers its Will; false: D7 is not announced.
+	Announce bool
+	// Peer is the peer attachment (DESIGN.md §3.4): RunBus announces a
+	// simulated second component PeerIL on its own connection; T7-ADR-01
+	// judges the requests of the CUT to it. false: T7-ADR-01 is
+	// inconclusive.
+	Peer   bool
+	PeerIL string // Identification Link of the peer (default: generated per run)
 }
 
 // Request is one stimulus of the run (report).
@@ -132,7 +143,8 @@ type Result struct {
 	Tester       string // PublisherId of D7
 	Requests     []Request
 	Observations []verdict.Observation
-	Restore      *Restore // nil if no write test ran
+	Restore      *Restore    // nil if no write test ran
+	Announced    []Announced // the components D7 announced (--announce, --peer)
 }
 
 // PublishFunc sends one request.
@@ -173,6 +185,12 @@ type Runner struct {
 	busWill     *netMsg   // Health FAILURE_1 of the CUT about itself after dropped
 	restartAt   time.Time // the restart hook was started
 	restarted   []*netMsg // publications of the CUT after restartAt
+	peer        string    // AppId of the simulated peer ("" without --peer)
+	toPeer      []*netMsg // requests of the CUT that address the peer (T7-ADR-01)
+	// present lets the announced components publish their Health once
+	// the CUT is found (RunBus): a CUT that connected after their Birth
+	// sees them by their heartbeat.
+	present func(context.Context) error
 }
 
 // New creates a runner; the tester identity is fixed here.
@@ -201,6 +219,12 @@ func New(opt Options, reqs verdict.Requirements, pub PublishFunc) *Runner {
 	r := &Runner{opt: opt, reqs: reqs, pub: pub, seen: map[string]bool{}, tester: "Utility/" + opt.TesterIL, cites: map[string][]string{},
 		used: map[int64]bool{}}
 	r.st, r.app = SplitApp(opt.App)
+	if opt.Peer {
+		if opt.PeerIL == "" {
+			r.opt.PeerIL = PeerIL()
+		}
+		r.peer = r.opt.PeerIL
+	}
 	if tests, err := Tests(); err == nil {
 		for _, t := range tests {
 			r.cites[t.ID] = t.Reqs
@@ -270,7 +294,7 @@ func (d dsm) helper() bool { return d.id >= 0 && d.id <= 9 }
 
 type netMsg struct {
 	topic, method, resource         string
-	st, app                         string
+	st, app, source                 string // source: the Source of the topic, decoded ("" if absent)
 	messageID, replyTo, publisherID string
 	msgType                         string
 	msgs                            []dsm // for ua-metadata: one entry with the MetaData as payload
@@ -292,6 +316,9 @@ func parse(m Message) *netMsg {
 		return nil
 	}
 	n := &netMsg{topic: m.Topic, st: lv[1], app: dec(lv[2]), method: lv[3], resource: lv[4], received: m.Received, size: len(m.Payload)}
+	if len(lv) > 5 {
+		n.source = dec(lv[5])
+	}
 	n.messageID, _ = doc["MessageId"].(string)
 	n.replyTo, _ = doc["ReplyTo"].(string)
 	n.publisherID, _ = doc["PublisherId"].(string)
@@ -402,6 +429,12 @@ func (r *Runner) Deliver(m Message) {
 			r.actions = append(r.actions, a)
 			r.mu.Unlock()
 		}
+		return
+	}
+	if n != nil && r.requestToPeer(n) {
+		r.mu.Lock()
+		r.toPeer = append(r.toPeer, n)
+		r.mu.Unlock()
 		return
 	}
 	if n == nil || n.method != "Pub" {
@@ -699,8 +732,13 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 	if !r.found {
 		return r.result(), nil
 	}
+	if r.present != nil {
+		if err := r.present(ctx); err != nil {
+			return r.result(), err
+		}
+	}
 	tests := map[string]func(context.Context) error{
-		"T7-ADR-02": r.adr02, "T7-ADR-03": r.adr03,
+		"T7-ADR-01": r.adr01, "T7-ADR-02": r.adr02, "T7-ADR-03": r.adr03,
 		"T7-GET-01": r.get01, "T7-GET-02": r.get02, "T7-GET-03": r.get03, "T7-GET-04": r.get04, "T7-GET-05": r.get05,
 		"T7-GET-06": r.get06, "T7-GET-07": r.get07, "T7-GET-08": r.get08, "T7-GET-09": r.get09,
 		"T7-SET-01": r.set01, "T7-SET-02": r.set02, "T7-SET-03": r.set03, "T7-SET-04": r.set04, "T7-SET-05": r.set05,
@@ -789,6 +827,10 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 			return r.result(), err
 		}
 		r.judgeADR02()
+	}
+	// T7-ADR-01 judges the requests to the peer of the whole run.
+	if r.Selected("T7-ADR-01") {
+		r.judgeADR01()
 	}
 	return r.result(), nil
 }

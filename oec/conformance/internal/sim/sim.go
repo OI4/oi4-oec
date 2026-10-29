@@ -80,6 +80,11 @@ const (
 	CloseWriter  Fault = "T7-LIFE-04/writer-id"    // the Close message uses another DataSetWriterId than the Health
 	Abort        Fault = "T7-LIFE-04/abort"        // variant: the restart breaks the connection (no DISCONNECT, the Will fires)
 	NotPersisted Fault = "T7-SET-10/not-persisted" // a set ReferenceDesignation does not survive a restart
+
+	// Requests to other components (C-068): with the peer of the probe.
+	OwnApp      Fault = "T7-ADR-01/own-app"      // requests a discovered application under its own ServiceType and AppId, with it as Source
+	OwnST       Fault = "T7-ADR-01/service-type" // requests a discovered application under its own ServiceType instead of the application's
+	NoDiscovery Fault = "T7-ADR-01/silent"       // variant, conforming: requests nothing of other components
 )
 
 // Faults lists every fault.
@@ -88,7 +93,8 @@ var Faults = []Fault{ReplyTo, AllAssets, Unanswered, Missing, EmptyList, Unknown
 	NotListed, SetUnknown, SetMetadata, DelPublishes, ConfigName, DataNoPub, MetaNoEvent, PublistMode, DelSilent, RefDesFixed, SublistNone, NoCreate, FixedLevel,
 	NoCorrelation, Progress, Reissue, AnswersUnknown, NoReply,
 	MQTT31, ClientIDs, TLS11, NoVerify, Anonymous, Retained, NoWill, StaleWill, WillTime, NoRebirth, HealthFirst, FailNoBirth, FailRecovery, LateSub, WillWriter,
-	NoClose, CloseWriter, Abort, NotPersisted}
+	NoClose, CloseWriter, Abort, NotPersisted,
+	OwnApp, OwnST, NoDiscovery}
 
 // ServiceType, AppID and Asset identify the simulated CUT: the OT connector
 // of the guideline examples (MG B1.1) with one subordinate asset.
@@ -270,6 +276,9 @@ type Sim struct {
 	// tells keep that Restart replaced the connection.
 	restartMu sync.Mutex
 	swapped   chan struct{}
+	// known are the other applications (<ServiceType>/<AppId>) the
+	// simulated CUT has seen (consumer, C-068); reset per connection.
+	known map[string]bool
 }
 
 func enc(il string) string { return base64.RawURLEncoding.EncodeToString([]byte(il)) }
@@ -456,8 +465,23 @@ func (s *Sim) connect(ctx context.Context) error {
 				return err
 			}
 		}
+		// Consumer (C-068): the simulated CUT watches the Birth messages
+		// and heartbeats of the other applications. After the request
+		// subscriptions: D7 takes the first SUBACK as the CUT ready for
+		// requests (lifecycle.go).
+		if s.fault != NoDiscovery {
+			for _, res := range []string{"MAM", "Health"} {
+				if err := cl.Subscribe(ctx, "Oi4v2/+/+/Pub/"+res+"/+", 1, receive); err != nil {
+					cl.Kill()
+					return err
+				}
+			}
+		}
 		return nil
 	}
+	s.state.Lock()
+	s.known = map[string]bool{}
+	s.state.Unlock()
 	if s.fault != LateSub {
 		if err := subscribe(); err != nil {
 			return err
@@ -837,6 +861,10 @@ func (s *Sim) handle(msg mqttwire.Message) {
 	}
 	s.state.Lock()
 	defer s.state.Unlock()
+	if lv[3] == "Pub" {
+		s.discover(lv, doc)
+		return
+	}
 	if lv[3] == "Set" || lv[3] == "Del" {
 		s.write(lv, doc)
 		return
@@ -954,4 +982,56 @@ func (s *Sim) handle(msg mqttwire.Message) {
 	// The answer is published on the topic of the request (the Source as
 	// requested, also with the fault Case).
 	s.answer(ctx, res, requested, filter, replyTo, q, localize(out))
+}
+
+// discover is the consumer side of the simulated CUT (C-068): an
+// application seen first by its Health (it started before the simulated
+// CUT) is asked for its MAM, like the SDK directory does. A MAM about the
+// application itself marks it known; the Will (FAILURE_1/0) and the Close
+// message (NORMAL_0/0) do not announce an application. The faults of
+// T7-ADR-01 address the request elsewhere.
+func (s *Sim) discover(lv []string, doc map[string]any) {
+	if len(lv) != 6 || lv[2] != lv[5] {
+		return
+	}
+	app, ok := dec(lv[2])
+	if !ok || app == AppID {
+		return
+	}
+	key := lv[1] + "/" + app
+	if s.known[key] {
+		return
+	}
+	if lv[4] == "Health" {
+		list, _ := doc["Messages"].([]any)
+		if len(list) == 0 {
+			return
+		}
+		d, _ := list[0].(map[string]any)
+		p, _ := d["Payload"].(map[string]any)
+		state, _ := p["Health"].(string)
+		score, _ := p["HealthScore"].(float64)
+		if state == "FAILURE_1" || (state == "NORMAL_0" && score == 0) {
+			return
+		}
+	}
+	s.known[key] = true
+	if lv[4] == "MAM" {
+		return
+	}
+	t := "Oi4v2/" + lv[1] + "/" + lv[2] + "/Get/MAM/" + lv[2]
+	switch s.fault {
+	case OwnApp:
+		t = topic("Get", "MAM", app, "")
+	case OwnST:
+		t = "Oi4v2/" + ServiceType + "/" + lv[2] + "/Get/MAM/" + lv[2]
+	}
+	payload, err := json.Marshal(map[string]any{"MessageId": s.nextID(), "MessageType": "ua-data", "PublisherId": ServiceType + "/" + AppID,
+		"DataSetClassId": s.m.classes["MAM"], "ReplyTo": "", "Messages": []any{}})
+	if err != nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_ = s.client().Publish(ctx, mqttwire.Message{Topic: t, Payload: payload})
 }

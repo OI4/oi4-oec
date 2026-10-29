@@ -32,8 +32,11 @@ type simIndex struct {
 		Positive bool   `yaml:"positive"`
 		// Tests limits the run to these tests (patterns); empty: every
 		// test.
-		Tests  []string `yaml:"tests"`
-		Expect map[string]struct {
+		Tests []string `yaml:"tests"`
+		// Peer and Announce run with --peer and --announce (C-068).
+		Peer     bool `yaml:"peer"`
+		Announce bool `yaml:"announce"`
+		Expect   map[string]struct {
 			Outcome verdict.Outcome `yaml:"outcome"`
 			Reqs    []string        `yaml:"reqs"`
 		} `yaml:"expect"`
@@ -62,13 +65,6 @@ func loadSimIndex(t *testing.T) simIndex {
 // run fails the heartbeat check of T7-MON-05: rerun.
 const simTimeout = 3 * time.Second
 
-// runSim runs oec-check test (monitor + runner) against the simulated CUT
-// with the fault on a fresh test broker.
-func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, level int, tests []string) ([]verdict.TestResult, Session) {
-	t.Helper()
-	return runSimWith(t, v, reqs, fault, Options{Level: level, Tests: tests}, attach{proxy: true, restart: true})
-}
-
 // attach selects how the simulated CUT is attached: through the proxy
 // (DESIGN.md §3.4) and with the restart hook (Sim.Restart).
 type attach struct{ proxy, restart bool }
@@ -77,7 +73,9 @@ type attach struct{ proxy, restart bool }
 // credentials (the fault T7-CON-03/anonymous).
 const simUser, simPassword = "oec", "secret"
 
-// runSimWith is runSim with the Level and the test selection of opt; with
+// runSimWith runs oec-check test (monitor + runner) against the simulated
+// CUT with the fault on a fresh test broker, with the Level, the test
+// selection, Peer and Announce of opt; with
 // at.proxy the simulated CUT connects through the proxy attachment
 // (DESIGN.md §3.4), D7 itself directly; with at.restart D7 restarts it
 // through Sim.Restart.
@@ -145,7 +143,7 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 	}
 	app := sim.ServiceType + "/" + sim.AppID
 	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start, Tests: opt.Tests, Proxy: px, ProxyWait: 10 * simTimeout,
-		Restart: restart, RestartWait: 10 * simTimeout}, reqs, observe)
+		Restart: restart, RestartWait: 10 * simTimeout, Peer: opt.Peer, Announce: opt.Announce}, reqs, observe)
 	if cutStarted != nil {
 		if serr := <-cutStarted; serr != nil {
 			t.Fatal(serr)
@@ -201,6 +199,30 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 		}
 	}
 	sort.Strings(own)
+	// The announced components (C-068) publish conforming messages; the
+	// peer sends no request.
+	announced := map[string]bool{}
+	for _, a := range s.Probe.Announced {
+		announced[a.PublisherID] = true
+	}
+	if len(s.Probe.Announced) != btoi(opt.Peer)+btoi(opt.Announce) {
+		t.Errorf("announced %+v, want peer %t, tester %t", s.Probe.Announced, opt.Peer, opt.Announce)
+	}
+	// The conforming CUT asks every announced component for its MAM, and
+	// the component answers.
+	for _, a := range s.Probe.Announced {
+		if fault == sim.None && (a.Requests == 0 || a.Answered != a.Requests) {
+			t.Errorf("announced %+v: want requests, all answered", a)
+		}
+	}
+	for _, o := range mon.Observations {
+		if announced[o.Participant] && o.Participant != s.Probe.Tester && (o.Kind == verdict.Violation || o.Kind == verdict.Warning) {
+			t.Errorf("peer: %s %s %s %s %s", o.Test, o.Req, o.Kind, o.Topic, o.Detail)
+		}
+		if o.Participant == s.Probe.Tester && o.Kind == verdict.Warning {
+			t.Errorf("tester: %s %s %s %s %s", o.Test, o.Req, o.Kind, o.Topic, o.Detail)
+		}
+	}
 	if fault == "none" && len(opt.Tests) == 0 && !slices.Equal(own, want) || !subset(own, want) {
 		t.Errorf("violations of the requests of D7 %v, want %v (the deliberate stimuli of T7-GET-07, T7-GET-09, T7-SET-05 and T7-ACT-03)", own, want)
 	}
@@ -209,6 +231,13 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 		t.Fatal(err)
 	}
 	return res, s
+}
+
+func btoi(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 // subset reports whether the sorted a is a sub-multiset of the sorted b.
@@ -260,7 +289,7 @@ func TestSimFixtures(t *testing.T) {
 				if fx.Fault == "none" {
 					fault = sim.None
 				}
-				res, s := runSim(t, v, reqs, fault, 3, fx.Tests)
+				res, s := runSimWith(t, v, reqs, fault, Options{Level: 3, Tests: fx.Tests, Peer: fx.Peer, Announce: fx.Announce}, attach{proxy: true, restart: true})
 				results[i].ran = true
 				t.Logf("%d requests", len(s.Probe.Requests))
 				for id := range fx.Expect {
@@ -275,6 +304,15 @@ func TestSimFixtures(t *testing.T) {
 					t.Logf("%s %s %s", tr.ID, tr.Outcome, tr.Reason)
 					for _, r := range tr.Reqs {
 						t.Logf("  %s %s %s", r.Req, r.Outcome, r.Reason)
+					}
+					// Without the peer T7-ADR-01 is inconclusive; with it a
+					// skip is plain (the CUT requests nothing of it).
+					if tr.ID == "T7-ADR-01" && tr.Outcome == verdict.Skip && Selected(fx.Tests, tr.ID) {
+						for _, r := range tr.Reqs {
+							if r.Inconclusive == fx.Peer {
+								t.Errorf("%s %s: inconclusive %t with peer %t (%s)", tr.ID, r.Req, r.Inconclusive, fx.Peer, r.Reason)
+							}
+						}
 					}
 					want, listed := fx.Expect[tr.ID]
 					if !listed {

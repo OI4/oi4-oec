@@ -5,7 +5,103 @@ import (
 	"context"
 	"strings"
 	"unicode"
+
+	"github.com/OI4/oec/conformance/internal/verdict"
 )
+
+// adr01Reqs are the requirements of T7-ADR-01.
+var adr01Reqs = []string{"REQ-BUS-002", "REQ-TOP-006", "REQ-TOP-010"}
+
+// requestMethods are the methods of a request (MG 7.4).
+var requestMethods = map[string]bool{"Get": true, "Set": true, "Del": true, "Call": true}
+
+// requestToPeer reports a request of the CUT that addresses the simulated
+// peer: its topic carries the AppId of the peer, or the peer as Source
+// under another AppId (in the run only the peer represents its asset). A
+// request under a wrongly encoded AppId cannot be attributed.
+func (r *Runner) requestToPeer(n *netMsg) bool {
+	return r.peer != "" && r.app != "" && requestMethods[n.method] && strings.HasSuffix(n.publisherID, "/"+r.app) &&
+		(n.app == r.peer || n.source == r.peer)
+}
+
+// adr01 is T7-ADR-01 (REQ-BUS-002, REQ-TOP-006, REQ-TOP-010): the requests
+// of the CUT address the destination. D7 announces a simulated peer
+// (RunBus, --peer); the requirements apply if the CUT sends requests to it.
+// The test waits up to the timeout for a first request and is judged at the
+// end of the run (judgeADR01) over every request to the peer.
+func (r *Runner) adr01(ctx context.Context) error {
+	if r.peer == "" {
+		return nil
+	}
+	return r.until(ctx, func() bool {
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		return len(r.toPeer) > 0
+	})
+}
+
+func (r *Runner) judgeADR01() {
+	const t = "T7-ADR-01"
+	if r.peer == "" {
+		for _, req := range adr01Reqs {
+			r.add(verdict.Observation{Test: t, Req: req, Kind: verdict.Skipped, Inconclusive: true,
+				Evidence: r.ev(nil, "needs a peer (--peer): D7 announces no second component the CUT could address")})
+		}
+		return
+	}
+	r.mu.Lock()
+	reqs := append([]*netMsg(nil), r.toPeer...)
+	r.mu.Unlock()
+	if len(reqs) == 0 {
+		for _, req := range adr01Reqs {
+			r.skip(t, req, "the CUT sent no request to the peer %s/%s during the run (%s applies to a requester)", AnnouncedServiceType, r.peer, req)
+		}
+		return
+	}
+	checked, seen := map[string]bool{}, map[string]bool{}
+	ok := func(req string, n *netMsg) {
+		if !checked[req] {
+			checked[req] = true
+			r.add(verdict.Observation{Test: t, Req: req, Kind: verdict.Checked, Evidence: r.evTopic(n, "%s %s (MessageId %s) addresses the peer", n.method, n.resource, n.messageID)})
+		}
+	}
+	bad := func(req string, n *netMsg, format string, a ...any) {
+		r.add(verdict.Observation{Test: t, Req: req, Kind: verdict.Violation, Evidence: r.evTopic(n, format, a...)})
+	}
+	for _, n := range reqs {
+		stOK, appOK := n.st == AnnouncedServiceType, n.app == r.peer
+		if stOK && appOK {
+			ok("REQ-TOP-006", n)
+			ok("REQ-TOP-010", n)
+			ok("REQ-BUS-002", n)
+			continue
+		}
+		// One violation per topic: a consumer repeats its request.
+		if seen[n.topic] {
+			continue
+		}
+		seen[n.topic] = true
+		if stOK {
+			ok("REQ-TOP-006", n)
+		} else {
+			bad("REQ-TOP-006", n, "the %s (MessageId %s) to the peer carries the ServiceType %s instead of %s, the ServiceType of the peer", n.method, n.messageID, n.st, AnnouncedServiceType)
+		}
+		if appOK {
+			ok("REQ-TOP-010", n)
+		} else {
+			bad("REQ-TOP-010", n, "the %s (MessageId %s) about the peer carries the AppId %s instead of %s, the AppId of the peer", n.method, n.messageID, n.app, r.peer)
+		}
+		bad("REQ-BUS-002", n, "the %s %s (MessageId %s) to the peer is not published on the %s topic of the peer (%s)", n.method, n.resource, n.messageID, n.method,
+			Topic(AnnouncedServiceType, r.peer, n.method, n.resource, "", "")+"/…")
+	}
+}
+
+// evTopic is the evidence of a message of the CUT.
+func (r *Runner) evTopic(n *netMsg, format string, a ...any) verdict.Evidence {
+	e := r.ev(nil, format, a...)
+	e.Topic = n.topic
+	return e
+}
 
 // adr02 is T7-ADR-02 (REQ-TOP-004): versions are not mixed. D7 sends its
 // requests under Oi4v2 only; the requirement applies if the CUT also

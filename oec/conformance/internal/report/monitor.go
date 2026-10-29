@@ -46,6 +46,7 @@ type Monitor struct {
 	Tester         string                  `json:"tester,omitempty"`       // test: PublisherId of D7 in the requests
 	Requests       []probe.Request         `json:"requests,omitempty"`     // test: the stimuli in order
 	Restore        *probe.Restore          `json:"restore,omitempty"`      // test: the state of the CUT after the write tests
+	Announced      []probe.Announced       `json:"announced,omitempty"`    // test: the components D7 announced (--announce, --peer)
 	ProxyListen    string                  `json:"proxy_listen,omitempty"` // test, proxy attachment: address of the proxy
 	Connections    []proxy.Conn            `json:"connections,omitempty"`  // test, proxy attachment: the connection attempts of the CUT (no payloads, no password)
 	Tests          []verdict.TestResult    `json:"tests"`
@@ -127,6 +128,9 @@ func (r *Monitor) Text(w io.Writer) error {
 			}
 		}
 		fmt.Fprintf(&b, "tester %s: %d request(s), %d answered\n", r.Tester, len(r.Requests), answered)
+		for _, a := range r.Announced {
+			fmt.Fprintf(&b, "announced %s %s: %d request(s) received, %d answered\n", a.Role, a.PublisherID, a.Requests, a.Answered)
+		}
 		if rs := r.Restore; rs != nil {
 			b.WriteString(rs.Summary() + "\n")
 		}

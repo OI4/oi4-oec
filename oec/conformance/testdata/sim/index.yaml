@@ -39,6 +39,16 @@
 # (every 50 ms) and publishes its Birth again. The test broker requires the
 # credentials but also accepts an anonymous CONNECT (for the fault
 # T7-CON-03/anonymous).
+# Since C-068 the CUT is also a consumer: it subscribes to the MAM and
+# Health of every application and sends Get MAM/<AppId> (Source = AppId,
+# DataSetClassId of MAM) to an application it sees first by a Health that
+# is neither a Will (FAILURE_1/0) nor a Close message (NORMAL_0/0), like
+# the SDK directory. With `peer: true` D7 announces a simulated peer
+# (--peer, DESIGN.md §3.4; Utility, Birth MAM + Health, heartbeat, Close
+# message, Will) and publishes its Health once the CUT is found, so the
+# CUT asks the peer for its MAM; with `announce: true` D7 announces itself
+# the same way (--announce, Q-029 (a)). Without the peer T7-ADR-01 is
+# skipped as inconclusive (not listed in expect).
 # internal/probe/sim_test.go runs `oec-check test` (monitor + runner,
 # level 3) against every entry over the in-process TLS test broker. An
 # entry may restrict the run to `tests` (patterns of --tests) to keep it
@@ -59,11 +69,14 @@
 #         Every implemented test (monitor and test) not listed passes or is
 #         skipped.
 # tests:  optional selection (--tests patterns); default all
+# peer, announce: run with --peer, --announce (C-068); default false
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: reviewed
+    status: draft
     positive: true
+    peer: true
+    announce: true
     expect: {}
     notes: >-
       The conforming CUT. Every implemented test passes except T7-ADR-02,
@@ -81,7 +94,11 @@ fixtures:
       simulation). Changed in C-067: with the restart hook T7-LIFE-04
       (Close message before the DISCONNECT) and T7-SET-10 (the changed
       ReferenceDesignation survives the restart) pass with every
-      requirement judged.
+      requirement judged. Changed in C-068 (back to draft): the run uses
+      --peer and --announce; the CUT asks the peer and D7 for their MAM
+      on the Get topics of the destination, so T7-ADR-01 passes with
+      REQ-BUS-002, REQ-TOP-006 and REQ-TOP-010 checked; the messages of
+      the peer and of D7 conform (no monitor violation or warning).
   - fault: T7-GET-01/reply-to
     status: reviewed
     expect:
@@ -610,3 +627,42 @@ fixtures:
       it on the restart: after the restart Get ReferenceDesignation returns
       the object before the Set (REQ-RES-REFDES-002). D7 restores the
       original object afterwards.
+  - fault: T7-ADR-01/own-app
+    status: draft
+    peer: true
+    tests: [T7-ADR-01]
+    expect:
+      T7-ADR-01: {outcome: fail, reqs: [REQ-BUS-002, REQ-TOP-006, REQ-TOP-010]}
+    notes: >-
+      The CUT asks the peer for its MAM on its own Get topic with the peer
+      as Source (Oi4v2/OTConnector/<AppId of the CUT>/Get/MAM/<AppId of the
+      peer>) instead of the Get topic of the peer
+      (Oi4v2/Utility/<AppId of the peer>/Get/MAM/<AppId of the peer>):
+      ServiceType (REQ-TOP-006) and AppId (REQ-TOP-010) are not those of
+      the destination, and the request is not published on the Get topic
+      of the addressed component (REQ-BUS-002). The CUT answers its own
+      request with Event Status Bad (BadNotFound).
+  - fault: T7-ADR-01/service-type
+    status: draft
+    peer: true
+    tests: [T7-ADR-01]
+    expect:
+      T7-ADR-01: {outcome: fail, reqs: [REQ-BUS-002, REQ-TOP-006]}
+    notes: >-
+      The CUT asks the peer for its MAM under the AppId of the peer, but
+      with its own ServiceType OTConnector instead of Utility, the
+      ServiceType of the peer (REQ-TOP-006); so the request is not on the
+      Get topic of the peer (REQ-BUS-002). The AppId is right
+      (REQ-TOP-010 passes). The peer does not see the request.
+  - fault: T7-ADR-01/silent
+    status: draft
+    positive: true
+    peer: true
+    tests: [T7-ADR-01]
+    expect:
+      T7-ADR-01: {outcome: skip, reqs: [REQ-BUS-002, REQ-TOP-006, REQ-TOP-010]}
+    notes: >-
+      Variant, conforming: the CUT requests nothing of other components
+      (it does not watch the bus). REQ-BUS-002, REQ-TOP-006 and
+      REQ-TOP-010 apply to a requester only, so T7-ADR-01 is skipped (plain
+      skip, not inconclusive: the peer was announced during the run).
