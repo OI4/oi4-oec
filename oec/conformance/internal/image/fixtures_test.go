@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -59,7 +60,11 @@ func licLayer(gzip bool, files map[string]string) ocitest.Layer {
 	return l
 }
 
-type pkg struct{ name, concluded, declared string }
+type pkg struct{ name, version, concluded, declared string }
+
+// purl is a package URL for the components of the fixtures (RIG 4.1.4
+// recommends a unique identifier per component).
+func purl(name, version string) string { return "pkg:generic/" + name + "@" + version }
 
 func spdx(pkgs []pkg, extracted map[string]string) string {
 	var b strings.Builder
@@ -69,7 +74,15 @@ func spdx(pkgs []pkg, extracted map[string]string) string {
 		if i > 0 {
 			b.WriteString(",")
 		}
-		fmt.Fprintf(&b, `{"name":%q,"SPDXID":"SPDXRef-Package-%d","downloadLocation":"NOASSERTION","licenseConcluded":%q,"licenseDeclared":%q}`, p.name, i, p.concluded, p.declared)
+		fmt.Fprintf(&b, `{"name":%q,"SPDXID":"SPDXRef-Package-%d",`, p.name, i)
+		if p.version != "" {
+			fmt.Fprintf(&b, `"versionInfo":%q,`, p.version)
+		}
+		fmt.Fprintf(&b, `"downloadLocation":"NOASSERTION","licenseConcluded":%q,"licenseDeclared":%q`, p.concluded, p.declared)
+		if !strings.HasPrefix(p.name, "no-id-") {
+			fmt.Fprintf(&b, `,"externalRefs":[{"referenceCategory":"PACKAGE-MANAGER","referenceType":"purl","referenceLocator":%q}]`, purl(p.name, p.version))
+		}
+		b.WriteString("}")
 	}
 	b.WriteString("]")
 	if len(extracted) > 0 {
@@ -92,18 +105,23 @@ func spdx(pkgs []pkg, extracted map[string]string) string {
 }
 
 var goodPkgs = []pkg{
-	{"oec-demo-app", "Apache-2.0", "Apache-2.0"},
-	{"libfoo", "MIT OR BSD-3-Clause", "MIT OR BSD-3-Clause"},
-	{"acme-sdk", "LicenseRef-acme", "LicenseRef-acme"},
+	{"oec-demo-app", "1.0.0", "Apache-2.0", "Apache-2.0"},
+	{"libfoo", "2.4.1", "MIT OR BSD-3-Clause", "MIT OR BSD-3-Clause"},
+	{"acme-sdk", "7.0", "LicenseRef-acme", "LicenseRef-acme"},
 }
+
+// goodWith returns the packages of good.tar with p appended.
+func goodWith(p ...pkg) []pkg { return append(slices.Clone(goodPkgs), p...) }
 
 var goodExtracted = map[string]string{"LicenseRef-acme": text("LicenseRef-acme")}
 
 // goodLicenses: Apache-2.0.txt is a symlink into /usr/share (resolved
 // inside the image), LicenseRef-acme is embedded in the SBOM.
-func goodLicenses() map[string]string {
+func goodLicenses() map[string]string { return licensesOf(goodPkgs) }
+
+func licensesOf(pkgs []pkg) map[string]string {
 	return map[string]string{
-		"sbom.spdx.json":                       spdx(goodPkgs, goodExtracted),
+		"sbom.spdx.json":                       spdx(pkgs, goodExtracted),
 		"MIT.txt":                              text("MIT"),
 		"BSD-3-Clause.txt":                     text("BSD-3-Clause"),
 		"Apache-2.0.txt":                       "->/usr/share/common-licenses/Apache-2.0",
@@ -144,12 +162,43 @@ func multi(lic func() ocitest.Layer) []ocitest.Image {
 
 func good() ocitest.Layer { return licLayer(true, goodLicenses()) }
 
-func cdx() string {
-	return `{"bomFormat":"CycloneDX","specVersion":"1.6","version":1,` +
+func cdx() string { return cdxVersion("1.6") }
+
+func cdxVersion(v string) string {
+	return `{"bomFormat":"CycloneDX","specVersion":"` + v + `","version":1,` +
 		`"metadata":{"component":{"type":"application","name":"oec-demo-app","licenses":[{"license":{"id":"Apache-2.0","text":{"content":` + fmt.Sprintf("%q", text("Apache-2.0")) + `}}}]}},` +
 		`"components":[` +
-		`{"type":"library","name":"libbar","licenses":[{"expression":"MIT OR ISC"}]},` +
-		`{"type":"library","name":"vendor-lib","licenses":[{"license":{"name":"Vendor EULA","text":{"content":` + fmt.Sprintf("%q", text("Vendor EULA")) + `}}}]}]}` + "\n"
+		`{"type":"library","name":"libbar","version":"0.9.2","purl":"` + purl("libbar", "0.9.2") + `","licenses":[{"expression":"MIT OR ISC"}]},` +
+		`{"type":"library","name":"vendor-lib","version":"3.1","cpe":"cpe:2.3:a:vendor:vendor-lib:3.1:*:*:*:*:*:*:*","licenses":[{"license":{"name":"Vendor EULA","text":{"content":` + fmt.Sprintf("%q", text("Vendor EULA")) + `}}}]}]}` + "\n"
+}
+
+// spdx3 is an SPDX 3.0.1 JSON-LD SBOM: a license expression with a
+// LicenseRef mapped to an embedded text, a license with an exception in
+// the Expanded Licensing profile, and identifiers as purl and CPE.
+func spdx3() string {
+	const ci = `"creationInfo":"_:ci"`
+	el := []string{
+		`{"type":"CreationInfo","@id":"_:ci","specVersion":"3.0.1","created":"2026-01-01T00:00:00Z","createdBy":["https://example.com/ocitest"]}`,
+		`{"type":"SpdxDocument","spdxId":"https://example.com/spdx3/doc",` + ci + `,"rootElement":["https://example.com/spdx3/app"],"profileConformance":["core","software","simpleLicensing","expandedLicensing"]}`,
+	}
+	pkgs := []struct{ id, name, version, lic, ident string }{
+		{"app", "oec-demo-app", "1.0.0", "lic-app", `"software_packageUrl":"` + purl("oec-demo-app", "1.0.0") + `"`},
+		{"libfoo", "libfoo", "2.4.1", "lic-libfoo", `"software_packageUrl":"` + purl("libfoo", "2.4.1") + `"`},
+		{"libjava", "libjava", "11.0", "lic-libjava", `"externalIdentifier":[{"type":"ExternalIdentifier","externalIdentifierType":"cpe23","identifier":"cpe:2.3:a:example:libjava:11.0:*:*:*:*:*:*:*"}]`},
+	}
+	for _, p := range pkgs {
+		el = append(el, fmt.Sprintf(`{"type":"software_Package","spdxId":"https://example.com/spdx3/%s",%s,"name":%q,"software_packageVersion":%q,%s}`, p.id, ci, p.name, p.version, p.ident),
+			fmt.Sprintf(`{"type":"Relationship","spdxId":"https://example.com/spdx3/rel-%s",%s,"from":"https://example.com/spdx3/%s","relationshipType":"hasConcludedLicense","to":["https://example.com/spdx3/%s"]}`, p.id, ci, p.id, p.lic))
+	}
+	el = append(el,
+		`{"type":"simplelicensing_LicenseExpression","spdxId":"https://example.com/spdx3/lic-app",`+ci+`,"simplelicensing_licenseExpression":"Apache-2.0"}`,
+		`{"type":"simplelicensing_LicenseExpression","spdxId":"https://example.com/spdx3/lic-libfoo",`+ci+`,"simplelicensing_licenseExpression":"MIT AND LicenseRef-acme","simplelicensing_customIdToUri":[{"type":"DictionaryEntry","key":"LicenseRef-acme","value":"https://example.com/spdx3/acme-text"}]}`,
+		`{"type":"simplelicensing_SimpleLicensingText","spdxId":"https://example.com/spdx3/acme-text",`+ci+`,"simplelicensing_licenseText":`+fmt.Sprintf("%q", text("LicenseRef-acme"))+`}`,
+		`{"type":"expandedlicensing_WithAdditionOperator","spdxId":"https://example.com/spdx3/lic-libjava",`+ci+`,"expandedlicensing_subjectLicense":"https://spdx.org/licenses/GPL-2.0-only","expandedlicensing_subjectAddition":"https://spdx.org/licenses/Classpath-exception-2.0"}`,
+		`{"type":"expandedlicensing_ListedLicense","spdxId":"https://spdx.org/licenses/GPL-2.0-only",`+ci+`,"simplelicensing_licenseText":`+fmt.Sprintf("%q", text("GPL-2.0-only"))+`}`,
+		`{"type":"expandedlicensing_ListedLicenseException","spdxId":"https://spdx.org/licenses/Classpath-exception-2.0",`+ci+`,"expandedlicensing_additionText":`+fmt.Sprintf("%q", text("Classpath-exception-2.0"))+`}`,
+	)
+	return `{"@context":"https://spdx.org/rdf/3.0.1/spdx-context.jsonld","@graph":[` + "\n" + strings.Join(el, ",\n") + "\n]}\n"
 }
 
 // scenarios are the image fixtures by file name.
@@ -197,10 +246,38 @@ func scenarios() map[string]ocitest.Spec {
 		"dangling-symlink.tar": {Multi: true, Images: multi(func() ocitest.Layer {
 			return licLayer(true, with(goodLicenses(), "MIT.txt", "->/host/licenses/MIT.txt"))
 		})},
-		// sbom.spdx.json holds an SPDX 3.0 JSON-LD document (SF-114 (a)).
+		// sbom.spdx.json holds a CycloneDX document: no SPDX document.
 		"invalid-sbom.tar": {Multi: true, Images: multi(func() ocitest.Layer {
-			return licLayer(true, with(goodLicenses(), "sbom.spdx.json",
-				`{"@context":"https://spdx.org/rdf/3.0.1/spdx-context.jsonld","@graph":[{"type":"SpdxDocument","spdxId":"https://example.com/doc"}]}`+"\n"))
+			return licLayer(true, with(goodLicenses(), "sbom.spdx.json", cdx()))
+		})},
+		// Positive: SPDX 3.0.1 JSON-LD (SF-114: every version of the
+		// format), texts embedded and as files, an exception after WITH.
+		"spdx3.tar": {Multi: true, Images: multi(func() ocitest.Layer {
+			return licLayer(true, map[string]string{"sbom.spdx.json": spdx3(), "Apache-2.0.txt": text("Apache-2.0"), "MIT.txt": text("MIT")})
+		})},
+		// CycloneDX 2.0: a version oec-infra cannot read (inconclusive).
+		"unknown-version.tar": {Multi: true, Images: multi(func() ocitest.Layer {
+			return licLayer(true, map[string]string{"sbom.cdx.json": cdxVersion("2.0"), "MIT.txt": text("MIT"), "ISC.txt": text("ISC")})
+		})},
+		// A package whose license is NOASSERTION.
+		"no-license.tar": {Multi: true, Images: multi(func() ocitest.Layer {
+			return licLayer(true, licensesOf(goodWith(pkg{"libbaz", "0.3.0", "NOASSERTION", "NOASSERTION"})))
+		})},
+		// libfoo has no version.
+		"no-version.tar": {Multi: true, Images: multi(func() ocitest.Layer {
+			p := slices.Clone(goodPkgs)
+			p[1].version = ""
+			return licLayer(true, licensesOf(p))
+		})},
+		// GPL-2.0-only WITH Classpath-exception-2.0: the license has its
+		// text, the exception has none.
+		"exception-text.tar": {Multi: true, Images: multi(func() ocitest.Layer {
+			l := licensesOf(goodWith(pkg{"libjava", "11.0", "GPL-2.0-only WITH Classpath-exception-2.0", "GPL-2.0-only WITH Classpath-exception-2.0"}))
+			return licLayer(true, with(l, "GPL-2.0-only.txt", text("GPL-2.0-only")))
+		})},
+		// A package without purl or CPE (recommendation of RIG 4.1.4).
+		"no-identifier.tar": {Multi: true, Images: multi(func() ocitest.Layer {
+			return licLayer(true, licensesOf(goodWith(pkg{"no-id-libqux", "1.2", "MIT", "MIT"})))
 		})},
 		// The image declares VOLUME /opt/oi4.
 		"sbom-volume.tar": {Multi: true, Images: volumes(multi(good), "/opt/oi4")},

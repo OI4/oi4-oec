@@ -115,7 +115,7 @@ go run ./cmd/oec-check report-schema > report.schema.json
 
 ## `oec-infra image`
 
-Offline inspection of an OCI image (D8, T8-IMG-01 … 04): OCI image format, supported platforms (linux on amd64, arm64/v8, arm/v7; multi-architecture), exactly one SBOM in `/opt/oi4/licenses` (`sbom.spdx.json` SPDX 2.2/2.3 or `sbom.cdx.json` CycloneDX 1.x JSON) with a text for every license, SHA256 digests. No Docker daemon, no network.
+Offline inspection of an OCI image (D8, T8-IMG-01 … 04): OCI image format, supported platforms (linux on amd64, arm64/v8, arm/v7; multi-architecture), exactly one SBOM in `/opt/oi4/licenses` (`sbom.spdx.json` SPDX 2.x JSON or 3.x JSON-LD, `sbom.cdx.json` CycloneDX 1.x JSON; another version is inconclusive, RIG 4.1.4 does not restrict it) that lists every component with name, version, a stated license (and a purl or CPE, recommended), and a text for every license and license exception, SHA256 digests. No Docker daemon, no network.
 
 ```sh
 docker save IMAGE -o image.tar                     # Docker 25 or later writes an OCI layout
@@ -152,7 +152,7 @@ go run ./cmd/oec-infra report-schema > infra-report.schema.json
 | `internal/verdict` | verdict model: severity from REQ keyword × level, test aggregation, exit code |
 | `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` and `test` and of `oec-infra` (shared JUnit writer) |
 | `internal/oci` | OCI image reader on the standard library: layout directory and oci-archive, digest verification, layer file system (D8); `ocitest`: test-only image archive builder |
-| `internal/sbom` | minimal SPDX 2.2/2.3 and CycloneDX 1.x JSON reader (D8) |
+| `internal/sbom` | minimal SPDX 2.x JSON, SPDX 3.x JSON-LD and CycloneDX 1.x JSON reader (D8) |
 | `internal/image` | rules T8-IMG-01 … 04 of `oec-infra image` |
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
 | `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews, C-065 … C-067 in the C-067 review, C-068 in the C-068 review; new entries start as `draft`, G-3.9) |

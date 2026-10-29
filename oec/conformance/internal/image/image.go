@@ -43,6 +43,8 @@ const (
 	reqCnt013    = "REQ-CNT-013"
 	reqCnt014    = "REQ-CNT-014"
 	reqCnt015    = "REQ-CNT-015"
+	reqCnt026    = "REQ-CNT-026"
+	reqCnt027    = "REQ-CNT-027"
 	reqLic002    = "REQ-LIC-002"
 	reqIntegrity = "REQ-CMP-030"
 )
@@ -194,7 +196,7 @@ func (c *checker) platforms() {
 
 // T8-IMG-03: SBOM and license texts (RIG 4.1.4).
 func (c *checker) sbom() {
-	all := []string{reqCmp028, reqCnt013, reqCnt014, reqCnt015, reqLic002}
+	all := []string{reqCmp028, reqCnt013, reqCnt014, reqCnt015, reqCnt026, reqCnt027, reqLic002}
 	run := c.img.Runnable()
 	if len(run) == 0 {
 		c.skip(TSBOM, all, true, "", "the image holds no readable platform image (see T8-IMG-01)")
@@ -226,7 +228,8 @@ func (c *checker) sbomOf(m *oci.Manifest, all []string) {
 		c.skip(TSBOM, all, true, plat, "the file system cannot be read: "+tree.Incomplete)
 		return
 	}
-	notChecked := func(detail string) { c.skip(TSBOM, []string{reqCnt014, reqLic002}, false, plat, detail) }
+	content := []string{reqCnt014, reqCnt026, reqCnt027, reqLic002}
+	notChecked := func(detail string) { c.skip(TSBOM, content, false, plat, detail) }
 	dir, err := tree.Resolve(LicenseDir)
 	if err != nil {
 		if !errors.Is(err, oci.ErrNotExist) || isLink(tree, LicenseDir) {
@@ -279,17 +282,53 @@ func (c *checker) sbomOf(m *oci.Manifest, all []string) {
 		return
 	}
 	doc, err := sbom.Parse(found[0], data)
-	if err != nil {
+	switch {
+	case errors.Is(err, sbom.ErrUnsupported):
+		// RIG 4.1.4 does not restrict the version of the format (SF-114):
+		// an SBOM this tool cannot read is not judged.
+		c.add(TSBOM, reqCmp028, verdict.Checked, plat, file, "the image has an SBOM")
+		c.skip(TSBOM, append([]string{reqCnt013}, content...), true, plat, err.Error())
+		return
+	case err != nil:
 		for _, r := range []string{reqCmp028, reqCnt013} {
 			c.add(TSBOM, r, verdict.Violation, plat, file, "%v", err)
 		}
 		notChecked("the SBOM is invalid")
 		return
 	}
-	for _, r := range []string{reqCmp028, reqCnt013} {
-		c.add(TSBOM, r, verdict.Checked, plat, file, "%s %s SBOM with %d packages and %d licenses", doc.Format, doc.Version, doc.Packages, len(doc.Licenses))
-	}
+	c.add(TSBOM, reqCmp028, verdict.Checked, plat, file, "%s %s SBOM with %d components and %d licenses", doc.Format, doc.Version, len(doc.Components), len(doc.Licenses))
+	c.components(doc, plat, file)
 	c.texts(tree, doc, plat, file)
+}
+
+// components: name, version, license statement and identifier of every
+// component (RIG 4.1.4, SF-114).
+func (c *checker) components(doc *sbom.Doc, plat, file string) {
+	n := len(doc.Components)
+	unnamed := doc.Missing(func(x sbom.Component) bool { return x.Name != "" })
+	unversioned := doc.Missing(func(x sbom.Component) bool { return x.Version != "" })
+	if len(unnamed) > 0 {
+		c.add(TSBOM, reqCnt013, verdict.Violation, plat, file, "%d of %d components have no name: %s", len(unnamed), n, list(unnamed, 5))
+	}
+	if len(unversioned) > 0 {
+		c.add(TSBOM, reqCnt013, verdict.Violation, plat, file, "%d of %d components have no version: %s", len(unversioned), n, list(unversioned, 5))
+	}
+	if len(unnamed)+len(unversioned) == 0 {
+		c.add(TSBOM, reqCnt013, verdict.Checked, plat, file, "%s %s SBOM: %d components, each with name and version", doc.Format, doc.Version, n)
+	}
+	if n == 0 {
+		c.add(TSBOM, reqCnt013, verdict.Note, plat, file, "the SBOM lists no component (completeness is checked manually)")
+	}
+	if u := doc.Missing(func(x sbom.Component) bool { return x.Licensed }); len(u) > 0 {
+		c.add(TSBOM, reqCnt026, verdict.Violation, plat, file, "%d of %d components state no license (none or NOASSERTION): %s", len(u), n, list(u, 5))
+	} else {
+		c.add(TSBOM, reqCnt026, verdict.Checked, plat, file, "every component states its license")
+	}
+	if u := doc.Missing(func(x sbom.Component) bool { return x.Identified }); len(u) > 0 {
+		c.add(TSBOM, reqCnt027, verdict.Violation, plat, file, "%d of %d components have no unique identifier such as a purl or a CPE: %s", len(u), n, list(u, 5))
+	} else {
+		c.add(TSBOM, reqCnt027, verdict.Checked, plat, file, "every component has a unique identifier (purl, CPE, …)")
+	}
 }
 
 func isLink(t *oci.Tree, p string) bool {
@@ -337,10 +376,14 @@ func (c *checker) texts(t *oci.Tree, doc *sbom.Doc, plat, file string) {
 		if l.Embedded {
 			continue
 		}
+		kind := "license"
+		if l.Exception {
+			kind = "license exception"
+		}
 		if l.ID == "" {
 			missing++
 			for _, r := range []string{reqCnt014, reqLic002} {
-				c.add(TSBOM, r, verdict.Violation, plat, file, "license %q (%s) is given only by name and has no embedded text", l.Name, l.Where)
+				c.add(TSBOM, r, verdict.Violation, plat, file, "%s %q (%s) is given only by name and has no embedded text", kind, l.Name, l.Where)
 			}
 			continue
 		}
@@ -350,25 +393,22 @@ func (c *checker) texts(t *oci.Tree, doc *sbom.Doc, plat, file string) {
 		case err != nil:
 			missing++
 			for _, r := range []string{reqCnt014, reqLic002} {
-				c.add(TSBOM, r, verdict.Violation, plat, p, "no text for license %s (%s): not embedded in the SBOM and no readable %s (%v)", l.ID, l.Where, path.Base(p), err)
+				c.add(TSBOM, r, verdict.Violation, plat, p, "no text for %s %s (%s): not embedded in the SBOM and no readable %s (%v)", kind, l.ID, l.Where, path.Base(p), err)
 			}
 		case len(strings.TrimSpace(string(data))) == 0:
 			missing++
 			for _, r := range []string{reqCnt014, reqLic002} {
-				c.add(TSBOM, r, verdict.Violation, plat, p, "the text of license %s is empty", l.ID)
+				c.add(TSBOM, r, verdict.Violation, plat, p, "the text of %s %s is empty", kind, l.ID)
 			}
 		}
 	}
 	if missing == 0 {
 		for _, r := range []string{reqCnt014, reqLic002} {
-			c.add(TSBOM, r, verdict.Checked, plat, file, "every license of the SBOM has its text (%d licenses)", len(doc.Licenses))
+			c.add(TSBOM, r, verdict.Checked, plat, file, "every license and license exception of the SBOM has its text (%d)", len(doc.Licenses))
 		}
 	}
 	if len(doc.Licenses) == 0 {
 		c.add(TSBOM, reqLic002, verdict.Note, plat, file, "the SBOM names no license")
-	}
-	if n := len(doc.Unlicensed); n > 0 {
-		c.add(TSBOM, reqLic002, verdict.Note, plat, file, "%d of %d packages state no license (completeness is checked manually): %s", n, doc.Packages, list(doc.Unlicensed, 5))
 	}
 	if len(doc.External) > 0 {
 		c.add(TSBOM, reqCnt014, verdict.Note, plat, file, "license references to other SPDX documents are not checked: %s", list(doc.External, 5))
