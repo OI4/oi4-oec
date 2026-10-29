@@ -74,6 +74,12 @@ const (
 	FailRecovery Fault = "T7-LIFE-02/recovery"       // variant, conforming: reports FAILURE_1/0 and recovers with a new Birth
 	LateSub      Fault = "T7-LIFE-02/late-subscribe" // variant, conforming: subscribes 300 ms after its Birth
 	WillWriter   Fault = "T7-LIFE-03/writer-id"      // the Will uses another DataSetWriterId than the Health
+
+	// Restart (C-067): through the restart hook (Restart).
+	NoClose      Fault = "T7-LIFE-04/no-close"     // disconnects gracefully without a Close message
+	CloseWriter  Fault = "T7-LIFE-04/writer-id"    // the Close message uses another DataSetWriterId than the Health
+	Abort        Fault = "T7-LIFE-04/abort"        // variant: the restart breaks the connection (no DISCONNECT, the Will fires)
+	NotPersisted Fault = "T7-SET-10/not-persisted" // a set ReferenceDesignation does not survive a restart
 )
 
 // Faults lists every fault.
@@ -81,7 +87,8 @@ var Faults = []Fault{ReplyTo, AllAssets, Unanswered, Missing, EmptyList, Unknown
 	DualVersion, Mixed, Case, NoMetadata, FilterIgnored, AssetLevel, PerPage, QueryIgnored, QuerySource, NoRefDes, WrongLocale,
 	NotListed, SetUnknown, SetMetadata, DelPublishes, ConfigName, DataNoPub, MetaNoEvent, PublistMode, DelSilent, RefDesFixed, SublistNone, NoCreate, FixedLevel,
 	NoCorrelation, Progress, Reissue, AnswersUnknown, NoReply,
-	MQTT31, ClientIDs, TLS11, NoVerify, Anonymous, Retained, NoWill, StaleWill, WillTime, NoRebirth, HealthFirst, FailNoBirth, FailRecovery, LateSub, WillWriter}
+	MQTT31, ClientIDs, TLS11, NoVerify, Anonymous, Retained, NoWill, StaleWill, WillTime, NoRebirth, HealthFirst, FailNoBirth, FailRecovery, LateSub, WillWriter,
+	NoClose, CloseWriter, Abort, NotPersisted}
 
 // ServiceType, AppID and Asset identify the simulated CUT: the OT connector
 // of the guideline examples (MG B1.1) with one subordinate asset.
@@ -259,6 +266,10 @@ type Sim struct {
 	gets     chan mqttwire.Message
 	stop     chan struct{}
 	done     chan struct{}
+	// restartMu serializes Restart and the reconnect of keep; swapped
+	// tells keep that Restart replaced the connection.
+	restartMu sync.Mutex
+	swapped   chan struct{}
 }
 
 func enc(il string) string { return base64.RawURLEncoding.EncodeToString([]byte(il)) }
@@ -331,7 +342,7 @@ func Start(ctx context.Context, cfg mqttwire.Config, fault Fault) (*Sim, error) 
 	if err != nil {
 		return nil, err
 	}
-	s := &Sim{m: m, fault: fault, gets: make(chan mqttwire.Message, 256), stop: make(chan struct{}), done: make(chan struct{}), loop: make(chan struct{})}
+	s := &Sim{m: m, fault: fault, gets: make(chan mqttwire.Message, 256), stop: make(chan struct{}), done: make(chan struct{}), loop: make(chan struct{}), swapped: make(chan struct{}, 1)}
 	if cfg.ClientID == "" {
 		cfg.ClientID = mqttwire.ClientID("oec-sim")
 	}
@@ -514,25 +525,91 @@ func (s *Sim) fail(ctx context.Context) error {
 func (s *Sim) keep() {
 	defer close(s.loop)
 	for {
+		cl := s.client()
 		select {
-		case <-s.client().Lost():
+		case <-cl.Lost():
+		case <-s.swapped:
+			continue
 		case <-s.stop:
 			return
 		}
-		for {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			err := s.connect(ctx)
-			cancel()
-			if err == nil {
-				break
-			}
-			select {
-			case <-time.After(50 * time.Millisecond):
-			case <-s.stop:
-				return
-			}
+		if !s.reconnect(cl) {
+			return
 		}
 	}
+}
+
+// reconnect replaces the lost connection cl unless Restart already did;
+// false: Close was called.
+func (s *Sim) reconnect(cl *mqttwire.Client) bool {
+	s.restartMu.Lock()
+	defer s.restartMu.Unlock()
+	if s.client() != cl {
+		return true
+	}
+	for {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		err := s.connect(ctx)
+		cancel()
+		if err == nil {
+			return true
+		}
+		select {
+		case <-time.After(50 * time.Millisecond):
+		case <-s.stop:
+			return false
+		}
+	}
+}
+
+// Restart stops the simulated CUT gracefully (Close message, DISCONNECT)
+// and connects again with its Birth: the restart hook of the probe tests
+// (C-067). The faults of T7-LIFE-04 change the end of the connection;
+// NotPersisted forgets a set ReferenceDesignation.
+func (s *Sim) Restart(ctx context.Context) error {
+	s.restartMu.Lock()
+	defer s.restartMu.Unlock()
+	cl := s.client()
+	switch s.fault {
+	case NoClose, Abort:
+	case CloseWriter:
+		h := s.m.dsms["Health"][AppID][0]
+		d := map[string]any{}
+		for k, v := range h {
+			d[k] = v
+		}
+		d["DataSetWriterId"] = 3999.0
+		d["Payload"] = map[string]any{"Health": "NORMAL_0", "HealthScore": 0}
+		if err := s.publish(ctx, "Health", AppID, "", "", []map[string]any{d}); err != nil {
+			return err
+		}
+	default:
+		if err := s.health(ctx, "NORMAL_0", 0); err != nil {
+			return err
+		}
+	}
+	if s.fault == Abort {
+		cl.Kill()
+	} else {
+		cl.Close()
+	}
+	if s.fault == NotPersisted {
+		m, err := build(s.fault)
+		if err != nil {
+			return err
+		}
+		s.state.Lock()
+		s.m.dsms["ReferenceDesignation"] = m.dsms["ReferenceDesignation"]
+		s.state.Unlock()
+	}
+	if err := s.connect(ctx); err != nil {
+		return err
+	}
+	select {
+	case s.swapped <- struct{}{}:
+	default:
+	}
+	return nil
 }
 
 // Connections returns the number of connections so far.

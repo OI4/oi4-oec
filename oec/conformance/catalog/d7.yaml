@@ -218,7 +218,8 @@ tests:
     level: 1
     needs: [restart-hook]
     reqs: [REQ-CMP-046, REQ-LIFE-005, REQ-LIFE-006, REQ-LIFE-007]
-    status: planned
+    status: implemented
+    notes: The restart hook stops the CUT gracefully and starts it again; the Close message is the last Pub Health of the CUT before its DISCONNECT (proxy) or before its new Birth (bus). Without the hook, without DISCONNECT or with the Will on the bus the test is inconclusive. The DataSetWriterId is compared with the answer to Get Health after the restart.
 
   # --- test: addressing and identification --------------------------------
   - id: T7-ADR-01
@@ -366,7 +367,8 @@ tests:
     level: 1
     needs: [restart-hook]
     reqs: [REQ-RES-REFDES-002]
-    status: planned
+    status: implemented
+    notes: Sets a changed ReferenceDesignation of the application (else of the first object), restarts the CUT with the restart hook, reads it again and restores the original. Not applicable if the CUT has no ReferenceDesignation or rejects the Set with Status Bad (the condition of REQ-RES-REFDES-002, the CUT offers Set ReferenceDesignation, is not met).
   - id: T7-SET-11
     title: Set and Del SubscriptionList
     mode: test

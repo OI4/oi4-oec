@@ -25,10 +25,10 @@ import (
 
 // Implemented lists the test-mode catalog tests the runner judges (d7.yaml
 // status implemented), in run order.
-var Implemented = []string{"T7-CON-01", "T7-CON-02", "T7-CON-03", "T7-CON-04", "T7-LIFE-01", "T7-LIFE-02", "T7-LIFE-03",
+var Implemented = []string{"T7-CON-01", "T7-CON-02", "T7-CON-03", "T7-CON-04", "T7-LIFE-01", "T7-LIFE-02", "T7-LIFE-03", "T7-LIFE-04",
 	"T7-ADR-02", "T7-ADR-03", "T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04",
 	"T7-GET-05", "T7-GET-06", "T7-GET-07", "T7-GET-08", "T7-GET-09", "T7-SET-01", "T7-SET-02", "T7-SET-03", "T7-SET-04",
-	"T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-09", "T7-SET-11", "T7-SET-12",
+	"T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-09", "T7-SET-10", "T7-SET-11", "T7-SET-12",
 	"T7-ACT-01", "T7-ACT-02", "T7-ACT-03", "T7-ACT-04"}
 
 // Tests returns the test-mode tests of the D7 catalog for verdict.Build.
@@ -105,6 +105,14 @@ type Options struct {
 	// Tolerance is the allowed difference between the time in the
 	// MessageId of a Will and its CONNECT (REQ-LIFE-016, default 5 s).
 	Tolerance time.Duration
+
+	// Restart is the restart hook (DESIGN.md §3.4): it stops the CUT
+	// gracefully and starts it again; nil: T7-LIFE-04 and T7-SET-10 are
+	// inconclusive.
+	Restart func(context.Context) error
+	// RestartWait is the time the CUT has to come back after the restart
+	// hook returned (default 2 min).
+	RestartWait time.Duration
 }
 
 // Request is one stimulus of the run (report).
@@ -163,6 +171,8 @@ type Runner struct {
 	retained    []*netMsg // delivered with Retain, from the CUT (T7-CON-04 without proxy)
 	dropped     time.Time // the proxy dropped the connection of the CUT
 	busWill     *netMsg   // Health FAILURE_1 of the CUT about itself after dropped
+	restartAt   time.Time // the restart hook was started
+	restarted   []*netMsg // publications of the CUT after restartAt
 }
 
 // New creates a runner; the tester identity is fixed here.
@@ -184,6 +194,9 @@ func New(opt Options, reqs verdict.Requirements, pub PublishFunc) *Runner {
 	}
 	if opt.Tolerance <= 0 {
 		opt.Tolerance = 5 * time.Second
+	}
+	if opt.RestartWait <= 0 {
+		opt.RestartWait = 2 * time.Minute
 	}
 	r := &Runner{opt: opt, reqs: reqs, pub: pub, seen: map[string]bool{}, tester: "Utility/" + opt.TesterIL, cites: map[string][]string{},
 		used: map[int64]bool{}}
@@ -401,6 +414,9 @@ func (r *Runner) Deliver(m Message) {
 		r.noteUsed(n)
 		if m.Retain {
 			r.retained = append(r.retained, n)
+		}
+		if !r.restartAt.IsZero() {
+			r.restarted = append(r.restarted, n)
 		}
 		if !r.dropped.IsZero() && r.busWill == nil && n.resource == "Health" && strings.HasSuffix(n.topic, "/"+enc(r.app)) {
 			if state, _, _, ok := health(n); ok && state == "FAILURE_1" {
@@ -715,7 +731,7 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 		return r.result(), err
 	}
 	for _, id := range Implemented {
-		if !r.Selected(id) || id == "T7-SET-03" || isLifecycleTest(id) {
+		if !r.Selected(id) || id == "T7-SET-03" || isLifecycleTest(id) || isRestartTest(id) {
 			continue
 		}
 		// The Action tests run in the write window: the ids the CUT
@@ -740,6 +756,19 @@ func (r *Runner) Run(ctx context.Context) (Result, error) {
 		}
 		if err := r.set03(ctx); err != nil {
 			return interrupted("T7-SET-03", err)
+		}
+	}
+	// The restart tests run in the write window: T7-SET-10 restores the
+	// ReferenceDesignation it changed before the restore check.
+	if r.restartSelected() {
+		if r.Selected("T7-SET-10") && !writing {
+			writing = true
+			if err := r.prepareWrite(ctx); err != nil {
+				return r.result(), err
+			}
+		}
+		if err := r.restart(ctx); err != nil {
+			return interrupted("restart", err)
 		}
 	}
 	if writing {

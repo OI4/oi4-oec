@@ -30,6 +30,45 @@ func freePort(t *testing.T) string {
 	return strconv.Itoa(l.Addr().(*net.TCPAddr).Port)
 }
 
+// restartOn restarts the simulated CUT once the restart hook created flag.
+func restartOn(ctx context.Context, t *testing.T, s *sim.Sim, flag string) {
+	for ctx.Err() == nil {
+		if _, err := os.Stat(flag); err == nil {
+			if err := s.Restart(ctx); err != nil {
+				t.Errorf("restart: %v", err)
+			}
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
+// TestRestartHook runs --stop-cmd and --start-cmd in this order and
+// reports a failing command.
+func TestRestartHook(t *testing.T) {
+	dir := t.TempDir()
+	log := filepath.Join(dir, "log")
+	var errOut bytes.Buffer
+	f := &monitorFlags{stopCmd: "echo stop >> '" + log + "'", startCmd: "echo start >> '" + log + "'", restartWait: time.Second}
+	hook, err := f.restartHook(&errOut)
+	if err != nil || hook == nil {
+		t.Fatal(hook != nil, err)
+	}
+	if err := hook(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(log); string(b) != "stop\nstart\n" {
+		t.Errorf("commands ran %q", b)
+	}
+	f = &monitorFlags{restartCmd: "exit 3", restartWait: time.Second}
+	if hook, _ = f.restartHook(&errOut); hook == nil || hook(context.Background()) == nil {
+		t.Error("a failing restart command is not reported")
+	}
+	if hook, err = (&monitorFlags{restartWait: time.Second}).restartHook(&errOut); hook != nil || err != nil {
+		t.Errorf("no restart flags: %v %v", hook != nil, err)
+	}
+}
+
 // TestTestLive runs oec-check test against the simulated CUT on a loopback
 // broker (DESIGN.md §10): pass without a fault through the proxy attachment
 // (§3.4), fail with one on the bus.
@@ -64,13 +103,20 @@ func TestTestLive(t *testing.T) {
 				// The CUT connects to the proxy, which listens once
 				// oec-check runs: retry until it is there.
 				port := freePort(t)
-				args = append(args, "--proxy-listen", "127.0.0.1:"+port, "--proxy-ca", p.CAFile, "--proxy-ca-key", p.CAKeyFile, "--proxy-wait", "30s")
+				// The restart hook creates a file; the test restarts the
+				// simulated CUT when it appears.
+				flag := filepath.Join(dir, fmt.Sprintf("restart-%d", i))
+				args = append(args, "--proxy-listen", "127.0.0.1:"+port, "--proxy-ca", p.CAFile, "--proxy-ca-key", p.CAKeyFile, "--proxy-wait", "30s",
+					"--restart-cmd", "touch '"+flag+"'", "--restart-wait", "30s")
 				cfg.Broker = "mqtts://localhost:" + port
 				go func() {
 					for {
 						var err error
 						if s, err = sim.Start(ctx, cfg, c.fault); err == nil || ctx.Err() != nil {
 							started <- err
+							if err == nil {
+								go restartOn(ctx, t, s, flag)
+							}
 							return
 						}
 						time.Sleep(50 * time.Millisecond)
@@ -108,6 +154,9 @@ func TestTestLive(t *testing.T) {
 			if c.proxy && (rep.Attachment != "proxy" || len(rep.Connections) < 5 || !strings.Contains(out, "proxy 127.0.0.1:")) {
 				t.Errorf("proxy attachment: %s, %d connection(s)\n%s", rep.Attachment, len(rep.Connections), out)
 			}
+			if c.proxy && (!strings.Contains(out, "pass  T7-LIFE-04") || !strings.Contains(out, "pass  T7-SET-10") || !strings.Contains(errOut, "restart hook: touch")) {
+				t.Errorf("restart hook:\n%s%s", out, errOut)
+			}
 			if strings.Contains(string(raw), "secret\"") {
 				t.Error("the password is in the report")
 			}
@@ -137,6 +186,11 @@ func TestTestUsage(t *testing.T) {
 		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--proxy-ca", "ca.pem"},
 		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--proxy-listen", "127.0.0.1:0", "--proxy-ca", "nope.pem", "--proxy-ca-key", "nope.key"},
 		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--proxy-listen", "127.0.0.1:0", "--proxy-ca", "a", "--proxy-ca-key", "b", "--proxy-wait", "0s"},
+		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--restart-cmd", "true", "--stop-cmd", "true", "--start-cmd", "true"},
+		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--stop-cmd", "true"},
+		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--start-cmd", "true"},
+		{"test", "--broker", "mqtts://localhost", "--app", "a.com/M/P/S", "--restart-cmd", "true", "--restart-wait", "0s"},
+		{"monitor", "--broker", "mqtts://localhost", "--restart-cmd", "true"},
 	} {
 		if code, out, errOut := exec(t, "", args...); code != exitUsage {
 			t.Errorf("%v: exit %d\n%s%s", args, code, out, errOut)

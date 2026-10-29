@@ -71,6 +71,10 @@ func runTest(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		return usageErr("%v", err)
 	}
+	restart, err := f.restartHook(stderr)
+	if err != nil {
+		return usageErr("%v", err)
+	}
 	all, err := probe.AllTests()
 	if err != nil {
 		fmt.Fprintf(stderr, "%s: %v\n", tool, err)
@@ -138,7 +142,7 @@ func runTest(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "%s: proxy attachment on %s: the component under test connects there (waiting up to %s)\n", tool, px.Addr(), f.proxyWait)
 	}
 	s, err := probe.RunBus(ctx, cfg, probe.Options{App: f.app, Level: f.level, Timeout: f.timeout, TesterIL: f.testerIL, Tests: f.tests,
-		Proxy: px, ProxyWait: f.proxyWait, Tolerance: f.tolerance}, reqs, o.observe)
+		Proxy: px, ProxyWait: f.proxyWait, Tolerance: f.tolerance, Restart: restart, RestartWait: f.restartWait}, reqs, o.observe)
 	if err != nil {
 		fmt.Fprintf(stderr, "%s: %v\n", tool, err)
 		return exitInternal

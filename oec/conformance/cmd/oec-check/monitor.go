@@ -89,11 +89,14 @@ type monitorFlags struct {
 	proxyListen, proxyCA, proxyCAKey    string        // test
 	proxyNames                          string        // test
 	proxyWait                           time.Duration // test
+	restartCmd, stopCmd, startCmd       string        // test
+	restartWait                         time.Duration // test
 }
 
 // newMonitorFlags registers the flags of monitor or test: the connection,
 // verdict and output flags are shared; --replay and --duration belong to
-// monitor, --timeout, --tester-il, --tests and the --proxy-* flags to test.
+// monitor, --timeout, --tester-il, --tests, the --proxy-* flags and the
+// restart hook flags to test.
 func newMonitorFlags(name string, stderr io.Writer) *monitorFlags {
 	f := &monitorFlags{name: name, fl: flag.NewFlagSet(name, flag.ContinueOnError)}
 	fl := f.fl
@@ -112,6 +115,10 @@ func newMonitorFlags(name string, stderr io.Writer) *monitorFlags {
 		fl.StringVar(&f.proxyCAKey, "proxy-ca-key", "", "private key of --proxy-ca (PEM)")
 		fl.StringVar(&f.proxyNames, "proxy-name", "", "host names and IP addresses of the proxy certificate, comma separated (default: localhost,127.0.0.1,::1)")
 		fl.DurationVar(&f.proxyWait, "proxy-wait", 2*time.Minute, "waiting time for the component under test to connect through the proxy and to reconnect")
+		fl.StringVar(&f.restartCmd, "restart-cmd", "", "restart hook: shell command that stops the component under test gracefully and starts it again")
+		fl.StringVar(&f.stopCmd, "stop-cmd", "", "restart hook: shell command that stops the component under test gracefully (with --start-cmd)")
+		fl.StringVar(&f.startCmd, "start-cmd", "", "restart hook: shell command that starts the component under test (with --stop-cmd)")
+		fl.DurationVar(&f.restartWait, "restart-wait", 2*time.Minute, "waiting time for the component under test to come back after the restart hook")
 	}
 	fl.StringVar(&f.record, "record", "", "write the observed messages to a capture (JSONL)")
 	fl.StringVar(&f.app, "app", "", "component under test: AppId (Identification Link) or <ServiceType>/<AppId>")

@@ -66,18 +66,24 @@ const simTimeout = 3 * time.Second
 // with the fault on a fresh test broker.
 func runSim(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, level int, tests []string) ([]verdict.TestResult, Session) {
 	t.Helper()
-	return runSimWith(t, v, reqs, fault, Options{Level: level, Tests: tests}, true)
+	return runSimWith(t, v, reqs, fault, Options{Level: level, Tests: tests}, attach{proxy: true, restart: true})
 }
+
+// attach selects how the simulated CUT is attached: through the proxy
+// (DESIGN.md §3.4) and with the restart hook (Sim.Restart).
+type attach struct{ proxy, restart bool }
 
 // Credentials of the test broker; it also accepts a CONNECT without
 // credentials (the fault T7-CON-03/anonymous).
 const simUser, simPassword = "oec", "secret"
 
 // runSimWith is runSim with the Level and the test selection of opt; with
-// viaProxy the simulated CUT connects through the proxy attachment
-// (DESIGN.md §3.4), D7 itself directly.
-func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, opt Options, viaProxy bool) ([]verdict.TestResult, Session) {
+// at.proxy the simulated CUT connects through the proxy attachment
+// (DESIGN.md §3.4), D7 itself directly; with at.restart D7 restarts it
+// through Sim.Restart.
+func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, fault sim.Fault, opt Options, at attach) ([]verdict.TestResult, Session) {
 	t.Helper()
+	viaProxy := at.proxy
 	level := opt.Level
 	pki := mqtttest.NewPKI(t)
 	b := mqtttest.NewBroker(t, pki, simUser, simPassword, false)
@@ -128,8 +134,18 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 		}()
 		return nil
 	}
+	var restart func(context.Context) error
+	if at.restart {
+		restart = func(ctx context.Context) error {
+			if c == nil {
+				return errors.New("the simulated CUT is not running")
+			}
+			return c.Restart(ctx)
+		}
+	}
 	app := sim.ServiceType + "/" + sim.AppID
-	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start, Tests: opt.Tests, Proxy: px, ProxyWait: 10 * simTimeout}, reqs, observe)
+	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start, Tests: opt.Tests, Proxy: px, ProxyWait: 10 * simTimeout,
+		Restart: restart, RestartWait: 10 * simTimeout}, reqs, observe)
 	if cutStarted != nil {
 		if serr := <-cutStarted; serr != nil {
 			t.Fatal(serr)
@@ -347,7 +363,7 @@ func TestSimMaskLevel1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	res, s := runSimWith(t, v, reqs, sim.None, Options{Level: 1, Tests: []string{"T7-SET-01", "T7-SET-05"}}, false)
+	res, s := runSimWith(t, v, reqs, sim.None, Options{Level: 1, Tests: []string{"T7-SET-01", "T7-SET-05"}}, attach{})
 	for _, q := range s.Probe.Requests {
 		// Oi4v2/<ServiceType>/<AppId>/Set/Config/<Source>/<Filter>
 		p := strings.Split(q.Topic, "/")
@@ -424,7 +440,7 @@ func TestSimActionRequests(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, s := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: []string{"T7-ACT-01", "T7-ACT-04"}}, false)
+	_, s := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: []string{"T7-ACT-01", "T7-ACT-04"}}, attach{})
 	calls := map[string]int{}
 	for i, q := range s.Probe.Requests {
 		if i > 0 && q.Sent.Before(s.Probe.Requests[i-1].Sent) {
@@ -454,7 +470,7 @@ func TestSimLateSubscribe(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, s := runSimWith(t, v, reqs, sim.LateSub, Options{Level: 3, Tests: []string{"T7-GET-01"}}, true)
+	_, s := runSimWith(t, v, reqs, sim.LateSub, Options{Level: 3, Tests: []string{"T7-GET-01"}}, attach{proxy: true})
 	if len(s.Probe.Requests) == 0 {
 		t.Fatal("no requests")
 	}
@@ -477,7 +493,7 @@ func TestSimNoProxy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	res, _ := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: []string{"T7-CON-*", "T7-LIFE-*"}}, false)
+	res, _ := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: []string{"T7-CON-*", "T7-LIFE-*"}}, attach{})
 	for _, tr := range res {
 		if !isLifecycleTest(tr.ID) {
 			continue
@@ -490,6 +506,44 @@ func TestSimNoProxy(t *testing.T) {
 				t.Errorf("%s %s: %s inconclusive %t (%s)", tr.ID, r.Req, r.Outcome, r.Inconclusive, r.Obligation)
 			}
 		}
+	}
+	if got := verdict.Exit(res, false); got != verdict.ExitInconclusive {
+		t.Errorf("exit %d, want %d", got, verdict.ExitInconclusive)
+	}
+}
+
+// TestSimNoRestart: without the restart hook T7-LIFE-04 and T7-SET-10 are
+// skipped as inconclusive (DESIGN.md §3.4), the state is restored.
+func TestSimNoRestart(t *testing.T) {
+	v, err := validate.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	reqs, err := verdict.LoadRequirements()
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, s := runSimWith(t, v, reqs, sim.None, Options{Level: 3, Tests: restartTests}, attach{proxy: true})
+	n := 0
+	for _, tr := range res {
+		if !isRestartTest(tr.ID) {
+			continue
+		}
+		n++
+		if tr.Outcome != verdict.Skip {
+			t.Errorf("%s: %s, want skip", tr.ID, tr.Outcome)
+		}
+		for _, r := range tr.Reqs {
+			if r.Outcome != verdict.Skip || r.Inconclusive != verdict.Mandatory(r.Obligation) || !strings.Contains(r.Reason, "restart hook") {
+				t.Errorf("%s %s: %s inconclusive %t (%s) %q", tr.ID, r.Req, r.Outcome, r.Inconclusive, r.Obligation, r.Reason)
+			}
+		}
+	}
+	if n != len(restartTests) {
+		t.Errorf("%d restart tests in the result, want %d", n, len(restartTests))
+	}
+	if rs := s.Probe.Restore; rs == nil || !rs.Restored {
+		t.Errorf("restore %+v", rs)
 	}
 	if got := verdict.Exit(res, false); got != verdict.ExitInconclusive {
 		t.Errorf("exit %d, want %d", got, verdict.ExitInconclusive)

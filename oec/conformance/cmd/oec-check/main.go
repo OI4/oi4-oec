@@ -88,6 +88,10 @@ monitor and --record, plus:
               test connects to D7 (it trusts --proxy-ca), D7 relays to the
               broker and judges the connection and lifecycle tests (T7-CON-*,
               T7-LIFE-*); without the proxy they are skipped (inconclusive)
+  restart:    --restart-cmd CMD, or --stop-cmd CMD --start-cmd CMD
+              [--restart-wait 2m]: shell commands that stop the component
+              under test gracefully and start it again (T7-LIFE-04,
+              T7-SET-10); without them these tests are skipped (inconclusive)
 
 Exit codes: 0 valid/pass, 1 invalid/fail, 2 usage or input error,
 3 internal error or broker not reachable, 4 inconclusive (monitor, test).

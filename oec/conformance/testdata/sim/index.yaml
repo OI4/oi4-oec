@@ -497,23 +497,29 @@ fixtures:
       SHOULD NOT: warn).
   - fault: T7-LIFE-02/no-birth
     status: draft
-    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-01, T7-LIFE-02, T7-LIFE-03]
     expect:
       T7-LIFE-02: {outcome: fail, reqs: [REQ-LIFE-001]}
       T7-MON-03: {outcome: fail, reqs: [REQ-CMP-003, REQ-LIFE-001]}
     notes: >-
       The CUT publishes no Birth after the reconnect (REQ-LIFE-001); the
       monitor sees the Health after the Will without a Birth on that
-      connection (T7-MON-03, REQ-LIFE-001 and REQ-CMP-003).
+      connection (T7-MON-03, REQ-LIFE-001 and REQ-CMP-003). Without
+      T7-LIFE-04 (C-067): the restart makes the monitor judge the reconnect
+      after the Close message (T7-MON-05, REQ-LIFE-014) instead of after
+      the Will.
   - fault: T7-LIFE-02/health-first
     status: draft
-    tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
+    tests: [T7-MON-*, T7-CON-*, T7-LIFE-01, T7-LIFE-02, T7-LIFE-03]
     expect:
       T7-LIFE-02: {outcome: warn, reqs: [REQ-LIFE-015]}
     notes: >-
       The CUT publishes its Health before the Birth after the reconnect
       (REQ-LIFE-015, SHOULD: warn). The late Birth still fulfils REQ-
-      LIFE-001 (T7-MON-03 passes since the C-066 change of the monitor).
+      LIFE-001 (T7-MON-03 passes since the C-066 change of the monitor). Without
+      T7-LIFE-04 (C-067): the restart makes the monitor judge the reconnect
+      after the Close message (T7-MON-05, REQ-LIFE-014) instead of after
+      the Will.
   - fault: T7-LIFE-02/no-rebirth
     status: draft
     tests: [T7-MON-*, T7-CON-*, T7-LIFE-*]
@@ -552,3 +558,51 @@ fixtures:
       the Health of the application (REQ-LIFE-009); T7-MON-08 sees the
       Health with another DataSetWriterId for the same DataSet (REQ-
       MSG-021).
+  - fault: T7-LIFE-04/no-close
+    status: draft
+    tests: [T7-LIFE-04]
+    expect:
+      T7-LIFE-04: {outcome: fail, reqs: [REQ-CMP-046, REQ-LIFE-005]}
+      T7-MON-10: {outcome: info, reqs: [REQ-IL-012]}
+    notes: >-
+      The restart hook stops the CUT; it disconnects gracefully (DISCONNECT)
+      without publishing a Close message before (REQ-LIFE-005, graded by
+      REQ-CMP-046). REQ-LIFE-006 and REQ-LIFE-007 are skipped: their
+      condition (the CUT publishes a Close message) is not met. T7-MON-10
+      reports the new Birth without Will or Close in between (REQ-IL-012,
+      information).
+  - fault: T7-LIFE-04/writer-id
+    status: draft
+    tests: [T7-LIFE-04]
+    expect:
+      T7-LIFE-04: {outcome: fail, reqs: [REQ-CMP-046, REQ-LIFE-007]}
+      T7-MON-08: {outcome: fail, reqs: [REQ-MSG-021]}
+    notes: >-
+      The Close message (Health NORMAL_0/0 on the Health topic of the
+      application) uses DataSetWriterId 3999 instead of the DataSetWriterId
+      of the Health of the application, which D7 reads with Get Health
+      after the restart (REQ-LIFE-007, graded by REQ-CMP-046); T7-MON-08
+      sees the Health with another DataSetWriterId for the same DataSet
+      (REQ-MSG-021).
+  - fault: T7-LIFE-04/abort
+    status: draft
+    positive: true
+    tests: [T7-LIFE-04]
+    expect:
+      T7-LIFE-04: {outcome: skip, reqs: [REQ-CMP-046, REQ-LIFE-005, REQ-LIFE-006, REQ-LIFE-007]}
+    notes: >-
+      Variant, not a failure: the restart breaks the connection of the CUT
+      without DISCONNECT (the broker publishes its Will). That is no
+      graceful disconnect, so REQ-LIFE-005 … 007 do not apply; D7 cannot
+      tell whether the CUT or the restart hook is at fault and skips the
+      test as inconclusive.
+  - fault: T7-SET-10/not-persisted
+    status: draft
+    tests: [T7-SET-10]
+    expect:
+      T7-SET-10: {outcome: fail, reqs: [REQ-RES-REFDES-002]}
+    notes: >-
+      The CUT accepts the Set ReferenceDesignation (Status Good) but forgets
+      it on the restart: after the restart Get ReferenceDesignation returns
+      the object before the Set (REQ-RES-REFDES-002). D7 restores the
+      original object afterwards.
