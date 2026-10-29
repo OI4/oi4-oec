@@ -4,8 +4,9 @@
 # checked by a test here or listed under `manual` (only if its verification
 # also contains `manual`).
 #
-# mode:   image     – offline inspection of an OCI image (registry reference,
-#                     OCI layout or archive); no container daemon needed
+# mode:   image     – offline inspection of an OCI image (OCI layout directory
+#                     or oci-archive; a registry reference is read with
+#                     docker save / skopeo, C-070); no container daemon needed
 #         run       – D8 starts the image in a sandbox with generated test
 #                     storages (/etc/oi4/mqtt, /etc/oi4/certs, /run/secrets/oi4,
 #                     hostname) and its own MQTT test endpoint, and observes

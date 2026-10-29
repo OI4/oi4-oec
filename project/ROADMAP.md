@@ -305,15 +305,47 @@ Why this cut: increment 1 carries all the infrastructure (engine, simulated CUT,
 
 **Decision (C-069 review, D-1 (a), 2026-10-29):** P5 is closed. Criterion 4 (CI on Windows/macOS/Linux runners) and the D7 container image are carried into P9. Next phase: P5b (C-069 addendum 1).
 
-## P5b – Infrastructure compliance tool (D8) – next (D-1 (a) of the C-069 review; plan and cycle cut in its first cycle, C-070)
+## P5b – Infrastructure compliance tool (D8) – in progress (C-070 …; D-1 (a) of the C-069 review)
 
-Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance (Level 1/2/3)** of application containers and, as far as testable, the **platform requirements** of the RIG (scope confirmed, Q-017). Same conventions as D7: Windows/macOS/Linux, test cases reference REQ ids, profiles `level1..3`, console + JSON + JUnit output, exit codes.
+Command-line tool `oec-infra` (Go, ADR-0014, one module with D7, ADR-0025) that checks the **Service Container Compliance (Level 1/2/3)** of application containers and, as far as testable, the **platform requirements** of the RIG (scope confirmed, Q-017). Same conventions as D7: Windows/macOS/Linux, test cases reference REQ ids, profiles `level1..3` (default 3, REQ-CMP-012), console + JSON + JUnit output, exit codes 0–4 with `--allow-skip`. Catalog `oec/conformance/catalog/d8.yaml` (17 tests, 1 `manual`), design in `oec/conformance/DESIGN.md` §9.
 
-- `inspect-image` – offline: analyze an OCI image (registry reference or archive): OCI format, exactly one canonical SBOM (`sbom.spdx.json` / `sbom.cdx.json`) + license texts (`<License-ID>.txt` or embedded) in `/opt/oi4/licenses` (RIG 4.1.4), storage paths, user, labels, digest/integrity.
-- `inspect-container` – a running app container: storage mounts (`/etc/oi4/...`, `/run/secrets/...`), hostname = container name rules, networks.
-- `inspect-platform` – platform host/broker as far as testable (TLS-only broker, `broker.json` provisioning, registry ports 5798/5799).
-- Command names and catalog per ADR-0025 (accepted C-045; start with `image`, exit code 4 "inconclusive" as D7): `image`, `run` (sandbox start with generated storages), `container`, `host`, `bus` replace the working names `inspect-image`/`inspect-container`/`inspect-platform` above; catalog `oec/conformance/catalog/d8.yaml`.
-- **Exit:** our demo and registry images pass `level3`; purpose-built faulty images fail.
+- `image` – offline: an OCI image (OCI layout directory or oci-archive; a registry reference is read with `docker save`/`skopeo`/`podman`, not by D8 – A-240): OCI format, supported platforms and multi-architecture index, exactly one SBOM (`sbom.spdx.json` / `sbom.cdx.json`) with a text for every license in `/opt/oi4/licenses` (RIG 4.1.4, SF-114), digest integrity. T8-IMG-01 … 04.
+- `run` – the image in a sandbox with generated storages (`/etc/oi4/mqtt`, `/etc/oi4/certs`, `/run/secrets/oi4`), hostname and a D8 MQTT test endpoint: the application uses the Message Bus storage, its certificate and secrets and its container name. T8-RUN-01 … 03.
+- `container` – a running application container: networks, name/hostname, the licenses are not overlaid by a host mount. T8-CTR-01 … 03.
+- `host` – the Service Container host: storage layout and permissions, isolation of application storages, platform properties. T8-HST-01 … 04.
+- `bus` – the broker: protocol, TLS and certificate, write access and Actions restricted by ACL (second credential set), OEC Registry present. T8-BUS-01 … 03.
+- `list`, `explain`, `report-schema`, `version` as in D7.
+
+**Plan (C-070, agent, G-3.4 b; reason in `log/2026-10-29_C-070_p5b-plan-d8-image.md`).** Each increment test-first with offline self-test data in the gate – no network, no Docker daemon: generated OCI archives (`testdata/images`), host roots, a fake Engine API, the in-process TLS broker `mqtttest`; every fixture with a verdict starts as `draft` and is reviewed by the PO (G-3.9). Runs with Docker are opt-in (as `live.sh`). Shared with D7: `catalog`, `verdict`, `report` (shared JUnit writer and text helpers), the module root `conformance` (schemas, fixture indexes), `mqttwire`/`mqtttest`, later `explain`. D8 has its own report schema `infra-report.schema.json` (report version 1, independent of the D7 report; A-244).
+
+1. ✅ (C-070) `image`: stdlib OCI reader `internal/oci` (layout directory and oci-archive, digest verification, layer file system with whiteouts and symlinks), `internal/sbom` (SPDX 2.2/2.3 and CycloneDX 1.x JSON), `internal/image` (T8-IMG-01 … 04), `oec-infra image`/`report-schema`/`version`, `infra-report.schema.json`.
+2. `bus`: T8-BUS-01 … 03 – `--broker`/`--bus-storage` as D7, TLS-only listener and certificate checks, ACL probe with `--credentials-2` (a write to a foreign topic and an Action must be refused), Registry MAM on the bus; self-test against `mqtttest` with TLS/ACL faults; opt-in run against the dev Mosquitto.
+3. `host`: T8-HST-01, 02, 04 – `--root DIR` (default `/`), storage layout and permissions, `broker.json` against the D1 schema and the V-BRK vectors, platform properties; self-test on generated host roots; T8-HST-03 (isolation, needs Docker) with increment 4.
+4. Engine API and `container`: own read-only Docker/Podman Engine API client `internal/engine` (Unix socket / named pipe); T8-CTR-01 … 03 and T8-HST-03; self-test against a fake Engine API with recorded inspect documents.
+5. `run`: sandbox via the Engine API (create, start, observe, remove only what D8 created) with generated storages and a D8 MQTT endpoint; T8-RUN-01 … 03; self-test with the fake Engine API starting a simulated application in process; purpose-built good and faulty test images built reproducibly from test sources (`docker load` of a generated OCI archive, no registry, nothing committed but the sources) and the opt-in `live-infra.sh`.
+6. `list`/`explain` for D8, coverage report of `d8.yaml`, report version 1 frozen, README/DESIGN as-built pass, P5b exit run.
+
+**Order and cycle cut** (agent; reason in `log/2026-10-29_C-070_p5b-plan-d8-image.md`):
+
+| Cycle | Increment | Content | New dependencies (ADR-0013/0025) |
+|---|---|---|---|
+| **C-070** ✅ | plan, 1 | P5b plan; `internal/oci` (stdlib OCI reader), `internal/sbom`, `internal/image`, `cmd/oec-infra` (`image`, `report-schema`, `version`), `infra-report.schema.json` (report version 1, grows additively until the P5b exit); T8-IMG-01 … 04 `implemented` with 13 generated image fixtures (2 positive, 11 negative; draft, R-1); SF-114 (accepted SBOM formats, license texts) open (D-1); opt-in `docker save` try (Docker 28); cross builds; ADR-0025 amendment C-070 | none (go-containerregistry of ADR-0025 decision 7 not needed, A-239) |
+| C-071 | 2 | `bus`, T8-BUS-01 … 03 with `mqtttest` fixtures; opt-in run against the dev broker | none planned |
+| C-072 | 3 | `host`, T8-HST-01, 02, 04 with generated host roots | none planned |
+| C-073 | 4 | `internal/engine`, `container`, T8-CTR-01 … 03, T8-HST-03 with a fake Engine API | none planned (Windows named pipe: `golang.org/x/sys` or `Microsoft/go-winio` only if the standard library is not enough) |
+| C-074 | 5 | `run`, T8-RUN-01 … 03; purpose-built test images; `live-infra.sh` (opt-in) | none planned |
+| C-075 | 6 | `list`/`explain`/coverage for D8, report version 1 frozen, docs, P5b exit run | none |
+
+Why this cut: `image` is offline and needs neither a daemon nor a broker, so it carries the D8 infrastructure (CLI, report, schema, fixture contract) with the smallest risk. `bus` and `host` reuse what D7 has (`mqttwire`, `mqtttest`, the `broker.json` vectors) and need no Engine API. The Engine API client comes once, in increment 4, for `container` and the Docker part of `host`; `run` (5) builds on it and is the only part that starts containers. `list`/`explain` and the frozen report come last, as in P5. Dependencies: 4 → 5; 2, 3 and 4 are independent of each other; 6 needs all. A cycle may take two increments if they are small (2 + 3).
+
+**Exit** (precised in C-070; the demo and registry images follow with P6/P7):
+
+1. Every `d8.yaml` test `implemented` or a documented `manual`; every implemented test has a positive and a negative fixture, all reviewed by the PO; the self-test runs in the gate offline – no network, no Docker daemon.
+2. Self-test against purpose-built images: `image` and `run` pass at level 3 on a purpose-built good image and fail with the expected REQ ids on each purpose-built faulty image – `image` in the gate, `run` in the opt-in run with Docker (`live-infra.sh`), recorded in the exit log.
+3. `bus` and `host` run against the dev environment (`oec/dev`, opt-in); the result is recorded in the exit log, deviations are fixed in the dev environment or become an SF.
+4. `infra-report.schema.json` frozen (report version 1) and every report of the gate validated; `list`, `explain`, `report-schema`; coverage report of `d8.yaml`; `CGO_ENABLED=0` cross builds windows/linux/darwin × amd64/arm64.
+
+Carried to other phases: "our demo and registry images pass `level3`" is part of the P6 and P7 exits (they need those images); CI on Windows/macOS/Linux runners and the D8 binaries/container image come with P9 (as D7, D-1 (a) of the C-069 review).
 
 ## P6 – Demo services (D3, D4)
 
@@ -346,6 +378,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 - CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF builds for `esp32` + `esp32s3`), SBOM/license report, security scan.
 - SDK platform matrix carried forward from P4 exit criterion 5 (D-1 (a), C-061 review): `oec` and `oec-ffi` built and tested natively on Linux/macOS/Windows amd64 + arm64 incl. Windows MSVC, ARMv7 Linux best effort.
+- D8 (planned in C-070): the `oec/conformance` gate incl. the D8 self-test on Windows/macOS/Linux runners and the `oec-infra` binaries; the opt-in Docker runs (`live-infra.sh`) on a Linux runner.
 - D7 carried forward from P5 exit criterion 4 (D-1 (a), C-069 review): `oec/conformance` gate (incl. the sim fixtures through the proxy with the restart hook) on Windows/macOS/Linux runners, the binaries for windows/linux/darwin × amd64/arm64 and the multi-arch D7 container image (A-237).
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
 - Publication target: private GitHub repositories (working assumption, Q-011). CRA review before any *public* release (Q-011): SBOM, vulnerability handling process, security update policy, support period.
