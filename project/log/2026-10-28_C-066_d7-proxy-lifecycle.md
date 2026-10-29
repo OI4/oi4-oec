@@ -278,7 +278,7 @@ None. `go.mod` is unchanged. The relay uses only `crypto/tls`, `crypto/x509`, `c
 
 - `bcab7c0`: proxy, CON/LIFE tests, sim faults, CLI flags, report, monitor fixes, catalog, sim index.
 - `ff5b79b`: SUBACK wait before discovery (defect 6), `late-subscribe` variant and test.
-- This commit: README, DESIGN, ADR-0025 amendment C-066, log, STATUS, ROADMAP, REVIEW, REVIEW_DE.
+- `6ea05ce`: README, DESIGN, ADR-0025 amendment C-066, log, STATUS, ROADMAP, REVIEW, REVIEW_DE.
 
 ## Checks (final)
 
