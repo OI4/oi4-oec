@@ -74,8 +74,17 @@ name with `-san` and use it as `-address`.
   (`max_packet_size`) is 65544 octets higher, which leaves room for the
   largest PUBLISH header. With `max_packet_size 262144`, Mosquitto would
   disconnect a client that publishes a payload of exactly MaxPacketSize.
+- **ACL (MG 9.1, REQ-GEN-001; C-071):** [`mosquitto/acl`](mosquitto/acl). Only
+  the probe user `oec-probe` (the test tools, the interop probe) may publish
+  `Set`, `Del` and `Call`; every client reads `Oi4v2/#` and publishes `Pub`,
+  `Get` and `Reply`. Mosquitto drops (and acknowledges) a denied PUBLISH. Limitation of
+  the dev environment: Mosquitto cannot bind the AppId topic level to a user,
+  and an application must read its own `Set/Config`, so every client can read
+  the `Set/Config` of the others – `oec-infra bus` warns on
+  REQ-RES-CONFIG-026 here. An application that sends `Set`, `Del` or `Call`
+  to others needs a `user` entry with these rights.
 
-The entrypoint copies the TLS material and the password file from the
+The entrypoint copies the TLS material, the password file and the ACL from the
 read-only mount into `/mosquitto/tls` (owner `mosquitto`, mode 0600), so host
 ownership and permissions of `generated/` don't matter. On SELinux hosts the
 bind mounts may need the `:z` option.
@@ -208,7 +217,7 @@ cd ../../dev
 docker compose down -v
 ```
 
-## Live run of `oec-check monitor` (D7)
+## Live run of `oec-check monitor` (D7) and `oec-infra bus` (D8)
 
 ```sh
 oec/conformance/live.sh
@@ -216,7 +225,12 @@ oec/conformance/live.sh
 
 Same pattern as `interop.sh` (PKI if missing, broker up, tests, broker down;
 `OEC_LIVE_KEEP=1` keeps it, `OEC_LIVE_OUT=DIR` keeps the recorded captures).
-It runs `go test ./cmd/oec-check -run TestMonitorDevBroker` with
+Since C-071 it also runs `go test ./cmd/oec-infra -run TestBusDevBroker`:
+`oec-infra bus` on 8883 (probe credentials, unprivileged client
+`oec-dev-app`) and 8884 (probe certificate, unprivileged client
+`oec-dev-cert`) – T8-BUS-01 passes, T8-BUS-02 warns REQ-RES-CONFIG-026 (see
+the ACL above), T8-BUS-03 is inconclusive (no OEC Registry before P7). First
+it runs `go test ./cmd/oec-check -run TestMonitorDevBroker` with
 `OEC_LIVE=1`: two monitors attach with the sample storages
 (`--bus-storage generated/roots/oec-dev-cert`, client certificate on 8884;
 `--bus-storage generated/roots/oec-dev-app`, credentials on 8883), a

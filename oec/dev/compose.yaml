@@ -11,7 +11,7 @@ services:
     # Mosquitto 2.1.2 (Alpine), multi-arch index digest of 2026-10-23
     image: docker.io/library/eclipse-mosquitto:2.1.2-alpine@sha256:860aeb5d63ce509508f6dcfb2bc8a1c1dd2bc60555b562b45ce90e52d8dabb0f
     hostname: mosquitto
-    # copy the read-only TLS material and the password file to a directory
+    # copy the read-only TLS material, the password file and the ACL to a directory
     # owned by the broker user with mode 0600 (bind mounts keep the owner of
     # the host, Mosquitto refuses world-readable secrets in future versions)
     entrypoint:
@@ -19,13 +19,14 @@ services:
       - -ec
       - >-
         install -d -o mosquitto -g mosquitto -m 0700 /mosquitto/tls &&
-        install -o mosquitto -g mosquitto -m 0600 /oec/broker/ca.pem /oec/broker/broker.pem /oec/broker/broker.key /oec/broker/passwd /mosquitto/tls/ &&
+        install -o mosquitto -g mosquitto -m 0600 /oec/broker/ca.pem /oec/broker/broker.pem /oec/broker/broker.key /oec/broker/passwd /oec/acl/acl /mosquitto/tls/ &&
         exec /docker-entrypoint.sh /usr/sbin/mosquitto -c /mosquitto/config/mosquitto.conf
     ports:
       - "${OEC_DEV_BIND:-127.0.0.1}:${OEC_DEV_MQTT_PORT:-8883}:8883"
       - "${OEC_DEV_BIND:-127.0.0.1}:${OEC_DEV_CERT_PORT:-8884}:8884"
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/acl:/oec/acl/acl:ro
       - ./generated/broker:/oec/broker:ro
       - data:/mosquitto/data
     healthcheck:

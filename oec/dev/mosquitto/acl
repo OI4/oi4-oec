@@ -1,0 +1,24 @@
+# ACL of the Mosquitto of the OEC dev environment (oec/dev, C-071).
+# DEVELOPMENT ONLY. MG 9.1 (REQ-GEN-001): only authorized clients may send
+# Set, Del and Call requests; Set/Config should not be readable by others
+# (REQ-RES-CONFIG-026). Mosquitto checks every PUBLISH against this file and
+# drops (and acknowledges) a denied one; a denied subscription gets 0x80.
+#
+# Limitation of the dev environment: Mosquitto cannot bind the AppId topic
+# level (base64url of the Identification Link) to a user, so every client
+# may read Oi4v2/# – including the Set/Config of other applications, which
+# an application needs for its own Set/Config. `oec-infra bus` therefore
+# warns on REQ-RES-CONFIG-026 against oec/dev (C-071 log).
+
+# The probe user of the test tools (oec-check test, interop probe,
+# oec-infra bus) is privileged: it requests Set, Del and Call.
+user oec-probe
+topic readwrite #
+
+# Every client (pattern lines apply to all users, also oec-probe): read the
+# Message Bus, publish Pub (answers, data, Health, MAM, Event, Will), Get and
+# Reply (the answer to a Call, MG 9.2).
+pattern read Oi4v2/#
+pattern write Oi4v2/+/+/Pub/#
+pattern write Oi4v2/+/+/Get/#
+pattern write Oi4v2/+/+/Reply/#

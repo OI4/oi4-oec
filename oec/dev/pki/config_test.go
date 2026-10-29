@@ -86,6 +86,33 @@ func TestMosquittoConf(t *testing.T) {
 	if one(t, global, "persistence") != "true" || one(t, global, "queue_qos0_messages") != "true" {
 		t.Error("the restart test needs persistence and queued QoS 0 messages")
 	}
+	if one(t, global, "acl_file") != "/mosquitto/tls/acl" {
+		t.Error("acl_file must be the ACL copied by the entrypoint")
+	}
+}
+
+// The ACL lets only the probe user publish Set, Del and Call (REQ-GEN-001,
+// oec-infra bus T8-BUS-02); every client reads the Message Bus and
+// publishes Pub and Get.
+func TestACL(t *testing.T) {
+	b, err := os.ReadFile("../mosquitto/acl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lines []string
+	for _, line := range strings.Split(string(b), "\n") {
+		if line = strings.TrimSpace(line); line != "" && !strings.HasPrefix(line, "#") {
+			lines = append(lines, line)
+		}
+	}
+	want := []string{
+		"user " + probeUser, "topic readwrite #",
+		"pattern read Oi4v2/#", "pattern write Oi4v2/+/+/Pub/#", "pattern write Oi4v2/+/+/Get/#",
+		"pattern write Oi4v2/+/+/Reply/#",
+	}
+	if strings.Join(lines, "\n") != strings.Join(want, "\n") {
+		t.Errorf("acl:\n%s\nwant:\n%s", strings.Join(lines, "\n"), strings.Join(want, "\n"))
+	}
 }
 
 // The image is pinned by tag and digest; the ports default to loopback and
@@ -104,6 +131,8 @@ func TestCompose(t *testing.T) {
 		`"${OEC_DEV_BIND:-127.0.0.1}:${OEC_DEV_MQTT_PORT:-` + strconv.Itoa(d.port) + `}:8883"`,
 		`"${OEC_DEV_BIND:-127.0.0.1}:${OEC_DEV_CERT_PORT:-` + strconv.Itoa(d.certPort) + `}:8884"`,
 		"./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro",
+		"./mosquitto/acl:/oec/acl/acl:ro",
+		"/oec/acl/acl /mosquitto/tls/",
 		"./generated/broker:/oec/broker:ro",
 	} {
 		if !strings.Contains(c, want) {
