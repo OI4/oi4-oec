@@ -24,7 +24,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – SF-114 überarbeitet: SBOM „CRA und RED ready“ (bitte bestätigen)
+### D-1 – SF-114 überarbeitet: SBOM „CRA und RED ready“ (bestätigt am 29.10.)
 
 **Deine Antwort (29.10.):** Alle Lizenzen sollen lizenzkonform genannt werden, das Ganze soll „CRA und RED ready“ sein, die Versionen werden nicht eingeschränkt, und die Texte müssen rechtskonform sein. Damit ist mein erster Vorschlag (feste Versionen) vom Tisch.
 
@@ -50,7 +50,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 - D8 bekommt den Leser für SPDX 3 und prüft Name, Version und Lizenz je Komponente sowie die Texte der Ausnahmen.
 - Die zwei betroffenen Test-Images werden umgebaut, dazu kommen neue Test-Images. Alle gehen wieder an dich zum Review.
 
-**Antwort z. B.:** „D-1 überarbeitet ok“.
+**Erledigt:** Du hast den Text bestätigt („D-1 überarbeitet ok, einarbeiten“). Ich setze ihn um.
 
 ### R-1 – 13 Test-Images für `oec-infra image` (akzeptiert am 29.10.)
 

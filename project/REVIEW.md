@@ -433,7 +433,7 @@ Logs: [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29
 | A-236 | Exit criterion 2: negative fixtures of SHOULD/heuristic rules expect `warn`/`info` | info (agent) | C-069 | – | – |
 | A-237 | Exit criterion 4 and distribution: local runs now, CI and container image with P9 | info (agent) | C-069 | – | – |
 | A-238 | No new dependency, no schema change, SDK unchanged | info (agent) | C-069 | – | – |
-| **D-1** | **SF-114 – RIG 4.1.4: SBOM versions, naming of licenses, texts, CRA/RED (revised after your answer)** | **confirm** | C-070 | revised wording | ☐ |
+| D-1 | SF-114 – RIG 4.1.4: SBOM versions, naming of licenses, texts, CRA/RED (revised after your answer) | confirm | C-070 | revised wording | ☑ revised wording 2026-10-29 |
 | R-1 | 13 image fixtures of `oec-infra image` (T8-IMG-01 … 04) | review | C-070 | accept | ☑ accepted 2026-10-29 |
 | A-239 | Standard-library OCI and SBOM readers, no `go-containerregistry` | info (agent) | C-070 | – | – |
 | A-240 | Input forms: OCI layout directory and oci-archive; no registry access | info (agent) | C-070 | – | – |
@@ -469,7 +469,7 @@ Logs: [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29
   - (d') **CRA/RED ready:** the SBOM lists every software component with name and version (CRA Annex I Part II (1): commonly used, machine-readable, at least the top-level dependencies; RED DA (EU) 2022/30 / EN 18031 expect a component inventory); recommended: a purl or CPE per component.
   - **Wording for RIG 4.1.4:** see the register SF-114 (`6d53556`): first bullet "The SBOM shall list all software components used in the application, each with its name, its version and its licenses. It shall use one of the following formats; the version of the format is not restricted:"; a new bullet on naming licenses unambiguously; the texts bullet for "every license and license exception"; a RECOMMENDED purl/CPE; the CRA note extended by RED and the provider's legal responsibility (RIG 5.3).
   - **Effect:** re-baseline; REQ-CNT-013/014 and REQ-LIC-002 follow (→ `draft`, R-x); D8 reads SPDX 3, checks name/version/license per component and exception texts; `invalid-sbom` and `missing-license-text` reworked (→ `draft`), new fixtures for the new rules.
-- **PO:** ☐ revised wording ☐ other: …
+- **PO:** ☑ revised wording ("D-1 überarbeitet ok, einarbeiten", 2026-10-29) ☐ other: …
 
 ### R-1 – image fixtures of `oec-infra image` (G-3.9)
 
