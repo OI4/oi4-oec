@@ -251,7 +251,7 @@ SDK for microcontroller-class smart devices without container (ADR-0016), writte
 - Targets: ESP-IDF `esp32` + `esp32s3` supported, C3/C6 best effort; reference hardware: ESP32 dev board + M5Stack Core2/CoreS3. Example firmware generic + M5Stack variant (display/buttons via `M5Unified`, example only) (ADR-0017 amendment C-011).
 - **Exit:** example firmware on the ESP32 reference board and on the M5Stack device (and in QEMU, if feasible) passes D7 `--level 1` against the dev broker (first increment); later increments pass `--level 2` and `--level 3`.
 
-## P5 – Conformance test tool (D7) – exit proposed (C-062 … C-069; PO confirmation REVIEW D-1)
+## P5 – Conformance test tool (D7) ✅ (C-062 … C-069; closed in the C-069 review, D-1 (a): criterion 4 (CI) → P9 CI)
 
 Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of applications and smart devices against the guideline (no platform/broker/container checks – those are D8, ADR-0006/0014). Shares only the D1 JSON Schemas and the spec baseline `oec/spec/` (ADR-0018) with the SDK, no code. Runs on **Windows and macOS** (and Linux for CI) and doubles as the **integration test harness** for SDK, demos and registry.
 
@@ -303,7 +303,9 @@ Why this cut: increment 1 carries all the infrastructure (engine, simulated CUT,
 3. *every catalog item `implemented` or a documented `manual`* – **met**: 55 of 55 tests `implemented`, 4 `manual` entries with reason; 47 `d7-monitor` and 122 `d7-test` REQs covered, 0 uncovered (`catalog/COVERAGE.md`).
 4. *runs in CI on Windows, macOS and Linux runners* – **carried forward to P9** (as the SDK platform matrix, D-1 (a)): the gate runs natively on macOS arm64; `CGO_ENABLED=0` cross builds for windows/linux/darwin × amd64/arm64 succeed (C-069). The container image of the "Distribution" bullet is a release artifact and comes with P9 as well (A-237).
 
-## P5b – Infrastructure compliance tool (D8)
+**Decision (C-069 review, D-1 (a), 2026-10-29):** P5 is closed. Criterion 4 (CI on Windows/macOS/Linux runners) and the D7 container image are carried into P9. Next phase: P5b (C-069 addendum 1).
+
+## P5b – Infrastructure compliance tool (D8) – next (D-1 (a) of the C-069 review; plan and cycle cut in its first cycle, C-070)
 
 Command-line tool (Go, ADR-0014) that checks the **Service Container Compliance (Level 1/2/3)** of application containers and, as far as testable, the **platform requirements** of the RIG (scope confirmed, Q-017). Same conventions as D7: Windows/macOS/Linux, test cases reference REQ ids, profiles `level1..3`, console + JSON + JUnit output, exit codes.
 
@@ -344,6 +346,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 - CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF builds for `esp32` + `esp32s3`), SBOM/license report, security scan.
 - SDK platform matrix carried forward from P4 exit criterion 5 (D-1 (a), C-061 review): `oec` and `oec-ffi` built and tested natively on Linux/macOS/Windows amd64 + arm64 incl. Windows MSVC, ARMv7 Linux best effort.
+- D7 carried forward from P5 exit criterion 4 (D-1 (a), C-069 review): `oec/conformance` gate (incl. the sim fixtures through the proxy with the restart hook) on Windows/macOS/Linux runners, the binaries for windows/linux/darwin × amd64/arm64 and the multi-arch D7 container image (A-237).
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
 - Publication target: private GitHub repositories (working assumption, Q-011). CRA review before any *public* release (Q-011): SBOM, vulnerability handling process, security update policy, support period.
 - Guideline feedback package: all spec findings with proposed text changes for the work group.

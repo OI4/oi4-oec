@@ -187,3 +187,13 @@ Next free ids:
 - REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029, REQ-ACT-025;
 - V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129;
 - ADR-0027, Q-031, A-239; review items from R-1, decisions from D-2.
+
+## Addendum 1 – PO review: D-1 (2026-10-29)
+
+The PO answered "D-1 (a)" (G-3.4 a: phase order).
+
+- **P5 is closed** (ROADMAP P5 heading ✅ and a "Decision" paragraph after the exit assessment; STATUS current phase, next step, open questions and history).
+- **Exit criterion 4** (CI on Windows/macOS/Linux runners) and the D7 container image (A-237) are carried into P9: new bullet "D7 carried forward from P5 exit criterion 4" under the P9 CI pipelines.
+- **Next phase: P5b** (D8 `oec-infra`); the ROADMAP P5b heading says "next". It starts in C-070 with a new agent as decided in the handover above; `prompt.md` is updated to start with the P5b plan and cycle cut (no longer with the D-1 answer). The caveat of D-1 stands: the P5b exit run on the demo and registry images follows with P6/P7; D8 is built and self-tested against purpose-built images first.
+- REVIEW/REVIEW_DE: D-1 moved to "Answered earlier" / "Was aus deinem letzten Review (C-069) geworden ist"; nothing is open for the PO.
+- No code, spec, schema or catalog change; coverage unchanged (442 REQs, 0 gaps). Next free ids unchanged (A-239 …).

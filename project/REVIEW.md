@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-069 (P5 increments 7/8: `list`/`explain`, the report schema, the coverage report and the P5 exit run). **One item to decide: D-1 – close P5 and choose the next phase.** A-229 … A-238 for information, worth a look: A-231, A-235, A-236._
+_Last updated: 2026-10-29, C-069 review: your answer "D-1 (a)" is applied – **P5 is closed**, CI and the D7 container image move to P9, **next phase P5b (D8)**. **Nothing is open for you.** A-229 … A-238 for information, worth a look: A-231, A-235, A-236._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -177,6 +177,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **P5 exit run** against `demo.rs` (level 2, proxy, restart hook, `--peer`, `--announce`): **49 pass, 0 fail, 6 skip, exit 0**, state restored, the report valid against the schema; the demo asked the peer and D7 for their MAM. Cross builds for Windows/Linux/macOS × amd64/arm64 succeed. The SDK was not changed.
   - **P5 exit** (ROADMAP P5 "Exit assessment"): criteria 1–3 met, 4 (CI on Windows/macOS/Linux) with P9 → **D-1**.
   - No new or changed fixture (nothing to review), no SF, no new dependency (the schema uses the validator of `validate`). ADR-0025 amendment C-069; A-229 … A-238 for information.
+- C-069 review: your answer ("D-1 (a)") is applied: **P5 is closed** (ROADMAP P5 heading and "Decision" paragraph, STATUS). Criterion 4 (CI on Windows/macOS/Linux runners) and the D7 container image move to the P9 CI (new P9 bullet). **Next phase: P5b** (D8 `oec-infra`), planned by a new agent in C-070.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
@@ -414,7 +415,6 @@ Logs: [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C
 | A-226 | T7-ADR-01: which requests are judged, per-request checks, skips | info (agent) | C-068 | – | – |
 | A-227 | Sim as a consumer, 3 faults, harness checks, `none` with peer and announce | info (agent) | C-068 | – | – |
 | A-228 | Report: key `announced`, report version 1 | info (agent) | C-068 | – | – |
-| **D-1** | **P5 exit and the next phase** | **decide** | C-069 | (a) close P5, next P5b | ☐ |
 | A-229 | Cut: increments 7 and 8 in one cycle | info (agent) | C-069 | – | – |
 | A-230 | Module root package `conformance` for the report schema and the fixture indexes | info (agent) | C-069 | – | – |
 | A-231 | Report schema: scope, closed objects, validated in the gate | info (agent) | C-069 | – | – |
@@ -428,19 +428,12 @@ Logs: [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C
 
 ## Decisions and review items
 
-### D-1 – P5 exit and the next phase (G-3.4 a: phase order)
-
-- **State:** all P5 increments (1–8) are done (C-062 … C-069). The exit criteria (ROADMAP P5) one by one, with evidence in `log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md`:
-  1. `test` passes against the SDK example app `demo.rs` – **met**: level 2 through the proxy with restart hook, `--peer` and `--announce`, 49 pass, 0 fail, 6 skip (not applicable to the demo), exit 0, state restored. This also closes the former P4 criterion 3 (your D-1 (a) of the C-061 review);
-  2. it fails on purpose-built faulty fixtures; every implemented test has a positive and a negative fixture – **met**: 59 sim and 29 capture fixtures, all reviewed by you, all expected verdicts checked by the gate; since C-069 the gate also checks "a negative and a positive fixture" for all 55 tests. For three tests whose rule is a SHOULD or a heuristic (T7-GET-09, T7-SET-12, T7-MON-10) the negative fixture expects `warn` or `info`, not `fail` – the verdict of the obligation (A-236);
-  3. every catalog item `implemented` or a documented `manual` – **met**: 55 of 55 `implemented`, 4 `manual` entries with reason; 0 uncovered REQs;
-  4. runs in CI on Windows, macOS and Linux runners – **with P9** (as the SDK platform matrix, D-1 (a) of C-061): the gate runs natively on macOS arm64; cross builds for Windows/Linux/macOS × amd64/arm64 succeed. The container image of D7 is a release artifact and also comes with P9 (A-237).
-- **Options:** (a) close P5 (criterion 4 to the P9 CI); next **P5b** – D8 `oec-infra` (container and platform checks). (b) As (a), but next **P4b** – the micro SDK in C for the ESP32 (D9). (c) As (a), but next **P6** – the demos (weather in Rust, logger in C); their exit also needs D8, which would then stay open. (d) Keep P5 open until the CI exists.
-- **Recommendation:** (a). Your C-045 order puts P4b/P5b after P4/P5. P5b comes first because the exits of P6 and P7 need D8 (`level3` container compliance) and D8 reuses the module, catalog (`d8.yaml`, 17 tests planned), verdict model and report of D7 while they are fresh. P4b is independent of both and can follow; the CI belongs to P9 and the publication (your decision).
-- **Note on (a):** the P5b exit ("our demo and registry images pass `level3`") needs container images that do not exist yet (no image in the repo; they come with P6/P7). P5b can build and self-test D8 against purpose-built images (good and faulty); the exit run on the demo and registry images would then follow with P6/P7 – as the D7 run against the demo waited for P4.
-- **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ (d) ☐ other: …
+No open item.
 
 ### Answered earlier
+
+Answered in the C-069 review (2026-10-29) and applied in C-069 addendum 1:
+- D-1 – P5 exit and the next phase: ☑ (a) → P5 closed; criteria 1–3 met, criterion 4 (CI on Windows/macOS/Linux runners) and the D7 container image carried into the P9 CI; next phase **P5b** (D8). The criteria and the evidence are in the C-069 log (P5 exit assessment). Caveat noted: the P5b exit on the demo and registry images follows with P6/P7.
 
 Answered in the C-068 review (2026-10-29) and applied in C-068 addendum 1:
 - R-6 – the changed sim fixture `none` (runs with peer and `--announce`, T7-ADR-01 pass): ☑ accepted → `reviewed`.
@@ -1132,4 +1125,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-070)
 
-1. Apply your answer to D-1 (ROADMAP P5 heading and exit, STATUS); with (a)/(b)/(c) the first cycle of the chosen phase plans it (plan and cycle cut in the ROADMAP, ADRs as needed); in a new session (start prompt in `prompt.md`).
+1. P5b planning (D8 `oec-infra`): plan and cycle cut in ROADMAP P5b, exit criteria made precise (self-test against purpose-built good and faulty images; the run on the demo and registry images with P6/P7), DESIGN §9 and the D8 parts of ADR-0025 checked against the as-built D7; then increment 1 of D8 test-first if the cycle allows; in a new session (start prompt in `prompt.md`).

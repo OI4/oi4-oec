@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, nach C-069 (P5 Inkremente 7/8: `list`/`explain`, Schema des Berichts, Abdeckungsbericht und Abschlusslauf von P5). **Für dich offen: eine Entscheidung – D-1: P5 abschließen und die nächste Phase wählen.** A-229 … A-238 nur zur Info._
+_Stand: 29.10.2026, Review C-069: Deine Antwort „D-1 (a)“ ist eingetragen – **P5 ist abgeschlossen**, die CI und das Container-Image von D7 kommen mit P9, **als Nächstes kommt P5b (D8)**. **Für dich ist nichts offen.** A-229 … A-238 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,28 +24,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – Ist P5 fertig, und womit geht es weiter? (zu entscheiden)
-
-**Worum es geht:** Alle acht Inkremente von P5 (das Prüf-Tool D7 `oec-check`) sind gebaut. Die ROADMAP nennt vier Bedingungen für den Abschluss von P5. Ich habe sie einzeln geprüft (Belege im Log C-069):
-
-| # | Bedingung | Stand |
-|---|---|---|
-| 1 | `test` besteht gegen die Beispiel-App `demo.rs` | **erfüllt**: Level 2, über die Zwischenstation, mit Neustart, zweiter App und angemeldetem D7: 49 bestanden, 0 durchgefallen, 6 übersprungen (passen nicht zur Demo), Exit 0, Stand danach wie vorher. Damit ist auch der offene Punkt 3 aus P4 erledigt (deine Entscheidung D-1 (a) aus C-061). |
-| 2 | Absichtlich fehlerhafte Testfälle fallen durch; jeder Test hat einen guten und einen schlechten Testfall | **erfüllt**: 59 Testfälle gegen die simulierte App und 29 Aufzeichnungen, alle von dir geprüft; das Prüfskript kontrolliert jedes erwartete Ergebnis und seit C-069 auch „je Test ein guter und ein schlechter Testfall“ für alle 55 Tests. Bei drei Tests ist die Regel nur ein „sollte“ oder eine Vermutung (T7-GET-09, T7-SET-12, T7-MON-10): dort ergibt der schlechte Testfall eine **Warnung** bzw. einen **Hinweis**, kein „durchgefallen“ – so streng, wie die Regel ist (A-236). |
-| 3 | Jeder Eintrag im Katalog ist gebaut oder als „nur von Hand prüfbar“ begründet | **erfüllt**: 55 von 55 Tests gebaut, 4 Regeln mit Begründung „von Hand“; keine Regel ohne Prüfung. |
-| 4 | Läuft in einer CI auf Windows, macOS und Linux | **kommt mit P9** (wie beim SDK, deine Entscheidung D-1 (a) aus C-061): Das Prüfskript läuft hier auf dem Mac (arm64); gebaut für Windows, Linux und macOS je mit amd64 und arm64 – alles klappt. Auch das Container-Image von D7 gehört zur Veröffentlichung in P9 (A-237). |
-
-**Möglichkeiten:**
-- **(a)** P5 abschließen (Punkt 4 wandert in die CI von P9). Weiter mit **P5b** – D8 `oec-infra`, das Prüf-Tool für Container und Plattform.
-- **(b)** wie (a), aber weiter mit **P4b** – das Micro-SDK in C für den ESP32 (D9).
-- **(c)** wie (a), aber weiter mit **P6** – die Demos (Wetter in Rust, Logger in C). Deren Abschluss braucht aber auch D8; der bliebe dann offen.
-- **(d)** P5 offen lassen, bis es eine CI gibt.
-
-**Meine Empfehlung: (a).** Nach deiner Reihenfolge aus C-045 kommen P4b und P5b nach P4/P5. P5b zuerst, weil die Demos (P6) und die Registry (P7) am Ende auch D8 bestehen müssen. D8 nutzt dasselbe Go-Modul, denselben Katalog-Aufbau (`d8.yaml`, 17 Tests geplant), dieselbe Bewertung und denselben Bericht wie D7 – das ist jetzt alles frisch. P4b hängt von beidem nicht ab und kann danach kommen. Die CI gehört zur Veröffentlichung (deine Entscheidung) und damit nach P9.
-
-**Gut zu wissen zu (a):** Der Abschluss von P5b verlangt, dass „unsere Demo- und Registry-Images Level 3 bestehen“. Diese Container-Images gibt es noch nicht (sie entstehen in P6/P7). P5b kann D8 aber gegen eigens gebaute Images (gute und fehlerhafte) bauen und selbst testen; der Abschlusslauf gegen die echten Images käme dann mit P6/P7 – so wie der Lauf von D7 gegen die Demo auf P4 gewartet hat.
-
-Antwort z. B.: „D-1 (a)“.
+**Nichts.** Deine Antwort „D-1 (a)“ ist eingetragen, siehe unten „Was aus deinem letzten Review (C-069) geworden ist“.
 
 ### Zur Info: was C-069 gebaut hat
 
@@ -768,7 +747,7 @@ Neu aus C-069 (P5 Inkremente 7/8):
 
 ### Was als Nächstes passiert (C-070)
 
-1. **Deine Antwort auf D-1 eintragen** (ROADMAP, STATUS). Bei (a), (b) oder (c) plant der erste Zyklus die gewählte Phase (Plan und Zuschnitt in der ROADMAP, ggf. ADRs).
+1. **P5b planen** (D8 `oec-infra`): Plan und Zuschnitt in der ROADMAP, die Abschlussbedingungen genauer fassen (Selbsttest gegen eigens gebaute gute und fehlerhafte Images; der Lauf gegen die Demo- und Registry-Images kommt mit P6/P7), den Entwurf von D8 (DESIGN §9, ADR-0025) mit dem fertigen D7 abgleichen; danach, wenn der Zyklus reicht, das erste Inkrement von D8, Test zuerst.
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---
@@ -848,7 +827,35 @@ Neu aus C-069 (P5 Inkremente 7/8):
 
 ---
 
-## Was aus deinem letzten Review (C-061) geworden ist
+## Was aus deinem letzten Review (C-069) geworden ist
+
+Du hast geschrieben: „D-1 (a)“. Daraus wurde Nachtrag 1 zu C-069:
+- **P5 ist abgeschlossen** (ROADMAP: Überschrift von P5 und ein Absatz „Decision“ nach der Bewertung der Abschlussbedingungen; STATUS).
+- **Punkt 4** (CI auf Windows, macOS und Linux) und das **Container-Image von D7** wandern in die **CI von P9** (neuer Punkt bei P9).
+- **Nächste Phase: P5b** (D8 `oec-infra`, das Prüf-Tool für Container und Plattform). Sie beginnt in C-070 mit einem neuen Agenten, der zuerst Plan und Zuschnitt macht. Der Abschlusslauf von D8 gegen die echten Demo- und Registry-Images kommt mit P6/P7.
+
+Zur Erinnerung, worum es ging:
+
+**Worum es geht:** Alle acht Inkremente von P5 (das Prüf-Tool D7 `oec-check`) sind gebaut. Die ROADMAP nennt vier Bedingungen für den Abschluss von P5. Ich habe sie einzeln geprüft (Belege im Log C-069):
+
+| # | Bedingung | Stand |
+|---|---|---|
+| 1 | `test` besteht gegen die Beispiel-App `demo.rs` | **erfüllt**: Level 2, über die Zwischenstation, mit Neustart, zweiter App und angemeldetem D7: 49 bestanden, 0 durchgefallen, 6 übersprungen (passen nicht zur Demo), Exit 0, Stand danach wie vorher. Damit ist auch der offene Punkt 3 aus P4 erledigt (deine Entscheidung D-1 (a) aus C-061). |
+| 2 | Absichtlich fehlerhafte Testfälle fallen durch; jeder Test hat einen guten und einen schlechten Testfall | **erfüllt**: 59 Testfälle gegen die simulierte App und 29 Aufzeichnungen, alle von dir geprüft; das Prüfskript kontrolliert jedes erwartete Ergebnis und seit C-069 auch „je Test ein guter und ein schlechter Testfall“ für alle 55 Tests. Bei drei Tests ist die Regel nur ein „sollte“ oder eine Vermutung (T7-GET-09, T7-SET-12, T7-MON-10): dort ergibt der schlechte Testfall eine **Warnung** bzw. einen **Hinweis**, kein „durchgefallen“ – so streng, wie die Regel ist (A-236). |
+| 3 | Jeder Eintrag im Katalog ist gebaut oder als „nur von Hand prüfbar“ begründet | **erfüllt**: 55 von 55 Tests gebaut, 4 Regeln mit Begründung „von Hand“; keine Regel ohne Prüfung. |
+| 4 | Läuft in einer CI auf Windows, macOS und Linux | **kommt mit P9** (wie beim SDK, deine Entscheidung D-1 (a) aus C-061): Das Prüfskript läuft hier auf dem Mac (arm64); gebaut für Windows, Linux und macOS je mit amd64 und arm64 – alles klappt. Auch das Container-Image von D7 gehört zur Veröffentlichung in P9 (A-237). |
+
+**Möglichkeiten:**
+- **(a)** P5 abschließen (Punkt 4 wandert in die CI von P9). Weiter mit **P5b** – D8 `oec-infra`, das Prüf-Tool für Container und Plattform.
+- **(b)** wie (a), aber weiter mit **P4b** – das Micro-SDK in C für den ESP32 (D9).
+- **(c)** wie (a), aber weiter mit **P6** – die Demos (Wetter in Rust, Logger in C). Deren Abschluss braucht aber auch D8; der bliebe dann offen.
+- **(d)** P5 offen lassen, bis es eine CI gibt.
+
+**Meine Empfehlung: (a).** Nach deiner Reihenfolge aus C-045 kommen P4b und P5b nach P4/P5. P5b zuerst, weil die Demos (P6) und die Registry (P7) am Ende auch D8 bestehen müssen. D8 nutzt dasselbe Go-Modul, denselben Katalog-Aufbau (`d8.yaml`, 17 Tests geplant), dieselbe Bewertung und denselben Bericht wie D7 – das ist jetzt alles frisch. P4b hängt von beidem nicht ab und kann danach kommen. Die CI gehört zur Veröffentlichung (deine Entscheidung) und damit nach P9.
+
+**Gut zu wissen zu (a):** Der Abschluss von P5b verlangt, dass „unsere Demo- und Registry-Images Level 3 bestehen“. Diese Container-Images gibt es noch nicht (sie entstehen in P6/P7). P5b kann D8 aber gegen eigens gebaute Images (gute und fehlerhafte) bauen und selbst testen; der Abschlusslauf gegen die echten Images käme dann mit P6/P7 – so wie der Lauf von D7 gegen die Demo auf P4 gewartet hat.
+
+## Was aus dem Review C-061 geworden ist
 
 Du hast geschrieben: „D-1 (a)“. Daraus wurde Nachtrag 1 zu C-061:
 - **P4 ist abgeschlossen** (ROADMAP: Überschrift von P4 und die Bewertung der Abschlussbedingungen; STATUS).
