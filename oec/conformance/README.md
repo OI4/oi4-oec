@@ -131,7 +131,7 @@ go run ./cmd/oec-infra report-schema > infra-report.schema.json
 
 ## `oec-infra bus`
 
-Probes a running Message Bus like an OEC application (D8, T8-BUS-01 … 03): MQTT 3.1.1 over TLS 1.2 or higher (raw handshakes for TLS 1.2, 1.3 and the refused 1.0/1.1, with the client certificate of the run), no plain-text MQTT listener (`--plain-port`, default 1883), the broker certificate (chain to `ca.pem` / `broker_ca.pem`, not self-signed, host name, validity – SF-115), a PUBLISH of exactly MaxPacketSize (SF-105); the ACL with a second, unprivileged client (Set, Del and Call to the probe AppId of D8 must not arrive, Set/Config should not be readable); the OEC Registry (two probe components announce themselves; Get MAM / Get Health with and without Source; Close message and Will). D8 publishes only on the topics of its own probe AppId `Utility/oi4.org/oec-infra/D8/<random>`.
+Probes a running Message Bus like an OEC application (D8, T8-BUS-01 … 03): MQTT 3.1.1 over TLS 1.2 or higher (raw handshakes for TLS 1.2, 1.3 and the refused 1.0/1.1, with the client certificate of the run), no plain-text MQTT listener (`--plain-port`, default 1883), the broker certificate (chain to `ca.pem` / `broker_ca.pem`, not self-signed, host name, validity – MG 6.2.2, SF-115), a PUBLISH of exactly MaxPacketSize (SF-105); the ACL with a second, unprivileged client (Set, Del and Call to the probe AppId of D8 must not arrive, Set/Config should not be readable); the OEC Registry (two probe components announce themselves; Get MAM / Get Health with and without Source; Close message and Will). D8 publishes only on the topics of its own probe AppId `Utility/oi4.org/oec-infra/D8/<random>`.
 
 ```sh
 G=../dev/generated
@@ -177,7 +177,7 @@ go run ./cmd/oec-infra bus --broker mqtts://localhost:8884 --ca $G/broker/ca.pem
 | `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews, C-065 … C-067 in the C-067 review, C-068 in the C-068 review; new entries start as `draft`, G-3.9) |
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (C-052 reviewed in the C-052 review, C-065 and C-067 in the C-067 review; new entries start as `draft`, G-3.9) |
 | `testdata/images` | generated OCI archives of the image rules + `index.yaml` with expected verdicts (C-070, reviewed in the C-070 review); regenerate with `go test ./internal/image -run TestFixtureFiles -update` |
-| `testdata/bus` | `index.yaml`: expected verdicts of `oec-infra bus` per broker scenario against `mqtttest` and the simulated Registry (C-071, `reviewed` since the C-071 review; new entries start as `draft`, G-3.9) |
+| `testdata/bus` | `index.yaml`: expected verdicts of `oec-infra bus` per broker scenario against `mqtttest` and the simulated Registry (C-071, `reviewed` since the C-071 review, `wrong-host` and `expired` `draft` again after SF-115; new or changed entries are `draft`, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `COVERAGE.md` (generated); `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
 ## Tests

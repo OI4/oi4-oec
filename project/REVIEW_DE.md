@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-071-Review Nachtrag 2: D-1 entschieden („D-1 wie vorgeschlagen“, SF-115 wie vorgeschlagen); Guideline-Text, Re-Baseline und D8 folgen in Nachtrag 3. R-1 hattest du schon akzeptiert._
+_Stand: 29.10.2026, C-071-Review Nachtrag 3: D-1 („D-1 wie vorgeschlagen“, SF-115) ist umgesetzt. Offen ist nur **R-2** (die erweiterte Regel REQ-MQTT-007 und zwei Broker-Szenarien). R-1 hattest du schon akzeptiert._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,23 +24,24 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – SF-115: Muss das Broker-Zertifikat zur Adresse des Brokers passen und noch gültig sein? (bitte entscheiden)
+### R-2 – Die Regel zum Broker-Zertifikat und zwei Szenarien nach deiner Entscheidung zu SF-115 (bitte prüfen)
 
-**Worum geht es?** Jede Anwendung verbindet sich über TLS mit dem Broker. Der Broker zeigt dabei sein **Zertifikat**, eine Art Ausweis. Die Guideline (MG 6.2.2) verlangt auf der **Broker-Seite** nur: TLS 1.2 oder neuer, und das Zertifikat ist von einer Zertifizierungsstelle (CA) unterschrieben, nicht von sich selbst. Auf der **Client-Seite** steht dagegen: Jede Anwendung prüft das Zertifikat gegen die CA **und gegen die Adresse des Brokers** und benutzt keine Verbindung, die sie nicht prüfen kann.
+**Worum geht es?** Du hast D-1 wie vorgeschlagen entschieden: Das Zertifikat des Brokers muss für die Adresse gelten, die die Plattform in `broker.json` ankündigt, und darf nicht abgelaufen (oder noch nicht gültig) sein. Der Satz steht jetzt in der Guideline (MG 6.2.2, Broker-Seite, Commit `b955783`). Daraus folgen zwei Änderungen an Dingen, die du schon abgenommen hattest – darum liegen sie wieder bei dir:
 
-Die Lücke: Ein Broker, dessen Zertifikat zwar von der CA unterschrieben ist, aber für einen **anderen Rechnernamen** ausgestellt oder **abgelaufen** ist, verstößt nach dem Text gegen nichts – obwohl sich dann keine korrekte Anwendung mit ihm verbinden kann. D8 kann so nicht sagen, ob das ein Fehler der Plattform ist oder nur ein Problem des Prüflaufs.
+- **REQ-MQTT-007** („Broker-Zertifikat von einer CA unterschrieben, gültig für die Broker-Adresse“): Die Regel sagt jetzt zusätzlich, dass das Zertifikat für die Adresse aus `broker.json` gilt (ein Rechnername als DNS-Name, eine IP-Adresse als IP-Adresse im Zertifikat) und in seinem Gültigkeitszeitraum liegt. Dazu das Zitat des neuen Guideline-Satzes.
+- **Zwei Broker-Szenarien** von `oec-infra bus`:
+  - `T8-BUS-01/wrong-host`: Das Zertifikat ist von der CA unterschrieben, aber für `broker.invalid` ausgestellt; der Broker heißt `localhost`.
+  - `T8-BUS-01/expired`: Das Zertifikat ist seit einer Minute abgelaufen.
 
-**Mein Vorschlag:** Auf der Broker-Seite von MG 6.2.2 ergänzen: „The broker certificate must be valid for the broker address provided in the Message Bus storage (`Address` of `broker.json`; a host name as DNS name or an IP address as IP address of the Subject Alternative Name) and within its period of validity.“ Also: Das Zertifikat muss für die Adresse gelten, die die Plattform in `broker.json` ankündigt, und darf nicht abgelaufen (oder noch nicht gültig) sein. Die Regel REQ-MQTT-007 wird entsprechend erweitert.
+  Das erwartete Ergebnis bleibt gleich: **durchgefallen** wegen REQ-MQTT-007; MQTT 3.1.1 und `broker.json` (REQ-MQTT-002, REQ-CNT-003) sind „nicht prüfbar“, weil keine Verbindung zustande kommt. Geändert hat sich nur der Begleittext: statt „nach dem Vorschlag zu SF-115“ jetzt „nach MG 6.2.2“. Auch im Bericht von D8 steht jetzt „(MG 6.2.2)“ statt „(SF-115, proposed)“.
 
-**Was passiert danach?** D8 arbeitet schon nach dem Vorschlag (im Bericht steht „SF-115, proposed“). Stimmst du zu, trage ich den Text in die Guideline ein, ziehe die Baseline nach und nehme das „proposed“ heraus. Lehnst du ab, werden falscher Name und Ablauf nur noch **Hinweise**; die zwei Szenarien `wrong-host` und `expired` ändern sich dann und gehen wieder auf `draft`.
-
-**Antwort z. B.:** „D-1 wie vorgeschlagen“.
+**Antwort z. B.:** „R-2 akzeptiert“.
 
 ### Was aus deinem Review C-071 geworden ist (Kurzfassung)
 
 - **R-1:** akzeptiert („R-1 akzeptiert“). Alle Broker-Szenarien von `oec-infra bus` stehen auf `reviewed`.
 - **Korrektur der Anzahl:** In C-071 habe ich „28 Szenarien“ geschrieben (und im Chat „6 gut, 22 mit Fehler“). Richtig sind **29** (6 gut, 23 mit Fehler) – genau die, die in R-1 einzeln aufgezählt waren. Die Zahl ist überall korrigiert; inhaltlich hat sich nichts geändert.
-- **D-1** (SF-115) ist weiter offen.
+- **D-1:** wie vorgeschlagen entschieden („D-1 wie vorgeschlagen“) und umgesetzt: der Satz steht in der Guideline (MG 6.2.2, `b955783`), SF-115 ist erledigt, die Baseline ist nachgezogen (1410 Fundstellen, 444 Regeln, keine Lücke), D8 schreibt „(MG 6.2.2)“ statt „(SF-115, proposed)“. Kein Finding mehr offen. Die geänderte Regel und die zwei Szenarien → R-2.
 
 ### Zur Info: was C-071 gebaut hat
 

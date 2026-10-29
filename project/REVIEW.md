@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-071 review addendum 2: you decided D-1 ("D-1 wie vorgeschlagen", SF-115 as proposed); the guideline text, the re-baseline and D8 follow in addendum 3. R-1 accepted earlier (addendum 1)._
+_Last updated: 2026-10-29, C-071 review addendum 3: D-1 ("D-1 wie vorgeschlagen", SF-115) is applied – MG 6.2.2 `b955783`, SF-115 resolved, re-baseline, D8 without "proposed". Open: **R-2** (REQ-MQTT-007 and the scenarios `T8-BUS-01/wrong-host`, `/expired`). R-1 accepted earlier (addendum 1)._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -200,8 +200,14 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - Two defects found by the live runs and fixed (test first): the TLS probes did not present the client certificate (TLS 1.2 looked refused on 8884); the dev ACL lacked `Reply` (D7 T7-ACT-01/02/04 failed against the demo). Interop and the D7 demo run are green again.
   - No new dependency, no reviewed item changed, `COVERAGE.md` unchanged. `host` is not pulled forward (C-072). A-250 … A-258 for information.
 - C-071 review (log addendum 1): **R-1 accepted** ("R-1 akzeptiert"), the 29 broker scenarios are `reviewed`. The C-071 docs counted 28 scenarios; `index.yaml` and the R-1 list had 29 (6 positive, 23 negative) – the count is corrected everywhere. D-1 is still open.
+- C-071 review addenda 2–3: you decided **D-1 as proposed** ("D-1 wie vorgeschlagen"). Applied:
+  - MG 6.2.2 in `b955783` (broker side: the broker certificate is valid for the broker address of `broker.json` and within its period of validity), **SF-115 resolved** (`db6a477`), no open finding.
+  - Re-baseline on `b955783`: 1410 inventory items (+1), 444 REQs, 0 gaps; schema `2.0.1-dev` @ `b955783` (no content change).
+  - REQ-MQTT-007 extended by the new sentence → `draft`.
+  - D8 T8-BUS-01: same verdicts, the findings cite "(MG 6.2.2)" instead of "(SF-115, proposed)"; the notes of the scenarios `T8-BUS-01/wrong-host` and `/expired` follow → `draft`.
+  - Together → **R-2** (numbered on in the C-071 review because R-1 is answered).
 
-Coverage stays at 0 gaps; schema `2.0.1-dev` @ `a55f475` (re-baseline, no content change).
+Coverage stays at 0 gaps; schema `2.0.1-dev` @ `b955783` (re-baseline, no content change).
 
 Logs: [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
@@ -470,16 +476,18 @@ Logs: [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-
 
 ## Decisions and review items
 
-### D-1 – SF-115: broker certificate for the broker address and within its validity (MG 6.2.2, G-3.4 a)
+### R-2 – REQ-MQTT-007 and two broker scenarios after SF-115 (G-3.9)
 
-- **Where:** register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, SF-115 (`b92dc61`); MG 6.2.2 (Broker side security settings); RIG 4.1.1 (`broker.json` `Address`); REQ-MQTT-007, REQ-MQTT-008; D8 T8-BUS-01.
-- **Problem:** the broker side of MG 6.2.2 requires TLS 1.2 or higher and a certificate signed by a CA, not self-signed (REQ-MQTT-006/007). Only the client side says the certificate is verified against the broker address, and a connection that cannot be verified is not used (REQ-MQTT-008). A broker whose certificate is signed by the CA but issued for another host name, or expired, is not forbidden by the text, although no conforming client can connect to it. D8 cannot say whether that is a fault of the platform or only of the run.
-- **Proposed interpretation:** add to the broker side of MG 6.2.2: "The broker certificate must be valid for the broker address provided in the Message Bus storage (`Address` of `broker.json`; a host name as DNS name or an IP address as IP address of the Subject Alternative Name) and within its period of validity." REQ-MQTT-007 is extended accordingly.
-- **Effect in the workspace:** `oec-infra bus` implements the proposal (findings marked "SF-115, proposed"); the scenarios `T8-BUS-01/wrong-host` and `T8-BUS-01/expired` (fail REQ-MQTT-007) depend on it. Accepted: guideline text, re-baseline, REQ-MQTT-007, the mark "proposed" removed. Rejected: both findings become notes, the two scenarios change and go back to `draft`.
-- **Recommendation:** as proposed.
-- **PO:** ☐ as proposed ☐ other: …
+- **Where:** `oec/spec/requirements/mqtt.yaml` (REQ-MQTT-007, view `oec/spec/requirements/view/mqtt.md`); `oec/conformance/testdata/bus/index.yaml` (`T8-BUS-01/wrong-host`, `T8-BUS-01/expired`); log C-071 addendum 3.
+- **REQ-MQTT-007** "Broker certificate signed by a CA, valid for the broker address" (MUST, platform, d8 + manual): the statement gains "The broker certificate is valid for the broker address of the Message Bus storage (Address of broker.json, REQ-CNT-003; a host name as DNS name, an IP address as IP address of the Subject Alternative Name) and within its period of validity."; second MG 6.2.2 quote (the new sentence), new inventory item MG-6.2.2-252f33e9, ref SF-115, note.
+- **`T8-BUS-01/wrong-host`** (certificate of the CA issued for `broker.invalid`, broker address `localhost`) and **`T8-BUS-01/expired`** (expired a minute ago): verdict unchanged – fail REQ-MQTT-007, REQ-MQTT-002 and REQ-CNT-003 skipped inconclusive. Only the notes changed ("fails (MG 6.2.2, SF-115 decided in the C-071 review)" instead of "fails under the proposed interpretation of SF-115").
+- **Recommendation:** accept.
+- **PO:** ☐ accepted ☐ changes: …
 
 ### Answered earlier
+
+Answered in the C-071 review (2026-10-29) and applied in C-071 addenda 2–3:
+- D-1 – SF-115 (MG 6.2.2: broker certificate for the broker address and within its validity): ☑ as proposed ("D-1 wie vorgeschlagen") → guideline `b955783`, SF-115 resolved (`db6a477`), re-baseline, REQ-MQTT-007 and the scenarios `wrong-host`/`expired` → R-2; D8 findings cite MG 6.2.2 (ADR-0025 amendment C-071 review).
 
 Answered after C-071 (2026-10-29) and applied in C-071 addendum 1:
 - R-1 – 29 broker scenarios of `oec-infra bus` (T8-BUS-01 … 03, `oec/conformance/testdata/bus/index.yaml`): ☑ accepted → `reviewed`.
@@ -1220,5 +1228,5 @@ ADR-0025 amendment C-071; DESIGN §9 "As built (C-071)".
 
 ## Next (C-072)
 
-1. Your answer to D-1 (recorded first, own commit).
+1. Your answer to R-2 (recorded first, own commit).
 2. C-072: P5b increment 3 – `oec-infra host` (T8-HST-01, 02, 04: storage layout and permissions, `broker.json`, platform properties) on generated host roots, opt-in against `oec/dev`; in a new session (start prompt in `prompt.md`).
