@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-068 (P5 increment 6b: the peer simulation, `--announce` and T7-ADR-01). **Open for you: R-6 (the changed sim fixture `none`) and R-7 (3 new sim fixtures of T7-ADR-01), review.** A-191 … A-228 for information, worth a look: A-225, A-226._
+_Last updated: 2026-10-29, C-068 review (you accepted R-6/R-7: `none` and the 3 sim fixtures of T7-ADR-01 are `reviewed`). **Nothing is open for you.** A-191 … A-228 for information, worth a look: A-225, A-226._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -165,9 +165,10 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **Peer simulation** `--peer`: D7 announces a simulated second component, a Level-1 `Utility` `oi4.org/oec-check/Peer/<random>` on its own connection – Will, Birth (MAM, Health), a "present" Health once the component under test is found (A-225), a heartbeat every 30 s, the Close message at the end. It answers Get MAM, Health and Profile; an unknown Source gets Event Status Bad `BadNotFound`.
   - **`--announce`** (your answer (a) to Q-029): D7 itself is announced the same way under its tester IL (`--tester-il` must then be an Oi4Identifier). Without the flag D7 stays unannounced as before.
   - **T7-ADR-01 `implemented`** – all 54 D7 tests are implemented: every request of the component to the peer must use the peer's request topic (its ServiceType REQ-TOP-006, its AppId REQ-TOP-010, the Get/Set/… topic of the addressed component REQ-BUS-002). Without `--peer` the test is an inconclusive skip (exit 4 unless `--allow-skip`), with the peer but without a request a plain skip (A-226).
-  - The demo asks every application it sees for its MAM (SDK directory), so T7-ADR-01 is judged on it. The simulated component now does the same; 3 new sim fixtures (1 conforming variant, 2 faults) → **R-7**; `none` runs with peer and `--announce` and is back to draft → **R-6**. The other reviewed fixtures keep their verdicts.
+  - The demo asks every application it sees for its MAM (SDK directory), so T7-ADR-01 is judged on it. The simulated component now does the same; 3 new sim fixtures (1 conforming variant, 2 faults) → **R-7**; `none` runs with peer and `--announce` and is back to draft → **R-6** (both accepted in the C-068 review). The other reviewed fixtures keep their verdicts.
   - Against `demo.rs` through the proxy with the restart hook, `--peer` and `--announce` (level 2): **49 pass, 0 fail, 6 skip, exit 0**; T7-ADR-01 passes (the demo asked the peer and D7 for their MAM on the right topics, both answered); state restored. The SDK was not changed.
   - ADR-0025 amendment C-068; no SF, no new dependency. A-222 … A-228 for information.
+- C-068 review: you accepted R-6 and R-7; all 59 sim fixtures and all 29 capture fixtures are `reviewed`. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `eb7889c` (re-baseline, no content change).
 
@@ -405,33 +406,16 @@ Logs: [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_
 | A-226 | T7-ADR-01: which requests are judged, per-request checks, skips | info (agent) | C-068 | – | – |
 | A-227 | Sim as a consumer, 3 faults, harness checks, `none` with peer and announce | info (agent) | C-068 | – | – |
 | A-228 | Report: key `announced`, report version 1 | info (agent) | C-068 | – | – |
-| R-6 | Changed sim fixture `none` (runs with peer and `--announce`, T7-ADR-01 pass) (`testdata/sim/index.yaml`) | review (G-3.9) | C-068 | accept | ☐ |
-| R-7 | 3 new sim fixtures of T7-ADR-01 and their expected verdicts (`testdata/sim/index.yaml`) | review (G-3.9) | C-068 | accept | ☐ |
 
 ## Decisions and review items
 
-### R-6 – changed sim fixture `none` (G-3.9)
-
-- **Where:** `oec/conformance/testdata/sim/index.yaml`, entry `none` (was `reviewed`, now `draft`).
-- **What changed:** it runs with `peer: true` and `announce: true`: D7 announces the peer and itself. The simulated component (now a consumer like the SDK directory) sees their Health and asks both for their MAM on the right topics (`Oi4v2/Utility/<peer>/Get/MAM/<peer>`, same for D7); both answer. Expected verdicts: as reviewed, plus **T7-ADR-01 pass** (REQ-BUS-002, REQ-TOP-006, REQ-TOP-010). The harness also checks that the peer and D7 each received requests and answered all of them, and that the peer caused no violation or warning.
-- **Please check:** is `none` still the conforming component, and is T7-ADR-01 pass right for it?
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
-
-### R-7 – sim fixtures of T7-ADR-01 (G-3.9)
-
-- **Where:** `oec/conformance/testdata/sim/index.yaml` – 3 new entries `draft`. The other 55 entries are unchanged; without `--peer` T7-ADR-01 is an inconclusive skip on them (the harness checks this) and is not part of their expected verdicts.
-- **What they are:** as in C-062 … C-067 – `internal/probe/sim_test.go` runs `oec-check test` (level 3) through the proxy against the simulated component with one fault and compares outcome and exact REQ ids. New: the entries run with `peer: true` (D7 announces the peer) and select only T7-ADR-01 (`tests`) to keep the gate short.
-- **Positive (conforming variant):**
-  - `T7-ADR-01/silent` – the component watches nothing and requests nothing of other components: plain skip of REQ-BUS-002, REQ-TOP-006 and REQ-TOP-010 (they bind a requester only; not inconclusive, because the peer was there).
-- **Negative (fault → expected outcome):**
-  - `T7-ADR-01/own-app` (asks the peer for its MAM on its own Get topic with the peer as Source, `Oi4v2/OTConnector/<own AppId>/Get/MAM/<peer>`): T7-ADR-01 fail REQ-BUS-002, REQ-TOP-006, REQ-TOP-010;
-  - `T7-ADR-01/service-type` (the peer's AppId, but its own ServiceType `OTConnector` instead of the peer's `Utility`): T7-ADR-01 fail REQ-BUS-002, REQ-TOP-006 (REQ-TOP-010 passes).
-- **Please check:** is each fault a real violation of the named REQ, and is `silent` rightly a plain skip? In particular: `own-app` counts as a request to the peer because the peer is its Source (A-226) – D7 cannot attribute a request with a wrong AppId and without the peer as Source.
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
+No open item.
 
 ### Answered earlier
+
+Answered in the C-068 review (2026-10-29) and applied in C-068 addendum 1:
+- R-6 – the changed sim fixture `none` (runs with peer and `--announce`, T7-ADR-01 pass): ☑ accepted → `reviewed`.
+- R-7 – 3 sim fixtures of T7-ADR-01 (`own-app`, `service-type`, the conforming variant `silent`): ☑ accepted → `reviewed`.
 
 Answered in the C-067 review (2026-10-29) and applied in the addenda of the C-065, C-066 and C-067 logs:
 - R-1 of C-065 – 5 sim fixtures of `oec-check test` (`testdata/sim/index.yaml`: faults and the conforming variant of T7-ACT-01 … 04): ☑ accepted → `reviewed`.
@@ -1106,5 +1090,4 @@ These are engineering items (G-3.4 b). Remarks are welcome, no answer is needed.
 
 ## Next (C-069)
 
-1. Your review of R-6 and R-7 (C-068).
-2. P5 increments 7/8: `oec-check list`/`explain`, the report schema, the P5 exit run (with `--peer` and `--announce`) and the check of the P5 exit criteria; in a new session (start prompt in `prompt.md`).
+1. P5 increments 7/8: `oec-check list`/`explain`, the report schema, the P5 exit run (with `--peer` and `--announce`) and the check of the P5 exit criteria; in a new session (start prompt in `prompt.md`).

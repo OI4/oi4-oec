@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-068: **P5 Inkrement 6b** – die simulierte zweite App (`--peer`), `--announce` (D7 meldet sich selbst auf dem Bus) und der Test T7-ADR-01 sind fertig; damit sind **alle 54 Tests von D7** gebaut. **Für dich offen: R-6 und R-7 (4 Testfälle prüfen).** A-191 … A-228 nur zur Info._
+_Stand: 29.10.2026, Review C-068: Deine Antwort „R-6 und R-7 akzeptiert“ ist eingetragen. In C-068 sind die simulierte zweite App (`--peer`), `--announce` und der Test T7-ADR-01 fertig geworden; damit sind **alle 54 Tests von D7** gebaut. **Für dich ist nichts offen.** A-191 … A-228 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,36 +24,11 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### R-6 – der geänderte Testfall `none` (bitte prüfen)
+**Nichts.** Deine Antwort „R-6 und R-7 akzeptiert“ ist eingetragen:
+- R-6 (C-068): der geänderte Testfall `none` (läuft mit der zweiten App und `--announce`, T7-ADR-01 besteht);
+- R-7 (C-068): die 3 neuen Testfälle zu T7-ADR-01 (`own-app`, `service-type`, `silent`).
 
-**Wo:** `oec/conformance/testdata/sim/index.yaml`, Eintrag `none` (war `reviewed`, jetzt wieder `draft`).
-
-**Worum es geht:** `none` ist die simulierte App ohne Fehler; bei ihr muss alles bestehen. Neu läuft sie mit der simulierten zweiten App (`peer: true`) und mit `--announce` (`announce: true`): D7 meldet die zweite App und sich selbst auf dem Bus an. Die simulierte App sieht deren Zustandsmeldung und fragt beide nach ihrem Typenschild (MAM) – auf dem richtigen Topic, also dem der jeweils anderen App. Beide antworten.
-
-**Was sich am Ergebnis ändert:** Alles bleibt wie von dir geprüft; dazu kommt **T7-ADR-01 bestanden** (REQ-BUS-002, REQ-TOP-006, REQ-TOP-010). Der Selbsttest prüft außerdem, dass die zweite App und D7 Anfragen bekommen und alle beantwortet haben und dass die zweite App selbst keinen Befund auslöst.
-
-**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-6 akzeptiert“.
-
-### R-7 – 3 neue Testfälle zu T7-ADR-01 (bitte prüfen)
-
-**Wo:** `oec/conformance/testdata/sim/index.yaml`, die 3 Einträge `T7-ADR-01/…` mit `status: draft`.
-
-**Worum es geht:** T7-ADR-01 prüft: Wenn die App eine **andere** App etwas fragt, muss die Anfrage auf dem Topic der gefragten App liegen – mit deren Dienst-Typ (ServiceType, REQ-TOP-006) und deren Kennung (AppId, REQ-TOP-010), also auf deren Get-/Set-/…-Topic (REQ-BUS-002). Damit es überhaupt eine andere App gibt, meldet D7 eine simulierte zweite App an (`peer: true`). Die simulierte App fragt – wie das SDK – jede neue App nach ihrem Typenschild. Die drei Einträge laufen nur T7-ADR-01, damit der Selbsttest kurz bleibt. Die anderen 55 Einträge bleiben unverändert; ohne zweite App ist T7-ADR-01 bei ihnen „nicht entscheidbar“ und gehört nicht zu ihrem erwarteten Ergebnis.
-
-**Ohne Fehler (muss bestehen bzw. übersprungen werden):**
-- `T7-ADR-01/silent` – die App fragt niemanden etwas. Die drei Regeln gelten nur für eine App, die fragt; der Test wird deshalb einfach übersprungen (nicht „nicht entscheidbar“, denn die zweite App war ja da).
-
-**Mit Fehler (muss durchfallen):**
-- `T7-ADR-01/own-app` – die App fragt die zweite App nach ihrem Typenschild, schickt die Frage aber auf ihr **eigenes** Topic und nennt die zweite App nur als Quelle (`Oi4v2/OTConnector/<eigene AppId>/Get/MAM/<zweite App>`). Dienst-Typ und Kennung sind die falschen: REQ-BUS-002, REQ-TOP-006, REQ-TOP-010.
-- `T7-ADR-01/service-type` – die Kennung der zweiten App stimmt, aber der Dienst-Typ ist der eigene (`OTConnector`) statt `Utility`: REQ-BUS-002, REQ-TOP-006 (REQ-TOP-010 besteht).
-
-**Besonders anschauen:** `own-app` zählt als Frage an die zweite App, weil sie dort als Quelle steht (A-226). Eine Frage mit falscher Kennung **und** ohne die zweite App als Quelle kann D7 keiner App zuordnen.
-
-**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-6 und R-7 akzeptiert“.
-
-### Zuletzt beantwortet (Review C-067)
-
-Deine Antwort „R-1, R-2, R-3, R-4 und R-5 akzeptiert“ ist eingetragen: die Testfälle aus C-065 … C-067 sind `reviewed`. Von den jetzt 59 Testfällen gegen die simulierte App sind 55 geprüft (offen nur R-6/R-7), alle 29 Aufzeichnungen sind geprüft.
+Damit sind alle 59 Testfälle gegen die simulierte App (`oec/conformance/testdata/sim/index.yaml`) und alle 29 Aufzeichnungen (`oec/conformance/testdata/captures/index.yaml`) geprüft.
 
 ### Zur Info: was C-068 gebaut hat
 
@@ -744,8 +719,7 @@ Neu aus C-068 (P5 Inkrement 6b):
 
 ### Was als Nächstes passiert (C-069)
 
-1. **Dein Review** von R-6 und R-7.
-2. **P5 Inkremente 7/8:** `oec-check list`/`explain` (Katalog und Regeln nachschlagen), das Schema des Berichts, der Abschlusslauf von P5 gegen die Demo (mit `--peer` und `--announce`) und die Prüfung der Abschluss-Kriterien von P5.
+1. **P5 Inkremente 7/8:** `oec-check list`/`explain` (Katalog und Regeln nachschlagen), das Schema des Berichts, der Abschlusslauf von P5 gegen die Demo (mit `--peer` und `--announce`) und die Prüfung der Abschluss-Kriterien von P5.
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

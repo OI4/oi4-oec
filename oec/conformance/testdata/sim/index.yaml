@@ -58,7 +58,8 @@
 # added or changed in C-063 were reviewed in the C-063 review (2026-10-28,
 # R-1); the entries added or changed in C-064 were reviewed in the C-064
 # review (2026-10-28, R-1); the entries added or changed in C-065 … C-067
-# were reviewed in the C-067 review (2026-10-29, R-1, R-3, R-4).
+# were reviewed in the C-067 review (2026-10-29, R-1, R-3, R-4); the entries
+# added or changed in C-068 in the C-068 review (2026-10-29, R-6, R-7).
 #
 # This index is test data with verdict (G-3.9): it states the expected
 # outcome of the tests and goes to the PO for review.
@@ -73,7 +74,7 @@
 # status: draft | reviewed
 fixtures:
   - fault: none
-    status: draft
+    status: reviewed
     positive: true
     peer: true
     announce: true
@@ -628,7 +629,7 @@ fixtures:
       the object before the Set (REQ-RES-REFDES-002). D7 restores the
       original object afterwards.
   - fault: T7-ADR-01/own-app
-    status: draft
+    status: reviewed
     peer: true
     tests: [T7-ADR-01]
     expect:
@@ -643,7 +644,7 @@ fixtures:
       of the addressed component (REQ-BUS-002). The CUT answers its own
       request with Event Status Bad (BadNotFound).
   - fault: T7-ADR-01/service-type
-    status: draft
+    status: reviewed
     peer: true
     tests: [T7-ADR-01]
     expect:
@@ -655,7 +656,7 @@ fixtures:
       Get topic of the peer (REQ-BUS-002). The AppId is right
       (REQ-TOP-010 passes). The peer does not see the request.
   - fault: T7-ADR-01/silent
-    status: draft
+    status: reviewed
     positive: true
     peer: true
     tests: [T7-ADR-01]

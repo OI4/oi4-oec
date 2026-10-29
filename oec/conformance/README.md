@@ -115,7 +115,7 @@ go run ./cmd/oec-check test … --proxy-listen 127.0.0.1:18883 --proxy-ca /tmp/x
 | `internal/verdict` | verdict model: severity from REQ keyword × level, test aggregation, exit code |
 | `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` and `test` |
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
-| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews, C-065 … C-067 in the C-067 review; C-068: 3 new entries and the changed `none` are `draft`; new entries start as `draft`, G-3.9) |
+| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews, C-065 … C-067 in the C-067 review, C-068 in the C-068 review; new entries start as `draft`, G-3.9) |
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (C-052 reviewed in the C-052 review, C-065 and C-067 in the C-067 review; new entries start as `draft`, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 

@@ -223,3 +223,11 @@ Next free ids:
 - REQ-CMP-048, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029, REQ-ACT-025;
 - V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129;
 - ADR-0027, Q-031, A-229; review items from R-8.
+
+## Addendum 1 – PO review: R-6/R-7 (2026-10-29)
+
+The PO answered "R-6 und R-7 akzeptiert" (G-3.9).
+
+- `oec/conformance/testdata/sim/index.yaml`: `none` (R-6) and `T7-ADR-01/own-app`, `/service-type`, `/silent` (R-7) → `reviewed`, header note updated; all 59 sim fixtures are `reviewed` (29 of 29 capture fixtures unchanged).
+- DESIGN.md §10, README, ROADMAP table (row C-068) follow. REVIEW/REVIEW_DE: R-6/R-7 moved to "Answered earlier"; nothing is open for the PO. STATUS: last updated, next step, open questions (no fixture drafts), D7 row, history row "C-068 review".
+- No code, spec, schema or catalog change. Next free ids unchanged (A-229 …; review items start again at R-1). `prompt.md` for C-069 no longer lists R-6/R-7 as open.
