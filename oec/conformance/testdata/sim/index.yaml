@@ -77,7 +77,10 @@ fixtures:
       C-064: the write tests T7-SET-01 … 09, 11, 12 run against it and pass
       with every requirement judged (none skipped); afterwards the state of
       the CUT equals the start state (restore check of D7 and of the
-      simulation).
+      simulation). Changed in C-067: with the restart hook T7-LIFE-04
+      (Close message before the DISCONNECT) and T7-SET-10 (the changed
+      ReferenceDesignation survives the restart) pass with every
+      requirement judged.
   - fault: T7-GET-01/reply-to
     status: reviewed
     expect:

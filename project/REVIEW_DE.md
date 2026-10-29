@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 28.10.2026, C-066: **P5 Inkrement 5** – D7 als Zwischenstation (Proxy) und die Tests zum Verbindungsaufbau und Lebenszyklus (T7-CON-01 … 04, T7-LIFE-01 … 03) sind fertig. **Für dich offen: R-1 (5 Testfälle) und R-2 (6 Aufzeichnungen) aus C-065 und R-3 (16 Testfälle gegen die simulierte App) aus C-066, bitte prüfen.** A-191 … A-214 nur zur Info._
+_Stand: 29.10.2026, C-067: **P5 Inkrement 6a** – Neustart der App auf Kommando (T7-LIFE-04, T7-SET-10) und die passive Regel T7-MON-14 (schickt die App so, wie ihre PublicationList es sagt) sind fertig. **Für dich offen: R-1 (5 Testfälle) und R-2 (6 Aufzeichnungen) aus C-065, R-3 (16 Testfälle) aus C-066, R-4 (4 Testfälle) und R-5 (6 Aufzeichnungen) aus C-067, bitte prüfen.** A-191 … A-221 nur zur Info._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -105,6 +105,77 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 **Die bisherigen 31 geprüften Testfälle** bleiben unverändert und `reviewed`. Sie laufen jetzt auch über D7; die Verbindungs-Tests bestehen dort, weil keiner ihrer Fehler die Verbindung betrifft.
 
 **Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-1, R-2 und R-3 akzeptiert“.
+
+### R-4 – 4 Testfälle zum Neustart (bitte prüfen)
+
+**Wo:** `oec/conformance/testdata/sim/index.yaml`, die 4 neuen Einträge `T7-LIFE-04/…` und `T7-SET-10/…` mit `status: draft`.
+
+**Worum es geht:** wie bei R-1 und R-3 – die simulierte App läuft mit genau einem eingebauten Fehler (über D7 als Zwischenstation), `oec-check test` (Level 3) muss das eingetragene Ergebnis liefern. Neu: D7 startet die App einmal neu, über ein Kommando, das der Tester angibt. Dabei prüft D7 zwei Dinge:
+- **T7-LIFE-04:** Bevor eine App sich geordnet abmeldet, schickt sie eine **Abschiedsmeldung** (Close message): ihre Zustandsmeldung „normal“ (`NORMAL_0`/0) auf ihrem eigenen Zustands-Topic, mit derselben Datensatz-Nummer wie sonst.
+- **T7-SET-10:** D7 ändert vor dem Neustart die **ReferenceDesignation** der App (ihre Kennzeichnung in der Anlage). Nach dem Neustart muss die Änderung noch da sein. Danach stellt D7 den alten Wert wieder her.
+
+Du prüfst: **Ist der Fehler wirklich ein Verstoß gegen die genannte Regel, und ist der Fall ohne Fehler zu Recht kein Verstoß?**
+
+**Ohne Fehler (darf nicht durchfallen):**
+- `T7-LIFE-04/abort` – der Neustart reißt die Verbindung ohne Abmeldung ab, der Broker verschickt den letzten Willen. Das ist keine geordnete Abmeldung, also gilt die Regel zur Abschiedsmeldung nicht. D7 kann nicht wissen, ob das Kommando des Testers oder die App schuld ist, und meldet „nicht entscheidbar“ statt „durchgefallen“.
+
+**Mit Fehler (muss durchfallen):**
+- `T7-LIFE-04/no-close` – die App meldet sich geordnet ab, schickt aber vorher keine Abschiedsmeldung (REQ-LIFE-005, über REQ-CMP-046). Nebenfolge: T7-MON-10 sieht eine neue Birth ohne Wille oder Abschied dazwischen (nur Hinweis, REQ-IL-012).
+- `T7-LIFE-04/writer-id` – die Abschiedsmeldung trägt die Datensatz-Nummer 3999 statt der Nummer der normalen Zustandsmeldung (REQ-LIFE-007). Auch T7-MON-08 sieht die zwei Nummern für denselben Datensatz (REQ-MSG-021).
+- `T7-SET-10/not-persisted` – die App bestätigt die geänderte ReferenceDesignation, hat sie nach dem Neustart aber vergessen (REQ-RES-REFDES-002).
+
+**Geändert (noch aus R-3, schon `draft`):**
+- `none` besteht jetzt zusätzlich T7-LIFE-04 und T7-SET-10.
+- `T7-LIFE-02/no-birth` und `/health-first` lassen jetzt nur T7-LIFE-01 … 03 laufen statt aller Lebenszyklus-Tests. Sonst würde die passive Prüfung das Neuverbinden nach dem Neustart bewerten statt nach dem Abbruch. Ihre Ergebnisse bleiben gleich.
+
+**Besonders anschauen:** `abort` („nicht entscheidbar“ statt „durchgefallen“) und die Nebenfolgen bei `no-close` und `writer-id`.
+
+**Die bisherigen 31 geprüften Testfälle** bleiben `reviewed`. Der Neustart läuft jetzt auch bei ihnen; T7-LIFE-04 und T7-SET-10 bestehen dort, weil keiner ihrer Fehler den Neustart betrifft.
+
+**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-4 akzeptiert“.
+
+### R-5 – 6 Aufzeichnungen zu T7-MON-14 (bitte prüfen)
+
+**Wo:** `oec/conformance/testdata/captures/index.yaml`, die 5 neuen Einträge `publist-…` und `lifecycle-pass`, alle mit `status: draft`, dazu die Aufzeichnungen (`.jsonl`).
+
+**Worum es geht:** wie bei R-2 – eine kleine, aus geprüften Beispielnachrichten gebaute Szene; bewertet wird App A, B stellt Fragen. Die neue Regel T7-MON-14 vergleicht während der ganzen Beobachtung, was A schickt, mit A's PublicationList:
+- **Mode:** über welche Topics ein Datensatz geschickt werden darf, und ob nur auf Anfrage (`ON_REQUEST_1`).
+- **Interval:** wie oft er mindestens kommen muss (plus 5 s Toleranz).
+- **Precisions:** ab welcher Änderung eines Werts neu geschickt werden soll.
+- Zeigt die Antwort auf eine Anfrage einen geänderten Wert, muss A diese Änderung auch von sich aus schicken.
+
+Du prüfst: **Ist die Szene wirklich ein Verstoß gegen die genannte Regel, und sind die Szenen ohne Fehler wirklich erlaubt?**
+
+**Ohne Fehler (muss bestehen):**
+- `publist-pass` – A hat vier Einträge (Typenschild und Zustand, Messdaten `oee` alle 2 s, Messdaten `temp` bei Änderungen ab 0,5, Messdaten `batch` nur auf Anfrage) und hält sich 32 s lang an alle.
+
+**Geändert:** `lifecycle-pass` (war `reviewed`) – A fragt jetzt B nach seiner PublicationList, und B antwortet. Ohne diese Liste kann T7-MON-14 B nicht beurteilen, und der Fall wäre nicht mehr „bestanden“, sondern „nicht entscheidbar“. Alle anderen Ergebnisse bleiben gleich. Deshalb wieder `draft`.
+
+**Mit Fehler (muss durchfallen):**
+- `publist-mode` – `oee` darf laut Mode nur über die Filter-Form geschickt werden, kommt aber über das Topic mit dem Gerät (REQ-RES-PUBLIST-011); `batch` ist „nur auf Anfrage“, kommt aber ungefragt (REQ-RES-PUBLIST-008).
+- `publist-interval` – `oee` soll alle 2 s kommen, bleibt aber 8 s aus (REQ-RES-PUBLIST-013, -014).
+- `publist-precision` – `temp` soll erst ab einer Änderung von 0,5 neu kommen, kommt aber schon bei 0,1 (REQ-RES-PUBLIST-015, „sollte“: Warnung).
+- `publist-change` – die Antwort auf eine Anfrage zeigt bei `temp` 22 statt der zuletzt geschickten 20; A schickt die Änderung aber nicht von sich aus (REQ-RES-PUBLIST-013, REQ-MQTT-019).
+
+**Besonders anschauen:**
+- `publist-mode`: Ich lese „der Mode erlaubt eine Form“ als „jede Veröffentlichung muss eine erlaubte Form benutzen“ (A-220).
+- `publist-change`: eine Änderung, die man in einer Antwort sieht, muss auch ungefragt kommen.
+
+**Wenn du zustimmst:** Status `reviewed`. Antwort z. B.: „R-4 und R-5 akzeptiert“.
+
+### Zur Info: was C-067 gebaut hat
+
+- **Neustart auf Kommando:** Der Tester gibt D7 ein Kommando, das die App geordnet beendet und wieder startet (`--restart-cmd`, oder getrennt `--stop-cmd` und `--start-cmd`; Wartezeit `--restart-wait`, Standard 2 min). D7 startet selbst keine Programme oder Container, weil es nicht wissen kann, wie die App betrieben wird (A-216). Ohne Kommando werden die beiden Neustart-Tests übersprungen, der Lauf ist dann „nicht entscheidbar“ (Exit 4).
+- **Drei neue Tests:** T7-LIFE-04 (Abschiedsmeldung), T7-SET-10 (ReferenceDesignation übersteht den Neustart) und T7-MON-14 (PublicationList). Damit sind **alle 19 passiven Regeln** fertig.
+- **Zuschnitt (A-215):** Inkrement 6 ist geteilt. Die simulierte zweite App, `--announce` (Q-029) und T7-ADR-01 kommen in C-068; `list`/`explain`, das Schema des Berichts und der Abschlusslauf von P5 in C-069.
+- **Gefunden und behoben** (Test zuerst): nur im Selbsttest – die Anfrage nach der PublicationList in einer Aufzeichnung hatte keine Klassen-Kennung, die sie braucht. D7 und SDK waren in Ordnung.
+- **Lauf gegen die Beispiel-App `demo.rs`** über die Zwischenstation, mit Neustart (Level 2): **48 bestanden, 0 durchgefallen, 6 übersprungen, Exit 0.**
+  - Die Demo schickt beim Beenden ihre Abschiedsmeldung und meldet sich ab; nach dem Neustart kam sie mit Birth zurück (T7-LIFE-04 bestanden).
+  - T7-MON-14 bestanden; T7-SET-10 übersprungen, weil die Demo keine ReferenceDesignation hat.
+  - 146 Anfragen, 143 beantwortet (die 3 anderen sind wieder die absichtlich unsinnigen von T7-ACT-03). Der Stand der App war danach wieder derselbe. Am SDK musste nichts geändert werden.
+- Kein Finding, keine neue Bibliothek.
+
+Die Technik-Entscheidungen A-215 … A-221 sind nur zur Info (unten). Einen Blick wert: **A-215** (Zuschnitt), **A-216** (Neustart-Kommando), **A-218** (was als Abschiedsmeldung zählt), **A-220** (was T7-MON-14 prüft und was nicht).
 
 ### Zur Info: was C-066 gebaut hat
 
@@ -262,7 +333,7 @@ Aus C-052: Deine Zustimmung zu D-1 (SF-106), R-1 (Testdaten) und R-2 (REQ-TOP-01
 
 Bei einem neuen Agenten schreibe ich den Start-Prompt gleich in `prompt.md`. Diese Datei committe ich nie. Für C-048 habe ich mich für einen **neuen Agenten** entschieden, weil mein Kontext mehrfach zusammengefasst wurde und C-048 in einem neuen Crate arbeitet. `prompt.md` ist schon gefüllt.
 
-Logs: [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 inkl. Nachtrag 1 bis 3](log/2026-10-26_C-046_p4-start.md).
 
 ### Begriffe aus C-061
 
@@ -743,10 +814,21 @@ Neu aus C-066 (P5 Inkrement 5):
 
 ---
 
-### Was als Nächstes passiert (C-067)
+Neu aus C-067 (P5 Inkrement 6a):
+- **A-215 (neu) – Zuschnitt:** Inkrement 6 ist geteilt. C-067: Neustart, T7-LIFE-04, T7-SET-10, T7-MON-14. C-068: die simulierte zweite App, `--announce` (Q-029 (a)) und T7-ADR-01 – eine zweite App mit eigenem Lebenszyklus ist neue Technik wie die Zwischenstation. C-069: `list`/`explain`, Schema des Berichts, Abschlusslauf von P5. Die ROADMAP-Tabelle ist angepasst.
+- **A-216 (neu) – Neustart-Kommando:** `--restart-cmd`, oder `--stop-cmd` und `--start-cmd`; ausgeführt über die Shell (`sh -c`, unter Windows `cmd /C`). Ein Start im Hintergrund muss seine Ausgabe umleiten, sonst wartet D7 bis zu 10 s darauf. `--restart-wait` (Standard 2 min) begrenzt das Warten auf die App. D7 beendet selbst keine Programme oder Container.
+- **A-217 (neu) – Wann der Neustart läuft:** im Schreib-Fenster, nach den anderen Schreib-Tests und vor dem Vergleich vorher/nachher. T7-SET-10 ändert, das Kommando läuft, D7 wartet auf die neue Birth (über die Zwischenstation auch auf die neue Verbindung und ihr erstes Abonnement) und eine Antwort auf „Zustand?“, dann wird bewertet und T7-SET-10 stellt den alten Wert wieder her. Der Vergleich vorher/nachher deckt damit auch den Neustart ab.
+- **A-218 (neu) – Was als Abschiedsmeldung zählt:** die letzte Zustandsmeldung der App (keine Antwort) nach dem Start des Kommandos und vor der Abmeldung (über die Zwischenstation) bzw. vor der neuen Birth (direkt am Bus). Geprüft: ob sie kommt, ob sie auf dem Zustands-Topic der App kommt, ob sie „normal“ (`NORMAL_0`/0) ist und die Datensatz-Nummer aus der normalen Zustandsmeldung trägt. Nachrichten nach der Abschiedsmeldung sind nur ein Hinweis. „Nicht entscheidbar“: kein Kommando, die Verbindung endet nicht, keine Abmeldung, der letzte Wille statt Abmeldung, keine neue Birth.
+- **A-219 (neu) – ReferenceDesignation:** D7 hängt „D7“ an Value und Local des ersten Teils der Kennzeichnung der App. Hat die App keine ReferenceDesignation oder lehnt sie die Änderung ab, wird T7-SET-10 einfach übersprungen: die Regel gilt nur, wenn die App das Ändern anbietet.
+- **A-220 (neu) – Was T7-MON-14 prüft:** die Einträge der zuletzt gesehenen PublicationList der App (ohne Mode gilt „nur auf Anfrage“). Ändert jemand die Liste, gilt bis zur nächsten veröffentlichten Liste nichts; kurz (Toleranz) nach einer Änderung oder Verbindung wird nichts bewertet; Birth, Wille und Abschied nie. Geprüft: ungefragt nur, wenn der Mode es erlaubt, und nur über erlaubte Topic-Formen; der Abstand höchstens Interval plus Toleranz; bei Interval 0 nicht schon bei kleineren Änderungen als die Precision („sollte“); eine in einer Antwort sichtbare Änderung muss auch ungefragt kommen. Nicht geprüft: `OFF_0` (das macht T7-SET-08), Abstände bei Ereignissen, ob jede erlaubte Form auch benutzt wird, Antworten in einer anderen Sprache. Schickt eine App, ohne dass ihre Liste bekannt ist, ist das „nicht entscheidbar“ (`test` fragt die Liste ab). Kein Finding nötig.
+- **A-221 (neu) – Selbsttest:** Der Neustart läuft bei allen Testfällen der simulierten App; `T7-LIFE-02/no-birth` und `/health-first` wählen nur T7-LIFE-01 … 03; `lifecycle-pass` bekommt die PublicationList von B (wieder `draft`); die Anfrage nach der PublicationList bekommt im Selbsttest ihre Klassen-Kennung.
 
-1. **Dein Review** von R-1, R-2 (C-065) und R-3 (C-066).
-2. **P5 Inkrement 6:** ein Neustart der App auf Kommando (T7-SET-10: die ReferenceDesignation ist nach einem Neustart noch da; T7-LIFE-04: Abschiedsmeldung vor dem geordneten Trennen), eine simulierte zweite App (T7-ADR-01: Anfragen der App sind richtig adressiert), `--announce` (D7 meldet sich selbst auf dem Bus, Q-029) und T7-MON-14 (so oft und so genau wie in der PublicationList).
+---
+
+### Was als Nächstes passiert (C-068)
+
+1. **Dein Review** von R-1, R-2 (C-065), R-3 (C-066), R-4 und R-5 (C-067).
+2. **P5 Inkrement 6b:** eine simulierte zweite App (T7-ADR-01: Anfragen der App sind richtig adressiert) und `--announce` (D7 meldet sich selbst auf dem Bus, Q-029 (a)).
    - Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---

@@ -1,6 +1,6 @@
 # `oec/conformance/` – D7/D8 compliance CLIs
 
-> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062), every `Get` test and T7-ADR-02/03 (C-063, amendment C-063), the write tests T7-SET-01 … 09, 11, 12 with restore (C-064, amendment C-064), the Action tests T7-ACT-01 … 04 and the monitor rules T7-MON-09, 13, 15, 16, 17 (18 of 19, C-065, amendment C-065), the proxy attachment with T7-CON-01 … 04 and T7-LIFE-01 … 03 (C-066, amendment C-066).** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
+> **State: D7 `validate` (C-040); test catalog and architecture design (C-044, [`DESIGN.md`](DESIGN.md), ADR-0025); `monitor` live and `--replay` with 13 of 19 monitor tests (C-052, ADR-0025 amendment C-052); `test` with the bus attachment and T7-GET-01/02/05/09 (C-062, ADR-0025 amendment C-062), every `Get` test and T7-ADR-02/03 (C-063, amendment C-063), the write tests T7-SET-01 … 09, 11, 12 with restore (C-064, amendment C-064), the Action tests T7-ACT-01 … 04 and the monitor rules T7-MON-09, 13, 15, 16, 17 (18 of 19, C-065, amendment C-065), the proxy attachment with T7-CON-01 … 04 and T7-LIFE-01 … 03 (C-066, amendment C-066), the restart hook with T7-LIFE-04 and T7-SET-10 and the monitor rule T7-MON-14 (19 of 19, C-067, amendment C-067).** One Go module (ADR-0013/0014) for the application and messaging compliance CLI **`oec-check`** (D7) and, from P5b, the infrastructure compliance CLI `oec-infra` (D8). It depends only on [`../spec/`](../spec/) (data files via `spec.FS`) and [`../schema/`](../schema/) (entry schemas via `schema.FS`), never on `sdk/` or on the internals of `spec/tools` (ADR-0006/0018/0019 §5).
 
 ## `oec-check validate`
 
@@ -29,7 +29,7 @@ Exit codes: `0` every message is valid (warnings allowed), `1` at least one mess
 
 ## `oec-check monitor`
 
-Observes the `Oi4v2/#` namespace passively (DESIGN.md §3.2) – live over MQTT 3.1.1 with TLS 1.2/1.3, or offline from a capture – and judges every message with the four layers of `validate` plus the stateful monitor rules of [`catalog/d7.yaml`](catalog/d7.yaml) (`T7-MON-01 … 13, 15 … 19`: origin, Birth/Will/Close order, Birth = MAM, Sources, heartbeat, Call/Response correlation, DataSetClassId per structure, Data/Event support, republication after a change, RevisionCounter, mandatory Config objects in a Set, MaxPacketSize, Debug before Set, …; T7-MON-14 follows in C-066).
+Observes the `Oi4v2/#` namespace passively (DESIGN.md §3.2) – live over MQTT 3.1.1 with TLS 1.2/1.3, or offline from a capture – and judges every message with the four layers of `validate` plus the stateful monitor rules of [`catalog/d7.yaml`](catalog/d7.yaml) (`T7-MON-01 … 19`: origin, Birth/Will/Close order, Birth = MAM, Sources, heartbeat, Call/Response correlation, DataSetClassId per structure, Data/Event support, republication after a change, RevisionCounter, mandatory Config objects in a Set, MaxPacketSize, Debug before Set, the publication rules of the PublicationList (Mode, Interval, Precisions; since C-067), …).
 
 ```sh
 # live against the dev broker of oec/dev, with the container storage of a sample root
@@ -51,7 +51,7 @@ Exit codes: `0` no failure, `1` at least one `fail`, `2` usage error, `3` intern
 
 ## `oec-check test`
 
-Tests one running component (CUT) actively (DESIGN.md §3.3): D7 sends `Get`, `Set` and `Del` requests as the not-announced tester `Utility/oi4.org/oec-check/D7/<random>` and judges the answers; the monitor rules run on the same subscription. Implemented: T7-GET-01 (Get MAM/Health with `ReplyTo`, all Sources), T7-GET-02 (Profile lists exactly the served resources of the level), T7-GET-05 (empty list, unknown Source → Event Status Bad), T7-GET-09 (unknown keys ignored); since C-063 also T7-GET-03 (every resource with and without Source and Filter, PublicationList entries, Data ⇒ Metadata), T7-GET-04 (every represented entity fulfills the level), T7-GET-06 (pagination on request; by size passively, T7-MON-18), T7-GET-07 (Query of ReferenceDesignation), T7-GET-08 (Locale), T7-ADR-02 (no answer in the namespace `Oi4`) and T7-ADR-03 (exact Identification Links); since C-064 the write tests T7-SET-01 … 09, 11, 12 (`Set`/`Del` ⇒ Status event with `ReplyTo` and publication; Config, Data, Metadata, PublicationList, ReferenceDesignation, SubscriptionList, log level); since C-065 the Action tests T7-ACT-01 … 04 (`Call NewDataSetWriterId` ⇒ one final `ua-action-response` on the ResponseAddress with CorrelationData, new ids while reserved (Ttl), no answer to unaddressable or undecodable requests, BadNotFound for an unknown Source); since C-066 with the proxy attachment the connection and lifecycle tests T7-CON-01 … 04 (MQTT 3.1.1 CONNECT, ClientId, TLS ≥ 1.2 and certificate verification, authentication, no Retain) and T7-LIFE-01 … 03 (Will on every connection, Birth first after every connect and after recovery, Will published on an abnormal disconnect). The other active tests follow the P5 plan (ROADMAP).
+Tests one running component (CUT) actively (DESIGN.md §3.3): D7 sends `Get`, `Set` and `Del` requests as the not-announced tester `Utility/oi4.org/oec-check/D7/<random>` and judges the answers; the monitor rules run on the same subscription. Implemented: T7-GET-01 (Get MAM/Health with `ReplyTo`, all Sources), T7-GET-02 (Profile lists exactly the served resources of the level), T7-GET-05 (empty list, unknown Source → Event Status Bad), T7-GET-09 (unknown keys ignored); since C-063 also T7-GET-03 (every resource with and without Source and Filter, PublicationList entries, Data ⇒ Metadata), T7-GET-04 (every represented entity fulfills the level), T7-GET-06 (pagination on request; by size passively, T7-MON-18), T7-GET-07 (Query of ReferenceDesignation), T7-GET-08 (Locale), T7-ADR-02 (no answer in the namespace `Oi4`) and T7-ADR-03 (exact Identification Links); since C-064 the write tests T7-SET-01 … 09, 11, 12 (`Set`/`Del` ⇒ Status event with `ReplyTo` and publication; Config, Data, Metadata, PublicationList, ReferenceDesignation, SubscriptionList, log level); since C-065 the Action tests T7-ACT-01 … 04 (`Call NewDataSetWriterId` ⇒ one final `ua-action-response` on the ResponseAddress with CorrelationData, new ids while reserved (Ttl), no answer to unaddressable or undecodable requests, BadNotFound for an unknown Source); since C-066 with the proxy attachment the connection and lifecycle tests T7-CON-01 … 04 (MQTT 3.1.1 CONNECT, ClientId, TLS ≥ 1.2 and certificate verification, authentication, no Retain) and T7-LIFE-01 … 03 (Will on every connection, Birth first after every connect and after recovery, Will published on an abnormal disconnect); since C-067 with the restart hook T7-LIFE-04 (Close message before a graceful disconnect) and T7-SET-10 (a changed ReferenceDesignation survives the restart). The other active tests follow the P5 plan (ROADMAP).
 
 ```sh
 # against the SDK example app (oec/sdk/rust/oec/examples/demo.rs) on the dev broker;
@@ -76,6 +76,15 @@ go run ./cmd/oec-check test --broker mqtts://localhost:8883 --ca ../dev/generate
     --proxy-listen 127.0.0.1:18883 --proxy-ca /tmp/x/proxy-ca.pem --proxy-ca-key /tmp/x/proxy-ca.key
 ```
 
+- **Restart hook** (DESIGN.md §3.4): `--restart-cmd CMD`, or `--stop-cmd CMD --start-cmd CMD`, and `[--restart-wait 2m]`. Shell commands (`sh -c`, Windows `cmd /C`) that stop the CUT gracefully (SIGTERM, `docker stop`, …) and start it again; a command that starts the CUT in the background must redirect its output, else D7 waits up to 10 s for it. In the write window, after the other write tests, T7-SET-10 sets a changed ReferenceDesignation, D7 runs the hook and waits up to `--restart-wait` for the new Birth (through the proxy also the first SUBACK) and an answer to Get Health; then T7-LIFE-04 judges the last Pub Health before the DISCONNECT (proxy) or before the new Birth (bus) as the Close message, and T7-SET-10 reads the ReferenceDesignation again and restores it. Without the hook both tests are skipped and the run is inconclusive (exit 4); a stop without DISCONNECT (Will) is inconclusive as well.
+
+```sh
+# demo through the proxy with the restart hook (stop.sh: SIGTERM to the demo and wait for its end;
+# start.sh: start it again in the background with its output redirected)
+go run ./cmd/oec-check test … --proxy-listen 127.0.0.1:18883 --proxy-ca /tmp/x/proxy-ca.pem --proxy-ca-key /tmp/x/proxy-ca.key \
+    --stop-cmd /tmp/x/stop.sh --start-cmd /tmp/x/start.sh
+```
+
 - The report is the monitor report with `"mode": "test"` plus `tester`, `requests` and `restore`; with the proxy `attachment` is `"proxy"`, plus `proxy_listen` and `connections` (each attempt: phase, TLS version, CONNECT without password, CONNACK, PUBLISH topics and times, first SUBACK, drop). Exit codes as for `monitor`.
 
 ## Layout
@@ -92,13 +101,14 @@ go run ./cmd/oec-check test --broker mqtts://localhost:8883 --ca ../dev/generate
 | `internal/mqttwire` | MQTT 3.1.1 client over TLS on `paho.mqtt.golang` v1.5.1 (EDL-1.0), PKCS#8 PBES2 keys, container storage reader |
 | `internal/mqttwire/mqtttest` | test-only in-process TLS broker and throw-away PKI (gate without network) |
 | `internal/monitor` | stateful monitor engine: participants, rules T7-MON-xx |
-| `internal/probe` | active test runner of `test`: discovery, requests with `ReplyTo` correlation, tests T7-GET-xx/ADR-xx/SET-xx, state snapshot and restore check, verdict of a test run |
+| `internal/probe` | active test runner of `test`: discovery, requests with `ReplyTo` correlation, tests T7-GET-xx/ADR-xx/SET-xx/ACT-xx/CON-xx/LIFE-xx, state snapshot and restore check, restart phase, verdict of a test run |
+| `internal/proxy` | proxy attachment: TLS listener with certificates from the proxy CA, minimal MQTT 3.1.1 relay (strict CONNECT/PUBLISH decoder), connection phases |
 | `internal/sim` | test-only simulated CUT with fault injection (DESIGN.md §10) |
 | `internal/verdict` | verdict model: severity from REQ keyword × level, test aggregation, exit code |
 | `internal/report` | text and JSON report of `validate`; text, JSON and JUnit report of `monitor` and `test` |
 | `internal/testvec` | test helper: reads the vectors of `../spec/vectors/` |
-| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064, reviewed in the C-062, C-063 and C-064 reviews, G-3.9) |
-| `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (reviewed in the C-052 review, G-3.9) |
+| `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews; C-065 … C-067 `draft`, G-3.9) |
+| `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (C-052 reviewed in the C-052 review; C-065 and C-067 `draft`, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
 ## Tests
