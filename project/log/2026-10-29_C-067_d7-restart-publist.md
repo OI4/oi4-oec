@@ -193,7 +193,7 @@ None. `go.mod` is unchanged; the hook uses `os/exec`.
 
 - `0f9d3ad`: restart hook, T7-LIFE-04, T7-SET-10, 4 sim faults, `Sim.Restart`, LIFE-02 selections, catalog, sim index.
 - `d1addc1`: T7-MON-14 (`publist.go`, monitor hooks), 5 capture fixtures, `lifecycle-pass` with B's PublicationList, catalog.
-- (docs): README, DESIGN, ADR-0025 amendment C-067, log, STATUS, ROADMAP, REVIEW, REVIEW_DE, sim index note.
+- `0c195ff`: README, DESIGN, ADR-0025 amendment C-067, log, STATUS, ROADMAP, REVIEW, REVIEW_DE, sim index note.
 
 ## Checks (final)
 
