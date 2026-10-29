@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/OI4/oec/conformance"
 	"github.com/OI4/oec/conformance/internal/testvec"
 	schema "github.com/OI4/oec/schema"
 )
@@ -29,7 +30,36 @@ func exec(t *testing.T, stdin string, args ...string) (int, string, string) {
 	t.Helper()
 	var out, errb bytes.Buffer
 	code := run(args, strings.NewReader(stdin), &out, &errb)
+	checkReports(t, args, code, out.Bytes())
 	return code, out.String(), errb.String()
+}
+
+// checkReports validates every JSON report of a monitor or test run –
+// standard output with --format json and each --report json=PATH – against
+// report.schema.json (C-069).
+func checkReports(t *testing.T, args []string, code int, stdout []byte) {
+	t.Helper()
+	if len(args) == 0 || args[0] != "monitor" && args[0] != "test" || code != exitValid && code != exitInvalid && code != exitInconclusive {
+		return
+	}
+	for i := 1; i+1 < len(args); i++ {
+		var doc []byte
+		switch {
+		case args[i] == "--format" && args[i+1] == "json":
+			doc = stdout
+		case args[i] == "--report" && strings.HasPrefix(args[i+1], "json="):
+			var err error
+			if doc, err = os.ReadFile(strings.TrimPrefix(args[i+1], "json=")); err != nil {
+				t.Errorf("%v: %v", args, err)
+				continue
+			}
+		default:
+			continue
+		}
+		if err := conformance.ValidateReport(doc); err != nil {
+			t.Errorf("%v: the JSON report does not conform to report.schema.json: %v", args, err)
+		}
+	}
 }
 
 func message(v testvec.Vector) string {

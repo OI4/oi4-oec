@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/tools/oec-check/report.schema.json",
+  "title": "oec-check report, version 1",
+  "description": "JSON report of the D7 compliance CLI oec-check for the commands monitor (live and --replay) and test (DESIGN.md §7, ADR-0025 amendment C-069). Report version 1 is frozen: a later change of a key or of its meaning increments report. Closed objects: a report carries no secret, no password and no payload of the component under test (it points into the capture of --record).",
+  "type": "object",
+  "required": ["report", "tool", "version", "schemas", "baseline", "catalog", "command", "mode", "attachment", "level", "self_assessment", "started", "ended", "observed", "messages", "namespace", "participants", "tests", "summary", "exit"],
+  "additionalProperties": false,
+  "properties": {
+    "report": {"const": 1, "description": "Version of this report format."},
+    "tool": {"const": "oec-check"},
+    "version": {"type": "string", "minLength": 1, "description": "Version of oec-check (dev for an unreleased build)."},
+    "schemas": {"type": "string", "minLength": 1, "description": "Release of the embedded D1 schema bundle."},
+    "baseline": {"type": "string", "minLength": 1, "description": "Guideline commit of the embedded spec baseline."},
+    "catalog": {"type": "string", "minLength": 1, "description": "Guideline baseline of the embedded test catalog d7.yaml."},
+    "command": {"type": "array", "items": {"type": "string"}, "minItems": 2, "prefixItems": [{"const": "oec-check"}, {"enum": ["monitor", "test"]}], "description": "Command line; passwords and passphrases are only read from files, so it holds none."},
+    "mode": {"enum": ["live", "replay", "test"]},
+    "attachment": {"enum": ["bus", "proxy"], "description": "bus: D7 is a client of the broker; proxy: the component under test connects to D7, which relays to the broker (test only)."},
+    "capture": {"type": "string", "description": "replay: the replayed capture; live and test: the capture written with --record."},
+    "broker": {"type": "string", "description": "URL of the broker (live and test)."},
+    "insecure": {"const": true, "description": "The broker certificate was not verified (--insecure, dev only); absent otherwise."},
+    "level": {"type": "integer", "minimum": 1, "maximum": 3, "description": "Declared compliance level (MG 1.3)."},
+    "app": {"type": "string", "minLength": 1, "description": "Component under test: AppId or <ServiceType>/<AppId> (--app)."},
+    "self_assessment": {"type": "boolean"},
+    "started": {"type": "string", "format": "date-time"},
+    "ended": {"type": "string", "format": "date-time"},
+    "observed": {"type": "string", "minLength": 1, "description": "Observed duration (Go duration syntax, e.g. 1m30.5s)."},
+    "messages": {"$ref": "#/$defs/count"},
+    "namespace": {"$ref": "#/$defs/count", "description": "Messages in the Oi4v2 namespace."},
+    "participants": {"type": "array", "items": {"$ref": "#/$defs/participant"}},
+    "tester": {"type": "string", "minLength": 1, "description": "test: PublisherId of D7 in its requests."},
+    "requests": {"type": "array", "items": {"$ref": "#/$defs/request"}, "description": "test: the stimuli in order."},
+    "restore": {"$ref": "#/$defs/restore"},
+    "announced": {"type": "array", "items": {"$ref": "#/$defs/announced"}, "maxItems": 2},
+    "proxy_listen": {"type": "string", "minLength": 1, "description": "test, proxy attachment: address of the proxy."},
+    "connections": {"type": "array", "items": {"$ref": "#/$defs/connection"}},
+    "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}},
+    "summary": {"type": "object", "propertyNames": {"$ref": "#/$defs/outcome"}, "additionalProperties": {"$ref": "#/$defs/count"}, "description": "Number of implemented tests per outcome."},
+    "error": {"type": "string", "minLength": 1, "description": "Why the observation stopped early."},
+    "exit": {"enum": [0, 1, 4], "description": "Exit code of the run: 0 pass, 1 fail, 4 inconclusive (DESIGN.md §5.3)."}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "test"}}},
+      "then": {"required": ["app", "tester"], "properties": {"command": {"prefixItems": [true, {"const": "test"}]}}},
+      "else": {"properties": {"command": {"prefixItems": [true, {"const": "monitor"}]}, "attachment": {"const": "bus"}, "tester": false, "requests": false, "restore": false, "announced": false}}
+    },
+    {"if": {"properties": {"mode": {"const": "replay"}}}, "then": {"required": ["capture"], "properties": {"broker": false, "insecure": false}}},
+    {"if": {"properties": {"mode": {"enum": ["live", "test"]}}}, "then": {"required": ["broker"]}},
+    {
+      "if": {"properties": {"attachment": {"const": "proxy"}}},
+      "then": {"required": ["proxy_listen"]},
+      "else": {"properties": {"proxy_listen": false, "connections": false}}
+    }
+  ],
+  "$defs": {
+    "count": {"type": "integer", "minimum": 0},
+    "time": {"type": "string", "format": "date-time"},
+    "outcome": {"enum": ["pass", "info", "skip", "warn", "fail", "manual"]},
+    "participant": {
+      "description": "A component seen on the bus.",
+      "type": "object",
+      "required": ["id", "service_type", "app_id", "messages", "invalid", "births", "wills", "closes", "first", "last"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "description": "<ServiceType>/<Identification Link>"},
+        "service_type": {"type": "string"},
+        "app_id": {"type": "string", "description": "Identification Link (unencoded)."},
+        "messages": {"$ref": "#/$defs/count"},
+        "invalid": {"$ref": "#/$defs/count"},
+        "births": {"$ref": "#/$defs/count"},
+        "wills": {"$ref": "#/$defs/count"},
+        "closes": {"$ref": "#/$defs/count"},
+        "sources": {"type": "array", "items": {"type": "string"}, "description": "Subordinate assets (Sources other than the AppId)."},
+        "first": {"$ref": "#/$defs/time"},
+        "last": {"$ref": "#/$defs/time"}
+      }
+    },
+    "request": {
+      "description": "One stimulus of D7.",
+      "type": "object",
+      "required": ["test", "topic", "message_id", "sent", "replies"],
+      "additionalProperties": false,
+      "properties": {
+        "test": {"anyOf": [{"$ref": "#/$defs/testId"}, {"enum": ["discovery", "state", "restart"]}], "description": "The test that sent the request, or a phase of the run: discovery of the component under test, state snapshot for the restore check, the heartbeat wait after a restart."},
+        "topic": {"type": "string", "minLength": 1},
+        "message_id": {"type": "string", "minLength": 1},
+        "sent": {"$ref": "#/$defs/time"},
+        "replies": {"$ref": "#/$defs/count", "description": "Messages with the MessageId as ReplyTo; for a Call the ActionResponses with its RequestId."}
+      }
+    },
+    "restore": {
+      "description": "test: the state of the component under test after the write tests.",
+      "type": "object",
+      "required": ["checked", "restored"],
+      "additionalProperties": false,
+      "properties": {
+        "checked": {"type": "boolean"},
+        "restored": {"type": "boolean"},
+        "changed": {"type": "array", "items": {"type": "string", "pattern": "^[-+] "}, "description": "\"- \" before, \"+ \" after."},
+        "note": {"type": "string"}
+      }
+    },
+    "announced": {
+      "description": "test: a component D7 announced (--announce: the tester, --peer: the peer).",
+      "type": "object",
+      "required": ["role", "publisher_id", "requests", "answered"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"enum": ["tester", "peer"]},
+        "publisher_id": {"type": "string", "minLength": 1},
+        "requests": {"$ref": "#/$defs/count", "description": "Requests received on its Get topics."},
+        "answered": {"$ref": "#/$defs/count"}
+      }
+    },
+    "connection": {
+      "description": "test, proxy attachment: one connection attempt of the component under test (no payload, no password).",
+      "type": "object",
+      "required": ["id", "phase", "remote", "accepted", "client_certificate", "connack", "disconnect", "dropped"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "integer", "minimum": 0, "description": "Number of the attempt, from 0."},
+        "phase": {"enum": ["relay", "tls1.1", "untrusted-ca", "wrong-host"]},
+        "remote": {"type": "string"},
+        "accepted": {"$ref": "#/$defs/time"},
+        "tls_version": {"type": "string", "minLength": 1},
+        "client_certificate": {"type": "boolean"},
+        "handshake_error": {"type": "string"},
+        "connect": {
+          "type": "object",
+          "required": ["protocol_name", "protocol_level", "clean_session", "keep_alive", "client_id", "has_username", "has_password"],
+          "additionalProperties": false,
+          "properties": {
+            "protocol_name": {"type": "string"},
+            "protocol_level": {"type": "integer", "minimum": 0, "maximum": 255},
+            "clean_session": {"type": "boolean"},
+            "keep_alive": {"type": "integer", "minimum": 0, "maximum": 65535},
+            "client_id": {"type": "string"},
+            "will": {"type": "object", "required": ["topic", "qos", "retain"], "additionalProperties": false, "properties": {"topic": {"type": "string"}, "qos": {"$ref": "#/$defs/qos"}, "retain": {"type": "boolean"}}},
+            "username": {"type": "string"},
+            "has_username": {"type": "boolean"},
+            "has_password": {"type": "boolean"}
+          }
+        },
+        "connect_time": {"$ref": "#/$defs/time"},
+        "error": {"type": "string"},
+        "connack": {"type": "integer", "minimum": -1, "maximum": 255, "description": "CONNACK code of the broker; -1: none."},
+        "publishes": {
+          "type": "array",
+          "items": {"type": "object", "required": ["topic", "qos", "retain", "time"], "additionalProperties": false,
+            "properties": {"topic": {"type": "string"}, "qos": {"$ref": "#/$defs/qos"}, "retain": {"type": "boolean"}, "dup": {"type": "boolean"}, "time": {"$ref": "#/$defs/time"}}}
+        },
+        "subscribed": {"$ref": "#/$defs/time", "description": "First SUBACK of the broker to the client."},
+        "disconnect": {"type": "boolean", "description": "The client sent DISCONNECT."},
+        "dropped": {"type": "boolean", "description": "Ended by D7."},
+        "closed": {"$ref": "#/$defs/time"}
+      }
+    },
+    "qos": {"type": "integer", "minimum": 0, "maximum": 3},
+    "testId": {"type": "string", "pattern": "^T7-[A-Z]+-[0-9]{2}$"},
+    "test": {
+      "description": "The verdict of one catalog test.",
+      "type": "object",
+      "required": ["id", "title", "status", "outcome"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"$ref": "#/$defs/testId"},
+        "title": {"type": "string", "minLength": 1},
+        "level": {"type": "integer", "minimum": 1, "maximum": 3},
+        "status": {"enum": ["planned", "implemented"]},
+        "outcome": {"$ref": "#/$defs/outcome"},
+        "reason": {"type": "string"},
+        "reqs": {"type": "array", "items": {"$ref": "#/$defs/req"}}
+      }
+    },
+    "req": {
+      "description": "The verdict of one requirement within a test.",
+      "type": "object",
+      "required": ["req", "outcome"],
+      "additionalProperties": false,
+      "properties": {
+        "req": {"type": "string", "pattern": "^(REQ-[A-Z0-9]+(-[A-Z0-9]+)*)?$", "description": "Empty: a finding without requirement (e.g. a schema keyword not mapped to a REQ)."},
+        "obligation": {"type": "string", "description": "Keyword of the requirement at the declared level, none if it does not apply."},
+        "outcome": {"$ref": "#/$defs/outcome"},
+        "inconclusive": {"const": true, "description": "The requirement could not be judged in this run (a gap of the run, exit code 4 for MUST)."},
+        "reason": {"type": "string"},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}}
+      }
+    },
+    "evidence": {
+      "description": "A pointer into the observed traffic.",
+      "type": "object",
+      "required": ["detail"],
+      "additionalProperties": false,
+      "properties": {
+        "participant": {"type": "string"},
+        "line": {"type": "integer", "minimum": 1, "description": "Line of the capture (1-based)."},
+        "topic": {"type": "string"},
+        "pointer": {"type": "string", "description": "JSON pointer into the payload."},
+        "detail": {"type": "string"}
+      }
+    }
+  }
+}

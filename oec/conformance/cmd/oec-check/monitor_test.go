@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/OI4/oec/conformance"
 	"github.com/OI4/oec/conformance/internal/capture"
 	"github.com/OI4/oec/conformance/internal/mqttwire"
 	"github.com/OI4/oec/conformance/internal/mqttwire/mqtttest"
@@ -52,6 +53,28 @@ func TestMonitorReplayExitCodes(t *testing.T) {
 		code, out, errOut := exec(t, "", append([]string{"monitor"}, c.args...)...)
 		if code != c.code {
 			t.Errorf("%v: exit %d, want %d\n%s%s", c.args, code, c.code, out, errOut)
+		}
+	}
+}
+
+// TestReplayReportSchema replays every capture fixture through the CLI at
+// every level, with and without the component under test; exec validates
+// each JSON report against report.schema.json (C-069).
+func TestReplayReportSchema(t *testing.T) {
+	fixtures, err := conformance.CaptureFixtures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range fixtures {
+		for _, level := range []string{"1", "2", "3"} {
+			args := []string{"monitor", "--replay", captures + f.File, "--format", "json", "--level", level}
+			if level == "2" {
+				args = append(args, "--app", "OTConnector/provider.com/FieldDataService/FDS-001/1200-0345")
+			}
+			code, out, errOut := exec(t, "", args...)
+			if code != exitValid && code != exitInvalid && code != exitInconclusive || !strings.HasPrefix(out, "{") {
+				t.Errorf("%v: exit %d\n%s", args, code, errOut)
+			}
 		}
 	}
 }

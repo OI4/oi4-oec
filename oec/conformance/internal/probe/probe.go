@@ -128,7 +128,7 @@ type Options struct {
 
 // Request is one stimulus of the run (report).
 type Request struct {
-	Test      string    `json:"test"`
+	Test      string    `json:"test"` // the test, or the phase discovery, state (restore check) or restart (report.schema.json)
 	Topic     string    `json:"topic"`
 	MessageID string    `json:"message_id"`
 	Sent      time.Time `json:"sent"`
@@ -1028,9 +1028,14 @@ func (r *Runner) get01(ctx context.Context) error {
 }
 
 // readProfile requests the Profile of the application; with a test it
-// judges the answer (T7-GET-02), without it only reads it.
+// judges the answer (T7-GET-02), without it only reads it (the request is
+// reported in the phase discovery).
 func (r *Runner) readProfile(ctx context.Context, test string) error {
-	x, err := r.get(ctx, test, r.st, "Profile", r.app, "", nil)
+	label := test
+	if label == "" {
+		label = "discovery"
+	}
+	x, err := r.get(ctx, label, r.st, "Profile", r.app, "", nil)
 	if err != nil {
 		return err
 	}

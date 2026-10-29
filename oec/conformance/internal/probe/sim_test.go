@@ -3,6 +3,7 @@ package probe
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 
 	"go.yaml.in/yaml/v3"
 
+	"github.com/OI4/oec/conformance"
 	"github.com/OI4/oec/conformance/internal/monitor"
 	"github.com/OI4/oec/conformance/internal/mqttwire"
 	"github.com/OI4/oec/conformance/internal/mqttwire/mqtttest"
@@ -226,11 +228,53 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 	if fault == "none" && len(opt.Tests) == 0 && !slices.Equal(own, want) || !subset(own, want) {
 		t.Errorf("violations of the requests of D7 %v, want %v (the deliberate stimuli of T7-GET-07, T7-GET-09, T7-SET-05 and T7-ACT-03)", own, want)
 	}
-	res, _, err := Judge(app, level, nil, mon, s, reqs)
+	res, parts, err := Judge(app, level, nil, mon, s, reqs)
 	if err != nil {
 		t.Fatal(err)
 	}
+	checkReport(t, v, cfg.Broker, app, level, started, res, parts, mon, s, px)
 	return res, s
+}
+
+// checkReport validates the JSON report the run would give in oec-check
+// test against report.schema.json (C-069). The report package imports
+// probe, so the test assembles the document with the keys of
+// report.Monitor; the CLI tests validate the report of report.Monitor
+// itself.
+func checkReport(t *testing.T, v *validate.Validator, broker, app string, level int, started time.Time, res []verdict.TestResult,
+	parts []monitor.Participant, mon monitor.Result, s Session, px *proxy.Proxy) {
+	t.Helper()
+	ended := time.Now().UTC()
+	if parts == nil {
+		parts = []monitor.Participant{}
+	}
+	doc := map[string]any{"report": 1, "tool": "oec-check", "version": "dev", "schemas": v.SchemaVersion(), "baseline": v.Baseline(),
+		"catalog": v.Baseline(), "command": []string{"oec-check", "test"}, "mode": "test", "attachment": "bus", "broker": broker,
+		"level": level, "app": app, "self_assessment": true, "started": started, "ended": ended,
+		"observed": ended.Sub(started).Round(time.Millisecond).String(), "messages": mon.Messages, "namespace": mon.Namespace,
+		"participants": parts, "tester": s.Probe.Tester, "tests": res, "summary": verdict.Summary(res), "exit": verdict.Exit(res, false)}
+	if len(s.Probe.Requests) > 0 {
+		doc["requests"] = s.Probe.Requests
+	}
+	if s.Probe.Restore != nil {
+		doc["restore"] = s.Probe.Restore
+	}
+	if len(s.Probe.Announced) > 0 {
+		doc["announced"] = s.Probe.Announced
+	}
+	if px != nil {
+		doc["attachment"], doc["proxy_listen"] = "proxy", px.Addr()
+		if cs := px.Conns(); len(cs) > 0 {
+			doc["connections"] = cs
+		}
+	}
+	raw, err := json.Marshal(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := conformance.ValidateReport(raw); err != nil {
+		t.Errorf("the report does not conform to report.schema.json: %v", err)
+	}
 }
 
 func btoi(b bool) int {
