@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.openindustry4.com/oec/tools/oec-infra/report.schema.json",
+  "title": "oec-infra report, version 1",
+  "description": "JSON report of the D8 infrastructure compliance CLI oec-infra (DESIGN.md §9, ADR-0025 amendment C-070). Its own document and version, independent of the oec-check report. Version 1 grows additively with the increments of P5b (new optional keys, new modes) and is frozen at the P5b exit; after that a change of a key or of its meaning increments report. Closed objects: a report carries no secret, no password and no file content of the image.",
+  "type": "object",
+  "required": ["report", "tool", "version", "schemas", "baseline", "catalog", "command", "mode", "input", "level", "started", "ended", "tests", "summary", "exit"],
+  "additionalProperties": false,
+  "properties": {
+    "report": {"const": 1, "description": "Version of this report format."},
+    "tool": {"const": "oec-infra"},
+    "version": {"type": "string", "minLength": 1, "description": "Version of oec-infra (dev for an unreleased build)."},
+    "schemas": {"type": "string", "minLength": 1, "description": "Release of the embedded D1 schema bundle."},
+    "baseline": {"type": "string", "minLength": 1, "description": "Guideline commit of the embedded spec baseline."},
+    "catalog": {"type": "string", "minLength": 1, "description": "Guideline baseline of the embedded test catalog d8.yaml."},
+    "command": {"type": "array", "items": {"type": "string"}, "minItems": 2, "prefixItems": [{"const": "oec-infra"}, {"enum": ["image"]}], "description": "Command line; passwords and passphrases are only read from files, so it holds none."},
+    "mode": {"enum": ["image"], "description": "Catalog mode of the judged tests."},
+    "input": {"type": "string", "minLength": 1, "description": "image: the OCI layout directory or oci-archive as given on the command line."},
+    "form": {"enum": ["oci-layout", "oci-archive"], "description": "image: the form of the input."},
+    "level": {"type": "integer", "minimum": 1, "maximum": 3, "description": "Declared compliance level (MG 1.3)."},
+    "started": {"$ref": "#/$defs/time"},
+    "ended": {"$ref": "#/$defs/time"},
+    "image": {"$ref": "#/$defs/image"},
+    "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}},
+    "summary": {"type": "object", "propertyNames": {"$ref": "#/$defs/outcome"}, "additionalProperties": {"$ref": "#/$defs/count"}, "description": "Number of implemented tests per outcome."},
+    "exit": {"enum": [0, 1, 4], "description": "Exit code of the run: 0 pass, 1 fail, 4 inconclusive (DESIGN.md §5.3)."}
+  },
+  "allOf": [
+    {"if": {"properties": {"mode": {"const": "image"}}}, "then": {"required": ["form", "image"], "properties": {"command": {"prefixItems": [true, {"const": "image"}]}}}}
+  ],
+  "$defs": {
+    "count": {"type": "integer", "minimum": 0},
+    "time": {"type": "string", "format": "date-time"},
+    "digest": {"type": "string", "pattern": "^[a-z0-9]+([+._-][a-z0-9]+)*:[a-zA-Z0-9=_-]+$"},
+    "outcome": {"enum": ["pass", "info", "skip", "warn", "fail", "manual"]},
+    "testId": {"type": "string", "pattern": "^T8-[A-Z]+-[0-9]{2}$"},
+    "image": {
+      "description": "image: what D8 found in the layout.",
+      "type": "object",
+      "required": ["index", "manifests"],
+      "additionalProperties": false,
+      "properties": {
+        "digest": {"$ref": "#/$defs/digest", "description": "Digest of the one descriptor of index.json; absent if it lists several."},
+        "media_type": {"type": "string", "minLength": 1, "description": "Media type of that descriptor."},
+        "index": {"type": "boolean", "description": "The image is an image index (several manifests or a referenced index)."},
+        "manifests": {"type": "array", "items": {"$ref": "#/$defs/manifest"}},
+        "algorithms": {"type": "array", "items": {"type": "string", "minLength": 1}, "description": "Digest algorithms of all descriptors."},
+        "problems": {"$ref": "#/$defs/count", "description": "Structure and integrity problems found while reading."}
+      }
+    },
+    "manifest": {
+      "description": "One image manifest of the layout.",
+      "type": "object",
+      "required": ["digest", "media_type", "runnable", "supported"],
+      "additionalProperties": false,
+      "properties": {
+        "digest": {"$ref": "#/$defs/digest"},
+        "media_type": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "minLength": 1, "description": "os/architecture[/variant] of the image config, else of the descriptor."},
+        "runnable": {"type": "boolean", "description": "An image of a real platform (not an attestation manifest)."},
+        "supported": {"type": "boolean", "description": "A platform of RIG 5.1: linux/amd64, linux/arm64/v8, linux/arm/v7."},
+        "layers": {"$ref": "#/$defs/count"}
+      }
+    },
+    "test": {
+      "description": "The verdict of one catalog test.",
+      "type": "object",
+      "required": ["id", "title", "status", "outcome"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"$ref": "#/$defs/testId"},
+        "title": {"type": "string", "minLength": 1},
+        "level": {"type": "integer", "minimum": 1, "maximum": 3},
+        "status": {"enum": ["planned", "implemented"]},
+        "outcome": {"$ref": "#/$defs/outcome"},
+        "reason": {"type": "string"},
+        "reqs": {"type": "array", "items": {"$ref": "#/$defs/req"}}
+      }
+    },
+    "req": {
+      "description": "The verdict of one requirement within a test.",
+      "type": "object",
+      "required": ["req", "outcome"],
+      "additionalProperties": false,
+      "properties": {
+        "req": {"type": "string", "pattern": "^(REQ-[A-Z0-9]+(-[A-Z0-9]+)*)?$", "description": "Empty: a finding without requirement."},
+        "obligation": {"type": "string", "description": "Keyword of the requirement at the declared level, none if it does not apply."},
+        "outcome": {"$ref": "#/$defs/outcome"},
+        "inconclusive": {"const": true, "description": "The requirement could not be judged in this run (a gap of the run, exit code 4 for MUST)."},
+        "reason": {"type": "string"},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}}
+      }
+    },
+    "evidence": {
+      "description": "A pointer into the inspected image.",
+      "type": "object",
+      "required": ["detail"],
+      "additionalProperties": false,
+      "properties": {
+        "image": {"type": "string", "description": "The image manifest or platform the evidence belongs to."},
+        "path": {"type": "string", "description": "Path in the layout (e.g. blobs/sha256/…) or in the image file system (e.g. /opt/oi4/licenses/sbom.spdx.json)."},
+        "detail": {"type": "string"}
+      }
+    }
+  }
+}

@@ -29,28 +29,28 @@ tests:
     mode: image
     level: 1
     reqs: [REQ-CMP-027]
-    status: planned
+    status: implemented
   - id: T8-IMG-02
     title: Processor architectures and multi-architecture image
     mode: image
     level: 2
     reqs: [REQ-APP-001, REQ-APP-002, REQ-CMP-032]
-    status: planned
-    notes: Architectures from the image index; the hardware part of RIG 5.2 is declared by the manufacturer and only reported.
+    status: implemented
+    notes: Platforms of the runnable images (attestation manifests excluded); supported are linux/amd64, linux/arm64 (v8) and linux/arm (v7) (RIG 5.1); REQ-APP-002 needs at least two of them. The hardware part of RIG 5.2 is declared by the manufacturer and only reported.
   - id: T8-IMG-03
     title: SBOM and license texts in /opt/oi4/licenses
     mode: image
     level: 2
     reqs: [REQ-CMP-028, REQ-CNT-013, REQ-CNT-014, REQ-CNT-015, REQ-LIC-002]
-    status: planned
-    notes: Exactly one of sbom.spdx.json / sbom.cdx.json; every license embedded or present as <License-ID>.txt; the files come from an image layer.
+    status: implemented
+    notes: Exactly one of sbom.spdx.json / sbom.cdx.json (SPDX 2.2/2.3 or CycloneDX 1.x JSON, SF-114 proposed); every license embedded or present as <License-ID>.txt; the files are in the file system of every platform image (layers applied with whiteouts, symlinks resolved inside the image); a VOLUME on the folder is a note.
   - id: T8-IMG-04
     title: Image integrity
     mode: image
     level: 2
     reqs: [REQ-CMP-030]
-    status: planned
-    notes: The checks follow RIG 4.3 (digests of manifest and layers; signature where RIG 4.3 requires it); details are fixed in P5b.
+    status: implemented
+    notes: Every blob is addressed by a verified SHA256 digest (RIG 4.3 recommends digests, SHA256; it requires no signature). A finding warns and never fails (note of REQ-CMP-030); a digest mismatch fails REQ-CMP-027 in T8-IMG-01 (C-070).
 
   # --- run: sandbox with test storages --------------------------------------
   - id: T8-RUN-01

@@ -1,0 +1,137 @@
+# Image fixtures of `oec-infra image` (DESIGN.md §9, §10; C-070).
+#
+# The .tar files are OCI image archives (oci-archive: an OCI image layout
+# as one tar) generated from the scenarios in
+# internal/image/fixtures_test.go (`go test ./internal/image -run
+# TestFixtureFiles -update`). The license texts in them are placeholders.
+# This index is test data with verdict (G-3.9): it states the expected
+# outcome of the image tests at level 3 and goes to the PO for review.
+#
+# expect: test → outcome and the requirements that have this outcome; the
+#         other requirements of the test have a better outcome or are not
+#         applicable. Every implemented T8-IMG test not listed passes.
+# status: draft | reviewed
+images:
+  - file: good.tar
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      OCI image index with linux/amd64 and linux/arm64/v8 and a buildx
+      attestation manifest (unknown/unknown, not runnable). SPDX 2.3 SBOM in
+      /opt/oi4/licenses (gzip layer) with Apache-2.0, MIT OR BSD-3-Clause
+      and LicenseRef-acme; MIT.txt and BSD-3-Clause.txt are files,
+      Apache-2.0.txt is a symlink to /usr/share/common-licenses/Apache-2.0
+      inside the image, the text of LicenseRef-acme is embedded
+      (hasExtractedLicensingInfos). Every image test passes.
+  - file: cdx-docker.tar
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      Docker v2 schema 2 media types (manifest list, gzip layers) as written
+      by `docker save` of a classic image, linux/amd64 and linux/arm/v7.
+      CycloneDX 1.6 SBOM: Apache-2.0 and the name-only license "Vendor EULA"
+      with embedded texts, the expression MIT OR ISC with MIT.txt and
+      ISC.txt. Every image test passes.
+  - file: bad-digest.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-01: {outcome: fail, reqs: [REQ-CMP-027]}
+      T8-IMG-03: {outcome: skip, reqs: [REQ-CMP-028, REQ-CNT-013, REQ-CNT-014, REQ-CNT-015, REQ-LIC-002]}
+      T8-IMG-04: {outcome: warn, reqs: [REQ-CMP-030]}
+    notes: >-
+      Like good.tar, but the application layer of linux/arm64/v8 has other
+      content of the same size than its digest says. REQ-CMP-027 fails; the
+      digest finding warns under REQ-CMP-030 (RIG 4.3 only recommends
+      digests); the file system of arm64 cannot be read, so T8-IMG-03 is
+      skipped inconclusive (amd64 alone passes).
+  - file: sha512.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-04: {outcome: warn, reqs: [REQ-CMP-030]}
+    notes: >-
+      Like good.tar with every descriptor digest in sha512 (valid OCI; the
+      diff_ids stay sha256). RIG 4.3 recommends SHA256: REQ-CMP-030 warns
+      and never fails (note of REQ-CMP-030, SF-091 (f)).
+  - file: single-arch.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-02: {outcome: warn, reqs: [REQ-APP-002]}
+    notes: >-
+      One linux/amd64 image; index.json lists its manifest directly (no
+      image index). Supported platform, but no multi-architecture image:
+      REQ-APP-002 (SHOULD) warns.
+  - file: unsupported-arch.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-02: {outcome: fail, reqs: [REQ-APP-001, REQ-CMP-032]}
+    notes: >-
+      Only linux/386 and linux/riscv64: no processor architecture of RIG 5.1
+      (ARMv7, ARMv8, amd64). REQ-APP-001 and REQ-CMP-032 fail at level 3;
+      REQ-APP-002 warns (no supported platform).
+  - file: no-sbom.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-03: {outcome: fail, reqs: [REQ-CMP-028, REQ-CNT-013]}
+    notes: >-
+      No /opt/oi4/licenses at all. The license texts (REQ-CNT-014,
+      REQ-LIC-002) cannot be checked without an SBOM and are skipped.
+  - file: two-sboms.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-013]}
+    notes: >-
+      Both sbom.spdx.json and sbom.cdx.json: RIG 4.1.4 allows exactly one.
+      The license texts are not checked.
+  - file: missing-license-text.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-014, REQ-LIC-002]}
+    notes: >-
+      Like good.tar without BSD-3-Clause.txt. BSD-3-Clause is one choice of
+      the expression MIT OR BSD-3-Clause; SF-114 (b) (proposed) requires a
+      text for every license id of an expression.
+  - file: sbom-whiteout.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-03: {outcome: fail, reqs: [REQ-CMP-028, REQ-CNT-013]}
+    notes: >-
+      Like good.tar with a third layer whose whiteout deletes
+      sbom.spdx.json: the SBOM is in a layer but not in the file system of
+      the image.
+  - file: dangling-symlink.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-03: {outcome: fail, reqs: [REQ-CNT-014, REQ-CNT-015, REQ-LIC-002]}
+    notes: >-
+      Like good.tar, but MIT.txt is a symlink to /host/licenses/MIT.txt,
+      which is not in the image (a text only a host mount would supply):
+      REQ-CNT-015 fails, and MIT has no text.
+  - file: invalid-sbom.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-03: {outcome: fail, reqs: [REQ-CMP-028, REQ-CNT-013]}
+    notes: >-
+      sbom.spdx.json holds an SPDX 3.0 JSON-LD document; SF-114 (a)
+      (proposed) accepts SPDX 2.2/2.3 JSON only. The license texts are not
+      checked.
+  - file: sbom-volume.tar
+    status: draft
+    positive: false
+    expect:
+      T8-IMG-03: {outcome: info, reqs: [REQ-CNT-015]}
+    notes: >-
+      Like good.tar with VOLUME /opt/oi4 in both image configs: the folder
+      becomes a mount point a platform could overlay from the host (RIG
+      4.1.4 forbids that). A note only; the image content is complete.

@@ -1,10 +1,11 @@
 // Package conformance holds the data files of the compliance tools that
-// live outside a Go package directory: the JSON Schema of the D7 report
-// (report.schema.json, report version 1, DESIGN.md §7) and the indexes of
-// the self-test fixtures (testdata/sim/index.yaml and
-// testdata/captures/index.yaml, DESIGN.md §10), which oec-check explain
-// and the catalog coverage report show. It holds data and their loaders
-// only and imports no package of the tools.
+// live outside a Go package directory: the JSON Schemas of the D7 report
+// (report.schema.json, report version 1, DESIGN.md §7) and of the D8 report
+// (infra-report.schema.json, report version 1, DESIGN.md §9) and the
+// indexes of the self-test fixtures (testdata/sim/index.yaml,
+// testdata/captures/index.yaml and testdata/images/index.yaml, DESIGN.md
+// §10), which the explain commands and the catalog coverage report show.
+// It holds data and their loaders only and imports no package of the tools.
 package conformance
 
 import (
@@ -29,38 +30,59 @@ var ReportSchema []byte
 // ReportSchemaID is the $id of ReportSchema.
 const ReportSchemaID = "https://schemas.openindustry4.com/oec/tools/oec-check/report.schema.json"
 
-var (
-	reportOnce   sync.Once
-	reportSchema *jsonschema.Schema
-	reportErr    error
-)
+// InfraReportSchema is the JSON Schema (2020-12) of the JSON report of
+// oec-infra, report version 1.
+//
+//go:embed infra-report.schema.json
+var InfraReportSchema []byte
 
-// ValidateReport validates one JSON report of monitor or test against
-// ReportSchema (formats such as date-time are asserted).
-func ValidateReport(doc []byte) error {
-	reportOnce.Do(func() {
-		s, err := jsonschema.UnmarshalJSON(bytes.NewReader(ReportSchema))
+// InfraReportSchemaID is the $id of InfraReportSchema.
+const InfraReportSchemaID = "https://schemas.openindustry4.com/oec/tools/oec-infra/report.schema.json"
+
+type compiled struct {
+	once   sync.Once
+	schema *jsonschema.Schema
+	err    error
+}
+
+var reportSchema, infraReportSchema compiled
+
+func (c *compiled) validate(name, id string, raw, doc []byte) error {
+	c.once.Do(func() {
+		s, err := jsonschema.UnmarshalJSON(bytes.NewReader(raw))
 		if err != nil {
-			reportErr = err
+			c.err = err
 			return
 		}
-		c := jsonschema.NewCompiler()
-		c.DefaultDraft(jsonschema.Draft2020)
-		c.AssertFormat()
-		if err := c.AddResource(ReportSchemaID, s); err != nil {
-			reportErr = err
+		comp := jsonschema.NewCompiler()
+		comp.DefaultDraft(jsonschema.Draft2020)
+		comp.AssertFormat()
+		if err := comp.AddResource(id, s); err != nil {
+			c.err = err
 			return
 		}
-		reportSchema, reportErr = c.Compile(ReportSchemaID)
+		c.schema, c.err = comp.Compile(id)
 	})
-	if reportErr != nil {
-		return fmt.Errorf("report.schema.json: %w", reportErr)
+	if c.err != nil {
+		return fmt.Errorf("%s: %w", name, c.err)
 	}
 	v, err := jsonschema.UnmarshalJSON(bytes.NewReader(doc))
 	if err != nil {
 		return fmt.Errorf("the report is no JSON document: %w", err)
 	}
-	return reportSchema.Validate(v)
+	return c.schema.Validate(v)
+}
+
+// ValidateReport validates one JSON report of monitor or test against
+// ReportSchema (formats such as date-time are asserted).
+func ValidateReport(doc []byte) error {
+	return reportSchema.validate("report.schema.json", ReportSchemaID, ReportSchema, doc)
+}
+
+// ValidateInfraReport validates one JSON report of oec-infra against
+// InfraReportSchema (formats such as date-time are asserted).
+func ValidateInfraReport(doc []byte) error {
+	return infraReportSchema.validate("infra-report.schema.json", InfraReportSchemaID, InfraReportSchema, doc)
 }
 
 //go:embed testdata/sim/index.yaml
@@ -68,6 +90,9 @@ var simIndex []byte
 
 //go:embed testdata/captures/index.yaml
 var captureIndex []byte
+
+//go:embed testdata/images/index.yaml
+var imageIndex []byte
 
 // Expect is the expected verdict of one test in a fixture: the outcome and
 // the requirements with this outcome.
@@ -78,7 +103,7 @@ type Expect struct {
 
 // Fixture is one entry of a fixture index.
 type Fixture struct {
-	Kind     string            `yaml:"-"` // sim | capture
+	Kind     string            `yaml:"-"` // sim | capture | image
 	Name     string            `yaml:"-"` // the fault (sim) or the file (capture)
 	Fault    string            `yaml:"fault"`
 	File     string            `yaml:"file"`
@@ -145,6 +170,25 @@ func CaptureFixtures() ([]Fixture, error) {
 		f.Kind, f.Name = "capture", f.File
 	}
 	return ix.Captures, nil
+}
+
+// ImageFixtures returns the entries of testdata/images/index.yaml (the
+// image archives of oec-infra image) in order.
+func ImageFixtures() ([]Fixture, error) {
+	var ix struct {
+		Images []Fixture `yaml:"images"`
+	}
+	if err := decode(imageIndex, &ix); err != nil {
+		return nil, fmt.Errorf("testdata/images/index.yaml: %w", err)
+	}
+	for i := range ix.Images {
+		f := &ix.Images[i]
+		if f.File == "" || f.Fault != "" || len(f.Tests) > 0 || f.Peer || f.Announce {
+			return nil, fmt.Errorf("testdata/images/index.yaml: entry %d: an image fixture names a file and nothing of a sim run", i+1)
+		}
+		f.Kind, f.Name = "image", f.File
+	}
+	return ix.Images, nil
 }
 
 // Fixtures returns the sim fixtures followed by the capture fixtures.
