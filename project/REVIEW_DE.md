@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-070: P5b (D8 `oec-infra`) ist geplant, das erste Stück (`oec-infra image`) ist fertig. **Für dich offen: D-1** (SF-114: welche SBOM-Versionen gelten und welche Lizenzen einen Text brauchen) und **R-1** (13 Test-Images). A-239 … A-248 nur zur Info._
+_Stand: 29.10.2026, C-070-Review: R-1 akzeptiert (13 Test-Images `reviewed`). Deine Antwort zu D-1 ist eingetragen; sie ändert den Vorschlag. **Für dich offen: D-1 (überarbeitet)** – bitte den genauen Text für RIG 4.1.4 bestätigen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,25 +24,35 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – SF-114: Welche SBOM-Versionen gelten, und welche Lizenzen brauchen einen Text? (bitte entscheiden)
+### D-1 – SF-114 überarbeitet: SBOM „CRA und RED ready“ (bitte bestätigen)
 
-**Worum geht es?** Jedes OEC-Image muss in `/opt/oi4/licenses` eine **SBOM** mitbringen (eine maschinenlesbare Stückliste der Software mit ihren Lizenzen) und zu jeder Lizenz den **Lizenztext** (RIG 4.1.4). D8 prüft das jetzt (T8-IMG-03). Dabei sind drei Dinge in der Guideline nicht eindeutig:
+**Deine Antwort (29.10.):** Alle Lizenzen sollen lizenzkonform genannt werden, das Ganze soll „CRA und RED ready“ sein, die Versionen werden nicht eingeschränkt, und die Texte müssen rechtskonform sein. Damit ist mein erster Vorschlag (feste Versionen) vom Tisch.
 
-- **(a) Versionen:** Die RIG nennt „SPDX (ISO/IEC 5962:2021)“ und „CycloneDX (ECMA-424)“. Wörtlich genommen sind das genau SPDX 2.2.1 und CycloneDX 1.6. Die meisten Werkzeuge erzeugen heute aber SPDX 2.3 oder CycloneDX 1.4/1.5 – die wären dann nicht erlaubt. Und das neue SPDX 3.0 (ganz anderes Format) wäre unklar.
-- **(b) Welche Kennungen brauchen einen Text?** In einer SBOM stehen oft Ausdrücke wie `GPL-2.0 WITH Classpath-exception-2.0` oder `MIT OR BSD-3-Clause`. Braucht die Ausnahme hinter `WITH` einen eigenen Text? Und die Sonderwerte `NONE`/`NOASSERTION` („keine Lizenz“/„unbekannt“)?
-- **(c) Lizenz nur mit Namen:** CycloneDX erlaubt eine Lizenz nur mit Namen (z. B. „Vendor EULA“) ohne Kennung. Dann gibt es keinen Dateinamen `<Kennung>.txt`.
+**Was das konkret heißt (mein überarbeiteter Vorschlag):**
+- **(a') Versionen:** SPDX und CycloneDX in jeder Version, jeweils als JSON (bei SPDX 3 das JSON-LD-Format). D8 prüft die Versionen, die es lesen kann (SPDX 2 und 3, CycloneDX 1). Bei einer unbekannten künftigen Version sagt D8 „kein sicheres Urteil“ statt „durchgefallen“.
+- **(b') Lizenzen eindeutig nennen:** mit der offiziellen SPDX-Kennung (auch in Ausdrücken wie `MIT OR BSD-3-Clause` und für Ausnahmen wie `WITH Classpath-exception-2.0`). Für Lizenzen ohne SPDX-Kennung nimmt man eine eigene Kennung `LicenseRef-…` (SPDX) oder den Namen (CycloneDX). **Jede Komponente muss ihre Lizenz angeben.** „Unbekannt“ (`NOASSERTION`) oder gar nichts reicht nicht, „keine Lizenz“ (`NONE`) ist in Ordnung.
+- **(c') Texte rechtskonform:** Zu jeder genannten Lizenz und Ausnahme liegt der Text bei, in der SBOM oder als `<Kennung>.txt`. Warum alle? Fast jede Lizenz verlangt, dass ihr Text mit der Software weitergegeben wird. Ein Prüfwerkzeug kann nicht je Lizenz beurteilen, ob der Text rechtlich nötig ist, und ein Text zu viel schadet nie. So ist die Regel prüfbar und immer rechtskonform.
+- **(d') CRA/RED:**
+  - Der CRA (Anhang I Teil II Nr. 1) verlangt eine SBOM in einem gängigen, maschinenlesbaren Format, mindestens mit den direkten Abhängigkeiten.
+  - Die RED-Verordnung (EU) 2022/30 mit EN 18031 nennt keine SBOM, erwartet aber eine Liste der Software-Komponenten, um Schwachstellen verfolgen zu können.
+  - Deshalb: **Die SBOM listet jede Software-Komponente mit Name und Version.** Empfohlen, aber nicht Pflicht: eine eindeutige Kennung je Komponente (Package-URL oder CPE).
+- **Text in RIG 4.1.4 (Englisch):**
+  - Erster Punkt wird zu „The SBOM shall list all software components used in the application, each with its name, its version and its licenses. It shall use one of the following formats; the version of the format is not restricted:“.
+  - Neuer Punkt zur eindeutigen Nennung der Lizenzen.
+  - Der Text-Punkt gilt für „every license and license exception“.
+  - Neu als Empfehlung: Package-URL/CPE.
+  - Der CRA-Hinweis wird um RED ergänzt und um den Satz, dass der Anbieter für die Rechtskonformität verantwortlich bleibt (RIG 5.3).
+  - Der genaue Wortlaut steht im Register SF-114 und in `REVIEW.md`.
 
-**Mein Vorschlag:**
-- (a) Erlaubt sind SPDX 2.2 und 2.3 sowie CycloneDX 1.x, jeweils als JSON. SPDX 3 erst, wenn die Guideline es nennt. Ergänzung in RIG 4.1.4: „SPDX in version 2.2 or 2.3, CycloneDX in version 1.x.“
-- (b) Jede Lizenz-Kennung, die in der SBOM vorkommt, braucht einen Text – auch jede Wahl in einem `OR`-Ausdruck. Ausnahmen hinter `WITH` und `NONE`/`NOASSERTION` brauchen keinen.
-- (c) Bei einer Lizenz ohne Kennung steht der Text in der SBOM selbst.
-- Ergänzung nach „…clearly assignable to the corresponding license in the SBOM.“: „Exception identifiers (`WITH`) need no separate text; the text of a license without an identifier is part of the SBOM.“
+**Was passiert danach?**
+- Ich trage den Text in die Guideline ein und ziehe die Baseline nach.
+- Die REQs zu SBOM und Lizenzen gehen wieder an dich zum Review.
+- D8 bekommt den Leser für SPDX 3 und prüft Name, Version und Lizenz je Komponente sowie die Texte der Ausnahmen.
+- Die zwei betroffenen Test-Images werden umgebaut, dazu kommen neue Test-Images. Alle gehen wieder an dich zum Review.
 
-**Was passiert danach?** D8 arbeitet schon nach dem Vorschlag. Stimmst du zu, trage ich den Text in die Guideline ein und ziehe die Baseline nach. Entscheidest du anders, passe ich D8 und die zwei betroffenen Test-Images (`invalid-sbom`, `missing-license-text`) an.
+**Antwort z. B.:** „D-1 überarbeitet ok“.
 
-**Antwort z. B.:** „D-1 wie vorgeschlagen“.
-
-### R-1 – 13 Test-Images für `oec-infra image` (bitte prüfen)
+### R-1 – 13 Test-Images für `oec-infra image` (akzeptiert am 29.10.)
 
 **Was ist das?** Kleine, künstliche Container-Images (als OCI-Archiv, je ein paar KB), die ein Test erzeugt. D8 prüft jedes davon, und das Ergebnis muss genau dem in der Liste `oec/conformance/testdata/images/index.yaml` entsprechen. Die Lizenztexte darin sind Platzhalter.
 
@@ -63,9 +73,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 - `invalid-sbom`: SBOM im neuen SPDX-3.0-Format → **durchgefallen** (hängt an D-1 (a));
 - `sbom-volume`: das Image erklärt `/opt/oi4` zum Volume, der Host könnte den Ordner also überdecken → nur ein **Hinweis**, der Inhalt selbst ist vollständig.
 
-**Bitte prüfen:** Ist jeder Fehler ein echter Verstoß gegen die genannte Regel, und sind die zwei guten Images in Ordnung? Besonders: `bad-digest` (Überspringen statt Durchfallen bei der Lizenzprüfung), die Warnungen bei `sha512`/`single-arch` und der Hinweis bei `sbom-volume`.
-
-**Antwort z. B.:** „R-1 akzeptiert“.
+**Erledigt:** Du hast R-1 akzeptiert, alle 13 stehen auf `reviewed`. `invalid-sbom` und `missing-license-text` werden nach D-1 umgebaut und gehen dann wieder an dich.
 
 ### Zur Info: was C-070 gebaut hat
 
