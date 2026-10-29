@@ -31,7 +31,7 @@ func call(t *testing.T, args ...string) (int, string, string) {
 // infra-report.schema.json.
 func checkReports(t *testing.T, args []string, stdout []byte) {
 	t.Helper()
-	if len(args) == 0 || args[0] != "image" {
+	if len(args) == 0 || args[0] != "image" && args[0] != "bus" {
 		return
 	}
 	for i := 0; i < len(args)-1; i++ {

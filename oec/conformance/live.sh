@@ -1,14 +1,15 @@
 #!/bin/sh
-# Opt-in live run of `oec-check monitor` against the Mosquitto of the dev
-# environment (oec/dev, C-051; C-052). Not part of the gate oec/check.sh:
-# it pulls the pinned image and needs a container engine.
+# Opt-in live run of `oec-check monitor` and `oec-infra bus` against the
+# Mosquitto of the dev environment (oec/dev, C-051; C-052; C-071). Not part
+# of the gate oec/check.sh: it pulls the pinned image and needs a container
+# engine.
 #
 #   oec/conformance/live.sh
 #
 # Steps: generate the dev PKI if missing (go run ./pki in oec/dev), start the
 # broker (compose up --wait), run `go test ./cmd/oec-check -run
-# TestMonitorDevBroker` with OEC_LIVE=1, stop the broker and remove its
-# volume (compose down -v).
+# TestMonitorDevBroker` and `go test ./cmd/oec-infra -run TestBusDevBroker`
+# with OEC_LIVE=1, stop the broker and remove its volume (compose down -v).
 #
 # Environment:
 #   OEC_COMPOSE    compose command (default "docker compose"; e.g.
@@ -51,5 +52,9 @@ echo "== oec-check monitor against the dev broker"
 cd "$here"
 OEC_LIVE=1 OEC_DEV_DIR="$dev" GOTOOLCHAIN=${GOTOOLCHAIN:-auto} \
     go test -count=1 -v -run '^TestMonitorDevBroker$' ./cmd/oec-check
+
+echo "== oec-infra bus against the dev broker"
+OEC_LIVE=1 OEC_DEV_DIR="$dev" GOTOOLCHAIN=${GOTOOLCHAIN:-auto} \
+    go test -count=1 -v -run '^TestBusDevBroker$' ./cmd/oec-infra
 
 echo "live: all tests passed"

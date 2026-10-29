@@ -3,7 +3,9 @@
 // offline – an OCI image layout directory or an oci-archive – and judges the
 // tests of mode image of the D8 catalog (T8-IMG-01 … 04): OCI format,
 // supported platforms, SBOM and license texts, digest integrity. No
-// container daemon and no network are needed. report-schema prints the JSON
+// container daemon and no network are needed. The command bus probes a
+// running Message Bus and judges the tests of mode bus (T8-BUS-01 … 03):
+// protocol, TLS and certificate, MaxPacketSize, ACL, OEC Registry. report-schema prints the JSON
 // Schema of the report (infra-report.schema.json, report version 1).
 //
 // Exit codes (DESIGN.md §5.3): 0 pass (warnings allowed), 1 at least one
@@ -52,6 +54,7 @@ func main() {
 
 const usage = `usage:
   oec-infra image [flags] OCI-LAYOUT-DIR | OCI-ARCHIVE.tar
+  oec-infra bus [flags]
   oec-infra report-schema
   oec-infra version
 
@@ -65,6 +68,28 @@ uncompressed tar of it (oci-archive), e.g. from
   podman save --format oci-archive IMAGE -o image.tar
 A registry reference and a Docker archive without index.json are not read.
   verdict:    --level 1|2|3 (default 3), --allow-skip
+  output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
+
+bus probes a running Message Bus like an OEC application and judges the
+bus tests of the D8 catalog (T8-BUS-01 … 03) at level 3: MQTT 3.1.1, TLS 1.2
+or higher without a plain-text listener, the broker certificate (chain to
+the CA, host name, validity), MaxPacketSize; the ACL against a second,
+unprivileged client (Set, Del and Call must not arrive, Set/Config should
+not be readable); the OEC Registry (collects MAM and Health, answers Get).
+It publishes only on the topics of its own probe AppId
+(Utility/oi4.org/oec-infra/D8/<random>).
+  connection: --broker mqtts://host[:port] | --bus-storage ROOT, --ca FILE,
+              --cert FILE --key FILE [--key-passphrase-file FILE],
+              --username NAME --password-file FILE, --insecure (dev only),
+              --config FILE (YAML, keys = flag names)
+  ACL probe:  --credentials-2 FILE | --bus-storage-2 ROOT (unprivileged
+              client; without it T8-BUS-02 is inconclusive)
+  probes:     --plain-port N (repeatable, default 1883, 0: none),
+              --max-packet-size N (default broker.json, else 262144),
+              --max-probe-size N (default 64 MiB), --timeout D (default 5s)
+  Registry:   --registry IL (default: discovered), --registry-wait D
+              (default 65s)
+  verdict:    --tests IDS, --allow-skip
   output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
 
 report-schema prints the JSON Schema of the JSON report (report version 1).
@@ -81,6 +106,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 	switch args[0] {
 	case "image":
 		return runImage(args[1:], stdout, stderr)
+	case "bus":
+		return runBus(args[1:], stdout, stderr)
 	case "report-schema":
 		if len(args) > 1 {
 			fmt.Fprintf(stderr, "%s: report-schema takes no arguments\n", tool)
