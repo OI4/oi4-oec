@@ -142,7 +142,7 @@ tests:
       --plain-port (default 1883) that accepts a CONNECT fails. The broker
       certificate chains to ca.pem / broker_ca.pem (or --ca), is not
       self-signed, names the broker host and is valid (REQ-MQTT-007; host
-      name and validity per SF-115, proposed). A PUBLISH of exactly
+      name and validity per MG 6.2.2, SF-115). A PUBLISH of exactly
       MaxPacketSize (broker.json, --max-packet-size, else 262144 with a note)
       on a 65535-octet probe topic is delivered without a disconnect (RIG
       4.1.1, SF-105); a MaxPacketSize above --max-probe-size is

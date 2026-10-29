@@ -121,8 +121,8 @@ func (r *runner) plain(ctx context.Context, d *net.Dialer, addr string) {
 
 // certificate judges the broker certificate (REQ-MQTT-007): not
 // self-signed, a chain to the CA of the client (--ca, broker_ca.pem or
-// ca.pem), and – proposed interpretation of SF-115 – valid for the broker
-// address and at the time of the run.
+// ca.pem), and valid for the broker address and at the time of the run
+// (MG 6.2.2, SF-115).
 func (r *runner) certificate(host string, certs []*x509.Certificate) {
 	leaf := certs[0]
 	c := &report.Certificate{Subject: leaf.Subject.String(), Issuer: leaf.Issuer.String(), NotBefore: leaf.NotBefore.UTC(), NotAfter: leaf.NotAfter.UTC()}
@@ -139,16 +139,16 @@ func (r *runner) certificate(host string, certs []*x509.Certificate) {
 	at := now
 	switch {
 	case now.Before(leaf.NotBefore):
-		r.violation(TProtocol, reqCert, "", "the broker certificate is not valid before %s (SF-115, proposed)", c.NotBefore.Format(time.RFC3339))
+		r.violation(TProtocol, reqCert, "", "the broker certificate is not valid before %s (MG 6.2.2)", c.NotBefore.Format(time.RFC3339))
 		at = leaf.NotBefore.Add(time.Second)
 	case now.After(leaf.NotAfter):
-		r.violation(TProtocol, reqCert, "", "the broker certificate expired at %s (SF-115, proposed)", c.NotAfter.Format(time.RFC3339))
+		r.violation(TProtocol, reqCert, "", "the broker certificate expired at %s (MG 6.2.2)", c.NotAfter.Format(time.RFC3339))
 		at = leaf.NotAfter.Add(-time.Second)
 	default:
 		r.checked(TProtocol, reqCert, "the broker certificate is valid until %s", c.NotAfter.Format(time.RFC3339))
 	}
 	if err := leaf.VerifyHostname(host); err != nil {
-		r.violation(TProtocol, reqCert, "", "the broker certificate is not valid for the broker address %s (SF-115, proposed): %v", host, err)
+		r.violation(TProtocol, reqCert, "", "the broker certificate is not valid for the broker address %s (MG 6.2.2): %v", host, err)
 	} else {
 		r.checked(TProtocol, reqCert, "the broker certificate is valid for %s", host)
 	}

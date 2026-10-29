@@ -272,6 +272,33 @@ func TestClientCertTLS(t *testing.T) {
 	}
 }
 
+// TestCertificateRule: a broker certificate for a different host or outside
+// its validity violates REQ-MQTT-007 under MG 6.2.2 (SF-115, decided in the
+// C-071 review), so the finding cites MG 6.2.2 and is not marked proposed.
+func TestCertificateRule(t *testing.T) {
+	for _, variant := range []string{mqtttest.CertWrongHost, mqtttest.CertExpired} {
+		t.Run(variant, func(t *testing.T) {
+			t.Parallel()
+			c := scenario(t, TProtocol+"/"+variant)
+			c.Tests = []string{TProtocol}
+			res := Run(context.Background(), c)
+			found := false
+			for _, o := range res.Observations {
+				if o.Req != reqCert || o.Kind != verdict.Violation {
+					continue
+				}
+				found = true
+				if !strings.Contains(o.Detail, "(MG 6.2.2)") || strings.Contains(o.Detail, "proposed") {
+					t.Errorf("finding %q: want the rule MG 6.2.2, not a proposed interpretation", o.Detail)
+				}
+			}
+			if !found {
+				t.Error("no violation of REQ-MQTT-007")
+			}
+		})
+	}
+}
+
 // TestFixtureCoverage: every bus test has a positive fixture (it passes)
 // and a negative fixture (an expectation worse than pass).
 func TestFixtureCoverage(t *testing.T) {

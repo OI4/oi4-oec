@@ -103,7 +103,7 @@ scenarios:
       run (ca.pem / broker_ca.pem): REQ-MQTT-007 fails; REQ-MQTT-002 and
       REQ-CNT-003 are skipped inconclusive.
   - fault: T8-BUS-01/wrong-host
-    status: reviewed
+    status: draft
     positive: false
     tests: [T8-BUS-01]
     expect:
@@ -111,18 +111,18 @@ scenarios:
     notes: >-
       The broker certificate is signed by the CA but issued for
       broker.invalid, not for the broker address localhost: REQ-MQTT-007
-      fails under the proposed interpretation of SF-115; REQ-MQTT-002 and
-      REQ-CNT-003 are skipped inconclusive.
+      fails (MG 6.2.2, SF-115 decided in the C-071 review); REQ-MQTT-002
+      and REQ-CNT-003 are skipped inconclusive.
   - fault: T8-BUS-01/expired
-    status: reviewed
+    status: draft
     positive: false
     tests: [T8-BUS-01]
     expect:
       T8-BUS-01: {outcome: fail, reqs: [REQ-MQTT-007]}
     notes: >-
-      The broker certificate expired a minute ago: REQ-MQTT-007 fails under
-      the proposed interpretation of SF-115; REQ-MQTT-002 and REQ-CNT-003
-      are skipped inconclusive.
+      The broker certificate expired a minute ago: REQ-MQTT-007 fails (MG
+      6.2.2, SF-115 decided in the C-071 review); REQ-MQTT-002 and
+      REQ-CNT-003 are skipped inconclusive.
   - fault: T8-BUS-01/no-311
     status: reviewed
     positive: false
