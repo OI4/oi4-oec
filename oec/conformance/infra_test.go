@@ -116,6 +116,73 @@ func TestBusFixtureIndex(t *testing.T) {
 	}
 }
 
+// infraHost is a valid oec-infra host report of version 1.
+const infraHost = `{
+  "report": 1, "tool": "oec-infra", "version": "dev", "schemas": "2.0.1-dev", "baseline": "b955783",
+  "catalog": "b955783", "command": ["oec-infra", "host", "--root", "/"], "mode": "host",
+  "input": "/", "level": 3,
+  "started": "2026-10-30T10:00:00Z", "ended": "2026-10-30T10:00:02Z",
+  "host": {"root": "/", "container": "oec-app",
+    "storages": [{"name": "mqtt", "path": "/etc/oi4/mqtt", "exists": true, "mount": "ro",
+      "files": [{"name": "broker.json", "mode": "-r--r--r--", "size": 61}]},
+      {"name": "secrets", "path": "/run/secrets/oi4", "exists": false, "mount": "none"}],
+    "platform": {"os": "linux", "kernel": "6.6.31", "machine": "aarch64", "memory": 4000000000,
+      "storage": 32000000000, "interfaces": ["eth0"], "daemon": "unix:///var/run/docker.sock"}},
+  "tests": [{"id": "T8-HST-04", "title": "Platform host", "level": 1, "status": "implemented", "outcome": "pass",
+    "reqs": [{"req": "REQ-PLT-003", "obligation": "MUST", "outcome": "manual",
+      "evidence": [{"path": "/etc/os-release", "detail": "patch level: Debian 12"}]}]}],
+  "summary": {"pass": 1}, "exit": 0
+}`
+
+func TestInfraHostReport(t *testing.T) {
+	if err := ValidateInfraReport([]byte(infraHost)); err != nil {
+		t.Fatal(err)
+	}
+	h := func(m map[string]any) map[string]any { return m["host"].(map[string]any) }
+	st := func(m map[string]any) map[string]any { return h(m)["storages"].([]any)[0].(map[string]any) }
+	for name, bad := range map[string][]byte{
+		"no host":         patch(t, infraHost, func(m map[string]any) { delete(m, "host") }),
+		"broker":          patch(t, infraHost, func(m map[string]any) { m["broker"] = map[string]any{} }),
+		"form":            patch(t, infraHost, func(m map[string]any) { m["form"] = "oci-layout" }),
+		"command":         patch(t, infraHost, func(m map[string]any) { m["command"] = []any{"oec-infra", "bus"} }),
+		"no root":         patch(t, infraHost, func(m map[string]any) { delete(h(m), "root") }),
+		"storage kind":    patch(t, infraHost, func(m map[string]any) { st(m)["name"] = "data" }),
+		"mount":           patch(t, infraHost, func(m map[string]any) { st(m)["mount"] = "readonly" }),
+		"file content":    patch(t, infraHost, func(m map[string]any) { st(m)["files"].([]any)[0].(map[string]any)["content"] = "x" }),
+		"file mode":       patch(t, infraHost, func(m map[string]any) { st(m)["files"].([]any)[0].(map[string]any)["mode"] = "0644" }),
+		"platform secret": patch(t, infraHost, func(m map[string]any) { h(m)["platform"].(map[string]any)["password"] = "x" }),
+	} {
+		if err := ValidateInfraReport(bad); err == nil {
+			t.Errorf("%s: accepted", name)
+		}
+	}
+}
+
+func TestHostFixtureIndex(t *testing.T) {
+	list, err := HostFixtures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) == 0 {
+		t.Fatal("no host fixture")
+	}
+	seen := map[string]bool{}
+	for _, f := range list {
+		if f.Kind != "host" || f.Fault == "" || f.File != "" || seen[f.Fault] || f.Status != "draft" && f.Status != "reviewed" {
+			t.Errorf("fixture %+v", f)
+		}
+		seen[f.Fault] = true
+		if len(f.Expect) == 0 {
+			t.Errorf("%s: no expectation", f.Fault)
+		}
+		for id, e := range f.Expect {
+			if !strings.HasPrefix(id, "T8-HST-") || e.Outcome == "" {
+				t.Errorf("%s: expect %s %+v", f.Fault, id, e)
+			}
+		}
+	}
+}
+
 func TestImageFixtureIndex(t *testing.T) {
 	list, err := ImageFixtures()
 	if err != nil {

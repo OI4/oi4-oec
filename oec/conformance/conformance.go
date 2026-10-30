@@ -97,22 +97,28 @@ var imageIndex []byte
 //go:embed testdata/bus/index.yaml
 var busIndex []byte
 
+//go:embed testdata/hosts/index.yaml
+var hostIndex []byte
+
 // Expect is the expected verdict of one test in a fixture: the outcome and
 // the requirements with this outcome.
 type Expect struct {
 	Outcome string   `yaml:"outcome"`
 	Reqs    []string `yaml:"reqs"`
+	// Manual lists the requirements whose verdict is manual (D8: a measured
+	// fact a human judges); they do not make the test worse than pass.
+	Manual []string `yaml:"manual"`
 }
 
 // Fixture is one entry of a fixture index.
 type Fixture struct {
-	Kind     string            `yaml:"-"` // sim | capture | image | bus
+	Kind     string            `yaml:"-"` // sim | capture | image | bus | host
 	Name     string            `yaml:"-"` // the fault (sim) or the file (capture)
 	Fault    string            `yaml:"fault"`
 	File     string            `yaml:"file"`
 	Status   string            `yaml:"status"`
 	Positive bool              `yaml:"positive"`
-	Tests    []string          `yaml:"tests"` // sim, bus: the selected tests (patterns); empty: every test
+	Tests    []string          `yaml:"tests"` // sim, bus, host: the selected tests (patterns); empty: every test
 	Peer     bool              `yaml:"peer"`
 	Announce bool              `yaml:"announce"`
 	Expect   map[string]Expect `yaml:"expect"`
@@ -212,6 +218,26 @@ func BusFixtures() ([]Fixture, error) {
 		f.Kind, f.Name = "bus", f.Fault
 	}
 	return ix.Scenarios, nil
+}
+
+// HostFixtures returns the entries of testdata/hosts/index.yaml (the host
+// roots of oec-infra host) in order. Like BusFixtures they are not part of
+// Fixtures (A-248).
+func HostFixtures() ([]Fixture, error) {
+	var ix struct {
+		Hosts []Fixture `yaml:"hosts"`
+	}
+	if err := decode(hostIndex, &ix); err != nil {
+		return nil, fmt.Errorf("testdata/hosts/index.yaml: %w", err)
+	}
+	for i := range ix.Hosts {
+		f := &ix.Hosts[i]
+		if f.Fault == "" || f.File != "" || f.Peer || f.Announce {
+			return nil, fmt.Errorf("testdata/hosts/index.yaml: entry %d: a host fixture names a fault and no file", i+1)
+		}
+		f.Kind, f.Name = "host", f.Fault
+	}
+	return ix.Hosts, nil
 }
 
 // Fixtures returns the sim fixtures followed by the capture fixtures.

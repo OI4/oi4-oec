@@ -106,14 +106,22 @@ tests:
     mode: host
     needs: [host-access]
     reqs: [REQ-CNT-001, REQ-CNT-003, REQ-MQTT-003]
-    status: planned
-    notes: broker.json is checked with the broker-json vectors of oec/spec (V-BRK-…) and platform/broker.schema.json.
+    status: implemented
+    notes: >-
+      broker.json is checked against platform/broker.schema.json (the broker-json vectors of oec/spec, V-BRK-…, are its
+      test vectors), broker.pem is verified by broker_ca.pem or else ca.pem of the certificate storage; the storage is
+      mounted read-only (Linux mount table; elsewhere reported as unknown). The validity and host name of the broker
+      certificate are judged by T8-BUS-01 (REQ-MQTT-007).
   - id: T8-HST-02
     title: Certificate and secret storages
     mode: host
     needs: [host-access]
     reqs: [REQ-CNT-002, REQ-CNT-005, REQ-CNT-006, REQ-CNT-007, REQ-CNT-008, REQ-MQTT-011]
-    status: planned
+    status: implemented
+    notes: >-
+      ca.pem, the certificate of the application (<containername>.pem with the key of private_key.pem), credentials,
+      private_key.pem and passphrase (decrypted) and the read-only mounts are checked; modes and sizes are reported,
+      never the content of a secret.
   - id: T8-HST-03
     title: Application storages are not shared
     mode: host
@@ -125,8 +133,11 @@ tests:
     mode: host
     needs: [host-access]
     reqs: [REQ-PLT-001, REQ-PLT-003, REQ-PLT-006, REQ-PLT-007, REQ-PLT-008]
-    status: planned
-    notes: Architecture, RAM, storage, network interface and container daemon are measured; "current patch level" is reported (OS release and pending updates where the package manager tells), the verdict is manual.
+    status: implemented
+    notes: >-
+      Architecture, RAM, storage, network interface and container daemon are measured on the system D8 runs on; the
+      Message Bus and the OEC Registry are reached with the storages of the root. "Current patch level" is reported
+      (kernel release, os-release, reboot-required), the verdict is manual; pending updates are not queried.
 
   # --- bus: the platform's Message Bus ------------------------------------------
   - id: T8-BUS-01
