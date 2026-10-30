@@ -123,6 +123,9 @@ const (
 	Warning   Kind = "warning"   // a validate warning: always warn
 	Note      Kind = "note"      // a hint or heuristic: always info
 	Skipped   Kind = "skipped"   // the rule could not be judged; Inconclusive marks a gap of the run
+	// Reported is a measured fact that a human judges (outcome manual),
+	// e.g. the patch level of the platform host (oec-infra host, C-072).
+	Reported Kind = "reported"
 )
 
 // Evidence points into the observed traffic.
@@ -257,7 +260,7 @@ func judge(id string, obs []Observation, reqs Requirements, level int) ReqResult
 		return r
 	}
 	sev := Severity(r.Obligation)
-	var bad, notes, skips, incon []Evidence
+	var bad, notes, skips, incon, reported []Evidence
 	checked := false
 	worst := Pass
 	for _, o := range obs {
@@ -275,6 +278,8 @@ func judge(id string, obs []Observation, reqs Requirements, level int) ReqResult
 			bad = append(bad, o.Evidence)
 		case Note:
 			notes = append(notes, o.Evidence)
+		case Reported:
+			reported = append(reported, o.Evidence)
 		case Skipped:
 			if o.Inconclusive {
 				incon = append(incon, o.Evidence)
@@ -292,6 +297,8 @@ func judge(id string, obs []Observation, reqs Requirements, level int) ReqResult
 	case len(incon) > 0:
 		r.Outcome, r.Inconclusive, r.Evidence = Skip, Mandatory(r.Obligation), append(incon, notes...)
 		r.Reason = reasons(incon)
+	case len(reported) > 0:
+		r.Outcome, r.Evidence = Manual, append(reported, notes...)
 	case len(notes) > 0:
 		r.Outcome, r.Evidence = Info, notes
 	case checked:

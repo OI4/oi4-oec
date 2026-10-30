@@ -24,7 +24,7 @@ type Infra struct {
 	Baseline string                  `json:"baseline"`
 	Catalog  string                  `json:"catalog"`
 	Command  []string                `json:"command"`
-	Mode     string                  `json:"mode"` // image | bus
+	Mode     string                  `json:"mode"` // image | bus | host
 	Input    string                  `json:"input"`
 	Form     string                  `json:"form,omitempty"` // image: oci-layout | oci-archive
 	Level    int                     `json:"level"`
@@ -32,6 +32,7 @@ type Infra struct {
 	Ended    time.Time               `json:"ended"`
 	Image    *Image                  `json:"image,omitempty"`
 	Broker   *Broker                 `json:"broker,omitempty"`
+	Host     *Host                   `json:"host,omitempty"`
 	Tests    []verdict.TestResult    `json:"tests"`
 	Summary  map[verdict.Outcome]int `json:"summary"`
 	Exit     int                     `json:"exit"`
@@ -76,6 +77,46 @@ type Certificate struct {
 	Names     []string  `json:"names,omitempty"` // DNS names and IP addresses of the subject alternative name
 }
 
+// Host is what oec-infra host found in the storages and on the platform
+// host: names, modes and sizes, never a file content.
+type Host struct {
+	Root      string    `json:"root"`
+	Container string    `json:"container,omitempty"`
+	Storages  []Storage `json:"storages"`
+	Platform  *Platform `json:"platform,omitempty"`
+}
+
+// Storage is one container storage of RIG 4.1.
+type Storage struct {
+	Name   string `json:"name"` // mqtt | certs | secrets
+	Path   string `json:"path"`
+	Exists bool   `json:"exists"`
+	Mount  string `json:"mount"` // ro | rw | none | unknown
+	Files  []File `json:"files,omitempty"`
+}
+
+// File is one entry of a storage.
+type File struct {
+	Name string `json:"name"`
+	Mode string `json:"mode,omitempty"`
+	Size int64  `json:"size"`
+}
+
+// Platform is what oec-infra host measured on the platform host (RIG 5.1).
+type Platform struct {
+	OS            string   `json:"os,omitempty"`
+	Kernel        string   `json:"kernel,omitempty"`
+	Distribution  string   `json:"distribution,omitempty"`
+	Machine       string   `json:"machine,omitempty"`
+	Memory        uint64   `json:"memory,omitempty"`
+	Storage       uint64   `json:"storage,omitempty"`
+	StorageSource string   `json:"storage_source,omitempty"`
+	Interfaces    []string `json:"interfaces,omitempty"`
+	Daemon        string   `json:"daemon,omitempty"`
+	Broker        string   `json:"broker,omitempty"`
+	Registry      string   `json:"registry,omitempty"`
+}
+
 // JSON writes the report as one JSON document.
 func (r *Infra) JSON(w io.Writer) error {
 	enc := json.NewEncoder(w)
@@ -112,6 +153,9 @@ func (r *Infra) Text(w io.Writer) error {
 			fmt.Fprintf(&b, "OEC Registry %s\n", br.Registry)
 		}
 	}
+	if h := r.Host; h != nil {
+		writeHost(&b, h)
+	}
 	if im := r.Image; im != nil {
 		kind := "image manifest"
 		if im.Index {
@@ -145,6 +189,55 @@ func (r *Infra) Text(w io.Writer) error {
 	fmt.Fprintf(&b, "summary: %s; result %s (exit %d)\n", summaryLine(r.Summary), exitText[r.Exit], r.Exit)
 	_, err := io.WriteString(w, b.String())
 	return err
+}
+
+func writeHost(b *strings.Builder, h *Host) {
+	if h.Container != "" {
+		fmt.Fprintf(b, "container %s\n", h.Container)
+	}
+	for _, s := range h.Storages {
+		if !s.Exists {
+			fmt.Fprintf(b, "storage %s %s: missing\n", s.Name, s.Path)
+			continue
+		}
+		names := make([]string, len(s.Files))
+		for i, f := range s.Files {
+			names[i] = f.Name
+			if f.Mode != "" {
+				names[i] += " " + f.Mode
+			}
+		}
+		fmt.Fprintf(b, "storage %s %s (mount %s): %s\n", s.Name, s.Path, s.Mount, strings.Join(names, ", "))
+	}
+	p := h.Platform
+	if p == nil {
+		return
+	}
+	if p.OS != "" {
+		fmt.Fprintf(b, "platform %s %s %s", p.OS, p.Machine, p.Kernel)
+		if p.Distribution != "" {
+			fmt.Fprintf(b, " (%s)", p.Distribution)
+		}
+		b.WriteString("\n")
+	}
+	if p.Memory > 0 {
+		fmt.Fprintf(b, "memory %d octets\n", p.Memory)
+	}
+	if p.Storage > 0 {
+		fmt.Fprintf(b, "non-volatile memory %d octets (%s)\n", p.Storage, p.StorageSource)
+	}
+	if len(p.Interfaces) > 0 {
+		fmt.Fprintf(b, "network interfaces %s\n", strings.Join(p.Interfaces, ", "))
+	}
+	if p.Daemon != "" {
+		fmt.Fprintf(b, "container daemon %s\n", p.Daemon)
+	}
+	if p.Broker != "" {
+		fmt.Fprintf(b, "broker %s\n", p.Broker)
+	}
+	if p.Registry != "" {
+		fmt.Fprintf(b, "OEC Registry %s\n", p.Registry)
+	}
 }
 
 // JUnit writes the report as JUnit XML (same structure as oec-check).

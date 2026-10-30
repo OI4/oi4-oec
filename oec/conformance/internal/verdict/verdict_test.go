@@ -125,3 +125,31 @@ func TestTestOutcomeIgnoresNotApplicable(t *testing.T) {
 		t.Errorf("nothing observed: %+v", r)
 	}
 }
+
+// TestReported: a reported fact is judged by a human (outcome manual); a
+// violation still wins, and a test with a manual requirement and nothing
+// worse passes (manual ranks as pass, §5.1; oec-infra host, C-072).
+func TestReported(t *testing.T) {
+	tests := []Test{{ID: "T", Status: "implemented", Level: 1, Reqs: []string{"REQ-A", "REQ-B"}}}
+	obs := []Observation{
+		{Test: "T", Req: "REQ-A", Kind: Checked},
+		{Test: "T", Req: "REQ-B", Kind: Checked},
+		{Test: "T", Req: "REQ-B", Kind: Reported, Evidence: Evidence{Detail: "patch level"}},
+		{Test: "T", Req: "REQ-B", Kind: Note, Evidence: Evidence{Detail: "hint"}},
+	}
+	r := Build(tests, obs, reqs(), 1)[0]
+	if r.Outcome != Pass || r.Reqs[1].Outcome != Manual || len(r.Reqs[1].Evidence) != 2 || r.Reqs[1].Evidence[0].Detail != "patch level" {
+		t.Errorf("reported: %+v", r)
+	}
+	if Exit([]TestResult{r}, false) != ExitPass {
+		t.Error("a manual requirement does not change the exit code")
+	}
+	obs = append(obs, Observation{Test: "T", Req: "REQ-B", Kind: Violation, Evidence: Evidence{Detail: "bad"}})
+	if r := Build(tests, obs, reqs(), 2)[0]; r.Reqs[1].Outcome != Fail {
+		t.Errorf("a violation wins over a reported fact: %+v", r)
+	}
+	incon := []Observation{{Test: "T", Req: "REQ-B", Kind: Reported}, {Test: "T", Req: "REQ-B", Kind: Skipped, Inconclusive: true}}
+	if r := Build(tests, incon, reqs(), 2)[0]; !r.Reqs[1].Inconclusive {
+		t.Errorf("an inconclusive observation wins over a reported fact: %+v", r)
+	}
+}
