@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 30.10.2026, C-071-Review Nachtrag 4: Du hast R-2 akzeptiert („R-2 akzeptiert“). REQ-MQTT-007 und alle 29 Broker-Szenarien stehen auf `reviewed`. **Für dich ist nichts offen.**_
+_Stand: 30.10.2026, C-072 (P5b Inkrement 3: `oec-infra host`). **Für dich offen: D-1** (SF-116, Speichergrößen in RIG 5.1) **und R-1** (55 Prüfszenarien)._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,9 +24,53 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts. Alle Punkte aus dem C-071-Review (R-1, D-1, R-2) sind beantwortet und umgesetzt.
+Zwei Punkte aus C-072: **D-1** (eine Entscheidung zur Guideline) und **R-1** (Testdaten prüfen).
+
+### D-1 – SF-116: Was heißt „1 GB RAM“ und „4 GB Speicher“ in RIG 5.1?
+
+- **Worum geht es?** RIG 5.1 verlangt vom Edge-Rechner „mindestens 1 GB RAM“ und „mindestens 4 GB nichtflüchtigen Speicher“. Offen bleibt zweierlei:
+  - (a) Ist 1 GB = 1.000.000.000 Byte (SI) oder 1.073.741.824 Byte (GiB)?
+  - (b) Zählt die **eingebaute** Größe laut Datenblatt oder das, was das Betriebssystem **sieht**?
+- **Warum ist das wichtig?** Ein Board mit 1 GiB RAM zeigt Linux nur etwa 0,9 · 10^9 Byte, weil Firmware, Kernel und Grafik sich vorher etwas nehmen. Eine 4-GB-Speicherkarte hat weniger als 4 · 10^9 Byte Nutzfläche. Liest man „sichtbar“, fällt so ein Board durch; liest man GiB, fällt ein Board mit genau 10^9 Byte durch. Ein Prüfwerkzeug kann das nicht entscheiden.
+- **Vorschlag:** 1 GB = 10^9 Byte, und gemeint ist die **eingebaute** Größe (Datenblatt). Ergänzung in RIG 5.1: „The edge computer must provide a minimum of 1 GB RAM (nominal size of the installed memory; 1 GB = 10^9 octets)“, genauso für die 4 GB.
+- **Was D8 bis zu deiner Entscheidung macht:** ab 10^9 Byte RAM und 4 · 10^9 Byte Speicher → bestanden; unter 768 MiB RAM bzw. 3,5 · 10^9 Byte → durchgefallen; dazwischen → „manuell“ (ein Mensch vergleicht mit dem Datenblatt; die Meldung nennt „SF-116“). Entscheidest du anders, ändern sich nur diese Grenzen.
+- **Empfehlung:** wie vorgeschlagen.
+
+### R-1 – 55 Prüfszenarien für `oec-infra host`
+
+- **Wo:** `oec/conformance/testdata/hosts/index.yaml`, alle `draft`. Die Beispiel-Rechner entstehen bei jedem Testlauf neu (in einem Temp-Ordner, mit Test-Zertifikaten); eingecheckt ist nur die Liste.
+- **Der gute Fall (`none`):** ein Container `oec-host-app` mit allen drei Storages schreibgeschützt eingehängt, Broker-Zertifikat von der richtigen CA, gültige `broker.json`, Zugangsdaten in `credentials`; der Rechner: Linux, x86_64, 2 GB RAM, 16 GB Speicher, Netzwerk `eth0` aktiv, Docker erreichbar, Broker nimmt die Anmeldung an, eine Registry läuft. Den Patch-Stand kann D8 nur berichten – er steht bei jedem bestandenen T8-HST-04 als „manuell“.
+- **Gute Varianten (7):** `none`; Broker-Zertifikat einer anderen CA, die in `broker_ca.pem` liegt; Anmeldung mit Client-Zertifikat und verschlüsseltem Schlüssel samt `passphrase`; unverschlüsselter Schlüssel ohne Passphrase; jede Geheimnis-Datei einzeln eingehängt (so macht es Docker); ARMv7; Docker-Adresse aus `DOCKER_HOST`.
+- **Fehlerfälle (48), grob:**
+  - **Message-Bus-Storage (T8-HST-01):** fehlt, Broker-Zertifikat fehlt/kaputt/von fremder CA, `broker.json` fehlt, ist kein JSON, verletzt das Schema (MaxPacketSize 1024) oder hat einen Port in der Adresse, Storage beschreibbar oder (im Container) gar nicht eingehängt → durchgefallen. Nur Hinweise: `broker_ca.pem` gleich der CA, Datei für alle beschreibbar, Broker-Zertifikat abgelaufen (das bewertet `oec-infra bus`).
+  - **Zertifikats- und Geheimnis-Storage (T8-HST-02):** CA fehlt oder ist keine CA, Storage beschreibbar, Geheimnisse fehlen, eine fremde Datei `token`, kaputte `credentials`, Benutzername `app/1` (Schrägstrich nicht erlaubt), Schlüssel passt nicht zum Zertifikat, Passphrase fehlt/falsch/überflüssig, Schlüssel ohne Zertifikat → durchgefallen. Nur Warnungen („sollte“-Regeln): privater Schlüssel in einem anderen Storage, Zertifikat heißt nicht wie der Container.
+  - **Plattform (T8-HST-04):** 32-Bit-x86, 512 MiB RAM, 2 · 10^9 Byte Speicher, kein Netzwerk außer Loopback, kein Linux, kein Docker oder nur eine tote Socket-Datei, Broker nicht erreichbar oder Anmeldung falsch, **keine Registry** → durchgefallen. Bestanden mit „manuell“: 950 · 10^6 Byte RAM sichtbar, 3,9 · 10^9 Byte Speicher (beides hängt an D-1), nur virtuelle Netzwerkkarten (so sieht es ein Container), Docker da, aber keine Berechtigung. Übersprungen: Betriebssystem liefert keine Werte; `--offline`.
+- **Bitte besonders ansehen:**
+  - die „manuell“-Bänder (hängen an D-1) und „nur virtuelle Netzwerkkarten“;
+  - **keine Registry = durchgefallen**: Die Plattform muss eine Registry mitbringen. `oec-infra bus` sagt im selben Fall nur „übersprungen“, weil es den Broker prüft und nicht die Plattform;
+  - **nicht eingehängter Storage:** fällt nur durch, wenn D8 in einem Container läuft. Auf einem normalen Ordner und unter macOS/Windows bewertet D8 das Einhängen nicht (A-262);
+  - die drei Hinweise und die Warnungen.
+- **Wenn ok:** „R-1 akzeptiert“ → alle 55 auf `reviewed`.
+
+### Zur Info: was C-072 gebaut hat
+
+- **`oec-infra host`** (T8-HST-01, 02, 04 fertig, jetzt 10 von 17 D8-Tests): prüft einen Rechner bzw. Container von innen.
+  - **T8-HST-01:** der Message-Bus-Storage `/etc/oi4/mqtt`: Broker-Zertifikat passt zur CA, `broker.json` passt zum Schema aus D1, schreibgeschützt eingehängt.
+  - **T8-HST-02:** der Zertifikats-Storage `/etc/oi4/certs` und die Geheimnisse `/run/secrets/oi4`: richtige Dateien, Schlüssel und Passphrase passen zusammen, schreibgeschützt eingehängt.
+  - **T8-HST-04:** der Rechner selbst: Prozessor-Architektur, RAM, Speicher, Netzwerk, Linux, Docker/Podman erreichbar, Broker erreichbar mit den Zugangsdaten aus den Storages, eine OEC Registry meldet sich.
+  - D8 **liest nur** und schreibt nie etwas. Im Bericht stehen Dateinamen, Rechte und Größen – nie Inhalte oder Geheimnisse.
+  - Ob ein Storage eingehängt ist, kann D8 nur unter Linux sehen. Darum läuft `host` am besten im Container der Anwendung (oder in einem mit denselben Mounts).
+- **Neue Bewertung „manuell“:** Manche Werte kann D8 messen, aber nicht beurteilen (Patch-Stand, RAM knapp unter 1 GB). Dann steht der Wert im Bericht mit „manuell“; der Test bleibt bestanden (A-263).
+- **Lauf gegen unsere Entwicklungsumgebung** (freiwillig, jetzt Teil von `live.sh`):
+  - auf dem Mac und in einem Linux-Container direkt neben dem Dev-Broker: T8-HST-01 und 02 bestehen;
+  - T8-HST-04 fällt durch, weil es noch keine Registry gibt (kommt mit P7); auf dem Mac zusätzlich, weil macOS kein Linux ist;
+  - mit beschreibbar eingehängten Geheimnissen fällt T8-HST-02 durch, wie erwartet;
+  - an `oec/dev` war nichts zu korrigieren.
+- **Ein alter Fehler behoben:** `oec-check` und `oec-infra` ließen sich nicht für 32-Bit-ARM (ARMv7) bauen, eine Plattform aus RIG 5.1. Ursache war eine Konstante, die in 32 Bit nicht passte (A-269); D7 verhält sich unverändert.
+- Keine neue Bibliothek, nichts Geprüftes geändert, D7 und `COVERAGE.md` unverändert. Das nächste Stück (Anbindung an Docker/Podman) habe ich nicht vorgezogen.
 
 ### Was aus deinem Review C-071 geworden ist (Kurzfassung)
+
 
 - **R-1:** akzeptiert („R-1 akzeptiert“). Alle Broker-Szenarien von `oec-infra bus` stehen auf `reviewed`.
 - **Korrektur der Anzahl:** In C-071 habe ich „28 Szenarien“ geschrieben (und im Chat „6 gut, 22 mit Fehler“). Richtig sind **29** (6 gut, 23 mit Fehler) – genau die, die in R-1 einzeln aufgezählt waren. Die Zahl ist überall korrigiert; inhaltlich hat sich nichts geändert.
@@ -810,15 +854,32 @@ Neu aus dem C-070-Review (nach deinem D-1):
   - Hinweise statt Fehler: Verweise auf andere SBOM-Dokumente, ein Volume über `/opt/oi4`, eine leere Komponentenliste.
   - Keine neue Bibliothek.
 
+
+Neu aus C-072 (P5b Inkrement 3, `host`):
+- **A-259 (neu) – Befehl:** `oec-infra host --root DIR` (Standard `/`); jeder Storage lässt sich auch einzeln angeben, der Container-Name mit `--container`. D8 liest nur, höchstens 1 MiB pro Datei, und schreibt keine Inhalte oder Geheimnisse in den Bericht.
+- **A-260 (neu) – T8-HST-01:** Das Broker-Zertifikat wird gegen `broker_ca.pem` geprüft, sonst gegen `ca.pem`. Ist es abgelaufen, gibt es hier nur einen Hinweis, weil `oec-infra bus` Gültigkeit und Adresse prüft. `broker.json` wird gegen das Schema aus D1 geprüft.
+- **A-261 (neu) – T8-HST-02:** Im Geheimnis-Storage dürfen nur `credentials`, `private_key.pem` und `passphrase` liegen. Ein verschlüsselter Schlüssel braucht eine passende Passphrase, und zum Schlüssel gehört das Zertifikat `<Containername>.pem`. Die zwei „sollte“-Regeln geben nur Warnungen.
+- **A-262 (neu) – Einhängen:** D8 sieht nur unter Linux, ob ein Storage eingehängt ist. Kein eigener Mount ist nur dann ein Fehler, wenn D8 in einem Container läuft.
+- **A-263 (neu) – „manuell“:** Ein gemessener Wert, den ein Mensch beurteilen muss, erscheint als „manuell“ und verschlechtert den Test nicht.
+- **A-264 (neu) – Hardware:** Grenzen und „manuell“-Bänder wie bei D-1; beim Netzwerk muss eine echte Netzwerkkarte aktiv sein. Gemessen wird mit Bordmitteln von Go je Betriebssystem, ohne neue Bibliothek.
+- **A-265 (neu) – Linux und Patch-Stand:** Kernel, Distribution und „Neustart nötig“ werden berichtet. Paketmanager fragt D8 nicht, weil die sich je nach Distribution unterscheiden und Netz brauchen.
+- **A-266 (neu) – Docker/Podman:** D8 nimmt `--daemon`, sonst `DOCKER_HOST`, sonst die üblichen Sockets. Hier genügt es, dass eine Verbindung zustande kommt; die eigentliche Docker-Schnittstelle kommt mit C-073.
+- **A-267 (neu) – Broker und Registry:** D8 meldet sich mit den Zugangsdaten aus den Storages an. Meldet sich keine Registry, ist das ein Fehler der Plattform.
+- **A-268 (neu) – Selbsttest:** 55 Szenarien mit nachgebauten Rechnern; kein Root, kein Docker, kein Netz außer der Loopback-Schnittstelle.
+- **A-269 (neu) – 32-Bit-Fehler** behoben (siehe oben).
+- **A-270 (neu) – Freiwillige Läufe:** auf dem Rechner selbst und in einem Linux-Container, beide in `live.sh`.
+
 ---
 
-### Was als Nächstes passiert (C-072)
+### Was als Nächstes passiert (C-073)
 
-1. **C-072:** das dritte Stück von D8, `oec-infra host`: prüft den Rechner (Ablage der Storages und ihre Rechte, `broker.json`, Plattform-Eigenschaften). Selbsttest gegen erzeugte Beispiel-Rechner-Verzeichnisse, freiwillig gegen unsere Entwicklungsumgebung. Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
+1. Deine Antworten zu **D-1** und **R-1** (werden zuerst eingetragen; D-1 ändert RIG 5.1, danach wird die Baseline nachgezogen).
+2. **C-073:** das vierte Stück von D8: eine eigene, nur lesende Anbindung an Docker/Podman, `oec-infra container` (laufende Container prüfen, T8-CTR-01 … 03) und T8-HST-03 (Storages verschiedener Anwendungen sind getrennt). Selbsttest gegen eine nachgebaute Docker-Schnittstelle. Läuft in einer **neuen Sitzung**; der Startauftrag steht in `prompt.md`.
 
 ---
 
 ## Begriffe aus den letzten Zyklen
+
 
 ### Begriffe aus C-045
 

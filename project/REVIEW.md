@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-30, C-071 review addendum 4: you accepted R-2 ("R-2 akzeptiert"); REQ-MQTT-007 and all 29 broker scenarios are `reviewed`. Nothing is open (R-1, D-1 and R-2 of the C-071 review answered and applied)._
+_Last updated: 2026-10-30, C-072 (P5b increment 3: `oec-infra host`). Open for you: **D-1** (SF-116, RIG 5.1 memory sizes) and **R-1** (55 host scenarios). A-259 … A-270 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -207,10 +207,18 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - D8 T8-BUS-01: same verdicts, the findings cite "(MG 6.2.2)" instead of "(SF-115, proposed)"; the notes of the scenarios `T8-BUS-01/wrong-host` and `/expired` follow → `draft`.
   - Together → **R-2** (numbered on in the C-071 review because R-1 is answered).
 - C-071 review addendum 4: you accepted **R-2** ("R-2 akzeptiert"); REQ-MQTT-007 and the scenarios `T8-BUS-01/wrong-host`, `/expired` are `reviewed` – all 29 broker scenarios `reviewed`. No draft, no open finding. Nothing is open.
+- C-072 (P5b increment 3):
+  - **`oec-infra host`** (T8-HST-01, 02, 04 `implemented`, 10 of 17 D8 tests): reads the storages of RIG 4.1 below `--root` (default `/`) and judges content, certificates, secrets and – on Linux, from the mount table – read-only mounts (T8-HST-01 Message Bus storage and `broker.json` against the D1 schema; T8-HST-02 certificate and secret storages). T8-HST-04 measures the host D8 runs on: architecture, RAM, non-volatile memory, network, Linux and patch level (reported for a manual verdict), container daemon, broker and OEC Registry. Read-only; no secret or file content in the report.
+  - **55 host scenarios** (7 positive) on generated roots with fake platform facts, mount tables and daemons, against `mqtttest` and `registrytest` → **R-1**.
+  - **One finding: SF-116** (RIG 5.1: is "1 GB RAM / 4 GB non-volatile memory" 10^9 or 2^30 octets, nominal or usable?) → **D-1**; D8 implements the proposal with a manual band until you decide.
+  - New verdict outcome on a requirement: `manual` (a measured value a human judges, e.g. the patch level); it does not make the test worse (A-263).
+  - **Opt-in runs** (now in `live.sh`): both sample roots of `oec/dev` on this Mac and in a Linux container next to the dev broker: T8-HST-01/02 pass; T8-HST-04 fails for REQ-PLT-008 (no OEC Registry before P7) and, on macOS, REQ-PLT-003 (not Linux). No deviation in `oec/dev`.
+  - A pre-existing defect fixed: `oec-check`/`oec-infra` did not compile for 32-bit ARM (ARMv7), A-269.
+  - No new dependency, no reviewed item changed, `COVERAGE.md` unchanged, D7 gate unchanged. Increment 4 (Engine API) not pulled forward. A-259 … A-270 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `b955783` (re-baseline, no content change).
 
-Logs: [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -474,10 +482,53 @@ Logs: [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-
 | A-256 | Self-test: `mqtttest` options (additive), `registrytest` (7 faults), 29 broker scenarios | info (agent) | C-071 | – | – |
 | A-257 | Report key `broker` (additive, report version 1 of `oec-infra`) | info (agent) | C-071 | – | – |
 | A-258 | Dev broker ACL (incl. `Reply`); REQ-RES-CONFIG-026 warns against `oec/dev` | info (agent) | C-071 | – | – |
+| A-259 | Command `oec-infra host`: `--root`, storage overrides, `--container`, read-only, no secret in the report | info (agent) | C-072 | – | – |
+| A-260 | T8-HST-01: CA choice, `broker.json` schema and Address, expiry left to T8-BUS-01 | info (agent) | C-072 | – | – |
+| A-261 | T8-HST-02: closed secret storage, key/passphrase/certificate rules, SHOULDs warn | info (agent) | C-072 | – | – |
+| A-262 | Mounts only from the Linux mount table; no own mount fails only inside a container | info (agent) | C-072 | – | – |
+| A-263 | Verdict kind `Reported` → outcome `manual` on a requirement, test unchanged | info (agent) | C-072 | – | – |
+| A-264 | Hardware thresholds and manual bands (SF-116), network, facts per OS on the standard library | info (agent) | C-072 | – | – |
+| A-265 | Linux check; patch level reported, not judged | info (agent) | C-072 | – | – |
+| A-266 | Container daemon: endpoint order, connect only | info (agent) | C-072 | – | – |
+| A-267 | Broker and Registry with the login of the storages; no Registry fails T8-HST-04 | info (agent) | C-072 | – | – |
+| A-268 | Self-test `hosttest`, 55 scenarios, report key `host` | info (agent) | C-072 | – | – |
+| A-269 | 32-bit build fix in `internal/probe` | info (agent) | C-072 | – | – |
+| A-270 | Live runs on the computer and in a Linux container | info (agent) | C-072 | – | – |
 
 ## Decisions and review items
 
-Nothing is open for you.
+### D-1 – SF-116: unit and reference of the memory sizes of RIG 5.1 (G-3.4 a)
+
+- **Where:** register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, SF-116 (`61e0b0f`); RIG 5.1 (minimum requirements on an OEC platform, hardware list); REQ-PLT-001; D8 T8-HST-04.
+- **Problem:** RIG 5.1 requires "a minimum of 1 GB RAM" and "a minimum of 4 GB non-volatile memory". It does not say (a) whether GB is 10^9 octets (SI) or 2^30 octets (GiB), and (b) whether the minimum is the nominal size of the installed memory (data sheet) or what the operating system can use. A board with 1 GiB of RAM shows Linux only about 0.9 · 10^9 octets (firmware, kernel, graphics), and a 4 GB flash medium has less than 4 · 10^9 octets of user area. Read as "usable", such a board fails; read as GiB, a board with 10^9 octets fails. A measuring tool cannot decide.
+- **Proposed interpretation:** GB = 10^9 octets; the minimum refers to the nominal size of the installed memory. Text addition in RIG 5.1: "The edge computer must provide a minimum of 1 GB RAM (nominal size of the installed memory; 1 GB = 10^9 octets)", the same for the 4 GB of non-volatile memory.
+- **Effect in the workspace:** D8 T8-HST-04 implements the proposal: at least 10^9 octets RAM and 4 · 10^9 octets of storage pass; below 768 MiB RAM or 3.5 · 10^9 octets fail; the band in between is `manual` (check against the data sheet; the message cites "SF-116"). The scenarios `ram-reserved`, `storage-nominal`, `ram-low` and `storage-low` depend on it. With the guideline change: re-baseline, a note on REQ-PLT-001, the messages cite RIG 5.1; another decision changes only the thresholds.
+- **Recommendation:** as proposed.
+- **PO:** ☐ as proposed ☐ other: …
+
+### R-1 – host scenarios of `oec-infra host` (G-3.9)
+
+- **Where:** `oec/conformance/testdata/hosts/index.yaml` – 55 entries `draft`; the setup of each fault is in `internal/host/fixtures_test.go` (roots generated at run time with the test PKI of `mqtttest`; nothing committed but the index).
+- **What they are:** `oec-infra host` at level 3 on a generated root and a fake host, compared per test with outcome and exact REQ ids, plus the REQs with a `manual` verdict. The conforming case (`none`): container name `oec-host-app`; `broker.pem` signed by the CA in `ca.pem`, `broker.json` valid; `credentials` in the secret storage; all three storages mounted read-only; Linux 6.1 x86_64, 2 GB RAM, 16 GB storage, `eth0` up, a container daemon; the broker accepts the login and runs a Registry. Every passing T8-HST-04 lists REQ-PLT-003 (patch level) as `manual`.
+- **Positive (conforming):** `none` (all host tests pass); `T8-HST-01/broker-ca` (broker certificate of another CA, given in `broker_ca.pem`); `T8-HST-02/certificate` (client certificate `oec-host-app.pem`, encrypted `private_key.pem` and `passphrase` instead of `credentials`); `T8-HST-02/unencrypted-key` (unencrypted key, no passphrase); `T8-HST-02/secret-files-mounted` (each secret file mounted on its own, as Docker does); `T8-HST-04/armv7`; `T8-HST-04/daemon-env` (daemon from `DOCKER_HOST`).
+- **Negative (fault → expected outcome):**
+  - T8-HST-01 fail REQ-CNT-001: `no-broker-pem`, `broker-pem-garbage`, `untrusted-broker` (not signed by the CA), `wrong-broker-ca` (`broker_ca.pem` does not sign it), `mqtt-rw` (mounted read-write), `mqtt-not-mounted` (no own mount while D8 runs in a container); with REQ-MQTT-003 too: `no-mqtt-storage`, `no-broker-json`;
+  - T8-HST-01 fail REQ-CNT-003 + REQ-MQTT-003: `not-json`, `address-with-port` (`"Address": "127.0.0.1:8883"`); REQ-CNT-003 alone: `broker-json-invalid` (MaxPacketSize 1024, below the minimum);
+  - T8-HST-01 info REQ-CNT-001 (notes only): `broker-ca-same` (`broker_ca.pem` equals the CA), `world-writable` (`broker.json` mode 0666 on a read-only mount), `broker-expired` (expiry is judged by T8-BUS-01);
+  - T8-HST-02 fail REQ-CNT-005 + 006: `no-certs-storage`, `no-ca`; REQ-CNT-005: `ca-not-ca` (`ca.pem` holds a client certificate); REQ-CNT-006: `certs-rw`; REQ-CNT-006 + 008: `key-without-cert`;
+  - T8-HST-02 fail REQ-CNT-008: `no-secrets`, `empty-secrets`, `extra-secret` (a file `token`), `bad-credentials` (no `:` password), `key-mismatch`, `no-passphrase` (encrypted key without passphrase), `wrong-passphrase`, `passphrase-unencrypted`, `secrets-rw`;
+  - T8-HST-02 fail REQ-MQTT-011: `username-reserved` (username `app/1`);
+  - T8-HST-02 warn REQ-CNT-002 (SHOULD): `key-in-mqtt`, `key-in-certs`; warn REQ-CNT-007 (SHOULD): `cert-misnamed` (`app.pem`);
+  - T8-HST-04 fail REQ-PLT-001: `arch-386`, `ram-low` (512 MiB), `storage-low` (2 · 10^9 octets), `no-network` (loopback only); fail REQ-PLT-003: `not-linux`; fail REQ-PLT-006: `no-daemon`, `daemon-stale` (connection refused); fail REQ-PLT-007: `no-broker`, `wrong-credentials`; fail REQ-PLT-008: `no-registry`;
+  - T8-HST-04 pass with REQ-PLT-001 `manual`: `ram-reserved` (950 · 10^6 octets visible), `storage-nominal` (3.9 · 10^9), `virtual-network` (only virtual interfaces, as in a container); pass with REQ-PLT-006 `manual`: `daemon-denied` (socket present, permission denied);
+  - T8-HST-04 skip (inconclusive): `unknown-facts` (REQ-PLT-001, 003 – no values from the OS), `offline` (REQ-PLT-007, 008 with `--offline`).
+- **Please check:** is each fault a real violation of the named REQ, and are the positives compliant? In particular:
+  - the manual bands (`ram-reserved`, `storage-nominal`, depending on D-1) and `virtual-network`;
+  - `no-registry` = fail (the platform must provide a Registry; `oec-infra bus` reports the same case as inconclusive because it checks the broker, not the platform);
+  - `mqtt-not-mounted`: a storage without its own mount fails only when D8 runs inside a container; on a plain directory and on macOS/Windows the mounts are not judged (A-262);
+  - the three `info` notes and the SHOULD warnings.
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -1224,6 +1275,23 @@ ADR-0025 amendment C-071; DESIGN §9 "As built (C-071)".
 - **A-257 Report:** `infra-report.schema.json` additive: `bus` in `command`/`mode`, key `broker` (url, probe, tls, certificate, max_packet_size, registry), evidence `topic`; report version stays 1.
 - **A-258 Dev broker ACL:** only `oec-probe` may publish Set, Del and Call; everyone reads `Oi4v2/#` and publishes Pub, Get and Reply. Mosquitto cannot bind the AppId level to a user and applications read their own Set/Config, so T8-BUS-02 warns REQ-RES-CONFIG-026 against `oec/dev` – a dev limitation, no SF.
 
-## Next (C-072)
+### A-259 … A-270 – P5b increment 3 `host` (C-072, agent)
 
-1. C-072: P5b increment 3 – `oec-infra host` (T8-HST-01, 02, 04: storage layout and permissions, `broker.json`, platform properties) on generated host roots, opt-in against `oec/dev`; in a new session (start prompt in `prompt.md`).
+ADR-0025 amendment C-072; DESIGN §9 "As built (C-072)"; log C-072.
+- **A-259 Command:** `oec-infra host` reads the storages of RIG 4.1 below `--root DIR` (default `/`); `--mqtt-storage`, `--certs-storage`, `--secrets-storage` override one storage, `--container` the name of `ROOT/etc/hostname`; `--daemon`, `--offline`, `--registry-wait` (65 s), `--timeout`, `--tests`, `--format`, `--report`, `--allow-skip`, `--config` (the YAML loader of `bus`, now shared). Read-only, at most 1 MiB per file; the report lists names, modes and sizes, never a content or secret. Level 3.
+- **A-260 T8-HST-01:** `broker.pem` is verified against `broker_ca.pem`, else `ca.pem`; a `broker_ca.pem` equal to the CA is a note; an expired chain is verified at the middle of its validity and noted (validity and host name are T8-BUS-01, MG 6.2.2). `broker.json` against `platform/broker.schema.json` with the D1 validator (a unit test runs the 18 V-BRK vectors) and its `Address` (REQ-MQTT-003).
+- **A-261 T8-HST-02:** `ca.pem` holds a CA certificate; the secret storage is a closed set (`credentials`, `private_key.pem`, `passphrase`) with at least one login; an encrypted key if and only if a passphrase, which must open it; the key needs its certificate `<containername>.pem` (another name: warn, REQ-CNT-007 is a SHOULD); a private key in the other storages: warn (REQ-CNT-002, SHOULD); username characters per REQ-MQTT-011.
+- **A-262 Mounts:** judged only from the Linux mount table (`/proc/self/mountinfo`): `ro`/`rw` when the storage or a file in it is a mount point (Docker mounts secrets per file) or a read-only mount covers it; `rw` fails; no own mount fails only if D8 runs in a container (`/.dockerenv`, `/run/.containerenv`); elsewhere `unknown`, not judged. World-writable entries are a note.
+- **A-263 Verdict kind `Reported`:** a measured value a human judges gets the outcome `manual` on its requirement (already in both report schemas); rank 0, so the test keeps its outcome. D7 never emits it.
+- **A-264 Hardware:** architecture from the kernel (ARMv7, ARMv8, amd64); RAM ≥ 10^9 octets pass, 768 MiB … 10^9 manual, below fail; storage ≥ 4 · 10^9 pass, 3.5 · 10^9 … 4 · 10^9 manual, below fail (SF-116); a physical interface that is up passes, only virtual or down interfaces are manual, none fails. Facts per OS on the standard library (`syscall`; Windows `kernel32` via `NewLazyDLL`), no `golang.org/x/sys`.
+- **A-265 Linux and patch level:** another OS fails REQ-PLT-003; on Linux the kernel, the os-release and `reboot-required` are reported for a manual verdict. Package managers are not queried (distribution-specific, needs network).
+- **A-266 Container daemon:** `--daemon`, else `DOCKER_HOST`/`CONTAINER_HOST`, else the default sockets of the OS (Docker and Podman); a connect within 2 s is enough (the Engine API comes with C-073); permission denied → manual; an unsupported scheme → inconclusive.
+- **A-267 Broker and Registry:** D8 connects to the broker of `broker.json` with the login of the storages (REQ-PLT-007) and waits `--registry-wait` for a publication on `Oi4v2/Registry/+/Pub/#` (REQ-PLT-008). No Registry fails here, because the platform must provide one (T8-BUS-03 says inconclusive, since it checks the broker). `--offline` → inconclusive.
+- **A-268 Self-test:** `internal/host/hosttest` writes the roots with the `mqtttest` PKI at run time; 55 scenarios with fake facts, mount tables and daemon dialers, T8-HST-04 against `mqtttest` + `registrytest`; no root, no network beyond loopback, no Docker. `HostFixtures()` is not part of `Fixtures()`, `COVERAGE.md` unchanged (A-248). Report key `host`, additive, report version 1.
+- **A-269 32-bit build:** `internal/probe` `BadNotFound` typed `int64`; before, `oec-check`/`oec-infra` did not compile for `GOARCH=arm`/`386` (ARMv7 is a RIG 5.1 platform). D7 behaviour unchanged.
+- **A-270 Live runs:** `live.sh` runs `TestHostDevRoots` (both sample roots on this computer) and `TestHostDevContainer` (the Linux binary in a container in the network namespace of the dev broker, storages `ro`, once the secret storage `rw`). Result in the C-072 log; no deviation in `oec/dev`.
+
+## Next (C-073)
+
+1. Your answers to D-1 and R-1 (entered first, own commit; D-1 changes RIG 5.1 → re-baseline).
+2. C-073: P5b increment 4 – Engine API client `internal/engine` (read-only, Unix socket / named pipe), `oec-infra container` (T8-CTR-01 … 03) and T8-HST-03 (application storages not shared), self-test against a fake Engine API; in a new session (start prompt in `prompt.md`).
