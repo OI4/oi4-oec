@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 29.10.2026, C-071-Review Nachtrag 3: D-1 („D-1 wie vorgeschlagen“, SF-115) ist umgesetzt. Offen ist nur **R-2** (die erweiterte Regel REQ-MQTT-007 und zwei Broker-Szenarien). R-1 hattest du schon akzeptiert._
+_Stand: 30.10.2026, C-071-Review Nachtrag 4: Du hast R-2 akzeptiert („R-2 akzeptiert“). REQ-MQTT-007 und alle 29 Broker-Szenarien stehen auf `reviewed`. **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,24 +24,14 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### R-2 – Die Regel zum Broker-Zertifikat und zwei Szenarien nach deiner Entscheidung zu SF-115 (bitte prüfen)
-
-**Worum geht es?** Du hast D-1 wie vorgeschlagen entschieden: Das Zertifikat des Brokers muss für die Adresse gelten, die die Plattform in `broker.json` ankündigt, und darf nicht abgelaufen (oder noch nicht gültig) sein. Der Satz steht jetzt in der Guideline (MG 6.2.2, Broker-Seite, Commit `b955783`). Daraus folgen zwei Änderungen an Dingen, die du schon abgenommen hattest – darum liegen sie wieder bei dir:
-
-- **REQ-MQTT-007** („Broker-Zertifikat von einer CA unterschrieben, gültig für die Broker-Adresse“): Die Regel sagt jetzt zusätzlich, dass das Zertifikat für die Adresse aus `broker.json` gilt (ein Rechnername als DNS-Name, eine IP-Adresse als IP-Adresse im Zertifikat) und in seinem Gültigkeitszeitraum liegt. Dazu das Zitat des neuen Guideline-Satzes.
-- **Zwei Broker-Szenarien** von `oec-infra bus`:
-  - `T8-BUS-01/wrong-host`: Das Zertifikat ist von der CA unterschrieben, aber für `broker.invalid` ausgestellt; der Broker heißt `localhost`.
-  - `T8-BUS-01/expired`: Das Zertifikat ist seit einer Minute abgelaufen.
-
-  Das erwartete Ergebnis bleibt gleich: **durchgefallen** wegen REQ-MQTT-007; MQTT 3.1.1 und `broker.json` (REQ-MQTT-002, REQ-CNT-003) sind „nicht prüfbar“, weil keine Verbindung zustande kommt. Geändert hat sich nur der Begleittext: statt „nach dem Vorschlag zu SF-115“ jetzt „nach MG 6.2.2“. Auch im Bericht von D8 steht jetzt „(MG 6.2.2)“ statt „(SF-115, proposed)“.
-
-**Antwort z. B.:** „R-2 akzeptiert“.
+Nichts. Alle Punkte aus dem C-071-Review (R-1, D-1, R-2) sind beantwortet und umgesetzt.
 
 ### Was aus deinem Review C-071 geworden ist (Kurzfassung)
 
 - **R-1:** akzeptiert („R-1 akzeptiert“). Alle Broker-Szenarien von `oec-infra bus` stehen auf `reviewed`.
 - **Korrektur der Anzahl:** In C-071 habe ich „28 Szenarien“ geschrieben (und im Chat „6 gut, 22 mit Fehler“). Richtig sind **29** (6 gut, 23 mit Fehler) – genau die, die in R-1 einzeln aufgezählt waren. Die Zahl ist überall korrigiert; inhaltlich hat sich nichts geändert.
 - **D-1:** wie vorgeschlagen entschieden („D-1 wie vorgeschlagen“) und umgesetzt: der Satz steht in der Guideline (MG 6.2.2, `b955783`), SF-115 ist erledigt, die Baseline ist nachgezogen (1410 Fundstellen, 444 Regeln, keine Lücke), D8 schreibt „(MG 6.2.2)“ statt „(SF-115, proposed)“. Kein Finding mehr offen. Die geänderte Regel und die zwei Szenarien → R-2.
+- **R-2:** akzeptiert („R-2 akzeptiert“). Die erweiterte Regel REQ-MQTT-007 (Broker-Zertifikat passt zur Adresse aus `broker.json` und ist gültig) und die Szenarien `T8-BUS-01/wrong-host` und `/expired` stehen auf `reviewed`; damit sind alle 29 Broker-Szenarien abgenommen. Kein Entwurf, kein offenes Finding.
 
 ### Zur Info: was C-071 gebaut hat
 
@@ -822,9 +812,9 @@ Neu aus dem C-070-Review (nach deinem D-1):
 
 ---
 
-### Was als Nächstes passiert (C-071)
+### Was als Nächstes passiert (C-072)
 
-1. **C-071:** das zweite Stück von D8, `oec-infra bus`: prüft den Broker (nur verschlüsselte Verbindungen, Zertifikat, dass fremde Anwendungen nicht überall schreiben dürfen, dass die OEC Registry da ist). Selbsttest gegen einen Test-Broker im Programm, freiwillig gegen unseren Entwicklungs-Broker. Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
+1. **C-072:** das dritte Stück von D8, `oec-infra host`: prüft den Rechner (Ablage der Storages und ihre Rechte, `broker.json`, Plattform-Eigenschaften). Selbsttest gegen erzeugte Beispiel-Rechner-Verzeichnisse, freiwillig gegen unsere Entwicklungsumgebung. Läuft in einer **neuen Sitzung**; der Start-Prompt steht in `prompt.md`.
 
 ---
 

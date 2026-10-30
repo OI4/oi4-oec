@@ -11,7 +11,7 @@ Guideline baseline: `b955783` · Area status: reviewed · Sections: MG 6
 | [REQ-MQTT-004](#req-mqtt-004) | Broker port 8883 by default | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
 | [REQ-MQTT-005](#req-mqtt-005) | MQTT over TLS 1.2 or higher only | MUST | MUST | MUST | MUST | messaging | d7-test, manual | reviewed |
 | [REQ-MQTT-006](#req-mqtt-006) | Broker accepts TLS connections only | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-MQTT-007](#req-mqtt-007) | Broker certificate signed by a CA, valid for the broker address | MUST | n/a | n/a | n/a | platform | d8, manual | draft |
+| [REQ-MQTT-007](#req-mqtt-007) | Broker certificate signed by a CA, valid for the broker address | MUST | n/a | n/a | n/a | platform | d8, manual | reviewed |
 | [REQ-MQTT-008](#req-mqtt-008) | Client verifies the broker certificate | MUST | MUST | MUST | MUST | messaging | manual, d7-test | reviewed |
 | [REQ-MQTT-009](#req-mqtt-009) | Client authenticates to the broker | MUST | MUST | MUST | MUST | messaging | d7-test, manual | reviewed |
 | [REQ-MQTT-010](#req-mqtt-010) | Client certificate takes precedence over username and password | MUST | MUST | MUST | MUST | messaging | manual | reviewed |
@@ -170,7 +170,7 @@ The broker uses a certificate signed by a well-known (public) or a platform- or 
 - Domain: platform · Applies to: broker, platform
 - Refs: MG 6.2.2, RIG 4.1.1, RIG 4.1.2, SF-057, SF-091, SF-115
 - Verification: d8, manual
-- Status: draft
+- Status: reviewed
 - Inventory: MG-6.2.2-252f33e9, MG-6.2.2-986fbb0d
 
 > The broker must use a certificate which is signed by a well-known (public) or a platform- or user-specific certificate authority (CA); self-signed broker certificates are not allowed.

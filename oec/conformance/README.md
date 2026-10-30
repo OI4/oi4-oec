@@ -177,7 +177,7 @@ go run ./cmd/oec-infra bus --broker mqtts://localhost:8884 --ca $G/broker/ca.pem
 | `testdata/sim` | `index.yaml`: expected verdicts of `test` against the simulated CUT per fault (C-062 … C-064 reviewed in the C-062, C-063 and C-064 reviews, C-065 … C-067 in the C-067 review, C-068 in the C-068 review; new entries start as `draft`, G-3.9) |
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (C-052 reviewed in the C-052 review, C-065 and C-067 in the C-067 review; new entries start as `draft`, G-3.9) |
 | `testdata/images` | generated OCI archives of the image rules + `index.yaml` with expected verdicts (C-070, reviewed in the C-070 review); regenerate with `go test ./internal/image -run TestFixtureFiles -update` |
-| `testdata/bus` | `index.yaml`: expected verdicts of `oec-infra bus` per broker scenario against `mqtttest` and the simulated Registry (C-071, `reviewed` since the C-071 review, `wrong-host` and `expired` `draft` again after SF-115; new or changed entries are `draft`, G-3.9) |
+| `testdata/bus` | `index.yaml`: expected verdicts of `oec-infra bus` per broker scenario against `mqtttest` and the simulated Registry (C-071, `reviewed` since the C-071 review, `wrong-host` and `expired` re-reviewed after SF-115; new or changed entries are `draft`, G-3.9) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `COVERAGE.md` (generated); `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
 ## Tests

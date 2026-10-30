@@ -103,7 +103,7 @@ scenarios:
       run (ca.pem / broker_ca.pem): REQ-MQTT-007 fails; REQ-MQTT-002 and
       REQ-CNT-003 are skipped inconclusive.
   - fault: T8-BUS-01/wrong-host
-    status: draft
+    status: reviewed
     positive: false
     tests: [T8-BUS-01]
     expect:
@@ -114,7 +114,7 @@ scenarios:
       fails (MG 6.2.2, SF-115 decided in the C-071 review); REQ-MQTT-002
       and REQ-CNT-003 are skipped inconclusive.
   - fault: T8-BUS-01/expired
-    status: draft
+    status: reviewed
     positive: false
     tests: [T8-BUS-01]
     expect:

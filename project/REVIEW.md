@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-29, C-071 review addendum 3: D-1 ("D-1 wie vorgeschlagen", SF-115) is applied – MG 6.2.2 `b955783`, SF-115 resolved, re-baseline, D8 without "proposed". Open: **R-2** (REQ-MQTT-007 and the scenarios `T8-BUS-01/wrong-host`, `/expired`). R-1 accepted earlier (addendum 1)._
+_Last updated: 2026-10-30, C-071 review addendum 4: you accepted R-2 ("R-2 akzeptiert"); REQ-MQTT-007 and all 29 broker scenarios are `reviewed`. Nothing is open (R-1, D-1 and R-2 of the C-071 review answered and applied)._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -206,6 +206,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - REQ-MQTT-007 extended by the new sentence → `draft`.
   - D8 T8-BUS-01: same verdicts, the findings cite "(MG 6.2.2)" instead of "(SF-115, proposed)"; the notes of the scenarios `T8-BUS-01/wrong-host` and `/expired` follow → `draft`.
   - Together → **R-2** (numbered on in the C-071 review because R-1 is answered).
+- C-071 review addendum 4: you accepted **R-2** ("R-2 akzeptiert"); REQ-MQTT-007 and the scenarios `T8-BUS-01/wrong-host`, `/expired` are `reviewed` – all 29 broker scenarios `reviewed`. No draft, no open finding. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `b955783` (re-baseline, no content change).
 
@@ -476,15 +477,12 @@ Logs: [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-
 
 ## Decisions and review items
 
-### R-2 – REQ-MQTT-007 and two broker scenarios after SF-115 (G-3.9)
-
-- **Where:** `oec/spec/requirements/mqtt.yaml` (REQ-MQTT-007, view `oec/spec/requirements/view/mqtt.md`); `oec/conformance/testdata/bus/index.yaml` (`T8-BUS-01/wrong-host`, `T8-BUS-01/expired`); log C-071 addendum 3.
-- **REQ-MQTT-007** "Broker certificate signed by a CA, valid for the broker address" (MUST, platform, d8 + manual): the statement gains "The broker certificate is valid for the broker address of the Message Bus storage (Address of broker.json, REQ-CNT-003; a host name as DNS name, an IP address as IP address of the Subject Alternative Name) and within its period of validity."; second MG 6.2.2 quote (the new sentence), new inventory item MG-6.2.2-252f33e9, ref SF-115, note.
-- **`T8-BUS-01/wrong-host`** (certificate of the CA issued for `broker.invalid`, broker address `localhost`) and **`T8-BUS-01/expired`** (expired a minute ago): verdict unchanged – fail REQ-MQTT-007, REQ-MQTT-002 and REQ-CNT-003 skipped inconclusive. Only the notes changed ("fails (MG 6.2.2, SF-115 decided in the C-071 review)" instead of "fails under the proposed interpretation of SF-115").
-- **Recommendation:** accept.
-- **PO:** ☐ accepted ☐ changes: …
+Nothing is open for you.
 
 ### Answered earlier
+
+Answered after the C-071 review (2026-10-30) and applied in C-071 addendum 4:
+- R-2 – REQ-MQTT-007 and the broker scenarios `T8-BUS-01/wrong-host`, `/expired` after SF-115: ☑ accepted ("R-2 akzeptiert") → `reviewed`; all 29 broker scenarios `reviewed`.
 
 Answered in the C-071 review (2026-10-29) and applied in C-071 addenda 2–3:
 - D-1 – SF-115 (MG 6.2.2: broker certificate for the broker address and within its validity): ☑ as proposed ("D-1 wie vorgeschlagen") → guideline `b955783`, SF-115 resolved (`db6a477`), re-baseline, REQ-MQTT-007 and the scenarios `wrong-host`/`expired` → R-2; D8 findings cite MG 6.2.2 (ADR-0025 amendment C-071 review).
@@ -1228,5 +1226,4 @@ ADR-0025 amendment C-071; DESIGN §9 "As built (C-071)".
 
 ## Next (C-072)
 
-1. Your answer to R-2 (recorded first, own commit).
-2. C-072: P5b increment 3 – `oec-infra host` (T8-HST-01, 02, 04: storage layout and permissions, `broker.json`, platform properties) on generated host roots, opt-in against `oec/dev`; in a new session (start prompt in `prompt.md`).
+1. C-072: P5b increment 3 – `oec-infra host` (T8-HST-01, 02, 04: storage layout and permissions, `broker.json`, platform properties) on generated host roots, opt-in against `oec/dev`; in a new session (start prompt in `prompt.md`).

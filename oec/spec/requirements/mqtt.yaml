@@ -176,7 +176,7 @@ requirements:
         text: The broker certificate must be valid for the broker address provided in the Message Bus storage (`Address` of `broker.json`; a host name as DNS name or an IP address as IP address of the Subject Alternative Name) and within its period of validity.
     verification: [d8, manual]
     inventory: [MG-6.2.2-986fbb0d, MG-6.2.2-252f33e9]
-    status: draft
+    status: reviewed
     notes: >-
       "preferably shall" replaced by "should" in C-026 (SF-057 (d)). SF-091
       (g), decided by the PO in the C-030 review (2026-10-22), revises this to
