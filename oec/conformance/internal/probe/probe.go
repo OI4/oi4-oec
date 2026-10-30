@@ -75,8 +75,9 @@ var levelResources = []struct{ resource, req string }{
 	{"SubscriptionList", "REQ-CMP-039"},
 }
 
-// BadNotFound is the StatusCode for an unknown asset (MG 8.3.6.1).
-const BadNotFound = 0x803E0000
+// BadNotFound is the StatusCode for an unknown asset (MG 8.3.6.1); typed so
+// that 32-bit targets (ARMv7, RIG 5.1) compile.
+const BadNotFound int64 = 0x803E0000
 
 // UnknownKey is the key T7-GET-09 adds to a Get (REQ-MSG-046).
 const UnknownKey = "OecCheckUnknownKey"
