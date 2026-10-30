@@ -5,8 +5,13 @@
 // supported platforms, SBOM and license texts, digest integrity. No
 // container daemon and no network are needed. The command bus probes a
 // running Message Bus and judges the tests of mode bus (T8-BUS-01 … 03):
-// protocol, TLS and certificate, MaxPacketSize, ACL, OEC Registry. report-schema prints the JSON
-// Schema of the report (infra-report.schema.json, report version 1).
+// protocol, TLS and certificate, MaxPacketSize, ACL, OEC Registry. The
+// command host reads the storages of RIG 4.1 below a root directory and
+// measures the platform host it runs on (T8-HST-01, 02, 04): Message Bus
+// storage and broker.json, certificate and secret storages, hardware,
+// Linux, container daemon, Message Bus and Registry. report-schema prints
+// the JSON Schema of the report (infra-report.schema.json, report version
+// 1).
 //
 // Exit codes (DESIGN.md §5.3): 0 pass (warnings allowed), 1 at least one
 // requirement violated, 2 usage or input error (also: the input is no OCI
@@ -55,6 +60,7 @@ func main() {
 const usage = `usage:
   oec-infra image [flags] OCI-LAYOUT-DIR | OCI-ARCHIVE.tar
   oec-infra bus [flags]
+  oec-infra host [flags]
   oec-infra report-schema
   oec-infra version
 
@@ -92,6 +98,28 @@ It publishes only on the topics of its own probe AppId
   verdict:    --tests IDS, --allow-skip
   output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
 
+host reads the storages of RIG 4.1 below a root directory and measures the
+platform host it runs on; it judges the host tests of the D8 catalog
+(T8-HST-01, 02, 04) at level 3: the Message Bus storage (broker.pem,
+broker.json against platform/broker.schema.json, broker_ca.pem), the OI4
+certificate storage (ca.pem, <containername>.pem) and the secret storage
+(credentials, private_key.pem, passphrase), each mounted read-only (Linux
+mount table), no private key outside the secret storage; architecture,
+main and non-volatile memory, network interface, Linux (the patch level is
+reported for a manual verdict), container daemon; it connects to the broker
+of broker.json with the login of the storages and waits for the OEC
+Registry. It never writes and never prints a secret. Run it inside the
+application container, or on the host with --root pointing to the files of
+the container (mounts are then not judged).
+  storages:   --root DIR (default /), --mqtt-storage DIR, --certs-storage DIR,
+              --secrets-storage DIR, --container NAME (default
+              ROOT/etc/hostname), --config FILE (YAML, keys = flag names)
+  platform:   --daemon ENDPOINT (default DOCKER_HOST, CONTAINER_HOST, the
+              default sockets), --offline (no Message Bus),
+              --registry-wait D (default 65s), --timeout D (default 5s)
+  verdict:    --tests IDS, --allow-skip
+  output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
+
 report-schema prints the JSON Schema of the JSON report (report version 1).
 
 Exit codes: 0 pass, 1 fail, 2 usage or input error (no OCI image layout),
@@ -108,6 +136,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runImage(args[1:], stdout, stderr)
 	case "bus":
 		return runBus(args[1:], stdout, stderr)
+	case "host":
+		return runHost(args[1:], stdout, stderr)
 	case "report-schema":
 		if len(args) > 1 {
 			fmt.Fprintf(stderr, "%s: report-schema takes no arguments\n", tool)

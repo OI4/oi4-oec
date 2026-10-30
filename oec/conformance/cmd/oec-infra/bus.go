@@ -114,23 +114,23 @@ func newBusFlags(stderr io.Writer) *busFlags {
 
 // applyConfig sets the flags that the command line did not set from the
 // YAML file (as oec-check, DESIGN.md §8). Unknown keys are usage errors.
-func (f *busFlags) applyConfig() error {
-	if f.config == "" {
+func applyConfig(fs *flag.FlagSet, config string) error {
+	if config == "" {
 		return nil
 	}
-	raw, err := os.ReadFile(f.config)
+	raw, err := os.ReadFile(config)
 	if err != nil {
 		return err
 	}
 	var doc map[string]any
 	if err := yaml.Unmarshal(raw, &doc); err != nil {
-		return fmt.Errorf("%s: %w", f.config, err)
+		return fmt.Errorf("%s: %w", config, err)
 	}
 	set := map[string]bool{}
-	f.fl.Visit(func(fl *flag.Flag) { set[fl.Name] = true })
+	fs.Visit(func(fl *flag.Flag) { set[fl.Name] = true })
 	for k, v := range doc {
-		if k == "config" || f.fl.Lookup(k) == nil {
-			return fmt.Errorf("%s: unknown key %q", f.config, k)
+		if k == "config" || fs.Lookup(k) == nil {
+			return fmt.Errorf("%s: unknown key %q", config, k)
 		}
 		if set[k] {
 			continue
@@ -140,8 +140,8 @@ func (f *busFlags) applyConfig() error {
 			vals = l
 		}
 		for _, x := range vals {
-			if err := f.fl.Set(k, fmt.Sprint(x)); err != nil {
-				return fmt.Errorf("%s: %s: %w", f.config, k, err)
+			if err := fs.Set(k, fmt.Sprint(x)); err != nil {
+				return fmt.Errorf("%s: %s: %w", config, k, err)
 			}
 		}
 	}
@@ -258,7 +258,7 @@ func runBus(args []string, stdout, stderr io.Writer) int {
 	if f.fl.NArg() != 0 {
 		return usageErr("bus takes no arguments")
 	}
-	if err := f.applyConfig(); err != nil {
+	if err := applyConfig(f.fl, f.config); err != nil {
 		return usageErr("%v", err)
 	}
 	if !validFormat(f.format) {
