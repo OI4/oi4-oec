@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 31.10.2026, C-072-Review Nachtrag 3. **Für dich offen: nichts** – D-1 (SF-116), R-1 (55 Host-Szenarien) und R-2 (REQ-PLT-001 und zwei Host-Szenarien) sind beantwortet und umgesetzt._
+_Stand: 31.10.2026, C-073 (D8 Teil 4: Anbindung an Docker/Podman, `oec-infra container`, T8-HST-03). **Für dich offen: R-1** – 26 Container-Szenarien und 16 Host-Szenarien zum Review. Keine Entscheidung, kein Finding._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,70 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts. Deine Antwort „R-2 akzeptiert“ ist eingetragen (C-072, Nachtrag 3).
+**R-1 – Prüfszenarien für `oec-infra container` und T8-HST-03 (Review, G-3.9).** Sonst nichts: kein neues Finding, keine Entscheidung.
+
+### R-1 – worum es geht
+
+D8 prüft jetzt laufende Container über die Docker/Podman-Schnittstelle. Für den Selbsttest habe ich bei Docker die Beschreibung von vier Containern aufgezeichnet (ohne Geheimnisse, ohne persönliche Pfade). Eine nachgebaute Docker-Schnittstelle spielt sie ab, so läuft der Test ohne Docker und ohne Netz:
+- `app` – so wie es sein soll: eigenes Bridge-Netz, Name `oec-rec-app-<uuid>` und genauso der Hostname, eigene Volumes für die Anwendungsdaten, eigene Geheimnisse, nichts über dem Lizenzordner;
+- `host` – alles falsch: Host-Netz, Name mit Unterstrich, ein Ordner des Rechners über dem Lizenzordner, flüchtiger Speicher (tmpfs) bzw. ein Image statt eines Host-Pfads für die Anwendungsdaten;
+- `stopped` – angelegt, nie gestartet, ohne Netz, nutzt das Volume von `app`;
+- `sidecar` – teilt sich das Netz von `app`.
+
+Jedes Szenario ändert genau eine Sache und sagt, was D8 melden muss (Stufe 3).
+
+**`oec-infra container` – 26 Szenarien** (`oec/conformance/testdata/containers/index.yaml`):
+- **in Ordnung (5):** `app` selbst; das Standard-Netz `bridge`; der Sidecar; ein Name mit genau 63 Zeichen; die Podman-Form (nachgebaut, Podman war nicht installiert).
+- **T8-CTR-01 Netz:** Host-Netz (auch über den Sidecar) → **Warnung**. Kein Netz, `macvlan`, Podmans `pasta` → nur ein **Hinweis**. Netz nicht lesbar → **nicht entscheidbar**.
+- **T8-CTR-02 Name:** Hostname = Container-ID (Docker-Standard), Hostname in Großbuchstaben, Unterstrich, 64 Zeichen, gleicher Name in anderer Schreibweise bei einem zweiten Container → **Fehler** (REQ-CNT-019). Ohne `-<uuid>` → **Warnung** (REQ-CNT-020, nur „sollte“).
+- **T8-CTR-03 Lizenzen:** ein Ordner/eine Datei des Rechners auf, über oder unter `/opt/oi4/licenses` oder ein tmpfs → **Fehler**. Ein Volume → **manuell**: erlaubt, wenn es aus dem Image befüllt ist, was D8 nicht sehen kann. Ein Image-Mount → **Hinweis**.
+- **Ganzer Container `host`:** Warnung, Fehler, Fehler. Keine Docker-Schnittstelle oder eine falsche → alles **nicht entscheidbar**.
+
+**T8-HST-03 in `oec-infra host` – 14 neue Szenarien** (`testdata/hosts/index.yaml`). Geprüft wird: Kein anderer Container kommt an die Geheimnisse (REQ-CNT-024) oder an die Anwendungsdaten (REQ-CNT-011) eines OI4-Containers.
+- **in Ordnung (3):**
+  - zwei Anwendungen mit getrennten Daten (den Broker-Ordner und den Zertifikatsordner dürfen sie teilen);
+  - D8 läuft selbst in einem Container mit den Ordnern von `app` und ist mit `--self` ausgenommen;
+  - einer Anwendung fehlt der Datenordner → **manuell**: vielleicht braucht sie keinen.
+- **Fehler:**
+  - zwei Container (auch ein gestoppter) nutzen dasselbe Volume;
+  - ein fremder Container hängt das Daten-Volume woanders ein;
+  - `host` mit tmpfs/Image statt Host-Pfad;
+  - zwei Anwendungen teilen den Geheimnis-Ordner;
+  - ein Backup-Container hängt den Ordner darüber ein;
+  - der Geheimnis-Ordner einer Anwendung liegt in einem Mount der anderen;
+  - D8s eigener Container ohne `--self`.
+- **nicht anwendbar oder nicht entscheidbar:**
+  - keine Anwendung speichert dauerhaft → die Regel greift nicht;
+  - `--self` unbekannt;
+  - Docker antwortet mit Fehler;
+  - keine Docker-Schnittstelle.
+- Die zwei schon abgenommenen Szenarien `none` und `T8-HST-02/certificate` laufen jetzt auch mit T8-HST-03 (bestanden). Darum stehen sie wieder auf Entwurf; ihr Ergebnis ist gleich geblieben.
+
+**Bitte besonders ansehen:**
+- **Host-Netz nur als Warnung**, obwohl REQ-CMP-031 ein „muss“ ist: RIG 4.4 erlaubt das Host-Netz für Ethernet auf unterer Ebene, und das sieht D8 nicht.
+- **Großschreibung im Hostname als Fehler:** D8 vergleicht Name und Hostname exakt, weil die Anwendung den Namen wörtlich nutzt, z. B. für `<Containername>.pem`.
+- Ein **gleicher Name in anderer Schreibweise** ist ein Fehler, weil Hostnamen Groß/klein nicht unterscheiden.
+- **Gestoppte Container zählen mit.**
+- Ein **Backup-Container**, der einen übergeordneten Ordner einhängt, gilt als Teilen.
+- „Kein Datenordner“ wird **manuell** bewertet, „keine Anwendung speichert dauerhaft“ als **nicht anwendbar**.
+
+Wenn alles passt: „R-1 akzeptiert“. Sonst schreib mir die Szenarien, die anders sein sollen.
+
+### Zur Info: was C-073 gebaut hat
+
+- **Eigene Docker/Podman-Anbindung** (`internal/engine`):
+  - nur lesend und nur mit Bordmitteln von Go, keine neue Bibliothek;
+  - funktioniert über den Unix-Socket, die Named Pipe unter Windows und TCP;
+  - die Windows-Variante ist gebaut, aber nicht gegen ein echtes Windows-Docker gelaufen.
+- **`oec-infra container NAME …`** prüft laufende Container (T8-CTR-01 … 03, siehe oben). Im Bericht stehen Netze und Einhängepunkte, nie Quellpfade, Umgebungsvariablen oder Labels.
+- **T8-HST-03** ist jetzt Teil von `oec-infra host`. D8 hat damit **14 von 17** Tests; es fehlen nur noch die drei `run`-Tests.
+- **Lauf gegen unsere Entwicklungsumgebung** (freiwillig, jetzt Teil von `live.sh`):
+  - ein korrekter Wegwerf-Container neben dem Dev-Broker besteht alles;
+  - ein absichtlich falscher fällt wie erwartet durch;
+  - T8-HST-03 meldet das geteilte Volume und ist wieder grün, sobald der falsche Container weg ist.
+  - Der Dev-Broker selbst fällt bei T8-CTR-02 durch (Hostname `mosquitto`). Das ist keine Abweichung: Mosquitto ist kein OI4-Container (A-279). An `oec/dev` war nichts zu ändern.
+- **Hinweis:** Beim Aufzeichnen lief auf deinem Mac einmal `docker volume prune -f`. Das löscht alle unbenutzten anonymen Volumes von Docker Desktop, nicht nur unsere. Falls dir etwas fehlt, kommt es daher (Log C-073, Risiken).
+- Kein neues Finding, keine neue Bibliothek. D7 und `COVERAGE.md` sind unverändert. Das nächste Stück (`run`) habe ich nicht vorgezogen.
 
 ### Was aus deinem Review C-072 geworden ist (Kurzfassung)
 
@@ -836,24 +899,49 @@ Neu aus dem C-070-Review (nach deinem D-1):
 
 
 Neu aus C-072 (P5b Inkrement 3, `host`):
-- **A-259 (neu) – Befehl:** `oec-infra host --root DIR` (Standard `/`); jeder Storage lässt sich auch einzeln angeben, der Container-Name mit `--container`. D8 liest nur, höchstens 1 MiB pro Datei, und schreibt keine Inhalte oder Geheimnisse in den Bericht.
-- **A-260 (neu) – T8-HST-01:** Das Broker-Zertifikat wird gegen `broker_ca.pem` geprüft, sonst gegen `ca.pem`. Ist es abgelaufen, gibt es hier nur einen Hinweis, weil `oec-infra bus` Gültigkeit und Adresse prüft. `broker.json` wird gegen das Schema aus D1 geprüft.
-- **A-261 (neu) – T8-HST-02:** Im Geheimnis-Storage dürfen nur `credentials`, `private_key.pem` und `passphrase` liegen. Ein verschlüsselter Schlüssel braucht eine passende Passphrase, und zum Schlüssel gehört das Zertifikat `<Containername>.pem`. Die zwei „sollte“-Regeln geben nur Warnungen.
-- **A-262 (neu) – Einhängen:** D8 sieht nur unter Linux, ob ein Storage eingehängt ist. Kein eigener Mount ist nur dann ein Fehler, wenn D8 in einem Container läuft.
-- **A-263 (neu) – „manuell“:** Ein gemessener Wert, den ein Mensch beurteilen muss, erscheint als „manuell“ und verschlechtert den Test nicht.
-- **A-264 (neu) – Hardware:** Grenzen und „manuell“-Bänder wie bei D-1; beim Netzwerk muss eine echte Netzwerkkarte aktiv sein. Gemessen wird mit Bordmitteln von Go je Betriebssystem, ohne neue Bibliothek.
-- **A-265 (neu) – Linux und Patch-Stand:** Kernel, Distribution und „Neustart nötig“ werden berichtet. Paketmanager fragt D8 nicht, weil die sich je nach Distribution unterscheiden und Netz brauchen.
-- **A-266 (neu) – Docker/Podman:** D8 nimmt `--daemon`, sonst `DOCKER_HOST`, sonst die üblichen Sockets. Hier genügt es, dass eine Verbindung zustande kommt; die eigentliche Docker-Schnittstelle kommt mit C-073.
-- **A-267 (neu) – Broker und Registry:** D8 meldet sich mit den Zugangsdaten aus den Storages an. Meldet sich keine Registry, ist das ein Fehler der Plattform.
-- **A-268 (neu) – Selbsttest:** 55 Szenarien mit nachgebauten Rechnern; kein Root, kein Docker, kein Netz außer der Loopback-Schnittstelle.
-- **A-269 (neu) – 32-Bit-Fehler** behoben (siehe oben).
-- **A-270 (neu) – Freiwillige Läufe:** auf dem Rechner selbst und in einem Linux-Container, beide in `live.sh`.
+- **A-259 – Befehl:** `oec-infra host --root DIR` (Standard `/`); jeder Storage lässt sich auch einzeln angeben, der Container-Name mit `--container`. D8 liest nur, höchstens 1 MiB pro Datei, und schreibt keine Inhalte oder Geheimnisse in den Bericht.
+- **A-260 – T8-HST-01:** Das Broker-Zertifikat wird gegen `broker_ca.pem` geprüft, sonst gegen `ca.pem`. Ist es abgelaufen, gibt es hier nur einen Hinweis, weil `oec-infra bus` Gültigkeit und Adresse prüft. `broker.json` wird gegen das Schema aus D1 geprüft.
+- **A-261 – T8-HST-02:** Im Geheimnis-Storage dürfen nur `credentials`, `private_key.pem` und `passphrase` liegen. Ein verschlüsselter Schlüssel braucht eine passende Passphrase, und zum Schlüssel gehört das Zertifikat `<Containername>.pem`. Die zwei „sollte“-Regeln geben nur Warnungen.
+- **A-262 – Einhängen:** D8 sieht nur unter Linux, ob ein Storage eingehängt ist. Kein eigener Mount ist nur dann ein Fehler, wenn D8 in einem Container läuft.
+- **A-263 – „manuell“:** Ein gemessener Wert, den ein Mensch beurteilen muss, erscheint als „manuell“ und verschlechtert den Test nicht.
+- **A-264 – Hardware:** Grenzen und „manuell“-Bänder wie bei D-1; beim Netzwerk muss eine echte Netzwerkkarte aktiv sein. Gemessen wird mit Bordmitteln von Go je Betriebssystem, ohne neue Bibliothek.
+- **A-265 – Linux und Patch-Stand:** Kernel, Distribution und „Neustart nötig“ werden berichtet. Paketmanager fragt D8 nicht, weil die sich je nach Distribution unterscheiden und Netz brauchen.
+- **A-266 – Docker/Podman:** D8 nimmt `--daemon`, sonst `DOCKER_HOST`, sonst die üblichen Sockets. Hier genügt es, dass eine Verbindung zustande kommt; die eigentliche Docker-Schnittstelle kommt mit C-073.
+- **A-267 – Broker und Registry:** D8 meldet sich mit den Zugangsdaten aus den Storages an. Meldet sich keine Registry, ist das ein Fehler der Plattform.
+- **A-268 – Selbsttest:** 55 Szenarien mit nachgebauten Rechnern; kein Root, kein Docker, kein Netz außer der Loopback-Schnittstelle.
+- **A-269 – 32-Bit-Fehler** behoben (siehe oben).
+- **A-270 – Freiwillige Läufe:** auf dem Rechner selbst und in einem Linux-Container, beide in `live.sh`.
+- **A-271 (neu) – Docker/Podman-Anbindung:**
+  - eigener Client, nur Lesen, nur Bordmittel von Go;
+  - Unix-Socket, Windows-Pipe oder TCP; verschlüsselte oder `ssh://`-Verbindungen kann D8 noch nicht (→ nicht entscheidbar);
+  - Selbsttest mit Aufzeichnungen von Docker 28.4; die Podman-Formen sind nachgebaut.
+- **A-272 (neu) – Befehl `oec-infra container`:**
+  - Container per Name, ID oder eindeutigem ID-Anfang;
+  - ein unbekannter Container ist ein Bedienfehler; ohne Docker ist das Ergebnis nicht entscheidbar;
+  - im Bericht stehen keine Quellpfade.
+- **A-273 (neu) – Netz:** Bridge ist richtig. Das Host-Netz gibt eine Warnung, weil die Ausnahme (Ethernet auf unterer Ebene) nicht sichtbar ist. Andere Netzarten geben nur einen Hinweis.
+- **A-274 (neu) – Name:**
+  - ein gültiger Hostname (RFC 1123), höchstens 63 Zeichen;
+  - in Docker eindeutig, ohne Rücksicht auf Groß/klein;
+  - genau gleich dem Hostname;
+  - empfohlen: `-<uuid>` am Ende.
+- **A-275 (neu) – Lizenzordner:** Ein Ordner des Rechners oder ein tmpfs ist ein Fehler. Ein Volume wird manuell bewertet, ein Image-Mount gibt einen Hinweis.
+- **A-276 (neu) – Welche Container zählen:**
+  - jeder mit einem Einhängepunkt in `/etc/oi4`, `/opt/oi4` oder `/run/secrets/oi4` (oder darüber), auch gestoppte;
+  - D8s eigener Container nur mit `--self` ausgenommen; D8 erkennt ihn nicht von selbst.
+- **A-277 (neu) – Was „geteilt“ heißt:**
+  - dasselbe Volume;
+  - oder Quellordner, die ineinander liegen – so verglichen, wie Docker sie meldet;
+  - auch ein Container, der den ganzen Rechner einhängt.
+- **A-278 (neu) – Anwendungsdaten:** Die Regel gilt nur, wenn die Plattform dauerhaft speichert, d. h. eine Anwendung einen Host-Pfad/ein Volume dafür hat. Fehlt einer Anwendung der Ordner, wird manuell bewertet.
+- **A-279 (neu) – Dev-Broker:** fällt bei der Namensregel durch, ist aber kein OI4-Container – keine Abweichung.
+- **A-280 (neu) – Freiwilliger Lauf** `TestContainerDev` in `live.sh`; das nächste Stück (`run`) nicht vorgezogen.
 
 ---
 
-### Was als Nächstes passiert (C-073)
+### Was als Nächstes passiert (C-074)
 
-1. **C-073:** das vierte Stück von D8: eine eigene, nur lesende Anbindung an Docker/Podman, `oec-infra container` (laufende Container prüfen, T8-CTR-01 … 03) und T8-HST-03 (Storages verschiedener Anwendungen sind getrennt). Selbsttest gegen eine nachgebaute Docker-Schnittstelle. Läuft in einer **neuen Sitzung**; der Startauftrag steht in `prompt.md`.
+1. **C-074:** das fünfte Stück von D8: `oec-infra run` (T8-RUN-01 … 03). D8 startet ein Anwendungs-Image in einer Sandbox mit erzeugten Storages, eigenem Container-Namen und einem eigenen MQTT-Testpunkt. Dann prüft D8, ob die Anwendung die Storages und den Namen richtig nutzt. Für den Selbsttest gibt es eigens gebaute gute und fehlerhafte Test-Images. Dazu kommt ein freiwilliger Lauf `live-infra.sh`. Läuft in einer **neuen Sitzung**; der Startauftrag steht in `prompt.md`.
 
 ---
 
