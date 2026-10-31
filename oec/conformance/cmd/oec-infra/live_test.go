@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -201,4 +203,126 @@ func TestHostDevContainer(t *testing.T) {
 			}
 		})
 	}
+}
+
+// liveEngine returns the Engine API endpoint of the engine of live.sh:
+// DOCKER_HOST/CONTAINER_HOST, else the endpoint of the current Docker
+// context or the socket of Podman.
+func liveEngine(t *testing.T, engine string) string {
+	t.Helper()
+	for _, env := range []string{"DOCKER_HOST", "CONTAINER_HOST"} {
+		if v := os.Getenv(env); v != "" {
+			return v
+		}
+	}
+	args := []string{"context", "inspect", "--format", "{{.Endpoints.docker.Host}}"}
+	if engine == "podman" {
+		args = []string{"info", "--format", "{{.Host.RemoteSocket.Path}}"}
+	}
+	out, err := exec.Command(engine, args...).Output()
+	if err != nil {
+		t.Fatalf("%s %v: %v", engine, args, err)
+	}
+	return strings.TrimSpace(string(out))
+}
+
+func liveUUID(t *testing.T) string {
+	t.Helper()
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		t.Fatal(err)
+	}
+	b[6], b[8] = b[6]&0x0f|0x40, b[8]&0x3f|0x80
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+}
+
+// TestContainerDev is the opt-in live run of `oec-infra container` and of
+// T8-HST-03 (`oec-infra host --tests T8-HST-03`) against the engine of
+// live.sh (C-073). It starts two containers from the image of the dev
+// broker (entrypoint sleep): a conforming application
+// oec-live-app-<uuid> (hostname = name, the bridge network of oec/dev, own
+// volumes on /etc/oi4/app and /opt/oi4/app, a read-only bind on
+// /run/secrets/oi4) and a faulty one (host network, hostname other than
+// the name, an underscore, a bind on /opt/oi4/licenses, the /etc/oi4/app
+// volume of the application). The dev broker itself is no OI4 container
+// (RIG 4.2): its hostname "mosquitto" differs from the compose name, so
+// REQ-CNT-019 fails there. The containers and volumes are removed
+// afterwards.
+func TestContainerDev(t *testing.T) {
+	if os.Getenv("OEC_LIVE") != "1" {
+		t.Skip("opt-in: OEC_LIVE=1 (oec/conformance/live.sh)")
+	}
+	dev, engine, broker := os.Getenv("OEC_DEV_DIR"), os.Getenv("OEC_ENGINE"), os.Getenv("OEC_BROKER_CONTAINER")
+	if dev == "" || engine == "" || broker == "" {
+		t.Fatal("OEC_DEV_DIR, OEC_ENGINE or OEC_BROKER_CONTAINER not set")
+	}
+	cmd := func(name string, args ...string) string {
+		t.Helper()
+		out, err := exec.Command(name, args...).CombinedOutput()
+		if err != nil {
+			t.Fatalf("%s %v: %v\n%s", name, args, err, out)
+		}
+		return strings.TrimSpace(string(out))
+	}
+	ep := liveEngine(t, engine)
+	image := cmd(engine, "inspect", "-f", "{{.Config.Image}}", broker)
+	brokerName := strings.TrimPrefix(cmd(engine, "inspect", "-f", "{{.Name}}", broker), "/")
+	network := strings.Fields(cmd(engine, "inspect", "-f", "{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}", broker))[0]
+	id := liveUUID(t)
+	app, bad := "oec-live-app-"+id, "oec-live-bad_"+id[:8]
+	cfg, data := "oec-live-cfg-"+id[:8], "oec-live-data-"+id[:8]
+	secrets, lic := t.TempDir(), t.TempDir()
+	t.Cleanup(func() {
+		_ = exec.Command(engine, "rm", "-f", app, bad).Run()
+		_ = exec.Command(engine, "volume", "rm", "-f", cfg, data).Run()
+	})
+	cmd(engine, "run", "-d", "--name", app, "--hostname", app, "--network", network,
+		"-v", cfg+":/etc/oi4/app", "-v", data+":/opt/oi4/app", "-v", secrets+":/run/secrets/oi4:ro",
+		"--entrypoint", "sleep", image, "600")
+	cmd(engine, "run", "-d", "--name", bad, "--hostname", "oec-live-bad", "--network", "host",
+		"-v", lic+":/opt/oi4/licenses:ro", "-v", cfg+":/etc/oi4/app",
+		"--entrypoint", "sleep", image, "600")
+
+	for _, c := range []struct {
+		label, name string
+		exit        int
+		want        map[string]string
+	}{
+		{"app", app, exitPass, map[string]string{"T8-CTR-01": "pass", "T8-CTR-02": "pass", "T8-CTR-03": "pass"}},
+		{"bad", bad, 1, map[string]string{"T8-CTR-01": "warn", "T8-CTR-02": "fail", "T8-CTR-03": "fail"}},
+		{"broker", brokerName, 1, map[string]string{"T8-CTR-01": "pass", "T8-CTR-02": "fail", "T8-CTR-03": "pass"}},
+	} {
+		t.Run("container/"+c.label, func(t *testing.T) {
+			code, out, errOut := call(t, "container", "--daemon", ep, "--format", "json", c.name)
+			t.Logf("%s%s", out, errOut)
+			_, got := containerOutcomes(t, out)
+			if code != c.exit {
+				t.Errorf("exit %d, want %d", code, c.exit)
+			}
+			for id, want := range c.want {
+				if got[id] != want {
+					t.Errorf("%s: %s, want %s", id, got[id], want)
+				}
+			}
+			if strings.Contains(out, secrets) || strings.Contains(out, lic) || strings.Contains(out, "/var/lib/") {
+				t.Error("a mount source in the report")
+			}
+		})
+	}
+
+	root := filepath.Join(dev, "generated", "roots", "oec-dev-app")
+	storages := func(t *testing.T, exit int, outcome, failing string) {
+		code, out, errOut := call(t, "host", "--root", root, "--offline", "--daemon", ep, "--tests", "T8-HST-03", "--format", "json")
+		t.Logf("%s%s", out, errOut)
+		r, got := outcomes(t, out)
+		if code != exit || got["T8-HST-03"] != outcome {
+			t.Errorf("exit %d, T8-HST-03 %s; want %d, %s", code, got["T8-HST-03"], exit, outcome)
+		}
+		if failing != "" && liveReq(r, "T8-HST-03", failing) != "fail" {
+			t.Errorf("%s %s, want fail", failing, liveReq(r, "T8-HST-03", failing))
+		}
+	}
+	t.Run("host/shared", func(t *testing.T) { storages(t, 1, "fail", "REQ-CNT-011") })
+	cmd(engine, "rm", "-f", bad)
+	t.Run("host/own", func(t *testing.T) { storages(t, exitPass, "pass", "") })
 }
