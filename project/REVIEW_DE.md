@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 31.10.2026, C-074-Review Nachtrag 1. **Für dich offen: nichts** – „D-1 wie vorgeschlagen“ und „R-1 akzeptiert“ sind eingetragen; D-1 setze ich in Nachtrag 2 um._
+_Stand: 31.10.2026, C-074-Review Nachtrag 2: D-1 („D-1 wie vorgeschlagen“, SF-117) ist umgesetzt. Offen ist nur **R-2** (die ergänzte Regel REQ-CNT-009 und drei Run-Testfälle). R-1 hattest du schon akzeptiert._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,12 +24,22 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts. Deine Antworten „D-1 wie vorgeschlagen“ und „R-1 akzeptiert“ sind eingetragen (C-074, Nachtrag 1).
+### R-2 – Die Regel zu Zertifikat und Geheimnissen und drei Run-Testfälle nach deiner Entscheidung zu SF-117 (bitte prüfen)
+
+**Worum geht es?** Du hast D-1 wie vorgeschlagen entschieden: Eine Anwendung muss **beide** Anmeldearten können (Benutzername/Passwort und Client-Zertifikat) und nimmt die, die die Plattform bereitstellt. Das steht jetzt in der Guideline (RIG 4.1.3, Commit `52d8470`). Daraus folgen Änderungen an Dingen, die du schon abgenommen hattest – darum liegen sie wieder bei dir:
+- **REQ-CNT-009** („Anwendung nutzt den Zertifikats- und den Geheimnis-Ordner“): Die Regel sagt jetzt zusätzlich: „Sie kann beide Anmeldearten (Benutzername/Passwort sowie privater Schlüssel mit Zertifikat) und nimmt die, die die Plattform bereitstellt.“ Der neue Satz aus RIG 4.1.3 ist als Zitat dabei.
+- **Drei Run-Testfälle** von `oec-infra run`:
+  - `passphrase-raw`: dekodiert die Passphrase nicht (base64), kann den Schlüssel also nicht entschlüsseln und meldet sich nur mit Passwort an;
+  - `no-cert`: ignoriert das Client-Zertifikat, kann also nur Passwort;
+  - `no-credentials`: ignoriert Benutzername/Passwort, kann also nur Zertifikat.
+  Bisher: **Warnung** mit Hinweis „SF-117“. Jetzt: **Fehler** in T8-RUN-02 (REQ-CNT-009) und, weil REQ-CMP-029 das wiederholt, auch in T8-RUN-01. Im Bericht steht als Begründung „RIG 4.1.3: the application shall support both means of authentication“. Die anderen 17 Testfälle bleiben, wie du sie abgenommen hast.
+
+**Antwort z. B.:** „R-2 akzeptiert“.
 
 ### Was aus deinem Review C-074 geworden ist (Kurzfassung)
 
-- **R-1 akzeptiert:** alle 20 Run-Testfälle stehen auf `reviewed`.
-- **D-1 wie vorgeschlagen:** Ich ergänze RIG 4.1.3 um den Satz, SF-117 ist dann erledigt. Danach ziehe ich die Anforderung REQ-CNT-009 nach und mache aus der Warnung in T8-RUN-02 einen Fehler. Die drei betroffenen Testfälle (`passphrase-raw`, `no-cert`, `no-credentials`) ändern ihr Ergebnis und kommen noch einmal zu dir (Nachtrag 2).
+- **R-1 akzeptiert:** alle 20 Run-Testfälle stehen auf `reviewed` (drei davon haben sich mit D-1 geändert → R-2).
+- **D-1:** wie vorgeschlagen entschieden („D-1 wie vorgeschlagen“) und umgesetzt: der Satz steht in der Guideline (RIG 4.1.3, `52d8470`), SF-117 ist erledigt, die Baseline ist nachgezogen (1411 Fundstellen, 444 Regeln, keine Lücke), D8 bewertet „kann nur eine Anmeldeart“ als Fehler statt als Warnung. Kein Finding mehr offen. Die geänderte Regel und die drei Testfälle → R-2.
 
 ### C-074 D-1 – SF-117: Muss eine Anwendung beide Anmeldearten können? (entschieden: wie vorgeschlagen)
 
@@ -58,7 +68,7 @@ Alle Werte weichen absichtlich vom Üblichen ab (Port nicht 8883, Broker heißt 
 **Die 20 Fälle** (`oec/conformance/testdata/run/index.yaml`; eine nachgebaute Anwendung mit je einem eingebauten Fehler, Stufe 3):
 - **in Ordnung (3):** `good` (alles richtig, alle drei Tests bestehen); `T8-RUN-01/ip-address` (in `broker.json` steht eine IP-Adresse statt eines Namens); `T8-RUN-02/only` (nur T8-RUN-02 ausgewählt, ohne den Durchlauf „falscher Broker“).
 - **T8-RUN-01 – nutzt die Broker-Daten** (REQ-CMP-029, REQ-CNT-004) → **Fehler** bei: `strict-json` (bricht wegen des unbekannten Eintrags ab), `port-8883` (ignoriert den Port), `ca-only` (ignoriert `broker_ca.pem`), `no-verify` (verbindet sich auch mit dem falschen Broker), `oversized` (schickt eine Nachricht, die 1 Byte zu groß ist), `exit` (beendet sich sofort), `image/other-entrypoint` (das Image startet gar keine OEC-Anwendung).
-- **T8-RUN-02 – nutzt Zertifikat und Geheimnisse** (REQ-CNT-009): `last-colon` (trennt Benutzer und Passwort am letzten `:` statt am ersten) und `no-auth` (meldet sich gar nicht an) → **Fehler**; `passphrase-raw` (dekodiert die Passphrase nicht), `no-cert` (ignoriert das Zertifikat), `no-credentials` (ignoriert das Passwort) → **Warnung, hängt an D-1**.
+- **T8-RUN-02 – nutzt Zertifikat und Geheimnisse** (REQ-CNT-009): `last-colon` (trennt Benutzer und Passwort am letzten `:` statt am ersten) und `no-auth` (meldet sich gar nicht an) → **Fehler**; `passphrase-raw` (dekodiert die Passphrase nicht), `no-cert` (ignoriert das Zertifikat), `no-credentials` (ignoriert das Passwort) → damals **Warnung, hing an D-1**; seit Nachtrag 2 **Fehler** (R-2).
 - **T8-RUN-03 – nutzt den Container-Namen** (REQ-CNT-021, REQ-MQTT-013): `serial-other` (Seriennummer `SN-0001` statt Container-Name) → **Fehler**; `client-id-random` (zufällige MQTT-ClientId) → **Warnung** (nur „sollte“); `uri-il` (Identification Link als URI) → nur **Hinweis**, die Seriennummer-Regel greift dann nicht.
 - **Docker-Probleme:** `engine/unreachable` (keine Docker-Schnittstelle), `engine/create-fails` (Docker lehnt das Anlegen ab) → alles **nicht entscheidbar**.
 - Was nichts zu bewerten hat, ist **nicht entscheidbar** (z. B. T8-RUN-02, wenn die Anwendung sich nie verbindet). REQ-CMP-029 in T8-RUN-01 wiederholt die Ergebnisse der anderen beiden Tests, weil RIG 1.3 die Container-Umgebung zur Bedingung von Level 2 macht.

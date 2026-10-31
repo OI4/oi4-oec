@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-31, C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"); D-1 is applied in addendum 2. Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
+_Last updated: 2026-10-31, C-074 review addendum 2: D-1 ("D-1 wie vorgeschlagen", SF-117) is applied – RIG 4.1.3 `52d8470`, SF-117 resolved, re-baseline, T8-RUN-02 judges one means of authentication only as a violation. Open: **R-2** (REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials`). R-1 accepted (addendum 1). Before that C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"). Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -239,8 +239,15 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **SF-117** (RIG 4.1.3) found → **D-1**; until decided T8-RUN-02 warns when the application authenticates in only one phase.
   - **Opt-in live run** (`live.sh`, `TestRunDev`, Docker 28.4): 15 of 15 faults give the same verdicts as in the self-test; nothing left behind. One defect found and fixed: the test-image archive needed a Docker `manifest.json` for the classic image store.
   - No new dependency; D7 gate and `COVERAGE.md` unchanged (shared packages only additive). Increment 6 not pulled forward (A-291). A-281 … A-291 for information.
+- C-074 review (log addendum 1): you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"). The 20 run fixtures are `reviewed`; SF-117 is applied in addendum 2.
+- C-074 review addendum 2: D-1 applied:
+  - RIG 4.1.3 in `52d8470` (the application supports both means of authentication and uses the means that the platform provides), **SF-117 resolved** (`eb821e9`), no open finding.
+  - Re-baseline on `52d8470`: 1411 inventory items (1 new, mapped to REQ-CNT-009), 444 REQs, 0 gaps; schema `2.0.1-dev` @ `52d8470` (no content change).
+  - REQ-CNT-009 follows the text → `draft`.
+  - D8 T8-RUN-02 (test first): authentication with only one of the two means is a violation of REQ-CNT-009 (was a warning marked "SF-117"); REQ-CMP-029 in T8-RUN-01 repeats it. The run fixtures `passphrase-raw`, `no-cert`, `no-credentials` change from warn to fail → `draft`.
+  - Together → **R-2** (numbered on because R-1 is answered).
 
-Coverage stays at 0 gaps; schema `2.0.1-dev` @ `7427a4f` (re-baseline, no content change).
+Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
 Logs: [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-engine-container.md), [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
@@ -531,6 +538,7 @@ Logs: [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-e
 | A-280 | Live test `TestContainerDev`; increment 5 not pulled forward | info (agent) | C-073 | – | – |
 | D-1 | SF-117: a containerized application supports both means of authentication (RIG 4.1.3) | decide (G-3.4 a) | C-074 | as proposed | ☑ as proposed |
 | R-1 | 20 run fixtures of `oec-infra run` (T8-RUN-01 … 03) | review (G-3.9) | C-074 | accept | ☑ accepted |
+| R-2 | REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` after SF-117 | review (G-3.9) | C-074 review | accept | ☐ |
 | A-281 | Engine API writes only for D8's own containers (prefix + label), no pull/volume/network/image call | info (agent) | C-074 | – | – |
 | A-282 | Local engine only (before any request), never pull | info (agent) | C-074 | – | – |
 | A-283 | Command `oec-infra run`, report key `run` without secrets, logs or host paths | info (agent) | C-074 | – | – |
@@ -545,13 +553,18 @@ Logs: [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-e
 
 ## Decisions and review items
 
-No open item (D-1 of C-074 is being applied, addendum 2).
+### R-2 – REQ-CNT-009 and three run fixtures after SF-117 (G-3.9)
+- **Where:** `oec/spec/requirements/cnt.yaml` (REQ-CNT-009, view `oec/spec/requirements/view/cnt.md`); `oec/conformance/testdata/run/index.yaml` (`passphrase-raw`, `no-cert`, `no-credentials`); log C-074 addendum 2.
+- **REQ-CNT-009** "Application uses the certificate and secret storages" (MUST, L3; L2 SHOULD; d8 + manual): the statement gains "It supports both means of authentication (the credentials and the private key together with the certificate) and uses the means that the platform provides."; new quote of the RIG 4.1.3 sentence, inventory RIG-4.1.3-014622f6, ref SF-117, notes.
+- **`passphrase-raw`** (does not base64-decode the passphrase, so it can only log in with the credentials), **`no-cert`** (ignores the client certificate), **`no-credentials`** (ignores the credentials): T8-RUN-01 (REQ-CMP-029) and T8-RUN-02 (REQ-CNT-009) change from **warn** to **fail**; the evidence cites "RIG 4.1.3: the application shall support both means of authentication". The other expectations and the 17 other run fixtures are unchanged.
+- **Recommendation:** accept.
+- **PO:** ☐ accepted ☐ changes: …
 
 ### Answered earlier
 
 Answered after C-074 (2026-10-31) and recorded in C-074 addendum 1:
 - D-1 – SF-117 (RIG 4.1.3: a containerized application supports both means of authentication and uses the means the platform provides): ☑ as proposed ("D-1 wie vorgeschlagen") → RIG 4.1.3 text, SF-117 resolved, re-baseline, REQ-CNT-009 follows; D8 T8-RUN-02: one means only becomes a violation of REQ-CNT-009 (addendum 2).
-- R-1 – 20 run fixtures of `oec-infra run` (`oec/conformance/testdata/run/index.yaml`): ☑ accepted ("R-1 akzeptiert") → `reviewed`.
+- R-1 – 20 run fixtures of `oec-infra run` (`oec/conformance/testdata/run/index.yaml`): ☑ accepted ("R-1 akzeptiert") → `reviewed`; three of them changed with D-1 and are in R-2.
 
 Answered after C-073 (2026-10-31) and applied in C-073 addendum 1:
 - R-1 – 26 container scenarios of `oec-infra container` (`oec/conformance/testdata/containers/index.yaml`) and 16 host scenarios (14 T8-HST-03, `none`, `T8-HST-02/certificate`; `testdata/hosts/index.yaml`): ☑ accepted ("R-1 akzeptiert") → `reviewed`; all 26 container and 69 host scenarios `reviewed`.
@@ -1346,12 +1359,12 @@ ADR-0025 amendment C-074; DESIGN §9 "As built (C-074)"; log C-074.
 - **A-285 Generated storages:** values that differ from every default (`SecurePort` ≠ 8883, broker host `oec-d8-broker`, unknown element `OecD8Unknown`, `:` in the password, encrypted key, base64 passphrase); Message Bus, certificate and secret storages `ro`, application storages `rw`; directories 0755 (application storages 0777), files 0644 – throw-away test storages readable by any user of the image, no recommendation for platforms.
 - **A-286 Network:** the endpoint listens on 127.0.0.1 on macOS/Windows (Docker Desktop forwards `host-gateway`), on the bridge gateway elsewhere; the broker host maps to `host-gateway`; `--listen` and `--broker-host` override.
 - **A-287 Test endpoint:** own minimal MQTT server (protocol levels 3, 4, 5) on the standard library and `mqttwire`; no forwarding; constant-time login check, no password kept; handshake timeout 15 s; a packet above `MaxPacketSize` + 65544 closes the connection (SF-105); `--max-packet-size` 1 … 268435455 − 65544.
-- **A-288 Judging:** DESIGN §9 "As built (C-074)"; REQ-CMP-029 repeats each observation of REQ-CNT-004/009/021 (RIG 1.3); a requirement without any observation is inconclusive; one means of authentication warns until SF-117 (D-1) is decided.
+- **A-288 Judging:** DESIGN §9 "As built (C-074)"; REQ-CMP-029 repeats each observation of REQ-CNT-004/009/021 (RIG 1.3); a requirement without any observation is inconclusive; one means of authentication warned until SF-117 (D-1) was decided; since the C-074 review (addendum 2) it is a violation of REQ-CNT-009 (RIG 4.1.3).
 - **A-289 Self-test:** `enginetest` runs the simulated application (`simapp`, 15 faults) in process; its dialer refuses port 8883 so that a self-test never reaches a real broker of this machine. Run fixtures are not part of `Fixtures()` (A-248), `COVERAGE.md` unchanged. Shared packages changed only additively: `mqttwire.EncryptPKCS8` (moved from `mqtttest`), `mqttwire.Config.Dialer`, `ocitest.File.Mode`. The self-test is skipped on Windows (Unix sockets); Windows and Podman not run live.
 - **A-290 Test images and live run:** `runtest.Archive` writes an OCI layout plus a Docker `manifest.json` (the classic image store of Docker 28 needs it; found in the live run, fixed test first); images built at test time, never committed, removed by tag afterwards; `TestRunDev` lives in `live.sh` instead of a separate `live-infra.sh`.
 - **A-291 Cut:** increment 6 not pulled forward – the D8 report version 1 is frozen after R-1 and D-1; no new dependency.
 
 ## Next (C-075)
 
-1. D-1 applied (C-074 addendum 2): guideline text RIG 4.1.3, re-baseline, T8-RUN-02 warning → violation, affected fixtures `draft` again (review item).
+1. Your answer to **R-2** (REQ-CNT-009 and three run fixtures after SF-117); it is recorded first (own commit).
 2. C-075: P5b increment 6 – `oec-infra list`/`explain`, coverage report for D8, D8 report version 1 frozen, P5b exit check; in a new session (start prompt in `prompt.md`).
