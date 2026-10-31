@@ -219,7 +219,7 @@ func (j *judge) secrets(by map[string]*phaseResult) {
 			}
 		}
 	}
-	const sf = " (SF-117: whether an application must support both means is open)"
+	const both = " (RIG 4.1.3: the application shall support both means of authentication)"
 	switch {
 	case cred == authWrong || cert == authWrong:
 		if cred == authWrong {
@@ -232,9 +232,9 @@ func (j *judge) secrets(by map[string]*phaseResult) {
 		j.add(reqSecrets, verdict.Checked, credCtr, DirSecrets+"/credentials", "authenticated with the credentials")
 		j.add(reqSecrets, verdict.Checked, certCtr, DirCerts, "authenticated with the client certificate and the private key decrypted with the passphrase")
 	case cred == authOK && cert == authUnused:
-		j.add(reqSecrets, verdict.Warning, certCtr, DirCerts, "authenticated with the credentials, but not with the client certificate and the encrypted private key"+sf)
+		j.add(reqSecrets, verdict.Violation, certCtr, DirCerts, "authenticated with the credentials, but not with the client certificate and the encrypted private key"+both)
 	case cred == authUnused && cert == authOK:
-		j.add(reqSecrets, verdict.Warning, credCtr, DirSecrets+"/credentials", "authenticated with the client certificate, but not with the credentials"+sf)
+		j.add(reqSecrets, verdict.Violation, credCtr, DirSecrets+"/credentials", "authenticated with the client certificate, but not with the credentials"+both)
 	case cred == authUnused && cert == authUnused:
 		j.add(reqSecrets, verdict.Violation, credCtr, DirSecrets, "authenticated neither with the credentials nor with the client certificate")
 	default:

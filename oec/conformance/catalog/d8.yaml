@@ -69,7 +69,7 @@ tests:
     needs: [docker]
     reqs: [REQ-CNT-009]
     status: implemented
-    notes: The test endpoint accepts only the generated credentials (base64, a password with ":", phase credentials) or the generated client certificate <containername>.pem with the encrypted private key and the base64 passphrase (phase certificate). Using only one of the two means warns until SF-117 is decided; other credentials or neither means fail (C-074).
+    notes: The test endpoint accepts only the generated credentials (base64, a password with ":", phase credentials) or the generated client certificate <containername>.pem with the encrypted private key and the base64 passphrase (phase certificate). Using only one of the two means fails (RIG 4.1.3, SF-117 decided in the C-074 review), as do other credentials or neither means (C-074).
   - id: T8-RUN-03
     title: Application uses its container name
     mode: run

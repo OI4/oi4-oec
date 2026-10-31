@@ -286,3 +286,8 @@ Decided by the agent within this ADR; the PO can overrule. Details: C-074 log, R
 6. **Self-test (A-289, A-290):** `enginetest` gains a run mode (image documents, create/start/stop/delete, a hook that runs `internal/run/simapp` in process); `internal/run/runtest` provides the test images `oec-d8-sim:<fault>` and, for the live run, an archive with an OCI layout and a Docker `manifest.json`. 20 fixtures in `testdata/run/index.yaml` (`draft`, R-1); not part of `Fixtures()` (A-248), `COVERAGE.md` unchanged. Shared packages: `mqttwire.EncryptPKCS8` (from `mqtttest`), `mqttwire.Config.Dialer`, `ocitest.File.Mode` – D7 unchanged.
 7. **Live:** `live.sh` runs `TestRunDev` (15 faults against Docker; the test removes its images by tag and checks that no `oec-d8-*` container is left). No separate `live-infra.sh`: one opt-in script for all live tests.
 8. No new dependency (standard library and `mqttwire`). Increment 6 is not pulled forward (A-291).
+
+## Amendment C-074 review (2026-10-31) – SF-117 decided (agent, G-3.4 b)
+
+- The PO decided SF-117 as proposed (D-1 of the C-074 review); RIG 4.1.3 (`52d8470`) now requires that the application supports both means of authentication and uses the means that the platform provides. REQ-CNT-009 follows the text (`draft`, R-2 of the C-074 review).
+- Item 5 of amendment C-074 changes: T8-RUN-02 judges an application that authenticates with only one of the two means as a **violation** of REQ-CNT-009 (evidence names RIG 4.1.3, no mark "SF-117"); REQ-CMP-029 (T8-RUN-01) repeats it. The fixtures `passphrase-raw`, `no-cert` and `no-credentials` expect `fail` for T8-RUN-01 and T8-RUN-02 and are `draft` again (R-2); the other 17 run fixtures stay `reviewed`.
