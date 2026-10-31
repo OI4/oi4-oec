@@ -253,3 +253,9 @@ Decided by the agent within this ADR; the PO can overrule. Details: C-072 log, R
 12. **Live (A-270):** `live.sh` runs `TestHostDevRoots` (both sample roots on this computer) and `TestHostDevContainer` (the Linux binary in a container in the network namespace of the dev broker, storages mounted `ro`, once the secret storage `rw`).
 13. No new dependency. Increment 4 (Engine API, `container`, T8-HST-03) is not pulled forward.
 
+## Amendment C-072 review (2026-10-31) – SF-116 decided (agent, G-3.4 b)
+
+The PO decided D-1 as proposed ("D-1 und R-1 reviewed und akzeptiert"): RIG 5.1 (guideline `7427a4f`) counts the minimum RAM and non-volatile memory as the nominal size of the installed memory, with 1 GB = 10^9 octets.
+
+1. T8-HST-04 keeps its thresholds and verdicts (amendment C-072 item 7, A-264): ≥ 10^9 / 4 · 10^9 octets pass, below 768 MiB / 3.5 · 10^9 octets fail, the band in between is `manual` – D8 sees what the operating system shows, not the nominal size, so a value just below the minimum needs the data sheet.
+2. The two manual messages cite "(RIG 5.1)" and "the nominal size of the installed memory" instead of "SF-116" (`internal/host/platform.go`, test `TestMemoryRule`); the report and its schema are unchanged.

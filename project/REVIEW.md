@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-31, C-072 review (addendum 1): you accepted **D-1** (SF-116 as proposed) and **R-1** (55 host scenarios `reviewed`); D-1 is applied in addendum 2. A-259 … A-270 for information._
+_Last updated: 2026-10-31, C-072 review addendum 2: D-1 ("D-1 … reviewed und akzeptiert", SF-116) is applied – RIG 5.1 `7427a4f`, SF-116 resolved, re-baseline, D8 messages cite RIG 5.1. Open: **R-2** (REQ-PLT-001 and the scenarios `T8-HST-04/ram-reserved`, `/storage-nominal`). R-1 accepted (addendum 1). A-259 … A-270 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -216,8 +216,14 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - A pre-existing defect fixed: `oec-check`/`oec-infra` did not compile for 32-bit ARM (ARMv7), A-269.
   - No new dependency, no reviewed item changed, `COVERAGE.md` unchanged, D7 gate unchanged. Increment 4 (Engine API) not pulled forward. A-259 … A-270 for information.
 - C-072 review (log addendum 1): you accepted **D-1** and **R-1** ("D-1 und R-1 reviewed und akzeptiert"). The 55 host scenarios are `reviewed`; SF-116 is decided as proposed and applied in addendum 2 (RIG 5.1 text, re-baseline, D8 messages).
+- C-072 review addendum 2: D-1 applied:
+  - RIG 5.1 in `7427a4f` (the minimum RAM and non-volatile memory are the nominal sizes of the installed memory, 1 GB = 10^9 octets), **SF-116 resolved** (`5a6f0b1`), no open finding.
+  - Re-baseline on `7427a4f`: 1410 inventory items (2 remapped), 444 REQs, 0 gaps; schema `2.0.1-dev` @ `7427a4f` (no content change).
+  - REQ-PLT-001 follows the text → `draft`.
+  - D8 T8-HST-04: same thresholds and verdicts, the two manual memory findings cite "(RIG 5.1)" and the nominal size of the installed memory instead of "(RIG 5.1, SF-116)"; the notes of the scenarios `T8-HST-04/ram-reserved` and `/storage-nominal` follow → `draft`.
+  - Together → **R-2** (numbered on because R-1 is answered).
 
-Coverage stays at 0 gaps; schema `2.0.1-dev` @ `b955783` (re-baseline, no content change).
+Coverage stays at 0 gaps; schema `2.0.1-dev` @ `7427a4f` (re-baseline, no content change).
 
 Logs: [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
@@ -498,7 +504,12 @@ Logs: [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-
 
 ## Decisions and review items
 
-No open item.
+### R-2 – REQ-PLT-001 and two host scenarios after SF-116 (G-3.9)
+- **Where:** `oec/spec/requirements/plt.yaml` (REQ-PLT-001, view `oec/spec/requirements/view/plt.md`); `oec/conformance/testdata/hosts/index.yaml` (`T8-HST-04/ram-reserved`, `T8-HST-04/storage-nominal`); log C-072 addendum 2.
+- **REQ-PLT-001** "Edge computer hardware" (MUST, platform, d8 + manual): the statement gains "The memory sizes are the nominal sizes of the installed memory, with 1 GB = 10^9 octets."; the RAM and storage quotes follow the new RIG 5.1 text, the inventory items are remapped (RIG-5.1-ceba026b, RIG-5.1-72877b76), ref SF-116.
+- **`T8-HST-04/ram-reserved`** (950000000 octets main memory visible) and **`T8-HST-04/storage-nominal`** (3900000000 octets non-volatile memory): verdict unchanged – pass, REQ-PLT-001 and REQ-PLT-003 `manual` (compare the nominal size with the data sheet). Only the notes changed ("RIG 5.1 counts the nominal size of the installed memory (1 GB = 10^9 octets), so manual" instead of "(SF-116)").
+- **Recommendation:** accept.
+- **PO:** ☐ accepted ☐ changes: …
 
 ### Answered earlier
 
@@ -1267,5 +1278,5 @@ ADR-0025 amendment C-072; DESIGN §9 "As built (C-072)"; log C-072.
 
 ## Next (C-073)
 
-1. Your answers to D-1 and R-1 (entered first, own commit; D-1 changes RIG 5.1 → re-baseline).
+1. Your answer to R-2 (recorded first, own commit).
 2. C-073: P5b increment 4 – Engine API client `internal/engine` (read-only, Unix socket / named pipe), `oec-infra container` (T8-CTR-01 … 03) and T8-HST-03 (application storages not shared), self-test against a fake Engine API; in a new session (start prompt in `prompt.md`).

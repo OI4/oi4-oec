@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 31.10.2026, C-072 Review (Addendum 1). **Für dich offen: nichts** – D-1 (SF-116) und R-1 (55 Prüfszenarien) akzeptiert; D-1 wird gerade umgesetzt (danach kommt R-2)._
+_Stand: 31.10.2026, C-072-Review Nachtrag 2: D-1 („D-1 und R-1 reviewed und akzeptiert“, SF-116) ist umgesetzt. Offen ist nur **R-2** (die ergänzte Regel REQ-PLT-001 und zwei Host-Szenarien). R-1 hattest du schon akzeptiert._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,15 +24,21 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts. Deine Antwort „D-1 und R-1 reviewed und akzeptiert“ ist eingetragen (C-072, Addendum 1).
+### R-2 – Die Regel zur Hardware und zwei Host-Szenarien nach deiner Entscheidung zu SF-116 (bitte prüfen)
+
+**Worum geht es?** Du hast D-1 wie vorgeschlagen entschieden: „1 GB RAM“ und „4 GB nichtflüchtiger Speicher“ in RIG 5.1 meinen die **eingebaute** Größe laut Datenblatt, und 1 GB sind 10^9 Byte. Das steht jetzt in der Guideline (RIG 5.1, Commit `7427a4f`). Daraus folgen zwei Änderungen an Dingen, die du schon abgenommen hattest – darum liegen sie wieder bei dir:
+- **REQ-PLT-001** („Hardware des Edge-Computers“): Die Regel sagt jetzt zusätzlich: „Die Speichergrößen sind die Nenngrößen des eingebauten Speichers, mit 1 GB = 10^9 Byte.“ Die beiden Zitate aus RIG 5.1 sind auf den neuen Text umgestellt.
+- **Zwei Host-Szenarien** von `oec-infra host`:
+  - `T8-HST-04/ram-reserved`: Das System zeigt 950 000 000 Byte Arbeitsspeicher – etwas unter 1 GB, so viel behalten Firmware und Kernel typischerweise ein.
+  - `T8-HST-04/storage-nominal`: Das System zeigt 3 900 000 000 Byte Speicher – der nutzbare Teil eines 4-GB-Mediums.
+  Das erwartete Ergebnis bleibt gleich: **bestanden**, aber REQ-PLT-001 (und wie immer der Patch-Stand, REQ-PLT-003) ist „**manuell**“ – ein Mensch vergleicht mit dem Datenblatt. Geändert hat sich nur der Begleittext: statt „(SF-116)“ jetzt „RIG 5.1 zählt die Nenngröße des eingebauten Speichers“. Auch im Bericht von D8 steht jetzt „(RIG 5.1)“ statt „(RIG 5.1, SF-116)“.
+
+**Antwort z. B.:** „R-2 akzeptiert“.
 
 ### Was aus deinem Review C-072 geworden ist (Kurzfassung)
 
 - **R-1 akzeptiert:** alle 55 Prüfszenarien für `oec-infra host` stehen auf `reviewed`.
-- **D-1 (SF-116) wie vorgeschlagen:** In RIG 5.1 heißt 1 GB = 10^9 Byte, und gemeint ist die **eingebaute** Größe laut Datenblatt. Das setze ich jetzt um (Addendum 2), genau wie bei SF-115:
-  - Text in RIG 5.1 ergänzen, SF-116 im Register auf „resolved“;
-  - Re-Baseline; die Anforderung REQ-PLT-001 folgt dem neuen Text und kommt dann noch einmal kurz zu dir (R-2);
-  - D8 behält die „manuell“-Bänder, die Meldungen nennen künftig RIG 5.1 statt „SF-116“. Die Szenarien `ram-reserved` und `storage-nominal` bekommen angepasste Notizen (Ergebnis unverändert) und kommen ebenfalls in R-2.
+- **D-1:** wie vorgeschlagen entschieden („D-1 und R-1 reviewed und akzeptiert“) und umgesetzt: der Satz steht in der Guideline (RIG 5.1, `7427a4f`), SF-116 ist erledigt, die Baseline ist nachgezogen (1410 Fundstellen, 444 Regeln, keine Lücke), D8 schreibt „(RIG 5.1)“ statt „(RIG 5.1, SF-116)“; die Schwellen und Ergebnisse bleiben gleich. Kein Finding mehr offen. Die geänderte Regel und die zwei Szenarien → R-2.
 
 ### Zur Info: was C-072 gebaut hat
 
