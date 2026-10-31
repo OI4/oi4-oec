@@ -60,24 +60,24 @@ tests:
     level: 2
     needs: [docker]
     reqs: [REQ-CMP-029, REQ-CNT-004]
-    status: planned
-    notes: broker.json points to the D8 test endpoint with a non-default port and MaxPacketSize; the application must connect there and verify the endpoint's certificate with broker_ca.pem or ca.pem (a second run offers an untrusted certificate).
+    status: implemented
+    notes: broker.json points to the D8 test endpoint (a host name resolved to host-gateway, a non-default SecurePort, MaxPacketSize, an element the application does not know); the application must connect there, verify the endpoint's certificate with ca.pem (phase credentials) or broker_ca.pem (phase certificate), refuse a certificate of an unknown CA (phase untrusted) and publish no payload larger than MaxPacketSize. REQ-CMP-029 repeats the observations of REQ-CNT-004, REQ-CNT-009 and REQ-CNT-021 (C-074).
   - id: T8-RUN-02
     title: Application uses the certificate and secret storages
     mode: run
     level: 2
     needs: [docker]
     reqs: [REQ-CNT-009]
-    status: planned
-    notes: The test endpoint accepts only the generated credentials or the generated client certificate.
+    status: implemented
+    notes: The test endpoint accepts only the generated credentials (base64, a password with ":", phase credentials) or the generated client certificate <containername>.pem with the encrypted private key and the base64 passphrase (phase certificate). Using only one of the two means warns until SF-117 is decided; other credentials or neither means fail (C-074).
   - id: T8-RUN-03
     title: Application uses its container name
     mode: run
     level: 1
     needs: [docker]
     reqs: [REQ-CNT-021, REQ-MQTT-013]
-    status: planned
-    notes: D8 sets a container name with a UUID postfix as hostname; the MQTT ClientId and, with an Oi4Identifier, the SerialNumber in the MAM must use it.
+    status: implemented
+    notes: D8 sets a container name oec-d8-run-<uuid> as hostname; the MQTT ClientId, the certificate name and, with an Oi4Identifier, the SerialNumber of the Birth message (Pub/MAM about the application) must use it. A URI as Identification Link is noted (C-074).
 
   # --- container: running container on a platform ----------------------------
   - id: T8-CTR-01

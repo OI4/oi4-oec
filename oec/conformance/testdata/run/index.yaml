@@ -1,0 +1,214 @@
+# Sandbox scenarios of `oec-infra run` (DESIGN.md §9, §10; C-074).
+#
+# Each fixture runs the run tests against the fake Engine API of
+# internal/engine/enginetest (no Docker daemon, no network but loopback).
+# The fake knows the recorded Docker Engine 28.4 (API 1.51) of C-073 and
+# the test images oec-d8-sim:<fault> of internal/run/runtest; a started
+# container runs the simulated application internal/run/simapp in process:
+# the paths of the container map to the generated storages (the bind
+# sources), the broker host of ExtraHosts with host-gateway resolves to
+# loopback, port 8883 is refused. The setup of a scenario is in
+# internal/run/fixtures_test.go (scenario).
+#
+# A run has three phases, one container oec-d8-run-<uuid> each (name =
+# hostname), every one with its own TLS endpoint port and its own storages:
+#   - credentials: broker.json with an element the application does not
+#     know, the broker certificate signed by the CA of ca.pem, no
+#     broker_ca.pem, only the credentials (base64, a password with ":");
+#   - certificate: broker.json without unknown element, the broker
+#     certificate signed by the CA of broker_ca.pem (ca.pem names another
+#     CA), only the client certificate <containername>.pem with the
+#     encrypted private key and the base64 passphrase;
+#   - untrusted (only with T8-RUN-01): the storages of credentials, the
+#     endpoint presents a certificate of a CA the container does not know.
+# The faults of the simulated application (simapp.Faults):
+#   good, uri-il (Identification Link is a URI), strict-json (refuses
+#   unknown elements of broker.json and exits), port-8883 (ignores
+#   SecurePort), ca-only (ignores broker_ca.pem), no-verify (does not verify
+#   the broker), oversized (a payload of MaxPacketSize + 1 octets),
+#   last-colon (splits the credentials at the last ":"), passphrase-raw
+#   (does not base64-decode the passphrase), no-cert, no-credentials,
+#   no-auth (ignores the client certificate, the credentials, both),
+#   client-id-random, serial-other (SerialNumber SN-0001), exit (exits at
+#   once with 1).
+#
+# Until SF-117 is decided an application that authenticates only with one
+# of the two means warns (REQ-CNT-009); REQ-CMP-029 (T8-RUN-01) repeats the
+# observations of REQ-CNT-004, REQ-CNT-009 and REQ-CNT-021.
+#
+# This index is test data with verdict (G-3.9): it states the expected
+# outcome of the run tests at level 3 and goes to the PO for review.
+#
+# fault:  the scenario (a fault of the simulated application or
+#         <area>/<case> for the environment)
+# tests:  the tests of the run (patterns); empty: every run test
+# expect: test → outcome and the requirements that have this outcome; the
+#         other requirements of the test have a better outcome or are not
+#         applicable. Every selected test not listed passes.
+# status: draft | reviewed
+runs:
+  - fault: good
+    status: draft
+    positive: true
+    notes: >-
+      Connects in every phase to the endpoint of broker.json, verifies the
+      broker with ca.pem or broker_ca.pem, refuses the untrusted
+      certificate, authenticates with the credentials and with the
+      certificate, ClientId and SerialNumber are the container name.
+
+  # --- T8-RUN-01 Message Bus storage -----------------------------------------
+  - fault: strict-json
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
+      T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
+    notes: >-
+      Exits in the phase credentials because of the unknown element of
+      broker.json; the credentials cannot be judged (no CONNECT).
+  - fault: port-8883
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
+      T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
+      T8-RUN-03: {outcome: skip, reqs: [REQ-CNT-021, REQ-MQTT-013]}
+    notes: >-
+      Never reaches the endpoint (it dials 8883 instead of SecurePort); no
+      CONNECT in any phase.
+  - fault: ca-only
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
+      T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
+    notes: >-
+      Verifies the broker with ca.pem although broker_ca.pem is present:
+      the handshake fails in the phase certificate, the certificate cannot
+      be judged.
+  - fault: no-verify
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
+    notes: >-
+      Accepts the certificate of the unknown CA in the phase untrusted.
+  - fault: oversized
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
+    notes: >-
+      Publishes a payload of MaxPacketSize + 1 octets (262145).
+  - fault: exit
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
+      T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
+      T8-RUN-03: {outcome: skip, reqs: [REQ-CNT-021, REQ-MQTT-013]}
+    notes: >-
+      The container exits at once with 1 in every phase: no connection.
+  - fault: T8-RUN-01/ip-address
+    status: draft
+    positive: true
+    tests: [T8-RUN-01]
+    notes: >-
+      Address of broker.json is the IP address 127.0.0.1 (no ExtraHosts,
+      the broker certificate has an IP SAN): the good application connects.
+
+  # --- T8-RUN-02 certificate and secret storages ------------------------------
+  - fault: last-colon
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
+      T8-RUN-02: {outcome: fail, reqs: [REQ-CNT-009]}
+    notes: >-
+      Splits the decoded credentials at the last ":" of the password: the
+      endpoint refuses the username.
+  - fault: passphrase-raw
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: warn, reqs: [REQ-CMP-029]}
+      T8-RUN-02: {outcome: warn, reqs: [REQ-CNT-009]}
+    notes: >-
+      Cannot decrypt the private key without base64-decoding the
+      passphrase and connects without certificate in the phase certificate
+      (refused); it authenticates only with the credentials – a warning
+      until SF-117 is decided.
+  - fault: no-cert
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: warn, reqs: [REQ-CMP-029]}
+      T8-RUN-02: {outcome: warn, reqs: [REQ-CNT-009]}
+    notes: >-
+      Supports only the credentials (SF-117).
+  - fault: no-credentials
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: warn, reqs: [REQ-CMP-029]}
+      T8-RUN-02: {outcome: warn, reqs: [REQ-CNT-009]}
+    notes: >-
+      Supports only the client certificate (SF-117).
+  - fault: no-auth
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
+      T8-RUN-02: {outcome: fail, reqs: [REQ-CNT-009]}
+      T8-RUN-03: {outcome: skip, reqs: [REQ-CNT-021]}
+    notes: >-
+      Connects without credentials and without certificate in both phases
+      (refused); no Birth message, so the SerialNumber cannot be judged.
+  - fault: T8-RUN-02/only
+    status: draft
+    positive: true
+    tests: [T8-RUN-02]
+    notes: >-
+      Only T8-RUN-02: the phases credentials and certificate run, the
+      phase untrusted does not.
+
+  # --- T8-RUN-03 container name -----------------------------------------------
+  - fault: uri-il
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: info, reqs: [REQ-CMP-029]}
+      T8-RUN-03: {outcome: info, reqs: [REQ-CNT-021]}
+    notes: >-
+      The Identification Link is a URI: the SerialNumber rule of
+      REQ-CNT-021 does not apply (noted); the certificate name is checked.
+  - fault: client-id-random
+    status: draft
+    expect:
+      T8-RUN-03: {outcome: warn, reqs: [REQ-MQTT-013]}
+    notes: >-
+      Connects with a random ClientId (REQ-MQTT-013 is a recommendation).
+  - fault: serial-other
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
+      T8-RUN-03: {outcome: fail, reqs: [REQ-CNT-021]}
+    notes: >-
+      The SerialNumber of the Oi4Identifier is SN-0001, not the container
+      name.
+
+  # --- environment -------------------------------------------------------------
+  - fault: image/other-entrypoint
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
+      T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
+      T8-RUN-03: {outcome: skip, reqs: [REQ-CNT-021, REQ-MQTT-013]}
+    notes: >-
+      An image whose command is no OEC application (the fake exits with
+      127 like a missing executable): no connection.
+  - fault: engine/unreachable
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: skip, reqs: [REQ-CMP-029, REQ-CNT-004]}
+      T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
+      T8-RUN-03: {outcome: skip, reqs: [REQ-CNT-021, REQ-MQTT-013]}
+    notes: >-
+      No Engine API at the endpoint: every test is inconclusive.
+  - fault: engine/create-fails
+    status: draft
+    expect:
+      T8-RUN-01: {outcome: skip, reqs: [REQ-CMP-029, REQ-CNT-004]}
+      T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
+      T8-RUN-03: {outcome: skip, reqs: [REQ-CNT-021, REQ-MQTT-013]}
+    notes: >-
+      The engine answers POST /containers/create with 500: no phase runs,
+      every test is inconclusive.

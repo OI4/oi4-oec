@@ -285,6 +285,31 @@ func TestContainerFixtureIndex(t *testing.T) {
 	}
 }
 
+func TestRunFixtureIndex(t *testing.T) {
+	list, err := RunFixtures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) == 0 {
+		t.Fatal("no run fixture")
+	}
+	seen := map[string]bool{}
+	for _, f := range list {
+		if f.Kind != "run" || f.Fault == "" || f.File != "" || seen[f.Fault] || f.Status != "draft" && f.Status != "reviewed" {
+			t.Errorf("fixture %+v", f)
+		}
+		seen[f.Fault] = true
+		if len(f.Expect) == 0 && !f.Positive {
+			t.Errorf("%s: no expectation and not positive", f.Fault)
+		}
+		for id, e := range f.Expect {
+			if !strings.HasPrefix(id, "T8-RUN-") || e.Outcome == "" || f.Positive && e.Outcome != "pass" {
+				t.Errorf("%s: expect %s %+v", f.Fault, id, e)
+			}
+		}
+	}
+}
+
 func TestHostFixtureIndex(t *testing.T) {
 	list, err := HostFixtures()
 	if err != nil {
