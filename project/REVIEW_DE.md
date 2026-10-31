@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 31.10.2026, C-073-Review Nachtrag 1. **Für dich offen: nichts** – R-1 (26 Container- und 16 Host-Szenarien) ist akzeptiert und eingetragen._
+_Stand: 31.10.2026, C-074. **Für dich offen: D-1** (SF-117: Muss eine Anwendung beide Anmeldearten können?) **und R-1** (20 Testfälle für `oec-infra run`)._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,13 +24,65 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts. Deine Antwort „R-1 akzeptiert“ ist eingetragen (C-073, Nachtrag 1).
+### D-1 – SF-117: Muss eine Anwendung beide Anmeldearten können? (RIG 4.1.3, du entscheidest)
+
+**Worum es geht:** Eine Anwendung meldet sich am Broker an – entweder mit **Benutzername und Passwort** (`credentials`) oder mit einem **Client-Zertifikat** (Zertifikat + verschlüsselter privater Schlüssel + Passphrase). RIG 4.1.3 sagt nur: Die **Plattform** muss **mindestens eine** der beiden Arten bereitstellen. MG 6.2.2 sagt: Hat der Client beide, nimmt er das Zertifikat.
+
+**Die Lücke:** Was die **Anwendung** können muss, steht nirgends. Die Plattform sucht aus. Kann eine Anwendung nur Passwort und die Plattform gibt ihr nur ein Zertifikat, kommt sie nie an den Broker – obwohl beide für sich die Guideline erfüllen. D8 kann deshalb nicht sagen, ob „kann nur eine Art“ ein Fehler ist.
+
+**Mein Vorschlag:** Die Anwendung kann beide Arten und nimmt die, die die Plattform bereitstellt (bei beiden: das Zertifikat). Neuer Satz in RIG 4.1.3 nach dem Kasten: „The application shall support both means of authentication and shall use the means that the platform provides.“
+
+**Was sich bei uns ändert:**
+- **Heute:** D8 startet die Anwendung einmal nur mit Passwort und einmal nur mit Zertifikat. Klappt keins → Fehler (REQ-CNT-009). Klappt nur eins → **Warnung** mit Hinweis „SF-117“.
+- **Wie vorgeschlagen:** Text in der Guideline, Re-Baseline, die Warnung wird ein Fehler. Die Testfälle `no-cert`, `no-credentials` und `passphrase-raw` werden dann „Fehler“ und gehen zurück auf Entwurf.
+- **Abgelehnt (eine Art reicht):** Die Warnung wird nur ein Hinweis; diese Testfälle bestehen T8-RUN-02.
+
+**Empfehlung:** wie vorgeschlagen – sonst weiß keine Plattform, welche Art sie bereitstellen muss, damit jede konforme Anwendung sich verbinden kann.
+
+**Antwort z. B.:** „D-1 wie vorgeschlagen“ oder „D-1: eine Art reicht“.
+
+### R-1 – 20 Testfälle für `oec-infra run` (bitte prüfen, G-3.9)
+
+**Wie D8 prüft:** D8 startet das Image der Anwendung in bis zu drei Wegwerf-Containern. Jeder heißt `oec-d8-run-<uuid>`, und genauso heißt der Rechner im Container (Hostname). D8 erzeugt die Ordner, die die Plattform liefern müsste (Broker-Daten, Zertifikate, Geheimnisse), und betreibt einen **eigenen kleinen MQTT-Testpunkt** mit TLS. Der leitet nichts weiter; er schaut nur zu, wie sich die Anwendung verbindet und was sie schickt. Die drei Durchläufe:
+- **mit Passwort:** nur `credentials`; in `broker.json` steht ein Eintrag, den die Anwendung nicht kennt (muss sie ignorieren);
+- **mit Zertifikat:** nur Zertifikat, verschlüsselter Schlüssel und Passphrase (base64); das Broker-Zertifikat ist von einer anderen CA, die nur in `broker_ca.pem` steht;
+- **falscher Broker:** ein Broker-Zertifikat von einer unbekannten CA – die Anwendung muss die Verbindung ablehnen (nur wenn T8-RUN-01 läuft).
+
+Alle Werte weichen absichtlich vom Üblichen ab (Port nicht 8883, Broker heißt `oec-d8-broker`, das Passwort enthält `:`), damit eine Anwendung auffällt, die die Ordner gar nicht liest.
+
+**Die 20 Fälle** (`oec/conformance/testdata/run/index.yaml`; eine nachgebaute Anwendung mit je einem eingebauten Fehler, Stufe 3):
+- **in Ordnung (3):** `good` (alles richtig, alle drei Tests bestehen); `T8-RUN-01/ip-address` (in `broker.json` steht eine IP-Adresse statt eines Namens); `T8-RUN-02/only` (nur T8-RUN-02 ausgewählt, ohne den Durchlauf „falscher Broker“).
+- **T8-RUN-01 – nutzt die Broker-Daten** (REQ-CMP-029, REQ-CNT-004) → **Fehler** bei: `strict-json` (bricht wegen des unbekannten Eintrags ab), `port-8883` (ignoriert den Port), `ca-only` (ignoriert `broker_ca.pem`), `no-verify` (verbindet sich auch mit dem falschen Broker), `oversized` (schickt eine Nachricht, die 1 Byte zu groß ist), `exit` (beendet sich sofort), `image/other-entrypoint` (das Image startet gar keine OEC-Anwendung).
+- **T8-RUN-02 – nutzt Zertifikat und Geheimnisse** (REQ-CNT-009): `last-colon` (trennt Benutzer und Passwort am letzten `:` statt am ersten) und `no-auth` (meldet sich gar nicht an) → **Fehler**; `passphrase-raw` (dekodiert die Passphrase nicht), `no-cert` (ignoriert das Zertifikat), `no-credentials` (ignoriert das Passwort) → **Warnung, hängt an D-1**.
+- **T8-RUN-03 – nutzt den Container-Namen** (REQ-CNT-021, REQ-MQTT-013): `serial-other` (Seriennummer `SN-0001` statt Container-Name) → **Fehler**; `client-id-random` (zufällige MQTT-ClientId) → **Warnung** (nur „sollte“); `uri-il` (Identification Link als URI) → nur **Hinweis**, die Seriennummer-Regel greift dann nicht.
+- **Docker-Probleme:** `engine/unreachable` (keine Docker-Schnittstelle), `engine/create-fails` (Docker lehnt das Anlegen ab) → alles **nicht entscheidbar**.
+- Was nichts zu bewerten hat, ist **nicht entscheidbar** (z. B. T8-RUN-02, wenn die Anwendung sich nie verbindet). REQ-CMP-029 in T8-RUN-01 wiederholt die Ergebnisse der anderen beiden Tests, weil RIG 1.3 die Container-Umgebung zur Bedingung von Level 2 macht.
+
+**Bitte besonders ansehen:**
+- `oversized`: eine zu große Nachricht ist ein Fehler gegen REQ-CNT-004.
+- `strict-json`: ein unbekannter Eintrag in `broker.json` muss ignoriert werden (SF-100) – Abbruch ist ein Fehler.
+- Die **Wiederholung in REQ-CMP-029**.
+- `client-id-random` nur als Warnung, `uri-il` nur als Hinweis.
+- Die drei **Warnungen**, die an D-1 hängen.
+
+Die ganze Tabelle steht im Log C-074 (Fixtures).
+
+**Antwort z. B.:** „R-1 akzeptiert“ oder Anmerkungen zu einzelnen Fällen.
+
+### Zur Info: was C-074 gebaut hat
+
+- **`oec-infra run IMAGE`** (T8-RUN-01 … 03) – damit hat D8 **alle 17 Tests**.
+- **Docker schreibend, aber eng begrenzt** (A-281, A-282): D8 legt nur eigene Container an (Name `oec-d8-…` und eine eigene Markierung), startet, stoppt und löscht nur diese. Vor jedem Start/Stopp/Löschen schaut D8 nach, ob der Container wirklich seiner ist; einen fremden fasst es nicht an. D8 lädt keine Images herunter und legt keine Volumes oder Netze an. Nur ein Docker auf diesem Rechner (wegen der erzeugten Ordner und des Testpunkts).
+- **Selbsttest ohne Docker und ohne Netz:** die nachgebaute Docker-Schnittstelle aus C-073 startet jetzt die nachgebaute Anwendung im selben Prozess.
+- **Freiwilliger Lauf mit echtem Docker** (`live.sh`, `TestRunDev`, Docker 28.4): alle 15 Fehler-Images ergeben dasselbe wie im Selbsttest, ca. 2 Minuten; danach war nichts übrig. Dabei einen Fehler gefunden und behoben: Docker brauchte im Test-Image zusätzlich eine `manifest.json`.
+- **Im Bericht** stehen nie Passwörter, Benutzernamen, Logs oder Pfade deines Rechners.
+- Keine neue Bibliothek. D7 und `COVERAGE.md` sind unverändert. Das letzte Stück (Inkrement 6) habe ich nicht vorgezogen: Der Bericht soll erst eingefroren werden, wenn D-1 und R-1 entschieden sind.
 
 ### Was aus deinem Review C-073 geworden ist (Kurzfassung)
 
 - **R-1 akzeptiert:** alle 26 Container-Szenarien und die 16 Host-Szenarien (14 für T8-HST-03, dazu `none` und `T8-HST-02/certificate`) stehen auf `reviewed`. Damit sind alle 69 Host- und 26 Container-Szenarien abgenommen, keine Entwürfe mehr.
 
-### R-1 – worum es ging (erledigt)
+### C-073 R-1 – worum es ging (erledigt)
 
 D8 prüft jetzt laufende Container über die Docker/Podman-Schnittstelle. Für den Selbsttest habe ich bei Docker die Beschreibung von vier Containern aufgezeichnet (ohne Geheimnisse, ohne persönliche Pfade). Eine nachgebaute Docker-Schnittstelle spielt sie ab, so läuft der Test ohne Docker und ohne Netz:
 - `app` – so wie es sein soll: eigenes Bridge-Netz, Name `oec-rec-app-<uuid>` und genauso der Hostname, eigene Volumes für die Anwendungsdaten, eigene Geheimnisse, nichts über dem Lizenzordner;
@@ -914,37 +966,49 @@ Neu aus C-072 (P5b Inkrement 3, `host`):
 - **A-268 – Selbsttest:** 55 Szenarien mit nachgebauten Rechnern; kein Root, kein Docker, kein Netz außer der Loopback-Schnittstelle.
 - **A-269 – 32-Bit-Fehler** behoben (siehe oben).
 - **A-270 – Freiwillige Läufe:** auf dem Rechner selbst und in einem Linux-Container, beide in `live.sh`.
-- **A-271 (neu) – Docker/Podman-Anbindung:**
+- **A-271 – Docker/Podman-Anbindung:**
   - eigener Client, nur Lesen, nur Bordmittel von Go;
   - Unix-Socket, Windows-Pipe oder TCP; verschlüsselte oder `ssh://`-Verbindungen kann D8 noch nicht (→ nicht entscheidbar);
   - Selbsttest mit Aufzeichnungen von Docker 28.4; die Podman-Formen sind nachgebaut.
-- **A-272 (neu) – Befehl `oec-infra container`:**
+- **A-272 – Befehl `oec-infra container`:**
   - Container per Name, ID oder eindeutigem ID-Anfang;
   - ein unbekannter Container ist ein Bedienfehler; ohne Docker ist das Ergebnis nicht entscheidbar;
   - im Bericht stehen keine Quellpfade.
-- **A-273 (neu) – Netz:** Bridge ist richtig. Das Host-Netz gibt eine Warnung, weil die Ausnahme (Ethernet auf unterer Ebene) nicht sichtbar ist. Andere Netzarten geben nur einen Hinweis.
-- **A-274 (neu) – Name:**
+- **A-273 – Netz:** Bridge ist richtig. Das Host-Netz gibt eine Warnung, weil die Ausnahme (Ethernet auf unterer Ebene) nicht sichtbar ist. Andere Netzarten geben nur einen Hinweis.
+- **A-274 – Name:**
   - ein gültiger Hostname (RFC 1123), höchstens 63 Zeichen;
   - in Docker eindeutig, ohne Rücksicht auf Groß/klein;
   - genau gleich dem Hostname;
   - empfohlen: `-<uuid>` am Ende.
-- **A-275 (neu) – Lizenzordner:** Ein Ordner des Rechners oder ein tmpfs ist ein Fehler. Ein Volume wird manuell bewertet, ein Image-Mount gibt einen Hinweis.
-- **A-276 (neu) – Welche Container zählen:**
+- **A-275 – Lizenzordner:** Ein Ordner des Rechners oder ein tmpfs ist ein Fehler. Ein Volume wird manuell bewertet, ein Image-Mount gibt einen Hinweis.
+- **A-276 – Welche Container zählen:**
   - jeder mit einem Einhängepunkt in `/etc/oi4`, `/opt/oi4` oder `/run/secrets/oi4` (oder darüber), auch gestoppte;
   - D8s eigener Container nur mit `--self` ausgenommen; D8 erkennt ihn nicht von selbst.
-- **A-277 (neu) – Was „geteilt“ heißt:**
+- **A-277 – Was „geteilt“ heißt:**
   - dasselbe Volume;
   - oder Quellordner, die ineinander liegen – so verglichen, wie Docker sie meldet;
   - auch ein Container, der den ganzen Rechner einhängt.
-- **A-278 (neu) – Anwendungsdaten:** Die Regel gilt nur, wenn die Plattform dauerhaft speichert, d. h. eine Anwendung einen Host-Pfad/ein Volume dafür hat. Fehlt einer Anwendung der Ordner, wird manuell bewertet.
-- **A-279 (neu) – Dev-Broker:** fällt bei der Namensregel durch, ist aber kein OI4-Container – keine Abweichung.
-- **A-280 (neu) – Freiwilliger Lauf** `TestContainerDev` in `live.sh`; das nächste Stück (`run`) nicht vorgezogen.
+- **A-278 – Anwendungsdaten:** Die Regel gilt nur, wenn die Plattform dauerhaft speichert, d. h. eine Anwendung einen Host-Pfad/ein Volume dafür hat. Fehlt einer Anwendung der Ordner, wird manuell bewertet.
+- **A-279 – Dev-Broker:** fällt bei der Namensregel durch, ist aber kein OI4-Container – keine Abweichung.
+- **A-280 – Freiwilliger Lauf** `TestContainerDev` in `live.sh`; das nächste Stück (`run`) nicht vorgezogen.
+- **A-281 (neu) – Was D8 bei Docker schreiben darf:** anlegen, starten, stoppen, löschen – nur Container mit Namen `oec-d8-…` und D8-Markierung; vorher wird nachgesehen. Kein Herunterladen, keine Volumes, Netze oder Images.
+- **A-282 (neu) – Nur lokales Docker:** Zeigt `--daemon` oder `DOCKER_HOST` auf einen anderen Rechner, bricht D8 vor der ersten Anfrage ab. Fehlt das Image, ebenso (D8 lädt nichts herunter).
+- **A-283 (neu) – Befehl `oec-infra run`** und der Berichtsteil `run` (ohne Geheimnisse, Logs, Pfade).
+- **A-284 (neu) – Drei Durchläufe** (Passwort, Zertifikat, falscher Broker) mit drei Test-CAs. Ein Durchlauf endet, wenn die Anwendung sich gemeldet hat, abgelehnt wurde, sich beendet hat oder die Wartezeit (30 s) um ist.
+- **A-285 (neu) – Erzeugte Ordner:** Werte bewusst anders als üblich. Die Ordner sind für jeden Benutzer im Container lesbar, weil D8 nicht weiß, unter welchem Benutzer die Anwendung läuft – das sind Wegwerf-Testdaten, keine Empfehlung für Plattformen.
+- **A-286 (neu) – Netz:** Der Testpunkt lauscht auf macOS/Windows auf 127.0.0.1, sonst am Docker-Bridge-Netz; der Container erreicht ihn unter `oec-d8-broker`. Beides lässt sich überschreiben.
+- **A-287 (neu) – Testpunkt:** eigener kleiner MQTT-Server, leitet nichts weiter, merkt sich kein Passwort; eine Nachricht über MaxPacketSize + 65544 Bytes beendet die Verbindung.
+- **A-288 (neu) – Bewertung:** wie oben bei R-1; nur eine Anmeldeart ist bis zu D-1 eine Warnung.
+- **A-289 (neu) – Selbsttest:** die nachgebaute Anwendung läuft im Testprozess; sie kann Port 8883 nie erreichen, damit kein echter Broker auf deinem Rechner gestört wird. Unter Windows läuft dieser Selbsttest nicht (wie schon in C-073); ein echter Lauf unter Windows oder mit Podman fehlt noch.
+- **A-290 (neu) – Test-Images** werden beim Test gebaut, nie eingecheckt, und nach dem Lauf wieder gelöscht. Der freiwillige Lauf steckt in `live.sh` statt in einem eigenen `live-infra.sh`.
+- **A-291 (neu) – Schnitt:** Inkrement 6 nicht vorgezogen; keine neue Bibliothek.
 
 ---
 
-### Was als Nächstes passiert (C-074)
+### Was als Nächstes passiert (C-075)
 
-1. **C-074:** das fünfte Stück von D8: `oec-infra run` (T8-RUN-01 … 03). D8 startet ein Anwendungs-Image in einer Sandbox mit erzeugten Storages, eigenem Container-Namen und einem eigenen MQTT-Testpunkt. Dann prüft D8, ob die Anwendung die Storages und den Namen richtig nutzt. Für den Selbsttest gibt es eigens gebaute gute und fehlerhafte Test-Images. Dazu kommt ein freiwilliger Lauf `live-infra.sh`. Läuft in einer **neuen Sitzung**; der Startauftrag steht in `prompt.md`.
+1. Zuerst trage ich deine Antworten zu **D-1** und **R-1** ein. Bei „D-1 wie vorgeschlagen“: Text in RIG 4.1.3, Re-Baseline, aus der Warnung wird ein Fehler, die betroffenen Testfälle gehen zurück auf Entwurf.
+2. **C-075:** das letzte Stück von D8: `oec-infra list`/`explain`, Abdeckungsbericht für D8, Bericht Version 1 einfrieren, Abschlussprüfung P5b. Läuft in einer **neuen Sitzung**; der Startauftrag steht in `prompt.md`.
 
 ---
 

@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-31, C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Nothing is open. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
+_Last updated: 2026-10-31, C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -232,10 +232,17 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - No SF, no new dependency, D7 gate and `COVERAGE.md` unchanged. Increment 5 (`run`) not pulled forward. A-271 … A-280 for information.
   - Note: during the recording, `docker volume prune -f` ran on this Mac's Docker Desktop; it removes all unused anonymous volumes of the engine (see C-073 log, Risks).
 - C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert"); all 26 container scenarios and all 69 host scenarios are `reviewed`. No draft, no open finding. Nothing is open.
+- C-074 (P5b increment 5):
+  - **`oec-infra run`** (T8-RUN-01 … 03 `implemented`, D8 17 of 17): D8 starts the application image in up to three sandbox containers `oec-d8-run-<uuid>` (name = hostname) with generated storages and its own MQTT TLS test endpoint and observes whether the application uses `broker.json` (port, host, MaxPacketSize, CA), the certificate and secret storages (credentials, client certificate with encrypted key and passphrase) and its container name (SerialNumber, ClientId).
+  - **Engine API writes** only for D8's own containers (name prefix `oec-d8-` and label); start/stop/remove inspect first and refuse a foreign container; no pull, no volume, network or image call; local engine only (A-281, A-282).
+  - **20 run fixtures** (3 positive, 15 faults of a simulated application, 2 engine cases) against the fake Engine API → **R-1**.
+  - **SF-117** (RIG 4.1.3) found → **D-1**; until decided T8-RUN-02 warns when the application authenticates in only one phase.
+  - **Opt-in live run** (`live.sh`, `TestRunDev`, Docker 28.4): 15 of 15 faults give the same verdicts as in the self-test; nothing left behind. One defect found and fixed: the test-image archive needed a Docker `manifest.json` for the classic image store.
+  - No new dependency; D7 gate and `COVERAGE.md` unchanged (shared packages only additive). Increment 6 not pulled forward (A-291). A-281 … A-291 for information.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `7427a4f` (re-baseline, no content change).
 
-Logs: [C-073](log/2026-10-31_C-073_d8-engine-container.md), [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-engine-container.md), [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -522,10 +529,44 @@ Logs: [C-073](log/2026-10-31_C-073_d8-engine-container.md), [C-072](log/2026-10-
 | A-278 | REQ-CNT-011 only with a persistent layer; missing app mount `manual`, tmpfs/image fail | info (agent) | C-073 | – | – |
 | A-279 | Dev broker fails REQ-CNT-019 in `container` mode – no OI4 container, no deviation | info (agent) | C-073 | – | – |
 | A-280 | Live test `TestContainerDev`; increment 5 not pulled forward | info (agent) | C-073 | – | – |
+| D-1 | SF-117: a containerized application supports both means of authentication (RIG 4.1.3) | decide (G-3.4 a) | C-074 | as proposed | ☐ |
+| R-1 | 20 run fixtures of `oec-infra run` (T8-RUN-01 … 03) | review (G-3.9) | C-074 | accept | ☐ |
+| A-281 | Engine API writes only for D8's own containers (prefix + label), no pull/volume/network/image call | info (agent) | C-074 | – | – |
+| A-282 | Local engine only (before any request), never pull | info (agent) | C-074 | – | – |
+| A-283 | Command `oec-infra run`, report key `run` without secrets, logs or host paths | info (agent) | C-074 | – | – |
+| A-284 | Three phases (credentials, certificate, untrusted) with CA A/B/X; phase end | info (agent) | C-074 | – | – |
+| A-285 | Generated storages that differ from every default; mounts and permissions | info (agent) | C-074 | – | – |
+| A-286 | Listen address and broker host `oec-d8-broker` via `host-gateway` | info (agent) | C-074 | – | – |
+| A-287 | Own minimal MQTT test endpoint, no forwarding, MaxPacketSize + 65544 | info (agent) | C-074 | – | – |
+| A-288 | Judging; REQ-CMP-029 repeats the items of CNT-004/009/021; SF-117 interim warning | info (agent) | C-074 | – | – |
+| A-289 | Self-test: fake Engine API runs the simulated application in process; Windows not covered | info (agent) | C-074 | – | – |
+| A-290 | Test images (`docker load`, OCI layout + `manifest.json`), live run in `live.sh` | info (agent) | C-074 | – | – |
+| A-291 | Cut: increment 6 not pulled forward; no new dependency | info (agent) | C-074 | – | – |
 
 ## Decisions and review items
 
-No open item.
+### D-1 – SF-117: must a containerized application support both means of authentication? (RIG 4.1.3, G-3.4 a)
+
+- **Where:** register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, SF-117 (`5ae22a0`); RIG 4.1.3 (secret storage, admonition "at least one means of authentication"), RIG 4.1.2, MG 6.2.2; REQ-CNT-009, REQ-MQTT-009, REQ-MQTT-010; D8 T8-RUN-02.
+- **Problem:** RIG 4.1.3 requires the *platform* to provide at least one means of authentication – the credentials, or the private key with the certificate of the application. MG 6.2.2 lets a client use either (with both: the client certificate). The guideline does not say which means the *application* must support. The platform chooses, so an application that supports only the credentials cannot connect to a platform that provides only a certificate (and the reverse) – although both are compliant on their own. D8 cannot decide whether an application that ignores one of the means violates REQ-CNT-009.
+- **Proposed interpretation:** the application supports both means and uses the means the platform provides (with both: the client certificate, MG 6.2.2). Proposed text for RIG 4.1.3, after the admonition: "The application shall support both means of authentication and shall use the means that the platform provides."
+- **Effect in the workspace:** `oec-infra run` runs the application once with only the credentials and once with only the client certificate. Today: fail REQ-CNT-009 if it authenticates in neither run, **warn** (message marked "SF-117") if only in one. Accepted: guideline text, re-baseline, REQ-CNT-009 follows (→ draft), the warning becomes a violation (test first); the fixtures `no-cert`, `no-credentials`, `passphrase-raw` change from warn to fail and go back to `draft`. Rejected (one means is enough): the warning becomes a note and these fixtures pass T8-RUN-02.
+- **Recommendation:** as proposed – otherwise the platform cannot know which means to provide so that every compliant application can connect.
+- **PO:** ☐ as proposed ☐ other: …
+
+### R-1 – run fixtures of `oec-infra run` (G-3.9)
+
+- **Where:** `oec/conformance/testdata/run/index.yaml` – 20 entries `draft`. Each fixture starts `oec-infra run` at level 3 against the fake Engine API; the fake starts the simulated application (`internal/run/simapp`) in process with one fault; the test compares per test the outcome and the exact REQ ids and checks that no container and no storage is left.
+- **What D8 generates:** three phases with one container `oec-d8-run-<uuid>` each – **credentials** (only `credentials`, broker certificate of CA A from `ca.pem`, `broker.json` with an unknown element), **certificate** (only client certificate, encrypted `private_key.pem`, base64 `passphrase`; broker certificate of CA B from `broker_ca.pem`) and **untrusted** (broker certificate of an unknown CA; the application must refuse). `SecurePort` is not 8883, the broker host is `oec-d8-broker`, the password contains `:`.
+- **Positive (conforming):** `good` (all three tests pass); `T8-RUN-01/ip-address` (`Address` is an IP address, IP SAN: T8-RUN-01 pass); `T8-RUN-02/only` (only T8-RUN-02 selected, no untrusted phase: pass).
+- **Negative (fault → expected outcome):**
+  - T8-RUN-01 (REQ-CMP-029, REQ-CNT-004): `strict-json` (refuses the unknown element), `port-8883` (ignores `SecurePort`), `ca-only` (ignores `broker_ca.pem`), `no-verify` (accepts the untrusted broker), `oversized` (publishes MaxPacketSize + 1 octets), `exit` (exits at once), `image/other-entrypoint` (no OEC application) → fail CMP-029 and CNT-004;
+  - T8-RUN-02 (REQ-CNT-009): `last-colon` (splits the credentials at the last `:`) and `no-auth` (ignores both means) → fail; `passphrase-raw` (passphrase not base64-decoded), `no-cert`, `no-credentials` → **warn (depends on D-1)**; REQ-CMP-029 repeats these outcomes in T8-RUN-01;
+  - T8-RUN-03 (REQ-CNT-021, REQ-MQTT-013): `serial-other` (SerialNumber `SN-0001`) → fail CNT-021; `client-id-random` → warn MQTT-013 (SHOULD); `uri-il` (a URI as Identification Link) → info CNT-021 (outcome `info`, no violation; the SerialNumber rule does not apply, the certificate name is checked);
+  - tests without anything to judge are inconclusive (skip): e.g. T8-RUN-02/03 when the application never connects; `engine/unreachable`, `engine/create-fails` → all three skip.
+- **Please check:** is each fault a real violation of the named REQ, and are the three positive fixtures compliant? In particular: `oversized` (a payload above MaxPacketSize fails CNT-004), `strict-json` (an unknown element of `broker.json` must be ignored, SF-100), the repetition in REQ-CMP-029, `client-id-random` (warn only, SHOULD), `uri-il` (note only), and the three warnings with D-1. The full table is in the C-074 log (Fixtures).
+- **If accepted:** status `reviewed` in `index.yaml`.
+- **PO:** ☐ accepted ☐ remarks: …
 
 ### Answered earlier
 
@@ -1312,6 +1353,22 @@ ADR-0025 amendment C-073; DESIGN §9 "As built (C-073)"; log C-073.
 - **A-279 Dev broker naming:** the dev broker fails REQ-CNT-019 in `container` mode (hostname `mosquitto`, compose name `oec-dev-mosquitto-1`). Mosquitto is no OI4 Alliance-compliant container (RIG 4.2), so this is no deviation and no SF; `oec/dev` unchanged.
 - **A-280 Live test and cut:** `live.sh` runs `TestContainerDev` (two throw-away `oec-live-*` containers next to the dev broker, removed afterwards). Increment 5 (`run`) is not pulled forward – it needs purpose-built test images and its own live harness.
 
-## Next (C-074)
+### A-281 … A-291 – P5b increment 5 `run` (C-074, agent)
 
-1. C-074: P5b increment 5 – `oec-infra run` (T8-RUN-01 … 03): D8 starts an application image in a sandbox with generated storages, a container name with UUID and a D8 MQTT test endpoint and checks that the application uses them; purpose-built good and faulty test images; `live-infra.sh` (opt-in); in a new session (start prompt in `prompt.md`).
+ADR-0025 amendment C-074; DESIGN §9 "As built (C-074)"; log C-074.
+- **A-281 Write boundaries of the Engine API client:** `POST /containers/create`, `…/start`, `…/stop` and `DELETE /containers/{id}?force=1&v=1` only for a container named `oec-d8-…` with the label `org.oi4.oec-infra=run`; start/stop/remove inspect first and refuse a foreign container (`ErrNotOwn`) without a write; each run labels its containers with `org.oi4.oec-infra.run=<run id>` and removes them with a fresh context, also after a cancel or an error. No pull, load, build, volume, network or image call; `container` and `host` stay read-only.
+- **A-282 Local engine only, never pull:** `--daemon`, `DOCKER_HOST` and `CONTAINER_HOST` must name a Unix socket, a named pipe or loopback TCP, else exit 2 before any request (bind mounts and the endpoint are on this machine); an image the engine does not have is exit 2.
+- **A-283 Command and report:** `oec-infra run IMAGE` with the flags of the README; report key `run` (additive, report version 1): engine, image, endpoint, cleanup problems, phases with connections and Birth; never a secret, username, log, environment or host path.
+- **A-284 Phases:** credentials, certificate, untrusted (only with T8-RUN-01); one container, storage set and port each; CA A (`ca.pem`, client certificates), CA B (`broker_ca.pem`), CA X (untrusted). A phase ends with Birth + `--settle`, a failed handshake, a refused CONNECT, the exit of the container or `--wait` (30 s).
+- **A-285 Generated storages:** values that differ from every default (`SecurePort` ≠ 8883, broker host `oec-d8-broker`, unknown element `OecD8Unknown`, `:` in the password, encrypted key, base64 passphrase); Message Bus, certificate and secret storages `ro`, application storages `rw`; directories 0755 (application storages 0777), files 0644 – throw-away test storages readable by any user of the image, no recommendation for platforms.
+- **A-286 Network:** the endpoint listens on 127.0.0.1 on macOS/Windows (Docker Desktop forwards `host-gateway`), on the bridge gateway elsewhere; the broker host maps to `host-gateway`; `--listen` and `--broker-host` override.
+- **A-287 Test endpoint:** own minimal MQTT server (protocol levels 3, 4, 5) on the standard library and `mqttwire`; no forwarding; constant-time login check, no password kept; handshake timeout 15 s; a packet above `MaxPacketSize` + 65544 closes the connection (SF-105); `--max-packet-size` 1 … 268435455 − 65544.
+- **A-288 Judging:** DESIGN §9 "As built (C-074)"; REQ-CMP-029 repeats each observation of REQ-CNT-004/009/021 (RIG 1.3); a requirement without any observation is inconclusive; one means of authentication warns until SF-117 (D-1) is decided.
+- **A-289 Self-test:** `enginetest` runs the simulated application (`simapp`, 15 faults) in process; its dialer refuses port 8883 so that a self-test never reaches a real broker of this machine. Run fixtures are not part of `Fixtures()` (A-248), `COVERAGE.md` unchanged. Shared packages changed only additively: `mqttwire.EncryptPKCS8` (moved from `mqtttest`), `mqttwire.Config.Dialer`, `ocitest.File.Mode`. The self-test is skipped on Windows (Unix sockets); Windows and Podman not run live.
+- **A-290 Test images and live run:** `runtest.Archive` writes an OCI layout plus a Docker `manifest.json` (the classic image store of Docker 28 needs it; found in the live run, fixed test first); images built at test time, never committed, removed by tag afterwards; `TestRunDev` lives in `live.sh` instead of a separate `live-infra.sh`.
+- **A-291 Cut:** increment 6 not pulled forward – the D8 report version 1 is frozen after R-1 and D-1; no new dependency.
+
+## Next (C-075)
+
+1. Your answers to **D-1** (SF-117) and **R-1** (20 run fixtures) are entered first; D-1 as proposed: guideline text RIG 4.1.3, re-baseline, T8-RUN-02 warning → violation, affected fixtures `draft` again.
+2. C-075: P5b increment 6 – `oec-infra list`/`explain`, coverage report for D8, D8 report version 1 frozen, P5b exit check; in a new session (start prompt in `prompt.md`).
