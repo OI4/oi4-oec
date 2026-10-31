@@ -13,7 +13,7 @@
 # (Q-020 (a)), reviewed in the C-035 review (2026-10-25); their topic REQs
 # REQ-LIFE-002/006/008 keep d7-monitor/d7-test (PO decision D-3 (a)).
 area: LIFE
-baseline: "b955783"
+baseline: "7427a4f"
 requirements:
   # --- Birth message (MG 6.3.3) ---------------------------------------------
   - id: REQ-LIFE-001
