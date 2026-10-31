@@ -13,9 +13,9 @@
     "schemas": {"type": "string", "minLength": 1, "description": "Release of the embedded D1 schema bundle."},
     "baseline": {"type": "string", "minLength": 1, "description": "Guideline commit of the embedded spec baseline."},
     "catalog": {"type": "string", "minLength": 1, "description": "Guideline baseline of the embedded test catalog d8.yaml."},
-    "command": {"type": "array", "items": {"type": "string"}, "minItems": 2, "prefixItems": [{"const": "oec-infra"}, {"enum": ["image", "bus", "host", "container"]}], "description": "Command line; passwords and passphrases are only read from files, so it holds none."},
-    "mode": {"enum": ["image", "bus", "host", "container"], "description": "Catalog mode of the judged tests."},
-    "input": {"type": "string", "minLength": 1, "description": "image: the OCI layout directory or oci-archive as given on the command line; bus: the broker URL (mqtts://host:port); host: the root directory of the storages (C-072); container: the judged containers as given on the command line, comma separated (C-073)."},
+    "command": {"type": "array", "items": {"type": "string"}, "minItems": 2, "prefixItems": [{"const": "oec-infra"}, {"enum": ["image", "bus", "host", "container", "run"]}], "description": "Command line; passwords and passphrases are only read from files, so it holds none."},
+    "mode": {"enum": ["image", "bus", "host", "container", "run"], "description": "Catalog mode of the judged tests."},
+    "input": {"type": "string", "minLength": 1, "description": "image: the OCI layout directory or oci-archive as given on the command line; bus: the broker URL (mqtts://host:port); host: the root directory of the storages (C-072); container: the judged containers as given on the command line, comma separated (C-073); run: the image reference as given on the command line (C-074)."},
     "form": {"enum": ["oci-layout", "oci-archive"], "description": "image: the form of the input."},
     "level": {"type": "integer", "minimum": 1, "maximum": 3, "description": "Declared compliance level (MG 1.3)."},
     "started": {"$ref": "#/$defs/time"},
@@ -24,15 +24,17 @@
     "broker": {"$ref": "#/$defs/broker"},
     "host": {"$ref": "#/$defs/host"},
     "container": {"$ref": "#/$defs/containerRun"},
+    "run": {"$ref": "#/$defs/runRun"},
     "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}},
     "summary": {"type": "object", "propertyNames": {"$ref": "#/$defs/outcome"}, "additionalProperties": {"$ref": "#/$defs/count"}, "description": "Number of implemented tests per outcome."},
     "exit": {"enum": [0, 1, 4], "description": "Exit code of the run: 0 pass, 1 fail, 4 inconclusive (DESIGN.md §5.3)."}
   },
   "allOf": [
-    {"if": {"properties": {"mode": {"const": "image"}}}, "then": {"required": ["form", "image"], "properties": {"command": {"prefixItems": [true, {"const": "image"}]}, "broker": false, "host": false, "container": false}}},
-    {"if": {"properties": {"mode": {"const": "bus"}}}, "then": {"required": ["broker"], "properties": {"command": {"prefixItems": [true, {"const": "bus"}]}, "form": false, "image": false, "host": false, "container": false}}},
-    {"if": {"properties": {"mode": {"const": "host"}}}, "then": {"required": ["host"], "properties": {"command": {"prefixItems": [true, {"const": "host"}]}, "form": false, "image": false, "broker": false, "container": false}}},
-    {"if": {"properties": {"mode": {"const": "container"}}}, "then": {"required": ["container"], "properties": {"command": {"prefixItems": [true, {"const": "container"}]}, "form": false, "image": false, "broker": false, "host": false}}}
+    {"if": {"properties": {"mode": {"const": "image"}}}, "then": {"required": ["form", "image"], "properties": {"command": {"prefixItems": [true, {"const": "image"}]}, "broker": false, "host": false, "container": false, "run": false}}},
+    {"if": {"properties": {"mode": {"const": "bus"}}}, "then": {"required": ["broker"], "properties": {"command": {"prefixItems": [true, {"const": "bus"}]}, "form": false, "image": false, "host": false, "container": false, "run": false}}},
+    {"if": {"properties": {"mode": {"const": "host"}}}, "then": {"required": ["host"], "properties": {"command": {"prefixItems": [true, {"const": "host"}]}, "form": false, "image": false, "broker": false, "container": false, "run": false}}},
+    {"if": {"properties": {"mode": {"const": "container"}}}, "then": {"required": ["container"], "properties": {"command": {"prefixItems": [true, {"const": "container"}]}, "form": false, "image": false, "broker": false, "host": false, "run": false}}},
+    {"if": {"properties": {"mode": {"const": "run"}}}, "then": {"required": ["run"], "properties": {"command": {"prefixItems": [true, {"const": "run"}]}, "form": false, "image": false, "broker": false, "host": false, "container": false}}}
   ],
   "$defs": {
     "count": {"type": "integer", "minimum": 0},
@@ -90,6 +92,86 @@
       "properties": {
         "engine": {"$ref": "#/$defs/engine"},
         "containers": {"type": "array", "items": {"$ref": "#/$defs/container"}}
+      }
+    },
+    "runRun": {
+      "description": "run: the sandbox run of the application image (C-074) – the Engine API, the image, the MQTT test endpoint of D8 and one entry per phase. No secret, no username, no log, no environment and no host path.",
+      "type": "object",
+      "required": ["engine", "image", "endpoint", "phases"],
+      "additionalProperties": false,
+      "properties": {
+        "engine": {"$ref": "#/$defs/engine"},
+        "image": {
+          "type": "object",
+          "required": ["ref"],
+          "additionalProperties": false,
+          "properties": {
+            "ref": {"type": "string", "minLength": 1, "description": "The image reference as given on the command line."},
+            "id": {"type": "string", "minLength": 1, "description": "Image id of the engine."},
+            "os": {"type": "string", "minLength": 1},
+            "arch": {"type": "string", "minLength": 1}
+          }
+        },
+        "endpoint": {
+          "type": "object",
+          "required": ["listen", "broker_host", "max_packet_size"],
+          "additionalProperties": false,
+          "properties": {
+            "listen": {"type": "string", "minLength": 1, "description": "The address the MQTT test endpoint listens on (each phase on its own port)."},
+            "broker_host": {"type": "string", "minLength": 1, "description": "Address of broker.json: the host name the container resolves to the endpoint, or an IP address."},
+            "max_packet_size": {"$ref": "#/$defs/count", "description": "MaxPacketSize of broker.json (payload limit, RIG 4.1.1)."}
+          }
+        },
+        "cleanup": {"type": "string", "minLength": 1, "description": "Problems while removing the containers or storages of the run."},
+        "phases": {"type": "array", "items": {"$ref": "#/$defs/runPhase"}}
+      }
+    },
+    "runPhase": {
+      "description": "One container of the run: credentials (only username/password, broker certificate signed by the CA of ca.pem), certificate (only client certificate with encrypted key, broker certificate signed by the CA of broker_ca.pem) or untrusted (storages as in credentials, the endpoint presents a certificate of a CA the container does not know).",
+      "type": "object",
+      "required": ["name", "started", "running", "observed_ms", "removed", "connections"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"enum": ["credentials", "certificate", "untrusted"]},
+        "container": {"type": "string", "minLength": 1, "description": "Container name = hostname (oec-d8-run-<uuid>)."},
+        "port": {"type": "integer", "minimum": 1, "maximum": 65535, "description": "SecurePort of broker.json."},
+        "started": {"type": "boolean"},
+        "running": {"type": "boolean", "description": "The container still ran at the end of the observation."},
+        "exit_code": {"type": "integer"},
+        "observed_ms": {"$ref": "#/$defs/count"},
+        "removed": {"type": "boolean", "description": "D8 removed the container."},
+        "error": {"type": "string", "minLength": 1, "description": "Why the phase could not run (create or start failed)."},
+        "connections": {"type": "array", "items": {"$ref": "#/$defs/runConnection"}},
+        "birth": {
+          "type": "object",
+          "required": ["topic", "identification_link"],
+          "additionalProperties": false,
+          "description": "The first MAM of the application about itself (Pub/MAM, Source = AppId).",
+          "properties": {
+            "topic": {"type": "string", "minLength": 1},
+            "identification_link": {"type": "string", "minLength": 1},
+            "serial_number": {"type": "string", "description": "SerialNumber of the MAM payload."}
+          }
+        }
+      }
+    },
+    "runConnection": {
+      "description": "One TLS connection of the container to the MQTT test endpoint. The username and the password are never reported.",
+      "type": "object",
+      "required": ["handshake", "client_certificate", "accepted", "publishes", "largest_payload", "oversized"],
+      "additionalProperties": false,
+      "properties": {
+        "handshake": {"enum": ["ok", "failed"]},
+        "handshake_error": {"type": "string", "minLength": 1},
+        "tls": {"enum": ["1.2", "1.3"]},
+        "client_certificate": {"enum": ["none", "verified", "untrusted"]},
+        "protocol_level": {"type": "integer", "minimum": 3, "maximum": 5},
+        "client_id": {"type": "string"},
+        "auth": {"enum": ["credentials", "credentials-wrong", "certificate", "none"], "description": "How the CONNECT authenticated: the right username and password, other ones, the verified client certificate, nothing."},
+        "accepted": {"type": "boolean", "description": "The endpoint accepted the CONNECT."},
+        "publishes": {"$ref": "#/$defs/count"},
+        "largest_payload": {"$ref": "#/$defs/count", "description": "Octets of the largest PUBLISH payload."},
+        "oversized": {"$ref": "#/$defs/count", "description": "PUBLISH payloads larger than MaxPacketSize."}
       }
     },
     "engine": {

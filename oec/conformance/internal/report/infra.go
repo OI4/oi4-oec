@@ -24,7 +24,7 @@ type Infra struct {
 	Baseline  string                  `json:"baseline"`
 	Catalog   string                  `json:"catalog"`
 	Command   []string                `json:"command"`
-	Mode      string                  `json:"mode"` // image | bus | host | container
+	Mode      string                  `json:"mode"` // image | bus | host | container | run
 	Input     string                  `json:"input"`
 	Form      string                  `json:"form,omitempty"` // image: oci-layout | oci-archive
 	Level     int                     `json:"level"`
@@ -34,6 +34,7 @@ type Infra struct {
 	Broker    *Broker                 `json:"broker,omitempty"`
 	Host      *Host                   `json:"host,omitempty"`
 	Container *ContainerRun           `json:"container,omitempty"`
+	Run       *Run                    `json:"run,omitempty"`
 	Tests     []verdict.TestResult    `json:"tests"`
 	Summary   map[verdict.Outcome]int `json:"summary"`
 	Exit      int                     `json:"exit"`
@@ -96,6 +97,68 @@ type Host struct {
 type ContainerRun struct {
 	Engine     Engine      `json:"engine"`
 	Containers []Container `json:"containers"`
+}
+
+// Run is what oec-infra run started and observed (C-074): no secret, no
+// username, no log, no environment and no host path.
+type Run struct {
+	Engine   Engine      `json:"engine"`
+	Image    RunImage    `json:"image"`
+	Endpoint RunEndpoint `json:"endpoint"`
+	Cleanup  string      `json:"cleanup,omitempty"`
+	Phases   []RunPhase  `json:"phases"`
+}
+
+// RunImage is the image of the run.
+type RunImage struct {
+	Ref  string `json:"ref"`
+	ID   string `json:"id,omitempty"`
+	OS   string `json:"os,omitempty"`
+	Arch string `json:"arch,omitempty"`
+}
+
+// RunEndpoint is the MQTT test endpoint of D8.
+type RunEndpoint struct {
+	Listen        string `json:"listen"`
+	BrokerHost    string `json:"broker_host"`
+	MaxPacketSize int    `json:"max_packet_size"`
+}
+
+// RunPhase is one container of the run.
+type RunPhase struct {
+	Name        string          `json:"name"` // credentials | certificate | untrusted
+	Container   string          `json:"container,omitempty"`
+	Port        int             `json:"port,omitempty"`
+	Started     bool            `json:"started"`
+	Running     bool            `json:"running"`
+	ExitCode    *int            `json:"exit_code,omitempty"`
+	ObservedMS  int64           `json:"observed_ms"`
+	Removed     bool            `json:"removed"`
+	Error       string          `json:"error,omitempty"`
+	Connections []RunConnection `json:"connections"`
+	Birth       *Birth          `json:"birth,omitempty"`
+}
+
+// RunConnection is one TLS connection of the container to the endpoint.
+type RunConnection struct {
+	Handshake         string `json:"handshake"` // ok | failed
+	HandshakeError    string `json:"handshake_error,omitempty"`
+	TLS               string `json:"tls,omitempty"`      // 1.2 | 1.3
+	ClientCertificate string `json:"client_certificate"` // none | verified | untrusted
+	ProtocolLevel     int    `json:"protocol_level,omitempty"`
+	ClientID          string `json:"client_id,omitempty"`
+	Auth              string `json:"auth,omitempty"` // credentials | credentials-wrong | certificate | none
+	Accepted          bool   `json:"accepted"`
+	Publishes         int    `json:"publishes"`
+	LargestPayload    int    `json:"largest_payload"`
+	Oversized         int    `json:"oversized"`
+}
+
+// Birth is the first MAM of the application about itself.
+type Birth struct {
+	Topic              string `json:"topic"`
+	IdentificationLink string `json:"identification_link"`
+	SerialNumber       string `json:"serial_number,omitempty"`
 }
 
 // Engine is a Docker or Podman Engine API.
@@ -209,6 +272,9 @@ func (r *Infra) Text(w io.Writer) error {
 			writeContainer(&b, ct)
 		}
 	}
+	if rn := r.Run; rn != nil {
+		writeRun(&b, rn)
+	}
 	if im := r.Image; im != nil {
 		kind := "image manifest"
 		if im.Index {
@@ -296,6 +362,56 @@ func writeHost(b *strings.Builder, h *Host) {
 	}
 	for _, c := range h.Containers {
 		writeContainer(b, c)
+	}
+}
+
+func writeRun(b *strings.Builder, r *Run) {
+	writeEngine(b, &r.Engine)
+	fmt.Fprintf(b, "image %s", r.Image.Ref)
+	if r.Image.ID != "" {
+		fmt.Fprintf(b, " (%s, %s/%s)", r.Image.ID, r.Image.OS, r.Image.Arch)
+	}
+	b.WriteString("\n")
+	fmt.Fprintf(b, "MQTT test endpoint on %s, broker address %s, MaxPacketSize %d\n", r.Endpoint.Listen, r.Endpoint.BrokerHost, r.Endpoint.MaxPacketSize)
+	for _, p := range r.Phases {
+		fmt.Fprintf(b, "phase %s: container %s, port %d", p.Name, p.Container, p.Port)
+		switch {
+		case p.Error != "":
+			fmt.Fprintf(b, ", %s", p.Error)
+		case !p.Started:
+			b.WriteString(", not started")
+		case p.Running:
+			fmt.Fprintf(b, ", ran %.1f s", float64(p.ObservedMS)/1000)
+		case p.ExitCode != nil:
+			fmt.Fprintf(b, ", exited with %d after %.1f s", *p.ExitCode, float64(p.ObservedMS)/1000)
+		}
+		if !p.Removed {
+			b.WriteString(", NOT removed")
+		}
+		b.WriteString("\n")
+		for _, c := range p.Connections {
+			if c.Handshake != "ok" {
+				fmt.Fprintf(b, "  connection: TLS handshake failed (%s)\n", c.HandshakeError)
+				continue
+			}
+			fmt.Fprintf(b, "  connection: TLS %s, client certificate %s", c.TLS, c.ClientCertificate)
+			if c.ProtocolLevel > 0 {
+				acc := "refused"
+				if c.Accepted {
+					acc = "accepted"
+				}
+				fmt.Fprintf(b, ", CONNECT level %d ClientId %q auth %s %s, %d PUBLISH (largest payload %d octets, %d oversized)", c.ProtocolLevel, c.ClientID, c.Auth, acc, c.Publishes, c.LargestPayload, c.Oversized)
+			} else {
+				b.WriteString(", no CONNECT")
+			}
+			b.WriteString("\n")
+		}
+		if p.Birth != nil {
+			fmt.Fprintf(b, "  birth %s (%s)\n", p.Birth.Topic, p.Birth.IdentificationLink)
+		}
+	}
+	if r.Cleanup != "" {
+		fmt.Fprintf(b, "cleanup: %s\n", r.Cleanup)
 	}
 }
 

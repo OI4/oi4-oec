@@ -208,6 +208,58 @@ func TestInfraContainerReport(t *testing.T) {
 	}
 }
 
+const infraRun = `{
+  "report": 1, "tool": "oec-infra", "version": "dev", "schemas": "2.0.1-dev", "baseline": "7427a4f",
+  "catalog": "7427a4f", "command": ["oec-infra", "run", "registry.example/oec-app:2.0.0"], "mode": "run",
+  "input": "registry.example/oec-app:2.0.0", "level": 3,
+  "started": "2026-10-31T10:00:00Z", "ended": "2026-10-31T10:00:20Z",
+  "run": {
+    "engine": {"endpoint": "unix:///var/run/docker.sock", "product": "Docker Engine - Community", "version": "28.4.0", "api": "1.51", "os": "linux", "arch": "amd64"},
+    "image": {"ref": "registry.example/oec-app:2.0.0", "id": "sha256:4f1c0e2d9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d", "os": "linux", "arch": "amd64"},
+    "endpoint": {"listen": "172.17.0.1", "broker_host": "oec-d8-broker", "max_packet_size": 262144},
+    "phases": [{"name": "credentials", "container": "oec-d8-run-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40", "port": 41883,
+      "started": true, "running": true, "observed_ms": 4100, "removed": true,
+      "connections": [{"handshake": "ok", "tls": "1.3", "client_certificate": "none", "protocol_level": 4,
+        "client_id": "oec-d8-run-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40", "auth": "credentials", "accepted": true,
+        "publishes": 2, "largest_payload": 812, "oversized": 0}],
+      "birth": {"topic": "Oi4v2/Application/b2kNC/Pub/MAM/b2kNC", "identification_link": "oi4.org/oec-d8-sim/SimApp/oec-d8-run-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40", "serial_number": "oec-d8-run-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40"}},
+      {"name": "untrusted", "container": "oec-d8-run-7d5f3a9b-8c40-4c8a-9e21-0b6a2c1e4f3d", "port": 41884,
+      "started": true, "running": false, "exit_code": 1, "observed_ms": 900, "removed": true,
+      "connections": [{"handshake": "failed", "handshake_error": "remote error: tls: bad certificate", "client_certificate": "none", "accepted": false, "publishes": 0, "largest_payload": 0, "oversized": 0}]}]},
+  "tests": [{"id": "T8-RUN-01", "title": "Application uses the Message Bus storage", "level": 2, "status": "implemented", "outcome": "pass",
+    "reqs": [{"req": "REQ-CNT-004", "obligation": "MUST", "outcome": "pass", "evidence": [{"container": "oec-d8-run-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40", "detail": "connected"}]}]}],
+  "summary": {"pass": 1}, "exit": 0
+}`
+
+func TestInfraRunReport(t *testing.T) {
+	if err := ValidateInfraReport([]byte(infraRun)); err != nil {
+		t.Fatal(err)
+	}
+	r := func(m map[string]any) map[string]any { return m["run"].(map[string]any) }
+	ph := func(m map[string]any) map[string]any { return r(m)["phases"].([]any)[0].(map[string]any) }
+	cn := func(m map[string]any) map[string]any { return ph(m)["connections"].([]any)[0].(map[string]any) }
+	for name, bad := range map[string][]byte{
+		"no run": patch(t, infraRun, func(m map[string]any) { delete(m, "run") }),
+		"container": patch(t, infraRun, func(m map[string]any) {
+			m["container"] = map[string]any{"engine": r(m)["engine"], "containers": []any{}}
+		}),
+		"command":      patch(t, infraRun, func(m map[string]any) { m["command"] = []any{"oec-infra", "container"} }),
+		"run in host":  patch(t, infraContainer, func(m map[string]any) { m["run"] = map[string]any{} }),
+		"no image":     patch(t, infraRun, func(m map[string]any) { delete(r(m), "image") }),
+		"phase name":   patch(t, infraRun, func(m map[string]any) { ph(m)["name"] = "other" }),
+		"username":     patch(t, infraRun, func(m map[string]any) { cn(m)["username"] = "oec-d8-1a2b" }),
+		"password":     patch(t, infraRun, func(m map[string]any) { cn(m)["password"] = "******" }),
+		"auth":         patch(t, infraRun, func(m map[string]any) { cn(m)["auth"] = "token" }),
+		"logs":         patch(t, infraRun, func(m map[string]any) { ph(m)["logs"] = "connected" }),
+		"storage path": patch(t, infraRun, func(m map[string]any) { ph(m)["storages"] = "/tmp/oec-d8-run" }),
+		"env":          patch(t, infraRun, func(m map[string]any) { ph(m)["env"] = []any{} }),
+	} {
+		if err := ValidateInfraReport(bad); err == nil {
+			t.Errorf("%s: accepted", name)
+		}
+	}
+}
+
 func TestContainerFixtureIndex(t *testing.T) {
 	list, err := ContainerFixtures()
 	if err != nil {
