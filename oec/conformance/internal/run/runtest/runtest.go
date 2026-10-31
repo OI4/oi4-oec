@@ -6,6 +6,7 @@ package runtest
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -151,6 +152,33 @@ func Archive(binary []byte, arch string, faults ...simapp.Fault) []byte {
 					"org.opencontainers.image.ref.name": fmt.Sprint(faults[i]),
 				}
 			}
+		},
+		// The classic image store of Docker loads manifest.json (written
+		// by docker save next to index.json), the containerd store
+		// index.json.
+		Layout: func(files map[string][]byte) {
+			var idx struct {
+				Manifests []struct{ Digest string } `json:"manifests"`
+			}
+			if json.Unmarshal(files["index.json"], &idx) != nil {
+				return
+			}
+			var docker []map[string]any
+			for i, d := range idx.Manifests {
+				var m struct {
+					Config struct{ Digest string }   `json:"config"`
+					Layers []struct{ Digest string } `json:"layers"`
+				}
+				if json.Unmarshal(files[ocitest.BlobPath(d.Digest)], &m) != nil {
+					return
+				}
+				var layers []string
+				for _, l := range m.Layers {
+					layers = append(layers, ocitest.BlobPath(l.Digest))
+				}
+				docker = append(docker, map[string]any{"Config": ocitest.BlobPath(m.Config.Digest), "RepoTags": []string{Ref(faults[i])}, "Layers": layers})
+			}
+			files["manifest.json"] = ocitest.JSON(docker)
 		},
 	})
 }

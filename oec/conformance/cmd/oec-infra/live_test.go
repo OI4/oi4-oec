@@ -11,6 +11,8 @@ import (
 	"testing"
 
 	"github.com/OI4/oec/conformance"
+	"github.com/OI4/oec/conformance/internal/run/runtest"
+	"github.com/OI4/oec/conformance/internal/run/simapp"
 )
 
 // TestBusDevBroker is the opt-in live run of `oec-infra bus` against the
@@ -325,4 +327,97 @@ func TestContainerDev(t *testing.T) {
 	t.Run("host/shared", func(t *testing.T) { storages(t, 1, "fail", "REQ-CNT-011") })
 	cmd(engine, "rm", "-f", bad)
 	t.Run("host/own", func(t *testing.T) { storages(t, exitPass, "pass", "") })
+}
+
+// TestRunDev is the opt-in live run of `oec-infra run` against the engine
+// of live.sh (C-074). It builds the simulated application oec-run-sim
+// (static, linux/<engine architecture>), loads it with `load` as the test
+// images oec-d8-sim:<fault> and runs every fault through the CLI: the
+// verdict must agree with the expectation of its fixture in
+// testdata/run/index.yaml (the fake Engine API against the real one). The
+// run leaves no oec-d8-run-* container; the test images are removed by tag
+// afterwards (never a prune).
+func TestRunDev(t *testing.T) {
+	if os.Getenv("OEC_LIVE") != "1" {
+		t.Skip("opt-in: OEC_LIVE=1 (oec/conformance/live.sh)")
+	}
+	engine := os.Getenv("OEC_ENGINE")
+	if engine == "" {
+		t.Fatal("OEC_ENGINE not set")
+	}
+	cmd := func(name string, args ...string) string {
+		t.Helper()
+		out, err := exec.Command(name, args...).CombinedOutput()
+		if err != nil {
+			t.Fatalf("%s %v: %v\n%s", name, args, err, out)
+		}
+		return strings.TrimSpace(string(out))
+	}
+	ep := liveEngine(t, engine)
+	arch := cmd(engine, "info", "--format", "{{.Architecture}}")
+	goarch := map[string]string{"aarch64": "arm64", "arm64": "arm64", "x86_64": "amd64", "amd64": "amd64"}[arch]
+	if goarch == "" {
+		t.Skipf("engine architecture %q", arch)
+	}
+	dir := t.TempDir()
+	bin := filepath.Join(dir, "oec-run-sim")
+	build := exec.Command("go", "build", "-trimpath", "-o", bin, "../../internal/run/simapp/oec-run-sim")
+	build.Env = append(os.Environ(), "GOOS=linux", "GOARCH="+goarch, "CGO_ENABLED=0")
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s", err, out)
+	}
+	b, err := os.ReadFile(bin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	archive := filepath.Join(dir, "oec-d8-sim.tar")
+	if err := os.WriteFile(archive, runtest.Archive(b, goarch), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		for _, f := range simapp.Faults {
+			_ = exec.Command(engine, "image", "rm", runtest.Ref(f)).Run()
+		}
+		out, _ := exec.Command(engine, "ps", "-a", "--filter", "name=oec-d8-", "--format", "{{.Names}}").Output()
+		if s := strings.TrimSpace(string(out)); s != "" {
+			t.Errorf("containers left: %s", s)
+		}
+	})
+	t.Logf("%s", cmd(engine, "load", "-i", archive))
+	fixtures, err := conformance.RunFixtures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range simapp.Faults {
+		t.Run(string(f), func(t *testing.T) {
+			var fx conformance.Fixture
+			for _, x := range fixtures {
+				if x.Fault == string(f) {
+					fx = x
+				}
+			}
+			code, out, errOut := call(t, "run", "--daemon", ep, "--format", "json", "--wait", "20s", runtest.Ref(f))
+			if code != exitPass && code != 1 && code != exitInconclusive {
+				t.Fatalf("exit %d\n%s%s", code, out, errOut)
+			}
+			r, got := runOutcomes(t, out)
+			for _, id := range []string{"T8-RUN-01", "T8-RUN-02", "T8-RUN-03"} {
+				want := "pass"
+				if e, ok := fx.Expect[id]; ok {
+					want = e.Outcome
+				}
+				if got[id] != want {
+					t.Errorf("%s: %s, want %s", id, got[id], want)
+				}
+			}
+			for _, p := range r.Run.Phases {
+				if !p.Removed {
+					t.Errorf("phase %s not removed", p.Name)
+				}
+			}
+			if t.Failed() {
+				t.Logf("%s%s", out, errOut)
+			}
+		})
+	}
 }

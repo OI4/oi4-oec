@@ -1,8 +1,11 @@
 package runtest
 
 import (
+	"archive/tar"
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -13,6 +16,28 @@ import (
 	"github.com/OI4/oec/conformance/internal/oci"
 	"github.com/OI4/oec/conformance/internal/run/simapp"
 )
+
+func tarFiles(t *testing.T, p string) map[string][]byte {
+	t.Helper()
+	f, err := os.Open(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	out := map[string][]byte{}
+	r := tar.NewReader(f)
+	for {
+		h, err := r.Next()
+		if err == io.EOF {
+			return out
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, _ := io.ReadAll(r)
+		out[h.Name] = b
+	}
+}
 
 func TestMapper(t *testing.T) {
 	m := Mapper(map[string]string{"/etc/oi4": "/h/etc", "/etc/oi4/mqtt": "/h/mqtt"})
@@ -81,6 +106,22 @@ func TestArchive(t *testing.T) {
 	for _, m := range img.Runnable() {
 		if m.Platform.OS != "linux" || m.Platform.Architecture != "arm64" {
 			t.Errorf("platform %+v", m.Platform)
+		}
+	}
+	// The classic image store of Docker loads by manifest.json.
+	var docker []struct {
+		Config   string
+		RepoTags []string
+		Layers   []string
+	}
+	files := tarFiles(t, p)
+	if err := json.Unmarshal(files["manifest.json"], &docker); err != nil || len(docker) != 2 {
+		t.Fatalf("manifest.json %v: %s", err, files["manifest.json"])
+	}
+	for i, f := range []simapp.Fault{simapp.Good, simapp.Exit} {
+		d := docker[i]
+		if len(d.RepoTags) != 1 || d.RepoTags[0] != Ref(f) || len(d.Layers) != 1 || files[d.Config] == nil || files[d.Layers[0]] == nil {
+			t.Errorf("manifest.json %d: %+v", i, d)
 		}
 	}
 	if n := len(Images("amd64")); n != len(simapp.Faults) {

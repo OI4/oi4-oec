@@ -1,7 +1,8 @@
 #!/bin/sh
 # Opt-in live run of `oec-check monitor`, `oec-infra bus`, `oec-infra
-# host` and `oec-infra container` against the Mosquitto of the dev
-# environment (oec/dev, C-051; C-052; C-071; C-072; C-073). Not part
+# host`, `oec-infra container` and `oec-infra run` against the Mosquitto of
+# the dev environment and the container engine (oec/dev, C-051; C-052;
+# C-071; C-072; C-073; C-074). Not part
 # of the gate oec/check.sh: it pulls the pinned image and needs a container
 # engine.
 #
@@ -13,8 +14,11 @@
 # `-run 'TestHostDev(Roots|Container)'` (the host run on this computer and in
 # a Linux container in the network namespace of the broker) and `-run
 # TestContainerDev` (two short-lived containers from the broker image, the
-# broker itself and T8-HST-03; they are removed afterwards) with
-# OEC_LIVE=1, stop the broker and remove its volume (compose down -v).
+# broker itself and T8-HST-03; they are removed afterwards) and `-run
+# TestRunDev` (loads the test images oec-d8-sim:<fault> of the simulated
+# application, runs every fault in oec-d8-run-* sandbox containers and
+# removes the images by tag; never a prune) with OEC_LIVE=1, stop the
+# broker and remove its volume (compose down -v).
 #
 # Environment:
 #   OEC_COMPOSE    compose command (default "docker compose"; e.g.
@@ -71,5 +75,9 @@ OEC_LIVE=1 OEC_DEV_DIR="$dev" OEC_ENGINE="$engine" OEC_BROKER_CONTAINER="$broker
 echo "== oec-infra container and T8-HST-03 on containers of the engine"
 OEC_LIVE=1 OEC_DEV_DIR="$dev" OEC_ENGINE="$engine" OEC_BROKER_CONTAINER="$broker" GOTOOLCHAIN=${GOTOOLCHAIN:-auto} \
     go test -count=1 -v -run '^TestContainerDev$' ./cmd/oec-infra
+
+echo "== oec-infra run with the test images of the simulated application"
+OEC_LIVE=1 OEC_ENGINE="$engine" GOTOOLCHAIN=${GOTOOLCHAIN:-auto} \
+    go test -count=1 -v -timeout 20m -run '^TestRunDev$' ./cmd/oec-infra
 
 echo "live: all tests passed"
