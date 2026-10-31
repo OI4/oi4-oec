@@ -1,9 +1,11 @@
 package mqttwire
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/pbkdf2"
+	"crypto/rand"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -167,4 +169,52 @@ func keyPEM(data, passphrase []byte) ([]byte, error) {
 			return pem.EncodeToMemory(b), nil
 		}
 	}
+}
+
+// EncryptPKCS8 encrypts a PKCS#8 private key (DER) with PBES2
+// (PBKDF2-HMAC-SHA256, 2048 iterations, AES-256-CBC) like `openssl pkcs8
+// -topk8 -v2 aes-256-cbc` and returns the DER of the EncryptedPrivateKeyInfo
+// (PEM type "ENCRYPTED PRIVATE KEY"). DecryptPKCS8 reverses it.
+func EncryptPKCS8(der, passphrase []byte) ([]byte, error) {
+	raw := func(v any) (asn1.RawValue, error) {
+		b, err := asn1.Marshal(v)
+		return asn1.RawValue{FullBytes: b}, err
+	}
+	salt, iv := make([]byte, 16), make([]byte, aes.BlockSize)
+	if _, err := rand.Read(salt); err != nil {
+		return nil, err
+	}
+	if _, err := rand.Read(iv); err != nil {
+		return nil, err
+	}
+	dk, err := pbkdf2.Key(sha256.New, string(passphrase), salt, 2048, 32)
+	if err != nil {
+		return nil, err
+	}
+	block, err := aes.NewCipher(dk)
+	if err != nil {
+		return nil, err
+	}
+	pad := aes.BlockSize - len(der)%aes.BlockSize
+	plain := append(append([]byte{}, der...), bytes.Repeat([]byte{byte(pad)}, pad)...)
+	enc := make([]byte, len(plain))
+	cipher.NewCBCEncrypter(block, iv).CryptBlocks(enc, plain)
+	null := asn1.RawValue{FullBytes: []byte{5, 0}}
+	kdf, err := raw(struct {
+		Salt []byte
+		Iter int
+		PRF  algorithm
+	}{salt, 2048, algorithm{oidHMACWithSHA256, null}})
+	if err != nil {
+		return nil, err
+	}
+	ivRaw, err := raw(iv)
+	if err != nil {
+		return nil, err
+	}
+	params, err := raw(struct{ KDF, Enc algorithm }{algorithm{oidPBKDF2, kdf}, algorithm{oidAES256CBC, ivRaw}})
+	if err != nil {
+		return nil, err
+	}
+	return asn1.Marshal(encryptedPrivateKeyInfo{algorithm{oidPBES2, params}, enc})
 }

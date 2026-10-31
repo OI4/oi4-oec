@@ -6,17 +6,12 @@ package mqtttest
 
 import (
 	"bytes"
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	"crypto/pbkdf2"
 	"crypto/rand"
-	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/asn1"
 	"encoding/pem"
 	"math/big"
 	"net"
@@ -28,6 +23,8 @@ import (
 	"time"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
+
+	"github.com/OI4/oec/conformance/internal/mqttwire"
 )
 
 // PKI holds the files of a throw-away CA, a broker certificate for
@@ -170,45 +167,10 @@ func (p *PKI) ServerCert(t testing.TB, kind string) tls.Certificate {
 }
 
 // EncryptPKCS8 encrypts a PKCS#8 key with PBES2 (PBKDF2-HMAC-SHA256, 2048
-// iterations, AES-256-CBC) like `openssl pkcs8 -topk8 -v2 aes-256-cbc`.
+// iterations, AES-256-CBC) like `openssl pkcs8 -topk8 -v2 aes-256-cbc`
+// (mqttwire.EncryptPKCS8).
 func EncryptPKCS8(t testing.TB, der []byte, passphrase string) []byte {
-	type alg struct {
-		Algorithm  asn1.ObjectIdentifier
-		Parameters asn1.RawValue `asn1:"optional"`
-	}
-	raw := func(v any) asn1.RawValue {
-		b, err := asn1.Marshal(v)
-		if err != nil {
-			t.Fatal(err)
-		}
-		return asn1.RawValue{FullBytes: b}
-	}
-	salt, iv := make([]byte, 16), make([]byte, aes.BlockSize)
-	rand.Read(salt)
-	rand.Read(iv)
-	dk, err := pbkdf2.Key(sha256.New, passphrase, salt, 2048, 32)
-	if err != nil {
-		t.Fatal(err)
-	}
-	block, _ := aes.NewCipher(dk)
-	pad := aes.BlockSize - len(der)%aes.BlockSize
-	plain := append(append([]byte{}, der...), bytes.Repeat([]byte{byte(pad)}, pad)...)
-	enc := make([]byte, len(plain))
-	cipher.NewCBCEncrypter(block, iv).CryptBlocks(enc, plain)
-	null := asn1.RawValue{FullBytes: []byte{5, 0}}
-	kdf := raw(struct {
-		Salt []byte
-		Iter int
-		PRF  alg
-	}{salt, 2048, alg{asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 9}, null}})
-	params := raw(struct{ KDF, Enc alg }{
-		alg{asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 12}, kdf},
-		alg{asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 1, 42}, raw(iv)},
-	})
-	out, err := asn1.Marshal(struct {
-		Alg  alg
-		Data []byte
-	}{alg{asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 13}, params}, enc})
+	out, err := mqttwire.EncryptPKCS8(der, []byte(passphrase))
 	if err != nil {
 		t.Fatal(err)
 	}

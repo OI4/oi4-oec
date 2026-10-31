@@ -49,6 +49,10 @@ type Config struct {
 	// and the lowest TLS version offered (default TLS 1.2).
 	ProtocolVersion uint
 	MinTLSVersion   uint16
+	// Dialer opens the TCP connection to the broker address host:port
+	// (TLS runs on top, verified for host); nil: net.Dialer. The simulated
+	// application of the D8 self-test maps the broker host to loopback.
+	Dialer func(ctx context.Context, network, addr string) (net.Conn, error)
 }
 
 // Message is one PUBLISH.
@@ -179,10 +183,26 @@ func Dial(ctx context.Context, c Config) (*Client, error) {
 		SetConnectRetry(false).
 		SetOrderMatters(true).
 		SetCustomOpenConnectionFn(func(u *url.URL, _ paho.ClientOptions) (net.Conn, error) {
-			d := tls.Dialer{NetDialer: &net.Dialer{Timeout: c.ConnectTimeout}, Config: tc}
-			conn, err := d.DialContext(ctx, "tcp", u.Host)
-			if err != nil {
-				return nil, err
+			var conn net.Conn
+			if c.Dialer != nil {
+				dctx, cancel := context.WithTimeout(ctx, c.ConnectTimeout)
+				defer cancel()
+				raw, err := c.Dialer(dctx, "tcp", u.Host)
+				if err != nil {
+					return nil, err
+				}
+				tlc := tls.Client(raw, tc)
+				if err := tlc.HandshakeContext(dctx); err != nil {
+					raw.Close()
+					return nil, err
+				}
+				conn = tlc
+			} else {
+				d := tls.Dialer{NetDialer: &net.Dialer{Timeout: c.ConnectTimeout}, Config: tc}
+				var err error
+				if conn, err = d.DialContext(ctx, "tcp", u.Host); err != nil {
+					return nil, err
+				}
 			}
 			cl.mu.Lock()
 			cl.conn = conn

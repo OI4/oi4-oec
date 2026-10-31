@@ -1,10 +1,12 @@
 package mqttwire_test
 
 import (
+	"bytes"
 	"context"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -149,6 +151,48 @@ func TestClientCertificate(t *testing.T) {
 	c.Close()
 	if _, err := dial(t, mqttwire.Config{Broker: b.URL(), CAFile: p.CAFile}); err == nil {
 		t.Error("no client certificate: connected")
+	}
+}
+
+func TestClientDialer(t *testing.T) {
+	p := mqtttest.NewPKI(t)
+	b := mqtttest.NewBroker(t, p, "", "", true)
+	var got string
+	cfg := mqttwire.Config{Broker: "mqtts://localhost:1", CAFile: p.CAFile, CertFile: p.ClientCert, KeyFile: p.ClientKeyEncrypted, KeyPassphrase: []byte(p.Passphrase),
+		Dialer: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			got = addr
+			var d net.Dialer
+			return d.DialContext(ctx, network, b.Addr)
+		}}
+	c, err := dial(t, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.Close()
+	if got != "localhost:1" {
+		t.Errorf("dialer address %q", got)
+	}
+	cfg.CAFile = p.OtherCAFile
+	if _, err := dial(t, cfg); err == nil {
+		t.Error("untrusted broker certificate: connected")
+	}
+}
+
+func TestEncryptPKCS8(t *testing.T) {
+	p := mqtttest.NewPKI(t)
+	raw, _ := os.ReadFile(p.ClientKeyEncrypted)
+	b, _ := pem.Decode(raw)
+	der, err := mqttwire.DecryptPKCS8(b.Bytes, []byte(p.Passphrase))
+	if err != nil {
+		t.Fatal(err)
+	}
+	enc, err := mqttwire.EncryptPKCS8(der, []byte("a:b"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	back, err := mqttwire.DecryptPKCS8(enc, []byte("a:b"))
+	if err != nil || !bytes.Equal(back, der) {
+		t.Fatalf("round trip: %v", err)
 	}
 }
 

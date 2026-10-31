@@ -38,12 +38,15 @@ const (
 var Epoch = time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
 // File is one entry of a layer. Type is a tar type flag (default regular
-// file); Link is the target of a symlink or hard link.
+// file); Link is the target of a symlink or hard link; Mode overrides the
+// default permission bits (0644 file, 0755 directory), e.g. 0755 for an
+// executable.
 type File struct {
 	Path string
 	Data string
 	Type byte
 	Link string
+	Mode int64
 }
 
 // Dir returns a directory entry.
@@ -139,6 +142,9 @@ func LayerTar(l Layer) []byte {
 			h.Mode = 0o755
 		case tar.TypeSymlink:
 			h.Mode = 0o777
+		}
+		if f.Mode != 0 {
+			h.Mode = f.Mode
 		}
 		if h.Typeflag == tar.TypeReg {
 			h.Size = int64(len(f.Data))
