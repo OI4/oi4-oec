@@ -15,6 +15,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net"
 	"net/http"
 	"net/url"
@@ -176,6 +177,30 @@ func Open(ctx context.Context, ep string, timeout time.Duration) (*Client, error
 		return nil, err
 	}
 	return c, nil
+}
+
+// Connect opens the first endpoint that answers as an Engine API: the
+// explicit one, else DOCKER_HOST and CONTAINER_HOST, else the defaults (a
+// default socket that does not exist is skipped). It returns the endpoints
+// it tried.
+func Connect(ctx context.Context, explicit string, getenv func(string) string, defaults []string, timeout time.Duration) (*Client, []string, error) {
+	eps, named := Endpoints(explicit, getenv, defaults)
+	var tried []string
+	var last error
+	for _, ep := range eps {
+		cl, err := Open(ctx, ep, timeout)
+		if err == nil {
+			return cl, []string{ep}, nil
+		}
+		if !named && (errors.Is(err, fs.ErrNotExist) || errors.Is(err, ErrUnsupported)) {
+			continue
+		}
+		tried, last = append(tried, ep), err
+	}
+	if last == nil {
+		return nil, eps, fmt.Errorf("none of the default endpoints exists")
+	}
+	return nil, tried, last
 }
 
 // Endpoint returns the endpoint of the client.

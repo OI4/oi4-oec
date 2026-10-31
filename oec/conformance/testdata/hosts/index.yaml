@@ -18,7 +18,15 @@
 #     memory, eth0 (a device) up, a container daemon at
 #     unix:///var/run/docker.sock;
 #   - the broker accepts app/app-secret and runs the Registry
-#     oi4.org/Registry/SIM/1 (heartbeat every 100 ms).
+#     oi4.org/Registry/SIM/1 (heartbeat every 100 ms);
+#   - for T8-HST-03 (C-073) the fake Engine API of
+#     internal/engine/enginetest (--daemon) with the inspect documents
+#     recorded from Docker 28.4 (testdata/containers/engine): App (own
+#     volumes on /etc/oi4/app and /opt/oi4/app, own read-only bind on
+#     /run/secrets/oi4, the Message Bus and OI4 certificate storage from
+#     the host) and Sidecar (no OI4 storage). The T8-HST-03 scenarios
+#     derive further containers from them (App2: a copy of App with its
+#     own volumes and secret storage; Host, Stopped: recorded).
 # D8 runs with --timeout 1s and --registry-wait 2s. This index is test data
 # with verdict (G-3.9): it states the expected outcome of the host tests at
 # level 3 and goes to the PO for review.
@@ -34,7 +42,7 @@
 # status: draft | reviewed
 hosts:
   - fault: none
-    status: reviewed
+    status: draft
     positive: true
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-003]}
@@ -42,7 +50,8 @@ hosts:
       The conforming root (credentials) with mounted storages on a
       conforming Linux host with a container daemon, the broker and the
       Registry: every host test passes; the patch level (REQ-PLT-003) is
-      reported for a manual verdict.
+      reported for a manual verdict. Since C-073 the run includes T8-HST-03
+      against App and Sidecar (pass), hence draft again.
   - fault: T8-HST-01/broker-ca
     status: reviewed
     positive: true
@@ -160,7 +169,7 @@ hosts:
       The broker certificate is signed by ca.pem but expired: a note;
       T8-BUS-01 judges the validity (REQ-MQTT-007, MG 6.2.2).
   - fault: T8-HST-02/certificate
-    status: reviewed
+    status: draft
     positive: true
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-003]}
@@ -168,7 +177,8 @@ hosts:
       The application authenticates with its certificate: <container>.pem in
       the certificate storage, the encrypted private_key.pem and the
       passphrase in the secret storage, no credentials; the broker requires
-      a client certificate.
+      a client certificate. Since C-073 the run includes T8-HST-03 against
+      App and Sidecar (pass), hence draft again.
   - fault: T8-HST-02/unencrypted-key
     status: reviewed
     positive: true
@@ -456,3 +466,124 @@ hosts:
       T8-HST-04: {outcome: skip, reqs: [REQ-PLT-007, REQ-PLT-008], manual: [REQ-PLT-003]}
     notes: >-
       --offline: the Message Bus is not contacted, inconclusive.
+  - fault: T8-HST-03/two-apps
+    status: draft
+    positive: true
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: pass}
+    notes: >-
+      App, App2 and Sidecar: each application has its own volumes on
+      /etc/oi4/app and /opt/oi4/app and its own secret storage; both share
+      the Message Bus storage and the OI4 certificate storage, which RIG
+      4.1.1/4.1.2 allow.
+  - fault: T8-HST-03/self-excluded
+    status: draft
+    positive: true
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: pass}
+    notes: >-
+      App, Sidecar and the container oec-d8, in which D8 runs with the
+      secret storage and the Message Bus storage of App mounted read-only;
+      --self oec-d8 excludes it, the platform passes.
+  - fault: T8-HST-03/missing-app-storage
+    status: draft
+    positive: true
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: pass, manual: [REQ-CNT-011]}
+    notes: >-
+      App without a mount on /opt/oi4/app: the data stays in the container
+      layer; whether the application uses the storage is judged manually.
+  - fault: T8-HST-03/shared-volume
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: fail, reqs: [REQ-CNT-011]}
+    notes: >-
+      App and the recorded container Stopped (created, never started)
+      mount the same volume on /etc/oi4/app; a stopped container counts.
+  - fault: T8-HST-03/volume-elsewhere
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: fail, reqs: [REQ-CNT-011]}
+    notes: >-
+      A container without OI4 storages mounts the volume of App's
+      /opt/oi4/app on /data.
+  - fault: T8-HST-03/recorded-host
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: fail, reqs: [REQ-CNT-011]}
+    notes: >-
+      App and the recorded container Host: App shows the persistent layer
+      of the platform; Host has a tmpfs on /etc/oi4/app and an image mount
+      on /opt/oi4/app – neither is a host-defined path.
+  - fault: T8-HST-03/no-persistence
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: skip, reqs: [REQ-CNT-011, REQ-CNT-024]}
+    notes: >-
+      Host and Sidecar only: no OI4 container has a bind or volume on an
+      application storage (the platform provides no persistent layer,
+      REQ-CNT-011 not applicable) and none has a secret storage.
+  - fault: T8-HST-03/shared-secrets
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: fail, reqs: [REQ-CNT-024]}
+    notes: >-
+      App2 mounts the secret storage of App (the same host folder) on its
+      /run/secrets/oi4.
+  - fault: T8-HST-03/backup-secrets
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: fail, reqs: [REQ-CNT-024]}
+    notes: >-
+      A backup container without OI4 storages mounts the host folder that
+      contains the secret storage of App (and its Message Bus and OI4
+      certificate storages, which may be shared).
+  - fault: T8-HST-03/covering-secrets
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: fail, reqs: [REQ-CNT-024]}
+    notes: >-
+      App mounts the host folder run on /run/secrets, App2 mounts
+      run/app2 on /run/secrets: the secret storage of App2 lies in the
+      mount of App.
+  - fault: T8-HST-03/d8-container
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: fail, reqs: [REQ-CNT-024], manual: [REQ-CNT-011]}
+    notes: >-
+      The scenario of self-excluded without --self: the container of D8
+      shares the secret storage of App and has no application storage
+      (manual).
+  - fault: T8-HST-03/self-unknown
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: skip, reqs: [REQ-CNT-011, REQ-CNT-024]}
+    notes: >-
+      --self names a container the engine does not know: inconclusive.
+  - fault: T8-HST-03/inspect-fails
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: skip, reqs: [REQ-CNT-011, REQ-CNT-024]}
+    notes: >-
+      The engine answers the inspection of App with an error: inconclusive.
+  - fault: T8-HST-03/engine-down
+    status: draft
+    tests: [T8-HST-03]
+    expect:
+      T8-HST-03: {outcome: skip, reqs: [REQ-CNT-011, REQ-CNT-024]}
+    notes: >-
+      --daemon names a TCP port without a listener: no Engine API,
+      inconclusive.

@@ -20,6 +20,7 @@ import (
 	"github.com/OI4/oec/conformance"
 	"github.com/OI4/oec/conformance/catalog"
 	"github.com/OI4/oec/conformance/internal/bus/registrytest"
+	"github.com/OI4/oec/conformance/internal/engine/enginetest"
 	"github.com/OI4/oec/conformance/internal/host/hosttest"
 	"github.com/OI4/oec/conformance/internal/mqttwire"
 	"github.com/OI4/oec/conformance/internal/mqttwire/mqtttest"
@@ -140,6 +141,7 @@ func scenario(t *testing.T, f conformance.Fixture) Config {
 	env := map[string]string{}
 	c := Config{Root: r.Dir, RegistryWait: 2 * time.Second, Timeout: time.Second, Tests: f.Tests}
 	file := func(dir, name string) string { return filepath.Join(dir, name) }
+	var eng *enginetest.Engine // T8-HST-03; nil: App and Sidecar of the recording
 	switch test {
 	case "none":
 	case TMQTT:
@@ -267,8 +269,19 @@ func scenario(t *testing.T, f conformance.Fixture) Config {
 		default:
 			t.Fatalf("unknown fixture %s", f.Fault)
 		}
+	case TStorages:
+		eng = storageEngine(t, variant, &c)
 	default:
 		t.Fatalf("unknown fixture %s", f.Fault)
+	}
+	if f.Runs(TStorages) && c.Daemon == "" {
+		if eng == nil {
+			rec := enginetest.Recorded(t)
+			e := rec.Engine(rec.App, rec.Sidecar)
+			eng = &e
+		}
+		c.Daemon = enginetest.Start(t, *eng).Endpoint()
+		daemons[c.Daemon] = nil
 	}
 	c.Facts = facts
 	c.Mounts = func() ([]Mount, error) { return mounts, nil }
@@ -281,6 +294,101 @@ func scenario(t *testing.T, f conformance.Fixture) Config {
 	}
 	c.Getenv = func(k string) string { return env[k] }
 	return c
+}
+
+// The second application of the T8-HST-03 scenarios: a copy of App with
+// its own name, volumes and secret storage; it shares the Message Bus and
+// the OI4 certificate storage with App (RIG 4.1.1, 4.1.2 allow it).
+const (
+	app2ID      = "5d0c9a7e31b24f6e8a4c2b19e07d6f3a5c8e1b2d4f6a8c0e2b4d6f8a0c2e4b6d"
+	app2Name    = "oec-rec-app2-7c1e9b2a-3d4f-4a6b-8c9d-0e1f2a3b4c5d"
+	app2Secrets = "/host_mnt/private/srv/oec/rec/app2/secrets"
+	appSecrets  = "/host_mnt/private/srv/oec/rec/secrets"
+)
+
+func volume(name, destination string) enginetest.Doc {
+	m := enginetest.Mount("volume", "/var/lib/docker/volumes/"+name+"/_data", destination, true)
+	m["Name"] = name
+	return m
+}
+
+// other returns a container derived from the recorded Sidecar (no OI4
+// storage, network of App) with the name, id and mounts.
+func other(rec enginetest.Recording, id, name string, mounts ...enginetest.Doc) enginetest.Doc {
+	d := enginetest.Clone(rec.Sidecar)
+	d["Id"], d["Name"], d["Mounts"] = id, "/"+name, []any{}
+	enginetest.Set(d, "Config.Hostname", name)
+	enginetest.SetMounts(d, mounts...)
+	return d
+}
+
+func app2(rec enginetest.Recording) enginetest.Doc {
+	d := enginetest.Clone(rec.App)
+	d["Id"], d["Name"] = app2ID, "/"+app2Name
+	enginetest.Set(d, "Config.Hostname", app2Name)
+	enginetest.RemoveMount(d, "/mosquitto/data")
+	enginetest.RemoveMount(d, "/mosquitto/log")
+	enginetest.SetMounts(d, volume("oec-rec-app2-cfg", ContainerAppEtc), volume("oec-rec-app2-data", ContainerAppOpt),
+		enginetest.Mount("bind", app2Secrets, ContainerSecrets, false))
+	return d
+}
+
+// storageEngine returns the engine of a T8-HST-03 scenario.
+func storageEngine(t *testing.T, variant string, c *Config) *enginetest.Engine {
+	rec := enginetest.Recorded(t)
+	var e enginetest.Engine
+	switch variant {
+	case "two-apps":
+		e = rec.Engine(rec.App, app2(rec), rec.Sidecar)
+	case "shared-volume":
+		e = rec.Engine(rec.App, rec.Stopped)
+	case "shared-secrets":
+		a := app2(rec)
+		enginetest.SetMounts(a, enginetest.Mount("bind", appSecrets, ContainerSecrets, false))
+		e = rec.Engine(rec.App, a)
+	case "backup-secrets":
+		e = rec.Engine(rec.App, other(rec, "b4c1d2e3f405162738495a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c5d6e7f801", "oec-rec-backup",
+			enginetest.Mount("bind", "/host_mnt/private/srv/oec/rec", "/backup", false)))
+	case "volume-elsewhere":
+		e = rec.Engine(rec.App, other(rec, "c5d2e3f4051627384950a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c5d6e7f8012", "oec-rec-reader",
+			volume("oec-rec-app-data", "/data")))
+	case "covering-secrets":
+		a, b := enginetest.Clone(rec.App), app2(rec)
+		enginetest.RemoveMount(a, ContainerSecrets)
+		enginetest.SetMounts(a, enginetest.Mount("bind", "/srv/oec/rec/run", "/run/secrets", false))
+		enginetest.RemoveMount(b, ContainerSecrets)
+		enginetest.SetMounts(b, enginetest.Mount("bind", "/srv/oec/rec/run/app2", "/run/secrets", false))
+		e = rec.Engine(a, b)
+	case "recorded-host":
+		e = rec.Engine(rec.App, rec.Host)
+	case "no-persistence":
+		e = rec.Engine(rec.Host, rec.Sidecar)
+	case "missing-app-storage":
+		a := enginetest.Clone(rec.App)
+		enginetest.RemoveMount(a, ContainerAppOpt)
+		e = rec.Engine(a, rec.Sidecar)
+	case "d8-container", "self-excluded":
+		d8 := other(rec, "d6e3f4051627384950a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c5d6e7f801234", "oec-d8",
+			enginetest.Mount("bind", appSecrets, ContainerSecrets, false),
+			enginetest.Mount("bind", "/host_mnt/private/srv/oec/rec/mqtt", "/etc/oi4/mqtt", false))
+		e = rec.Engine(rec.App, d8, rec.Sidecar)
+		if variant == "self-excluded" {
+			c.Self = "oec-d8"
+		}
+	case "self-unknown":
+		e = rec.Engine(rec.App, rec.Sidecar)
+		c.Self = "oec-d8"
+	case "inspect-fails":
+		e = rec.Engine(rec.App, rec.Sidecar)
+		id, _ := rec.App["Id"].(string)
+		e.Fail = []string{"/containers/" + id}
+	case "engine-down":
+		c.Daemon = "tcp://127.0.0.1:" + strconv.Itoa(closedPort(t))
+		return nil
+	default:
+		t.Fatalf("unknown fixture %s/%s", TStorages, variant)
+	}
+	return &e
 }
 
 // TestFixtures runs every host fixture of testdata/hosts/index.yaml and
@@ -411,6 +519,58 @@ func TestMemoryRule(t *testing.T) {
 			}
 			if !found {
 				t.Error("no manual finding on the memory of REQ-PLT-001")
+			}
+		})
+	}
+}
+
+// TestStorageEvidence: T8-HST-03 names the other container and its
+// destination, reports the OI4 containers and the engine, and never a
+// mount source.
+func TestStorageEvidence(t *testing.T) {
+	fixtures, err := conformance.HostFixtures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]string{
+		TStorages + "/shared-volume":    "oec-rec-stopped:/etc/oi4/app (created)",
+		TStorages + "/backup-secrets":   "oec-rec-backup:/backup",
+		TStorages + "/covering-secrets": "/run/secrets",
+		TStorages + "/recorded-host":    "mount of type tmpfs",
+	}
+	for fault, detail := range want {
+		i := slices.IndexFunc(fixtures, func(f conformance.Fixture) bool { return f.Fault == fault })
+		if i < 0 {
+			t.Fatalf("no fixture %s", fault)
+		}
+		t.Run(fault, func(t *testing.T) {
+			t.Parallel()
+			c := scenario(t, fixtures[i])
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+			res := Run(ctx, c)
+			found := false
+			for _, o := range res.Observations {
+				if o.Test != TStorages {
+					continue
+				}
+				found = found || o.Kind == verdict.Violation && strings.Contains(o.Detail, detail) && o.Container != ""
+				for _, leak := range []string{"/var/lib/docker", "/srv/oec", "/host_mnt"} {
+					if strings.Contains(o.Detail, leak) || strings.Contains(o.Path, leak) {
+						t.Errorf("evidence with a mount source: %+v", o.Evidence)
+					}
+				}
+			}
+			if !found {
+				t.Errorf("no violation naming %q: %+v", detail, res.Observations)
+			}
+			if res.Host.Engine == nil || res.Host.Engine.Product == "" || len(res.Host.Containers) == 0 {
+				t.Errorf("engine %+v, containers %d", res.Host.Engine, len(res.Host.Containers))
+			}
+			for _, ct := range res.Host.Containers {
+				if ct.Name == "oec-rec-sidecar" {
+					t.Error("Sidecar is no OI4 container")
+				}
 			}
 		})
 	}

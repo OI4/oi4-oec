@@ -139,7 +139,13 @@ tests:
     mode: host
     needs: [host-access, docker]
     reqs: [REQ-CNT-011, REQ-CNT-024]
-    status: planned
+    status: implemented
+    notes: >-
+      Every container of the engine (running or not) with a mount on, below or above /etc/oi4, /opt/oi4 or
+      /run/secrets/oi4 is an OI4 container; its secret storage and – if an OI4 container has a bind or volume on
+      /etc/oi4/app or /opt/oi4/app (persistent layer) – its application storages must not be reachable through a bind
+      or volume of another container (same volume or nested sources as the engine reports them). --self excludes the
+      container D8 runs in.
   - id: T8-HST-04
     title: Platform host
     mode: host

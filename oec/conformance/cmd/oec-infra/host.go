@@ -25,7 +25,7 @@ type hostFlags struct {
 	fl                         *flag.FlagSet
 	config                     string
 	root, mqtt, certs, secrets string
-	container, daemon          string
+	container, daemon, self    string
 	offline                    bool
 	registryWait, timeout      time.Duration
 	tests                      list
@@ -46,6 +46,7 @@ func newHostFlags(stderr io.Writer) *hostFlags {
 	fl.StringVar(&f.secrets, "secrets-storage", "", "secret storage (default ROOT/run/secrets/oi4)")
 	fl.StringVar(&f.container, "container", "", "container name of the application (default: ROOT/etc/hostname)")
 	fl.StringVar(&f.daemon, "daemon", "", "endpoint of the container daemon: unix://PATH, npipe://PATH, tcp://HOST:PORT or a socket path (default: DOCKER_HOST, CONTAINER_HOST, the default sockets)")
+	fl.StringVar(&f.self, "self", "", "the container D8 runs in (name, id or unique id prefix); T8-HST-03 neither judges it nor compares its mounts")
 	fl.BoolVar(&f.offline, "offline", false, "do not contact the Message Bus (REQ-PLT-007/008 inconclusive)")
 	fl.DurationVar(&f.registryWait, "registry-wait", host.DefaultRegistryWait, "discovery time of the OEC Registry")
 	fl.DurationVar(&f.timeout, "timeout", host.DefaultTimeout, "waiting time for one connection")
@@ -119,7 +120,7 @@ func runHost(args []string, stdout, stderr io.Writer) int {
 	defer stop()
 	started := time.Now().UTC()
 	res := host.Run(ctx, host.Config{Root: root, MQTT: abs(f.mqtt), Certs: abs(f.certs), Secrets: abs(f.secrets),
-		Container: f.container, Daemon: f.daemon, Offline: f.offline, RegistryWait: f.registryWait, Timeout: f.timeout, Tests: f.tests})
+		Container: f.container, Daemon: f.daemon, Self: f.self, Offline: f.offline, RegistryWait: f.registryWait, Timeout: f.timeout, Tests: f.tests})
 	h := res.Host
 	rep := &report.Infra{Report: report.InfraVersion, Tool: tool, Version: version, Schemas: schema.Version, Baseline: base,
 		Catalog: cat.Baseline, Command: append([]string{tool, "host"}, args...), Mode: "host", Input: root,

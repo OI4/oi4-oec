@@ -1,11 +1,14 @@
 // Package host implements the host tests of oec-infra host (DESIGN.md §9,
 // catalog d8.yaml, mode host): T8-HST-01 the Message Bus storage, T8-HST-02
-// the OI4 certificate and secret storages and T8-HST-04 the platform host.
+// the OI4 certificate and secret storages, T8-HST-03 the application and
+// secret storages of the containers (Engine API) and T8-HST-04 the
+// platform host.
 // It reads the storages of RIG 4.1 below a root directory – the file system
 // of a container (default /) or a directory with the same layout – and the
 // measured properties of the system it runs on; it never writes. The
 // platform tests connect to the container daemon and – like the application
-// of the root – to the Message Bus.
+// of the root – to the Message Bus; T8-HST-03 reads the inspect documents of
+// the containers through the read-only Engine API client (internal/engine).
 package host
 
 import (
@@ -24,17 +27,17 @@ import (
 	"github.com/OI4/oec/conformance/internal/verdict"
 )
 
-// The tests of the package. T8-HST-03 (application storages are not
-// shared) needs the Engine API and comes with P5b increment 4.
+// The tests of the package.
 const (
 	TMQTT     = "T8-HST-01"
 	TSecrets  = "T8-HST-02"
+	TStorages = "T8-HST-03"
 	TPlatform = "T8-HST-04"
 )
 
 // Implemented lists the tests this package implements; the catalog status
 // must agree (fixtures_test.go).
-var Implemented = map[string]bool{TMQTT: true, TSecrets: true, TPlatform: true}
+var Implemented = map[string]bool{TMQTT: true, TSecrets: true, TStorages: true, TPlatform: true}
 
 // Defaults.
 const (
@@ -57,7 +60,10 @@ type Config struct {
 	Secrets   string // the secret storage; "": Root/run/secrets/oi4
 	Container string // the container name (RIG 4.2); "": Root/etc/hostname
 	Daemon    string // the endpoint of the container daemon; "": DOCKER_HOST, CONTAINER_HOST, the default sockets
-	Offline   bool   // the Message Bus is not contacted (REQ-PLT-007/008 inconclusive)
+	// Self is the container D8 runs in (name, id or unique id prefix);
+	// T8-HST-03 neither judges it nor compares its mounts. "": none.
+	Self    string
+	Offline bool // the Message Bus is not contacted (REQ-PLT-007/008 inconclusive)
 
 	RegistryWait time.Duration // discovery of the OEC Registry; 0: DefaultRegistryWait
 	Timeout      time.Duration // one connection; 0: DefaultTimeout
@@ -210,6 +216,9 @@ func Run(ctx context.Context, c Config) Result {
 	}
 	if c.Runs(TSecrets) {
 		r.certificateStorages()
+	}
+	if c.Runs(TStorages) {
+		r.storages(ctx)
 	}
 	if c.Runs(TPlatform) {
 		r.platform(ctx)

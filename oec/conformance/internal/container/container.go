@@ -11,7 +11,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/fs"
 	"path"
 	"regexp"
 	"sort"
@@ -103,30 +102,6 @@ type Result struct {
 	Observations []verdict.Observation
 }
 
-// Connect opens the first endpoint that answers as an Engine API: the
-// explicit one, else DOCKER_HOST and CONTAINER_HOST, else the defaults (a
-// default socket that does not exist is skipped). It returns the endpoints
-// it tried.
-func Connect(ctx context.Context, explicit string, getenv func(string) string, defaults []string, timeout time.Duration) (*engine.Client, []string, error) {
-	eps, named := engine.Endpoints(explicit, getenv, defaults)
-	var tried []string
-	var last error
-	for _, ep := range eps {
-		cl, err := engine.Open(ctx, ep, timeout)
-		if err == nil {
-			return cl, []string{ep}, nil
-		}
-		if !named && (errors.Is(err, fs.ErrNotExist) || errors.Is(err, engine.ErrUnsupported)) {
-			continue
-		}
-		tried, last = append(tried, ep), err
-	}
-	if last == nil {
-		return nil, eps, fmt.Errorf("none of the default endpoints exists")
-	}
-	return nil, tried, last
-}
-
 type runner struct {
 	c        Config
 	cl       *engine.Client
@@ -174,7 +149,7 @@ func Run(ctx context.Context, c Config) (Result, error) {
 	}
 	var res Result
 	res.Run.Containers = []report.Container{}
-	cl, tried, err := Connect(ctx, c.Daemon, c.Getenv, c.Defaults, c.Timeout)
+	cl, tried, err := engine.Connect(ctx, c.Daemon, c.Getenv, c.Defaults, c.Timeout)
 	if err != nil {
 		res.Run.Engine.Endpoint = strings.Join(tried, ", ")
 		r.inconclusive(tests, "", "no Docker/Podman Engine API (%s): %v", res.Run.Engine.Endpoint, err)

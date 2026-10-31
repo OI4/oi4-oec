@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/OI4/oec/conformance/internal/engine/enginetest"
 	"github.com/OI4/oec/conformance/internal/host/hosttest"
 	"github.com/OI4/oec/conformance/internal/mqttwire/mqtttest"
 )
@@ -30,6 +31,13 @@ type hostReport struct {
 			OS      string `json:"os"`
 			Machine string `json:"machine"`
 		} `json:"platform"`
+		Engine *struct {
+			Endpoint string `json:"endpoint"`
+			Product  string `json:"product"`
+		} `json:"engine"`
+		Containers []struct {
+			Name string `json:"name"`
+		} `json:"containers"`
 	} `json:"host"`
 	Tests []struct {
 		ID      string `json:"id"`
@@ -93,7 +101,8 @@ func TestHostRun(t *testing.T) {
 }
 
 // TestHostAll runs all host tests offline: T8-HST-04 depends on this host,
-// REQ-PLT-007/008 are inconclusive offline, T8-HST-03 is planned (C-073).
+// REQ-PLT-007/008 are inconclusive offline, T8-HST-03 is inconclusive
+// without an Engine API at --daemon.
 func TestHostAll(t *testing.T) {
 	root := hostRoot(t)
 	code, out, errOut := call(t, "host", "--root", root.Dir, "--offline", "--daemon", "tcp://127.0.0.1:1", "--format", "json")
@@ -211,5 +220,41 @@ func TestHostDaemon(t *testing.T) {
 				t.Errorf("REQ-PLT-006 %s", q.Outcome)
 			}
 		}
+	}
+}
+
+// TestHostStorages: T8-HST-03 through the fake Engine API – App and
+// Sidecar pass, App and Stopped share a volume (exit 1), --self naming an
+// unknown container is inconclusive (exit 4).
+func TestHostStorages(t *testing.T) {
+	root := hostRoot(t)
+	rec := enginetest.Recorded(t)
+	cases := []struct {
+		name       string
+		containers []enginetest.Doc
+		args       []string
+		exit       int
+		outcome    string
+	}{
+		{"pass", []enginetest.Doc{rec.App, rec.Sidecar}, nil, exitPass, "pass"},
+		{"shared", []enginetest.Doc{rec.App, rec.Stopped}, nil, 1, "fail"},
+		{"self", []enginetest.Doc{rec.App, rec.Sidecar}, []string{"--self", "oec-d8"}, exitInconclusive, "skip"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := enginetest.Start(t, rec.Engine(tc.containers...))
+			args := append([]string{"host", "--root", root.Dir, "--offline", "--daemon", srv.Endpoint(), "--tests", "T8-HST-03", "--format", "json"}, tc.args...)
+			code, out, errOut := call(t, args...)
+			r, got := outcomes(t, out)
+			if code != tc.exit || got["T8-HST-03"] != tc.outcome || len(got) != 1 {
+				t.Errorf("exit %d, tests %v\n%s%s", code, got, out, errOut)
+			}
+			if r.Host.Engine == nil || r.Host.Engine.Endpoint != srv.Endpoint() {
+				t.Errorf("engine %+v", r.Host.Engine)
+			}
+			if tc.name != "self" && (len(r.Host.Containers) == 0 || strings.Contains(out, "/var/lib/docker") || strings.Contains(out, "/srv/oec")) {
+				t.Errorf("containers %+v or a mount source in the report\n%s", r.Host.Containers, out)
+			}
+		})
 	}
 }

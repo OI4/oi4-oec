@@ -105,7 +105,7 @@ It publishes only on the topics of its own probe AppId
 
 host reads the storages of RIG 4.1 below a root directory and measures the
 platform host it runs on; it judges the host tests of the D8 catalog
-(T8-HST-01, 02, 04) at level 3: the Message Bus storage (broker.pem,
+(T8-HST-01 … 04) at level 3: the Message Bus storage (broker.pem,
 broker.json against platform/broker.schema.json, broker_ca.pem), the OI4
 certificate storage (ca.pem, <containername>.pem) and the secret storage
 (credentials, private_key.pem, passphrase), each mounted read-only (Linux
@@ -113,14 +113,18 @@ mount table), no private key outside the secret storage; architecture,
 main and non-volatile memory, network interface, Linux (the patch level is
 reported for a manual verdict), container daemon; it connects to the broker
 of broker.json with the login of the storages and waits for the OEC
-Registry. It never writes and never prints a secret. Run it inside the
-application container, or on the host with --root pointing to the files of
-the container (mounts are then not judged).
+Registry; through the Engine API, no other container reaches the secret
+storage or – with a persistent layer – the application storages
+(/etc/oi4/app, /opt/oi4/app) of an OI4 container. It never writes and
+never prints a secret. Run it inside the application container, or on the
+host with --root pointing to the files of the container (mounts are then
+not judged).
   storages:   --root DIR (default /), --mqtt-storage DIR, --certs-storage DIR,
               --secrets-storage DIR, --container NAME (default
               ROOT/etc/hostname), --config FILE (YAML, keys = flag names)
   platform:   --daemon ENDPOINT (default DOCKER_HOST, CONTAINER_HOST, the
-              default sockets), --offline (no Message Bus),
+              default sockets), --self CONTAINER (the container D8 runs
+              in; T8-HST-03 ignores it), --offline (no Message Bus),
               --registry-wait D (default 65s), --timeout D (default 5s)
   verdict:    --tests IDS, --allow-skip
   output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
