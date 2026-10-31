@@ -100,6 +100,9 @@ var busIndex []byte
 //go:embed testdata/hosts/index.yaml
 var hostIndex []byte
 
+//go:embed testdata/containers/index.yaml
+var containerIndex []byte
+
 // Expect is the expected verdict of one test in a fixture: the outcome and
 // the requirements with this outcome.
 type Expect struct {
@@ -112,13 +115,13 @@ type Expect struct {
 
 // Fixture is one entry of a fixture index.
 type Fixture struct {
-	Kind     string            `yaml:"-"` // sim | capture | image | bus | host
+	Kind     string            `yaml:"-"` // sim | capture | image | bus | host | container
 	Name     string            `yaml:"-"` // the fault (sim) or the file (capture)
 	Fault    string            `yaml:"fault"`
 	File     string            `yaml:"file"`
 	Status   string            `yaml:"status"`
 	Positive bool              `yaml:"positive"`
-	Tests    []string          `yaml:"tests"` // sim, bus, host: the selected tests (patterns); empty: every test
+	Tests    []string          `yaml:"tests"` // sim, bus, host, container: the selected tests (patterns); empty: every test
 	Peer     bool              `yaml:"peer"`
 	Announce bool              `yaml:"announce"`
 	Expect   map[string]Expect `yaml:"expect"`
@@ -238,6 +241,26 @@ func HostFixtures() ([]Fixture, error) {
 		f.Kind, f.Name = "host", f.Fault
 	}
 	return ix.Hosts, nil
+}
+
+// ContainerFixtures returns the entries of testdata/containers/index.yaml
+// (the Engine API scenarios of oec-infra container, C-073). Like
+// HostFixtures they are not part of Fixtures (A-248).
+func ContainerFixtures() ([]Fixture, error) {
+	var ix struct {
+		Containers []Fixture `yaml:"containers"`
+	}
+	if err := decode(containerIndex, &ix); err != nil {
+		return nil, fmt.Errorf("testdata/containers/index.yaml: %w", err)
+	}
+	for i := range ix.Containers {
+		f := &ix.Containers[i]
+		if f.Fault == "" || f.File != "" || f.Peer || f.Announce {
+			return nil, fmt.Errorf("testdata/containers/index.yaml: entry %d: a container fixture names a fault and no file", i+1)
+		}
+		f.Kind, f.Name = "container", f.Fault
+	}
+	return ix.Containers, nil
 }
 
 // Fixtures returns the sim fixtures followed by the capture fixtures.

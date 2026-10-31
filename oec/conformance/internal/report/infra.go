@@ -17,25 +17,26 @@ const InfraVersion = 1
 // Infra is the report of oec-infra (D8, DESIGN.md §9): the inspected input
 // and one verdict per catalog test of the mode.
 type Infra struct {
-	Report   int                     `json:"report"` // InfraVersion
-	Tool     string                  `json:"tool"`
-	Version  string                  `json:"version"`
-	Schemas  string                  `json:"schemas"`
-	Baseline string                  `json:"baseline"`
-	Catalog  string                  `json:"catalog"`
-	Command  []string                `json:"command"`
-	Mode     string                  `json:"mode"` // image | bus | host
-	Input    string                  `json:"input"`
-	Form     string                  `json:"form,omitempty"` // image: oci-layout | oci-archive
-	Level    int                     `json:"level"`
-	Started  time.Time               `json:"started"`
-	Ended    time.Time               `json:"ended"`
-	Image    *Image                  `json:"image,omitempty"`
-	Broker   *Broker                 `json:"broker,omitempty"`
-	Host     *Host                   `json:"host,omitempty"`
-	Tests    []verdict.TestResult    `json:"tests"`
-	Summary  map[verdict.Outcome]int `json:"summary"`
-	Exit     int                     `json:"exit"`
+	Report    int                     `json:"report"` // InfraVersion
+	Tool      string                  `json:"tool"`
+	Version   string                  `json:"version"`
+	Schemas   string                  `json:"schemas"`
+	Baseline  string                  `json:"baseline"`
+	Catalog   string                  `json:"catalog"`
+	Command   []string                `json:"command"`
+	Mode      string                  `json:"mode"` // image | bus | host | container
+	Input     string                  `json:"input"`
+	Form      string                  `json:"form,omitempty"` // image: oci-layout | oci-archive
+	Level     int                     `json:"level"`
+	Started   time.Time               `json:"started"`
+	Ended     time.Time               `json:"ended"`
+	Image     *Image                  `json:"image,omitempty"`
+	Broker    *Broker                 `json:"broker,omitempty"`
+	Host      *Host                   `json:"host,omitempty"`
+	Container *ContainerRun           `json:"container,omitempty"`
+	Tests     []verdict.TestResult    `json:"tests"`
+	Summary   map[verdict.Outcome]int `json:"summary"`
+	Exit      int                     `json:"exit"`
 }
 
 // Image is what oec-infra image found in the layout.
@@ -84,6 +85,52 @@ type Host struct {
 	Container string    `json:"container,omitempty"`
 	Storages  []Storage `json:"storages"`
 	Platform  *Platform `json:"platform,omitempty"`
+	// Engine and Containers: T8-HST-03 (C-073), the OI4 containers of the
+	// engine except the one D8 runs in.
+	Engine     *Engine     `json:"engine,omitempty"`
+	Containers []Container `json:"containers,omitempty"`
+}
+
+// ContainerRun is what oec-infra container read through the Engine API
+// (C-073): no environment, no label, no address and no mount source.
+type ContainerRun struct {
+	Engine     Engine      `json:"engine"`
+	Containers []Container `json:"containers"`
+}
+
+// Engine is a Docker or Podman Engine API.
+type Engine struct {
+	Endpoint string `json:"endpoint"`
+	Product  string `json:"product,omitempty"`
+	Version  string `json:"version,omitempty"`
+	API      string `json:"api,omitempty"`
+	OS       string `json:"os,omitempty"`
+	Arch     string `json:"arch,omitempty"`
+}
+
+// Container is one inspected container.
+type Container struct {
+	ID          string           `json:"id,omitempty"` // short id
+	Name        string           `json:"name"`
+	Hostname    string           `json:"hostname,omitempty"`
+	Image       string           `json:"image,omitempty"`
+	Running     bool             `json:"running"`
+	NetworkMode string           `json:"network_mode,omitempty"`
+	Networks    []Network        `json:"networks,omitempty"`
+	Mounts      []ContainerMount `json:"mounts"`
+}
+
+// Network is a network a container is attached to.
+type Network struct {
+	Name   string `json:"name"`
+	Driver string `json:"driver,omitempty"`
+}
+
+// ContainerMount is a mount of a container without its source.
+type ContainerMount struct {
+	Destination string `json:"destination"`
+	Type        string `json:"type"`
+	Mode        string `json:"mode"` // ro | rw
 }
 
 // Storage is one container storage of RIG 4.1.
@@ -155,6 +202,12 @@ func (r *Infra) Text(w io.Writer) error {
 	}
 	if h := r.Host; h != nil {
 		writeHost(&b, h)
+	}
+	if c := r.Container; c != nil {
+		writeEngine(&b, &c.Engine)
+		for _, ct := range c.Containers {
+			writeContainer(&b, ct)
+		}
 	}
 	if im := r.Image; im != nil {
 		kind := "image manifest"
@@ -237,6 +290,58 @@ func writeHost(b *strings.Builder, h *Host) {
 	}
 	if p.Registry != "" {
 		fmt.Fprintf(b, "OEC Registry %s\n", p.Registry)
+	}
+	if h.Engine != nil {
+		writeEngine(b, h.Engine)
+	}
+	for _, c := range h.Containers {
+		writeContainer(b, c)
+	}
+}
+
+func writeEngine(b *strings.Builder, e *Engine) {
+	fmt.Fprintf(b, "engine %s", e.Endpoint)
+	if e.Product != "" {
+		fmt.Fprintf(b, ": %s %s (API %s, %s/%s)", e.Product, e.Version, e.API, e.OS, e.Arch)
+	}
+	b.WriteString("\n")
+}
+
+func writeContainer(b *strings.Builder, c Container) {
+	fmt.Fprintf(b, "container %s", c.Name)
+	var at []string
+	if c.ID != "" {
+		at = append(at, c.ID)
+	}
+	if c.Image != "" {
+		at = append(at, c.Image)
+	}
+	if !c.Running {
+		at = append(at, "not running")
+	}
+	if len(at) > 0 {
+		fmt.Fprintf(b, " (%s)", strings.Join(at, ", "))
+	}
+	b.WriteString("\n")
+	if c.Hostname != "" {
+		fmt.Fprintf(b, "  hostname %s\n", c.Hostname)
+	}
+	if c.NetworkMode != "" {
+		nets := make([]string, len(c.Networks))
+		for i, n := range c.Networks {
+			nets[i] = n.Name
+			if n.Driver != "" {
+				nets[i] += " (" + n.Driver + ")"
+			}
+		}
+		fmt.Fprintf(b, "  network mode %s", c.NetworkMode)
+		if len(nets) > 0 {
+			fmt.Fprintf(b, ", networks %s", strings.Join(nets, ", "))
+		}
+		b.WriteString("\n")
+	}
+	for _, m := range c.Mounts {
+		fmt.Fprintf(b, "  mount %s %s %s\n", m.Destination, m.Type, m.Mode)
 	}
 }
 

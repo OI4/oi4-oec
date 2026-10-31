@@ -134,11 +134,13 @@ type Evidence struct {
 	Line        int    `json:"line,omitempty"` // line of the capture (1-based)
 	Topic       string `json:"topic,omitempty"`
 	Pointer     string `json:"pointer,omitempty"`
-	// Image and Path locate D8 image findings: the platform image and the
-	// layout location or file path (oec-infra; D7 does not set them).
-	Image  string `json:"image,omitempty"`
-	Path   string `json:"path,omitempty"`
-	Detail string `json:"detail"`
+	// Image, Container and Path locate D8 findings: the platform image,
+	// the container (C-073) and the layout location or file path
+	// (oec-infra; D7 does not set them).
+	Image     string `json:"image,omitempty"`
+	Container string `json:"container,omitempty"`
+	Path      string `json:"path,omitempty"`
+	Detail    string `json:"detail"`
 }
 
 // Observation is one result of a rule for one requirement.

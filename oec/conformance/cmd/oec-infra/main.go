@@ -9,14 +9,18 @@
 // command host reads the storages of RIG 4.1 below a root directory and
 // measures the platform host it runs on (T8-HST-01, 02, 04): Message Bus
 // storage and broker.json, certificate and secret storages, hardware,
-// Linux, container daemon, Message Bus and Registry. report-schema prints
+// Linux, container daemon, Message Bus and Registry. The command container
+// reads containers through the Docker/Podman Engine API and judges the tests
+// of mode container (T8-CTR-01 … 03): networks, container name and
+// hostname, no host mount on /opt/oi4/licenses. report-schema prints
 // the JSON Schema of the report (infra-report.schema.json, report version
 // 1).
 //
 // Exit codes (DESIGN.md §5.3): 0 pass (warnings allowed), 1 at least one
 // requirement violated, 2 usage or input error (also: the input is no OCI
-// image layout), 3 internal error, 4 inconclusive (a mandatory requirement
-// could not be judged; --allow-skip turns it into 0).
+// image layout, the engine knows no such container), 3 internal error, 4
+// inconclusive (a mandatory requirement could not be judged; --allow-skip
+// turns it into 0).
 package main
 
 import (
@@ -61,6 +65,7 @@ const usage = `usage:
   oec-infra image [flags] OCI-LAYOUT-DIR | OCI-ARCHIVE.tar
   oec-infra bus [flags]
   oec-infra host [flags]
+  oec-infra container [flags] CONTAINER...
   oec-infra report-schema
   oec-infra version
 
@@ -120,10 +125,24 @@ the container (mounts are then not judged).
   verdict:    --tests IDS, --allow-skip
   output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
 
+container reads one or more containers (name, id or unique id prefix)
+through the Docker/Podman Engine API and judges the container tests of the
+D8 catalog (T8-CTR-01 … 03): the network mode and the drivers of the
+attached networks (a bridge network, RIG 4.4), the container name (at most
+63 characters, RFC 1123, unique, <DefaultContainerName>-<uuid>) set as
+hostname, and no bind mount or tmpfs of the host on /opt/oi4/licenses. It
+only reads (GET) and never reports the environment, labels or mount
+sources of a container. An unknown container is a usage error.
+  engine:     --daemon ENDPOINT (default DOCKER_HOST, CONTAINER_HOST, the
+              default sockets), --timeout D (default 10s),
+              --config FILE (YAML, keys = flag names)
+  verdict:    --level 1|2|3 (default 3), --tests IDS, --allow-skip
+  output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
+
 report-schema prints the JSON Schema of the JSON report (report version 1).
 
-Exit codes: 0 pass, 1 fail, 2 usage or input error (no OCI image layout),
-3 internal error, 4 inconclusive.
+Exit codes: 0 pass, 1 fail, 2 usage or input error (no OCI image layout,
+no such container), 3 internal error, 4 inconclusive.
 `
 
 func run(args []string, stdout, stderr io.Writer) int {
@@ -138,6 +157,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runBus(args[1:], stdout, stderr)
 	case "host":
 		return runHost(args[1:], stdout, stderr)
+	case "container":
+		return runContainer(args[1:], stdout, stderr)
 	case "report-schema":
 		if len(args) > 1 {
 			fmt.Fprintf(stderr, "%s: report-schema takes no arguments\n", tool)

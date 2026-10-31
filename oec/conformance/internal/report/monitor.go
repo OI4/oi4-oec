@@ -90,6 +90,9 @@ func evidenceText(e verdict.Evidence) string {
 	if e.Image != "" {
 		at = append(at, e.Image)
 	}
+	if e.Container != "" {
+		at = append(at, e.Container)
+	}
 	if e.Path != "" {
 		at = append(at, e.Path)
 	}

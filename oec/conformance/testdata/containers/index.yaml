@@ -1,0 +1,259 @@
+# Engine API scenarios of `oec-infra container` (DESIGN.md §9, §10; C-073).
+#
+# Each fixture runs the container tests against the fake Engine API of
+# internal/engine/enginetest (no Docker daemon, no network). It serves the
+# inspect documents recorded from Docker Engine 28.4 (API 1.51, Docker
+# Desktop) in testdata/containers/engine; the setup of a fault is in
+# internal/container/fixtures_test.go (scenario). The engine knows four
+# recorded containers:
+#   - app: oec-rec-app-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40, hostname =
+#     container name, user-defined bridge network oec-rec-net, own named
+#     volumes on /etc/oi4/app and /opt/oi4/app, read-only binds on
+#     /run/secrets/oi4 and /etc/oi4/mqtt, a bind on /etc/oi4/certs, a tmpfs
+#     on /tmp, no mount on /opt/oi4/licenses;
+#   - host: oec_rec_host, host network (hostname of the Docker host),
+#     read-only bind on /opt/oi4/licenses, tmpfs on /etc/oi4/app, image
+#     mount on /opt/oi4/app;
+#   - stopped: oec-rec-stopped, created and never started, network none,
+#     the volume of app on /etc/oi4/app;
+#   - sidecar: oec-rec-sidecar, network mode container:<id of app>.
+# The conforming scenario ("none") judges app. Mount sources are sanitized
+# (/srv/oec/rec/…). Podman shapes (Podman version document, a name without
+# the leading slash, the network mode pasta) are synthetic: Podman was not
+# available for a recording (A-271).
+#
+# This index is test data with verdict (G-3.9): it states the expected
+# outcome of the container tests at level 3 and goes to the PO for review.
+#
+# fault:  the scenario ("none" = the conforming container)
+# tests:  the tests of the run (patterns); empty: every container test
+# expect: test → outcome, the requirements that have this outcome and the
+#         requirements with a manual verdict (they do not make the test
+#         worse than pass); the other requirements of the test have a
+#         better outcome or are not applicable. Every selected test not
+#         listed passes without a manual verdict.
+# status: draft | reviewed
+containers:
+  - fault: none
+    status: draft
+    positive: true
+    notes: >-
+      The recorded container app: bridge network, name
+      <DefaultContainerName>-<uuid> set as hostname, /opt/oi4/licenses from
+      the image.
+  - fault: recorded-host
+    status: draft
+    expect:
+      T8-CTR-01: {outcome: warn, reqs: [REQ-CMP-031, REQ-CNT-023]}
+      T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
+      T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
+    notes: >-
+      The recorded container host: host network (RIG 4.4 prefers a bridge
+      network, a recommendation also at level 3), the name oec_rec_host has
+      an underscore and is not the hostname, no -<uuid> (REQ-CNT-020 warn),
+      a bind mount of the host overlays /opt/oi4/licenses.
+
+  # --- T8-CTR-01 networks ----------------------------------------------------
+  - fault: T8-CTR-01/default-bridge
+    status: draft
+    positive: true
+    tests: [T8-CTR-01]
+    notes: >-
+      app on the default network bridge (network mode bridge, driver
+      bridge).
+  - fault: T8-CTR-01/sidecar
+    status: draft
+    positive: true
+    tests: [T8-CTR-01]
+    notes: >-
+      The recorded container sidecar shares the network of app (network
+      mode container:<id>); D8 judges the networks of app.
+  - fault: T8-CTR-01/host-network
+    status: draft
+    tests: [T8-CTR-01]
+    expect:
+      T8-CTR-01: {outcome: warn, reqs: [REQ-CMP-031, REQ-CNT-023]}
+    notes: >-
+      app on the host network. RIG 4.4 only prefers bridge networks
+      ("should"); the exception for low-level Ethernet communication is
+      judged manually. REQ-CMP-031 (L3 MUST) keeps the recommendation of
+      RIG 4.4, so the deviation is a warning at every level.
+  - fault: T8-CTR-01/sidecar-of-host
+    status: draft
+    tests: [T8-CTR-01]
+    expect:
+      T8-CTR-01: {outcome: warn, reqs: [REQ-CMP-031, REQ-CNT-023]}
+    notes: >-
+      sidecar shares the network of the container host, which is on the
+      host network.
+  - fault: T8-CTR-01/none
+    status: draft
+    tests: [T8-CTR-01]
+    expect:
+      T8-CTR-01: {outcome: info, reqs: [REQ-CMP-031, REQ-CNT-023]}
+    notes: >-
+      The recorded container stopped has no network (network mode none):
+      neither a bridge nor the host network, reported as a hint.
+  - fault: T8-CTR-01/macvlan
+    status: draft
+    tests: [T8-CTR-01]
+    expect:
+      T8-CTR-01: {outcome: info, reqs: [REQ-CMP-031, REQ-CNT-023]}
+    notes: >-
+      app on a network with the driver macvlan: RIG 4.4 compares only the
+      bridge and the host network, so another driver is a hint, not a
+      warning.
+  - fault: T8-CTR-01/pasta
+    status: draft
+    tests: [T8-CTR-01]
+    expect:
+      T8-CTR-01: {outcome: info, reqs: [REQ-CMP-031, REQ-CNT-023]}
+    notes: >-
+      Podman shape (synthetic): rootless network mode pasta, a user-mode
+      network that is neither a bridge nor the host network.
+  - fault: T8-CTR-01/network-gone
+    status: draft
+    tests: [T8-CTR-01]
+    expect:
+      T8-CTR-01: {outcome: skip, reqs: [REQ-CMP-031, REQ-CNT-023]}
+    notes: >-
+      The engine does not know the network app is attached to: the driver
+      cannot be read, inconclusive (REQ-CMP-031 is MUST at level 3).
+
+  # --- T8-CTR-02 name and hostname -------------------------------------------
+  - fault: T8-CTR-02/hostname-id
+    status: draft
+    tests: [T8-CTR-02]
+    expect:
+      T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
+    notes: >-
+      The hostname is the short container id (the default of Docker
+      without --hostname), not the container name.
+  - fault: T8-CTR-02/hostname-case
+    status: draft
+    tests: [T8-CTR-02]
+    expect:
+      T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
+    notes: >-
+      The hostname is the container name in upper case. RIG 4.2 makes the
+      container name available as hostname; the application uses it
+      verbatim (e.g. <containername>.pem, REQ-CNT-007), so D8 compares
+      exactly.
+  - fault: T8-CTR-02/underscore
+    status: draft
+    tests: [T8-CTR-02]
+    expect:
+      T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
+    notes: >-
+      oec_rec_app-<uuid> (set as hostname): an underscore breaks the host
+      name rules of RFC 1123 (letters, digits and hyphens only).
+  - fault: T8-CTR-02/too-long
+    status: draft
+    tests: [T8-CTR-02]
+    expect:
+      T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
+    notes: >-
+      A default container name of 27 characters with -<uuid>: 64
+      characters, more than 63 (REQ-CNT-020 warns about the default name
+      longer than 26).
+  - fault: T8-CTR-02/max-length
+    status: draft
+    positive: true
+    tests: [T8-CTR-02]
+    notes: >-
+      A default container name of 26 characters with -<uuid>: 63
+      characters, the limit.
+  - fault: T8-CTR-02/duplicate-case
+    status: draft
+    tests: [T8-CTR-02]
+    expect:
+      T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
+    notes: >-
+      Another container of the engine has the name of app in upper case;
+      Docker accepts it, but host names are case-insensitive, so the name
+      is not unique as a host name.
+  - fault: T8-CTR-02/no-uuid
+    status: draft
+    tests: [T8-CTR-02]
+    expect:
+      T8-CTR-02: {outcome: warn, reqs: [REQ-CNT-020]}
+    notes: >-
+      oec-rec-app (set as hostname): valid and unique, but without the
+      recommended -<uuid>.
+  - fault: T8-CTR-02/podman
+    status: draft
+    positive: true
+    tests: [T8-CTR-02]
+    notes: >-
+      Podman shape (synthetic): the version document of Podman 5 and an
+      inspect document whose name has no leading slash.
+
+  # --- T8-CTR-03 /opt/oi4/licenses -------------------------------------------
+  - fault: T8-CTR-03/bind
+    status: draft
+    tests: [T8-CTR-03]
+    expect:
+      T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
+    notes: >-
+      A read-only bind mount of a host directory on /opt/oi4/licenses.
+  - fault: T8-CTR-03/bind-parent
+    status: draft
+    tests: [T8-CTR-03]
+    expect:
+      T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
+    notes: >-
+      A bind mount of a host directory on /opt/oi4 covers
+      /opt/oi4/licenses.
+  - fault: T8-CTR-03/bind-below
+    status: draft
+    tests: [T8-CTR-03]
+    expect:
+      T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
+    notes: >-
+      A bind mount of a host file below /opt/oi4/licenses overlays a part
+      of the folder.
+  - fault: T8-CTR-03/tmpfs
+    status: draft
+    tests: [T8-CTR-03]
+    expect:
+      T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
+    notes: >-
+      A tmpfs on /opt/oi4/licenses (HostConfig.Tmpfs): the folder is empty,
+      its content does not come from the image.
+  - fault: T8-CTR-03/volume
+    status: draft
+    tests: [T8-CTR-03]
+    expect:
+      T8-CTR-03: {outcome: pass, manual: [REQ-CNT-017]}
+    notes: >-
+      A read-only named volume on /opt/oi4/licenses: allowed if the volume
+      is populated from the image (REQ-CNT-018); D8 cannot see where its
+      content comes from, judged manually.
+  - fault: T8-CTR-03/image-mount
+    status: draft
+    tests: [T8-CTR-03]
+    expect:
+      T8-CTR-03: {outcome: info, reqs: [REQ-CNT-017]}
+    notes: >-
+      An image mount on /opt/oi4/licenses: content of an image, not a
+      host-defined mount; reported as a hint.
+
+  # --- Engine API ------------------------------------------------------------
+  - fault: engine/unreachable
+    status: draft
+    expect:
+      T8-CTR-01: {outcome: skip, reqs: [REQ-CMP-031, REQ-CNT-023]}
+      T8-CTR-02: {outcome: skip, reqs: [REQ-CNT-019, REQ-CNT-020]}
+      T8-CTR-03: {outcome: skip, reqs: [REQ-CNT-017]}
+    notes: >-
+      --daemon names a socket that does not exist: no Engine API,
+      inconclusive.
+  - fault: engine/not-an-engine
+    status: draft
+    expect:
+      T8-CTR-01: {outcome: skip, reqs: [REQ-CMP-031, REQ-CNT-023]}
+      T8-CTR-02: {outcome: skip, reqs: [REQ-CNT-019, REQ-CNT-020]}
+      T8-CTR-03: {outcome: skip, reqs: [REQ-CNT-017]}
+    notes: >-
+      The endpoint answers, but GET /_ping is no Engine API (e.g. the
+      socket of containerd): inconclusive.

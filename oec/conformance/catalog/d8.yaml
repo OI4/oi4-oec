@@ -86,19 +86,31 @@ tests:
     level: 2
     needs: [docker]
     reqs: [REQ-CMP-031, REQ-CNT-023]
-    status: planned
+    status: implemented
+    notes: >-
+      The network mode and the driver of every attached network are read through the Engine API (network mode
+      container:<id>: the networks of that container). bridge passes; the host network is a warning (RIG 4.4 prefers a
+      bridge network; the exception for low-level Ethernet communication is judged manually); none, user-mode networks
+      (pasta, slirp4netns) and other drivers are hints.
   - id: T8-CTR-02
     title: Container name and hostname
     mode: container
     needs: [docker]
     reqs: [REQ-CNT-019, REQ-CNT-020]
-    status: planned
+    status: implemented
+    notes: >-
+      The container name is at most 63 characters, follows RFC 1123, equals the hostname exactly and is unique among
+      the containers of the engine (case-insensitive); other engines of the platform are not seen. REQ-CNT-020:
+      <DefaultContainerName>-<uuid> with a default name of at most 26 characters.
   - id: T8-CTR-03
     title: Licenses are not overlaid by a host mount
     mode: container
     needs: [docker]
     reqs: [REQ-CNT-017]
-    status: planned
+    status: implemented
+    notes: >-
+      The mounts of the container (including --tmpfs) on, above or below /opt/oi4/licenses: a bind mount or a tmpfs
+      fails, a volume is judged manually (allowed if populated from the image, REQ-CNT-018), an image mount is a hint.
 
   # --- host: platform host --------------------------------------------------
   - id: T8-HST-01

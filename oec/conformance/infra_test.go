@@ -127,7 +127,10 @@ const infraHost = `{
       "files": [{"name": "broker.json", "mode": "-r--r--r--", "size": 61}]},
       {"name": "secrets", "path": "/run/secrets/oi4", "exists": false, "mount": "none"}],
     "platform": {"os": "linux", "kernel": "6.6.31", "machine": "aarch64", "memory": 4000000000,
-      "storage": 32000000000, "interfaces": ["eth0"], "daemon": "unix:///var/run/docker.sock"}},
+      "storage": 32000000000, "interfaces": ["eth0"], "daemon": "unix:///var/run/docker.sock"},
+    "engine": {"endpoint": "unix:///var/run/docker.sock", "product": "Docker Engine - Community", "version": "28.4.0", "api": "1.51", "os": "linux", "arch": "arm64"},
+    "containers": [{"name": "oec-app", "running": true,
+      "mounts": [{"destination": "/etc/oi4/app", "type": "volume", "mode": "rw"}, {"destination": "/run/secrets/oi4", "type": "bind", "mode": "ro"}]}]},
   "tests": [{"id": "T8-HST-04", "title": "Platform host", "level": 1, "status": "implemented", "outcome": "pass",
     "reqs": [{"req": "REQ-PLT-003", "obligation": "MUST", "outcome": "manual",
       "evidence": [{"path": "/etc/os-release", "detail": "patch level: Debian 12"}]}]}],
@@ -151,9 +154,81 @@ func TestInfraHostReport(t *testing.T) {
 		"file content":    patch(t, infraHost, func(m map[string]any) { st(m)["files"].([]any)[0].(map[string]any)["content"] = "x" }),
 		"file mode":       patch(t, infraHost, func(m map[string]any) { st(m)["files"].([]any)[0].(map[string]any)["mode"] = "0644" }),
 		"platform secret": patch(t, infraHost, func(m map[string]any) { h(m)["platform"].(map[string]any)["password"] = "x" }),
+		"mount source": patch(t, infraHost, func(m map[string]any) {
+			h(m)["containers"].([]any)[0].(map[string]any)["mounts"].([]any)[0].(map[string]any)["source"] = "/srv"
+		}),
+		"engine endpoint": patch(t, infraHost, func(m map[string]any) { delete(h(m)["engine"].(map[string]any), "endpoint") }),
+		"container data":  patch(t, infraHost, func(m map[string]any) { m["container"] = map[string]any{} }),
 	} {
 		if err := ValidateInfraReport(bad); err == nil {
 			t.Errorf("%s: accepted", name)
+		}
+	}
+}
+
+// infraContainer is a valid oec-infra container report of version 1.
+const infraContainer = `{
+  "report": 1, "tool": "oec-infra", "version": "dev", "schemas": "2.0.1-dev", "baseline": "7427a4f",
+  "catalog": "7427a4f", "command": ["oec-infra", "container", "oec-app-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40"], "mode": "container",
+  "input": "oec-app-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40", "level": 3,
+  "started": "2026-10-31T10:00:00Z", "ended": "2026-10-31T10:00:01Z",
+  "container": {
+    "engine": {"endpoint": "unix:///var/run/docker.sock", "product": "Docker Engine - Community", "version": "28.4.0", "api": "1.51", "os": "linux", "arch": "amd64"},
+    "containers": [{"id": "b33a87362c17", "name": "oec-app-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40", "hostname": "oec-app-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40",
+      "image": "registry.example/oec-app:2.0.0", "running": true, "network_mode": "oec-net",
+      "networks": [{"name": "oec-net", "driver": "bridge"}],
+      "mounts": [{"destination": "/opt/oi4/licenses", "type": "bind", "mode": "ro"}]}]},
+  "tests": [{"id": "T8-CTR-03", "title": "Licenses are not overlaid by a host mount", "level": 1, "status": "implemented", "outcome": "fail",
+    "reqs": [{"req": "REQ-CNT-017", "obligation": "MUST NOT", "outcome": "fail",
+      "evidence": [{"container": "oec-app-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40", "path": "/opt/oi4/licenses", "detail": "bind mount of the host"}]}]}],
+  "summary": {"fail": 1}, "exit": 1
+}`
+
+func TestInfraContainerReport(t *testing.T) {
+	if err := ValidateInfraReport([]byte(infraContainer)); err != nil {
+		t.Fatal(err)
+	}
+	c := func(m map[string]any) map[string]any { return m["container"].(map[string]any) }
+	ct := func(m map[string]any) map[string]any { return c(m)["containers"].([]any)[0].(map[string]any) }
+	for name, bad := range map[string][]byte{
+		"no container":   patch(t, infraContainer, func(m map[string]any) { delete(m, "container") }),
+		"host":           patch(t, infraContainer, func(m map[string]any) { m["host"] = map[string]any{"root": "/", "storages": []any{}} }),
+		"form":           patch(t, infraContainer, func(m map[string]any) { m["form"] = "oci-layout" }),
+		"command":        patch(t, infraContainer, func(m map[string]any) { m["command"] = []any{"oec-infra", "host"} }),
+		"no engine":      patch(t, infraContainer, func(m map[string]any) { delete(c(m), "engine") }),
+		"no name":        patch(t, infraContainer, func(m map[string]any) { delete(ct(m), "name") }),
+		"environment":    patch(t, infraContainer, func(m map[string]any) { ct(m)["env"] = []any{"PASSWORD=x"} }),
+		"mount source":   patch(t, infraContainer, func(m map[string]any) { ct(m)["mounts"].([]any)[0].(map[string]any)["source"] = "/srv" }),
+		"mount mode":     patch(t, infraContainer, func(m map[string]any) { ct(m)["mounts"].([]any)[0].(map[string]any)["mode"] = "z" }),
+		"network secret": patch(t, infraContainer, func(m map[string]any) { ct(m)["networks"].([]any)[0].(map[string]any)["ip"] = "10.0.0.2" }),
+	} {
+		if err := ValidateInfraReport(bad); err == nil {
+			t.Errorf("%s: accepted", name)
+		}
+	}
+}
+
+func TestContainerFixtureIndex(t *testing.T) {
+	list, err := ContainerFixtures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) == 0 {
+		t.Fatal("no container fixture")
+	}
+	seen := map[string]bool{}
+	for _, f := range list {
+		if f.Kind != "container" || f.Fault == "" || f.File != "" || seen[f.Fault] || f.Status != "draft" && f.Status != "reviewed" {
+			t.Errorf("fixture %+v", f)
+		}
+		seen[f.Fault] = true
+		if len(f.Expect) == 0 && !f.Positive {
+			t.Errorf("%s: no expectation and not positive", f.Fault)
+		}
+		for id, e := range f.Expect {
+			if !strings.HasPrefix(id, "T8-CTR-") || e.Outcome == "" || f.Positive && e.Outcome != "pass" {
+				t.Errorf("%s: expect %s %+v", f.Fault, id, e)
+			}
 		}
 	}
 }
