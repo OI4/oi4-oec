@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 31.10.2026, C-074. **Für dich offen: D-1** (SF-117: Muss eine Anwendung beide Anmeldearten können?) **und R-1** (20 Testfälle für `oec-infra run`)._
+_Stand: 31.10.2026, C-074-Review Nachtrag 1. **Für dich offen: nichts** – „D-1 wie vorgeschlagen“ und „R-1 akzeptiert“ sind eingetragen; D-1 setze ich in Nachtrag 2 um._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,14 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – SF-117: Muss eine Anwendung beide Anmeldearten können? (RIG 4.1.3, du entscheidest)
+Nichts. Deine Antworten „D-1 wie vorgeschlagen“ und „R-1 akzeptiert“ sind eingetragen (C-074, Nachtrag 1).
+
+### Was aus deinem Review C-074 geworden ist (Kurzfassung)
+
+- **R-1 akzeptiert:** alle 20 Run-Testfälle stehen auf `reviewed`.
+- **D-1 wie vorgeschlagen:** Ich ergänze RIG 4.1.3 um den Satz, SF-117 ist dann erledigt. Danach ziehe ich die Anforderung REQ-CNT-009 nach und mache aus der Warnung in T8-RUN-02 einen Fehler. Die drei betroffenen Testfälle (`passphrase-raw`, `no-cert`, `no-credentials`) ändern ihr Ergebnis und kommen noch einmal zu dir (Nachtrag 2).
+
+### C-074 D-1 – SF-117: Muss eine Anwendung beide Anmeldearten können? (entschieden: wie vorgeschlagen)
 
 **Worum es geht:** Eine Anwendung meldet sich am Broker an – entweder mit **Benutzername und Passwort** (`credentials`) oder mit einem **Client-Zertifikat** (Zertifikat + verschlüsselter privater Schlüssel + Passphrase). RIG 4.1.3 sagt nur: Die **Plattform** muss **mindestens eine** der beiden Arten bereitstellen. MG 6.2.2 sagt: Hat der Client beide, nimmt er das Zertifikat.
 
@@ -39,9 +46,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 **Empfehlung:** wie vorgeschlagen – sonst weiß keine Plattform, welche Art sie bereitstellen muss, damit jede konforme Anwendung sich verbinden kann.
 
-**Antwort z. B.:** „D-1 wie vorgeschlagen“ oder „D-1: eine Art reicht“.
-
-### R-1 – 20 Testfälle für `oec-infra run` (bitte prüfen, G-3.9)
+### C-074 R-1 – 20 Testfälle für `oec-infra run` (akzeptiert)
 
 **Wie D8 prüft:** D8 startet das Image der Anwendung in bis zu drei Wegwerf-Containern. Jeder heißt `oec-d8-run-<uuid>`, und genauso heißt der Rechner im Container (Hostname). D8 erzeugt die Ordner, die die Plattform liefern müsste (Broker-Daten, Zertifikate, Geheimnisse), und betreibt einen **eigenen kleinen MQTT-Testpunkt** mit TLS. Der leitet nichts weiter; er schaut nur zu, wie sich die Anwendung verbindet und was sie schickt. Die drei Durchläufe:
 - **mit Passwort:** nur `credentials`; in `broker.json` steht ein Eintrag, den die Anwendung nicht kennt (muss sie ignorieren);
@@ -66,8 +71,6 @@ Alle Werte weichen absichtlich vom Üblichen ab (Port nicht 8883, Broker heißt 
 - Die drei **Warnungen**, die an D-1 hängen.
 
 Die ganze Tabelle steht im Log C-074 (Fixtures).
-
-**Antwort z. B.:** „R-1 akzeptiert“ oder Anmerkungen zu einzelnen Fällen.
 
 ### Zur Info: was C-074 gebaut hat
 

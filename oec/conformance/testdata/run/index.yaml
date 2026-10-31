@@ -48,7 +48,7 @@
 # status: draft | reviewed
 runs:
   - fault: good
-    status: draft
+    status: reviewed
     positive: true
     notes: >-
       Connects in every phase to the endpoint of broker.json, verifies the
@@ -58,7 +58,7 @@ runs:
 
   # --- T8-RUN-01 Message Bus storage -----------------------------------------
   - fault: strict-json
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
       T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
@@ -66,7 +66,7 @@ runs:
       Exits in the phase credentials because of the unknown element of
       broker.json; the credentials cannot be judged (no CONNECT).
   - fault: port-8883
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
       T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
@@ -75,7 +75,7 @@ runs:
       Never reaches the endpoint (it dials 8883 instead of SecurePort); no
       CONNECT in any phase.
   - fault: ca-only
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
       T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
@@ -84,19 +84,19 @@ runs:
       the handshake fails in the phase certificate, the certificate cannot
       be judged.
   - fault: no-verify
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
     notes: >-
       Accepts the certificate of the unknown CA in the phase untrusted.
   - fault: oversized
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
     notes: >-
       Publishes a payload of MaxPacketSize + 1 octets (262145).
   - fault: exit
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
       T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
@@ -104,7 +104,7 @@ runs:
     notes: >-
       The container exits at once with 1 in every phase: no connection.
   - fault: T8-RUN-01/ip-address
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-RUN-01]
     notes: >-
@@ -113,7 +113,7 @@ runs:
 
   # --- T8-RUN-02 certificate and secret storages ------------------------------
   - fault: last-colon
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
       T8-RUN-02: {outcome: fail, reqs: [REQ-CNT-009]}
@@ -121,7 +121,7 @@ runs:
       Splits the decoded credentials at the last ":" of the password: the
       endpoint refuses the username.
   - fault: passphrase-raw
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: warn, reqs: [REQ-CMP-029]}
       T8-RUN-02: {outcome: warn, reqs: [REQ-CNT-009]}
@@ -131,21 +131,21 @@ runs:
       (refused); it authenticates only with the credentials – a warning
       until SF-117 is decided.
   - fault: no-cert
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: warn, reqs: [REQ-CMP-029]}
       T8-RUN-02: {outcome: warn, reqs: [REQ-CNT-009]}
     notes: >-
       Supports only the credentials (SF-117).
   - fault: no-credentials
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: warn, reqs: [REQ-CMP-029]}
       T8-RUN-02: {outcome: warn, reqs: [REQ-CNT-009]}
     notes: >-
       Supports only the client certificate (SF-117).
   - fault: no-auth
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
       T8-RUN-02: {outcome: fail, reqs: [REQ-CNT-009]}
@@ -154,7 +154,7 @@ runs:
       Connects without credentials and without certificate in both phases
       (refused); no Birth message, so the SerialNumber cannot be judged.
   - fault: T8-RUN-02/only
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-RUN-02]
     notes: >-
@@ -163,7 +163,7 @@ runs:
 
   # --- T8-RUN-03 container name -----------------------------------------------
   - fault: uri-il
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: info, reqs: [REQ-CMP-029]}
       T8-RUN-03: {outcome: info, reqs: [REQ-CNT-021]}
@@ -171,13 +171,13 @@ runs:
       The Identification Link is a URI: the SerialNumber rule of
       REQ-CNT-021 does not apply (noted); the certificate name is checked.
   - fault: client-id-random
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-03: {outcome: warn, reqs: [REQ-MQTT-013]}
     notes: >-
       Connects with a random ClientId (REQ-MQTT-013 is a recommendation).
   - fault: serial-other
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
       T8-RUN-03: {outcome: fail, reqs: [REQ-CNT-021]}
@@ -187,7 +187,7 @@ runs:
 
   # --- environment -------------------------------------------------------------
   - fault: image/other-entrypoint
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029, REQ-CNT-004]}
       T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
@@ -196,7 +196,7 @@ runs:
       An image whose command is no OEC application (the fake exits with
       127 like a missing executable): no connection.
   - fault: engine/unreachable
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: skip, reqs: [REQ-CMP-029, REQ-CNT-004]}
       T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}
@@ -204,7 +204,7 @@ runs:
     notes: >-
       No Engine API at the endpoint: every test is inconclusive.
   - fault: engine/create-fails
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: skip, reqs: [REQ-CMP-029, REQ-CNT-004]}
       T8-RUN-02: {outcome: skip, reqs: [REQ-CNT-009]}

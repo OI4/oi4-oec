@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-31, C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
+_Last updated: 2026-10-31, C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"); D-1 is applied in addendum 2. Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -529,8 +529,8 @@ Logs: [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-e
 | A-278 | REQ-CNT-011 only with a persistent layer; missing app mount `manual`, tmpfs/image fail | info (agent) | C-073 | – | – |
 | A-279 | Dev broker fails REQ-CNT-019 in `container` mode – no OI4 container, no deviation | info (agent) | C-073 | – | – |
 | A-280 | Live test `TestContainerDev`; increment 5 not pulled forward | info (agent) | C-073 | – | – |
-| D-1 | SF-117: a containerized application supports both means of authentication (RIG 4.1.3) | decide (G-3.4 a) | C-074 | as proposed | ☐ |
-| R-1 | 20 run fixtures of `oec-infra run` (T8-RUN-01 … 03) | review (G-3.9) | C-074 | accept | ☐ |
+| D-1 | SF-117: a containerized application supports both means of authentication (RIG 4.1.3) | decide (G-3.4 a) | C-074 | as proposed | ☑ as proposed |
+| R-1 | 20 run fixtures of `oec-infra run` (T8-RUN-01 … 03) | review (G-3.9) | C-074 | accept | ☑ accepted |
 | A-281 | Engine API writes only for D8's own containers (prefix + label), no pull/volume/network/image call | info (agent) | C-074 | – | – |
 | A-282 | Local engine only (before any request), never pull | info (agent) | C-074 | – | – |
 | A-283 | Command `oec-infra run`, report key `run` without secrets, logs or host paths | info (agent) | C-074 | – | – |
@@ -545,30 +545,13 @@ Logs: [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-e
 
 ## Decisions and review items
 
-### D-1 – SF-117: must a containerized application support both means of authentication? (RIG 4.1.3, G-3.4 a)
-
-- **Where:** register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, SF-117 (`5ae22a0`); RIG 4.1.3 (secret storage, admonition "at least one means of authentication"), RIG 4.1.2, MG 6.2.2; REQ-CNT-009, REQ-MQTT-009, REQ-MQTT-010; D8 T8-RUN-02.
-- **Problem:** RIG 4.1.3 requires the *platform* to provide at least one means of authentication – the credentials, or the private key with the certificate of the application. MG 6.2.2 lets a client use either (with both: the client certificate). The guideline does not say which means the *application* must support. The platform chooses, so an application that supports only the credentials cannot connect to a platform that provides only a certificate (and the reverse) – although both are compliant on their own. D8 cannot decide whether an application that ignores one of the means violates REQ-CNT-009.
-- **Proposed interpretation:** the application supports both means and uses the means the platform provides (with both: the client certificate, MG 6.2.2). Proposed text for RIG 4.1.3, after the admonition: "The application shall support both means of authentication and shall use the means that the platform provides."
-- **Effect in the workspace:** `oec-infra run` runs the application once with only the credentials and once with only the client certificate. Today: fail REQ-CNT-009 if it authenticates in neither run, **warn** (message marked "SF-117") if only in one. Accepted: guideline text, re-baseline, REQ-CNT-009 follows (→ draft), the warning becomes a violation (test first); the fixtures `no-cert`, `no-credentials`, `passphrase-raw` change from warn to fail and go back to `draft`. Rejected (one means is enough): the warning becomes a note and these fixtures pass T8-RUN-02.
-- **Recommendation:** as proposed – otherwise the platform cannot know which means to provide so that every compliant application can connect.
-- **PO:** ☐ as proposed ☐ other: …
-
-### R-1 – run fixtures of `oec-infra run` (G-3.9)
-
-- **Where:** `oec/conformance/testdata/run/index.yaml` – 20 entries `draft`. Each fixture starts `oec-infra run` at level 3 against the fake Engine API; the fake starts the simulated application (`internal/run/simapp`) in process with one fault; the test compares per test the outcome and the exact REQ ids and checks that no container and no storage is left.
-- **What D8 generates:** three phases with one container `oec-d8-run-<uuid>` each – **credentials** (only `credentials`, broker certificate of CA A from `ca.pem`, `broker.json` with an unknown element), **certificate** (only client certificate, encrypted `private_key.pem`, base64 `passphrase`; broker certificate of CA B from `broker_ca.pem`) and **untrusted** (broker certificate of an unknown CA; the application must refuse). `SecurePort` is not 8883, the broker host is `oec-d8-broker`, the password contains `:`.
-- **Positive (conforming):** `good` (all three tests pass); `T8-RUN-01/ip-address` (`Address` is an IP address, IP SAN: T8-RUN-01 pass); `T8-RUN-02/only` (only T8-RUN-02 selected, no untrusted phase: pass).
-- **Negative (fault → expected outcome):**
-  - T8-RUN-01 (REQ-CMP-029, REQ-CNT-004): `strict-json` (refuses the unknown element), `port-8883` (ignores `SecurePort`), `ca-only` (ignores `broker_ca.pem`), `no-verify` (accepts the untrusted broker), `oversized` (publishes MaxPacketSize + 1 octets), `exit` (exits at once), `image/other-entrypoint` (no OEC application) → fail CMP-029 and CNT-004;
-  - T8-RUN-02 (REQ-CNT-009): `last-colon` (splits the credentials at the last `:`) and `no-auth` (ignores both means) → fail; `passphrase-raw` (passphrase not base64-decoded), `no-cert`, `no-credentials` → **warn (depends on D-1)**; REQ-CMP-029 repeats these outcomes in T8-RUN-01;
-  - T8-RUN-03 (REQ-CNT-021, REQ-MQTT-013): `serial-other` (SerialNumber `SN-0001`) → fail CNT-021; `client-id-random` → warn MQTT-013 (SHOULD); `uri-il` (a URI as Identification Link) → info CNT-021 (outcome `info`, no violation; the SerialNumber rule does not apply, the certificate name is checked);
-  - tests without anything to judge are inconclusive (skip): e.g. T8-RUN-02/03 when the application never connects; `engine/unreachable`, `engine/create-fails` → all three skip.
-- **Please check:** is each fault a real violation of the named REQ, and are the three positive fixtures compliant? In particular: `oversized` (a payload above MaxPacketSize fails CNT-004), `strict-json` (an unknown element of `broker.json` must be ignored, SF-100), the repetition in REQ-CMP-029, `client-id-random` (warn only, SHOULD), `uri-il` (note only), and the three warnings with D-1. The full table is in the C-074 log (Fixtures).
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
+No open item (D-1 of C-074 is being applied, addendum 2).
 
 ### Answered earlier
+
+Answered after C-074 (2026-10-31) and recorded in C-074 addendum 1:
+- D-1 – SF-117 (RIG 4.1.3: a containerized application supports both means of authentication and uses the means the platform provides): ☑ as proposed ("D-1 wie vorgeschlagen") → RIG 4.1.3 text, SF-117 resolved, re-baseline, REQ-CNT-009 follows; D8 T8-RUN-02: one means only becomes a violation of REQ-CNT-009 (addendum 2).
+- R-1 – 20 run fixtures of `oec-infra run` (`oec/conformance/testdata/run/index.yaml`): ☑ accepted ("R-1 akzeptiert") → `reviewed`.
 
 Answered after C-073 (2026-10-31) and applied in C-073 addendum 1:
 - R-1 – 26 container scenarios of `oec-infra container` (`oec/conformance/testdata/containers/index.yaml`) and 16 host scenarios (14 T8-HST-03, `none`, `T8-HST-02/certificate`; `testdata/hosts/index.yaml`): ☑ accepted ("R-1 akzeptiert") → `reviewed`; all 26 container and 69 host scenarios `reviewed`.
@@ -1370,5 +1353,5 @@ ADR-0025 amendment C-074; DESIGN §9 "As built (C-074)"; log C-074.
 
 ## Next (C-075)
 
-1. Your answers to **D-1** (SF-117) and **R-1** (20 run fixtures) are entered first; D-1 as proposed: guideline text RIG 4.1.3, re-baseline, T8-RUN-02 warning → violation, affected fixtures `draft` again.
+1. D-1 applied (C-074 addendum 2): guideline text RIG 4.1.3, re-baseline, T8-RUN-02 warning → violation, affected fixtures `draft` again (review item).
 2. C-075: P5b increment 6 – `oec-infra list`/`explain`, coverage report for D8, D8 report version 1 frozen, P5b exit check; in a new session (start prompt in `prompt.md`).

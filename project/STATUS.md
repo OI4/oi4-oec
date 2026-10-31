@@ -1,6 +1,6 @@
 # Status
 
-_Last updated: 2026-10-31, C-074 (**P5b increment 5 done: `oec-infra run`** – sandbox through the Engine API with generated storages, container name `oec-d8-run-<uuid>` as hostname and an own MQTT TLS test endpoint; the Engine API client writes only D8's own containers (A-281); T8-RUN-01 … 03 `implemented` – **17 of 17 D8 tests**; 20 run fixtures `draft` (**R-1**); **SF-117** open (**D-1**, RIG 4.1.3: which means of authentication an application must support); opt-in `TestRunDev` against Docker 28.4: 15 of 15 faults as in the self-test; no new dependency); before that C-073 review (addendum 1: PO accepted **R-1** – the 26 container scenarios and 16 host scenarios `reviewed`; no draft, nothing open); before that C-073 (**P5b increment 4 done: Engine API and `oec-infra container`** – own read-only Engine API client `internal/engine` (standard library; Unix socket, Windows named pipe, TCP) with the fake Engine API `enginetest`; `oec-infra container` with T8-CTR-01 … 03 and T8-HST-03 in `oec-infra host` `implemented` (14 of 17 D8 tests); opt-in `TestContainerDev` green; no SF, no new dependency)._
+_Last updated: 2026-10-31, C-074 review addendum 1 (PO: **D-1** – SF-117 – as proposed, **R-1** accepted – the 20 run fixtures `reviewed`; D-1 is applied in addendum 2); before that C-074 (**P5b increment 5 done: `oec-infra run`** – sandbox through the Engine API with generated storages, container name `oec-d8-run-<uuid>` as hostname and an own MQTT TLS test endpoint; the Engine API client writes only D8's own containers (A-281); T8-RUN-01 … 03 `implemented` – **17 of 17 D8 tests**; 20 run fixtures `draft` (**R-1**); **SF-117** open (**D-1**, RIG 4.1.3: which means of authentication an application must support); opt-in `TestRunDev` against Docker 28.4: 15 of 15 faults as in the self-test; no new dependency); before that C-073 review (addendum 1: PO accepted **R-1** – the 26 container scenarios and 16 host scenarios `reviewed`; no draft, nothing open); before that C-073 (**P5b increment 4 done: Engine API and `oec-infra container`** – own read-only Engine API client `internal/engine` (standard library; Unix socket, Windows named pipe, TCP) with the fake Engine API `enginetest`; `oec-infra container` with T8-CTR-01 … 03 and T8-HST-03 in `oec-infra host` `implemented` (14 of 17 D8 tests); opt-in `TestContainerDev` green; no SF, no new dependency)._
 
 ## Current phase
 
@@ -302,11 +302,13 @@ C-074 (2026-10-31, `log/2026-10-31_C-074_d8-run.md`): P5b increment 5 – `oec-i
 - **SF-117** (RIG 4.1.3, register `5ae22a0`, open → **D-1**): must an application support both means of authentication? Until decided T8-RUN-02 warns.
 - Opt-in `TestRunDev` (`live.sh`, Docker 28.4): 15 of 15 faults as against the fake; `runtest.Archive` gained a Docker `manifest.json` (classic image store). Nothing left behind. No new dependency. ADR-0025 amendment C-074, A-281 … A-291.
 
+C-074 review addendum 1 (2026-10-31, same log): PO decided D-1 (SF-117) as proposed and accepted R-1 – the 20 run fixtures are `reviewed`. D-1 follows in addendum 2 (RIG 4.1.3 text, re-baseline, REQ-CNT-009, T8-RUN-02 warning → violation).
+
 ## Next step
 
 PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** ✅ → **P2 JSON Schema** (+ D7 `validate`) ✅ → **P3 design** ✅ → P4/P4b/P5/P5b.
 
-1. **Open for the PO (C-074):** **R-1** – the 20 run fixtures of `oec/conformance/testdata/run/index.yaml`; **D-1** – SF-117 (RIG 4.1.3, both means of authentication). Answers are entered first (REVIEW/REVIEW_DE/STATUS, addendum in the C-074 log, own commit); D-1 as proposed: guideline text, re-baseline, T8-RUN-02 warning → violation (test first), affected fixtures `draft` again.
+1. **Apply D-1 of the C-074 review** (SF-117 as proposed, addendum 2): RIG 4.1.3 text, SF-117 resolved, re-baseline, REQ-CNT-009 follows (→ draft), T8-RUN-02 warning → violation (test first), affected fixtures `draft` again (review item).
 2. **C-075 – P5b increment 6** (new agent, start prompt in `prompt.md`, G-3.10): `oec-infra list`/`explain`, coverage report for D8 (`internal/explain`, `COVERAGE.md` beyond D7-only, A-248), freeze D8 report version 1, P5b exit check.
 
 3. Every cycle ends with `oec/check.sh` ("all checks passed"). Schema changes after 2.0.0 start a pre-release (`2.0.1-dev`/`2.1.0-dev`) with an `Unreleased` section in `oec/schema/CHANGELOG.md` (ADR-0019 amendment C-041).
@@ -340,7 +342,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- C-074: **R-1** (20 run fixtures `draft`) and **D-1** (SF-117, RIG 4.1.3) open for the PO; not blocking C-075 except the freeze of D8 report version 1 (T8-RUN-02 verdicts may change). A-281 … A-291 for information.
+- C-074 review: R-1 accepted (addendum 1: all 20 run fixtures `reviewed`), D-1 (SF-117) decided as proposed – being applied (addendum 2). A-281 … A-291 for information.
 - C-073 review: R-1 accepted (addendum 1: all 26 container and 69 host scenarios `reviewed`). No D-x, no SF, no draft. A-271 … A-280 for information.
 - C-072 review: R-1 accepted (addendum 1), D-1 (SF-116) decided as proposed and applied (addendum 2), R-2 accepted (addendum 3: REQ-PLT-001 and all 55 host scenarios `reviewed`). No REQ or vector draft. A-259 … A-270 for information.
 - C-071 review: R-1 accepted (addendum 1), D-1 (SF-115) decided as proposed and applied (addenda 2–3), R-2 accepted (addendum 4: REQ-MQTT-007 and all 29 broker scenarios `reviewed`). No REQ or vector draft. A-250 … A-258 for information.
@@ -461,3 +463,4 @@ ADR-0001 source of truth · ADR-0002 languages · ADR-0003 JSON Schema 2020-12 �
 | C-073 | 2026-10-31 | P5b increment 4: own read-only Engine API client `internal/engine` + fake `enginetest` (recordings from Docker 28.4), `oec-infra container` (T8-CTR-01 … 03), T8-HST-03 in `host` (`--self`), report key `container` (additive); 26 container + 16 host scenarios `draft` (R-1); opt-in `TestContainerDev`; no SF, no new dependency | `log/2026-10-31_C-073_d8-engine-container.md` |
 | C-073 review | 2026-10-31 | PO: R-1 accepted – the 26 container scenarios and 16 host scenarios `reviewed`; nothing open | `log/2026-10-31_C-073_d8-engine-container.md` (addendum 1) |
 | C-074 | 2026-10-31 | P5b increment 5: `oec-infra run` – Engine API writes for own containers only (A-281), `internal/run` (3 phases, generated storages, `oec-d8-run-<uuid>`, own MQTT TLS test endpoint), T8-RUN-01 … 03 `implemented` (D8 17 of 17), report key `run` (additive); 20 run fixtures `draft` (R-1); SF-117 (D-1); opt-in `TestRunDev` 15/15; no new dependency; ADR-0025 amendment C-074, A-281 … A-291 | `log/2026-10-31_C-074_d8-run.md` |
+| C-074 review | 2026-10-31 | PO: D-1 (SF-117) as proposed, R-1 accepted – the 20 run fixtures `reviewed`; D-1 applied in addendum 2 | `log/2026-10-31_C-074_d8-run.md` (addendum 1) |
