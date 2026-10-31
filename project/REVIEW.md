@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-30, C-072 (P5b increment 3: `oec-infra host`). Open for you: **D-1** (SF-116, RIG 5.1 memory sizes) and **R-1** (55 host scenarios). A-259 … A-270 for information._
+_Last updated: 2026-10-31, C-072 review (addendum 1): you accepted **D-1** (SF-116 as proposed) and **R-1** (55 host scenarios `reviewed`); D-1 is applied in addendum 2. A-259 … A-270 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -215,6 +215,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **Opt-in runs** (now in `live.sh`): both sample roots of `oec/dev` on this Mac and in a Linux container next to the dev broker: T8-HST-01/02 pass; T8-HST-04 fails for REQ-PLT-008 (no OEC Registry before P7) and, on macOS, REQ-PLT-003 (not Linux). No deviation in `oec/dev`.
   - A pre-existing defect fixed: `oec-check`/`oec-infra` did not compile for 32-bit ARM (ARMv7), A-269.
   - No new dependency, no reviewed item changed, `COVERAGE.md` unchanged, D7 gate unchanged. Increment 4 (Engine API) not pulled forward. A-259 … A-270 for information.
+- C-072 review (log addendum 1): you accepted **D-1** and **R-1** ("D-1 und R-1 reviewed und akzeptiert"). The 55 host scenarios are `reviewed`; SF-116 is decided as proposed and applied in addendum 2 (RIG 5.1 text, re-baseline, D8 messages).
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `b955783` (re-baseline, no content change).
 
@@ -497,40 +498,13 @@ Logs: [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-
 
 ## Decisions and review items
 
-### D-1 – SF-116: unit and reference of the memory sizes of RIG 5.1 (G-3.4 a)
-
-- **Where:** register `oi4-oec-documentation/findings/SPEC-FINDINGS.md`, SF-116 (`61e0b0f`); RIG 5.1 (minimum requirements on an OEC platform, hardware list); REQ-PLT-001; D8 T8-HST-04.
-- **Problem:** RIG 5.1 requires "a minimum of 1 GB RAM" and "a minimum of 4 GB non-volatile memory". It does not say (a) whether GB is 10^9 octets (SI) or 2^30 octets (GiB), and (b) whether the minimum is the nominal size of the installed memory (data sheet) or what the operating system can use. A board with 1 GiB of RAM shows Linux only about 0.9 · 10^9 octets (firmware, kernel, graphics), and a 4 GB flash medium has less than 4 · 10^9 octets of user area. Read as "usable", such a board fails; read as GiB, a board with 10^9 octets fails. A measuring tool cannot decide.
-- **Proposed interpretation:** GB = 10^9 octets; the minimum refers to the nominal size of the installed memory. Text addition in RIG 5.1: "The edge computer must provide a minimum of 1 GB RAM (nominal size of the installed memory; 1 GB = 10^9 octets)", the same for the 4 GB of non-volatile memory.
-- **Effect in the workspace:** D8 T8-HST-04 implements the proposal: at least 10^9 octets RAM and 4 · 10^9 octets of storage pass; below 768 MiB RAM or 3.5 · 10^9 octets fail; the band in between is `manual` (check against the data sheet; the message cites "SF-116"). The scenarios `ram-reserved`, `storage-nominal`, `ram-low` and `storage-low` depend on it. With the guideline change: re-baseline, a note on REQ-PLT-001, the messages cite RIG 5.1; another decision changes only the thresholds.
-- **Recommendation:** as proposed.
-- **PO:** ☐ as proposed ☐ other: …
-
-### R-1 – host scenarios of `oec-infra host` (G-3.9)
-
-- **Where:** `oec/conformance/testdata/hosts/index.yaml` – 55 entries `draft`; the setup of each fault is in `internal/host/fixtures_test.go` (roots generated at run time with the test PKI of `mqtttest`; nothing committed but the index).
-- **What they are:** `oec-infra host` at level 3 on a generated root and a fake host, compared per test with outcome and exact REQ ids, plus the REQs with a `manual` verdict. The conforming case (`none`): container name `oec-host-app`; `broker.pem` signed by the CA in `ca.pem`, `broker.json` valid; `credentials` in the secret storage; all three storages mounted read-only; Linux 6.1 x86_64, 2 GB RAM, 16 GB storage, `eth0` up, a container daemon; the broker accepts the login and runs a Registry. Every passing T8-HST-04 lists REQ-PLT-003 (patch level) as `manual`.
-- **Positive (conforming):** `none` (all host tests pass); `T8-HST-01/broker-ca` (broker certificate of another CA, given in `broker_ca.pem`); `T8-HST-02/certificate` (client certificate `oec-host-app.pem`, encrypted `private_key.pem` and `passphrase` instead of `credentials`); `T8-HST-02/unencrypted-key` (unencrypted key, no passphrase); `T8-HST-02/secret-files-mounted` (each secret file mounted on its own, as Docker does); `T8-HST-04/armv7`; `T8-HST-04/daemon-env` (daemon from `DOCKER_HOST`).
-- **Negative (fault → expected outcome):**
-  - T8-HST-01 fail REQ-CNT-001: `no-broker-pem`, `broker-pem-garbage`, `untrusted-broker` (not signed by the CA), `wrong-broker-ca` (`broker_ca.pem` does not sign it), `mqtt-rw` (mounted read-write), `mqtt-not-mounted` (no own mount while D8 runs in a container); with REQ-MQTT-003 too: `no-mqtt-storage`, `no-broker-json`;
-  - T8-HST-01 fail REQ-CNT-003 + REQ-MQTT-003: `not-json`, `address-with-port` (`"Address": "127.0.0.1:8883"`); REQ-CNT-003 alone: `broker-json-invalid` (MaxPacketSize 1024, below the minimum);
-  - T8-HST-01 info REQ-CNT-001 (notes only): `broker-ca-same` (`broker_ca.pem` equals the CA), `world-writable` (`broker.json` mode 0666 on a read-only mount), `broker-expired` (expiry is judged by T8-BUS-01);
-  - T8-HST-02 fail REQ-CNT-005 + 006: `no-certs-storage`, `no-ca`; REQ-CNT-005: `ca-not-ca` (`ca.pem` holds a client certificate); REQ-CNT-006: `certs-rw`; REQ-CNT-006 + 008: `key-without-cert`;
-  - T8-HST-02 fail REQ-CNT-008: `no-secrets`, `empty-secrets`, `extra-secret` (a file `token`), `bad-credentials` (no `:` password), `key-mismatch`, `no-passphrase` (encrypted key without passphrase), `wrong-passphrase`, `passphrase-unencrypted`, `secrets-rw`;
-  - T8-HST-02 fail REQ-MQTT-011: `username-reserved` (username `app/1`);
-  - T8-HST-02 warn REQ-CNT-002 (SHOULD): `key-in-mqtt`, `key-in-certs`; warn REQ-CNT-007 (SHOULD): `cert-misnamed` (`app.pem`);
-  - T8-HST-04 fail REQ-PLT-001: `arch-386`, `ram-low` (512 MiB), `storage-low` (2 · 10^9 octets), `no-network` (loopback only); fail REQ-PLT-003: `not-linux`; fail REQ-PLT-006: `no-daemon`, `daemon-stale` (connection refused); fail REQ-PLT-007: `no-broker`, `wrong-credentials`; fail REQ-PLT-008: `no-registry`;
-  - T8-HST-04 pass with REQ-PLT-001 `manual`: `ram-reserved` (950 · 10^6 octets visible), `storage-nominal` (3.9 · 10^9), `virtual-network` (only virtual interfaces, as in a container); pass with REQ-PLT-006 `manual`: `daemon-denied` (socket present, permission denied);
-  - T8-HST-04 skip (inconclusive): `unknown-facts` (REQ-PLT-001, 003 – no values from the OS), `offline` (REQ-PLT-007, 008 with `--offline`).
-- **Please check:** is each fault a real violation of the named REQ, and are the positives compliant? In particular:
-  - the manual bands (`ram-reserved`, `storage-nominal`, depending on D-1) and `virtual-network`;
-  - `no-registry` = fail (the platform must provide a Registry; `oec-infra bus` reports the same case as inconclusive because it checks the broker, not the platform);
-  - `mqtt-not-mounted`: a storage without its own mount fails only when D8 runs inside a container; on a plain directory and on macOS/Windows the mounts are not judged (A-262);
-  - the three `info` notes and the SHOULD warnings.
-- **If accepted:** status `reviewed` in `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
+No open item.
 
 ### Answered earlier
+
+Answered in the C-072 review (2026-10-31) and applied in C-072 addenda 1–2:
+- D-1 – SF-116 (RIG 5.1: "1 GB RAM / 4 GB non-volatile memory" = 10^9 octets, nominal size of the installed memory): ☑ as proposed ("D-1 … reviewed und akzeptiert") → RIG 5.1 text, SF-116 resolved, re-baseline; D8 T8-HST-04 keeps the manual bands, its messages cite RIG 5.1.
+- R-1 – 55 host scenarios of `oec-infra host` (T8-HST-01, 02, 04, `oec/conformance/testdata/hosts/index.yaml`): ☑ accepted → `reviewed`.
 
 Answered after the C-071 review (2026-10-30) and applied in C-071 addendum 4:
 - R-2 – REQ-MQTT-007 and the broker scenarios `T8-BUS-01/wrong-host`, `/expired` after SF-115: ☑ accepted ("R-2 akzeptiert") → `reviewed`; all 29 broker scenarios `reviewed`.

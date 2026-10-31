@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 30.10.2026, C-072 (P5b Inkrement 3: `oec-infra host`). **Für dich offen: D-1** (SF-116, Speichergrößen in RIG 5.1) **und R-1** (55 Prüfszenarien)._
+_Stand: 31.10.2026, C-072 Review (Addendum 1). **Für dich offen: nichts** – D-1 (SF-116) und R-1 (55 Prüfszenarien) akzeptiert; D-1 wird gerade umgesetzt (danach kommt R-2)._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,33 +24,15 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Zwei Punkte aus C-072: **D-1** (eine Entscheidung zur Guideline) und **R-1** (Testdaten prüfen).
+Nichts. Deine Antwort „D-1 und R-1 reviewed und akzeptiert“ ist eingetragen (C-072, Addendum 1).
 
-### D-1 – SF-116: Was heißt „1 GB RAM“ und „4 GB Speicher“ in RIG 5.1?
+### Was aus deinem Review C-072 geworden ist (Kurzfassung)
 
-- **Worum geht es?** RIG 5.1 verlangt vom Edge-Rechner „mindestens 1 GB RAM“ und „mindestens 4 GB nichtflüchtigen Speicher“. Offen bleibt zweierlei:
-  - (a) Ist 1 GB = 1.000.000.000 Byte (SI) oder 1.073.741.824 Byte (GiB)?
-  - (b) Zählt die **eingebaute** Größe laut Datenblatt oder das, was das Betriebssystem **sieht**?
-- **Warum ist das wichtig?** Ein Board mit 1 GiB RAM zeigt Linux nur etwa 0,9 · 10^9 Byte, weil Firmware, Kernel und Grafik sich vorher etwas nehmen. Eine 4-GB-Speicherkarte hat weniger als 4 · 10^9 Byte Nutzfläche. Liest man „sichtbar“, fällt so ein Board durch; liest man GiB, fällt ein Board mit genau 10^9 Byte durch. Ein Prüfwerkzeug kann das nicht entscheiden.
-- **Vorschlag:** 1 GB = 10^9 Byte, und gemeint ist die **eingebaute** Größe (Datenblatt). Ergänzung in RIG 5.1: „The edge computer must provide a minimum of 1 GB RAM (nominal size of the installed memory; 1 GB = 10^9 octets)“, genauso für die 4 GB.
-- **Was D8 bis zu deiner Entscheidung macht:** ab 10^9 Byte RAM und 4 · 10^9 Byte Speicher → bestanden; unter 768 MiB RAM bzw. 3,5 · 10^9 Byte → durchgefallen; dazwischen → „manuell“ (ein Mensch vergleicht mit dem Datenblatt; die Meldung nennt „SF-116“). Entscheidest du anders, ändern sich nur diese Grenzen.
-- **Empfehlung:** wie vorgeschlagen.
-
-### R-1 – 55 Prüfszenarien für `oec-infra host`
-
-- **Wo:** `oec/conformance/testdata/hosts/index.yaml`, alle `draft`. Die Beispiel-Rechner entstehen bei jedem Testlauf neu (in einem Temp-Ordner, mit Test-Zertifikaten); eingecheckt ist nur die Liste.
-- **Der gute Fall (`none`):** ein Container `oec-host-app` mit allen drei Storages schreibgeschützt eingehängt, Broker-Zertifikat von der richtigen CA, gültige `broker.json`, Zugangsdaten in `credentials`; der Rechner: Linux, x86_64, 2 GB RAM, 16 GB Speicher, Netzwerk `eth0` aktiv, Docker erreichbar, Broker nimmt die Anmeldung an, eine Registry läuft. Den Patch-Stand kann D8 nur berichten – er steht bei jedem bestandenen T8-HST-04 als „manuell“.
-- **Gute Varianten (7):** `none`; Broker-Zertifikat einer anderen CA, die in `broker_ca.pem` liegt; Anmeldung mit Client-Zertifikat und verschlüsseltem Schlüssel samt `passphrase`; unverschlüsselter Schlüssel ohne Passphrase; jede Geheimnis-Datei einzeln eingehängt (so macht es Docker); ARMv7; Docker-Adresse aus `DOCKER_HOST`.
-- **Fehlerfälle (48), grob:**
-  - **Message-Bus-Storage (T8-HST-01):** fehlt, Broker-Zertifikat fehlt/kaputt/von fremder CA, `broker.json` fehlt, ist kein JSON, verletzt das Schema (MaxPacketSize 1024) oder hat einen Port in der Adresse, Storage beschreibbar oder (im Container) gar nicht eingehängt → durchgefallen. Nur Hinweise: `broker_ca.pem` gleich der CA, Datei für alle beschreibbar, Broker-Zertifikat abgelaufen (das bewertet `oec-infra bus`).
-  - **Zertifikats- und Geheimnis-Storage (T8-HST-02):** CA fehlt oder ist keine CA, Storage beschreibbar, Geheimnisse fehlen, eine fremde Datei `token`, kaputte `credentials`, Benutzername `app/1` (Schrägstrich nicht erlaubt), Schlüssel passt nicht zum Zertifikat, Passphrase fehlt/falsch/überflüssig, Schlüssel ohne Zertifikat → durchgefallen. Nur Warnungen („sollte“-Regeln): privater Schlüssel in einem anderen Storage, Zertifikat heißt nicht wie der Container.
-  - **Plattform (T8-HST-04):** 32-Bit-x86, 512 MiB RAM, 2 · 10^9 Byte Speicher, kein Netzwerk außer Loopback, kein Linux, kein Docker oder nur eine tote Socket-Datei, Broker nicht erreichbar oder Anmeldung falsch, **keine Registry** → durchgefallen. Bestanden mit „manuell“: 950 · 10^6 Byte RAM sichtbar, 3,9 · 10^9 Byte Speicher (beides hängt an D-1), nur virtuelle Netzwerkkarten (so sieht es ein Container), Docker da, aber keine Berechtigung. Übersprungen: Betriebssystem liefert keine Werte; `--offline`.
-- **Bitte besonders ansehen:**
-  - die „manuell“-Bänder (hängen an D-1) und „nur virtuelle Netzwerkkarten“;
-  - **keine Registry = durchgefallen**: Die Plattform muss eine Registry mitbringen. `oec-infra bus` sagt im selben Fall nur „übersprungen“, weil es den Broker prüft und nicht die Plattform;
-  - **nicht eingehängter Storage:** fällt nur durch, wenn D8 in einem Container läuft. Auf einem normalen Ordner und unter macOS/Windows bewertet D8 das Einhängen nicht (A-262);
-  - die drei Hinweise und die Warnungen.
-- **Wenn ok:** „R-1 akzeptiert“ → alle 55 auf `reviewed`.
+- **R-1 akzeptiert:** alle 55 Prüfszenarien für `oec-infra host` stehen auf `reviewed`.
+- **D-1 (SF-116) wie vorgeschlagen:** In RIG 5.1 heißt 1 GB = 10^9 Byte, und gemeint ist die **eingebaute** Größe laut Datenblatt. Das setze ich jetzt um (Addendum 2), genau wie bei SF-115:
+  - Text in RIG 5.1 ergänzen, SF-116 im Register auf „resolved“;
+  - Re-Baseline; die Anforderung REQ-PLT-001 folgt dem neuen Text und kommt dann noch einmal kurz zu dir (R-2);
+  - D8 behält die „manuell“-Bänder, die Meldungen nennen künftig RIG 5.1 statt „SF-116“. Die Szenarien `ram-reserved` und `storage-nominal` bekommen angepasste Notizen (Ergebnis unverändert) und kommen ebenfalls in R-2.
 
 ### Zur Info: was C-072 gebaut hat
 

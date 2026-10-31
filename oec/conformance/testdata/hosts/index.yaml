@@ -34,7 +34,7 @@
 # status: draft | reviewed
 hosts:
   - fault: none
-    status: draft
+    status: reviewed
     positive: true
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-003]}
@@ -44,7 +44,7 @@ hosts:
       Registry: every host test passes; the patch level (REQ-PLT-003) is
       reported for a manual verdict.
   - fault: T8-HST-01/broker-ca
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-HST-01, T8-HST-04]
     expect:
@@ -53,7 +53,7 @@ hosts:
       The broker certificate is signed by a CA other than ca.pem and
       broker_ca.pem holds that CA; T8-HST-04 connects with broker_ca.pem.
   - fault: T8-HST-01/no-mqtt-storage
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-001, REQ-MQTT-003]}
@@ -61,21 +61,21 @@ hosts:
       The Message Bus storage etc/oi4/mqtt does not exist: neither the
       storage nor the broker address is provided.
   - fault: T8-HST-01/no-broker-pem
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-001]}
     notes: >-
       broker.pem is missing.
   - fault: T8-HST-01/broker-pem-garbage
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-001]}
     notes: >-
       broker.pem holds no PEM certificate.
   - fault: T8-HST-01/no-broker-json
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-001, REQ-MQTT-003]}
@@ -83,14 +83,14 @@ hosts:
       broker.json is missing: the storage is incomplete and the broker
       address is not provided.
   - fault: T8-HST-01/not-json
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-003, REQ-MQTT-003]}
     notes: >-
       broker.json is no JSON document.
   - fault: T8-HST-01/broker-json-invalid
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-003]}
@@ -98,7 +98,7 @@ hosts:
       broker.json has MaxPacketSize 1024, below the minimum 262144
       (platform/broker.schema.json); the Address is fine.
   - fault: T8-HST-01/address-with-port
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-003, REQ-MQTT-003]}
@@ -106,7 +106,7 @@ hosts:
       The Address of broker.json is "127.0.0.1:8883" (the port belongs to
       SecurePort).
   - fault: T8-HST-01/untrusted-broker
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-001]}
@@ -114,14 +114,14 @@ hosts:
       broker.pem is signed by a CA other than ca.pem and there is no
       broker_ca.pem.
   - fault: T8-HST-01/wrong-broker-ca
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-001]}
     notes: >-
       broker_ca.pem holds a CA that did not sign broker.pem.
   - fault: T8-HST-01/broker-ca-same
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: info, reqs: [REQ-CNT-001]}
@@ -129,14 +129,14 @@ hosts:
       broker_ca.pem holds the CA of ca.pem, which RIG 4.1.1 provides only
       for a different CA: a note.
   - fault: T8-HST-01/mqtt-rw
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-001]}
     notes: >-
       The Message Bus storage is mounted read-write.
   - fault: T8-HST-01/mqtt-not-mounted
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: fail, reqs: [REQ-CNT-001]}
@@ -144,7 +144,7 @@ hosts:
       D8 runs in a container and the Message Bus storage is no mount point
       (the platform did not map a host path to it).
   - fault: T8-HST-01/world-writable
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: info, reqs: [REQ-CNT-001]}
@@ -152,7 +152,7 @@ hosts:
       broker.json is writable for every user (0666): a note; the read-only
       mount protects it in the container.
   - fault: T8-HST-01/broker-expired
-    status: draft
+    status: reviewed
     tests: [T8-HST-01]
     expect:
       T8-HST-01: {outcome: info, reqs: [REQ-CNT-001]}
@@ -160,7 +160,7 @@ hosts:
       The broker certificate is signed by ca.pem but expired: a note;
       T8-BUS-01 judges the validity (REQ-MQTT-007, MG 6.2.2).
   - fault: T8-HST-02/certificate
-    status: draft
+    status: reviewed
     positive: true
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-003]}
@@ -170,7 +170,7 @@ hosts:
       passphrase in the secret storage, no credentials; the broker requires
       a client certificate.
   - fault: T8-HST-02/unencrypted-key
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-HST-02]
     expect:
@@ -179,7 +179,7 @@ hosts:
       The certificate variant with an unencrypted private_key.pem and no
       passphrase.
   - fault: T8-HST-02/secret-files-mounted
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-HST-02]
     expect:
@@ -188,28 +188,28 @@ hosts:
       The files of the secret storage are mounted one by one (as Docker
       mounts secrets), the directory is no mount point.
   - fault: T8-HST-02/no-certs-storage
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-005, REQ-CNT-006]}
     notes: >-
       The OI4 certificate storage etc/oi4/certs does not exist.
   - fault: T8-HST-02/no-ca
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-005, REQ-CNT-006]}
     notes: >-
       ca.pem is missing.
   - fault: T8-HST-02/ca-not-ca
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-005]}
     notes: >-
       ca.pem holds a certificate that is no CA (the client certificate).
   - fault: T8-HST-02/key-in-mqtt
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: warn, reqs: [REQ-CNT-002]}
@@ -217,7 +217,7 @@ hosts:
       A PEM private key (extra.pem) lies in the Message Bus storage: SHOULD,
       warn.
   - fault: T8-HST-02/key-in-certs
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: warn, reqs: [REQ-CNT-002]}
@@ -225,7 +225,7 @@ hosts:
       A file named like a private key (oec-host-app.key) lies in the OI4
       certificate storage: SHOULD, warn.
   - fault: T8-HST-02/no-secrets
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
@@ -233,14 +233,14 @@ hosts:
       The secret storage run/secrets/oi4 does not exist: no means of
       authentication.
   - fault: T8-HST-02/empty-secrets
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
     notes: >-
       The secret storage is empty.
   - fault: T8-HST-02/extra-secret
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
@@ -248,21 +248,21 @@ hosts:
       The secret storage has a further file (token); further secrets are
       provided outside of it.
   - fault: T8-HST-02/bad-credentials
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
     notes: >-
       credentials is base64("app") without ":<password>".
   - fault: T8-HST-02/username-reserved
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-MQTT-011]}
     notes: >-
       The username of credentials is "app/1" ("/" is reserved).
   - fault: T8-HST-02/key-without-cert
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-006, REQ-CNT-008]}
@@ -270,7 +270,7 @@ hosts:
       The certificate variant without <container>.pem: the key has no
       certificate and there is no other means of authentication.
   - fault: T8-HST-02/cert-misnamed
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: warn, reqs: [REQ-CNT-007]}
@@ -278,49 +278,49 @@ hosts:
       The certificate of the application is app.pem, not <container>.pem:
       SHOULD, warn.
   - fault: T8-HST-02/key-mismatch
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
     notes: >-
       <container>.pem is a certificate of another key.
   - fault: T8-HST-02/no-passphrase
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
     notes: >-
       The certificate variant without the passphrase of the encrypted key.
   - fault: T8-HST-02/wrong-passphrase
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
     notes: >-
       The passphrase does not decrypt private_key.pem.
   - fault: T8-HST-02/passphrase-unencrypted
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
     notes: >-
       A passphrase for an unencrypted private_key.pem.
   - fault: T8-HST-02/secrets-rw
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-008]}
     notes: >-
       The secret storage is mounted read-write.
   - fault: T8-HST-02/certs-rw
-    status: draft
+    status: reviewed
     tests: [T8-HST-02]
     expect:
       T8-HST-02: {outcome: fail, reqs: [REQ-CNT-006]}
     notes: >-
       The OI4 certificate storage is mounted read-write.
   - fault: T8-HST-04/armv7
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-HST-04]
     expect:
@@ -328,7 +328,7 @@ hosts:
     notes: >-
       An ARMv7 host (armv7l).
   - fault: T8-HST-04/daemon-env
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-HST-04]
     expect:
@@ -337,21 +337,21 @@ hosts:
       DOCKER_HOST names the daemon (tcp://127.0.0.1:2375); the default
       socket does not exist.
   - fault: T8-HST-04/arch-386
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-001], manual: [REQ-PLT-003]}
     notes: >-
       An i686 host: none of ARMv7, ARMv8 and amd64.
   - fault: T8-HST-04/ram-low
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-001], manual: [REQ-PLT-003]}
     notes: >-
       512 MiB main memory.
   - fault: T8-HST-04/ram-reserved
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-001, REQ-PLT-003]}
@@ -359,14 +359,14 @@ hosts:
       950000000 octets main memory: less than 1 GB as the system shows it,
       within what firmware and kernel reserve (SF-116); manual.
   - fault: T8-HST-04/storage-low
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-001], manual: [REQ-PLT-003]}
     notes: >-
       2 GB non-volatile memory.
   - fault: T8-HST-04/storage-nominal
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-001, REQ-PLT-003]}
@@ -374,14 +374,14 @@ hosts:
       3900000000 octets non-volatile memory: a nominal 4 GB medium (SF-116);
       manual.
   - fault: T8-HST-04/no-network
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-001], manual: [REQ-PLT-003]}
     notes: >-
       No network interface besides loopback.
   - fault: T8-HST-04/virtual-network
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-001, REQ-PLT-003]}
@@ -389,21 +389,21 @@ hosts:
       Only a virtual interface is up (D8 in a container without --network
       host); manual.
   - fault: T8-HST-04/not-linux
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-003]}
     notes: >-
       The operating system is darwin.
   - fault: T8-HST-04/no-daemon
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-006], manual: [REQ-PLT-003]}
     notes: >-
       None of the default sockets of a container daemon exists.
   - fault: T8-HST-04/daemon-denied
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-003, REQ-PLT-006]}
@@ -411,7 +411,7 @@ hosts:
       The socket of the daemon exists, but D8 may not connect (permission
       denied); manual.
   - fault: T8-HST-04/daemon-stale
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-006], manual: [REQ-PLT-003]}
@@ -419,28 +419,28 @@ hosts:
       The socket of the daemon exists, but nothing answers (connection
       refused).
   - fault: T8-HST-04/no-broker
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-007], manual: [REQ-PLT-003]}
     notes: >-
       No broker listens on the address and port of broker.json.
   - fault: T8-HST-04/wrong-credentials
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-007], manual: [REQ-PLT-003]}
     notes: >-
       The broker rejects the credentials of the secret storage.
   - fault: T8-HST-04/no-registry
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: fail, reqs: [REQ-PLT-008], manual: [REQ-PLT-003]}
     notes: >-
       The broker runs without an OEC Registry.
   - fault: T8-HST-04/unknown-facts
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: skip, reqs: [REQ-PLT-001, REQ-PLT-003]}
@@ -448,7 +448,7 @@ hosts:
       D8 cannot measure the platform on this system (no OS, architecture,
       memory, storage, interfaces): inconclusive.
   - fault: T8-HST-04/offline
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: skip, reqs: [REQ-PLT-007, REQ-PLT-008], manual: [REQ-PLT-003]}
