@@ -214,3 +214,11 @@ C-074 – P5b increment 5: `oec-infra run` with T8-RUN-01 … 03.
 - Purpose-built test images (built at run time with `ocitest`, no registry).
 - A sandbox with generated storages, hostname and a D8 MQTT test endpoint (`mqtttest` broker), reusing `internal/engine` (read-only) plus the few write calls `run` needs (create, start, stop, remove of its own containers only – DESIGN §9).
 - `live-infra.sh` (opt-in).
+
+## Addendum 1 – PO review: R-1 (2026-10-31)
+
+PO answer (verbatim): "R-1 akzeptiert".
+
+- **R-1 accepted:** the 26 container scenarios of `oec/conformance/testdata/containers/index.yaml` (5 positive) and the 16 host scenarios of `oec/conformance/testdata/hosts/index.yaml` (14 T8-HST-03 scenarios, `none`, `T8-HST-02/certificate`) are `reviewed`. All 69 host and 26 container scenarios are `reviewed`; no draft, nothing open.
+- The notes of `none` and `T8-HST-02/certificate` say "re-reviewed in the C-073 review (R-1)" instead of "hence draft again"; expectations unchanged.
+- Updated: REVIEW (R-1 under "Answered earlier"), REVIEW_DE, STATUS (last updated, C-073 review block, Next step, open questions, history row), README/DESIGN/ADR-0025/ROADMAP (status of the scenarios). Gate: `oec/check.sh` "all checks passed".

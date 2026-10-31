@@ -35,14 +35,14 @@
 # status: draft | reviewed
 containers:
   - fault: none
-    status: draft
+    status: reviewed
     positive: true
     notes: >-
       The recorded container app: bridge network, name
       <DefaultContainerName>-<uuid> set as hostname, /opt/oi4/licenses from
       the image.
   - fault: recorded-host
-    status: draft
+    status: reviewed
     expect:
       T8-CTR-01: {outcome: warn, reqs: [REQ-CMP-031, REQ-CNT-023]}
       T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
@@ -55,21 +55,21 @@ containers:
 
   # --- T8-CTR-01 networks ----------------------------------------------------
   - fault: T8-CTR-01/default-bridge
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-CTR-01]
     notes: >-
       app on the default network bridge (network mode bridge, driver
       bridge).
   - fault: T8-CTR-01/sidecar
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-CTR-01]
     notes: >-
       The recorded container sidecar shares the network of app (network
       mode container:<id>); D8 judges the networks of app.
   - fault: T8-CTR-01/host-network
-    status: draft
+    status: reviewed
     tests: [T8-CTR-01]
     expect:
       T8-CTR-01: {outcome: warn, reqs: [REQ-CMP-031, REQ-CNT-023]}
@@ -79,7 +79,7 @@ containers:
       judged manually. REQ-CMP-031 (L3 MUST) keeps the recommendation of
       RIG 4.4, so the deviation is a warning at every level.
   - fault: T8-CTR-01/sidecar-of-host
-    status: draft
+    status: reviewed
     tests: [T8-CTR-01]
     expect:
       T8-CTR-01: {outcome: warn, reqs: [REQ-CMP-031, REQ-CNT-023]}
@@ -87,7 +87,7 @@ containers:
       sidecar shares the network of the container host, which is on the
       host network.
   - fault: T8-CTR-01/none
-    status: draft
+    status: reviewed
     tests: [T8-CTR-01]
     expect:
       T8-CTR-01: {outcome: info, reqs: [REQ-CMP-031, REQ-CNT-023]}
@@ -95,7 +95,7 @@ containers:
       The recorded container stopped has no network (network mode none):
       neither a bridge nor the host network, reported as a hint.
   - fault: T8-CTR-01/macvlan
-    status: draft
+    status: reviewed
     tests: [T8-CTR-01]
     expect:
       T8-CTR-01: {outcome: info, reqs: [REQ-CMP-031, REQ-CNT-023]}
@@ -104,7 +104,7 @@ containers:
       bridge and the host network, so another driver is a hint, not a
       warning.
   - fault: T8-CTR-01/pasta
-    status: draft
+    status: reviewed
     tests: [T8-CTR-01]
     expect:
       T8-CTR-01: {outcome: info, reqs: [REQ-CMP-031, REQ-CNT-023]}
@@ -112,7 +112,7 @@ containers:
       Podman shape (synthetic): rootless network mode pasta, a user-mode
       network that is neither a bridge nor the host network.
   - fault: T8-CTR-01/network-gone
-    status: draft
+    status: reviewed
     tests: [T8-CTR-01]
     expect:
       T8-CTR-01: {outcome: skip, reqs: [REQ-CMP-031, REQ-CNT-023]}
@@ -122,7 +122,7 @@ containers:
 
   # --- T8-CTR-02 name and hostname -------------------------------------------
   - fault: T8-CTR-02/hostname-id
-    status: draft
+    status: reviewed
     tests: [T8-CTR-02]
     expect:
       T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
@@ -130,7 +130,7 @@ containers:
       The hostname is the short container id (the default of Docker
       without --hostname), not the container name.
   - fault: T8-CTR-02/hostname-case
-    status: draft
+    status: reviewed
     tests: [T8-CTR-02]
     expect:
       T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
@@ -140,7 +140,7 @@ containers:
       verbatim (e.g. <containername>.pem, REQ-CNT-007), so D8 compares
       exactly.
   - fault: T8-CTR-02/underscore
-    status: draft
+    status: reviewed
     tests: [T8-CTR-02]
     expect:
       T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
@@ -148,7 +148,7 @@ containers:
       oec_rec_app-<uuid> (set as hostname): an underscore breaks the host
       name rules of RFC 1123 (letters, digits and hyphens only).
   - fault: T8-CTR-02/too-long
-    status: draft
+    status: reviewed
     tests: [T8-CTR-02]
     expect:
       T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
@@ -157,14 +157,14 @@ containers:
       characters, more than 63 (REQ-CNT-020 warns about the default name
       longer than 26).
   - fault: T8-CTR-02/max-length
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-CTR-02]
     notes: >-
       A default container name of 26 characters with -<uuid>: 63
       characters, the limit.
   - fault: T8-CTR-02/duplicate-case
-    status: draft
+    status: reviewed
     tests: [T8-CTR-02]
     expect:
       T8-CTR-02: {outcome: fail, reqs: [REQ-CNT-019]}
@@ -173,7 +173,7 @@ containers:
       Docker accepts it, but host names are case-insensitive, so the name
       is not unique as a host name.
   - fault: T8-CTR-02/no-uuid
-    status: draft
+    status: reviewed
     tests: [T8-CTR-02]
     expect:
       T8-CTR-02: {outcome: warn, reqs: [REQ-CNT-020]}
@@ -181,7 +181,7 @@ containers:
       oec-rec-app (set as hostname): valid and unique, but without the
       recommended -<uuid>.
   - fault: T8-CTR-02/podman
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-CTR-02]
     notes: >-
@@ -190,14 +190,14 @@ containers:
 
   # --- T8-CTR-03 /opt/oi4/licenses -------------------------------------------
   - fault: T8-CTR-03/bind
-    status: draft
+    status: reviewed
     tests: [T8-CTR-03]
     expect:
       T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
     notes: >-
       A read-only bind mount of a host directory on /opt/oi4/licenses.
   - fault: T8-CTR-03/bind-parent
-    status: draft
+    status: reviewed
     tests: [T8-CTR-03]
     expect:
       T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
@@ -205,7 +205,7 @@ containers:
       A bind mount of a host directory on /opt/oi4 covers
       /opt/oi4/licenses.
   - fault: T8-CTR-03/bind-below
-    status: draft
+    status: reviewed
     tests: [T8-CTR-03]
     expect:
       T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
@@ -213,7 +213,7 @@ containers:
       A bind mount of a host file below /opt/oi4/licenses overlays a part
       of the folder.
   - fault: T8-CTR-03/tmpfs
-    status: draft
+    status: reviewed
     tests: [T8-CTR-03]
     expect:
       T8-CTR-03: {outcome: fail, reqs: [REQ-CNT-017]}
@@ -221,7 +221,7 @@ containers:
       A tmpfs on /opt/oi4/licenses (HostConfig.Tmpfs): the folder is empty,
       its content does not come from the image.
   - fault: T8-CTR-03/volume
-    status: draft
+    status: reviewed
     tests: [T8-CTR-03]
     expect:
       T8-CTR-03: {outcome: pass, manual: [REQ-CNT-017]}
@@ -230,7 +230,7 @@ containers:
       is populated from the image (REQ-CNT-018); D8 cannot see where its
       content comes from, judged manually.
   - fault: T8-CTR-03/image-mount
-    status: draft
+    status: reviewed
     tests: [T8-CTR-03]
     expect:
       T8-CTR-03: {outcome: info, reqs: [REQ-CNT-017]}
@@ -240,7 +240,7 @@ containers:
 
   # --- Engine API ------------------------------------------------------------
   - fault: engine/unreachable
-    status: draft
+    status: reviewed
     expect:
       T8-CTR-01: {outcome: skip, reqs: [REQ-CMP-031, REQ-CNT-023]}
       T8-CTR-02: {outcome: skip, reqs: [REQ-CNT-019, REQ-CNT-020]}
@@ -249,7 +249,7 @@ containers:
       --daemon names a socket that does not exist: no Engine API,
       inconclusive.
   - fault: engine/not-an-engine
-    status: draft
+    status: reviewed
     expect:
       T8-CTR-01: {outcome: skip, reqs: [REQ-CMP-031, REQ-CNT-023]}
       T8-CTR-02: {outcome: skip, reqs: [REQ-CNT-019, REQ-CNT-020]}

@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-31, C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03): **R-1** is open – 26 container scenarios and 16 host scenarios (14 new for T8-HST-03, plus `none` and `T8-HST-02/certificate`, which now also run T8-HST-03). No decision (no SF). A-271 … A-280 for information._
+_Last updated: 2026-10-31, C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Nothing is open. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -231,6 +231,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **Opt-in live run** (`live.sh`, new `TestContainerDev`): a conforming container next to the dev broker passes, a bad one (host network, `_` in the name, bind on the license folder, shared application volume) fails as expected; the dev broker fails REQ-CNT-019 (hostname `mosquitto`), which is no deviation – Mosquitto is no OI4 Alliance-compliant container (A-279).
   - No SF, no new dependency, D7 gate and `COVERAGE.md` unchanged. Increment 5 (`run`) not pulled forward. A-271 … A-280 for information.
   - Note: during the recording, `docker volume prune -f` ran on this Mac's Docker Desktop; it removes all unused anonymous volumes of the engine (see C-073 log, Risks).
+- C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert"); all 26 container scenarios and all 69 host scenarios are `reviewed`. No draft, no open finding. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `7427a4f` (re-baseline, no content change).
 
@@ -510,7 +511,7 @@ Logs: [C-073](log/2026-10-31_C-073_d8-engine-container.md), [C-072](log/2026-10-
 | A-268 | Self-test `hosttest`, 55 scenarios, report key `host` | info (agent) | C-072 | – | – |
 | A-269 | 32-bit build fix in `internal/probe` | info (agent) | C-072 | – | – |
 | A-270 | Live runs on the computer and in a Linux container | info (agent) | C-072 | – | – |
-| R-1 | 26 container scenarios of `oec-infra container`; 14 T8-HST-03 host scenarios, `none` and `T8-HST-02/certificate` again | review (G-3.9) | C-073 | accept | ☐ |
+| R-1 | 26 container scenarios of `oec-infra container`; 14 T8-HST-03 host scenarios, `none` and `T8-HST-02/certificate` again | review (G-3.9) | C-073 | accept | ☑ accepted |
 | A-271 | Own read-only Engine API client (standard library, Unix/npipe/TCP), recordings, Podman synthetic | info (agent) | C-073 | – | – |
 | A-272 | Command `oec-infra container`, report key `container` without sources, evidence `container` | info (agent) | C-073 | – | – |
 | A-273 | T8-CTR-01: host network warns (REQ-CMP-031 warning, REQ-CNT-023 SHOULD); other networks are notes | info (agent) | C-073 | – | – |
@@ -524,37 +525,12 @@ Logs: [C-073](log/2026-10-31_C-073_d8-engine-container.md), [C-072](log/2026-10-
 
 ## Decisions and review items
 
-### R-1 – container scenarios of `oec-infra container` and T8-HST-03 host scenarios (G-3.9)
-
-- **Where:** `oec/conformance/testdata/containers/index.yaml` – 26 new entries, all `draft`; `oec/conformance/testdata/hosts/index.yaml` – 14 new T8-HST-03 entries and the changed `none`, `T8-HST-02/certificate`, all `draft`. The scenarios run against the fake Engine API `enginetest`, which serves four containers recorded from Docker 28.4: `app` (conforming: user-defined bridge network, `oec-rec-app-<uuid>` = hostname, own volumes on `/etc/oi4/app` and `/opt/oi4/app`, read-only bind on `/run/secrets/oi4`, nothing on `/opt/oi4/licenses`), `host` (host network, name `oec_rec_host`, read-only bind on `/opt/oi4/licenses`, tmpfs on `/etc/oi4/app`, image mount on `/opt/oi4/app`), `stopped` (created, never started, network `none`, the volume of `app` on `/etc/oi4/app`) and `sidecar` (network mode `container:<app>`). Each scenario changes one aspect. Level 3; a test not listed passes.
-- **Requirements:** REQ-CMP-031 (MUST: RIG 4.4), REQ-CNT-023 (SHOULD: bridge rather than host network, unless low-level Ethernet), REQ-CNT-019 (MUST: name unique, ≤ 63 characters, RFC 1123, available as hostname), REQ-CNT-020 (SHOULD: `<DefaultContainerName>-<uuid>`, default name ≤ 26), REQ-CNT-017 (MUST NOT: no host-defined mount on `/opt/oi4/licenses`), REQ-CNT-018 (MAY: a read-only volume populated from the image), REQ-CNT-011 (MUST: with a persistent layer, a host-defined path on `/etc/oi4/app` and `/opt/oi4/app`, used by this container only), REQ-CNT-024 (MUST NOT: the secret storage of a container is not available to another).
-- **Container – positive (all tests pass):** `none` (`app`); `T8-CTR-01/default-bridge` (default network `bridge`); `T8-CTR-01/sidecar` (shares the network of `app`, D8 judges the networks of `app`); `T8-CTR-02/max-length` (default name of 26 characters + `-<uuid>` = 63); `T8-CTR-02/podman` (synthetic: Podman 5 version document, name without the leading `/`).
-- **Container – negative (fault → expected):**
-  - T8-CTR-01 (REQ-CMP-031, REQ-CNT-023): `host-network`, `sidecar-of-host` (shares the network of `host`) → **warn**; `none` (`stopped`), `macvlan`, `pasta` (synthetic Podman user-mode network) → **info**; `network-gone` (the engine does not know the network) → **skip**, inconclusive;
-  - T8-CTR-02: `hostname-id` (hostname = short container id, the Docker default), `hostname-case` (hostname = the name in upper case), `underscore` (`oec_rec_app-<uuid>`), `too-long` (27 + `-<uuid>` = 64), `duplicate-case` (another container has the name of `app` in upper case) → **fail** REQ-CNT-019; `no-uuid` (`oec-rec-app`) → **warn** REQ-CNT-020;
-  - T8-CTR-03 (REQ-CNT-017): `bind` (read-only bind on `/opt/oi4/licenses`), `bind-parent` (bind on `/opt/oi4`), `bind-below` (a host file below `/opt/oi4/licenses`), `tmpfs` → **fail**; `volume` (read-only named volume) → pass, REQ-CNT-017 **manual** (REQ-CNT-018); `image-mount` → **info**;
-  - `recorded-host` (the recorded container `host`): T8-CTR-01 **warn**, T8-CTR-02 **fail** REQ-CNT-019 (underscore, not the hostname), T8-CTR-03 **fail** REQ-CNT-017;
-  - `engine/unreachable` (`--daemon` names a socket that does not exist), `engine/not-an-engine` (`/_ping` is no Engine API) → every test **skip**, inconclusive.
-- **Host (T8-HST-03) – positive:** `two-apps` (`app`, `app2` and `sidecar`: own application volumes and secret storages; the Message Bus and OI4 certificate storages are shared, which RIG 4.1.1/4.1.2 allow) → pass; `self-excluded` (D8's container `oec-d8` mounts the secret and Message Bus storages of `app` read-only, `--self oec-d8`) → pass; `missing-app-storage` (`app` without a mount on `/opt/oi4/app`) → pass, REQ-CNT-011 **manual**.
-- **Host (T8-HST-03) – negative:**
-  - `shared-volume` (`app` and the recorded `stopped` mount the same volume on `/etc/oi4/app`; a stopped container counts), `volume-elsewhere` (a container without OI4 storages mounts the volume of `app`'s `/opt/oi4/app` on `/data`), `recorded-host` (next to `app`, `host` has a tmpfs and an image mount on the application storages – no host-defined path) → **fail** REQ-CNT-011;
-  - `shared-secrets` (`app2` mounts the secret storage of `app`), `backup-secrets` (a backup container mounts the host folder that contains `app`'s secret storage), `covering-secrets` (`app` mounts the host folder `run` on `/run/secrets`, `app2` mounts `run/app2` on `/run/secrets` – the secret storage of `app2` lies in `app`'s mount) → **fail** REQ-CNT-024;
-  - `d8-container` (`self-excluded` without `--self`) → **fail** REQ-CNT-024, REQ-CNT-011 **manual** (D8's container has no application storage);
-  - `no-persistence` (only `host` and `sidecar`: no bind or volume on an application storage, no secret storage) → **skip** (REQ-CNT-011 not applicable, nothing to check for REQ-CNT-024);
-  - `self-unknown` (`--self` names an unknown container), `inspect-fails` (the inspection of `app` returns an error), `engine-down` (`--daemon` names a TCP port without a listener) → **skip**, inconclusive.
-- **Changed reviewed scenarios:** since C-073 the host runs of `none` and `T8-HST-02/certificate` include T8-HST-03 against `app` and `sidecar` (pass); their expectations are unchanged.
-- **Please check:** is each fault a real violation of the named REQ, and are the positives compliant? In particular:
-  - the host network is a **warning** on the MUST REQ-CMP-031: the RIG 4.4 exception for low-level Ethernet cannot be seen (A-273);
-  - `none`, `macvlan` and `pasta` are only notes;
-  - `hostname-case` fails because the name is compared exactly, and `duplicate-case` fails because host names are case-insensitive;
-  - `volume` is `manual` (REQ-CNT-018);
-  - `stopped` containers count;
-  - a backup container that binds a parent folder counts as sharing (A-277);
-  - `missing-app-storage` is `manual` and `no-persistence` is a skip (A-278).
-- **If accepted:** status `reviewed` in both `index.yaml`.
-- **PO:** ☐ accepted ☐ remarks: …
+No open item.
 
 ### Answered earlier
+
+Answered after C-073 (2026-10-31) and applied in C-073 addendum 1:
+- R-1 – 26 container scenarios of `oec-infra container` (`oec/conformance/testdata/containers/index.yaml`) and 16 host scenarios (14 T8-HST-03, `none`, `T8-HST-02/certificate`; `testdata/hosts/index.yaml`): ☑ accepted ("R-1 akzeptiert") → `reviewed`; all 26 container and 69 host scenarios `reviewed`.
 
 Answered after the C-072 review (2026-10-31) and applied in C-072 addendum 3:
 - R-2 – REQ-PLT-001 and the host scenarios `T8-HST-04/ram-reserved`, `/storage-nominal` after SF-116: ☑ accepted ("R-2 akzeptiert") → `reviewed`; all 55 host scenarios `reviewed`.

@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 31.10.2026, C-073 (D8 Teil 4: Anbindung an Docker/Podman, `oec-infra container`, T8-HST-03). **Für dich offen: R-1** – 26 Container-Szenarien und 16 Host-Szenarien zum Review. Keine Entscheidung, kein Finding._
+_Stand: 31.10.2026, C-073-Review Nachtrag 1. **Für dich offen: nichts** – R-1 (26 Container- und 16 Host-Szenarien) ist akzeptiert und eingetragen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,9 +24,13 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-**R-1 – Prüfszenarien für `oec-infra container` und T8-HST-03 (Review, G-3.9).** Sonst nichts: kein neues Finding, keine Entscheidung.
+Nichts. Deine Antwort „R-1 akzeptiert“ ist eingetragen (C-073, Nachtrag 1).
 
-### R-1 – worum es geht
+### Was aus deinem Review C-073 geworden ist (Kurzfassung)
+
+- **R-1 akzeptiert:** alle 26 Container-Szenarien und die 16 Host-Szenarien (14 für T8-HST-03, dazu `none` und `T8-HST-02/certificate`) stehen auf `reviewed`. Damit sind alle 69 Host- und 26 Container-Szenarien abgenommen, keine Entwürfe mehr.
+
+### R-1 – worum es ging (erledigt)
 
 D8 prüft jetzt laufende Container über die Docker/Podman-Schnittstelle. Für den Selbsttest habe ich bei Docker die Beschreibung von vier Containern aufgezeichnet (ohne Geheimnisse, ohne persönliche Pfade). Eine nachgebaute Docker-Schnittstelle spielt sie ab, so läuft der Test ohne Docker und ohne Netz:
 - `app` – so wie es sein soll: eigenes Bridge-Netz, Name `oec-rec-app-<uuid>` und genauso der Hostname, eigene Volumes für die Anwendungsdaten, eigene Geheimnisse, nichts über dem Lizenzordner;
@@ -71,7 +75,6 @@ Jedes Szenario ändert genau eine Sache und sagt, was D8 melden muss (Stufe 3).
 - Ein **Backup-Container**, der einen übergeordneten Ordner einhängt, gilt als Teilen.
 - „Kein Datenordner“ wird **manuell** bewertet, „keine Anwendung speichert dauerhaft“ als **nicht anwendbar**.
 
-Wenn alles passt: „R-1 akzeptiert“. Sonst schreib mir die Szenarien, die anders sein sollen.
 
 ### Zur Info: was C-073 gebaut hat
 
