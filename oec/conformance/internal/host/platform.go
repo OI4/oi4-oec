@@ -58,8 +58,9 @@ func Local() *Facts {
 	return f
 }
 
-// Thresholds of RIG 5.1 (SF-116, proposed interpretation): the memory a
-// system shows is less than its nominal size (firmware, kernel and graphics
+// Thresholds of RIG 5.1: the minimums are the nominal sizes of the
+// installed memory with 1 GB = 10^9 octets (SF-116). The memory a system
+// shows is less than its nominal size (firmware, kernel and graphics
 // reservations; the user area of a flash medium), so a value somewhat below
 // the minimum is judged manually against the data sheet.
 const (
@@ -113,7 +114,7 @@ func (r *runner) hardware(p *report.Platform) {
 	case m >= MinMemory:
 		r.checked(TPlatform, reqHardware, "", "main memory %d octets", m)
 	case m >= ManualMemory:
-		r.reported(TPlatform, reqHardware, "main memory %d octets visible to the operating system, less than 1 GB (10^9 octets) by less than firmware and kernel usually reserve: compare the installed memory with the data sheet (RIG 5.1, SF-116)", m)
+		r.reported(TPlatform, reqHardware, "main memory %d octets visible to the operating system, less than 1 GB (10^9 octets) by less than firmware and kernel usually reserve: compare the nominal size of the installed memory with the data sheet (RIG 5.1)", m)
 	default:
 		r.violation(TPlatform, reqHardware, "", "main memory %d octets, less than 1 GB (RIG 5.1)", m)
 	}
@@ -123,7 +124,7 @@ func (r *runner) hardware(p *report.Platform) {
 	case s >= MinStorage:
 		r.checked(TPlatform, reqHardware, "", "non-volatile memory %d octets (%s)", s, f.StorageSource)
 	case s >= ManualStorage:
-		r.reported(TPlatform, reqHardware, "non-volatile memory %d octets (%s), less than 4 GB (4·10^9 octets) by less than the nominal size of a medium usually exceeds its user area: compare with the data sheet (RIG 5.1, SF-116)", s, f.StorageSource)
+		r.reported(TPlatform, reqHardware, "non-volatile memory %d octets (%s), less than 4 GB (4·10^9 octets) by less than the nominal size of a medium usually exceeds its user area: compare the nominal size of the installed memory with the data sheet (RIG 5.1)", s, f.StorageSource)
 	default:
 		r.violation(TPlatform, reqHardware, "", "non-volatile memory %d octets (%s), less than 4 GB (RIG 5.1)", s, f.StorageSource)
 	}

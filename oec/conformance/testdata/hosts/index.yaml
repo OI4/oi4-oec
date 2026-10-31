@@ -351,13 +351,14 @@ hosts:
     notes: >-
       512 MiB main memory.
   - fault: T8-HST-04/ram-reserved
-    status: reviewed
+    status: draft
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-001, REQ-PLT-003]}
     notes: >-
       950000000 octets main memory: less than 1 GB as the system shows it,
-      within what firmware and kernel reserve (SF-116); manual.
+      within what firmware and kernel reserve; RIG 5.1 counts the nominal
+      size of the installed memory (1 GB = 10^9 octets), so manual.
   - fault: T8-HST-04/storage-low
     status: reviewed
     tests: [T8-HST-04]
@@ -366,13 +367,14 @@ hosts:
     notes: >-
       2 GB non-volatile memory.
   - fault: T8-HST-04/storage-nominal
-    status: reviewed
+    status: draft
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-001, REQ-PLT-003]}
     notes: >-
-      3900000000 octets non-volatile memory: a nominal 4 GB medium (SF-116);
-      manual.
+      3900000000 octets non-volatile memory: the user area of a nominal 4 GB
+      medium; RIG 5.1 counts the nominal size of the installed memory
+      (1 GB = 10^9 octets), so manual.
   - fault: T8-HST-04/no-network
     status: reviewed
     tests: [T8-HST-04]

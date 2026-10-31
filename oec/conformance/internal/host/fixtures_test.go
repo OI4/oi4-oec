@@ -378,3 +378,40 @@ func TestFixtureCoverage(t *testing.T) {
 		}
 	}
 }
+
+// TestMemoryRule: the manual bands below the minimums of RIG 5.1 cite the
+// decided text (SF-116 resolved in RIG 5.1: nominal size of the installed
+// memory, 1 GB = 10^9 octets), not a proposed interpretation.
+func TestMemoryRule(t *testing.T) {
+	fixtures, err := conformance.HostFixtures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fault := range []string{TPlatform + "/ram-reserved", TPlatform + "/storage-nominal"} {
+		i := slices.IndexFunc(fixtures, func(f conformance.Fixture) bool { return f.Fault == fault })
+		if i < 0 {
+			t.Fatalf("no fixture %s", fault)
+		}
+		t.Run(fault, func(t *testing.T) {
+			t.Parallel()
+			c := scenario(t, fixtures[i])
+			c.Tests = []string{TPlatform}
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+			res := Run(ctx, c)
+			found := false
+			for _, o := range res.Observations {
+				if o.Req != reqHardware || o.Kind != verdict.Reported || !strings.Contains(o.Detail, "memory") {
+					continue
+				}
+				found = true
+				if !strings.Contains(o.Detail, "(RIG 5.1)") || !strings.Contains(o.Detail, "nominal size of the installed memory") || strings.Contains(o.Detail, "SF-116") {
+					t.Errorf("finding %q: want the rule of RIG 5.1 (nominal size of the installed memory), not SF-116", o.Detail)
+				}
+			}
+			if !found {
+				t.Error("no manual finding on the memory of REQ-PLT-001")
+			}
+		})
+	}
+}
