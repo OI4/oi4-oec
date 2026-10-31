@@ -6,7 +6,7 @@
 # behavior of MG 9.1.1. Checked by tools/internal/payload (C-027).
 # Reviewed and accepted by the PO in the C-027 review (2026-10-20).
 area: RES-MAM
-baseline: "7427a4f"
+baseline: "52d8470"
 requirements:
   # --- DataSet content (MG 5, MG 8.3.1) ---------------------------------------
   - id: REQ-RES-MAM-001

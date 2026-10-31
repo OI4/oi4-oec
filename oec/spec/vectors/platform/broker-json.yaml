@@ -2,7 +2,7 @@
 # Message Bus storage (RIG 4.1.1). Format: vectors/vectors.schema.json;
 # checked by spectool lint (reference check internal/platform).
 kind: broker-json
-baseline: "7427a4f"
+baseline: "52d8470"
 description: >-
   Content of the file broker.json of the Message Bus storage (RIG 4.1.1,
   REQ-CNT-003): the mandatory elements Address (IP address or host name),
