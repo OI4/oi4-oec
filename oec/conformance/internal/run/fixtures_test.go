@@ -387,6 +387,18 @@ func TestUsage(t *testing.T) {
 	if l := left(t, s); len(l) != 0 {
 		t.Errorf("containers left: %v", l)
 	}
+	// A remote engine is refused before any request.
+	for _, rc := range []Config{
+		{Daemon: "tcp://192.0.2.1:2375"},
+		{Getenv: func(k string) string { return map[string]string{"DOCKER_HOST": "ssh://user@docker.example"}[k] }},
+		{Getenv: func(k string) string { return map[string]string{"CONTAINER_HOST": "tcp://192.0.2.1:2375"}[k] }},
+	} {
+		rc.Image, rc.Defaults, rc.TempDir = runtest.Ref(simapp.Good), []string{}, base.TempDir
+		start := time.Now()
+		if _, err := Run(context.Background(), rc); !errors.Is(err, ErrRemote) || time.Since(start) > time.Second {
+			t.Errorf("%+v: %v after %s", rc, err, time.Since(start))
+		}
+	}
 	c = base
 	c.Image, c.Tests = runtest.Ref(simapp.Good), []string{"T8-CTR-*"}
 	res, err := Run(context.Background(), c)

@@ -232,6 +232,17 @@ func Run(ctx context.Context, c Config) (Result, error) {
 	if len(r.tests) == 0 {
 		return res, nil
 	}
+	// A named remote endpoint (--daemon, DOCKER_HOST, CONTAINER_HOST) is
+	// refused before any request: the run never talks to an engine of
+	// another machine.
+	if eps, named := engine.Endpoints(c.Daemon, c.Getenv, c.Defaults); named {
+		for _, ep := range eps {
+			if !Local(ep) {
+				res.Run.Engine.Endpoint = ep
+				return res, fmt.Errorf("%w (%s): oec-infra run needs the engine of this machine (--daemon)", ErrRemote, ep)
+			}
+		}
+	}
 	cl, tried, err := engine.Connect(ctx, c.Daemon, c.Getenv, c.Defaults, c.Timeout)
 	if err != nil {
 		res.Run.Engine.Endpoint = strings.Join(tried, ", ")

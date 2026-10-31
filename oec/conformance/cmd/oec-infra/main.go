@@ -12,13 +12,18 @@
 // Linux, container daemon, Message Bus and Registry. The command container
 // reads containers through the Docker/Podman Engine API and judges the tests
 // of mode container (T8-CTR-01 … 03): networks, container name and
-// hostname, no host mount on /opt/oi4/licenses. report-schema prints
+// hostname, no host mount on /opt/oi4/licenses. The command run starts the
+// application image in containers of its own through the Engine API, with
+// generated storages and an MQTT test endpoint of D8, and judges the tests
+// of mode run (T8-RUN-01 … 03): Message Bus storage, certificate and secret
+// storages, container name as hostname and identity. report-schema prints
 // the JSON Schema of the report (infra-report.schema.json, report version
 // 1).
 //
 // Exit codes (DESIGN.md §5.3): 0 pass (warnings allowed), 1 at least one
 // requirement violated, 2 usage or input error (also: the input is no OCI
-// image layout, the engine knows no such container), 3 internal error, 4
+// image layout, the engine knows no such container or image, the engine is
+// remote), 3 internal error, 4
 // inconclusive (a mandatory requirement could not be judged; --allow-skip
 // turns it into 0).
 package main
@@ -66,6 +71,7 @@ const usage = `usage:
   oec-infra bus [flags]
   oec-infra host [flags]
   oec-infra container [flags] CONTAINER...
+  oec-infra run [flags] IMAGE
   oec-infra report-schema
   oec-infra version
 
@@ -143,10 +149,39 @@ sources of a container. An unknown container is a usage error.
   verdict:    --level 1|2|3 (default 3), --tests IDS, --allow-skip
   output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
 
+run starts the application image (name, id or unique id prefix of an image
+the engine already has; it never pulls) in sandbox containers of its own
+through the Docker/Podman Engine API on this machine and judges the run
+tests of the D8 catalog (T8-RUN-01 … 03): it generates the Message Bus
+storage (broker.json with a non-default SecurePort, MaxPacketSize and an
+unknown element, broker.pem, ca.pem), the certificate storage and the
+secret storage (credentials or client certificate with an encrypted key)
+of RIG 4.1, names each container oec-d8-run-<uuid> and sets the name as
+hostname (RIG 4.2), and runs an MQTT test endpoint (TLS, credentials or
+client certificate) that answers like a broker without forwarding. Three
+containers: credentials, certificate and an untrusted broker CA (the
+application must not connect). It checks the connection to Address and
+SecurePort, the login, the payload sizes, the client id and the Birth
+message (MAM of the application with the container name as SerialNumber).
+It creates, starts, stops and removes only containers named oec-d8-run-…
+with its labels, never volumes, networks or images, and never reports a
+secret, a username, a log or a host path.
+  engine:     --daemon ENDPOINT (local only; default DOCKER_HOST,
+              CONTAINER_HOST, the default sockets), --timeout D (default
+              10s), --config FILE (YAML, keys = flag names)
+  sandbox:    --wait D (default 30s, until the Birth message), --settle D
+              (default 2s), --listen ADDR (default 127.0.0.1 on macOS and
+              Windows, the bridge gateway elsewhere), --broker-host NAME|IP
+              (default oec-d8-broker via host-gateway), --max-packet-size N
+              (default 262144)
+  verdict:    --level 1|2|3 (default 3), --tests IDS, --allow-skip
+  output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
+
 report-schema prints the JSON Schema of the JSON report (report version 1).
 
 Exit codes: 0 pass, 1 fail, 2 usage or input error (no OCI image layout,
-no such container), 3 internal error, 4 inconclusive.
+no such container or image, a remote engine), 3 internal error, 4
+inconclusive.
 `
 
 func run(args []string, stdout, stderr io.Writer) int {
@@ -163,6 +198,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runHost(args[1:], stdout, stderr)
 	case "container":
 		return runContainer(args[1:], stdout, stderr)
+	case "run":
+		return runRun(args[1:], stdout, stderr)
 	case "report-schema":
 		if len(args) > 1 {
 			fmt.Fprintf(stderr, "%s: report-schema takes no arguments\n", tool)
