@@ -5,7 +5,7 @@ Guideline baseline: `7427a4f` · Area status: reviewed · Sections: RIG 5
 
 | ID | Title | Keyword | L1 | L2 | L3 | Domain | Verification | Status |
 |---|---|---|---|---|---|---|---|---|
-| [REQ-PLT-001](#req-plt-001) | Minimum hardware of an OEC platform | MUST | n/a | n/a | n/a | platform | d8, manual | draft |
+| [REQ-PLT-001](#req-plt-001) | Minimum hardware of an OEC platform | MUST | n/a | n/a | n/a | platform | d8, manual | reviewed |
 | [REQ-PLT-002](#req-plt-002) | Platform hardened for industrial use | SHOULD | n/a | n/a | n/a | platform | manual | reviewed |
 | [REQ-PLT-003](#req-plt-003) | Linux at the current patch level | MUST | n/a | n/a | n/a | platform | d8, manual | reviewed |
 | [REQ-PLT-004](#req-plt-004) | User and role management with granular access control | MUST | n/a | n/a | n/a | platform | manual | reviewed |
@@ -27,7 +27,7 @@ The edge computer of an OEC platform uses one of the processor architectures ARM
 - Domain: platform · Applies to: platform
 - Refs: RIG 5.1, SF-092, SF-116
 - Verification: d8, manual
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-5.1-7017a7e5, RIG-5.1-72877b76, RIG-5.1-937b5b97, RIG-5.1-b96535ec, RIG-5.1-ceba026b
 
 > To achieve Open Industry 4.0 Alliance compliance, the hardware and software must meet several requirements.

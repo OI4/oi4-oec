@@ -32,7 +32,7 @@ requirements:
         text: The edge computer must provide at least one available network interface (likely Ethernet interface, but LTE or similar might be possible too)
     verification: [d8, manual]
     inventory: [RIG-5.1-7017a7e5, RIG-5.1-937b5b97, RIG-5.1-ceba026b, RIG-5.1-72877b76, RIG-5.1-b96535ec]
-    status: draft
+    status: reviewed
     notes: >-
       Each list item has its own "must" since SF-092 (a) was resolved. The
       non-volatile memory may be eMMC, SD card, SSD, HDD or similar. RIG 5.2

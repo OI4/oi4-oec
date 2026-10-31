@@ -202,7 +202,7 @@ docker run --rm --network container:oec-dev-mosquitto-1 --entrypoint /oec-infra 
 | `testdata/captures` | capture fixtures of the monitor rules + `index.yaml` with expected verdicts (C-052 reviewed in the C-052 review, C-065 and C-067 in the C-067 review; new entries start as `draft`, G-3.9) |
 | `testdata/images` | generated OCI archives of the image rules + `index.yaml` with expected verdicts (C-070, reviewed in the C-070 review); regenerate with `go test ./internal/image -run TestFixtureFiles -update` |
 | `testdata/bus` | `index.yaml`: expected verdicts of `oec-infra bus` per broker scenario against `mqtttest` and the simulated Registry (C-071, `reviewed` since the C-071 review, `wrong-host` and `expired` re-reviewed after SF-115; new or changed entries are `draft`, G-3.9) |
-| `testdata/hosts` | `index.yaml`: expected verdicts of `oec-infra host` per host scenario (generated root, fake facts, mount table and daemon, `mqtttest` broker with the simulated Registry; C-072, `draft`, G-3.9) |
+| `testdata/hosts` | `index.yaml`: expected verdicts of `oec-infra host` per host scenario (generated root, fake facts, mount table and daemon, `mqtttest` broker with the simulated Registry; C-072, `reviewed` since the C-072 review, `ram-reserved` and `storage-nominal` re-reviewed after SF-116) |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `COVERAGE.md` (generated); `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
 ## Tests

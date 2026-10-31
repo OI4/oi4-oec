@@ -351,7 +351,7 @@ hosts:
     notes: >-
       512 MiB main memory.
   - fault: T8-HST-04/ram-reserved
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-001, REQ-PLT-003]}
@@ -367,7 +367,7 @@ hosts:
     notes: >-
       2 GB non-volatile memory.
   - fault: T8-HST-04/storage-nominal
-    status: draft
+    status: reviewed
     tests: [T8-HST-04]
     expect:
       T8-HST-04: {outcome: pass, manual: [REQ-PLT-001, REQ-PLT-003]}

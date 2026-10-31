@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-31, C-072 review addendum 2: D-1 ("D-1 … reviewed und akzeptiert", SF-116) is applied – RIG 5.1 `7427a4f`, SF-116 resolved, re-baseline, D8 messages cite RIG 5.1. Open: **R-2** (REQ-PLT-001 and the scenarios `T8-HST-04/ram-reserved`, `/storage-nominal`). R-1 accepted (addendum 1). A-259 … A-270 for information._
+_Last updated: 2026-10-31, C-072 review addendum 3: you accepted **R-2** ("R-2 akzeptiert"); REQ-PLT-001 and all 55 host scenarios are `reviewed`. D-1 (SF-116) and R-1 were answered and applied in addenda 1–2. **Nothing is open.** A-259 … A-270 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -222,6 +222,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - REQ-PLT-001 follows the text → `draft`.
   - D8 T8-HST-04: same thresholds and verdicts, the two manual memory findings cite "(RIG 5.1)" and the nominal size of the installed memory instead of "(RIG 5.1, SF-116)"; the notes of the scenarios `T8-HST-04/ram-reserved` and `/storage-nominal` follow → `draft`.
   - Together → **R-2** (numbered on because R-1 is answered).
+- C-072 review addendum 3: you accepted **R-2** ("R-2 akzeptiert"); REQ-PLT-001 and the scenarios `T8-HST-04/ram-reserved`, `/storage-nominal` are `reviewed` – all 55 host scenarios `reviewed`. No draft, no open finding. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `7427a4f` (re-baseline, no content change).
 
@@ -504,14 +505,12 @@ Logs: [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-
 
 ## Decisions and review items
 
-### R-2 – REQ-PLT-001 and two host scenarios after SF-116 (G-3.9)
-- **Where:** `oec/spec/requirements/plt.yaml` (REQ-PLT-001, view `oec/spec/requirements/view/plt.md`); `oec/conformance/testdata/hosts/index.yaml` (`T8-HST-04/ram-reserved`, `T8-HST-04/storage-nominal`); log C-072 addendum 2.
-- **REQ-PLT-001** "Edge computer hardware" (MUST, platform, d8 + manual): the statement gains "The memory sizes are the nominal sizes of the installed memory, with 1 GB = 10^9 octets."; the RAM and storage quotes follow the new RIG 5.1 text, the inventory items are remapped (RIG-5.1-ceba026b, RIG-5.1-72877b76), ref SF-116.
-- **`T8-HST-04/ram-reserved`** (950000000 octets main memory visible) and **`T8-HST-04/storage-nominal`** (3900000000 octets non-volatile memory): verdict unchanged – pass, REQ-PLT-001 and REQ-PLT-003 `manual` (compare the nominal size with the data sheet). Only the notes changed ("RIG 5.1 counts the nominal size of the installed memory (1 GB = 10^9 octets), so manual" instead of "(SF-116)").
-- **Recommendation:** accept.
-- **PO:** ☐ accepted ☐ changes: …
+No open item.
 
 ### Answered earlier
+
+Answered after the C-072 review (2026-10-31) and applied in C-072 addendum 3:
+- R-2 – REQ-PLT-001 and the host scenarios `T8-HST-04/ram-reserved`, `/storage-nominal` after SF-116: ☑ accepted ("R-2 akzeptiert") → `reviewed`; all 55 host scenarios `reviewed`.
 
 Answered in the C-072 review (2026-10-31) and applied in C-072 addenda 1–2:
 - D-1 – SF-116 (RIG 5.1: "1 GB RAM / 4 GB non-volatile memory" = 10^9 octets, nominal size of the installed memory): ☑ as proposed ("D-1 … reviewed und akzeptiert") → RIG 5.1 text, SF-116 resolved, re-baseline; D8 T8-HST-04 keeps the manual bands, its messages cite RIG 5.1.
@@ -1278,5 +1277,4 @@ ADR-0025 amendment C-072; DESIGN §9 "As built (C-072)"; log C-072.
 
 ## Next (C-073)
 
-1. Your answer to R-2 (recorded first, own commit).
-2. C-073: P5b increment 4 – Engine API client `internal/engine` (read-only, Unix socket / named pipe), `oec-infra container` (T8-CTR-01 … 03) and T8-HST-03 (application storages not shared), self-test against a fake Engine API; in a new session (start prompt in `prompt.md`).
+1. C-073: P5b increment 4 – Engine API client `internal/engine` (read-only, Unix socket / named pipe), `oec-infra container` (T8-CTR-01 … 03) and T8-HST-03 (application storages not shared), self-test against a fake Engine API; in a new session (start prompt in `prompt.md`).
