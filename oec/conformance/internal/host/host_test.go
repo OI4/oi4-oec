@@ -2,9 +2,6 @@ package host
 
 import (
 	"context"
-	"errors"
-	"io/fs"
-	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -90,14 +87,6 @@ func TestArchitecture(t *testing.T) {
 	}
 }
 
-func TestEndpoint(t *testing.T) {
-	for in, want := range map[string]string{"/var/run/docker.sock": "unix:///var/run/docker.sock", "tcp://h:2375": "tcp://h:2375", `\\.\pipe\docker_engine`: "npipe:////./pipe/docker_engine"} {
-		if got := endpoint(in); got != want {
-			t.Errorf("%s: %s, want %s", in, got, want)
-		}
-	}
-}
-
 // TestLocal: the facts of the system the test runs on are measured where
 // D8 supports it (Linux, macOS, Windows).
 func TestLocal(t *testing.T) {
@@ -115,76 +104,6 @@ func TestLocal(t *testing.T) {
 		t.Errorf("no kernel release: %+v", f)
 	}
 	t.Logf("%+v", f)
-}
-
-// TestDialDaemon connects to a socket, a TCP port and a missing socket.
-func TestDialDaemon(t *testing.T) {
-	ctx := context.Background()
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer ln.Close()
-	go func() {
-		for {
-			c, err := ln.Accept()
-			if err != nil {
-				return
-			}
-			c.Close()
-		}
-	}()
-	if err := dialDaemon(ctx, "tcp://"+ln.Addr().String(), 0); err != nil {
-		t.Errorf("tcp: %v", err)
-	}
-	missing := filepath.Join(t.TempDir(), "missing.sock")
-	if err := dialDaemon(ctx, "unix://"+missing, 0); !errors.Is(err, fs.ErrNotExist) {
-		t.Errorf("missing socket: %v", err)
-	}
-	if err := dialDaemon(ctx, "ssh://user@host", 0); !errors.Is(err, errUnsupported) {
-		t.Errorf("ssh: %v", err)
-	}
-	if runtime.GOOS == "windows" {
-		return
-	}
-	if err := dialDaemon(ctx, "npipe:////./pipe/docker_engine", 0); !errors.Is(err, errUnsupported) {
-		t.Errorf("npipe: %v", err)
-	}
-	// A short path: the limit of a socket path is about 104 octets.
-	dir, err := os.MkdirTemp("", "d8")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
-	sock := filepath.Join(dir, "d.sock")
-	ul, err := net.Listen("unix", sock)
-	if err != nil {
-		t.Fatal(err)
-	}
-	go func() {
-		for {
-			c, err := ul.Accept()
-			if err != nil {
-				return
-			}
-			c.Close()
-		}
-	}()
-	if err := dialDaemon(ctx, "unix://"+sock, 0); err != nil {
-		t.Errorf("unix: %v", err)
-	}
-	ul.Close()
-	// A socket file without a listener (a stopped daemon): refused.
-	stale := filepath.Join(dir, "stale.sock")
-	sl, err := net.Listen("unix", stale)
-	if err != nil {
-		t.Fatal(err)
-	}
-	sl.(*net.UnixListener).SetUnlinkOnClose(false)
-	sl.Close()
-	if err := dialDaemon(ctx, "unix://"+stale, 0); err == nil || errors.Is(err, fs.ErrNotExist) || errors.Is(err, fs.ErrPermission) {
-		t.Errorf("stale socket: %v, want connection refused", err)
-	}
 }
 
 // TestUnreadable: a secret D8 may not read makes its requirement

@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/OI4/oec/conformance/catalog"
+	"github.com/OI4/oec/conformance/internal/engine"
 	"github.com/OI4/oec/conformance/internal/report"
 	"github.com/OI4/oec/conformance/internal/schemas"
 	"github.com/OI4/oec/conformance/internal/verdict"
@@ -176,7 +177,7 @@ func Run(ctx context.Context, c Config) Result {
 	}
 	if c.DialDaemon == nil {
 		timeout := c.Timeout
-		c.DialDaemon = func(ctx context.Context, ep string) error { return dialDaemon(ctx, ep, timeout) }
+		c.DialDaemon = func(ctx context.Context, ep string) error { return engine.Probe(ctx, ep, timeout) }
 	}
 	if c.Container == "" {
 		if b, err := os.ReadFile(filepath.Join(c.Root, "etc", "hostname")); err == nil {

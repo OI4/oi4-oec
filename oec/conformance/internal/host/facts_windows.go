@@ -5,6 +5,8 @@ import (
 	"os"
 	"syscall"
 	"unsafe"
+
+	"github.com/OI4/oec/conformance/internal/engine"
 )
 
 var (
@@ -42,11 +44,9 @@ func local(f *Facts) {
 			f.Storage, f.StorageSource = total, "volume "+drive
 		}
 	}
-	f.Daemons = []string{"npipe:////./pipe/docker_engine", "npipe:////./pipe/podman-machine-default"}
+	f.Daemons = engine.Defaults()
 }
 
 func physical(i net.Interface) bool {
 	return i.Flags&net.FlagLoopback == 0 && len(i.HardwareAddr) > 0
 }
-
-func openPipe(name string) (*os.File, error) { return os.OpenFile(name, os.O_RDWR, 0) }

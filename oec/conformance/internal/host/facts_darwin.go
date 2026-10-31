@@ -3,9 +3,9 @@ package host
 import (
 	"encoding/binary"
 	"net"
-	"os"
-	"path/filepath"
 	"syscall"
+
+	"github.com/OI4/oec/conformance/internal/engine"
 )
 
 func local(f *Facts) {
@@ -21,10 +21,7 @@ func local(f *Facts) {
 	if syscall.Statfs("/", &st) == nil {
 		f.Storage, f.StorageSource = st.Blocks*uint64(st.Bsize), "file system /"
 	}
-	f.Daemons = []string{"unix:///var/run/docker.sock"}
-	if h, err := os.UserHomeDir(); err == nil {
-		f.Daemons = append(f.Daemons, "unix://"+filepath.Join(h, ".docker", "run", "docker.sock"))
-	}
+	f.Daemons = engine.Defaults()
 }
 
 func physical(i net.Interface) bool {

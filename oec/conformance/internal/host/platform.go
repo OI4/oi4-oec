@@ -9,13 +9,12 @@ import (
 	"io"
 	"io/fs"
 	"net"
-	"net/url"
-	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/OI4/oec/conformance/internal/engine"
 	"github.com/OI4/oec/conformance/internal/mqttwire"
 	"github.com/OI4/oec/conformance/internal/report"
 )
@@ -64,11 +63,10 @@ func Local() *Facts {
 // reservations; the user area of a flash medium), so a value somewhat below
 // the minimum is judged manually against the data sheet.
 const (
-	MinMemory        = 1_000_000_000 // 1 GB RAM
-	ManualMemory     = 768 << 20     // below: fail; up to MinMemory: manual
-	MinStorage       = 4_000_000_000 // 4 GB non-volatile memory
-	ManualStorage    = 3_500_000_000 // below: fail; up to MinStorage: manual
-	defaultDaemonTry = 2 * time.Second
+	MinMemory     = 1_000_000_000 // 1 GB RAM
+	ManualMemory  = 768 << 20     // below: fail; up to MinMemory: manual
+	MinStorage    = 4_000_000_000 // 4 GB non-volatile memory
+	ManualStorage = 3_500_000_000 // below: fail; up to MinStorage: manual
 )
 
 // Architecture maps the machine of a kernel to an architecture of RIG 5.1
@@ -202,7 +200,7 @@ func (r *runner) daemon(ctx context.Context, p *report.Platform) {
 			p.Daemon = ep
 			r.checked(TPlatform, reqDaemon, "", "container daemon at %s", ep)
 			return
-		case errors.Is(err, errUnsupported):
+		case errors.Is(err, engine.ErrUnsupported):
 			r.inconclusive(TPlatform, []string{reqDaemon}, "", "%s: %v", ep, err)
 			return
 		case errors.Is(err, fs.ErrPermission):
@@ -226,69 +224,7 @@ func (r *runner) daemon(ctx context.Context, p *report.Platform) {
 // daemonEndpoints returns the endpoints to try: --daemon, DOCKER_HOST,
 // CONTAINER_HOST, else the default sockets of the system.
 func (r *runner) daemonEndpoints() ([]string, bool) {
-	if r.c.Daemon != "" {
-		return []string{endpoint(r.c.Daemon)}, true
-	}
-	var out []string
-	for _, env := range []string{"DOCKER_HOST", "CONTAINER_HOST"} {
-		if v := r.c.Getenv(env); v != "" {
-			out = append(out, endpoint(v))
-		}
-	}
-	if len(out) > 0 {
-		return out, true
-	}
-	return r.facts.Daemons, false
-}
-
-// endpoint normalizes a socket path or named pipe to a URL.
-func endpoint(s string) string {
-	switch {
-	case strings.Contains(s, "://"):
-		return s
-	case strings.HasPrefix(s, `\\.\pipe\`):
-		return "npipe://" + strings.ReplaceAll(s, `\`, "/")
-	}
-	return "unix://" + s
-}
-
-var errUnsupported = errors.New("endpoint not supported by D8")
-
-// dialDaemon connects to the endpoint of a container daemon and closes the
-// connection: unix://, tcp:// and npipe:// (Windows).
-func dialDaemon(ctx context.Context, ep string, timeout time.Duration) error {
-	u, err := url.Parse(ep)
-	if err != nil {
-		return err
-	}
-	if timeout <= 0 || timeout > defaultDaemonTry {
-		timeout = defaultDaemonTry
-	}
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	var d net.Dialer
-	var c io.Closer
-	switch u.Scheme {
-	case "unix":
-		p := u.Path
-		if p == "" {
-			p = u.Opaque
-		}
-		if _, err := os.Stat(p); err != nil {
-			return err
-		}
-		c, err = d.DialContext(ctx, "unix", p)
-	case "tcp":
-		c, err = d.DialContext(ctx, "tcp", u.Host)
-	case "npipe":
-		c, err = openPipe(strings.ReplaceAll(u.Host+u.Path, "/", `\`))
-	default:
-		return fmt.Errorf("%w: %s", errUnsupported, u.Scheme)
-	}
-	if err != nil {
-		return err
-	}
-	return c.Close()
+	return engine.Endpoints(r.c.Daemon, r.c.Getenv, r.facts.Daemons)
 }
 
 // messageBus judges REQ-PLT-007 and REQ-PLT-008: D8 connects to the broker

@@ -1,0 +1,32 @@
+{
+  "Name": "host",
+  "Id": "0c913c5d6206e568075d3006e5961e741d2a2591aeaeccf15b18820a831060a9",
+  "Created": "2025-01-14T16:10:00.374887166Z",
+  "Scope": "local",
+  "Driver": "host",
+  "EnableIPv4": true,
+  "EnableIPv6": false,
+  "IPAM": {
+    "Driver": "default",
+    "Options": null,
+    "Config": null
+  },
+  "Internal": false,
+  "Attachable": false,
+  "Ingress": false,
+  "ConfigFrom": {
+    "Network": ""
+  },
+  "ConfigOnly": false,
+  "Containers": {
+    "33335347899af3d59f5037f1e5e19b8373ab8641c50601e40a245378f7a5bc53": {
+      "Name": "oec_rec_host",
+      "EndpointID": "cecaaaaaca218bfc98ab01a92b4b0fe0f1524aff8b9a5a3023e721aead227e38",
+      "MacAddress": "",
+      "IPv4Address": "",
+      "IPv6Address": ""
+    }
+  },
+  "Options": {},
+  "Labels": {}
+}

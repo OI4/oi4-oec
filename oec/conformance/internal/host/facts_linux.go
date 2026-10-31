@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/OI4/oec/conformance/internal/engine"
 )
 
 func local(f *Facts) {
@@ -27,11 +29,7 @@ func local(f *Facts) {
 	f.Distribution = osRelease("/etc/os-release")
 	f.InContainer = exists("/.dockerenv") || exists("/run/.containerenv")
 	f.RebootRequired = exists("/var/run/reboot-required")
-	f.Daemons = []string{"unix:///var/run/docker.sock", "unix:///run/docker.sock", "unix:///run/podman/podman.sock"}
-	if x := os.Getenv("XDG_RUNTIME_DIR"); x != "" {
-		f.Daemons = append(f.Daemons, "unix://"+filepath.Join(x, "podman", "podman.sock"), "unix://"+filepath.Join(x, "docker.sock"))
-	}
-	f.Daemons = append(f.Daemons, "unix:///run/containerd/containerd.sock", "unix:///run/k3s/containerd/containerd.sock", "unix:///var/run/crio/crio.sock")
+	f.Daemons = append(engine.Defaults(), "unix:///run/containerd/containerd.sock", "unix:///run/k3s/containerd/containerd.sock", "unix:///var/run/crio/crio.sock")
 }
 
 // chars converts a NUL-terminated field of Utsname (int8 or uint8 by

@@ -1,0 +1,251 @@
+{
+  "Id": "ceebd9cd02e9f6065b59554b3ede65ad1ce59d26e02edc4796a5ac14d28202e2",
+  "Created": "2026-10-31T08:07:11.631034926Z",
+  "Path": "sleep",
+  "Args": [
+    "600"
+  ],
+  "State": {
+    "Status": "created",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "0001-01-01T00:00:00Z",
+    "FinishedAt": "0001-01-01T00:00:00Z"
+  },
+  "Image": "sha256:8ee2ff5a675f6206f2fb41d0403649d142cb26937eb5730d8d8d05d0499b3399",
+  "ResolvConfPath": "",
+  "HostnamePath": "",
+  "HostsPath": "",
+  "LogPath": "",
+  "Name": "/oec-rec-stopped",
+  "RestartCount": 0,
+  "Driver": "overlay2",
+  "Platform": "linux",
+  "MountLabel": "",
+  "ProcessLabel": "",
+  "AppArmorProfile": "",
+  "ExecIDs": null,
+  "HostConfig": {
+    "Binds": [
+      "oec-rec-app-cfg:/etc/oi4/app"
+    ],
+    "ContainerIDFile": "",
+    "LogConfig": {
+      "Type": "json-file",
+      "Config": {}
+    },
+    "NetworkMode": "none",
+    "PortBindings": {},
+    "RestartPolicy": {
+      "Name": "no",
+      "MaximumRetryCount": 0
+    },
+    "AutoRemove": false,
+    "VolumeDriver": "",
+    "VolumesFrom": null,
+    "ConsoleSize": [
+      0,
+      0
+    ],
+    "CapAdd": null,
+    "CapDrop": null,
+    "CgroupnsMode": "private",
+    "Dns": [],
+    "DnsOptions": [],
+    "DnsSearch": [],
+    "ExtraHosts": null,
+    "GroupAdd": null,
+    "IpcMode": "private",
+    "Cgroup": "",
+    "Links": null,
+    "OomScoreAdj": 0,
+    "PidMode": "",
+    "Privileged": false,
+    "PublishAllPorts": false,
+    "ReadonlyRootfs": false,
+    "SecurityOpt": null,
+    "UTSMode": "",
+    "UsernsMode": "",
+    "ShmSize": 67108864,
+    "Runtime": "runc",
+    "Isolation": "",
+    "CpuShares": 0,
+    "Memory": 0,
+    "NanoCpus": 0,
+    "CgroupParent": "",
+    "BlkioWeight": 0,
+    "BlkioWeightDevice": [],
+    "BlkioDeviceReadBps": [],
+    "BlkioDeviceWriteBps": [],
+    "BlkioDeviceReadIOps": [],
+    "BlkioDeviceWriteIOps": [],
+    "CpuPeriod": 0,
+    "CpuQuota": 0,
+    "CpuRealtimePeriod": 0,
+    "CpuRealtimeRuntime": 0,
+    "CpusetCpus": "",
+    "CpusetMems": "",
+    "Devices": [],
+    "DeviceCgroupRules": null,
+    "DeviceRequests": null,
+    "MemoryReservation": 0,
+    "MemorySwap": 0,
+    "MemorySwappiness": null,
+    "OomKillDisable": false,
+    "PidsLimit": null,
+    "Ulimits": [],
+    "CpuCount": 0,
+    "CpuPercent": 0,
+    "IOMaximumIOps": 0,
+    "IOMaximumBandwidth": 0,
+    "MaskedPaths": [
+      "/proc/asound",
+      "/proc/acpi",
+      "/proc/interrupts",
+      "/proc/kcore",
+      "/proc/keys",
+      "/proc/latency_stats",
+      "/proc/timer_list",
+      "/proc/timer_stats",
+      "/proc/sched_debug",
+      "/proc/scsi",
+      "/sys/firmware",
+      "/sys/devices/virtual/powercap"
+    ],
+    "ReadonlyPaths": [
+      "/proc/bus",
+      "/proc/fs",
+      "/proc/irq",
+      "/proc/sys",
+      "/proc/sysrq-trigger"
+    ]
+  },
+  "GraphDriver": {
+    "Data": {
+      "ID": "ceebd9cd02e9f6065b59554b3ede65ad1ce59d26e02edc4796a5ac14d28202e2",
+      "LowerDir": "/var/lib/docker/overlay2/d586fdf27126d18b02b8afeeab03ea6ecf78e427a38e0c876d6dfe351fa50b60-init/diff:/var/lib/docker/overlay2/63802568f1f7fd116e848ca786095fdbf253d070b3be5a94f7f333130a25b086/diff:/var/lib/docker/overlay2/ada03ff645958f41304469d4c6e68b43358dee10e1a3271c17c183c14baf13eb/diff:/var/lib/docker/overlay2/6ed8334743b34fd5e68cd00cf32b96159116c0b48c1fef74e4c9412b1b438db0/diff",
+      "MergedDir": "/var/lib/docker/overlay2/d586fdf27126d18b02b8afeeab03ea6ecf78e427a38e0c876d6dfe351fa50b60/merged",
+      "UpperDir": "/var/lib/docker/overlay2/d586fdf27126d18b02b8afeeab03ea6ecf78e427a38e0c876d6dfe351fa50b60/diff",
+      "WorkDir": "/var/lib/docker/overlay2/d586fdf27126d18b02b8afeeab03ea6ecf78e427a38e0c876d6dfe351fa50b60/work"
+    },
+    "Name": "overlay2"
+  },
+  "Mounts": [
+    {
+      "Type": "volume",
+      "Name": "oec-rec-app-cfg",
+      "Source": "/var/lib/docker/volumes/oec-rec-app-cfg/_data",
+      "Destination": "/etc/oi4/app",
+      "Driver": "local",
+      "Mode": "z",
+      "RW": true,
+      "Propagation": ""
+    },
+    {
+      "Type": "volume",
+      "Name": "2d018d37436791229cacb47ca7b19f6c3db2dbb26e24f09ebecb46602389ce7a",
+      "Source": "/var/lib/docker/volumes/2d018d37436791229cacb47ca7b19f6c3db2dbb26e24f09ebecb46602389ce7a/_data",
+      "Destination": "/mosquitto/data",
+      "Driver": "local",
+      "Mode": "",
+      "RW": true,
+      "Propagation": ""
+    },
+    {
+      "Type": "volume",
+      "Name": "11e8c16edee4df4e76fa46fa3e3de9a9d573c469036a68bcba6412afdabeaf34",
+      "Source": "/var/lib/docker/volumes/11e8c16edee4df4e76fa46fa3e3de9a9d573c469036a68bcba6412afdabeaf34/_data",
+      "Destination": "/mosquitto/log",
+      "Driver": "local",
+      "Mode": "",
+      "RW": true,
+      "Propagation": ""
+    }
+  ],
+  "Config": {
+    "Hostname": "ceebd9cd02e9",
+    "Domainname": "",
+    "User": "",
+    "AttachStdin": false,
+    "AttachStdout": true,
+    "AttachStderr": true,
+    "ExposedPorts": {
+      "1883/tcp": {}
+    },
+    "Tty": false,
+    "OpenStdin": false,
+    "StdinOnce": false,
+    "Env": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "VERSION=2.1.2",
+      "DOWNLOAD_SHA256=fd905380691ac65ea5a93779e8214941829e3d6e038d5edff9eac5fd74cbed02",
+      "GPG_KEYS=A0D6EEA1DCAE49A635A3B2F0779B22DFB3E717B7"
+    ],
+    "Cmd": [
+      "600"
+    ],
+    "Image": "docker.io/library/eclipse-mosquitto:2.1.2-alpine@sha256:860aeb5d63ce509508f6dcfb2bc8a1c1dd2bc60555b562b45ce90e52d8dabb0f",
+    "Volumes": {
+      "/mosquitto/data": {},
+      "/mosquitto/log": {}
+    },
+    "WorkingDir": "/",
+    "Entrypoint": [
+      "sleep"
+    ],
+    "OnBuild": null,
+    "Labels": {
+      "org.opencontainers.image.description": "Eclipse Mosquitto MQTT Broker",
+      "org.opencontainers.image.documentation": "https://mosquitto.org/documentation/",
+      "org.opencontainers.image.licenses": "EPL-2.0 OR BSD-3-Clause",
+      "org.opencontainers.image.source": "https://github.com/eclipse-mosquitto/mosquitto",
+      "org.opencontainers.image.title": "eclipse-mosquitto",
+      "org.opencontainers.image.url": "https://mosquitto.org/",
+      "org.opencontainers.image.version": "2.1.2"
+    }
+  },
+  "NetworkSettings": {
+    "Bridge": "",
+    "SandboxID": "",
+    "SandboxKey": "",
+    "Ports": {},
+    "HairpinMode": false,
+    "LinkLocalIPv6Address": "",
+    "LinkLocalIPv6PrefixLen": 0,
+    "SecondaryIPAddresses": null,
+    "SecondaryIPv6Addresses": null,
+    "EndpointID": "",
+    "Gateway": "",
+    "GlobalIPv6Address": "",
+    "GlobalIPv6PrefixLen": 0,
+    "IPAddress": "",
+    "IPPrefixLen": 0,
+    "IPv6Gateway": "",
+    "MacAddress": "",
+    "Networks": {
+      "none": {
+        "IPAMConfig": null,
+        "Links": null,
+        "Aliases": null,
+        "MacAddress": "",
+        "DriverOpts": null,
+        "GwPriority": 0,
+        "NetworkID": "",
+        "EndpointID": "",
+        "Gateway": "",
+        "IPAddress": "",
+        "IPPrefixLen": 0,
+        "IPv6Gateway": "",
+        "GlobalIPv6Address": "",
+        "GlobalIPv6PrefixLen": 0,
+        "DNSNames": null
+      }
+    }
+  }
+}

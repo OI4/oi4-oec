@@ -1,0 +1,40 @@
+{
+  "Name": "oec-rec-net",
+  "Id": "d619c7e756b95d10536c242e4a7de436e92a99fee1c9eb3b8ef6c65c0774e711",
+  "Created": "2026-10-31T08:07:11.310728634Z",
+  "Scope": "local",
+  "Driver": "bridge",
+  "EnableIPv4": true,
+  "EnableIPv6": false,
+  "IPAM": {
+    "Driver": "default",
+    "Options": {},
+    "Config": [
+      {
+        "Subnet": "172.22.0.0/16",
+        "Gateway": "172.22.0.1"
+      }
+    ]
+  },
+  "Internal": false,
+  "Attachable": false,
+  "Ingress": false,
+  "ConfigFrom": {
+    "Network": ""
+  },
+  "ConfigOnly": false,
+  "Containers": {
+    "b33a87362c17418d3a5d62e78795aa25e1d28ad57752db7f8857883c24a018f0": {
+      "Name": "oec-rec-app-0b6a2c1e-4f3d-4c8a-9e21-7d5f3a9b8c40",
+      "EndpointID": "5ae0bc297693b6f9c1703f17501ac1e292366800e5d520d016fa623943c54069",
+      "MacAddress": "be:32:6c:3b:d2:e0",
+      "IPv4Address": "172.22.0.2/16",
+      "IPv6Address": ""
+    }
+  },
+  "Options": {
+    "com.docker.network.enable_ipv4": "true",
+    "com.docker.network.enable_ipv6": "false"
+  },
+  "Labels": {}
+}
