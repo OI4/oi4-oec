@@ -1,15 +1,21 @@
-// Package engine is the own, minimal and read-only client of the Docker
-// Engine API that oec-infra uses (DESIGN.md §9, ADR-0025 item 7; C-073).
-// Podman serves the same endpoints in its compatibility API. The client
-// only sends GET requests: /_ping, /version, /containers/json,
-// /containers/{id}/json and /networks/{id}. It speaks HTTP/1.1 over one
-// connection per request (Connection: close) to a Unix socket, a TCP port
-// or a Windows named pipe; the paths are unversioned (the engine answers in
-// its own API version, which the report names).
+// Package engine is the own, minimal client of the Docker Engine API that
+// oec-infra uses (DESIGN.md §9, ADR-0025 item 7; C-073, C-074). Podman
+// serves the same endpoints in its compatibility API. It reads with GET
+// /_ping, /version, /containers/json, /containers/{id}/json,
+// /networks/{id} and /images/{name}/json. It writes only for the sandbox of
+// oec-infra run (C-074) and only its own containers: Create needs the name
+// prefix OwnPrefix and the label LabelOwner=OwnerRun; Start, Stop and Remove
+// first inspect the container and refuse every other one (ErrNotOwn). It
+// never pulls, loads or removes images and never creates or removes
+// volumes or networks. It speaks HTTP/1.1 over one connection per request
+// (Connection: close) to a Unix socket, a TCP port or a Windows named pipe;
+// the paths are unversioned (the engine answers in its own API version,
+// which the report names).
 package engine
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -35,6 +41,19 @@ var (
 	// ErrNotEngine: the endpoint answers, but not as an Engine API (e.g.
 	// the gRPC socket of containerd).
 	ErrNotEngine = errors.New("no Docker/Podman Engine API")
+	// ErrNotOwn: a container oec-infra did not create (no OwnPrefix name or
+	// no LabelOwner=OwnerRun label); the client does not change it.
+	ErrNotOwn = errors.New("not a container of oec-infra run")
+)
+
+// The marks of the containers oec-infra run creates (C-074): every one
+// carries the name prefix and the owner label; the run label tells the
+// runs apart.
+const (
+	OwnPrefix  = "oec-d8-"
+	LabelOwner = "org.oi4.oec-infra"
+	OwnerRun   = "run"
+	LabelRun   = "org.oi4.oec-infra.run"
 )
 
 // DefaultTry is the longest time one connection attempt to an endpoint may
@@ -147,7 +166,7 @@ func try(timeout time.Duration) time.Duration {
 	return timeout
 }
 
-// Client is a read-only client of one Engine API endpoint.
+// Client is a client of one Engine API endpoint.
 type Client struct {
 	endpoint string
 	target   target
@@ -221,7 +240,7 @@ func (e *DialError) Unwrap() error { return e.Err }
 func (c *Client) Ping(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, try(c.timeout))
 	defer cancel()
-	body, err := c.get(ctx, "/_ping", nil)
+	body, err := c.do(ctx, http.MethodGet, "/_ping", nil, nil)
 	var de *DialError
 	switch {
 	case errors.As(err, &de):
@@ -236,16 +255,21 @@ func (c *Client) Ping(ctx context.Context) error {
 
 // StatusError is an answer of the engine other than 2xx.
 type StatusError struct {
+	Method  string // "" is GET
 	Path    string
 	Code    int
 	Message string
 }
 
 func (e *StatusError) Error() string {
-	if e.Message != "" {
-		return fmt.Sprintf("GET %s: %d %s", e.Path, e.Code, e.Message)
+	m := e.Method
+	if m == "" {
+		m = http.MethodGet
 	}
-	return fmt.Sprintf("GET %s: %d %s", e.Path, e.Code, http.StatusText(e.Code))
+	if e.Message != "" {
+		return fmt.Sprintf("%s %s: %d %s", m, e.Path, e.Code, e.Message)
+	}
+	return fmt.Sprintf("%s %s: %d %s", m, e.Path, e.Code, http.StatusText(e.Code))
 }
 
 // Is maps 404 to ErrNotFound.
@@ -253,9 +277,9 @@ func (e *StatusError) Is(target error) bool {
 	return target == ErrNotFound && e.Code == http.StatusNotFound
 }
 
-// get sends one GET request over a new connection and returns the body of
-// a 2xx answer.
-func (c *Client) get(ctx context.Context, p string, query url.Values) ([]byte, error) {
+// do sends one request over a new connection and returns the body of a
+// 2xx answer; body (JSON) only for POST.
+func (c *Client) do(ctx context.Context, method, p string, query url.Values, body []byte) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
 	conn, err := c.target.dial(ctx)
@@ -273,47 +297,58 @@ func (c *Client) get(ctx context.Context, p string, query url.Values) ([]byte, e
 		host = c.target.addr
 	}
 	u := &url.URL{Scheme: "http", Host: host, Path: p, RawQuery: query.Encode()}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	var rd io.Reader
+	if body != nil {
+		rd = bytes.NewReader(body)
+	}
+	req, err := http.NewRequestWithContext(ctx, method, u.String(), rd)
 	if err != nil {
 		return nil, err
 	}
 	req.Close = true
 	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
 	req.Header.Set("User-Agent", "oec-infra")
 	if err := req.Write(conn); err != nil {
-		return nil, ctxErr(ctx, p, err)
+		return nil, ctxErr(ctx, method, p, err)
 	}
 	resp, err := http.ReadResponse(bufio.NewReader(conn), req)
 	if err != nil {
-		return nil, ctxErr(ctx, p, err)
+		return nil, ctxErr(ctx, method, p, err)
 	}
 	defer resp.Body.Close()
-	body, err := io.ReadAll(io.LimitReader(resp.Body, MaxResponse+1))
+	out, err := io.ReadAll(io.LimitReader(resp.Body, MaxResponse+1))
 	if err != nil {
-		return nil, ctxErr(ctx, p, err)
+		return nil, ctxErr(ctx, method, p, err)
 	}
-	if len(body) > MaxResponse {
-		return nil, fmt.Errorf("GET %s: answer larger than %d octets", p, MaxResponse)
+	if len(out) > MaxResponse {
+		return nil, fmt.Errorf("%s %s: answer larger than %d octets", method, p, MaxResponse)
 	}
 	if resp.StatusCode/100 != 2 {
 		var m struct {
 			Message string `json:"message"`
 		}
-		_ = json.Unmarshal(body, &m)
-		return nil, &StatusError{Path: p, Code: resp.StatusCode, Message: m.Message}
+		_ = json.Unmarshal(out, &m)
+		se := &StatusError{Path: p, Code: resp.StatusCode, Message: m.Message}
+		if method != http.MethodGet {
+			se.Method = method
+		}
+		return nil, se
 	}
-	return body, nil
+	return out, nil
 }
 
-func ctxErr(ctx context.Context, p string, err error) error {
+func ctxErr(ctx context.Context, method, p string, err error) error {
 	if ctx.Err() != nil {
-		return fmt.Errorf("GET %s: %w (%v)", p, ctx.Err(), err)
+		return fmt.Errorf("%s %s: %w (%v)", method, p, ctx.Err(), err)
 	}
-	return fmt.Errorf("GET %s: %w", p, err)
+	return fmt.Errorf("%s %s: %w", method, p, err)
 }
 
 func (c *Client) getJSON(ctx context.Context, p string, query url.Values, v any) error {
-	body, err := c.get(ctx, p, query)
+	body, err := c.do(ctx, http.MethodGet, p, query, nil)
 	if err != nil {
 		return err
 	}
@@ -366,6 +401,9 @@ type Summary struct {
 	Names []string `json:"Names"`
 	Image string   `json:"Image"`
 	State string   `json:"State"`
+	// Labels decide whether a container is one of oec-infra run; never
+	// reported.
+	Labels map[string]string `json:"Labels"`
 }
 
 // Name returns the first name without the leading slash.
@@ -394,12 +432,16 @@ type Container struct {
 	Name  string `json:"Name"`
 	Image string `json:"Image"`
 	State struct {
-		Status  string `json:"Status"`
-		Running bool   `json:"Running"`
+		Status   string `json:"Status"`
+		Running  bool   `json:"Running"`
+		ExitCode int    `json:"ExitCode"`
 	} `json:"State"`
 	Config struct {
 		Hostname string `json:"Hostname"`
 		Image    string `json:"Image"`
+		// Labels decide whether a container is one of oec-infra run
+		// (Own); never reported.
+		Labels map[string]string `json:"Labels"`
 	} `json:"Config"`
 	HostConfig struct {
 		NetworkMode string            `json:"NetworkMode"`
@@ -486,6 +528,12 @@ type Network struct {
 	ID     string `json:"Id"`
 	Name   string `json:"Name"`
 	Driver string `json:"Driver"`
+	IPAM   struct {
+		Config []struct {
+			Subnet  string `json:"Subnet"`
+			Gateway string `json:"Gateway"`
+		} `json:"Config"`
+	} `json:"IPAM"`
 }
 
 // Network returns GET /networks/{id}. ErrNotFound: no such network.

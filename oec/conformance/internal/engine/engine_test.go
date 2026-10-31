@@ -260,3 +260,100 @@ func TestProbe(t *testing.T) {
 		t.Errorf("stale socket: %v, want connection refused", err)
 	}
 }
+
+// TestWrite: the client creates, starts, stops and removes only its own
+// containers (label and name prefix); a foreign container is refused
+// before any request that changes it (C-074).
+func TestWrite(t *testing.T) {
+	rec := enginetest.Recorded(t)
+	e := rec.Engine(rec.App)
+	e.Images = []enginetest.Doc{enginetest.Image("sha256:"+strings.Repeat("ab", 32), []string{"oec-d8-sim:good"}, "linux", "arm64", []string{"/oec-run-sim"}, []string{"--fault", "good"})}
+	started := make(chan enginetest.Started, 1)
+	e.Run = func(ctx context.Context, s enginetest.Started) int {
+		started <- s
+		<-ctx.Done()
+		return 143
+	}
+	srv := enginetest.Start(t, e)
+	ctx := context.Background()
+	c, err := Open(ctx, srv.Endpoint(), 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img, err := c.Image(ctx, "oec-d8-sim:good")
+	if err != nil || img.Os != "linux" || img.Architecture != "arm64" || !strings.HasPrefix(img.ID, "sha256:abab") {
+		t.Fatalf("image %+v, %v", img, err)
+	}
+	if _, err := c.Image(ctx, "oec-d8-sim:nosuch"); !errors.Is(err, ErrNotFound) {
+		t.Errorf("unknown image: %v", err)
+	}
+	gw, err := c.Gateway(ctx, "bridge")
+	if err != nil || gw != "172.17.0.1" {
+		t.Errorf("gateway %q, %v", gw, err)
+	}
+	own := map[string]string{LabelOwner: OwnerRun, LabelRun: "r1"}
+	spec := CreateSpec{Name: OwnPrefix + "run-x", Image: "oec-d8-sim:good", Hostname: OwnPrefix + "run-x", Labels: own,
+		Binds: []string{"/tmp/a:/etc/oi4/mqtt:ro"}, ExtraHosts: []string{"oec-d8-broker:host-gateway"}, NetworkMode: "bridge"}
+	for _, bad := range []CreateSpec{
+		{Name: "app", Image: spec.Image, Labels: own},
+		{Name: spec.Name, Image: spec.Image, Labels: map[string]string{LabelRun: "r1"}},
+	} {
+		if _, err := c.Create(ctx, bad); !errors.Is(err, ErrNotOwn) {
+			t.Errorf("create %+v: %v", bad, err)
+		}
+	}
+	appName := rec.App["Name"].(string)[1:]
+	for name, op := range map[string]func(string) error{
+		"start":  func(id string) error { return c.Start(ctx, id) },
+		"stop":   func(id string) error { return c.Stop(ctx, id, time.Second) },
+		"remove": func(id string) error { return c.Remove(ctx, id) },
+	} {
+		if err := op(appName); !errors.Is(err, ErrNotOwn) {
+			t.Errorf("%s of a foreign container: %v", name, err)
+		}
+	}
+	if w := srv.Writes(); len(w) != 0 {
+		t.Fatalf("writes %v", w)
+	}
+	id, err := c.Create(ctx, spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Start(ctx, id); err != nil {
+		t.Fatal(err)
+	}
+	s := <-started
+	if s.Name != spec.Name || s.Hostname != spec.Hostname || s.Binds["/etc/oi4/mqtt"] != "/tmp/a" || !slices.Equal(s.Cmd, []string{"/oec-run-sim", "--fault", "good"}) || !slices.Equal(s.ExtraHosts, spec.ExtraHosts) {
+		t.Errorf("started %+v", s)
+	}
+	ctr, err := c.Inspect(ctx, id)
+	if err != nil || !ctr.State.Running || ctr.Config.Labels[LabelRun] != "r1" || ctr.ContainerName() != spec.Name {
+		t.Errorf("inspect %+v, %v", ctr, err)
+	}
+	list, err := c.Own(ctx, "r1")
+	if err != nil || len(list) != 1 || list[0].ID != id {
+		t.Errorf("own %+v, %v", list, err)
+	}
+	if list, _ := c.Own(ctx, "r2"); len(list) != 0 {
+		t.Errorf("own r2 %+v", list)
+	}
+	if err := c.Stop(ctx, id, time.Second); err != nil {
+		t.Fatal(err)
+	}
+	if ctr, _ := c.Inspect(ctx, id); ctr.State.Running || ctr.State.ExitCode != 143 {
+		t.Errorf("stopped %+v", ctr.State)
+	}
+	if err := c.Stop(ctx, id, time.Second); err != nil {
+		t.Errorf("stop of a stopped container: %v", err)
+	}
+	if err := c.Remove(ctx, id); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Inspect(ctx, id); !errors.Is(err, ErrNotFound) {
+		t.Errorf("removed: %v", err)
+	}
+	want := []string{"POST /containers/create?name=" + spec.Name, "POST /containers/" + id + "/start", "POST /containers/" + id + "/stop?t=1", "DELETE /containers/" + id + "?force=1&v=1"}
+	if w := srv.Writes(); !slices.Equal(w, want) {
+		t.Errorf("writes %v, want %v", w, want)
+	}
+}
