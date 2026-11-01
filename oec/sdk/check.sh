@@ -42,6 +42,18 @@
 #      oec/check.sh); rust/spike/mqtt-codec is the sans-IO MQTT 3.1.1 codec
 #      of option (a) of Q-026, byte-exact against hand-encoded packets (the
 #      product codec is oec-core::mqtt since C-049).
+#   3. go (Go SDK of P4c, ADR-0027, from C-076): gofmt, go vet; builds
+#      liboec_ffi.a into go/lib/<GOOS>_<GOARCH>/ (go run ./cmd/oec-buildlib,
+#      release, git-ignored), the Rust helper go-testbroker (example of
+#      oec-ffi: the in-process TLS test broker of oec/tests/testbroker as a
+#      program the Go tests start) and the D7 CLI oec-check of
+#      oec/conformance into a temporary directory (run by exec, no code
+#      import: D7 stays independent, ADR-0006); then go test -race with
+#      GODEBUG=cgocheck=1: the API tests against the test broker, the
+#      examples, and D7 `test --level 1` against examples/hello with proxy,
+#      restart hook, peer and announce (~2 min, loopback only, PKI generated
+#      per run). OEC_GO_REQUIRE_BROKER=1: a missing helper fails instead of
+#      skipping.
 set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
 cc="${CC:-cc}"
@@ -95,5 +107,19 @@ for spike in schema-embed mqtt-codec; do
 	cd "$root/rust/spike/$spike"
 	cargo test --offline --locked --quiet
 done
+
+echo "go: gofmt, vet, liboec_ffi.a, go-testbroker, oec-check, go test -race"
+cd "$root/go"
+unformatted="$(gofmt -l .)"
+test -z "$unformatted" || { echo "gofmt needed: $unformatted" >&2; exit 1; }
+go run ./cmd/oec-buildlib
+go vet ./...
+(cd "$root/rust" && cargo build --offline --locked --quiet -p oec-ffi --example go-testbroker)
+target="$(cd "$root/rust" && cargo metadata --offline --locked --format-version 1 --no-deps | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')"
+gotmp="$(mktemp -d)"
+(cd "$root/../conformance" && go build -o "$gotmp/oec-check" ./cmd/oec-check)
+GODEBUG=cgocheck=1 OEC_GO_REQUIRE_BROKER=1 OEC_GO_TESTBROKER="$target/debug/examples/go-testbroker" \
+	OEC_GO_D7="$gotmp/oec-check" go test -race -count=1 ./... || { rm -rf "$gotmp"; exit 1; }
+rm -rf "$gotmp"
 
 echo "sdk checks ok"
