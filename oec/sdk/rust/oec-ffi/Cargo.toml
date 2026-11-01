@@ -36,6 +36,13 @@ rustls.workspace = true
 rustls-pki-types.workspace = true
 pkcs8.workspace = true
 
+# The test broker of the Go SDK tests (oec/sdk/go, ADR-0027 §9): the test
+# broker above as a program, built by oec/sdk/check.sh.
+[[example]]
+name = "go-testbroker"
+path = "tests/go/testbroker.rs"
+test = false
+
 # The workspace lints, but `unsafe_code` is `deny` instead of `forbid`: each
 # FFI module allows it with a reason (ADR-0021, ADR-0026 §4).
 [lints.rust]
