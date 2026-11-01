@@ -6,13 +6,14 @@ real broker. Nothing here is fit for production; every generated file is a
 development secret and is never committed (`generated/` is git-ignored).
 
 Decisions: ADR-0012 (monorepo `oec/dev/`), ADR-0026 amendment C-051 (dev
-environment and interop test contract).
+environment and interop test contract), ADR-0028 §5 and amendment C-084
+(compose profile `demos`).
 
 | Path | Content |
 |---|---|
-| `compose.yaml` | Mosquitto 2.1.2, pinned by tag and digest, ports on loopback only |
+| `compose.yaml` | Mosquitto 2.1.2, pinned by tag and digest, ports on loopback only; opt-in profile `demos` with the three demo services |
 | `mosquitto/mosquitto.conf` | TLS 1.2/1.3 only, credentials listener, client certificate listener, packet limits |
-| `pki/` | Go generator of the dev PKI, the password file and the sample container storages (standard library only) |
+| `pki/` | Go generator of the dev PKI, the password file, the sample container storages and the storages of the demos (standard library only) |
 | `interop.sh` | Opt-in interop tests of the Rust SDK against this broker |
 | `../conformance/live.sh` | Opt-in live run of `oec-check monitor` (D7) against this broker (C-052) |
 | `generated/` | Output of `go run ./pki` – **never commit** |
@@ -74,10 +75,11 @@ name with `-san` and use it as `-address`.
   (`max_packet_size`) is 65544 octets higher, which leaves room for the
   largest PUBLISH header. With `max_packet_size 262144`, Mosquitto would
   disconnect a client that publishes a payload of exactly MaxPacketSize.
-- **ACL (MG 9.1, REQ-GEN-001; C-071):** [`mosquitto/acl`](mosquitto/acl). Only
+- **ACL (MG 9.1, REQ-GEN-001; C-071, C-084):** [`mosquitto/acl`](mosquitto/acl). Only
   the probe user `oec-probe` (the test tools, the interop probe) may publish
-  `Set`, `Del` and `Call`; every client reads `Oi4v2/#` and publishes `Pub`,
-  `Get` and `Reply`. Mosquitto drops (and acknowledges) a denied PUBLISH. Limitation of
+  `Set`, `Del` and `Call`; the user `oec-config` of the config service (profile
+  `demos`) may publish `Set/Config` and no other request; every client reads
+  `Oi4v2/#` and publishes `Pub`, `Get` and `Reply`. Mosquitto drops (and acknowledges) a denied PUBLISH. Limitation of
   the dev environment: Mosquitto cannot bind the AppId topic level to a user,
   and an application must read its own `Set/Config`, so every client can read
   the `Set/Config` of the others – `oec-infra bus` warns on
@@ -101,9 +103,12 @@ generated/
 ├── probe/                       a second client for tools and the interop tests
 │   ├── username, password       credentials (plain text)
 │   └── probe.pem, probe.key     client certificate and key (unencrypted)
+├── demos.env                    container names of the profile demos
 └── roots/                       sample container storages (RIG 4.1)
     ├── oec-dev-app/             credentials, SecurePort 8883
-    └── oec-dev-cert/            client certificate, SecurePort 8884
+    ├── oec-dev-cert/            client certificate, SecurePort 8884
+    └── oec-logger/, oec-weather/, oec-config/
+                                 storages of the profile demos (below)
 ```
 
 Each sample root is the file system of an application container below `/`:
@@ -123,7 +128,57 @@ Each sample root is the file system of an application container below `/`:
 `broker.json` has exactly the keys of the vectors V-BRK-001 … 018:
 `{"Address": "localhost", "SecurePort": 8883, "MaxPacketSize": 262144}`.
 There is no `broker_ca.pem`, so clients verify the broker against
-`etc/oi4/certs/ca.pem` (RIG 4.1.1). Secret files have mode 0600.
+`etc/oi4/certs/ca.pem` (RIG 4.1.1). Secret files have mode 0600 (the
+credentials of the demo storages: see the profile `demos`).
+
+## Compose profile `demos` (C-084)
+
+The three demo services of `oec/demos` (ADR-0028) as containers next to the
+broker – opt-in, `docker compose up` alone still starts only the broker.
+The images are local (`oi4/oec-<demo>:0.1.0`, built by
+[`../demos/images/build.sh`](../demos/images/build.sh); `pull_policy: never`,
+compose never pulls them).
+
+```sh
+cd oec/demos && images/build.sh /tmp/oec-images   # once: build, D8 image, load
+cd ../dev
+go run ./pki            # a generated/ of an older cycle: go run ./pki -force
+docker compose --env-file generated/demos.env --profile demos up -d --wait
+# Web UIs: http://127.0.0.1:8781 (logger), :8782 (weather), :8783 (config)
+docker compose --env-file generated/demos.env --profile demos down -v
+cd ../demos && images/build.sh --remove           # remove the loaded images
+```
+
+| Service | Image | Web UI | Messaging level | MQTT user |
+|---|---|---|---|---|
+| `oec-logger` | `oi4/oec-logger` | `127.0.0.1:8781` | L2 | `oec-logger` |
+| `oec-weather` | `oi4/oec-weather` | `127.0.0.1:8782` | L3 | `oec-weather` |
+| `oec-config` | `oi4/oec-config` | `127.0.0.1:8783` | L1 | `oec-config` (ACL: `Set/Config`) |
+
+- **Container name = hostname** `<service>-<uuid>` (REQ-CNT-019, REQ-CNT-020):
+  `go run ./pki` draws a UUID per demo and installation and writes the names
+  to `generated/demos.env`; compose reads them with `--env-file`. Without it
+  the containers are named `oec-logger`, `oec-weather`, `oec-config` (valid,
+  but without the UUID that REQ-CNT-020 recommends). The name is the
+  SerialNumber of the AppId (REQ-CNT-021).
+- **Storages:** `generated/roots/<service>/` holds `broker.json` (Address
+  `mosquitto`, SecurePort 8883 – the broker in the compose network, not the
+  host port), `broker.pem`, `ca.pem` and the credentials, mounted read-only at
+  `/etc/oi4/mqtt`, `/etc/oi4/certs` and `/run/secrets/oi4`. The image runs as
+  UID 65532, so the credentials file is readable by all; its `run/`
+  directory (mode 0700) keeps the other users of the host out. The
+  application storages `/etc/oi4/app` and `/opt/oi4/app` are named volumes
+  (`down -v` removes them); nothing is mounted over `/opt/oi4/licenses`
+  (REQ-CNT-017).
+- **Config service:** `generated/roots/oec-config/etc/oec-config/config-service.json`
+  lists the logger and the weather service by AppId (`apps`), so the service
+  asks them with `Get MAM` at every connect, also after a restart of its own.
+- **Weather service:** starts with the provider `simulation` (offline); it
+  calls `api.met.no` only after a `Set` of `provider` and `userAgentContact`.
+- **Hardening:** read-only root file system, all capabilities dropped,
+  `no-new-privileges`, bridge network of the project (REQ-CNT-023). The Web
+  UIs listen on `0.0.0.0` inside the container and are published on
+  `127.0.0.1` only (A-305: no authentication, no TLS).
 
 ## Run an application against the broker
 

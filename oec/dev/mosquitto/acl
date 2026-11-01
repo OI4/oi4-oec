@@ -15,6 +15,11 @@
 user oec-probe
 topic readwrite #
 
+# The config service of the demos (compose profile demos, ADR-0028 §5,
+# C-084) writes the Config of other applications: Set/Config only.
+user oec-config
+topic write Oi4v2/+/+/Set/Config/#
+
 # Every client (pattern lines apply to all users, also oec-probe): read the
 # Message Bus, publish Pub (answers, data, Health, MAM, Event, Will), Get and
 # Reply (the answer to a Call, MG 9.2).

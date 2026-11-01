@@ -15,6 +15,7 @@ import (
 	"encoding/pem"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -187,11 +188,12 @@ func TestMosquittoPasswdVector(t *testing.T) {
 	}
 }
 
-// The password file holds the users of the credentials files.
+// The password file holds the users of the credentials files: oec-dev-app,
+// the probe, then the demos (TestDemoStorages).
 func TestPasswordFile(t *testing.T) {
 	out, _ := generated(t)
 	lines := strings.Split(strings.TrimSpace(string(read(t, out, "broker/passwd"))), "\n")
-	if len(lines) != 2 {
+	if len(lines) != 2+len(demos) {
 		t.Fatalf("passwd: %d lines", len(lines))
 	}
 	user, password, _ := strings.Cut(decode64(t, read(t, out, "roots/oec-dev-app/run/secrets/oi4/credentials")), ":")
@@ -279,5 +281,102 @@ func TestPrepare(t *testing.T) {
 	o.out = foreign
 	if err := generate(o); err == nil || !strings.Contains(err.Error(), "not written by this tool") {
 		t.Fatalf("foreign directory replaced: %v", err)
+	}
+}
+
+// demoEnv reads generated/demos.env, the container names of the compose
+// profile demos.
+func demoEnv(t *testing.T, out string) map[string]string {
+	t.Helper()
+	env := map[string]string{}
+	for _, line := range strings.Split(strings.TrimSpace(string(read(t, out, demosEnv))), "\n") {
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		k, v, ok := strings.Cut(line, "=")
+		if !ok {
+			t.Fatalf("%s: %q", demosEnv, line)
+		}
+		env[k] = v
+	}
+	return env
+}
+
+var containerName = regexp.MustCompile(`^([a-z0-9-]{1,26})-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
+
+// The demo containers of the compose profile demos (ADR-0028 §5): a
+// <DefaultContainerName>-<uuid> name per installation (REQ-CNT-019,
+// REQ-CNT-020), a container storage per demo with the broker as seen in the
+// compose network and own credentials that the non-root container user may
+// read (the run directory keeps other users of the host out), the
+// applications the config service asks at every connect.
+func TestDemoStorages(t *testing.T) {
+	out, _ := generated(t)
+	env := demoEnv(t, out)
+	if len(env) != len(demos) {
+		t.Fatalf("%s: %v", demosEnv, env)
+	}
+	lines := strings.Split(strings.TrimSpace(string(read(t, out, "broker/passwd"))), "\n")
+	names := map[string]string{}
+	for i, d := range demos {
+		name := env[d.env]
+		m := containerName.FindStringSubmatch(name)
+		if m == nil || m[1] != d.user || len(name) > 63 {
+			t.Fatalf("%s=%q", d.env, name)
+		}
+		names[d.user] = name
+		root := "roots/" + d.user + "/"
+		var b map[string]any
+		if err := json.Unmarshal(read(t, out, root+"etc/oi4/mqtt/broker.json"), &b); err != nil {
+			t.Fatal(err)
+		}
+		if len(b) != 3 || b["Address"] != "mosquitto" || b["SecurePort"] != float64(8883) || b["MaxPacketSize"] != float64(maxPacketSize) {
+			t.Errorf("%s broker.json: %v", d.user, b)
+		}
+		for _, rel := range []string{"etc/oi4/certs/ca.pem", "etc/oi4/mqtt/broker.pem"} {
+			if !bytes.Equal(read(t, out, root+rel), read(t, out, "broker/"+filepath.Base(rel))) {
+				t.Errorf("%s/%s differs from the broker side", d.user, rel)
+			}
+		}
+		user, password, _ := strings.Cut(decode64(t, read(t, out, root+"run/secrets/oi4/credentials")), ":")
+		if user != d.user || len(password) < 32 || len(lines) != 2+len(demos) || !verify(t, lines[2+i], user, password) {
+			t.Errorf("the credentials of %s do not match passwd line %d", d.user, 3+i)
+		}
+		for _, rel := range []string{"etc/hostname", "etc/oi4/app", "run/secrets/oi4/private_key.pem"} {
+			if _, err := os.Stat(filepath.Join(out, root+rel)); err == nil {
+				t.Errorf("%s: unexpected %s (the engine sets the hostname, the volumes are named)", d.user, rel)
+			}
+		}
+		if runtime.GOOS != "windows" {
+			for rel, want := range map[string]os.FileMode{"run": 0o700, "run/secrets/oi4": 0o755, "run/secrets/oi4/credentials": 0o644} {
+				fi, err := os.Stat(filepath.Join(out, root+rel))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if fi.Mode().Perm() != want {
+					t.Errorf("%s/%s: mode %v, want %v", d.user, rel, fi.Mode().Perm(), want)
+				}
+			}
+		}
+	}
+	var settings struct {
+		Apps []string `json:"apps"`
+	}
+	dec := json.NewDecoder(bytes.NewReader(read(t, out, "roots/oec-config/"+configServiceFile)))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&settings); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{
+		"Utility/oi4.org/OEC,20Logger/OEC-LOGGER/" + names["oec-logger"],
+		"OTConnector/oi4.org/OEC,20Weather/OEC-WEATHER/" + names["oec-weather"],
+	}
+	if strings.Join(settings.Apps, " ") != strings.Join(want, " ") {
+		t.Errorf("config-service.json apps %v, want %v", settings.Apps, want)
+	}
+	// a new installation gets new names
+	out2, _ := generated(t)
+	if env2 := demoEnv(t, out2); env2["OEC_LOGGER_NAME"] == env["OEC_LOGGER_NAME"] {
+		t.Error("the container names are not per installation")
 	}
 }

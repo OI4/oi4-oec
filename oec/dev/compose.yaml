@@ -4,6 +4,13 @@
 # Ports are published on loopback only; change with OEC_DEV_BIND,
 # OEC_DEV_MQTT_PORT and OEC_DEV_CERT_PORT (then pass the same ports to
 # `go run ./pki -port … -cert-port …`). See README.md.
+#
+# Profile demos (opt-in, ADR-0028 §5, C-084): the demo services logger,
+# weather and config of the local images (oec/demos/images/build.sh, never
+# pulled), each with the container storage of `go run ./pki` and its
+# container name of generated/demos.env (REQ-CNT-019, REQ-CNT-020):
+#   docker compose --env-file generated/demos.env --profile demos up -d
+# The Web UIs are published on 127.0.0.1 only (A-305).
 name: oec-dev
 
 services:
@@ -39,5 +46,83 @@ services:
       retries: 3
     restart: "no"
 
+  oec-logger:
+    profiles: [demos]
+    image: oi4/oec-logger:${OEC_DEMOS_VERSION:-0.1.0}
+    pull_policy: never
+    container_name: ${OEC_LOGGER_NAME:-oec-logger}
+    hostname: ${OEC_LOGGER_NAME:-oec-logger}
+    ports:
+      - "127.0.0.1:8781:8781"
+    volumes:
+      - ./generated/roots/oec-logger/etc/oi4/mqtt:/etc/oi4/mqtt:ro
+      - ./generated/roots/oec-logger/etc/oi4/certs:/etc/oi4/certs:ro
+      - ./generated/roots/oec-logger/run/secrets/oi4:/run/secrets/oi4:ro
+      - oec-logger-etc:/etc/oi4/app
+      - oec-logger-opt:/opt/oi4/app
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    restart: "no"
+
+  # the weather service starts with the provider simulation (offline); met-no
+  # only after a Set of provider and userAgentContact (README of the demo)
+  oec-weather:
+    profiles: [demos]
+    image: oi4/oec-weather:${OEC_DEMOS_VERSION:-0.1.0}
+    pull_policy: never
+    container_name: ${OEC_WEATHER_NAME:-oec-weather}
+    hostname: ${OEC_WEATHER_NAME:-oec-weather}
+    ports:
+      - "127.0.0.1:8782:8782"
+    volumes:
+      - ./generated/roots/oec-weather/etc/oi4/mqtt:/etc/oi4/mqtt:ro
+      - ./generated/roots/oec-weather/etc/oi4/certs:/etc/oi4/certs:ro
+      - ./generated/roots/oec-weather/run/secrets/oi4:/run/secrets/oi4:ro
+      - oec-weather-etc:/etc/oi4/app
+      - oec-weather-opt:/opt/oi4/app
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    restart: "no"
+
+  oec-config:
+    profiles: [demos]
+    image: oi4/oec-config:${OEC_DEMOS_VERSION:-0.1.0}
+    pull_policy: never
+    container_name: ${OEC_CONFIG_NAME:-oec-config}
+    hostname: ${OEC_CONFIG_NAME:-oec-config}
+    environment:
+      # the applications to ask at every connect (written by `go run ./pki`)
+      OEC_CONFIG_FILE: /etc/oec-config/config-service.json
+    ports:
+      - "127.0.0.1:8783:8783"
+    volumes:
+      - ./generated/roots/oec-config/etc/oi4/mqtt:/etc/oi4/mqtt:ro
+      - ./generated/roots/oec-config/etc/oi4/certs:/etc/oi4/certs:ro
+      - ./generated/roots/oec-config/run/secrets/oi4:/run/secrets/oi4:ro
+      - ./generated/roots/oec-config/etc/oec-config/config-service.json:/etc/oec-config/config-service.json:ro
+      - oec-config-etc:/etc/oi4/app
+      - oec-config-opt:/opt/oi4/app
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    restart: "no"
+
 volumes:
   data:
+  oec-logger-etc:
+  oec-logger-opt:
+  oec-weather-etc:
+  oec-weather-opt:
+  oec-config-etc:
+  oec-config-opt:

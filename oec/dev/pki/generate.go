@@ -34,6 +34,33 @@ const (
 	probeUser = "oec-probe"
 )
 
+// The demos of the compose profile demos (ADR-0028 §5): the MQTT user and
+// default container name, the variable of generated/demos.env with the
+// container name and the port of the Web UI.
+type demo struct {
+	user, env string
+	port      int
+}
+
+var demos = []demo{
+	{"oec-logger", "OEC_LOGGER_NAME", 8781},
+	{"oec-weather", "OEC_WEATHER_NAME", 8782},
+	{"oec-config", "OEC_CONFIG_NAME", 8783},
+}
+
+// configUser is the user of the config service: the ACL lets it publish
+// Set/Config.
+const configUser = "oec-config"
+
+// demosEnv holds the container names of the demos for the variable
+// interpolation of compose.yaml (`--env-file generated/demos.env`);
+// configServiceFile is the settings file of the config service below its
+// storage root, mounted at the same path in the container.
+const (
+	demosEnv          = "demos.env"
+	configServiceFile = "etc/oec-config/config-service.json"
+)
+
 // MaxPacketSize of the sample broker.json: the minimum of RIG 4.1.1. The
 // Mosquitto configuration limits the payload to it (message_size_limit) and
 // the whole packet to it plus the largest PUBLISH header (SF-105).
@@ -128,8 +155,22 @@ func generate(o options) error {
 	if err != nil {
 		return err
 	}
+	users := [][2]string{{appName, appPassword}, {probeUser, probePassword}}
+	names := make([]string, len(demos))
+	for i, d := range demos {
+		password, err := secret(o.rand)
+		if err != nil {
+			return err
+		}
+		users = append(users, [2]string{d.user, password})
+		id, err := uuid4(o.rand)
+		if err != nil {
+			return err
+		}
+		names[i] = d.user + "-" + id
+	}
 	var passwd []byte
-	for _, u := range [][2]string{{appName, appPassword}, {probeUser, probePassword}} {
+	for _, u := range users {
 		line, err := mosquittoHash(o.rand, u[0], u[1])
 		if err != nil {
 			return err
@@ -166,7 +207,67 @@ func generate(o options) error {
 	w.file("roots/"+certName+"/etc/oi4/certs/"+certName+".pem", client.pem(), 0o644)
 	w.file("roots/"+certName+"/run/secrets/oi4/private_key.pem", encrypted, 0o600)
 	w.file("roots/"+certName+"/run/secrets/oi4/passphrase", []byte(base64.StdEncoding.EncodeToString([]byte(passphrase))+"\n"), 0o600)
+	// the demos of the compose profile demos
+	env := "# written by `go run ./pki`: container names of the compose profile demos\n"
+	for i, d := range demos {
+		env += d.env + "=" + names[i] + "\n"
+		w.demoStorage(d.user, ca, broker, credentials(d.user, users[2+i][1]))
+	}
+	w.file(demosEnv, []byte(env), 0o644)
+	settings, err := json.MarshalIndent(struct {
+		Apps []string `json:"apps"`
+	}{[]string{
+		"Utility/oi4.org/OEC,20Logger/OEC-LOGGER/" + names[0],
+		"OTConnector/oi4.org/OEC,20Weather/OEC-WEATHER/" + names[1],
+	}}, "", "  ")
+	if err != nil {
+		return err
+	}
+	w.file("roots/"+configUser+"/"+configServiceFile, append(settings, '\n'), 0o644)
 	return w.err
+}
+
+// demoStorage writes the container storage of a demo of the compose profile
+// demos: the broker in the compose network, the credentials. The engine sets
+// the hostname and named volumes hold the application storages. The non-root
+// user of the image must read the credentials through the read-only bind
+// mount, so the file is readable by all and the run directory keeps the
+// other users of the host out (as the storages of oec-infra run).
+func (w *writer) demoStorage(name string, ca, broker issued, creds []byte) {
+	if w.err != nil {
+		return
+	}
+	brokerJSON, err := json.MarshalIndent(struct {
+		Address       string
+		SecurePort    int
+		MaxPacketSize int
+	}{"mosquitto", 8883, maxPacketSize}, "", "  ")
+	if err != nil {
+		w.err = err
+		return
+	}
+	base := "roots/" + name + "/"
+	w.file(base+"etc/oi4/mqtt/broker.json", append(brokerJSON, '\n'), 0o644)
+	w.file(base+"etc/oi4/mqtt/broker.pem", broker.pem(), 0o644)
+	w.file(base+"etc/oi4/certs/ca.pem", ca.pem(), 0o644)
+	w.file(base+"run/secrets/oi4/credentials", creds, 0o644)
+	// independent of the umask
+	for rel, mode := range map[string]os.FileMode{"run": 0o700, "run/secrets": 0o755, "run/secrets/oi4": 0o755, "run/secrets/oi4/credentials": 0o644} {
+		if w.err == nil {
+			w.err = os.Chmod(filepath.Join(w.root, filepath.FromSlash(base+rel)), mode)
+		}
+	}
+}
+
+// uuid4 is a random UUID (RFC 9562 version 4) in lower case.
+func uuid4(r io.Reader) (string, error) {
+	b := make([]byte, 16)
+	if _, err := io.ReadFull(r, b); err != nil {
+		return "", err
+	}
+	b[6] = b[6]&0x0f | 0x40
+	b[8] = b[8]&0x3f | 0x80
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:]), nil
 }
 
 // prepare creates an empty output directory; an existing one is replaced

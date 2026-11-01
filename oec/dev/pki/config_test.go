@@ -92,8 +92,9 @@ func TestMosquittoConf(t *testing.T) {
 }
 
 // The ACL lets only the probe user publish Set, Del and Call (REQ-GEN-001,
-// oec-infra bus T8-BUS-02); every client reads the Message Bus and
-// publishes Pub and Get.
+// oec-infra bus T8-BUS-02) and the user of the config service only
+// Set/Config (ADR-0028 §5); every client reads the Message Bus and
+// publishes Pub, Get and Reply.
 func TestACL(t *testing.T) {
 	b, err := os.ReadFile("../mosquitto/acl")
 	if err != nil {
@@ -107,6 +108,7 @@ func TestACL(t *testing.T) {
 	}
 	want := []string{
 		"user " + probeUser, "topic readwrite #",
+		"user " + configUser, "topic write Oi4v2/+/+/Set/Config/#",
 		"pattern read Oi4v2/#", "pattern write Oi4v2/+/+/Pub/#", "pattern write Oi4v2/+/+/Get/#",
 		"pattern write Oi4v2/+/+/Reply/#",
 	}
@@ -137,6 +139,91 @@ func TestCompose(t *testing.T) {
 	} {
 		if !strings.Contains(c, want) {
 			t.Errorf("compose.yaml lacks %s", want)
+		}
+	}
+}
+
+// service is the text of one service of compose.yaml (the lines below
+// `  <name>:` up to the next service or top-level key).
+func services(t *testing.T, c string) map[string]string {
+	t.Helper()
+	out, name, in := map[string]string{}, "", false
+	for _, line := range strings.Split(c, "\n") {
+		switch {
+		case line == "services:":
+			in = true
+		case in && line != "" && !strings.HasPrefix(line, " ") && !strings.HasPrefix(line, "#"):
+			in, name = false, ""
+		case in && strings.HasPrefix(line, "  ") && !strings.HasPrefix(line, "   ") && strings.HasSuffix(line, ":") && !strings.HasPrefix(strings.TrimSpace(line), "#"):
+			name = strings.TrimSuffix(strings.TrimSpace(line), ":")
+		case in && name != "":
+			out[name] += line + "\n"
+		}
+	}
+	return out
+}
+
+// The profile demos (ADR-0028 §5): opt-in, so the broker alone stays the
+// default; the local images only (never pulled); the container name of
+// generated/demos.env as name and hostname (REQ-CNT-019); the container
+// storage of `go run ./pki` read-only, named volumes for the application
+// storages and nothing over /opt/oi4/licenses (REQ-CNT-017); the Web UI on
+// loopback only (A-305); a bridge network (REQ-CNT-023).
+func TestComposeDemos(t *testing.T) {
+	b, err := os.ReadFile("../compose.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := services(t, string(b))
+	if len(s) != 1+len(demos) || s["mosquitto"] == "" || strings.Contains(s["mosquitto"], "profiles:") {
+		t.Fatalf("services %v: mosquitto without profile plus the demos", len(s))
+	}
+	for _, d := range demos {
+		c := s[d.user]
+		if c == "" {
+			t.Errorf("no service %s", d.user)
+			continue
+		}
+		for _, want := range []string{
+			"profiles: [demos]",
+			"image: oi4/oec-" + strings.TrimPrefix(d.user, "oec-") + ":${OEC_DEMOS_VERSION:-0.1.0}",
+			"pull_policy: never",
+			"container_name: ${" + d.env + ":-" + d.user + "}",
+			"hostname: ${" + d.env + ":-" + d.user + "}",
+			"./generated/roots/" + d.user + "/etc/oi4/mqtt:/etc/oi4/mqtt:ro",
+			"./generated/roots/" + d.user + "/etc/oi4/certs:/etc/oi4/certs:ro",
+			"./generated/roots/" + d.user + "/run/secrets/oi4:/run/secrets/oi4:ro",
+			d.user + "-etc:/etc/oi4/app",
+			d.user + "-opt:/opt/oi4/app",
+			`"127.0.0.1:` + strconv.Itoa(d.port) + ":" + strconv.Itoa(d.port) + `"`,
+			"condition: service_healthy",
+			"no-new-privileges:true",
+			"cap_drop: [ALL]",
+			"read_only: true",
+		} {
+			if !strings.Contains(c, want) {
+				t.Errorf("%s lacks %s", d.user, want)
+			}
+		}
+		for _, bad := range []string{"/opt/oi4/licenses", "network_mode", "privileged", "OEC_DEV_BIND", "0.0.0.0"} {
+			if strings.Contains(c, bad) {
+				t.Errorf("%s: %s", d.user, bad)
+			}
+		}
+		if n := strings.Count(c, "127.0.0.1:"); n != 1 {
+			t.Errorf("%s: %d published ports, want the Web UI only", d.user, n)
+		}
+		if !regexp.MustCompile(`(?m)^volumes:\n(?:  .*\n)*  ` + d.user + `-etc:\n(?:  .*\n)*  ` + d.user + `-opt:$`).MatchString(string(b)) {
+			t.Errorf("%s: named volumes not declared", d.user)
+		}
+	}
+	c := s["oec-config"]
+	for _, want := range []string{
+		"./generated/roots/oec-config/" + configServiceFile + ":/" + configServiceFile + ":ro",
+		"OEC_CONFIG_FILE: /" + configServiceFile,
+	} {
+		if !strings.Contains(c, want) {
+			t.Errorf("oec-config lacks %s", want)
 		}
 	}
 }
