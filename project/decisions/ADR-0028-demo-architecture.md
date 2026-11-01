@@ -88,3 +88,17 @@ oec/demos/
 - The gate gets a demos step (a few minutes for the D7 runs).
 - A change of the C ABI, the Go SDK or the Rust API that a demo needs is an additive amendment with a test first (ADR-0021/0027/0020); D7, D8 and the report formats stay as they are.
 - The three UI ports and the `demos` profile are fixed for the dev environment; the README of `oec/dev` documents them in increment 6.
+
+## Amendment C-080 (2026-11-01) – increment 2, the weather service core as built (agent, G-3.4 b)
+
+Details: `log/2026-11-01_C-080_weather-core.md`, REVIEW A-341 … A-346, `oec/demos/weather/README.md`. No change to the Go SDK, `oec` or `oec-ffi`.
+
+1. **§1 module:** `oec/demos/go.mod` requires `github.com/OI4/oec/sdk/go v0.0.0`, replaced by `../sdk/go`. Go code stays standard library plus the Go SDK of this workspace; no external module, no `go.sum`. The layout line "standard library only" of §1 means no third-party module.
+2. **Weather service:**
+   - `package main` in `oec/demos/weather`: `provider.go` (provider interface, fields of `Oi4Pv`), `simulation.go` (offline provider), `settings.go` (Config definitions), `service.go` (stations, poll goroutine), `main.go`.
+   - Stations are represented assets with SerialNumber `<hostname>-station-<n>`. A removed station leaves the `PublicationList`, because MG has no Close message for a represented asset (A-341).
+   - Every SDK call after the start is made by one poll goroutine; the `OnSet` handlers only hand over (A-344).
+   - The Frost/Storm warnings are Generic events of the station, built in C-080 instead of C-081 (A-345).
+3. **§6 tests:**
+   - `oec/demos/check.sh` puts `liboec_ffi.a` for cgo into `oec/sdk/go/lib/<GOOS>_<GOARCH>/` (`go run ./cmd/oec-buildlib`) and builds the weather service with `-race` into `weather/target/`; `go test -race ./...` gets `OEC_WEATHER`.
+   - D7 `test --level 3` against the weather service: 49 pass pinned, 6 skips (requests of the CUT; ReferenceDesignation) as against the Go SDK example `source`.
