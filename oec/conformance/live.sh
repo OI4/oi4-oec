@@ -18,7 +18,8 @@
 # TestRunDev` (loads the test images oec-d8-sim:<fault> of the simulated
 # application, runs every fault in oec-d8-run-* sandbox containers and
 # removes the images by tag; never a prune) with OEC_LIVE=1, stop the
-# broker and remove its volume (compose down -v).
+# broker and remove its volume (compose down -v). Containers of the live
+# tests are removed with their anonymous volumes (rm -v, C-075).
 #
 # Environment:
 #   OEC_COMPOSE    compose command (default "docker compose"; e.g.

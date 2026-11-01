@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -274,9 +275,18 @@ func TestContainerDev(t *testing.T) {
 	app, bad := "oec-live-app-"+id, "oec-live-bad_"+id[:8]
 	cfg, data := "oec-live-cfg-"+id[:8], "oec-live-data-"+id[:8]
 	secrets, lic := t.TempDir(), t.TempDir()
+	// The image of the broker declares volumes: removing the containers
+	// with -v removes their anonymous volumes (C-075); no prune.
+	dangling := func() []string { return strings.Fields(cmd(engine, "volume", "ls", "-q", "--filter", "dangling=true")) }
+	before := dangling()
 	t.Cleanup(func() {
-		_ = exec.Command(engine, "rm", "-f", app, bad).Run()
+		_ = exec.Command(engine, "rm", "-f", "-v", app, bad).Run()
 		_ = exec.Command(engine, "volume", "rm", "-f", cfg, data).Run()
+		for _, v := range dangling() {
+			if !slices.Contains(before, v) {
+				t.Errorf("the live run left the anonymous volume %s", v)
+			}
+		}
 	})
 	cmd(engine, "run", "-d", "--name", app, "--hostname", app, "--network", network,
 		"-v", cfg+":/etc/oi4/app", "-v", data+":/opt/oi4/app", "-v", secrets+":/run/secrets/oi4:ro",
@@ -325,7 +335,7 @@ func TestContainerDev(t *testing.T) {
 		}
 	}
 	t.Run("host/shared", func(t *testing.T) { storages(t, 1, "fail", "REQ-CNT-011") })
-	cmd(engine, "rm", "-f", bad)
+	cmd(engine, "rm", "-f", "-v", bad)
 	t.Run("host/own", func(t *testing.T) { storages(t, exitPass, "pass", "") })
 }
 
