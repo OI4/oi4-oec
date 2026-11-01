@@ -136,6 +136,25 @@ func TestFixtureIndexes(t *testing.T) {
 	if none.Name != "none" || !none.Positive || !none.Runs("T7-GET-01") || !none.Peer || !none.Announce {
 		t.Errorf("first sim fixture %+v", none)
 	}
+	infra, err := InfraFixtures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	kinds := map[string]int{}
+	for _, f := range infra {
+		kinds[f.Kind]++
+		if f.Name == "" || f.Status != "draft" && f.Status != "reviewed" {
+			t.Errorf("fixture %+v", f)
+		}
+		for id, e := range f.Expect {
+			if !strings.HasPrefix(id, "T8-") || e.Outcome == "" {
+				t.Errorf("%s: expect %s %+v", f.Label(), id, e)
+			}
+		}
+	}
+	if infra[0].Label() != "image good.tar" || len(kinds) != 5 || kinds["image"] == 0 || kinds["bus"] == 0 || kinds["host"] == 0 || kinds["container"] == 0 || kinds["run"] == 0 {
+		t.Errorf("D8 fixtures: first %s, kinds %v", infra[0].Label(), kinds)
+	}
 	sel := Fixture{Tests: []string{"T7-MON-*", "T7-CON-*"}}
 	if !sel.Runs("T7-CON-02") || sel.Runs("T7-GET-01") {
 		t.Error("Runs ignores the test selection")

@@ -261,3 +261,125 @@ applicable). A negative fixture is one with fail, warn or info.
 | REQ-TOP-018 | MUST | d7-validate, d7-test | T7-ADR-03 | 0 |
 | REQ-TOP-024 | MUST NOT | d7-monitor | T7-MON-19 | 1 |
 | REQ-TOP-027 | SHOULD | d7-test | T7-SET-12 | 1 |
+
+# D8 catalog coverage
+
+Generated from `catalog/d8.yaml`, the requirements catalog of `oec/spec` (baseline `52d8470`) and the indexes of the
+self-test fixtures (`testdata/images/index.yaml`, `testdata/bus/index.yaml`, `testdata/hosts/index.yaml`,
+`testdata/containers/index.yaml`, `testdata/run/index.yaml`) – generated with the D7 part above.
+`oec-infra list` and `oec-infra explain` show the same data.
+
+## Summary
+
+| Tests | Count |
+|---|---:|
+| all | 17 |
+| status `planned` | 0 |
+| status `implemented` | 17 |
+| mode `image` | 4 |
+| mode `run` | 3 |
+| mode `container` | 3 |
+| mode `host` | 4 |
+| mode `bus` | 3 |
+| needs `docker` | 7 |
+| needs `host-access` | 4 |
+| needs `credentials-2` | 1 |
+| needs `none` | 6 |
+
+| Active requirements by verification kind | REQs | checked by a test | `manual` | not covered |
+|---|---:|---:|---:|---:|
+| `d8` | 52 | 51 | 1 | 0 |
+| none of these (D7, manual or other tools) | 389 | | | |
+
+Fixtures: 19 image, 29 bus, 69 host, 26 container, 20 run; 27 positive; 163 of 163 reviewed.
+Tests with a negative fixture (fail, warn or info): 17 of 17; with a positive fixture: 17 of 17.
+
+## Tests
+
+Fixtures by the outcome their index states for the test: `fail`; `warn`/`info` (the verdict of a SHOULD or a
+heuristic rule); `skip`; `positive` – positive fixtures that run the test without stating an outcome or with `pass`
+(pass or not applicable); `manual` – fixtures that state requirements with a manual verdict (a measured value for
+a human to judge), whatever the outcome of the test. A negative fixture is one with fail, warn or info. Level `–`:
+no requirement of the test is graded by level; they apply with their keyword (DESIGN.md §9).
+
+| Test | Mode | Level | Needs | Status | Requirements | fail | warn/info | skip | positive | manual |
+|---|---|---:|---|---|---|---:|---:|---:|---:|---:|
+| T8-IMG-01 | image | 1 | – | implemented | REQ-CMP-027 | 1 | 0 | 0 | 3 | 0 |
+| T8-IMG-02 | image | 2 | – | implemented | REQ-APP-001 REQ-APP-002 REQ-CMP-032 | 1 | 1 | 0 | 3 | 0 |
+| T8-IMG-03 | image | 2 | – | implemented | REQ-CMP-028 REQ-CNT-013 REQ-CNT-014 REQ-CNT-015 REQ-CNT-026 REQ-CNT-027 REQ-LIC-002 | 9 | 2 | 2 | 3 | 0 |
+| T8-IMG-04 | image | 2 | – | implemented | REQ-CMP-030 | 0 | 2 | 0 | 3 | 0 |
+| T8-RUN-01 | run | 2 | docker | implemented | REQ-CMP-029 REQ-CNT-004 | 13 | 1 | 2 | 2 | 0 |
+| T8-RUN-02 | run | 2 | docker | implemented | REQ-CNT-009 | 5 | 0 | 7 | 2 | 0 |
+| T8-RUN-03 | run | 1 | docker | implemented | REQ-CNT-021 REQ-MQTT-013 | 1 | 2 | 6 | 1 | 0 |
+| T8-CTR-01 | container | 2 | docker | implemented | REQ-CMP-031 REQ-CNT-023 | 0 | 6 | 3 | 3 | 0 |
+| T8-CTR-02 | container | – | docker | implemented | REQ-CNT-019 REQ-CNT-020 | 6 | 1 | 2 | 3 | 0 |
+| T8-CTR-03 | container | – | docker | implemented | REQ-CNT-017 | 5 | 1 | 2 | 1 | 1 |
+| T8-HST-01 | host | – | host-access | implemented | REQ-CNT-001 REQ-CNT-003 REQ-MQTT-003 | 11 | 3 | 0 | 3 | 0 |
+| T8-HST-02 | host | – | host-access | implemented | REQ-CNT-002 REQ-CNT-005 REQ-CNT-006 REQ-CNT-007 REQ-CNT-008 REQ-MQTT-011 | 15 | 3 | 0 | 4 | 0 |
+| T8-HST-03 | host | – | host-access, docker | implemented | REQ-CNT-011 REQ-CNT-024 | 7 | 0 | 4 | 5 | 2 |
+| T8-HST-04 | host | – | host-access | implemented | REQ-PLT-001 REQ-PLT-003 REQ-PLT-006 REQ-PLT-007 REQ-PLT-008 | 10 | 0 | 2 | 5 | 19 |
+| T8-BUS-01 | bus | – | – | implemented | REQ-MQTT-002 REQ-MQTT-006 REQ-MQTT-007 REQ-CNT-003 | 10 | 0 | 0 | 3 | 0 |
+| T8-BUS-02 | bus | – | credentials-2 | implemented | REQ-GEN-001 REQ-RES-CONFIG-020 REQ-RES-CONFIG-026 REQ-RES-DATA-010 REQ-RES-META-005 REQ-RES-PUBLIST-023 REQ-RES-REFDES-008 REQ-RES-SUBLIST-012 | 3 | 1 | 1 | 3 | 0 |
+| T8-BUS-03 | bus | – | – | implemented | REQ-REG-001 REQ-REG-002 | 7 | 0 | 1 | 2 | 0 |
+
+## Manual requirements
+
+| Requirement | Reason |
+|---|---|
+| REQ-CMP-012 | A rule for D8 itself, not a test – `--level` defaults to 3 when the manufacturer states no level. |
+
+## Requirements checked by tests
+
+| Requirement | Keyword | Verification | Tests | Fixtures with a stated outcome |
+|---|---|---|---|---:|
+| REQ-APP-001 | MUST | d8 | T8-IMG-02 | 1 |
+| REQ-APP-002 | SHOULD | d8 | T8-IMG-02 | 1 |
+| REQ-CMP-027 | MUST | d8 | T8-IMG-01 | 1 |
+| REQ-CMP-028 | MUST | d8 | T8-IMG-03 | 4 |
+| REQ-CMP-029 | MUST | d8 | T8-RUN-01 | 16 |
+| REQ-CMP-030 | MUST | d8 | T8-IMG-04 | 2 |
+| REQ-CMP-031 | MUST | d8 | T8-CTR-01 | 9 |
+| REQ-CMP-032 | MUST | d8, manual | T8-IMG-02 | 1 |
+| REQ-CNT-001 | MUST | d8 | T8-HST-01 | 11 |
+| REQ-CNT-002 | SHOULD | d8 | T8-HST-02 | 2 |
+| REQ-CNT-003 | MUST | d8 | T8-HST-01 T8-BUS-01 | 5 |
+| REQ-CNT-004 | MUST | d8, manual | T8-RUN-01 | 9 |
+| REQ-CNT-005 | MUST | d8 | T8-HST-02 | 3 |
+| REQ-CNT-006 | MUST | d8 | T8-HST-02 | 4 |
+| REQ-CNT-007 | SHOULD | d8 | T8-HST-02 | 1 |
+| REQ-CNT-008 | MUST | d8 | T8-HST-02 | 10 |
+| REQ-CNT-009 | MUST | d8, manual | T8-RUN-02 | 12 |
+| REQ-CNT-011 | MUST | d8 | T8-HST-03 | 9 |
+| REQ-CNT-013 | MUST | d8 | T8-IMG-03 | 7 |
+| REQ-CNT-014 | MUST | d8 | T8-IMG-03 | 5 |
+| REQ-CNT-015 | MUST | d8 | T8-IMG-03 | 3 |
+| REQ-CNT-017 | MUST NOT | d8 | T8-CTR-03 | 9 |
+| REQ-CNT-019 | MUST | d8 | T8-CTR-02 | 8 |
+| REQ-CNT-020 | SHOULD | d8 | T8-CTR-02 | 3 |
+| REQ-CNT-021 | MUST | manual, d8 | T8-RUN-03 | 8 |
+| REQ-CNT-023 | SHOULD | d8, manual | T8-CTR-01 | 9 |
+| REQ-CNT-024 | MUST NOT | d8, manual | T8-HST-03 | 8 |
+| REQ-CNT-026 | MUST | d8 | T8-IMG-03 | 3 |
+| REQ-CNT-027 | SHOULD | d8 | T8-IMG-03 | 3 |
+| REQ-GEN-001 | MUST | d8 | T8-BUS-02 | 4 |
+| REQ-LIC-002 | MUST | d8, manual | T8-IMG-03 | 5 |
+| REQ-MQTT-002 | MUST | d8 | T8-BUS-01 | 1 |
+| REQ-MQTT-003 | MUST | d8 | T8-HST-01 | 4 |
+| REQ-MQTT-006 | MUST | d8 | T8-BUS-01 | 3 |
+| REQ-MQTT-007 | MUST | d8, manual | T8-BUS-01 | 4 |
+| REQ-MQTT-011 | MUST | d8, manual | T8-HST-02 | 1 |
+| REQ-MQTT-013 | SHOULD | manual, d8 | T8-RUN-03 | 6 |
+| REQ-PLT-001 | MUST | d8, manual | T8-HST-04 | 8 |
+| REQ-PLT-003 | MUST | d8, manual | T8-HST-04 | 21 |
+| REQ-PLT-006 | MUST | d8 | T8-HST-04 | 3 |
+| REQ-PLT-007 | MUST | d8 | T8-HST-04 | 3 |
+| REQ-PLT-008 | MUST | d8 | T8-HST-04 | 2 |
+| REQ-REG-001 | MUST | d8 | T8-BUS-03 | 2 |
+| REQ-REG-002 | MUST | d8 | T8-BUS-03 | 7 |
+| REQ-RES-CONFIG-020 | MUST | d8 | T8-BUS-02 | 2 |
+| REQ-RES-CONFIG-026 | SHOULD | d8 | T8-BUS-02 | 2 |
+| REQ-RES-DATA-010 | MUST | d8 | T8-BUS-02 | 2 |
+| REQ-RES-META-005 | MUST | d8 | T8-BUS-02 | 2 |
+| REQ-RES-PUBLIST-023 | MUST | d8 | T8-BUS-02 | 2 |
+| REQ-RES-REFDES-008 | MUST | d8 | T8-BUS-02 | 3 |
+| REQ-RES-SUBLIST-012 | MUST | d8 | T8-BUS-02 | 3 |

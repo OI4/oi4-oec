@@ -207,8 +207,7 @@ func ImageFixtures() ([]Fixture, error) {
 }
 
 // BusFixtures returns the entries of testdata/bus/index.yaml (the broker
-// scenarios of oec-infra bus) in order. They are not part of Fixtures:
-// internal/explain stays D7-only until P5b increment 6 (A-248).
+// scenarios of oec-infra bus) in order.
 func BusFixtures() ([]Fixture, error) {
 	var ix struct {
 		Scenarios []Fixture `yaml:"scenarios"`
@@ -227,8 +226,7 @@ func BusFixtures() ([]Fixture, error) {
 }
 
 // HostFixtures returns the entries of testdata/hosts/index.yaml (the host
-// roots of oec-infra host) in order. Like BusFixtures they are not part of
-// Fixtures (A-248).
+// roots of oec-infra host) in order.
 func HostFixtures() ([]Fixture, error) {
 	var ix struct {
 		Hosts []Fixture `yaml:"hosts"`
@@ -247,8 +245,7 @@ func HostFixtures() ([]Fixture, error) {
 }
 
 // ContainerFixtures returns the entries of testdata/containers/index.yaml
-// (the Engine API scenarios of oec-infra container, C-073). Like
-// HostFixtures they are not part of Fixtures (A-248).
+// (the Engine API scenarios of oec-infra container, C-073).
 func ContainerFixtures() ([]Fixture, error) {
 	var ix struct {
 		Containers []Fixture `yaml:"containers"`
@@ -267,8 +264,7 @@ func ContainerFixtures() ([]Fixture, error) {
 }
 
 // RunFixtures returns the entries of testdata/run/index.yaml (the sandbox
-// scenarios of oec-infra run, C-074). Like ContainerFixtures they are not
-// part of Fixtures (A-248).
+// scenarios of oec-infra run, C-074).
 func RunFixtures() ([]Fixture, error) {
 	var ix struct {
 		Runs []Fixture `yaml:"runs"`
@@ -286,7 +282,8 @@ func RunFixtures() ([]Fixture, error) {
 	return ix.Runs, nil
 }
 
-// Fixtures returns the sim fixtures followed by the capture fixtures.
+// Fixtures returns the fixtures of oec-check (D7): the sim fixtures followed
+// by the capture fixtures.
 func Fixtures() ([]Fixture, error) {
 	s, err := SimFixtures()
 	c, cerr := CaptureFixtures()
@@ -296,5 +293,23 @@ func Fixtures() ([]Fixture, error) {
 	return append(s, c...), nil
 }
 
-// Label is the short name of a fixture: "sim <fault>" or "capture <file>".
+// InfraFixtures returns the fixtures of oec-infra (D8): the image, bus,
+// host, container and run fixtures in this order (C-075; before, the D8
+// indexes were not joined, A-248).
+func InfraFixtures() ([]Fixture, error) {
+	var out []Fixture
+	var errs []error
+	for _, load := range []func() ([]Fixture, error){ImageFixtures, BusFixtures, HostFixtures, ContainerFixtures, RunFixtures} {
+		f, err := load()
+		out = append(out, f...)
+		errs = append(errs, err)
+	}
+	if err := errors.Join(errs...); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Label is the short name of a fixture: its kind and its fault or file,
+// e.g. "sim none", "capture lifecycle-pass.jsonl", "image good.tar".
 func (f Fixture) Label() string { return f.Kind + " " + strings.TrimSpace(f.Name) }
