@@ -33,7 +33,7 @@ func TestCitedRequirements(t *testing.T) {
 			return nil
 		}
 		switch filepath.Ext(path) {
-		case ".c", ".h", ".go", ".md", ".sh", ".html", ".js", ".css", ".yaml", ".yml", "":
+		case ".c", ".h", ".go", ".rs", ".toml", ".md", ".sh", ".html", ".js", ".css", ".yaml", ".yml", "":
 		default:
 			return nil
 		}

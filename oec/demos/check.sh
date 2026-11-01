@@ -7,13 +7,19 @@
 #   weather (D3, Go on the Go SDK, from C-080): liboec_ffi.a for cgo in
 #   oec/sdk/go/lib/<GOOS>_<GOARCH>/ (go run ./cmd/oec-buildlib, never
 #   committed), the service built with -race (weather/target/);
+#   config (D10, Rust on the SDK crate oec, from C-082; own Cargo package
+#   with its own Cargo.lock, ADR-0028 §7): cargo fmt --check, clippy
+#   (pedantic, warnings are errors), cargo test, cargo-deny with the
+#   deny.toml of the SDK (licenses, advisories, bans, sources; ADR-0023),
+#   the binary (config/target/debug/oec-config);
 #   go (one module, standard library and the Go SDK of this workspace):
 #   gofmt, go vet, go test -race – the cited REQ ids, the unit tests, the
-#   integration tests of the logger (ASan build) and of the weather service
-#   against the in-process TLS test broker and D7 `oec-check test` against
-#   them (--level 2 logger, --level 3 weather; oec-check of oec/conformance
+#   integration tests of the logger (ASan build), of the weather service and
+#   of the config service against the in-process TLS test broker and D7
+#   `oec-check test` against them (--level 2 logger, --level 3 weather,
+#   --level 1 config; oec-check of oec/conformance
 #   built into a temporary directory and run, not imported: ADR-0006).
-# Needs GNU make. OEC_DEMOS_REQUIRE=1 (default here): a missing helper
+# Needs GNU make and cargo-deny. OEC_DEMOS_REQUIRE=1 (default here): a missing helper
 # fails instead of skipping.
 set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
@@ -41,7 +47,20 @@ echo "demos/weather: liboec_ffi.a for cgo, go build -race"
 cd "$root"
 go build -race -o "$root/weather/target/oec-weather" ./weather
 
-echo "demos/go: gofmt, vet, oec-check, go test -race (logger D7 level 2, weather D7 level 3)"
+echo "demos/config: cargo fmt, clippy, test, deny (deny.toml of the SDK), build"
+cd "$root/config"
+cargo fmt --check
+cargo clippy --offline --locked --all-targets --quiet -- -D warnings
+cargo test --offline --locked --quiet
+command -v cargo-deny >/dev/null || { echo "cargo-deny missing: cargo install cargo-deny --locked" >&2; exit 1; }
+cargo deny --log-level error --config "$rust/deny.toml" check || {
+	echo "cargo deny: retrying with the cached advisory DB (no network?)" >&2
+	cargo deny --log-level error --config "$rust/deny.toml" --frozen check
+}
+cargo build --offline --locked --quiet
+
+echo "demos/go: gofmt, vet, oec-check, go test -race (logger D7 level 2, weather D7 level 3, config D7 level 1)"
+cd "$root"
 unformatted="$(gofmt -l .)"
 test -z "$unformatted" || { echo "gofmt needed: $unformatted" >&2; exit 1; }
 go vet ./...
@@ -49,7 +68,7 @@ tmp="$(mktemp -d)"
 (cd "$root/../conformance" && go build -o "$tmp/oec-check" ./cmd/oec-check) || { rm -rf "$tmp"; exit 1; }
 OEC_DEMOS_REQUIRE="${OEC_DEMOS_REQUIRE:-1}" OEC_TESTBROKER="$target/debug/examples/go-testbroker" \
 	OEC_LOGGER="$root/logger/target/asan/oec-logger" OEC_WEATHER="$root/weather/target/oec-weather" \
-	OEC_D7="$tmp/oec-check" \
+	OEC_CONFIG="$root/config/target/debug/oec-config" OEC_D7="$tmp/oec-check" \
 	go test -race -count=1 ./... || { rm -rf "$tmp"; exit 1; }
 rm -rf "$tmp"
 echo "demos: ok"
