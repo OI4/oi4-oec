@@ -209,3 +209,13 @@ No change under `oec/conformance`, `oec/sdk`, `oec-ffi` or the Go SDK. D7 pins u
 ## Next
 
 C-085 – P6 exit run: the exit criteria of ROADMAP P6 over all three demos (gate, D7 at their levels, Web UIs, images with D8, compose profile `demos` with D7 `monitor`), the P6 summary, and the plan of P7.
+
+## Addendum 1 – PO answers to D-1 and R-1 (2026-11-01)
+
+PO answer (chat, 2026-11-01): "D-1 wie vorgeschlagen, R-1 akzeptiert"
+
+- **D-1 – licenses of the base image:** decided as proposed. `oec/demos/images/debian.json` stays: Debian short names → SPDX ids (`Expat` → `MIT`, `Artistic` → `Artistic-1.0-Perl`, `GPL-2` → `GPL-2.0-only`, `+` → `-or-later`), the four GCC runtime packages → `GPL-3.0-or-later WITH GCC-exception-3.1`, 21 `LicenseRef-<package>-<name>` with the exact Debian text. A new or unclear name keeps failing the image build and goes to the PO again (G-3.4 a).
+- **R-1 – golden SBOM:** accepted. `oec/demos/internal/sbom/testdata/expected/` (`sbom.spdx.json`, `texts.txt`) is reviewed; `TestGolden` and `TestD8Image` keep it. There is no index or status field for these fixtures, so nothing changes in the code.
+- Recorded in REVIEW (D-1 ☑ as proposed, R-1 ☑ accepted, "Answered earlier"), REVIEW_DE and STATUS. No change to code, test data or ROADMAP; no gate run needed (docs only).
+- Nothing is open for the PO.
+- **Handover (G-3.10):** unchanged – **new agent session** for C-085 (P6 exit run); `prompt.md` (not committed) is updated: the answers are entered.
