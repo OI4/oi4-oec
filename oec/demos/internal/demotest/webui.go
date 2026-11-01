@@ -3,6 +3,7 @@ package demotest
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -21,6 +22,8 @@ const (
 	UIMaxSSE         = 8
 	UIMaxBody        = 64 << 10
 	UIMaxHead        = 8 << 10
+	// UIRequestTime is the time a client has to send its request.
+	UIRequestTime = 5 * time.Second
 	// UIKeepAliveEnv shortens the SSE keep-alive period of a demo (tests
 	// only; default 15 s).
 	UIKeepAliveEnv = "OEC_UI_KEEPALIVE_MS"
@@ -404,6 +407,36 @@ func (u *UI) CheckLimits(t *testing.T, first string) {
 		}
 		return true
 	})
+}
+
+// CheckSlow checks the time limit of a request (UIRequestTime): a client
+// that does not finish its head is answered with 408 or, by net/http,
+// disconnected without an answer – not earlier than half of the limit and
+// not much later than the limit.
+func (u *UI) CheckSlow(t *testing.T) {
+	t.Helper()
+	c, err := net.Dial("tcp", u.Addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	start := time.Now()
+	if _, err := c.Write([]byte("GET / HTTP/1.1\r\nHost: " + u.Addr + "\r\n")); err != nil {
+		t.Fatal(err)
+	}
+	_ = c.SetReadDeadline(start.Add(UIRequestTime + 3*time.Second))
+	got, err := io.ReadAll(c)
+	took := time.Since(start)
+	var ne net.Error
+	if errors.As(err, &ne) && ne.Timeout() {
+		t.Fatalf("slow request: still open after %v", took)
+	}
+	if len(got) > 0 && !strings.HasPrefix(string(got), "HTTP/1.1 408") {
+		t.Errorf("slow request: %q", got)
+	}
+	if took < UIRequestTime/2 {
+		t.Errorf("slow request: ended after %v, limit %v", took, UIRequestTime)
+	}
 }
 
 // CheckKeepAlive checks that an event stream gets the comment keep-alive

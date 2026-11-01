@@ -102,6 +102,7 @@ func TestWebUI(t *testing.T) {
 	}
 
 	ui.CheckGuards(t, "/api/apps")
+	ui.CheckSlow(t)
 	ui.CheckKeepAlive(t)
 	ev.Close()
 	ui.CheckLimits(t, "apps")
