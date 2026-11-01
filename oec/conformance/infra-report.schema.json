@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.openindustry4.com/oec/tools/oec-infra/report.schema.json",
   "title": "oec-infra report, version 1",
-  "description": "JSON report of the D8 infrastructure compliance CLI oec-infra (DESIGN.md §9, ADR-0025 amendment C-070). Its own document and version, independent of the oec-check report. Version 1 grows additively with the increments of P5b (new optional keys, new modes) and is frozen at the P5b exit; after that a change of a key or of its meaning increments report. Closed objects: a report carries no secret, no password and no file content of the image.",
+  "description": "JSON report of the D8 infrastructure compliance CLI oec-infra (DESIGN.md §9, ADR-0025 amendments C-070 and C-075). Its own document and version, independent of the oec-check report. Report version 1 grew additively with the increments of P5b and is frozen since the P5b exit (C-075): a later change of a key or of its meaning increments report. Closed objects: a report carries no secret, no password and no file content of the image.",
   "type": "object",
   "required": ["report", "tool", "version", "schemas", "baseline", "catalog", "command", "mode", "input", "level", "started", "ended", "tests", "summary", "exit"],
   "additionalProperties": false,

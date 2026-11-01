@@ -11,7 +11,8 @@ import (
 )
 
 // InfraVersion is the version of the JSON document of oec-infra
-// (infra-report.schema.json); independent of MonitorVersion.
+// (infra-report.schema.json); independent of MonitorVersion. Version 1 is
+// frozen since the P5b exit (C-075).
 const InfraVersion = 1
 
 // Infra is the report of oec-infra (D8, DESIGN.md §9): the inspected input
