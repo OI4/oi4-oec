@@ -403,6 +403,126 @@ static void action_requests(oec_app *c) {
           OEC_ERR_INVALID_ARGUMENT);
 }
 
+/* ---- lifecycle: state, wait, presence (amendment C-076) ---------------- */
+
+#define SUBSCRIBER "example.com/Abi/ABI-1/presence-sub"
+#define PEER "example.com/Abi/ABI-1/presence-peer"
+
+static atomic_int mam_own, mam_peer;
+
+static void count_mam(void *user_data, const oec_received *msg) {
+    (void)user_data;
+    if (msg->resource != OEC_RES_MAM)
+        return;
+    if (strcmp(msg->app, SUBSCRIBER) == 0)
+        atomic_fetch_add(&mam_own, 1);
+    if (strcmp(msg->app, PEER) == 0)
+        atomic_fetch_add(&mam_peer, 1);
+}
+
+static void wait_state(oec_app *a, oec_connection_state want) {
+    long start = now_ms();
+    oec_connection_state st = -1;
+    for (;;) {
+        OK(oec_app_state(a, &st));
+        if (st == want)
+            return;
+        CHECK(now_ms() - start < WAIT_MS);
+        sleep_ms(5);
+    }
+}
+
+static void wait_count(atomic_int *n, int want, const char *what) {
+    long start = now_ms();
+    while (atomic_load(n) < want) {
+        if (now_ms() - start >= WAIT_MS) {
+            fprintf(stderr, "timeout: %s\n", what);
+            exit(1);
+        }
+        sleep_ms(5);
+    }
+}
+
+/* A start error ends the SDK thread of oec_app_start; oec_app_wait
+ * reports it (here: a CA file that holds no certificate). */
+static void start_error(void) {
+    char ca[1024];
+    snprintf(ca, sizeof ca, "%s/no-ca.pem", work_arg);
+    FILE *f = fopen(ca, "w");
+    CHECK(f != NULL);
+    fputs("no certificate\n", f);
+    fclose(f);
+    oec_product *p = product();
+    oec_builder *b = NULL;
+    oec_app *a = NULL;
+    OK(oec_builder_new(OEC_LEVEL_1, OEC_ST_UTILITY, p, &b));
+    oec_product_free(p);
+    OK(oec_builder_broker(b, "localhost", (uint16_t)atoi(port_arg), ca));
+    OK(oec_builder_credentials(b, "user", "pa:ss"));
+    OK(oec_builder_serial_number(b, "start-error"));
+    OK(oec_builder_build(b, &a));
+    OK(oec_app_start(a));
+    FAILS(oec_app_wait(a, OEC_WAIT_FOREVER), OEC_ERR_BOOTSTRAP);
+    CHECK(strstr(oec_last_error(), "no-ca.pem") != NULL);
+    /* the result stays */
+    FAILS(oec_app_wait(a, 0), OEC_ERR_BOOTSTRAP);
+    oec_connection_state st = -1;
+    OK(oec_app_state(a, &st));
+    CHECK(st == OEC_STATE_CLOSED);
+    oec_app_free(a);
+}
+
+/* The spike finding of C-075: a MAM subscription receives the Birth of a
+ * peer that connects later, not the own Birth (the SUBSCRIBE follows it,
+ * REQ-LIFE-015), and the own MAM as answer of a Get. */
+static void lifecycle(void) {
+    oec_app *s = app(OEC_LEVEL_2, "presence-sub");
+    oec_subscription *sub = NULL;
+    oec_connection_state st = -1;
+
+    FAILS(oec_app_state(NULL, &st), OEC_ERR_INVALID_ARGUMENT);
+    FAILS(oec_app_state(s, NULL), OEC_ERR_INVALID_ARGUMENT);
+    OK(oec_app_state(s, &st));
+    CHECK(st == OEC_STATE_CLOSED); /* before the run */
+    FAILS(oec_app_wait(NULL, 0), OEC_ERR_INVALID_ARGUMENT);
+    FAILS(oec_app_wait(s, 0), OEC_ERR_INVALID_STATE); /* not started */
+    CHECK(strstr(oec_last_error(), "oec_app_start") != NULL);
+
+    OK(oec_subscribe(s, OEC_RES_MAM, OEC_ST_ANY, NULL, NULL, NULL, count_mam, NULL, &sub));
+    OK(oec_app_start(s));
+    wait_state(s, OEC_STATE_ONLINE);
+    FAILS(oec_app_wait(s, 0), OEC_ERR_TIMEOUT);
+    FAILS(oec_app_wait(s, 20), OEC_ERR_TIMEOUT);
+
+    /* the Get follows the MAM SUBSCRIBE: afterwards it is active */
+    struct got *g = calloc(1, sizeof *g);
+    CHECK(g != NULL);
+    OK(oec_get(s, OEC_RES_MAM, OEC_ST_UTILITY, SUBSCRIBER, NULL, NULL, 0, collect, g));
+    CHECK(g->n == 1);
+    free(g);
+    wait_count(&mam_own, 1, "own MAM answer received by the subscription");
+    sleep_ms(100);
+    CHECK(atomic_load(&mam_own) == 1); /* the answer only, not the Birth */
+
+    oec_app *peer = app(OEC_LEVEL_1, "presence-peer");
+    OK(oec_app_start(peer));
+    wait_count(&mam_peer, 1, "Birth MAM of the peer");
+
+    oec_app_shutdown(peer);
+    OK(oec_app_wait(peer, OEC_WAIT_FOREVER));
+    OK(oec_app_wait(peer, 0));
+    OK(oec_app_state(peer, &st));
+    CHECK(st == OEC_STATE_CLOSED);
+    oec_app_free(peer);
+
+    oec_app_shutdown(s);
+    OK(oec_app_wait(s, WAIT_MS));
+    oec_app_free(s);
+    oec_subscription_free(sub);
+
+    start_error();
+}
+
 /* ---- stress ------------------------------------------------------------ */
 
 #define THREADS 6
@@ -462,6 +582,7 @@ int main(int argc, char **argv) {
 
     argument_errors();
     state_errors();
+    lifecycle();
 
     struct provider p = provider();
     oec_app *c = app(OEC_LEVEL_2, "consumer");

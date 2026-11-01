@@ -75,6 +75,11 @@
 #define OEC_MODE_FILTER 8u
 
 /**
+ * `timeout_ms` of `oec_app_wait`: wait without a time limit.
+ */
+#define OEC_WAIT_FOREVER UINT32_MAX
+
+/**
  * An application; owned by the caller.
  */
 typedef struct oec_app oec_app;
@@ -139,6 +144,11 @@ typedef int32_t oec_service_type;
  * the least severe.
  */
 typedef int32_t oec_syslog_level;
+
+/**
+ * Connection state of an app (`OEC_STATE_*`, `oec_app_state`).
+ */
+typedef int32_t oec_connection_state;
 
 /**
  * Health state (MG 8.3.2, `OEC_HEALTH_*`).
@@ -505,6 +515,30 @@ typedef void (*oec_received_fn)(void *user_data, const struct oec_received *msg)
  */
 #define OEC_SYSLOG_DEBUG 7
 
+/**
+ * Connecting for the first time (TCP, TLS, CONNECT); retried with backoff
+ * until the broker accepts.
+ */
+#define OEC_STATE_CONNECTING 0
+
+/**
+ * Connected; the Birth is sent as first message (REQ-LIFE-001,
+ * REQ-LIFE-015).
+ */
+#define OEC_STATE_ONLINE 1
+
+/**
+ * Connection lost; the SDK reconnects with backoff and sends the Birth
+ * again (REQ-LIFE-001).
+ */
+#define OEC_STATE_RECONNECTING 2
+
+/**
+ * No connection and no attempt: before the run, after a start error and
+ * after the Close (REQ-LIFE-005).
+ */
+#define OEC_STATE_CLOSED 3
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -711,7 +745,8 @@ oec_status oec_app_run(struct oec_app *app);
 /**
  * Non-blocking alternative to `oec_app_run`: runs on an SDK thread until
  * `oec_app_shutdown` or `oec_app_free`; no signal handling. Errors
- * before the first connection end that thread.
+ * before the first connection end that thread; `oec_app_wait` reports
+ * them.
  *
  * # Safety
  *
@@ -739,6 +774,31 @@ void oec_app_shutdown(struct oec_app *app);
  * `app` is NULL or a live app, not used concurrently or afterwards.
  */
 void oec_app_free(struct oec_app *app);
+
+/**
+ * The connection state of `app` (`OEC_STATE_*`) into `*state`; also
+ * inside a callback.
+ *
+ * # Safety
+ *
+ * `app` is NULL or a live app; `state` is NULL or valid for writes.
+ */
+oec_status oec_app_state(const struct oec_app *app, oec_connection_state *state);
+
+/**
+ * Waits up to `timeout_ms` (0 = do not wait, `OEC_WAIT_FOREVER` = no
+ * limit) until the run of `oec_app_start` has ended and returns its
+ * result: `OEC_OK` after `oec_app_shutdown`, the start error otherwise
+ * (`OEC_ERR_BOOTSTRAP`, `OEC_ERR_INVALID_ARGUMENT`, `OEC_ERR_IO`, as for
+ * `oec_app_run`), every time it is asked. `OEC_ERR_TIMEOUT` while it
+ * still runs; `OEC_ERR_INVALID_STATE` without `oec_app_start` and inside
+ * a callback.
+ *
+ * # Safety
+ *
+ * `app` is NULL or a live app.
+ */
+oec_status oec_app_wait(struct oec_app *app, uint32_t timeout_ms);
 
 /**
  * The app itself as asset; never NULL for a live app.

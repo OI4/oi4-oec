@@ -6,22 +6,27 @@
 
 use std::any::Any;
 use std::ffi::{c_char, c_int};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::PathBuf;
-use std::sync::atomic::AtomicBool;
-use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
 use std::thread::JoinHandle;
+use std::time::{Duration, Instant};
 
-use oec::app::{AppBuilder, AppHandle, Bootstrap, Broker};
+use oec::app::{AppBuilder, AppHandle, Bootstrap, Broker, ConnectionState as State};
 use oec::asset::AssetDef;
 use oec::event::GenericEvent;
 use oec::identity::IdentificationLink;
 use oec::store::FileStore;
 
 use crate::abi::{
-    Fail, Handle, OEC_ERR_IO, Res, Status, guard, handle, opt_text, out, outside_callback, plain,
-    run, text,
+    Fail, Handle, OEC_ERR_IO, OEC_ERR_PANIC, OEC_ERR_TIMEOUT, Res, Status, guard, handle, opt_text,
+    out, outside_callback, plain, run, text,
 };
-use crate::types::{self, Health, Level, ServiceType, SyslogLevel};
+use crate::types::{
+    self, ConnectionState, Health, Level, OEC_STATE_CLOSED, OEC_STATE_CONNECTING, OEC_STATE_ONLINE,
+    OEC_STATE_RECONNECTING, OEC_WAIT_FOREVER, ServiceType, SyslogLevel,
+};
 
 pub(crate) fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
     m.lock().unwrap_or_else(PoisonError::into_inner)
@@ -414,6 +419,7 @@ pub unsafe extern "C" fn oec_builder_build(b: *mut Builder, out: *mut *mut App) 
             handle,
             this,
             thread: Mutex::new(None),
+            ended: Arc::new(Ended::default()),
         }));
         Ok(())
     })
@@ -441,6 +447,21 @@ pub struct App {
     pub(crate) handle: AppHandle,
     this: Arc<Asset>,
     thread: Mutex<Option<JoinHandle<()>>>,
+    ended: Arc<Ended>,
+}
+
+/// The result of the run of `oec_app_start`, `None` while it runs.
+#[derive(Default)]
+struct Ended {
+    result: Mutex<Option<Res<()>>>,
+    done: Condvar,
+}
+
+impl Ended {
+    fn set(&self, result: Res<()>) {
+        *lock(&self.result) = Some(result);
+        self.done.notify_all();
+    }
 }
 
 impl Handle for App {
@@ -478,7 +499,8 @@ pub unsafe extern "C" fn oec_app_run(app: *mut App) -> Status {
 
 /// Non-blocking alternative to `oec_app_run`: runs on an SDK thread until
 /// `oec_app_shutdown` or `oec_app_free`; no signal handling. Errors
-/// before the first connection end that thread.
+/// before the first connection end that thread; `oec_app_wait` reports
+/// them.
 ///
 /// # Safety
 ///
@@ -495,10 +517,22 @@ pub unsafe extern "C" fn oec_app_start(app: *mut App) -> Status {
             .enable_time()
             .build()
             .map_err(io)?;
+        let ended = Arc::clone(&app.ended);
+        let shared = Arc::clone(&app.shared);
         let thread = std::thread::Builder::new()
             .name("oec-app".to_owned())
             .spawn(move || {
-                let _ = rt.block_on(inner.run_async());
+                let result = catch_unwind(AssertUnwindSafe(|| rt.block_on(inner.run_async())));
+                let result = if let Ok(r) = result {
+                    r.map_err(Fail::from)
+                } else {
+                    shared.poisoned.store(true, Ordering::SeqCst);
+                    Err(Fail::new(
+                        OEC_ERR_PANIC,
+                        "panic on the SDK thread; the app is unusable",
+                    ))
+                };
+                ended.set(result);
             })
             .map_err(io)?;
         *lock(&app.thread) = Some(thread);
@@ -543,6 +577,81 @@ pub unsafe extern "C" fn oec_app_free(app: *mut App) {
         lock(&app.shared.children).clear();
         Ok(())
     });
+}
+
+/// The connection state of `app` (`OEC_STATE_*`) into `*state`; also
+/// inside a callback.
+///
+/// # Safety
+///
+/// `app` is NULL or a live app; `state` is NULL or valid for writes.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn oec_app_state(app: *const App, state: *mut ConnectionState) -> Status {
+    guard(|| {
+        // SAFETY: header contract.
+        let app = unsafe { handle(app, "app") }?;
+        // SAFETY: NULL or writable (contract).
+        let state = unsafe { state.as_mut() }.ok_or_else(|| Fail::invalid("state is NULL"))?;
+        *state = match app.handle.state() {
+            State::Connecting => OEC_STATE_CONNECTING,
+            State::Online => OEC_STATE_ONLINE,
+            State::Reconnecting => OEC_STATE_RECONNECTING,
+            State::Closed => OEC_STATE_CLOSED,
+        };
+        Ok(())
+    })
+}
+
+/// Waits up to `timeout_ms` (0 = do not wait, `OEC_WAIT_FOREVER` = no
+/// limit) until the run of `oec_app_start` has ended and returns its
+/// result: `OEC_OK` after `oec_app_shutdown`, the start error otherwise
+/// (`OEC_ERR_BOOTSTRAP`, `OEC_ERR_INVALID_ARGUMENT`, `OEC_ERR_IO`, as for
+/// `oec_app_run`), every time it is asked. `OEC_ERR_TIMEOUT` while it
+/// still runs; `OEC_ERR_INVALID_STATE` without `oec_app_start` and inside
+/// a callback.
+///
+/// # Safety
+///
+/// `app` is NULL or a live app.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn oec_app_wait(app: *mut App, timeout_ms: u32) -> Status {
+    guard(|| {
+        outside_callback("oec_app_wait")?;
+        // SAFETY: header contract.
+        let app = unsafe { handle(app, "app") }?;
+        if lock(&app.thread).is_none() {
+            return Err(Fail::state("oec_app_wait without oec_app_start"));
+        }
+        let ended = &app.ended;
+        let deadline = (timeout_ms != OEC_WAIT_FOREVER)
+            .then(|| Instant::now() + Duration::from_millis(timeout_ms.into()));
+        let mut result = lock(&ended.result);
+        loop {
+            if let Some(r) = result.as_ref() {
+                return r.clone();
+            }
+            result = match deadline {
+                None => ended
+                    .done
+                    .wait(result)
+                    .unwrap_or_else(PoisonError::into_inner),
+                Some(d) => {
+                    let left = d.saturating_duration_since(Instant::now());
+                    if left.is_zero() {
+                        return Err(Fail::new(
+                            OEC_ERR_TIMEOUT,
+                            format!("the app still runs after {timeout_ms} ms"),
+                        ));
+                    }
+                    ended
+                        .done
+                        .wait_timeout(result, left)
+                        .unwrap_or_else(PoisonError::into_inner)
+                        .0
+                }
+            };
+        }
+    })
 }
 
 // ------------------------------------------------------------------ assets

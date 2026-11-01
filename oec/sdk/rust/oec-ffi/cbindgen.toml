@@ -71,6 +71,7 @@ item_types = ["constants", "globals", "enums", "structs", "unions", "typedefs", 
 "Writable" = "oec_writable"
 "StatusCode" = "oec_status_code"
 "SyslogLevel" = "oec_syslog_level"
+"ConnectionState" = "oec_connection_state"
 "Product" = "oec_product"
 "Builder" = "oec_builder"
 "App" = "oec_app"

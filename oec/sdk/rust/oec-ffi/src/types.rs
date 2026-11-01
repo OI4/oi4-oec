@@ -142,6 +142,24 @@ pub const OEC_SYSLOG_INFORMATIONAL: SyslogLevel = 6;
 /// `Debug`.
 pub const OEC_SYSLOG_DEBUG: SyslogLevel = 7;
 
+/// Connection state of an app (`OEC_STATE_*`, `oec_app_state`).
+pub type ConnectionState = i32;
+/// Connecting for the first time (TCP, TLS, CONNECT); retried with backoff
+/// until the broker accepts.
+pub const OEC_STATE_CONNECTING: ConnectionState = 0;
+/// Connected; the Birth is sent as first message (REQ-LIFE-001,
+/// REQ-LIFE-015).
+pub const OEC_STATE_ONLINE: ConnectionState = 1;
+/// Connection lost; the SDK reconnects with backoff and sends the Birth
+/// again (REQ-LIFE-001).
+pub const OEC_STATE_RECONNECTING: ConnectionState = 2;
+/// No connection and no attempt: before the run, after a start error and
+/// after the Close (REQ-LIFE-005).
+pub const OEC_STATE_CLOSED: ConnectionState = 3;
+
+/// `timeout_ms` of `oec_app_wait`: wait without a time limit.
+pub const OEC_WAIT_FOREVER: u32 = u32::MAX;
+
 fn index<T: Copy>(all: &[T], value: i32, what: &str) -> Res<T> {
     usize::try_from(value)
         .ok()

@@ -63,7 +63,7 @@ thread_local! {
 }
 
 /// An error on its way to the caller.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct Fail {
     status: Status,
     message: String,
