@@ -234,3 +234,11 @@ PO answer (chat, 2026-11-01): "Ich möchte schon ein SDK oder ein Anbindung für
 - No code, no test data, no reviewed item changed; no SF (next SF-118); no new dependency. The gate does not read the project docs.
 - `prompt.md` (not committed) is rewritten: C-076 = P4c increment 1.
 - Next free ids: SF-118, ADR-0028, Q-035, A-312.
+
+## Addendum 4 – C-075 review, Web UIs (2026-11-01)
+
+PO answer (chat, 2026-11-01): "D-3 (a)"
+
+- **D-3 = Q-032 decided (a):** each demo service serves its own Web UI – static HTML/CSS/JavaScript embedded in the binary, no build step, no framework, no npm dependencies; Server-Sent Events for live updates, plain HTTP requests for edits (config service). The small HTTP server of the C logger is chosen in P6 within the dependency policy (MIT-compatible; license doubts go to the PO, G-3.4 a). UI ports bound to localhost, no authentication (A-305, unchanged). Details (ports, embedding per language) in ADR-0028 in the first P6 cycle.
+- Q-032 moved to "Decided"; ROADMAP P6, REVIEW/REVIEW_DE, STATUS updated. **Nothing is open for the PO.**
+- No code, no test data, no reviewed item changed; no SF; no new dependency. `prompt.md` (not committed): no open PO item any more.

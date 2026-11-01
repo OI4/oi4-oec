@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 01.11.2026, C-075-Review Nachtrag 3: Du willst vor den Demos ein SDK für Go, gern auf dem Rust-Kern. Damit ist **D-5 beantwortet**: Der Wetterdienst wird in **Go** gebaut, auf einem neuen **Go-SDK**. Dafür gibt es die neue Phase **P4c** vor P6. Die Technik habe ich nach einem kleinen Versuch selbst entschieden (**ADR-0027**): ein Go-Paket über die vorhandene C-Schnittstelle, fest ins Programm gelinkt. A-309 … A-311 zur Info. **Für dich offen: D-3** (Web-Oberflächen, erst in P6 nötig). Davor C-075-Review Nachtrag 2: Du hast die Sprachen und Grafana entschieden – **D-2 (a)** Config-Service in Rust, **D-4 (b)** kein Grafana, Logger bleibt C. Beim Wetterdienst hast du Go genannt und gefragt, was gesetzt war (Rust) → **D-5** zur Bestätigung. **Für dich offen: D-3** (Web-Oberflächen) und **D-5** (Sprache des Wetterdienstes). A-307, A-308 zur Info. Davor C-075-Review Nachtrag 1: Du hast **D-1 (a)** entschieden – **P5b ist abgeschlossen**, weiter mit **P6**, und P6 erweitert: drei Demo-Dienste (Wetter, neu ein **Config-Service D10**, Logger mit Historie, Grafana wenn machbar), jeder mit kleiner Web-Oberfläche. **Für dich offen: D-2** (Sprache des Config-Service), **D-3** (Technik der Web-Oberflächen), **D-4** (Grafana und seine Lizenz). A-301 … A-306 zur Info. Davor C-075: D8 fertig gebaut, Abschlusslauf._
+_Stand: 01.11.2026, C-075-Review Nachtrag 4: Du hast **D-3 (a)** entschieden – jeder Demo-Dienst liefert seine Web-Oberfläche selbst aus (einfaches HTML/CSS/JavaScript, ohne Build-Schritt, Live-Updates per Server-Sent Events). **Für dich ist nichts offen.** Davor C-075-Review Nachtrag 3: Du willst vor den Demos ein SDK für Go, gern auf dem Rust-Kern. Damit ist **D-5 beantwortet**: Der Wetterdienst wird in **Go** gebaut, auf einem neuen **Go-SDK**. Dafür gibt es die neue Phase **P4c** vor P6. Die Technik habe ich nach einem kleinen Versuch selbst entschieden (**ADR-0027**): ein Go-Paket über die vorhandene C-Schnittstelle, fest ins Programm gelinkt. A-309 … A-311 zur Info. **Für dich offen: D-3** (Web-Oberflächen, erst in P6 nötig). Davor C-075-Review Nachtrag 2: Du hast die Sprachen und Grafana entschieden – **D-2 (a)** Config-Service in Rust, **D-4 (b)** kein Grafana, Logger bleibt C. Beim Wetterdienst hast du Go genannt und gefragt, was gesetzt war (Rust) → **D-5** zur Bestätigung. **Für dich offen: D-3** (Web-Oberflächen) und **D-5** (Sprache des Wetterdienstes). A-307, A-308 zur Info. Davor C-075-Review Nachtrag 1: Du hast **D-1 (a)** entschieden – **P5b ist abgeschlossen**, weiter mit **P6**, und P6 erweitert: drei Demo-Dienste (Wetter, neu ein **Config-Service D10**, Logger mit Historie, Grafana wenn machbar), jeder mit kleiner Web-Oberfläche. **Für dich offen: D-2** (Sprache des Config-Service), **D-3** (Technik der Web-Oberflächen), **D-4** (Grafana und seine Lizenz). A-301 … A-306 zur Info. Davor C-075: D8 fertig gebaut, Abschlusslauf._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,18 +24,13 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-3 – Wie bauen wir die drei kleinen Web-Oberflächen? (zu entscheiden)
+Nichts. Deine letzte Antwort „D-3 (a)“ ist eingetragen (siehe unten).
 
-**Worum es geht:** Jeder Demo-Dienst bekommt eine kleine Web-Oberfläche, auf der man sieht, was passiert. Sie gehört nicht zum OEC-Standard und läuft nicht über den Bus.
+### Was aus deiner Antwort zu D-3 geworden ist
 
-**Möglichkeiten:**
-- **(a) Jeder Dienst liefert seine Seite selbst aus:** einfache HTML/CSS/JavaScript-Dateien, fest ins Programm eingebaut, ohne Build-Schritt, ohne Framework, ohne npm-Pakete. Live-Updates über „Server-Sent Events“ (der Browser bekommt neue Werte automatisch geschickt). Der Logger in C braucht dafür einen kleinen HTTP-Server (Auswahl in P6, Lizenz MIT-verträglich).
-- **(b) Ein Frontend-Framework mit Build-Schritt** (z. B. Svelte oder React mit Vite): schönere Bausteine, aber eine Node-Werkzeugkette und viele npm-Pakete für drei kleine Seiten.
-- **(c) Ein gemeinsamer Oberflächen-Dienst für alle drei:** ein Container mehr, und die Oberfläche gehört nicht mehr zu ihrem Dienst.
-
-**Meine Empfehlung: (a)** – klein, keine zusätzliche Werkzeugkette, jedes Image bleibt in sich geschlossen. Die Registry (P7) bekommt später eine eigene, reichere Oberfläche.
-
-Antwort z. B.: „D-3 (a)“. D-3 blockiert C-076 (Go-SDK) nicht; ich brauche die Antwort erst für die Oberflächen in P6.
+- **D-3 (a):** Jeder Demo-Dienst liefert seine kleine Web-Oberfläche selbst aus: einfache HTML/CSS/JavaScript-Dateien, fest ins Programm eingebaut, ohne Build-Schritt, ohne Framework, ohne npm-Pakete. Neue Werte kommen per „Server-Sent Events“ automatisch in den Browser; der Config-Service schreibt Änderungen über normale HTTP-Anfragen.
+- Der Logger in C bekommt dafür einen kleinen HTTP-Server. Welchen, entscheide ich in P6 (Lizenz MIT-verträglich; bei Zweifeln frage ich dich).
+- Eingetragen in OPEN-QUESTIONS (Q-032 entschieden), ROADMAP P6 und STATUS. Die Einzelheiten (Ports usw.) kommen in P6 in ADR-0028.
 
 ### Was aus deinem Wunsch nach einem Go-SDK geworden ist
 
@@ -1099,7 +1094,7 @@ Neu aus C-072 (P5b Inkrement 3, `host`):
 ### Was als Nächstes passiert (C-076)
 
 1. **C-076:** P4c Inkrement 1 – Grundgerüst des Go-SDK (Anwendung starten und beenden, Fehler, Health, „Hello“-Beispiel, Tests gegen den Test-Broker, Prüfung mit D7 auf Level 1). Läuft in einer **neuen Sitzung**; der Startauftrag steht in `prompt.md`.
-2. Von dir brauche ich nur noch **D-3** (Web-Oberflächen), und zwar erst in P6.
+2. Von dir brauche ich im Moment nichts.
 
 ### Was davor als Nächstes geplant war (C-075)
 
