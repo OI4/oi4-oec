@@ -1,0 +1,90 @@
+# ADR-0028 – Demo architecture (P6: weather D3, logger D4, config service D10)
+
+- Status: **accepted (agent, G-3.4 b)** – the PO decided the scope, the languages and the Web UI technique (C-075 review: D-2 (a), D-3 (a), D-4 (b), D-5); the agent decided the architecture below
+- Date: 2026-11-01
+- Deciders: agent (architecture); product owner (Thomas) – scope, languages, Web UI technique, no Grafana
+- Related: ADR-0006 (D7 independent), ADR-0010 (weather data source, offline), ADR-0012 (monorepo `oec/`), ADR-0016 (+ amendment C-075 review: level targets), ADR-0020 (Rust API), ADR-0021 (C ABI), ADR-0023 (Rust dependencies), ADR-0026 (Rust workspace, dev environment), ADR-0027 (Go SDK), G-4.7 (offline), Q-024, Q-031 … Q-034, A-301 … A-308
+
+## Context
+
+P6 builds three demo services that work together in the dev environment (`oec/dev`):
+
+| Demo | Language, SDK | ServiceType | Messaging | Service Container |
+|------|---------------|-------------|-----------|-------------------|
+| D3 weather service | Go on the Go SDK (`oec/sdk/go`, ADR-0027) | `OTConnector` | L3 | L3 |
+| D4 logger | C17 on the C ABI (`oec-ffi`, ADR-0021) | `Utility` | L2 | L3 |
+| D10 config service | Rust on `oec` (ADR-0020) | `Utility` | L1 | L3 |
+
+Each has a small Web UI outside the OEC standard (PO, C-075 review) with the technique D-3 (a): served by the service itself, static HTML/CSS/JavaScript embedded in the binary, no build step, no framework, no npm, Server-Sent Events (SSE) for live updates, plain HTTP requests for edits. The PO wants one place to see what happens, not a product UI. The demos must run offline (G-4.7) and be tested without Docker and without network in the gate, like the SDKs.
+
+## Decision
+
+### 1. Layout
+
+```text
+oec/demos/
+├── README.md              overview, how to run the three demos
+├── check.sh               gate step of the demos (called by oec/check.sh)
+├── go.mod                 Go module github.com/OI4/oec/demos (standard library only)
+├── internal/demotest/     Go test harness: test broker, container storage, D7 runner
+├── reqs_test.go           every REQ id cited under oec/demos/ is active
+├── logger/                D4 in C (src/, test/, Makefile, README.md, Go integration tests)
+├── weather/               D3 in Go (increment 2; package main of the same module)
+└── config/                D10 in Rust (increment 4; own Cargo package, see §7)
+```
+
+- One Go module for the Go demo code and every integration test: the test harness is shared and the weather service needs the Go SDK anyway (`require github.com/OI4/oec/sdk/go` with `replace ../sdk/go`, from increment 2). Go only with the standard library (ADR-0027).
+- The C sources of the logger live in `logger/src/` and its C unit tests in `logger/test/`, because Go refuses `.c` files in a package directory without cgo; `logger/` itself holds the Go integration tests (package `logger`, test files only).
+- Build output goes to `target/` below each demo (git-ignored like every `target/`; `build/` is ignored too but reserved).
+
+### 2. Common runtime conventions
+
+- Container storage contract of RIG 4.1 (REQ-CNT-004 …): every demo is built with the container storage below a root, `/` in the image, `OEC_ROOT` in tests and in local runs. The SDK keeps its store (RevisionCounter, Config values) in `/etc/oi4/app`; demo data (e.g. the log file of the logger) in `/opt/oi4/app`.
+- Product identity: `ManufacturerUri` `oi4.org` like the own tools D7/D8 (`oi4.org/oec-check/…`), a Model and ProductCode per demo (`OEC Logger`/`OEC-LOGGER`, `OEC Weather`/`OEC-WEATHER`, `OEC Config`/`OEC-CONFIG`), `SoftwareRevision` = the demo version (0.1.0 until a release, P9). The SerialNumber comes from the container (hostname, REQ-CNT-019/021).
+- Logs of the service itself (not the logger's records) go to stderr; the Syslog bridge of the SDK publishes them from `Notice` on.
+- SIGTERM/SIGINT → Close message, clean exit (REQ-LIFE-005). The C logger uses `oec_app_run` (signal handling of the SDK); Go uses `signal.NotifyContext` + `Run(ctx)`; Rust its runtime.
+- Configuration of a demo: its OEC `Config` resource where it has one (weather, logger; persisted by the SDK). Settings that are not on the bus (Web UI address) come from the environment (`OEC_UI_LISTEN`), the config service in addition from a file (A-304).
+
+### 3. Web UI (D-3 (a), A-305)
+
+- Each service serves its UI on **its own HTTP port**: logger **8781**, weather **8782**, config service **8783** (unassigned in common use; the Registry ports 5798/5799 of MG A1 are avoided). In the container the server listens on `0.0.0.0:<port>` (`OEC_UI_LISTEN`, empty = off), in compose the port is published on `127.0.0.1` only (`${OEC_DEV_BIND:-127.0.0.1}`).
+- **No authentication, no TLS** (demo, localhost only, A-305); stated in every README. The UI is never on the bus and not part of the compliance claim.
+- Static files (`index.html`, `app.css`, `app.js`) are embedded in the binary: Go `embed`, Rust `include_str!`, C a generated byte array – the generator is a small committed script (Go, standard library), the generated file is checked in the gate like `oec.h` (no build step at run time, no npm).
+- Endpoints, one convention for all three: `GET /` (UI), `GET /api/…` (JSON snapshots), `GET /api/events` (SSE stream, `text/event-stream`, one JSON object per `data:` line, a comment line as keep-alive every 15 s), `POST /api/…` (edits, JSON body, JSON answer). The UIs use `fetch` and `EventSource` only; charts are plain SVG drawn by the page script.
+- Small and bounded: a maximum request body, a maximum number of SSE clients, short timeouts; the HTTP server is a separate thread/goroutine that reads the service state under a lock and never blocks the SDK thread.
+- HTTP server per language: Go `net/http`, Rust within ADR-0023 (decided in increment 4/5 – a small blocking server on `std::net` is preferred to a new dependency), **C: chosen in increment 5** within the dependency policy (an own minimal HTTP/1.1 server on POSIX sockets, or a small permissive library; the PO is asked in case of license doubts).
+
+### 4. Images (increment 6)
+
+- One `Dockerfile` per demo in its directory, build context `oec/` (the demos need the SDK sources), multi-stage: builder images pinned by tag and digest, runtime image minimal with glibc (the Rust static library and cgo link glibc) – the base is chosen in increment 6 by size, license and SBOM support.
+- OCI images for **linux/amd64 and linux/arm64** (`docker buildx`, cross toolchains as in P4c); **non-root** (fixed UID/GID, no shell needed at run time); `/etc/oi4/app` and `/opt/oi4/app` as volumes; no secrets in the image (REQ-CNT-*); labels `org.opencontainers.image.*`.
+- **SBOM and license texts in `/opt/oi4/licenses`** (RIG 4.1.4, SF-114, REQ-CNT-013 …): one SBOM (SPDX JSON) listing every component with name, version and licenses (purl where available), the text of every license as `<License-ID>.txt`. Generated at image build by a small Go tool of the demos module (standard library) from `cargo metadata`, `go version -m` and the package database of the base image. D8 `oec-infra image` (T8-IMG-*) checks it.
+- Image names `oi4/oec-<demo>:<version>` locally; publication is P9 (PO).
+
+### 5. Compose integration (increment 6)
+
+- The demos join `oec/dev/compose.yaml` under the compose profile **`demos`** (opt-in: `docker compose --profile demos up -d`); the broker alone stays the default.
+- `go run ./pki` writes one container storage per demo below `generated/roots/` (credentials, `broker.json` with the address `mosquitto`, CA) and mounts it into the container; nothing generated is committed.
+- ACL (oec/dev, MG 9.1): the config service is the only demo that sends `Set` (Config) – it gets its own user with the right to publish `Set/Config` only; everything else stays as it is (only `oec-probe` may `Set`/`Del`/`Call` in general).
+
+### 6. Testing (offline first)
+
+1. **Unit tests** per language: C test program under ASan + UBSan (C17, `-Wall -Wextra -Wpedantic -Werror`), Go `go test -race`, Rust `cargo test` with clippy pedantic.
+2. **Integration tests** in Go (`oec/demos/…/*_test.go`) against the in-process TLS test broker of the Rust SDK, run as a program (`go-testbroker`, C-076): the demo binary runs as a separate process on a container storage in a temporary directory; the test injects messages through the broker (`send`) and checks what the demo publishes and prints. No Docker, loopback only.
+3. **D7 in the gate**: `oec-check test` at the declared level (`level2` logger, `level3` weather, `level1` config service) against the demo binary on the test broker – with the proxy attachment, the restart hook, the peer and `--announce`, as for the Go SDK (`oec/sdk/go/d7_test.go`). D7 is built from `oec/conformance` and run as a program, no code import (ADR-0006). A fail, a missing pinned pass or exit ≠ 0 fails the gate.
+4. **Web UI tests** (increment 5): HTTP and SSE with the Go client against the running demo; no browser in the gate.
+5. **Opt-in** only (Docker/network): image build and D8 `oec-infra image`/`container`/`run` against the images (increment 6), a compose run of the three demos with D7 `monitor` (live), the MET Norway provider (increment 3). Results go into the cycle log.
+- `oec/demos/check.sh` is a step of `oec/check.sh`: it builds what the tests need (`oec-ffi` release library, `go-testbroker`, `oec-check`), the demos and runs all of the above that needs no Docker and no network. Without `OEC_DEMOS_REQUIRE=1` (set by the gate) the Go tests skip when a helper is missing, so `go test ./...` works on a fresh checkout.
+
+### 7. Language specifics
+
+- **Logger (C):** links `liboec_ffi.a` statically (one binary; system libraries per `rustc --print native-static-libs`); POSIX `Makefile` (variables for the header, the library, the sanitizers); no new C dependency in increment 1 – an own small JSON reader/writer (as D9 does, ADR-0024), the HTTP server in increment 5 (§3). The core (settings, filter, records, history) is free of `oec.h` and unit-testable; `main.c` is the glue to the ABI.
+- **Weather (Go):** package `main` in `oec/demos/weather`, on the Go SDK (static `liboec_ffi.a` via cgo, ADR-0027 §2), provider interface with the offline simulation provider and MET Norway (ADR-0010).
+- **Config service (Rust):** an own Cargo package `oec/demos/config` outside the SDK workspace (the SDK workspace stays the SDK), depending on `oec` by path, with its own `Cargo.lock` and the `deny.toml` of the SDK; dependencies within ADR-0023.
+
+## Consequences
+
+- The demos are tested like the SDKs: offline in the gate, D7 at their level on every run, Docker only opt-in.
+- The gate gets a demos step (a few minutes for the D7 runs).
+- A change of the C ABI, the Go SDK or the Rust API that a demo needs is an additive amendment with a test first (ADR-0021/0027/0020); D7, D8 and the report formats stay as they are.
+- The three UI ports and the `demos` profile are fixed for the dev environment; the README of `oec/dev` documents them in increment 6.
