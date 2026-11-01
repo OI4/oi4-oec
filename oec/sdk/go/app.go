@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
+	"runtime/cgo"
 	"sync"
 )
 
@@ -156,6 +157,9 @@ type App struct {
 	state   sync.Mutex
 	started bool
 	closing bool
+
+	hmu     sync.Mutex
+	handles []cgo.Handle // user data of callbacks, deleted after the release
 }
 
 var errClosed = &Error{Status: StatusClosed, Message: "the app is closed"}
@@ -278,6 +282,20 @@ func (a *App) with(f func(*C.oec_app) C.oec_status) error {
 	return call(func() C.oec_status { return f(a.c) })
 }
 
+// do runs f on the live handle (shared lock) with the OS thread locked,
+// so f can read the errors of its C calls with lastError; errClosed after
+// Close.
+func (a *App) do(f func(*C.oec_app) error) error {
+	a.life.RLock()
+	defer a.life.RUnlock()
+	if a.c == nil {
+		return errClosed
+	}
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+	return f(a.c)
+}
+
 // Start connects in the background on a thread of the SDK: Birth, Will,
 // Health heartbeat (REQ-LIFE-001, REQ-LIFE-008, REQ-TOP-017); a lost
 // connection is re-established. Once per app. Errors of the first
@@ -362,6 +380,12 @@ func (a *App) Close() error {
 	defer a.life.Unlock()
 	C.oec_app_free(a.c)
 	a.c = nil
+	a.hmu.Lock()
+	for _, h := range a.handles {
+		h.Delete()
+	}
+	a.handles = nil
+	a.hmu.Unlock()
 	return runErr
 }
 

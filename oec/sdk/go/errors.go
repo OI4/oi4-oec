@@ -143,6 +143,15 @@ func optString(s string) *C.char {
 	return C.CString(s)
 }
 
+// optBytes is b as C string (JSON from encoding/json has no NUL), NULL for
+// nil.
+func optBytes(b []byte) *C.char {
+	if b == nil {
+		return nil
+	}
+	return C.CString(string(b))
+}
+
 func free(p *C.char) {
 	if p != nil {
 		C.free(unsafe.Pointer(p))

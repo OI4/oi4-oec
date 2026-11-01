@@ -167,6 +167,10 @@ var statusCodeNames = map[StatusCode]string{
 // IsBad reports the severity Bad (the two top bits 10).
 func (c StatusCode) IsBad() bool { return c>>30 == 2 }
 
+// Error makes a StatusCode usable as the result of an OnSet handler:
+// return BadOutOfRange to reject a Set with that code.
+func (c StatusCode) Error() string { return "oec: StatusCode " + c.String() }
+
 func (c StatusCode) String() string {
 	if n, ok := statusCodeNames[c]; ok {
 		return n
