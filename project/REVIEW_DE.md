@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 01.11.2026, C-074-Review Nachtrag 3: Du hast **R-2** akzeptiert („R-2 akzeptiert“). REQ-CNT-009 und alle 20 Run-Testfälle stehen auf `reviewed`. **Für dich ist nichts offen.**_
+_Stand: 01.11.2026, C-075: D8 ist fertig gebaut (`oec-infra list`/`explain`, Abdeckungsbericht, Bericht eingefroren, Abschlusslauf). **Für dich offen: D-1** – P5b abschließen und die nächste Phase wählen. Keine neuen Testdaten (kein R-x), kein Finding. Davor C-074-Review Nachtrag 3: Du hast **R-2** akzeptiert; REQ-CNT-009 und alle 20 Run-Testfälle stehen auf `reviewed`._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,36 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts – alles ist entschieden bzw. abgenommen.
+### D-1 – Ist P5b fertig, und womit geht es weiter? (zu entscheiden)
+
+**Worum es geht:** Alle sechs Inkremente von P5b (das Infrastruktur-Prüf-Tool D8 `oec-infra`) sind gebaut. Die ROADMAP nennt vier Bedingungen für den Abschluss. Ich habe sie einzeln geprüft (Belege im Log C-075):
+
+| # | Bedingung | Stand |
+|---|---|---|
+| 1 | Jeder Test im D8-Katalog ist gebaut oder als „nur von Hand prüfbar“ begründet; je Test ein guter und ein schlechter Testfall, alle von dir geprüft; der Selbsttest läuft ohne Netz und ohne Docker | **erfüllt**: 17 von 17 Tests gebaut, 1 Regel „von Hand“ mit Begründung (REQ-CMP-012: welches Level der Prüfer wählt). 163 Testfälle (19 Images, 29 Broker, 69 Hosts, 26 Container, 20 Runs), alle von dir abgenommen; jeder Test hat beide Sorten (steht jetzt auch in `COVERAGE.md`). Das Prüfskript braucht weder Netz noch Docker. |
+| 2 | `image` und `run` mit eigens gebauten guten und fehlerhaften Images | **erfüllt**: `image` im Prüfskript; `run` mit echtem Docker im freiwilligen Lauf `live.sh` (statt eines eigenen `live-infra.sh`, A-290): das gute Image besteht, jedes der 14 fehlerhaften ergibt genau das erwartete Ergebnis – 15 von 15. |
+| 3 | `bus` und `host` gegen die Entwicklungsumgebung `oec/dev` | **erfüllt, mit festgehaltenen Abweichungen – kein Finding** (A-298): BUS-01 besteht. BUS-02 warnt bei REQ-RES-CONFIG-026 (ein „sollte“, das sich mit den Zugriffsregeln des Mosquitto-Brokers nicht ausdrücken lässt; bekannt seit C-071). BUS-03 und ein Teil von HST-04 (REQ-PLT-008) können erst bestehen, wenn es die Registry gibt (P7). HST-01/02 bestehen; HST-04 meldet außerdem REQ-PLT-003 auf dem Mac (kein Linux) und REQ-PLT-006 in einem Container ohne Docker-Zugang. Das alles liegt an der Entwicklungsumgebung, die keine echte Container-Plattform ist – nicht an D8 und nicht an der Guideline. |
+| 4 | Berichtsformat eingefroren, jeder Bericht geprüft, `list`/`explain`/`report-schema`, Abdeckungsbericht, Builds für alle Systeme | **erfüllt**: Das Berichtsformat ist eingefroren und per Prüfsumme gesichert (A-296); gebaut für Windows, Linux und macOS je mit amd64 und arm64, dazu Linux arm/386 – alles klappt. |
+
+**Was in andere Phasen wandert (wie in C-070 geplant, A-299):** „unsere Demo- und Registry-Images bestehen `level3`“ gehört zum Abschluss von P6 bzw. P7 (die Images gibt es erst dann). Die CI auf Windows/macOS/Linux, die fertigen D8-Programme, das Container-Image des Tools und Läufe mit Podman und Docker unter Windows kommen mit P9.
+
+**Möglichkeiten:**
+- **(a)** P5b abschließen. Weiter mit **P6** – die Demo-Dienste (Wetter in Rust, Logger in C über `oec-ffi`), jeweils mit Dockerfile, SBOM und Lizenzen, geprüft mit D7 und D8.
+- **(b)** wie (a), aber weiter mit **P4b** – das Micro-SDK in C für den ESP32 (D9).
+- **(c)** wie (a), aber weiter mit **P7** – die OEC Registry (D5). Damit würden auch BUS-03 und REQ-PLT-008 gegen `oec/dev` bestehen.
+- **(d)** P5b offen lassen, bis es die Demo- und Registry-Images gibt.
+
+**Meine Empfehlung: (a).** In der ROADMAP kommt P6 vor P7 und P9. SDK (P4), D7 (P5) und D8 (P5b) sind fertig, die Demos lassen sich also sofort von vorne bis hinten bauen und prüfen. Sie sind die ersten echten Images für D8 und die ersten echten Anwendungen für D7 (Level 3 bzw. Level 1); der Logger nutzt außerdem die C-Schnittstelle `oec-ffi`. P4b hängt davon nicht ab und kann danach kommen; die Registry (P7) profitiert davon, dass die Demos schon als Teilnehmer in der Entwicklungsumgebung laufen.
+
+Antwort z. B.: „D-1 (a)“.
+
+### Zur Info: was C-075 gebaut hat
+
+- **`oec-infra list` und `oec-infra explain`** – wie bei `oec-check`: alle 17 D8-Tests auflisten, filtern, und zu einem Test oder einer Regel die Details mit den zugehörigen Testfällen zeigen. Eine Regel, die nur D7 prüft, verweist auf `oec-check explain` (A-292).
+- **Abdeckungsbericht `catalog/COVERAGE.md` jetzt auch für D8** (bisher nur D7, A-248 aufgehoben): 52 D8-Regeln, 51 durch Tests geprüft, 1 von Hand, keine ohne Prüfung; je Test die guten und schlechten Testfälle. Der D7-Teil ist Zeichen für Zeichen unverändert (A-293 … A-295).
+- **D8-Berichtsformat (Version 1) eingefroren:** Ein Test im Prüfskript kennt die Prüfsummen beider Berichtsformate (D7 und D8). Wer eines ändert, muss eine neue Version anlegen (A-296).
+- **Abschlusslauf:** Builds für alle Systeme; `live.sh` mit echtem Docker grün. Dabei einen Fehler **im Test** gefunden und behoben (zuerst der Test): Ein Live-Test seit C-073 hat bei jedem Lauf vier leere, namenlose Docker-Volumes übrig gelassen (das Broker-Image legt sie automatisch an, der Test hat sie beim Aufräumen nicht mitgelöscht). Jetzt löscht er sie mit und prüft danach, dass nichts übrig ist. Die alten Reste dieser Läufe habe ich einzeln anhand von Zeitpunkt und Inhalt erkannt und gelöscht – kein „prune“, nichts Fremdes angefasst (A-297). `oec-infra run` selbst war nicht betroffen.
+- Keine neue Bibliothek, keine Schema-Änderung, D7 unverändert, keine neuen Testdaten.
 
 ### Was aus deinem Review C-074 geworden ist (Kurzfassung)
 
