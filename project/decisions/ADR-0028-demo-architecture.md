@@ -102,3 +102,20 @@ Details: `log/2026-11-01_C-080_weather-core.md`, REVIEW A-341 … A-346, `oec/de
 3. **§6 tests:**
    - `oec/demos/check.sh` puts `liboec_ffi.a` for cgo into `oec/sdk/go/lib/<GOOS>_<GOARCH>/` (`go run ./cmd/oec-buildlib`) and builds the weather service with `-race` into `weather/target/`; `go test -race ./...` gets `OEC_WEATHER`.
    - D7 `test --level 3` against the weather service: 49 pass pinned, 6 skips (requests of the CUT; ReferenceDesignation) as against the Go SDK example `source`.
+
+## Amendment C-081 (2026-11-01) – increment 3, the provider `met-no` as built (agent, G-3.4 b)
+
+Details: `log/2026-11-01_C-081_weather-met-no.md`, REVIEW A-347 … A-352, ADR-0010 amendment C-081. No change to the Go SDK, `oec` or `oec-ffi`.
+
+1. **Weather service:**
+   - `metno.go` is the second provider (MET Norway Locationforecast, standard library HTTP client).
+   - The application `Config` gets `met-no` in the `provider` OneOf and a Pattern for `userAgentContact`. `met-no` needs a contact and at least 600 s (A-348).
+   - Switching between providers works by `Set` at run time.
+2. **Health (A-349):**
+   - A station without data has `FAILURE_1`/0 and gets no `Data` update.
+   - The application has `OFF_SPEC_3` with the share of good stations, never `FAILURE_1` about itself.
+   - Each transition is a Syslog event of the application.
+3. **§6 tests:**
+   - `OEC_WEATHER_METNO_URL` points the service at a fake server in the integration tests. It is an environment variable for tests, not a `Config` object (A-350).
+   - The live run against api.met.no is opt-in (`OEC_WEATHER_LIVE_CONTACT`), as §6.5 foresees.
+   - D7 `level3` is unchanged (49 pins, simulation).
