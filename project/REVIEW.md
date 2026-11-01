@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-01, C-075 review addendum 1: you decided **D-1 (a)** ("D-1 (a)") – **P5b is closed**, next **P6** – and extended P6: three demo services (weather, a new **config service D10**, logger with history, Grafana if feasible), each with a small Web UI. **Open for you: D-2** (language of the config service, Q-031), **D-3** (technique of the Web UIs, Q-032), **D-4** (Grafana, AGPL-3.0, Q-033). A-301 … A-306 for information (A-301: logger now Messaging L2, config service L1). Before that C-075: P5b increment 6 done – `oec-infra list`/`explain`, D8 section of `catalog/COVERAGE.md`, D8 report version 1 frozen, P5b exit run; **open for you: D-1** (close P5b, next phase). No R-x (no new or changed test data), no SF. A-292 … A-300 for information. Before that C-074 review addendum 3: you accepted **R-2** ("R-2 akzeptiert") – REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` are `reviewed`; all 20 run fixtures `reviewed`, no REQ draft, no open finding. **Nothing is open.** Before that C-074 review addendum 2: D-1 ("D-1 wie vorgeschlagen", SF-117) is applied – RIG 4.1.3 `52d8470`, SF-117 resolved, re-baseline, T8-RUN-02 judges one means of authentication only as a violation. Open: **R-2** (REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials`). R-1 accepted (addendum 1). Before that C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"). Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
+_Last updated: 2026-11-01, C-075 review addendum 2: you decided the languages and Grafana ("Config Service in Rust, Logger in C, Kein Grafana") – **D-2 (a)** Rust, **D-4 (b)** no Grafana; for the weather service you named Go and asked what was set (Rust on `oec`) → **D-5** (Q-034) to confirm, working assumption Rust. **Open for you: D-3** (Web UI technique, Q-032) and **D-5**. A-307 (P6 starts with the logger core in C), A-308 (no `/metrics`) for information. Before that C-075 review addendum 1: you decided **D-1 (a)** ("D-1 (a)") – **P5b is closed**, next **P6** – and extended P6: three demo services (weather, a new **config service D10**, logger with history, Grafana if feasible), each with a small Web UI. **Open for you: D-2** (language of the config service, Q-031), **D-3** (technique of the Web UIs, Q-032), **D-4** (Grafana, AGPL-3.0, Q-033). A-301 … A-306 for information (A-301: logger now Messaging L2, config service L1). Before that C-075: P5b increment 6 done – `oec-infra list`/`explain`, D8 section of `catalog/COVERAGE.md`, D8 report version 1 frozen, P5b exit run; **open for you: D-1** (close P5b, next phase). No R-x (no new or changed test data), no SF. A-292 … A-300 for information. Before that C-074 review addendum 3: you accepted **R-2** ("R-2 akzeptiert") – REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` are `reviewed`; all 20 run fixtures `reviewed`, no REQ draft, no open finding. **Nothing is open.** Before that C-074 review addendum 2: D-1 ("D-1 wie vorgeschlagen", SF-117) is applied – RIG 4.1.3 `52d8470`, SF-117 resolved, re-baseline, T8-RUN-02 judges one means of authentication only as a violation. Open: **R-2** (REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials`). R-1 accepted (addendum 1). Before that C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"). Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -259,6 +259,10 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **P6 scope (yours):** weather service as planned, its `Config` sets the coordinates (and more, A-302); a new **config service (D10)** that shows and edits the `Config` of the weather service and the logger (A-304); the logger with a history, Grafana if feasible; a small Web UI for each, outside the OEC standard. ROADMAP P6, project README (D10), AGENTS.md.
   - Consequence decided by the agent (**A-301**): the logger offers `Config` and becomes Messaging **L2**, the config service is Messaging **L1**, weather stays **L3** (ADR-0016 amendment C-075 review); C for the logger stays (Q-024).
   - **Three points are yours by G-3.4 a** and open: **D-2** (Q-031), **D-3** (Q-032), **D-4** (Q-033). Increment 1 of P6 (weather core) does not depend on them.
+- C-075 review addendum 2: your answer on the languages and Grafana is applied.
+  - **D-2 (a):** the config service is Rust on `oec`. **D-4 (b):** no Grafana; the logger shows its history in its own UI, no `/metrics` (A-308). The logger stays C.
+  - **Weather service:** you named Go and asked what was set – it is Rust on `oec` since C-042. Recorded as **D-5** (Q-034) with the working assumption Rust.
+  - **A-307:** P6 increment 1 is now the logger core in C, which depends on no open point; the weather core waits for D-5, the Web UIs for D-3.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -573,23 +577,30 @@ Logs: [C-075](log/2026-11-01_C-075_d8-list-explain-p5b-exit.md), [C-074](log/202
 | A-298 | Exit criterion 3: deviations of the dev environment recorded, no SF | info (agent) | C-075 | – | – |
 | A-299 | Carried items: demo/Registry images → P6/P7, CI/binaries/image/Podman/Windows → P9 | info (agent) | C-075 | – | – |
 | A-300 | No new dependency, no schema change, D7 unchanged | info (agent) | C-075 | – | – |
-| D-2 | Q-031: language/runtime of the config service D10 | decide (G-3.4 a) | C-075 review | (a) Rust on `oec` | ☐ |
+| D-2 | Q-031: language/runtime of the config service D10 | decide (G-3.4 a) | C-075 review | (a) Rust on `oec` | ☑ (a) |
 | D-3 | Q-032: technique of the three Web UIs | decide (G-3.4 a) | C-075 review | (a) served by the service, static HTML/CSS/JS, SSE, no build step | ☐ |
-| D-4 | Q-033: Grafana (AGPL-3.0) for the logger history | decide (G-3.4 a: license) | C-075 review | (a) optional profile, unchanged official images | ☐ |
+| D-4 | Q-033: Grafana (AGPL-3.0) for the logger history | decide (G-3.4 a: license) | C-075 review | (a) optional profile, unchanged official images | ☑ (b) |
 | A-301 | Messaging levels: weather L3, logger L2, config service L1; ADR-0016 amendment | info (agent) | C-075 review | – | – |
 | A-302 | Proposal: Config of the weather service | info (agent) | C-075 review | – | – |
 | A-303 | Proposal: Config and history of the logger | info (agent) | C-075 review | – | – |
 | A-304 | Proposal: behavior of the config service | info (agent) | C-075 review | – | – |
 | A-305 | Web UIs outside the standard: own port, localhost only, no authentication | info (agent) | C-075 review | – | – |
 | A-306 | Deliverable D10; provisional P6 cycle cut | info (agent) | C-075 review | – | – |
+| D-5 | Q-034: language of the weather service D3 (you named Go; set is Rust) | decide (G-3.4 a) | C-075 review addendum 2 | (a) Rust on `oec` as set | ☐ |
+| A-307 | P6 cut reordered: increment 1 = logger core in C | info (agent) | C-075 review addendum 2 | – | – |
+| A-308 | No Grafana → no Prometheus, no `/metrics`; A-303 changed | info (agent) | C-075 review addendum 2 | – | – |
 
 ## Decisions and review items
 
-### D-2 – Q-031: language/runtime of the config service D10 (G-3.4 a)
+### D-5 – Q-034: language of the weather service D3 (G-3.4 a)
 
-- **Context:** your P6 scope adds a config service that shows and edits the `Config` of the weather service and the logger. G-3.4 a makes the language of a deliverable your decision.
-- **Options:** **(a)** Rust on `oec` – the consumer API (`get`/`set` of another application's resources) exists since C-058, the same toolchain as the weather service, and it shows the requester side of the SDK; (b) C on `oec-ffi` – like the logger, but a form editor in C is much code for little extra insight (the logger already shows C); (c) Go – outside our SDK, it would show nothing of D2.
-- **Recommendation:** (a).
+- **Context:** you wrote "Wetter Service in Go (oder was hatten wir hier gesetzt?)". Set since C-042 is **Rust on `oec`** (ADR-0011 S4, `research/sdk-options.md`): the weather service shows the Rust API of the SDK at L3, the logger the C ABI, and with D-2 the config service the requester side in Rust. Go has no SDK of ours.
+- **Options:**
+  - **(a)** Rust on `oec`, as set – the full L3 provider API (assets, Data/Metadata, Config per asset, publish modes) exists in Rust and is tested; no new layer.
+  - **(b)** Go on the C ABI `oec-ffi` through a thin cgo package (e.g. `oec/sdk/go`) – three demos in three languages, and it shows that the C ABI serves other languages; but it adds a binding layer to P6 (more work than the weather service itself), cgo needs a C toolchain per target for cross builds; the C ABI already offers assets, Data and asset `Config` (`oec_asset_*`, `oec_config_*`), so the Go package would wrap it, idiomatic Go types and callbacks across cgo included.
+  - **(c)** Go as an own implementation without our SDK – shows nothing of D2; D7 would still check it.
+- **Recommendation:** (a). If you want a Go demo for its own sake, (b) is the honest way; then I plan the Go package as its own increment.
+- **Until your answer:** no weather code; P6 starts with the logger core in C (A-307).
 - **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ other: …
 
 ### D-3 – Q-032: technique of the three Web UIs (G-3.4 a: runtime of a deliverable)
@@ -599,14 +610,12 @@ Logs: [C-075](log/2026-11-01_C-075_d8-list-explain-p5b-exit.md), [C-074](log/202
 - **Recommendation:** (a): small, no extra toolchain, each image stays self-contained; the Registry (P7) decides its own, richer stack.
 - **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ other: …
 
-### D-4 – Q-033: Grafana for the history of the logger (G-3.4 a: license)
-
-- **Context:** you asked for Grafana "if feasible". It is feasible, but Grafana is licensed under **AGPL-3.0**; our deliverables are MIT (ADR-0004) and G-4.10 asks for MIT-compatible dependencies.
-- **Options:** **(a)** an optional compose profile (e.g. `history`) with the unchanged official images of Grafana (AGPL-3.0) and Prometheus (Apache-2.0); they are pulled, not built, changed or shipped by us; our parts – the logger's `/metrics` endpoint, the Prometheus configuration and the provisioned dashboards – are MIT; without the profile the demos run fully and the logger shows a short history (e.g. the last hour) in its own UI; (b) no Grafana: the history only in the logger UI (a few charts, MIT); (c) Grafana as a fixed part of the dev environment.
-- **Recommendation:** (a). It gives the Grafana view without making it a dependency of our code. Before any publication (Q-011) the AGPL images in the compose file are named in the license notes.
-- **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ other: …
-
 ### Answered earlier
+
+Answered after the C-075 review addendum 1 (2026-11-01) and recorded in C-075 addendum 2:
+- D-2 – Q-031 language of the config service D10: ☑ (a) ("Config Service in Rust") → Rust on `oec`.
+- D-4 – Q-033 Grafana for the logger history: ☑ (b) ("Kein Grafana") → the history only in the logger UI; no Prometheus, no `/metrics` (A-308).
+- Logger in C ("Logger in C"): confirms Q-024. Weather service: see D-5.
 
 Answered after C-075 (2026-11-01) and recorded in C-075 addendum 1:
 - D-1 – P5b exit and the next phase: ☑ (a) ("D-1 (a)") → P5b closed with the carried items (demo/Registry images → P6/P7 exits, CI/binaries/tool image/Podman/Windows engine → P9); next P6, with your extended scope (three demos with Web UIs, config service D10, logger history, Grafana if feasible).
@@ -1434,12 +1443,17 @@ ADR-0025 amendment C-075; DESIGN §2, §6, §7, §9, §10 "As built (C-075)"; lo
 ADR-0016 amendment C-075 review; ROADMAP P6; log C-075 addendum 1. The proposals A-302 … A-304 are the starting point of the P6 design (ADR-0027, C-076); they can change there with reasons.
 - **A-301 Levels:** weather Messaging L3 (unchanged), logger **L2** (it offers `Get`/`Set Config` because the config service edits it; from L2 the `Event` Status after a `Set` is a must), config service **L1** (it offers nothing to modify and only requests); all three Service Container L3. Your wish of C-007 (one demo at L1, one at L3) holds, the three demos now show all three levels. The logger stays C on `oec-ffi` (Q-024; `oec_config_on_set` exists since C-061).
 - **A-302 Config of the weather service:** per station (Config of the station asset): `name`, `latitude` (−90 … 90), `longitude` (−180 … 180), both at most 4 decimals (MET Norway terms, `Pattern`), `altitude` (m, optional, improves the MET temperature). For the application: `provider` (`met-no` | `simulation`; switching takes effect at once and shows in `Health`), `userAgentContact` (MET Norway requires an identifying User-Agent), `pollInterval` (s; at least 600 with `met-no`, `Expires`/`If-Modified-Since` honored anyway), `stations` (1 … 5; station assets appear with Birth/MAM and leave with their Close, the `PublicationList` follows), `frostThreshold` (°C) and `stormThreshold` (m/s) – crossing raises an `Event` that the logger shows. Rejected sets (out of range, wrong pattern) give the `Event` Status `Bad…`, visible in the config service.
-- **A-303 Config and history of the logger:** `resources` (which resources to log; default `Event`, `Health`), `sources` (filter on AppId/Source), `minEventLevel`, `format` (`text` | `json`), `file` (on/off). History: a ring buffer of the last entries and of the numeric `Data`/`Health` values for the own UI; `/metrics` (Prometheus text format, standard C, no library) for the optional history profile (D-4).
+- **A-303 Config and history of the logger:** `resources` (which resources to log; default `Event`, `Health`), `sources` (filter on AppId/Source), `minEventLevel`, `format` (`text` | `json`), `file` (on/off). History: a ring buffer of the last entries and of the numeric `Data`/`Health` values for the own UI; ~~`/metrics` (Prometheus text format, standard C, no library) for the optional history profile (D-4).~~ Dropped with D-4 (b), A-308.
 - **A-304 Config service:** discovers the applications by their `Pub/MAM` (and `Get/MAM` at start); a `Config` is writable if the `SubscriptionList` lists its `Set` topic (SF-107); renders a form from the Config definition (type, unit, `Min`/`Max`/`Length`/`Pattern`/`Values`, mandatory, groups); sensitive values stay masked – an untouched masked value is sent back as the mask, which keeps it (REQ-RES-CONFIG-025); shows the `Event` Status of each `Set`. Generic: works for every OEC application with a `Config`, not only the two demos. Configured by file/environment (broker from `broker.json`).
 - **A-305 Web UIs:** outside the OEC standard and never on the bus; one HTTP port per service, published only on `127.0.0.1` in the compose file, no authentication (demo; noted in the READMEs); the weather UI shows the MET Norway attribution (CC BY 4.0).
 - **A-306 Deliverable and cut:** the config service is deliverable **D10** (D1 … D9 keep their numbers). Provisional cut, final in the C-076 plan: (1) weather core (simulation provider, station assets, `Data`/`Metadata`/`Config`, L3, D7 `test` at L3 in the gate); (2) weather MET Norway provider (opt-in live), warnings, Web UI; (3) logger in C (subscriptions, output, `Config`, history, Web UI, `/metrics`); (4) config service; (5) images, SBOM, compose incl. the optional history profile, D8 `level3`; (6) exit run and docs. Increment 1 does not depend on D-2 … D-4.
 
+### A-307, A-308 – after the C-075 review addendum 2 (agent)
+
+- **A-307 Cut reordered:** P6 increment 1 is the logger core in C on `oec-ffi` (subscriptions, structured output, `Config` at L2, history buffer, offline tests, D7 `test` at `level2` in the gate). Its language is decided and it has no Web UI yet, so it depends on neither D-3 nor D-5. Then the weather core (language per D-5), MET Norway and warnings, the config service core in Rust, the three Web UIs together (D-3), images/SBOM/compose/D8, exit. ROADMAP P6.
+- **A-308 No metrics endpoint:** without Grafana there is no Prometheus in the dev environment; the logger offers no `/metrics`. The history (ring buffer of the last entries and of numeric `Data`/`Health` values) is only served to its own Web UI.
+
 ## Next (C-076)
 
-1. PO: D-2 (Q-031), D-3 (Q-032), D-4 (Q-033) – needed before P6 increments 2 … 5, not before increment 1.
-2. C-076 (new session, start prompt in `prompt.md`): P6 plan and cycle cut in the ROADMAP, ADR-0027 (demo architecture), increment 1 (weather core).
+1. PO: D-5 (Q-034, language of the weather service) before the weather core; D-3 (Q-032, Web UI technique) before the Web UI increment. Neither blocks C-076.
+2. C-076 (new session, start prompt in `prompt.md`): P6 plan and cycle cut in the ROADMAP, ADR-0027 (demo architecture), increment 1 (logger core in C, A-307).

@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 01.11.2026, C-075-Review Nachtrag 1: Du hast **D-1 (a)** entschieden – **P5b ist abgeschlossen**, weiter mit **P6**, und P6 erweitert: drei Demo-Dienste (Wetter, neu ein **Config-Service D10**, Logger mit Historie, Grafana wenn machbar), jeder mit kleiner Web-Oberfläche. **Für dich offen: D-2** (Sprache des Config-Service), **D-3** (Technik der Web-Oberflächen), **D-4** (Grafana und seine Lizenz). A-301 … A-306 zur Info. Davor C-075: D8 fertig gebaut, Abschlusslauf._
+_Stand: 01.11.2026, C-075-Review Nachtrag 2: Du hast die Sprachen und Grafana entschieden – **D-2 (a)** Config-Service in Rust, **D-4 (b)** kein Grafana, Logger bleibt C. Beim Wetterdienst hast du Go genannt und gefragt, was gesetzt war (Rust) → **D-5** zur Bestätigung. **Für dich offen: D-3** (Web-Oberflächen) und **D-5** (Sprache des Wetterdienstes). A-307, A-308 zur Info. Davor C-075-Review Nachtrag 1: Du hast **D-1 (a)** entschieden – **P5b ist abgeschlossen**, weiter mit **P6**, und P6 erweitert: drei Demo-Dienste (Wetter, neu ein **Config-Service D10**, Logger mit Historie, Grafana wenn machbar), jeder mit kleiner Web-Oberfläche. **Für dich offen: D-2** (Sprache des Config-Service), **D-3** (Technik der Web-Oberflächen), **D-4** (Grafana und seine Lizenz). A-301 … A-306 zur Info. Davor C-075: D8 fertig gebaut, Abschlusslauf._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,16 +24,18 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-2 – In welcher Sprache bauen wir den Config-Service? (zu entscheiden)
+### D-5 – In welcher Sprache bauen wir den Wetterdienst? (zu bestätigen)
 
-**Worum es geht:** Du hast P6 um einen dritten Dienst erweitert: einen Config-Service, der die Einstellungen (`Config`) des Wetterdienstes und des Loggers anzeigt und ändert. Die Sprache eines Lieferobjekts entscheidest du (G-3.4 a).
+**Worum es geht:** Du hast geschrieben „Wetter Service in Go (oder was hatten wir hier gesetzt?)“. Gesetzt ist seit C-042 **Rust mit unserem SDK `oec`** (ADR-0011): Der Wetterdienst zeigt die Rust-Schnittstelle des SDK mit allen Level-3-Funktionen, der Logger die C-Schnittstelle. Mit D-2 zeigt der Config-Service in Rust die „anfragende“ Seite. Für Go haben wir kein SDK.
 
 **Möglichkeiten:**
-- **(a) Rust mit unserem SDK `oec`.** Das SDK kann seit C-058 bei anderen Anwendungen nachfragen und Werte setzen (`get`/`set`). Gleiche Werkzeuge wie beim Wetterdienst, und der Dienst zeigt die „anfragende“ Seite des SDK.
-- **(b) C über `oec-ffi`** wie der Logger. Ein Formular-Editor in C ist viel Code, und die C-Seite zeigt schon der Logger.
-- **(c) Go.** Liegt außerhalb unseres SDK und würde von D2 nichts zeigen.
+- **(a) Rust, wie gesetzt.** Alles, was der Wetterdienst braucht (Stationen als Assets, Messwerte, Einstellungen je Station), gibt es im Rust-SDK schon und ist getestet.
+- **(b) Go über die C-Schnittstelle:** ein dünnes Go-Paket über `oec-ffi` (per „cgo“). Dann hätten die drei Demos drei Sprachen, und man sieht, dass die C-Schnittstelle auch anderen Sprachen dient. Aber: Das Go-Paket ist eine neue Schicht und mehr Arbeit als der Wetterdienst selbst, und für Builds auf andere Plattformen braucht cgo jeweils einen C-Compiler.
+- **(c) Go ganz ohne unser SDK.** Zeigt nichts von unserem SDK; D7 prüft den Dienst trotzdem.
 
-**Meine Empfehlung: (a).**
+**Meine Empfehlung: (a).** Wenn du eine Go-Demo um ihrer selbst willen willst, ist (b) der saubere Weg; dann plane ich das Go-Paket als eigenes Inkrement.
+
+**Bis zu deiner Antwort** schreibe ich keinen Code für den Wetterdienst. P6 beginnt mit dem Kern des Loggers in C, der von keiner offenen Frage abhängt (A-307).
 
 ### D-3 – Wie bauen wir die drei kleinen Web-Oberflächen? (zu entscheiden)
 
@@ -46,18 +48,16 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 **Meine Empfehlung: (a)** – klein, keine zusätzliche Werkzeugkette, jedes Image bleibt in sich geschlossen. Die Registry (P7) bekommt später eine eigene, reichere Oberfläche.
 
-### D-4 – Grafana für die Historie des Loggers? (zu entscheiden, wegen der Lizenz)
+Antwort z. B.: „D-3 (a), D-5 (a)“. Beide blockieren C-076 nicht.
 
-**Worum es geht:** Grafana ist machbar, steht aber unter der **AGPL-3.0**. Unsere Ergebnisse sind MIT-lizenziert (ADR-0004), und G-4.10 verlangt MIT-verträgliche Abhängigkeiten. Lizenzfragen entscheidest du (G-3.4 a).
+### Was aus deinem Review (Sprachen, Grafana) geworden ist
 
-**Möglichkeiten:**
-- **(a) Grafana als optionaler Zusatz:** Ein Compose-Profil (z. B. `history`) startet die unveränderten offiziellen Images von Grafana (AGPL-3.0) und Prometheus (Apache-2.0, sammelt die Messwerte). Wir laden sie nur herunter, bauen, ändern oder verteilen sie nicht. Unsere Teile sind MIT: der Messwert-Endpunkt `/metrics` des Loggers, die Prometheus-Einstellungen und die fertigen Dashboards. Ohne das Profil laufen alle Demos vollständig, und der Logger zeigt eine kurze Historie (z. B. die letzte Stunde) in seiner eigenen Oberfläche.
-- **(b) Kein Grafana:** Die Historie gibt es nur in der Logger-Oberfläche (ein paar Diagramme, MIT).
-- **(c) Grafana fest in der Entwicklungsumgebung.**
+- **D-2 (a):** Der Config-Service wird in Rust gebaut.
+- **D-4 (b):** Kein Grafana. Der Logger zeigt seine Historie nur in seiner eigenen Oberfläche (die letzten Einträge und kleine Verlaufskurven der Messwerte). Damit entfällt auch der Messwert-Endpunkt `/metrics` für Prometheus (A-308).
+- **Logger in C:** wie gehabt.
+- **Wetterdienst:** siehe D-5.
+- **Neue Reihenfolge (A-307):** P6 beginnt mit dem Kern des Loggers in C (Mitschreiben, Einstellungen, Historie, Prüfung mit D7 auf Level 2). Danach der Wetterdienst (nach D-5), MET Norway und Warnungen, der Config-Service in Rust, dann die drei Oberflächen zusammen (nach D-3), Images und Compose, Abschluss.
 
-**Meine Empfehlung: (a).** Du bekommst die Grafana-Ansicht, ohne dass unser Code davon abhängt. Vor einer Veröffentlichung (Q-011) nennen wir die AGPL-Images in den Lizenzhinweisen.
-
-Antwort z. B.: „D-2 (a), D-3 (a), D-4 (a)“. Das erste P6-Inkrement (Kern des Wetterdienstes) hängt von keiner dieser Fragen ab.
 
 ### Was aus deinem Review C-075 geworden ist
 
@@ -69,10 +69,10 @@ Antwort z. B.: „D-2 (a), D-3 (a), D-4 (a)“. Das erste P6-Inkrement (Kern des
     - Schwellen für Frost- und Sturmwarnung: Wird eine überschritten, meldet der Dienst ein Ereignis, das man im Logger sieht.
     - Ungültige Eingaben (z. B. Breitengrad 100) lehnt der Dienst mit einer Fehlermeldung ab; die sieht man im Config-Service.
   - **Config-Service (D10):** findet die Anwendungen am Bus selbst, zeigt ihre Einstellungen als Formular (mit Einheit, erlaubtem Bereich, Pflichtfeld; geheime Werte bleiben maskiert) und schreibt Änderungen zurück; danach zeigt er die Antwort der Anwendung (angenommen oder abgelehnt). Er funktioniert mit jeder OEC-Anwendung, die Einstellungen anbietet, nicht nur mit unseren Demos (A-304).
-  - **Logger (D4)**, weiterhin in C: Er bekommt jetzt selbst Einstellungen, damit der Config-Service ihn bearbeiten kann: was er mitschreibt, von wem, ab welcher Wichtigkeit, als Text oder JSON, Datei an/aus. Dazu eine kurze Historie in seiner Oberfläche; Grafana nach D-4 (A-303).
+  - **Logger (D4)**, weiterhin in C: Er bekommt jetzt selbst Einstellungen, damit der Config-Service ihn bearbeiten kann: was er mitschreibt, von wem, ab welcher Wichtigkeit, als Text oder JSON, Datei an/aus. Dazu eine kurze Historie in seiner Oberfläche (A-303; ohne Grafana, D-4 (b)).
   - Die Web-Oberflächen sind nur auf dem eigenen Rechner (`127.0.0.1`) erreichbar und haben keine Anmeldung – es sind Demos (A-305).
 - **Folge, die ich selbst entschieden habe (A-301):** Weil der Logger jetzt Einstellungen anbietet, erfüllt er **Level 2** statt Level 1. Der Config-Service bietet selbst nichts zum Ändern an und ist **Level 1**; der Wetterdienst bleibt **Level 3**. Dein Wunsch aus C-007 – eine Demo auf Level 1, eine auf Level 3 – gilt weiter, jetzt zeigen die drei Demos alle drei Level. Steht in ADR-0016 (Nachtrag). Wenn du das anders willst, sag es.
-- **Vorläufiger Zuschnitt (A-306)**, endgültig im P6-Plan in C-076: (1) Kern des Wetterdienstes mit simulierten Daten, (2) MET Norway, Warnungen und Oberfläche, (3) Logger, (4) Config-Service, (5) Images und Compose, Prüfung mit D8, (6) Abschlusslauf und Doku.
+- **Vorläufiger Zuschnitt (A-306)**, inzwischen umgestellt durch A-307 (siehe oben).
 
 ### Zur Info: was C-075 gebaut hat
 

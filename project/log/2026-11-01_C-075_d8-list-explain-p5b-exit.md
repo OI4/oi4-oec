@@ -190,3 +190,17 @@ Alle 3 Service sollen eine kleine Web UI bekommen (gehört nicht zum OEC Standar
   - **A-302 … A-306** proposals for the Config contents, the config service, the Web UIs and the provisional cycle cut (REVIEW.md); final with the P6 plan and ADR-0027 in C-076.
 - No code, no test data, no reviewed item changed; no SF (next SF-118). `oec/check.sh` unchanged since the docs commit.
 - `prompt.md` (not committed) is rewritten for C-076: P6 plan, ADR-0027, increment 1 (weather core) – which does not depend on D-2 … D-4.
+
+## Addendum 2 – C-075 review, languages and Grafana (2026-11-01)
+
+PO answer (chat, 2026-11-01): "Sprachen: Wetter Service in Go (oder was hatten wir hier gesetzt?) Config Service in Rust Logger in C Kein Grafana"
+
+### Applied
+
+- **D-2 = Q-031 decided (a):** the config service D10 is written in Rust on `oec`. Q-031 moved to "Decided".
+- **D-4 = Q-033 decided (b):** no Grafana. The history of the logger is only shown in its own Web UI. Q-033 moved to "Decided".
+- **Logger in C:** confirms Q-024 (unchanged).
+- **Weather service – new D-5 = Q-034:** the language set since C-042 is Rust on `oec` (ADR-0011 S4, `research/sdk-options.md`: the weather service shows the Rust API at L3, the logger the C ABI). The PO named Go and asked what was set. A second question in the chat got no answer (the PO reviews later). The answer is ambiguous: "Go" may be meant (one language per demo), or "what was set" (Rust). Go has no SDK of ours: it needs a thin cgo package on `oec-ffi` (a new binding layer, cross builds with a C toolchain per target) or an own implementation that shows nothing of D2. The language of a deliverable is the PO's (G-3.4 a). Recorded as D-5 with the options (a) Rust as set (recommended), (b) Go through cgo on `oec-ffi`, (c) Go without the SDK; working assumption (a), no weather code before the answer.
+- **A-307 cut reordered:** P6 increment 1 is now the logger core in C (language decided, no Web UI, so independent of D-3 and D-5); the weather core follows when D-5 is answered; the three Web UIs form one increment after the cores (D-3). ROADMAP P6.
+- **A-308 no metrics endpoint:** without Grafana there is no Prometheus, so the logger offers no `/metrics`; A-303 is changed accordingly (history buffer for the own UI only).
+- OPEN-QUESTIONS, ROADMAP P6, REVIEW/REVIEW_DE, STATUS updated. No code, no test data, no reviewed item changed; no SF. `prompt.md` (not committed) rewritten: C-076 starts with the P6 plan, ADR-0027 and the logger core.
