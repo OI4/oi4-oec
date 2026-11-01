@@ -1,0 +1,3 @@
+# liboec_ffi.a per target, built by `go run ./cmd/oec-buildlib` (ADR-0027 §2);
+# about 30 MB each, never committed.
+/lib/
