@@ -9,7 +9,9 @@
 // data under CC BY 4.0). A station without data has the Health
 // FAILURE_1/0, the application then OFF_SPEC_3. OEC_ROOT (optional) is
 // the root of the container storage, "/" in a container (REQ-CNT-004);
-// the SDK keeps its state in /etc/oi4/app.
+// the SDK keeps its state in /etc/oi4/app. The Web UI (ui.go) listens on
+// OEC_UI_LISTEN (default 127.0.0.1:8782, empty: off); OEC_UI_KEEPALIVE_MS
+// (1 … 15000, for tests) shortens the keep-alive of its event stream.
 package main
 
 import (
@@ -17,7 +19,10 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
+	"time"
 
 	oec "github.com/OI4/oec/sdk/go"
 )
@@ -42,13 +47,51 @@ func main() {
 	}
 }
 
+// listen binds the Web UI of OEC_UI_LISTEN before the application
+// starts, so a wrong address stops the service at once; nil = off.
+func listen() (*webUI, error) {
+	keepAlive := uiKeepAlive
+	if v, ok := os.LookupEnv("OEC_UI_KEEPALIVE_MS"); ok {
+		ms, err := strconv.Atoi(v)
+		if err != nil || ms < 1 || time.Duration(ms)*time.Millisecond > uiKeepAlive {
+			return nil, fmt.Errorf("Web UI: OEC_UI_KEEPALIVE_MS %s is no number 1 … %d", v, uiKeepAlive.Milliseconds())
+		}
+		keepAlive = time.Duration(ms) * time.Millisecond
+	}
+	address, ok := os.LookupEnv("OEC_UI_LISTEN")
+	if !ok {
+		address = uiDefaultListen
+	}
+	if strings.TrimSpace(address) == "" {
+		fmt.Fprintln(os.Stderr, "oec-weather: Web UI off")
+		return nil, nil
+	}
+	ui, err := listenUI(address)
+	if err != nil {
+		return nil, fmt.Errorf("Web UI: %w", err)
+	}
+	ui.keepAlive = keepAlive
+	return ui, nil
+}
+
 func run() error {
 	root := os.Getenv("OEC_ROOT")
-	app, err := oec.New(oec.Options{Level: oec.Level3, ServiceType: oec.OTConnector, Product: product, ContainerRoot: root})
+	ui, err := listen()
 	if err != nil {
 		return err
 	}
+	app, err := oec.New(oec.Options{Level: oec.Level3, ServiceType: oec.OTConnector, Product: product, ContainerRoot: root})
+	if err != nil {
+		if ui != nil {
+			ui.close()
+		}
+		return err
+	}
 	defer app.Close()
+	if ui != nil {
+		// Before app.Close: the UI asks the application for its state.
+		defer ui.close()
+	}
 	if err := app.This().SetHealth(oec.Normal, 100); err != nil {
 		return err
 	}
@@ -59,8 +102,13 @@ func run() error {
 		fmt.Fprintln(os.Stderr, "oec-weather: met-no endpoint", metnoURL, "(OEC_WEATHER_METNO_URL, for tests)")
 	}
 	svc := newService(app, hostname(root), metnoURL, os.Stdout)
+	svc.ui = ui
 	if err := svc.start(); err != nil {
 		return err
+	}
+	if ui != nil {
+		ui.serve(func() string { return strings.ToLower(app.State().String()) })
+		fmt.Fprintf(os.Stderr, "oec-weather: Web UI on http://%s/\n", ui.addr())
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

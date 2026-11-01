@@ -47,6 +47,8 @@ type rig struct {
 	root string
 	p    *demotest.Process
 	conn int
+	// The address of the Web UI (OEC_UI_LISTEN).
+	ui string
 	// The first Pub Config of the application and the index of the broker
 	// events after it.
 	config map[string]any
@@ -56,16 +58,16 @@ type rig struct {
 func start(t *testing.T) *rig {
 	t.Helper()
 	b := demotest.StartBroker(t)
-	r := &rig{b: b, root: b.Container(t, host)}
+	r := &rig{b: b, root: b.Container(t, host), ui: demotest.UIAddr(t)}
 	r.run(t, 0)
 	return r
 }
 
-// run starts the weather service (again) with the environment env and
-// waits for its Pub Config.
+// run starts the weather service (again) with its Web UI on r.ui ("" =
+// off) and the environment env and waits for its Pub Config.
 func (r *rig) run(t *testing.T, from int, env ...string) {
 	t.Helper()
-	r.p = demotest.Start(t, exe(t), append([]string{"OEC_ROOT=" + r.root}, env...)...)
+	r.p = demotest.Start(t, exe(t), append([]string{"OEC_ROOT=" + r.root, "OEC_UI_LISTEN=" + r.ui}, env...)...)
 	connect, i := r.b.Expect(t, from, "CONNECT of the weather service", func(s demotest.Seen) bool {
 		return s.Seen == "connect" && s.ClientID == host
 	})
@@ -508,7 +510,7 @@ func TestMetNoProvider(t *testing.T) {
 	t.Parallel()
 	met := newMetnoServer(t)
 	b := demotest.StartBroker(t)
-	r := &rig{b: b, root: b.Container(t, host)}
+	r := &rig{b: b, root: b.Container(t, host), ui: demotest.UIAddr(t)}
 	r.run(t, 0, "OEC_WEATHER_METNO_URL="+met.url())
 
 	for name, values := range map[string]map[string]string{
@@ -535,6 +537,12 @@ func TestMetNoProvider(t *testing.T) {
 	for i := 1; i <= 3; i++ {
 		r.metnoData(t, from, i, 0)
 	}
+	// The Web UI credits MET Norway (A-351).
+	ui := r.uiState(t, "attribution of met-no", func(s uiStateJSON) bool { return s.Provider == "met-no" && s.Attribution != nil })
+	if a := ui.Attribution; a.Text != metnoAttribution || a.License != "CC BY 4.0" ||
+		a.LicenseURL != "https://creativecommons.org/licenses/by/4.0/" || !strings.HasPrefix(a.SourceURL, "https://api.met.no/") {
+		t.Errorf("attribution %+v", a)
+	}
 	reqs := met.requests()
 	if len(reqs) != 3 {
 		t.Fatalf("%d requests", len(reqs))
@@ -558,6 +566,10 @@ func TestMetNoProvider(t *testing.T) {
 	r.setApp(t, map[string]string{"frostThreshold": "1"})
 	r.health(t, from, station(2), "FAILURE_1", 0)
 	r.health(t, from, il, "OFF_SPEC_3", 66)
+	r.uiState(t, "station 2 failed", func(s uiStateJSON) bool {
+		return s.Health == "OFF_SPEC_3" && s.HealthScore == 66 && s.Stations[1].Failed && s.Stations[1].Health == "FAILURE_1" &&
+			s.Stations[1].Observation == nil && s.Stations[1].Error != "" && !s.Stations[0].Failed
+	})
 	r.syslog(t, from, "Warning", "station 2 Oslo")
 	r.metnoData(t, from, 1, 1)
 	r.metnoData(t, from, 3, 1)
@@ -596,6 +608,7 @@ func TestMetNoProvider(t *testing.T) {
 		r.publication(t, from, "Data", station(i), "Oi4Pv")
 	}
 	r.health(t, from, il, "NORMAL_0", 100)
+	r.uiState(t, "no attribution with the simulation", func(s uiStateJSON) bool { return s.Provider == "simulation" && s.Attribution == nil })
 	n, pl := len(met.requests()), r.p.Len()
 	r.setApp(t, map[string]string{"frostThreshold": "0"})
 	r.p.Line(t, pl, "poll line", func(l string) bool { return strings.HasPrefix(l, "poll 3 stations") })
@@ -620,6 +633,7 @@ func TestD7Level3(t *testing.T) {
 		Level:    3,
 		Pass:     d7Level3Pass,
 		Report:   "OEC_WEATHER_D7_REPORT",
+		Env:      []string{"OEC_UI_LISTEN="},
 	})
 }
 

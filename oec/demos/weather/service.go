@@ -40,6 +40,11 @@ type service struct {
 	// with the share of good stations).
 	health      oec.Health
 	healthScore int
+	// updated is the time of the last poll round.
+	updated time.Time
+	// ui is the Web UI (nil = off); the poll goroutine hands it a
+	// snapshot after every round and change.
+	ui *webUI
 }
 
 // weatherStation is a weather station: an asset represented on Level 3
@@ -54,6 +59,10 @@ type weatherStation struct {
 	frost, storm bool
 	// Whether the last observation failed (Health FAILURE_1/0).
 	failed bool
+	// For the Web UI: the last observations (at most uiHistory) and the
+	// error of the last failed one.
+	history []Observation
+	lastErr string
 }
 
 // newService is the service; the application has the Health
@@ -100,7 +109,11 @@ func (s *service) start() error {
 	}
 	s.cur = cur
 	s.logf("config provider=%s stations=%d pollInterval=%s", cur.Provider, cur.Stations, cur.PollInterval)
-	return s.resize()
+	if err := s.resize(); err != nil {
+		return err
+	}
+	s.publishUI()
+	return nil
 }
 
 // newProvider is the provider of the settings.
@@ -264,9 +277,11 @@ func (s *service) run(ctx context.Context) error {
 		if err := s.apply(); err != nil {
 			return err
 		}
+		s.publishUI()
 		if err := s.poll(ctx); err != nil {
 			return err
 		}
+		s.publishUI()
 		timer.Reset(s.cur.PollInterval)
 	}
 }
@@ -284,12 +299,14 @@ func (s *service) poll(ctx context.Context) error {
 				return nil
 			}
 			fmt.Fprintf(os.Stderr, "oec-weather: station %d: %v\n", st.index, err)
+			st.lastErr = err.Error()
 			if err := s.stationHealth(ctx, st, err); err != nil {
 				return err
 			}
 			continue
 		}
 		good++
+		st.observed(o)
 		if err := s.stationHealth(ctx, st, nil); err != nil {
 			return err
 		}
@@ -312,6 +329,7 @@ func (s *service) poll(ctx context.Context) error {
 	if err := s.appHealth(ctx, good); err != nil {
 		return err
 	}
+	s.updated = now
 	s.logf("poll %d stations", len(s.stations))
 	return nil
 }
