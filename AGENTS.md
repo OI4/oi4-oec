@@ -1,7 +1,7 @@
 # AGENTS.md – Entry point for humans and AI agents
 
 This workspace builds **OI4 Open Edge Computing (OEC) v2.0** artifacts from scratch:
-JSON Schema, developer SDK/library, two demo services (weather, logger), an OEC Registry, a micro SDK in C for microcontrollers (reference ESP32), two cross-platform compliance CLIs (application/messaging D7, infrastructure D8) and a Docusaurus documentation.
+JSON Schema, developer SDK/library, three demo services with small Web UIs (weather, config, logger; P6 scope of the C-075 review), an OEC Registry, a micro SDK in C for microcontrollers (reference ESP32), two cross-platform compliance CLIs (application/messaging D7, infrastructure D8) and a Docusaurus documentation.
 
 **Before doing anything, read in this order:**
 

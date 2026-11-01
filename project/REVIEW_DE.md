@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 01.11.2026, C-075: D8 ist fertig gebaut (`oec-infra list`/`explain`, Abdeckungsbericht, Bericht eingefroren, Abschlusslauf). **Für dich offen: D-1** – P5b abschließen und die nächste Phase wählen. Keine neuen Testdaten (kein R-x), kein Finding. Davor C-074-Review Nachtrag 3: Du hast **R-2** akzeptiert; REQ-CNT-009 und alle 20 Run-Testfälle stehen auf `reviewed`._
+_Stand: 01.11.2026, C-075-Review Nachtrag 1: Du hast **D-1 (a)** entschieden – **P5b ist abgeschlossen**, weiter mit **P6**, und P6 erweitert: drei Demo-Dienste (Wetter, neu ein **Config-Service D10**, Logger mit Historie, Grafana wenn machbar), jeder mit kleiner Web-Oberfläche. **Für dich offen: D-2** (Sprache des Config-Service), **D-3** (Technik der Web-Oberflächen), **D-4** (Grafana und seine Lizenz). A-301 … A-306 zur Info. Davor C-075: D8 fertig gebaut, Abschlusslauf._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,28 +24,55 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – Ist P5b fertig, und womit geht es weiter? (zu entscheiden)
+### D-2 – In welcher Sprache bauen wir den Config-Service? (zu entscheiden)
 
-**Worum es geht:** Alle sechs Inkremente von P5b (das Infrastruktur-Prüf-Tool D8 `oec-infra`) sind gebaut. Die ROADMAP nennt vier Bedingungen für den Abschluss. Ich habe sie einzeln geprüft (Belege im Log C-075):
-
-| # | Bedingung | Stand |
-|---|---|---|
-| 1 | Jeder Test im D8-Katalog ist gebaut oder als „nur von Hand prüfbar“ begründet; je Test ein guter und ein schlechter Testfall, alle von dir geprüft; der Selbsttest läuft ohne Netz und ohne Docker | **erfüllt**: 17 von 17 Tests gebaut, 1 Regel „von Hand“ mit Begründung (REQ-CMP-012: welches Level der Prüfer wählt). 163 Testfälle (19 Images, 29 Broker, 69 Hosts, 26 Container, 20 Runs), alle von dir abgenommen; jeder Test hat beide Sorten (steht jetzt auch in `COVERAGE.md`). Das Prüfskript braucht weder Netz noch Docker. |
-| 2 | `image` und `run` mit eigens gebauten guten und fehlerhaften Images | **erfüllt**: `image` im Prüfskript; `run` mit echtem Docker im freiwilligen Lauf `live.sh` (statt eines eigenen `live-infra.sh`, A-290): das gute Image besteht, jedes der 14 fehlerhaften ergibt genau das erwartete Ergebnis – 15 von 15. |
-| 3 | `bus` und `host` gegen die Entwicklungsumgebung `oec/dev` | **erfüllt, mit festgehaltenen Abweichungen – kein Finding** (A-298): BUS-01 besteht. BUS-02 warnt bei REQ-RES-CONFIG-026 (ein „sollte“, das sich mit den Zugriffsregeln des Mosquitto-Brokers nicht ausdrücken lässt; bekannt seit C-071). BUS-03 und ein Teil von HST-04 (REQ-PLT-008) können erst bestehen, wenn es die Registry gibt (P7). HST-01/02 bestehen; HST-04 meldet außerdem REQ-PLT-003 auf dem Mac (kein Linux) und REQ-PLT-006 in einem Container ohne Docker-Zugang. Das alles liegt an der Entwicklungsumgebung, die keine echte Container-Plattform ist – nicht an D8 und nicht an der Guideline. |
-| 4 | Berichtsformat eingefroren, jeder Bericht geprüft, `list`/`explain`/`report-schema`, Abdeckungsbericht, Builds für alle Systeme | **erfüllt**: Das Berichtsformat ist eingefroren und per Prüfsumme gesichert (A-296); gebaut für Windows, Linux und macOS je mit amd64 und arm64, dazu Linux arm/386 – alles klappt. |
-
-**Was in andere Phasen wandert (wie in C-070 geplant, A-299):** „unsere Demo- und Registry-Images bestehen `level3`“ gehört zum Abschluss von P6 bzw. P7 (die Images gibt es erst dann). Die CI auf Windows/macOS/Linux, die fertigen D8-Programme, das Container-Image des Tools und Läufe mit Podman und Docker unter Windows kommen mit P9.
+**Worum es geht:** Du hast P6 um einen dritten Dienst erweitert: einen Config-Service, der die Einstellungen (`Config`) des Wetterdienstes und des Loggers anzeigt und ändert. Die Sprache eines Lieferobjekts entscheidest du (G-3.4 a).
 
 **Möglichkeiten:**
-- **(a)** P5b abschließen. Weiter mit **P6** – die Demo-Dienste (Wetter in Rust, Logger in C über `oec-ffi`), jeweils mit Dockerfile, SBOM und Lizenzen, geprüft mit D7 und D8.
-- **(b)** wie (a), aber weiter mit **P4b** – das Micro-SDK in C für den ESP32 (D9).
-- **(c)** wie (a), aber weiter mit **P7** – die OEC Registry (D5). Damit würden auch BUS-03 und REQ-PLT-008 gegen `oec/dev` bestehen.
-- **(d)** P5b offen lassen, bis es die Demo- und Registry-Images gibt.
+- **(a) Rust mit unserem SDK `oec`.** Das SDK kann seit C-058 bei anderen Anwendungen nachfragen und Werte setzen (`get`/`set`). Gleiche Werkzeuge wie beim Wetterdienst, und der Dienst zeigt die „anfragende“ Seite des SDK.
+- **(b) C über `oec-ffi`** wie der Logger. Ein Formular-Editor in C ist viel Code, und die C-Seite zeigt schon der Logger.
+- **(c) Go.** Liegt außerhalb unseres SDK und würde von D2 nichts zeigen.
 
-**Meine Empfehlung: (a).** In der ROADMAP kommt P6 vor P7 und P9. SDK (P4), D7 (P5) und D8 (P5b) sind fertig, die Demos lassen sich also sofort von vorne bis hinten bauen und prüfen. Sie sind die ersten echten Images für D8 und die ersten echten Anwendungen für D7 (Level 3 bzw. Level 1); der Logger nutzt außerdem die C-Schnittstelle `oec-ffi`. P4b hängt davon nicht ab und kann danach kommen; die Registry (P7) profitiert davon, dass die Demos schon als Teilnehmer in der Entwicklungsumgebung laufen.
+**Meine Empfehlung: (a).**
 
-Antwort z. B.: „D-1 (a)“.
+### D-3 – Wie bauen wir die drei kleinen Web-Oberflächen? (zu entscheiden)
+
+**Worum es geht:** Jeder Demo-Dienst bekommt eine kleine Web-Oberfläche, auf der man sieht, was passiert. Sie gehört nicht zum OEC-Standard und läuft nicht über den Bus.
+
+**Möglichkeiten:**
+- **(a) Jeder Dienst liefert seine Seite selbst aus:** einfache HTML/CSS/JavaScript-Dateien, fest ins Programm eingebaut, ohne Build-Schritt, ohne Framework, ohne npm-Pakete. Live-Updates über „Server-Sent Events“ (der Browser bekommt neue Werte automatisch geschickt). Der Logger in C braucht dafür einen kleinen HTTP-Server (Auswahl in C-076, Lizenz MIT-verträglich).
+- **(b) Ein Frontend-Framework mit Build-Schritt** (z. B. Svelte oder React mit Vite): schönere Bausteine, aber eine Node-Werkzeugkette und viele npm-Pakete für drei kleine Seiten.
+- **(c) Ein gemeinsamer Oberflächen-Dienst für alle drei:** ein Container mehr, und die Oberfläche gehört nicht mehr zu ihrem Dienst.
+
+**Meine Empfehlung: (a)** – klein, keine zusätzliche Werkzeugkette, jedes Image bleibt in sich geschlossen. Die Registry (P7) bekommt später eine eigene, reichere Oberfläche.
+
+### D-4 – Grafana für die Historie des Loggers? (zu entscheiden, wegen der Lizenz)
+
+**Worum es geht:** Grafana ist machbar, steht aber unter der **AGPL-3.0**. Unsere Ergebnisse sind MIT-lizenziert (ADR-0004), und G-4.10 verlangt MIT-verträgliche Abhängigkeiten. Lizenzfragen entscheidest du (G-3.4 a).
+
+**Möglichkeiten:**
+- **(a) Grafana als optionaler Zusatz:** Ein Compose-Profil (z. B. `history`) startet die unveränderten offiziellen Images von Grafana (AGPL-3.0) und Prometheus (Apache-2.0, sammelt die Messwerte). Wir laden sie nur herunter, bauen, ändern oder verteilen sie nicht. Unsere Teile sind MIT: der Messwert-Endpunkt `/metrics` des Loggers, die Prometheus-Einstellungen und die fertigen Dashboards. Ohne das Profil laufen alle Demos vollständig, und der Logger zeigt eine kurze Historie (z. B. die letzte Stunde) in seiner eigenen Oberfläche.
+- **(b) Kein Grafana:** Die Historie gibt es nur in der Logger-Oberfläche (ein paar Diagramme, MIT).
+- **(c) Grafana fest in der Entwicklungsumgebung.**
+
+**Meine Empfehlung: (a).** Du bekommst die Grafana-Ansicht, ohne dass unser Code davon abhängt. Vor einer Veröffentlichung (Q-011) nennen wir die AGPL-Images in den Lizenzhinweisen.
+
+Antwort z. B.: „D-2 (a), D-3 (a), D-4 (a)“. Das erste P6-Inkrement (Kern des Wetterdienstes) hängt von keiner dieser Fragen ab.
+
+### Was aus deinem Review C-075 geworden ist
+
+- **D-1 (a):** P5b ist abgeschlossen. Was offen blieb, wandert wie vorgeschlagen weiter: Demo-Images → Abschluss P6, Registry-Image → Abschluss P7, CI, fertige Programme, Tool-Image, Podman und Docker unter Windows → P9.
+- **Deine Ideen für P6 sind eingetragen** (ROADMAP P6, Projekt-README mit neuem Lieferobjekt **D10 Config-Service**, AGENTS.md). Drei Dienste mit je einer kleinen Web-Oberfläche:
+  - **Wetterdienst (D3)** wie geplant. Mein Vorschlag für seine Einstellungen (A-302):
+    - je Wetterstation Name, Breiten- und Längengrad (höchstens 4 Nachkommastellen, so verlangt es MET Norway) und Höhe;
+    - für den Dienst die Datenquelle (MET Norway oder Simulation, umschaltbar im laufenden Betrieb), die Kontaktangabe für MET Norway, das Abfrageintervall (mindestens 10 Minuten bei MET Norway) und die Zahl der Stationen (1 bis 5; neue Stationen melden sich am Bus an, entfernte ab);
+    - Schwellen für Frost- und Sturmwarnung: Wird eine überschritten, meldet der Dienst ein Ereignis, das man im Logger sieht.
+    - Ungültige Eingaben (z. B. Breitengrad 100) lehnt der Dienst mit einer Fehlermeldung ab; die sieht man im Config-Service.
+  - **Config-Service (D10):** findet die Anwendungen am Bus selbst, zeigt ihre Einstellungen als Formular (mit Einheit, erlaubtem Bereich, Pflichtfeld; geheime Werte bleiben maskiert) und schreibt Änderungen zurück; danach zeigt er die Antwort der Anwendung (angenommen oder abgelehnt). Er funktioniert mit jeder OEC-Anwendung, die Einstellungen anbietet, nicht nur mit unseren Demos (A-304).
+  - **Logger (D4)**, weiterhin in C: Er bekommt jetzt selbst Einstellungen, damit der Config-Service ihn bearbeiten kann: was er mitschreibt, von wem, ab welcher Wichtigkeit, als Text oder JSON, Datei an/aus. Dazu eine kurze Historie in seiner Oberfläche; Grafana nach D-4 (A-303).
+  - Die Web-Oberflächen sind nur auf dem eigenen Rechner (`127.0.0.1`) erreichbar und haben keine Anmeldung – es sind Demos (A-305).
+- **Folge, die ich selbst entschieden habe (A-301):** Weil der Logger jetzt Einstellungen anbietet, erfüllt er **Level 2** statt Level 1. Der Config-Service bietet selbst nichts zum Ändern an und ist **Level 1**; der Wetterdienst bleibt **Level 3**. Dein Wunsch aus C-007 – eine Demo auf Level 1, eine auf Level 3 – gilt weiter, jetzt zeigen die drei Demos alle drei Level. Steht in ADR-0016 (Nachtrag). Wenn du das anders willst, sag es.
+- **Vorläufiger Zuschnitt (A-306)**, endgültig im P6-Plan in C-076: (1) Kern des Wetterdienstes mit simulierten Daten, (2) MET Norway, Warnungen und Oberfläche, (3) Logger, (4) Config-Service, (5) Images und Compose, Prüfung mit D8, (6) Abschlusslauf und Doku.
 
 ### Zur Info: was C-075 gebaut hat
 

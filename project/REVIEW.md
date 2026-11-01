@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-01, C-075: P5b increment 6 done – `oec-infra list`/`explain`, D8 section of `catalog/COVERAGE.md`, D8 report version 1 frozen, P5b exit run; **open for you: D-1** (close P5b, next phase). No R-x (no new or changed test data), no SF. A-292 … A-300 for information. Before that C-074 review addendum 3: you accepted **R-2** ("R-2 akzeptiert") – REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` are `reviewed`; all 20 run fixtures `reviewed`, no REQ draft, no open finding. **Nothing is open.** Before that C-074 review addendum 2: D-1 ("D-1 wie vorgeschlagen", SF-117) is applied – RIG 4.1.3 `52d8470`, SF-117 resolved, re-baseline, T8-RUN-02 judges one means of authentication only as a violation. Open: **R-2** (REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials`). R-1 accepted (addendum 1). Before that C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"). Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
+_Last updated: 2026-11-01, C-075 review addendum 1: you decided **D-1 (a)** ("D-1 (a)") – **P5b is closed**, next **P6** – and extended P6: three demo services (weather, a new **config service D10**, logger with history, Grafana if feasible), each with a small Web UI. **Open for you: D-2** (language of the config service, Q-031), **D-3** (technique of the Web UIs, Q-032), **D-4** (Grafana, AGPL-3.0, Q-033). A-301 … A-306 for information (A-301: logger now Messaging L2, config service L1). Before that C-075: P5b increment 6 done – `oec-infra list`/`explain`, D8 section of `catalog/COVERAGE.md`, D8 report version 1 frozen, P5b exit run; **open for you: D-1** (close P5b, next phase). No R-x (no new or changed test data), no SF. A-292 … A-300 for information. Before that C-074 review addendum 3: you accepted **R-2** ("R-2 akzeptiert") – REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` are `reviewed`; all 20 run fixtures `reviewed`, no REQ draft, no open finding. **Nothing is open.** Before that C-074 review addendum 2: D-1 ("D-1 wie vorgeschlagen", SF-117) is applied – RIG 4.1.3 `52d8470`, SF-117 resolved, re-baseline, T8-RUN-02 judges one means of authentication only as a violation. Open: **R-2** (REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials`). R-1 accepted (addendum 1). Before that C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"). Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -254,6 +254,11 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - **P5b exit run:** cross builds of both CLIs; `live.sh` against `oec/dev` and Docker 28.4 green (`run` 15 of 15 faults). One defect of the live test found and fixed test first: `TestContainerDev` left the anonymous volumes of the Mosquitto image behind; only our own leftovers were removed, by name (A-297).
   - **P5b exit** (ROADMAP P5b "Exit assessment (C-075)"): criteria 1, 2, 4 met, 3 met with recorded deviations of the dev environment (A-298) → **D-1**.
   - No new or changed test data (no R-x), no SF, no new dependency, D7 unchanged. ADR-0025 amendment C-075; A-292 … A-300 for information.
+- C-075 review addendum 1: your answer ("D-1 (a)", with ideas for the demos) is applied.
+  - **P5b closed** with the carried items; **next phase P6** (C-076).
+  - **P6 scope (yours):** weather service as planned, its `Config` sets the coordinates (and more, A-302); a new **config service (D10)** that shows and edits the `Config` of the weather service and the logger (A-304); the logger with a history, Grafana if feasible; a small Web UI for each, outside the OEC standard. ROADMAP P6, project README (D10), AGENTS.md.
+  - Consequence decided by the agent (**A-301**): the logger offers `Config` and becomes Messaging **L2**, the config service is Messaging **L1**, weather stays **L3** (ADR-0016 amendment C-075 review); C for the logger stays (Q-024).
+  - **Three points are yours by G-3.4 a** and open: **D-2** (Q-031), **D-3** (Q-032), **D-4** (Q-033). Increment 1 of P6 (weather core) does not depend on them.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -558,7 +563,7 @@ Logs: [C-075](log/2026-11-01_C-075_d8-list-explain-p5b-exit.md), [C-074](log/202
 | A-289 | Self-test: fake Engine API runs the simulated application in process; Windows not covered | info (agent) | C-074 | – | – |
 | A-290 | Test images (`docker load`, OCI layout + `manifest.json`), live run in `live.sh` | info (agent) | C-074 | – | – |
 | A-291 | Cut: increment 6 not pulled forward; no new dependency | info (agent) | C-074 | – | – |
-| D-1 | P5b exit and the next phase | decide (G-3.4 a) | C-075 | (a) close P5b, next P6 | ☐ |
+| D-1 | P5b exit and the next phase | decide (G-3.4 a) | C-075 | (a) close P5b, next P6 | ☑ (a) |
 | A-292 | `oec-infra list`/`explain` as `oec-check`; helpers duplicated because D7 is closed | info (agent) | C-075 | – | – |
 | A-293 | `internal/explain` with one view per tool; `InfraFixtures`; A-248 lifted | info (agent) | C-075 | – | – |
 | A-294 | `COVERAGE.md`: D8 section appended, D7 section byte-identical; D8 columns | info (agent) | C-075 | – | – |
@@ -568,22 +573,43 @@ Logs: [C-075](log/2026-11-01_C-075_d8-list-explain-p5b-exit.md), [C-074](log/202
 | A-298 | Exit criterion 3: deviations of the dev environment recorded, no SF | info (agent) | C-075 | – | – |
 | A-299 | Carried items: demo/Registry images → P6/P7, CI/binaries/image/Podman/Windows → P9 | info (agent) | C-075 | – | – |
 | A-300 | No new dependency, no schema change, D7 unchanged | info (agent) | C-075 | – | – |
+| D-2 | Q-031: language/runtime of the config service D10 | decide (G-3.4 a) | C-075 review | (a) Rust on `oec` | ☐ |
+| D-3 | Q-032: technique of the three Web UIs | decide (G-3.4 a) | C-075 review | (a) served by the service, static HTML/CSS/JS, SSE, no build step | ☐ |
+| D-4 | Q-033: Grafana (AGPL-3.0) for the logger history | decide (G-3.4 a: license) | C-075 review | (a) optional profile, unchanged official images | ☐ |
+| A-301 | Messaging levels: weather L3, logger L2, config service L1; ADR-0016 amendment | info (agent) | C-075 review | – | – |
+| A-302 | Proposal: Config of the weather service | info (agent) | C-075 review | – | – |
+| A-303 | Proposal: Config and history of the logger | info (agent) | C-075 review | – | – |
+| A-304 | Proposal: behavior of the config service | info (agent) | C-075 review | – | – |
+| A-305 | Web UIs outside the standard: own port, localhost only, no authentication | info (agent) | C-075 review | – | – |
+| A-306 | Deliverable D10; provisional P6 cycle cut | info (agent) | C-075 review | – | – |
 
 ## Decisions and review items
 
-### D-1 – P5b exit and the next phase (G-3.4 a: phase order)
+### D-2 – Q-031: language/runtime of the config service D10 (G-3.4 a)
 
-- **State:** all six P5b increments are done (C-070 … C-075). The exit criteria (ROADMAP P5b) one by one, with evidence in `log/2026-11-01_C-075_d8-list-explain-p5b-exit.md`:
-  1. every `d8.yaml` test `implemented` or a documented `manual`, a positive and a negative fixture per test, all reviewed, self-test offline – **met**: 17 of 17 tests `implemented`, 1 `manual` requirement with reason (REQ-CMP-012); 163 fixtures (19 image, 29 bus, 69 host, 26 container, 20 run), all reviewed by you; every test has both kinds (`COVERAGE.md`); the gate needs no network and no Docker daemon;
-  2. `image` and `run` on purpose-built good and faulty images – **met**: `image` in the gate; `run` with real Docker in `live.sh` (`TestRunDev`, instead of a separate `live-infra.sh`, A-290): the good image passes, each of the 14 faulty images gives its expected verdicts – 15 of 15;
-  3. `bus` and `host` against `oec/dev` – **met with recorded deviations, no SF** (A-298): BUS-01 pass; BUS-02 warns REQ-RES-CONFIG-026 (a SHOULD the Mosquitto ACL of the dev broker cannot express, known since C-071, A-258); BUS-03 and REQ-PLT-008 of HST-04 cannot pass before the Registry exists (P7); HST-01/02 pass; HST-04 also fails REQ-PLT-003 on macOS (not Linux) and REQ-PLT-006 in a container without engine socket. These come from the dev environment, which is not a Service Container platform – not from D8 and not from the guideline;
-  4. report schema frozen, every report validated, `list`/`explain`/`report-schema`, coverage, cross builds – **met** (A-296).
-- **Carried, as planned in C-070:** "our demo and Registry images pass `level3`" into the P6 and P7 exits; CI on Windows/macOS/Linux runners, the D8 binaries and the tool container image, live runs on Podman and on a Windows engine into P9 (A-299).
-- **Options:** (a) close P5b with the carried items; next **P6** – the demo services (weather in Rust, logger in C on `oec-ffi`), each with a Dockerfile, SBOM and licenses, checked by D7 and D8. (b) As (a), but next **P4b** – the micro SDK in C for the ESP32 (D9). (c) As (a), but next **P7** – the OEC Registry (D5); it would also let BUS-03 and REQ-PLT-008 pass against `oec/dev`. (d) Keep P5b open until the demo and Registry images exist.
-- **Recommendation:** (a). The ROADMAP orders P6 before P7 and P9; the SDK (P4), D7 (P5) and D8 (P5b) are complete, so the demos can be built and checked end to end at once – they are the first real images for D8 (`image`, `run`, `container`) and the first real applications for D7 at level 3 and level 1. The logger demo also exercises the C ABI `oec-ffi`. P4b depends on none of this and can follow; P7 profits from the demos as participants in the dev environment.
-- **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ (d) ☐ other: …
+- **Context:** your P6 scope adds a config service that shows and edits the `Config` of the weather service and the logger. G-3.4 a makes the language of a deliverable your decision.
+- **Options:** **(a)** Rust on `oec` – the consumer API (`get`/`set` of another application's resources) exists since C-058, the same toolchain as the weather service, and it shows the requester side of the SDK; (b) C on `oec-ffi` – like the logger, but a form editor in C is much code for little extra insight (the logger already shows C); (c) Go – outside our SDK, it would show nothing of D2.
+- **Recommendation:** (a).
+- **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ other: …
+
+### D-3 – Q-032: technique of the three Web UIs (G-3.4 a: runtime of a deliverable)
+
+- **Context:** each demo gets a small Web UI that shows what happens; it is not part of the OEC standard and not on the bus.
+- **Options:** **(a)** each service serves its own UI: static HTML/CSS/JavaScript embedded in the binary, no build step, no framework, no npm dependencies; live updates by Server-Sent Events, the config service edits by plain HTTP requests; the C logger needs a small HTTP server (choice in C-076 within the dependency policy, MIT-compatible); (b) a frontend framework with a build step (e.g. Svelte or React with Vite) per UI – nicer components, but a Node toolchain and many npm dependencies for three small pages; (c) one shared UI service for all three – one more container, and the UIs would no longer belong to their service.
+- **Recommendation:** (a): small, no extra toolchain, each image stays self-contained; the Registry (P7) decides its own, richer stack.
+- **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ other: …
+
+### D-4 – Q-033: Grafana for the history of the logger (G-3.4 a: license)
+
+- **Context:** you asked for Grafana "if feasible". It is feasible, but Grafana is licensed under **AGPL-3.0**; our deliverables are MIT (ADR-0004) and G-4.10 asks for MIT-compatible dependencies.
+- **Options:** **(a)** an optional compose profile (e.g. `history`) with the unchanged official images of Grafana (AGPL-3.0) and Prometheus (Apache-2.0); they are pulled, not built, changed or shipped by us; our parts – the logger's `/metrics` endpoint, the Prometheus configuration and the provisioned dashboards – are MIT; without the profile the demos run fully and the logger shows a short history (e.g. the last hour) in its own UI; (b) no Grafana: the history only in the logger UI (a few charts, MIT); (c) Grafana as a fixed part of the dev environment.
+- **Recommendation:** (a). It gives the Grafana view without making it a dependency of our code. Before any publication (Q-011) the AGPL images in the compose file are named in the license notes.
+- **PO:** ☐ (a) ☐ (b) ☐ (c) ☐ other: …
 
 ### Answered earlier
+
+Answered after C-075 (2026-11-01) and recorded in C-075 addendum 1:
+- D-1 – P5b exit and the next phase: ☑ (a) ("D-1 (a)") → P5b closed with the carried items (demo/Registry images → P6/P7 exits, CI/binaries/tool image/Podman/Windows engine → P9); next P6, with your extended scope (three demos with Web UIs, config service D10, logger history, Grafana if feasible).
 
 Answered after the C-074 review (2026-11-01) and recorded in C-074 addendum 3:
 - R-2 – REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` after SF-117 (one means of authentication only: warn → fail): ☑ accepted ("R-2 akzeptiert") → `reviewed`; all 20 run fixtures `reviewed`.
@@ -1403,7 +1429,17 @@ ADR-0025 amendment C-075; DESIGN §2, §6, §7, §9, §10 "As built (C-075)"; lo
 - **A-299 Carried items:** the demo images to the P6 exit, the Registry image to the P7 exit, CI, binaries, the tool container image and live runs on Podman and on a Windows engine to P9 – as planned in C-070.
 - **A-300 Other parts:** no new dependency, no schema change (D1 stays `2.0.1-dev` @ `52d8470`), no new or changed test data, D7 (`cmd/oec-check`, the D7 fixtures, `report.schema.json`) unchanged.
 
+### A-301 … A-306 – P6 scope after the C-075 review (agent)
+
+ADR-0016 amendment C-075 review; ROADMAP P6; log C-075 addendum 1. The proposals A-302 … A-304 are the starting point of the P6 design (ADR-0027, C-076); they can change there with reasons.
+- **A-301 Levels:** weather Messaging L3 (unchanged), logger **L2** (it offers `Get`/`Set Config` because the config service edits it; from L2 the `Event` Status after a `Set` is a must), config service **L1** (it offers nothing to modify and only requests); all three Service Container L3. Your wish of C-007 (one demo at L1, one at L3) holds, the three demos now show all three levels. The logger stays C on `oec-ffi` (Q-024; `oec_config_on_set` exists since C-061).
+- **A-302 Config of the weather service:** per station (Config of the station asset): `name`, `latitude` (−90 … 90), `longitude` (−180 … 180), both at most 4 decimals (MET Norway terms, `Pattern`), `altitude` (m, optional, improves the MET temperature). For the application: `provider` (`met-no` | `simulation`; switching takes effect at once and shows in `Health`), `userAgentContact` (MET Norway requires an identifying User-Agent), `pollInterval` (s; at least 600 with `met-no`, `Expires`/`If-Modified-Since` honored anyway), `stations` (1 … 5; station assets appear with Birth/MAM and leave with their Close, the `PublicationList` follows), `frostThreshold` (°C) and `stormThreshold` (m/s) – crossing raises an `Event` that the logger shows. Rejected sets (out of range, wrong pattern) give the `Event` Status `Bad…`, visible in the config service.
+- **A-303 Config and history of the logger:** `resources` (which resources to log; default `Event`, `Health`), `sources` (filter on AppId/Source), `minEventLevel`, `format` (`text` | `json`), `file` (on/off). History: a ring buffer of the last entries and of the numeric `Data`/`Health` values for the own UI; `/metrics` (Prometheus text format, standard C, no library) for the optional history profile (D-4).
+- **A-304 Config service:** discovers the applications by their `Pub/MAM` (and `Get/MAM` at start); a `Config` is writable if the `SubscriptionList` lists its `Set` topic (SF-107); renders a form from the Config definition (type, unit, `Min`/`Max`/`Length`/`Pattern`/`Values`, mandatory, groups); sensitive values stay masked – an untouched masked value is sent back as the mask, which keeps it (REQ-RES-CONFIG-025); shows the `Event` Status of each `Set`. Generic: works for every OEC application with a `Config`, not only the two demos. Configured by file/environment (broker from `broker.json`).
+- **A-305 Web UIs:** outside the OEC standard and never on the bus; one HTTP port per service, published only on `127.0.0.1` in the compose file, no authentication (demo; noted in the READMEs); the weather UI shows the MET Norway attribution (CC BY 4.0).
+- **A-306 Deliverable and cut:** the config service is deliverable **D10** (D1 … D9 keep their numbers). Provisional cut, final in the C-076 plan: (1) weather core (simulation provider, station assets, `Data`/`Metadata`/`Config`, L3, D7 `test` at L3 in the gate); (2) weather MET Norway provider (opt-in live), warnings, Web UI; (3) logger in C (subscriptions, output, `Config`, history, Web UI, `/metrics`); (4) config service; (5) images, SBOM, compose incl. the optional history profile, D8 `level3`; (6) exit run and docs. Increment 1 does not depend on D-2 … D-4.
+
 ## Next (C-076)
 
-1. PO: D-1 (P5b exit, next phase).
-2. C-076: plan and first increment of the chosen phase (with (a): P6 demo services); in a new session (start prompt in `prompt.md`).
+1. PO: D-2 (Q-031), D-3 (Q-032), D-4 (Q-033) – needed before P6 increments 2 … 5, not before increment 1.
+2. C-076 (new session, start prompt in `prompt.md`): P6 plan and cycle cut in the ROADMAP, ADR-0027 (demo architecture), increment 1 (weather core).

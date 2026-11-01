@@ -164,3 +164,29 @@ New agent session for C-076. The next cycle starts a new phase (plan and first i
 ## Next
 
 PO answer to D-1. Then C-076: with (a) the P6 plan (weather demo in Rust on `oec`, logger demo in C on `oec-ffi`, Dockerfiles with SBOM and license texts, compose integration; cycle cut; exit with D7 and D8) and its first increment.
+
+## Addendum 1 – C-075 review (2026-11-01)
+
+PO answer (chat, 2026-11-01): "D-1 (a), zu den Demo-Diensten habe ich aber noch Ideen:
+- Service 1 Wetterservice wie gehabt
+- Service 2 Config Service, der die Configs von Service 1 und 3 anzeigt und bearbeiten kann
+- Service 3 Logger, vielleicht noch Grafana (wenn machbar) zur Historienaufzeichnung
+
+Alle 3 Service sollen eine kleine Web UI bekommen (gehört nicht zum OEC Standard) bei dem man sieht was passiert. Bei Service 1 kann über die Config die Koordinaten für das Wetter eingestellt werden, ansonsten noch was Sinn macht. Überleg dir was."
+
+### Applied
+
+- **D-1 (a): P5b is closed** with the carried items of the exit assessment (demo images → P6 exit, Registry image → P7 exit, CI/binaries/tool image/Podman/Windows engine → P9). ROADMAP P5b heading ✅, STATUS, REVIEW/REVIEW_DE. **Next phase: P6.**
+- **P6 scope (PO input, G-3.4 a: scope and deliverables):** three demo services instead of two, each with a small Web UI that is not part of the OEC standard:
+  - **D3 weather service** (`OTConnector`, Rust on `oec`) as planned; its Config sets the coordinates of the weather locations and further sensible settings (proposal A-302).
+  - **D10 config service** (new deliverable): shows and edits the `Config` of the weather service and of the logger (proposal A-304).
+  - **D4 logger service** (C on `oec-ffi`, Q-024): now with a `Config` resource (so that the config service can edit it) and a history; Grafana for the history "if feasible" (D-4).
+  ROADMAP P6 rewritten as the planning input of C-076; project README deliverables (D10), AGENTS.md quick facts.
+- A first attempt to ask the PO the license question of Grafana in the chat got no answer (the PO reviews later). The points that are the PO's by G-3.4 a are therefore recorded as open questions with a recommendation, the engineering consequences are decided by the agent:
+  - **D-2 = Q-031** language/runtime of the config service D10 (recommended: Rust on `oec`).
+  - **D-3 = Q-032** technique of the three Web UIs (recommended: served by each service itself, static HTML/CSS/JavaScript without a build step and without a framework, live updates by Server-Sent Events).
+  - **D-4 = Q-033** Grafana (AGPL-3.0) for the history of the logger (recommended: an optional compose profile with the unchanged official Grafana and Prometheus images, not built or shipped by us; the logger shows a short history in its own UI without them).
+  - **A-301** Messaging levels: weather L3, logger **L2** (it now offers `Get`/`Set Config`; the `Event` Status after `Set` is a must from L2), config service **L1** (it offers nothing to modify; it only requests); all three Service Container L3. The PO asked in C-007 for one demo at L1 and one at L3 – that holds, the logger adds L2. ADR-0016 amendment C-075 review. Language C of the logger stays (Q-024); the part "configured by file/environment, no `Config` resource" of Q-024 is superseded by the PO input.
+  - **A-302 … A-306** proposals for the Config contents, the config service, the Web UIs and the provisional cycle cut (REVIEW.md); final with the P6 plan and ADR-0027 in C-076.
+- No code, no test data, no reviewed item changed; no SF (next SF-118). `oec/check.sh` unchanged since the docs commit.
+- `prompt.md` (not committed) is rewritten for C-076: P6 plan, ADR-0027, increment 1 (weather core) – which does not depend on D-2 … D-4.

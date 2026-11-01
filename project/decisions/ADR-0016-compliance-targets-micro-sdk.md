@@ -44,3 +44,17 @@ The micro SDK is written in **C17**, with ESP-IDF on an ESP32 as the reference p
 - Consequence for the design of D9: the architecture (resource registry, request dispatcher, `Event` publisher, payload buffers, pagination) is sized for all L3 messages from the first increment, so that later increments add resources without redesign. A smart device with its own MQTT client fulfills its claimed level itself, like an application (MG 1.3 since GL-ADR-017; formerly MG 7.2.2), so L3 includes `SubscriptionList`, `Call`/`Reply` with `NewDataSetWriterId` and the empty-list behavior of MG 7.2.
 - D7 must test D9 devices at every level they declare (L1 … L3).
 - **Status event after `Set`/`Del` (PO, C-016):** from Level 2 on must, at Level 1 should (MG 7.1.4). This applies to all artifacts; the logger demo (L1, no `Set`) is not affected.
+
+## Amendment C-075 review (2026-11-01, agent, G-3.4 b)
+
+The PO extended P6 in the C-075 review: three demo services – weather (D3), a new **config service (D10)** that shows and edits the `Config` of the other demos, and the logger (D4) with a history; each with a small Web UI outside the OEC standard. Because the config service edits the logger, the logger now offers a `Config` resource. The level targets of the demos become:
+
+| Artifact | Messaging level | Service Container level | Remark |
+|----------|-----------------|-------------------------|--------|
+| Weather demo (D3) | **L3** | L3 | unchanged: full provider showcase; `Config` of the application and of every station asset |
+| Logger demo (D4) | **L2** | L3 | `Get` answered, `Get`/`Set Config` offered (resources, filters, output), so the `Event` Status after a `Set` is a must (MG 7.1.4, PO C-016); still C on `oec-ffi` (Q-024) |
+| Config service (D10) | **L1** | L3 | minimal participant: Birth/Will, `Pub` MAM + Health; it offers nothing to modify and only sends requests (`Get`/`Set Config`) to others; configured by file/environment |
+
+- The PO's wish of C-007 – one demo at L1, one at L3 – still holds; the three demos now show all three Messaging levels.
+- The part "configured via file/environment (no `Config` resource)" of the logger row above and of Q-024 is superseded; the language C of Q-024 stays.
+- D7 checks each demo at its declared level (`level3`, `level2`, `level1`), D8 each image at `level3` (P6 exit, ROADMAP).
