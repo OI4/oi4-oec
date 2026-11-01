@@ -119,3 +119,19 @@ Details: `log/2026-11-01_C-081_weather-met-no.md`, REVIEW A-347 … A-352, ADR-0
    - `OEC_WEATHER_METNO_URL` points the service at a fake server in the integration tests. It is an environment variable for tests, not a `Config` object (A-350).
    - The live run against api.met.no is opt-in (`OEC_WEATHER_LIVE_CONTACT`), as §6.5 foresees.
    - D7 `level3` is unchanged (49 pins, simulation).
+
+## Amendment C-082 (2026-11-01) – increment 4, the config service core as built (agent, G-3.4 b)
+
+Details: `log/2026-11-01_C-082_config-core.md`, REVIEW A-353 … A-358, `oec/demos/config/README.md`. One additive SDK getter (ADR-0020 amendment C-082); `oec-ffi` and the Go SDK unchanged.
+
+1. **§7 package:** `oec/demos/config` is the Cargo package `oec-config` with an empty `[workspace]` (outside the SDK workspace), `oec` by path, `serde_json` and `log` (already in the SDK lock, ADR-0023; no new crate), its own `Cargo.lock`, the lints of the SDK. Binary `target/debug/oec-config`.
+2. **Config service:**
+   - `Utility`, Level 1; AppId `oi4.org/OEC,20Config/OEC-CONFIG/<hostname>`.
+   - No OEC `Config` of its own; settings from `<root>/etc/oi4/app/config-service.json` (or `OEC_CONFIG_FILE`) and `OEC_UI_LISTEN`, the broker from `broker.json` through the SDK (A-354).
+   - Discovery on Birth, `Get MAM` at every connect to the configured applications, rediscovery after a reconnect, the live `Pub/Config` subscription; one worker thread, no tokio of its own (A-355).
+   - `Set Config` checks only the structure, the target decides; missing `Mandatory` objects at their current value, the mask kept; the `Status` event is the result (A-356).
+   - An internal HTTP/JSON API on `std::net` (`/api/apps`, `/api/refresh`, `/api/set`, `/api/sets`), hardened for loopback (`Host`/`Origin` checks, limits), no authentication (A-305, A-357). The Web UI of increment 5 builds on it (§3).
+3. **§6 tests:**
+   - `oec/demos/check.sh` runs `cargo fmt --check`, clippy (`-D warnings`), `cargo test`, `cargo deny` with the SDK `deny.toml` and `cargo build` in `oec/demos/config`; `go test` gets `OEC_CONFIG`.
+   - The Go integration tests (`oec/demos/config/config_test.go`) run the logger, the weather service and the config service on the test broker (three hostnames): discovery, a Good `Set` that arrives, a refused `Set` (`BadOutOfRange`), the error answers, the request guards.
+   - D7 `test --level 1`: 22 pass pinned, 5 warn (SHOULD answers of Level 2), 28 skip, 0 fail.
