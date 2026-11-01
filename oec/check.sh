@@ -20,7 +20,9 @@
 #      interop tests against the broker are opt-in (oec/dev/interop.sh);
 #   7. demos/check.sh: the demo services of P6 (ADR-0028, from C-079): the
 #      logger (C17, unit tests and integration tests under AddressSanitizer
-#      + UBSan against the in-process TLS test broker, D7 test --level 2).
+#      + UBSan against the in-process TLS test broker, D7 test --level 2)
+#      and the weather service (Go on the Go SDK, from C-080: unit tests,
+#      integration tests with -race, D7 test --level 3).
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
