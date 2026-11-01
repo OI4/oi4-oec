@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -51,12 +52,13 @@ func TestParseSettings(t *testing.T) {
 		t.Fatalf("%+v, %v; want %+v", got, err, want)
 	}
 	for name, bad := range map[string][]string{
-		"provider":       {"met-no", "SIMULATION"},
-		"pollInterval":   {"0", "0.5", "86401", "ten"},
-		"stations":       {"0", "6", "2.5", "x"},
-		"frostThreshold": {"-51", "51", "cold"},
-		"stormThreshold": {"-1", "101"},
-		"simulationSeed": {"-1", "1.5", "1000000000"},
+		"provider":         {"SIMULATION", "met", "metno"},
+		"userAgentContact": {"a b@example.org", "x\r\ny", "café@example.org"},
+		"pollInterval":     {"0", "0.5", "86401", "ten"},
+		"stations":         {"0", "6", "2.5", "x"},
+		"frostThreshold":   {"-51", "51", "cold"},
+		"stormThreshold":   {"-1", "101"},
+		"simulationSeed":   {"-1", "1.5", "1000000000"},
 	} {
 		for _, value := range bad {
 			v := values(appConfig())
@@ -74,6 +76,52 @@ func TestParseSettings(t *testing.T) {
 				t.Errorf("%s=%q: %+v, want the defaults", name, value, got)
 			}
 		}
+	}
+}
+
+// The provider met-no (ADR-0010, A-302): it needs a userAgentContact
+// (MET Norway terms) and a poll interval of at least 600 s. A proposal
+// without them is refused; stored values fall back to the simulation.
+func TestParseSettingsMetNo(t *testing.T) {
+	v := values(appConfig())
+	v["common"]["provider"] = "met-no"
+	v["common"]["userAgentContact"] = testContact
+	v["common"]["pollInterval"] = "600"
+	got, err := parseSettings(v)
+	want := defaultSettings()
+	want.Provider, want.UserAgentContact, want.PollInterval = "met-no", testContact, 600*time.Second
+	if err != nil || got != want {
+		t.Fatalf("%+v, %v; want %+v", got, err, want)
+	}
+	for name, c := range map[string]struct {
+		contact, poll string
+		code          oec.StatusCode
+	}{
+		"no contact":      {"", "600", oec.BadInvalidArgument},
+		"599 s":           {testContact, "599", oec.BadOutOfRange},
+		"default 60 s":    {testContact, "", oec.BadOutOfRange},
+		"contact refused": {"a b", "600", oec.BadInvalidArgument},
+	} {
+		v := values(appConfig())
+		v["common"]["provider"] = "met-no"
+		v["common"]["userAgentContact"] = c.contact
+		v["common"]["pollInterval"] = c.poll
+		got, err := parseSettings(v)
+		var code oec.StatusCode
+		if !errors.As(err, &code) || code != c.code {
+			t.Errorf("%s: %v, want %v", name, err, c.code)
+		}
+		if got.Provider != "simulation" {
+			t.Errorf("%s: provider %q, want the simulation", name, got.Provider)
+		}
+	}
+	if minMetNoInterval != 600*time.Second {
+		t.Errorf("minimum %v", minMetNoInterval)
+	}
+	provider := appConfig().Groups[0].Objects[0]
+	if provider.Name != "provider" || len(provider.OneOf) != 2 || provider.OneOf[1] != "met-no" ||
+		!strings.Contains(provider.Description, "MET Norway") || !strings.Contains(provider.Description, "CC BY 4.0") {
+		t.Errorf("provider %+v", provider)
 	}
 }
 
@@ -145,6 +193,8 @@ func TestPatterns(t *testing.T) {
 		"stations":       {"1": true, "5": true, "2.5": false, "12": false},
 		"pollInterval":   {"60": true, "86400": true, "1.5": false},
 		"simulationSeed": {"0": true, "123456789": true, "-1": false, "1.5": false},
+		"userAgentContact": {testContact: true, "https://example.org/oec": true, "a b": false, " x": false,
+			"x\r\nX-Evil: 1": false, "café@example.org": false},
 	} {
 		o, ok := objects[name]
 		if !ok || o.Pattern == "" {

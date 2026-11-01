@@ -4,8 +4,15 @@ A small OEC application in Go on the Go SDK (ADR-0027): an `OTConnector`
 that represents weather stations as assets of its own. Each station publishes
 its weather as the `Data` resource `Oi4Pv`, has a `Config` with its location,
 and raises the Generic events `Frost` and `Storm`. A provider supplies the
-weather. Today the only provider is `simulation`, which is offline and
-deterministic (ADR-0010). MET Norway follows in C-081, the Web UI in C-083.
+weather: `simulation` is offline and deterministic, `met-no` reads the
+Locationforecast of MET Norway (ADR-0010, since C-081). The Web UI follows in
+C-083.
+
+Weather data of the provider `met-no`: **Based on data from MET Norway**
+(Locationforecast 2.0, [api.met.no](https://api.met.no/)), licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (and NLOD 2.0).
+Changed: the forecast of the hour nearest to the poll time, mapped to
+`Oi4Pv` and rounded. MET Norway does not endorse this service.
 
 | | |
 |---|---|
@@ -41,6 +48,11 @@ config provider=simulation stations=3 pollInterval=1m0s
 station 1 Frankfurt am Main at 50.1109, 8.6821, 112 m added
 running 0.1.0
 event station 3 Frost begins
+station 2 Oslo failed: met-no: 500 Internal Server Error
+health OFF_SPEC_3 66
+poll 3 stations
+station 2 Oslo recovered
+health NORMAL_0 100
 poll 3 stations
 ```
 
@@ -51,15 +63,15 @@ with `Get`/`Set Config`, e.g. by the config service D10 or `oec-probe`.
 Values persist across restarts, and `""` resets an object to its default. A
 `Set` changes all values at once or nothing: an invalid value is refused
 with Event `Status` Bad. An accepted `Set` takes effect in an immediate poll
-round.
+round, also a change of the provider.
 
 Application (context `weather`):
 
 | Object | Type | Default | Meaning |
 |---|---|---|---|
-| `provider` | String, one of `simulation` | `simulation` | the weather data provider (`met-no` follows in C-081) |
-| `userAgentContact` | String (≤ 256) | `""` | e-mail address or URL in the User-Agent of a provider that requires it (MET Norway, C-081) |
-| `pollInterval` | Number 1 … 86400, whole | `60` s | time between two observations of all stations |
+| `provider` | String, one of `simulation`, `met-no` | `simulation` | the weather data provider |
+| `userAgentContact` | String (≤ 256, printable ASCII without spaces) | `""` | e-mail address or URL of the operator in the User-Agent; required by `met-no` |
+| `pollInterval` | Number 1 … 86400, whole | `60` s | time between two observations of all stations; at least 600 s with `met-no` |
 | `stations` | Number 1 … 5, whole | `3` | number of stations; new ones appear, removed ones leave the `PublicationList` |
 | `frostThreshold` | Number −50 … 50 | `0` °C | a temperature at or below it raises `Frost` |
 | `stormThreshold` | Number 0 … 100 | `20.8` m/s | a wind speed at or above it (Beaufort 9) raises `Storm` |
@@ -75,6 +87,13 @@ Station n (context `station`):
 | `altitude` | Number −500 … 9000, whole | 112, 23, 2962, 6, 519 | height above sea level (m) |
 
 A station that is removed and added again keeps its stored `Config`.
+
+Rules across objects (A-348): a `Set` with `provider` `met-no` is refused
+with `BadInvalidArgument` without a `userAgentContact` and with
+`BadOutOfRange` with a `pollInterval` below 600 s. The service never clamps
+a value, so the `Config` shows what it does. A stored `Config` that breaks
+these rules (e.g. written by an older version) starts with `simulation` and
+a note on standard error.
 
 ## Data and events
 
@@ -96,6 +115,55 @@ or `…/Storm`). `Number` 1 means the warning begins and 0 means it ends.
 `Details` carry the value and the threshold. A warning is evaluated only
 while connected, so a change during a connection loss is reported after the
 reconnect.
+
+## Health
+
+The service publishes the Health of the application and of each station
+(A-349). The order of priority of MG 7.5 (SF-096) applies to each asset of
+its own.
+
+| Situation | Station | Application |
+|---|---|---|
+| every station has data | `NORMAL_0` / 100 | `NORMAL_0` / 100 |
+| k of n stations without data | `FAILURE_1` / 0 for each of them | `OFF_SPEC_3` / 100·(n−k)/n (rounded down) |
+
+A station without data (the provider failed, timed out, sent a broken
+document, or was throttled) gets no `Data` update. The service never
+invents values, and its last values stay readable with `Get` while its
+Health marks them invalid. Each change is a `Syslog` event of the
+application: `Warning` when a station fails and `Notice` when it recovers.
+The application never reports `FAILURE_1` about itself, because it stays
+available (REQ-LIFE-012/017).
+
+## MET Norway (`met-no`)
+
+The provider follows the [terms of service](https://api.met.no/doc/TermsOfService)
+of api.met.no (ADR-0010, A-347):
+
+- **User-Agent** `oec-weather/<version> <userAgentContact>`. Without a
+  contact the service sends no request.
+- **Caching**: no request before `Expires`. After that it sends a
+  conditional request with `If-Modified-Since` (the `Last-Modified` of the
+  cached document), and a `304` renews `Expires`. A response without
+  `Expires` counts as expired. At most 16 documents are cached.
+- **Coordinates** with at most 4 decimals and the altitude in whole metres
+  (`lat`, `lon`, `altitude` of the compact product).
+- **No bursts**: at least 1 s between two requests, so a poll round spreads
+  the stations. The minimum poll interval is 600 s.
+- **429**: no request for `Retry-After`, but at least 10 min. **403**: the
+  error names the User-Agent. **203** (deprecated product): one `Syslog`
+  Warning.
+- Timeout of 30 s per request and at most 4 MiB per response. The units of
+  the document are checked, and every value must lie in the Range of its
+  field.
+
+Mapping to `Oi4Pv` (A-343): `air_temperature` → `Pv`, `relative_humidity`
+→ `Sv1`, `air_pressure_at_sea_level` → `Sv2`, `wind_speed` → `Sv3`,
+`wind_from_direction` → `Sv4`, from the instant values of the forecast
+entry nearest to the poll time (at most 1 h away).
+
+`OEC_WEATHER_METNO_URL` replaces the endpoint for tests (a fake server). It
+is deliberately no part of the `Config` (A-350).
 
 ## Simulation
 
@@ -119,6 +187,10 @@ influence.
 
 - unit tests for the simulation (determinism, ranges, climate, smoothness),
   the settings and the Config definitions;
+- unit tests for `met-no` against an `httptest` server: User-Agent, query,
+  mapping, caching with `304`, missing `Expires`, 4xx/5xx, 403, 429 with
+  `Retry-After`, 203, timeout, broken JSON, wrong units, out-of-range values,
+  spacing, cache bound, body limit;
 - integration tests against the in-process TLS test broker:
   - defaults;
   - adding and removing stations;
@@ -126,7 +198,17 @@ influence.
   - `Set Config` of a station, and refused values;
   - Frost/Storm events;
   - persistence across a restart;
+  - `met-no` against a fake server: refused `Set`s, the switch at runtime,
+    User-Agent, spacing and query, a failing station and its recovery,
+    every station failing, and the switch back;
 - D7 `oec-check test --level 3`: 49 pass, 6 skip.
+
+The live test against api.met.no is opt-in and never part of the gate:
+
+```sh
+cd oec/demos
+OEC_WEATHER_LIVE_CONTACT=<your e-mail address or URL> go test -run TestMetNoLive -v ./weather
+```
 
 See [`../README.md`](../README.md).
 
@@ -136,6 +218,7 @@ See [`../README.md`](../README.md).
 |---|---|
 | `provider.go` | `Location`, `Observation`, the `Provider` interface, the quantities of `Oi4Pv` |
 | `simulation.go` | the offline provider `simulation` |
+| `metno.go` | the provider `met-no` (MET Norway Locationforecast 2.0) |
 | `settings.go` | the Config definitions, their parsing and checks, the identity helpers |
-| `service.go` | the stations and the poll goroutine (applies accepted Configs, polls, publishes, raises warnings) |
+| `service.go` | the stations and the poll goroutine (applies accepted Configs, polls, publishes, sets the Health, raises warnings) |
 | `main.go` | the app: identity, start, signals |

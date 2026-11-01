@@ -20,6 +20,9 @@ type service struct {
 	app  *oec.App
 	host string
 	out  io.Writer
+	// metnoURL is the endpoint of met-no ("" = api.met.no); another one
+	// only for tests (OEC_WEATHER_METNO_URL).
+	metnoURL string
 
 	mu    sync.Mutex
 	next  *settings                    // accepted application Config, not yet applied
@@ -30,6 +33,13 @@ type service struct {
 	cur      settings
 	provider Provider
 	stations []*weatherStation
+	// metno is kept across provider changes while the contact is the
+	// same: its cache, its spacing and a throttling stay (ADR-0010).
+	metno *MetNo
+	// The Health of the application (A-349: NORMAL_0/100 or OFF_SPEC_3
+	// with the share of good stations).
+	health      oec.Health
+	healthScore int
 }
 
 // weatherStation is a weather station: an asset represented on Level 3
@@ -42,10 +52,15 @@ type weatherStation struct {
 	data   *oec.DataSet
 	// Whether the warnings are on (A-345).
 	frost, storm bool
+	// Whether the last observation failed (Health FAILURE_1/0).
+	failed bool
 }
 
-func newService(app *oec.App, host string, out io.Writer) *service {
-	return &service{app: app, host: host, out: out, moved: map[*weatherStation]Location{}, wake: make(chan struct{}, 1)}
+// newService is the service; the application has the Health
+// NORMAL_0/100.
+func newService(app *oec.App, host, metnoURL string, out io.Writer) *service {
+	return &service{app: app, host: host, out: out, metnoURL: metnoURL, moved: map[*weatherStation]Location{},
+		wake: make(chan struct{}, 1), health: oec.Normal, healthScore: 100}
 }
 
 func (s *service) signal() {
@@ -80,7 +95,7 @@ func (s *service) start() error {
 	}); err != nil {
 		return err
 	}
-	if s.provider, err = newProvider(cur); err != nil {
+	if s.provider, err = s.newProvider(cur); err != nil {
 		return err
 	}
 	s.cur = cur
@@ -89,10 +104,20 @@ func (s *service) start() error {
 }
 
 // newProvider is the provider of the settings.
-func newProvider(set settings) (Provider, error) {
+func (s *service) newProvider(set settings) (Provider, error) {
 	switch set.Provider {
 	case "simulation":
 		return Simulation{Seed: set.Seed}, nil
+	case "met-no":
+		if s.metno == nil || s.metno.contact != set.UserAgentContact {
+			m, err := NewMetNo(set.UserAgentContact, s.metnoURL)
+			if err != nil {
+				return nil, err
+			}
+			m.Notice = s.notice
+			s.metno = m
+		}
+		return s.metno, nil
 	}
 	return nil, fmt.Errorf("unknown provider %q", set.Provider)
 }
@@ -193,7 +218,7 @@ func (s *service) apply() error {
 	s.next, s.moved = nil, map[*weatherStation]Location{}
 	s.mu.Unlock()
 	if next != nil {
-		p, err := newProvider(*next)
+		p, err := s.newProvider(*next)
 		if err != nil {
 			return err
 		}
@@ -246,9 +271,12 @@ func (s *service) run(ctx context.Context) error {
 	}
 }
 
-// poll observes every station, publishes its Data and its warnings.
+// poll observes every station, publishes its Data, its Health and its
+// warnings, then the Health of the application. A station without an
+// observation publishes no Data (no invented values).
 func (s *service) poll(ctx context.Context) error {
 	now := time.Now().UTC()
+	good := 0
 	for _, st := range s.stations {
 		o, err := s.provider.Observe(ctx, st.loc, now)
 		if err != nil {
@@ -256,7 +284,14 @@ func (s *service) poll(ctx context.Context) error {
 				return nil
 			}
 			fmt.Fprintf(os.Stderr, "oec-weather: station %d: %v\n", st.index, err)
+			if err := s.stationHealth(ctx, st, err); err != nil {
+				return err
+			}
 			continue
+		}
+		good++
+		if err := s.stationHealth(ctx, st, nil); err != nil {
+			return err
 		}
 		if err := st.data.Update(dataValues(o)); err != nil {
 			if ctx.Err() != nil {
@@ -274,8 +309,81 @@ func (s *service) poll(ctx context.Context) error {
 		s.warn(st, "Storm", o.WindSpeed >= s.cur.StormThreshold, &st.storm,
 			map[string]float64{"WindSpeed": o.WindSpeed, "StormThreshold": s.cur.StormThreshold})
 	}
+	if err := s.appHealth(ctx, good); err != nil {
+		return err
+	}
 	s.logf("poll %d stations", len(s.stations))
 	return nil
+}
+
+// stationHealth sets the Health of a station on a change: FAILURE_1/0
+// without an observation (err), else NORMAL_0/100; the change is a Syslog
+// event of the application (Warning, Notice).
+func (s *service) stationHealth(ctx context.Context, st *weatherStation, err error) error {
+	failed := err != nil
+	if failed == st.failed {
+		return nil
+	}
+	st.failed = failed
+	health, score := oec.Normal, 100
+	if failed {
+		health, score = oec.Failure, 0
+	}
+	if err := st.asset.SetHealth(health, score); err != nil {
+		if ctx.Err() != nil {
+			return nil
+		}
+		return err
+	}
+	if failed {
+		s.logf("station %d %s failed: %v", st.index, st.loc.Name, err)
+		s.syslog(oec.SyslogWarning, fmt.Sprintf("station %d %s: no weather data from %s: %v", st.index, st.loc.Name, s.provider.Name(), err))
+	} else {
+		s.logf("station %d %s recovered", st.index, st.loc.Name)
+		s.syslog(oec.SyslogNotice, fmt.Sprintf("station %d %s: weather data from %s again", st.index, st.loc.Name, s.provider.Name()))
+	}
+	return nil
+}
+
+// appHealth sets the Health of the application on a change: NORMAL_0/100
+// with every station good, else OFF_SPEC_3 (an uncertain signal, MG
+// 8.3.2) with the share of good stations as HealthScore. Never
+// FAILURE_1/0 about itself: that means not available (REQ-LIFE-012/017).
+func (s *service) appHealth(ctx context.Context, good int) error {
+	health, score := oec.Normal, 100
+	if n := len(s.stations); good < n {
+		health, score = oec.OffSpec, 100*good/n
+	}
+	if health == s.health && score == s.healthScore {
+		return nil
+	}
+	if err := s.app.This().SetHealth(health, score); err != nil {
+		if ctx.Err() != nil {
+			return nil
+		}
+		return err
+	}
+	s.health, s.healthScore = health, score
+	s.logf("health %s %d", health, score)
+	return nil
+}
+
+// syslog publishes a Syslog event of the application while connected
+// (the SDK drops events offline).
+func (s *service) syslog(level oec.SyslogLevel, message string) {
+	if s.app.State() != oec.Online {
+		return
+	}
+	if err := s.app.Syslog(level, message); err != nil && !errors.Is(err, oec.ErrClosed) {
+		fmt.Fprintf(os.Stderr, "oec-weather: syslog: %v\n", err)
+	}
+}
+
+// notice reports a notice of a provider on standard error and as Syslog
+// Warning.
+func (s *service) notice(message string) {
+	fmt.Fprintln(os.Stderr, "oec-weather:", message)
+	s.syslog(oec.SyslogWarning, message)
 }
 
 // warn raises the Generic event of a warning when it begins (Number 1)

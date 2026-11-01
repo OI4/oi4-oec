@@ -8,9 +8,14 @@ package main
 
 import (
 	"fmt"
+	"math"
+	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/OI4/oec/demos/internal/demotest"
 )
@@ -56,10 +61,11 @@ func start(t *testing.T) *rig {
 	return r
 }
 
-// run starts the weather service (again) and waits for its Pub Config.
-func (r *rig) run(t *testing.T, from int) {
+// run starts the weather service (again) with the environment env and
+// waits for its Pub Config.
+func (r *rig) run(t *testing.T, from int, env ...string) {
 	t.Helper()
-	r.p = demotest.Start(t, exe(t), "OEC_ROOT="+r.root)
+	r.p = demotest.Start(t, exe(t), append([]string{"OEC_ROOT=" + r.root}, env...)...)
 	connect, i := r.b.Expect(t, from, "CONNECT of the weather service", func(s demotest.Seen) bool {
 		return s.Seen == "connect" && s.ClientID == host
 	})
@@ -328,7 +334,7 @@ func TestSetConfigRefused(t *testing.T) {
 	t.Parallel()
 	r := start(t)
 	for name, value := range map[string]string{
-		"provider":       "met-no",
+		"provider":       "met",
 		"stations":       "6",
 		"pollInterval":   "0",
 		"simulationSeed": "1.5",
@@ -410,6 +416,197 @@ func TestRestartKeepsConfig(t *testing.T) {
 		t.Errorf("name after restart %q", v)
 	}
 	r.publication(t, from, "Data", station(4), "Oi4Pv")
+}
+
+// metnoServer is a fake Locationforecast server for the service: Pv is
+// 20 + version, Sv1 the latitude rounded (which station asked); a failing
+// latitude is answered with 500. Without Expires every poll round asks
+// again (conditionally).
+type metnoServer struct {
+	*fakeMET
+	mu      sync.Mutex
+	version float64
+	failing map[float64]bool
+}
+
+func newMetnoServer(t *testing.T) *metnoServer {
+	m := &metnoServer{failing: map[float64]bool{}}
+	m.fakeMET = newFakeMET(t, func(w http.ResponseWriter, r *http.Request) {
+		q, _ := url.ParseQuery(r.URL.RawQuery)
+		lat, _ := strconv.ParseFloat(q.Get("lat"), 64)
+		m.mu.Lock()
+		version, fail := m.version, m.failing[lat] || m.failing[0]
+		m.mu.Unlock()
+		if fail {
+			http.Error(w, "unavailable", http.StatusInternalServerError)
+			return
+		}
+		now := time.Now().UTC().Truncate(time.Hour)
+		e := forecastEntry{now, 20 + version, math.Round(lat), 1000, 5, 180}
+		next := e
+		next.time = now.Add(time.Hour)
+		ok(forecast([]forecastEntry{e, next}, nil), time.Time{}, now)(w, r)
+	})
+	return m
+}
+
+// state sets the version of the values and the failing latitudes (0 =
+// all).
+func (m *metnoServer) state(version float64, failing ...float64) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.version, m.failing = version, map[float64]bool{}
+	for _, lat := range failing {
+		m.failing[lat] = true
+	}
+}
+
+// health waits for a Health of source with the value and score.
+func (r *rig) health(t *testing.T, from int, source, health string, score int) {
+	t.Helper()
+	topic := r.topic("Pub", "Health", source)
+	want := fmt.Sprintf(`"Health":"%s","HealthScore":%d`, health, score)
+	r.b.Expect(t, from, fmt.Sprintf("Health %s/%d of %s", health, score, source), func(s demotest.Seen) bool {
+		return s.Seen == "publish" && s.Topic == topic && strings.Contains(s.Payload, want)
+	})
+}
+
+// metnoData waits for the Data of station i with the values of the fake
+// server of the version.
+func (r *rig) metnoData(t *testing.T, from, i int, version float64) int {
+	t.Helper()
+	topic := r.topic("Pub", "Data", station(i)) + "/Oi4Pv"
+	lat := math.Round(defaultLocation(i).Latitude)
+	_, at := r.b.Expect(t, from, fmt.Sprintf("Data of station %d from met-no, version %v", i, version), func(s demotest.Seen) bool {
+		if s.Seen != "publish" || s.Topic != topic {
+			return false
+		}
+		p := payload(t, demotest.AsJSON(t, s.Payload))
+		return p["Pv"] == 20+version && p["Sv1"] == lat && p["Sv2"] == 1000.0 && p["Sv3"] == 5.0 && p["Sv4"] == 180.0
+	})
+	return at
+}
+
+// syslog waits for a Syslog event of the application with the level and
+// the text.
+func (r *rig) syslog(t *testing.T, from int, level, text string) {
+	t.Helper()
+	topic := r.topic("Pub", "Event", il) + "/Syslog/" + level
+	r.b.Expect(t, from, level+" Syslog event with "+text, func(s demotest.Seen) bool {
+		return s.Seen == "publish" && s.Topic == topic && strings.Contains(s.Payload, text)
+	})
+}
+
+// The provider met-no (ADR-0010) against a fake Locationforecast server
+// (OEC_WEATHER_METNO_URL, for tests only): it needs a userAgentContact
+// and a poll interval of at least 600 s; switched by Set at run time,
+// the stations publish the values of the server. A failing request
+// makes the station FAILURE_1/0 without a Data publication and the
+// application OFF_SPEC_3 with the share of good stations (Syslog
+// Warning); recovery is NORMAL_0/100 again (Syslog Notice).
+func TestMetNoProvider(t *testing.T) {
+	t.Parallel()
+	met := newMetnoServer(t)
+	b := demotest.StartBroker(t)
+	r := &rig{b: b, root: b.Container(t, host)}
+	r.run(t, 0, "OEC_WEATHER_METNO_URL="+met.url())
+
+	for name, values := range map[string]map[string]string{
+		"no contact":  {"provider": "met-no", "pollInterval": "600"},
+		"60 s":        {"provider": "met-no", "userAgentContact": testContact},
+		"bad contact": {"provider": "met-no", "userAgentContact": "a b", "pollInterval": "600"},
+		"poll 599 s":  {"provider": "met-no", "userAgentContact": testContact, "pollInterval": "599"},
+	} {
+		if cfg, status := r.set(t, il, appContext, r.config, values); cfg != nil {
+			t.Errorf("%s: %v accepted", name, values)
+		} else if n := demotest.EventNumber(t, status); n == good {
+			t.Errorf("%s: status %d", name, n)
+		}
+	}
+	if n := len(met.requests()); n != 0 {
+		t.Fatalf("%d requests to met-no before it is selected", n)
+	}
+
+	from := r.b.Len()
+	cfg := r.setApp(t, map[string]string{"provider": "met-no", "userAgentContact": testContact, "pollInterval": "600"})
+	if v := configValue(t, cfg, "provider"); v != "met-no" {
+		t.Fatalf("provider %q", v)
+	}
+	for i := 1; i <= 3; i++ {
+		r.metnoData(t, from, i, 0)
+	}
+	reqs := met.requests()
+	if len(reqs) != 3 {
+		t.Fatalf("%d requests", len(reqs))
+	}
+	for i, q := range reqs {
+		if ua := q.header.Get("User-Agent"); ua != "oec-weather/"+version+" "+testContact {
+			t.Errorf("User-Agent %q", ua)
+		}
+		if i > 0 && q.at.Sub(reqs[i-1].at) < 900*time.Millisecond {
+			t.Errorf("requests %d and %d %v apart", i-1, i, q.at.Sub(reqs[i-1].at))
+		}
+	}
+	if reqs[0].query != "lat=50.1109&lon=8.6821&altitude=112" {
+		t.Errorf("query %q", reqs[0].query)
+	}
+
+	// Oslo fails: station 2 FAILURE_1/0 and no Data, the others go on;
+	// the application is OFF_SPEC_3 with 2 of 3 good stations.
+	met.state(1, defaultLocation(2).Latitude)
+	from = r.b.Len()
+	r.setApp(t, map[string]string{"frostThreshold": "1"})
+	r.health(t, from, station(2), "FAILURE_1", 0)
+	r.health(t, from, il, "OFF_SPEC_3", 66)
+	r.syslog(t, from, "Warning", "station 2 Oslo")
+	r.metnoData(t, from, 1, 1)
+	r.metnoData(t, from, 3, 1)
+	r.p.Line(t, 0, "failure line", func(l string) bool { return strings.HasPrefix(l, "station 2 Oslo failed: ") })
+
+	// Recovery.
+	met.state(2)
+	from2 := r.b.Len()
+	r.setApp(t, map[string]string{"frostThreshold": "0"})
+	r.health(t, from2, station(2), "NORMAL_0", 100)
+	r.health(t, from2, il, "NORMAL_0", 100)
+	r.syslog(t, from2, "Notice", "station 2 Oslo")
+	at := r.metnoData(t, from2, 2, 2)
+	for _, s := range r.b.Events()[from:at] {
+		if s.Seen == "publish" && strings.HasPrefix(s.Topic, r.topic("Pub", "Data", station(2))) {
+			t.Errorf("Data of the failed station 2: %s", s.Payload)
+		}
+	}
+
+	// Every request fails: OFF_SPEC_3 with HealthScore 0 (never
+	// FAILURE_1/0 about itself, REQ-LIFE-012/017).
+	met.state(3, 0)
+	from = r.b.Len()
+	r.setApp(t, map[string]string{"frostThreshold": "1"})
+	for i := 1; i <= 3; i++ {
+		r.health(t, from, station(i), "FAILURE_1", 0)
+	}
+	r.health(t, from, il, "OFF_SPEC_3", 0)
+
+	// Back to the simulation: every station NORMAL again, no further
+	// request.
+	from = r.b.Len()
+	r.setApp(t, map[string]string{"provider": "simulation"})
+	for i := 1; i <= 3; i++ {
+		r.health(t, from, station(i), "NORMAL_0", 100)
+		r.publication(t, from, "Data", station(i), "Oi4Pv")
+	}
+	r.health(t, from, il, "NORMAL_0", 100)
+	n, pl := len(met.requests()), r.p.Len()
+	r.setApp(t, map[string]string{"frostThreshold": "0"})
+	r.p.Line(t, pl, "poll line", func(l string) bool { return strings.HasPrefix(l, "poll 3 stations") })
+	if len(met.requests()) != n {
+		t.Errorf("requests to met-no with the simulation")
+	}
+	for _, s := range r.b.Events() {
+		if s.Seen == "publish" && s.Topic == r.topic("Pub", "Health", il) && strings.Contains(s.Payload, `"FAILURE_1"`) {
+			t.Errorf("FAILURE_1 about itself: %s", s.Payload)
+		}
+	}
 }
 
 // D7 `oec-check test --level 3` against the weather service (ADR-0028 §6):

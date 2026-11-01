@@ -47,8 +47,11 @@ const (
 	patternLatitude  = `^-?[0-9]{1,2}(\.[0-9]{1,4})?$`
 	patternLongitude = `^-?[0-9]{1,3}(\.[0-9]{1,4})?$`
 	patternAltitude  = `^-?[0-9]{1,4}$`
-	maxContact       = 256
-	maxName          = 64
+	// An e-mail address or URL for the User-Agent: printable ASCII without
+	// spaces (no header injection).
+	patternContact = `^[!-~]+$`
+	maxContact     = 256
+	maxName        = 64
 )
 
 func number(name string, def, min, max float64, pattern, unit, label, description string) oec.ConfigObject {
@@ -57,19 +60,29 @@ func number(name string, def, min, max float64, pattern, unit, label, descriptio
 	return o
 }
 
+// minMetNoInterval is the shortest poll interval with met-no (A-302):
+// a forecast changes about hourly, MET Norway asks for no request before
+// Expires.
+const minMetNoInterval = 600 * time.Second
+
+// metnoAttribution credits the data of met-no (CC BY 4.0, ADR-0010).
+const metnoAttribution = "Based on data from MET Norway (Locationforecast 2.0, api.met.no), licensed under CC BY 4.0 " +
+	"(https://creativecommons.org/licenses/by/4.0/); changed: the forecast of the hour nearest to now, mapped to Oi4Pv and rounded"
+
 // appConfig is the definition of the application Config (A-342).
 func appConfig() oec.ConfigDef {
 	provider := oec.StringObject("provider", "simulation")
-	provider.OneOf, provider.Label = []string{"simulation"}, "Weather data provider"
-	provider.Description = "Source of the weather data: simulation (offline, deterministic)"
+	provider.OneOf, provider.Label = []string{"simulation", "met-no"}, "Weather data provider"
+	provider.Description = "Source of the weather data: simulation (offline, deterministic) or met-no (MET Norway " +
+		"Locationforecast, needs userAgentContact and a pollInterval of at least 600 s). met-no: " + metnoAttribution
 	contact := oec.StringObject("userAgentContact", "")
-	contact.MaxLength, contact.Label = maxContact, "User-Agent contact"
-	contact.Description = "E-mail address or URL sent in the User-Agent to a provider that requires it"
+	contact.MaxLength, contact.Pattern, contact.Label = maxContact, patternContact, "User-Agent contact"
+	contact.Description = "E-mail address or URL of the operator, sent in the User-Agent to MET Norway (required by its terms for met-no)"
 	return oec.ConfigDef{Context: appContext, Label: "Weather service", Groups: []oec.ConfigGroup{{
 		Name: "common", Label: "Common settings", Objects: []oec.ConfigObject{
 			provider,
 			contact,
-			number("pollInterval", 60, 1, 86400, patternWhole, "s", "Poll interval", "Time between two observations of all stations"),
+			number("pollInterval", 60, 1, 86400, patternWhole, "s", "Poll interval", "Time between two observations of all stations (at least 600 s with met-no)"),
 			number("stations", 3, 1, maxStations, patternStations, "", "Stations", "Number of weather stations (represented assets)"),
 			number("frostThreshold", 0, -50, 50, "", "°C", "Frost threshold", "A temperature at or below raises the event Frost"),
 			number("stormThreshold", 20.8, 0, 100, "", "m/s", "Storm threshold", "A wind speed at or above raises the event Storm"),
@@ -85,10 +98,10 @@ func appConfig() oec.ConfigDef {
 func parseSettings(v oec.ConfigValues) (settings, error) {
 	s := defaultSettings()
 	p := parser{values: v["common"]}
-	if x, ok := p.oneOf("provider", "simulation"); ok {
+	if x, ok := p.oneOf("provider", "simulation", "met-no"); ok {
 		s.Provider = x
 	}
-	if x, ok := p.text("userAgentContact", maxContact); ok {
+	if x, ok := p.text("userAgentContact", maxContact, patternContact); ok {
 		s.UserAgentContact = x
 	}
 	if x, ok := p.number("pollInterval", 1, 86400, patternWhole); ok {
@@ -105,6 +118,20 @@ func parseSettings(v oec.ConfigValues) (settings, error) {
 	}
 	if x, ok := p.number("simulationSeed", 0, 999999999, patternSeed); ok {
 		s.Seed = uint64(x)
+	}
+	// The rules of met-no across objects (A-302, ADR-0010): a proposal
+	// that breaks them is refused, stored values fall back to the
+	// simulation.
+	if s.Provider == "met-no" {
+		switch {
+		case s.UserAgentContact == "":
+			p.failf(oec.BadInvalidArgument, "provider met-no needs a userAgentContact (MET Norway terms)")
+			s.Provider = "simulation"
+		case s.PollInterval < minMetNoInterval:
+			p.failf(oec.BadOutOfRange, "provider met-no needs a pollInterval of at least %d s, not %d s",
+				int(minMetNoInterval.Seconds()), int(s.PollInterval.Seconds()))
+			s.Provider = "simulation"
+		}
 	}
 	return s, p.err
 }
@@ -141,7 +168,7 @@ func stationConfig(i int) oec.ConfigDef {
 func parseLocation(i int, v oec.ConfigValues) (Location, error) {
 	loc := defaultLocation(i)
 	p := parser{values: v["common"]}
-	if x, ok := p.text("name", maxName); ok {
+	if x, ok := p.text("name", maxName, ""); ok {
 		loc.Name = x
 	}
 	if x, ok := p.number("latitude", -90, 90, patternLatitude); ok {
@@ -169,13 +196,23 @@ func (p *parser) fail(name, value string, code oec.StatusCode) {
 	}
 }
 
-func (p *parser) text(name string, maxLength int) (string, bool) {
+func (p *parser) failf(code oec.StatusCode, format string, args ...any) {
+	if p.err == nil {
+		p.err = fmt.Errorf(format+": %w", append(args, code)...)
+	}
+}
+
+func (p *parser) text(name string, maxLength int, pattern string) (string, bool) {
 	v := p.values[name]
 	if v == "" {
 		return "", false
 	}
 	if utf8.RuneCountInString(v) > maxLength {
 		p.fail(name, v, oec.BadOutOfRange)
+		return "", false
+	}
+	if pattern != "" && !patterns[pattern].MatchString(v) {
+		p.fail(name, v, oec.BadInvalidArgument)
 		return "", false
 	}
 	return v, true
@@ -199,7 +236,7 @@ func (p *parser) oneOf(name string, allowed ...string) (string, bool) {
 // SDK thread, stations are added by the poll goroutine).
 var patterns = func() map[string]*regexp.Regexp {
 	m := map[string]*regexp.Regexp{}
-	for _, p := range []string{patternWhole, patternStations, patternSeed, patternLatitude, patternLongitude, patternAltitude} {
+	for _, p := range []string{patternWhole, patternStations, patternSeed, patternLatitude, patternLongitude, patternAltitude, patternContact} {
 		m[p] = regexp.MustCompile(p)
 	}
 	return m

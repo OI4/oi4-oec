@@ -5,7 +5,7 @@ Three small services show the OEC SDKs at work (ADR-0028):
 | Demo | Language, SDK | ServiceType | Messaging level | State |
 |---|---|---|---|---|
 | [`logger/`](logger/README.md) – D4 | C17 on the C ABI (`oec-ffi`) | `Utility` | L2 | core since C-079, no Web UI yet |
-| [`weather/`](weather/README.md) – D3 | Go on the Go SDK | `OTConnector` | L3 | core with the offline provider `simulation` and warnings since C-080; MET Norway C-081, no Web UI yet |
+| [`weather/`](weather/README.md) – D3 | Go on the Go SDK | `OTConnector` | L3 | core with the offline provider `simulation` and warnings since C-080; provider `met-no` (MET Norway, CC BY 4.0) and Health since C-081; no Web UI yet |
 | `config/` – D10 | Rust on `oec` | `Utility` | L1 | planned (C-082) |
 
 Each demo gets a small Web UI served by the service itself (static HTML/CSS/JS,
@@ -53,3 +53,9 @@ OEC_D7=<path of oec-check> go test ./...
 `OEC_DEMOS_REQUIRE=1` turns a missing helper into a failure (set by
 `check.sh`). `OEC_LOGGER_D7_REPORT=<file>` and `OEC_WEATHER_D7_REPORT=<file>`
 keep the D7 report of the logger and of the weather service.
+
+The weather tests of the provider `met-no` run against a fake server of
+their own and never reach the network. A live test against api.met.no is
+opt-in and never part of `check.sh`: set
+`OEC_WEATHER_LIVE_CONTACT=<your e-mail address or URL>` (see
+[`weather/README.md`](weather/README.md#tests)).

@@ -4,10 +4,12 @@
 // humidity, pressure, wind) and a Config with their location; the
 // application Config selects the provider, the number of stations, the
 // poll interval and the thresholds of the warnings Frost and Storm
-// (Generic events). The provider simulation is offline and deterministic
-// (ADR-0010). OEC_ROOT (optional) is the root of the container storage,
-// "/" in a container (REQ-CNT-004); the SDK keeps its state in
-// /etc/oi4/app.
+// (Generic events). The provider simulation is offline and deterministic,
+// the provider met-no reads the Locationforecast of MET Norway (ADR-0010;
+// data under CC BY 4.0). A station without data has the Health
+// FAILURE_1/0, the application then OFF_SPEC_3. OEC_ROOT (optional) is
+// the root of the container storage, "/" in a container (REQ-CNT-004);
+// the SDK keeps its state in /etc/oi4/app.
 package main
 
 import (
@@ -50,7 +52,13 @@ func run() error {
 	if err := app.This().SetHealth(oec.Normal, 100); err != nil {
 		return err
 	}
-	svc := newService(app, hostname(root), os.Stdout)
+	// OEC_WEATHER_METNO_URL replaces the endpoint of met-no for tests
+	// (a fake server); it is no part of the Config (A-350).
+	metnoURL := os.Getenv("OEC_WEATHER_METNO_URL")
+	if metnoURL != "" {
+		fmt.Fprintln(os.Stderr, "oec-weather: met-no endpoint", metnoURL, "(OEC_WEATHER_METNO_URL, for tests)")
+	}
+	svc := newService(app, hostname(root), metnoURL, os.Stdout)
 	if err := svc.start(); err != nil {
 		return err
 	}
