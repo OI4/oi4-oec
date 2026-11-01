@@ -91,6 +91,19 @@ func (p *Process) Stderr() string {
 	return p.stderr.String()
 }
 
+// Exit waits for the exit without a signal; it returns the exit error
+// (nil for status 0) and fails t after Wait.
+func (p *Process) Exit(t *testing.T) error {
+	t.Helper()
+	select {
+	case <-p.exited:
+		return p.err
+	case <-time.After(Wait):
+		t.Fatalf("no exit within %v", Wait)
+		return nil
+	}
+}
+
 // Stop sends SIGTERM and waits for the exit; it returns the exit error
 // (nil for status 0) and fails t after Wait.
 func (p *Process) Stop(t *testing.T) error {

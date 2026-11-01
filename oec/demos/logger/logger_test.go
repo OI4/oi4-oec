@@ -51,20 +51,24 @@ type rig struct {
 	// The first Pub Config and the index of the broker events after it.
 	config map[string]any
 	at     int
+	// The address of the Web UI (OEC_UI_LISTEN).
+	ui string
 }
 
-func start(t *testing.T) *rig {
+// start runs a logger with the extra environment env.
+func start(t *testing.T, env ...string) *rig {
 	t.Helper()
 	b := demotest.StartBroker(t)
-	r := &rig{b: b, root: b.Container(t, host)}
-	r.run(t, 0)
+	r := &rig{b: b, root: b.Container(t, host), ui: demotest.UIAddr(t)}
+	r.run(t, 0, env...)
 	return r
 }
 
-// run starts the logger (again) and waits for its Pub Config.
-func (r *rig) run(t *testing.T, from int) {
+// run starts the logger (again) with its Web UI on r.ui and waits for its
+// Pub Config.
+func (r *rig) run(t *testing.T, from int, env ...string) {
 	t.Helper()
-	r.p = demotest.Start(t, exe(t), "OEC_ROOT="+r.root)
+	r.p = demotest.Start(t, exe(t), append([]string{"OEC_ROOT=" + r.root, "OEC_UI_LISTEN=" + r.ui}, env...)...)
 	connect, i := r.b.Expect(t, from, "CONNECT of the logger", func(s demotest.Seen) bool {
 		return s.Seen == "connect" && s.ClientID == host
 	})
@@ -354,6 +358,7 @@ func TestRestartKeepsConfig(t *testing.T) {
 func TestD7Level2(t *testing.T) {
 	demotest.RunD7(t, demotest.D7{
 		Exe:      exe(t),
+		Env:      []string{"OEC_UI_LISTEN="},
 		Hostname: "app-1",
 		App:      "Utility/oi4.org/OEC,20Logger/OEC-LOGGER/app-1",
 		Level:    2,

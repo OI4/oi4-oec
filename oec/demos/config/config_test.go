@@ -53,12 +53,13 @@ func exe(t *testing.T) string {
 }
 
 // start runs an application on the broker b with its own container storage
-// and waits for its Pub Config of the context.
+// and waits for its Pub Config of the context; its Web UI is off (the
+// default ports would clash).
 func start(t *testing.T, b *demotest.Broker, env, def, hint, hostname, serviceType, app, context string) *demotest.Process {
 	t.Helper()
 	path := demotest.Tool(t, env, def, hint)
 	from := b.Len()
-	p := demotest.Start(t, path, "OEC_ROOT="+b.Container(t, hostname))
+	p := demotest.Start(t, path, "OEC_ROOT="+b.Container(t, hostname), "OEC_UI_LISTEN=")
 	topic := demotest.Topic(app)
 	b.Publish(t, from, "Oi4v2/"+serviceType+"/"+topic+"/Pub/Config/"+topic+"/"+context)
 	return p

@@ -1,6 +1,6 @@
 /* Unit tests of the logger core (D4, ADR-0028 §6): JSON reader and
- * writer, settings from the Config, filter, Event level, records and
- * history. No SDK, no broker; run under AddressSanitizer and UBSan by
+ * writer, settings from the Config, filter, Event level, records,
+ * history, the request parser of the Web UI and its files. No SDK, no broker; run under AddressSanitizer and UBSan by
  * oec/demos/check.sh (make test). */
 #include <math.h>
 #include <stdio.h>
@@ -9,7 +9,9 @@
 
 #include "../src/core.h"
 #include "../src/history.h"
+#include "../src/http.h"
 #include "../src/json.h"
+#include "../src/ui.h"
 
 static int failures;
 
@@ -469,6 +471,177 @@ static void history(void) {
     lg_history_free(NULL);
 }
 
+/* ---- history queries of the Web UI -------------------------------------- */
+
+static void history_query(void) {
+    lg_history *h = lg_history_new(LG_HISTORY_MIN);
+    CHECK(h != NULL);
+    if (!h)
+        return;
+    CHECK(lg_history_last_seq(h) == 0);
+    bool missed = true;
+    struct seen seen = {0};
+    CHECK(lg_history_since(h, 0, 10, on_record, &seen, &missed) == 0 && !missed && seen.n == 0);
+    CHECK(lg_history_wait(h, 0, 20) == 0);
+
+    lg_msg ev = {LG_EVENT, "Utility", "b.com/M/P/1", "b.com/M/P/1", "Syslog/Error",
+                 "{\"Number\":11,\"Category\":\"CAT_SYSLOG_0\",\"Details\":{\"Text\":\"Pump Stopped\"}}",
+                 1000};
+    lg_msg warn = ev;
+    warn.payload = "{\"Number\":12,\"Category\":\"CAT_SYSLOG_0\",\"Details\":{\"Text\":\"valve\"}}";
+    lg_msg health = {LG_HEALTH, "Utility", "b.com/M/P/1", "b.com/M/P/1", NULL,
+                     "{\"Health\":\"NORMAL_0\",\"HealthScore\":80}", 2000};
+    lg_history_add(h, &ev, 3);     /* 1 Error */
+    lg_history_add(h, &warn, 4);   /* 2 Warning */
+    lg_history_add(h, &health, -1); /* 3 */
+    lg_history_add(h, &warn, 4);   /* 4 */
+    CHECK(lg_history_last_seq(h) == 4 && lg_history_wait(h, 3, 5000) == 4);
+
+    lg_query q = {-1, -1, NULL, 0, 200};
+    CHECK(lg_history_query(h, &q, on_record, &seen) == 4 && seen.n == 4 && seen.seq[0] == 1);
+    q.resource = LG_HEALTH;
+    memset(&seen, 0, sizeof seen);
+    lg_history_query(h, &q, on_record, &seen);
+    CHECK(seen.n == 1 && seen.seq[0] == 3);
+    q.resource = -1;
+    q.max_level = 3; /* Error and more severe: Events only */
+    memset(&seen, 0, sizeof seen);
+    lg_history_query(h, &q, on_record, &seen);
+    CHECK(seen.n == 1 && seen.seq[0] == 1);
+    q.max_level = 4;
+    memset(&seen, 0, sizeof seen);
+    lg_history_query(h, &q, on_record, &seen);
+    CHECK(seen.n == 3 && seen.seq[2] == 4);
+    q.limit = 2; /* the newest two, the oldest first */
+    memset(&seen, 0, sizeof seen);
+    lg_history_query(h, &q, on_record, &seen);
+    CHECK(seen.n == 2 && seen.seq[0] == 2 && seen.seq[1] == 4);
+    q = (lg_query){-1, -1, "pUMP sTOPPED", 0, 200};
+    memset(&seen, 0, sizeof seen);
+    lg_history_query(h, &q, on_record, &seen);
+    CHECK(seen.n == 1 && seen.seq[0] == 1);
+    q.text = "";
+    q.after = 2;
+    memset(&seen, 0, sizeof seen);
+    lg_history_query(h, &q, on_record, &seen);
+    CHECK(seen.n == 2 && seen.seq[0] == 3);
+    q.text = "no such text";
+    memset(&seen, 0, sizeof seen);
+    lg_history_query(h, &q, on_record, &seen);
+    CHECK(seen.n == 0);
+
+    /* since: in batches; missed once the ring dropped records */
+    memset(&seen, 0, sizeof seen);
+    CHECK(lg_history_since(h, 1, 2, on_record, &seen, &missed) == 3 && !missed && seen.n == 2 &&
+          seen.seq[0] == 2);
+    memset(&seen, 0, sizeof seen);
+    CHECK(lg_history_since(h, 4, 2, on_record, &seen, &missed) == 4 && !missed && seen.n == 0);
+    for (int i = 0; i < 12; i++)
+        lg_history_add(h, &health, -1); /* 5 … 16, holds 7 … 16 */
+    memset(&seen, 0, sizeof seen);
+    CHECK(lg_history_since(h, 4, 100, on_record, &seen, &missed) == 16 && missed && seen.n == 0);
+    CHECK(lg_history_since(h, 6, 100, on_record, &seen, &missed) == 16 && !missed && seen.n == 10 &&
+          seen.seq[0] == 7);
+    lg_history_free(h);
+}
+
+/* ---- HTTP of the Web UI -------------------------------------------------- */
+
+static int parse(const char *head, lh_request *r) {
+    const char *why = NULL;
+    int rc = lh_parse(head, strlen(head), r, &why);
+    CHECK(rc == 0 || why != NULL);
+    return rc;
+}
+
+static void http_parse(void) {
+    lh_request r;
+    CHECK(parse("GET /api/records?limit=5&q=a%20b HTTP/1.1\r\nHost: 127.0.0.1:8781\r\n"
+                "User-Agent: t\r\n\r\n",
+                &r) == 0);
+    CHECK(strcmp(r.method, "GET") == 0 && strcmp(r.path, "/api/records") == 0 &&
+          strcmp(r.query, "limit=5&q=a%20b") == 0 && strcmp(r.host, "127.0.0.1:8781") == 0 &&
+          r.content_length == 0);
+    CHECK(parse("GET / HTTP/1.1\r\nhost: localhost\r\nOrigin: http://localhost\r\n\r\n", &r) == 0);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: [::1]:8781\r\nOrigin: http://[::1]:8781\r\n\r\n", &r) == 0);
+    CHECK(parse("POST /x HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json; charset=utf-8\r\n"
+                "Content-Length: 2\r\n\r\n",
+                &r) == 0 &&
+          r.content_length == 2);
+    CHECK(parse("GET / HTTP/1.0\r\nHost: localhost\r\n\r\n", &r) == 0);
+
+    CHECK(parse("GET / HTTP/1.1\r\n\r\n", &r) == 400);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: a\r\nHost: b\r\n\r\n", &r) == 400);
+    CHECK(parse("GET /\r\nHost: localhost\r\n\r\n", &r) == 400);
+    CHECK(parse("GET / HTTP/2\r\nHost: localhost\r\n\r\n", &r) == 400);
+    CHECK(parse("GET  / HTTP/1.1\r\nHost: localhost\r\n\r\n", &r) == 400);
+    CHECK(parse("GET x HTTP/1.1\r\nHost: localhost\r\n\r\n", &r) == 400);
+    CHECK(parse("GET / HTTP/1.1\r\nHost localhost\r\n\r\n", &r) == 400);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: demo.example\r\n\r\n", &r) == 403);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: localhost.example:80\r\n\r\n", &r) == 403);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: localhost\r\nOrigin: http://evil.example\r\n\r\n", &r) == 403);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: localhost:1\r\nOrigin: http://localhost:2\r\n\r\n", &r) == 403);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: localhost\r\nOrigin: null\r\n\r\n", &r) == 403);
+    CHECK(parse("POST / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n", &r) == 501);
+    CHECK(parse("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/plain\r\n"
+                "Content-Length: 2\r\n\r\n",
+                &r) == 415);
+    CHECK(parse("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 2\r\n\r\n", &r) == 415);
+    CHECK(parse("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\n"
+                "Content-Length: 65537\r\n\r\n",
+                &r) == 413);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: x\r\n\r\n", &r) == 400);
+    CHECK(parse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 1\r\nContent-Length: 2\r\n\r\n",
+                &r) == 400);
+
+    CHECK(lh_host_ok("localhost") && lh_host_ok("LOCALHOST:8781") && lh_host_ok("127.0.0.1") &&
+          lh_host_ok("10.1.2.3:80") && lh_host_ok("[::1]") && lh_host_ok("[fe80::1]:8781"));
+    CHECK(!lh_host_ok("") && !lh_host_ok("demo.example") && !lh_host_ok("localhost.example") &&
+          !lh_host_ok("127.0.0.1.nip.io") && !lh_host_ok("[::1") && !lh_host_ok("localhost:x") &&
+          !lh_host_ok("1.2.3"));
+}
+
+static void http_query(void) {
+    char name[16], value[8];
+    const char *q = "a=1&b=x+y%2F&c&&d=";
+    CHECK(lh_query_next(&q, name, sizeof name, value, sizeof value) == 1 && strcmp(name, "a") == 0 &&
+          strcmp(value, "1") == 0);
+    CHECK(lh_query_next(&q, name, sizeof name, value, sizeof value) == 1 && strcmp(name, "b") == 0 &&
+          strcmp(value, "x y/") == 0);
+    CHECK(lh_query_next(&q, name, sizeof name, value, sizeof value) == 1 && strcmp(name, "c") == 0 &&
+          value[0] == 0);
+    CHECK(lh_query_next(&q, name, sizeof name, value, sizeof value) == 1 && strcmp(name, "d") == 0 &&
+          value[0] == 0);
+    CHECK(lh_query_next(&q, name, sizeof name, value, sizeof value) == 0);
+    q = "";
+    CHECK(lh_query_next(&q, name, sizeof name, value, sizeof value) == 0);
+    static const char *const bad[] = {"a=%zz", "a=%2", "a=%00", "a=12345678", "abcdefghijklmnopq=1"};
+    for (size_t i = 0; i < sizeof bad / sizeof bad[0]; i++) {
+        q = bad[i];
+        CHECK(lh_query_next(&q, name, sizeof name, value, sizeof value) == -1);
+    }
+
+    char host[64], port[8];
+    CHECK(lh_split_listen("127.0.0.1:8781", host, sizeof host, port, sizeof port) &&
+          strcmp(host, "127.0.0.1") == 0 && strcmp(port, "8781") == 0);
+    CHECK(lh_split_listen("[::1]:0", host, sizeof host, port, sizeof port) && strcmp(host, "::1") == 0 &&
+          strcmp(port, "0") == 0);
+    CHECK(lh_split_listen("localhost:65535", host, sizeof host, port, sizeof port));
+    static const char *const no[] = {"no-port", "127.0.0.1:", "127.0.0.1:99999", "[::1:80", "::1:80",
+                                     ":80", "127.0.0.1:8a", "[::1]80", "127.0.0.1:-1"};
+    for (size_t i = 0; i < sizeof no / sizeof no[0]; i++)
+        CHECK(!lh_split_listen(no[i], host, sizeof host, port, sizeof port));
+}
+
+/* The embedded files are the files of ui/ (generated ui_assets.c). */
+static void ui_files(void) {
+    CHECK(lg_ui_asset_count == 3);
+    const char *paths[] = {"/app.css", "/app.js", "/index.html"};
+    for (size_t i = 0; i < lg_ui_asset_count && i < 3; i++)
+        CHECK(strcmp(lg_ui_assets[i].path, paths[i]) == 0 && lg_ui_assets[i].size > 100 &&
+              strstr(lg_ui_assets[i].content_type, "charset=utf-8") != NULL);
+}
+
 int main(void) {
     json_valid();
     json_access();
@@ -481,6 +654,10 @@ int main(void) {
     accept();
     records();
     history();
+    history_query();
+    http_parse();
+    http_query();
+    ui_files();
     if (failures) {
         fprintf(stderr, "%d failure(s)\n", failures);
         return 1;

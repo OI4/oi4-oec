@@ -5,7 +5,9 @@
  * Its own Config (context "logger") selects resources, sources, the
  * minimum Event level, the format, the file and the history size; Get and
  * Set by the SDK. OEC_ROOT (optional) is the root of the container
- * storage, "/" in a container (REQ-CNT-004). Diagnostics go to standard
+ * storage, "/" in a container (REQ-CNT-004). The Web UI (ui.c) listens on
+ * OEC_UI_LISTEN (default 127.0.0.1:8781, empty: off); OEC_UI_KEEPALIVE_MS
+ * shortens its SSE keep-alive for tests. Diagnostics go to standard
  * error. Runs until SIGINT/SIGTERM. */
 #include <errno.h>
 #include <stdio.h>
@@ -17,6 +19,7 @@
 #include "core.h"
 #include "history.h"
 #include "oec.h"
+#include "ui.h"
 
 #define LOGGER_VERSION "0.1.0"
 /* A file is rotated to <file>.1 at this size. */
@@ -29,6 +32,7 @@ typedef struct logger {
     lg_settings s;
     oec_subscription *subs[3]; /* by lg_resource */
     lg_history *history;
+    lg_ui *ui; /* NULL: no Web UI */
     char root[PATH_LEN];
     FILE *file;
     char path[PATH_LEN];
@@ -188,6 +192,8 @@ static bool apply(logger *lg, const lg_settings *next) {
             lg->subs[r] = NULL;
         }
     }
+    if (lg->ui)
+        lg_ui_settings(lg->ui, next);
     return true;
 }
 
@@ -265,6 +271,52 @@ static oec_app *build(const char *root) {
     return app;
 }
 
+static const char *app_state(void *user_data) {
+    const logger *lg = user_data;
+    oec_connection_state st;
+    if (oec_app_state(lg->app, &st) != OEC_OK)
+        return "unknown";
+    switch (st) {
+    case OEC_STATE_CONNECTING: return "connecting";
+    case OEC_STATE_ONLINE: return "online";
+    case OEC_STATE_RECONNECTING: return "reconnecting";
+    case OEC_STATE_CLOSED: return "closed";
+    default: return "unknown";
+    }
+}
+
+/* OEC_UI_LISTEN and OEC_UI_KEEPALIVE_MS: binds the Web UI before the app
+ * starts (a wrong address stops the logger). false on an error. */
+static bool listen_ui(logger *lg, unsigned *keepalive_ms) {
+    const char *ka = getenv("OEC_UI_KEEPALIVE_MS");
+    *keepalive_ms = LG_UI_KEEPALIVE_MS;
+    if (ka) {
+        char *end;
+        errno = 0;
+        unsigned long v = strtoul(ka, &end, 10);
+        if (errno || end == ka || *end || v < 1 || v > LG_UI_KEEPALIVE_MS) {
+            fprintf(stderr, "oec-logger: Web UI: OEC_UI_KEEPALIVE_MS %s is no number 1 … %d\n", ka,
+                    LG_UI_KEEPALIVE_MS);
+            return false;
+        }
+        *keepalive_ms = (unsigned)v;
+    }
+    const char *address = getenv("OEC_UI_LISTEN");
+    if (!address)
+        address = LG_UI_DEFAULT_LISTEN;
+    if (!*address) {
+        fprintf(stderr, "oec-logger: Web UI off\n");
+        return true;
+    }
+    char err[256];
+    lg->ui = lg_ui_listen(address, err, sizeof err);
+    if (!lg->ui) {
+        fprintf(stderr, "oec-logger: Web UI: %s\n", err);
+        return false;
+    }
+    return true;
+}
+
 int main(void) {
     static logger lg;
     const char *root = getenv("OEC_ROOT");
@@ -276,8 +328,13 @@ int main(void) {
     while (n > 0 && lg.root[n - 1] == '/')
         lg.root[--n] = 0;
 
-    if (!(lg.app = build(root)))
+    unsigned keepalive_ms;
+    if (!listen_ui(&lg, &keepalive_ms))
         return 1;
+    if (!(lg.app = build(root))) {
+        lg_ui_stop(lg.ui);
+        return 1;
+    }
     lg_settings next;
     int rc = 1;
     if (oec_asset_add_config(oec_app_this(lg.app), LG_CONFIG_CONTEXT, lg_config_definition(),
@@ -304,9 +361,18 @@ int main(void) {
         fail("config");
         goto out;
     }
+    if (lg.ui) {
+        if (!lg_ui_start(lg.ui, lg.history, LOGGER_VERSION, keepalive_ms, app_state, &lg)) {
+            fprintf(stderr, "oec-logger: Web UI: no thread\n");
+            goto out;
+        }
+        lg_ui_settings(lg.ui, &lg.s);
+        fprintf(stderr, "oec-logger: Web UI on http://%s/\n", lg_ui_address(lg.ui));
+    }
     fprintf(stderr, "oec-logger %s: running\n", LOGGER_VERSION);
     rc = oec_app_run(lg.app) == OEC_OK ? 0 : fail("run");
 out:
+    lg_ui_stop(lg.ui); /* before the app: the UI reads its state */
     for (int r = 0; r < 3; r++)
         oec_subscription_free(lg.subs[r]);
     oec_app_free(lg.app);

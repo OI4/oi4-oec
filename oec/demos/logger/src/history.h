@@ -40,6 +40,34 @@ uint64_t lg_history_series_dropped(lg_history *h);
 typedef void (*lg_record_fn)(void *user_data, uint64_t seq, const char *record_json);
 void lg_history_each(lg_history *h, lg_record_fn f, void *user_data);
 
+/* The seq of the newest record ever added (0: none yet). */
+uint64_t lg_history_last_seq(lg_history *h);
+
+/* A selection of records for the Web UI. */
+typedef struct lg_query {
+    int resource;        /* lg_resource, -1: every resource */
+    int max_level;       /* only Events of this severity or more severe, -1: every record */
+    const char *text;    /* NULL or "": every record, else a part of the record JSON (ASCII
+                            letters in any case) */
+    uint64_t after;      /* only records with a larger seq */
+    unsigned limit;      /* the newest limit records that match */
+} lg_query;
+
+/* Calls f for the records that match q, the oldest first; returns
+ * lg_history_last_seq. Under the lock: f must not call back. */
+uint64_t lg_history_query(lg_history *h, const lg_query *q, lg_record_fn f, void *user_data);
+
+/* Calls f for the oldest max records with a seq above after and returns
+ * the seq of the last record passed to f (after if none). If records
+ * above after are no longer held, *missed is true, f is not called and
+ * the newest seq is returned. Under the lock: f must not call back. */
+uint64_t lg_history_since(lg_history *h, uint64_t after, unsigned max, lg_record_fn f, void *user_data,
+                          bool *missed);
+
+/* Waits until a record with a seq above after is added, at most
+ * timeout_ms; returns lg_history_last_seq. */
+uint64_t lg_history_wait(lg_history *h, uint64_t after, unsigned timeout_ms);
+
 /* One point of a series. */
 typedef struct lg_point {
     int64_t time_ms;

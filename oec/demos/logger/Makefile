@@ -33,8 +33,8 @@ else
 NATIVE = -lgcc_s -lutil -lrt -lpthread -lm -ldl -lc
 endif
 
-CORE = src/json.c src/core.c src/history.c
-HEADERS = src/json.h src/core.h src/history.h
+CORE = src/json.c src/core.c src/history.c src/http.c src/ui.c src/ui_assets.c
+HEADERS = src/json.h src/core.h src/history.h src/http.h src/ui.h
 
 .PHONY: all test clean
 all: $(OUT)/oec-logger
