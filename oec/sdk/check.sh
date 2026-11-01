@@ -49,11 +49,16 @@
 #      program the Go tests start) and the D7 CLI oec-check of
 #      oec/conformance into a temporary directory (run by exec, no code
 #      import: D7 stays independent, ADR-0006); then go test -race with
-#      GODEBUG=cgocheck=1: the API tests against the test broker, the
-#      examples, and D7 `test --level 1` against examples/hello with proxy,
-#      restart hook, peer and announce (~2 min, loopback only, PKI generated
-#      per run). OEC_GO_REQUIRE_BROKER=1: a missing helper fails instead of
-#      skipping.
+#      GODEBUG=cgocheck=1: the API tests against the test broker (provider,
+#      consumer, ABI coverage of oec.h), the examples, D7 `test --level 1`
+#      against examples/hello and `--level 3` against examples/source with
+#      proxy, restart hook, peer and announce (~3 min, loopback only, PKI
+#      generated per run). OEC_GO_REQUIRE_BROKER=1: a missing helper fails
+#      instead of skipping. On darwin arm64 also go vet for darwin amd64
+#      (cgo compiled, not linked); OEC_GO_CROSS=1 adds liboec_ffi.a and the
+#      examples for darwin amd64 (needs the rustup target
+#      x86_64-apple-darwin; C-078). linux amd64/arm64: opt-in container
+#      build go/cross/run.sh (Docker, network).
 set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
 cc="${CC:-cc}"
@@ -114,6 +119,17 @@ unformatted="$(gofmt -l .)"
 test -z "$unformatted" || { echo "gofmt needed: $unformatted" >&2; exit 1; }
 go run ./cmd/oec-buildlib
 go vet ./...
+if [ "$(go env GOOS)/$(go env GOARCH)" = "darwin/arm64" ]; then
+	# darwin amd64: cgo compiles for x86_64 (Apple clang), nothing is linked
+	CGO_ENABLED=1 GOARCH=amd64 go vet ./...
+	if [ "${OEC_GO_CROSS:-0}" = "1" ]; then
+		# needs the Rust target x86_64-apple-darwin (rustup) of the cargo in PATH
+		go run ./cmd/oec-buildlib -target x86_64-apple-darwin
+		gox="$(mktemp -d)"
+		CGO_ENABLED=1 GOARCH=amd64 go build -o "$gox/" ./examples/...
+		rm -rf "$gox"
+	fi
+fi
 (cd "$root/rust" && cargo build --offline --locked --quiet -p oec-ffi --example go-testbroker)
 target="$(cd "$root/rust" && cargo metadata --offline --locked --format-version 1 --no-deps | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')"
 gotmp="$(mktemp -d)"

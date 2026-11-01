@@ -7,11 +7,13 @@ linked statically with cgo. Identity, topics, payloads, Health, MAM, lifecycle,
 TLS and reconnection are implemented once, in Rust; this package maps them to Go
 types, errors and contexts. Standard library only.
 
-State (C-077, P4c increment 2): application lifecycle (`New`, `Run`, `Start`,
+State (C-078, P4c complete): application lifecycle (`New`, `Run`, `Start`,
 `Shutdown`, `Close`, `State`), own `Health`, `Syslog`, errors (increment 1);
 provider Level 2/3 – represented assets, `Data` with its `Metadata`, `Config`,
-events, `OnSet` handlers (increment 2); examples `hello` (Level 1) and
-`source` (Level 3). The consumer side (increment 3) follows.
+events, `OnSet` handlers (increment 2); consumer – `Subscribe`, `Get`, `Set`,
+`Del`, `NewDataSetWriterID` (increment 3); examples `hello` (Level 1) and
+`source` (Level 3). Every function of `oec.h` is reachable but one (see
+[C ABI coverage](#c-abi-coverage)).
 
 ## Build
 
@@ -51,9 +53,32 @@ CGO_LDFLAGS="-L/path/to/lib -loec_ffi -lgcc_s -lutil -lrt -lpthread -lm -ldl -lc
 go build -tags oec_external ./...
 ```
 
-Containers: build `liboec_ffi.a` in a Rust stage and the Go program in a Go
-stage with `CGO_ENABLED=1` for the target platform (linux amd64/arm64); the
-result is one binary without a shared `liboec`. Windows (MinGW) comes with P9.
+### Other platforms
+
+cgo compiles and links for the target: a cross build needs the Rust target
+(`rustup target add …`; a Homebrew `rustc` has no other targets) and a C
+toolchain of the target.
+
+- **darwin amd64 on darwin arm64** (Apple clang builds both):
+
+  ```sh
+  rustup target add x86_64-apple-darwin
+  go run ./cmd/oec-buildlib -target x86_64-apple-darwin   # rustup's cargo first in PATH
+  CGO_ENABLED=1 GOARCH=amd64 go build ./examples/...
+  ```
+
+  `oec/sdk/check.sh` vets the package for darwin amd64 (cgo compiles, no
+  link) and, with `OEC_GO_CROSS=1`, builds the archive and the examples.
+- **linux amd64/arm64:** [`cross/run.sh`](cross/run.sh) (opt-in, Docker
+  and network) builds `liboec_ffi.a` and the examples for both in one
+  `rust:1.89-bookworm` container of the host platform with the Debian cross
+  toolchains (Go copied from `golang:1.27-bookworm`, no emulation), vets the
+  package for both and runs each binary once on its platform. The result is
+  one binary per platform without a shared `liboec` (glibc only). It creates
+  only its own containers (`--rm`) and removes the base images it pulled;
+  no image is built. For an own image: the same two steps in a Rust build
+  stage, then copy the binary into a glibc base image.
+- **Windows** (MinGW, `x86_64-pc-windows-gnu`): P9.
 
 ## Hello world
 
@@ -76,9 +101,10 @@ See [`examples/hello`](examples/hello/main.go). In a container the app reads
 the container storage (RIG 4.1: `broker.json`, the CA, the credentials or the
 client certificate, the hostname); `Options.ContainerRoot` (or `OEC_ROOT` of
 the example) moves its root, `Options.Broker` replaces it (then a
-`SerialNumber` is needed). Against the dev environment:
-`OEC_ROOT=../../dev/generated/roots/oec-dev-app go run ./examples/hello` after
-`oec/dev` is up.
+`SerialNumber` is needed). Against the dev environment, after `oec/dev` is
+up, on a copy of a sample storage (the app writes its store into
+`etc/oi4/app` of the root; keep `generated/` clean):
+`cp -R ../../dev/generated/roots/oec-dev-app /tmp/r && OEC_ROOT=/tmp/r go run ./examples/hello`.
 
 ## Provider (Level 2/3)
 
@@ -128,6 +154,57 @@ err = temperature.OnSet(func(v json.RawMessage) error {
   state. A second `OnSet` replaces
   the handler.
 
+## Consumer
+
+```go
+pump := oec.Address{ServiceType: oec.OTConnector, App: "vendor.com/Gateway/GW-1/gw-7",
+	Source: "vendor.com/Pump/P-3/0815", Filter: "speed"}
+ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+defer cancel()
+got, err := app.Get(ctx, oec.ResourceData, pump)        // []oec.Received
+err = app.Set(ctx, oec.ResourceData, pump, map[string]any{"Setpoint": 2000.0})
+if errors.Is(err, oec.BadOutOfRange) { … }             // the responder's Status event
+sub, err := app.Subscribe(oec.ResourceHealth, oec.Address{}, func(r oec.Received) {
+	log.Printf("%s %s: %s", r.App, r.Source, r.Payload)
+})
+defer sub.Close()
+```
+
+- **`Address`:** ServiceType, AppId, Source and Filter of the topic; App and
+  Source are Identification Links as text (unencoded), the Filter is the
+  decoded value. For `Subscribe` a zero part is the wildcard `+`; a request
+  needs ServiceType and App (`ErrInvalidArgument` otherwise), Source `""`
+  addresses the application itself.
+- **`Received`:** the resource, the parts of the topic, the
+  DataSetWriterId and the `Payload` as `json.RawMessage`.
+- **`Subscribe`:** becomes an entry of the own SubscriptionList; the
+  callback runs for every DataSetMessage, also for the answers to the `Get`
+  of other applications. `Subscription.Close` ends it (idempotent, also
+  inside its callback and after `App.Close`).
+- **`Get`:** all answers with all pages in order; an empty list is a valid
+  answer. **`Set`/`Del`:** the payload is encoded with `encoding/json`
+  (`json.RawMessage` as is, `nil` = no payload for `Del`); nil for a Status
+  event Good, else an `*oec.Error` with the `StatusCode` –
+  `errors.Is(err, oec.BadNotFound)` matches it. **`NewDataSetWriterID`:**
+  the id and its validity.
+- **Context:** the deadline of `ctx` is the timeout of the request (no
+  deadline: the SDK default of 10 s; at most 2^32−1 ms). A done `ctx` is
+  not sent. A timeout at the deadline matches both `oec.ErrTimeout` and
+  `context.DeadlineExceeded`. The C ABI cannot abort a request in flight:
+  cancelling a `ctx` without a deadline does not end it early – give
+  requests a deadline.
+
+## C ABI coverage
+
+Every function of `oec.h` is called by the package, except:
+
+| function | why |
+|----------|-----|
+| `oec_app_run` | installs SIGINT/SIGTERM handlers in the process, which conflict with the Go runtime; `App.Run(ctx)` uses `oec_app_start`, `oec_app_wait` and `oec_app_shutdown` instead |
+
+`TestABICoverage` compares this list (`notWrapped` in `abi_test.go`) with the
+declarations of the header.
+
 ## Rules
 
 - **Threads:** every method may be called from any goroutine. The C ABI keeps
@@ -144,12 +221,15 @@ err = temperature.OnSet(func(v json.RawMessage) error {
 - **Errors:** `*oec.Error` with `Status`, message and, for a Bad answer, the
   OPC UA `StatusCode`; `errors.Is(err, oec.ErrBootstrap)` etc. Strings with a
   NUL character are refused with `ErrInvalidArgument`.
-- **Callbacks** (`OnSet`): they run on a thread of the Rust runtime, one at
-  a time, and must return quickly. Blocking SDK calls inside them return
-  `ErrInvalidState` – start a goroutine. A panic is recovered, logged with
-  `log.Printf` and answered with `BadInternalError`; it never unwinds into
-  Rust. The handler state (`cgo.Handle`) lives until `App.Close`, as the C
-  ABI requires of its `user_data`.
+- **Callbacks** (`OnSet`, `Subscribe`): they run on a thread of the Rust
+  runtime, one at a time, and must return quickly. Blocking SDK calls inside
+  them (`Get`, `Set`, `Del`, `NewDataSetWriterID`, `App.Close`) return
+  `ErrInvalidState` – start a goroutine. A panic is recovered and logged
+  with `log.Printf`; an `OnSet` panic is answered with `BadInternalError`, a
+  subscription panic drops the message. It never unwinds into Rust. The
+  callback state (`cgo.Handle`) lives until `App.Close`, as the C ABI
+  requires of its `user_data` (a closed subscription keeps a few bytes
+  until then; its callback is not called again).
 
 ## Tests
 
@@ -169,4 +249,13 @@ restart hook, peer, announce; ~2 min and ~45 s);
 `OEC_GO_D7_REPORT=<file>` and `OEC_GO_D7_L3_REPORT=<file>` keep the JSON
 reports. D7 is built from
 `oec/conformance` and run as a program – the two modules share no code.
-`oec/sdk/check.sh` runs all of it (gofmt, vet, `go test -race`).
+`oec/sdk/check.sh` runs all of it (gofmt, vet, `go test -race`, the vet for
+darwin amd64; `OEC_GO_CROSS=1` adds the darwin amd64 build).
+
+Against the dev environment (opt-in, Docker): with the broker of `oec/dev`
+running (`docker compose -f ../../dev/compose.yaml up -d --wait`),
+`OEC_GO_DEV=$PWD/../../dev go test -run TestInteropDev .` runs a Level 3
+provider on a copy of the sample storage `oec-dev-cert` (client certificate)
+and a consumer on a copy of `oec-dev-app` (password, probe user: the ACL lets
+only `oec-probe` send `Set`) – Get, Set and Subscribe through Mosquitto.
+The copies keep `oec/dev/generated` clean. Afterwards `docker compose … down -v`.
