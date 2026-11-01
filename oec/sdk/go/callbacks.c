@@ -6,6 +6,7 @@
 #include "_cgo_export.h"
 
 oec_set_fn go_set_fn(void) { return (oec_set_fn)goSet; }
+oec_received_fn go_received_fn(void) { return (oec_received_fn)goReceived; }
 
 // go_handle turns a runtime/cgo.Handle into the user data of a callback
 // (go vet flags unsafe.Pointer(uintptr(h)) in Go).

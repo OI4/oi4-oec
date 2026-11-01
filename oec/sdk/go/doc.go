@@ -47,14 +47,35 @@
 //		return oec.BadOutOfRange
 //	})
 //
+// # Consumer
+//
+// An [Address] names the application (ServiceType, AppId), the asset
+// (Source) and the Filter of a topic; App and Source are Identification
+// Links as text. [App.Subscribe] calls a function for every received
+// DataSetMessage ([Received]); zero parts of the address are wildcards.
+// [App.Get], [App.Set], [App.Del] and [App.NewDataSetWriterID] send a
+// request to one application and wait for its answer; the deadline of the
+// context is the timeout (no deadline: the SDK default of 10 s), a Status
+// event Bad of the responder is an [*Error] with its [StatusCode]:
+//
+//	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+//	defer cancel()
+//	err := app.Set(ctx, oec.ResourceData, pump, map[string]any{"Setpoint": 2000.0})
+//	if errors.Is(err, oec.BadOutOfRange) { ... }
+//
+// The C ABI cannot abort a request in flight: cancelling a context without
+// a deadline does not end it early.
+//
 // # Threading and resources
 //
-//   - Every method of [App], [Asset], [DataSet] and [Config] is safe for
-//     concurrent use.
-//   - Handlers run on a thread of the Rust runtime, one at a time, and must
-//     return quickly; blocking SDK calls inside them return
-//     [ErrInvalidState] (start a goroutine). A panic in a handler is
-//     recovered, logged and answered with BadInternalError.
+//   - Every method of [App], [Asset], [DataSet], [Config] and
+//     [Subscription] is safe for concurrent use.
+//   - Callbacks (OnSet handlers, subscription functions) run on a thread
+//     of the Rust runtime, one at a time, and must return quickly;
+//     blocking SDK calls inside them (Get, Set, Del, NewDataSetWriterID,
+//     App.Close) return [ErrInvalidState] (start a goroutine). A panic in
+//     a callback is recovered and logged; an OnSet panic is answered with
+//     BadInternalError, a subscription panic drops the message.
 //   - The C ABI reports errors through thread-local state; the package
 //     locks the OS thread for each call and its error read, callers need
 //     not care.
@@ -72,9 +93,10 @@
 // Every error of the C ABI is an [*Error] with the [Status], the message
 // of oec_last_error and, for a Bad answer, the OPC UA [StatusCode]. The
 // sentinels ErrInvalidArgument … ErrInternal match by status with
-// errors.Is:
+// errors.Is, and a [StatusCode] matches the code of a Bad answer:
 //
 //	if errors.Is(err, oec.ErrBootstrap) { ... }
+//	if errors.Is(err, oec.BadNotFound) { ... }
 //
 // Strings with a NUL character are refused with [ErrInvalidArgument]
 // before they reach the C ABI.

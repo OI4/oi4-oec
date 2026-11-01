@@ -74,8 +74,12 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("oec: %s: %s", e.Status, e.Message)
 }
 
-// Is reports whether target is the sentinel of e's status.
+// Is reports whether target is the sentinel of e's status or, for
+// StatusStatus, e's StatusCode (errors.Is(err, oec.BadNotFound)).
 func (e *Error) Is(target error) bool {
+	if c, ok := target.(StatusCode); ok {
+		return e.Status == StatusStatus && e.StatusCode == c
+	}
 	t, ok := target.(*Error)
 	return ok && t.Message == "" && t.Status == e.Status
 }
