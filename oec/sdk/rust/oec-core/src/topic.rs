@@ -11,7 +11,9 @@ mod subscription;
 
 use core::fmt;
 
-pub use filter::{EventFilter, Filter, FilterKind, ListFilter, StatusLevel, SyslogLevel};
+pub use filter::{
+    EventFilter, Filter, FilterKind, ListFilter, StatusLevel, SyslogLevel, decode_level,
+};
 pub use subscription::{SourceSelector, TopicFilter, TopicFilterBuilder, mqtt_match};
 
 use crate::base64url;

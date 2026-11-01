@@ -66,7 +66,7 @@ use oec_core::consumer::{
 use oec_core::lifecycle::Publication;
 use oec_core::message::{DataSetWriterId, MessageId};
 use oec_core::mqtt::SubscribeReturnCode;
-use oec_core::topic::{Filter, Form, Method, Subject, TopicFilter};
+use oec_core::topic::{Filter, Form, Method, Subject, TopicFilter, decode_level};
 use tokio::sync::oneshot;
 
 pub use oec_core::consumer::{AppState, Payload};
@@ -237,6 +237,24 @@ impl Received {
     /// DataSetWriterName: the asset the DataSet is about (REQ-MSG-023).
     pub fn data_set_writer_name(&self) -> IdentificationLink {
         IdentificationLink(self.inner.data_set_writer_name.clone())
+    }
+
+    /// The WriterGroupName (REQ-MSG-024), decoded as [`Self::filter`]
+    /// (levels joined with `/`); `None` if empty. It names the context of a
+    /// Config DataSet when the topic has no Filter, e.g. in the answer to
+    /// a `Get Config` without Source (REQ-RES-CONFIG-017). A level that is
+    /// no valid topic encoding is kept as received.
+    pub fn writer_group_name(&self) -> Option<String> {
+        let wgn = &self.inner.writer_group_name;
+        if wgn.is_empty() {
+            return None;
+        }
+        Some(
+            wgn.split('/')
+                .map(|level| decode_level(level).unwrap_or_else(|_| level.to_owned()))
+                .collect::<Vec<_>>()
+                .join("/"),
+        )
     }
 
     /// The typed Payload.

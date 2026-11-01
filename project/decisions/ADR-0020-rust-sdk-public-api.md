@@ -465,3 +465,13 @@ Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b); the
 | `AppHandle::emit_syslog(level, message)` | A Syslog event of this application without the process-wide `log` bridge (same level switch, rate limit and size limit as `oec::event::syslog`) – `oec_app_syslog`; with two apps in one process (tests, C programs) the `log` bridge would reach only the first one. |
 
 `oec-core` (no stability promise of its own) gains `Provider::data_fields` (field names and types of a Data DataSet), which `update_json`/`to_json` need.
+
+## Amendment C-082 (2026-11-01) – P6 increment 4: `Received::writer_group_name` for the config service (agent, G-3.4 b)
+
+Decided by the agent within this ADR (APIs within an accepted ADR, G-3.4 b; ADR-0028 §7: the Rust SDK changes only for defects or small additive items the demos need); the PO can overrule. Details: `log/2026-11-01_C-082_config-core.md`, REVIEW A-353. One addition; nothing existing changes.
+
+| Item | Why |
+|---|---|
+| `Received::writer_group_name() -> Option<String>` | The WriterGroupName of the DataSetMessage (REQ-MSG-024), decoded as `Received::filter` (levels joined with `/`), `None` if empty. A `Get Config` without Source answers every Config of every asset on the Pub topic without Source and Filter (REQ-RES-CONFIG-017); the DataSetWriterName names the asset, but only the WriterGroupName names the context, because `Context` is optional in the payload. The config service D10 discovers all Configs of an application with one `Get` and needs it. A level that is no valid topic encoding is kept as received (a getter, no check). |
+
+`oec-core` (no stability promise of its own) makes its decoder of one Filter level public (`topic::decode_level`). Test first: `oec/tests/consumer.rs` `writer_group_name_names_the_context` (a context name with `/`, `+`, `#` and `%`, a Config of an asset, a Data Tag, none for MAM). The C ABI (ADR-0021) and the Go SDK (ADR-0027) are unchanged: their received message has no WriterGroupName yet; no demo in C or Go needs it (the logger and the weather service do not discover Configs). Added there only when a consumer needs it.

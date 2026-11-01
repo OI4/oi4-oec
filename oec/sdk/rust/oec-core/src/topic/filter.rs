@@ -322,7 +322,11 @@ pub(super) fn encode_level(value: &str) -> String {
 
 /// Decodes one Filter level; the only accepted escapes are `%2B`, `%23`,
 /// `%2F` and `%25` (rule `filter-level`).
-pub(super) fn decode_level(level: &str) -> Result<String, TopicError> {
+///
+/// # Errors
+///
+/// [`TopicError::Grammar`] for an empty level or another `%` escape.
+pub fn decode_level(level: &str) -> Result<String, TopicError> {
     let bad = |what: &str| {
         Err(TopicError::Grammar(format!(
             "Filter level {level:?}: {what}"

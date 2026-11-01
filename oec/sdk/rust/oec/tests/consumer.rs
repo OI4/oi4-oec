@@ -299,6 +299,79 @@ fn one_app_writes_to_another() {
     stop(&ph, prun);
 }
 
+/// A `Get Config` without Source answers every Config of every asset on
+/// the Pub topic without Source and Filter (REQ-RES-CONFIG-017): the
+/// context of each DataSetMessage is its WriterGroupName (REQ-MSG-024),
+/// decoded (amendment C-082 of ADR-0020); a Data DataSet has its Tag.
+#[test]
+fn writer_group_name_names_the_context() {
+    let (pki, root) = (pki(), Root::new("cons-wgn"));
+    let tb = routing_broker(&pki);
+    let p = Provider::new(&root, &pki, &tb);
+    let app_il = p.app.identification_link().clone();
+    let pump_il = p.pump.identification_link().clone();
+    let objects = || [ConfigObject::string("Label", "x")];
+    p.app
+        .this()
+        .add_config(ConfigDef::new("net/a+b#%").group("g", "G", objects()))
+        .unwrap();
+    p.pump
+        .add_config(ConfigDef::new("pump").group("g", "G", objects()))
+        .unwrap();
+    let target = Target::app(ServiceType::Utility, app_il.clone());
+    let c = app(Level::L1, "C-SN", &root, &pki, &tb);
+    let consumer = c.consumer();
+    let (ph, prun) = spawn(p.app);
+    let (ch, crun) = spawn(c);
+    wait_online(&ph);
+    wait_online(&ch);
+
+    let all = consumer
+        .get_blocking(Resource::Config, &target, &GetOptions::new())
+        .unwrap();
+    let mut contexts: Vec<_> = all
+        .iter()
+        .map(|r| {
+            assert_eq!(r.filter(), None);
+            (
+                r.data_set_writer_name().as_str().to_owned(),
+                r.writer_group_name(),
+            )
+        })
+        .collect();
+    contexts.sort();
+    let mut expected = vec![
+        (app_il.as_str().to_owned(), Some("net/a+b#%".to_owned())),
+        (pump_il.as_str().to_owned(), Some("pump".to_owned())),
+    ];
+    expected.sort();
+    assert_eq!(contexts, expected);
+
+    let one = consumer
+        .get_blocking(
+            Resource::Config,
+            &target.clone().source(app_il).filter("net/a+b#%"),
+            &GetOptions::new(),
+        )
+        .unwrap();
+    assert_eq!(one.len(), 1);
+    assert_eq!(one[0].filter(), one[0].writer_group_name());
+    let data = consumer
+        .get_blocking(
+            Resource::Data,
+            &target.clone().source(pump_il),
+            &GetOptions::new(),
+        )
+        .unwrap();
+    assert_eq!(data[0].writer_group_name().as_deref(), Some("oee"));
+    let mam = consumer
+        .get_blocking(Resource::Mam, &target, &GetOptions::new())
+        .unwrap();
+    assert!(mam.iter().all(|r| r.writer_group_name().is_none()));
+    stop(&ch, crun);
+    stop(&ph, prun);
+}
+
 /// NewDataSetWriterId of the other app for itself and its pump: two
 /// different reserved ids with the Ttl of the SDK; BadNotFound for an
 /// unknown asset (SF-113); a Level 1 app does not answer (REQ-CMP-040).
