@@ -4,14 +4,35 @@ Three small services show the OEC SDKs at work (ADR-0028):
 
 | Demo | Language, SDK | ServiceType | Messaging level | State |
 |---|---|---|---|---|
-| [`logger/`](logger/README.md) – D4 | C17 on the C ABI (`oec-ffi`) | `Utility` | L2 | core since C-079, no Web UI yet |
-| [`weather/`](weather/README.md) – D3 | Go on the Go SDK | `OTConnector` | L3 | core with the offline provider `simulation` and warnings since C-080; provider `met-no` (MET Norway, CC BY 4.0) and Health since C-081; no Web UI yet |
-| [`config/`](config/README.md) – D10 | Rust on `oec` | `Utility` | L1 | core since C-082: discovery, read, writable `Config` (SF-107), `Set` with `Status` event, HTTP/JSON API; no Web UI yet |
+| [`logger/`](logger/README.md) – D4 | C17 on the C ABI (`oec-ffi`) | `Utility` | L2 | core since C-079; Web UI since C-083 (port 8781) |
+| [`weather/`](weather/README.md) – D3 | Go on the Go SDK | `OTConnector` | L3 | core with the offline provider `simulation` and warnings since C-080; provider `met-no` (MET Norway, CC BY 4.0) and Health since C-081; Web UI since C-083 (port 8782) |
+| [`config/`](config/README.md) – D10 | Rust on `oec` | `Utility` | L1 | core since C-082: discovery, read, writable `Config` (SF-107), `Set` with `Status` event, HTTP/JSON API; Web UI since C-083 (port 8783) |
 
-Each demo gets a small Web UI served by the service itself (static HTML/CSS/JS,
-Server-Sent Events) on `127.0.0.1` only and **without authentication** – a demo,
-not a product (increment 5). Images and the compose profile `demos` of
-`oec/dev` follow in increment 6.
+## Web UIs
+
+Each demo serves a small Web UI itself (C-083, ADR-0028 §3 and amendment
+C-083): static HTML/CSS/JS embedded in the binary (no build step, no npm, no
+CDN, nothing loaded from elsewhere), JSON under `/api/`, live updates by
+Server-Sent Events (`GET /api/events`). Open them in a browser while the
+demo runs:
+
+| Demo | Address | What it shows |
+|---|---|---|
+| logger | `http://127.0.0.1:8781/` | the last records with filters, live; charts of numeric values; settings read only |
+| weather | `http://127.0.0.1:8782/` | the stations with values, Health, warnings and a short SVG history; the MET Norway credit while `met-no` is active |
+| config service | `http://127.0.0.1:8783/` | the applications and a form per `Config`; `Set Config` of writable ones with the `Status` result |
+
+**No authentication and no TLS** – a demo, not a product (A-305). The
+default address is loopback; `OEC_UI_LISTEN=host:port` changes it, empty
+turns the UI off. All three servers apply the same rules: a `Host` that is
+`localhost` or an IP address and no `Origin` of another site (else 403),
+JSON only for `POST` (415), no `Transfer-Encoding` (501), head 8 KiB (431),
+body 64 KiB (413), 5 s per request (408; the weather service on `net/http`
+closes the connection), one request per connection, at
+most 16 connections and 8 event streams (503), `Cache-Control: no-store`,
+`X-Content-Type-Options: nosniff`, a `Content-Security-Policy` of
+`default-src 'self'` and `Referrer-Policy: no-referrer`. Images and the
+compose profile `demos` of `oec/dev` follow in increment 6.
 
 ## Layout
 
@@ -19,7 +40,8 @@ not a product (increment 5). Images and the compose profile `demos` of
 oec/demos/
 ├── check.sh             gate step (called by oec/check.sh)
 ├── go.mod               one Go module: standard library and the Go SDK (replace ../sdk/go)
-├── internal/demotest/   test harness: test broker, container storage, process, D7
+├── internal/demotest/   test harness: test broker, container storage, process, D7, Web UI checks
+├── internal/cembed/     generator of the embedded UI files of the logger (C arrays)
 ├── reqs_test.go         every REQ id cited here exists and is active
 ├── config/              D10: own Cargo package (src/ in Rust, Cargo.lock), Go integration tests
 ├── logger/              D4: src/ and test/ in C, Makefile, Go integration tests
@@ -42,7 +64,9 @@ runs the C unit tests, checks the config service with `cargo fmt`, clippy,
 its unit tests and cargo-deny (`deny.toml` of the SDK) and builds it, then `go test -race ./...`: the integration tests of
 every demo against the in-process TLS test broker and D7
 (`oec-check test`, built from `oec/conformance` and run as a program) at the
-demo's level. The tests can also run alone; a missing helper skips them:
+demo's level, and the HTTP/SSE tests of the three Web UIs with the Go
+client (no browser). The tests can also run alone; a missing helper skips
+them:
 
 ```sh
 cd oec/demos

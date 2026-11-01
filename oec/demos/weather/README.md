@@ -5,8 +5,8 @@ that represents weather stations as assets of its own. Each station publishes
 its weather as the `Data` resource `Oi4Pv`, has a `Config` with its location,
 and raises the Generic events `Frost` and `Storm`. A provider supplies the
 weather: `simulation` is offline and deterministic, `met-no` reads the
-Locationforecast of MET Norway (ADR-0010, since C-081). The Web UI follows in
-C-083.
+Locationforecast of MET Norway (ADR-0010, since C-081). A small Web UI shows
+the stations (since C-083).
 
 Weather data of the provider `met-no`: **Based on data from MET Norway**
 (Locationforecast 2.0, [api.met.no](https://api.met.no/)), licensed under
@@ -21,7 +21,7 @@ Changed: the forecast of the hour nearest to the poll time, mapped to
 | ServiceType | `OTConnector` |
 | Messaging level | **L3** (`Get`/`Set` of every resource of the application and of each station; D7 `test --level 3` in the gate) |
 | Storage | container storage (REQ-CNT-004) below `OEC_ROOT` (default `/`) |
-| Web UI | not yet (port 8782, localhost only, no authentication – C-083) |
+| Web UI | `http://127.0.0.1:8782/`, read only, localhost only, **no authentication, no TLS** (A-305) |
 
 ## Build and run
 
@@ -55,6 +55,33 @@ station 2 Oslo recovered
 health NORMAL_0 100
 poll 3 stations
 ```
+
+## Web UI
+
+Open `http://127.0.0.1:8782/` in a browser while the service runs. The page
+shows the connection state, the Health of the service, the provider and the
+settings (read only), and per station its location, Health, the current
+values (temperature, humidity, pressure, wind), the Frost/Storm warnings, an
+error of the provider, and an SVG line of the last 60 temperature and wind
+values. While `met-no` is the provider, the page shows the MET Norway credit
+("Based on data from MET Norway", CC BY 4.0) as a banner and in the footer
+(A-351). The settings are changed only through the OEC `Config` (e.g. with
+the config service D10); the UI has no `POST`.
+
+| Request | Answer |
+|---|---|
+| `GET /`, `/app.css`, `/app.js` | the page (embedded with `embed`, no external resource) |
+| `GET /api/state` | `{state, version, provider, pollIntervalSeconds, frostThreshold, stormThreshold, health, healthScore, attribution, stations:[{index, name, latitude, longitude, altitude, serialNumber, health, healthScore, failed, error, frost, storm, observation, history}], updated}`; `attribution` is `null` unless `met-no` is active |
+| `GET /api/events` | event stream: `{"type":"state", …}` (as `/api/state`) first, after every poll or change and when the connection state changes; a comment `keep-alive` after 15 s without an event |
+
+Environment: `OEC_UI_LISTEN` = `host:port` (default `127.0.0.1:8782`;
+empty: no Web UI; the container of C-084 sets `0.0.0.0:8782`). An address
+that cannot be bound stops the service before it connects. The server is
+`net/http` with the same rules as the other two demos: one request per
+connection, at most 16 connections and 8 event streams (503 beyond), head
+8 KiB, body 64 KiB, 5 s per request (then `net/http` closes the connection
+without an answer), a `Host` that is `localhost` or an IP
+address and no `Origin` of another site (else 403).
 
 ## Configuration
 
@@ -201,6 +228,10 @@ influence.
   - `met-no` against a fake server: refused `Set`s, the switch at runtime,
     User-Agent, spacing and query, a failing station and its recovery,
     every station failing, and the switch back;
+- the Web UI over HTTP and SSE (`webui_test.go`: files, state and events,
+  guards, limits, keep-alive, listen addresses; the MET Norway credit in
+  `TestMetNoProvider` appears with `met-no` and disappears after the switch
+  back);
 - D7 `oec-check test --level 3`: 49 pass, 6 skip.
 
 The live test against api.met.no is opt-in and never part of the gate:
@@ -221,4 +252,5 @@ See [`../README.md`](../README.md).
 | `metno.go` | the provider `met-no` (MET Norway Locationforecast 2.0) |
 | `settings.go` | the Config definitions, their parsing and checks, the identity helpers |
 | `service.go` | the stations and the poll goroutine (applies accepted Configs, polls, publishes, sets the Health, raises warnings) |
-| `main.go` | the app: identity, start, signals |
+| `ui.go`, `ui/` | the Web UI: server, guards, snapshot, event stream; `index.html`, `app.css`, `app.js` |
+| `main.go` | the app: identity, start, Web UI, signals |

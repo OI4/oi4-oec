@@ -7,9 +7,9 @@ their `Config`, shows which `Config` is writable and changes values with
 crate `oec` (`oec/sdk/rust`), ServiceType `Utility`, Messaging Level 1:
 the service only sends requests and answers none.
 
-Increment 4 (C-082) is the core with a small HTTP/JSON API; the Web UI on
-this API follows in C-083, the image, the compose profile and the ACL user
-in C-084.
+Increment 4 (C-082) is the core with a small HTTP/JSON API, increment 5
+(C-083) the Web UI on this API; the image, the compose profile and the ACL
+user follow in C-084.
 
 ## Build and run
 
@@ -44,15 +44,18 @@ Not on the bus, so no OEC `Config` of its own (A-354). An optional JSON file
 
 | Key | Meaning | Default |
 |---|---|---|
-| `listen` | address of the HTTP API; `""` turns it off | `127.0.0.1:8783` |
+| `listen` | address of the Web UI and its API; `""` turns both off | `127.0.0.1:8783` |
 | `requestTimeoutSeconds` | timeout of every request, 1 … 60 | 5 |
 | `apps` | applications asked with `Get MAM` at every connect, as `<ServiceType>/<AppId>` | none |
 | `setHistory` | results of `Set` kept for `/api/sets`, 1 … 1000 | 50 |
 
-Unknown keys and invalid values stop the service with a message (exit ≠ 0).
+Unknown keys and invalid values stop the service with a message (exit ≠ 0),
+also an address that cannot be bound (before the service connects).
 Environment: `OEC_UI_LISTEN` overrides `listen` (empty: off; the container
 of C-084 sets `0.0.0.0:8783`), `OEC_CONFIG_LOG` = `error`, `warn`,
-`info` (default) or `debug` for the log on stderr.
+`info` (default) or `debug` for the log on stderr, `OEC_UI_KEEPALIVE_MS`
+(1 … 15000, for tests) the time between the keep-alive comments of the
+event streams.
 
 ## Discovery
 
@@ -68,16 +71,52 @@ of C-084 sets `0.0.0.0:8783`), `OEC_CONFIG_LOG` = `error`, `warn`,
   message or a Will marks the application offline (REQ-LIFE-011/012);
 - the service never lists itself.
 
+## Web UI
+
+Open `http://127.0.0.1:8783/` in a browser while the service runs
+(A-304):
+
+- **Applications:** the discovered applications with their state, Health
+  and number of `Config`s, live; *Discover again* reads every online one
+  again, *Read again* the chosen one.
+- **Configs:** for the chosen application its identity (MAM), Profile and
+  one form per `Config`, built from the definition in the `Config` itself:
+  a select for `Validation.Values` and for Booleans, a number field with
+  `Min`/`Max` for Numbers, `Length` as the maximum length, `Unit`,
+  `Pattern`, `DefaultValue`, `Mandatory` and the description as hints. Only
+  a **writable** `Config` (SF-107) can be edited; the others are shown read
+  only.
+- **Sensitive objects** stay masked: the field is a password field with the
+  mask `********` as placeholder; left empty, the mask is sent back and the
+  application keeps its value (GL-ADR-021); a new value is sent but never
+  shown.
+- **Send Set Config** sends only the changed values (the service adds the
+  `Mandatory` ones) and shows the result of the `Status` event, e.g.
+  `Good (0x00000000)` or `BadOutOfRange (0x803C0000)`, under the form. The
+  form shows the new values once the application publishes its `Config`;
+  while the user edits, a change from the bus does not overwrite the form
+  but shows a notice.
+- **Set results:** every `Set` of the service, newest first, live.
+
+The UI checks no value itself: the application decides (A-356), the UI
+shows its answer.
+
 ## API
 
-JSON over HTTP/1.1, one request per connection (`Connection: close`):
+JSON over HTTP/1.1, one request per connection (`Connection: close`); the
+Web UI uses the same API (A-357, changed in C-083: `GET /` is the page and
+`GET /api/events` is new):
 
 | Request | Answer |
 |---|---|
+| `GET /`, `/app.css`, `/app.js` | the Web UI (embedded with `include_str!`, no external resource) |
 | `GET /api/apps` | `{"apps":[{serviceType, app, state, health, healthScore, mam, profile, subscriptionList, configs:[{source, context, writable, dataSetWriterId, config}], errors, discoveredMs}]}` |
 | `POST /api/refresh` | body empty or `{}`: discovery of every online application; `{"serviceType","app"}`: of one (unknown: `Get MAM` first, 404 without answer); answers like `/api/apps` |
 | `POST /api/set` | body `{"serviceType","app","source","context","values":{"<group>":{"<object>":"<value>"}}}`; answers the recorded result |
 | `GET /api/sets` | `{"sets":[…]}`, the newest first: `{id, timeMs, serviceType, app, source, context, values, status:{code, symbol, good}, error}` |
+| `GET /api/events` | event stream (SSE): `{"type":"apps", "apps":[…], "connected":…}` (as `/api/apps`) first and on every change, `{"type":"set", "set":{…}}` (as an entry of `/api/sets`) for every `Set` result; a comment `keep-alive` after 15 s without an event |
+
+A query (`?…`) is refused with 400: no route takes parameters.
 
 `POST /api/set` checks only the structure (A-356): 400 for an unknown
 group or object, a value that is not a string (REQ-RES-CONFIG-007) or no
@@ -97,8 +136,11 @@ The API is for loopback and the Web UI of the service (A-357): no
 authentication, no TLS (a demo, A-305); it refuses a `Host` that is not
 `localhost` or an IP address and an `Origin` other than its own (403), a
 POST without `application/json` (415), `Transfer-Encoding` (501), bodies
-above 64 KiB (413), heads above 8 KiB (431), slow requests (408) and more
-than 16 connections (503).
+above 64 KiB (413), heads above 8 KiB (431), slow requests (408), more
+than 16 connections and more than 8 event streams (503). Every answer
+carries `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`,
+`Content-Security-Policy: default-src 'self'; frame-ancestors 'none'` and
+`Referrer-Policy: no-referrer`.
 
 ## Tests
 
@@ -111,8 +153,10 @@ The Go integration tests in `config_test.go` (package of the Go module
 (D3) and the config service on loopback: discovery, read, `Set` of the
 logger's `minEventLevel` (Good, arrives at the logger), a rejected `Set` of
 the weather service (`met-no` with `pollInterval` 599 → `BadOutOfRange`,
-A-348), the error answers, the request guards, invalid settings, and D7
-`oec-check test --level 1` with a pinned list of passes. `OEC_CONFIG` is the
+A-348), the error answers, the request guards, invalid settings, the Web UI
+over HTTP and SSE (`webui_test.go`: files, the events `apps` and `set` of a
+Good and a refused `Set`, guards, limits, keep-alive, listen addresses), and
+D7 `oec-check test --level 1` with a pinned list of passes. `OEC_CONFIG` is the
 path of the binary (default `target/debug/oec-config`),
 `OEC_CONFIG_D7_REPORT=<file>` keeps the D7 report. `oec/demos/check.sh` runs
 fmt, clippy (pedantic, `-D warnings`), the unit tests, cargo-deny with the
