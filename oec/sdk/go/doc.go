@@ -35,9 +35,26 @@
 // fails; a stop by ctx, Shutdown or Close is not an error. [App.Start]
 // starts the app in the background instead.
 //
+// # Provider
+//
+// [App.This] is the application itself, [App.AddAsset] adds a represented
+// asset. [Asset.AddData] adds a Data DataSet with its Metadata,
+// [Asset.AddConfig] a Config, [Asset.EmitEvent] publishes a Generic event.
+// [DataSet.OnSet] and [Config.OnSet] decide about a Set request: nil
+// accepts, a [StatusCode] refuses with that code:
+//
+//	err = temperature.OnSet(func(v json.RawMessage) error {
+//		return oec.BadOutOfRange
+//	})
+//
 // # Threading and resources
 //
-//   - Every method of [App] and [Asset] is safe for concurrent use.
+//   - Every method of [App], [Asset], [DataSet] and [Config] is safe for
+//     concurrent use.
+//   - Handlers run on a thread of the Rust runtime, one at a time, and must
+//     return quickly; blocking SDK calls inside them return
+//     [ErrInvalidState] (start a goroutine). A panic in a handler is
+//     recovered, logged and answered with BadInternalError.
 //   - The C ABI reports errors through thread-local state; the package
 //     locks the OS thread for each call and its error read, callers need
 //     not care.

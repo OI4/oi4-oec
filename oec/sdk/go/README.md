@@ -7,10 +7,11 @@ linked statically with cgo. Identity, topics, payloads, Health, MAM, lifecycle,
 TLS and reconnection are implemented once, in Rust; this package maps them to Go
 types, errors and contexts. Standard library only.
 
-State (C-076, P4c increment 1): application lifecycle (`New`, `Run`, `Start`,
-`Shutdown`, `Close`, `State`), own `Health`, `Syslog`, errors, Level 1
-example `hello`. Assets, `Data`/`Metadata`, `Config`, events (increment 2) and
-the consumer side (increment 3) follow.
+State (C-077, P4c increment 2): application lifecycle (`New`, `Run`, `Start`,
+`Shutdown`, `Close`, `State`), own `Health`, `Syslog`, errors (increment 1);
+provider Level 2/3 – represented assets, `Data` with its `Metadata`, `Config`,
+events, `OnSet` handlers (increment 2); examples `hello` (Level 1) and
+`source` (Level 3). The consumer side (increment 3) follows.
 
 ## Build
 
@@ -79,6 +80,54 @@ the example) moves its root, `Options.Broker` replaces it (then a
 `OEC_ROOT=../../dev/generated/roots/oec-dev-app go run ./examples/hello` after
 `oec/dev` is up.
 
+## Provider (Level 2/3)
+
+```go
+device, err := app.AddAsset(oec.AssetOptions{
+	Product:      oec.Product{ManufacturerURI: "sensor-maker.com", Model: "TS-100", ProductCode: "TS-100-A"},
+	SerialNumber: "4711", // no IdentificationLink: the Oi4Identifier is derived
+})
+temperature, err := device.AddData(oec.DataDef{
+	Tag: oec.OI4PV,
+	Fields: []oec.Field{
+		{Name: "Pv", Type: oec.TypeDouble, Unit: "°C", Precision: 0.1},
+		{Name: "Sv1", Type: oec.TypeDouble, Unit: "°C", Range: &oec.Range{Low: -20, High: 80}},
+	},
+	Writable: oec.WritableModeAndInterval, // Set PublicationList may change Mode and Interval
+})
+err = temperature.Update(map[string]float64{"Pv": 21.5, "Sv1": 22})
+err = temperature.OnSet(func(v json.RawMessage) error {
+	return oec.BadOutOfRange // or nil: accepted, the SDK publishes the new state
+})
+```
+
+- **Assets:** `App.This()` is the application itself, `App.AddAsset` adds a
+  represented asset (MAM, Health, Profile, PublicationList per `Source`;
+  from Level 2 the ReferenceDesignation is offered, which needs a persistent
+  store – the container storage or `Options.StoreDir`). `Asset.Remove` withdraws it.
+- **Data:** `DataDef` names the fields with their built-in type, unit,
+  range and precision; the SDK derives the `Metadata` and the
+  `DataSetClassId`. `Mode` zero is the default `ON_REQUEST|FILTER`,
+  `ModeOff` stands for `OFF_0`; `Interval` in whole milliseconds. `Update`
+  takes any value `encoding/json` encodes to an object of the fields;
+  publishing follows the mode (on change, cyclic, on request).
+- **Config:** `ConfigDef` with groups and objects (`NumberObject`,
+  `StringObject`, `BooleanObject` or a `ConfigObject` with every element of
+  MG 8.3.3: `Mandatory`, `Sensitive`, `Min`/`Max`, `MaxLength`, `Pattern`,
+  `OneOf`); `AddConfigJSON` takes a ready definition. `Config.Get`/`Set`
+  read and write one value (as text); the SDK validates, masks sensitive
+  values, persists and answers `Get`/`Set Config`.
+- **Events:** `Asset.EmitEvent(oec.Event{Level, Number, Description,
+  Details})` publishes a Generic event.
+- **`OnSet`:** the handler decides about a `Set Data` (the values as
+  `json.RawMessage`) or `Set Config` (the whole proposal as `ConfigValues`,
+  clear text). nil accepts; an `oec.StatusCode` (e.g. `oec.BadOutOfRange`)
+  or an `*oec.Error` with a Bad code refuses with that code; any other error
+  refuses with `Bad`. The SDK checks the request against the fields and
+  their types before, answers with the Status event and publishes the new
+  state. A second `OnSet` replaces
+  the handler.
+
 ## Rules
 
 - **Threads:** every method may be called from any goroutine. The C ABI keeps
@@ -95,8 +144,12 @@ the example) moves its root, `Options.Broker` replaces it (then a
 - **Errors:** `*oec.Error` with `Status`, message and, for a Bad answer, the
   OPC UA `StatusCode`; `errors.Is(err, oec.ErrBootstrap)` etc. Strings with a
   NUL character are refused with `ErrInvalidArgument`.
-- **Callbacks** (from increment 2): they run on a thread of the Rust runtime;
-  blocking SDK calls inside them return `ErrInvalidState` – start a goroutine.
+- **Callbacks** (`OnSet`): they run on a thread of the Rust runtime, one at
+  a time, and must return quickly. Blocking SDK calls inside them return
+  `ErrInvalidState` – start a goroutine. A panic is recovered, logged with
+  `log.Printf` and answered with `BadInternalError`; it never unwinds into
+  Rust. The handler state (`cgo.Handle`) lives until `App.Close`, as the C
+  ABI requires of its `user_data`.
 
 ## Tests
 
@@ -111,7 +164,9 @@ loopback only, PKI generated per test). Without the helper they skip, unless
 `OEC_GO_REQUIRE_BROKER=1`; `OEC_GO_TESTBROKER` names another path.
 
 `OEC_GO_D7=<path of oec-check>` adds D7 `test --level 1` against
-`examples/hello` (TLS proxy, restart hook, peer, announce; ~2 min);
-`OEC_GO_D7_REPORT=<file>` keeps the JSON report. D7 is built from
+`examples/hello` and `test --level 3` against `examples/source` (TLS proxy,
+restart hook, peer, announce; ~2 min and ~45 s);
+`OEC_GO_D7_REPORT=<file>` and `OEC_GO_D7_L3_REPORT=<file>` keep the JSON
+reports. D7 is built from
 `oec/conformance` and run as a program – the two modules share no code.
 `oec/sdk/check.sh` runs all of it (gofmt, vet, `go test -race`).
