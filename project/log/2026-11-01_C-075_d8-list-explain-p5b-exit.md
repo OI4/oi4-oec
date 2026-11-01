@@ -217,7 +217,7 @@ PO answer (chat, 2026-11-01): "Ich möchte schon ein SDK oder ein Anbindung für
 ### Decided by the agent (G-3.4 b): ADR-0027
 
 - Revisited the early analysis: `research/sdk-options.md` §9.4/9.6 (for Go "wazero WASM rather than cgo", to be decided by a spike) and ADR-0011 (further languages by a spike between S9 and S1/S2).
-- Measured the code: `oec-core` ≈ 18 200 lines, the `oec` runtime ≈ 7 300 lines (transport, TLS/PKCS#8, bootstrap, store, Config validation/persistence, secret reload, Syslog), `oec-ffi` ≈ 2 300 lines with 40 functions covering L1 … L3.
+- Measured the code: `oec-core` ≈ 18 200 lines, the `oec` runtime ≈ 7 300 lines (transport, TLS/PKCS#8, bootstrap, store, Config validation/persistence, secret reload, Syslog), `oec-ffi` ≈ 2 300 lines with 43 functions in `oec.h` covering L1 … L3.
 - **Spike** (in the session folder, not committed; no change to the repository):
   - `cargo build --release -p oec-ffi`. `liboec_ffi.a` is 30 MB on macOS arm64; native libs are `-lSystem -lc -lm`.
   - A Go program (cgo, Go 1.26) builds a Level 1 `Utility` from the `oec-dev-app` sample storage and subscribes to `Health`. It runs `oec_app_run` in a goroutine on a locked OS thread, against the `oec/dev` Mosquitto with TLS.

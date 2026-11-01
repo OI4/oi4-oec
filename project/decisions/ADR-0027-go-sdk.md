@@ -12,13 +12,13 @@ The PO wants an SDK for Go, and wants it before the demos. The weather demo (D3)
 What exists today (C-061):
 - `oec-core` (≈ 18 200 lines): sans-IO protocol logic, including the own MQTT 3.1.1 codec and session.
 - `oec` (≈ 7 300 lines): the runtime. It covers the TCP/TLS transport with rustls and PKCS#8 passphrases, the container storage bootstrap (REQ-CNT-*), reconnect, timers, the persistent store, Config validation, masking and persistence, the secret reload and the `log`/Syslog bridge.
-- `oec-ffi` (≈ 2 300 lines): the C ABI of ADR-0021 with 40 functions over `oec`. It covers Level 1 … 3: provider, assets, Data/Metadata, Config, events, consumer, `Get`/`Set`/`Del` and the Action `NewDataSetWriterId`. It has opaque handles, JSON values, callbacks with a user-data pointer and a panic guard, and it is tested in C under ASan/UBSan.
+- `oec-ffi` (≈ 2 300 lines): the C ABI of ADR-0021 with 43 functions over `oec`. It covers Level 1 … 3: provider, assets, Data/Metadata, Config, events, consumer, `Get`/`Set`/`Del` and the Action `NewDataSetWriterId`. It has opaque handles, JSON values, callbacks with a user-data pointer and a panic guard, and it is tested in C under ASan/UBSan.
 
 ## Options
 
 | | Approach | Assessment |
 |-|----------|------------|
-| **A** | **cgo over `oec-ffi`**: a Go package wraps the C ABI; `liboec_ffi.a` is linked statically | Uses the whole tested runtime. The package is a thin layer of about 40 functions. One implementation of the protocol and the runtime. Costs: cgo, so builds for another platform need a C toolchain for the target; there is no `go get` without the Rust library (a release brings prebuilt archives, P9). |
+| **A** | **cgo over `oec-ffi`**: a Go package wraps the C ABI; `liboec_ffi.a` is linked statically | Uses the whole tested runtime. The package is a thin layer over 43 functions. One implementation of the protocol and the runtime. Costs: cgo, so builds for another platform need a C toolchain for the target; there is no `go get` without the Rust library (a release brings prebuilt archives, P9). |
 | B | WASM: `oec-core` compiled to WebAssembly, hosted by wazero (pure Go); Go does transport, TLS, timers and storage | No cgo, plain Go cross builds. But `oec-core` has no WASM interface (a second foreign ABI next to ADR-0021). And the 7 300 lines of the `oec` runtime would have to be written again in Go: transport, bootstrap, store, Config persistence, secret reload. That is two runtimes that can drift apart, for one demo. |
 | C | Co-process (S9): the Rust runtime as a sidecar, Go talks IPC | Two processes per application container, against the one-app-per-container model (RIG). A new IPC protocol and its versioning. |
 | D | Go implementation of its own | A third implementation (Rust, D9 in C, Go). The PO allowed the Rust core so that this is not needed. |
@@ -70,7 +70,7 @@ A Go program (Go 1.26, cgo) against `liboec_ffi.a` of the release build (macOS a
    - Static linking against musl for the images is decided with the image of the weather demo (P6).
 9. **Tests and gate:**
    - Go tests (`go test -race`, `go vet`, `gofmt`) of the package run against the in-process TLS test broker of `oec` (`oec/tests/testbroker`). They use it either through a small Rust test binary that the Go tests start, or through a Rust test that builds and runs the Go test programs, as `oec-ffi/tests/c.rs` does with C. The choice is made in P4c increment 1.
-   - Examples `hello` (L1) and an L3 asset source; D7 `test` against the Go examples at `level1` and `level3` in the gate.
+   - Examples `hello` (L1) and an L3 asset source. D7 `test` against the Go examples at `level1` and `level3`: in the gate, if a broker without Docker suffices for it (e.g. the Rust test broker as a helper binary – decided in P4c increment 1 with reasons); otherwise as an opt-in run against `oec/dev` with the result in the log, as the P5 exit run against `demo.rs` (C-069).
    - Opt-in interop against `oec/dev`.
    - The SDK gate `oec/sdk/check.sh` gets a Go section.
 10. **Versioning:** the Go module carries the SDK version of the Rust workspace; `oec.Version()` returns `oec_version()`.

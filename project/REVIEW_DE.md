@@ -50,7 +50,7 @@ Ein Go-Paket (`oec/sdk/go`) ruft die **C-Schnittstelle `oec-ffi`** auf, die es s
 
 - **Warum das am praktischsten ist:**
   - Die C-Schnittstelle kann schon alles, was eine OEC-Anwendung braucht, Level 1 bis 3: Assets, Messwerte, Einstellungen, Ereignisse, Abos, `Get`/`Set`/`Del`. Sie ist in C getestet.
-  - Das Go-Paket ist nur eine dünne Hülle mit Go-typischen Namen und Typen um etwa 40 Funktionen. Das ganze Protokoll und die ganze Laufzeit stehen weiter **nur einmal**, in Rust: Verbindung, TLS, Zugangsdaten aus dem Container, Speicher, Einstellungen. Ein Fehler wird an einer Stelle behoben und gilt für Rust, C und Go.
+  - Das Go-Paket ist nur eine dünne Hülle mit Go-typischen Namen und Typen um 43 Funktionen. Das ganze Protokoll und die ganze Laufzeit stehen weiter **nur einmal**, in Rust: Verbindung, TLS, Zugangsdaten aus dem Container, Speicher, Einstellungen. Ein Fehler wird an einer Stelle behoben und gilt für Rust, C und Go.
   - Es braucht keine neue Bibliothek, weder in Go noch in Rust.
 - **Der Versuch (Spike):** Ein kleines Go-Programm hat sich über die Rust-Bibliothek mit TLS mit dem Broker unserer Entwicklungsumgebung verbunden. Es hat seine eigene Health-Nachricht über ein Abo zurückbekommen; der Aufruf kam aus dem Rust-Thread sauber in Go an. Danach hat es sich ordentlich beendet. Das Programm ist 16 MB groß und braucht nur Systembibliotheken.
 - **Was ich verworfen habe:**
