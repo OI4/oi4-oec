@@ -122,7 +122,7 @@ runs:
       Splits the decoded credentials at the last ":" of the password: the
       endpoint refuses the username.
   - fault: passphrase-raw
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
       T8-RUN-02: {outcome: fail, reqs: [REQ-CNT-009]}
@@ -132,7 +132,7 @@ runs:
       (refused); it authenticates only with the credentials – a violation
       since SF-117 (C-074 review: both means must be supported).
   - fault: no-cert
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
       T8-RUN-02: {outcome: fail, reqs: [REQ-CNT-009]}
@@ -140,7 +140,7 @@ runs:
       Supports only the credentials – a violation since SF-117 (both means
       must be supported).
   - fault: no-credentials
-    status: draft
+    status: reviewed
     expect:
       T8-RUN-01: {outcome: fail, reqs: [REQ-CMP-029]}
       T8-RUN-02: {outcome: fail, reqs: [REQ-CNT-009]}

@@ -312,7 +312,7 @@ requirements:
         text: With this identity, the application authenticates itself at the Message Bus (OEC Messaging Guideline, 6.2.2 Security Settings).
     verification: [d8, manual]
     inventory: [RIG-4.1.3-014622f6, RIG-4.1.3-7745248f, RIG-4.1.3-fabb06b7]
-    status: draft
+    status: reviewed
     notes: >-
       Graded by REQ-CMP-029 (secret handling). Which means is used if both
       are available: REQ-MQTT-010. The decoding is explicit since GL-ADR-022

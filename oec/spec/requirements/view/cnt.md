@@ -13,7 +13,7 @@ Guideline baseline: `52d8470` · Area status: reviewed · Sections: RIG 2, RIG 4
 | [REQ-CNT-006](#req-cnt-006) | Content and mount of the certificate storage | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-007](#req-cnt-007) | Certificate of the application named after the container | SHOULD | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-008](#req-cnt-008) | Platform provides the secrets of the identity of the application | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
-| [REQ-CNT-009](#req-cnt-009) | Application uses the certificate and secret storages | MUST | none | SHOULD | MUST | service-container | d8, manual | draft |
+| [REQ-CNT-009](#req-cnt-009) | Application uses the certificate and secret storages | MUST | none | SHOULD | MUST | service-container | d8, manual | reviewed |
 | [REQ-CNT-010](#req-cnt-010) | Application uses the OI4 application storage paths | SHOULD | none | SHOULD | SHOULD | service-container | manual | reviewed |
 | [REQ-CNT-011](#req-cnt-011) | Application storages are mapped and owned by one container | MUST | n/a | n/a | n/a | platform | d8 | reviewed |
 | [REQ-CNT-012](#req-cnt-012) | Application detects manipulation of its stored data | MUST | none | SHOULD | MUST | service-container | manual | reviewed |
@@ -256,7 +256,7 @@ A containerized application takes the secrets of its identity from /run/secrets/
 - Domain: service-container · Applies to: application, container-image
 - Refs: RIG 4.1.3, RIG 4.1.2, RIG 1.3, MG 6.2.2, GL-ADR-022, SF-117
 - Verification: d8, manual
-- Status: draft
+- Status: reviewed
 - Inventory: RIG-4.1.3-014622f6, RIG-4.1.3-7745248f, RIG-4.1.3-fabb06b7
 
 > The application shall support both means of authentication and shall use the means that the platform provides.

@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-10-31, C-074 review addendum 2: D-1 ("D-1 wie vorgeschlagen", SF-117) is applied – RIG 4.1.3 `52d8470`, SF-117 resolved, re-baseline, T8-RUN-02 judges one means of authentication only as a violation. Open: **R-2** (REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials`). R-1 accepted (addendum 1). Before that C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"). Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
+_Last updated: 2026-11-01, C-074 review addendum 3: you accepted **R-2** ("R-2 akzeptiert") – REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` are `reviewed`; all 20 run fixtures `reviewed`, no REQ draft, no open finding. **Nothing is open.** Before that C-074 review addendum 2: D-1 ("D-1 wie vorgeschlagen", SF-117) is applied – RIG 4.1.3 `52d8470`, SF-117 resolved, re-baseline, T8-RUN-02 judges one means of authentication only as a violation. Open: **R-2** (REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials`). R-1 accepted (addendum 1). Before that C-074 review addendum 1: you decided **D-1** as proposed ("D-1 wie vorgeschlagen") and accepted **R-1** ("R-1 akzeptiert"). Before that C-074 (P5b increment 5: `oec-infra run`, T8-RUN-01 … 03, D8 17 of 17): open for you are **R-1** (20 run fixtures) and **D-1** (SF-117, RIG 4.1.3: must an application support both means of authentication?); A-281 … A-291 for information. Before that C-073 review addendum 1: you accepted **R-1** ("R-1 akzeptiert") – the 26 container scenarios and the 16 host scenarios are `reviewed`. Before that C-073 (P5b increment 4: Engine API, `oec-infra container`, T8-HST-03); A-271 … A-280 for information._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -246,6 +246,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
   - REQ-CNT-009 follows the text → `draft`.
   - D8 T8-RUN-02 (test first): authentication with only one of the two means is a violation of REQ-CNT-009 (was a warning marked "SF-117"); REQ-CMP-029 in T8-RUN-01 repeats it. The run fixtures `passphrase-raw`, `no-cert`, `no-credentials` change from warn to fail → `draft`.
   - Together → **R-2** (numbered on because R-1 is answered).
+- C-074 review addendum 3: you accepted **R-2** ("R-2 akzeptiert"); REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` are `reviewed` – all 20 run fixtures `reviewed`. No draft, no open finding. Nothing is open.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -538,7 +539,7 @@ Logs: [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-e
 | A-280 | Live test `TestContainerDev`; increment 5 not pulled forward | info (agent) | C-073 | – | – |
 | D-1 | SF-117: a containerized application supports both means of authentication (RIG 4.1.3) | decide (G-3.4 a) | C-074 | as proposed | ☑ as proposed |
 | R-1 | 20 run fixtures of `oec-infra run` (T8-RUN-01 … 03) | review (G-3.9) | C-074 | accept | ☑ accepted |
-| R-2 | REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` after SF-117 | review (G-3.9) | C-074 review | accept | ☐ |
+| R-2 | REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` after SF-117 | review (G-3.9) | C-074 review | accept | ☑ accepted |
 | A-281 | Engine API writes only for D8's own containers (prefix + label), no pull/volume/network/image call | info (agent) | C-074 | – | – |
 | A-282 | Local engine only (before any request), never pull | info (agent) | C-074 | – | – |
 | A-283 | Command `oec-infra run`, report key `run` without secrets, logs or host paths | info (agent) | C-074 | – | – |
@@ -553,14 +554,12 @@ Logs: [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-e
 
 ## Decisions and review items
 
-### R-2 – REQ-CNT-009 and three run fixtures after SF-117 (G-3.9)
-- **Where:** `oec/spec/requirements/cnt.yaml` (REQ-CNT-009, view `oec/spec/requirements/view/cnt.md`); `oec/conformance/testdata/run/index.yaml` (`passphrase-raw`, `no-cert`, `no-credentials`); log C-074 addendum 2.
-- **REQ-CNT-009** "Application uses the certificate and secret storages" (MUST, L3; L2 SHOULD; d8 + manual): the statement gains "It supports both means of authentication (the credentials and the private key together with the certificate) and uses the means that the platform provides."; new quote of the RIG 4.1.3 sentence, inventory RIG-4.1.3-014622f6, ref SF-117, notes.
-- **`passphrase-raw`** (does not base64-decode the passphrase, so it can only log in with the credentials), **`no-cert`** (ignores the client certificate), **`no-credentials`** (ignores the credentials): T8-RUN-01 (REQ-CMP-029) and T8-RUN-02 (REQ-CNT-009) change from **warn** to **fail**; the evidence cites "RIG 4.1.3: the application shall support both means of authentication". The other expectations and the 17 other run fixtures are unchanged.
-- **Recommendation:** accept.
-- **PO:** ☐ accepted ☐ changes: …
+_Nothing is open._
 
 ### Answered earlier
+
+Answered after the C-074 review (2026-11-01) and recorded in C-074 addendum 3:
+- R-2 – REQ-CNT-009 and the run fixtures `passphrase-raw`, `no-cert`, `no-credentials` after SF-117 (one means of authentication only: warn → fail): ☑ accepted ("R-2 akzeptiert") → `reviewed`; all 20 run fixtures `reviewed`.
 
 Answered after C-074 (2026-10-31) and recorded in C-074 addendum 1:
 - D-1 – SF-117 (RIG 4.1.3: a containerized application supports both means of authentication and uses the means the platform provides): ☑ as proposed ("D-1 wie vorgeschlagen") → RIG 4.1.3 text, SF-117 resolved, re-baseline, REQ-CNT-009 follows; D8 T8-RUN-02: one means only becomes a violation of REQ-CNT-009 (addendum 2).
@@ -1366,5 +1365,4 @@ ADR-0025 amendment C-074; DESIGN §9 "As built (C-074)"; log C-074.
 
 ## Next (C-075)
 
-1. Your answer to **R-2** (REQ-CNT-009 and three run fixtures after SF-117); it is recorded first (own commit).
-2. C-075: P5b increment 6 – `oec-infra list`/`explain`, coverage report for D8, D8 report version 1 frozen, P5b exit check; in a new session (start prompt in `prompt.md`).
+1. C-075: P5b increment 6 – `oec-infra list`/`explain`, coverage report for D8, D8 report version 1 frozen, P5b exit check; in a new session (start prompt in `prompt.md`).

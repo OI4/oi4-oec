@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 31.10.2026, C-074-Review Nachtrag 2: D-1 („D-1 wie vorgeschlagen“, SF-117) ist umgesetzt. Offen ist nur **R-2** (die ergänzte Regel REQ-CNT-009 und drei Run-Testfälle). R-1 hattest du schon akzeptiert._
+_Stand: 01.11.2026, C-074-Review Nachtrag 3: Du hast **R-2** akzeptiert („R-2 akzeptiert“). REQ-CNT-009 und alle 20 Run-Testfälle stehen auf `reviewed`. **Für dich ist nichts offen.**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,15 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### R-2 – Die Regel zu Zertifikat und Geheimnissen und drei Run-Testfälle nach deiner Entscheidung zu SF-117 (bitte prüfen)
+Nichts – alles ist entschieden bzw. abgenommen.
+
+### Was aus deinem Review C-074 geworden ist (Kurzfassung)
+
+- **R-1 akzeptiert:** alle 20 Run-Testfälle stehen auf `reviewed` (drei davon haben sich mit D-1 geändert → R-2).
+- **D-1:** wie vorgeschlagen entschieden („D-1 wie vorgeschlagen“) und umgesetzt: der Satz steht in der Guideline (RIG 4.1.3, `52d8470`), SF-117 ist erledigt, die Baseline ist nachgezogen (1411 Fundstellen, 444 Regeln, keine Lücke), D8 bewertet „kann nur eine Anmeldeart“ als Fehler statt als Warnung. Kein Finding mehr offen. Die geänderte Regel und die drei Testfälle → R-2.
+- **R-2 akzeptiert:** REQ-CNT-009 und die Testfälle `passphrase-raw`, `no-cert`, `no-credentials` stehen wieder auf `reviewed` – alle 20 Run-Testfälle sind abgenommen, keine Entwürfe mehr.
+
+### C-074 R-2 – Die Regel zu Zertifikat und Geheimnissen und drei Run-Testfälle nach deiner Entscheidung zu SF-117 (akzeptiert)
 
 **Worum geht es?** Du hast D-1 wie vorgeschlagen entschieden: Eine Anwendung muss **beide** Anmeldearten können (Benutzername/Passwort und Client-Zertifikat) und nimmt die, die die Plattform bereitstellt. Das steht jetzt in der Guideline (RIG 4.1.3, Commit `52d8470`). Daraus folgen Änderungen an Dingen, die du schon abgenommen hattest – darum liegen sie wieder bei dir:
 - **REQ-CNT-009** („Anwendung nutzt den Zertifikats- und den Geheimnis-Ordner“): Die Regel sagt jetzt zusätzlich: „Sie kann beide Anmeldearten (Benutzername/Passwort sowie privater Schlüssel mit Zertifikat) und nimmt die, die die Plattform bereitstellt.“ Der neue Satz aus RIG 4.1.3 ist als Zitat dabei.
@@ -33,13 +41,6 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
   - `no-cert`: ignoriert das Client-Zertifikat, kann also nur Passwort;
   - `no-credentials`: ignoriert Benutzername/Passwort, kann also nur Zertifikat.
   Bisher: **Warnung** mit Hinweis „SF-117“. Jetzt: **Fehler** in T8-RUN-02 (REQ-CNT-009) und, weil REQ-CMP-029 das wiederholt, auch in T8-RUN-01. Im Bericht steht als Begründung „RIG 4.1.3: the application shall support both means of authentication“. Die anderen 17 Testfälle bleiben, wie du sie abgenommen hast.
-
-**Antwort z. B.:** „R-2 akzeptiert“.
-
-### Was aus deinem Review C-074 geworden ist (Kurzfassung)
-
-- **R-1 akzeptiert:** alle 20 Run-Testfälle stehen auf `reviewed` (drei davon haben sich mit D-1 geändert → R-2).
-- **D-1:** wie vorgeschlagen entschieden („D-1 wie vorgeschlagen“) und umgesetzt: der Satz steht in der Guideline (RIG 4.1.3, `52d8470`), SF-117 ist erledigt, die Baseline ist nachgezogen (1411 Fundstellen, 444 Regeln, keine Lücke), D8 bewertet „kann nur eine Anmeldeart“ als Fehler statt als Warnung. Kein Finding mehr offen. Die geänderte Regel und die drei Testfälle → R-2.
 
 ### C-074 D-1 – SF-117: Muss eine Anwendung beide Anmeldearten können? (entschieden: wie vorgeschlagen)
 
