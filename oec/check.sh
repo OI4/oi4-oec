@@ -17,7 +17,10 @@
 #      D9 sketch oecm.h compiles as C17 (ADR-0022, from C-042);
 #   6. dev: gofmt, vet, tests of the dev PKI generator and the lint of the
 #      Mosquitto and compose configuration (C-051). No container engine: the
-#      interop tests against the broker are opt-in (oec/dev/interop.sh).
+#      interop tests against the broker are opt-in (oec/dev/interop.sh);
+#   7. demos/check.sh: the demo services of P6 (ADR-0028, from C-079): the
+#      logger (C17, unit tests and integration tests under AddressSanitizer
+#      + UBSan against the in-process TLS test broker, D7 test --level 2).
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
@@ -62,5 +65,8 @@ step "sdk/check.sh (Rust SDK, C headers)"
 step "dev: gofmt, vet, test (dev PKI, broker configuration)"
 cd "$root/dev"
 gocheck
+
+step "demos/check.sh (demo services)"
+"$root/demos/check.sh"
 
 printf '\nall checks passed\n'
