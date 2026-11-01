@@ -204,3 +204,33 @@ PO answer (chat, 2026-11-01): "Sprachen: Wetter Service in Go (oder was hatten w
 - **A-307 cut reordered:** P6 increment 1 is now the logger core in C (language decided, no Web UI, so independent of D-3 and D-5); the weather core follows when D-5 is answered; the three Web UIs form one increment after the cores (D-3). ROADMAP P6.
 - **A-308 no metrics endpoint:** without Grafana there is no Prometheus, so the logger offers no `/metrics`; A-303 is changed accordingly (history buffer for the own UI only).
 - OPEN-QUESTIONS, ROADMAP P6, REVIEW/REVIEW_DE, STATUS updated. No code, no test data, no reviewed item changed; no SF. `prompt.md` (not committed) rewritten: C-076 starts with the P6 plan, ADR-0027 and the logger core.
+
+## Addendum 3 – C-075 review, Go SDK (2026-11-01)
+
+PO answer (chat, 2026-11-01): "Ich möchte schon ein SDK oder ein Anbindung für Go haben, dann brauchen wir vor den Demos noch ein SDK für Go, dieses darf gerne den Rust Kern verwenden. Wir hatten am Anfang schon Überlegungen, wie das am besten geht. Mach dir Gedanken darüber und finde die praktischste Lösung für ein Go SDK."
+
+### Applied (PO, G-3.4 a)
+
+- **D-5 = Q-034 decided:** the weather service D3 is written in Go on a Go SDK that uses the Rust core (option (b) of D-5, grown into its own phase). Q-034 moved to "Decided". Logger C (Q-024), config service Rust (Q-031).
+- **Phase order:** new phase **P4c – Go SDK (D2 Go binding)** before P6. ROADMAP diagram, P4c section, P6 (weather in Go, P6 after the P4c exit).
+
+### Decided by the agent (G-3.4 b): ADR-0027
+
+- Revisited the early analysis: `research/sdk-options.md` §9.4/9.6 (for Go "wazero WASM rather than cgo", to be decided by a spike) and ADR-0011 (further languages by a spike between S9 and S1/S2).
+- Measured the code: `oec-core` ≈ 18 200 lines, the `oec` runtime ≈ 7 300 lines (transport, TLS/PKCS#8, bootstrap, store, Config validation/persistence, secret reload, Syslog), `oec-ffi` ≈ 2 300 lines with 40 functions covering L1 … L3.
+- **Spike** (in the session folder, not committed; no change to the repository):
+  - `cargo build --release -p oec-ffi`. `liboec_ffi.a` is 30 MB on macOS arm64; native libs are `-lSystem -lc -lm`.
+  - A Go program (cgo, Go 1.26) builds a Level 1 `Utility` from the `oec-dev-app` sample storage and subscribes to `Health`. It runs `oec_app_run` in a goroutine on a locked OS thread, against the `oec/dev` Mosquitto with TLS.
+  - The subscription callback arrived in Go on the SDK thread with the own Health (`NORMAL_0`, score 100). `oec_app_shutdown` ended the run with `OEC_OK`.
+  - The binary is 16 MB unstripped and links system libraries only.
+  - `go vet` is clean once the `cgo.Handle` goes through a C helper. A Go-exported callback needs a C trampoline file, because of the `const` parameter and the function-pointer conversion.
+  - A first attempt with `oec_app_start` and a MAM-only subscription saw no message within 15 s. Either the Birth MAM came before the subscription was active, or `oec_app_start` failed silently: its start errors are not reported (ADR-0021 §8). This is to be checked in P4c increment 1, with a test first.
+  - Docker: `oec/dev` was brought down with `down -v`. No `oec-*` containers, volumes or networks are left; foreign objects were not touched.
+- **Decision:** ADR-0027 `accepted (agent, G-3.4 b)`. It is an idiomatic Go package `oec/sdk/go`: module `github.com/OI4/oec/sdk/go`, package `oec`, standard library only, over the C ABI via cgo, with `liboec_ffi.a` linked statically. The ADR also covers the API, callbacks with `cgo.Handle` and panic recovery, error sentinels, the ABI version check, platforms, tests and the gate.
+  - Rejected: WASM/wazero, which needs a second foreign interface plus a Go copy of the runtime; a co-process; an own Go implementation; UniFFI-go and purego.
+  - ADR-0011 amendment, and a note in `research/sdk-options.md` §9.6.
+- **A-309** technique, **A-310** P4c cut (three increments) and exit proposal, **A-311** consequences for P6 (weather in Go, P6 after P4c, the demo architecture becomes ADR-0028; the A-307 cut stays provisional).
+- OPEN-QUESTIONS, ROADMAP, ADR-0011, ADR-0027, research note, project README (D2/D3), AGENTS.md, REVIEW/REVIEW_DE, STATUS updated.
+- No code, no test data, no reviewed item changed; no SF (next SF-118); no new dependency. The gate does not read the project docs.
+- `prompt.md` (not committed) is rewritten: C-076 = P4c increment 1.
+- Next free ids: SF-118, ADR-0028, Q-035, A-312.

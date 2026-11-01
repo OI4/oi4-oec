@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 01.11.2026, C-075-Review Nachtrag 2: Du hast die Sprachen und Grafana entschieden – **D-2 (a)** Config-Service in Rust, **D-4 (b)** kein Grafana, Logger bleibt C. Beim Wetterdienst hast du Go genannt und gefragt, was gesetzt war (Rust) → **D-5** zur Bestätigung. **Für dich offen: D-3** (Web-Oberflächen) und **D-5** (Sprache des Wetterdienstes). A-307, A-308 zur Info. Davor C-075-Review Nachtrag 1: Du hast **D-1 (a)** entschieden – **P5b ist abgeschlossen**, weiter mit **P6**, und P6 erweitert: drei Demo-Dienste (Wetter, neu ein **Config-Service D10**, Logger mit Historie, Grafana wenn machbar), jeder mit kleiner Web-Oberfläche. **Für dich offen: D-2** (Sprache des Config-Service), **D-3** (Technik der Web-Oberflächen), **D-4** (Grafana und seine Lizenz). A-301 … A-306 zur Info. Davor C-075: D8 fertig gebaut, Abschlusslauf._
+_Stand: 01.11.2026, C-075-Review Nachtrag 3: Du willst vor den Demos ein SDK für Go, gern auf dem Rust-Kern. Damit ist **D-5 beantwortet**: Der Wetterdienst wird in **Go** gebaut, auf einem neuen **Go-SDK**. Dafür gibt es die neue Phase **P4c** vor P6. Die Technik habe ich nach einem kleinen Versuch selbst entschieden (**ADR-0027**): ein Go-Paket über die vorhandene C-Schnittstelle, fest ins Programm gelinkt. A-309 … A-311 zur Info. **Für dich offen: D-3** (Web-Oberflächen, erst in P6 nötig). Davor C-075-Review Nachtrag 2: Du hast die Sprachen und Grafana entschieden – **D-2 (a)** Config-Service in Rust, **D-4 (b)** kein Grafana, Logger bleibt C. Beim Wetterdienst hast du Go genannt und gefragt, was gesetzt war (Rust) → **D-5** zur Bestätigung. **Für dich offen: D-3** (Web-Oberflächen) und **D-5** (Sprache des Wetterdienstes). A-307, A-308 zur Info. Davor C-075-Review Nachtrag 1: Du hast **D-1 (a)** entschieden – **P5b ist abgeschlossen**, weiter mit **P6**, und P6 erweitert: drei Demo-Dienste (Wetter, neu ein **Config-Service D10**, Logger mit Historie, Grafana wenn machbar), jeder mit kleiner Web-Oberfläche. **Für dich offen: D-2** (Sprache des Config-Service), **D-3** (Technik der Web-Oberflächen), **D-4** (Grafana und seine Lizenz). A-301 … A-306 zur Info. Davor C-075: D8 fertig gebaut, Abschlusslauf._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,38 +24,59 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-5 – In welcher Sprache bauen wir den Wetterdienst? (zu bestätigen)
-
-**Worum es geht:** Du hast geschrieben „Wetter Service in Go (oder was hatten wir hier gesetzt?)“. Gesetzt ist seit C-042 **Rust mit unserem SDK `oec`** (ADR-0011): Der Wetterdienst zeigt die Rust-Schnittstelle des SDK mit allen Level-3-Funktionen, der Logger die C-Schnittstelle. Mit D-2 zeigt der Config-Service in Rust die „anfragende“ Seite. Für Go haben wir kein SDK.
-
-**Möglichkeiten:**
-- **(a) Rust, wie gesetzt.** Alles, was der Wetterdienst braucht (Stationen als Assets, Messwerte, Einstellungen je Station), gibt es im Rust-SDK schon und ist getestet.
-- **(b) Go über die C-Schnittstelle:** ein dünnes Go-Paket über `oec-ffi` (per „cgo“). Dann hätten die drei Demos drei Sprachen, und man sieht, dass die C-Schnittstelle auch anderen Sprachen dient. Aber: Das Go-Paket ist eine neue Schicht und mehr Arbeit als der Wetterdienst selbst, und für Builds auf andere Plattformen braucht cgo jeweils einen C-Compiler.
-- **(c) Go ganz ohne unser SDK.** Zeigt nichts von unserem SDK; D7 prüft den Dienst trotzdem.
-
-**Meine Empfehlung: (a).** Wenn du eine Go-Demo um ihrer selbst willen willst, ist (b) der saubere Weg; dann plane ich das Go-Paket als eigenes Inkrement.
-
-**Bis zu deiner Antwort** schreibe ich keinen Code für den Wetterdienst. P6 beginnt mit dem Kern des Loggers in C, der von keiner offenen Frage abhängt (A-307).
-
 ### D-3 – Wie bauen wir die drei kleinen Web-Oberflächen? (zu entscheiden)
 
 **Worum es geht:** Jeder Demo-Dienst bekommt eine kleine Web-Oberfläche, auf der man sieht, was passiert. Sie gehört nicht zum OEC-Standard und läuft nicht über den Bus.
 
 **Möglichkeiten:**
-- **(a) Jeder Dienst liefert seine Seite selbst aus:** einfache HTML/CSS/JavaScript-Dateien, fest ins Programm eingebaut, ohne Build-Schritt, ohne Framework, ohne npm-Pakete. Live-Updates über „Server-Sent Events“ (der Browser bekommt neue Werte automatisch geschickt). Der Logger in C braucht dafür einen kleinen HTTP-Server (Auswahl in C-076, Lizenz MIT-verträglich).
+- **(a) Jeder Dienst liefert seine Seite selbst aus:** einfache HTML/CSS/JavaScript-Dateien, fest ins Programm eingebaut, ohne Build-Schritt, ohne Framework, ohne npm-Pakete. Live-Updates über „Server-Sent Events“ (der Browser bekommt neue Werte automatisch geschickt). Der Logger in C braucht dafür einen kleinen HTTP-Server (Auswahl in P6, Lizenz MIT-verträglich).
 - **(b) Ein Frontend-Framework mit Build-Schritt** (z. B. Svelte oder React mit Vite): schönere Bausteine, aber eine Node-Werkzeugkette und viele npm-Pakete für drei kleine Seiten.
 - **(c) Ein gemeinsamer Oberflächen-Dienst für alle drei:** ein Container mehr, und die Oberfläche gehört nicht mehr zu ihrem Dienst.
 
 **Meine Empfehlung: (a)** – klein, keine zusätzliche Werkzeugkette, jedes Image bleibt in sich geschlossen. Die Registry (P7) bekommt später eine eigene, reichere Oberfläche.
 
-Antwort z. B.: „D-3 (a), D-5 (a)“. Beide blockieren C-076 nicht.
+Antwort z. B.: „D-3 (a)“. D-3 blockiert C-076 (Go-SDK) nicht; ich brauche die Antwort erst für die Oberflächen in P6.
+
+### Was aus deinem Wunsch nach einem Go-SDK geworden ist
+
+Du hast geschrieben: „Ich möchte schon ein SDK oder ein Anbindung für Go haben, dann brauchen wir vor den Demos noch ein SDK für Go, dieses darf gerne den Rust Kern verwenden.“
+
+- **D-5 ist damit beantwortet:** Der Wetterdienst wird in Go gebaut, auf unserem Go-SDK. Der Logger bleibt C, der Config-Service Rust. Die drei Demos zeigen so die drei Zugänge zu unserem SDK: Rust, C und Go.
+- **Neue Phase P4c – Go-SDK**, vor P6 (so wie du es willst).
+
+**Welche Lösung ich gewählt habe und warum (ADR-0027, A-309):**
+
+Ein Go-Paket (`oec/sdk/go`) ruft die **C-Schnittstelle `oec-ffi`** auf, die es seit C-061 gibt. Die Technik dafür heißt „cgo“. Die Rust-Bibliothek wird **fest ins Go-Programm eingebaut** (statisch gelinkt). Am Ende ist eine Go-Anwendung ein einziges Programm, das keine zusätzliche Bibliothek braucht.
+
+- **Warum das am praktischsten ist:**
+  - Die C-Schnittstelle kann schon alles, was eine OEC-Anwendung braucht, Level 1 bis 3: Assets, Messwerte, Einstellungen, Ereignisse, Abos, `Get`/`Set`/`Del`. Sie ist in C getestet.
+  - Das Go-Paket ist nur eine dünne Hülle mit Go-typischen Namen und Typen um etwa 40 Funktionen. Das ganze Protokoll und die ganze Laufzeit stehen weiter **nur einmal**, in Rust: Verbindung, TLS, Zugangsdaten aus dem Container, Speicher, Einstellungen. Ein Fehler wird an einer Stelle behoben und gilt für Rust, C und Go.
+  - Es braucht keine neue Bibliothek, weder in Go noch in Rust.
+- **Der Versuch (Spike):** Ein kleines Go-Programm hat sich über die Rust-Bibliothek mit TLS mit dem Broker unserer Entwicklungsumgebung verbunden. Es hat seine eigene Health-Nachricht über ein Abo zurückbekommen; der Aufruf kam aus dem Rust-Thread sauber in Go an. Danach hat es sich ordentlich beendet. Das Programm ist 16 MB groß und braucht nur Systembibliotheken.
+- **Was ich verworfen habe:**
+  - **WebAssembly** (am Projektanfang meine Idee für Go): Damit hätte Go nur den Protokollkern bekommen. Die Laufzeit (etwa 7 300 Zeilen: Verbindung, TLS, Zugangsdaten, Speicher, Einstellungen) hätte man in Go **noch einmal schreiben** müssen. Zwei Laufzeiten laufen mit der Zeit auseinander. Diese Laufzeit ist erst nach meiner damaligen Empfehlung so groß geworden.
+  - **Ein zweiter Prozess neben der Go-App** (Rust als „Beiwagen“): zwei Programme pro Container und ein eigenes Protokoll dazwischen.
+  - **Ein eigenes SDK ganz in Go:** eine dritte Umsetzung des Protokolls. Genau das wolltest du mit „darf gerne den Rust Kern verwenden“ vermeiden.
+- **Der Preis:**
+  - Zum Bauen braucht man einen C-Compiler. Für Linux amd64/arm64 bauen wir im Container (Docker), das ist bei Container-Apps ohnehin üblich.
+  - Ein einfaches `go get` ohne die Rust-Bibliothek geht erst, wenn wir fertige Bibliotheken veröffentlichen (P9).
+  - Windows kommt später (P9).
+
+**Plan für P4c (A-310):**
+1. Grundgerüst: Anwendung starten und beenden, Fehler, Health, ein „Hello“-Beispiel (Level 1), Tests gegen einen Test-Broker, Prüfung mit D7.
+2. Anbieter-Seite: Assets, Messwerte, Einstellungen, Ereignisse; ein Level-3-Beispiel, Prüfung mit D7.
+3. Anfrager-Seite: Abos, `Get`/`Set`/`Del`; Absicherung der Rückrufe; Anleitung (README); Builds für Linux amd64/arm64 und den Mac.
+
+Den Abschluss von P4c entscheidest du; der Vorschlag steht in der ROADMAP.
+
+**Folgen für P6 (A-311):** P6 beginnt nach P4c. Die Architektur der Demos bekommt die Nummer ADR-0028, weil ADR-0027 jetzt das Go-SDK ist.
 
 ### Was aus deinem Review (Sprachen, Grafana) geworden ist
 
 - **D-2 (a):** Der Config-Service wird in Rust gebaut.
 - **D-4 (b):** Kein Grafana. Der Logger zeigt seine Historie nur in seiner eigenen Oberfläche (die letzten Einträge und kleine Verlaufskurven der Messwerte). Damit entfällt auch der Messwert-Endpunkt `/metrics` für Prometheus (A-308).
 - **Logger in C:** wie gehabt.
-- **Wetterdienst:** siehe D-5.
+- **Wetterdienst:** damals als D-5 offen, jetzt beantwortet (Go auf dem Go-SDK, siehe oben).
 - **Neue Reihenfolge (A-307):** P6 beginnt mit dem Kern des Loggers in C (Mitschreiben, Einstellungen, Historie, Prüfung mit D7 auf Level 2). Danach der Wetterdienst (nach D-5), MET Norway und Warnungen, der Config-Service in Rust, dann die drei Oberflächen zusammen (nach D-3), Images und Compose, Abschluss.
 
 
@@ -1075,7 +1096,12 @@ Neu aus C-072 (P5b Inkrement 3, `host`):
 
 ---
 
-### Was als Nächstes passiert (C-075)
+### Was als Nächstes passiert (C-076)
+
+1. **C-076:** P4c Inkrement 1 – Grundgerüst des Go-SDK (Anwendung starten und beenden, Fehler, Health, „Hello“-Beispiel, Tests gegen den Test-Broker, Prüfung mit D7 auf Level 1). Läuft in einer **neuen Sitzung**; der Startauftrag steht in `prompt.md`.
+2. Von dir brauche ich nur noch **D-3** (Web-Oberflächen), und zwar erst in P6.
+
+### Was davor als Nächstes geplant war (C-075)
 
 1. Zuerst trage ich deine Antworten zu **D-1** und **R-1** ein. Bei „D-1 wie vorgeschlagen“: Text in RIG 4.1.3, Re-Baseline, aus der Warnung wird ein Fehler, die betroffenen Testfälle gehen zurück auf Entwurf.
 2. **C-075:** das letzte Stück von D8: `oec-infra list`/`explain`, Abdeckungsbericht für D8, Bericht Version 1 einfrieren, Abschlussprüfung P5b. Läuft in einer **neuen Sitzung**; der Startauftrag steht in `prompt.md`.

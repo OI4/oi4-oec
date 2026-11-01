@@ -7,8 +7,8 @@ Deliver, step by step and traceable, a clean-room v2.0 implementation of the OI4
 | # | Deliverable | Short description |
 |---|-------------|-------------------|
 | D1 | JSON Schema | Validates every OEC message (topic + payload) as precisely as possible, based on the latest JSON Schema draft |
-| D2 | SDK / library | Makes building OEC-compliant applications easy; hides protocol complexity |
-| D3 | Demo: weather service | OT-connector-like demo publishing weather data; must work without a paid/registered API subscription |
+| D2 | SDK / library | Makes building OEC-compliant applications easy; hides protocol complexity. Rust core with front ends for Rust, C (C ABI) and Go (cgo over the C ABI, ADR-0027) |
+| D3 | Demo: weather service | OT-connector-like demo publishing weather data; must work without a paid/registered API subscription; Go on the Go SDK (C-075 review) |
 | D4 | Demo: logger service | Consumes and logs messages from the Message Bus; C on the C ABI of D2; history (P6 scope, C-075 review) |
 | D5 | OEC Registry | State-of-the-art registry listing all participants and what they support |
 | D6 | Documentation | Docusaurus docs explaining SDK, JSON Schema, conformance tool and demos, simple and understandable |

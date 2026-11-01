@@ -200,3 +200,5 @@ Tooling notes: UniFFI (Mozilla) plus the community generators `uniffi-bindgen-cs
    - C# wrapper
    - TypeScript and Go: decide per language between the binding (napi-rs or WASM; for Go, wazero WASM rather than cgo) and a native implementation, based on a small spike.
 3. D7 (conformance tool) stays independent (ADR-0006) and checks every language binding the same way.
+
+> **Note (C-075 review addendum 3):** for Go the spike was done and the decision is **cgo over the C ABI**, not wazero – see ADR-0027 (the runtime of `oec` grew after this recommendation; WASM would need a Go copy of it).

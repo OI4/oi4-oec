@@ -44,3 +44,7 @@ The guideline changes (GL-ADR-001 … 011) do not change the decision, they stre
 ## Amendment C-009 (ADR-0017)
 
 The C-007 requirement that `oec-core` be `no_std`-compatible is **withdrawn**. The micro SDK (D9) is a separate C17 implementation (ADR-0017). Keeping `oec-core` free of `std` is still welcome where it costs nothing, but it is not a design constraint.
+
+## Amendment C-075 review addendum 3 (ADR-0027)
+
+The Go binding is decided: an idiomatic Go package over the C ABI `oec-ffi` via cgo, `liboec_ffi.a` linked statically (ADR-0027, phase P4c). This is option S1 (native binding over the one C ABI), not S9 (co-process). It revises the recommendation of `research/sdk-options.md` §9.6 ("wazero WASM rather than cgo"): the WASM path would need a second foreign interface of `oec-core` and a Go copy of the runtime of `oec` (transport, bootstrap, store, Config persistence), which grew after that recommendation. The C ABI stays the only foreign interface of the Rust SDK.
