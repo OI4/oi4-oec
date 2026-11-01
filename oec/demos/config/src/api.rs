@@ -1,18 +1,28 @@
-//! The routes of the HTTP API (A-357), used by the tests and by the Web UI
-//! of C-083:
+//! The routes of the Web UI and its API (ADR-0028 §3, A-357, amendment
+//! C-083):
 //!
 //! | Request | Answer |
 //! |---|---|
-//! | `GET /` | a short text |
+//! | `GET /`, `/app.css`, `/app.js` | the Web UI (embedded files) |
 //! | `GET /api/apps` | the applications, their Configs and whether writable |
 //! | `POST /api/refresh` | discover again: `{}` every online one, or `{"serviceType", "app"}` |
 //! | `POST /api/set` | a `Set Config`, waits for its Status event |
 //! | `GET /api/sets` | the last `Set` results, newest first |
+//! | `GET /api/events` | event stream: `{"type": "apps", …}` (as `GET /api/apps`) first and on every change, `{"type": "set", "set": …}` for every `Set` result |
+//!
+//! A query is refused (400): no route takes parameters.
 
-use serde_json::Value;
+use std::sync::Arc;
+
+use serde_json::{Value, json};
 
 use crate::directory::{ApiError, AppKey, SetRequest};
+use crate::events::Hub;
 use crate::http::{Request, Response};
+
+const INDEX_HTML: &str = include_str!("../ui/index.html");
+const APP_CSS: &str = include_str!("../ui/app.css");
+const APP_JS: &str = include_str!("../ui/app.js");
 
 /// What the routes need of the service.
 pub(crate) trait Api {
@@ -37,8 +47,20 @@ impl Api for crate::service::Service {
     }
 }
 
-const INDEX: &str = "OEC config service (D10). API: GET /api/apps, POST /api/refresh, \
-POST /api/set, GET /api/sets. The Web UI follows.\n";
+/// The event `apps` of the snapshot `apps` (`GET /api/apps`).
+pub(crate) fn apps_event(apps: &Value) -> String {
+    let mut event = json!({ "type": "apps" });
+    if let (Some(e), Some(a)) = (event.as_object_mut(), apps.as_object()) {
+        for (k, v) in a {
+            e.insert(k.clone(), v.clone());
+        }
+    }
+    event.to_string()
+}
+
+fn set_event(record: &Value) -> String {
+    json!({ "type": "set", "set": record }).to_string()
+}
 
 fn body(req: &Request) -> Result<Value, ApiError> {
     if req.body.is_empty() {
@@ -78,10 +100,23 @@ fn not_allowed(allow: &str) -> Response {
     r
 }
 
-/// Answers one request.
-pub(crate) fn route(api: &dyn Api, req: &Request) -> Response {
+/// Answers one request; `hub` takes the events.
+pub(crate) fn route(api: &dyn Api, hub: &Arc<Hub>, req: &Request) -> Response {
+    if req.query.is_some() {
+        return Response::error(400, "no query is supported");
+    }
     match (req.path.as_str(), req.method.as_str()) {
-        ("/", "GET") => Response::text(200, INDEX),
+        ("/", "GET") => Response::content(200, "text/html; charset=utf-8", INDEX_HTML.as_bytes()),
+        ("/app.css", "GET") => {
+            Response::content(200, "text/css; charset=utf-8", APP_CSS.as_bytes())
+        }
+        ("/app.js", "GET") => {
+            Response::content(200, "text/javascript; charset=utf-8", APP_JS.as_bytes())
+        }
+        ("/api/events", "GET") => match hub.subscribe(apps_event(&api.apps())) {
+            Some(sub) => Response::events(sub),
+            None => Response::error(503, "too many event streams"),
+        },
         ("/api/apps", "GET") => Response::json(200, &api.apps()),
         ("/api/sets", "GET") => Response::json(200, &api.sets()),
         ("/api/refresh", "POST") => result(
@@ -90,12 +125,18 @@ pub(crate) fn route(api: &dyn Api, req: &Request) -> Response {
                 .and_then(|k| api.refresh(k))
                 .map(|v| (200, v)),
         ),
-        ("/api/set", "POST") => result(
-            body(req)
+        ("/api/set", "POST") => {
+            let r = body(req)
                 .and_then(|b| SetRequest::parse(&b))
-                .and_then(|r| api.set(&r)),
-        ),
-        ("/" | "/api/apps" | "/api/sets", _) => not_allowed("GET"),
+                .and_then(|r| api.set(&r));
+            if let Ok((_, record)) = &r {
+                hub.send(&set_event(record));
+            }
+            result(r)
+        }
+        ("/" | "/app.css" | "/app.js" | "/api/apps" | "/api/sets" | "/api/events", _) => {
+            not_allowed("GET")
+        }
         ("/api/refresh" | "/api/set", _) => not_allowed("POST"),
         _ => Response::error(404, "not found"),
     }
@@ -108,6 +149,7 @@ mod tests {
     use serde_json::json;
 
     use super::*;
+    use crate::events::{KEEP_ALIVE, MAX_STREAMS};
 
     #[derive(Default)]
     struct Fake {
@@ -139,6 +181,7 @@ mod tests {
         Request {
             method: method.to_owned(),
             path: path.to_owned(),
+            query: None,
             body: body.as_bytes().to_vec(),
         }
     }
@@ -150,10 +193,23 @@ mod tests {
     #[test]
     fn routes() {
         let fake = Fake::default();
-        let r = route(&fake, &req("GET", "/", ""));
+        let hub = Hub::new(KEEP_ALIVE);
+        let route = |api: &Fake, r: &Request| route(api, &hub, r);
+        for (path, content_type, start) in [
+            ("/", "text/html; charset=utf-8", "<!DOCTYPE html>"),
+            ("/app.css", "text/css; charset=utf-8", ""),
+            ("/app.js", "text/javascript; charset=utf-8", ""),
+        ] {
+            let r = route(&fake, &req("GET", path, ""));
+            assert_eq!((r.status, r.content_type), (200, content_type), "{path}");
+            assert!(r.body.starts_with(start.as_bytes()), "{path}");
+        }
+        let watcher = hub.subscribe(String::new()).unwrap();
+        let r = route(&fake, &req("GET", "/api/events", ""));
+        let sub = r.stream.unwrap();
         assert_eq!(
-            (r.status, r.content_type),
-            (200, "text/plain; charset=utf-8")
+            serde_json::from_str::<Value>(&sub.first).unwrap(),
+            json!({"type": "apps", "apps": []})
         );
         assert_eq!(
             json_of(&route(&fake, &req("GET", "/api/apps", ""))),
@@ -183,6 +239,10 @@ mod tests {
         let set = r#"{"serviceType":"Utility","app":"a","source":"a","context":"c","values":{"g":{"o":"v"}}}"#;
         let r = route(&fake, &req("POST", "/api/set", set));
         assert_eq!((r.status, json_of(&r)), (200, json!({"id": 1})));
+        for s in [&watcher, &sub] {
+            let event: Value = serde_json::from_str(&s.events.try_recv().unwrap()).unwrap();
+            assert_eq!(event, json!({"type": "set", "set": {"id": 1}}));
+        }
         let r = route(
             &fake,
             &req(
@@ -196,15 +256,38 @@ mod tests {
             (409, json!({"error": "the application is offlineGraceful"}))
         );
         assert_eq!(fake.set.lock().unwrap().len(), 2);
+        assert!(watcher.events.try_recv().is_err(), "no event for an error");
+    }
+
+    #[test]
+    fn event_streams_are_limited() {
+        let fake = Fake::default();
+        let hub = Hub::new(KEEP_ALIVE);
+        let streams: Vec<Response> = (0..MAX_STREAMS)
+            .map(|_| route(&fake, &hub, &req("GET", "/api/events", "")))
+            .collect();
+        assert!(streams.iter().all(|r| r.stream.is_some()));
+        let r = route(&fake, &hub, &req("GET", "/api/events", ""));
+        assert_eq!((r.status, r.stream.is_none()), (503, true));
+        drop(streams);
+        assert!(
+            route(&fake, &hub, &req("GET", "/api/events", ""))
+                .stream
+                .is_some()
+        );
     }
 
     #[test]
     fn refused() {
         let fake = Fake::default();
+        let hub = Hub::new(KEEP_ALIVE);
+        let route = |api: &Fake, r: &Request| route(api, &hub, r);
         for (method, path, body, status) in [
             ("GET", "/nope", "", 404),
             ("POST", "/api/apps", "", 405),
             ("GET", "/api/set", "", 405),
+            ("POST", "/api/events", "{}", 405),
+            ("POST", "/app.js", "{}", 405),
             ("POST", "/api/set", "", 400),
             ("POST", "/api/set", "[]", 400),
             ("POST", "/api/set", "{", 400),
@@ -220,6 +303,11 @@ mod tests {
             let r = route(&fake, &req(method, path, body));
             assert_eq!(r.status, status, "{method} {path} {body}");
             assert!(json_of(&r)["error"].is_string());
+        }
+        for path in ["/api/apps", "/api/events", "/"] {
+            let mut q = req("GET", path, "");
+            q.query = Some("x=1".to_owned());
+            assert_eq!(route(&fake, &q).status, 400, "{path}?x=1");
         }
         let r = route(&fake, &req("DELETE", "/api/set", ""));
         assert_eq!(r.headers, vec![("Allow", "POST".to_owned())]);

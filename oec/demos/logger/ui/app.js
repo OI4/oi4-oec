@@ -219,7 +219,7 @@ $("filter").addEventListener("change", (e) => {
   reload();
 });
 let typing = null;
-$("filter").q.addEventListener("input", () => {
+$("filter").elements.namedItem("q").addEventListener("input", () => {
   clearTimeout(typing);
   typing = setTimeout(reload, 300);
 });

@@ -1,6 +1,7 @@
-//! A minimal HTTP/1.1 server on `std::net` for the API of the config
-//! service (A-357): one request per connection (`Connection: close`),
-//! bounded in size, time and number of connections. Without TLS and
+//! A minimal HTTP/1.1 server on `std::net` for the Web UI and the API of
+//! the config service (ADR-0028 §3, A-357): one request per connection
+//! (`Connection: close`), bounded in size, time and number of connections;
+//! a response may be an event stream (`text/event-stream`). Without TLS and
 //! authentication, like every demo UI (A-305): it listens on loopback by
 //! default and refuses requests whose `Host` is a DNS name other than
 //! `localhost` or whose `Origin` is another site (DNS rebinding, CSRF).
@@ -10,7 +11,10 @@ use std::io::{Read, Write};
 use std::net::{IpAddr, TcpListener, TcpStream};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::mpsc::RecvTimeoutError;
 use std::time::{Duration, Instant};
+
+use crate::events::Subscription;
 
 /// At most this many connections at a time; more get a 503.
 pub(crate) const MAX_CONNECTIONS: usize = 16;
@@ -22,6 +26,13 @@ pub(crate) const MAX_BODY: usize = 64 * 1024;
 const READ_TIME: Duration = Duration::from_secs(5);
 /// Time to drop what a client sends after the response.
 const DRAIN_TIME: Duration = Duration::from_millis(100);
+/// How often an event stream looks for its client having gone.
+const POLL_TIME: Duration = Duration::from_millis(250);
+/// The headers of every response.
+const COMMON_HEADERS: &str = "Connection: close\r\nCache-Control: no-store\r\n\
+X-Content-Type-Options: nosniff\r\n\
+Content-Security-Policy: default-src 'self'; frame-ancestors 'none'\r\n\
+Referrer-Policy: no-referrer\r\n";
 
 /// A request.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -29,17 +40,21 @@ pub(crate) struct Request {
     pub(crate) method: String,
     /// The path without query.
     pub(crate) path: String,
+    /// The query (after `?`), `None` without `?`.
+    pub(crate) query: Option<String>,
     pub(crate) body: Vec<u8>,
 }
 
 /// A response.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 pub(crate) struct Response {
     pub(crate) status: u16,
     pub(crate) content_type: &'static str,
     pub(crate) body: Vec<u8>,
     /// Extra headers, e.g. `Allow`.
     pub(crate) headers: Vec<(&'static str, String)>,
+    /// An event stream instead of the body.
+    pub(crate) stream: Option<Box<Subscription>>,
 }
 
 impl Response {
@@ -50,6 +65,7 @@ impl Response {
             content_type: "application/json",
             body: value.to_string().into_bytes(),
             headers: Vec::new(),
+            stream: None,
         }
     }
 
@@ -58,13 +74,25 @@ impl Response {
         Self::json(status, &serde_json::json!({ "error": message }))
     }
 
-    /// A text response.
-    pub(crate) fn text(status: u16, text: &str) -> Self {
+    /// A response of the type `content_type`.
+    pub(crate) fn content(status: u16, content_type: &'static str, body: &[u8]) -> Self {
         Self {
             status,
-            content_type: "text/plain; charset=utf-8",
-            body: text.as_bytes().to_vec(),
+            content_type,
+            body: body.to_vec(),
             headers: Vec::new(),
+            stream: None,
+        }
+    }
+
+    /// The event stream of `subscription`.
+    pub(crate) fn events(subscription: Subscription) -> Self {
+        Self {
+            status: 200,
+            content_type: "text/event-stream",
+            body: Vec::new(),
+            headers: Vec::new(),
+            stream: Some(Box::new(subscription)),
         }
     }
 }
@@ -119,12 +147,76 @@ pub(crate) fn serve(listener: &TcpListener, handler: &Handler) {
 fn connection(mut stream: TcpStream, handler: &Handler) {
     let _ = stream.set_read_timeout(Some(READ_TIME));
     let _ = stream.set_write_timeout(Some(READ_TIME));
-    let response = match read(&mut stream) {
+    let mut response = match read(&mut stream) {
         Ok(req) => handler(&req),
         Err(resp) => resp,
     };
-    let _ = write(&mut stream, &response);
+    match response.stream.take() {
+        Some(sub) => stream_events(&mut stream, &response, &sub),
+        None => {
+            let _ = write(&mut stream, &response);
+        }
+    }
     finish(&mut stream);
+}
+
+/// Sends the events of `sub` as `data:` lines until the client goes, a
+/// write fails or the hub drops the subscriber; a comment `keep-alive`
+/// after [`Subscription::keep_alive`] without an event.
+fn stream_events(stream: &mut TcpStream, r: &Response, sub: &Subscription) {
+    let head = format!(
+        "HTTP/1.1 {} {}\r\nContent-Type: {}\r\n{COMMON_HEADERS}\r\n",
+        r.status,
+        reason(r.status),
+        r.content_type
+    );
+    if send(stream, head.as_bytes()).is_err() || send(stream, &event(&sub.first)).is_err() {
+        return;
+    }
+    let mut quiet = Instant::now();
+    loop {
+        let sent = match sub.events.recv_timeout(POLL_TIME) {
+            Ok(data) => send(stream, &event(&data)),
+            Err(RecvTimeoutError::Disconnected) => return,
+            Err(RecvTimeoutError::Timeout) if quiet.elapsed() >= sub.keep_alive() => {
+                send(stream, b": keep-alive\n\n")
+            }
+            Err(RecvTimeoutError::Timeout) => {
+                if gone(stream) {
+                    return;
+                }
+                continue;
+            }
+        };
+        if sent.is_err() {
+            return;
+        }
+        quiet = Instant::now();
+    }
+}
+
+fn event(data: &str) -> Vec<u8> {
+    format!("data: {data}\n\n").into_bytes()
+}
+
+fn send(stream: &mut TcpStream, b: &[u8]) -> std::io::Result<()> {
+    stream.write_all(b)?;
+    stream.flush()
+}
+
+/// Whether the client of an event stream has closed its side (what it
+/// still sends is dropped).
+fn gone(stream: &mut TcpStream) -> bool {
+    if stream.set_nonblocking(true).is_err() {
+        return true;
+    }
+    let mut sink = [0u8; 512];
+    let closed = match stream.read(&mut sink) {
+        Ok(0) => true,
+        Ok(_) => false,
+        Err(e) => e.kind() != std::io::ErrorKind::WouldBlock,
+    };
+    stream.set_nonblocking(false).is_err() || closed
 }
 
 /// Closes after the response: what the client still sends is read and
@@ -145,7 +237,7 @@ fn finish(stream: &mut TcpStream) {
 
 fn write(stream: &mut TcpStream, r: &Response) -> std::io::Result<()> {
     let mut head = format!(
-        "HTTP/1.1 {} {}\r\nContent-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\n",
+        "HTTP/1.1 {} {}\r\nContent-Type: {}\r\nContent-Length: {}\r\n{COMMON_HEADERS}",
         r.status,
         reason(r.status),
         r.content_type,
@@ -226,10 +318,14 @@ fn read(stream: &mut impl Read) -> Result<Request, Response> {
     if body.len() != length {
         return Err(Response::error(400, "body longer than Content-Length"));
     }
-    let path = target.split('?').next().unwrap_or(target).to_owned();
+    let (path, query) = match target.split_once('?') {
+        Some((path, query)) => (path.to_owned(), Some(query.to_owned())),
+        None => (target.to_owned(), None),
+    };
     Ok(Request {
         method: method.to_owned(),
         path,
+        query,
         body,
     })
 }
@@ -315,12 +411,15 @@ mod tests {
     #[test]
     fn requests() {
         let r = parse("GET /api/apps?x=1 HTTP/1.1\r\nHost: 127.0.0.1:8783\r\n\r\n").unwrap();
-        assert_eq!((r.method.as_str(), r.path.as_str()), ("GET", "/api/apps"));
+        assert_eq!(
+            (r.method.as_str(), r.path.as_str(), r.query.as_deref()),
+            ("GET", "/api/apps", Some("x=1"))
+        );
         let r = parse(
             "POST /api/set HTTP/1.1\r\nHost: localhost:8783\r\nOrigin: http://localhost:8783\r\nContent-Type: application/json; charset=utf-8\r\nContent-Length: 2\r\n\r\n{}",
         )
         .unwrap();
-        assert_eq!(r.body, b"{}");
+        assert_eq!((r.body.as_slice(), r.query), (&b"{}"[..], None));
     }
 
     #[test]
@@ -390,10 +489,67 @@ mod tests {
     }
 
     #[test]
+    fn event_streams() {
+        use crate::events::Hub;
+        use std::io::{BufRead, BufReader};
+
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+        let hub = Hub::new(Duration::from_millis(50));
+        let served = Arc::clone(&hub);
+        let handler: Handler = Arc::new(move |_: &Request| {
+            Response::events(served.subscribe("first".to_owned()).unwrap())
+        });
+        std::thread::spawn(move || serve(&listener, &handler));
+        let mut s = TcpStream::connect(addr).unwrap();
+        s.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+        write!(s, "GET /api/events HTTP/1.1\r\nHost: {addr}\r\n\r\n").unwrap();
+        let mut lines = BufReader::new(s.try_clone().unwrap()).lines();
+        let mut next = || lines.next().unwrap().unwrap();
+        assert_eq!(next(), "HTTP/1.1 200 OK");
+        let mut head = Vec::new();
+        loop {
+            let l = next();
+            if l.is_empty() {
+                break;
+            }
+            head.push(l);
+        }
+        assert!(head.contains(&"Content-Type: text/event-stream".to_owned()));
+        assert!(head.contains(&"Cache-Control: no-store".to_owned()));
+        assert!(!head.iter().any(|h| h.starts_with("Content-Length")));
+        assert_eq!((next(), next()), ("data: first".to_owned(), String::new()));
+        hub.send("{\"a\":1}");
+        let mut got = Vec::new();
+        while got.len() < 2 {
+            let l = next();
+            if !l.is_empty() {
+                got.push(l);
+            }
+        }
+        assert_eq!(got[0], "data: {\"a\":1}");
+        assert_eq!(got[1], ": keep-alive");
+        assert_eq!(hub.len(), 1);
+        drop(s);
+        drop(lines);
+        let mut gone = false;
+        for _ in 0..40 {
+            std::thread::sleep(Duration::from_millis(50));
+            if hub.len() == 0 {
+                gone = true;
+                break;
+            }
+        }
+        assert!(gone, "the stream ends when the client goes");
+    }
+
+    #[test]
     fn served_over_loopback_with_a_connection_limit() {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let addr = listener.local_addr().unwrap();
-        let handler: Handler = Arc::new(|r: &Request| Response::text(200, &r.path));
+        let handler: Handler = Arc::new(|r: &Request| {
+            Response::content(200, "text/plain; charset=utf-8", r.path.as_bytes())
+        });
         std::thread::spawn(move || serve(&listener, &handler));
         let get = |path: &str| {
             let mut s = TcpStream::connect(addr).unwrap();
@@ -406,6 +562,10 @@ mod tests {
         assert!(out.starts_with("HTTP/1.1 200 OK\r\n"), "{out}");
         assert!(out.contains("Cache-Control: no-store\r\n"));
         assert!(out.contains("X-Content-Type-Options: nosniff\r\n"));
+        assert!(out.contains("Referrer-Policy: no-referrer\r\n"));
+        assert!(
+            out.contains("Content-Security-Policy: default-src 'self'; frame-ancestors 'none'\r\n")
+        );
         assert!(out.ends_with("\r\n\r\n/hello"));
         // idle connections occupy the slots
         let idle: Vec<TcpStream> = (0..MAX_CONNECTIONS)

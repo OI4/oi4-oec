@@ -84,15 +84,15 @@ type service struct {
 }
 
 // startService runs the config service on b with the settings file
-// (none if "") and waits for its HTTP API.
-func startService(t *testing.T, b *demotest.Broker, settings string) *service {
+// (none if "") and the environment env and waits for its HTTP API.
+func startService(t *testing.T, b *demotest.Broker, settings string, env ...string) *service {
 	t.Helper()
 	root := b.Container(t, host)
 	if settings != "" {
 		demotest.Write(t, filepath.Join(root, "etc", "oi4", "app", "config-service.json"), settings)
 	}
 	s := &service{addr: fmt.Sprintf("127.0.0.1:%d", demotest.FreePort(t))}
-	s.p = demotest.Start(t, exe(t), "OEC_ROOT="+root, "OEC_UI_LISTEN="+s.addr, "OEC_CONFIG_LOG=debug")
+	s.p = demotest.Start(t, exe(t), append([]string{"OEC_ROOT=" + root, "OEC_UI_LISTEN=" + s.addr, "OEC_CONFIG_LOG=debug"}, env...)...)
 	demotest.Eventually(t, "HTTP API on "+s.addr, func() bool {
 		c, err := net.Dial("tcp", s.addr)
 		if err == nil {

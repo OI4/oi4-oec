@@ -15,7 +15,7 @@
 //! }
 //! ```
 //!
-//! `OEC_UI_LISTEN` overrides `listen` (empty: no HTTP server).
+//! `OEC_UI_LISTEN` overrides `listen` (empty: no Web UI and no HTTP API).
 
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -24,14 +24,14 @@ use oec::ServiceType;
 use oec::identity::IdentificationLink;
 use serde_json::Value;
 
-/// The HTTP address without file and environment (ADR-0028 §3: port 8783,
+/// The address of the Web UI without file and environment (ADR-0028 §3: port 8783,
 /// loopback; the container sets `OEC_UI_LISTEN=0.0.0.0:8783`).
 pub(crate) const DEFAULT_LISTEN: &str = "127.0.0.1:8783";
 
 /// The settings.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Settings {
-    /// Address of the HTTP API; `None`: off.
+    /// Address of the Web UI and its HTTP API; `None`: off.
     pub(crate) listen: Option<String>,
     /// Timeout of every request on the bus.
     pub(crate) request_timeout: Duration,
