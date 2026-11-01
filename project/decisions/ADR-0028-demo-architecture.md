@@ -78,7 +78,7 @@ oec/demos/
 
 ### 7. Language specifics
 
-- **Logger (C):** links `liboec_ffi.a` statically (one binary; system libraries per `rustc --print native-static-libs`); POSIX `Makefile` (variables for the header, the library, the sanitizers); no new C dependency in increment 1 – an own small JSON reader/writer (as D9 does, ADR-0024), the HTTP server in increment 5 (§3). The core (settings, filter, records, history) is free of `oec.h` and unit-testable; `main.c` is the glue to the ABI.
+- **Logger (C):** links `liboec_ffi.a` statically (one binary; system libraries per `rustc --print native-static-libs`); `Makefile` for GNU make (`ifeq`, `$(shell uname)`; the GNU make 3.81 of macOS suffices; variables for the header, the library, the sanitizers; corrected from "POSIX" in C-079); no new C dependency in increment 1 – an own small JSON reader/writer (as D9 does, ADR-0024), the HTTP server in increment 5 (§3). The core (settings, filter, records, history) is free of `oec.h` and unit-testable; `main.c` is the glue to the ABI.
 - **Weather (Go):** package `main` in `oec/demos/weather`, on the Go SDK (static `liboec_ffi.a` via cgo, ADR-0027 §2), provider interface with the offline simulation provider and MET Norway (ADR-0010).
 - **Config service (Rust):** an own Cargo package `oec/demos/config` outside the SDK workspace (the SDK workspace stays the SDK), depending on `oec` by path, with its own `Cargo.lock` and the `deny.toml` of the SDK; dependencies within ADR-0023.
 
