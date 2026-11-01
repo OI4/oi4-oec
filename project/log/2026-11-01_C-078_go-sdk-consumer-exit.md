@@ -126,3 +126,13 @@ Deviation from the cycle-cut wording: "on macOS darwin arm64/amd64 in the gate" 
 ## Next
 
 PO: D-1. After D-1 (a): C-079 – first P6 cycle: ADR-0028 (demo architecture: Web UI per D-3 (a), ports, images), increment 1 = logger core in C (A-307).
+
+## Addendum 1 – PO decision on the P4c exit (2026-11-01)
+
+PO answer (chat, 2026-11-01): "D-1 (a)"
+
+### Applied
+
+- **D-1 (a): P4c is closed** with the carried items of the exit assessment: Windows (MinGW, `x86_64-pc-windows-gnu`), prebuilt archives and publication of the Go module → P9 (Q-011). ROADMAP P4c heading ✅ and "Decision" bullet; STATUS (current phase P6, previous phase P4c, next step, D2 row, cycle table); REVIEW/REVIEW_DE (nothing open for the PO).
+- No change to OPEN-QUESTIONS (no question covered the exit).
+- **Next phase: P6** – C-079: ADR-0028 demo architecture (Web UI per D-3 (a), ports, images), cycle cut A-306/A-307 confirmed or changed, increment 1 = logger core D4 in C on `oec-ffi` with D7 `level2` in the gate. Handover by `prompt.md` (not committed).

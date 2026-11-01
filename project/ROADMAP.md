@@ -357,7 +357,7 @@ Carried to other phases: "our demo and registry images pass `level3`" is part of
 
 Carried, as planned: the demo images to the P6 exit and the Registry image to the P7 exit ("pass `level3`"; with the Registry, BUS-03 and REQ-PLT-008 can pass against `oec/dev`); CI on Windows/macOS/Linux runners, the D8 binaries and the tool container image, and live runs on Podman and on a Windows engine (named pipe, A-271/A-289) to P9. Proposal: close P5b; next phase P6 (D-1 (a)). **PO (C-075 review, 2026-11-01): "D-1 (a)" – P5b closed, next P6** (with new P6 scope, see P6).
 
-## P4c – Go SDK (D2 Go binding)
+## P4c – Go SDK (D2 Go binding) ✅ (C-076 … C-078; closed after C-078, D-1 (a): Windows, prebuilt archives and publication → P9)
 
 **PO (C-075 review addendum 3, 2026-11-01):** "Ich möchte schon ein SDK oder ein Anbindung für Go haben, dann brauchen wir vor den Demos noch ein SDK für Go, dieses darf gerne den Rust Kern verwenden." Technique decided by the agent: **ADR-0027** – an idiomatic Go package `oec/sdk/go` (module `github.com/OI4/oec/sdk/go`, package `oec`, standard library only) over the C ABI `oec-ffi` (ADR-0021) via cgo, `liboec_ffi.a` linked statically; spike in the C-075 review addendum 3 (callback from the SDK thread into Go against `oec/dev`).
 
@@ -368,7 +368,9 @@ Carried, as planned: the demo images to the P6 exit and the Registry image to th
 - Gaps of the C ABI found on the way are closed in `oec-ffi` first (ADR-0021 amendment, header diff, C test).
 - Windows (MinGW, `x86_64-pc-windows-gnu`), prebuilt archives and publication of the module go to P9 (Q-011).
 - **Exit (proposal, the PO decides; sharpened in C-076):** (1) the whole C ABI is reachable from Go: every exported `oec_*` function of `oec.h` is wrapped or listed in the README as not needed (a test compares the list with the header); (2) the Go examples pass D7 `test` at `level1` (`hello`) and `level3` (asset source) with exit 0 and no fail, in the gate (since C-076 without Docker); (3) gofmt, vet and `go test -race` with `GODEBUG=cgocheck=1` clean, no Go dependency outside the standard library, no new Rust dependency, `oec`/`oec-ffi` only additively changed (ABI version 1); (4) the examples build for linux amd64/arm64 (container build, opt-in run with the result in the log) and darwin arm64; (5) README and godoc with build, linking, overriding the flags and the threading rules of callbacks; (6) `oec/check.sh` green.
-- **Exit assessment (C-078):** all six criteria met – (1) 44 of 45 functions wrapped, `oec_app_run` not needed; (2) D7 L1/L3 in the gate, exit 0, no fail; (3) clean, stdlib only, `oec-ffi` only additive in C-076; (4) linux amd64/arm64 opt-in run, darwin arm64 in the gate (+ darwin amd64); (5) README/godoc; (6) gate green. Carried to P9: Windows, prebuilt archives, publication. **The PO decides the exit (REVIEW D-1 of C-078).**
+- **Exit assessment (C-078):** all six criteria met – (1) 44 of 45 functions wrapped, `oec_app_run` not needed; (2) D7 L1/L3 in the gate, exit 0, no fail; (3) clean, stdlib only, `oec-ffi` only additive in C-076; (4) linux amd64/arm64 opt-in run, darwin arm64 in the gate (+ darwin amd64); (5) README/godoc; (6) gate green. Carried to P9: Windows, prebuilt archives, publication.
+
+**Decision (C-078 addendum 1, D-1 (a), 2026-11-01):** P4c is closed. Windows (MinGW), prebuilt archives and publication of the Go module are carried into P9 (Q-011). Next phase: P6 (C-079).
 
 ## P6 – Demo services (D3, D4, D10)
 
