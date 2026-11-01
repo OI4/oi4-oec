@@ -18,7 +18,10 @@
 #   of the config service against the in-process TLS test broker and D7
 #   `oec-check test` against them (--level 2 logger, --level 3 weather,
 #   --level 1 config; oec-check of oec/conformance
-#   built into a temporary directory and run, not imported: ADR-0006).
+#   built into a temporary directory and run, not imported: ADR-0006);
+#   the SBOM generator of the images (internal/sbom, C-084) against its
+#   reviewed fixtures and D8 `oec-infra image` on an OCI layout of its
+#   output (oec-infra built like oec-check).
 # Needs GNU make and cargo-deny. OEC_DEMOS_REQUIRE=1 (default here): a missing helper
 # fails instead of skipping.
 set -eu
@@ -59,16 +62,17 @@ cargo deny --log-level error --config "$rust/deny.toml" check || {
 }
 cargo build --offline --locked --quiet
 
-echo "demos/go: gofmt, vet, oec-check, go test -race (logger D7 level 2, weather D7 level 3, config D7 level 1)"
+echo "demos/go: gofmt, vet, oec-check, oec-infra, go test -race (logger D7 level 2, weather D7 level 3, config D7 level 1, SBOM D8 image)"
 cd "$root"
 unformatted="$(gofmt -l .)"
 test -z "$unformatted" || { echo "gofmt needed: $unformatted" >&2; exit 1; }
 go vet ./...
 tmp="$(mktemp -d)"
-(cd "$root/../conformance" && go build -o "$tmp/oec-check" ./cmd/oec-check) || { rm -rf "$tmp"; exit 1; }
+(cd "$root/../conformance" && go build -o "$tmp/oec-check" ./cmd/oec-check &&
+	go build -o "$tmp/oec-infra" ./cmd/oec-infra) || { rm -rf "$tmp"; exit 1; }
 OEC_DEMOS_REQUIRE="${OEC_DEMOS_REQUIRE:-1}" OEC_TESTBROKER="$target/debug/examples/go-testbroker" \
 	OEC_LOGGER="$root/logger/target/asan/oec-logger" OEC_WEATHER="$root/weather/target/oec-weather" \
 	OEC_CONFIG="$root/config/target/debug/oec-config" OEC_D7="$tmp/oec-check" \
-	go test -race -count=1 ./... || { rm -rf "$tmp"; exit 1; }
+	OEC_D8="$tmp/oec-infra" go test -race -count=1 ./... || { rm -rf "$tmp"; exit 1; }
 rm -rf "$tmp"
 echo "demos: ok"

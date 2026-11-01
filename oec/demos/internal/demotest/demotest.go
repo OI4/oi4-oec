@@ -8,6 +8,7 @@
 //
 //	OEC_TESTBROKER  go-testbroker (sdk/rust/target/debug/examples/go-testbroker)
 //	OEC_D7          oec-check (no default: built by oec/demos/check.sh)
+//	OEC_D8          oec-infra (no default: built by oec/demos/check.sh)
 //
 // A missing tool skips the test, unless OEC_DEMOS_REQUIRE=1 (set by
 // oec/demos/check.sh), then it fails.
