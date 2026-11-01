@@ -200,3 +200,26 @@ func TestDockerignore(t *testing.T) {
 		}
 	}
 }
+
+// images/build.sh runs BuildKit pinned by tag and digest, not the shared
+// tag buildx-stable-1 that other builders of the host use; it removes its
+// builder and the BuildKit image it pulled, and never prunes.
+func TestBuildScript(t *testing.T) {
+	b, err := os.ReadFile(filepath.Join("images", "build.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(b)
+	m := regexp.MustCompile(`(?m)^buildkit="([^"]+)"$`).FindStringSubmatch(s)
+	if m == nil || !pinned.MatchString(m[1]) || !strings.HasPrefix(m[1], "docker.io/moby/buildkit:v") {
+		t.Fatalf("BuildKit image not pinned by version tag and digest: %v", m)
+	}
+	for _, want := range []string{`--driver-opt "image=$buildkit"`, `docker buildx rm "$builder"`} {
+		if !strings.Contains(s, want) {
+			t.Errorf("build.sh lacks %s", want)
+		}
+	}
+	if regexp.MustCompile(`(?m)^[^#]*\bprune\b`).MatchString(s) {
+		t.Error("build.sh must not prune")
+	}
+}

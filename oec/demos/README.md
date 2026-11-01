@@ -31,8 +31,60 @@ body 64 KiB (413), 5 s per request (408; the weather service on `net/http`
 closes the connection), one request per connection, at
 most 16 connections and 8 event streams (503), `Cache-Control: no-store`,
 `X-Content-Type-Options: nosniff`, a `Content-Security-Policy` of
-`default-src 'self'` and `Referrer-Policy: no-referrer`. Images and the
-compose profile `demos` of `oec/dev` follow in increment 6.
+`default-src 'self'` and `Referrer-Policy: no-referrer`. In the images the
+UIs listen on `0.0.0.0:<port>`; the compose profile `demos` of `oec/dev`
+publishes them on `127.0.0.1` only.
+
+## Images (C-084)
+
+One `Dockerfile` per demo (`logger/`, `weather/`, `config/`; ADR-0028 §4 and
+amendment C-084), build context `oec/` (allowlist `oec/.dockerignore`):
+
+| | |
+|---|---|
+| Names | `oi4/oec-logger`, `oi4/oec-weather`, `oi4/oec-config`, tag `0.1.0`; local only (publication: P9) |
+| Platforms | `linux/amd64` and `linux/arm64`, cross-built on the build platform (`docker buildx`) |
+| Builders | `rust:1.89-trixie`, `golang:1.27.3-trixie`, pinned by tag and digest |
+| Runtime | `gcr.io/distroless/cc-debian13:nonroot` (glibc 2.41, libgcc, no shell, no package manager), pinned by tag and digest |
+| User | `65532:65532` (non-root); `ENTRYPOINT` is the binary `/usr/local/bin/oec-<demo>` |
+| Volumes | `/etc/oi4/app`, `/opt/oi4/app` (owned by 65532); the platform mounts `/etc/oi4/mqtt`, `/etc/oi4/certs`, `/run/secrets/oi4` |
+| Web UI | `OEC_UI_LISTEN=0.0.0.0:8781` / `8782` / `8783`, `EXPOSE` the port |
+| Licenses | `/opt/oi4/licenses`: `sbom.spdx.json` (SPDX 2.3 JSON) and the text of every license and exception (RIG 4.1.4, SF-114) |
+| Labels | OCI `title`, `description`, `version`, `licenses`, `vendor`, `source`, `base.name` |
+
+No secrets, keys or certificates are in an image; the storages come from the
+platform at run time.
+
+```sh
+oec/demos/images/build.sh /tmp/oec-images   # both platforms, D8 image, load the native one
+oec/demos/images/build.sh --remove          # remove the loaded images
+```
+
+`build.sh` (opt-in, needs Docker and network) builds each image for both
+platforms as an OCI archive `/tmp/oec-images/oec-<demo>.oci.tar`, checks
+it with D8 `oec-infra image` at the level of the demo (reports next to the
+archive) and loads the image of the native platform as `oi4/oec-<demo>:0.1.0`
+(the classic image store of Docker cannot load a multi-platform image). It
+uses a buildx builder of its own with BuildKit pinned by tag and digest and
+removes both at the end; it never prunes. Run an image with a container
+storage, e.g. `docker run --rm -v <root>/etc/oi4/mqtt:/etc/oi4/mqtt:ro -v
+<root>/etc/oi4/certs:/etc/oi4/certs:ro -v <root>/run/secrets/oi4:/run/secrets/oi4:ro
+--hostname <name> --name <name> -p 127.0.0.1:8781:8781 oi4/oec-logger:0.1.0`,
+or all three with the broker through the compose profile `demos`
+([`../dev/README.md`](../dev/README.md#compose-profile-demos-c-084)).
+
+**SBOM and license texts** come from `internal/sbom` (`go run
+./internal/sbom/cmd/oec-sbom`, standard library only), which the Dockerfiles
+run in the build stage: the Rust crates of `cargo tree` (normal edges, no
+build or proc-macro dependencies), the Go modules of `go version -m`, the
+Debian packages of the base image (`/var/lib/dpkg/status.d` and the DEP-5
+copyright files) mapped to SPDX by [`images/debian.json`](images/debian.json)
+(D-1 of C-084), and the texts of [`images/licenses/`](images/licenses)
+(SPDX license-list-data v3.29.0) or of the Debian copyright files for
+`LicenseRef-*`. Every license is named unambiguously and every text is
+present, or the tool fails. Its tests run offline in the gate (fixtures and
+golden SBOM in `internal/sbom/testdata/`, D8 `oec-infra image` on a
+synthetic OCI layout).
 
 ## Layout
 
@@ -42,6 +94,9 @@ oec/demos/
 ├── go.mod               one Go module: standard library and the Go SDK (replace ../sdk/go)
 ├── internal/demotest/   test harness: test broker, container storage, process, D7, Web UI checks
 ├── internal/cembed/     generator of the embedded UI files of the logger (C arrays)
+├── internal/sbom/       SBOM (SPDX 2.3 JSON) and license texts of the images
+├── images/              build.sh, Debian license map, SPDX license texts
+├── images_test.go       Dockerfiles, .dockerignore and build.sh rules (offline)
 ├── reqs_test.go         every REQ id cited here exists and is active
 ├── config/              D10: own Cargo package (src/ in Rust, Cargo.lock), Go integration tests
 ├── logger/              D4: src/ and test/ in C, Makefile, Go integration tests
@@ -50,7 +105,8 @@ oec/demos/
 
 ## Tests
 
-Everything runs offline, on loopback, without Docker:
+Everything runs offline, on loopback, without Docker (the image builds are
+opt-in, see above):
 
 ```sh
 oec/demos/check.sh

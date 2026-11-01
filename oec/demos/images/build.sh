@@ -13,12 +13,17 @@
 # classic image store of Docker cannot load a multi-platform image). The
 # builds run in a buildx builder of their own (driver docker-container),
 # which is removed at the end with its cache; the base and builder images
-# are pulled into that builder only.
+# are pulled into that builder only. The builder runs BuildKit pinned by tag
+# and digest (not the shared tag buildx-stable-1, which a new pull would move
+# away from the image other builders of the host use); a BuildKit image the
+# script pulled is removed at the end as well. Nothing is pruned.
 set -eu
 here="$(cd "$(dirname "$0")" && pwd)"
 oec="$(cd "$here/../.." && pwd)"
 version="${VERSION:-0.1.0}"
 demos="logger weather config"
+# BuildKit v0.34.1 (Apache-2.0), multi-arch index digest of 2026-11-01
+buildkit="docker.io/moby/buildkit:v0.34.1@sha256:99368f3e46177c6405b9740e4461d91cee004128daeecca78d4ceac50ec1da5c"
 
 if [ "${1:-}" = "--remove" ]; then
 	for d in $demos; do
@@ -38,14 +43,20 @@ esac
 epoch="$(git -C "$oec" log -1 --format=%ct)"
 builder="oec-demos-$$"
 tmp="$(mktemp -d)"
+had_buildkit=0
+docker image inspect "$buildkit" >/dev/null 2>&1 && had_buildkit=1
 cleanup() {
 	docker buildx rm "$builder" >/dev/null 2>&1 || true
+	if [ "$had_buildkit" = 0 ]; then
+		id="$(docker image inspect -f '{{.Id}}' "$buildkit" 2>/dev/null || true)"
+		[ -z "$id" ] || docker image rm "$id" >/dev/null 2>&1 || true
+	fi
 	rm -rf "$tmp"
 }
 trap cleanup EXIT
 
 (cd "$oec/conformance" && GOTOOLCHAIN=auto go build -o "$tmp/oec-infra" ./cmd/oec-infra)
-docker buildx create --name "$builder" --driver docker-container >/dev/null
+docker buildx create --name "$builder" --driver docker-container --driver-opt "image=$buildkit" >/dev/null
 level() {
 	case "$1" in logger) echo 2 ;; weather) echo 3 ;; config) echo 1 ;; esac
 }

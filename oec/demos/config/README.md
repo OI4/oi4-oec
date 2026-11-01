@@ -8,8 +8,9 @@ crate `oec` (`oec/sdk/rust`), ServiceType `Utility`, Messaging Level 1:
 the service only sends requests and answers none.
 
 Increment 4 (C-082) is the core with a small HTTP/JSON API, increment 5
-(C-083) the Web UI on this API; the image, the compose profile and the ACL
-user follow in C-084.
+(C-083) the Web UI on this API, increment 6 (C-084) the image and the
+compose profile `demos` of `oec/dev` with an MQTT user `oec-config` of its
+own: the broker ACL lets it publish `Set/Config` and no other request.
 
 ## Build and run
 
@@ -26,6 +27,25 @@ The broker, the credentials and the identity come from the container
 storage under `OEC_ROOT` (default `/`) through the SDK: `broker.json`,
 `/etc/oi4/mqtt/…`, `/run/secrets/oi4` (REQ-CNT-003, GL-ADR-022). Run it on
 a **copy** of an example storage, never on `oec/dev/generated/` itself.
+
+
+### Image
+
+`config/Dockerfile` builds `oi4/oec-config:0.1.0` for `linux/amd64` and
+`linux/arm64` (distroless, non-root UID 65532, SBOM and license texts in
+`/opt/oi4/licenses`; see [`../README.md`](../README.md#images-c-084)):
+
+```sh
+oec/demos/images/build.sh /tmp/oec-images   # all three demos, D8 oec-infra image
+docker run --rm --name oec-config-<uuid> --hostname oec-config-<uuid> \
+  -v <root>/etc/oi4/mqtt:/etc/oi4/mqtt:ro -v <root>/etc/oi4/certs:/etc/oi4/certs:ro \
+  -v <root>/run/secrets/oi4:/run/secrets/oi4:ro -p 127.0.0.1:8783:8783 oi4/oec-config:0.1.0
+```
+
+The Web UI listens on `0.0.0.0:8783` in the container; publish it on
+`127.0.0.1` only (A-305). With the broker of `oec/dev`: compose profile
+`demos` ([`../../dev/README.md`](../../dev/README.md#compose-profile-demos-c-084)).
+D8 `oec-infra image`/`run` judge the image at level 1.
 
 ## Settings
 
