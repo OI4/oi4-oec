@@ -30,12 +30,34 @@ import (
 // D7 stays independent, ADR-0006). Without it the test is skipped;
 // oec/sdk/check.sh sets it. OEC_GO_D7_REPORT keeps the JSON report.
 func TestD7Level1Hello(t *testing.T) {
+	// The lifecycle of the Go SDK at Level 1: connection, Birth, Will,
+	// Close message on SIGTERM, restart (REQ-LIFE-*, T7-CON-*, T7-MON-*).
+	// A Level 1 app answers no Get Health: the restart wait always ends by
+	// its timeout.
+	runD7(t, "hello", "Utility/example.com/Hello,20OEC,20Go/HELLO-GO-1/app-1", 1, []string{
+		"T7-MON-01", "T7-MON-02", "T7-MON-03", "T7-MON-04", "T7-MON-05", "T7-MON-06",
+		"T7-CON-01", "T7-CON-02", "T7-CON-03", "T7-CON-04",
+		"T7-LIFE-01", "T7-LIFE-02", "T7-LIFE-03", "T7-LIFE-04",
+	})
+}
+
+// D7 `oec-check test --level 3` against examples/source (C-077): the
+// provider part of the Go SDK – Get/Set of every resource, the represented
+// asset, writable Data and Config, PublicationList and SubscriptionList,
+// ReferenceDesignation. OEC_GO_D7_L3_REPORT keeps the JSON report.
+func TestD7Level3Source(t *testing.T) {
+	runD7(t, "source", "OTConnector/example.com/Demo,20Connector,20Go/CONN-GO-1/app-1", 3, d7Level3Pass)
+}
+
+// runD7 runs oec-check test at the level against the example and fails on
+// every fail, on a test of want that does not pass and on exit ≠ 0.
+func runD7(t *testing.T, example, app string, level int, want []string) {
 	check := os.Getenv("OEC_GO_D7")
 	if check == "" {
 		t.Skip("OEC_GO_D7 (path of oec-check) is not set")
 	}
 	b := startBroker(t)
-	exe := buildExample(t, "hello")
+	exe := buildExample(t, example)
 	work := t.TempDir()
 	proxyCA, proxyKey := proxyCA(t, work)
 	proxyPort := freePort(t)
@@ -52,11 +74,11 @@ func TestD7Level1Hello(t *testing.T) {
 	write(t, password, "pa:ss\n")
 
 	// The restart hook: SIGTERM and wait; start again in the background.
-	pid := filepath.Join(work, "hello.pid")
+	pid := filepath.Join(work, example+".pid")
+	logf := filepath.Join(work, example+".log")
 	start := filepath.Join(work, "start.sh")
 	stop := filepath.Join(work, "stop.sh")
-	write(t, start, fmt.Sprintf("#!/bin/sh\nOEC_ROOT=%q %q >> %q 2>&1 &\necho $! > %q\n",
-		root, exe, filepath.Join(work, "hello.log"), pid))
+	write(t, start, fmt.Sprintf("#!/bin/sh\nOEC_ROOT=%q %q >> %q 2>&1 &\necho $! > %q\n", root, exe, logf, pid))
 	write(t, stop, fmt.Sprintf("#!/bin/sh\nP=$(cat %q)\nkill -TERM \"$P\"\nwhile kill -0 \"$P\" 2>/dev/null; do sleep 0.1; done\n", pid))
 	for _, f := range []string{start, stop} {
 		if err := os.Chmod(f, 0o755); err != nil {
@@ -72,8 +94,8 @@ func TestD7Level1Hello(t *testing.T) {
 				_ = syscall.Kill(p, syscall.SIGKILL)
 			}
 		}
-		if log, err := os.ReadFile(filepath.Join(work, "hello.log")); err == nil && t.Failed() {
-			t.Logf("hello.log:\n%s", log)
+		if log, err := os.ReadFile(logf); err == nil && t.Failed() {
+			t.Logf("%s:\n%s", filepath.Base(logf), log)
 		}
 	})
 
@@ -81,17 +103,15 @@ func TestD7Level1Hello(t *testing.T) {
 	cmd := exec.Command(check, "test",
 		"--broker", fmt.Sprintf("mqtts://localhost:%d", b.Port), "--ca", b.CA,
 		"--username", "user", "--password-file", password,
-		"--app", "Utility/example.com/Hello,20OEC,20Go/HELLO-GO-1/app-1", "--level", "1",
+		"--app", app, "--level", strconv.Itoa(level),
 		"--timeout", "3s",
 		"--proxy-listen", fmt.Sprintf("127.0.0.1:%d", proxyPort),
 		"--proxy-ca", proxyCA, "--proxy-ca-key", proxyKey,
-		// A Level 1 app answers no Get Health: the restart wait always ends
-		// by its timeout.
 		"--stop-cmd", stop, "--start-cmd", start, "--restart-wait", "15s", "--peer", "--announce",
 		"--format", "text", "--report", "json="+report)
 	began := time.Now()
 	out, err := cmd.CombinedOutput()
-	t.Logf("oec-check test: %v after %v", err, time.Since(began).Round(time.Second))
+	t.Logf("oec-check test --level %d: %v after %v", level, err, time.Since(began).Round(time.Second))
 	if err != nil {
 		t.Fatalf("oec-check test: %v\n%s", err, out)
 	}
@@ -99,7 +119,11 @@ func TestD7Level1Hello(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if keep := os.Getenv("OEC_GO_D7_REPORT"); keep != "" {
+	keepEnv := "OEC_GO_D7_REPORT"
+	if level == 3 {
+		keepEnv = "OEC_GO_D7_L3_REPORT"
+	}
+	if keep := os.Getenv(keepEnv); keep != "" {
 		if err := os.WriteFile(keep, raw, 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -116,6 +140,9 @@ func TestD7Level1Hello(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("summary %v, exit %d", r.Summary, r.Exit)
+	if testing.Verbose() {
+		t.Logf("oec-check output:\n%s", out)
+	}
 	outcome := map[string]string{}
 	for _, x := range r.Tests {
 		outcome[x.ID] = x.Outcome
@@ -123,20 +150,29 @@ func TestD7Level1Hello(t *testing.T) {
 			t.Errorf("%s: fail", x.ID)
 		}
 	}
-	// The lifecycle of the Go SDK at Level 1: connection, Birth, Will,
-	// Close message on SIGTERM, restart (REQ-LIFE-*, T7-CON-*, T7-MON-*).
-	for _, id := range []string{
-		"T7-MON-01", "T7-MON-02", "T7-MON-03", "T7-MON-04", "T7-MON-05", "T7-MON-06",
-		"T7-CON-01", "T7-CON-02", "T7-CON-03", "T7-CON-04",
-		"T7-LIFE-01", "T7-LIFE-02", "T7-LIFE-03", "T7-LIFE-04",
-	} {
+	for _, id := range want {
 		if outcome[id] != "pass" {
-			t.Errorf("%s: %q, want pass\n%s", id, outcome[id], out)
+			t.Errorf("%s: %q, want pass", id, outcome[id])
 		}
 	}
-	if r.Exit != 0 {
-		t.Errorf("exit %d", r.Exit)
+	if r.Exit != 0 || t.Failed() {
+		t.Errorf("exit %d\n%s", r.Exit, out)
 	}
+}
+
+// d7Level3Pass: the 49 D7 tests that pass against examples/source (C-077).
+// D7 skips the other six, as for the Rust demo since C-067: T7-MON-07,
+// T7-MON-17, T7-ADR-01 and T7-ADR-02 judge requests of the CUT (none sent);
+// T7-SET-04 and T7-SET-10 need a ReferenceDesignation object, which the
+// fresh store of the run does not have.
+var d7Level3Pass = []string{
+	"T7-MON-01", "T7-MON-02", "T7-MON-03", "T7-MON-04", "T7-MON-05", "T7-MON-06", "T7-MON-08", "T7-MON-09", "T7-MON-10", "T7-MON-11", "T7-MON-12", "T7-MON-13", "T7-MON-14", "T7-MON-15", "T7-MON-16", "T7-MON-18", "T7-MON-19",
+	"T7-CON-01", "T7-CON-02", "T7-CON-03", "T7-CON-04",
+	"T7-LIFE-01", "T7-LIFE-02", "T7-LIFE-03", "T7-LIFE-04",
+	"T7-ADR-03",
+	"T7-GET-01", "T7-GET-02", "T7-GET-03", "T7-GET-04", "T7-GET-05", "T7-GET-06", "T7-GET-07", "T7-GET-08", "T7-GET-09",
+	"T7-SET-01", "T7-SET-02", "T7-SET-03", "T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-09", "T7-SET-11", "T7-SET-12",
+	"T7-ACT-01", "T7-ACT-02", "T7-ACT-03", "T7-ACT-04",
 }
 
 // proxyCA writes a CA for the proxy attachment of D7 (test material only).
