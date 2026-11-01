@@ -60,14 +60,20 @@ static void make_dirs(const char *root) {
     static const char *const parts[] = {"/opt", "/opt/oi4", "/opt/oi4/app"};
     char dir[PATH_LEN];
     for (size_t i = 0; i < sizeof parts / sizeof parts[0]; i++) {
-        snprintf(dir, sizeof dir, "%s%s", root, parts[i]);
+        int n = snprintf(dir, sizeof dir, "%s%s", root, parts[i]);
+        if (n < 0 || (size_t)n >= sizeof dir)
+            return;
         mkdir(dir, 0750);
     }
 }
 
 static FILE *open_file(const logger *lg, const char *name, char *path, long *size) {
     make_dirs(lg->root);
-    snprintf(path, PATH_LEN, "%s/opt/oi4/app/%s", lg->root, name);
+    int n = snprintf(path, PATH_LEN, "%s/opt/oi4/app/%s", lg->root, name);
+    if (n < 0 || n >= PATH_LEN) {
+        errno = ENAMETOOLONG;
+        return NULL;
+    }
     FILE *f = fopen(path, "a");
     if (!f)
         return NULL;

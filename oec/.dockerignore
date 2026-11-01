@@ -1,0 +1,12 @@
+# Build context of the demo images (oec/demos/*/Dockerfile, C-084): only
+# what the builds need; no build output, no generated keys or storages.
+*
+!schema
+!sdk/rust
+!sdk/go
+!demos
+schema/tools
+sdk/rust/spike
+sdk/go/lib
+**/target
+**/.DS_Store

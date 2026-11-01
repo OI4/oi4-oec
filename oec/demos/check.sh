@@ -3,7 +3,8 @@
 #   logger (D4, C on oec-ffi, from C-079): liboec_ffi.a (release) and the
 #   test broker go-testbroker of oec/sdk/rust; the logger with make (C17,
 #   warnings are errors) normally and with AddressSanitizer + UBSan
-#   (target/asan/); its C unit tests under the sanitizers;
+#   (target/asan/); its C unit tests under the sanitizers; with GCC 14/15
+#   (if installed) every source compiled once (make gcc-check, C-084);
 #   weather (D3, Go on the Go SDK, from C-080): liboec_ffi.a for cgo in
 #   oec/sdk/go/lib/<GOOS>_<GOARCH>/ (go run ./cmd/oec-buildlib, never
 #   committed), the service built with -race (weather/target/);
@@ -44,6 +45,12 @@ echo "demos/logger: make, make SANITIZE=1, unit tests (ASan/UBSan)"
 cd "$root/logger"
 "$make" -s OEC_LIB="$target/release/liboec_ffi.a"
 "$make" -s OEC_LIB="$target/release/liboec_ffi.a" SANITIZE=1 all test
+# GCC finds what the Linux image build (GCC 14) would refuse; optional
+gcc="$(command -v gcc-15 || command -v gcc-14 || true)"
+if [ -n "$gcc" ]; then
+	echo "demos/logger: $(basename "$gcc") -O2 (warnings are errors)"
+	"$make" -s gcc-check GCC="$gcc"
+fi
 
 echo "demos/weather: liboec_ffi.a for cgo, go build -race"
 (cd "$root/../sdk/go" && go run ./cmd/oec-buildlib)

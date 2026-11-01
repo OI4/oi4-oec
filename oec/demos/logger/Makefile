@@ -5,6 +5,10 @@
 #   make test            build and run the unit tests (no SDK needed)
 #   make SANITIZE=1 ...  the same with AddressSanitizer and UBSan in
 #                        target/asan/
+#   make gcc-check GCC=gcc-15
+#                        compile every source with GCC -O2 (its warnings,
+#                        e.g. -Wformat-truncation, are those of the Linux
+#                        image build; C-084), no output
 #
 # OEC_INCLUDE is the directory of oec.h, OEC_LIB the liboec_ffi.a; the
 # defaults are the release build of oec/sdk/rust (cargo build --release
@@ -36,7 +40,7 @@ endif
 CORE = src/json.c src/core.c src/history.c src/http.c src/ui.c src/ui_assets.c
 HEADERS = src/json.h src/core.h src/history.h src/http.h src/ui.h
 
-.PHONY: all test clean
+.PHONY: all test clean gcc-check
 all: $(OUT)/oec-logger
 
 $(OUT)/oec-logger: src/main.c $(CORE) $(HEADERS) $(OEC_INCLUDE)/oec.h $(OEC_LIB)
@@ -50,6 +54,11 @@ $(OUT)/unit: test/unit.c $(CORE) $(HEADERS)
 
 test: $(OUT)/unit
 	./$(OUT)/unit
+
+gcc-check:
+	@for f in src/main.c $(CORE) test/unit.c; do \
+		$(GCC) $(WARN) $(DEFS) -O2 -I$(OEC_INCLUDE) -c $$f -o /dev/null || exit 1; \
+	done
 
 clean:
 	rm -rf target
