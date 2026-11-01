@@ -16,9 +16,11 @@
 // application image in containers of its own through the Engine API, with
 // generated storages and an MQTT test endpoint of D8, and judges the tests
 // of mode run (T8-RUN-01 … 03): Message Bus storage, certificate and secret
-// storages, container name as hostname and identity. report-schema prints
-// the JSON Schema of the report (infra-report.schema.json, report version
-// 1).
+// storages, container name as hostname and identity. list and explain show
+// the tests of the D8 catalog and the requirements with the expected
+// verdicts of the self-test fixtures. report-schema prints the JSON Schema
+// of the report (infra-report.schema.json, report version 1, frozen at the
+// P5b exit).
 //
 // Exit codes (DESIGN.md §5.3): 0 pass (warnings allowed), 1 at least one
 // requirement violated, 2 usage or input error (also: the input is no OCI
@@ -72,6 +74,10 @@ const usage = `usage:
   oec-infra host [flags]
   oec-infra container [flags] CONTAINER...
   oec-infra run [flags] IMAGE
+  oec-infra list [--mode image|run|container|host|bus] [--level 1|2|3]
+                 [--req REQ-…] [--needs docker|host-access|credentials-2|none]
+                 [--status planned|implemented] [--format text|json] [ID|GLOB ...]
+  oec-infra explain [--format text|json] T8-…|REQ-…
   oec-infra report-schema
   oec-infra version
 
@@ -177,7 +183,13 @@ secret, a username, a log or a host path.
   verdict:    --level 1|2|3 (default 3), --tests IDS, --allow-skip
   output:     --format text|json|junit, --report FORMAT=PATH (repeatable)
 
-report-schema prints the JSON Schema of the JSON report (report version 1).
+list shows the tests of the D8 catalog with mode, level ("-": not graded,
+the requirements apply with their keyword), needs, status and requirements;
+explain shows a test with its requirements, or a requirement (statement,
+source in the Runtime & Infrastructure Guideline (RIG) or the Messaging
+Guideline (MG), the tests that check it), with the expected verdicts of the
+self-test fixtures. report-schema prints the JSON Schema of the JSON report
+(report version 1).
 
 Exit codes: 0 pass, 1 fail, 2 usage or input error (no OCI image layout,
 no such container or image, a remote engine), 3 internal error, 4
@@ -200,6 +212,10 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runContainer(args[1:], stdout, stderr)
 	case "run":
 		return runRun(args[1:], stdout, stderr)
+	case "list":
+		return runList(args[1:], stdout, stderr)
+	case "explain":
+		return runExplain(args[1:], stdout, stderr)
 	case "report-schema":
 		if len(args) > 1 {
 			fmt.Fprintf(stderr, "%s: report-schema takes no arguments\n", tool)
