@@ -7,7 +7,8 @@
 #   meta-schema and the topic forms of the SDK core, the HTTP side: router,
 #   guards, views, event stream, settings, a loopback server, the OpenAPI
 #   document against the vendored OpenAPI 3.2 meta-schema, its paths = the
-#   router, its schemas validating the views), cargo-deny with the
+#   router, its schemas validating the views, the embedded Web UI table =
+#   ui/dist/), cargo-deny with the
 #   deny.toml of the SDK (ADR-0023), the binary (target/debug/oec-registry);
 #   go (module oec/registry, standard library only, A-387): gofmt, go vet,
 #   go test -race – the registry against the in-process TLS test broker
@@ -19,7 +20,13 @@
 #   imported: ADR-0006); the HTTP side on loopback ports (ADR-0029 §7):
 #   HTTPS with a self-signed and with the application certificate, plain
 #   only with OEC_REGISTRY_TLS=off, REST, the event stream, the documents,
-#   guards, limits, time limits, keep-alive and the settings.
+#   guards, limits, time limits, keep-alive and the settings, the files
+#   of the Web UI over HTTPS; the Web UI without node and network
+#   (internal/uipolicy, ADR-0029 §10): package.json and the lockfile v3
+#   (exact versions, registry.npmjs.org, sha512 integrity, licenses of the
+#   allowlist, shipped = react, react-dom, scheduler), the CSP rules of
+#   ui/dist/ and the committed ui/build.stamp and src/ui_assets.rs. The npm
+#   build is opt-in: ui/build.sh.
 # Needs cargo-deny. OEC_REGISTRY_REQUIRE=1 (default here): a missing helper
 # fails instead of skipping.
 set -eu

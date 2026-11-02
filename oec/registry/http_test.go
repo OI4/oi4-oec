@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"slices"
 	"strings"
 	"testing"
 
 	"github.com/OI4/oec/registry/internal/regtest"
+	"github.com/OI4/oec/registry/internal/uipolicy"
 )
 
 // Integration tests of the HTTP side of the registry (ADR-0029 §7, §11,
@@ -207,14 +209,68 @@ func checkContent(t *testing.T, s started, w, a *regtest.Web) {
 		}
 	}
 
-	// / is the page of the Web UI port only
-	resp, body := w.Do(t, "GET", "/", "", "")
-	if resp.StatusCode != http.StatusOK || !strings.HasPrefix(resp.Header.Get("Content-Type"), "text/html") || !bytes.Contains(body, []byte("/api/")) {
-		t.Errorf("GET / on the Web UI port: %d %s", resp.StatusCode, resp.Header.Get("Content-Type"))
+	checkUI(t, w, a)
+}
+
+// checkUI: the Web UI (ui/dist/, ADR-0029 §9, C-089) is served on the Web
+// UI port only, every file with its bytes, its content type and the
+// headers of the hardening contract; / is index.html; other paths are 404.
+func checkUI(t *testing.T, w, a *regtest.Web) {
+	t.Helper()
+	names, err := uipolicy.Dist("ui")
+	if err != nil {
+		t.Fatal(err)
 	}
-	regtest.CheckHeaders(t, "GET /", resp)
-	if resp, _ := a.Do(t, "GET", "/", "", ""); resp.StatusCode != http.StatusNotFound {
-		t.Errorf("GET / on the API port: %d", resp.StatusCode)
+	if !slices.Contains(names, "index.html") || len(names) < 3 {
+		t.Fatalf("ui/dist: %v", names)
+	}
+	index, err := os.ReadFile("ui/dist/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, n := range append([]string{""}, names...) {
+		p, file := "/"+n, n
+		if n == "" {
+			file = "index.html"
+		}
+		want, err := os.ReadFile("ui/dist/" + file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp, body := w.Do(t, "GET", p, "", "")
+		ct := uipolicy.Types[path.Ext(file)]
+		if resp.StatusCode != http.StatusOK || resp.Header.Get("Content-Type") != ct || !bytes.Equal(body, want) {
+			t.Errorf("GET %s on the Web UI port: %d %q, %d octets (want %q, %s)", p, resp.StatusCode, resp.Header.Get("Content-Type"), len(body), ct, file)
+		}
+		regtest.CheckHeaders(t, "GET "+p, resp)
+		if resp, _ := a.Do(t, "GET", p, "", ""); resp.StatusCode != http.StatusNotFound {
+			t.Errorf("GET %s on the API port: %d", p, resp.StatusCode)
+		}
+	}
+	if !bytes.Contains(index, []byte(`<div id="root">`)) || !bytes.Contains(index, []byte(`<script type="module" crossorigin src="/assets/`)) {
+		t.Errorf("ui/dist/index.html is not the Web UI:\n%s", index)
+	}
+	for _, p := range []string{"/assets/", "/assets/nope.js", "/index.htm", "/dist/index.html", "/favicon.svg/x"} {
+		if resp, _ := w.Do(t, "GET", p, "", ""); resp.StatusCode != http.StatusNotFound {
+			t.Errorf("GET %s on the Web UI port: %d", p, resp.StatusCode)
+		}
+	}
+	// a request of the module script carries Origin (crossorigin): same
+	// origin passes, another is 403
+	for origin, want := range map[string]int{w.Scheme() + "://" + w.Addr: http.StatusOK, "https://evil.example": http.StatusForbidden} {
+		req, err := http.NewRequest("GET", w.Scheme()+"://"+w.Addr+"/"+names[0], nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Origin", origin)
+		resp, err := w.Client().Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		if resp.StatusCode != want {
+			t.Errorf("GET /%s with Origin %s: %d, want %d", names[0], origin, resp.StatusCode, want)
+		}
 	}
 }
 

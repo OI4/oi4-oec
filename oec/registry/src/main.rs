@@ -26,6 +26,7 @@ mod bus;
 mod directory;
 mod http;
 mod tls;
+mod ui_assets;
 
 use std::path::PathBuf;
 use std::process::ExitCode;

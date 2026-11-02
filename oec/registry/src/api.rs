@@ -13,7 +13,10 @@
 //!   messages with a member `type`: first a `snapshot`, then `asset`,
 //!   `event` and `directory` changes; a comment `keep-alive` when quiet.
 //! - `GET /api/openapi.json`, `GET /api/asyncapi.json`: the API documents.
-//! - `GET /` (only on the Web UI port): the page of the Web UI.
+//! - `GET /` and the other files of the Web UI (only on the Web UI port):
+//!   the built `ui/dist/` embedded through the generated table
+//!   [`crate::ui_assets`] (ADR-0029 §9, amendment C-089); `/` is
+//!   `/index.html`.
 //!
 //! The JSON members are camelCase; the MG payloads (MAM, Health, Event,
 //! PublicationList and SubscriptionList entries) are embedded as on the
@@ -26,13 +29,32 @@ use serde_json::{Value, json};
 use crate::directory::{
     Answer, Availability, Directory, Entry, EventRecord, Kind, Limits, Violation, Want,
 };
+use crate::ui_assets::UI_FILES;
 
 /// The OpenAPI document (ADR-0029 §7).
 pub(crate) const OPENAPI: &str = include_str!("../api/openapi.json");
 /// The AsyncAPI document (ADR-0029 §7, C-087).
 pub(crate) const ASYNCAPI: &str = include_str!("../api/asyncapi.json");
-/// The page of the Web UI port until the Web UI of increment 4.
-pub(crate) const INDEX: &str = include_str!("index.html");
+
+/// A file of the Web UI: its path (`/…`), content type and bytes.
+#[derive(PartialEq, Eq)]
+pub(crate) struct UiFile {
+    pub(crate) path: &'static str,
+    pub(crate) content_type: &'static str,
+    pub(crate) bytes: &'static [u8],
+}
+
+impl std::fmt::Debug for UiFile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "UiFile({}, {} octets)", self.path, self.bytes.len())
+    }
+}
+
+/// The file of the Web UI at `path` (`/` is `/index.html`).
+fn ui_file(path: &str) -> Option<&'static UiFile> {
+    let path = if path == "/" { "/index.html" } else { path };
+    UI_FILES.iter().find(|f| f.path == path)
+}
 
 /// At most this many request bodies are announced (ADR-0028 amendment
 /// C-083); no resource takes a body.
@@ -41,8 +63,8 @@ pub(crate) const MAX_BODY: u64 = 64 * 1024;
 /// A resource of the API.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum Route {
-    /// `/` on the Web UI port.
-    Index,
+    /// A file of the Web UI, on the Web UI port only.
+    Ui(&'static UiFile),
     Assets,
     /// `/api/assets/{il}`, the decoded Identification Link.
     Asset(String),
@@ -67,7 +89,7 @@ impl Route {
     /// The path template of the route (`None`: not part of the API).
     pub(crate) fn template(&self) -> Option<&'static str> {
         Some(match self {
-            Self::Index => return None,
+            Self::Ui(_) => return None,
             Self::Assets => Self::PATHS[0],
             Self::Asset(_) => Self::PATHS[1],
             Self::Events => Self::PATHS[2],
@@ -79,10 +101,15 @@ impl Route {
 }
 
 /// The route of `path` (without query); `ui`: the Web UI port, which also
-/// serves `/`. `None`: not found.
+/// serves the files of the Web UI. `None`: not found.
 pub(crate) fn route(path: &str, ui: bool) -> Option<Route> {
+    if ui
+        && !path.starts_with("/api/")
+        && let Some(f) = ui_file(path)
+    {
+        return Some(Route::Ui(f));
+    }
     Some(match path {
-        "/" if ui => Route::Index,
         "/api/assets" => Route::Assets,
         "/api/events" => Route::Events,
         "/api/stream" => Route::Stream,
@@ -553,8 +580,28 @@ pub(crate) mod tests {
 
     #[test]
     fn routes() {
-        assert_eq!(route("/", true), Some(Route::Index));
+        let Some(Route::Ui(index)) = route("/", true) else {
+            panic!("/ is not the Web UI");
+        };
+        assert_eq!(index.path, "/index.html");
+        assert_eq!(index.content_type, "text/html; charset=utf-8");
+        assert_eq!(route("/index.html", true), Some(Route::Ui(index)));
         assert_eq!(route("/", false), None);
+        assert_eq!(route("/index.html", false), None);
+        for f in UI_FILES {
+            assert_eq!(route(f.path, true), Some(Route::Ui(f)), "{}", f.path);
+            assert_eq!(route(f.path, false), None, "{}", f.path);
+        }
+        for none in [
+            "/x.js",
+            "/assets",
+            "/assets/",
+            "/index.htm",
+            "//index.html",
+            "/../index.html",
+        ] {
+            assert_eq!(route(none, true), None, "{none}");
+        }
         assert_eq!(route("/api/assets", false), Some(Route::Assets));
         assert_eq!(route("/api/assets/", false), None);
         assert_eq!(
@@ -576,12 +623,66 @@ pub(crate) mod tests {
         assert_eq!(route("/api/assets/%2", false), None);
         assert_eq!(route("/api/stream", false), Some(Route::Stream));
         assert_eq!(route("/api/stream/", false), None);
-        assert_eq!(route("/index.html", true), None);
+        assert_eq!(route("/index.html", false), None);
         assert_eq!(route("/api", true), None);
         for p in Route::PATHS {
             let r = route(&p.replace("{il}", "x"), false).unwrap();
             assert_eq!(r.template(), Some(p));
         }
+    }
+
+    /// The files of `dir` below `prefix`: (`/`-path, bytes).
+    fn walk(dir: &std::path::Path, prefix: &str, out: &mut Vec<(String, Vec<u8>)>) {
+        for e in std::fs::read_dir(dir).unwrap() {
+            let e = e.unwrap();
+            let name = e.file_name().into_string().unwrap();
+            if name == ".DS_Store" {
+                continue;
+            }
+            let path = format!("{prefix}/{name}");
+            if e.file_type().unwrap().is_dir() {
+                walk(&e.path(), &path, out);
+            } else {
+                out.push((path, std::fs::read(e.path()).unwrap()));
+            }
+        }
+    }
+
+    /// The generated table embeds exactly the files of `ui/dist/`, sorted,
+    /// with the content type of their extension (ADR-0029 §9).
+    #[test]
+    fn ui_table_is_dist() {
+        let dist = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("ui/dist");
+        let mut files = Vec::new();
+        walk(&dist, "", &mut files);
+        files.sort();
+        let table: Vec<_> = UI_FILES
+            .iter()
+            .map(|f| (f.path.to_owned(), f.bytes.to_vec()))
+            .collect();
+        assert_eq!(
+            table.iter().map(|f| &f.0).collect::<Vec<_>>(),
+            files.iter().map(|f| &f.0).collect::<Vec<_>>(),
+            "src/ui_assets.rs is not ui/dist/: run ui/build.sh"
+        );
+        assert!(
+            table == files,
+            "src/ui_assets.rs: other bytes than ui/dist/"
+        );
+        for f in UI_FILES {
+            let ext = f.path.rsplit_once('.').map_or("", |(_, e)| e);
+            let want = match ext {
+                "html" => "text/html; charset=utf-8",
+                "js" => "text/javascript; charset=utf-8",
+                "css" => "text/css; charset=utf-8",
+                "svg" => "image/svg+xml",
+                _ => panic!("{}: no content type", f.path),
+            };
+            assert_eq!(f.content_type, want, "{}", f.path);
+        }
+        let index = std::str::from_utf8(ui_file("/").unwrap().bytes).unwrap();
+        assert!(index.contains(r#"<div id="root">"#));
+        assert!(!index.contains("<style") && !index.contains(" style="));
     }
 
     fn head<'a>(method: &'a str, host: &'a str) -> Head<'a> {

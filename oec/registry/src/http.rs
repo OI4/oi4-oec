@@ -431,11 +431,7 @@ fn handle(
     };
     let dir = || lock(&s.dir);
     match route {
-        Route::Index => content(
-            200,
-            "text/html; charset=utf-8",
-            Bytes::from_static(api::INDEX.as_bytes()),
-        ),
+        Route::Ui(f) => content(200, f.content_type, Bytes::from_static(f.bytes)),
         Route::Assets => json(200, &api::assets(&dir(), unix_ms())),
         Route::Asset(il) => match api::asset(&dir(), &il) {
             Some(v) => json(200, &v),
@@ -608,9 +604,23 @@ mod tests {
         assert!(r.contains(crate::api::tests::APP), "{r}");
         let r = get(web, "/");
         assert!(
-            r.starts_with("HTTP/1.1 200 OK\r\n") && r.contains("text/html"),
+            r.starts_with("HTTP/1.1 200 OK\r\n")
+                && r.contains("text/html")
+                && r.contains(r#"<div id="root">"#),
             "{r}"
         );
+        for f in crate::ui_assets::UI_FILES {
+            let r = get(web, f.path);
+            assert!(
+                r.starts_with("HTTP/1.1 200 OK\r\n")
+                    && r.to_ascii_lowercase()
+                        .contains(&format!("content-type: {}", f.content_type)),
+                "{}: {r}",
+                f.path
+            );
+            assert!(get(api, f.path).starts_with("HTTP/1.1 404 "), "{}", f.path);
+        }
+        assert!(get(web, "/nope.js").starts_with("HTTP/1.1 404 "));
         assert!(get(api, "/").starts_with("HTTP/1.1 404 "));
         assert!(get(api, "/api/assets/nope").starts_with("HTTP/1.1 404 "));
         let r = exchange(

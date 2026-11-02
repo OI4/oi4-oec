@@ -8,7 +8,7 @@ and `Get/Health[/<Source>]` on its own AppId. Step 1 is **read-only**
 `Del` or `Call`. ServiceType `Registry`, product `oi4.org` / `OEC Registry`
 / `OEC-REGISTRY`, SerialNumber = the hostname of the container.
 
-State (C-088, increment 3 of the P7 cycle cut in `project/ROADMAP.md`):
+State (C-089, increment 4 of the P7 cycle cut in `project/ROADMAP.md`):
 Messaging Level 3. The registry collects `MAM`, `Health`, `Profile`,
 `Event`, `PublicationList` and `SubscriptionList` of every participant
 (raw subscriptions of the SDK, ADR-0026 §23), asks with `Get` for what is
@@ -17,8 +17,9 @@ relation and the devices, an observed Messaging level (informative) and a
 conformity view (every received message validated with the strict D1
 schemas, independent of D7). It has its own `Config` (below) and a
 persistent `ReferenceDesignation`; D7 `oec-check test --level 3` passes.
-Since C-088 it serves the directory over **HTTPS**, read-only (below).
-Next: the React/TypeScript/Vite UI (increment 4), the image (increment 5).
+Since C-088 it serves the directory over **HTTPS**, read-only (below);
+since C-089 the **Web UI** (React/TypeScript/Vite, `ui/`) on the web port.
+Next: the image and the compose profile (increment 5).
 
 ### Config `registry`
 
@@ -46,7 +47,7 @@ Read-only (ADR-0008): every resource answers `GET` only, any other method
 | `GET /api/events` | the Event trail, oldest first, with a sequence number |
 | `GET /api/stream` | `text/event-stream`: a `snapshot`, then `asset`, `event` and `directory` messages; a `keep-alive` comment when quiet |
 | `GET /api/openapi.json`, `GET /api/asyncapi.json` | the API documents |
-| `GET /` | web port only: a placeholder page until the Web UI (increment 4) |
+| `GET /`, `GET /<file of ui/dist>` | web port only: the Web UI (below); other paths `404` |
 
 | Variable | Default | Meaning |
 |---|---|---|
@@ -75,6 +76,41 @@ streams (more: `503`); 5 s for the TLS handshake and the request head,
 streams); `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, a
 restrictive CSP, `Referrer-Policy: no-referrer`.
 
+## Web UI (ADR-0029 §9, §10)
+
+A single page on the web port (`https://<host>:5798/`), read-only and live
+over `/api/stream`: the applications with their devices (filter), per
+asset the availability, MAM, latest Health with its history, the observed
+Messaging level and the schema conformity (both informative, with the
+missing REQs and the last violations), Profile and the answers to the
+`Get`s, PublicationList and SubscriptionList, and the Event trail (pause).
+Hash routes (`#/asset/<IL>`), no other origin: the CSP `default-src
+'self'` holds without `unsafe-inline`.
+
+React 19.3.1 + react-dom, TypeScript 7.0.2, Vite 7.3.7 (not Vite 8:
+`lightningcss` is MPL-2.0, A-382); JSX through esbuild, no
+`@vitejs/plugin-react`. The built `ui/dist/` is committed and embedded in
+the binary (`src/ui_assets.rs`, generated: `include_bytes!` per file, the
+content type by extension), so neither the build of the registry nor the
+gate needs node or the network.
+
+After a change of `ui/` (opt-in, needs node ≥ 22.12 and the network):
+
+```sh
+oec/registry/ui/build.sh   # npm ci --ignore-scripts, tsc --noEmit + vite build,
+                           # then ui/build.stamp and src/ui_assets.rs
+```
+
+The gate (`internal/uipolicy`, standard library only) checks without node:
+`package.json` (private, exact versions, only the script `build`) and
+`package-lock.json` v3 (every package from `registry.npmjs.org` with a
+sha512 `integrity`, licenses of the allowlist of ADR-0023, shipped = react,
+react-dom, scheduler), the CSP rules of `ui/dist/` (no inline script,
+style or handler, only own files, no source map) and that the committed
+`ui/build.stamp` (sha256 of every input and every built file) and
+`src/ui_assets.rs` are current – a changed source without a new `dist/`
+fails.
+
 ## Build and run
 
 An own Cargo package outside the SDK workspace with its own `Cargo.lock`;
@@ -102,7 +138,9 @@ log on stderr; `info` reports "N of M assets available" after every change.
 | `src/api.rs` | the HTTP API, sans-IO: router, guards, JSON views of the directory, the stream messages |
 | `src/http.rs` | the HTTP server on hyper 1: listeners, TLS, limits, timeouts, the stream |
 | `src/tls.rs` | the TLS identity: application certificate or self-signed (rcgen) |
-| `src/index.html` | the placeholder page of the web port |
+| `src/ui_assets.rs` | generated: the files of `ui/dist/` embedded (`include_bytes!`) with their content types |
+| `ui/` | the Web UI: `src/` (React/TypeScript), `index.html`, `public/`, `package.json`, `package-lock.json`, `vite.config.mjs`, `tsconfig.json`; `dist/` and `build.stamp` committed; `build.sh` (opt-in) |
+| `internal/uipolicy/` | the npm policy, the CSP rules, the stamp and the table (gate); `cmd/uigen` writes the stamp and the table |
 | `src/bus.rs` | the `Config`, the raw subscriptions, the conformity check, the worker that feeds the directory, `Get` of what is missing, listing in the SDK; a source scan asserts that no `Set`/`Del`/`Call` is sent |
 | `src/api_tests.rs` | the AsyncAPI document against its meta-schema, its channels against the topic forms of the SDK core (`Form::of`) and the collected resources, its operations read-only; the OpenAPI document against its meta-schema, its paths = the router, the views against its response schemas |
 | `api/openapi.json` | OpenAPI 3.2.0: the REST API and the event stream (`itemSchema`); MG payloads reference the D1 schemas by `$id` |
@@ -134,7 +172,12 @@ ADR-0006):
   application certificate on both ports, plain only with `TLS=off`; every
   OpenAPI path, the views and the stream with a participant on the bus;
   the guards, limits, timeouts and keep-alive of the hardening contract;
-  invalid settings. The D8/D7/RD runs keep HTTP off (`regtest.HTTPOff`).
+  invalid settings; every file of the Web UI over HTTPS with its bytes,
+  content type and headers on the web port, `404` on the API port. The
+  D8/D7/RD runs keep HTTP off (`regtest.HTTPOff`).
+- `internal/uipolicy` `TestUI`, `TestViolations`, `TestWrite`: the npm
+  policy, the stamp and the table of the committed UI, and 31 violations
+  on a copy.
 - `internal/regtest` `TestAPI`: the channel patterns of the AsyncAPI.
 
 `OEC_REGISTRY_D7_REPORT=<file>` keeps the D7 report of the run.
