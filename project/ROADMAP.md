@@ -409,6 +409,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 - Model: applications vs. devices (assets) incl. "published by" relation, supported resources/methods, **observed (informative) Messaging compliance level** derived from `Profile` + `Get` answers (MG 1.3, A1), health incl. `Details[]` and history, last seen, event/audit trail; v2 only, v1 traffic ignored (ADR-0015). Target: Messaging + Service Container L3 (ADR-0016).
 - Conformity view: validation of observed traffic per participant (reuses D1 and the D7 rule engine where sensible).
 - Web UI (modern stack, decided in an ADR) + documented API (REST/OpenAPI and/or live updates via WebSocket/SSE); default ports 5798/5799 (A1).
+- **Technology (PO, Q-035, C-085 addendum 2, 2026-11-02):** backend **Rust on `oec`**; Web UI **React + TypeScript + Vite** (npm dependencies pinned and license-checked, built files embedded in the binary); HTTP API **REST with OpenAPI**, live updates by **SSE**; the MQTT interface of the registry (Registry services of MG A1, own publications) described in **AsyncAPI**. Details and versions in ADR-0029 (C-086).
 - **Exit:** registry lists all dev-environment participants with capabilities, health and conformity status; registry passes D7 and D8 at `level3`.
 
 ## P8 – Documentation (D6) – continuous
