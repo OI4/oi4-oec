@@ -1,7 +1,11 @@
 #!/bin/sh
 # Checks of the micro SDK D9 (ADR-0030), offline, no Docker, no ESP-IDF:
-#   host (Go module, standard library only): gofmt, go vet, go test; the
-#   C vector header tests/vectors_gen.h equals the output of
+#   host (Go module, standard library only): gofmt, go vet, go test – the
+#   MQTT client (with -race) and the host runner cmd/oecm-host (the core
+#   with a Go PAL over cgo) under D7 `oec-check test --level 1` on the test
+#   broker go-testbroker of oec/sdk/rust (oec-check of oec/conformance built
+#   into a temporary directory, ADR-0006; OECM_REQUIRE=1: a missing tool
+#   fails); the C vector header tests/vectors_gen.h equals the output of
 #   cmd/oecm-vecgen on oec/spec/export/vectors (G-1.4);
 #   core (C17, CMake build in target/host, warnings are errors): the Unity
 #   tests under AddressSanitizer + UBSan (ctest), clang --analyze with
@@ -11,9 +15,8 @@
 #   src/ compiled once;
 #   payloads: tests/emit.c writes the messages of two device lifecycles
 #   (Will, Birth, Health, Close) as JSONL, D7 `oec-check validate` checks
-#   them (oec-check of oec/conformance built into a temporary directory,
-#   ADR-0006); the host example examples/host/hello_device.c runs.
-# Needs cmake and a C17 compiler with sanitizers.
+#   them; the host example examples/host/hello_device.c runs.
+# Needs cmake, cargo and a C17 compiler with sanitizers.
 set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
 export GOTOOLCHAIN=auto
@@ -26,11 +29,18 @@ export UBSAN_OPTIONS="${UBSAN_OPTIONS:-print_stacktrace=1:halt_on_error=1}"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-echo "micro/host: gofmt, vet, test, oecm-vecgen -check"
+echo "micro: oec-check, go-testbroker"
+rust="$root/../rust"
+(cd "$root/../../conformance" && go build -o "$tmp/oec-check" ./cmd/oec-check)
+(cd "$rust" && cargo build --offline --locked --quiet -p oec-ffi --example go-testbroker)
+target="$(cd "$rust" && cargo metadata --offline --locked --format-version 1 --no-deps | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')"
+
+echo "micro/host: gofmt, vet, test (D7 --level 1), oecm-vecgen -check"
 cd "$root/host"
 test -z "$(gofmt -l .)" || { gofmt -l .; echo "gofmt: files need formatting in $(pwd)" >&2; exit 1; }
 go vet ./...
-go test ./...
+go test -race ./mqtt
+OECM_REQUIRE=1 OEC_D7="$tmp/oec-check" OEC_TESTBROKER="$target/debug/examples/go-testbroker" go test ./...
 go run ./cmd/oecm-vecgen -check
 
 echo "micro: cmake build (target/host), ctest (ASan + UBSan)"
@@ -68,7 +78,6 @@ if [ -n "$gcc" ]; then
 fi
 
 echo "micro: payloads of the core → D7 oec-check validate"
-(cd "$root/../../conformance" && go build -o "$tmp/oec-check" ./cmd/oec-check)
 target/host/oecm-emit "$tmp/messages.jsonl"
 "$tmp/oec-check" validate "$tmp/messages.jsonl"
 

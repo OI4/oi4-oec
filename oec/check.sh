@@ -32,8 +32,9 @@
 #   9. sdk/micro/check.sh: the micro SDK D9 of P4b (ADR-0030, from C-092):
 #      C17 core with the Unity tests against the shared vectors under
 #      AddressSanitizer + UBSan, vector header freshness, clang --analyze,
-#      the symbol allowlist of the core, GCC 14/15 if installed, and the
-#      emitted payloads validated by D7 `oec-check validate`.
+#      the symbol allowlist of the core, GCC 14/15 if installed, the
+#      emitted payloads validated by D7 `oec-check validate`, and (from
+#      C-093) the Go host runner under D7 `oec-check test --level 1`.
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu

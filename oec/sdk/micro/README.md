@@ -5,9 +5,10 @@ and a platform abstraction layer (PAL), the reference port for ESP32 on
 ESP-IDF. Decisions: API in ADR-0022 (with the amendments), implementation in
 ADR-0030, ESP32 reference platform in ADR-0024.
 
-State (C-092): **Messaging Level 1** in the core, host tests and payload
-check. Levels 2 and 3, the host runner for D7, the ESP-IDF port and the
-Arduino library follow in C-093 … C-097 (ADR-0030 §10).
+State (C-093): **Messaging Level 1** in the core, host tests and payload
+check; the Go host runner runs the core under D7 `--level 1` in the gate.
+Levels 2 and 3, the ESP-IDF port and the Arduino library follow in
+C-094 … C-097 (ADR-0030 §10).
 
 | Path | Content |
 |---|---|
@@ -15,7 +16,7 @@ Arduino library follow in C-093 … C-097 (ADR-0030 §10).
 | `src/` | the core: Identification Link, base64url, dnp-encoding, Oi4Identifier (`oecm_il.c`), output buffer and JSON writer (`oecm_buf.c`), messages and lifecycle (`oecm_device.c`) |
 | `tests/` | Unity tests, the recording PAL `fake_pal.c`, the payload emitter `emit.c`, the generated vector header `vectors_gen.h` |
 | `examples/host/hello_device.c` | a Level 1 device with a stub PAL that prints, the shape of the firmware |
-| `host/` | Go module (standard library only): `cmd/oecm-vecgen` generates `tests/vectors_gen.h` from `oec/spec/export/vectors` |
+| `host/` | Go module (standard library only): `cmd/oecm-vecgen` generates `tests/vectors_gen.h` from `oec/spec/export/vectors`; `cmd/oecm-host` is the host runner (the core with a PAL in Go over cgo), `mqtt/` its MQTT 3.1.1 client, `internal/d7run` the D7 harness |
 | `third_party/unity/` | Unity v2.7.0 (MIT), unchanged, test only |
 
 ## Rules of the core
@@ -68,13 +69,40 @@ for an Identification Link of 255 octets (1804 octets). The Birth grows with
 the MAM texts; a typical Birth needs about 1000 octets, a 255-octet
 Identification Link with empty texts 2315.
 
+## Host runner
+
+`host/cmd/oecm-host` links the core with cgo and implements the PAL in Go
+(`crypto/tls`, TLS 1.2+, and a minimal MQTT 3.1.1 client). It is a test
+harness for D7, not a product (ADR-0030 §7, amendment C-093). It reads a
+container storage below `OEC_ROOT` (default `/`, RIG 4.1):
+
+| File | Use |
+|---|---|
+| `proc/sys/kernel/hostname`, else `etc/hostname` | default SerialNumber, name of the client certificate |
+| `etc/oi4/mqtt/broker.json` | Address, SecurePort, MaxPacketSize (all required) |
+| `etc/oi4/mqtt/broker_ca.pem`, else `etc/oi4/certs/ca.pem` | CA of the broker certificate |
+| `run/secrets/oi4/private_key.pem` + `etc/oi4/certs/<hostname>.pem` | client certificate (used when present; no passphrase) |
+| `run/secrets/oi4/credentials` | `base64(user:password)` otherwise |
+
+Flags: `-level` (1), `-il`, `-manufacturer`, `-manufacturer-uri`, `-model`,
+`-product-code`, `-serial`, `-software-revision`, `-client-id`. SIGTERM or
+SIGINT stops it gracefully (Close message). Against the dev broker
+(`oec/dev`, broker running):
+
+```sh
+cd oec/sdk/micro/host
+OEC_ROOT=../../../dev/generated/roots/oec-dev-app go run ./cmd/oecm-host
+```
+
 ## Check
 
-`./check.sh` (step 9 of `oec/check.sh`, about 6 s): host Go module, vector
-header freshness, CMake build in `target/host`, the Unity tests under
-AddressSanitizer + UBSan, `clang --analyze`, the symbol allowlist, GCC 14/15
-if installed, the emitted payloads validated by D7 `oec-check validate`, the
-host example. Needs `cmake`.
+`./check.sh` (step 9 of `oec/check.sh`, about 2.5 min): host Go module with
+the MQTT client under `-race` and D7 `oec-check test --level 1` against the
+host runner on the Rust SDK's `go-testbroker` (21 pinned passes, about
+2 min), vector header freshness, CMake build in `target/host`, the Unity
+tests under AddressSanitizer + UBSan, `clang --analyze`, the symbol
+allowlist, GCC 14/15 if installed, the emitted payloads validated by D7
+`oec-check validate`, the host example. Needs `cmake` and `cargo`.
 
 Regenerate the vectors after a change of `oec/spec/export/vectors`:
 
