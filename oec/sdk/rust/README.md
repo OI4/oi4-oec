@@ -75,7 +75,7 @@ cd oec/sdk/rust/oec-ffi && cbindgen --config cbindgen.toml --output include/oec.
 1. Address check: unknown → `BadNotFound`, not writable → `BadNotWritable` (REQ-CMP-043).
 2. Type check against the field definitions → `BadTypeMismatch`.
 3. Application handler `on_set` → `Ok` or a `StatusCode`.
-4. On `Good`: store the new values and publish the changed DataSet (REQ-RES-DATA-012).
+4. On `Good`: store the new values and publish the changed DataSet (REQ-RES-DATA-012): the answer with `ReplyTo`, then – if the content changed – the publication configured in the PublicationList without `ReplyTo` (REQ-MQTT-019; `Data`, `Config` and `ReferenceDesignation` alike, A-378 of C-085).
 5. Always: Status event with `ReplyTo` (REQ-RES-EVENT-005, REQ-TOP-014).
 
 **`Set` of the PublicationList** – the same pipeline:

@@ -368,7 +368,9 @@ impl DataSet {
     /// Makes the DataSet writable (`Set Data`, MG 9.1.4). The handler
     /// decides about a checked request ([`SetData`]): on `Ok` the SDK
     /// applies the values as state, publishes the DataSet with the ReplyTo
-    /// of the `Set` (REQ-RES-DATA-012) and the Status event Good; on `Err`
+    /// of the `Set` (REQ-RES-DATA-012) and the Status event Good; changed
+    /// values are then published as the PublicationList says, without
+    /// ReplyTo (REQ-MQTT-019); on `Err`
     /// only the Status event with that code (REQ-RES-DATA-011,
     /// REQ-RES-EVENT-005), an `Err` with a Good code as `Bad`. Without a
     /// handler a `Set` is answered with `BadNotWritable` (REQ-CMP-043). A

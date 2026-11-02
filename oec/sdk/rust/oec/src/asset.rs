@@ -239,7 +239,8 @@ impl Asset {
     /// ReferenceDesignation of this asset (MG 8.3.10): `Ok` accepts it,
     /// the SDK then persists it (REQ-RES-REFDES-002), increments the
     /// RevisionCounter (REQ-RES-MAM-018), publishes it with the ReplyTo of
-    /// the request (REQ-RES-REFDES-010) and sends the Status event Good;
+    /// the request (REQ-RES-REFDES-010) and sends the Status event Good,
+    /// then a changed object without ReplyTo (publication on change);
     /// an `Err` rejects it with a Status event with that code. Without a
     /// handler every valid change is accepted. Called on the thread of
     /// the runtime, outside any lock; a panic answers `BadInternalError`.

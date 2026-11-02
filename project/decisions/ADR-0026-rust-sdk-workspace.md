@@ -397,3 +397,16 @@ Decided by the agent within ADR-0021, ADR-0023 and this ADR; the PO can overrule
    - without sanitizer support the sanitized variant is skipped, unless `OEC_FFI_REQUIRE_SANITIZERS=1` (default of `oec/sdk/check.sh`);
    - programs and their roots live below `CARGO_TARGET_TMPDIR/oec-ffi-c/{bin,run}`; the test binary must not run in parallel processes (fixed roots, as §10).
 7. **Dependencies:** none new (ADR-0023 amendment C-061).
+
+## Amendment C-085 (2026-11-02) – the answer to a `Set` does not replace the on-change publication (agent, G-3.4 b)
+
+Defect fix found in the P6 exit run (D7 `monitor` against the compose profile `demos`: T7-MON-14 fail, REQ-MQTT-019 and REQ-RES-PUBLIST-013, for the logger, the weather service and one station). Decided by the agent within this ADR (A-378, log `log/2026-11-02_C-085_p6-exit-docs.md`); the PO can overrule. No spec change, no SF: the reviewed REQ notes of REQ-RES-DATA-012 and REQ-RES-CONFIG-022 already say that the publications configured in the PublicationList follow on their own (REQ-MQTT-019), as does A-220 of D7.
+
+### 21. A `Set` answer and the publication of the PublicationList are two messages
+
+1. **Rule:** the answer to an accepted `Set` (with `ReplyTo`) answers the requester only. If the `Set` changed the content of the DataSet, the publication configured in the PublicationList follows without `ReplyTo` (REQ-MQTT-019), on the next poll of the provider, after the Status event. A `Set` that changes nothing triggers no publication. The other rules of the entry (Mode, Interval, Precisions) apply unchanged.
+2. **`Config`** (§15.3 and §15.7 amended): `apply_set_config` marks the Config pending when the values changed (it no longer clears the flag); `config_changes` publishes it masked. Order on the bus: answer with `ReplyTo`, Status event Good, the `Pub/MAM` of the RevisionCounter, then `Pub/Config` without `ReplyTo`.
+3. **`Data`** (§14.10 amended): `apply_set_data` no longer marks the DataSet as published by the answer (the function `answered` is removed); the dead band and the interval of the entry decide as for every other update.
+4. **`ReferenceDesignation`** (§16.3 amended, "not published on connect (only on request and after a `Set`)" now means the self-initiated publication as well): an accepted `Set` that changes the stored object queues its source; `changes()` publishes `Pub/ReferenceDesignation/<Source>` without `ReplyTo` (Mode `ON_REQUEST_SOURCE_10`). A `Del` publishes nothing (the object is gone).
+5. **Bindings:** the C ABI (`oec-ffi`) and the Go SDK run on this core, so the logger (C), the weather service (Go) and the config service (Rust) follow without a change of their own; no API or ABI change (ABI version 1).
+6. **Tests as contract (changed first):** `oec-core/tests/provider_config.rs` (`the_application_decides`), `provider_write.rs` (`set_data_completion_answers_as_decided`), `provider_refdes.rs` (`the_application_decides`) and `oec/tests/runtime.rs` (`config_is_got_set_and_persisted`) expect the publication without `ReplyTo` after a changing `Set` and none after an unchanged one.

@@ -714,8 +714,22 @@ fn the_application_decides() {
     assert_eq!(value_of(&p, &src, "device1", "ip_address"), "10.0.0.1");
     assert!(p.take_config_values().is_some());
     assert!(p.take_config_values().is_none());
-    // nothing pending: the answer was the publication
-    assert!(p.poll(Duration::from_millis(5), MS + 5).is_empty());
+    // the publication on change (ON_REQUEST_FILTER_9) follows on its own,
+    // without ReplyTo (REQ-RES-CONFIG-022 notes, REQ-MQTT-019)
+    let out = p.poll(Duration::from_millis(5), MS + 5);
+    assert_eq!(topics(&out), [config_topic("Pub", &src, CTX)]);
+    let v = json_of(&out[0]);
+    assert_eq!(v["ReplyTo"], "");
+    assert_eq!(
+        v["Messages"][0]["Payload"]["device1"]["ip_address"]["Value"],
+        "10.0.0.1"
+    );
+    assert!(p.poll(Duration::from_millis(6), MS + 6).is_empty());
+    // an accepted Set that changes nothing is answered, nothing follows
+    let (out, changed) = p.complete_set_config(&req, Ok(()), MS + 7);
+    assert!(!changed);
+    assert_eq!(status(&out), json!({"Level": "Good", "Number": 0}));
+    assert!(p.poll(Duration::from_millis(8), MS + 8).is_empty());
 }
 
 /// A request for a Config DataSet removed or added anew meanwhile is

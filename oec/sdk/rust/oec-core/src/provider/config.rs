@@ -838,7 +838,9 @@ impl Provider {
     /// Answers a `Set Config` the application decided: on `Ok` the values
     /// are applied and persisted, the complete Config is published,
     /// masked, on `Pub/Config/<Source>/<Filter>` with the ReplyTo of the
-    /// `Set` (REQ-RES-CONFIG-022), then the Status event Good; on `Err`
+    /// `Set` (REQ-RES-CONFIG-022), then the Status event Good; a changed
+    /// Config is published on change without ReplyTo at the next poll
+    /// (REQ-MQTT-019); on `Err`
     /// only the Status event with that code (REQ-RES-CONFIG-021/023), an
     /// `Err` with a Good code as `Bad`. If the Config DataSet was removed
     /// or added anew meanwhile, the answer is `BadNotFound`. Returns the
@@ -966,7 +968,9 @@ impl Provider {
             .filter(|i| self.configs[*i].instance == r.instance)
             .ok_or(StatusCode::BAD_NOT_FOUND)?;
         let changed = self.write_config(i, &r.changes, unix_ms);
-        self.configs[i].pending = false;
+        // the answer does not replace the publication on change
+        // (REQ-RES-CONFIG-022 notes, REQ-MQTT-019)
+        self.configs[i].pending |= changed;
         let out = self.publish_config(i, Some(&r.message_id), unix_ms);
         Ok((out, changed))
     }

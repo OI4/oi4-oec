@@ -343,15 +343,28 @@ fn set_data_completion_answers_as_decided() {
     let req = set_data(&mut p, "t", &ok).unwrap();
     let out = p.complete_set_data(&req, Err(StatusCode::GOOD), MS + 2);
     assert_eq!(status_of(&out), code(StatusCode::BAD));
-    // accepted: the DataSet on its FILTER topic with the ReplyTo, which is
-    // its publication on change, too
+    // accepted: the DataSet on its FILTER topic with the ReplyTo; the
+    // publication on change follows on its own, without ReplyTo
+    // (REQ-RES-DATA-012 notes, REQ-MQTT-019)
     let req = set_data(&mut p, "t", &ok).unwrap();
     let out = p.complete_set_data(&req, Ok(()), MS + 2);
     let data = format!("Data/{}/t", pump.encode());
     assert_eq!(topics(&out)[0], topic("Pub", &data));
     assert_eq!(json_of(&out[0])["ReplyTo"], SET_ID);
     assert_eq!(status_of(&out), code(StatusCode::GOOD));
-    assert_eq!(p.poll(Duration::from_millis(3), MS + 3), []);
+    let out = p.poll(Duration::from_millis(3), MS + 3);
+    assert_eq!(topics(&out), [topic("Pub", &data)]);
+    assert_eq!(json_of(&out[0])["ReplyTo"], "");
+    assert_eq!(
+        json_of(&out[0])["Messages"][0]["Payload"],
+        json!({"T": 1.5, "N": "7"})
+    );
+    assert_eq!(p.poll(Duration::from_millis(4), MS + 4), []);
+    // the same values again: answered, nothing follows
+    let req = set_data(&mut p, "t", &ok).unwrap();
+    let out = p.complete_set_data(&req, Ok(()), MS + 4);
+    assert_eq!(status_of(&out), code(StatusCode::GOOD));
+    assert_eq!(p.poll(Duration::from_millis(5), MS + 5), []);
     // removed meanwhile: BadNotFound
     let req = set_data(&mut p, "t", &ok).unwrap();
     p.remove_data(&pump, "t").unwrap();

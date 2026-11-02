@@ -1566,12 +1566,26 @@ fn config_is_got_set_and_persisted() {
     assert_eq!(status_event(tb, &prefix, &me, "Good")["Number"], 0);
     let mam = next_on(tb, &format!("{prefix}Pub/MAM/{me}"), &mut Vec::new());
     assert_eq!(data_payload(&mam)["RevisionCounter"], 1);
+    // the publication on change follows the answer, without ReplyTo
+    let p = json(&next_on(tb, &pub_topic, &mut Vec::new()).payload);
+    assert_eq!(p["ReplyTo"], "", "{p}");
+    assert_eq!(
+        p["Messages"][0]["Payload"]["common"]["interval"]["Value"],
+        "20"
+    );
+    assert!(!p.to_string().contains("s3cr3t"));
     assert_eq!(
         r.config.values().string("common", "api_key"),
         Some("s3cr3t")
     );
 
     decided_sets(&r, &calls);
+    let p = json(&next_on(tb, &pub_topic, &mut Vec::new()).payload);
+    assert_eq!(p["ReplyTo"], "", "{p}");
+    assert_eq!(
+        p["Messages"][0]["Payload"]["common"]["interval"]["Value"],
+        "30"
+    );
 
     // from the application side: published at once, no ReplyTo
     r.config.set("common", "interval", "40").unwrap();

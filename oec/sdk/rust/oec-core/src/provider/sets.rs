@@ -102,17 +102,6 @@ impl Set {
         was_on != is_on
     }
 
-    /// The DataSet was published as the answer to a `Set Data` on its
-    /// FILTER_4 topic: with FILTER_4 as only form and Interval 0 that is
-    /// its publication on change.
-    pub(super) fn answered(&mut self) {
-        let m = self.mode();
-        if m.filter() && !m.application() && !m.source() && self.interval().is_none() {
-            self.pending = false;
-            self.sent = self.values();
-        }
-    }
-
     pub(super) fn mode(&self) -> Mode {
         self.spec.publication.mode
     }

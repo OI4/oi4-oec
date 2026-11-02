@@ -345,6 +345,9 @@ pub struct Provider {
     config_values: StoredConfigValues,
     config_instance: u64,
     refdes: Option<StoredReferenceDesignations>,
+    /// The sources whose ReferenceDesignation a `Set` changed: published
+    /// on change at the next poll.
+    refdes_pending: Vec<IdentificationLink>,
     events: events::Events,
     consumer_subs: Vec<ConsumerSubscription>,
     sub_overrides: SubscriptionOverrides,
@@ -383,6 +386,7 @@ impl Provider {
             config_values: StoredConfigValues::new(),
             config_instance: 0,
             refdes: None,
+            refdes_pending: Vec::new(),
             events: events::Events::default(),
             consumer_subs: Vec::new(),
             sub_overrides: SubscriptionOverrides::new(),
@@ -1103,11 +1107,12 @@ impl Provider {
     }
 
     /// The pending publications of assets, Profiles and PublicationList,
-    /// then Config, Metadata and Data.
+    /// then Config, ReferenceDesignation, Metadata and Data.
     fn changes(&mut self, now: Duration, unix_ms: u64) -> Vec<Publication> {
         let mut out = self.resource_changes(unix_ms);
         out.extend(self.event_changes());
         out.extend(self.config_changes(unix_ms));
+        out.extend(self.refdes_changes(unix_ms));
         out.extend(self.meta_data_changes(unix_ms));
         out.extend(self.data_changes(now, unix_ms));
         out

@@ -206,7 +206,9 @@ impl Provider {
     /// decided: on `Ok` a `Set` replaces the object and publishes it on
     /// `Pub/ReferenceDesignation/<Source>` with the ReplyTo of the request
     /// (REQ-RES-REFDES-010), a `Del` deletes it and publishes nothing on
-    /// the resource; then the Status event Good (REQ-RES-REFDES-009). On
+    /// the resource; then the Status event Good (REQ-RES-REFDES-009). A
+    /// changed object is published on change without ReplyTo at the next
+    /// poll (REQ-MQTT-019). On
     /// `Err` only the Status event with that code, an `Err` with a Good
     /// code as `Bad`. If the source was removed meanwhile, or a `Del` finds
     /// no object any more, the answer is `BadNotFound`.
@@ -248,7 +250,14 @@ impl Provider {
             self.unsaved.refdes = true;
             return Ok(Vec::new());
         };
-        self.unsaved.refdes |= table.set(r.source.as_str(), value.clone());
+        if table.set(r.source.as_str(), value.clone()) {
+            self.unsaved.refdes = true;
+            // the answer does not replace the publication on change
+            // (ON_REQUEST_SOURCE_10, REQ-MQTT-019)
+            if !self.refdes_pending.contains(&r.source) {
+                self.refdes_pending.push(r.source.clone());
+            }
+        }
         let topic = self
             .topic(Resource::ReferenceDesignation, Some(&r.source), None)
             .map_err(|_| StatusCode::BAD_INTERNAL_ERROR)?;
@@ -314,6 +323,34 @@ impl Provider {
                 Some(DataSetMessage::new(id, il, "", rd.clone()))
             })
             .collect()
+    }
+
+    /// The ReferenceDesignations a `Set` changed, on
+    /// `Pub/ReferenceDesignation/<Source>` without ReplyTo.
+    pub(super) fn refdes_changes(&mut self, unix_ms: u64) -> Vec<Publication> {
+        let mut out = Vec::new();
+        for il in core::mem::take(&mut self.refdes_pending) {
+            if !self.is_source(&il) {
+                continue;
+            }
+            let Ok(topic) = self.topic(Resource::ReferenceDesignation, Some(&il), None) else {
+                continue;
+            };
+            let items = self.refdes_items(Some(&il), None);
+            if items.is_empty() {
+                continue;
+            }
+            let limit = self.config.max_packet_size;
+            out.extend(
+                self.series(items, None, None, limit, unix_ms)
+                    .into_iter()
+                    .map(|payload| Publication {
+                        topic: topic.clone(),
+                        payload,
+                    }),
+            );
+        }
+        out
     }
 
     /// The PublicationList entry of the ReferenceDesignation of `il`

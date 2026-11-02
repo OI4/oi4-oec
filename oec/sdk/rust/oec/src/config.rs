@@ -472,7 +472,9 @@ impl ConfigHandle {
     /// resolved (REQ-RES-CONFIG-025). On `Ok` the SDK applies all values at
     /// once, persists them, increments the RevisionCounter if a value
     /// changed (REQ-RES-MAM-018), publishes the Config with the ReplyTo of
-    /// the `Set` (REQ-RES-CONFIG-022) and a Status event Good; on `Err`
+    /// the `Set` (REQ-RES-CONFIG-022) and a Status event Good, then a
+    /// changed Config without ReplyTo (publication on change,
+    /// REQ-MQTT-019); on `Err`
     /// nothing is applied (REQ-RES-CONFIG-023) and a Status event with that
     /// code is sent (REQ-RES-CONFIG-021). Without handler the values are
     /// applied. The handler runs outside the SDK's locks; a panic is

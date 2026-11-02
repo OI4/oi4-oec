@@ -420,7 +420,9 @@ impl Provider {
     /// Answers a `Set Data` the application decided: on `Ok` the values
     /// are applied and the DataSet is published on
     /// `Pub/Data/<Source>/<Tag>` with the ReplyTo of the `Set`
-    /// (REQ-RES-DATA-012), then the Status event Good; on `Err` the Status
+    /// (REQ-RES-DATA-012), then the Status event Good; changed values are
+    /// published on change as the PublicationList says, without ReplyTo
+    /// (REQ-MQTT-019); on `Err` the Status
     /// event with that code (REQ-RES-DATA-011), an `Err` with a Good code
     /// as `Bad`. If the DataSet was removed or redefined meanwhile, the
     /// answer is `BadNotFound`.
@@ -468,8 +470,9 @@ impl Provider {
         let s = &self.sets[i];
         let (items, classes) = (vec![s.message()], [s.class_id]);
         let limit = self.config.max_packet_size;
+        // the answer does not replace the publication on change, which
+        // `update` made due (REQ-RES-DATA-012 notes, REQ-MQTT-019)
         let payloads = self.series_of(items, &classes, None, Some(&r.message_id), limit, unix_ms);
-        self.sets[i].answered();
         Ok(payloads
             .into_iter()
             .map(|payload| Publication {

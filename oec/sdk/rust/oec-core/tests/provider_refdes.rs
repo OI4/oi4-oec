@@ -297,12 +297,22 @@ fn the_application_decides() {
     assert_eq!(p.reference_designation(&il(MOTOR)), None);
     assert_eq!(p.take_reference_designations(), None);
     // a Set of the same object again: Good, published, not saved again
+    assert!(p.poll(std::time::Duration::from_millis(1), MS).is_empty());
     let out = set(&mut p, MOTOR, &rd);
     assert_eq!(status(&out), good(MOTOR));
     assert!(p.take_reference_designations().is_some());
+    // the publication on change (ON_REQUEST_SOURCE_10) follows on its
+    // own, without ReplyTo (REQ-MQTT-019)
+    let out = p.poll(std::time::Duration::from_millis(2), MS);
+    let rest = format!("ReferenceDesignation/{}", il(MOTOR).encode());
+    assert_eq!(topics(&out), [topic("Pub", &rest)]);
+    let v = json_of(&out[0]);
+    assert_eq!(v["ReplyTo"], "");
+    assert_eq!(v["Messages"][0]["Payload"], rd);
     let out = set(&mut p, MOTOR, &rd);
     assert_eq!(out.len(), 2);
     assert_eq!(p.take_reference_designations(), None);
+    assert!(p.poll(std::time::Duration::from_millis(3), MS).is_empty());
     // the asset removed before the answer
     let r = request(write(&mut p, "Del", MOTOR, None));
     p.remove_asset(&il(MOTOR)).unwrap();
