@@ -8,14 +8,30 @@ and `Get/Health[/<Source>]` on its own AppId. Step 1 is **read-only**
 `Del` or `Call`. ServiceType `Registry`, product `oi4.org` / `OEC Registry`
 / `OEC-REGISTRY`, SerialNumber = the hostname of the container.
 
-State (C-086, increment 1 of the P7 cycle cut in `project/ROADMAP.md`):
-Messaging Level 2; the directory rules (Birth, Close, Will, availability),
-the collecting subscriptions, `Get MAM`/`Get Health` for what is missing,
-the Registry services through the SDK feature "listed assets" (ADR-0026
-§22) and the AsyncAPI document of the MQTT interface. Next: Level 3 and
-the observed level (increment 2), REST/OpenAPI/SSE/TLS on 5798/5799
-(increment 3), the React/TypeScript/Vite UI (increment 4), the image
-(increment 5).
+State (C-087, increment 2 of the P7 cycle cut in `project/ROADMAP.md`):
+Messaging Level 3. The registry collects `MAM`, `Health`, `Profile`,
+`Event`, `PublicationList` and `SubscriptionList` of every participant
+(raw subscriptions of the SDK, ADR-0026 §23), asks with `Get` for what is
+missing (once per online period and `GetInterval`), keeps the publisher
+relation and the devices, an observed Messaging level (informative) and a
+conformity view (every received message validated with the strict D1
+schemas, independent of D7). It has its own `Config` (below) and a
+persistent `ReferenceDesignation`; D7 `oec-check test --level 3` passes.
+Next: REST/OpenAPI/SSE/TLS on 5798/5799 (increment 3), the
+React/TypeScript/Vite UI (increment 4), the image (increment 5).
+
+### Config `registry`
+
+Group `directory`, read by the worker at least once a second; values out
+of range are clamped:
+
+| Setting | Default | Range | Meaning |
+|---|---|---|---|
+| `GetInterval` | 10 s | 1 … 3600 | least time between two `Get` of a resource of a participant |
+| `GetTimeout` | 5 s | 1 … 60 | time an answer may take |
+| `HealthHistory` | 20 | 0 … 1000 | kept `Health` changes per asset |
+| `EventTrail` | 200 | 0 … 10000 | kept `Event`s of all participants |
+| `ViolationTrail` | 10 | 0 … 1000 | kept schema violations per participant |
 
 ## Build and run
 
@@ -41,8 +57,8 @@ log on stderr; `info` reports "N of M assets available" after every change.
 |---|---|
 | `src/main.rs` | wiring: identity, level, log, the SDK application |
 | `src/directory.rs` | the directory: sans-IO rules of ADR-0029 §3 with unit tests |
-| `src/bus.rs` | subscriptions, the worker that feeds the directory, `Get` of what is missing, listing in the SDK; a source scan asserts that only `Consumer::get` is used |
-| `src/api_tests.rs` | the AsyncAPI document against its meta-schema and against the topics of the registry |
+| `src/bus.rs` | the `Config`, the raw subscriptions, the conformity check, the worker that feeds the directory, `Get` of what is missing, listing in the SDK; a source scan asserts that no `Set`/`Del`/`Call` is sent |
+| `src/api_tests.rs` | the AsyncAPI document against its meta-schema, its channels against the topic forms of the SDK core (`Form::of`) and the collected resources, its operations read-only |
 | `api/asyncapi.json` | AsyncAPI 3.1.0: the MQTT interface (Registry services, lifecycle, collecting subscriptions, `Get`s to others); payloads reference the D1 schemas by `$id` |
 | `api/meta/` | the AsyncAPI 3.1.0 JSON Schema, vendored from `asyncapi/spec-json-schemas` (commit `eee8d22`, `schemas/3.1.0.json`, Apache-2.0, license file beside it) |
 | `registry_test.go`, `internal/regtest/` | Go integration tests (module `github.com/OI4/oec/registry`, standard library only): the registry on the in-process TLS test broker, judged by D8 and D7 |
@@ -58,12 +74,14 @@ the SDK, the build; then `gofmt`, `go vet` and `go test -race` with
 ADR-0006):
 
 - `TestD8Registry`: `oec-infra bus --tests T8-BUS-03` passes (REQ-REG-001,
-  REQ-REG-002); on the wire the registry subscribes to
-  `Oi4v2/+/+/Pub/MAM/#` and `Oi4v2/+/+/Pub/Health/#` and publishes only
-  `Pub` of its own and `Get` to others.
-- `TestD7Level2`: `oec-check test --level 2` – no fail, 44 pinned passes;
-  T7-GET-04 warns REQ-CMP-010 and T7-MON-04 reports REQ-CMP-045 (info)
-  because the registry lists D7 and its peer as assets – the D7 refinement
-  for registries follows in increment 2 (ADR-0029 §5, A-388).
+  REQ-REG-002); the registry subscribes to `Oi4v2/+/+/Pub/<R>/#` for the
+  six collected resources, and its topics and subscriptions on the wire
+  are channels of `api/asyncapi.json`.
+- `TestD7Level3`: `oec-check test --level 3` – no fail, 49 pinned passes,
+  the wire again against `api/asyncapi.json`; T7-GET-04, T7-SET-03 and
+  T7-MON-04 treat only the registry itself as an entity (A-388).
+- `TestReferenceDesignationPersists`: a `Set` of the ReferenceDesignation
+  survives a restart on the same storage.
+- `internal/regtest` `TestAPI`: the channel patterns of the AsyncAPI.
 
 `OEC_REGISTRY_D7_REPORT=<file>` keeps the D7 report of the run.

@@ -717,6 +717,7 @@ dependencies = [
 name = "oec-core"
 version = "0.1.0"
 dependencies = [
+ "jsonschema",
  "regex",
  "serde",
  "serde_json",
@@ -731,6 +732,7 @@ dependencies = [
  "jsonschema",
  "log",
  "oec",
+ "oec-core",
  "serde_json",
 ]
 

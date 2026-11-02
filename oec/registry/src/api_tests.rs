@@ -1,16 +1,20 @@
 //! Tests of the API documents (ADR-0029 §8, §11, A-385): `api/asyncapi.json`
 //! is valid against the vendored AsyncAPI 3.1.0 JSON Schema and describes
-//! exactly the MQTT interface of the registry – the Registry services of
-//! MG A1 on its own AppId, its own publications, the subscriptions and the
-//! `Get`s it uses to collect – with the D1 topic schemas as payloads.
+//! exactly the MQTT interface of the registry – on its own AppId every
+//! topic form of MG 7/9 (the SDK at Messaging Level 3, including the
+//! Registry services of MG A1), the subscriptions and the `Get`s it uses
+//! to collect – with the D1 topic schemas as payloads. The Go test
+//! `TestD7Level3` checks the topics of the running registry against it.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use oec::ServiceType;
+use oec_core::topic::{Form, Method, Presence, Resource, Service, Subject};
 use serde_json::Value;
 
 use crate::bus::COLLECTED;
+use crate::directory::Want;
 
 const D1: &str = "https://schemas.openindustry4.com/oec/v2/topics/";
 
@@ -54,13 +58,44 @@ fn asyncapi_is_valid() {
     assert_eq!(doc["info"]["version"], env!("CARGO_PKG_VERSION"));
 }
 
-/// The channels: (own AppId, method, resource, with Source).
+/// The topic forms of a method and subject (REQ-TOP-013): with Source,
+/// with Filter.
+fn forms(method: Method, subject: Subject) -> Vec<(bool, bool)> {
+    let Some(form) = Form::of(method, subject) else {
+        return Vec::new();
+    };
+    let admits = |p: Presence| match p {
+        Presence::Forbidden => vec![false],
+        Presence::Optional => vec![false, true],
+        Presence::Required => vec![true],
+    };
+    let mut out = Vec::new();
+    for source in admits(form.source) {
+        for filter in admits(form.filter) {
+            if source || !filter {
+                out.push((source, filter));
+            }
+        }
+    }
+    out
+}
+
+fn subjects() -> impl Iterator<Item = Subject> {
+    Resource::ALL
+        .iter()
+        .map(|r| Subject::Resource(*r))
+        .chain(Service::ALL.iter().map(|s| Subject::Service(*s)))
+}
+
+type Channel = (String, String, bool, bool);
+
+/// The channels: (method, resource, with Source, with Filter), own and of
+/// others.
 #[test]
 fn asyncapi_channels_are_the_interface() {
     let doc = asyncapi();
-    let collected: BTreeSet<&str> = COLLECTED.iter().map(|r| r.as_str()).collect();
-    let mut own = BTreeSet::new();
-    let mut others = BTreeSet::new();
+    let mut own: BTreeSet<Channel> = BTreeSet::new();
+    let mut others: BTreeSet<Channel> = BTreeSet::new();
     for (name, channel) in doc["channels"].as_object().expect("channels") {
         let address = channel["address"].as_str().expect("address");
         let levels: Vec<&str> = address.split('/').collect();
@@ -76,14 +111,15 @@ fn asyncapi_channels_are_the_interface() {
             .unwrap_or_default();
         assert_eq!(used, declared, "{name}");
         let (method, resource) = (levels[3], levels[4]);
-        assert!(collected.contains(resource), "{name}: {resource}");
-        let source = match &levels[5..] {
-            [] => false,
-            ["{source}"] => true,
+        let (source, filter) = match &levels[5..] {
+            [] => (false, false),
+            ["{source}"] => (true, false),
+            ["{source}", "{filter}"] => (true, true),
             rest => panic!("{name}: {rest:?}"),
         };
+        let key = (method.to_owned(), resource.to_owned(), source, filter);
         match (levels[1], levels[2]) {
-            ("Registry", "{appId}") => assert!(own.insert((method, resource, source)), "{name}"),
+            ("Registry", "{appId}") => assert!(own.insert(key), "{name}"),
             ("{serviceType}", "{otherAppId}") => {
                 let names: BTreeSet<&str> = channel["parameters"]["serviceType"]["enum"]
                     .as_array()
@@ -93,7 +129,7 @@ fn asyncapi_channels_are_the_interface() {
                     .collect();
                 let all: BTreeSet<&str> = ServiceType::ALL.iter().map(|s| s.as_str()).collect();
                 assert_eq!(names, all, "{name}");
-                assert!(others.insert((method, resource, source)), "{name}");
+                assert!(others.insert(key), "{name}");
             }
             other => panic!("{name}: {other:?}"),
         }
@@ -110,31 +146,51 @@ fn asyncapi_channels_are_the_interface() {
         let schema = json(&root().join("../schema/v2/topics").join(&file));
         assert_eq!(schema["$id"], format!("{D1}{file}"), "{name}");
     }
-    // MG A1 (REQ-REG-002): Get and Pub, with and without Source, per resource
+    // own: every form of MG 7/9 – the SDK serves all of them at Level 3,
+    // MAM and Health with and without Source being the Registry services of
+    // MG A1 (REQ-REG-002)
     let mut want = BTreeSet::new();
-    for r in &collected {
-        for m in ["Get", "Pub"] {
-            for s in [false, true] {
-                want.insert((m, *r, s));
+    for method in Method::ALL {
+        for subject in subjects() {
+            for (source, filter) in forms(*method, subject) {
+                want.insert((
+                    method.as_str().to_owned(),
+                    subject.to_string(),
+                    source,
+                    filter,
+                ));
             }
         }
     }
     assert_eq!(own, want);
-    // collecting: every Pub with Source (subscribed with #), Get without
-    let want: BTreeSet<_> = collected
-        .iter()
-        .flat_map(|r| [("Pub", *r, true), ("Get", *r, false)])
-        .collect();
+    // collecting: every form of Pub of the collected resources (subscribed
+    // with #), Get without Source of what the registry asks for
+    let mut want = BTreeSet::new();
+    for r in COLLECTED {
+        let subject = Subject::Resource(r);
+        for (source, filter) in forms(Method::Pub, subject) {
+            want.insert(("Pub".to_owned(), subject.to_string(), source, filter));
+        }
+    }
+    for w in Want::ALL {
+        want.insert((
+            "Get".to_owned(),
+            w.resource().as_str().to_owned(),
+            false,
+            false,
+        ));
+    }
     assert_eq!(others, want);
 }
 
 /// Every operation points to a channel of the document and its messages;
 /// the registry receives requests to itself and publications of others,
-/// and sends its publications and `Get`s to others only (ADR-0008).
+/// and sends its publications, its replies and `Get`s to others only
+/// (ADR-0008); a `Get` is answered by `Pub`, a `Call` by `Reply`.
 #[test]
 fn asyncapi_operations_are_read_only() {
     let doc = asyncapi();
-    let mut received = BTreeSet::new();
+    let mut used = BTreeSet::new();
     for (name, op) in doc["operations"].as_object().expect("operations") {
         let channel = resolve(&doc, &op["channel"]);
         let address = channel["address"].as_str().expect("address");
@@ -145,29 +201,41 @@ fn asyncapi_operations_are_read_only() {
         let own = levels[1] == "Registry";
         let action = op["action"].as_str().expect("action");
         match (own, levels[3], action) {
-            (true, "Get", "receive") | (false, "Pub", "receive") => {
-                received.insert(address);
+            (true, "Get" | "Set" | "Del" | "Call", "receive")
+            | (false, "Pub", "receive")
+            | (true, "Pub" | "Reply", "send")
+            | (false, "Get", "send") => {
+                used.insert(address);
             }
-            (true, "Pub", "send") | (false, "Get", "send") => {}
             other => panic!("{name}: {other:?}"),
         }
         if let Some(reply) = op.get("reply") {
-            assert!(own && levels[3] == "Get", "{name}");
+            let answer = match levels[3] {
+                "Get" if own => "/Pub/",
+                "Call" if own => "/Reply/",
+                _ => panic!("{name}: a reply"),
+            };
             let to = resolve(&doc, &reply["channel"])["address"]
                 .as_str()
                 .expect("address");
-            assert_eq!(to, address.replace("/Get/", "/Pub/"), "{name}");
+            assert_eq!(
+                to,
+                address.replacen(&format!("/{}/", levels[3]), answer, 1),
+                "{name}"
+            );
             for m in reply["messages"].as_array().expect("messages") {
                 resolve(&doc, m);
             }
+        } else {
+            assert!(
+                !(own && matches!(levels[3], "Get" | "Call")),
+                "{name}: no reply"
+            );
         }
     }
-    // every receiving channel has its operation
+    // every channel has its operation
     for channel in doc["channels"].as_object().expect("channels").values() {
         let address = channel["address"].as_str().expect("address");
-        let levels: Vec<&str> = address.split('/').collect();
-        if (levels[1] == "Registry") == (levels[3] == "Get") {
-            assert!(received.contains(address), "{address}");
-        }
+        assert!(used.contains(address), "{address}");
     }
 }

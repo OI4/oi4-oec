@@ -2,7 +2,10 @@
 //! (ADR-0008): read-only. It collects the MAM and Health of the assets on
 //! the Message Bus (REQ-REG-001) and offers them to others with the
 //! Registry services `Get/MAM[/<Source>]` and `Get/Health[/<Source>]` on
-//! its own AppId (REQ-REG-002).
+//! its own AppId (REQ-REG-002). It also collects the Profile, Events,
+//! PublicationList and SubscriptionList of the applications, observes
+//! their Messaging level and checks their messages against the schemas
+//! (informative). Its settings are its own Config `registry`.
 //!
 //! Environment: `OEC_ROOT` (container storage, default `/`) and
 //! `OEC_REGISTRY_LOG` (`error`, `warn`, `info` (default), `debug`) for the
@@ -43,9 +46,9 @@ fn product() -> Product {
         .software_revision(env!("CARGO_PKG_VERSION"))
 }
 
-/// The Messaging level of the current increment (ADR-0029 §2): Level 2,
-/// the first level that serves `Get` (ADR-0020 §3).
-const LEVEL: Level = Level::L2;
+/// The Messaging level of the registry (ADR-0029 §2, increment 2):
+/// Level 3, with its own Config and a persistent ReferenceDesignation.
+const LEVEL: Level = Level::L3;
 
 fn run() -> Result<(), String> {
     let level = match std::env::var("OEC_REGISTRY_LOG").as_deref() {
@@ -64,7 +67,11 @@ fn run() -> Result<(), String> {
         "OEC Registry {} at Level {LEVEL:?}",
         app.identification_link().as_str()
     );
-    let _bus = bus::Bus::start(app.handle())?;
+    let config = app
+        .this()
+        .add_config(bus::config())
+        .map_err(|e| e.to_string())?;
+    let _bus = bus::Bus::start(app.handle(), config)?;
     app.run().map_err(|e| e.to_string())
 }
 

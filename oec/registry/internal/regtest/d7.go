@@ -36,8 +36,9 @@ type D7 struct {
 // imported: D7 stays independent, ADR-0006) against the registry on a test
 // broker, with the proxy attachment, the restart hook, the peer and D7
 // announced (pattern oec/sdk/go/d7_test.go, C-076). It fails on every
-// fail, on a test of Pass that does not pass and on exit ≠ 0.
-func RunD7(t *testing.T, d D7) {
+// fail, on a test of Pass that does not pass and on exit ≠ 0. It returns
+// the broker, for a look at the wire.
+func RunD7(t *testing.T, d D7) *Broker {
 	t.Helper()
 	check := Tool(t, "OEC_D7", "", "go build ./cmd/oec-check in oec/conformance")
 	b := StartBroker(t)
@@ -144,6 +145,7 @@ func RunD7(t *testing.T, d D7) {
 	if r.Exit != 0 || t.Failed() {
 		t.Errorf("exit %d\n%s", r.Exit, out)
 	}
+	return b
 }
 
 func tail(b []byte, n int) []byte {

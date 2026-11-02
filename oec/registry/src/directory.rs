@@ -1,9 +1,10 @@
-//! The directory of the registry (ADR-0029 §3): one entry per
-//! Identification Link, fed by the `Pub/MAM` and `Pub/Health` messages on
-//! the bus. Sans-IO: every message returns the effects for the bus side –
-//! list or unlist an available asset in the Registry services (MG A1,
-//! REQ-REG-002) and ask an application with `Get` for what is missing
-//! (ADR-0029 §4).
+//! The directory of the registry (ADR-0029 §3, §6): one entry per
+//! Identification Link, fed by the `Pub/MAM`, `Pub/Health`, `Pub/Profile`,
+//! `Pub/Event`, `Pub/PublicationList` and `Pub/SubscriptionList` messages
+//! on the bus and by the answers to the registry's `Get`s. Sans-IO: every
+//! message returns the effects for the bus side – list or unlist an
+//! available asset in the Registry services (MG A1, REQ-REG-002) and ask an
+//! application with `Get` (ADR-0029 §4).
 //!
 //! Rules (MG 6.3, MG A1, REQ-LIFE-011 … 013):
 //! 1. A `Pub/MAM` of an application about itself without `ReplyTo` is its
@@ -19,6 +20,19 @@
 //!    publisher.
 //! 5. Available = online with MAM and Health known; only available assets
 //!    are listed.
+//! 6. When an application comes online (rules 1 and 2) the registry asks
+//!    it once with `Get` (without Source) for `MAM`, `Health`, `Profile`,
+//!    `PublicationList` and `SubscriptionList` (increment 2, C-087): the
+//!    answers cover its devices too and show which methods and resources
+//!    it serves. Later, `MAM` and `Health` are asked again while one is
+//!    missing for the application or a device.
+//!
+//! Collected besides MAM and Health (MG A1 optional, REQ-REG-004/005): the
+//! Profile per entry, a bounded history of Health changes, a bounded trail
+//! of the Events of all participants, the PublicationList and
+//! SubscriptionList per application, the answers per entry, the schema
+//! conformity per participant (counted by the bus side, [`Conformity`]) and
+//! the observed Messaging level (informative, REQ-CMP-013, [`Observed`]).
 //!
 //! Ignored (counted): the registry's own messages, the republications of
 //! other registries (a `Source` ≠ `AppId` under ServiceType Registry is a
@@ -26,11 +40,13 @@
 //! ProductInstanceUri is not its `Source`, and a device message about a
 //! known application.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use oec::ServiceType;
-use oec::consumer::{Health, HealthState};
+use oec::consumer::{Health, HealthState, Resource};
 use oec::identity::Mam;
+use oec_core::resource::{Event, PublicationEntry, SubscriptionEntry};
+use oec_core::topic::{Service, Subject};
 
 /// What an entry is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -53,6 +69,19 @@ pub(crate) enum Availability {
     OfflineUngraceful,
 }
 
+/// The outcome of the requests for a resource of an entry since its
+/// publisher came online.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum Answer {
+    /// Answered (an answer with `ReplyTo` about the entry, or the
+    /// registry's `Get` was answered, an empty list included).
+    Answered,
+    /// The registry's `Get` got no answer in time.
+    Timeout,
+    /// The registry's `Get` was refused or failed otherwise.
+    Refused(String),
+}
+
 /// One asset (ADR-0029 §3).
 #[derive(Debug, Clone)]
 pub(crate) struct Entry {
@@ -71,6 +100,19 @@ pub(crate) struct Entry {
     pub(crate) first_seen: u64,
     pub(crate) last_seen: u64,
     pub(crate) online_since: Option<u64>,
+    /// The resources and services of its last Profile.
+    pub(crate) profile: Option<Vec<Subject>>,
+    /// The changes of its Health (time, Health), oldest first, bounded
+    /// by [`Limits::health_history`].
+    pub(crate) health_history: VecDeque<(u64, Health)>,
+    /// The answers per resource since its publisher came online.
+    pub(crate) answers: BTreeMap<Want, Answer>,
+    /// PublicationList and SubscriptionList (applications): the last
+    /// complete answer to the registry's `Get`, updated by later entries.
+    pub(crate) publications: Vec<PublicationEntry>,
+    pub(crate) subscriptions: Vec<SubscriptionEntry>,
+    /// The resources received about it at all (Level 1 of [`Observed`]).
+    seen: BTreeSet<Want>,
     /// Time of the last MAM (rule 4).
     mam_at: Option<u64>,
 }
@@ -88,6 +130,12 @@ impl Entry {
             first_seen: o.now,
             last_seen: o.now,
             online_since: None,
+            profile: None,
+            health_history: VecDeque::new(),
+            answers: BTreeMap::new(),
+            publications: Vec::new(),
+            subscriptions: Vec::new(),
+            seen: BTreeSet::new(),
             mam_at: None,
         }
     }
@@ -97,11 +145,25 @@ impl Entry {
         self.availability == Availability::Online && self.mam.is_some() && self.health.is_some()
     }
 
-    fn online(&mut self, now: u64) {
-        if self.availability != Availability::Online {
-            self.availability = Availability::Online;
-            self.online_since = Some(now);
+    /// Online now; `true` if it was not.
+    fn online(&mut self, now: u64) -> bool {
+        if self.availability == Availability::Online {
+            return false;
         }
+        self.availability = Availability::Online;
+        self.online_since = Some(now);
+        true
+    }
+
+    fn received(&mut self, want: Want, reply: bool) {
+        self.seen.insert(want);
+        if reply {
+            self.answers.insert(want, Answer::Answered);
+        }
+    }
+
+    fn answered(&self, want: Want) -> bool {
+        self.answers.get(&want) == Some(&Answer::Answered)
     }
 }
 
@@ -119,12 +181,37 @@ pub(crate) struct Origin<'a> {
     pub(crate) now: u64,
 }
 
-/// What the registry asks an application for (without Source: the
-/// answer covers the application and its devices).
+/// What the registry asks an application for, in this order (without
+/// Source: the answer covers the application and its devices).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) enum Want {
     Mam,
     Health,
+    Profile,
+    PublicationList,
+    SubscriptionList,
+}
+
+impl Want {
+    /// Everything, in the order of the requests (rule 6).
+    pub(crate) const ALL: [Self; 5] = [
+        Self::Mam,
+        Self::Health,
+        Self::Profile,
+        Self::PublicationList,
+        Self::SubscriptionList,
+    ];
+
+    /// The resource of the `Get`.
+    pub(crate) fn resource(self) -> Resource {
+        match self {
+            Self::Mam => Resource::Mam,
+            Self::Health => Resource::Health,
+            Self::Profile => Resource::Profile,
+            Self::PublicationList => Resource::PublicationList,
+            Self::SubscriptionList => Resource::SubscriptionList,
+        }
+    }
 }
 
 /// A `Get` to an application.
@@ -146,8 +233,90 @@ pub(crate) enum Effect {
     },
     /// Remove an asset that is no longer available.
     Unlist(String),
-    /// Ask an application for what is missing.
+    /// Ask an application.
     Fetch(Fetch),
+}
+
+/// The bounds of the collected histories (the registry's Config, group
+/// `directory`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct Limits {
+    /// Health changes kept per entry.
+    pub(crate) health_history: usize,
+    /// Events kept in the trail.
+    pub(crate) event_trail: usize,
+    /// Schema violations kept per participant.
+    pub(crate) violation_trail: usize,
+}
+
+impl Default for Limits {
+    fn default() -> Self {
+        Self {
+            health_history: 20,
+            event_trail: 200,
+            violation_trail: 10,
+        }
+    }
+}
+
+/// One Event of the trail.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct EventRecord {
+    /// Registry clock, Unix ms.
+    pub(crate) at: u64,
+    /// AppId of the publisher.
+    pub(crate) publisher: String,
+    /// Its `Source` (DataSetWriterName).
+    pub(crate) source: String,
+    /// The Filter of its topic (category and level, MG 7.6).
+    pub(crate) filter: Option<String>,
+    pub(crate) event: Event,
+}
+
+/// A message that violates the D1 schemas (or is no message at all).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct Violation {
+    /// Registry clock, Unix ms.
+    pub(crate) at: u64,
+    pub(crate) topic: String,
+    /// The violated requirements, sorted and unique; empty if unknown.
+    pub(crate) reqs: Vec<String>,
+    /// What is wrong (bounded).
+    pub(crate) message: String,
+}
+
+/// The schema conformity of one participant (ADR-0029 §6), judged by the
+/// bus side with the strict D1 schemas, independent of D7.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub(crate) struct Conformity {
+    /// Checked messages (NetworkMessages).
+    pub(crate) messages: u64,
+    /// Of which violate the schemas.
+    pub(crate) violations: u64,
+    /// The last violations, oldest first, bounded by
+    /// [`Limits::violation_trail`].
+    pub(crate) last: VecDeque<Violation>,
+}
+
+/// The observed Messaging level of an entry (REQ-CMP-013, ADR-0008):
+/// informative, never a compliance claim; derived from what the registry
+/// received about the entry since its publisher came online.
+///
+/// - Level 1: MAM and Health about it received (REQ-CMP-014).
+/// - Level 2: `Get` answered (REQ-CMP-015), `MAM` and `Health` among the
+///   answers (REQ-CMP-017).
+/// - Level 3: its Profile answered (REQ-CMP-018) and listing
+///   ReferenceDesignation (REQ-CMP-020), Config, Data, Metadata and Event
+///   (REQ-CMP-035 … 038); for an application also PublicationList and
+///   SubscriptionList, listed and answered (REQ-CMP-019, REQ-CMP-039), and
+///   the service NewDataSetWriterId (REQ-CMP-034).
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
+pub(crate) struct Observed {
+    /// 0 (not yet seen) … 3.
+    pub(crate) level: u8,
+    /// The requirements of the next level not observed (empty at 3).
+    pub(crate) missing: Vec<&'static str>,
 }
 
 /// The directory: see the [module](self).
@@ -157,6 +326,9 @@ pub(crate) struct Directory {
     entries: BTreeMap<String, Entry>,
     listed: BTreeSet<String>,
     ignored: u64,
+    limits: Limits,
+    events: VecDeque<EventRecord>,
+    conformity: BTreeMap<String, Conformity>,
 }
 
 fn fetch(o: &Origin<'_>, want: Want) -> Effect {
@@ -167,6 +339,10 @@ fn fetch(o: &Origin<'_>, want: Want) -> Effect {
     })
 }
 
+fn fetch_all<'a>(o: &'a Origin<'_>) -> impl Iterator<Item = Effect> + 'a {
+    Want::ALL.into_iter().map(|w| fetch(o, w))
+}
+
 fn is_close(h: &Health) -> bool {
     h.health == HealthState::Normal && h.health_score == Some(0)
 }
@@ -174,6 +350,56 @@ fn is_close(h: &Health) -> bool {
 fn is_will(h: &Health) -> bool {
     h.health == HealthState::Failure && h.health_score == Some(0)
 }
+
+fn trim<T>(q: &mut VecDeque<T>, max: usize) {
+    while q.len() > max {
+        q.pop_front();
+    }
+}
+
+/// Puts each item in `list`, replacing one with the same key.
+fn upsert<T, K: PartialEq>(list: &mut Vec<T>, items: Vec<T>, key: impl Fn(&T) -> K) {
+    for item in items {
+        match list.iter().position(|x| key(x) == key(&item)) {
+            Some(i) => list[i] = item,
+            None => list.push(item),
+        }
+    }
+}
+
+fn publication_key(p: &PublicationEntry) -> (Resource, String, Option<String>) {
+    (p.resource, p.source.clone(), p.filter.clone())
+}
+
+/// The Profile entries of Level 3 (see [`Observed`]); the last field: only
+/// for applications.
+#[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
+const PROFILE_L3: [(Subject, &str, bool); 8] = [
+    (
+        Subject::Resource(Resource::PublicationList),
+        "REQ-CMP-019",
+        true,
+    ),
+    (
+        Subject::Resource(Resource::ReferenceDesignation),
+        "REQ-CMP-020",
+        false,
+    ),
+    (
+        Subject::Service(Service::NewDataSetWriterId),
+        "REQ-CMP-034",
+        true,
+    ),
+    (Subject::Resource(Resource::Config), "REQ-CMP-035", false),
+    (Subject::Resource(Resource::Data), "REQ-CMP-036", false),
+    (Subject::Resource(Resource::Metadata), "REQ-CMP-037", false),
+    (Subject::Resource(Resource::Event), "REQ-CMP-038", false),
+    (
+        Subject::Resource(Resource::SubscriptionList),
+        "REQ-CMP-039",
+        true,
+    ),
+];
 
 impl Directory {
     /// The directory of the registry with the AppId `me`.
@@ -183,6 +409,9 @@ impl Directory {
             entries: BTreeMap::new(),
             listed: BTreeSet::new(),
             ignored: 0,
+            limits: Limits::default(),
+            events: VecDeque::new(),
+            conformity: BTreeMap::new(),
         }
     }
 
@@ -192,14 +421,53 @@ impl Directory {
     }
 
     /// One entry.
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3")]
+    #[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
     pub(crate) fn get(&self, il: &str) -> Option<&Entry> {
         self.entries.get(il)
+    }
+
+    /// The devices of the application `app` (the publisher relation, MG A1
+    /// optional), sorted by Identification Link.
+    #[allow(dead_code, reason = "read by the HTTP side of increment 3")]
+    pub(crate) fn devices<'a>(&'a self, app: &'a str) -> impl Iterator<Item = &'a Entry> + 'a {
+        self.entries
+            .values()
+            .filter(move |e| e.kind == Kind::Device && e.publisher == app)
     }
 
     /// The number of ignored messages.
     pub(crate) fn ignored(&self) -> u64 {
         self.ignored
+    }
+
+    /// The bounds of the histories.
+    #[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
+    pub(crate) fn limits(&self) -> Limits {
+        self.limits
+    }
+
+    /// Changes the bounds; longer histories are cut at once.
+    pub(crate) fn set_limits(&mut self, limits: Limits) {
+        self.limits = limits;
+        for e in self.entries.values_mut() {
+            trim(&mut e.health_history, limits.health_history);
+        }
+        trim(&mut self.events, limits.event_trail);
+        for c in self.conformity.values_mut() {
+            trim(&mut c.last, limits.violation_trail);
+        }
+    }
+
+    /// The Event trail, oldest first.
+    #[allow(dead_code, reason = "read by the HTTP side of increment 3")]
+    pub(crate) fn events(&self) -> impl Iterator<Item = &EventRecord> {
+        self.events.iter()
+    }
+
+    /// The schema conformity of the participant with the AppId `app`.
+    #[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
+    pub(crate) fn conformity(&self, app: &str) -> Option<&Conformity> {
+        self.conformity.get(app)
     }
 
     fn ignore(&mut self, o: &Origin<'_>) -> bool {
@@ -214,6 +482,16 @@ impl Directory {
             self.ignored += 1;
         }
         skip
+    }
+
+    /// Rule 6: the application `app` came online; the answers of it and
+    /// its devices from before do not count.
+    fn reborn(&mut self, app: &str) {
+        for e in self.entries.values_mut() {
+            if e.il == app || (e.kind == Kind::Device && e.publisher == app) {
+                e.answers.clear();
+            }
+        }
     }
 
     /// A `Pub/MAM` message.
@@ -235,16 +513,20 @@ impl Directory {
             e.last_seen = o.now;
             e.service_type = o.service_type;
             let was_online = known && e.availability == Availability::Online;
-            if !known || (!was_online && !o.reply) {
+            let came = (!known || (!was_online && !o.reply)) && {
                 // Birth or first sighting; a Health from before is stale
                 if known {
                     e.health = None;
                 }
-                e.online(o.now);
-            }
+                e.online(o.now)
+            };
             e.mam = Some(mam);
             e.mam_at = Some(o.now);
-            if e.availability == Availability::Online && e.health.is_none() {
+            let health = e.availability == Availability::Online && e.health.is_none();
+            if came {
+                self.reborn(o.app);
+                out.extend(fetch_all(o));
+            } else if health {
                 out.push(fetch(o, Want::Health));
             }
         } else {
@@ -259,6 +541,7 @@ impl Directory {
             }
         }
         out.extend(self.sync(o.app));
+        self.received(o, Want::Mam);
         out
     }
 
@@ -268,6 +551,7 @@ impl Directory {
             return Vec::new();
         }
         let mut out = Vec::new();
+        let keep = self.limits.health_history;
         if o.source == o.app {
             let known = self.entries.contains_key(o.app);
             let e = self
@@ -276,6 +560,7 @@ impl Directory {
                 .or_insert_with(|| Entry::new(o.app, Kind::Application, o));
             e.last_seen = o.now;
             e.service_type = o.service_type;
+            let mut came = false;
             if is_close(&health) {
                 e.availability = Availability::OfflineGraceful;
                 e.online_since = None;
@@ -283,14 +568,20 @@ impl Directory {
                 e.availability = Availability::OfflineUngraceful;
                 e.online_since = None;
             } else if !known {
-                e.online(o.now);
+                came = e.online(o.now);
             }
+            remember(e, o.now, &health, keep);
             e.health = Some(health);
-            if e.availability == Availability::Online && e.mam.is_none() {
+            let mam = e.availability == Availability::Online && e.mam.is_none();
+            if came {
+                self.reborn(o.app);
+                out.extend(fetch_all(o));
+            } else if mam {
                 out.push(fetch(o, Want::Mam));
             }
         } else {
             let e = self.device(o);
+            remember(e, o.now, &health, keep);
             e.health = Some(health);
             let mam = e.mam.is_none();
             match self.entries.get(o.app).map(|p| p.availability) {
@@ -300,12 +591,134 @@ impl Directory {
             }
         }
         out.extend(self.sync(o.app));
+        self.received(o, Want::Health);
         out
     }
 
+    /// A `Pub/Profile` message about a known entry.
+    pub(crate) fn profile(&mut self, o: &Origin<'_>, resources: Vec<Subject>) {
+        if self.ignore(o) {
+            return;
+        }
+        if let Some(e) = self.known(o) {
+            e.profile = Some(resources);
+            e.received(Want::Profile, o.reply);
+        }
+    }
+
+    /// A `Pub/Event` message: into the trail.
+    pub(crate) fn event(&mut self, o: &Origin<'_>, filter: Option<String>, event: Event) {
+        if self.ignore(o) {
+            return;
+        }
+        self.events.push_back(EventRecord {
+            at: o.now,
+            publisher: o.app.to_owned(),
+            source: o.source.to_owned(),
+            filter,
+            event,
+        });
+        trim(&mut self.events, self.limits.event_trail);
+    }
+
+    /// `Pub/PublicationList` entries of the application `o.app`.
+    pub(crate) fn publications(&mut self, o: &Origin<'_>, entries: Vec<PublicationEntry>) {
+        if o.app == self.me {
+            return;
+        }
+        if let Some(e) = self.application(o.app) {
+            upsert(&mut e.publications, entries, publication_key);
+            e.received(Want::PublicationList, o.reply);
+        }
+    }
+
+    /// `Pub/SubscriptionList` entries of the application `o.app`.
+    pub(crate) fn subscriptions(&mut self, o: &Origin<'_>, entries: Vec<SubscriptionEntry>) {
+        if o.app == self.me {
+            return;
+        }
+        if let Some(e) = self.application(o.app) {
+            upsert(&mut e.subscriptions, entries, |s| s.topic_path.clone());
+            e.received(Want::SubscriptionList, o.reply);
+        }
+    }
+
+    /// The outcome of the registry's `Get` `f`. A complete answer to `Get
+    /// PublicationList` or `Get SubscriptionList` (without Source and
+    /// Filter) replaces the list of the application.
+    pub(crate) fn asked(&mut self, f: &Fetch, answer: Answer, lists: Lists) {
+        let Some(e) = self.application(&f.app) else {
+            return;
+        };
+        if answer == Answer::Answered {
+            match lists {
+                Lists::Publications(p) => e.publications = p,
+                Lists::Subscriptions(s) => e.subscriptions = s,
+                Lists::None => {}
+            }
+            e.answers.insert(f.want, Answer::Answered);
+        } else if !e.answered(f.want) {
+            e.answers.insert(f.want, answer);
+        }
+    }
+
+    /// A message of the participant `app` was checked against the schemas
+    /// (`None`: it conforms).
+    pub(crate) fn checked(&mut self, app: &str, violation: Option<Violation>) {
+        if app == self.me {
+            return;
+        }
+        let c = self.conformity.entry(app.to_owned()).or_default();
+        c.messages += 1;
+        if let Some(v) = violation {
+            c.violations += 1;
+            c.last.push_back(v);
+            trim(&mut c.last, self.limits.violation_trail);
+        }
+    }
+
+    /// The observed Messaging level of the entry `il` (see [`Observed`]).
+    #[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
+    pub(crate) fn observed(&self, il: &str) -> Option<Observed> {
+        let e = self.entries.get(il)?;
+        let app = e.kind == Kind::Application;
+        let mut levels: [Vec<&'static str>; 3] = Default::default();
+        if !(e.seen.contains(&Want::Mam) && e.seen.contains(&Want::Health)) {
+            levels[0].push("REQ-CMP-014");
+        }
+        if !e.answers.values().any(|a| *a == Answer::Answered) {
+            levels[1].push("REQ-CMP-015");
+        }
+        if !(e.answered(Want::Mam) && e.answered(Want::Health)) {
+            levels[1].push("REQ-CMP-017");
+        }
+        let l3 = &mut levels[2];
+        if !e.answered(Want::Profile) {
+            l3.push("REQ-CMP-018");
+        }
+        let profile = e.profile.as_deref().unwrap_or_default();
+        for (subject, req, apps_only) in PROFILE_L3 {
+            if (app || !apps_only) && !profile.contains(&subject) {
+                l3.push(req);
+            }
+        }
+        if app && !e.answered(Want::PublicationList) && !l3.contains(&"REQ-CMP-019") {
+            l3.push("REQ-CMP-019");
+        }
+        if app && !e.answered(Want::SubscriptionList) && !l3.contains(&"REQ-CMP-039") {
+            l3.push("REQ-CMP-039");
+        }
+        l3.sort_unstable();
+        let reached = levels.iter().take_while(|m| m.is_empty()).count();
+        Some(Observed {
+            level: u8::try_from(reached).unwrap_or(3),
+            missing: levels.get(reached).cloned().unwrap_or_default(),
+        })
+    }
+
     /// Whether `f` is still needed: the application is unknown (only for
-    /// its MAM) or online and lacks the resource for itself or one of its
-    /// devices.
+    /// its MAM), or online and has not answered it since it came online,
+    /// or (MAM, Health) lacks it for itself or one of its devices.
     pub(crate) fn missing(&self, f: &Fetch) -> bool {
         let Some(app) = self.entries.get(&f.app) else {
             return f.want == Want::Mam;
@@ -313,15 +726,37 @@ impl Directory {
         if app.availability != Availability::Online {
             return false;
         }
+        if !app.answers.contains_key(&f.want) {
+            return true;
+        }
         let lacks = |e: &Entry| match f.want {
             Want::Mam => e.mam.is_none(),
             Want::Health => e.health.is_none(),
+            _ => false,
         };
         lacks(app)
             || self
                 .entries
                 .values()
                 .any(|e| e.kind == Kind::Device && e.publisher == f.app && lacks(e))
+    }
+
+    fn known(&mut self, o: &Origin<'_>) -> Option<&mut Entry> {
+        let e = self.entries.get_mut(o.source)?;
+        (e.publisher == o.app).then_some(e)
+    }
+
+    fn application(&mut self, app: &str) -> Option<&mut Entry> {
+        self.entries
+            .get_mut(app)
+            .filter(|e| e.kind == Kind::Application)
+    }
+
+    /// Marks `want` received about `o.source` after the effects of rule 6.
+    fn received(&mut self, o: &Origin<'_>, want: Want) {
+        if let Some(e) = self.known(o) {
+            e.received(want, o.reply);
+        }
     }
 
     fn device(&mut self, o: &Origin<'_>) -> &mut Entry {
@@ -372,6 +807,27 @@ impl Directory {
             }
         }
         out
+    }
+}
+
+/// The lists of a complete answer (see [`Directory::asked`]).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub(crate) enum Lists {
+    #[default]
+    None,
+    Publications(Vec<PublicationEntry>),
+    Subscriptions(Vec<SubscriptionEntry>),
+}
+
+/// Appends a changed Health (state or score) to the history.
+fn remember(e: &mut Entry, now: u64, health: &Health, max: usize) {
+    let changed = e
+        .health_history
+        .back()
+        .is_none_or(|(_, h)| h.health != health.health || h.health_score != health.health_score);
+    if changed {
+        e.health_history.push_back((now, health.clone()));
+        trim(&mut e.health_history, max);
     }
 }
 
@@ -466,7 +922,7 @@ mod tests {
         let mut d = Directory::new(ME);
         let fx = d.mam(&at(APP, APP, false, 1), mam(APP));
         assert_eq!(state(&d, APP), Availability::Online);
-        assert_eq!(fetches(&fx), [Want::Health], "Health is missing");
+        assert_eq!(fetches(&fx), Want::ALL, "rule 6");
         assert!(listed(&fx).is_empty(), "not available without Health");
         let fx = d.health(&at(APP, APP, false, 2), normal());
         assert_eq!(listed(&fx), [APP]);
@@ -487,7 +943,7 @@ mod tests {
         let fx = d.mam(&at(APP, APP, false, 6), mam(APP));
         assert_eq!(state(&d, APP), Availability::Online);
         assert!(d.get(APP).unwrap().health.is_none());
-        assert_eq!(fetches(&fx), [Want::Health]);
+        assert_eq!(fetches(&fx), Want::ALL);
         let fx = d.health(&at(APP, APP, false, 7), normal());
         assert_eq!(listed(&fx), [APP]);
         let e = d.get(APP).unwrap();
@@ -518,14 +974,7 @@ mod tests {
         let mut d = Directory::new(ME);
         let fx = d.health(&at(APP, APP, false, 1), normal());
         assert_eq!(state(&d, APP), Availability::Online);
-        assert_eq!(
-            fx,
-            [Effect::Fetch(Fetch {
-                service_type: ServiceType::Aggregation,
-                app: APP.to_owned(),
-                want: Want::Mam
-            })]
-        );
+        assert_eq!(fetches(&fx), Want::ALL, "rule 6");
         assert!(d.missing(&Fetch {
             service_type: ServiceType::Aggregation,
             app: APP.to_owned(),
@@ -583,7 +1032,7 @@ mod tests {
         assert_eq!(state(&d, PUMP), Availability::OfflineGraceful);
         // the answer to Get MAM without Source: the publisher, then the device
         let fx = d.mam(&at(APP, APP, true, 2), mam(APP));
-        assert_eq!(fetches(&fx), [Want::Health]);
+        assert_eq!(fetches(&fx), Want::ALL);
         let fx = d.mam(&at(APP, PUMP, true, 2), mam(PUMP));
         // available on its own: MAM and Health known, its publisher online
         assert_eq!(listed(&fx), [PUMP]);
@@ -656,5 +1105,334 @@ mod tests {
             app: APP.to_owned(),
             want: Want::Mam
         }));
+    }
+
+    fn subjects(resources: &[Resource]) -> Vec<Subject> {
+        resources
+            .iter()
+            .map(|r| Subject::Resource(*r))
+            .chain([Subject::Service(Service::NewDataSetWriterId)])
+            .collect()
+    }
+
+    /// The Profile of an application of Level 3 (as the SDK's).
+    fn l3() -> Vec<Subject> {
+        subjects(&[
+            Resource::Mam,
+            Resource::Health,
+            Resource::Config,
+            Resource::Data,
+            Resource::Metadata,
+            Resource::ReferenceDesignation,
+            Resource::Event,
+            Resource::Profile,
+            Resource::PublicationList,
+            Resource::SubscriptionList,
+        ])
+    }
+
+    fn event(number: u32) -> Event {
+        serde_json::from_value(serde_json::json!({
+            "Number": number, "Category": "CAT_STATUS_1", "Description": "d"
+        }))
+        .unwrap()
+    }
+
+    fn publication(resource: Resource, source: &str, id: u16) -> PublicationEntry {
+        serde_json::from_value(serde_json::json!({
+            "Resource": resource.as_str(), "Source": source, "DataSetWriterId": id
+        }))
+        .unwrap()
+    }
+
+    fn subscription(topic: &str) -> SubscriptionEntry {
+        serde_json::from_value(serde_json::json!({ "TopicPath": topic })).unwrap()
+    }
+
+    fn ask(d: &mut Directory, want: Want, answer: Answer, lists: Lists) {
+        let f = Fetch {
+            service_type: ServiceType::Aggregation,
+            app: APP.to_owned(),
+            want,
+        };
+        d.asked(&f, answer, lists);
+    }
+
+    fn online_app(d: &mut Directory) {
+        d.mam(&at(APP, APP, false, 1), mam(APP));
+        d.health(&at(APP, APP, false, 1), normal());
+    }
+
+    /// Rule 6 and `missing`: everything is asked once per online period;
+    /// a `Get` without answer is not repeated for the resource, MAM and
+    /// Health are while they lack.
+    #[test]
+    fn asked_once_per_online_period() {
+        let mut d = Directory::new(ME);
+        online_app(&mut d);
+        let f = |want| Fetch {
+            service_type: ServiceType::Aggregation,
+            app: APP.to_owned(),
+            want,
+        };
+        for w in Want::ALL {
+            assert!(d.missing(&f(w)), "{w:?}");
+        }
+        ask(&mut d, Want::Profile, Answer::Timeout, Lists::None);
+        assert!(!d.missing(&f(Want::Profile)));
+        ask(&mut d, Want::Health, Answer::Answered, Lists::None);
+        assert!(!d.missing(&f(Want::Health)));
+        // a device lacks its Health: asked again
+        d.mam(&at(APP, PUMP, false, 2), mam(PUMP));
+        assert!(d.missing(&f(Want::Health)));
+        // a later answer counts, a later failure does not undo it
+        ask(&mut d, Want::Profile, Answer::Answered, Lists::None);
+        ask(&mut d, Want::Profile, Answer::Timeout, Lists::None);
+        assert_eq!(
+            d.get(APP).unwrap().answers.get(&Want::Profile),
+            Some(&Answer::Answered)
+        );
+        // the next Birth: asked again
+        d.health(&at(APP, APP, false, 3), health(HealthState::Normal, 0));
+        let fx = d.mam(&at(APP, APP, false, 4), mam(APP));
+        assert_eq!(fetches(&fx), Want::ALL);
+        assert!(d.get(APP).unwrap().answers.is_empty());
+        assert!(d.missing(&f(Want::Profile)));
+    }
+
+    /// Profile, Events, PublicationList and SubscriptionList; the
+    /// publisher relation.
+    #[test]
+    fn profile_events_and_lists() {
+        let mut d = Directory::new(ME);
+        online_app(&mut d);
+        d.mam(&at(APP, PUMP, false, 2), mam(PUMP));
+        d.profile(&at(APP, APP, true, 3), l3());
+        d.profile(&at(APP, PUMP, false, 3), subjects(&[Resource::Mam]));
+        // of an unknown entry or the wrong publisher: dropped
+        d.profile(&at(APP, OTHER, false, 3), l3());
+        d.profile(&at(OTHER, PUMP, false, 3), l3());
+        assert_eq!(d.get(APP).unwrap().profile, Some(l3()));
+        assert_eq!(
+            d.get(PUMP).unwrap().profile,
+            Some(subjects(&[Resource::Mam]))
+        );
+        assert!(d.get(OTHER).is_none());
+        let devices: Vec<&str> = d.devices(APP).map(|e| e.il.as_str()).collect();
+        assert_eq!(devices, [PUMP]);
+
+        // the Event trail of all participants, bounded, own ones ignored
+        d.set_limits(Limits {
+            event_trail: 2,
+            ..Limits::default()
+        });
+        d.event(
+            &at(APP, APP, false, 4),
+            Some("CAT_STATUS_1/Good".into()),
+            event(0),
+        );
+        d.event(&at(ME, ME, false, 4), None, event(1));
+        d.event(&at(APP, PUMP, false, 5), None, event(2));
+        d.event(&at(OTHER, OTHER, false, 6), None, event(3));
+        let trail: Vec<(u64, &str, u32)> = d
+            .events()
+            .map(|r| (r.at, r.source.as_str(), r.event.number))
+            .collect();
+        assert_eq!(trail, [(5, PUMP, 2), (6, OTHER, 3)]);
+
+        // lists: entries are put in by key; the complete answer to the
+        // registry's Get replaces them
+        d.publications(
+            &at(APP, APP, false, 7),
+            vec![
+                publication(Resource::Mam, APP, 11),
+                publication(Resource::Mam, PUMP, 12),
+            ],
+        );
+        d.publications(
+            &at(APP, PUMP, false, 8),
+            vec![publication(Resource::Mam, PUMP, 13)],
+        );
+        let ids = |d: &Directory| -> Vec<u16> {
+            d.get(APP)
+                .unwrap()
+                .publications
+                .iter()
+                .map(|p| p.data_set_writer_id.get())
+                .collect()
+        };
+        assert_eq!(ids(&d), [11, 13]);
+        ask(
+            &mut d,
+            Want::PublicationList,
+            Answer::Answered,
+            Lists::Publications(vec![publication(Resource::Health, APP, 14)]),
+        );
+        assert_eq!(ids(&d), [14]);
+        d.subscriptions(
+            &at(APP, APP, false, 9),
+            vec![subscription("Oi4v2/+/+/Pub/MAM/#")],
+        );
+        d.subscriptions(
+            &at(APP, APP, false, 9),
+            vec![subscription("Oi4v2/+/+/Pub/MAM/#"), subscription("t")],
+        );
+        assert_eq!(d.get(APP).unwrap().subscriptions.len(), 2);
+        ask(
+            &mut d,
+            Want::SubscriptionList,
+            Answer::Answered,
+            Lists::Subscriptions(Vec::new()),
+        );
+        assert!(d.get(APP).unwrap().subscriptions.is_empty());
+        // lists of a device's publisher only
+        d.subscriptions(&at(PUMP, PUMP, false, 9), vec![subscription("t")]);
+        assert!(d.get(PUMP).unwrap().subscriptions.is_empty());
+    }
+
+    /// The observed level (REQ-CMP-013): Level 1 by the publications,
+    /// Level 2 by the answers to Get MAM and Health, Level 3 by the
+    /// Profile and the lists; a device needs no lists.
+    #[test]
+    fn observed_level() {
+        let mut d = Directory::new(ME);
+        d.mam(&at(APP, APP, false, 1), mam(APP));
+        let o = d.observed(APP).unwrap();
+        assert_eq!((o.level, o.missing), (0, vec!["REQ-CMP-014"]));
+        d.health(&at(APP, APP, false, 1), normal());
+        let o = d.observed(APP).unwrap();
+        assert_eq!(
+            (o.level, o.missing),
+            (1, vec!["REQ-CMP-015", "REQ-CMP-017"])
+        );
+        // an answer by the raw items or the registry's Get
+        d.mam(&at(APP, APP, true, 2), mam(APP));
+        assert_eq!(d.observed(APP).unwrap().missing, ["REQ-CMP-017"]);
+        ask(&mut d, Want::Health, Answer::Answered, Lists::None);
+        let o = d.observed(APP).unwrap();
+        assert_eq!(o.level, 2);
+        assert_eq!(
+            o.missing,
+            [
+                "REQ-CMP-018",
+                "REQ-CMP-019",
+                "REQ-CMP-020",
+                "REQ-CMP-034",
+                "REQ-CMP-035",
+                "REQ-CMP-036",
+                "REQ-CMP-037",
+                "REQ-CMP-038",
+                "REQ-CMP-039"
+            ]
+        );
+        // a Profile without ReferenceDesignation, published, not answered
+        let mut profile = l3();
+        profile.retain(|s| *s != Subject::Resource(Resource::ReferenceDesignation));
+        d.profile(&at(APP, APP, false, 3), profile);
+        assert_eq!(
+            d.observed(APP).unwrap().missing,
+            ["REQ-CMP-018", "REQ-CMP-019", "REQ-CMP-020", "REQ-CMP-039"]
+        );
+        d.profile(&at(APP, APP, true, 4), l3());
+        ask(
+            &mut d,
+            Want::PublicationList,
+            Answer::Answered,
+            Lists::default(),
+        );
+        assert_eq!(d.observed(APP).unwrap().missing, ["REQ-CMP-039"]);
+        ask(&mut d, Want::SubscriptionList, Answer::Timeout, Lists::None);
+        assert_eq!(d.observed(APP).unwrap().level, 2);
+        ask(
+            &mut d,
+            Want::SubscriptionList,
+            Answer::Answered,
+            Lists::default(),
+        );
+        let o = d.observed(APP).unwrap();
+        assert_eq!((o.level, o.missing), (3, vec![]));
+
+        // a device: its MAM, Health and Profile in answers of its publisher
+        d.mam(&at(APP, PUMP, true, 5), mam(PUMP));
+        d.health(&at(APP, PUMP, true, 5), normal());
+        assert_eq!(d.observed(PUMP).unwrap().level, 2);
+        let mut device = l3();
+        device.retain(|s| {
+            !matches!(
+                s,
+                Subject::Resource(Resource::PublicationList | Resource::SubscriptionList)
+                    | Subject::Service(_)
+            )
+        });
+        d.profile(&at(APP, PUMP, true, 6), device);
+        assert_eq!(d.observed(PUMP).unwrap().level, 3);
+
+        // the next Birth: answers from before do not count
+        d.health(&at(APP, APP, false, 7), health(HealthState::Failure, 0));
+        d.mam(&at(APP, APP, false, 8), mam(APP));
+        d.health(&at(APP, APP, false, 8), normal());
+        assert_eq!(d.observed(APP).unwrap().level, 1);
+        assert_eq!(d.observed(PUMP).unwrap().level, 1);
+        assert!(d.observed(OTHER).is_none());
+    }
+
+    /// The Health history keeps the changes only, bounded; a smaller bound
+    /// cuts it at once.
+    #[test]
+    fn health_history() {
+        let mut d = Directory::new(ME);
+        online_app(&mut d);
+        d.health(&at(APP, APP, false, 2), normal());
+        d.health(&at(APP, APP, false, 3), health(HealthState::OffSpec, 50));
+        d.health(&at(APP, APP, false, 4), health(HealthState::OffSpec, 40));
+        d.health(&at(APP, APP, false, 5), health(HealthState::OffSpec, 40));
+        let times = |d: &Directory| -> Vec<u64> {
+            d.get(APP)
+                .unwrap()
+                .health_history
+                .iter()
+                .map(|(t, _)| *t)
+                .collect()
+        };
+        assert_eq!(times(&d), [1, 3, 4]);
+        d.set_limits(Limits {
+            health_history: 2,
+            ..Limits::default()
+        });
+        assert_eq!(times(&d), [3, 4]);
+        d.health(&at(APP, APP, false, 6), normal());
+        assert_eq!(times(&d), [4, 6]);
+        assert_eq!(d.limits().health_history, 2);
+    }
+
+    /// Conformity per participant: counted, the last violations bounded,
+    /// own messages not.
+    #[test]
+    fn conformity() {
+        let mut d = Directory::new(ME);
+        let v = |at: u64| Violation {
+            at,
+            topic: "t".into(),
+            reqs: vec!["REQ-MSG-003".into()],
+            message: "m".into(),
+        };
+        d.set_limits(Limits {
+            violation_trail: 2,
+            ..Limits::default()
+        });
+        d.checked(APP, None);
+        for at in 1..=3 {
+            d.checked(APP, Some(v(at)));
+        }
+        d.checked(ME, Some(v(9)));
+        let c = d.conformity(APP).unwrap();
+        assert_eq!((c.messages, c.violations), (4, 3));
+        assert_eq!(c.last.iter().map(|v| v.at).collect::<Vec<_>>(), [2, 3]);
+        assert!(d.conformity(ME).is_none());
+        d.set_limits(Limits {
+            violation_trail: 1,
+            ..Limits::default()
+        });
+        assert_eq!(d.conformity(APP).unwrap().last.len(), 1);
     }
 }
