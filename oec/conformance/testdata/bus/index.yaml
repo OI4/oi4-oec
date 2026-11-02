@@ -229,7 +229,7 @@ scenarios:
       The conforming Registry, named by --registry instead of discovered:
       T8-BUS-03 passes.
   - fault: T8-BUS-03/status-event
-    status: draft
+    status: reviewed
     positive: true
     tests: [T8-BUS-03]
     expect: {}

@@ -291,7 +291,7 @@ self-test fixtures (`testdata/images/index.yaml`, `testdata/bus/index.yaml`, `te
 | `d8` | 52 | 51 | 1 | 0 |
 | none of these (D7, manual or other tools) | 389 | | | |
 
-Fixtures: 19 image, 30 bus, 69 host, 26 container, 20 run; 28 positive; 163 of 164 reviewed.
+Fixtures: 19 image, 30 bus, 69 host, 26 container, 20 run; 28 positive; 164 of 164 reviewed.
 Tests with a negative fixture (fail, warn or info): 17 of 17; with a positive fixture: 17 of 17.
 
 ## Tests

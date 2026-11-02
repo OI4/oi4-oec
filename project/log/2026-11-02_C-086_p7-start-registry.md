@@ -127,3 +127,14 @@ See "Checks (final)".
 ## Next
 
 C-087 – P7 increment 2: Level 3 (own `Config`, persistent ReferenceDesignation), `Profile`/`Event`/`PublicationList`/`SubscriptionList`, publisher relation, observed level and conformity view, the D7 refinement for registries (A-388), D7 `level3` pinned, AsyncAPI extended.
+
+## Addendum 1 – PO review of R-1 (2026-11-02)
+
+PO answer (chat, 2026-11-02): "R-1 akzeptiert"
+
+### Applied
+
+- **R-1 accepted:** `oec/conformance/testdata/bus/index.yaml` scenario `T8-BUS-03/status-event` `draft` → `reviewed`. `COVERAGE.md` regenerated (`-update`): only the fixture line changes, 164 of 164 D8 fixtures reviewed. Conformance README `testdata/bus` row.
+- REVIEW/REVIEW_DE (R-1 ☑ accepted, nothing open), STATUS (header, blocking line, cycle row C-086 addendum 1).
+- No other change; the handover stays (new session for C-087, `prompt.md` updated: R-1 no longer open).
+- Checks: `go test ./...` of `oec/conformance` green; `oec/check.sh` → all checks passed.
