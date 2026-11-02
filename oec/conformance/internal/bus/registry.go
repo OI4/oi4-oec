@@ -63,7 +63,7 @@ func health(state string, score int) map[string]any {
 
 func (c *component) message(resource string, writer int, payload any) mqttwire.Message {
 	doc := map[string]any{"MessageId": c.mk.next(), "MessageType": "ua-data", "PublisherId": c.pid, "DataSetClassId": probe.Classes[resource], "ReplyTo": "",
-		"Messages": []any{map[string]any{"DataSetWriterId": writer, "DataSetWriterName": c.il, "Payload": payload}}}
+		"Messages": []any{map[string]any{"DataSetWriterId": writer, "WriterGroupName": "", "DataSetWriterName": c.il, "Payload": payload}}}
 	raw, _ := json.Marshal(doc)
 	return mqttwire.Message{Topic: probe.Topic(ServiceType, c.il, "Pub", resource, c.il, ""), Payload: raw, QoS: 1}
 }
@@ -217,6 +217,7 @@ func (p *registryProbe) round(ctx context.Context, wait time.Duration, qs []quer
 		}
 	}
 	var out []problem
+	status := p.topic("Pub", "Event", p.il) + "/Status/"
 	for i, q := range qs {
 		get, want := "Get "+q.resource, p.topic("Pub", q.resource, q.source)
 		if q.source != "" {
@@ -235,7 +236,9 @@ func (p *registryProbe) round(ctx context.Context, wait time.Duration, qs []quer
 			continue
 		}
 		for _, a := range res[i].as {
-			if a.topic != want {
+			// An absent Source is an unknown asset: the Status Event of
+			// SF-099 under the AppId (SF-108) is a conforming answer.
+			if a.topic != want && !(len(q.present) == 0 && strings.HasPrefix(a.topic, status)) {
 				out = append(out, problem{reqAnswer, a.topic, fmt.Sprintf("the answer to %s is published on %s, not on %s", get, a.topic, want)})
 			}
 			if a.publisherID != "Registry/"+p.il {

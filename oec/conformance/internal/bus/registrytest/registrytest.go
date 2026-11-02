@@ -32,6 +32,11 @@ const (
 	KeepsWill    = "keeps-will"    // ignores the Will
 )
 
+// StatusEvent is a conforming variant (no fault): the Registry answers a
+// Get for an unknown Source with the Status Event of SF-099 under its own
+// AppId (SF-108) instead of no answer.
+const StatusEvent = "status-event"
+
 // Faults lists every fault.
 var Faults = []string{NotCollected, NoAnswer, Publisher, WriterName, StaleHealth, KeepsClosed, KeepsWill}
 
@@ -57,7 +62,7 @@ type Registry struct {
 // and stops it at the end of the test.
 func Start(t testing.TB, c mqttwire.Config, il, fault string, hb time.Duration) *Registry {
 	t.Helper()
-	if fault != None && !slices.Contains(Faults, fault) {
+	if fault != None && fault != StatusEvent && !slices.Contains(Faults, fault) {
 		t.Fatalf("unknown registry fault %q", fault)
 	}
 	r := &Registry{IL: il, fault: fault, pid: "Registry/" + il, assets: map[string]*asset{}}
@@ -130,7 +135,7 @@ func (r *Registry) nextID() string {
 }
 
 func (r *Registry) dsm(writer int, name string, payload json.RawMessage) map[string]any {
-	return map[string]any{"DataSetWriterId": writer, "DataSetWriterName": name, "Payload": payload}
+	return map[string]any{"DataSetWriterId": writer, "WriterGroupName": "", "DataSetWriterName": name, "Payload": payload}
 }
 
 func (r *Registry) message(method, resource, source, replyTo string, dsms ...map[string]any) mqttwire.Message {
@@ -246,7 +251,23 @@ func (r *Registry) answer(ctx context.Context, m mqttwire.Message) {
 	}
 	r.mu.Unlock()
 	if source != "" && len(dsms) == 0 {
+		if r.fault == StatusEvent {
+			_ = r.cl.Publish(ctx, StatusBad(r.IL, r.nextID(), nm.MessageId))
+		}
 		return
 	}
 	_ = r.cl.Publish(ctx, r.message("Pub", resource, source, nm.MessageId, dsms...))
+}
+
+// eventClass is the DataSetClassId of Event (MG A2).
+const eventClass = "543ae05e-b6d9-4161-a0a3-350a0fac5976"
+
+// StatusBad is the Status Event of SF-099 (MG 8.3.6.1, Status Bad) for
+// the Get with the MessageId replyTo of the Registry il, published under
+// its AppId (SF-108) with the MessageId id.
+func StatusBad(il, id, replyTo string) mqttwire.Message {
+	payload := map[string]any{"Number": 2147483648, "Category": "CAT_STATUS_1", "Description": "Bad", "Details": map[string]any{"SymbolicId": "Bad"}}
+	dsm := map[string]any{"DataSetWriterId": 12, "WriterGroupName": "Status/Bad", "DataSetWriterName": il, "Payload": payload}
+	raw, _ := json.Marshal(map[string]any{"MessageId": id, "MessageType": "ua-data", "PublisherId": "Registry/" + il, "DataSetClassId": eventClass, "ReplyTo": replyTo, "Messages": []any{dsm}})
+	return mqttwire.Message{Topic: probe.Topic("Registry", il, "Pub", "Event", il, "Status/Bad"), Payload: raw, QoS: 1}
 }

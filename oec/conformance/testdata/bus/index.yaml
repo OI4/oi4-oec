@@ -228,6 +228,16 @@ scenarios:
     notes: >-
       The conforming Registry, named by --registry instead of discovered:
       T8-BUS-03 passes.
+  - fault: T8-BUS-03/status-event
+    status: draft
+    positive: true
+    tests: [T8-BUS-03]
+    expect: {}
+    notes: >-
+      The conforming Registry that answers a Get MAM or Get Health for an
+      unknown Source (a probe component after its Close message or Will)
+      with the Status Event Bad of SF-099 under its own AppId (SF-108)
+      instead of no answer: T8-BUS-03 passes (C-086).
   - fault: T8-BUS-03/no-registry
     status: reviewed
     positive: false

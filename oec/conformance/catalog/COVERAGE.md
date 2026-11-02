@@ -291,7 +291,7 @@ self-test fixtures (`testdata/images/index.yaml`, `testdata/bus/index.yaml`, `te
 | `d8` | 52 | 51 | 1 | 0 |
 | none of these (D7, manual or other tools) | 389 | | | |
 
-Fixtures: 19 image, 29 bus, 69 host, 26 container, 20 run; 27 positive; 163 of 163 reviewed.
+Fixtures: 19 image, 30 bus, 69 host, 26 container, 20 run; 28 positive; 163 of 164 reviewed.
 Tests with a negative fixture (fail, warn or info): 17 of 17; with a positive fixture: 17 of 17.
 
 ## Tests
@@ -320,7 +320,7 @@ no requirement of the test is graded by level; they apply with their keyword (DE
 | T8-HST-04 | host | – | host-access | implemented | REQ-PLT-001 REQ-PLT-003 REQ-PLT-006 REQ-PLT-007 REQ-PLT-008 | 10 | 0 | 2 | 5 | 19 |
 | T8-BUS-01 | bus | – | – | implemented | REQ-MQTT-002 REQ-MQTT-006 REQ-MQTT-007 REQ-CNT-003 | 10 | 0 | 0 | 3 | 0 |
 | T8-BUS-02 | bus | – | credentials-2 | implemented | REQ-GEN-001 REQ-RES-CONFIG-020 REQ-RES-CONFIG-026 REQ-RES-DATA-010 REQ-RES-META-005 REQ-RES-PUBLIST-023 REQ-RES-REFDES-008 REQ-RES-SUBLIST-012 | 3 | 1 | 1 | 3 | 0 |
-| T8-BUS-03 | bus | – | – | implemented | REQ-REG-001 REQ-REG-002 | 7 | 0 | 1 | 2 | 0 |
+| T8-BUS-03 | bus | – | – | implemented | REQ-REG-001 REQ-REG-002 | 7 | 0 | 1 | 3 | 0 |
 
 ## Manual requirements
 

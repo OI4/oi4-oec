@@ -161,6 +161,8 @@ func scenario(t *testing.T, fault string) Config {
 			c.RegistryWait = 500 * time.Millisecond
 		case "named":
 			c.Registry = registryIL
+		case registrytest.StatusEvent:
+			regFault = variant
 		default:
 			if !slices.Contains(registrytest.Faults, variant) {
 				t.Fatalf("unknown scenario %s", fault)
