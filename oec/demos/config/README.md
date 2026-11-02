@@ -36,7 +36,7 @@ a **copy** of an example storage, never on `oec/dev/generated/` itself.
 `/opt/oi4/licenses`; see [`../README.md`](../README.md#images-c-084)):
 
 ```sh
-oec/demos/images/build.sh /tmp/oec-images   # all three demos, D8 oec-infra image
+oec/demos/images/build.sh /tmp/oec-images   # all three demos, D8 oec-infra image + run
 docker run --rm --name oec-config-<uuid> --hostname oec-config-<uuid> \
   -v <root>/etc/oi4/mqtt:/etc/oi4/mqtt:ro -v <root>/etc/oi4/certs:/etc/oi4/certs:ro \
   -v <root>/run/secrets/oi4:/run/secrets/oi4:ro -p 127.0.0.1:8783:8783 oi4/oec-config:0.1.0
@@ -45,7 +45,8 @@ docker run --rm --name oec-config-<uuid> --hostname oec-config-<uuid> \
 The Web UI listens on `0.0.0.0:8783` in the container; publish it on
 `127.0.0.1` only (A-305). With the broker of `oec/dev`: compose profile
 `demos` ([`../../dev/README.md`](../../dev/README.md#compose-profile-demos-c-084)).
-D8 `oec-infra image`/`run` judge the image at level 1.
+D8 `oec-infra image`/`run` judge the image at level 3, the Service
+Container level of all three demos (A-377).
 
 ## Settings
 

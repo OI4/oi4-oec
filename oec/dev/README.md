@@ -140,7 +140,7 @@ The images are local (`oi4/oec-<demo>:0.1.0`, built by
 compose never pulls them).
 
 ```sh
-cd oec/demos && images/build.sh /tmp/oec-images   # once: build, D8 image, load
+cd oec/demos && images/build.sh /tmp/oec-images   # once: build, D8 image + run, load
 cd ../dev
 go run ./pki            # a generated/ of an older cycle: go run ./pki -force
 docker compose --env-file generated/demos.env --profile demos up -d --wait

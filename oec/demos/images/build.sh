@@ -8,9 +8,12 @@
 #
 # For every demo (logger, weather, config) it builds the image for
 # linux/amd64 and linux/arm64 as an OCI archive <output dir>/oec-<demo>.oci.tar,
-# runs D8 `oec-infra image` on it (reports next to it) and loads the image
+# runs D8 `oec-infra image` on it (reports next to it), loads the image
 # of the native platform as oi4/oec-<demo>:$VERSION into Docker (the
-# classic image store of Docker cannot load a multi-platform image). The
+# classic image store of Docker cannot load a multi-platform image) and runs
+# D8 `oec-infra run` on it (sandbox containers oec-d8-run-…, removed by D8).
+# D8 judges at level 3, the Service Container level of all three demos
+# (ADR-0028); a D8 verdict other than pass makes the script fail. The
 # builds run in a buildx builder of their own (driver docker-container),
 # which is removed at the end with its cache; the base and builder images
 # are pulled into that builder only. The builder runs BuildKit pinned by tag
@@ -57,9 +60,7 @@ trap cleanup EXIT
 
 (cd "$oec/conformance" && GOTOOLCHAIN=auto go build -o "$tmp/oec-infra" ./cmd/oec-infra)
 docker buildx create --name "$builder" --driver docker-container --driver-opt "image=$buildkit" >/dev/null
-level() {
-	case "$1" in logger) echo 2 ;; weather) echo 3 ;; config) echo 1 ;; esac
-}
+d8=0
 for d in $demos; do
 	echo "== oec-$d: linux/amd64 + linux/arm64"
 	start=$(date +%s)
@@ -70,13 +71,29 @@ for d in $demos; do
 		{ tail -40 "$out/oec-$d.build.log" >&2; exit 1; }
 	echo "built in $(($(date +%s) - start)) s: $(du -h "$out/oec-$d.oci.tar" | cut -f1) $out/oec-$d.oci.tar"
 	rc=0
-	"$tmp/oec-infra" image --level "$(level "$d")" --report "json=$out/oec-$d.d8-image.json" \
+	"$tmp/oec-infra" image --level 3 --report "json=$out/oec-$d.d8-image.json" \
 		"$out/oec-$d.oci.tar" >"$out/oec-$d.d8-image.txt" || rc=$?
-	echo "D8 oec-infra image --level $(level "$d"): exit $rc ($out/oec-$d.d8-image.txt)"
+	echo "D8 oec-infra image --level 3: exit $rc ($out/oec-$d.d8-image.txt)"
+	[ "$rc" = 0 ] || d8=1
+	old="$(docker image inspect -f '{{.Id}}' "oi4/oec-$d:$version" 2>/dev/null || true)"
 	docker buildx build --builder "$builder" --progress quiet -f "$oec/demos/$d/Dockerfile" \
 		--platform "linux/$native" --build-arg VERSION="$version" \
 		--build-arg SOURCE_DATE_EPOCH="$epoch" \
 		-t "oi4/oec-$d:$version" --load "$oec" >/dev/null
+	new="$(docker image inspect -f '{{.Id}}' "oi4/oec-$d:$version")"
+	if [ -n "$old" ] && [ "$old" != "$new" ]; then
+		# the image of an earlier run lost its tag; without -f it stays if it has another
+		docker image rm "$old" >/dev/null 2>&1 || true
+	fi
 	echo "loaded oi4/oec-$d:$version (linux/$native): $(docker image inspect -f '{{.Size}}' "oi4/oec-$d:$version") bytes"
+	rc=0
+	"$tmp/oec-infra" run --level 3 --report "json=$out/oec-$d.d8-run.json" \
+		"oi4/oec-$d:$version" >"$out/oec-$d.d8-run.txt" || rc=$?
+	echo "D8 oec-infra run --level 3: exit $rc ($out/oec-$d.d8-run.txt)"
+	[ "$rc" = 0 ] || d8=1
 done
+[ "$d8" = 0 ] || {
+	echo "D8 did not pass (see the reports in $out); the loaded images stay for a look ($0 --remove)" >&2
+	exit 1
+}
 echo "images ok: $out (remove the loaded images with $0 --remove)"

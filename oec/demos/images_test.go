@@ -222,4 +222,23 @@ func TestBuildScript(t *testing.T) {
 	if regexp.MustCompile(`(?m)^[^#]*\bprune\b`).MatchString(s) {
 		t.Error("build.sh must not prune")
 	}
+	// D8 levels are Service Container levels: all three demos target L3
+	// (ADR-0028 table), whatever their Messaging level (A-377).
+	for _, want := range []string{`oec-infra" image --level 3 `, `oec-infra" run --level 3 `} {
+		if !strings.Contains(s, want) {
+			t.Errorf("build.sh lacks D8 %s…", want)
+		}
+	}
+	if regexp.MustCompile(`--level "?\$`).MatchString(s) {
+		t.Error("build.sh must not take the D8 level from the demo (Messaging level)")
+	}
+	// A rebuild replaces the tag; the image it replaced is removed by ID
+	// (without -f: an image that has another tag stays).
+	if !strings.Contains(s, `docker image rm "$old"`) {
+		t.Error("build.sh must remove the image a rebuild replaced")
+	}
+	// A D8 fail or inconclusive verdict must fail the script, not end in "images ok".
+	if !regexp.MustCompile(`(?m)^\[ "\$d8" = 0 \] \|\| \{`).MatchString(s) {
+		t.Error("build.sh must exit non-zero when a D8 run did not pass")
+	}
 }

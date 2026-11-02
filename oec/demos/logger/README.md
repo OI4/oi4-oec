@@ -43,7 +43,7 @@ itself go to standard error, errors also as a Syslog `Event`.
 `/opt/oi4/licenses`; see [`../README.md`](../README.md#images-c-084)):
 
 ```sh
-oec/demos/images/build.sh /tmp/oec-images   # all three demos, D8 oec-infra image
+oec/demos/images/build.sh /tmp/oec-images   # all three demos, D8 oec-infra image + run
 docker run --rm --name oec-logger-<uuid> --hostname oec-logger-<uuid> \
   -v <root>/etc/oi4/mqtt:/etc/oi4/mqtt:ro -v <root>/etc/oi4/certs:/etc/oi4/certs:ro \
   -v <root>/run/secrets/oi4:/run/secrets/oi4:ro -p 127.0.0.1:8781:8781 oi4/oec-logger:0.1.0
@@ -52,7 +52,8 @@ docker run --rm --name oec-logger-<uuid> --hostname oec-logger-<uuid> \
 The Web UI listens on `0.0.0.0:8781` in the container; publish it on
 `127.0.0.1` only (A-305). With the broker of `oec/dev`: compose profile
 `demos` ([`../../dev/README.md`](../../dev/README.md#compose-profile-demos-c-084)).
-D8 `oec-infra image`/`run` judge the image at level 2.
+D8 `oec-infra image`/`run` judge the image at level 3, the Service
+Container level of all three demos (A-377).
 
 ## Configuration
 

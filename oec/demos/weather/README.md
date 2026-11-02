@@ -64,7 +64,7 @@ poll 3 stations
 `/opt/oi4/licenses`; see [`../README.md`](../README.md#images-c-084)):
 
 ```sh
-oec/demos/images/build.sh /tmp/oec-images   # all three demos, D8 oec-infra image
+oec/demos/images/build.sh /tmp/oec-images   # all three demos, D8 oec-infra image + run
 docker run --rm --name oec-weather-<uuid> --hostname oec-weather-<uuid> \
   -v <root>/etc/oi4/mqtt:/etc/oi4/mqtt:ro -v <root>/etc/oi4/certs:/etc/oi4/certs:ro \
   -v <root>/run/secrets/oi4:/run/secrets/oi4:ro -p 127.0.0.1:8782:8782 oi4/oec-weather:0.1.0
@@ -73,7 +73,8 @@ docker run --rm --name oec-weather-<uuid> --hostname oec-weather-<uuid> \
 The Web UI listens on `0.0.0.0:8782` in the container; publish it on
 `127.0.0.1` only (A-305). With the broker of `oec/dev`: compose profile
 `demos` ([`../../dev/README.md`](../../dev/README.md#compose-profile-demos-c-084)).
-D8 `oec-infra image`/`run` judge the image at level 3.
+D8 `oec-infra image`/`run` judge the image at level 3, the Service
+Container level of all three demos (A-377).
 
 ## Web UI
 

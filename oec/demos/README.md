@@ -56,16 +56,19 @@ No secrets, keys or certificates are in an image; the storages come from the
 platform at run time.
 
 ```sh
-oec/demos/images/build.sh /tmp/oec-images   # both platforms, D8 image, load the native one
+oec/demos/images/build.sh /tmp/oec-images   # both platforms, D8 image + run, load the native one
 oec/demos/images/build.sh --remove          # remove the loaded images
 ```
 
 `build.sh` (opt-in, needs Docker and network) builds each image for both
 platforms as an OCI archive `/tmp/oec-images/oec-<demo>.oci.tar`, checks
-it with D8 `oec-infra image` at the level of the demo (reports next to the
-archive) and loads the image of the native platform as `oi4/oec-<demo>:0.1.0`
-(the classic image store of Docker cannot load a multi-platform image). It
-uses a buildx builder of its own with BuildKit pinned by tag and digest and
+it with D8 `oec-infra image --level 3`, loads the image of the native
+platform as `oi4/oec-<demo>:0.1.0` (the classic image store of Docker
+cannot load a multi-platform image) and checks it with D8 `oec-infra run
+--level 3` (reports `oec-<demo>.d8-*.{json,txt}` next to the archive). Level 3
+is the Service Container level of all three demos (ADR-0028, A-377 of
+C-085); a D8 verdict other than pass makes the script exit 1. A rebuild
+removes the image it replaces (by ID). It uses a buildx builder of its own with BuildKit pinned by tag and digest and
 removes both at the end; it never prunes. Run an image with a container
 storage, e.g. `docker run --rm -v <root>/etc/oi4/mqtt:/etc/oi4/mqtt:ro -v
 <root>/etc/oi4/certs:/etc/oi4/certs:ro -v <root>/run/secrets/oi4:/run/secrets/oi4:ro
