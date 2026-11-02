@@ -348,7 +348,9 @@ it runs `go test ./cmd/oec-check -run TestMonitorDevBroker` with
 simulated component logs in with the probe credentials, publishes its Birth,
 is killed (the broker publishes its Will) and reconnects with a new Birth.
 Both monitors must record the five messages and judge the lifecycle as
-passed (the heartbeat stays inconclusive in 6 s, exit 4). By hand:
+passed (the heartbeat stays inconclusive in 6 s, exit 4). By hand (not at
+the same time as `oec-infra bus`: its probes send invalid messages on
+purpose, which a monitor judges as fails – C-091):
 
 ```sh
 cd oec/conformance

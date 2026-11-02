@@ -8,7 +8,8 @@ and `Get/Health[/<Source>]` on its own AppId. Step 1 is **read-only**
 `Del` or `Call`. ServiceType `Registry`, product `oi4.org` / `OEC Registry`
 / `OEC-REGISTRY`, SerialNumber = the hostname of the container.
 
-State (C-090, increment 5 of the P7 cycle cut in `project/ROADMAP.md`):
+State (C-091, P7 exit run after the six increments of the P7 cycle cut in
+`project/ROADMAP.md`):
 Messaging Level 3. The registry collects `MAM`, `Health`, `Profile`,
 `Event`, `PublicationList` and `SubscriptionList` of every participant
 (raw subscriptions of the SDK, ADR-0026 §23), asks with `Get` for what is
@@ -20,13 +21,18 @@ persistent `ReferenceDesignation`; D7 `oec-check test --level 3` passes.
 Since C-088 it serves the directory over **HTTPS**, read-only (below);
 since C-089 the **Web UI** (React/TypeScript/Vite, `ui/`) on the web port;
 since C-090 the **image** `oi4/oec-registry` (below) and the compose profile
-`registry` of `oec/dev`. Next: the P7 exit run and the docs page
-(increment 6).
+`registry` of `oec/dev`. C-091 ran the P7 exit (image with D8 `image`,
+`run` and `container` at `--level 3`; compose run in which the registry
+lists every participant over REST and in the Web UI) and added the guide
+page [`oec/docs/docs/registry/index.md`](../docs/docs/registry/index.md).
+Next: the PO decides on closing P7.
 
 ### Config `registry`
 
-Group `directory`, read by the worker at least once a second; values out
-of range are clamped:
+Group `directory`, read by the worker at least once a second. A `Set`
+with a value out of range is refused by the SDK with `BadOutOfRange` (the
+range is the `Validation` of the Config definition); the worker clamps
+what it reads as a second line of defence:
 
 | Setting | Default | Range | Meaning |
 |---|---|---|---|
