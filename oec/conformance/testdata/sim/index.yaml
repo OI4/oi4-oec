@@ -227,7 +227,7 @@ fixtures:
       monitor sees WriterGroupNames that differ from the Filter of the topic
       (T7-MON-01, REQ-MSG-025).
   - fault: T7-GET-04/registry
-    status: draft
+    status: reviewed
     positive: true
     expect: {}
     notes: >-

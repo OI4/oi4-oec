@@ -115,3 +115,14 @@ A-391 D7 refinement for registries; A-392 SDK raw subscriptions; A-393 the regis
 ## Next
 
 C-088 – P7 increment 3: HTTP – REST read-only + `api/openapi.json` (OpenAPI 3.2.0 against the vendored meta-schema, paths = router), SSE `/api/stream`, TLS with the application certificate and a self-signed fallback, ports 5798/5799, the hardening contract of ADR-0028 amendment C-083; `hyper` 1 (ADR-0023 amendment C-086); the HTTP side reads the directory of C-087 (entries, devices, observed level, conformity, events).
+
+## Addendum 1 – PO review of R-1 (2026-11-03)
+
+PO answer (chat): "R-1 akzeptiert"
+
+### Applied
+
+- **R-1 accepted:** `oec/conformance/testdata/sim/index.yaml` fault `T7-GET-04/registry` `draft` → `reviewed`. `COVERAGE.md` regenerated (`go test ./internal/explain -run TestCoverageReport -update`): only the fixture line changes, 89 of 89 D7 fixtures reviewed. Conformance README `testdata/sim` row.
+- REVIEW/REVIEW_DE (R-1 ☑ accepted, nothing open), STATUS (header, blocking line, cycle row C-087 addendum 1).
+- No other change; the handover stays (new session for C-088, `prompt.md` updated: R-1 no longer open).
+- Checks: `go test ./...` of `oec/conformance` green; `oec/check.sh` → all checks passed.

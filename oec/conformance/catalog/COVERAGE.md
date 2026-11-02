@@ -27,7 +27,7 @@ self-test fixtures (`testdata/sim/index.yaml`, `testdata/captures/index.yaml`) â
 | `d7-validate` | 157 | 0 | 0 | 157 | 0 |
 | none of these (D8, manual or other tools) | 143 | | | | |
 
-Fixtures: 60 sim, 29 capture; 15 positive; 88 of 89 reviewed.
+Fixtures: 60 sim, 29 capture; 15 positive; 89 of 89 reviewed.
 Tests with a negative fixture (fail, warn or info): 55 of 55; with a positive fixture: 55 of 55.
 
 ## Tests
