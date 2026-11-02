@@ -191,3 +191,15 @@ After `down -v` of the compose copy: `OEC_LIVE_REGISTRY=1 caffeinate -i oec/conf
 ## Next
 
 After D-1: with (a) C-092 = P8 start (plan and cycle cut of the Docusaurus site, ADR for the site); with (b) C-092 = P9 start; with (c) the named gap.
+
+## Addendum 1 – PO decision on the P7 exit (2026-11-07)
+
+PO answer (chat): "P7 schließen, dann P4b – Micro SDK (D9). Das Micro SDK soll möglichst in einer Session durchgebaut werden. Ich möchte gefragt werden, wenn wirklich was nicht geht oder unklar ist, oder wenn es Änderungen an der Guideline bedarf."
+
+### Applied
+
+- **D-1: P7 is closed** with the carried items of the exit assessment: image publication/signing, an image registry, CI, Podman/Windows engine runs, release/versioning → P9; the Docusaurus site → P8; registry step 2 (writing), HTTP authentication, persistence and expiry of the directory → a later step (PO). ROADMAP P7 heading ✅ and "Decision" line; STATUS (current phase P4b, previous phase P7, next step, cycle row); REVIEW/REVIEW_DE (D-1 answered).
+- **Next phase: P4b – Micro SDK (D9)** instead of the proposed P8 (option (a)); P8 stays continuous (each phase delivers its doc pages).
+- Working mode for P4b (PO): build D9 through in one session if possible – several cycles C-092 ff. in a row, each with its log, gate and commits; the PO is asked only when something really does not work or is unclear, or when the guideline needs a change (SF).
+- No change to OPEN-QUESTIONS. Nothing is open for the PO.
+

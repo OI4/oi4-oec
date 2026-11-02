@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-07, C-091: **P7 exit run done – one decision for you: D-1 "close P7?"** The registry image passes D8 `image` (4 pass), `run` (3 pass) and `container` (3 pass) at `--level 3`. In a compose run with the profiles `demos` and `registry` the registry lists every participant – the config service (L1), the logger (L3), the weather service (L3) with its three stations, and the probes of D8 `bus` – with MAM, Health, availability, Profile, observed level and conformity over REST and in the Web UI; `Set`s of the config service (also on the registry's own `Config`), the Close of a restarted and the Will of a killed demo are visible. T8-BUS-03 and REQ-PLT-008 pass against `oec/dev`; D7 `monitor` has 0 fail once the deliberately invalid probe messages of D8 `bus` are left out (A-425). All eight exit criteria are met (log C-091). New: the Registry guide `oec/docs/docs/registry/index.md`; README fixes; no code change. No R-x, no SF; A-424 … A-428 for information._
+_Last updated: 2026-11-07, C-091 addendum 1: **D-1 answered – P7 is closed; next phase P4b – Micro SDK (D9).** Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -739,7 +739,7 @@ Logs: [C-091](log/2026-11-07_C-091_p7-exit-registry-guide.md), [C-090](log/2026-
 | A-421 | Demos start after the registry (Level 1 config service answers no `Get MAM`); no SF | info (agent) | C-090 | – | – |
 | A-422 | Observations left unchanged: SDK self-`Get MAM` on the own heartbeat, repeated registry INFO line | info (agent) | C-090 | – | – |
 | A-423 | SBOM extraction from an image with volumes: `docker rm -v` | info (agent) | C-090 | – | – |
-| D-1 | Close P7? All eight exit criteria met | decide (G-3.4 a) | C-091 | (a) close P7, next P8 | ☐ |
+| D-1 | Close P7? All eight exit criteria met | decide (G-3.4 a) | C-091 | (a) close P7, next P8 | ☑ closed; next P4b (add. 1) |
 | A-424 | Exit run in a copy of `oec/dev` (own compose project and `generated/`) | info (agent) | C-091 | – | – |
 | A-425 | D7 `monitor` overlapping D8 `bus`: replay without the probe topics and a clean window; README notes | info (agent) | C-091 | – | – |
 | A-426 | Web UI screenshots through the Chrome DevTools protocol; headless `--timeout` stops the detail refetch – no defect | info (agent) | C-091 | – | – |
@@ -750,12 +750,17 @@ Logs: [C-091](log/2026-11-07_C-091_p7-exit-registry-guide.md), [C-090](log/2026-
 
 ### Open for you
 
-**D-1 – close P7?** (C-091, G-3.4 a: phase order). The exit run is the final gate of C-091 plus the opt-in runs (log C-091, "Exit assessment"). All eight exit criteria of ROADMAP P7 are met: (1) D7 `test --level 3` (49 pinned passes, 0 fail) and D8 T8-BUS-03 in gate step 8; (2) the image passes D8 `image` (4 pass), `run` (3 pass) and `container` (3 pass) at level 3; (3) in the compose run with `demos` and `registry` the registry lists every participant with MAM, Health, availability, Profile, observed level and conformity over REST and in the Web UI, `Set`s, Close and Will are visible, T8-BUS-03 passes against the run and in `live.sh` (REQ-PLT-008 too), D7 `monitor` 0 fail without the deliberately invalid D8 probe traffic; (4) read-only – gate tests on the sources, the AsyncAPI operations and `405` for every method but `GET`; on the bus only `Get` towards others; (5) OpenAPI/AsyncAPI valid and consistent in the gate; (6) npm policy in the gate, README, docs page; (7) no new dependency, only additive SDK/D7/D8 changes with amendments and D8 defect fixes over P7; (8) gate green. Deviations, none blocking: the Level 1 start order (A-421), REQ-PLT-003 on macOS (A-298).
-- (a) **close P7, next P8 – Documentation** – recommended: the Docusaurus site around `oec/docs/docs/` (demos, registry and the guides still missing: getting started, concepts, SDK and tool guides, schema reference, migration notes); its exit "docs build without broken links; a newcomer can run the demos by following the docs only"; then P9. Carried: publication and signing of the images, an image registry, CI, Podman/Windows engine runs, release/versioning → P9; the Docusaurus site → P8; registry step 2 (writing, ADR-0008), HTTP authentication, persistence and expiry of the directory → a later step you decide.
-- (b) close P7, next **P9** (hardening and release), P8 alongside.
-- (c) keep P7 open for follow-ups (name them).
+Nothing is open for you.
 
 ### Answered earlier
+
+Answered after C-091 (2026-11-07) and recorded in C-091 addendum 1:
+- D-1 – close P7: ☑ closed, next phase **P4b – Micro SDK (D9)** instead of P8 ("P7 schließen, dann P4b – Micro SDK (D9)"); carried items as proposed. The question was:
+
+> **D-1 – close P7?** (C-091, G-3.4 a: phase order). The exit run is the final gate of C-091 plus the opt-in runs (log C-091, "Exit assessment"). All eight exit criteria of ROADMAP P7 are met: (1) D7 `test --level 3` (49 pinned passes, 0 fail) and D8 T8-BUS-03 in gate step 8; (2) the image passes D8 `image` (4 pass), `run` (3 pass) and `container` (3 pass) at level 3; (3) in the compose run with `demos` and `registry` the registry lists every participant with MAM, Health, availability, Profile, observed level and conformity over REST and in the Web UI, `Set`s, Close and Will are visible, T8-BUS-03 passes against the run and in `live.sh` (REQ-PLT-008 too), D7 `monitor` 0 fail without the deliberately invalid D8 probe traffic; (4) read-only – gate tests on the sources, the AsyncAPI operations and `405` for every method but `GET`; on the bus only `Get` towards others; (5) OpenAPI/AsyncAPI valid and consistent in the gate; (6) npm policy in the gate, README, docs page; (7) no new dependency, only additive SDK/D7/D8 changes with amendments and D8 defect fixes over P7; (8) gate green. Deviations, none blocking: the Level 1 start order (A-421), REQ-PLT-003 on macOS (A-298).
+> - (a) **close P7, next P8 – Documentation** – recommended: the Docusaurus site around `oec/docs/docs/` (demos, registry and the guides still missing: getting started, concepts, SDK and tool guides, schema reference, migration notes); its exit "docs build without broken links; a newcomer can run the demos by following the docs only"; then P9. Carried: publication and signing of the images, an image registry, CI, Podman/Windows engine runs, release/versioning → P9; the Docusaurus site → P8; registry step 2 (writing, ADR-0008), HTTP authentication, persistence and expiry of the directory → a later step you decide.
+> - (b) close P7, next **P9** (hardening and release), P8 alongside.
+> - (c) keep P7 open for follow-ups (name them).
 
 Answered after C-087 (2026-11-03) and recorded in C-087 addendum 1:
 - R-1 – positive sim variant `T7-GET-04/registry`: ☑ accepted ("R-1 akzeptiert") → status `reviewed`; `COVERAGE.md` 89 of 89 D7 fixtures reviewed.
@@ -1928,4 +1933,4 @@ Log C-091, ADR-0029 amendment C-091, `oec/registry/README.md`, `oec/dev/README.m
 
 ## Next (C-092)
 
-1. Your decision on **D-1** (close P7?). With (a): C-092 = P8 start – plan, cycle cut and an ADR for the Docusaurus site in `oec/docs`. With (b): C-092 = P9 start. With (c): the follow-ups you name.
+1. C-092 – P4b start (Micro SDK D9): plan and cycle cut, implementation ADR-0030, first increment (portable core, Messaging L1) test first; then the further P4b increments in the same session (PO).

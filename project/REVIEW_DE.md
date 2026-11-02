@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 07.11.2026, C-091: **Der Abschlusslauf der Registry ist fertig – eine Entscheidung für dich: D-1 „P7 schließen?“** Das Image besteht D8 `image`, `run` und – neu geprüft – `container` auf Stufe 3. Im Dev-Aufbau mit Demos und Registry listet die Registry jeden Teilnehmer mit Typenschild, Health, Verfügbarkeit, Profil, beobachteter Stufe und Konformität – über die REST-Schnittstelle und in der Web-Oberfläche. Alle acht Exit-Kriterien sind erfüllt. Neu ist die Doku-Seite „OEC Registry“. Am Code hat sich nichts geändert._
+_Stand: 07.11.2026, C-091 Addendum 1: **D-1 ist beantwortet – P7 ist abgeschlossen, als Nächstes kommt P4b, das Micro SDK (D9).** Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,41 +24,13 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – P7 schließen? (Phasenreihenfolge, deine Entscheidung)
-
-Mit C-091 ist der letzte geplante Schritt der Registry erledigt: der Abschlusslauf. Ich habe jedes der acht Exit-Kriterien aus der ROADMAP geprüft und belegt (Log C-091, Abschnitt „Exit assessment“):
-
-1. **Im Gate:** D7 prüft die Registry auf Stufe 3 (49 festgeschriebene „bestanden“, kein Fehler), und D8 findet sie am Bus (T8-BUS-03 bestanden).
-2. **Image:** D8 prüft das Image (`image`, 4 bestanden), den Start mit Passwort, mit Zertifikat und mit einer fremden Zertifizierungsstelle (`run`, 3 bestanden) und den laufenden Container im Dev-Aufbau (`container`, 3 bestanden) – alles auf Stufe 3.
-3. **Dev-Aufbau mit Demos und Registry:** Die Registry listet alle Teilnehmer – Config-Service (Stufe 1), Logger (Stufe 3), Wetter-Service (Stufe 3) mit seinen drei Wetterstationen und auch die kurzzeitigen Prüf-Teilnehmer von D8. Zu jedem zeigt sie Typenschild (MAM), Health, Verfügbarkeit, Profil, beobachtete Stufe und Konformität, und zwar sowohl über die REST-Schnittstelle als auch in der Web-Oberfläche. Ich habe dort auch etwas geändert und beobachtet:
-   - Eine Änderung über den Config-Service erscheint als Status-Ereignis in der Registry. Das gilt auch für eine Änderung an der Registry selbst: Der zu große Wert wurde richtig abgelehnt.
-   - Ein Neustart des Loggers zeigt „offline (geordnet)“ und gleich danach wieder „online“.
-   - Ein hartes Abschießen des Wetter-Service zeigt „offline (verloren)“ für ihn und seine drei Stationen. Nach dem Start sind alle wieder online.
-   - D8 findet die Registry auch im echten Dev-Aufbau (`live.sh`).
-   - Das Mithören mit D7 ergibt keinen Fehler.
-4. **Nur lesend:** Tests im Gate belegen, dass die Registry niemandem etwas vorschreibt. Am Bus schickt sie anderen nur Anfragen (`Get`), über HTTP beantwortet sie nur Lesezugriffe.
-5. **Schnittstellen-Beschreibungen** (OpenAPI, AsyncAPI) sind gültig und passen zum Code (im Gate).
-6. **npm-Regeln** werden im Gate geprüft. README und Doku-Seite sind da.
-7. **Keine neue Bibliothek.** Über ganz P7 gab es an SDK, D7 und D8 nur dokumentierte Ergänzungen und Fehlerbehebungen.
-8. **Gate grün.**
-
-Kleine Abweichungen, die nichts blockieren:
-- Ein Teilnehmer der Stufe 1 (Config-Service) erscheint erst als verfügbar, wenn die Registry seinen Start gesehen hat (A-421, steht in der Doku).
-- Auf dem Mac meldet D8 „kein Linux“. Das ist bekannt, denn der Dev-Aufbau ist keine Container-Plattform.
-
-Möglichkeiten:
-- **(a) P7 schließen, weiter mit P8 – Dokumentation (mein Vorschlag).** Wir bauen die Docusaurus-Seite um die vorhandenen Doku-Seiten herum und ergänzen, was noch fehlt: Einstieg, Konzepte, SDK- und Werkzeug-Anleitungen, Schema-Referenz und Hinweise zum Umstieg von 1.x. Das Ziel von P8: Die Doku baut ohne kaputte Links, und eine neue Person kann die Demos allein mit der Doku starten. Danach folgt P9.
-- (b) P7 schließen, weiter mit P9 (Härtung und Release); P8 läuft nebenher.
-- (c) P7 offen lassen für Nacharbeiten, die du benennst.
-
-Was bei (a) oder (b) weiterwandert:
-- **nach P9:** Images veröffentlichen und signieren, eine Image-Registry, CI, Läufe mit Podman und unter Windows, Versionen und Release.
-- **nach P8:** die Docusaurus-Seite selbst.
-- **in einen späteren Schritt (du entscheidest):** eine schreibende Registry (Schritt 2), eine Anmeldung für die Web-Oberfläche und die Schnittstelle, ein dauerhaftes Verzeichnis und das Aufräumen alter Offline-Einträge.
-
-Antwort z. B.: „D-1 (a)“.
+Für dich ist nichts offen.
 
 ## Früher beantwortet
+
+### D-1 aus C-091 – P7 schließen?
+
+Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
 
 ### Zur Info: was C-091 gemacht hat (P7, Abschlusslauf)
 
