@@ -3,8 +3,8 @@
 // every component with name, version, license expression and purl; the
 // text of every license and license exception as <id>.txt. Inputs are the
 // crates of the binary (cargo tree), its Go build information (go version
-// -m), the Rust standard library and the Debian packages of the base
-// image. Standard library only; the command is cmd/oec-sbom.
+// -m), the npm packages of a bundled Web UI (package-lock.json), the Rust
+// standard library and the Debian packages of the base image. Standard library only; the command is cmd/oec-sbom.
 package sbom
 
 import (
@@ -29,6 +29,7 @@ const (
 	KindApp Kind = iota
 	KindCargo
 	KindGo
+	KindNpm
 	KindRust
 	KindDebian
 )

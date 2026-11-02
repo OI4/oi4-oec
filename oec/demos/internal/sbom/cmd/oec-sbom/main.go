@@ -1,16 +1,19 @@
 // Command oec-sbom makes the SBOM (SPDX 2.3 JSON) and the license texts
-// of a demo image for /opt/oi4/licenses (ADR-0028 §4, RIG 4.1.4,
+// of a demo or registry image for /opt/oi4/licenses (ADR-0028 §4, RIG 4.1.4,
 // SF-114). It runs in the build stage of the Dockerfiles:
 //
 //	oec-sbom -name oec-logger -version 0.1.0 -license MIT \
 //	    -cargo cargo-tree.txt [-go go-version.txt] [-rust 1.89.0] \
+//	    [-npm ui/package-lock.json] \
 //	    -base /base -debian images/debian.json -texts images/licenses \
 //	    -out /licenses
 //
 // -cargo is the output of cargo tree --edges normal,no-proc-macro
 // --target <triple> -p <crate> --prefix none --format '{p}|{l}', -go the
-// output of go version -m <binary>, -base the file tree of the base image
-// (dpkg status, copyright files, os-release). The creation time is
+// output of go version -m <binary>, -npm the package-lock.json of a Web UI
+// whose bundle is embedded in the binary (its non-dev packages, the
+// registry image, C-090), -base the file tree of the base image (dpkg
+// status, copyright files, os-release). The creation time is
 // SOURCE_DATE_EPOCH if set (reproducible builds), else now.
 package main
 
@@ -39,6 +42,7 @@ func run(args []string) error {
 	cargo := fl.String("cargo", "", "cargo tree output (optional)")
 	gov := fl.String("go", "", "go version -m output (optional)")
 	rust := fl.String("rust", "", "version of the Rust standard library linked in (optional)")
+	npm := fl.String("npm", "", "package-lock.json of an embedded Web UI bundle (optional)")
 	base := fl.String("base", "", "file tree of the base image (Debian)")
 	debian := fl.String("debian", "", "Debian license map (images/debian.json)")
 	texts := fl.String("texts", "", "directory of the SPDX license texts <id>.txt")
@@ -77,6 +81,18 @@ func run(args []string) error {
 			return err
 		}
 		cs, err := sbom.Go(f, *license)
+		f.Close()
+		if err != nil {
+			return err
+		}
+		in.Components = append(in.Components, cs...)
+	}
+	if *npm != "" {
+		f, err := os.Open(*npm)
+		if err != nil {
+			return err
+		}
+		cs, err := sbom.Npm(f)
 		f.Close()
 		if err != nil {
 			return err
