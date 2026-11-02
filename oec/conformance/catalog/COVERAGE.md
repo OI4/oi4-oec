@@ -27,7 +27,7 @@ self-test fixtures (`testdata/sim/index.yaml`, `testdata/captures/index.yaml`) �
 | `d7-validate` | 157 | 0 | 0 | 157 | 0 |
 | none of these (D8, manual or other tools) | 143 | | | | |
 
-Fixtures: 59 sim, 29 capture; 14 positive; 88 of 88 reviewed.
+Fixtures: 60 sim, 29 capture; 15 positive; 88 of 89 reviewed.
 Tests with a negative fixture (fail, warn or info): 55 of 55; with a positive fixture: 55 of 55.
 
 ## Tests
@@ -38,61 +38,61 @@ applicable). A negative fixture is one with fail, warn or info.
 
 | Test | Mode | Level | Needs | Status | Requirements | fail | warn/info | skip | positive |
 |---|---|---:|---|---|---|---:|---:|---:|---:|
-| T7-MON-01 | monitor | 1 | – | implemented | REQ-TOP-002 REQ-TOP-003 | 5 | 0 | 0 | 12 |
-| T7-MON-02 | monitor | 1 | – | implemented | REQ-TOP-006 REQ-TOP-010 | 1 | 0 | 0 | 12 |
-| T7-MON-03 | monitor | 1 | – | implemented | REQ-CMP-003 REQ-LIFE-001 REQ-LIFE-002 REQ-LIFE-003 | 4 | 0 | 0 | 12 |
-| T7-MON-04 | monitor | 1 | – | implemented | REQ-CMP-006 REQ-CMP-007 REQ-CMP-014 REQ-CMP-045 | 1 | 0 | 0 | 12 |
-| T7-MON-05 | monitor | 1 | – | implemented | REQ-TOP-017 REQ-RES-HEALTH-004 REQ-LIFE-014 | 3 | 0 | 0 | 12 |
-| T7-MON-06 | monitor | 1 | – | implemented | REQ-MSG-008 REQ-ACT-004 | 1 | 0 | 0 | 12 |
-| T7-MON-07 | monitor | 1 | – | implemented | REQ-ACT-011 | 1 | 0 | 0 | 12 |
-| T7-MON-08 | monitor | 1 | – | implemented | REQ-MSG-021 REQ-MSG-033 REQ-RES-PUBLIST-005 | 4 | 0 | 0 | 12 |
-| T7-MON-09 | monitor | 1 | – | implemented | REQ-MSG-013 | 1 | 0 | 0 | 12 |
-| T7-MON-10 | monitor | 1 | – | implemented | REQ-IL-010 REQ-IL-012 | 0 | 4 | 0 | 12 |
-| T7-MON-11 | monitor | 1 | – | implemented | REQ-CMP-042 | 1 | 0 | 0 | 12 |
-| T7-MON-12 | monitor | 1 | – | implemented | REQ-CMP-009 REQ-MQTT-017 | 1 | 0 | 0 | 12 |
-| T7-MON-13 | monitor | 2 | – | implemented | REQ-CMP-010 REQ-CMP-036 REQ-CMP-038 | 1 | 0 | 0 | 12 |
-| T7-MON-14 | monitor | 1 | – | implemented | REQ-MQTT-019 REQ-RES-PUBLIST-008 REQ-RES-PUBLIST-009 REQ-RES-PUBLIST-010 REQ-RES-PUBLIST-011 REQ-RES-PUBLIST-013 REQ-RES-PUBLIST-014 REQ-RES-PUBLIST-015 | 3 | 1 | 0 | 12 |
-| T7-MON-15 | monitor | 1 | – | implemented | REQ-RES-PUBLIST-017 REQ-RES-PUBLIST-018 REQ-RES-SUBLIST-005 REQ-RES-SUBLIST-006 | 1 | 0 | 0 | 12 |
-| T7-MON-16 | monitor | 1 | – | implemented | REQ-RES-MAM-018 | 1 | 0 | 0 | 12 |
-| T7-MON-17 | monitor | 1 | – | implemented | REQ-RES-CONFIG-011 | 1 | 0 | 0 | 12 |
-| T7-MON-18 | monitor | 1 | – | implemented | REQ-PAG-004 REQ-PAG-005 | 2 | 0 | 0 | 12 |
-| T7-MON-19 | monitor | 1 | – | implemented | REQ-TOP-024 | 1 | 0 | 0 | 12 |
-| T7-CON-01 | test | 1 | proxy | implemented | REQ-CMP-001 REQ-CMP-009 REQ-MQTT-001 | 2 | 0 | 0 | 8 |
-| T7-CON-02 | test | 1 | proxy | implemented | REQ-CMP-002 REQ-MQTT-005 REQ-MQTT-008 | 2 | 0 | 0 | 8 |
-| T7-CON-03 | test | 1 | proxy | implemented | REQ-MQTT-009 | 1 | 0 | 0 | 8 |
-| T7-CON-04 | test | 1 | proxy | implemented | REQ-MQTT-018 | 1 | 0 | 0 | 8 |
-| T7-LIFE-01 | test | 1 | proxy | implemented | REQ-CMP-003 REQ-LIFE-008 REQ-LIFE-010 REQ-LIFE-016 | 2 | 1 | 0 | 8 |
-| T7-LIFE-02 | test | 1 | proxy | implemented | REQ-LIFE-001 REQ-LIFE-015 REQ-LIFE-017 | 2 | 1 | 0 | 8 |
-| T7-LIFE-03 | test | 1 | proxy | implemented | REQ-LIFE-009 | 1 | 0 | 0 | 8 |
-| T7-LIFE-04 | test | 1 | restart-hook | implemented | REQ-CMP-046 REQ-LIFE-005 REQ-LIFE-006 REQ-LIFE-007 | 2 | 0 | 1 | 8 |
+| T7-MON-01 | monitor | 1 | – | implemented | REQ-TOP-002 REQ-TOP-003 | 5 | 0 | 0 | 13 |
+| T7-MON-02 | monitor | 1 | – | implemented | REQ-TOP-006 REQ-TOP-010 | 1 | 0 | 0 | 13 |
+| T7-MON-03 | monitor | 1 | – | implemented | REQ-CMP-003 REQ-LIFE-001 REQ-LIFE-002 REQ-LIFE-003 | 4 | 0 | 0 | 13 |
+| T7-MON-04 | monitor | 1 | – | implemented | REQ-CMP-006 REQ-CMP-007 REQ-CMP-014 REQ-CMP-045 | 1 | 0 | 0 | 13 |
+| T7-MON-05 | monitor | 1 | – | implemented | REQ-TOP-017 REQ-RES-HEALTH-004 REQ-LIFE-014 | 3 | 0 | 0 | 13 |
+| T7-MON-06 | monitor | 1 | – | implemented | REQ-MSG-008 REQ-ACT-004 | 1 | 0 | 0 | 13 |
+| T7-MON-07 | monitor | 1 | – | implemented | REQ-ACT-011 | 1 | 0 | 0 | 13 |
+| T7-MON-08 | monitor | 1 | – | implemented | REQ-MSG-021 REQ-MSG-033 REQ-RES-PUBLIST-005 | 4 | 0 | 0 | 13 |
+| T7-MON-09 | monitor | 1 | – | implemented | REQ-MSG-013 | 1 | 0 | 0 | 13 |
+| T7-MON-10 | monitor | 1 | – | implemented | REQ-IL-010 REQ-IL-012 | 0 | 4 | 0 | 13 |
+| T7-MON-11 | monitor | 1 | – | implemented | REQ-CMP-042 | 1 | 0 | 0 | 13 |
+| T7-MON-12 | monitor | 1 | – | implemented | REQ-CMP-009 REQ-MQTT-017 | 1 | 0 | 0 | 13 |
+| T7-MON-13 | monitor | 2 | – | implemented | REQ-CMP-010 REQ-CMP-036 REQ-CMP-038 | 1 | 0 | 0 | 13 |
+| T7-MON-14 | monitor | 1 | – | implemented | REQ-MQTT-019 REQ-RES-PUBLIST-008 REQ-RES-PUBLIST-009 REQ-RES-PUBLIST-010 REQ-RES-PUBLIST-011 REQ-RES-PUBLIST-013 REQ-RES-PUBLIST-014 REQ-RES-PUBLIST-015 | 3 | 1 | 0 | 13 |
+| T7-MON-15 | monitor | 1 | – | implemented | REQ-RES-PUBLIST-017 REQ-RES-PUBLIST-018 REQ-RES-SUBLIST-005 REQ-RES-SUBLIST-006 | 1 | 0 | 0 | 13 |
+| T7-MON-16 | monitor | 1 | – | implemented | REQ-RES-MAM-018 | 1 | 0 | 0 | 13 |
+| T7-MON-17 | monitor | 1 | – | implemented | REQ-RES-CONFIG-011 | 1 | 0 | 0 | 13 |
+| T7-MON-18 | monitor | 1 | – | implemented | REQ-PAG-004 REQ-PAG-005 | 2 | 0 | 0 | 13 |
+| T7-MON-19 | monitor | 1 | – | implemented | REQ-TOP-024 | 1 | 0 | 0 | 13 |
+| T7-CON-01 | test | 1 | proxy | implemented | REQ-CMP-001 REQ-CMP-009 REQ-MQTT-001 | 2 | 0 | 0 | 9 |
+| T7-CON-02 | test | 1 | proxy | implemented | REQ-CMP-002 REQ-MQTT-005 REQ-MQTT-008 | 2 | 0 | 0 | 9 |
+| T7-CON-03 | test | 1 | proxy | implemented | REQ-MQTT-009 | 1 | 0 | 0 | 9 |
+| T7-CON-04 | test | 1 | proxy | implemented | REQ-MQTT-018 | 1 | 0 | 0 | 9 |
+| T7-LIFE-01 | test | 1 | proxy | implemented | REQ-CMP-003 REQ-LIFE-008 REQ-LIFE-010 REQ-LIFE-016 | 2 | 1 | 0 | 9 |
+| T7-LIFE-02 | test | 1 | proxy | implemented | REQ-LIFE-001 REQ-LIFE-015 REQ-LIFE-017 | 2 | 1 | 0 | 9 |
+| T7-LIFE-03 | test | 1 | proxy | implemented | REQ-LIFE-009 | 1 | 0 | 0 | 9 |
+| T7-LIFE-04 | test | 1 | restart-hook | implemented | REQ-CMP-046 REQ-LIFE-005 REQ-LIFE-006 REQ-LIFE-007 | 2 | 0 | 1 | 9 |
 | T7-ADR-01 | test | 1 | peer | implemented | REQ-BUS-002 REQ-TOP-006 REQ-TOP-010 | 2 | 0 | 1 | 1 |
-| T7-ADR-02 | test | 1 | – | implemented | REQ-TOP-004 | 1 | 0 | 0 | 6 |
-| T7-ADR-03 | test | 1 | – | implemented | REQ-IL-001 REQ-IL-013 REQ-IL-015 REQ-TOP-018 | 1 | 0 | 0 | 6 |
-| T7-GET-01 | test | 1 | – | implemented | REQ-BUS-003 REQ-CMP-015 REQ-CMP-017 REQ-MSG-015 REQ-RES-HEALTH-006 REQ-RES-MAM-021 | 2 | 0 | 0 | 6 |
-| T7-GET-02 | test | 1 | – | implemented | REQ-CMP-018 REQ-CMP-021 REQ-RES-PROFILE-002 REQ-RES-PROFILE-004 | 3 | 0 | 0 | 6 |
-| T7-GET-03 | test | 1 | – | implemented | REQ-CMP-008 REQ-CMP-019 REQ-CMP-020 REQ-CMP-035 REQ-CMP-036 REQ-CMP-037 REQ-CMP-039 REQ-RES-CONFIG-017 REQ-RES-DATA-007 REQ-RES-META-002 REQ-RES-PUBLIST-020 REQ-RES-PUBLIST-027 REQ-RES-REFDES-004 REQ-RES-SUBLIST-008 | 4 | 0 | 0 | 6 |
-| T7-GET-04 | test | 1 | – | implemented | REQ-CMP-010 REQ-CMP-024 REQ-CMP-045 | 3 | 0 | 0 | 6 |
-| T7-GET-05 | test | 1 | – | implemented | REQ-CMP-041 REQ-CMP-044 REQ-CMP-047 | 1 | 2 | 0 | 6 |
-| T7-GET-06 | test | 1 | – | implemented | REQ-PAG-002 REQ-PAG-005 | 1 | 0 | 0 | 6 |
-| T7-GET-07 | test | 1 | – | implemented | REQ-QRY-001 REQ-QRY-002 REQ-QRY-003 REQ-RES-REFDES-011 REQ-RES-REFDES-013 REQ-RES-REFDES-014 | 2 | 0 | 0 | 6 |
-| T7-GET-08 | test | 1 | – | implemented | REQ-LOC-002 | 1 | 0 | 0 | 6 |
-| T7-GET-09 | test | 1 | – | implemented | REQ-MSG-046 | 0 | 1 | 0 | 6 |
-| T7-SET-01 | test | 1 | – | implemented | REQ-BUS-006 REQ-CMP-016 REQ-CMP-023 REQ-CMP-038 REQ-MQTT-019 REQ-MSG-015 REQ-RES-EVENT-005 REQ-RES-SUBLIST-016 REQ-TOP-014 REQ-TOP-015 | 2 | 0 | 0 | 6 |
-| T7-SET-02 | test | 1 | – | implemented | REQ-CMP-043 | 1 | 0 | 0 | 6 |
-| T7-SET-03 | test | 3 | – | implemented | REQ-CMP-033 | 3 | 0 | 0 | 6 |
-| T7-SET-04 | test | 1 | – | implemented | REQ-BUS-007 REQ-BUS-008 | 1 | 0 | 0 | 6 |
-| T7-SET-05 | test | 1 | – | implemented | REQ-RES-CONFIG-005 REQ-RES-CONFIG-021 REQ-RES-CONFIG-022 REQ-RES-CONFIG-023 REQ-RES-CONFIG-024 REQ-RES-CONFIG-025 | 1 | 0 | 0 | 6 |
-| T7-SET-06 | test | 1 | – | implemented | REQ-RES-DATA-011 REQ-RES-DATA-012 | 1 | 0 | 0 | 6 |
-| T7-SET-07 | test | 1 | – | implemented | REQ-RES-META-006 REQ-RES-META-007 | 2 | 0 | 0 | 6 |
-| T7-SET-08 | test | 1 | – | implemented | REQ-RES-PUBLIST-007 REQ-RES-PUBLIST-016 REQ-RES-PUBLIST-024 REQ-RES-PUBLIST-025 | 1 | 0 | 0 | 6 |
-| T7-SET-09 | test | 1 | – | implemented | REQ-RES-REFDES-009 REQ-RES-REFDES-010 | 1 | 0 | 0 | 6 |
-| T7-SET-10 | test | 1 | restart-hook | implemented | REQ-RES-REFDES-002 | 1 | 0 | 0 | 6 |
-| T7-SET-11 | test | 1 | – | implemented | REQ-RES-SUBLIST-004 REQ-RES-SUBLIST-013 REQ-RES-SUBLIST-014 REQ-RES-SUBLIST-015 | 1 | 0 | 0 | 6 |
-| T7-SET-12 | test | 1 | – | implemented | REQ-TOP-027 | 0 | 1 | 0 | 6 |
-| T7-ACT-01 | test | 1 | – | implemented | REQ-ACT-001 REQ-ACT-006 REQ-ACT-007 REQ-ACT-012 REQ-ACT-014 REQ-ACT-015 REQ-ACT-016 REQ-ACT-020 REQ-ACT-022 REQ-CMP-034 REQ-CMP-040 REQ-TOP-016 | 2 | 0 | 0 | 6 |
-| T7-ACT-02 | test | 1 | – | implemented | REQ-ACT-023 | 1 | 0 | 0 | 6 |
-| T7-ACT-03 | test | 1 | – | implemented | REQ-ACT-017 | 1 | 0 | 0 | 6 |
-| T7-ACT-04 | test | 1 | – | implemented | REQ-ACT-024 | 1 | 0 | 0 | 6 |
+| T7-ADR-02 | test | 1 | – | implemented | REQ-TOP-004 | 1 | 0 | 0 | 7 |
+| T7-ADR-03 | test | 1 | – | implemented | REQ-IL-001 REQ-IL-013 REQ-IL-015 REQ-TOP-018 | 1 | 0 | 0 | 7 |
+| T7-GET-01 | test | 1 | – | implemented | REQ-BUS-003 REQ-CMP-015 REQ-CMP-017 REQ-MSG-015 REQ-RES-HEALTH-006 REQ-RES-MAM-021 | 2 | 0 | 0 | 7 |
+| T7-GET-02 | test | 1 | – | implemented | REQ-CMP-018 REQ-CMP-021 REQ-RES-PROFILE-002 REQ-RES-PROFILE-004 | 3 | 0 | 0 | 7 |
+| T7-GET-03 | test | 1 | – | implemented | REQ-CMP-008 REQ-CMP-019 REQ-CMP-020 REQ-CMP-035 REQ-CMP-036 REQ-CMP-037 REQ-CMP-039 REQ-RES-CONFIG-017 REQ-RES-DATA-007 REQ-RES-META-002 REQ-RES-PUBLIST-020 REQ-RES-PUBLIST-027 REQ-RES-REFDES-004 REQ-RES-SUBLIST-008 | 4 | 0 | 0 | 7 |
+| T7-GET-04 | test | 1 | – | implemented | REQ-CMP-010 REQ-CMP-024 REQ-CMP-045 | 3 | 0 | 0 | 7 |
+| T7-GET-05 | test | 1 | – | implemented | REQ-CMP-041 REQ-CMP-044 REQ-CMP-047 | 1 | 2 | 0 | 7 |
+| T7-GET-06 | test | 1 | – | implemented | REQ-PAG-002 REQ-PAG-005 | 1 | 0 | 0 | 7 |
+| T7-GET-07 | test | 1 | – | implemented | REQ-QRY-001 REQ-QRY-002 REQ-QRY-003 REQ-RES-REFDES-011 REQ-RES-REFDES-013 REQ-RES-REFDES-014 | 2 | 0 | 0 | 7 |
+| T7-GET-08 | test | 1 | – | implemented | REQ-LOC-002 | 1 | 0 | 0 | 7 |
+| T7-GET-09 | test | 1 | – | implemented | REQ-MSG-046 | 0 | 1 | 0 | 7 |
+| T7-SET-01 | test | 1 | – | implemented | REQ-BUS-006 REQ-CMP-016 REQ-CMP-023 REQ-CMP-038 REQ-MQTT-019 REQ-MSG-015 REQ-RES-EVENT-005 REQ-RES-SUBLIST-016 REQ-TOP-014 REQ-TOP-015 | 2 | 0 | 0 | 7 |
+| T7-SET-02 | test | 1 | – | implemented | REQ-CMP-043 | 1 | 0 | 0 | 7 |
+| T7-SET-03 | test | 3 | – | implemented | REQ-CMP-033 | 3 | 0 | 0 | 7 |
+| T7-SET-04 | test | 1 | – | implemented | REQ-BUS-007 REQ-BUS-008 | 1 | 0 | 0 | 7 |
+| T7-SET-05 | test | 1 | – | implemented | REQ-RES-CONFIG-005 REQ-RES-CONFIG-021 REQ-RES-CONFIG-022 REQ-RES-CONFIG-023 REQ-RES-CONFIG-024 REQ-RES-CONFIG-025 | 1 | 0 | 0 | 7 |
+| T7-SET-06 | test | 1 | – | implemented | REQ-RES-DATA-011 REQ-RES-DATA-012 | 1 | 0 | 0 | 7 |
+| T7-SET-07 | test | 1 | – | implemented | REQ-RES-META-006 REQ-RES-META-007 | 2 | 0 | 0 | 7 |
+| T7-SET-08 | test | 1 | – | implemented | REQ-RES-PUBLIST-007 REQ-RES-PUBLIST-016 REQ-RES-PUBLIST-024 REQ-RES-PUBLIST-025 | 1 | 0 | 0 | 7 |
+| T7-SET-09 | test | 1 | – | implemented | REQ-RES-REFDES-009 REQ-RES-REFDES-010 | 1 | 0 | 0 | 7 |
+| T7-SET-10 | test | 1 | restart-hook | implemented | REQ-RES-REFDES-002 | 1 | 0 | 0 | 7 |
+| T7-SET-11 | test | 1 | – | implemented | REQ-RES-SUBLIST-004 REQ-RES-SUBLIST-013 REQ-RES-SUBLIST-014 REQ-RES-SUBLIST-015 | 1 | 0 | 0 | 7 |
+| T7-SET-12 | test | 1 | – | implemented | REQ-TOP-027 | 0 | 1 | 0 | 7 |
+| T7-ACT-01 | test | 1 | – | implemented | REQ-ACT-001 REQ-ACT-006 REQ-ACT-007 REQ-ACT-012 REQ-ACT-014 REQ-ACT-015 REQ-ACT-016 REQ-ACT-020 REQ-ACT-022 REQ-CMP-034 REQ-CMP-040 REQ-TOP-016 | 2 | 0 | 0 | 7 |
+| T7-ACT-02 | test | 1 | – | implemented | REQ-ACT-023 | 1 | 0 | 0 | 7 |
+| T7-ACT-03 | test | 1 | – | implemented | REQ-ACT-017 | 1 | 0 | 0 | 7 |
+| T7-ACT-04 | test | 1 | – | implemented | REQ-ACT-024 | 1 | 0 | 0 | 7 |
 
 ## Manual requirements
 

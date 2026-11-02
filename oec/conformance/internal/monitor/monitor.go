@@ -1088,6 +1088,9 @@ func (e *Engine) finishSources(p *part, end time.Time, observed time.Duration) {
 	}
 	sort.Strings(names)
 	for _, il := range names {
+		if p.ServiceType == registryST && il != p.AppID {
+			continue // a listed asset (MG A1): only the Registry itself is judged
+		}
 		s := p.sources[il]
 		if s.mam {
 			e.check(p, test, "REQ-CMP-006")
@@ -1187,6 +1190,11 @@ func (e *Engine) finishChains(end time.Time) {
 	}
 }
 
+// registryST is the ServiceType of a Registry (MG A1): the Sources it
+// publishes MAM and Health for are listed assets, not represented ones
+// (ADR-0025 amendment C-087).
+const registryST = "Registry"
+
 // finishRepresented is the heuristic of REQ-CMP-045: a represented entity
 // (a Source of another component) does not communicate on the bus itself.
 func (e *Engine) finishRepresented(ids []string) {
@@ -1197,6 +1205,10 @@ func (e *Engine) finishRepresented(ids []string) {
 	}
 	for _, id := range ids {
 		p := e.parts[id]
+		if p.ServiceType == registryST && len(p.Sources) > 0 {
+			e.skip(p, test, req, false, "the participant is a Registry: its Sources are listed assets (MG A1), not represented entities")
+			continue
+		}
 		for _, il := range p.Sources {
 			e.check(p, test, req)
 			if q, ok := byIL[il]; ok && q != id {

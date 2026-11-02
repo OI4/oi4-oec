@@ -85,6 +85,10 @@ const (
 	OwnApp      Fault = "T7-ADR-01/own-app"      // requests a discovered application under its own ServiceType and AppId, with it as Source
 	OwnST       Fault = "T7-ADR-01/service-type" // requests a discovered application under its own ServiceType instead of the application's
 	NoDiscovery Fault = "T7-ADR-01/silent"       // variant, conforming: requests nothing of other components
+
+	// A registry (C-087, ADR-0025 amendment C-087): the CUT is a Registry
+	// (MG A1) that lists the subordinate asset.
+	Listed Fault = "T7-GET-04/registry" // variant, conforming: ServiceType Registry; the asset is listed (MAM and Health only), not represented
 )
 
 // Faults lists every fault.
@@ -94,10 +98,12 @@ var Faults = []Fault{ReplyTo, AllAssets, Unanswered, Missing, EmptyList, Unknown
 	NoCorrelation, Progress, Reissue, AnswersUnknown, NoReply,
 	MQTT31, ClientIDs, TLS11, NoVerify, Anonymous, Retained, NoWill, StaleWill, WillTime, NoRebirth, HealthFirst, FailNoBirth, FailRecovery, LateSub, WillWriter,
 	NoClose, CloseWriter, Abort, NotPersisted,
-	OwnApp, OwnST, NoDiscovery}
+	OwnApp, OwnST, NoDiscovery,
+	Listed}
 
 // ServiceType, AppID and Asset identify the simulated CUT: the OT connector
-// of the guideline examples (MG B1.1) with one subordinate asset.
+// of the guideline examples (MG B1.1) with one subordinate asset. With the
+// fault Listed the CUT is a Registry (ServiceTypeOf).
 const (
 	ServiceType = "OTConnector"
 	AppID       = "provider.com/FieldDataService/FDS-001/1200-0345"
@@ -120,6 +126,7 @@ const (
 const Mask = "********"
 
 type model struct {
+	st       string                                 // the ServiceType of the CUT (ServiceTypeOf)
 	classes  map[string]string                      // resource → DataSetClassId
 	dsms     map[string]map[string][]map[string]any // resource → Source → DataSetMessages; "MAM/de-DE": MAM in German
 	profiles map[string][]string                    // Source → Resources
@@ -133,7 +140,16 @@ var known = map[string]bool{"MessageId": true, "MessageType": true, "PublisherId
 	// the DataSetMetaData of a Get Metadata (MessageType ua-metadata)
 	"DataSetWriterId": true, "WriterGroupName": true, "DataSetWriterName": true, "Timestamp": true, "MetaData": true}
 
-func load() (*model, error) {
+// ServiceTypeOf is the ServiceType of the simulated CUT with the fault:
+// Registry for Listed, else ServiceType.
+func ServiceTypeOf(f Fault) string {
+	if f == Listed {
+		return "Registry"
+	}
+	return ServiceType
+}
+
+func load(st string) (*model, error) {
 	vs, err := testvec.Load("payload")
 	if err != nil {
 		return nil, err
@@ -145,7 +161,7 @@ func load() (*model, error) {
 			byID[v.ID] = doc
 		}
 	}
-	m := &model{classes: map[string]string{}, dsms: map[string]map[string][]map[string]any{}, profiles: map[string][]string{}, meta: map[string]map[string]any{}}
+	m := &model{st: st, classes: map[string]string{}, dsms: map[string]map[string][]map[string]any{}, profiles: map[string][]string{}, meta: map[string]map[string]any{}}
 	add := func(res, vid string, writer float64) error {
 		doc, ok := byID[vid]
 		if !ok {
@@ -222,7 +238,7 @@ func load() (*model, error) {
 	for _, sub := range []struct{ res, tag string }{{"Data", "oee"}, {"Config", "Networksettings"}} {
 		m.dsms["SubscriptionList"][AppID] = append(m.dsms["SubscriptionList"][AppID], map[string]any{"DataSetWriterId": 227.0,
 			"WriterGroupName": sub.res + "/" + sub.tag, "DataSetWriterName": AppID, "Payload": map[string]any{
-				"TopicPath": topic("Set", sub.res, AppID, sub.tag), "Interval": 0.0, "Config": "NONE_0"}})
+				"TopicPath": topicOf(st, "Set", sub.res, AppID, sub.tag), "Interval": 0.0, "Config": "NONE_0"}})
 	}
 	if len(m.dsms["MAM"][Asset]) != 1 || len(m.dsms["Profile"][AppID]) != 1 {
 		return nil, fmt.Errorf("sim: content model incomplete")
@@ -288,8 +304,8 @@ func dec(s string) (string, bool) {
 	return string(b), err == nil
 }
 
-func topic(method, resource, source, filter string) string {
-	t := "Oi4v2/" + ServiceType + "/" + enc(AppID) + "/" + method + "/" + resource
+func topicOf(st, method, resource, source, filter string) string {
+	t := "Oi4v2/" + st + "/" + enc(AppID) + "/" + method + "/" + resource
 	if source != "" {
 		t += "/" + enc(source)
 		if filter != "" {
@@ -299,9 +315,24 @@ func topic(method, resource, source, filter string) string {
 	return t
 }
 
+// topic is a topic of the simulated CUT.
+func (s *Sim) topic(method, resource, source, filter string) string {
+	return topicOf(s.m.st, method, resource, source, filter)
+}
+
+// pub is the PublisherId of the simulated CUT.
+func (s *Sim) pub() string { return s.m.st + "/" + AppID }
+
+// listed reports a request about the listed asset of a registry (fault
+// Listed) for another resource than MAM and Health: the registry answers it
+// as for an unknown asset (MG A1, ADR-0026 §22).
+func (s *Sim) listed(source, res string) bool {
+	return s.fault == Listed && source == Asset && res != "MAM" && res != "Health"
+}
+
 // build loads the content model of a run with the changes of the fault.
 func build(fault Fault) (*model, error) {
-	m, err := load()
+	m, err := load(ServiceTypeOf(fault))
 	if err != nil {
 		return nil, err
 	}
@@ -322,6 +353,9 @@ func build(fault Fault) (*model, error) {
 	if fault == NoRefDes {
 		m.dsms["ReferenceDesignation"] = map[string][]map[string]any{}
 	}
+	if fault == Listed {
+		listAsset(m)
+	}
 	if fault == FixedLevel {
 		for _, d := range m.dsms["PublicationList"][AppID] {
 			p, _ := d["Payload"].(map[string]any)
@@ -340,6 +374,35 @@ func build(fault Fault) (*model, error) {
 		m.dsms["SubscriptionList"][AppID] = keep
 	}
 	return m, nil
+}
+
+// listAsset turns the content model into the one of a registry (fault
+// Listed, MG A1): the asset keeps its MAM and Health (published by the
+// registry as a publisher of its own); every other resource, its Profile
+// and its PublicationList entries are dropped, and the MAM and the Will of
+// the application name the ServiceType Registry.
+func listAsset(m *model) {
+	for res, bySource := range m.dsms {
+		if res != "MAM" && res != "Health" && res != "MAM/de-DE" {
+			delete(bySource, Asset)
+		}
+	}
+	delete(m.profiles, Asset)
+	var keep []map[string]any
+	for _, d := range m.dsms["PublicationList"][AppID] {
+		if p, _ := d["Payload"].(map[string]any); p["Source"] != Asset {
+			keep = append(keep, d)
+		}
+	}
+	m.dsms["PublicationList"][AppID] = keep
+	for _, res := range []string{"MAM", "MAM/de-DE"} {
+		for _, d := range m.dsms[res][AppID] {
+			if p, ok := d["Payload"].(map[string]any); ok {
+				p["DeviceClass"] = "Oi4." + m.st
+			}
+		}
+	}
+	m.willDoc["PublisherId"] = m.st + "/" + AppID
 }
 
 // Start connects the simulated CUT with its Will, subscribes to its Get,
@@ -438,7 +501,7 @@ func (s *Sim) connect(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		cfg.Will = &mqttwire.Message{Topic: topic("Pub", "Health", AppID, ""), Payload: will}
+		cfg.Will = &mqttwire.Message{Topic: s.topic("Pub", "Health", AppID, ""), Payload: will}
 	}
 	if s.fault == ClientIDs {
 		cfg.ClientID = mqttwire.ClientID("oec-sim")
@@ -460,7 +523,7 @@ func (s *Sim) connect(ctx context.Context) error {
 	}
 	subscribe := func() error {
 		for _, method := range []string{"Get", "Set", "Del", "Call"} {
-			if err := cl.Subscribe(ctx, topic(method, "#", "", ""), 1, receive); err != nil {
+			if err := cl.Subscribe(ctx, s.topic(method, "#", "", ""), 1, receive); err != nil {
 				cl.Kill()
 				return err
 			}
@@ -662,7 +725,7 @@ func (s *Sim) nextID() string {
 		ms = s.last + 1
 	}
 	s.last = ms
-	return fmt.Sprintf("%d-%s/%s", ms, ServiceType, AppID)
+	return fmt.Sprintf("%d-%s", ms, s.pub())
 }
 
 // V1Topic is the topic of the version 1 Birth of the dual-version
@@ -673,7 +736,7 @@ var V1Topic = "Oi4/" + ServiceType + "/" + AppID + "/pub/mam/" + AppID
 // publishV1 publishes the MAM of the application under the namespace Oi4;
 // with a correlation id (Mixed) as the answer to that request.
 func (s *Sim) publishV1(ctx context.Context, correlation string) error {
-	doc := map[string]any{"MessageId": s.nextID(), "MessageType": "ua-data", "PublisherId": ServiceType + "/" + AppID,
+	doc := map[string]any{"MessageId": s.nextID(), "MessageType": "ua-data", "PublisherId": s.pub(),
 		"DataSetClassId": s.m.classes["MAM"], "CorrelationId": correlation, "Messages": []any{s.m.dsms["MAM"][AppID][0]}}
 	payload, err := json.Marshal(doc)
 	if err != nil {
@@ -687,7 +750,7 @@ func (s *Sim) publish(ctx context.Context, res, source, filter, replyTo string, 
 }
 
 func (s *Sim) publishID(ctx context.Context, id, res, source, filter, replyTo string, dsms []map[string]any) error {
-	doc := map[string]any{"MessageId": id, "MessageType": "ua-data", "PublisherId": ServiceType + "/" + AppID, "ReplyTo": replyTo}
+	doc := map[string]any{"MessageId": id, "MessageType": "ua-data", "PublisherId": s.pub(), "ReplyTo": replyTo}
 	if c, ok := s.m.classes[res]; ok {
 		doc["DataSetClassId"] = c
 	}
@@ -705,7 +768,7 @@ func (s *Sim) publishID(ctx context.Context, id, res, source, filter, replyTo st
 	}
 	// Retained: the Birth (MAM of the application, no answer) is retained.
 	retain := s.fault == Retained && res == "MAM" && source == AppID && replyTo == ""
-	return s.client().Publish(ctx, mqttwire.Message{Topic: topic("Pub", res, source, filter), Payload: payload, Retain: retain})
+	return s.client().Publish(ctx, mqttwire.Message{Topic: s.topic("Pub", res, source, filter), Payload: payload, Retain: retain})
 }
 
 func contains(s []string, x string) bool {
@@ -840,13 +903,13 @@ func (s *Sim) metadata(ctx context.Context, source, tag, replyTo string) {
 	for k, v := range doc {
 		c[k] = v
 	}
-	c["MessageId"], c["ReplyTo"] = s.nextID(), replyTo
+	c["MessageId"], c["ReplyTo"], c["PublisherId"] = s.nextID(), replyTo, s.pub()
 	c["Timestamp"] = time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
 	payload, err := json.Marshal(c)
 	if err != nil {
 		return
 	}
-	_ = s.client().Publish(ctx, mqttwire.Message{Topic: topic("Pub", "Metadata", source, tag), Payload: payload})
+	_ = s.client().Publish(ctx, mqttwire.Message{Topic: s.topic("Pub", "Metadata", source, tag), Payload: payload})
 }
 
 // handle answers one Get, Set, Del or Call.
@@ -949,7 +1012,7 @@ func (s *Sim) handle(msg mqttwire.Message) {
 			}
 		}
 	}
-	if !ok || (source != AppID && source != Asset) {
+	if !ok || (source != AppID && source != Asset) || s.listed(source, res) {
 		if s.fault == UnknownSource {
 			_ = s.publish(ctx, res, source, filter, replyTo, nil)
 			return
@@ -1022,11 +1085,11 @@ func (s *Sim) discover(lv []string, doc map[string]any) {
 	t := "Oi4v2/" + lv[1] + "/" + lv[2] + "/Get/MAM/" + lv[2]
 	switch s.fault {
 	case OwnApp:
-		t = topic("Get", "MAM", app, "")
+		t = s.topic("Get", "MAM", app, "")
 	case OwnST:
-		t = "Oi4v2/" + ServiceType + "/" + lv[2] + "/Get/MAM/" + lv[2]
+		t = "Oi4v2/" + s.m.st + "/" + lv[2] + "/Get/MAM/" + lv[2]
 	}
-	payload, err := json.Marshal(map[string]any{"MessageId": s.nextID(), "MessageType": "ua-data", "PublisherId": ServiceType + "/" + AppID,
+	payload, err := json.Marshal(map[string]any{"MessageId": s.nextID(), "MessageType": "ua-data", "PublisherId": s.pub(),
 		"DataSetClassId": s.m.classes["MAM"], "ReplyTo": "", "Messages": []any{}})
 	if err != nil {
 		return

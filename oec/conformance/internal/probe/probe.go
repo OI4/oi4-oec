@@ -1258,3 +1258,27 @@ func (r *Runner) get09(ctx context.Context) error {
 	r.violation(t, "REQ-MSG-046", x, "Get MAM/<AppId> with the unknown key %s (MessageId %s) is not answered within %s, the same Get without it is", UnknownKey, x.id, r.opt.Timeout)
 	return nil
 }
+
+// registryST is the ServiceType of a Registry (MG A1).
+const registryST = "Registry"
+
+// registry reports a CUT with the ServiceType Registry: the Sources it
+// publishes MAM and Health for besides itself are listed assets (MG A1,
+// ADR-0026 §22), not represented entities (ADR-0025 amendment C-087).
+func (r *Runner) registry() bool { return r.st == registryST }
+
+// represented are the entities the CUT represents: the Sources of the
+// answer to Get MAM without Source except its own AppId; none for a
+// Registry.
+func (r *Runner) represented() []string {
+	if r.registry() {
+		return nil
+	}
+	var out []string
+	for _, s := range r.mamAll {
+		if s != r.app {
+			out = append(out, s)
+		}
+	}
+	return out
+}

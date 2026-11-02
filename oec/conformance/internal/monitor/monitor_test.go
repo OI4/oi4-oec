@@ -364,3 +364,62 @@ func TestSetConfigUnchanged(t *testing.T) {
 		t.Error("want a check")
 	}
 }
+
+// TestListedAssets (C-087, ADR-0025 amendment C-087): a Registry
+// publishes the MAM and the Health of the components it lists (MG A1);
+// they are listed assets, not represented ones, so REQ-CMP-045 is skipped
+// for it and only its own MAM and Health are judged (REQ-CMP-006/007).
+// Here it publishes the MAM of compA, not its Health.
+// Another component that republishes them gets the note of the heuristic.
+func TestListedAssets(t *testing.T) {
+	for _, c := range []struct {
+		st   string
+		note int
+	}{{"Registry", 0}, {"ITConnector", 1}} {
+		t.Run(c.st, func(t *testing.T) {
+			r := comp{st: c.st, il: "registry.com/OecRegistry/REG-1/1", mamID: 1, health: 2,
+				mam: map[string]any{"Manufacturer": map[string]any{"Locale": "en-US", "Text": "Registry Inc."}, "ManufacturerUri": "registry.com",
+					"Model": map[string]any{"Locale": "en-US", "Text": "OecRegistry"}, "ProductCode": "REG-1",
+					"HardwareRevision": "", "SoftwareRevision": "1.0.0", "DeviceRevision": "", "DeviceManual": "",
+					"DeviceClass": "Oi4." + c.st, "SerialNumber": "1", "ProductInstanceUri": "registry.com/OecRegistry/REG-1/1",
+					"RevisionCounter": json.Number("1"), "Description": map[string]any{"Locale": "en-US", "Text": "Directory"}}}
+			s := scenario(t, "x", "")
+			s.birth(0, compA)
+			s.birth(1, r)
+			s.health(1.5, r, "NORMAL_0", 100)
+			s.health(2, compA, "NORMAL_0", 100)
+			s.add(3, r.base()+"/Pub/MAM/"+compA.self(), network(r, at(3), classMAM, "", dsMsg(1001, compA.il, "", compA.mam)))
+			s.end = 10 * time.Second
+			res := run(t, s, DefaultOptions())
+			var notes, skips int
+			for _, o := range find(res, "T7-MON-04", "REQ-CMP-045", verdict.Note) {
+				if o.Participant == r.pub() {
+					notes++
+				}
+			}
+			for _, o := range find(res, "T7-MON-04", "REQ-CMP-045", verdict.Skipped) {
+				if o.Participant == r.pub() && strings.Contains(o.Detail, "listed") {
+					skips++
+				}
+			}
+			if notes != c.note {
+				t.Errorf("%d notes of REQ-CMP-045 for %s, want %d", notes, r.pub(), c.note)
+			}
+			if want := 1 - c.note; skips != want {
+				t.Errorf("%d skips of REQ-CMP-045 (listed assets) for %s, want %d", skips, r.pub(), want)
+			}
+			// A Registry is judged on its own MAM and Health only; another
+			// component on every Source (it published no Health of compA
+			// after the MAM: REQ-CMP-007 is skipped for that Source).
+			others := 0
+			for _, o := range find(res, "T7-MON-04", "REQ-CMP-007", verdict.Skipped) {
+				if o.Participant == r.pub() {
+					others++
+				}
+			}
+			if others != c.note {
+				t.Errorf("%d skips of REQ-CMP-007 for %s, want %d", others, r.pub(), c.note)
+			}
+		})
+	}
+}

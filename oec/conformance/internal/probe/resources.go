@@ -361,7 +361,8 @@ var appOnly = map[string]bool{"PublicationList": true, "SubscriptionList": true}
 // get04 is T7-GET-04: the application itself (REQ-CMP-024) and every entity
 // it represents (REQ-CMP-045) answer Get with their Source for every
 // resource of the level; at level 2 the recommended resources are
-// REQ-CMP-010.
+// REQ-CMP-010. A Registry represents no entity: the other Sources of its
+// answer to Get MAM are listed assets (MG A1, ADR-0025 amendment C-087).
 func (r *Runner) get04(ctx context.Context) error {
 	const t = "T7-GET-04"
 	required, recommended := r.entityResources()
@@ -374,7 +375,7 @@ func (r *Runner) get04(ctx context.Context) error {
 	}
 	srcs := []string{r.app}
 	for _, s := range sources(r.reply(t, all)) {
-		if s != "" && !contains(srcs, s) && len(srcs) < maxSources {
+		if s != "" && !contains(srcs, s) && len(srcs) < maxSources && !r.registry() {
 			srcs = append(srcs, s)
 		}
 	}
@@ -429,7 +430,9 @@ func (r *Runner) get04(ctx context.Context) error {
 	if !bad["REQ-CMP-024"] {
 		r.checked(t, "REQ-CMP-024", nil)
 	}
-	if len(srcs) == 1 {
+	if r.registry() {
+		r.skip(t, "REQ-CMP-045", "the application is a Registry: the other Sources of its answer to Get MAM are listed assets (MG A1), not represented entities")
+	} else if len(srcs) == 1 {
 		r.skip(t, "REQ-CMP-045", "the application represents no entity (the answer to Get MAM without Source has only its own MAM)")
 	} else if !bad["REQ-CMP-045"] {
 		r.checked(t, "REQ-CMP-045", nil)

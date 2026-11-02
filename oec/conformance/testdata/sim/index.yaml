@@ -226,6 +226,21 @@ fixtures:
       instead of the entries of the Filter (REQ-RES-PUBLIST-020); the
       monitor sees WriterGroupNames that differ from the Filter of the topic
       (T7-MON-01, REQ-MSG-025).
+  - fault: T7-GET-04/registry
+    status: draft
+    positive: true
+    expect: {}
+    notes: >-
+      Variant, conforming (C-087, ADR-0025 amendment C-087): the CUT is a
+      Registry (ServiceType Registry, DeviceClass Oi4.Registry) that lists the
+      asset (MG A1): it publishes the MAM and the Health of the asset and
+      answers Get MAM and Get Health with its Source, but the asset is no
+      represented asset. Every other request about the asset (Get, Set, Del
+      of another resource, NewDataSetWriterId) is answered as for an unknown
+      asset (BadNotFound under the AppId, REQ-MSG-046). T7-GET-04 judges the
+      level of the application only (REQ-CMP-045 is skipped: listed assets),
+      T7-SET-03 writes to the application only, and T7-MON-04 judges the
+      MAM and the Health of the application; every test passes.
   - fault: T7-GET-04/asset-level
     status: reviewed
     expect:

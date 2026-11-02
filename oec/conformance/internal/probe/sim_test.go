@@ -143,7 +143,7 @@ func runSimWith(t *testing.T, v *validate.Validator, reqs verdict.Requirements, 
 			return c.Restart(ctx)
 		}
 	}
-	app := sim.ServiceType + "/" + sim.AppID
+	app := sim.ServiceTypeOf(fault) + "/" + sim.AppID
 	s, err := RunBus(ctx, cfg, Options{App: app, Level: level, Timeout: simTimeout, Subscribed: start, Tests: opt.Tests, Proxy: px, ProxyWait: 10 * simTimeout,
 		Restart: restart, RestartWait: 10 * simTimeout, Peer: opt.Peer, Announce: opt.Announce}, reqs, observe)
 	if cutStarted != nil {

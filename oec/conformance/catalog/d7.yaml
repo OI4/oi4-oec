@@ -51,7 +51,7 @@ tests:
     level: 1
     reqs: [REQ-CMP-006, REQ-CMP-007, REQ-CMP-014, REQ-CMP-045]
     status: implemented
-    notes: Every Source seen in a Pub of the component has MAM and Health; represented entities never publish a Birth, Will or Close of their own.
+    notes: Every Source seen in a Pub of the component has MAM and Health; represented entities never publish a Birth, Will or Close of their own. For a Registry (ServiceType Registry) the other Sources are listed assets (MG A1), not represented ones; only the Registry itself is judged (C-087).
   - id: T7-MON-05
     title: Health at start, on change and every 60 seconds
     mode: monitor
@@ -279,7 +279,7 @@ tests:
     level: 1
     reqs: [REQ-CMP-010, REQ-CMP-024, REQ-CMP-045]
     status: implemented
-    notes: The Get tests repeat for every Source the CUT represents.
+    notes: The Get tests repeat for every Source the CUT represents. A Registry represents none; the other Sources of its answer to Get MAM are listed assets (MG A1, C-087).
   - id: T7-GET-05
     title: Get without content, unknown asset, Metadata without Data
     mode: test
@@ -332,6 +332,7 @@ tests:
     level: 3
     reqs: [REQ-CMP-033]
     status: implemented
+    notes: The application and one represented asset; a Registry represents none (MG A1, C-087).
   - id: T7-SET-04
     title: Del semantics
     mode: test

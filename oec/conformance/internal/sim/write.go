@@ -109,7 +109,7 @@ func (s *Sim) write(lv []string, doc map[string]any) {
 	if len(lv) > 6 {
 		filter = strings.Join(lv[6:], "/")
 	}
-	if source != AppID && source != Asset {
+	if source != AppID && source != Asset || s.listed(source, res) {
 		at := AppID
 		if s.fault == SetUnknown && source != "" {
 			at = source

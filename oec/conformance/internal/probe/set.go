@@ -310,7 +310,7 @@ func (r *Runner) statusOf(x *exchange) status {
 // Source of the request, for an asset the entity neither is nor
 // represents its AppId (REQ-CMP-043, SF-108).
 func (r *Runner) eventSource(source string) string {
-	if source == r.app || contains(r.mamAll, source) {
+	if source == r.app || contains(r.represented(), source) {
 		return source
 	}
 	return r.app
@@ -1600,7 +1600,8 @@ func unknownMeta(name string) map[string]any {
 // set03 is T7-SET-03 (level 3): the application supports Set and Del for
 // every resource MG 9.1 defines them for, a represented asset Set for
 // Config, Data, Metadata and ReferenceDesignation and Del for
-// ReferenceDesignation (REQ-CMP-033). It judges the reactions of the
+// ReferenceDesignation (REQ-CMP-033); a Registry represents none
+// (represented). It judges the reactions of the
 // earlier write tests and stimulates the missing combinations; supported
 // means any reaction with the ReplyTo except BadNotSupported. It runs
 // after the other write tests.
@@ -1611,11 +1612,8 @@ func (r *Runner) set03(ctx context.Context) error {
 		return nil
 	}
 	targets := []string{r.app}
-	for _, s := range r.mamAll {
-		if s != r.app {
-			targets = append(targets, s)
-			break
-		}
+	if rep := r.represented(); len(rep) > 0 {
+		targets = append(targets, rep[0])
 	}
 	type combo struct{ method, resource, source string }
 	var missing []combo

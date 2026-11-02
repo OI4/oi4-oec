@@ -43,18 +43,18 @@ func (s *Sim) call(lv []string, doc map[string]any) {
 		}
 		source = src
 	}
-	reply := topic("Reply", "NewDataSetWriterId", "", "")
+	reply := s.topic("Reply", "NewDataSetWriterId", "", "")
 	if len(lv) == 6 {
-		reply = topic("Reply", "NewDataSetWriterId", source, "")
+		reply = s.topic("Reply", "NewDataSetWriterId", source, "")
 	}
-	if doc["MessageType"] != "ua-action-request" || doc["PublisherId"] != ServiceType+"/"+AppID || doc["ResponseAddress"] != reply {
+	if doc["MessageType"] != "ua-action-request" || doc["PublisherId"] != s.pub() || doc["ResponseAddress"] != reply {
 		return
 	}
 	requestor, _ := doc["RequestorId"].(string)
 	if requestor == "" {
 		return
 	}
-	known := source == AppID || source == Asset
+	known := source == AppID || source == Asset && s.fault != Listed
 	list, _ := doc["Messages"].([]any)
 	var final []any
 	var progress []any
@@ -116,7 +116,7 @@ func (s *Sim) reserve() int {
 
 // respond publishes a ua-action-response (MG 8.2.6) to the ResponseAddress.
 func (s *Sim) respond(ctx context.Context, reply, requestor string, correlation any, responses []any) {
-	doc := map[string]any{"MessageId": s.nextID(), "MessageType": "ua-action-response", "PublisherId": ServiceType + "/" + AppID,
+	doc := map[string]any{"MessageId": s.nextID(), "MessageType": "ua-action-response", "PublisherId": s.pub(),
 		"Timestamp": time.Now().UTC().Format("2006-01-02T15:04:05.000Z"), "RequestorId": requestor, "Messages": responses}
 	if correlation != nil && s.fault != NoCorrelation {
 		doc["CorrelationData"] = correlation
