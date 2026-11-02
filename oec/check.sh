@@ -27,7 +27,8 @@
 #      Rust package on the SDK crate oec (fmt, clippy, tests incl. the
 #      AsyncAPI document against its meta-schema, cargo-deny), Go
 #      integration tests with -race against the test broker: D8 bus
-#      T8-BUS-03 and D7 test --level 2.
+#      T8-BUS-03, D7 test --level 3, HTTP/SSE/TLS and the embedded Web UI,
+#      and the offline npm policy of the Web UI (internal/uipolicy).
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
