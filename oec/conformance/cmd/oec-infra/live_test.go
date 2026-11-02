@@ -23,8 +23,10 @@ import (
 // oec-dev-app. Port 8884 (client certificate required): the probe presents
 // its client certificate, the unprivileged client is the sample storage
 // oec-dev-cert. The dev ACL cannot bind the AppId level to a user and the
-// applications read their own Set/Config, so REQ-RES-CONFIG-026 warns; there
-// is no OEC Registry before P7, so T8-BUS-03 skips (C-071).
+// applications read their own Set/Config, so REQ-RES-CONFIG-026 warns.
+// Without an OEC Registry T8-BUS-03 skips (C-071); with the registry of the
+// compose profile registry (live.sh with OEC_LIVE_REGISTRY=1, C-090) the
+// run on 8883 discovers it and T8-BUS-03 passes.
 func TestBusDevBroker(t *testing.T) {
 	if os.Getenv("OEC_LIVE") != "1" {
 		t.Skip("opt-in: OEC_LIVE=1 (oec/conformance/live.sh)")
@@ -35,16 +37,21 @@ func TestBusDevBroker(t *testing.T) {
 	}
 	gen := filepath.Join(dev, "generated")
 	probe := filepath.Join(gen, "probe")
+	registry := liveRegistry(t, dev)
+	wait, exit8883, bus03 := []string{"--registry-wait", "5s"}, exitInconclusive, "skip"
+	if registry != "" {
+		wait, exit8883, bus03 = nil, exitPass, "pass"
+	}
 	runs := []struct {
 		name string
 		args []string
 		exit int
 		want map[string]string
 	}{
-		{"8883", []string{"--broker", "mqtts://localhost:8883", "--bus-storage", filepath.Join(gen, "roots", "oec-dev-app"),
+		{"8883", append([]string{"--broker", "mqtts://localhost:8883", "--bus-storage", filepath.Join(gen, "roots", "oec-dev-app"),
 			"--username", "oec-probe", "--password-file", filepath.Join(probe, "password"),
-			"--credentials-2", filepath.Join(gen, "roots", "oec-dev-app", "run", "secrets", "oi4", "credentials"), "--registry-wait", "5s"},
-			exitInconclusive, map[string]string{"T8-BUS-01": "pass", "T8-BUS-02": "warn", "T8-BUS-03": "skip"}},
+			"--credentials-2", filepath.Join(gen, "roots", "oec-dev-app", "run", "secrets", "oi4", "credentials")}, wait...),
+			exit8883, map[string]string{"T8-BUS-01": "pass", "T8-BUS-02": "warn", "T8-BUS-03": bus03}},
 		{"8884", []string{"--broker", "mqtts://localhost:8884", "--ca", filepath.Join(gen, "broker", "ca.pem"),
 			"--cert", filepath.Join(probe, "probe.pem"), "--key", filepath.Join(probe, "probe.key"),
 			"--bus-storage-2", filepath.Join(gen, "roots", "oec-dev-cert"), "--max-packet-size", "262144", "--tests", "T8-BUS-0[12]"},
@@ -64,6 +71,9 @@ func TestBusDevBroker(t *testing.T) {
 			if strings.Join(rep.Broker.TLS, ",") != "1.2,1.3" || rep.Broker.MaxPacketSize != 262144 {
 				t.Errorf("broker %+v", rep.Broker)
 			}
+			if r.name == "8883" && rep.Broker.Registry != registry {
+				t.Errorf("registry %q, want %q", rep.Broker.Registry, registry)
+			}
 			got := map[string]string{}
 			for _, tc := range rep.Tests {
 				got[tc.ID] = tc.Outcome
@@ -78,6 +88,28 @@ func TestBusDevBroker(t *testing.T) {
 			}
 		})
 	}
+}
+
+// liveRegistry is the Identification Link of the OEC Registry of the compose
+// profile registry of oec/dev (MG 4.1: the container name of
+// generated/demos.env as serial number) if live.sh started it
+// (OEC_LIVE_REGISTRY=1, C-090), else "".
+func liveRegistry(t *testing.T, dev string) string {
+	t.Helper()
+	if os.Getenv("OEC_LIVE_REGISTRY") != "1" {
+		return ""
+	}
+	b, err := os.ReadFile(filepath.Join(dev, "generated", "demos.env"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range strings.Split(string(b), "\n") {
+		if name, ok := strings.CutPrefix(strings.TrimSpace(line), "OEC_REGISTRY_NAME="); ok && name != "" {
+			return "oi4.org/OEC,20Registry/OEC-REGISTRY/" + name
+		}
+	}
+	t.Fatal("generated/demos.env: no OEC_REGISTRY_NAME (go run ./pki -force)")
+	return ""
 }
 
 // liveReq returns the outcome of a requirement in a host report.
@@ -97,10 +129,12 @@ func liveReq(r hostReport, test, req string) string {
 
 // TestHostDevRoots is the opt-in live run of `oec-infra host` on this
 // computer against the sample roots of oec/dev (live.sh): the storages pass,
-// D8 connects to the dev broker with the login of the root (REQ-PLT-007);
-// there is no OEC Registry before P7, so REQ-PLT-008 fails and T8-HST-04
-// fails (C-072). The mounts are not judged (the roots are plain
-// directories).
+// D8 connects to the dev broker with the login of the root (REQ-PLT-007).
+// Without an OEC Registry REQ-PLT-008 fails and T8-HST-04 fails (C-072);
+// with the registry of the compose profile registry (OEC_LIVE_REGISTRY=1,
+// C-090) D8 discovers it within the default wait and REQ-PLT-008 passes,
+// the outcome of T8-HST-04 then depends on the computer.
+// The mounts are not judged (the roots are plain directories).
 func TestHostDevRoots(t *testing.T) {
 	if os.Getenv("OEC_LIVE") != "1" {
 		t.Skip("opt-in: OEC_LIVE=1 (oec/conformance/live.sh)")
@@ -109,19 +143,26 @@ func TestHostDevRoots(t *testing.T) {
 	if dev == "" {
 		t.Fatal("OEC_DEV_DIR not set")
 	}
+	registry := liveRegistry(t, dev)
+	wait, plt008 := "3s", "fail"
+	if registry != "" {
+		wait, plt008 = "65s", "pass"
+	}
 	for _, root := range []string{"oec-dev-app", "oec-dev-cert"} {
 		t.Run(root, func(t *testing.T) {
-			code, out, errOut := call(t, "host", "--root", filepath.Join(dev, "generated", "roots", root), "--registry-wait", "3s", "--format", "json")
+			code, out, errOut := call(t, "host", "--root", filepath.Join(dev, "generated", "roots", root), "--registry-wait", wait, "--format", "json")
 			t.Logf("%s%s", out, errOut)
 			r, got := outcomes(t, out)
-			if code != 1 || got["T8-HST-01"] != "pass" || got["T8-HST-02"] != "pass" || got["T8-HST-04"] != "fail" {
+			// with the registry T8-HST-04 still depends on the computer
+			// (REQ-PLT-003: a Linux-based distribution)
+			if got["T8-HST-01"] != "pass" || got["T8-HST-02"] != "pass" || registry == "" && (code != 1 || got["T8-HST-04"] != "fail") {
 				t.Errorf("exit %d, tests %v", code, got)
 			}
 			if o := liveReq(r, "T8-HST-04", "REQ-PLT-007"); o != "pass" {
 				t.Errorf("REQ-PLT-007 %s", o)
 			}
-			if o := liveReq(r, "T8-HST-04", "REQ-PLT-008"); o != "fail" {
-				t.Errorf("REQ-PLT-008 %s (an OEC Registry in oec/dev? then update this test)", o)
+			if o := liveReq(r, "T8-HST-04", "REQ-PLT-008"); o != plt008 {
+				t.Errorf("REQ-PLT-008 %s, want %s", o, plt008)
 			}
 		})
 	}
