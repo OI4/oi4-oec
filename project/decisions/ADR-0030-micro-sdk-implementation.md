@@ -70,3 +70,14 @@ The work happens on a Mac without a connected ESP32. The real-hardware run there
 - **Parse the vector JSON in the C tests:** needs a JSON file reader before L2 and mixes test and product code. Rejected for a generated header.
 - **Validate the C output only with own C assertions:** would test the encoder against itself. Rejected; D7 `validate` is the independent judge (ADR-0006).
 - **QEMU in the gate:** needs ESP-IDF (~2 GB) and long builds. Rejected; opt-in like the Docker runs.
+
+## Amendment C-093 (2026-11-09) – increment 2: host runner and D7 Level 1 (agent, G-3.4 b)
+
+Refines §7 (A-439 … A-445):
+
+- **Layout:** `host/mqtt` (MQTT 3.1.1 client, stdlib), `host/cmd/oecm-host` (the runner: cgo PAL, storage, event loop), `host/internal/d7run` (copy of the D7 part of `oec/demos/internal/demotest`; the demos module is not imported, so the micro SDK keeps its own module and the copy carries only what a device needs). Each core source is compiled as its own cgo translation unit (`core_*.c` include `src/oecm_*.c`), so the static names of the core do not clash.
+- **MQTT subset:** CONNECT (clean session, Will QoS 0 without retain, user/password, the keepalive of the core, 60 s by default), CONNACK, PUBLISH QoS 0 out, PUBLISH QoS 0/1 in (PUBACK for QoS 1, D7 sends with QoS 1), SUBSCRIBE QoS 0 (SUBACK refusal = error), PINGREQ every keepalive/2 (an unanswered ping closes the connection), DISCONNECT. Incoming packets are bounded by `MaxPacketSize` + 65544 (SF-105).
+- **Events by generation:** every connect gets a generation number; events of an older connection are dropped, a late CONNACK of an older connection is answered with DISCONNECT (no Will). This mirrors what the ESP-IDF port must do with esp-mqtt events after `esp_mqtt_client_stop`.
+- **Storage (RIG 4.1):** `OEC_ROOT` (default `/`): hostname from `proc/sys/kernel/hostname`, else `etc/hostname`; `etc/oi4/mqtt/broker.json` (all three elements required); CA `etc/oi4/mqtt/broker_ca.pem`, else `etc/oi4/certs/ca.pem`; a client certificate (`run/secrets/oi4/private_key.pem` + `etc/oi4/certs/<hostname>.pem`) is used when present, else `run/secrets/oi4/credentials` (SF-117: the means the platform provides). An encrypted key (passphrase file) is rejected: the runner is a test harness, the ESP32 port has its own key storage.
+- **The test binary is the device:** `TestMain` runs the runner when `OECM_HOST_MAIN=1`, so D7 starts the test binary itself (no separate build step in the gate); the restart hooks stop it with SIGTERM (Close) and start it again.
+- **Gate:** `micro/check.sh` builds `oec-check` and `go-testbroker` first, runs `go test -race ./mqtt` and `go test ./...` with `OECM_REQUIRE=1` (a missing tool fails). The D7 Level 1 run takes about 2 min. Pinned: 21 pass (the list of the config service without T7-ADR-01, the device sends no requests), 5 warn for the SHOULD answers a Level 1 device does not give, 0 fail.

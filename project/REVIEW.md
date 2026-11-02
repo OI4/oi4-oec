@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-08, C-092: **P4b started** – Micro SDK core Messaging L1 (A-429 … A-438 for information). Nothing is open for you._
+_Last updated: 2026-11-09, C-093: P4b increment 2 – Go host runner, D7 Level 1 against the micro core in the gate (A-439 … A-445 for information). Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -293,6 +293,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 
 - C-091 (P7 increment 6 = exit run; ADR-0029 amendment C-091): image D8 `image`/`run`/`container` pass at L3; compose run – every participant over REST and in the Web UI, `Set`/Close/Will visible, T8-BUS-03 and REQ-PLT-008 pass, D7 `monitor` 0 fail without the D8 probe traffic; Registry guide (A-424 … A-428). **D-1** close P7? No R-x, no SF.
 - C-092 (P4b start + increment 1; ADR-0030, ADR-0022 amendment C-092): micro SDK core Messaging L1 in C17, 30 Unity tests under ASan/UBSan against the shared vectors, emitted payloads valid by D7 `validate`, gate step 9 (A-429 … A-438). No D-x, no R-x, no SF.
+- C-093 (P4b increment 2; ADR-0030 amendment C-093): Go host runner (cgo PAL, own MQTT 3.1.1 client), D7 `test --level 1` against the micro core in gate step 9 – 21 pass, 5 warn, 0 fail; opt-in D7 `monitor` against `oec/dev` 0 fail (A-439 … A-445). No D-x, no R-x, no SF.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -756,6 +757,13 @@ Logs: [C-091](log/2026-11-07_C-091_p7-exit-registry-guide.md), [C-090](log/2026-
 | A-436 | Test vectors as a generated C header (`oecm-vecgen`, `-check` in the gate) | info (agent) | C-092 | – | – |
 | A-437 | ESP-IDF v6.1 and Espressif QEMU installed outside the workspace (opt-in) | info (agent) | C-092 | – | – |
 | A-438 | Sketch folder removed (`git mv` of header and example) | info (agent) | C-092 | – | – |
+| A-439 | Own MQTT 3.1.1 client for the host runner (stdlib; QoS 1 inbound with PUBACK) | info (agent) | C-093 | – | – |
+| A-440 | Runner layout: one cgo TU per core source, C-allocated state, one OS-locked loop | info (agent) | C-093 | – | – |
+| A-441 | Connection generations: stale events dropped, stale CONNACK → DISCONNECT (also for the ESP-IDF port) | info (agent) | C-093 | – | – |
+| A-442 | Runner storage like a container (RIG 4.1); client certificate before credentials; no encrypted key | info (agent) | C-093 | – | – |
+| A-443 | D7 harness `internal/d7run` as a copy of `demotest` (own module) | info (agent) | C-093 | – | – |
+| A-444 | The test binary is the device (`OECM_HOST_MAIN=1`) | info (agent) | C-093 | – | – |
+| A-445 | Gate step 9 now about 2 min 20 s (D7 Level 1); one D7 run per level | info (agent) | C-093 | – | – |
 
 ## Decisions and review items
 
@@ -1957,6 +1965,16 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 - **A-437 Toolchain:** ESP-IDF v6.1 (`~/esp/esp-idf-v6.1`, targets `esp32`, `esp32s3`) and Espressif QEMU in `~/.espressif`; not in the repository, not in the gate.
 - **A-438 Sketch:** `oec/sdk/micro/sketch/` is removed; header and example moved with history, `oec/sdk/check.sh` no longer compiles the sketch.
 
-## Next (C-093)
+### C-093 – P4b increment 2 (agent, G-3.4 b; log `log/2026-11-09_C-093_micro-host-runner.md`)
 
-1. C-093 – P4b increment 2: Go host runner (cgo PAL, own MQTT 3.1.1 client on `crypto/tls`), D7 `test --level 1` against the micro core in the gate; then C-094 … C-097 in the same session (PO).
+- **A-439 MQTT client:** `oec/sdk/micro/host/mqtt` – CONNECT with Will and user/password, PUBLISH QoS 0 out, QoS 0/1 in (PUBACK; D7 sends requests with QoS 1), SUBSCRIBE, PINGREQ every keepalive/2 (an unanswered ping closes), DISCONNECT; incoming packets bounded by `MaxPacketSize` + 65544 (SF-105). 7 byte-exact tests over `net.Pipe`, `-race` in the gate.
+- **A-440 Runner:** `cmd/oecm-host` – each core source its own cgo translation unit; config, device and buffer allocated in C; all core calls on one OS-locked goroutine with events through a channel (the model of the FreeRTOS queue of the ESP-IDF port).
+- **A-441 Generations:** events of an older connection are dropped, a late CONNACK of an older connection gets DISCONNECT; the ESP-IDF port needs the same rule.
+- **A-442 Storage:** `OEC_ROOT` as a container storage (hostname, `broker.json` with all three elements, CA, client certificate or credentials per SF-117); an encrypted key is rejected (test harness).
+- **A-443 Harness copy:** `internal/d7run` copies the D7 part of `oec/demos/internal/demotest`; changes of the D7 options go to both.
+- **A-444 Test binary as device:** `TestMain` runs the runner with `OECM_HOST_MAIN=1`.
+- **A-445 Gate time:** step 9 about 2 min 20 s; D7 Level 1: 21 pass (config service list without T7-ADR-01), 5 warn (SHOULD answers from Level 2), 29 skip, 0 fail. From C-094 the run is at `--level 2` (one run per level, not two).
+
+## Next (C-094)
+
+1. C-094 – P4b increment 3: Messaging Level 2 in the micro core (JSON pull reader and topic parser with fuzz targets, `Get`/`Set`/Status, Data/Config definitions, number formatting), D7 `test --level 2` in the gate; then C-095 … C-097 in the same session (PO).

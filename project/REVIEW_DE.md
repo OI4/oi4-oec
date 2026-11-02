@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 08.11.2026, C-092: **P4b hat begonnen** – der Kern des Micro SDK für Stufe 1 steht (A-429 … A-438 zur Info). Für dich ist nichts offen._
+_Stand: 09.11.2026, C-093: P4b Teil 2 – D7 prüft den Micro-SDK-Kern jetzt live am Broker, im Gate (A-439 … A-445 zur Info). Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -31,6 +31,14 @@ Für dich ist nichts offen.
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-093 gemacht hat (P4b, Teil 2 von 6)
+
+- **Was neu ist:** Ein kleines Testprogramm auf dem Mac (`oecm-host`) nimmt den C-Kern des Micro SDK unverändert und verbindet ihn über TLS mit einem echten MQTT-Broker. Die Netzwerkteile, die auf dem ESP32 später ESP-IDF liefert, sind hier in Go geschrieben (eigener kleiner MQTT-Client, nur Standardbibliothek; A-439, A-440).
+- **Ergebnis:** D7 prüft das Gerät im Gate wie eine echte Anwendung auf Stufe 1: **21 bestanden, 0 Fehler**. Die 5 Warnungen sind Antworten, die erst ab Stufe 2 Pflicht sind (kommen in C-094). Der Kern hatte keinen einzigen Fehler; die einzigen Fehler im Zyklus waren in meinen eigenen Tests.
+- **Gegen den echten Dev-Broker (freiwillig):** Das Gerät lief gegen Mosquitto in `oec/dev`; D7 hat mitgehört: 0 Fehler, Birth, Close (sauberes Beenden) und Will (hartes Beenden) waren zu sehen. Alle Docker-Objekte sind danach wieder weg.
+- **Kleine Festlegungen:** Verspätete Meldungen einer alten Verbindung werden verworfen – das braucht der ESP32-Port genauso (A-441). Das Programm liest seine Einstellungen wie eine Container-Anwendung (A-442). Der D7-Prüfrahmen der Demos ist als Kopie übernommen, damit das Micro SDK unabhängig bleibt (A-443, A-444).
+- **Kosten:** Schritt 9 im Gate dauert jetzt etwa 2 ½ Minuten statt 6 Sekunden (A-445). Keine Testdaten zum Review, kein Guideline-Befund.
 
 ### Zur Info: was C-092 gemacht hat (P4b, Teil 1 von 6)
 
