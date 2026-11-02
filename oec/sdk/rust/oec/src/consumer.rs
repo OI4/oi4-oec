@@ -70,7 +70,7 @@ use oec_core::topic::{Filter, Form, Method, Subject, TopicFilter, decode_level};
 use tokio::sync::oneshot;
 
 pub use oec_core::consumer::{AppState, Payload};
-pub use oec_core::resource::{Aspect, HealthState, ReferenceDesignationQuery as Query};
+pub use oec_core::resource::{Aspect, Health, HealthState, ReferenceDesignationQuery as Query};
 /// The OI4 resources (REQ-TOP-012, MG 7.5.1).
 pub use oec_core::topic::Resource;
 

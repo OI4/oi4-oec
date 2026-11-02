@@ -308,6 +308,82 @@ fn assets() {
     assert!(app.assets().is_empty());
 }
 
+/// Listed assets of a Registry (MG A1, ADR-0026 amendment C-086 §22): the
+/// available assets of others, answered for `Get MAM`/`Get Health` only;
+/// their DataSetWriterIds are persisted.
+#[test]
+fn listed_assets() {
+    use oec::consumer::Health;
+    let root = Root::new("listed-store");
+    let store = || FileStore::new(root.path("store"));
+    let other = || {
+        let il = IdentificationLink::parse("vendor.com/Pump/P-1/0815").unwrap();
+        let mam = oec::identity::Mam {
+            product_instance_uri: il.as_str().to_owned(),
+            ..device(Level::L1, explicit()).build().unwrap().mam()
+        };
+        (il, mam)
+    };
+    let health = Health {
+        health: HealthState::Normal,
+        health_score: Some(100),
+        details: None,
+    };
+    let (il, mam) = other();
+
+    // only a Registry lists the assets of others
+    let utility = device(Level::L2, explicit())
+        .reference_designation(false)
+        .build()
+        .unwrap();
+    assert!(matches!(
+        utility.list_asset(&il, mam.clone(), health.clone()),
+        Err(oec::Error::Invalid(m)) if m.contains("Registry")
+    ));
+
+    let registry = App::builder(Level::L3, ServiceType::Registry, product())
+        .bootstrap(Bootstrap::Explicit(explicit()))
+        .serial_number("SN-1")
+        .store(store())
+        .build()
+        .unwrap();
+    let before = store().load("app/writer-ids").unwrap().unwrap();
+    registry
+        .list_asset(&il, mam.clone(), health.clone())
+        .unwrap();
+    assert_eq!(registry.listed_assets(), std::slice::from_ref(&il));
+    // no represented asset
+    assert!(registry.assets().is_empty());
+    assert!(registry.asset(&il).is_none());
+    let after = store().load("app/writer-ids").unwrap().unwrap();
+    assert_ne!(before, after);
+    assert!(String::from_utf8(after).unwrap().contains(il.as_str()));
+
+    // the MAM must be the one of the listed asset; not the registry itself
+    let me = registry.identification_link().clone();
+    assert!(matches!(
+        registry.list_asset(&me, mam.clone(), health.clone()),
+        Err(oec::Error::Invalid(_))
+    ));
+    let mine = oec::identity::Mam {
+        product_instance_uri: me.as_str().to_owned(),
+        ..mam.clone()
+    };
+    assert!(matches!(
+        registry.list_asset(&me, mine, health.clone()),
+        Err(oec::Error::Invalid(_))
+    ));
+    // a listed asset can not be represented as well
+    assert!(matches!(
+        registry.add_asset(pump_def()),
+        Err(oec::Error::Invalid(_))
+    ));
+
+    assert!(registry.unlist_asset(&il));
+    assert!(!registry.unlist_asset(&il));
+    assert!(registry.listed_assets().is_empty());
+}
+
 /// RevisionCounter of the application and of an asset: incremented,
 /// persisted and read again (REQ-RES-MAM-018); a counter from the
 /// VendorNameplate stays unchanged. The DataSetWriterIds are persisted

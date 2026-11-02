@@ -47,8 +47,8 @@ use crate::resource::{
     ReferenceDesignationQuery,
 };
 use crate::topic::{
-    Filter, ListFilter, Method, Resource, Service, StatusLevel, Subject, Topic, TopicError,
-    TopicFilter,
+    Filter, ListFilter, Method, Resource, Service, ServiceType, StatusLevel, Subject, Topic,
+    TopicError, TopicFilter,
 };
 pub use action::WRITER_ID_TTL_SECONDS;
 use config::ConfigEntry;
@@ -138,6 +138,9 @@ pub enum ProviderError {
     },
     /// An event is refused.
     Event(String),
+    /// Only an application of ServiceType Registry lists the assets of
+    /// others (MG A1, ADR-0026 amendment C-086 §22).
+    NotRegistry,
 }
 
 impl fmt::Display for ProviderError {
@@ -168,6 +171,9 @@ impl fmt::Display for ProviderError {
                 write!(f, "the source {source:?} has no Config {context:?}")
             }
             Self::Event(e) => write!(f, "invalid event: {e}"),
+            Self::NotRegistry => f.write_str(
+                "only an application of ServiceType Registry lists the assets of others",
+            ),
         }
     }
 }
@@ -323,6 +329,15 @@ struct Pending {
     sublist: bool,
 }
 
+/// An available asset of another application, listed by a Registry
+/// (MG A1): answered for `Get MAM` and `Get Health` only.
+#[derive(Debug, Clone)]
+struct ListedAsset {
+    il: IdentificationLink,
+    mam: Mam,
+    health: Health,
+}
+
 #[derive(Debug, Clone)]
 struct Asset {
     il: IdentificationLink,
@@ -338,6 +353,8 @@ pub struct Provider {
     config: ProviderConfig,
     writers: WriterIds,
     assets: Vec<Asset>,
+    /// Sorted by Identification Link.
+    listed: Vec<ListedAsset>,
     sets: Vec<Set>,
     versions: MetaDataVersions,
     overrides: PublicationOverrides,
@@ -379,6 +396,7 @@ impl Provider {
             config,
             writers,
             assets: Vec::new(),
+            listed: Vec::new(),
             sets: Vec::new(),
             versions: MetaDataVersions::new(),
             overrides: PublicationOverrides::new(),
@@ -546,7 +564,7 @@ impl Provider {
         if &il == self.app_id() {
             return Err(ProviderError::SelfAsset);
         }
-        if self.find(&il).is_some() {
+        if self.find(&il).is_some() || self.find_listed(&il).is_ok() {
             return Err(ProviderError::DuplicateAsset(il.into_string()));
         }
         let mut keys = vec![
@@ -597,6 +615,76 @@ impl Provider {
         self.events.remove(il);
         self.pending.list = self.config.get;
         Ok(())
+    }
+
+    /// Lists or replaces an available asset of another application: a
+    /// Registry answers `Get MAM` and `Get Health` with and without Source
+    /// also for it, with its own PublisherId and DataSetWriterIds (MG A1,
+    /// REQ-REG-002; ADR-0026 amendment C-086 §22). A listed asset is no
+    /// represented asset: it is never published on the provider's own
+    /// initiative and has no Profile, PublicationList entry or other
+    /// resource. Its DataSetWriterIds are assigned at the first listing
+    /// and stay reserved for it.
+    ///
+    /// # Errors
+    ///
+    /// [`ProviderError::NotRegistry`] unless the ServiceType is Registry,
+    /// [`ProviderError::ProductInstanceUri`] if the MAM is not the one of
+    /// `il`, [`ProviderError::SelfAsset`], [`ProviderError::DuplicateAsset`]
+    /// for a represented asset, [`ProviderError::Lifecycle`] for an
+    /// invalid Health, [`ProviderError::WriterId`].
+    pub fn list_asset(
+        &mut self,
+        il: IdentificationLink,
+        mam: Mam,
+        health: Health,
+    ) -> Result<(), ProviderError> {
+        if self.lifecycle.publisher_id().service_type() != ServiceType::Registry {
+            return Err(ProviderError::NotRegistry);
+        }
+        if mam.product_instance_uri != il.as_str() {
+            return Err(ProviderError::ProductInstanceUri(format!(
+                "{:?} is not the asset {:?}",
+                mam.product_instance_uri,
+                il.as_str()
+            )));
+        }
+        if &il == self.app_id() {
+            return Err(ProviderError::SelfAsset);
+        }
+        if self.find(&il).is_some() {
+            return Err(ProviderError::DuplicateAsset(il.into_string()));
+        }
+        check_health(&health).map_err(ProviderError::Lifecycle)?;
+        match self.find_listed(&il) {
+            Ok(i) => {
+                self.listed[i].mam = mam;
+                self.listed[i].health = health;
+            }
+            Err(i) => {
+                self.assign(WriterKey::new(Resource::Mam, il.as_str()))?;
+                self.assign(WriterKey::new(Resource::Health, il.as_str()))?;
+                self.listed.insert(i, ListedAsset { il, mam, health });
+            }
+        }
+        Ok(())
+    }
+
+    /// Removes a listed asset (e.g. offline); returns whether it was
+    /// listed. Its DataSetWriterIds stay reserved for it.
+    pub fn unlist_asset(&mut self, il: &IdentificationLink) -> bool {
+        match self.find_listed(il) {
+            Ok(i) => {
+                self.listed.remove(i);
+                true
+            }
+            Err(_) => false,
+        }
+    }
+
+    /// The listed assets of others, sorted by Identification Link.
+    pub fn listed(&self) -> impl Iterator<Item = &IdentificationLink> {
+        self.listed.iter().map(|a| &a.il)
     }
 
     /// The subordinate assets in the order of registration.
@@ -944,6 +1032,8 @@ impl Provider {
         let get = GetWire::parse(payload)?;
         if let Some(src) = topic.source()
             && !self.is_source(src)
+            && !(matches!(resource, Resource::Mam | Resource::Health)
+                && self.find_listed(src).is_ok())
         {
             return Ok(self.unknown_source(&get.message_id, unix_ms));
         }
@@ -1046,6 +1136,23 @@ impl Provider {
 
     fn find(&self, il: &IdentificationLink) -> Option<usize> {
         self.assets.iter().position(|a| &a.il == il)
+    }
+
+    fn find_listed(&self, il: &IdentificationLink) -> Result<usize, usize> {
+        self.listed
+            .binary_search_by(|a| a.il.as_str().cmp(il.as_str()))
+    }
+
+    /// The listed assets addressed by a `Get MAM` or `Get Health`: the
+    /// given one if listed, or all without Source.
+    fn listed_items(&self, source: Option<&IdentificationLink>) -> &[ListedAsset] {
+        match source {
+            None => &self.listed,
+            Some(s) => match self.find_listed(s) {
+                Ok(i) => core::slice::from_ref(&self.listed[i]),
+                Err(_) => &[],
+            },
+        }
     }
 
     fn assign(&mut self, key: WriterKey) -> Result<DataSetWriterId, WriterIdError> {
@@ -1431,6 +1538,10 @@ impl Provider {
                 let id = self.writer(Resource::Mam, &il);
                 Some(DataSetMessage::new(id, il, "", mam).without_message_type())
             })
+            .chain(self.listed_items(source).iter().map(|a| {
+                let id = self.writer(Resource::Mam, &a.il);
+                DataSetMessage::new(id, a.il.clone(), "", a.mam.clone()).without_message_type()
+            }))
             .collect()
     }
 
@@ -1442,6 +1553,10 @@ impl Provider {
                 let id = self.writer(Resource::Health, &il);
                 Some(DataSetMessage::new(id, il, "", health).without_message_type())
             })
+            .chain(self.listed_items(source).iter().map(|a| {
+                let id = self.writer(Resource::Health, &a.il);
+                DataSetMessage::new(id, a.il.clone(), "", a.health.clone()).without_message_type()
+            }))
             .collect()
     }
 

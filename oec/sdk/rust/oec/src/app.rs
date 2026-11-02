@@ -1166,6 +1166,56 @@ impl AppHandle {
             .collect()
     }
 
+    /// Lists or replaces an available asset of another application with its
+    /// last MAM and Health: a Registry answers `Get MAM` and `Get Health`
+    /// with and without Source also for it, with its own PublisherId and
+    /// DataSetWriterIds (MG A1, REQ-REG-002). A listed asset is no
+    /// represented asset: it is never published on the registry's own
+    /// initiative and has no other resource. Its DataSetWriterIds are
+    /// persisted (REQ-RES-PUBLIST-006).
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] unless the ServiceType is Registry, for a MAM
+    /// that is not the one of `il`, for the application itself or a
+    /// represented asset or an invalid Health, [`Error::Io`] if the store
+    /// fails.
+    pub fn list_asset(
+        &self,
+        il: &IdentificationLink,
+        mam: Mam,
+        health: crate::consumer::Health,
+    ) -> Result<()> {
+        let store = self.shared.store.as_ref();
+        let mut registry = self.registry();
+        let known = registry.provider.listed().any(|l| l == &il.0);
+        registry.provider.list_asset(il.0.clone(), mam, health)?;
+        if let Some(json) = registry.provider.take_writer_ids()
+            && let Err(e) = store.save(WRITER_IDS, &json)
+        {
+            if !known {
+                registry.provider.unlist_asset(&il.0);
+            }
+            return Err(e.into());
+        }
+        Ok(())
+    }
+
+    /// Removes a listed asset (e.g. offline); returns whether it was
+    /// listed. Its DataSetWriterIds stay reserved for it.
+    pub fn unlist_asset(&self, il: &IdentificationLink) -> bool {
+        self.registry().provider.unlist_asset(&il.0)
+    }
+
+    /// The listed assets of others, sorted by Identification Link.
+    pub fn listed_assets(&self) -> Vec<IdentificationLink> {
+        self.registry()
+            .provider
+            .listed()
+            .map(|il| IdentificationLink(il.clone()))
+            .collect()
+    }
+
     /// The consumer side: subscriptions, presence and requests to other
     /// applications ([`crate::consumer`]).
     pub fn consumer(&self) -> Consumer {
