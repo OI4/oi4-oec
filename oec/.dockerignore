@@ -1,12 +1,23 @@
-# Build context of the demo images (oec/demos/*/Dockerfile, C-084): only
-# what the builds need; no build output, no generated keys or storages.
+# Build context of the demo images (oec/demos/*/Dockerfile, C-084) and of
+# the registry image (oec/registry/Dockerfile, C-090): only what the builds
+# need; no build output, no generated keys or storages, no node_modules.
 *
 !schema
 !sdk/rust
 !sdk/go
 !demos
+# the registry: its crate, the API documents it embeds, the reviewed and
+# stamped Web UI bundle it embeds and the lockfile of that bundle (SBOM)
+!registry/Cargo.toml
+!registry/Cargo.lock
+!registry/src
+!registry/api/openapi.json
+!registry/api/asyncapi.json
+!registry/ui/dist
+!registry/ui/package-lock.json
 schema/tools
 sdk/rust/spike
 sdk/go/lib
 **/target
+**/node_modules
 **/.DS_Store
