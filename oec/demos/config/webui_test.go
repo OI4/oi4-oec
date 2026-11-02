@@ -121,6 +121,10 @@ func TestWebUIListen(t *testing.T) {
 	root := b.Container(t, host)
 	p := demotest.Start(t, exe(t), "OEC_ROOT="+root, "OEC_UI_LISTEN=")
 	demotest.Eventually(t, "Web UI off", func() bool { return strings.Contains(p.Stderr(), "Web UI off") })
+	// SIGTERM is handled once the application runs: wait for its Birth
+	b.Expect(t, 0, "Birth", func(s demotest.Seen) bool {
+		return s.Seen == "publish" && strings.Contains(s.Topic, "/Pub/MAM/")
+	})
 	if err := p.Stop(t); err != nil {
 		t.Errorf("exit after SIGTERM: %v", err)
 	}
