@@ -3,7 +3,8 @@
 #   host (Go module, standard library only): gofmt, go vet, go test – the
 #   MQTT client (with -race) and the host runner cmd/oecm-host (the core
 #   with a Go PAL over cgo) under D7 `oec-check test --level 1` and, as the
-#   simulated sensor of demo.c, `--level 2` on the test
+#   simulated sensor of demo.c, `--level 2` and `--level 3` (with a stored
+#   ReferenceDesignation) on the test
 #   broker go-testbroker of oec/sdk/rust (oec-check of oec/conformance built
 #   into a temporary directory, ADR-0006; OECM_REQUIRE=1: a missing tool
 #   fails); the C vector header tests/vectors_gen.h equals the output of
@@ -16,8 +17,9 @@
 #   §2 (no heap, no stdio), with GCC 14/15 (if installed) every source of
 #   src/ compiled once;
 #   payloads: tests/emit.c writes the messages of two Level 1 device
-#   lifecycles (Will, Birth, Health, Close) and of a Level 2 lifecycle with
-#   requests (Get, Set) as JSONL, D7 `oec-check validate` checks
+#   lifecycles (Will, Birth, Health, Close), of a Level 2 lifecycle with
+#   requests (Get, Set) and of a Level 3 lifecycle (ReferenceDesignation,
+#   NewDataSetWriterId) as JSONL, D7 `oec-check validate` checks
 #   them; the host example examples/host/hello_device.c runs.
 # Needs cmake, cargo and a C17 compiler with sanitizers.
 set -eu
@@ -38,7 +40,7 @@ rust="$root/../rust"
 (cd "$rust" && cargo build --offline --locked --quiet -p oec-ffi --example go-testbroker)
 target="$(cd "$rust" && cargo metadata --offline --locked --format-version 1 --no-deps | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')"
 
-echo "micro/host: gofmt, vet, test (D7 --level 1 and 2), oecm-vecgen -check"
+echo "micro/host: gofmt, vet, test (D7 --level 1, 2 and 3), oecm-vecgen -check"
 cd "$root/host"
 test -z "$(gofmt -l .)" || { gofmt -l .; echo "gofmt: files need formatting in $(pwd)" >&2; exit 1; }
 go vet ./...

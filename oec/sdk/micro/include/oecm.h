@@ -22,10 +22,10 @@
  *    with broker certificate verification and user/password or client
  *    certificate (REQ-MQTT-005, REQ-MQTT-008, REQ-MQTT-009). The core has
  *    no API for a plain connection.
- *  - Messaging Level 1 (Birth/Will/Close, Pub MAM + Health) and Level 2
+ *  - Messaging Level 1 (Birth/Will/Close, Pub MAM + Health), Level 2
  *    (Get, Set/Del, Status Event, Profile, PublicationList,
- *    SubscriptionList, Config, Data, Metadata; C-094). Level 3
- *    (ReferenceDesignation, NewDataSetWriterId) is an addition.
+ *    SubscriptionList, Config, Data, Metadata; C-094) and Level 3
+ *    (ReferenceDesignation, Call NewDataSetWriterId; C-095).
  */
 #ifndef OECM_H
 #define OECM_H
@@ -42,8 +42,8 @@ extern "C" {
 #define OECM_API_VERSION 1u
 
 /* Size of the opaque device state; checked by a static assertion in the
- * core (ADR-0022 §3). Level 1 and 2 use less than 768 octets on a 64-bit
- * host (C-094); the rest is reserved for Level 3. */
+ * core (ADR-0022 §3). Level 1 … 3 use less than 640 octets on a 64-bit
+ * host (C-095); the rest is reserve for additions. */
 #define OECM_DEVICE_SIZE 1024u
 /* Minimum transmit buffer. The buffer holds the topic, a NUL and the
  * payload of one message. 2048 octets hold every Health, Will and Close,
@@ -218,7 +218,19 @@ typedef struct oecm_config {
     void *app_ctx;
     void (*on_config)(void *app_ctx, size_t context);
     void (*on_data)(void *app_ctx, size_t data);
+    /* Level 3: the buffer of the device's ReferenceDesignation object
+     * (MG 8.3.10), at least OECM_REFDES_MIN octets. The core keeps the
+     * object in its canonical JSON form here and in the PAL persistence
+     * (key "oecm.refdes", REQ-RES-REFDES-002); a Set with a larger object
+     * is answered with BadOutOfRange. The usable size is also bounded by
+     * half of the transmit buffer and by the MaxPacketSize. */
+    char *refdes_buf;
+    size_t refdes_cap;
 } oecm_config;
+
+/* The smallest ReferenceDesignation buffer and the smallest usable size
+ * (Level 3). */
+#define OECM_REFDES_MIN 128u
 
 /* Connect options handed to the PAL. The Will is created anew for every
  * connect (REQ-LIFE-008, REQ-LIFE-016): a port must not reuse an old Will
@@ -250,7 +262,15 @@ typedef struct oecm_pal {
     int64_t (*unix_time_ms)(void *ctx);
     /* Monotonic ms for timers. */
     uint32_t (*monotonic_ms)(void *ctx);
-    /* Optional persistence (Level 3: ReferenceDesignation, Config). */
+    /* Persistence of small records, required at Level 3, else unused.
+     * Keys: "oecm.refdes" (the ReferenceDesignation, at most refdes_cap
+     * octets) and "oecm.wid" (4 octets: the NewDataSetWriterId limit,
+     * REQ-ACT-023). persist_load: OECM_OK with *len = 0 if the key has no
+     * record; a record larger than cap is an error. persist_save: len 0
+     * deletes the record; it is called inside oecm_on_message, at most once
+     * per 256 reserved DataSetWriterIds and once per changed
+     * ReferenceDesignation. The core does not persist Config values: the
+     * application does it in on_config if needed. */
     oecm_err (*persist_load)(void *ctx, const char *key, uint8_t *buf, size_t cap, size_t *len);
     oecm_err (*persist_save)(void *ctx, const char *key, const uint8_t *buf, size_t len);
 } oecm_pal;
@@ -262,7 +282,9 @@ typedef struct oecm_device {
 
 /* Validates the configuration (Identification Link, REQ-IL-008/016/019;
  * level; buffer sizes). cfg and pal are borrowed for the device lifetime.
- * tx_buf (>= OECM_TX_MIN) is used to encode every outgoing message. */
+ * tx_buf (>= OECM_TX_MIN) is used to encode every outgoing message. At
+ * Level 3 it loads the persisted records: OECM_E_PAL if persist_load
+ * fails; a stored ReferenceDesignation that is not valid is ignored. */
 oecm_err oecm_init(oecm_device *dev, const oecm_config *cfg, const oecm_pal *pal,
                    uint8_t *tx_buf, size_t tx_cap);
 
@@ -287,8 +309,8 @@ void oecm_on_connected(oecm_device *dev);
 /* PAL → core: connection lost or closed. */
 void oecm_on_disconnected(oecm_device *dev);
 /* PAL → core: received message (Level 2+; ignored at Level 1). The core
- * subscribes to the Get, Set and Del topics of its AppId at every connect
- * and answers inside this call. */
+ * subscribes to the Get, Set and Del topics of its AppId (Level 3: also
+ * Call) at every connect and answers inside this call. */
 void oecm_on_message(oecm_device *dev, const char *topic, const uint8_t *payload, size_t len);
 
 /* score < 0: no HealthScore; 0 … 100 otherwise (REQ-RES-HEALTH-001).

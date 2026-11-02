@@ -1,7 +1,7 @@
 #!/bin/sh
 # Fuzzes the micro SDK core with libFuzzer (ADR-0030 §6, C-094; opt-in, not
 # in the gate): the JSON reader, the topic parser and a received message at
-# a connected Level 2 device. Each target runs SECONDS (default 60) on a
+# a connected Level 3 device (C-095). Each target runs SECONDS (default 60) on a
 # copy of its seed corpus in target/fuzz/<target>; findings are written
 # there as crash-*. Afterwards the grown corpus is replayed under ASan and
 # UBSan with fuzz/replay.c, built by the system compiler (cc).

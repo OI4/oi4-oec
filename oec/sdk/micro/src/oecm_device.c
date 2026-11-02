@@ -371,8 +371,6 @@ oecm_err oecm_init(oecm_device *dev, const oecm_config *cfg, const oecm_pal *pal
     memset(s, 0, sizeof *s);
     if (cfg->level < OECM_LEVEL_1 || cfg->level > OECM_LEVEL_3)
         return OECM_E_ARG;
-    if (cfg->level == OECM_LEVEL_3)
-        return OECM_E_LEVEL;
     if (cfg->level == OECM_LEVEL_1 && (cfg->data_count != 0 || cfg->config_count != 0))
         return OECM_E_LEVEL;
     if (oecm_service_type_name(cfg->service_type) == NULL)
@@ -381,6 +379,9 @@ oecm_err oecm_init(oecm_device *dev, const oecm_config *cfg, const oecm_pal *pal
         !pal->monotonic_ms)
         return OECM_E_ARG;
     if (cfg->level >= OECM_LEVEL_2 && !pal->mqtt_subscribe)
+        return OECM_E_ARG;
+    if (cfg->level == OECM_LEVEL_3 && (!pal->persist_load || !pal->persist_save ||
+                                       !cfg->refdes_buf || cfg->refdes_cap < OECM_REFDES_MIN))
         return OECM_E_ARG;
     if (tx_cap < OECM_TX_MIN)
         return OECM_E_NOSPACE;
@@ -437,6 +438,8 @@ oecm_err oecm_init(oecm_device *dev, const oecm_config *cfg, const oecm_pal *pal
         return OECM_E_NOSPACE;
     if (cfg->level >= OECM_LEVEL_2) {
         oecm_err err = oecm_l2_init(s);
+        if (err == OECM_OK && cfg->level == OECM_LEVEL_3)
+            err = oecm_l3_init(s);
         if (err != OECM_OK) {
             memset(s, 0, sizeof *s);
             return err;

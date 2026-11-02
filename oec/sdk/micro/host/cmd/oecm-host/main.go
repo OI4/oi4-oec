@@ -7,11 +7,13 @@
 // the credentials or a client certificate, the hostname (the default
 // serial number).
 //
-//	oecm-host [-level 1|2] [-serial S] [-model M] …
+//	oecm-host [-level 1|2|3] [-state DIR] [-serial S] [-model M] …
 //
 // From Level 2 the device is a simulated temperature sensor (demo.c):
 // Data "Temperature" with a writable Setpoint and the Config context
-// "Sensor".
+// "Sensor". Level 3 adds the ReferenceDesignation and NewDataSetWriterId;
+// their records are files in the state directory (default
+// OEC_ROOT/var/lib/oecm-host).
 //
 // SIGTERM or SIGINT publishes the Close and ends the program (exit 0).
 package main
@@ -35,6 +37,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"syscall"
 	"time"
@@ -73,6 +76,7 @@ type runner struct {
 	events    chan event
 	gen       uint64
 	cancel    context.CancelFunc
+	state     string // directory of the persisted records
 	client    *mqtt.Client
 	published int
 }
@@ -82,6 +86,10 @@ var current *runner
 // txSize is the transmit buffer of the core: room for the largest
 // publication of the demo (the Config with its definition).
 const txSize = 8192
+
+// refdesSize is the buffer of the ReferenceDesignation (Level 3); the core
+// limits it to half the transmit buffer and the room of an answer.
+const refdesSize = 2048
 
 // drop ends the current connection attempt or connection: later events of
 // it are ignored. A connected client is ended with DISCONNECT (no Will).
@@ -115,7 +123,8 @@ func cstr(s string) *C.char {
 func run(args []string, root string) int {
 	logger := log.New(os.Stderr, "oecm-host: ", log.LstdFlags|log.Lmicroseconds)
 	fs := flag.NewFlagSet("oecm-host", flag.ContinueOnError)
-	level := fs.Int("level", 1, "Messaging level of the device (1 or 2; 3 follows in a later increment)")
+	level := fs.Int("level", 1, "Messaging level of the device (1, 2 or 3)")
+	state := fs.String("state", "", "directory of the persisted records (Level 3); default: OEC_ROOT/var/lib/oecm-host")
 	il := fs.String("il", "", "an existing Identification Link; default: the Oi4Identifier from the MAM")
 	manufacturer := fs.String("manufacturer", "OI4", "MAM Manufacturer")
 	manufacturerURI := fs.String("manufacturer-uri", "oi4.org", "MAM ManufacturerUri")
@@ -127,12 +136,15 @@ func run(args []string, root string) int {
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
-	if *level < 1 || *level > 2 {
-		logger.Printf("-level %d: 1 or 2", *level)
+	if *level < 1 || *level > 3 {
+		logger.Printf("-level %d: 1, 2 or 3", *level)
 		return 2
 	}
 	if root == "" {
 		root = "/"
+	}
+	if *state == "" {
+		*state = filepath.Join(root, "var/lib/oecm-host")
 	}
 	st, err := loadStorage(root)
 	if err != nil {
@@ -168,10 +180,15 @@ func run(args []string, root string) int {
 		began:  time.Now(),
 		dev:    (*C.oecm_device)(C.calloc(1, C.size_t(unsafe.Sizeof(C.oecm_device{})))),
 		events: make(chan event, 256),
+		state:  *state,
 	}
 	current = r
 	if *level >= 2 {
 		C.oecm_host_demo(cfg, r.dev)
+	}
+	if *level >= 3 {
+		cfg.refdes_buf = (*C.char)(C.malloc(refdesSize))
+		cfg.refdes_cap = refdesSize
 	}
 	tx := (*C.uint8_t)(C.malloc(txSize))
 	if e := C.oecm_init(r.dev, cfg, &C.oecm_host_pal, tx, txSize); e != C.OECM_OK {

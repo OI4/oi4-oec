@@ -42,7 +42,7 @@ target_link_libraries(fake_pal PUBLIC oecm)
 target_compile_options(fake_pal PRIVATE ${OECM_WARNINGS} ${OECM_SAN})
 
 enable_testing()
-foreach(t il json reader num topic device level2)
+foreach(t il json reader num topic device level2 level3)
   add_executable(test_${t} tests/test_${t}.c)
   target_include_directories(test_${t} PRIVATE src tests)
   target_link_libraries(test_${t} PRIVATE fake_pal unity)

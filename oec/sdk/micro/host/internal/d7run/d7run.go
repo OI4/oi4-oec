@@ -127,14 +127,15 @@ func Write(t *testing.T, path, content string) {
 
 // D7 describes a run of `oec-check test` against a device program.
 type D7 struct {
-	Exe      string   // the device program; started with OEC_ROOT and Env
-	Args     []string // its arguments
-	Env      []string // extra environment of the program
-	Hostname string   // of the storage: the serial number of the device
-	App      string   // ServiceType/IL of the device (--app)
-	Level    int      // --level
-	Pass     []string // the tests that must pass
-	Report   string   // environment variable: keep the JSON report there
+	Exe      string            // the device program; started with OEC_ROOT and Env
+	Args     []string          // its arguments
+	Env      []string          // extra environment of the program
+	Hostname string            // of the storage: the serial number of the device
+	App      string            // ServiceType/IL of the device (--app)
+	Level    int               // --level
+	Pass     []string          // the tests that must pass
+	Report   string            // environment variable: keep the JSON report there
+	Files    map[string]string // extra files of the storage (path below the root: content)
 }
 
 // Run runs D7 (the program of OEC_D7 – run, not imported: D7 stays
@@ -160,6 +161,9 @@ func Run(t *testing.T, d D7) {
 		"etc/oi4/certs/ca.pem":        string(ca),
 		"run/secrets/oi4/credentials": "dXNlcjpwYTpzcw==\n", // base64("user:pa:ss")
 	} {
+		Write(t, filepath.Join(root, name), content)
+	}
+	for name, content := range d.Files {
 		Write(t, filepath.Join(root, name), content)
 	}
 	password := filepath.Join(work, "password")

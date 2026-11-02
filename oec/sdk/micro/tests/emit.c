@@ -3,7 +3,9 @@
  * built Oi4Identifier and a given Identification Link with all optional MAM
  * elements; at Level 2 (C-094) also the Profile, both lists, Config, Data
  * and Metadata, and the answers to Get and Set requests (publications with
- * ReplyTo, Status events Good and Bad). Usage: oecm-emit OUT.jsonl */
+ * ReplyTo, Status events Good and Bad); at Level 3 (C-095) the
+ * ReferenceDesignation (Set, Get, Get with Query, invalid Set) and the
+ * replies to NewDataSetWriterId Calls. Usage: oecm-emit OUT.jsonl */
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -92,10 +94,57 @@ static const char *const requests[][3] = {
      "\"Label\":\"Room\"}}]"},
 };
 
+/* Requests of a peer at Level 3 (DataSetWriterId of the
+ * ReferenceDesignation: 20). */
+static const char *const requests3[][3] = {
+    {"/Set/ReferenceDesignation/", "",
+     "[{\"DataSetWriterId\":20,\"Payload\":{\"Function\":{\"Value\":\"=TE1\","
+     "\"Local\":\"Temperatur \\\"A\\\"\",\"Parent\":{\"Value\":\"=PLANT\","
+     "\"IdentificationLink\":\"other.com/X/Y/1\"}},\"Location\":{\"Value\":\"+R1\"}}}]"},
+    {"/Get/ReferenceDesignation/", "", "[]"},
+    {"/Get/ReferenceDesignation", "",
+     "[{\"DataSetWriterId\":9,\"Payload\":{\"Parent\":\"other.com/X/Y/1\","
+     "\"Aspect\":\"Function\"}}]"},
+    {"/Set/ReferenceDesignation/", "", "[{\"DataSetWriterId\":20,\"Payload\":[]}]"},
+};
+
 static char topic[512], msg[2048];
 
+/* The PublisherId of the device, from its Will. */
+static char publisher[256];
+
+static void find_publisher(void) {
+    const char *p = strstr(fp.events[0].payload, "\"PublisherId\":\"");
+    publisher[0] = '\0';
+    if (p) {
+        p += strlen("\"PublisherId\":\"");
+        const char *e = strchr(p, '"');
+        if (e && (size_t)(e - p) < sizeof publisher)
+            snprintf(publisher, sizeof publisher, "%.*s", (int)(e - p), p);
+    }
+}
+
+/* A NewDataSetWriterId Call of a peer (MG 9.2.1); source: "" or "/<AppId>". */
+static void call(oecm_device *dev, const char *prefix, size_t prefix_len, const char *source,
+                 const char *items, bool correlation) {
+    int n = snprintf(topic, sizeof topic, "%.*s/Call/NewDataSetWriterId%s", (int)prefix_len,
+                     prefix, source);
+    (void)n;
+    snprintf(msg, sizeof msg,
+             "{\"MessageId\":\"1793000000100-Registry/other.com/X/Y/1\","
+             "\"MessageType\":\"ua-action-request\",\"PublisherId\":\"%s\","
+             "\"Timestamp\":\"2026-11-11T10:00:00.000Z\","
+             "\"ResponseAddress\":\"%.*s/Reply/NewDataSetWriterId%s\","
+             "\"RequestorId\":\"Registry/other.com/X/Y/1\",\"TimeoutHint\":5000%s,"
+             "\"Messages\":%s}",
+             publisher, (int)prefix_len, prefix, source,
+             correlation ? ",\"CorrelationData\":\"QUJDRA==\"" : "", items);
+    oecm_on_message(dev, topic, (const uint8_t *)msg, strlen(msg));
+    fp.unix_ms += 10;
+}
+
 /* Sends every request of the list to the device, as a peer would. */
-static int ask(oecm_device *dev, const char *app) {
+static int ask(oecm_device *dev, const char *app, const oecm_config *cfg) {
     const fake_event *will = &fp.events[0];
     const char *pub = strstr(will->topic, "/Pub/");
     if (!pub)
@@ -112,6 +161,40 @@ static int ask(oecm_device *dev, const char *app) {
         oecm_on_message(dev, topic, (const uint8_t *)msg, strlen(msg));
         fp.unix_ms += 10;
     }
+    if (cfg->level < OECM_LEVEL_3)
+        return 0;
+    for (size_t i = 0; i < sizeof requests3 / sizeof requests3[0]; i++) {
+        bool with_source = requests3[i][0][strlen(requests3[i][0]) - 1] == '/';
+        int n = snprintf(topic, sizeof topic, "%.*s", (int)(pub - will->topic), will->topic);
+        snprintf(topic + n, sizeof topic - (size_t)n, "%s%s", requests3[i][0],
+                 with_source ? app : "");
+        snprintf(msg, sizeof msg,
+                 "{\"MessageId\":\"%llu-Registry/other.com/X/Y/1\","
+                 "\"MessageType\":\"ua-data\",\"PublisherId\":\"Registry/other.com/X/Y/1\","
+                 "\"Messages\":%s}",
+                 1793000000050ull + i, requests3[i][2]);
+        oecm_on_message(dev, topic, (const uint8_t *)msg, strlen(msg));
+        fp.unix_ms += 10;
+    }
+    if (oecm_poll(dev) != OECM_OK)
+        return 1;
+    static char source[256];
+    snprintf(source, sizeof source, "/%s", app);
+    find_publisher();
+    size_t prefix_len = (size_t)(pub - will->topic);
+    call(dev, will->topic, prefix_len, "",
+         "[{\"DataSetWriterId\":8,\"ActionTargetId\":1,\"RequestId\":1,\"ActionState\":1,"
+         "\"Payload\":{\"Resource\":\"Data\"}},{\"DataSetWriterId\":8,\"ActionTargetId\":1,"
+         "\"RequestId\":2,\"ActionState\":1,\"Payload\":{\"Resource\":\"Nope\"}}]",
+         true);
+    call(dev, will->topic, prefix_len, source,
+         "[{\"DataSetWriterId\":8,\"ActionTargetId\":1,\"RequestId\":3,\"ActionState\":1,"
+         "\"Payload\":{\"Resource\":\"Config\"}}]",
+         false);
+    call(dev, will->topic, prefix_len, "/b3RoZXIuY29tL1gvWS8x",
+         "[{\"DataSetWriterId\":8,\"ActionTargetId\":1,\"RequestId\":4,\"ActionState\":1,"
+         "\"Payload\":{\"Resource\":\"Data\"}}]",
+         false);
     return 0;
 }
 
@@ -124,7 +207,7 @@ static int run(FILE *f, const oecm_config *cfg) {
     oecm_on_connected(&dev);
     if (cfg->level >= OECM_LEVEL_2) {
         const char *app = strstr(fp.events[0].topic, "/Pub/Health/");
-        if (!app || ask(&dev, app + strlen("/Pub/Health/")))
+        if (!app || ask(&dev, app + strlen("/Pub/Health/"), cfg))
             return 1;
     }
     fp.unix_ms += 1500;
@@ -188,6 +271,11 @@ int main(int argc, char **argv) {
     cfg.data_count = 1;
     cfg.config = contexts;
     cfg.config_count = 1;
+    rc |= run(f, &cfg);
+    static char refdes[1024];
+    cfg.level = OECM_LEVEL_3;
+    cfg.refdes_buf = refdes;
+    cfg.refdes_cap = sizeof refdes;
     rc |= run(f, &cfg);
     if (fclose(f) != 0)
         rc = 1;

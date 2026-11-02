@@ -5,15 +5,16 @@ and a platform abstraction layer (PAL), the reference port for ESP32 on
 ESP-IDF. Decisions: API in ADR-0022 (with the amendments), implementation in
 ADR-0030, ESP32 reference platform in ADR-0024.
 
-State (C-094): **Messaging Level 2** in the core (Level 1 since C-092), host
-tests, payload check and fuzz targets; the Go host runner runs the core under
-D7 `--level 1` and `--level 2` in the gate. Level 3, the ESP-IDF port and the
-Arduino library follow in C-095 … C-097 (ADR-0030 §10).
+State (C-095): **Messaging Level 3** in the core (Level 1 since C-092,
+Level 2 since C-094), host tests, payload check and fuzz targets; the Go host
+runner runs the core under D7 `--level 1`, `--level 2` and `--level 3` in the
+gate. The ESP-IDF port and the Arduino library follow in C-096 and C-097
+(ADR-0030 §10).
 
 | Path | Content |
 |---|---|
 | `include/oecm.h` | the API (the only public header) |
-| `src/` | the core: Identification Link, base64url, dnp-encoding, Oi4Identifier (`oecm_il.c`), output buffer and JSON writer (`oecm_buf.c`), messages and lifecycle (`oecm_device.c`); Level 2: numbers, time, SHA-1/UUIDv5 (`oecm_num.c`), JSON pull reader (`oecm_json.c`), topic parser (`oecm_topic.c`), resources and pagination (`oecm_res.c`), requests (`oecm_req.c`) |
+| `src/` | the core: Identification Link, base64url, dnp-encoding, Oi4Identifier (`oecm_il.c`), output buffer and JSON writer (`oecm_buf.c`), messages and lifecycle (`oecm_device.c`); Level 2: numbers, time, SHA-1/UUIDv5 (`oecm_num.c`), JSON pull reader (`oecm_json.c`), topic parser (`oecm_topic.c`), resources and pagination (`oecm_res.c`), requests (`oecm_req.c`); Level 3: ReferenceDesignation and `NewDataSetWriterId` (`oecm_l3.c`) |
 | `tests/` | Unity tests, the recording PAL `fake_pal.c`, the payload emitter `emit.c`, the generated vector header `vectors_gen.h` |
 | `fuzz/` | libFuzzer targets `fuzz_json.c`, `fuzz_topic.c`, `fuzz_message.c`, the corpus replayer `replay.c`, seed corpora, `run.sh` |
 | `examples/host/hello_device.c` | a Level 1 device with a stub PAL that prints, the shape of the firmware |
@@ -43,8 +44,9 @@ Same as the Rust SDK (`oec-core` `lifecycle.rs`):
    MAM (REQ-IL-007); it encodes the Birth once with the longest MessageId
    and fails with `OECM_E_NOSPACE` if the transmit buffer is too small.
    The ClientId is `oec` + 16 hex digits of the FNV-1a hash of the
-   Identification Link unless given (REQ-MQTT-013). Level 3 returns
-   `OECM_E_LEVEL` until it is implemented (C-095).
+   Identification Link unless given (REQ-MQTT-013). Level 3 needs
+   `persist_load`/`persist_save` and a ReferenceDesignation buffer
+   (`OECM_E_ARG` otherwise, see below).
 2. `oecm_start` needs a set wall clock (after 2020-01-01, e.g. SNTP) and
    connects with a new Will (Health `FAILURE_1`, score 0; REQ-LIFE-008,
    REQ-LIFE-016).
@@ -93,11 +95,45 @@ Data). Differences to the Rust SDK (ADR-0030 amendment C-094): the first
 violation in document order, no Validation `Pattern`, no Syslog, `double`
 output not correctly rounded beyond 15 … 17 significant digits.
 
+## Level 3 behavior
+
+Level 3 adds the resource and the method of REQ-CMP-010/033 that a device
+serves beyond Level 2 (as `oec-core` `provider/refdes.rs` and
+`provider/actions.rs`):
+
+- **ReferenceDesignation** of the device (MG 8.3.10): `Get` (with a Query
+  DataSetMessage, id 9, for the direct children of a `Parent`), `Set` and
+  `Del`, each `Set`/`Del` answered with a Status event; an accepted change
+  is published with `ReplyTo` and persisted. The object is kept in the
+  application's buffer `refdes_buf` (at least `OECM_REFDES_MIN` 128 octets)
+  in its canonical form; a larger object than fits the buffer or half the
+  transmit buffer is answered with `BadOutOfRange`. As in Rust it is
+  published on change, not at connect. Entry in the PublicationList:
+  `ON_REQUEST_SOURCE_10`.
+- **`Call NewDataSetWriterId`** (MG 9.2.1): `Reply` with new ids above the
+  own definitions (Ttl 60 s), `CorrelationData` echoed, requests for another
+  Source answered with `BadNotFound`, at most 256 new ids per 60 s
+  (`BadResourceUnavailable`); the ids are reserved in blocks of 256 in the
+  persisted record and are not reused after a restart; replies that do not
+  fit one message are split.
+- Persistence over the PAL (`persist_load`/`persist_save`, small records):
+  `oecm.refdes` (the ReferenceDesignation) and `oecm.wid` (the reserved
+  DataSetWriterIds). `oecm_init` loads both; a load error is `OECM_E_PAL`, a
+  stored record that is not valid is ignored. Config values live in the
+  application, which persists them itself in `on_config` if it needs to.
+- Requests to the ReferenceDesignation and `Call` topics with a Filter level
+  are ignored (Rust: Filter forbidden).
+
+The Profile lists `ReferenceDesignation` and `NewDataSetWriterId`, the
+SubscriptionList adds `Call/NewDataSetWriterId`. The DataSetWriterId of the
+ReferenceDesignation follows the Config contexts and Data DataSets.
+
 ## Sizes
 
-`OECM_DEVICE_SIZE` is 1024 octets; Level 1 uses 368 and Level 2 568 on a
-64-bit host (544 on Cortex-M4). The Level 2 core compiled for Cortex-M4 with
-`-Os` has about 35 KB of code and constants, no data and no bss.
+`OECM_DEVICE_SIZE` is 1024 octets; the state of Level 1 … 3 uses 600 on a
+64-bit host (568 on Cortex-M4). The Level 3 core compiled for Cortex-M4 with
+`-Os` has about 42 KB of code and constants (6.3 KB of it Level 3), no data
+and no bss.
 `OECM_TX_MIN` is 2048 octets: enough for every Health, Will and Close, also
 for an Identification Link of 255 octets (1804 octets). The Birth grows with
 the MAM texts; a typical Birth needs about 1000 octets, a 255-octet
@@ -119,8 +155,10 @@ container storage below `OEC_ROOT` (default `/`, RIG 4.1):
 | `etc/oi4/mqtt/broker_ca.pem`, else `etc/oi4/certs/ca.pem` | CA of the broker certificate |
 | `run/secrets/oi4/private_key.pem` + `etc/oi4/certs/<hostname>.pem` | client certificate (used when present; no passphrase) |
 | `run/secrets/oi4/credentials` | `base64(user:password)` otherwise |
+| `var/lib/oecm-host/` (or `-state`) | Level 3: one file per persisted record (`oecm.refdes`, `oecm.wid`) |
 
-Flags: `-level` (1; 2 runs the simulated temperature sensor of `demo.c`), `-il`, `-manufacturer`, `-manufacturer-uri`, `-model`,
+Flags: `-level` (1; 2 runs the simulated temperature sensor of `demo.c`; 3
+adds the ReferenceDesignation and `NewDataSetWriterId`), `-state`, `-il`, `-manufacturer`, `-manufacturer-uri`, `-model`,
 `-product-code`, `-serial`, `-software-revision`, `-client-id`. SIGTERM or
 SIGINT stops it gracefully (Close message). Against the dev broker
 (`oec/dev`, broker running):
@@ -132,10 +170,11 @@ OEC_ROOT=../../../dev/generated/roots/oec-dev-app go run ./cmd/oecm-host
 
 ## Check
 
-`./check.sh` (step 9 of `oec/check.sh`, about 4 min): host Go module with
+`./check.sh` (step 9 of `oec/check.sh`, about 5 min): host Go module with
 the MQTT client under `-race` and D7 `oec-check test --level 1` (21 pinned
-passes) and `--level 2` (the demo sensor, 38 pinned passes) against the host
-runner on the Rust SDK's `go-testbroker` (about 3 min), vector header
+passes), `--level 2` (the demo sensor, 38 pinned passes) and `--level 3`
+(with a stored ReferenceDesignation, 50 pinned passes) against the host
+runner on the Rust SDK's `go-testbroker`, vector header
 freshness, CMake build in `target/host`, the Unity tests and the replay of
 the fuzz seed corpora under AddressSanitizer + UBSan, `clang --analyze`, the
 symbol allowlist, GCC 14/15 if installed, the emitted payloads validated by

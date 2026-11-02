@@ -157,3 +157,38 @@ func TestD7Level2(t *testing.T) {
 		Report:   "OECM_D7_REPORT",
 	})
 }
+
+// d7Level3Pass: the 50 D7 tests that pass against the micro core in the
+// host runner at Level 3 (C-095): the Level 2 list, T7-SET-03, the
+// ReferenceDesignation tests (T7-GET-03, T7-GET-04, T7-GET-07, T7-SET-04,
+// T7-SET-09, T7-SET-10; the run starts with a stored ReferenceDesignation,
+// refdesSeed), T7-MON-14 (its publication on change) and the
+// NewDataSetWriterId tests (T7-ACT-01 … 04). D7 skips five: T7-SET-12
+// needs a Syslog publication (none in the micro SDK); T7-MON-07, T7-ADR-01
+// and T7-ADR-02 judge requests of the CUT (none sent); T7-MON-17 observed
+// no Set Config of a group with mandatory objects.
+var d7Level3Pass = append(append([]string{}, d7Level2Pass...),
+	"T7-MON-14", "T7-GET-03", "T7-GET-04", "T7-GET-07", "T7-SET-03", "T7-SET-04", "T7-SET-09", "T7-SET-10",
+	"T7-ACT-01", "T7-ACT-02", "T7-ACT-03", "T7-ACT-04")
+
+// refdesSeed is a stored ReferenceDesignation in the form the core stores
+// (canonical member order, oecm_l3.c), as after a Set at commissioning.
+const refdesSeed = `{"Function":{"Value":"=OEC.MICRO","Parent":{"Value":"=OEC","IdentificationLink":"oi4.org/OEC/OEC/1"}},"Location":{"Value":"+HOST"}}`
+
+func TestD7Level3(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	d7run.Run(t, d7run.D7{
+		Exe:      exe,
+		Args:     []string{"-level", "3"},
+		Env:      []string{"OECM_HOST_MAIN=1"},
+		Hostname: "dev-1",
+		App:      "OTConnector/oi4.org/OEC,20Micro,20Host/OECM-HOST/dev-1",
+		Level:    3,
+		Pass:     d7Level3Pass,
+		Report:   "OECM_D7_REPORT",
+		Files:    map[string]string{"var/lib/oecm-host/oecm.refdes": refdesSeed},
+	})
+}

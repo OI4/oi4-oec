@@ -1,0 +1,2 @@
+Set/ReferenceDesignation/cHJvdmlkZXIuY29tL1NlbnNvci9TLTEvNDcxMQ
+{"MessageId":"1793000000000-Registry/other.com/X/Y/1","MessageType":"ua-data","PublisherId":"Registry/other.com/X/Y/1","Messages":[{"DataSetWriterId":21,"Payload":{"Function":{"Value":"=TE1","Local":"T \"A\"","Parent":{"Value":"=P","IdentificationLink":"other.com/X/Y/1"}},"Location":{"Value":"+R1"},"Product":{"Value":"-B1"}}}]}

@@ -2,7 +2,8 @@
  * Requests to the device from Level 2 (MG 8.2, MG 9.1; ADR-0030): Get of
  * the served resources and Set/Del answered with a Status event
  * (REQ-RES-EVENT-005, REQ-CMP-043), as the Rust provider decides them
- * (oec-core provider.rs, provider/write.rs, config.rs, sublist.rs). The
+ * (oec-core provider.rs, provider/write.rs, config.rs, sublist.rs); from
+ * Level 3 also ReferenceDesignation and Call (oecm_l3.c). The
  * first violation is the first in document order (Rust: key order).
  */
 #include <string.h>
@@ -95,7 +96,7 @@ static bool cstr_eq(const char *a, size_t n, const char *b) {
 }
 
 /* `^[0-9]+-<ServiceType>/.+` (REQ-MSG-007), on the token text. */
-static bool message_id_ok(oecm_span v) {
+bool oecm_message_id_ok(oecm_span v) {
     if (oecm_json_kind(v) != OECM_J_STRING)
         return false;
     const char *p = v.p + 1, *end = v.p + v.n - 1, *q = p;
@@ -219,6 +220,15 @@ static void get(req *r) {
                              (tag.n == 0 || (e.filter && oecm_span_eq(tag, e.filter)))))
                 add(&a, i);
         }
+    } else if (oecm_span_eq(res, "ReferenceDesignation")) {
+        if (c->level < OECM_LEVEL_3)
+            return; /* not offered */
+        int m = oecm_l3_refdes_get(s, r->root, r->t.source.n != 0);
+        if (m < 0)
+            return;
+        a.res = OECM_R_REFDES;
+        if (m > 0)
+            add(&a, 0);
     } else if (oecm_span_eq(res, "SubscriptionList")) {
         oecm_span head, tag;
         split_level(f, &head, &tag);
@@ -860,6 +870,14 @@ static const oecm_status *set_config(req *r) {
     return &oecm_good;
 }
 
+/* --- Set ReferenceDesignation (REQ-RES-REFDES-006) --- */
+
+static const oecm_status *set_refdes(req *r) {
+    oecm_span payload;
+    const oecm_status *e = payload_object(r, &payload);
+    return e ? e : oecm_l3_refdes_set(r->s, payload, r->id);
+}
+
 static void write_req(req *r, bool del) {
     if (r->t.source.n == 0)
         return;
@@ -871,6 +889,8 @@ static void write_req(req *r, bool del) {
     const oecm_status *st = &oecm_bad_not_found;
     if (oecm_span_eq(res, "SubscriptionList"))
         st = sublist(r, del);
+    else if (oecm_span_eq(res, "ReferenceDesignation") && r->s->cfg->level >= OECM_LEVEL_3)
+        st = del ? oecm_l3_refdes_del(r->s) : set_refdes(r);
     else if (del)
         st = &oecm_bad_not_found;
     else if (oecm_span_eq(res, "Data"))
@@ -898,15 +918,25 @@ void oecm_l2_message(oecm_state *s, const char *topic, const uint8_t *payload, s
         !oecm_b64url_eq(r.t.app, s->il, s->il_len))
         return;
     bool get_ = oecm_span_eq(r.t.method, "Get"), del = oecm_span_eq(r.t.method, "Del");
-    if (!get_ && !del && !oecm_span_eq(r.t.method, "Set"))
+    bool call = oecm_span_eq(r.t.method, "Call");
+    if (!get_ && !del && !call && !oecm_span_eq(r.t.method, "Set"))
         return;
-    if (index_of(r.t.resource, resources, RESOURCES) == SIZE_MAX)
+    if (call ? !oecm_span_eq(r.t.resource, "NewDataSetWriterId")
+             : index_of(r.t.resource, resources, RESOURCES) == SIZE_MAX)
         return;
     if (r.t.source.n != 0 && !own_source(&r)) {
         char il[OECM_IL_MAX + 1];
         size_t n;
         if (oecm_il_decode(r.t.source.p, r.t.source.n, il, sizeof il, &n) != 0)
             return; /* no valid topic (REQ-TOP-*) */
+    }
+    /* no Filter on these topics (oec-core topic.rs Form) */
+    if ((call || oecm_span_eq(r.t.resource, "ReferenceDesignation")) && r.t.filter.n != 0)
+        return;
+    if (call) {
+        if (s->cfg->level >= OECM_LEVEL_3)
+            oecm_l3_call(s, topic, &r.t, payload, len);
+        return;
     }
     if ((oecm_span_eq(r.t.resource, "PublicationList") ||
          oecm_span_eq(r.t.resource, "SubscriptionList")) &&
@@ -919,7 +949,7 @@ void oecm_l2_message(oecm_state *s, const char *topic, const uint8_t *payload, s
     if (payload == NULL ||
         !oecm_json_parse((const char *)payload, len, &r.root) ||
         oecm_json_kind(r.root) != OECM_J_OBJECT || !oecm_json_get(r.root, "MessageId", &r.id) ||
-        !message_id_ok(r.id))
+        !oecm_message_id_ok(r.id))
         return;
     r.rest = (oecm_span){r.t.resource.p, (size_t)(topic + tn - r.t.resource.p)};
     if (get_)

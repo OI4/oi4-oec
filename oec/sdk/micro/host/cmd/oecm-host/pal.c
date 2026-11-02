@@ -34,6 +34,16 @@ static uint32_t t_mono_ms(void *ctx) {
     return oecmHostMonoMs();
 }
 
+static oecm_err t_load(void *ctx, const char *key, uint8_t *buf, size_t cap, size_t *len) {
+    (void)ctx;
+    return oecmHostLoad((char *)key, buf, cap, len);
+}
+
+static oecm_err t_save(void *ctx, const char *key, const uint8_t *buf, size_t len) {
+    (void)ctx;
+    return oecmHostSave((char *)key, (uint8_t *)buf, len);
+}
+
 const oecm_pal oecm_host_pal = {
     .mqtt_connect = t_connect,
     .mqtt_publish = t_publish,
@@ -41,4 +51,6 @@ const oecm_pal oecm_host_pal = {
     .mqtt_disconnect = t_disconnect,
     .unix_time_ms = t_unix_ms,
     .monotonic_ms = t_mono_ms,
+    .persist_load = t_load,
+    .persist_save = t_save,
 };

@@ -56,6 +56,62 @@ static oecm_err pal_disconnect(void *ctx) {
     return OECM_OK;
 }
 
+static fake_record *record(fake_pal *fp, const char *key, bool create) {
+    for (size_t i = 0; i < FAKE_RECORDS; i++)
+        if (fp->records[i].used && strcmp(fp->records[i].key, key) == 0)
+            return &fp->records[i];
+    if (!create)
+        return NULL;
+    for (size_t i = 0; i < FAKE_RECORDS; i++)
+        if (!fp->records[i].used) {
+            fake_record *r = &fp->records[i];
+            r->used = true;
+            copy(r->key, sizeof r->key, key, strlen(key));
+            return r;
+        }
+    return NULL;
+}
+
+static oecm_err pal_load(void *ctx, const char *key, uint8_t *buf, size_t cap, size_t *len) {
+    fake_pal *fp = ctx;
+    if (fp->load_result != OECM_OK)
+        return fp->load_result;
+    const fake_record *r = record(fp, key, false);
+    *len = 0;
+    if (r == NULL)
+        return OECM_OK;
+    if (r->len > cap)
+        return OECM_E_NOSPACE;
+    memcpy(buf, r->data, r->len);
+    *len = r->len;
+    return OECM_OK;
+}
+
+static oecm_err pal_save(void *ctx, const char *key, const uint8_t *buf, size_t len) {
+    fake_pal *fp = ctx;
+    if (fp->save_result != OECM_OK)
+        return fp->save_result;
+    fake_record *r = record(fp, key, len != 0);
+    if (len == 0) {
+        if (r)
+            memset(r, 0, sizeof *r);
+    } else {
+        if (r == NULL || len > FAKE_RECORD_MAX)
+            return OECM_E_NOSPACE;
+        memcpy(r->data, buf, len);
+        r->len = len;
+    }
+    fp->saves++;
+    return OECM_OK;
+}
+
+const fake_record *fake_record_of(const fake_pal *fp, const char *key) {
+    for (size_t i = 0; i < FAKE_RECORDS; i++)
+        if (fp->records[i].used && strcmp(fp->records[i].key, key) == 0)
+            return &fp->records[i];
+    return NULL;
+}
+
 static int64_t pal_unix(void *ctx) { return ((fake_pal *)ctx)->unix_ms; }
 static uint32_t pal_mono(void *ctx) { return ((fake_pal *)ctx)->mono_ms; }
 
@@ -68,6 +124,8 @@ oecm_pal fake_pal_make(fake_pal *fp) {
         .mqtt_disconnect = pal_disconnect,
         .unix_time_ms = pal_unix,
         .monotonic_ms = pal_mono,
+        .persist_load = pal_load,
+        .persist_save = pal_save,
     };
     return p;
 }

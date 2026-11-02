@@ -1,7 +1,7 @@
 /*
- * Level 2 resources (MG 8.2.3, MG 8.3, MG 9.1): the DataSetMessages of
- * MAM, Health, Profile, PublicationList, SubscriptionList, Config, Data and
- * Metadata, their pagination and the publications after a connect, on
+ * Level 2 and 3 resources (MG 8.2.3, MG 8.3, MG 9.1): the DataSetMessages
+ * of MAM, Health, Profile, PublicationList, SubscriptionList, Config,
+ * ReferenceDesignation, Data and Metadata, their pagination and the publications after a connect, on
  * change and per Interval. Same wire form as the Rust provider (oec-core
  * provider and its modules).
  */
@@ -26,6 +26,11 @@ const oecm_status oecm_bad_type_mismatch = {
     "The value supplied for the attribute is not of the same type as the attribute's value."};
 const oecm_status oecm_bad_invalid_argument = {0x80AB0000u, "BadInvalidArgument",
                                                "One or more arguments are invalid."};
+const oecm_status oecm_bad_internal_error = {
+    0x80020000u, "BadInternalError",
+    "An internal error occurred as a result of a programming or configuration error."};
+const oecm_status oecm_bad_resource_unavailable = {
+    0x80040000u, "BadResourceUnavailable", "An operating system resource is not available."};
 
 /* Namespace of the publisher-defined DataSetClassIds (oec-core data.rs). */
 static const uint8_t class_ns[16] = {0xe7, 0x95, 0x41, 0x13, 0xfb, 0x31, 0x53, 0x34,
@@ -33,7 +38,8 @@ static const uint8_t class_ns[16] = {0xe7, 0x95, 0x41, 0x13, 0xfb, 0x31, 0x53, 0
 
 static const char *const fixed_class[] = {OECM_CLASS_MAM,     OECM_CLASS_HEALTH,
                                           OECM_CLASS_PROFILE, OECM_CLASS_PUBLIST,
-                                          OECM_CLASS_SUBLIST, OECM_CLASS_CONFIG};
+                                          OECM_CLASS_SUBLIST, OECM_CLASS_CONFIG,
+                                          OECM_CLASS_REFDES};
 
 static const unsigned builtin[] = {1u, 6u, 7u, 10u, 11u, 12u}; /* by oecm_type */
 static const char *const cfg_type_name[] = {"Boolean", "Number", "String"};
@@ -50,6 +56,12 @@ unsigned oecm_data_writer(const oecm_state *s, size_t data) {
     return OECM_WRITER_FIRST + (unsigned)s->cfg->config_count + (unsigned)data;
 }
 
+unsigned oecm_refdes_writer(const oecm_state *s) {
+    return oecm_data_writer(s, s->cfg->data_count);
+}
+
+static bool level3(const oecm_state *s) { return s->cfg->level >= OECM_LEVEL_3; }
+
 static uint32_t data_version(const oecm_state *s, size_t j) {
     const oecm_data *d = &s->cfg->data[j];
     if (d->version != 0)
@@ -62,13 +74,23 @@ static uint32_t data_version(const oecm_state *s, size_t j) {
 /* --- Lists ------------------------------------------------------------------- */
 
 size_t oecm_publist_count(const oecm_state *s) {
-    return 6u + s->cfg->config_count + 2u * s->cfg->data_count;
+    return 6u + (level3(s) ? 1u : 0u) + s->cfg->config_count + 2u * s->cfg->data_count;
 }
 
 void oecm_publist_entry(const oecm_state *s, size_t i, oecm_pub_entry *e) {
     static const char *const fixed[] = {"MAM", "Health", "Profile"};
     static const char *const status[] = {"Status/Good", "Status/Uncertain", "Status/Bad"};
     size_t nc = s->cfg->config_count;
+    if (level3(s) && i >= 3) {
+        /* the ReferenceDesignation after the Profile (oec-core provider.rs
+         * list_items), also without an object */
+        if (i == 3) {
+            *e = (oecm_pub_entry){"ReferenceDesignation", NULL, oecm_refdes_writer(s),
+                                  "ON_REQUEST_SOURCE_10"};
+            return;
+        }
+        i--;
+    }
     if (i < 3) {
         *e = (oecm_pub_entry){fixed[i], NULL, OECM_WRITER_MAM + (unsigned)i,
                               "ON_REQUEST_SOURCE_10"};
@@ -294,8 +316,11 @@ static void put_item(oecm_buf *b, const oecm_state *s, enum oecm_res res, size_t
         break;
     case OECM_R_PROFILE:
         oecm_put_dsm(b, s, OECM_WRITER_PROFILE, "", NULL, -1, 0, "ua-keyframe");
-        oecm_puts(b, "{\"Resources\":[\"MAM\",\"Health\",\"Config\",\"Data\",\"Metadata\","
-                     "\"Event\",\"Profile\",\"PublicationList\",\"SubscriptionList\"]}");
+        oecm_puts(b, "{\"Resources\":[\"MAM\",\"Health\",\"Config\",\"Data\",\"Metadata\",");
+        if (level3(s))
+            oecm_puts(b, "\"ReferenceDesignation\",");
+        oecm_puts(b, "\"Event\",\"Profile\",\"PublicationList\",\"SubscriptionList\"");
+        oecm_puts(b, level3(s) ? ",\"NewDataSetWriterId\"]}" : "]}");
         break;
     case OECM_R_PUBLIST: {
         oecm_pub_entry e;
@@ -329,6 +354,10 @@ static void put_item(oecm_buf *b, const oecm_state *s, enum oecm_res res, size_t
         oecm_put_dsm(b, s, oecm_config_writer(s, i), s->cfg->config[i].name, NULL,
                      s->config_ms[i], 0, "ua-keyframe");
         put_config(b, &s->cfg->config[i]);
+        break;
+    case OECM_R_REFDES:
+        oecm_put_dsm(b, s, oecm_refdes_writer(s), "", NULL, -1, 0, "ua-keyframe");
+        oecm_put(b, s->cfg->refdes_buf, s->refdes_len);
         break;
     case OECM_R_DATA:
         oecm_put_dsm(b, s, oecm_data_writer(s, i), s->cfg->data[i].tag, NULL, now,
@@ -701,10 +730,11 @@ static oecm_err subscribe(oecm_state *s, const char *method) {
 }
 
 oecm_err oecm_l2_subscribe(oecm_state *s) {
-    static const char *const methods[] = {"Get", "Set", "Del"};
+    static const char *const methods[] = {"Get", "Set", "Del", "Call"};
+    size_t n = level3(s) ? 4u : 3u;
     oecm_err err = OECM_OK;
     s->subs_due = true;
-    for (size_t i = 0; i < 3 && err == OECM_OK; i++)
+    for (size_t i = 0; i < n && err == OECM_OK; i++)
         err = subscribe(s, methods[i]);
     if (err == OECM_OK)
         s->subs_due = false;
@@ -761,6 +791,17 @@ oecm_err oecm_l2_publish_due(oecm_state *s) {
             return err;
         s->config_due = (uint8_t)(s->config_due & ~(1u << i));
     }
+    if (s->refdes_due) {
+        /* without ReplyTo (REQ-MQTT-019); a deleted object is not */
+        if (s->refdes_len != 0) {
+            oecm_answer a = {.res = OECM_R_REFDES, .topic_res = "ReferenceDesignation",
+                             .topic_source = true, .n = 1};
+            oecm_err err = oecm_answer_publish(s, &a);
+            if (err != OECM_OK)
+                return err;
+        }
+        s->refdes_due = false;
+    }
     uint32_t now = oecm_mono(s);
     for (size_t j = 0; j < c->data_count; j++) {
         uint32_t iv = c->data[j].interval_ms;
@@ -777,7 +818,7 @@ oecm_err oecm_l2_publish_due(oecm_state *s) {
 }
 
 uint32_t oecm_l2_wait_ms(const oecm_state *s, uint32_t wait) {
-    if (s->lists_due || s->data_due || s->config_due)
+    if (s->lists_due || s->data_due || s->config_due || s->refdes_due)
         return 0;
     uint32_t now = oecm_mono(s);
     for (size_t j = 0; j < s->cfg->data_count; j++) {
@@ -941,6 +982,25 @@ static bool item_fits(oecm_state *s, enum oecm_res res, size_t i, const char *na
     oecm_buf_count(&b);
     put_item(&b, s, res, i, INT64_C(253402300799999));
     return counted_page(s, &a, true, 0) + b.len + 1u <= oecm_payload_limit(s, topic);
+}
+
+size_t oecm_refdes_room(oecm_state *s) {
+    /* the Set answer with a ReplyTo of up to REPLY_ROOM octets */
+    enum { REPLY_ROOM = 320 };
+    size_t len = s->refdes_len;
+    s->refdes_len = 0;
+    oecm_answer a = {.res = OECM_R_REFDES, .topic_res = "ReferenceDesignation",
+                     .topic_source = true, .n = 1};
+    oecm_buf b;
+    oecm_buf_count(&b);
+    put_answer_topic(&b, s, &a);
+    size_t topic = b.len - 1u;
+    oecm_buf_count(&b);
+    put_item(&b, s, OECM_R_REFDES, 0, 0);
+    size_t need = counted_page(s, &a, true, 0) + b.len + 1u + REPLY_ROOM;
+    s->refdes_len = len;
+    size_t limit = oecm_payload_limit(s, topic);
+    return limit > need ? limit - need : 0u;
 }
 
 oecm_err oecm_l2_init(oecm_state *s) {

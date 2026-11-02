@@ -8,7 +8,11 @@ import "C"
 import (
 	"context"
 	"crypto/tls"
+	"errors"
+	"io/fs"
 	"net"
+	"os"
+	"path/filepath"
 	"time"
 	"unsafe"
 
@@ -108,4 +112,59 @@ func oecmHostUnixMs() C.int64_t {
 //export oecmHostMonoMs
 func oecmHostMonoMs() C.uint32_t {
 	return C.uint32_t(uint64(time.Since(current.began).Milliseconds()))
+}
+
+// The persisted records of Level 3 (oecm_pal persist_*): one file per key
+// in the state directory, replaced by rename.
+
+//export oecmHostLoad
+func oecmHostLoad(key *C.char, buf *C.uint8_t, capacity C.size_t, n *C.size_t) C.oecm_err {
+	r := current
+	*n = 0
+	raw, err := os.ReadFile(filepath.Join(r.state, C.GoString(key)))
+	if errors.Is(err, fs.ErrNotExist) {
+		return C.OECM_OK
+	}
+	if err != nil {
+		r.log.Printf("persist load: %v", err)
+		return C.OECM_E_PAL
+	}
+	if len(raw) > int(capacity) {
+		r.log.Printf("persist load %s: %d octets, room for %d", C.GoString(key), len(raw), capacity)
+		return C.OECM_E_NOSPACE
+	}
+	if len(raw) > 0 {
+		copy(unsafe.Slice((*byte)(unsafe.Pointer(buf)), len(raw)), raw)
+	}
+	*n = C.size_t(len(raw))
+	return C.OECM_OK
+}
+
+//export oecmHostSave
+func oecmHostSave(key *C.char, buf *C.uint8_t, n C.size_t) C.oecm_err {
+	r := current
+	path := filepath.Join(r.state, C.GoString(key))
+	if err := save(path, C.GoBytes(unsafe.Pointer(buf), C.int(n))); err != nil {
+		r.log.Printf("persist save: %v", err)
+		return C.OECM_E_PAL
+	}
+	return C.OECM_OK
+}
+
+// save writes the record (len 0: removes it).
+func save(path string, data []byte) error {
+	if len(data) == 0 {
+		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		return nil
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return err
+	}
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+		return err
+	}
+	return os.Rename(tmp, path)
 }

@@ -179,6 +179,7 @@ const char *oecm_health_name(oecm_health h);
 #define OECM_CLASS_SUBLIST "e5d68c47-c276-4929-8ab9-4c1090cac785"
 #define OECM_CLASS_CONFIG "9d5983db-440d-4474-9fd7-1cd7a6c8b6c2"
 #define OECM_CLASS_STATUS "543ae05e-b6d9-4161-a0a3-350a0fac5976"
+#define OECM_CLASS_REFDES "27a75019-164a-496d-a38b-90e8a55c2cfa"
 
 /* DataSetWriterIds of the device's own publications (ADR-0030 §9), as
  * the Rust provider assigns them: Config contexts from 18, then Data
@@ -225,6 +226,14 @@ typedef struct oecm_state {
     int64_t config_ms[OECM_CONFIG_MAX]; /* last change of a context */
     uint32_t data_ms[OECM_DATA_MAX];    /* last periodic publication */
     uint8_t class_id[OECM_DATA_MAX][16];
+    /* Level 3 */
+    bool refdes_due;        /* publish the ReferenceDesignation on change */
+    uint16_t wid_count;     /* NewDataSetWriterId reservations in the window */
+    uint32_t wid_window_ms; /* start of the window (oecm_mono) */
+    uint32_t wid_next;      /* next DataSetWriterId to reserve */
+    uint32_t wid_limit;     /* persisted: no id below it was reserved before */
+    size_t refdes_len;      /* the stored object in cfg->refdes_buf; 0: none */
+    size_t refdes_max;      /* the largest object that fits every answer */
 } oecm_state;
 
 /* --- Level 2 (oecm_res.c, oecm_req.c) ------------------------------------ */
@@ -236,7 +245,7 @@ typedef struct oecm_status {
 } oecm_status;
 extern const oecm_status oecm_good, oecm_bad_decoding, oecm_bad_not_writable,
     oecm_bad_out_of_range, oecm_bad_not_supported, oecm_bad_not_found, oecm_bad_type_mismatch,
-    oecm_bad_invalid_argument;
+    oecm_bad_invalid_argument, oecm_bad_internal_error, oecm_bad_resource_unavailable;
 
 /* Common parts of the encoders (oecm_device.c). */
 void oecm_put_publisher(oecm_buf *b, const oecm_state *s);
@@ -289,6 +298,7 @@ enum oecm_res {
     OECM_R_PUBLIST,
     OECM_R_SUBLIST,
     OECM_R_CONFIG,
+    OECM_R_REFDES,
     OECM_R_DATA
 };
 #define OECM_ITEMS_MAX 32u
@@ -330,6 +340,38 @@ oecm_err oecm_publish_data(oecm_state *s, size_t data, oecm_span reply_to);
 oecm_err oecm_publish_config(oecm_state *s, size_t ctx, oecm_span reply_to);
 unsigned oecm_data_writer(const oecm_state *s, size_t data);
 unsigned oecm_config_writer(const oecm_state *s, size_t ctx);
+/* `^[0-9]+-<ServiceType>/.+` (REQ-MSG-007), on the JSON string token. */
+bool oecm_message_id_ok(oecm_span v);
+
+/* --- Level 3 (oecm_l3.c; MG 8.3.10, 8.4.1, 9.1.10, 9.2.1) --------------- */
+
+/* The DataSetWriterId of the own ReferenceDesignation: after the Config
+ * and Data DataSets; NewDataSetWriterId reserves the ids above it. */
+unsigned oecm_refdes_writer(const oecm_state *s);
+/* The room for the ReferenceDesignation object in an answer on
+ * Pub/ReferenceDesignation/<own Source> (oecm_res.c). */
+size_t oecm_refdes_room(oecm_state *s);
+/* Checks the Level 3 configuration, derives refdes_max and loads the
+ * stored ReferenceDesignation and the DataSetWriterId limit. */
+oecm_err oecm_l3_init(oecm_state *s);
+/* The answer to a Get of the own ReferenceDesignation (REQ-RES-REFDES-012
+ * … 015): -1 no answer (an invalid Query), 0 an empty answer, 1 the
+ * object. root: the request; with_source: the topic has a Source. */
+int oecm_l3_refdes_get(oecm_state *s, oecm_span root, bool with_source);
+/* Set with the Payload object of the one DataSetMessage: publishes the
+ * object with the ReplyTo and returns the Status (REQ-RES-REFDES-006 …
+ * 010). */
+const oecm_status *oecm_l3_refdes_set(oecm_state *s, oecm_span payload, oecm_span reply_to);
+const oecm_status *oecm_l3_refdes_del(oecm_state *s);
+/* Canonical form of a ReferenceDesignation object into out; scratch holds
+ * one decoded string. 0: valid; 1: invalid (BadDecodingError); 2: does
+ * not fit out (BadOutOfRange). */
+int oecm_refdes_encode(oecm_span obj, oecm_buf *out, char *scratch, size_t scratch_cap);
+/* RFC 3339 DateTime of the schema (oec-core value.rs). */
+bool oecm_date_time_ok(const char *s, size_t n);
+/* Call NewDataSetWriterId (MG 9.2.1, REQ-ACT-*); topic is the Call topic. */
+void oecm_l3_call(oecm_state *s, const char *topic, const oecm_topic *t, const uint8_t *payload,
+                  size_t len);
 
 /* Encodes into tx: the topic, a NUL, then the payload. Returns the payload
  * offset and sets *payload_len; 0 if it did not fit. */
