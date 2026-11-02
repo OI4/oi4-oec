@@ -78,3 +78,15 @@ The commonalities with and deliberate differences from `oec.h` are listed in ADR
 - **Heap with a pluggable allocator:** simpler API (copies of strings), but non-deterministic memory on MCUs. Rejected.
 - **Callback-driven core on the MQTT task (no `poll`):** fewer lines in the example, but locks or races in the core and an RTOS dependency. Rejected.
 - **JSON values at the API (as `oec.h`):** uniform with D2, but needs a JSON parser on the hot path and dynamic sizes. Rejected for values; JSON stays internal.
+
+## Amendment C-092 (2026-11-08) – P4b increment 1: Level 1 core (agent, G-3.4 b)
+
+The sketch became the real header `oec/sdk/micro/include/oecm.h` (the folder `sketch/` is removed); the implementation decisions are in ADR-0030. Details: `log/2026-11-08_C-092_micro-core-l1.md`, REVIEW A-429 … A-438. Changes to the contract of §1 … §11:
+
+1. **`oecm_mam.global_asset_id`** (A-430): optional AAS globalAssetId, appended after `revision_counter` (REQ-RES-MAM-023); `NULL` omits `GlobalAssetId`, as `NULL` omits `Description`. `NULL` hardware or software revision is sent as `"undefined"` (§10), every other `NULL` text as `""`.
+2. **ClientId** (A-430, §10): without `client_id` the core derives `oec` + 16 lower-case hex digits of the FNV-1a 64 hash of the Identification Link (19 characters; stable across reconnects and restarts, REQ-MQTT-013). A given `client_id` has 1 … 23 octets.
+3. **`oecm_init`** (A-431): checks UTF-8 of every text, the ManufacturerUri (REQ-RES-MAM-004), the Identification Link or the built Oi4Identifier, `revision_counter ≥ -1` and the PAL functions of Level 1; it encodes the Birth once with the longest possible MessageId and returns `OECM_E_NOSPACE` if it does not fit. Level 2 and 3 return `OECM_E_LEVEL` until their increment is delivered (C-094, C-095). `oecm_start` returns `OECM_E_STATE` while the wall clock is before 2020-01-01 (no SNTP yet).
+4. **Timers** (A-432): reconnect after 1 s, doubling up to 30 s, reset by a successful connect; a connect without `oecm_on_connected` is given up after 30 s (PAL `mqtt_disconnect`, then backoff); `oecm_poll_interval_ms` returns at most 1000. A failed publication stays due and is retried by the next `oecm_poll`.
+5. **Health** (A-432): `oecm_set_health` rejects `NORMAL`/0 (`OECM_E_ARG`): it is the Close (REQ-LIFE-005). After an own `FAILURE`/0 the next other Health is preceded by a Birth (REQ-LIFE-017), as in `oec-core`.
+6. **Sizes** (A-433, §3): `OECM_DEVICE_SIZE` stays **1024** (Level 1 uses 368 octets on a 64-bit host; the rest is reserved for Level 2/3). `OECM_TX_MIN` stays **2048**: every Health, Will and Close fits also with a 255-octet Identification Link (1804 octets); the Birth is checked by `oecm_init` (typical about 1000 octets, 2315 with a 255-octet Identification Link and empty texts).
+7. **Messages** (A-434): as `oec-core`: DataSetWriterId 10 (MAM) and 11 (Health) (ADR-0030 §9), DataSetWriterName the Identification Link, `WriterGroupName` and `ReplyTo` empty, no Timestamp, no SequenceNumber.

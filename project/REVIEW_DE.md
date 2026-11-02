@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 07.11.2026, C-091 Addendum 1: **D-1 ist beantwortet – P7 ist abgeschlossen, als Nächstes kommt P4b, das Micro SDK (D9).** Für dich ist nichts offen._
+_Stand: 08.11.2026, C-092: **P4b hat begonnen** – der Kern des Micro SDK für Stufe 1 steht (A-429 … A-438 zur Info). Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -31,6 +31,15 @@ Für dich ist nichts offen.
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-092 gemacht hat (P4b, Teil 1 von 6)
+
+- **Plan (A-429, ADR-0030):** Das Micro SDK entsteht in sechs Schritten: C-092 Kern für Stufe 1, C-093 ein Testprogramm auf dem Mac, mit dem D7 den Kern live am Broker prüft, C-094 Stufe 2, C-095 Stufe 3, C-096 der ESP32-Port im Emulator (QEMU), C-097 Arduino/M5Stack, Doku-Seite und Abschluss. Es ist kein ESP32 angeschlossen; der Lauf auf echter Hardware wird deshalb am Ende eine Entscheidung (D-x) für dich.
+- **Was es kann:** Der Kern ist reines C17 ohne Heap und ohne `printf`. Er prüft den Identification Link, baut Topics, MAM und Health genau wie das Rust-SDK, regelt Verbinden, Wiederverbinden und Herunterfahren (Birth, Will, Close, Heartbeat alle 60 s).
+- **Wie es geprüft ist:** 30 Tests laufen mit Speicher- und Undefiniertheits-Prüfung (ASan/UBSan) gegen dieselben gemeinsamen Testvektoren wie das Rust-SDK – alle grün. Zehn erzeugte Nachrichten hat D7 `validate` geprüft: alle gültig. Dazu statische Analyse, ein zweiter Compiler (GCC) und die Kontrolle, dass der Kern nur sechs harmlose Funktionen der C-Bibliothek braucht. Das alles läuft als Schritt 9 im Gate (etwa 6 s).
+- **Kleine Festlegungen (A-430 … A-434):** z. B. die Client-ID wird aus dem Identification Link abgeleitet, wenn keine angegeben ist; ein zu kleiner Sendepuffer fällt schon beim Start auf, nicht erst am Bus; ohne gestellte Uhr (vor 2020) startet das Gerät nicht, weil die MessageId sonst nicht eindeutig wäre. Gemessen: der Zustand braucht 368 von 1024 Byte.
+- **Werkzeuge (A-436, A-437):** ESP-IDF v6.1 und der Espressif-Emulator sind außerhalb des Projekts installiert und nur für den späteren, freiwilligen ESP32-Lauf nötig. Neue Bibliothek: nur das Testframework Unity (MIT), wie in ADR-0024 schon entschieden.
+- Der alte Entwurfsordner `sketch/` ist weg (A-438); Kopfdatei und Beispiel sind mit ihrer Historie umgezogen. Keine Testdaten zum Review, kein Guideline-Befund.
 
 ### Zur Info: was C-091 gemacht hat (P7, Abschlusslauf)
 

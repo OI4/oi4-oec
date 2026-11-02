@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-07, C-091 addendum 1: **D-1 answered – P7 is closed; next phase P4b – Micro SDK (D9).** Nothing is open for you._
+_Last updated: 2026-11-08, C-092: **P4b started** – Micro SDK core Messaging L1 (A-429 … A-438 for information). Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -292,6 +292,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-090 (P7 increment 5; ADR-0029 and ADR-0028 amendments C-090): registry image (amd64 + arm64, non-root, SBOM incl. the npm packages of the bundle, no node), opt-in `images/build.sh` with D8 `image`/`run` at L3 (pass), compose profile `registry` in `oec/dev`, `live.sh` `OEC_LIVE_REGISTRY` – T8-BUS-03 pass against `oec/dev`; demos start after the registry (A-416 … A-423). No R-x, no D-x, no SF.
 
 - C-091 (P7 increment 6 = exit run; ADR-0029 amendment C-091): image D8 `image`/`run`/`container` pass at L3; compose run – every participant over REST and in the Web UI, `Set`/Close/Will visible, T8-BUS-03 and REQ-PLT-008 pass, D7 `monitor` 0 fail without the D8 probe traffic; Registry guide (A-424 … A-428). **D-1** close P7? No R-x, no SF.
+- C-092 (P4b start + increment 1; ADR-0030, ADR-0022 amendment C-092): micro SDK core Messaging L1 in C17, 30 Unity tests under ASan/UBSan against the shared vectors, emitted payloads valid by D7 `validate`, gate step 9 (A-429 … A-438). No D-x, no R-x, no SF.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -745,6 +746,16 @@ Logs: [C-091](log/2026-11-07_C-091_p7-exit-registry-guide.md), [C-090](log/2026-
 | A-426 | Web UI screenshots through the Chrome DevTools protocol; headless `--timeout` stops the detail refetch – no defect | info (agent) | C-091 | – | – |
 | A-427 | The directory lists every participant seen (also short-lived tools), never itself; unchanged in step 1 | info (agent) | C-091 | – | – |
 | A-428 | README: a `Set` out of range is refused (`BadOutOfRange`), the worker clamps as second line | info (agent) | C-091 | – | – |
+| A-429 | ADR-0030: implementation of D9 and cycle cut C-092 … C-097; real hardware as D-x at the exit | info (agent) | C-092 | – | – |
+| A-430 | Header additions: `global_asset_id`, `NULL` defaults, derived ClientId (FNV-1a) | info (agent) | C-092 | – | – |
+| A-431 | `oecm_init` validates fully incl. a trial Birth; L2/L3 → `OECM_E_LEVEL` until delivered; `oecm_start` needs a wall clock ≥ 2020 | info (agent) | C-092 | – | – |
+| A-432 | Timers and Health: backoff 1 … 30 s, connect timeout 30 s, failed publication stays due, Birth after `FAILURE`/0 | info (agent) | C-092 | – | – |
+| A-433 | Sizes: `OECM_DEVICE_SIZE` 1024 (368 used), `OECM_TX_MIN` 2048 (Health ≤ 1804) | info (agent) | C-092 | – | – |
+| A-434 | Message fields as `oec-core` (DataSetWriterId MAM 10, Health 11, name = IL) | info (agent) | C-092 | – | – |
+| A-435 | Gate step 9 `oec/sdk/micro/check.sh` (vectors, ASan/UBSan, analyzer, symbol allowlist, GCC, D7 `validate`) | info (agent) | C-092 | – | – |
+| A-436 | Test vectors as a generated C header (`oecm-vecgen`, `-check` in the gate) | info (agent) | C-092 | – | – |
+| A-437 | ESP-IDF v6.1 and Espressif QEMU installed outside the workspace (opt-in) | info (agent) | C-092 | – | – |
+| A-438 | Sketch folder removed (`git mv` of header and example) | info (agent) | C-092 | – | – |
 
 ## Decisions and review items
 
@@ -1931,6 +1942,21 @@ Log C-091, ADR-0029 amendment C-091, `oec/registry/README.md`, `oec/dev/README.m
 - **A-427 What the directory holds:** every participant it saw – also short-lived tools such as the D8 probes, which stay *offline* (Close) or *offline (lost)* (Will) until the registry restarts – and never the registry itself (it ignores its own messages; its `ignored` counter grows with its own heartbeat, A-422). The directory is in memory (ADR-0029 §3). Unchanged for step 1; stated in the docs page; an expiry of offline entries is a candidate for a later step.
 - **A-428 Config wording:** the README said values out of range "are clamped". A `Set` of `GetTimeout` 99 was refused with `BadOutOfRange` (the SDK checks the `Validation` of the Config definition, max 60); the worker clamps what it reads only as a second line of defence. README corrected; no code change.
 
-## Next (C-092)
+### A-429 … A-438 – P4b increment 1 (C-092, agent)
 
-1. C-092 – P4b start (Micro SDK D9): plan and cycle cut, implementation ADR-0030, first increment (portable core, Messaging L1) test first; then the further P4b increments in the same session (PO).
+Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
+
+- **A-429 ADR-0030:** layout `oec/sdk/micro/` (`include/`, `src/`, `tests/`, `host/`, `third_party/unity/`, `examples/`), core rules (C17, no heap, no stdio, only `memcmp memcpy memmove memset strchr strlen`), cycle cut C-092 (core L1), C-093 (Go host runner, D7 L1 in the gate), C-094 (L2), C-095 (L3), C-096 (ESP-IDF port, QEMU, footprint), C-097 (Arduino/M5Stack, docs page, exit). No board is connected in this session: QEMU is the evidence for the port, the run on real hardware becomes a D-x at the exit.
+- **A-430 Header additions:** `global_asset_id` appended to `oecm_mam` (REQ-RES-MAM-023); `NULL` revisions → `"undefined"`, other `NULL` texts → `""`; ClientId `oec` + FNV-1a 64 of the IL in hex when none is given (19 characters).
+- **A-431 Init/start:** `oecm_init` checks everything once (UTF-8, ManufacturerUri, IL or Oi4Identifier, revision counter, PAL functions of the level) and encodes a trial Birth with the longest MessageId, so a too-small transmit buffer fails at init (`OECM_E_NOSPACE`), not on the bus; Level 2/3 return `OECM_E_LEVEL` until C-094/C-095; `oecm_start` refuses a wall clock before 2020-01-01 (REQ-MSG-008 – the MessageId must be unique).
+- **A-432 Timers and Health:** as `oec-core`; reconnect backoff 1 s doubling to 30 s, connect timeout 30 s, poll interval ≤ 1000 ms; a failed publication stays due and is repeated on the next poll.
+- **A-433 Sizes (measured on the host):** state 368 of 1024 octets at L1; Health/Will/Close ≤ 1804 octets for a 255-octet IL, so `OECM_TX_MIN` 2048 holds for all of them; the Birth depends on the texts (typical 996) and is checked at init.
+- **A-434 Message fields:** DataSetWriterId MAM 10 and Health 11, DataSetWriterName = IL, empty `WriterGroupName`/`ReplyTo`, as `oec-core` – D7 sees the same shape for both SDKs.
+- **A-435 Gate step 9:** `oec/sdk/micro/check.sh` (~6 s; needs `cmake`): Go host module, vector header check, ctest under ASan/UBSan, `clang --analyze`, symbol allowlist of the freestanding build, GCC 14/15 if installed, emitter + D7 `validate` (10 valid, an invalid one rejected), host example.
+- **A-436 Vector header:** the Unity tests read the shared vectors from a generated header (C literals with octal escapes), not through a JSON reader; the gate fails if it is stale.
+- **A-437 Toolchain:** ESP-IDF v6.1 (`~/esp/esp-idf-v6.1`, targets `esp32`, `esp32s3`) and Espressif QEMU in `~/.espressif`; not in the repository, not in the gate.
+- **A-438 Sketch:** `oec/sdk/micro/sketch/` is removed; header and example moved with history, `oec/sdk/check.sh` no longer compiles the sketch.
+
+## Next (C-093)
+
+1. C-093 – P4b increment 2: Go host runner (cgo PAL, own MQTT 3.1.1 client on `crypto/tls`), D7 `test --level 1` against the micro core in the gate; then C-094 … C-097 in the same session (PO).

@@ -252,6 +252,15 @@ SDK for microcontroller-class smart devices without container (ADR-0016), writte
 - Targets: ESP-IDF `esp32` + `esp32s3` supported, C3/C6 best effort; reference hardware: ESP32 dev board + M5Stack Core2/CoreS3. Example firmware generic + M5Stack variant (display/buttons via `M5Unified`, example only) (ADR-0017 amendment C-011).
 - **Exit:** example firmware on the ESP32 reference board and on the M5Stack device (and in QEMU, if feasible) passes D7 `--level 1` against the dev broker (first increment); later increments pass `--level 2` and `--level 3`.
 
+**Plan (C-092, agent, G-3.4 b; ADR-0030 §10, reason in `log/2026-11-08_C-092_micro-core-l1.md`).** Started in C-092 after the P7 close (PO, C-091 addendum 1: built through in one session if possible). Increments, each test first:
+
+1. ✅ (C-092) Portable core Messaging L1 (`oec/sdk/micro/`): IL/base64url/dnp/Oi4Identifier, JSON writer, MAM/Health/NetworkMessage, lifecycle; Unity tests under ASan/UBSan against the shared vectors, payloads valid by D7 `validate`, static analysis, symbol allowlist; gate step 9.
+2. (C-093) Go host runner (cgo PAL, own MQTT 3.1.1 client on `crypto/tls`): D7 `test --level 1` against the core on the host in the gate.
+3. (C-094) Messaging L2: JSON pull reader and topic parser (with fuzz targets), `Get`/`Set`/Status, Data/Config definitions; D7 `--level 2` in the gate.
+4. (C-095) Messaging L3: the remaining resources and methods; D7 `--level 3` in the gate.
+5. (C-096) ESP-IDF port (`esp-mqtt` + `esp-tls`) and the example firmware; Espressif QEMU (`esp32`) against `oec/dev` with D7 (opt-in), `esp32s3` build, RAM/flash footprint.
+6. (C-097) Arduino library and the M5Stack example, docs page `oec/docs/docs/micro-sdk/`, exit assessment. Without a connected board the run on the real reference hardware is proposed as a D-x at the exit (QEMU is the evidence in the session).
+
 ## P5 – Conformance test tool (D7) ✅ (C-062 … C-069; closed in the C-069 review, D-1 (a): criterion 4 (CI) → P9 CI)
 
 Command-line tool to check the **OEC Messaging Compliance (Level 1/2/3)** of applications and smart devices against the guideline (no platform/broker/container checks – those are D8, ADR-0006/0014). Shares only the D1 JSON Schemas and the spec baseline `oec/spec/` (ADR-0018) with the SDK, no code. Runs on **Windows and macOS** (and Linux for CI) and doubles as the **integration test harness** for SDK, demos and registry.
