@@ -8,7 +8,7 @@ and `Get/Health[/<Source>]` on its own AppId. Step 1 is **read-only**
 `Del` or `Call`. ServiceType `Registry`, product `oi4.org` / `OEC Registry`
 / `OEC-REGISTRY`, SerialNumber = the hostname of the container.
 
-State (C-089, increment 4 of the P7 cycle cut in `project/ROADMAP.md`):
+State (C-090, increment 5 of the P7 cycle cut in `project/ROADMAP.md`):
 Messaging Level 3. The registry collects `MAM`, `Health`, `Profile`,
 `Event`, `PublicationList` and `SubscriptionList` of every participant
 (raw subscriptions of the SDK, ADR-0026 §23), asks with `Get` for what is
@@ -18,8 +18,10 @@ conformity view (every received message validated with the strict D1
 schemas, independent of D7). It has its own `Config` (below) and a
 persistent `ReferenceDesignation`; D7 `oec-check test --level 3` passes.
 Since C-088 it serves the directory over **HTTPS**, read-only (below);
-since C-089 the **Web UI** (React/TypeScript/Vite, `ui/`) on the web port.
-Next: the image and the compose profile (increment 5).
+since C-089 the **Web UI** (React/TypeScript/Vite, `ui/`) on the web port;
+since C-090 the **image** `oi4/oec-registry` (below) and the compose profile
+`registry` of `oec/dev`. Next: the P7 exit run and the docs page
+(increment 6).
 
 ### Config `registry`
 
@@ -129,6 +131,41 @@ a **copy** of an example storage, never on `oec/dev/generated/` itself.
 `OEC_REGISTRY_LOG` = `error`, `warn`, `info` (default) or `debug` sets the
 log on stderr; `info` reports "N of M assets available" after every change.
 
+## Image (ADR-0029 §12)
+
+`Dockerfile` (build context `oec/`, allowlist `oec/.dockerignore`), as the
+demo images (ADR-0028 §4): the build stage runs on the build platform and
+cross-compiles for linux/amd64 and linux/arm64 (`rust:1.89-trixie`,
+`golang:1.27.3-trixie` for the SBOM tool); the runtime base is
+`gcr.io/distroless/cc-debian13:nonroot` – all pinned by tag and digest. The
+final stage has no `RUN`: `/usr/local/bin/oec-registry`, user 65532,
+volumes `/etc/oi4/app` and `/opt/oi4/app`, ports 5798 (Web UI and API) and
+5799 (API), `OEC_REGISTRY_WEB=0.0.0.0:5798`, `OEC_REGISTRY_API=0.0.0.0:5799`.
+TLS is on: with a client certificate in the container storage the registry
+serves HTTPS with it, otherwise with a self-signed certificate (above).
+
+**The Web UI is not built in the image:** the committed, stamped `ui/dist/`
+is embedded through `src/ui_assets.rs`; there is no node in any stage.
+`/opt/oi4/licenses` holds the SBOM (`sbom.spdx.json`, SPDX 2.3) and the
+license texts: the crates linked into the binary (`cargo tree`), the Rust
+standard library, the Debian packages of the base and the npm packages of
+the bundle – `react`, `react-dom`, `scheduler` (MIT), read from
+`ui/package-lock.json` (the non-dev packages, the same rule as
+`internal/uipolicy`).
+
+```sh
+images/build.sh /tmp/oec-registry   # opt-in: buildx (amd64 + arm64), D8 image + run at --level 3, load
+images/build.sh --remove            # remove the loaded image
+```
+
+`images/build.sh` uses an own buildx builder with the pinned BuildKit of the
+demos and removes it (and a BuildKit image it pulled) at the end; nothing is
+pruned. `image_test.go` checks the Dockerfile, the `.dockerignore` and the
+script offline (gate). To read the SBOM of a loaded image:
+`docker create --name x oi4/oec-registry:0.1.0 && docker cp x:/opt/oi4/licenses /tmp/l && docker rm -v x`
+(`-v`: the image declares volumes). With a broker: the compose profile
+`registry` of [`../dev`](../dev/README.md#compose-profile-registry-c-090).
+
 ## Layout
 
 | Path | Content |
@@ -147,6 +184,7 @@ log on stderr; `info` reports "N of M assets available" after every change.
 | `api/asyncapi.json` | AsyncAPI 3.1.0: the MQTT interface (Registry services, lifecycle, collecting subscriptions, `Get`s to others); payloads reference the D1 schemas by `$id` |
 | `api/meta/` | the AsyncAPI 3.1.0 JSON Schema, vendored from `asyncapi/spec-json-schemas` (commit `eee8d22`, `schemas/3.1.0.json`, Apache-2.0, license file beside it); the OpenAPI 3.2 schema iteration `2026-08-30`, vendored from `https://spec.openapis.org/oas/3.2/schema/2026-08-30` (OpenAPI Initiative, Apache-2.0, license file beside it) |
 | `registry_test.go`, `internal/regtest/` | Go integration tests (module `github.com/OI4/oec/registry`, standard library only): the registry on the in-process TLS test broker, judged by D8 and D7, and its HTTP side |
+| `Dockerfile`, `images/build.sh`, `image_test.go` | the image (ADR-0029 §12), its opt-in build with D8 and its offline test |
 | `check.sh` | step 8 of `oec/check.sh` |
 
 ## Checks
@@ -179,5 +217,9 @@ ADR-0006):
   policy, the stamp and the table of the committed UI, and 31 violations
   on a copy.
 - `internal/regtest` `TestAPI`: the channel patterns of the AsyncAPI.
+- `TestDockerfile`, `TestDockerignore`, `TestBuildScript` (`image_test.go`):
+  the pinned images, the final stage without `RUN`, user, volumes, ports,
+  no node, the SBOM with `-npm`; the build context; the D8 levels and the
+  clean-up of `images/build.sh`.
 
 `OEC_REGISTRY_D7_REPORT=<file>` keeps the D7 report of the run.

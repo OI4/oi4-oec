@@ -54,6 +54,19 @@ cd ../demos && images/build.sh --remove
 `generated/` holds the keys and passwords of your dev environment; never
 commit or share it.
 
+### With the OEC Registry
+
+The OEC Registry lists every asset on the bus. Build its image once
+(`registry/images/build.sh /tmp/oec-registry` from `oec/`), add
+`--profile registry` to both compose commands above and remove the image at
+the end with `registry/images/build.sh --remove`. Its Web UI is at
+`https://localhost:5798/` (HTTPS with a certificate of the dev CA
+`generated/broker/ca.pem`) and shows the three demos and the stations of
+the weather service. Start both profiles together: the demos then start
+after the registry, which matters for the config service (it announces
+itself only at its start). Details:
+[`oec/dev/README.md` – Compose profile `registry`](../../../dev/README.md#compose-profile-registry-c-090).
+
 ## Good to know
 
 - **No authentication and no TLS on the Web UIs.** They are demos, not
