@@ -7,7 +7,11 @@
 // the credentials or a client certificate, the hostname (the default
 // serial number).
 //
-//	oecm-host [-level 1] [-serial S] [-model M] …
+//	oecm-host [-level 1|2] [-serial S] [-model M] …
+//
+// From Level 2 the device is a simulated temperature sensor (demo.c):
+// Data "Temperature" with a writable Setpoint and the Config context
+// "Sensor".
 //
 // SIGTERM or SIGINT publishes the Close and ends the program (exit 0).
 package main
@@ -18,6 +22,9 @@ package main
 #include "oecm.h"
 
 extern const oecm_pal oecm_host_pal;
+void oecm_host_demo(oecm_config *cfg, oecm_device *dev);
+unsigned oecm_host_demo_interval(void);
+void oecm_host_demo_tick(void);
 */
 import "C"
 
@@ -72,6 +79,10 @@ type runner struct {
 
 var current *runner
 
+// txSize is the transmit buffer of the core: room for the largest
+// publication of the demo (the Config with its definition).
+const txSize = 8192
+
 // drop ends the current connection attempt or connection: later events of
 // it are ignored. A connected client is ended with DISCONNECT (no Will).
 func (r *runner) drop() error {
@@ -104,7 +115,7 @@ func cstr(s string) *C.char {
 func run(args []string, root string) int {
 	logger := log.New(os.Stderr, "oecm-host: ", log.LstdFlags|log.Lmicroseconds)
 	fs := flag.NewFlagSet("oecm-host", flag.ContinueOnError)
-	level := fs.Int("level", 1, "Messaging level of the device (1; 2 and 3 follow in later increments)")
+	level := fs.Int("level", 1, "Messaging level of the device (1 or 2; 3 follows in a later increment)")
 	il := fs.String("il", "", "an existing Identification Link; default: the Oi4Identifier from the MAM")
 	manufacturer := fs.String("manufacturer", "OI4", "MAM Manufacturer")
 	manufacturerURI := fs.String("manufacturer-uri", "oi4.org", "MAM ManufacturerUri")
@@ -114,6 +125,10 @@ func run(args []string, root string) int {
 	software := fs.String("software-revision", "0.1.0", "MAM SoftwareRevision")
 	clientID := fs.String("client-id", "", "MQTT ClientId; default: derived from the Identification Link")
 	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *level < 1 || *level > 2 {
+		logger.Printf("-level %d: 1 or 2", *level)
 		return 2
 	}
 	if root == "" {
@@ -155,8 +170,11 @@ func run(args []string, root string) int {
 		events: make(chan event, 256),
 	}
 	current = r
-	tx := (*C.uint8_t)(C.malloc(C.OECM_TX_MIN))
-	if e := C.oecm_init(r.dev, cfg, &C.oecm_host_pal, tx, C.OECM_TX_MIN); e != C.OECM_OK {
+	if *level >= 2 {
+		C.oecm_host_demo(cfg, r.dev)
+	}
+	tx := (*C.uint8_t)(C.malloc(txSize))
+	if e := C.oecm_init(r.dev, cfg, &C.oecm_host_pal, tx, txSize); e != C.OECM_OK {
 		logger.Printf("oecm_init: %s", C.GoString(C.oecm_err_str(e)))
 		return 1
 	}
@@ -169,6 +187,10 @@ func run(args []string, root string) int {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	timer := time.NewTimer(0)
+	step := time.NewTimer(time.Duration(C.oecm_host_demo_interval()) * time.Second)
+	if *level < 2 {
+		step.Stop()
+	}
 	for {
 		select {
 		case sig := <-stop:
@@ -181,6 +203,9 @@ func run(args []string, root string) int {
 		case ev := <-r.events:
 			r.handle(ev)
 		case <-timer.C:
+		case <-step.C:
+			C.oecm_host_demo_tick()
+			step.Reset(time.Duration(C.oecm_host_demo_interval()) * time.Second)
 		}
 		if e := C.oecm_poll(r.dev); e != C.OECM_OK {
 			logger.Printf("oecm_poll: %s", C.GoString(C.oecm_err_str(e)))

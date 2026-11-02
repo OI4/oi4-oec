@@ -121,3 +121,39 @@ func TestD7Level1(t *testing.T) {
 		Report:   "OECM_D7_REPORT",
 	})
 }
+
+// d7Level2Pass: the 38 D7 tests that pass against the micro core in the
+// host runner at Level 2 (C-094), the simulated temperature sensor of
+// demo.c. D7 warns on three SHOULDs of features of Level 3 of the micro
+// SDK (C-095): ReferenceDesignation (T7-GET-03, T7-GET-04) and
+// NewDataSetWriterId (T7-ACT-01). It skips 14: T7-GET-07, T7-SET-04,
+// T7-SET-09 and T7-SET-10 need ReferenceDesignation; T7-ACT-02 … 04 need
+// NewDataSetWriterId; T7-SET-12 needs a Syslog publication (the micro SDK
+// has none, ADR-0030); T7-MON-07, T7-ADR-01 and T7-ADR-02 judge requests
+// of the CUT (none sent); T7-MON-14 and T7-MON-17 observed nothing to
+// judge; T7-SET-03 is Level 3.
+var d7Level2Pass = []string{
+	"T7-MON-01", "T7-MON-02", "T7-MON-03", "T7-MON-04", "T7-MON-05", "T7-MON-06", "T7-MON-08", "T7-MON-09", "T7-MON-10", "T7-MON-11", "T7-MON-12", "T7-MON-13", "T7-MON-15", "T7-MON-16", "T7-MON-18", "T7-MON-19",
+	"T7-CON-01", "T7-CON-02", "T7-CON-03", "T7-CON-04",
+	"T7-LIFE-01", "T7-LIFE-02", "T7-LIFE-03", "T7-LIFE-04",
+	"T7-ADR-03",
+	"T7-GET-01", "T7-GET-02", "T7-GET-05", "T7-GET-06", "T7-GET-08", "T7-GET-09",
+	"T7-SET-01", "T7-SET-02", "T7-SET-05", "T7-SET-06", "T7-SET-07", "T7-SET-08", "T7-SET-11",
+}
+
+func TestD7Level2(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	d7run.Run(t, d7run.D7{
+		Exe:      exe,
+		Args:     []string{"-level", "2"},
+		Env:      []string{"OECM_HOST_MAIN=1"},
+		Hostname: "dev-1",
+		App:      "OTConnector/oi4.org/OEC,20Micro,20Host/OECM-HOST/dev-1",
+		Level:    2,
+		Pass:     d7Level2Pass,
+		Report:   "OECM_D7_REPORT",
+	})
+}

@@ -44,6 +44,13 @@ static oecm_err pal_publish(void *ctx, const char *topic, const uint8_t *payload
     return OECM_OK;
 }
 
+static oecm_err pal_subscribe(void *ctx, const char *filter) {
+    fake_event *e = next(ctx, FAKE_SUBSCRIBE);
+    if (e)
+        copy(e->topic, sizeof e->topic, filter, strlen(filter));
+    return OECM_OK;
+}
+
 static oecm_err pal_disconnect(void *ctx) {
     (void)next(ctx, FAKE_DISCONNECT);
     return OECM_OK;
@@ -57,6 +64,7 @@ oecm_pal fake_pal_make(fake_pal *fp) {
         .ctx = fp,
         .mqtt_connect = pal_connect,
         .mqtt_publish = pal_publish,
+        .mqtt_subscribe = pal_subscribe,
         .mqtt_disconnect = pal_disconnect,
         .unix_time_ms = pal_unix,
         .monotonic_ms = pal_mono,
@@ -75,4 +83,11 @@ const fake_event *fake_last(const fake_pal *fp, fake_kind kind) {
         if (fp->events[i - 1].kind == kind)
             return &fp->events[i - 1];
     return NULL;
+}
+
+size_t fake_count(const fake_pal *fp, fake_kind kind) {
+    size_t n = 0;
+    for (size_t i = 0; i < fp->count; i++)
+        n += fp->events[i].kind == kind;
+    return n;
 }

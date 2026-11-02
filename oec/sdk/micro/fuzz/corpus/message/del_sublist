@@ -1,0 +1,2 @@
+Del/SubscriptionList/cHJvdmlkZXIuY29tL1NlbnNvci9TLTEvNDcxMQ/Data/Temperature
+{"MessageId":"1793000000000-Registry/other.com/X/Y/1","MessageType":"ua-data","PublisherId":"Registry/other.com/X/Y/1","Messages":[{"DataSetWriterId":17,"Payload":{"TopicPath":"Oi4v2/OTConnector/cHJvdmlkZXIuY29tL1NlbnNvci9TLTEvNDcxMQ/Set/Data/cHJvdmlkZXIuY29tL1NlbnNvci9TLTEvNDcxMQ/Temperature"}}]}

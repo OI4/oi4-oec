@@ -1,0 +1,1 @@
+{"MessageId":"1-Registry/x","MessageType":"ua-data","PublisherId":"Registry/x","Messages":[{"DataSetWriterId":18,"Payload":{"General":{"Interval":{"Type":"Number","Value":"5"}}}}]}

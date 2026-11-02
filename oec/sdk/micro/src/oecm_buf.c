@@ -13,12 +13,14 @@ void oecm_buf_init(oecm_buf *b, uint8_t *p, size_t cap) {
     b->full = false;
 }
 
+void oecm_buf_count(oecm_buf *b) { oecm_buf_init(b, NULL, SIZE_MAX); }
+
 void oecm_put(oecm_buf *b, const void *s, size_t n) {
     if (b->full || n > b->cap - b->len) {
         b->full = true;
         return;
     }
-    if (n > 0)
+    if (n > 0 && b->p != NULL)
         memcpy(b->p + b->len, s, n);
     b->len += n;
 }
@@ -46,9 +48,8 @@ void oecm_put_i64(oecm_buf *b, int64_t v) {
     }
 }
 
-void oecm_put_json_str(oecm_buf *b, const char *s, size_t n) {
+void oecm_put_json_chars(oecm_buf *b, const char *s, size_t n) {
     static const char hex[] = "0123456789abcdef";
-    oecm_putc(b, '"');
     size_t run = 0; /* start of the pending unescaped run */
     for (size_t i = 0; i < n; i++) {
         unsigned char c = (unsigned char)s[i];
@@ -79,5 +80,10 @@ void oecm_put_json_str(oecm_buf *b, const char *s, size_t n) {
         }
     }
     oecm_put(b, s + run, n - run);
+}
+
+void oecm_put_json_str(oecm_buf *b, const char *s, size_t n) {
+    oecm_putc(b, '"');
+    oecm_put_json_chars(b, s, n);
     oecm_putc(b, '"');
 }

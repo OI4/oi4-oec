@@ -93,21 +93,25 @@ uint64_t oecm_fnv1a64(const char *s, size_t n) {
 
 /* --- Encoding ---------------------------------------------------------------- */
 
-static void put_json_cstr(oecm_buf *b, const char *s) { oecm_put_json_str(b, s, s ? strlen(s) : 0); }
+void oecm_put_json_cstr(oecm_buf *b, const char *s) { oecm_put_json_str(b, s, s ? strlen(s) : 0); }
 
-static void put_localized(oecm_buf *b, const char *text) {
+void oecm_put_localized(oecm_buf *b, const char *text) {
     oecm_puts(b, "{\"Locale\":\"en-US\",\"Text\":");
-    put_json_cstr(b, text);
+    oecm_put_json_cstr(b, text);
     oecm_putc(b, '}');
 }
 
-/* Topic "Oi4v2/<ST>/<AppId>/Pub/<resource>/<AppId>", then a NUL. */
-static void put_own_topic(oecm_buf *b, const oecm_state *s, const char *resource) {
+void oecm_put_pub_prefix(oecm_buf *b, const oecm_state *s) {
     oecm_puts(b, "Oi4v2/");
     oecm_puts(b, oecm_service_type_name(s->cfg->service_type));
     oecm_putc(b, '/');
     oecm_put_b64url(b, (const uint8_t *)s->il, s->il_len);
     oecm_puts(b, "/Pub/");
+}
+
+/* Topic "Oi4v2/<ST>/<AppId>/Pub/<resource>/<AppId>", then a NUL. */
+static void put_own_topic(oecm_buf *b, const oecm_state *s, const char *resource) {
+    oecm_put_pub_prefix(b, s);
     oecm_puts(b, resource);
     oecm_putc(b, '/');
     oecm_put_b64url(b, (const uint8_t *)s->il, s->il_len);
@@ -116,7 +120,7 @@ static void put_own_topic(oecm_buf *b, const oecm_state *s, const char *resource
 
 /* The next MessageId (REQ-MSG-007, REQ-MSG-008): the Unix time in ms, a
  * counter appended while the clock does not advance. */
-static void next_message_id(oecm_state *s, int64_t unix_ms) {
+void oecm_next_message_id(oecm_state *s, int64_t unix_ms) {
     uint64_t ms = unix_ms > 0 ? (uint64_t)unix_ms : 0u;
     if (ms > s->id_ms) {
         s->id_ms = ms;
@@ -129,31 +133,84 @@ static void next_message_id(oecm_state *s, int64_t unix_ms) {
     }
 }
 
-static void put_publisher(oecm_buf *b, const oecm_state *s) {
+void oecm_put_publisher(oecm_buf *b, const oecm_state *s) {
     oecm_puts(b, oecm_service_type_name(s->cfg->service_type));
     oecm_putc(b, '/');
     oecm_put(b, s->il, s->il_len);
 }
 
+void oecm_put_id(oecm_buf *b, const oecm_state *s, uint64_t ms, uint32_t counter) {
+    oecm_put_u64(b, ms);
+    if (counter != 0)
+        oecm_put_u64(b, counter);
+    oecm_putc(b, '-');
+    oecm_put_publisher(b, s);
+}
+
+void oecm_put_nm(oecm_buf *b, const oecm_state *s, const char *message_type, const char *class_id,
+                 const uint8_t *class_uuid, oecm_span reply_to) {
+    oecm_puts(b, "{\"MessageId\":\"");
+    oecm_put_id(b, s, s->id_ms, s->id_counter);
+    oecm_puts(b, "\",\"MessageType\":\"");
+    oecm_puts(b, message_type);
+    oecm_puts(b, "\",\"PublisherId\":\"");
+    oecm_put_publisher(b, s);
+    oecm_putc(b, '"');
+    if (class_id || class_uuid) {
+        oecm_puts(b, ",\"DataSetClassId\":\"");
+        if (class_id)
+            oecm_puts(b, class_id);
+        else
+            oecm_put_uuid(b, class_uuid);
+        oecm_putc(b, '"');
+    }
+    oecm_puts(b, ",\"ReplyTo\":");
+    if (reply_to.n != 0)
+        oecm_put(b, reply_to.p, reply_to.n);
+    else
+        oecm_puts(b, "\"\"");
+}
+
+void oecm_put_dsm(oecm_buf *b, const oecm_state *s, unsigned writer, const char *group,
+                  const char *group_tail, int64_t timestamp_ms, uint32_t version,
+                  const char *message_type) {
+    oecm_puts(b, "{\"DataSetWriterId\":");
+    oecm_put_u64(b, writer);
+    oecm_puts(b, ",\"WriterGroupName\":\"");
+    oecm_put_json_chars(b, group, strlen(group));
+    if (group_tail) {
+        oecm_putc(b, '/');
+        oecm_put_json_chars(b, group_tail, strlen(group_tail));
+    }
+    oecm_puts(b, "\",\"DataSetWriterName\":");
+    oecm_put_json_str(b, s->il, s->il_len);
+    if (timestamp_ms >= 0) {
+        oecm_puts(b, ",\"Timestamp\":\"");
+        oecm_put_time(b, timestamp_ms);
+        oecm_putc(b, '"');
+    }
+    if (version != 0) {
+        oecm_puts(b, ",\"MetaDataVersion\":{\"MajorVersion\":");
+        oecm_put_u64(b, version);
+        oecm_puts(b, ",\"MinorVersion\":");
+        oecm_put_u64(b, version);
+        oecm_putc(b, '}');
+    }
+    if (message_type) {
+        oecm_puts(b, ",\"MessageType\":\"");
+        oecm_puts(b, message_type);
+        oecm_putc(b, '"');
+    }
+    oecm_puts(b, ",\"Payload\":");
+}
+
 /* NetworkMessage up to the Payload of its single DataSetMessage. */
 static void put_head(oecm_buf *b, oecm_state *s, int64_t unix_ms, const char *class_id,
                      unsigned writer) {
-    next_message_id(s, unix_ms);
-    oecm_puts(b, "{\"MessageId\":\"");
-    oecm_put_u64(b, s->id_ms);
-    if (s->id_counter != 0)
-        oecm_put_u64(b, s->id_counter);
-    oecm_putc(b, '-');
-    put_publisher(b, s);
-    oecm_puts(b, "\",\"MessageType\":\"ua-data\",\"PublisherId\":\"");
-    put_publisher(b, s);
-    oecm_puts(b, "\",\"DataSetClassId\":\"");
-    oecm_puts(b, class_id);
-    oecm_puts(b, "\",\"ReplyTo\":\"\",\"Messages\":[{\"DataSetWriterId\":");
-    oecm_put_u64(b, writer);
-    oecm_puts(b, ",\"WriterGroupName\":\"\",\"DataSetWriterName\":");
-    oecm_put_json_str(b, s->il, s->il_len);
-    oecm_puts(b, ",\"Payload\":");
+    oecm_next_message_id(s, unix_ms);
+    oecm_put_nm(b, s, "ua-data", class_id, NULL, (oecm_span){NULL, 0});
+    oecm_puts(b, ",\"Messages\":[");
+    oecm_put_dsm(b, s, writer, "", NULL, -1, 0, NULL);
 }
 
 static size_t finish(oecm_buf *b, size_t payload_at, size_t *payload_len) {
@@ -166,46 +223,61 @@ static size_t finish(oecm_buf *b, size_t payload_at, size_t *payload_len) {
     return payload_at;
 }
 
-size_t oecm_encode_birth(oecm_state *s, int64_t unix_ms, size_t *payload_len) {
+void oecm_put_mam(oecm_buf *b, const oecm_state *s) {
     const oecm_mam *m = &s->cfg->mam;
+    oecm_puts(b, "{\"Manufacturer\":");
+    oecm_put_localized(b, m->manufacturer);
+    oecm_puts(b, ",\"ManufacturerUri\":");
+    oecm_put_json_cstr(b, m->manufacturer_uri);
+    oecm_puts(b, ",\"Model\":");
+    oecm_put_localized(b, m->model);
+    oecm_puts(b, ",\"ProductCode\":");
+    oecm_put_json_cstr(b, m->product_code);
+    oecm_puts(b, ",\"HardwareRevision\":");
+    oecm_put_json_cstr(b, m->hardware_revision ? m->hardware_revision : "undefined");
+    oecm_puts(b, ",\"SoftwareRevision\":");
+    oecm_put_json_cstr(b, m->software_revision ? m->software_revision : "undefined");
+    oecm_puts(b, ",\"DeviceRevision\":");
+    oecm_put_json_cstr(b, m->device_revision);
+    oecm_puts(b, ",\"DeviceManual\":");
+    oecm_put_json_cstr(b, m->device_manual);
+    oecm_puts(b, ",\"DeviceClass\":");
+    oecm_put_json_cstr(b, m->device_class);
+    oecm_puts(b, ",\"SerialNumber\":");
+    oecm_put_json_cstr(b, m->serial_number);
+    oecm_puts(b, ",\"ProductInstanceUri\":");
+    oecm_put_json_str(b, s->il, s->il_len);
+    oecm_puts(b, ",\"RevisionCounter\":");
+    oecm_put_i64(b, m->revision_counter);
+    if (m->description) {
+        oecm_puts(b, ",\"Description\":");
+        oecm_put_localized(b, m->description);
+    }
+    if (m->global_asset_id) {
+        oecm_puts(b, ",\"GlobalAssetId\":");
+        oecm_put_json_cstr(b, m->global_asset_id);
+    }
+    oecm_putc(b, '}');
+}
+
+void oecm_put_health(oecm_buf *b, oecm_health h, int score) {
+    oecm_puts(b, "{\"Health\":\"");
+    oecm_puts(b, oecm_health_name(h));
+    oecm_putc(b, '"');
+    if (score >= 0) {
+        oecm_puts(b, ",\"HealthScore\":");
+        oecm_put_u64(b, (uint64_t)score);
+    }
+    oecm_putc(b, '}');
+}
+
+size_t oecm_encode_birth(oecm_state *s, int64_t unix_ms, size_t *payload_len) {
     oecm_buf b;
     oecm_buf_init(&b, s->tx, s->tx_cap);
     put_own_topic(&b, s, "MAM");
     size_t at = b.len;
     put_head(&b, s, unix_ms, OECM_CLASS_MAM, OECM_WRITER_MAM);
-    oecm_puts(&b, "{\"Manufacturer\":");
-    put_localized(&b, m->manufacturer);
-    oecm_puts(&b, ",\"ManufacturerUri\":");
-    put_json_cstr(&b, m->manufacturer_uri);
-    oecm_puts(&b, ",\"Model\":");
-    put_localized(&b, m->model);
-    oecm_puts(&b, ",\"ProductCode\":");
-    put_json_cstr(&b, m->product_code);
-    oecm_puts(&b, ",\"HardwareRevision\":");
-    put_json_cstr(&b, m->hardware_revision ? m->hardware_revision : "undefined");
-    oecm_puts(&b, ",\"SoftwareRevision\":");
-    put_json_cstr(&b, m->software_revision ? m->software_revision : "undefined");
-    oecm_puts(&b, ",\"DeviceRevision\":");
-    put_json_cstr(&b, m->device_revision);
-    oecm_puts(&b, ",\"DeviceManual\":");
-    put_json_cstr(&b, m->device_manual);
-    oecm_puts(&b, ",\"DeviceClass\":");
-    put_json_cstr(&b, m->device_class);
-    oecm_puts(&b, ",\"SerialNumber\":");
-    put_json_cstr(&b, m->serial_number);
-    oecm_puts(&b, ",\"ProductInstanceUri\":");
-    oecm_put_json_str(&b, s->il, s->il_len);
-    oecm_puts(&b, ",\"RevisionCounter\":");
-    oecm_put_i64(&b, m->revision_counter);
-    if (m->description) {
-        oecm_puts(&b, ",\"Description\":");
-        put_localized(&b, m->description);
-    }
-    if (m->global_asset_id) {
-        oecm_puts(&b, ",\"GlobalAssetId\":");
-        put_json_cstr(&b, m->global_asset_id);
-    }
-    oecm_putc(&b, '}');
+    oecm_put_mam(&b, s);
     return finish(&b, at, payload_len);
 }
 
@@ -216,23 +288,16 @@ size_t oecm_encode_health(oecm_state *s, int64_t unix_ms, oecm_health h, int sco
     put_own_topic(&b, s, "Health");
     size_t at = b.len;
     put_head(&b, s, unix_ms, OECM_CLASS_HEALTH, OECM_WRITER_HEALTH);
-    oecm_puts(&b, "{\"Health\":\"");
-    oecm_puts(&b, oecm_health_name(h));
-    oecm_putc(&b, '"');
-    if (score >= 0) {
-        oecm_puts(&b, ",\"HealthScore\":");
-        oecm_put_u64(&b, (uint64_t)score);
-    }
-    oecm_putc(&b, '}');
+    oecm_put_health(&b, h, score);
     return finish(&b, at, payload_len);
 }
 
 /* --- Lifecycle --------------------------------------------------------------- */
 
-static uint32_t mono(const oecm_state *s) { return s->pal->monotonic_ms(s->pal->ctx); }
-static int64_t wall(const oecm_state *s) { return s->pal->unix_time_ms(s->pal->ctx); }
+uint32_t oecm_mono(const oecm_state *s) { return s->pal->monotonic_ms(s->pal->ctx); }
+int64_t oecm_wall(const oecm_state *s) { return s->pal->unix_time_ms(s->pal->ctx); }
 
-static oecm_err publish(oecm_state *s, size_t at, size_t len) {
+oecm_err oecm_publish(oecm_state *s, size_t at, size_t len) {
     if (at == 0)
         return OECM_E_NOSPACE;
     if (s->pal->mqtt_publish(s->pal->ctx, (const char *)s->tx, s->tx + at, len) != OECM_OK)
@@ -242,13 +307,13 @@ static oecm_err publish(oecm_state *s, size_t at, size_t len) {
 
 static void enter(oecm_state *s, uint8_t phase) {
     s->phase = phase;
-    s->phase_since_ms = mono(s);
+    s->phase_since_ms = oecm_mono(s);
 }
 
 /* A new Will for every connect (REQ-LIFE-008, REQ-LIFE-016). */
 static oecm_err connect(oecm_state *s) {
     size_t len;
-    size_t at = oecm_encode_health(s, wall(s), OECM_HEALTH_FAILURE, 0, &len);
+    size_t at = oecm_encode_health(s, oecm_wall(s), OECM_HEALTH_FAILURE, 0, &len);
     if (at == 0)
         return OECM_E_NOSPACE;
     const oecm_config *c = s->cfg;
@@ -273,13 +338,13 @@ static bool is_failure(oecm_health h, int score) { return h == OECM_HEALTH_FAILU
 /* The Birth when due, then the Health on change or heartbeat (REQ-LIFE-001,
  * REQ-LIFE-017, REQ-TOP-017). A failed publication stays due. */
 static oecm_err publish_due(oecm_state *s) {
-    uint32_t now = mono(s);
+    uint32_t now = oecm_mono(s);
     bool beat = s->health_due || now - s->last_health_ms >= HEARTBEAT_MS;
     bool failure = is_failure((oecm_health)s->health, s->score);
     bool birth = s->birth_due || (beat && s->unavailable && !failure);
     size_t len;
     if (birth) {
-        oecm_err err = publish(s, oecm_encode_birth(s, wall(s), &len), len);
+        oecm_err err = oecm_publish(s, oecm_encode_birth(s, oecm_wall(s), &len), len);
         if (err != OECM_OK)
             return err;
         s->birth_due = false;
@@ -287,7 +352,7 @@ static oecm_err publish_due(oecm_state *s) {
     if (!beat)
         return OECM_OK;
     oecm_err err =
-        publish(s, oecm_encode_health(s, wall(s), (oecm_health)s->health, s->score, &len), len);
+        oecm_publish(s, oecm_encode_health(s, oecm_wall(s), (oecm_health)s->health, s->score, &len), len);
     if (err != OECM_OK) {
         s->health_due = true;
         return err;
@@ -306,12 +371,16 @@ oecm_err oecm_init(oecm_device *dev, const oecm_config *cfg, const oecm_pal *pal
     memset(s, 0, sizeof *s);
     if (cfg->level < OECM_LEVEL_1 || cfg->level > OECM_LEVEL_3)
         return OECM_E_ARG;
-    if (cfg->level != OECM_LEVEL_1)
+    if (cfg->level == OECM_LEVEL_3)
+        return OECM_E_LEVEL;
+    if (cfg->level == OECM_LEVEL_1 && (cfg->data_count != 0 || cfg->config_count != 0))
         return OECM_E_LEVEL;
     if (oecm_service_type_name(cfg->service_type) == NULL)
         return OECM_E_ARG;
     if (!pal->mqtt_connect || !pal->mqtt_publish || !pal->mqtt_disconnect || !pal->unix_time_ms ||
         !pal->monotonic_ms)
+        return OECM_E_ARG;
+    if (cfg->level >= OECM_LEVEL_2 && !pal->mqtt_subscribe)
         return OECM_E_ARG;
     if (tx_cap < OECM_TX_MIN)
         return OECM_E_NOSPACE;
@@ -366,6 +435,13 @@ oecm_err oecm_init(oecm_device *dev, const oecm_config *cfg, const oecm_pal *pal
     s->id_counter = 0;
     if (at == 0)
         return OECM_E_NOSPACE;
+    if (cfg->level >= OECM_LEVEL_2) {
+        oecm_err err = oecm_l2_init(s);
+        if (err != OECM_OK) {
+            memset(s, 0, sizeof *s);
+            return err;
+        }
+    }
     s->health = OECM_HEALTH_NORMAL;
     s->score = 100;
     s->health_due = true;
@@ -380,7 +456,7 @@ oecm_err oecm_start(oecm_device *dev) {
     oecm_state *s = state(dev);
     if (s->phase != PH_IDLE && s->phase != PH_STOPPED)
         return OECM_E_STATE;
-    if (wall(s) < PLAUSIBLE_UNIX_MS)
+    if (oecm_wall(s) < PLAUSIBLE_UNIX_MS)
         return OECM_E_STATE;
     s->backoff_ms = BACKOFF_MIN_MS;
     return connect(s);
@@ -395,7 +471,7 @@ oecm_err oecm_stop(oecm_device *dev) {
     case PH_CONNECTED: {
         /* Close, then DISCONNECT (REQ-LIFE-005 … 007). */
         size_t len;
-        err = publish(s, oecm_encode_health(s, wall(s), OECM_HEALTH_NORMAL, 0, &len), len);
+        err = oecm_publish(s, oecm_encode_health(s, oecm_wall(s), OECM_HEALTH_NORMAL, 0, &len), len);
         if (s->pal->mqtt_disconnect(s->pal->ctx) != OECM_OK && err == OECM_OK)
             err = OECM_E_PAL;
         break;
@@ -417,7 +493,7 @@ oecm_err oecm_poll(oecm_device *dev) {
     if (!ready(dev))
         return OECM_E_STATE;
     oecm_state *s = state(dev);
-    uint32_t now = mono(s);
+    uint32_t now = oecm_mono(s);
     switch (s->phase) {
     case PH_CONNECTING:
         if (now - s->phase_since_ms >= CONNECT_TIMEOUT_MS) {
@@ -430,8 +506,15 @@ oecm_err oecm_poll(oecm_device *dev) {
             return OECM_OK;
         s->backoff_ms = s->backoff_ms * 2u > BACKOFF_MAX_MS ? BACKOFF_MAX_MS : s->backoff_ms * 2u;
         return connect(s);
-    case PH_CONNECTED:
-        return publish_due(s);
+    case PH_CONNECTED: {
+        oecm_err err = publish_due(s);
+        if (s->cfg->level >= OECM_LEVEL_2) {
+            oecm_err e2 = oecm_l2_publish_due(s);
+            if (err == OECM_OK)
+                err = e2;
+        }
+        return err;
+    }
     default:
         return OECM_OK;
     }
@@ -449,6 +532,8 @@ uint32_t oecm_poll_interval_ms(const oecm_device *dev) {
             return 0;
         if (HEARTBEAT_MS - since < wait)
             wait = HEARTBEAT_MS - since;
+        if (s->cfg->level >= OECM_LEVEL_2)
+            wait = oecm_l2_wait_ms(s, wait);
     } else if (s->phase == PH_BACKOFF) {
         uint32_t since = now - s->phase_since_ms;
         if (since >= s->backoff_ms)
@@ -471,10 +556,17 @@ void oecm_on_connected(oecm_device *dev) {
         return;
     enter(s, PH_CONNECTED);
     s->backoff_ms = BACKOFF_MIN_MS;
-    /* The Birth first, then the Health (REQ-LIFE-001, REQ-LIFE-015). */
+    /* The subscriptions (Level 2+), the Birth as first publication, then
+     * the Health (REQ-LIFE-001, REQ-LIFE-015). */
+    if (s->cfg->level >= OECM_LEVEL_2) {
+        s->lists_due = true;
+        (void)oecm_l2_subscribe(s);
+    }
     s->birth_due = true;
     s->health_due = true;
     (void)publish_due(s);
+    if (s->cfg->level >= OECM_LEVEL_2)
+        (void)oecm_l2_connected(s);
 }
 
 void oecm_on_disconnected(oecm_device *dev) {
@@ -486,10 +578,30 @@ void oecm_on_disconnected(oecm_device *dev) {
 }
 
 void oecm_on_message(oecm_device *dev, const char *topic, const uint8_t *payload, size_t len) {
-    (void)dev;
-    (void)topic;
-    (void)payload;
-    (void)len;
+    if (!ready(dev) || topic == NULL || (payload == NULL && len != 0))
+        return;
+    oecm_state *s = state(dev);
+    if (s->cfg->level < OECM_LEVEL_2 || s->phase != PH_CONNECTED)
+        return;
+    oecm_l2_message(s, topic, payload, len);
+}
+
+oecm_err oecm_data_changed(oecm_device *dev, size_t data) {
+    if (!ready(dev))
+        return OECM_E_STATE;
+    oecm_state *s = state(dev);
+    if (s->cfg->level < OECM_LEVEL_2)
+        return OECM_E_LEVEL;
+    if (data >= s->cfg->data_count)
+        return OECM_E_ARG;
+    s->data_due = (uint8_t)(s->data_due | 1u << data);
+    return OECM_OK;
+}
+
+size_t oecm_payload_limit(const oecm_state *s, size_t topic_len) {
+    size_t limit = s->cfg->max_packet_size ? s->cfg->max_packet_size : 262144u;
+    size_t room = s->tx_cap > topic_len + 1u ? s->tx_cap - topic_len - 1u : 0u;
+    return limit < room ? limit : room;
 }
 
 oecm_err oecm_set_health(oecm_device *dev, oecm_health health, int score) {

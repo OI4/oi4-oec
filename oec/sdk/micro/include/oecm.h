@@ -22,8 +22,10 @@
  *    with broker certificate verification and user/password or client
  *    certificate (REQ-MQTT-005, REQ-MQTT-008, REQ-MQTT-009). The core has
  *    no API for a plain connection.
- *  - Messaging Level 1 (Birth/Will/Close, Pub MAM + Health); Level 2/3
- *    (Get, Set/Del, Data, Config, lists, NewDataSetWriterId) are additions.
+ *  - Messaging Level 1 (Birth/Will/Close, Pub MAM + Health) and Level 2
+ *    (Get, Set/Del, Status Event, Profile, PublicationList,
+ *    SubscriptionList, Config, Data, Metadata; C-094). Level 3
+ *    (ReferenceDesignation, NewDataSetWriterId) is an addition.
  */
 #ifndef OECM_H
 #define OECM_H
@@ -40,8 +42,8 @@ extern "C" {
 #define OECM_API_VERSION 1u
 
 /* Size of the opaque device state; checked by a static assertion in the
- * core (ADR-0022 §3). Level 1 uses 368 octets on a 64-bit host (C-092);
- * the rest is reserved for Level 2/3. */
+ * core (ADR-0022 §3). Level 1 and 2 use less than 768 octets on a 64-bit
+ * host (C-094); the rest is reserved for Level 3. */
 #define OECM_DEVICE_SIZE 1024u
 /* Minimum transmit buffer. The buffer holds the topic, a NUL and the
  * payload of one message. 2048 octets hold every Health, Will and Close,
@@ -101,6 +103,95 @@ typedef struct oecm_mam {
     const char *global_asset_id;   /* optional AAS globalAssetId, NULL: omitted (REQ-RES-MAM-023) */
 } oecm_mam;
 
+/* --- Level 2: Data and Config definitions (ADR-0022 §9, C-094) ----------- */
+
+#define OECM_DATA_MAX 8u   /* Data DataSets of a device */
+#define OECM_FIELDS_MAX 16u /* fields of a Data DataSet */
+#define OECM_CONFIG_MAX 4u /* Config contexts of a device */
+
+/* Type of a Data field (OPC UA BuiltInType, MG 8.3.5). */
+typedef enum oecm_type {
+    OECM_TYPE_BOOLEAN, /* bool */
+    OECM_TYPE_INT32,   /* int32_t */
+    OECM_TYPE_UINT32,  /* uint32_t */
+    OECM_TYPE_FLOAT,   /* float */
+    OECM_TYPE_DOUBLE,  /* double */
+    OECM_TYPE_STRING   /* char[cap], NUL-terminated UTF-8 */
+} oecm_type;
+
+/* A field of a Data DataSet. The value lives in the application; the core
+ * reads it when it publishes and writes it on an accepted Set Data. */
+typedef struct oecm_field {
+    const char *name;        /* FieldName; letters, digits, '_' */
+    const char *description; /* NULL: empty text */
+    oecm_type type;
+    void *value;             /* points to the variable of the type */
+    size_t cap;              /* OECM_TYPE_STRING: size of the buffer */
+    uint8_t decimals;        /* FLOAT/DOUBLE: digits after the point, 0 … 9 */
+    const char *unit;        /* NULL: no EngineeringUnits, e.g. "°C" */
+    const char *eu_low;      /* EURange as JSON numbers; both or none */
+    const char *eu_high;
+} oecm_field;
+
+/* A Data DataSet of the device (MG 8.3.5): one Tag, its fields and the
+ * Metadata derived from them (DataSetClassId per ADR-0022 §9). */
+typedef struct oecm_data {
+    const char *tag;         /* Tag; letters, digits, '_' and '-' */
+    const char *description; /* Metadata description; NULL: omitted */
+    const oecm_field *fields;
+    size_t field_count;      /* 1 … OECM_FIELDS_MAX */
+    /* ConfigurationVersion (MajorVersion = MinorVersion), a VersionTime
+     * (seconds since 2000-01-01) of the definition; raise it with every
+     * change of the fields. 0: derived from the DataSetClassId. */
+    uint32_t version;
+    uint32_t interval_ms;    /* periodic publication; 0: only on change */
+    bool writable;           /* accepts Set Data (REQ-RES-DATA-009) */
+} oecm_data;
+
+typedef enum oecm_cfg_type { /* Type of a configuration object (MG 8.3.4) */
+    OECM_CFG_BOOLEAN,
+    OECM_CFG_NUMBER,
+    OECM_CFG_STRING
+} oecm_cfg_type;
+
+/* A configuration object. Its value is text in an application buffer;
+ * the core validates a Set against the definition (Type, Length, Min,
+ * Max, Values) and writes the buffer only if the whole Set is valid. */
+typedef struct oecm_cfg_object {
+    const char *key;           /* ConfigName */
+    const char *name;          /* Name (en-US) */
+    const char *description;   /* NULL: omitted */
+    oecm_cfg_type type;
+    char *value;               /* current value, NUL-terminated */
+    size_t cap;                /* size of the value buffer */
+    const char *default_value; /* NULL: omitted */
+    const char *unit;          /* NULL: omitted */
+    bool mandatory;
+    bool sensitive;            /* published masked (REQ-RES-CONFIG-024) */
+    uint32_t length;           /* Validation Length in characters; 0: none */
+    const char *min;           /* Validation Min/Max (Number), JSON numbers; NULL: none */
+    const char *max;
+    const char *const *values; /* Validation Values; NULL: none */
+    size_t value_count;
+} oecm_cfg_object;
+
+typedef struct oecm_cfg_group {
+    const char *key;           /* GroupName */
+    const char *name;          /* Name (en-US) */
+    const char *description;   /* NULL: omitted */
+    const oecm_cfg_object *objects;
+    size_t count;
+} oecm_cfg_group;
+
+/* A Config context: the Filter of Pub/Config/<Source>/<Filter>. */
+typedef struct oecm_cfg_context {
+    const char *name;          /* the Filter */
+    const char *title;         /* Context Name (en-US) */
+    const char *description;   /* Context Description; NULL: omitted */
+    const oecm_cfg_group *groups;
+    size_t count;
+} oecm_cfg_context;
+
 typedef struct oecm_config {
     oecm_level level;
     /* A directly connected smart device uses OECM_ST_OT_CONNECTOR
@@ -116,6 +207,17 @@ typedef struct oecm_config {
     const char *client_id;
     uint16_t keep_alive_s;    /* 0 → 60 (REQ-MQTT-014) */
     uint32_t max_packet_size; /* 0 → 262144 */
+    /* Level 2+. Definitions are borrowed like the strings; values are
+     * read and written by the core only inside oecm_ calls. */
+    const oecm_data *data;
+    size_t data_count;                /* 0 … OECM_DATA_MAX */
+    const oecm_cfg_context *config;
+    size_t config_count;              /* 0 … OECM_CONFIG_MAX */
+    /* Called after an accepted Set changed values, inside oecm_on_message;
+     * it may call oecm_data_changed and oecm_set_health only. NULL: none. */
+    void *app_ctx;
+    void (*on_config)(void *app_ctx, size_t context);
+    void (*on_data)(void *app_ctx, size_t data);
 } oecm_config;
 
 /* Connect options handed to the PAL. The Will is created anew for every
@@ -184,7 +286,9 @@ uint32_t oecm_poll_interval_ms(const oecm_device *dev);
 void oecm_on_connected(oecm_device *dev);
 /* PAL → core: connection lost or closed. */
 void oecm_on_disconnected(oecm_device *dev);
-/* PAL → core: received message (Level 2+; ignored at Level 1). */
+/* PAL → core: received message (Level 2+; ignored at Level 1). The core
+ * subscribes to the Get, Set and Del topics of its AppId at every connect
+ * and answers inside this call. */
 void oecm_on_message(oecm_device *dev, const char *topic, const uint8_t *payload, size_t len);
 
 /* score < 0: no HealthScore; 0 … 100 otherwise (REQ-RES-HEALTH-001).
@@ -192,6 +296,10 @@ void oecm_on_message(oecm_device *dev, const char *topic, const uint8_t *payload
  * OECM_E_ARG. The next oecm_poll publishes a change (REQ-TOP-017). A
  * recovery from FAILURE_1/0 publishes the Birth again (REQ-LIFE-017). */
 oecm_err oecm_set_health(oecm_device *dev, oecm_health health, int score);
+
+/* Level 2+: the values of Data DataSet `data` changed; the next oecm_poll
+ * publishes it (on change, MG 8.3.5). */
+oecm_err oecm_data_changed(oecm_device *dev, size_t data);
 
 /* The Identification Link in use (unencoded, REQ-IL-005); borrowed. */
 const char *oecm_identification_link(const oecm_device *dev);

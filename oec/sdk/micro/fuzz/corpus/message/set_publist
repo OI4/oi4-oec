@@ -1,0 +1,2 @@
+Set/PublicationList/cHJvdmlkZXIuY29tL1NlbnNvci9TLTEvNDcxMQ/Data/Temperature
+{"MessageId":"1793000000000-Registry/other.com/X/Y/1","MessageType":"ua-data","PublisherId":"Registry/other.com/X/Y/1","Messages":[{"DataSetWriterId":13,"Payload":{"Resource":"Data","Source":"provider.com/Sensor/S-1/4711","Filter":"Temperature","DataSetWriterId":19,"Mode":"ON_REQUEST_FILTER_9"}}]}

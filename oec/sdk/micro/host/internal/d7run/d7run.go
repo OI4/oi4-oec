@@ -128,6 +128,7 @@ func Write(t *testing.T, path, content string) {
 // D7 describes a run of `oec-check test` against a device program.
 type D7 struct {
 	Exe      string   // the device program; started with OEC_ROOT and Env
+	Args     []string // its arguments
 	Env      []string // extra environment of the program
 	Hostname string   // of the storage: the serial number of the device
 	App      string   // ServiceType/IL of the device (--app)
@@ -174,7 +175,11 @@ func Run(t *testing.T, d D7) {
 		k, v, _ := strings.Cut(e, "=")
 		env += fmt.Sprintf(" %s=%q", k, v)
 	}
-	Write(t, start, fmt.Sprintf("#!/bin/sh\n%s %q >> %q 2>&1 &\necho $! > %q\n", env, d.Exe, logf, pid))
+	args := ""
+	for _, a := range d.Args {
+		args += fmt.Sprintf(" %q", a)
+	}
+	Write(t, start, fmt.Sprintf("#!/bin/sh\n%s %q%s >> %q 2>&1 &\necho $! > %q\n", env, d.Exe, args, logf, pid))
 	Write(t, stop, fmt.Sprintf("#!/bin/sh\nP=$(cat %q)\nkill -TERM \"$P\"\nwhile kill -0 \"$P\" 2>/dev/null; do sleep 0.1; done\n", pid))
 	for _, f := range []string{start, stop} {
 		if err := os.Chmod(f, 0o755); err != nil {

@@ -1,0 +1,2 @@
+Set/Data/cHJvdmlkZXIuY29tL1NlbnNvci9TLTEvNDcxMQ/Temperature
+{"MessageId":"1793000000000-Registry/other.com/X/Y/1","MessageType":"ua-data","PublisherId":"Registry/other.com/X/Y/1","Messages":[{"DataSetWriterId":19,"Payload":{"Pv":1.25,"Sv1":2.5,"Count":-1,"State":3,"On":false,"Label":"room"}}]}

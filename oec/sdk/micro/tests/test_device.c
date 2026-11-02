@@ -310,7 +310,10 @@ static void test_init_errors(void) {
     c.mam.revision_counter = -2;
     TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_init(&dev, &c, &pal, tx, sizeof tx));
     c = cfg;
-    c.level = OECM_LEVEL_2;
+    c.level = OECM_LEVEL_3; /* C-095 */
+    TEST_ASSERT_EQUAL(OECM_E_LEVEL, oecm_init(&dev, &c, &pal, tx, sizeof tx));
+    c.level = OECM_LEVEL_1; /* Data and Config need Level 2 */
+    c.data_count = 1;
     TEST_ASSERT_EQUAL(OECM_E_LEVEL, oecm_init(&dev, &c, &pal, tx, sizeof tx));
     oecm_pal p = pal;
     p.monotonic_ms = NULL;

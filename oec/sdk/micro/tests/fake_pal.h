@@ -9,13 +9,13 @@
 #include "oecm.h"
 
 #define FAKE_MAX_EVENTS 64
-#define FAKE_MAX_TEXT 4096
+#define FAKE_MAX_TEXT 16384
 
-typedef enum fake_kind { FAKE_CONNECT, FAKE_PUBLISH, FAKE_DISCONNECT } fake_kind;
+typedef enum fake_kind { FAKE_CONNECT, FAKE_PUBLISH, FAKE_SUBSCRIBE, FAKE_DISCONNECT } fake_kind;
 
 typedef struct fake_event {
     fake_kind kind;
-    char topic[1024];          /* publish topic or Will topic */
+    char topic[1024];          /* publish topic, Will topic or topic filter */
     char payload[FAKE_MAX_TEXT]; /* NUL-terminated copy */
     size_t len;
     char client_id[64];
@@ -36,5 +36,7 @@ oecm_pal fake_pal_make(fake_pal *fp);
 void fake_pal_reset(fake_pal *fp);
 /* The last event of a kind, NULL if none. */
 const fake_event *fake_last(const fake_pal *fp, fake_kind kind);
+/* The number of events of a kind. */
+size_t fake_count(const fake_pal *fp, fake_kind kind);
 
 #endif
