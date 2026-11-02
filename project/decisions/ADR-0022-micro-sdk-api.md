@@ -100,3 +100,11 @@ Details: `log/2026-11-10_C-094_micro-level2.md`, REVIEW A-446 … A-457. Changes
 3. **Limits:** `OECM_DATA_MAX` 8 Data DataSets, `OECM_FIELDS_MAX` 16 fields, `OECM_CONFIG_MAX` 4 Config contexts; names as in `oec-core` (`[A-Za-z_][A-Za-z0-9_-]*`; ConfigName `Name`/`Description` and GroupName `Context` reserved).
 4. **Sizes** (A-456): `OECM_DEVICE_SIZE` stays 1024 (Level 2: 568 octets on a 64-bit host, 544 on Cortex-M4); `OECM_TX_MIN` stays 2048 (the Level 1 bound); a Level 2 device sizes its transmit buffer for its largest Config/Metadata answer, larger answers are paginated (REQ-PAG-005).
 5. **Level checks** (A-453): Level 1 with Data or Config definitions returns `OECM_E_LEVEL`; Level 3 returns `OECM_E_LEVEL` until C-095.
+
+## Amendment C-095 (2026-11-11) – P4b increment 4: Level 3 (agent, G-3.4 b)
+
+Details: `log/2026-11-11_C-095_micro-level3.md`, REVIEW A-458 … A-466. Additive to the contract of C-092/C-094:
+
+1. **ReferenceDesignation buffer** (A-458, A-459): `oecm_config.refdes_buf`/`refdes_cap` (at least `OECM_REFDES_MIN` 128 octets) hold the device's ReferenceDesignation in canonical JSON form; the usable size is also bounded by half the transmit buffer and by the room of one answer; a larger object is answered with `BadOutOfRange`.
+2. **Persistence** (A-458, A-463): at Level 3 `persist_load` and `persist_save` are required (`OECM_E_ARG` otherwise); keys `oecm.refdes` and `oecm.wid` (4 octets, the reserved `NewDataSetWriterId` limit); `persist_load` returns `*len = 0` for a missing record; `persist_save` with `len` 0 deletes; `oecm_init` returns `OECM_E_PAL` on a load error. The core persists no Config values; the application does it in `on_config` if it needs to.
+3. **Level checks** (replaces item 5 of amendment C-094 for Level 3): Level 3 is accepted; Level 1 with Data or Config definitions still returns `OECM_E_LEVEL`.

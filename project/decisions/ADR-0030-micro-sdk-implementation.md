@@ -93,3 +93,15 @@ Refines §4, §6, §9 and §10 (A-446 … A-457; details in `log/2026-11-10_C-09
 - **Fuzzing** (A-454, §6): `fuzz/fuzz_json.c`, `fuzz_topic.c`, `fuzz_message.c` (a connected Level 2 device; traps on a publication outside `Oi4v2/` or with invalid JSON), `replay.c`, seed corpora; ctest replays them under ASan + UBSan in the gate; `fuzz/run.sh` (opt-in) fuzzes with libFuzzer and replays the grown corpus. On macOS the fuzzing runs with UBSan only (the ASan runtime of Homebrew LLVM 21 hangs at start-up on macOS 27), ASan comes from the replay.
 - **D7 in the gate** (A-455, revises A-445): `TestD7Level1` (21 pinned passes) and `TestD7Level2` (the simulated sensor `cmd/oecm-host/demo.c`, `-level 2`, 38 pinned passes, 3 warns for Level 3 features); step 9 takes about 4 min.
 - **Symbol check** (A-457): the plain build sets `-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0`, so the checked `memset` of the macOS headers is not lowered to `bzero` (not on the allowlist).
+
+## Amendment C-095 (2026-11-11) – increment 4: Level 3, D7 Level 3 (agent, G-3.4 b)
+
+Refines §4, §6, §7, §9 and §10 (A-458 … A-466; details in `log/2026-11-11_C-095_micro-level3.md`):
+
+- **Scope:** `Get` (with Query), `Set`, `Del` of the device's ReferenceDesignation with Status events, publication on change and persistence (REQ-RES-REFDES-002); `Call`/`Reply NewDataSetWriterId` (MG 9.2.1, REQ-ACT-023) with persisted reservations. The lists (PublicationList, SubscriptionList) were already done in C-094 (A-446). Persisted Config values are not part of the core (A-463).
+- **Source:** `oecm_l3.c`; hooks in `oecm_res.c` (Profile, lists, publication) and `oecm_req.c` (dispatch); the host runner compiles it as `core_l3.c`.
+- **DataSetWriterIds** (§9): the ReferenceDesignation takes the id after the Config contexts and Data DataSets; ids of `NewDataSetWriterId` start after it, are reserved in persisted blocks of 256, wrap after 65535 to the first id and are limited to 256 per 60 s (A-460).
+- **Deviations from the Rust provider** (A-461, A-462): `NewDataSetWriterId` in the Profile from Level 3 only; requests to the ReferenceDesignation and `Call` topics with a Filter level are ignored at every level; duplicate fields make a `Call` ignored, an array-form `Payload` is rejected.
+- **Host runner** (§7, A-464): `-level 3`, `-state DIR` (default `OEC_ROOT/var/lib/oecm-host`, one file per record, atomic rename); `internal/d7run` `Files` seeds the storage.
+- **D7 in the gate** (A-464): `TestD7Level3` with a stored ReferenceDesignation, 50 pinned passes, 0 warn; the Level 1 (21) and Level 2 (38) runs stay; step 9 takes about 5 min.
+- **Payload check and fuzzing** (§5, §6, A-465): the emitter adds a Level 3 lifecycle (69 messages valid); `fuzz_message` drives a Level 3 device with an in-memory store reset per input, 6 new seeds.

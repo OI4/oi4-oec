@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 10.11.2026, C-094: P4b Teil 3 – der Micro-SDK-Kern kann jetzt Stufe 2 (Anfragen beantworten, Daten und Konfiguration), D7 prüft das im Gate; dazu Fuzz-Tests (A-446 … A-457 zur Info). Für dich ist nichts offen._
+_Stand: 11.11.2026, C-095: P4b Teil 4 – der Micro-SDK-Kern kann jetzt Stufe 3 (Referenzkennzeichnung, neue DataSetWriterIds, Speichern über Neustarts), D7 prüft das im Gate (A-458 … A-466 zur Info). Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -31,6 +31,16 @@ Für dich ist nichts offen.
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-095 gemacht hat (P4b, Teil 4 von 6)
+
+- **Was neu ist:** Der C-Kern kann jetzt **Messaging-Stufe 3**. Dazu gehören zwei Dinge: Erstens die **Referenzkennzeichnung** des Geräts (wo es in der Anlage sitzt und welche Funktion es hat, z. B. „=TE1“ an Ort „+R1“). Andere können sie lesen (auch gefiltert nach einem übergeordneten Teil), setzen und löschen; jede Änderung wird bestätigt, veröffentlicht und **dauerhaft gespeichert**, sodass sie einen Neustart übersteht (so verlangt es die Guideline). Zweitens die Aktion **„neue DataSetWriterId“**: Ein anderer Teilnehmer fragt nach freien Nummern und bekommt welche, die das Gerät nie doppelt vergibt – auch nicht nach einem Neustart.
+- **Speichern:** Das Gerät speichert über zwei kleine Einträge (auf dem ESP32 später im NVS-Flash). Konfigurationswerte speichert der Kern bewusst nicht selbst – sie liegen in den Variablen der Anwendung, und die Guideline verlangt nur das Speichern der Referenzkennzeichnung (A-463).
+- **Ergebnis:** D7 prüft im Gate den simulierten Sensor auf Stufe 3: **50 bestanden, 0 Warnungen, 0 Fehler**. Die drei Warnungen aus C-094 sind jetzt bestanden. Die Prüfungen auf Stufe 1 (21) und 2 (38) laufen unverändert mit. 87 Unit-Tests unter Speicherprüfung grün; 69 erzeugte Nachrichten hat D7 `validate` als gültig bewertet.
+- **Kleine Abweichungen vom Rust-SDK (A-461, A-462):** Das Gerät kündigt die Aktion „neue DataSetWriterId“ erst ab Stufe 3 an (Rust schon ab Stufe 2), weil es sie erst dort beantwortet. Anfragen mit einem unerlaubten Zusatz im Topic ignoriert es, wie Rust.
+- **Fehler gefunden:** keine in D7 oder den SDKs; die Fehlschläge unterwegs waren Fehler in meinen eigenen Tests.
+- **Größe (A-466, vorläufig):** Gerätezustand 568 Byte auf einem 32-Bit-Mikrocontroller (Platz 1024), Code für Cortex-M4 etwa 42 KB (davon 6 KB für Stufe 3). Die echten ESP32-Zahlen kommen in C-096.
+- **Kosten:** Schritt 9 im Gate dauert jetzt etwa 5 Minuten (drei D7-Läufe). Keine Testdaten zum Review, kein Guideline-Befund.
 
 ### Zur Info: was C-094 gemacht hat (P4b, Teil 3 von 6)
 

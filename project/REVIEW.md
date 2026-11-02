@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-10, C-094: P4b increment 3 – Messaging Level 2 in the micro core, D7 Level 2 in the gate, fuzz targets (A-446 … A-457 for information). Nothing is open for you._
+_Last updated: 2026-11-11, C-095: P4b increment 4 – Messaging Level 3 in the micro core (ReferenceDesignation, `NewDataSetWriterId`, persistence), D7 Level 3 in the gate (A-458 … A-466 for information). Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -295,6 +295,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-092 (P4b start + increment 1; ADR-0030, ADR-0022 amendment C-092): micro SDK core Messaging L1 in C17, 30 Unity tests under ASan/UBSan against the shared vectors, emitted payloads valid by D7 `validate`, gate step 9 (A-429 … A-438). No D-x, no R-x, no SF.
 - C-093 (P4b increment 2; ADR-0030 amendment C-093): Go host runner (cgo PAL, own MQTT 3.1.1 client), D7 `test --level 1` against the micro core in gate step 9 – 21 pass, 5 warn, 0 fail; opt-in D7 `monitor` against `oec/dev` 0 fail (A-439 … A-445). No D-x, no R-x, no SF.
 - C-094 (P4b increment 3; ADR-0022 and ADR-0030 amendments C-094): micro core Messaging L2 – JSON pull reader, topic parser, `Get` of 8 resources with pagination, `Set`/`Del` with Status events, Data/Config definitions, own number formatting; 72 Unity tests; D7 `test --level 2` in gate step 9 – 38 pass, 3 warn (Level 3 features), 0 fail; fuzz targets, seed replay in the gate, opt-in libFuzzer 0 findings (A-446 … A-457). No D-x, no R-x, no SF.
+- C-095 (P4b increment 4; ADR-0022 and ADR-0030 amendments C-095): micro core Messaging L3 – ReferenceDesignation (`Get` with Query, `Set`, `Del`, persisted) and `Call`/`Reply NewDataSetWriterId` (persisted reservations) over PAL `persist_*`; 87 Unity tests; 69 emitted messages valid; D7 `test --level 3` in gate step 9 – 50 pass, 0 warn, 0 fail (A-458 … A-466). No D-x, no R-x, no SF.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -777,6 +778,15 @@ Logs: [C-094](log/2026-11-10_C-094_micro-level2.md), [C-093](log/2026-11-09_C-09
 | A-455 | Both D7 runs (Level 1 and 2) in the gate, step 9 about 4 min (revises A-445) | info (agent) | C-094 | – | – |
 | A-456 | Sizes: state 568 of 1024 octets at L2; `OECM_TX_MIN` stays the L1 bound; L2 answers paginated | info (agent) | C-094 | – | – |
 | A-457 | Plain core build without `_FORTIFY_SOURCE` (symbol allowlist on macOS) | info (agent) | C-094 | – | – |
+| A-458 | Level 3 contract: persist hooks + ReferenceDesignation buffer required, records loaded at init (ends A-453 for L3) | info (agent) | C-095 | – | – |
+| A-459 | ReferenceDesignation size bound, one canonical form, published on change only | info (agent) | C-095 | – | – |
+| A-460 | `NewDataSetWriterId`: persisted blocks of 256, wrap, 256 ids per 60 s, split replies | info (agent) | C-095 | – | – |
+| A-461 | Strict request check as serde; Filter level on ReferenceDesignation/`Call` topics ignored | info (agent) | C-095 | – | – |
+| A-462 | `NewDataSetWriterId` in the Profile from Level 3 only (Rust: Level 2) | info (agent) | C-095 | – | – |
+| A-463 | No persisted Config values in the core (app in `on_config`); only REQ-RES-REFDES-002 | info (agent) | C-095 | – | – |
+| A-464 | Runner `-state`, `d7run.Files`, D7 Level 3 seeded (50 passes); three D7 runs, step 9 about 5 min | info (agent) | C-095 | – | – |
+| A-465 | Fuzz target and emitter at Level 3 | info (agent) | C-095 | – | – |
+| A-466 | Sizes: state 600/568 octets; Cortex-M4 42.3 KB | info (agent) | C-095 | – | – |
 
 ## Decisions and review items
 
@@ -2004,6 +2014,18 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 - **A-456 Sizes:** state 568 octets on 64-bit, 544 on Cortex-M4 (of 1024); Cortex-M4 `-Os` about 35 KB code + constants; the host demo uses an 8192-octet transmit buffer, larger answers are paginated.
 - **A-457 Fortify:** the plain build for the symbol check sets `-D_FORTIFY_SOURCE=0`, so the macOS `memset` is not lowered to `bzero`.
 
-## Next (C-095)
+### C-095 – P4b increment 4 (agent, G-3.4 b; log `log/2026-11-11_C-095_micro-level3.md`)
 
-1. C-095 – P4b increment 4: Messaging Level 3 in the micro core (`Get`/`Set`/`Del ReferenceDesignation` with persistence, persisted Config values, `NewDataSetWriterId`), D7 `test --level 3` in the gate; then C-096 … C-097 in the same session (PO).
+- **A-458 Level 3 contract:** at Level 3 `oecm_init` requires `persist_load`/`persist_save` and a ReferenceDesignation buffer of at least 128 octets (`OECM_E_ARG`), loads `oecm.refdes` and `oecm.wid` (`OECM_E_PAL` on a load error), ignores a stored ReferenceDesignation that is not canonical; A-453's `OECM_E_LEVEL` for Level 3 ends.
+- **A-459 ReferenceDesignation size and form:** usable size = min(`refdes_cap`, half the transmit buffer, room of one answer minus a 320-octet `ReplyTo` reserve); larger → `BadOutOfRange`; one canonical JSON form (`\b`/`\f` as `\u0008`/`\u000c`); published on change only, not at connect (as Rust).
+- **A-460 `NewDataSetWriterId`:** ids after the ReferenceDesignation id; limit persisted in blocks of 256, wrap after 65535 to the first id; at most 256 ids per fixed 60 s window (`BadResourceUnavailable`); replies split when they do not fit.
+- **A-461 Strict request check:** duplicate fields → `Call` ignored; `null` = absent; array-form `Payload` rejected; DateTime up to 64 octets; ReferenceDesignation/`Call` topics with a Filter level ignored at every level (small Level 2 change, as Rust).
+- **A-462 Profile:** `NewDataSetWriterId` listed from Level 3 only (Rust: from Level 2); the micro core serves `Call` only at Level 3.
+- **A-463 Config values not persisted by the core:** only the ReferenceDesignation must survive a restart (REQ-RES-REFDES-002); the application saves Config values in `on_config` if needed (replaces "persisted Config values" of the C-094 plan).
+- **A-464 Host runner state, D7 seeding:** `-state` directory (one file per record, atomic rename), `d7run.Files`; the D7 Level 3 run starts with a stored ReferenceDesignation (50 pinned passes, T7-SET-04/10 and T7-MON-14 run); all three D7 runs stay in the gate, step 9 about 5 min.
+- **A-465 Fuzzing and emitter at Level 3:** `fuzz_message` on a Level 3 device (store reset per input), 6 new seeds; emitter Level 3 lifecycle (69 messages valid).
+- **A-466 Sizes:** state 600 octets on 64-bit, 568 on Cortex-M4 (of 1024); Cortex-M4 `-Os` 42.3 KB code + constants (Level 3: 6.3 KB).
+
+## Next (C-096)
+
+1. C-096 – P4b increment 5: ESP-IDF v6.1 port (esp-mqtt, esp-tls/mbedTLS, SNTP, NVS for `persist_*`), `examples/esp-idf` for `esp32`/`esp32s3`, Espressif QEMU run with D7 (opt-in), ESP32 footprint; then C-097 in the same session (PO).
