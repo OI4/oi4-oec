@@ -90,3 +90,13 @@ The sketch became the real header `oec/sdk/micro/include/oecm.h` (the folder `sk
 5. **Health** (A-432): `oecm_set_health` rejects `NORMAL`/0 (`OECM_E_ARG`): it is the Close (REQ-LIFE-005). After an own `FAILURE`/0 the next other Health is preceded by a Birth (REQ-LIFE-017), as in `oec-core`.
 6. **Sizes** (A-433, §3): `OECM_DEVICE_SIZE` stays **1024** (Level 1 uses 368 octets on a 64-bit host; the rest is reserved for Level 2/3). `OECM_TX_MIN` stays **2048**: every Health, Will and Close fits also with a 255-octet Identification Link (1804 octets); the Birth is checked by `oecm_init` (typical about 1000 octets, 2315 with a 255-octet Identification Link and empty texts).
 7. **Messages** (A-434): as `oec-core`: DataSetWriterId 10 (MAM) and 11 (Health) (ADR-0030 §9), DataSetWriterName the Identification Link, `WriterGroupName` and `ReplyTo` empty, no Timestamp, no SequenceNumber.
+
+## Amendment C-094 (2026-11-10) – P4b increment 3: Level 2 (agent, G-3.4 b)
+
+Details: `log/2026-11-10_C-094_micro-level2.md`, REVIEW A-446 … A-457. Changes to §9 and §3 (additive to the Level 1 contract of C-092):
+
+1. **Static definitions instead of `oecm_add_data`/`oecm_on_set`** (A-447): `oecm_config` carries the Level 2 definitions – `data`/`data_count` (`oecm_data`: Tag, description, `oecm_field` array, version, `interval_ms`, `writable`) and `config`/`config_count` (`oecm_cfg_context` → `oecm_cfg_group` → `oecm_cfg_object`). Field values (`OECM_TYPE_BOOLEAN`, `INT32`, `UINT32`, `FLOAT`, `DOUBLE`, `STRING` with capacity) and Config values (text buffers) live in the application. The core validates a `Set` completely like the Rust provider and writes the values only when the whole `Set` is valid; then it calls `on_data(app_ctx, data)` or `on_config(app_ctx, context)`, which may call only `oecm_data_changed` and `oecm_set_health`. The status code is decided by the core, not by the application (the sketched callback returning `oecm_status_code` is dropped).
+2. **`oecm_data_changed(dev, data)`** replaces `oecm_data_update`: the application marks a Data DataSet as changed; `oecm_poll` publishes it.
+3. **Limits:** `OECM_DATA_MAX` 8 Data DataSets, `OECM_FIELDS_MAX` 16 fields, `OECM_CONFIG_MAX` 4 Config contexts; names as in `oec-core` (`[A-Za-z_][A-Za-z0-9_-]*`; ConfigName `Name`/`Description` and GroupName `Context` reserved).
+4. **Sizes** (A-456): `OECM_DEVICE_SIZE` stays 1024 (Level 2: 568 octets on a 64-bit host, 544 on Cortex-M4); `OECM_TX_MIN` stays 2048 (the Level 1 bound); a Level 2 device sizes its transmit buffer for its largest Config/Metadata answer, larger answers are paginated (REQ-PAG-005).
+5. **Level checks** (A-453): Level 1 with Data or Config definitions returns `OECM_E_LEVEL`; Level 3 returns `OECM_E_LEVEL` until C-095.

@@ -256,7 +256,7 @@ SDK for microcontroller-class smart devices without container (ADR-0016), writte
 
 1. ✅ (C-092) Portable core Messaging L1 (`oec/sdk/micro/`): IL/base64url/dnp/Oi4Identifier, JSON writer, MAM/Health/NetworkMessage, lifecycle; Unity tests under ASan/UBSan against the shared vectors, payloads valid by D7 `validate`, static analysis, symbol allowlist; gate step 9.
 2. ✅ (C-093) Go host runner (cgo PAL, own MQTT 3.1.1 client on `crypto/tls`): D7 `test --level 1` against the core on the host in the gate – 21 pass, 5 warn, 0 fail.
-3. (C-094) Messaging L2: JSON pull reader and topic parser (with fuzz targets), `Get`/`Set`/Status, Data/Config definitions; D7 `--level 2` in the gate.
+3. ✅ (C-094) Messaging L2: JSON pull reader and topic parser (with fuzz targets), `Get`/`Set`/Status, Data/Config definitions; D7 `--level 2` in the gate – 38 pass, 3 warn (Level 3 features), 0 fail; Level 1 run kept; opt-in libFuzzer 0 findings.
 4. (C-095) Messaging L3: the remaining resources and methods; D7 `--level 3` in the gate.
 5. (C-096) ESP-IDF port (`esp-mqtt` + `esp-tls`) and the example firmware; Espressif QEMU (`esp32`) against `oec/dev` with D7 (opt-in), `esp32s3` build, RAM/flash footprint.
 6. (C-097) Arduino library and the M5Stack example, docs page `oec/docs/docs/micro-sdk/`, exit assessment. Without a connected board the run on the real reference hardware is proposed as a D-x at the exit (QEMU is the evidence in the session).

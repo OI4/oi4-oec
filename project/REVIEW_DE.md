@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 09.11.2026, C-093: P4b Teil 2 – D7 prüft den Micro-SDK-Kern jetzt live am Broker, im Gate (A-439 … A-445 zur Info). Für dich ist nichts offen._
+_Stand: 10.11.2026, C-094: P4b Teil 3 – der Micro-SDK-Kern kann jetzt Stufe 2 (Anfragen beantworten, Daten und Konfiguration), D7 prüft das im Gate; dazu Fuzz-Tests (A-446 … A-457 zur Info). Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -31,6 +31,15 @@ Für dich ist nichts offen.
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-094 gemacht hat (P4b, Teil 3 von 6)
+
+- **Was neu ist:** Der C-Kern kann jetzt **Messaging-Stufe 2**. Ein Gerät beschreibt seine Messwerte (z. B. Temperatur mit Einheit und Messbereich) und seine Einstellungen (z. B. Messintervall 1 … 3600 s) einmal fest im Programm. Der Kern beantwortet damit selbst alle Anfragen (`Get` von MAM, Health, Profil, Daten, Metadaten, Konfiguration und den beiden Listen, bei großen Antworten seitenweise) und entscheidet Schreibanfragen (`Set`/`Del`) genau wie das Rust-SDK – mit Statusmeldung „Good“ oder dem passenden Fehlercode. Eine ungültige Konfiguration wird komplett abgelehnt, nie halb übernommen; geheime Werte werden maskiert veröffentlicht.
+- **Ergebnis:** D7 prüft im Gate einen simulierten Temperatursensor auf Stufe 2: **38 bestanden, 0 Fehler**. Die 3 Warnungen betreffen Funktionen der Stufe 3 (Referenzkennzeichnung, neue DataSetWriterId), die in C-095 kommen. Die Stufe-1-Prüfung (21 bestanden) läuft weiter mit (A-455). 72 Unit-Tests unter Speicherprüfung grün; 36 erzeugte Nachrichten hat D7 `validate` als gültig bewertet.
+- **Fuzz-Tests (A-454):** Drei Fuzzer werfen zufällig veränderte JSON-Texte, Topics und ganze Anfragen auf den Kern. Ein kurzer Lauf (je 1 Minute, dazu 10 Minuten nur Anfragen, zusammen über 50 Millionen Eingaben) fand **keinen Fehler**. Die Startbeispiele laufen bei jedem Gate mit. Auf dem Mac hängt die Speicherprüfung (ASan) der Homebrew-LLVM-Version beim Start – deshalb fuzzt das Skript dort ohne ASan und prüft die gefundenen Eingaben danach mit ASan nach.
+- **Kleine Abweichungen vom Rust-SDK (A-447 … A-453):** z. B. bei mehreren Fehlern in einer Anfrage meldet der Kern den ersten in Textreihenfolge; reguläre Ausdrücke (`Pattern`) in der Konfiguration gibt es auf dem Mikrocontroller nicht; das Gerät schreibt kein Syslog (eine SHOULD-Empfehlung, D7 überspringt den Test). Ein Unit-Test hat eine fehlende Prüfung gefunden (die Namen `Name`/`Description` sind wie im Rust-SDK für Einstellungen reserviert) – behoben.
+- **Größe (A-456, vorläufig):** Der Gerätezustand braucht 544 Byte auf einem 32-Bit-Mikrocontroller (Platz sind 1024), der Code für Cortex-M4 etwa 35 KB. Die echten ESP32-Zahlen kommen in C-096.
+- **Kosten:** Schritt 9 im Gate dauert jetzt etwa 4 Minuten (zwei D7-Läufe). Keine Testdaten zum Review, kein Guideline-Befund.
 
 ### Zur Info: was C-093 gemacht hat (P4b, Teil 2 von 6)
 

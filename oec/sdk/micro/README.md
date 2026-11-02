@@ -5,16 +5,17 @@ and a platform abstraction layer (PAL), the reference port for ESP32 on
 ESP-IDF. Decisions: API in ADR-0022 (with the amendments), implementation in
 ADR-0030, ESP32 reference platform in ADR-0024.
 
-State (C-093): **Messaging Level 1** in the core, host tests and payload
-check; the Go host runner runs the core under D7 `--level 1` in the gate.
-Levels 2 and 3, the ESP-IDF port and the Arduino library follow in
-C-094 … C-097 (ADR-0030 §10).
+State (C-094): **Messaging Level 2** in the core (Level 1 since C-092), host
+tests, payload check and fuzz targets; the Go host runner runs the core under
+D7 `--level 1` and `--level 2` in the gate. Level 3, the ESP-IDF port and the
+Arduino library follow in C-095 … C-097 (ADR-0030 §10).
 
 | Path | Content |
 |---|---|
 | `include/oecm.h` | the API (the only public header) |
-| `src/` | the core: Identification Link, base64url, dnp-encoding, Oi4Identifier (`oecm_il.c`), output buffer and JSON writer (`oecm_buf.c`), messages and lifecycle (`oecm_device.c`) |
+| `src/` | the core: Identification Link, base64url, dnp-encoding, Oi4Identifier (`oecm_il.c`), output buffer and JSON writer (`oecm_buf.c`), messages and lifecycle (`oecm_device.c`); Level 2: numbers, time, SHA-1/UUIDv5 (`oecm_num.c`), JSON pull reader (`oecm_json.c`), topic parser (`oecm_topic.c`), resources and pagination (`oecm_res.c`), requests (`oecm_req.c`) |
 | `tests/` | Unity tests, the recording PAL `fake_pal.c`, the payload emitter `emit.c`, the generated vector header `vectors_gen.h` |
+| `fuzz/` | libFuzzer targets `fuzz_json.c`, `fuzz_topic.c`, `fuzz_message.c`, the corpus replayer `replay.c`, seed corpora, `run.sh` |
 | `examples/host/hello_device.c` | a Level 1 device with a stub PAL that prints, the shape of the firmware |
 | `host/` | Go module (standard library only): `cmd/oecm-vecgen` generates `tests/vectors_gen.h` from `oec/spec/export/vectors`; `cmd/oecm-host` is the host runner (the core with a PAL in Go over cgo), `mqtt/` its MQTT 3.1.1 client, `internal/d7run` the D7 harness |
 | `third_party/unity/` | Unity v2.7.0 (MIT), unchanged, test only |
@@ -42,8 +43,8 @@ Same as the Rust SDK (`oec-core` `lifecycle.rs`):
    MAM (REQ-IL-007); it encodes the Birth once with the longest MessageId
    and fails with `OECM_E_NOSPACE` if the transmit buffer is too small.
    The ClientId is `oec` + 16 hex digits of the FNV-1a hash of the
-   Identification Link unless given (REQ-MQTT-013). Levels 2 and 3 return
-   `OECM_E_LEVEL` until they are implemented.
+   Identification Link unless given (REQ-MQTT-013). Level 3 returns
+   `OECM_E_LEVEL` until it is implemented (C-095).
 2. `oecm_start` needs a set wall clock (after 2020-01-01, e.g. SNTP) and
    connects with a new Will (Health `FAILURE_1`, score 0; REQ-LIFE-008,
    REQ-LIFE-016).
@@ -61,13 +62,48 @@ Same as the Rust SDK (`oec-core` `lifecycle.rs`):
 Every message has a MessageId of the Unix time in ms, with a counter while
 the clock does not advance (REQ-MSG-007, REQ-MSG-008).
 
+## Level 2 behavior
+
+The application describes its Data DataSets (`oecm_data`: Tag, typed fields
+pointing to its own variables, unit, EURange, decimals, interval, writable)
+and its Config contexts (`oecm_cfg_context` → groups → objects with a text
+buffer, Type, Validation Length/Min/Max/Values, mandatory, sensitive) in
+`oecm_config`. The core decides every request as the Rust provider does
+(`oec-core`):
+
+- after CONNACK it subscribes to its `Get`/`Set`/`Del` topics, then sends
+  Birth and Health, then Profile, PublicationList, SubscriptionList, Config,
+  Metadata and Data (the order of `oec-core` `provider.rs`);
+- `Get` of MAM, Health, Profile, Data, Metadata, Config, PublicationList and
+  SubscriptionList, paginated when the answer does not fit the transmit
+  buffer or `MaxPacketSize` (REQ-PAG-002 … 008), with `PerPage`/`Page` of a
+  PaginationRequest;
+- `Set Data` (writable DataSets, every field), `Set Config` (the whole `Set`
+  is validated before any buffer is written; sensitive values are published
+  masked), `Set PublicationList`, `Set`/`Del SubscriptionList`, each answered
+  with a Status event `Pub/Event/<AppId>/Status/Good|Bad`;
+- after an accepted `Set` the core calls `on_data`/`on_config`; the
+  application calls `oecm_data_changed` when it changed a value itself;
+  DataSets with `interval_ms` are published periodically.
+
+DataSetWriterIds: MAM 10, Health 11, Profile 12, PublicationList 13, Status
+14/15/16 (Good/Uncertain/Bad), SubscriptionList 17, then the Config contexts
+and the Data DataSets from 18 in definition order (Metadata uses the id of its
+Data). Differences to the Rust SDK (ADR-0030 amendment C-094): the first
+violation in document order, no Validation `Pattern`, no Syslog, `double`
+output not correctly rounded beyond 15 … 17 significant digits.
+
 ## Sizes
 
-`OECM_DEVICE_SIZE` is 1024 octets; Level 1 uses 368 on a 64-bit host.
+`OECM_DEVICE_SIZE` is 1024 octets; Level 1 uses 368 and Level 2 568 on a
+64-bit host (544 on Cortex-M4). The Level 2 core compiled for Cortex-M4 with
+`-Os` has about 35 KB of code and constants, no data and no bss.
 `OECM_TX_MIN` is 2048 octets: enough for every Health, Will and Close, also
 for an Identification Link of 255 octets (1804 octets). The Birth grows with
 the MAM texts; a typical Birth needs about 1000 octets, a 255-octet
-Identification Link with empty texts 2315.
+Identification Link with empty texts 2315. A Level 2 device needs a larger
+transmit buffer for its Config and Metadata answers (the host demo uses 8192);
+larger answers are paginated.
 
 ## Host runner
 
@@ -84,7 +120,7 @@ container storage below `OEC_ROOT` (default `/`, RIG 4.1):
 | `run/secrets/oi4/private_key.pem` + `etc/oi4/certs/<hostname>.pem` | client certificate (used when present; no passphrase) |
 | `run/secrets/oi4/credentials` | `base64(user:password)` otherwise |
 
-Flags: `-level` (1), `-il`, `-manufacturer`, `-manufacturer-uri`, `-model`,
+Flags: `-level` (1; 2 runs the simulated temperature sensor of `demo.c`), `-il`, `-manufacturer`, `-manufacturer-uri`, `-model`,
 `-product-code`, `-serial`, `-software-revision`, `-client-id`. SIGTERM or
 SIGINT stops it gracefully (Close message). Against the dev broker
 (`oec/dev`, broker running):
@@ -96,13 +132,25 @@ OEC_ROOT=../../../dev/generated/roots/oec-dev-app go run ./cmd/oecm-host
 
 ## Check
 
-`./check.sh` (step 9 of `oec/check.sh`, about 2.5 min): host Go module with
-the MQTT client under `-race` and D7 `oec-check test --level 1` against the
-host runner on the Rust SDK's `go-testbroker` (21 pinned passes, about
-2 min), vector header freshness, CMake build in `target/host`, the Unity
-tests under AddressSanitizer + UBSan, `clang --analyze`, the symbol
-allowlist, GCC 14/15 if installed, the emitted payloads validated by D7
-`oec-check validate`, the host example. Needs `cmake` and `cargo`.
+`./check.sh` (step 9 of `oec/check.sh`, about 4 min): host Go module with
+the MQTT client under `-race` and D7 `oec-check test --level 1` (21 pinned
+passes) and `--level 2` (the demo sensor, 38 pinned passes) against the host
+runner on the Rust SDK's `go-testbroker` (about 3 min), vector header
+freshness, CMake build in `target/host`, the Unity tests and the replay of
+the fuzz seed corpora under AddressSanitizer + UBSan, `clang --analyze`, the
+symbol allowlist, GCC 14/15 if installed, the emitted payloads validated by
+D7 `oec-check validate`, the host example. Needs `cmake` and `cargo`.
+
+## Fuzzing
+
+`fuzz/run.sh [SECONDS] [TARGET...]` (opt-in, default 60 s each for `json`,
+`topic`, `message`) builds the targets with a clang that has libFuzzer
+(Homebrew LLVM first), fuzzes a copy of the seed corpus in
+`target/fuzz/<target>` and replays the grown corpus under ASan + UBSan.
+On macOS the fuzzing itself runs with UBSan only, because the ASan runtime
+of Homebrew LLVM 21 hangs at start-up on macOS 27; `OECM_FUZZ_SAN` overrides
+the sanitizers. Findings are written as `target/fuzz/<target>-crash-*`; add
+a minimized finding to `fuzz/corpus/<target>/` together with the fix.
 
 Regenerate the vectors after a change of `oec/spec/export/vectors`:
 

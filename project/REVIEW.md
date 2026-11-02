@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-09, C-093: P4b increment 2 – Go host runner, D7 Level 1 against the micro core in the gate (A-439 … A-445 for information). Nothing is open for you._
+_Last updated: 2026-11-10, C-094: P4b increment 3 – Messaging Level 2 in the micro core, D7 Level 2 in the gate, fuzz targets (A-446 … A-457 for information). Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -294,10 +294,11 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-091 (P7 increment 6 = exit run; ADR-0029 amendment C-091): image D8 `image`/`run`/`container` pass at L3; compose run – every participant over REST and in the Web UI, `Set`/Close/Will visible, T8-BUS-03 and REQ-PLT-008 pass, D7 `monitor` 0 fail without the D8 probe traffic; Registry guide (A-424 … A-428). **D-1** close P7? No R-x, no SF.
 - C-092 (P4b start + increment 1; ADR-0030, ADR-0022 amendment C-092): micro SDK core Messaging L1 in C17, 30 Unity tests under ASan/UBSan against the shared vectors, emitted payloads valid by D7 `validate`, gate step 9 (A-429 … A-438). No D-x, no R-x, no SF.
 - C-093 (P4b increment 2; ADR-0030 amendment C-093): Go host runner (cgo PAL, own MQTT 3.1.1 client), D7 `test --level 1` against the micro core in gate step 9 – 21 pass, 5 warn, 0 fail; opt-in D7 `monitor` against `oec/dev` 0 fail (A-439 … A-445). No D-x, no R-x, no SF.
+- C-094 (P4b increment 3; ADR-0022 and ADR-0030 amendments C-094): micro core Messaging L2 – JSON pull reader, topic parser, `Get` of 8 resources with pagination, `Set`/`Del` with Status events, Data/Config definitions, own number formatting; 72 Unity tests; D7 `test --level 2` in gate step 9 – 38 pass, 3 warn (Level 3 features), 0 fail; fuzz targets, seed replay in the gate, opt-in libFuzzer 0 findings (A-446 … A-457). No D-x, no R-x, no SF.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
-Logs: [C-091](log/2026-11-07_C-091_p7-exit-registry-guide.md), [C-090](log/2026-11-06_C-090_registry-image-compose.md), [C-089](log/2026-11-05_C-089_registry-web-ui.md), [C-088](log/2026-11-04_C-088_registry-http.md), [C-087](log/2026-11-03_C-087_registry-level3.md), [C-086](log/2026-11-02_C-086_p7-start-registry.md), [C-085](log/2026-11-02_C-085_p6-exit-docs.md), [C-084](log/2026-11-01_C-084_images-compose.md), [C-083](log/2026-11-01_C-083_web-uis.md), [C-082](log/2026-11-01_C-082_config-core.md), [C-081](log/2026-11-01_C-081_weather-met-no.md), [C-080](log/2026-11-01_C-080_weather-core.md), [C-079](log/2026-11-01_C-079_p6-demo-architecture-logger-core.md), [C-078](log/2026-11-01_C-078_go-sdk-consumer-exit.md), [C-077](log/2026-11-01_C-077_go-sdk-provider.md), [C-076](log/2026-11-01_C-076_go-sdk-core.md), [C-075](log/2026-11-01_C-075_d8-list-explain-p5b-exit.md), [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-engine-container.md), [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
+Logs: [C-094](log/2026-11-10_C-094_micro-level2.md), [C-093](log/2026-11-09_C-093_micro-host-runner.md), [C-092](log/2026-11-08_C-092_micro-core-l1.md), [C-091](log/2026-11-07_C-091_p7-exit-registry-guide.md), [C-090](log/2026-11-06_C-090_registry-image-compose.md), [C-089](log/2026-11-05_C-089_registry-web-ui.md), [C-088](log/2026-11-04_C-088_registry-http.md), [C-087](log/2026-11-03_C-087_registry-level3.md), [C-086](log/2026-11-02_C-086_p7-start-registry.md), [C-085](log/2026-11-02_C-085_p6-exit-docs.md), [C-084](log/2026-11-01_C-084_images-compose.md), [C-083](log/2026-11-01_C-083_web-uis.md), [C-082](log/2026-11-01_C-082_config-core.md), [C-081](log/2026-11-01_C-081_weather-met-no.md), [C-080](log/2026-11-01_C-080_weather-core.md), [C-079](log/2026-11-01_C-079_p6-demo-architecture-logger-core.md), [C-078](log/2026-11-01_C-078_go-sdk-consumer-exit.md), [C-077](log/2026-11-01_C-077_go-sdk-provider.md), [C-076](log/2026-11-01_C-076_go-sdk-core.md), [C-075](log/2026-11-01_C-075_d8-list-explain-p5b-exit.md), [C-074](log/2026-10-31_C-074_d8-run.md), [C-073](log/2026-10-31_C-073_d8-engine-container.md), [C-072](log/2026-10-30_C-072_d8-host.md), [C-071](log/2026-10-29_C-071_d8-bus.md), [C-070](log/2026-10-29_C-070_p5b-plan-d8-image.md), [C-069](log/2026-10-29_C-069_d7-list-explain-report-schema-p5-exit.md), [C-068](log/2026-10-29_C-068_d7-peer-announce.md), [C-067](log/2026-10-29_C-067_d7-restart-publist.md), [C-066](log/2026-10-28_C-066_d7-proxy-lifecycle.md), [C-065](log/2026-10-28_C-065_d7-action-monitor.md), [C-064](log/2026-10-28_C-064_d7-set-tests.md), [C-063](log/2026-10-28_C-063_d7-get-tests.md), [C-062](log/2026-10-28_C-062_d7-test-engine.md), [C-061](log/2026-10-28_C-061_oec-ffi.md), [C-060](log/2026-10-28_C-060_new-data-set-writer-id.md), [C-059](log/2026-10-28_C-059_subscription-list.md), [C-058](log/2026-10-27_C-058_consumer-core.md), [C-057](log/2026-10-27_C-057_refdes-events.md), [C-056](log/2026-10-27_C-056_config.md), [C-055](log/2026-10-27_C-055_write-side.md), [C-054](log/2026-10-27_C-054_data-sets-metadata.md), [C-053](log/2026-10-27_C-053_provider-registry-get.md), [C-052](log/2026-10-26_C-052_d7-monitor.md), [C-051](log/2026-10-26_C-051_dev-environment-interop.md), [C-050](log/2026-10-26_C-050_runtime-tokio-rustls.md), [C-049](log/2026-10-26_C-049_mqtt-session-lifecycle.md), [C-048](log/2026-10-26_C-048_oec-crate-bootstrap.md), [C-047](log/2026-10-26_C-047_message-model.md), [C-046 incl. addenda 1–3](log/2026-10-26_C-046_p4-start.md).
 
 ## Overview
 
@@ -764,6 +765,18 @@ Logs: [C-091](log/2026-11-07_C-091_p7-exit-registry-guide.md), [C-090](log/2026-
 | A-443 | D7 harness `internal/d7run` as a copy of `demotest` (own module) | info (agent) | C-093 | – | – |
 | A-444 | The test binary is the device (`OECM_HOST_MAIN=1`) | info (agent) | C-093 | – | – |
 | A-445 | Gate step 9 now about 2 min 20 s (D7 Level 1); one D7 run per level | info (agent) | C-093 | – | – |
+| A-446 | Level 2 scope: `Get` of 8 resources, `Set`/`Del` with Status; PublicationList/SubscriptionList pulled into C-094 | info (agent) | C-094 | – | – |
+| A-447 | Static Data/Config definitions with app-owned values; the core decides every `Set` (ADR-0022 §9 amended) | info (agent) | C-094 | – | – |
+| A-448 | DataSetWriterIds Profile 12 … SubscriptionList 17, definitions from 18; helper DSMs 1 … 9 | info (agent) | C-094 | – | – |
+| A-449 | Decision order and small deviations from the Rust provider (document order, no `Pattern`, …) | info (agent) | C-094 | – | – |
+| A-450 | Own `double` formatting with fixed decimals (not correctly rounded beyond 15 … 17 digits) | info (agent) | C-094 | – | – |
+| A-451 | Subscriptions before the Birth (as Rust) | info (agent) | C-094 | – | – |
+| A-452 | No Syslog on the device (REQ-TOP-027 SHOULD; T7-SET-12 skipped) | info (agent) | C-094 | – | – |
+| A-453 | Init checks: Level 1 with definitions / Level 3 → `OECM_E_LEVEL`; reserved names as Rust | info (agent) | C-094 | – | – |
+| A-454 | Fuzz targets, seed replay in the gate, `fuzz/run.sh`; macOS: UBSan fuzzing + ASan replay (Homebrew LLVM 21 ASan hangs) | info (agent) | C-094 | – | – |
+| A-455 | Both D7 runs (Level 1 and 2) in the gate, step 9 about 4 min (revises A-445) | info (agent) | C-094 | – | – |
+| A-456 | Sizes: state 568 of 1024 octets at L2; `OECM_TX_MIN` stays the L1 bound; L2 answers paginated | info (agent) | C-094 | – | – |
+| A-457 | Plain core build without `_FORTIFY_SOURCE` (symbol allowlist on macOS) | info (agent) | C-094 | – | – |
 
 ## Decisions and review items
 
@@ -1975,6 +1988,22 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 - **A-444 Test binary as device:** `TestMain` runs the runner with `OECM_HOST_MAIN=1`.
 - **A-445 Gate time:** step 9 about 2 min 20 s; D7 Level 1: 21 pass (config service list without T7-ADR-01), 5 warn (SHOULD answers from Level 2), 29 skip, 0 fail. From C-094 the run is at `--level 2` (one run per level, not two).
 
-## Next (C-094)
 
-1. C-094 – P4b increment 3: Messaging Level 2 in the micro core (JSON pull reader and topic parser with fuzz targets, `Get`/`Set`/Status, Data/Config definitions, number formatting), D7 `test --level 2` in the gate; then C-095 … C-097 in the same session (PO).
+### C-094 – P4b increment 3 (agent, G-3.4 b; log `log/2026-11-10_C-094_micro-level2.md`)
+
+- **A-446 Scope:** `Get` of MAM, Health, Profile, Data, Metadata, Config, PublicationList, SubscriptionList with pagination; `Set` of Data, Config, PublicationList, SubscriptionList; `Del` of SubscriptionList; Status events. PublicationList and SubscriptionList moved from C-095 into C-094 (D7 `--level 2` requests them). ReferenceDesignation, `NewDataSetWriterId`, persistence: C-095.
+- **A-447 Definitions:** Data fields and Config objects are described statically with pointers to application variables; the core validates a whole `Set` like the Rust provider and writes values only if it is valid, then calls `on_data`/`on_config`. The sketched `oecm_on_set` returning a status code is dropped (ADR-0022 amendment C-094).
+- **A-448 Ids:** MAM 10, Health 11, Profile 12, PublicationList 13, Status 14/15/16, SubscriptionList 17, Config contexts and Data from 18 (Metadata shares the Data id); helper DSMs 1 … 9 inbound (PaginationRequest 1 used, Locale 3 and Query 9 ignored).
+- **A-449 Decision order:** first violation in document order; MessageId pattern on the raw token; all duplicate keys checked, the last applies; value too large → `BadOutOfRange`; TopicPath too long → `BadInvalidArgument`; list entries `NONE_0`; no Validation `Pattern`.
+- **A-450 Numbers:** own `double` output with fixed decimals; beyond 15 … 17 significant digits not correctly rounded.
+- **A-451 Connect order:** subscriptions, Birth, Health, then Profile, PublicationList, SubscriptionList, Config, Metadata, Data (as `oec-core`).
+- **A-452 No Syslog:** no log levels to configure (REQ-TOP-027 SHOULD); T7-SET-12 skipped.
+- **A-453 Init checks:** Level 1 with Data/Config and Level 3 → `OECM_E_LEVEL`; ConfigName `Name`/`Description`, GroupName `Context`, invalid names → `OECM_E_ARG` (Rust `check_definition`; found by a unit test).
+- **A-454 Fuzzing:** `fuzz_json`, `fuzz_topic`, `fuzz_message`; seed corpora replayed by ctest under ASan + UBSan; `fuzz/run.sh` opt-in. The ASan runtime of Homebrew LLVM 21 hangs on macOS 27 even for an empty target, so on macOS libFuzzer runs with UBSan and the grown corpus is replayed under ASan. 60 s per target + 10 min `message`: 0 findings.
+- **A-455 D7 runs:** Level 1 (21 pass) and Level 2 (38 pass, 3 warn for Level 3 features) both stay in the gate – different code paths; step 9 about 4 min.
+- **A-456 Sizes:** state 568 octets on 64-bit, 544 on Cortex-M4 (of 1024); Cortex-M4 `-Os` about 35 KB code + constants; the host demo uses an 8192-octet transmit buffer, larger answers are paginated.
+- **A-457 Fortify:** the plain build for the symbol check sets `-D_FORTIFY_SOURCE=0`, so the macOS `memset` is not lowered to `bzero`.
+
+## Next (C-095)
+
+1. C-095 – P4b increment 4: Messaging Level 3 in the micro core (`Get`/`Set`/`Del ReferenceDesignation` with persistence, persisted Config values, `NewDataSetWriterId`), D7 `test --level 3` in the gate; then C-096 … C-097 in the same session (PO).
