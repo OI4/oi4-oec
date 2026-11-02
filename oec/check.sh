@@ -13,8 +13,8 @@
 #      cited under oec/sdk/ is active, oec/tests/citations.rs), the C ABI
 #      oec-ffi (from C-061, ADR-0021: oec.h equals the cbindgen output, the
 #      C examples and the C test program run against the shared and the
-#      static library, the latter under AddressSanitizer + UBSan) and the
-#      D9 sketch oecm.h compiles as C17 (ADR-0022, from C-042);
+#      static library, the latter under AddressSanitizer + UBSan); the D9
+#      sketch oecm.h of C-042 was replaced by the micro SDK in C-092;
 #   6. dev: gofmt, vet, tests of the dev PKI generator and the lint of the
 #      Mosquitto and compose configuration (C-051). No container engine: the
 #      interop tests against the broker are opt-in (oec/dev/interop.sh);
@@ -29,6 +29,11 @@
 #      integration tests with -race against the test broker: D8 bus
 #      T8-BUS-03, D7 test --level 3, HTTP/SSE/TLS and the embedded Web UI,
 #      and the offline npm policy of the Web UI (internal/uipolicy).
+#   9. sdk/micro/check.sh: the micro SDK D9 of P4b (ADR-0030, from C-092):
+#      C17 core with the Unity tests against the shared vectors under
+#      AddressSanitizer + UBSan, vector header freshness, clang --analyze,
+#      the symbol allowlist of the core, GCC 14/15 if installed, and the
+#      emitted payloads validated by D7 `oec-check validate`.
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
@@ -79,5 +84,8 @@ step "demos/check.sh (demo services)"
 
 step "registry/check.sh (OEC Registry D5)"
 "$root/registry/check.sh"
+
+step "sdk/micro/check.sh (micro SDK D9)"
+"$root/sdk/micro/check.sh"
 
 printf '\nall checks passed\n'

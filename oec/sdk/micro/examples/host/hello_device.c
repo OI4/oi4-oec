@@ -1,5 +1,6 @@
-/* Level 1 smart device on the Micro SDK (ADR-0022): the shape of the ESP32
- * example firmware, with a stub PAL instead of ESP-IDF. */
+/* Level 1 smart device on the micro SDK (ADR-0022, ADR-0030): the shape of
+ * the ESP32 example firmware, with a stub PAL that prints instead of
+ * ESP-IDF. Built and run by micro/check.sh. */
 #include <stdio.h>
 
 #include "oecm.h"
@@ -66,11 +67,13 @@ int main(void) {
         return 1;
     }
     printf("IL %s\n", oecm_identification_link(&device));
-    oecm_start(&device);
+    if ((err = oecm_start(&device)) != OECM_OK) {
+        printf("start: %s\n", oecm_err_str(err));
+        return 1;
+    }
     oecm_on_connected(&device); /* normally queued from the MQTT event task */
-    oecm_set_health(&device, OECM_HEALTH_NORMAL, 100);
+    oecm_set_health(&device, OECM_HEALTH_OFF_SPEC, 70);
     for (int i = 0; i < 3; i++) /* firmware: for (;;) with a task delay */
         oecm_poll(&device);
-    oecm_stop(&device);
-    return 0;
+    return oecm_stop(&device) == OECM_OK ? 0 : 1;
 }

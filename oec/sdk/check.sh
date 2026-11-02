@@ -1,6 +1,7 @@
 #!/bin/sh
-# Checks of the SDKs (ADR-0026; C ABI ADR-0021) and of the remaining P3 sketch
-# (oecm.h, ADR-0022):
+# Checks of the SDKs (ADR-0026; C ABI ADR-0021). The micro SDK D9 has its
+# own check (micro/check.sh, ADR-0030, step 9 of oec/check.sh; it replaced
+# the P3 sketch oecm.h in C-092):
 #   0. rust (Cargo workspace of D2: oec-core from C-046, oec from C-048,
 #      oec-ffi from C-061):
 #      rustfmt, clippy (pedantic, warnings are errors), tests including the
@@ -34,8 +35,7 @@
 #   1. rust/oec-ffi/include/oec.h is the output of cbindgen 0.29.4 (pinned,
 #      CLI only, ADR-0023 amendment C-061): regenerated into a temporary
 #      file and compared; the header with the examples and tests/c/*.c
-#      compile as C17 without warnings; oecm.h (D9 sketch) and its
-#      examples as well (syntax only – no implementation);
+#      compile as C17 without warnings;
 #   2. spikes (C-043, ADR-0023): rust/spike/schema-embed embeds oec/schema/v2
 #      at compile time and reproduces every strict verdict of
 #      oec/schema/dist/cases.json (needs schema/check.sh first, as in
@@ -99,12 +99,6 @@ rm -f "$header"
 for f in "$root"/rust/oec-ffi/examples/*.c "$root"/rust/oec-ffi/tests/c/*.c; do
 	# shellcheck disable=SC2086
 	"$cc" $cflags -I "$root/rust/oec-ffi/include" "$f"
-done
-
-echo "micro/sketch: oecm.h + examples (C17)"
-for f in "$root"/micro/sketch/examples/*.c; do
-	# shellcheck disable=SC2086
-	"$cc" $cflags -I "$root/micro/sketch/include" "$f"
 done
 
 for spike in schema-embed mqtt-codec; do

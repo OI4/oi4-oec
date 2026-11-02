@@ -1,10 +1,7 @@
 /*
  * oecm.h - API of the OEC Micro SDK (D9) for microcontroller-class smart
  * devices: C17, portable core + platform abstraction layer (PAL), static
- * memory (ADR-0016, ADR-0017).
- *
- * P3 SKETCH (C-042, ADR-0022) - NOT PRODUCT CODE. Compile-checked by
- * oec/check.sh with -std=c17 -Wall -Wextra -Wpedantic -Werror.
+ * memory (ADR-0016, ADR-0017, ADR-0022, ADR-0030).
  *
  * Contract (ADR-0022):
  *  - Prefix oecm_ / OECM_. Same names as oec.h (D2 C ABI) where the concept
@@ -25,9 +22,8 @@
  *    with broker certificate verification and user/password or client
  *    certificate (REQ-MQTT-005, REQ-MQTT-008, REQ-MQTT-009). The core has
  *    no API for a plain connection.
- *  - Increment 1 implements Messaging Level 1 (Birth/Will/Close, Pub MAM +
- *    Health); the API is designed so that Level 2/3 (Get, Set/Del, Data,
- *    Config, lists, NewDataSetWriterId) are additions, not changes.
+ *  - Messaging Level 1 (Birth/Will/Close, Pub MAM + Health); Level 2/3
+ *    (Get, Set/Del, Data, Config, lists, NewDataSetWriterId) are additions.
  */
 #ifndef OECM_H
 #define OECM_H
@@ -44,10 +40,15 @@ extern "C" {
 #define OECM_API_VERSION 1u
 
 /* Size of the opaque device state; checked by a static assertion in the
- * core. Value to be measured in P4b. */
+ * core (ADR-0022 §3). Level 1 uses 368 octets on a 64-bit host (C-092);
+ * the rest is reserved for Level 2/3. */
 #define OECM_DEVICE_SIZE 1024u
-/* Minimum transmit buffer: the largest message of Level 1 is the Birth
- * (MAM) with a 255-character Identification Link. */
+/* Minimum transmit buffer. The buffer holds the topic, a NUL and the
+ * payload of one message. 2048 octets hold every Health, Will and Close,
+ * also for an Identification Link of 255 octets (1804 octets). The Birth
+ * (MAM) grows with the MAM texts: oecm_init encodes it once and fails with
+ * OECM_E_NOSPACE if the buffer is too small for the Identification Link and
+ * the MAM; a typical Birth needs about 1000 octets. */
 #define OECM_TX_MIN 2048u
 
 typedef enum oecm_err {
@@ -81,21 +82,23 @@ typedef enum oecm_health { /* MG 8.3.2, same order as oec.h */
     OECM_HEALTH_MAINTENANCE_REQUIRED
 } oecm_health;
 
-/* MAM of the device (REQ-RES-MAM-001); borrowed. ProductInstanceUri is the
- * Identification Link (REQ-RES-MAM-016). */
+/* MAM of the device (REQ-RES-MAM-001); borrowed, UTF-8. ProductInstanceUri
+ * is the Identification Link (REQ-RES-MAM-016). Other NULL strings are
+ * sent as the empty string. */
 typedef struct oecm_mam {
     const char *manufacturer;      /* LocalizedText, locale en-US */
     const char *manufacturer_uri;  /* REQ-RES-MAM-004 */
     const char *model;             /* LocalizedText, locale en-US (REQ-RES-MAM-024) */
     const char *product_code;
-    const char *hardware_revision; /* "undefined" if unknown (REQ-RES-MAM-008) */
-    const char *software_revision; /* firmware version (REQ-RES-MAM-010) */
+    const char *hardware_revision; /* NULL: "undefined" (REQ-RES-MAM-008) */
+    const char *software_revision; /* firmware version; NULL: "undefined" (REQ-RES-MAM-010) */
     const char *device_revision;
     const char *device_manual;     /* URL (REQ-RES-MAM-012) */
     const char *device_class;      /* class of the product, not Oi4.<ServiceType> */
     const char *serial_number;     /* e.g. from the MAC address (REQ-RES-MAM-015) */
-    const char *description;       /* optional, NULL */
+    const char *description;       /* optional, NULL: omitted */
     int32_t revision_counter;      /* -1 without counter (REQ-RES-MAM-018) */
+    const char *global_asset_id;   /* optional AAS globalAssetId, NULL: omitted (REQ-RES-MAM-023) */
 } oecm_mam;
 
 typedef struct oecm_config {
@@ -107,8 +110,9 @@ typedef struct oecm_config {
      * REQ-RES-MAM-006); else an existing Identification Link (REQ-IL-006). */
     const char *identification_link;
     oecm_mam mam;
-    /* MQTT ClientId; NULL: derived from the Identification Link, stable
-     * across reconnects (REQ-MQTT-013). */
+    /* MQTT ClientId; NULL: "oec" + 16 hex digits of the FNV-1a hash of the
+     * Identification Link, stable across reconnects (REQ-MQTT-013), as the
+     * Rust SDK derives it. */
     const char *client_id;
     uint16_t keep_alive_s;    /* 0 → 60 (REQ-MQTT-014) */
     uint32_t max_packet_size; /* 0 → 262144 */
@@ -168,8 +172,11 @@ oecm_err oecm_start(oecm_device *dev);
 /* Publishes Close (REQ-LIFE-005) and disconnects. */
 oecm_err oecm_stop(oecm_device *dev);
 
-/* Drives timers: Health heartbeat every 60 s (REQ-TOP-017), reconnect. */
+/* Drives timers: Health heartbeat every 60 s (REQ-TOP-017), reconnect
+ * with backoff (1 s doubling to 30 s), connect timeout (30 s). OECM_E_PAL
+ * if a publication failed; it is retried on the next call. */
 oecm_err oecm_poll(oecm_device *dev);
+/* Milliseconds until oecm_poll has work, at most 1000. */
 uint32_t oecm_poll_interval_ms(const oecm_device *dev);
 
 /* PAL → core: connection established. The core publishes the Birth as
@@ -180,8 +187,10 @@ void oecm_on_disconnected(oecm_device *dev);
 /* PAL → core: received message (Level 2+; ignored at Level 1). */
 void oecm_on_message(oecm_device *dev, const char *topic, const uint8_t *payload, size_t len);
 
-/* score < 0: no HealthScore. Publishes on change (REQ-TOP-017). A recovery
- * from FAILURE_1/0 publishes the Birth again (REQ-LIFE-017). */
+/* score < 0: no HealthScore; 0 … 100 otherwise (REQ-RES-HEALTH-001).
+ * NORMAL_0 with score 0 is reserved for the Close (REQ-LIFE-014):
+ * OECM_E_ARG. The next oecm_poll publishes a change (REQ-TOP-017). A
+ * recovery from FAILURE_1/0 publishes the Birth again (REQ-LIFE-017). */
 oecm_err oecm_set_health(oecm_device *dev, oecm_health health, int score);
 
 /* The Identification Link in use (unencoded, REQ-IL-005); borrowed. */
