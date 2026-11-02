@@ -166,11 +166,11 @@ fn whole(value: Option<f64>, default: u32) -> u32 {
         .map_or(default, |v| v.clamp(0.0, f64::from(u32::MAX)) as u32)
 }
 
-fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
+pub(crate) fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
     m.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
 }
 
-fn unix_ms() -> u64 {
+pub(crate) fn unix_ms() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_or(0, |d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX))
@@ -182,7 +182,7 @@ pub(crate) struct Bus {
     consumer: Consumer,
     config: ConfigHandle,
     validator: Option<Validator>,
-    dir: Mutex<Directory>,
+    dir: Arc<Mutex<Directory>>,
     jobs: Mutex<Sender<Vec<Effect>>>,
     /// The applications being asked (one thread each).
     probing: Mutex<BTreeSet<String>>,
@@ -207,7 +207,7 @@ impl Bus {
         dir.set_limits(settings.limits);
         let bus = Arc::new(Self {
             consumer: app.consumer(),
-            dir: Mutex::new(dir),
+            dir: Arc::new(Mutex::new(dir)),
             app,
             config,
             validator,
@@ -235,10 +235,10 @@ impl Bus {
         Ok(bus)
     }
 
-    /// The directory (for the HTTP side of increment 3).
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3")]
-    pub(crate) fn directory(&self) -> MutexGuard<'_, Directory> {
-        lock(&self.dir)
+    /// The directory, shared with the HTTP side ([`crate::http`]), which
+    /// only reads it.
+    pub(crate) fn directory(&self) -> Arc<Mutex<Directory>> {
+        Arc::clone(&self.dir)
     }
 
     /// A publication of any application on one of the [`COLLECTED`]
@@ -568,7 +568,9 @@ mod tests {
     /// `subscribe_raw`, `on_presence`, `apps` and `get` only: no `set`,
     /// `del` or `new_data_set_writer_id` (a `Call`) in its sources, all
     /// files below `src`, whitespace ignored, test modules excluded. The
-    /// sources use no other method of these names either.
+    /// sources use no other method of these names either. The HTTP side
+    /// (C-088) names no other HTTP method, reads no request body, and the
+    /// guard of `api.rs` refuses every method but `GET` with `405`.
     #[test]
     fn read_only() {
         let mut files = Vec::new();
@@ -576,7 +578,8 @@ mod tests {
             &Path::new(env!("CARGO_MANIFEST_DIR")).join("src"),
             &mut files,
         );
-        assert!(files.len() >= 4, "the sources were not found");
+        assert!(files.len() >= 7, "the sources were not found");
+        let mut gets = 0;
         for path in files {
             let text = std::fs::read_to_string(&path).unwrap();
             let code: String = without_tests(&text)
@@ -592,7 +595,28 @@ mod tests {
             ] {
                 assert!(!code.contains(method), "{}: {method}", path.display());
             }
+            // the HTTP side (C-088): no method but GET is served, no
+            // request body is read
+            for http in [
+                "Method::POST",
+                "Method::PUT",
+                "Method::PATCH",
+                "Method::DELETE",
+                "\"POST\"=>",
+                "\"PUT\"=>",
+                "\"PATCH\"=>",
+                "\"DELETE\"=>",
+                "into_body(",
+                "collect_body",
+            ] {
+                assert!(!code.contains(http), "{}: {http}", path.display());
+            }
+            if path.ends_with("api.rs") {
+                gets += 1;
+                assert!(code.contains(r#"ifh.method!="GET"{returnErr((405,"#));
+            }
         }
+        assert_eq!(gets, 1, "the method guard of api.rs");
     }
 
     /// The scan sees code after a test module and in front of it.

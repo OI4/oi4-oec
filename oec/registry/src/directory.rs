@@ -96,7 +96,6 @@ pub(crate) struct Entry {
     pub(crate) health: Option<Health>,
     pub(crate) availability: Availability,
     /// Times of the registry clock (Unix ms).
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3")]
     pub(crate) first_seen: u64,
     pub(crate) last_seen: u64,
     pub(crate) online_since: Option<u64>,
@@ -262,6 +261,9 @@ impl Default for Limits {
 /// One Event of the trail.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct EventRecord {
+    /// Its number, counting from 1 since the start of the registry (the
+    /// HTTP side streams the Events after the last number it sent).
+    pub(crate) seq: u64,
     /// Registry clock, Unix ms.
     pub(crate) at: u64,
     /// AppId of the publisher.
@@ -311,7 +313,6 @@ pub(crate) struct Conformity {
 ///   SubscriptionList, listed and answered (REQ-CMP-019, REQ-CMP-039), and
 ///   the service NewDataSetWriterId (REQ-CMP-034).
 #[derive(Debug, Clone, PartialEq, Eq)]
-#[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
 pub(crate) struct Observed {
     /// 0 (not yet seen) … 3.
     pub(crate) level: u8,
@@ -328,6 +329,8 @@ pub(crate) struct Directory {
     ignored: u64,
     limits: Limits,
     events: VecDeque<EventRecord>,
+    /// The number of Events received so far (the last [`EventRecord::seq`]).
+    events_seen: u64,
     conformity: BTreeMap<String, Conformity>,
 }
 
@@ -373,7 +376,6 @@ fn publication_key(p: &PublicationEntry) -> (Resource, String, Option<String>) {
 
 /// The Profile entries of Level 3 (see [`Observed`]); the last field: only
 /// for applications.
-#[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
 const PROFILE_L3: [(Subject, &str, bool); 8] = [
     (
         Subject::Resource(Resource::PublicationList),
@@ -411,6 +413,7 @@ impl Directory {
             ignored: 0,
             limits: Limits::default(),
             events: VecDeque::new(),
+            events_seen: 0,
             conformity: BTreeMap::new(),
         }
     }
@@ -421,18 +424,21 @@ impl Directory {
     }
 
     /// One entry.
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
     pub(crate) fn get(&self, il: &str) -> Option<&Entry> {
         self.entries.get(il)
     }
 
     /// The devices of the application `app` (the publisher relation, MG A1
     /// optional), sorted by Identification Link.
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3")]
     pub(crate) fn devices<'a>(&'a self, app: &'a str) -> impl Iterator<Item = &'a Entry> + 'a {
         self.entries
             .values()
             .filter(move |e| e.kind == Kind::Device && e.publisher == app)
+    }
+
+    /// The AppId of the registry itself.
+    pub(crate) fn me(&self) -> &str {
+        &self.me
     }
 
     /// The number of ignored messages.
@@ -441,7 +447,6 @@ impl Directory {
     }
 
     /// The bounds of the histories.
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
     pub(crate) fn limits(&self) -> Limits {
         self.limits
     }
@@ -459,13 +464,11 @@ impl Directory {
     }
 
     /// The Event trail, oldest first.
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3")]
     pub(crate) fn events(&self) -> impl Iterator<Item = &EventRecord> {
         self.events.iter()
     }
 
     /// The schema conformity of the participant with the AppId `app`.
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
     pub(crate) fn conformity(&self, app: &str) -> Option<&Conformity> {
         self.conformity.get(app)
     }
@@ -611,7 +614,9 @@ impl Directory {
         if self.ignore(o) {
             return;
         }
+        self.events_seen += 1;
         self.events.push_back(EventRecord {
+            seq: self.events_seen,
             at: o.now,
             publisher: o.app.to_owned(),
             source: o.source.to_owned(),
@@ -678,7 +683,6 @@ impl Directory {
     }
 
     /// The observed Messaging level of the entry `il` (see [`Observed`]).
-    #[allow(dead_code, reason = "read by the HTTP side of increment 3 (C-088)")]
     pub(crate) fn observed(&self, il: &str) -> Option<Observed> {
         let e = self.entries.get(il)?;
         let app = e.kind == Kind::Application;
@@ -1234,11 +1238,12 @@ mod tests {
         d.event(&at(ME, ME, false, 4), None, event(1));
         d.event(&at(APP, PUMP, false, 5), None, event(2));
         d.event(&at(OTHER, OTHER, false, 6), None, event(3));
-        let trail: Vec<(u64, &str, u32)> = d
+        let trail: Vec<(u64, u64, &str, u32)> = d
             .events()
-            .map(|r| (r.at, r.source.as_str(), r.event.number))
+            .map(|r| (r.seq, r.at, r.source.as_str(), r.event.number))
             .collect();
-        assert_eq!(trail, [(5, PUMP, 2), (6, OTHER, 3)]);
+        // numbered from 1, the own one not counted, numbers kept when cut
+        assert_eq!(trail, [(2, 5, PUMP, 2), (3, 6, OTHER, 3)]);
 
         // lists: entries are put in by key; the complete answer to the
         // registry's Get replaces them

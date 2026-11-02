@@ -4,7 +4,10 @@
 #   cargo fmt --check, clippy (pedantic, warnings are errors), cargo test
 #   (the directory rules, the bus side incl. the read-only source scan and
 #   the settings, the AsyncAPI document against the vendored AsyncAPI 3.1.0
-#   meta-schema and the topic forms of the SDK core), cargo-deny with the
+#   meta-schema and the topic forms of the SDK core, the HTTP side: router,
+#   guards, views, event stream, settings, a loopback server, the OpenAPI
+#   document against the vendored OpenAPI 3.2 meta-schema, its paths = the
+#   router, its schemas validating the views), cargo-deny with the
 #   deny.toml of the SDK (ADR-0023), the binary (target/debug/oec-registry);
 #   go (module oec/registry, standard library only, A-387): gofmt, go vet,
 #   go test -race – the registry against the in-process TLS test broker
@@ -13,7 +16,10 @@
 #   topics and subscriptions checked against api/asyncapi.json, its
 #   ReferenceDesignation across a restart (oec-check and oec-infra of
 #   oec/conformance built into a temporary directory and run, not
-#   imported: ADR-0006).
+#   imported: ADR-0006); the HTTP side on loopback ports (ADR-0029 §7):
+#   HTTPS with a self-signed and with the application certificate, plain
+#   only with OEC_REGISTRY_TLS=off, REST, the event stream, the documents,
+#   guards, limits, time limits, keep-alive and the settings.
 # Needs cargo-deny. OEC_REGISTRY_REQUIRE=1 (default here): a missing helper
 # fails instead of skipping.
 set -eu
@@ -36,7 +42,7 @@ cargo deny --log-level error --config "$rust/deny.toml" check || {
 }
 cargo build --offline --locked --quiet
 
-echo "registry/go: gofmt, vet, oec-check, oec-infra, go test -race (D8 T8-BUS-03, D7 level 3)"
+echo "registry/go: gofmt, vet, oec-check, oec-infra, go test -race (D8 T8-BUS-03, D7 level 3, HTTP)"
 unformatted="$(gofmt -l .)"
 test -z "$unformatted" || { echo "gofmt needed: $unformatted" >&2; exit 1; }
 go vet ./...

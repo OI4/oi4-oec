@@ -71,11 +71,12 @@ func Registry(t *testing.T) string {
 }
 
 // StartRegistry starts the registry with the container storage root (and
-// env) and waits for its Birth – its MAM about itself on topic – on b.
+// env) and waits for its Birth – its MAM about itself on topic – on b. The
+// HTTP side is off unless env switches a port on (HTTPOff).
 func StartRegistry(t *testing.T, b *Broker, root, il string, env ...string) (*Process, Seen) {
 	t.Helper()
 	from := b.Len()
-	p := Start(t, Registry(t), append([]string{"OEC_ROOT=" + root}, env...)...)
+	p := Start(t, Registry(t), append(append([]string{"OEC_ROOT=" + root}, HTTPOff...), env...)...)
 	t.Cleanup(func() {
 		if t.Failed() {
 			t.Logf("registry stderr:\n%s", p.Stderr())

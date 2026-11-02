@@ -80,6 +80,7 @@ func TestD8Registry(t *testing.T) {
 func TestD7Level3(t *testing.T) {
 	b := regtest.RunD7(t, regtest.D7{
 		Exe:      regtest.Registry(t),
+		Env:      regtest.HTTPOff,
 		Hostname: "reg-1",
 		App:      "Registry/" + il,
 		Level:    3,
