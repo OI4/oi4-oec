@@ -136,6 +136,13 @@ pub struct Incoming {
     pub presence: Vec<PresenceChange>,
     /// The presence subscriptions to tell about [`Incoming::presence`].
     pub presence_subscriptions: Vec<SubscriptionId>,
+    /// The raw subscriptions ([`Consumer::subscribe_raw`]) whose filter
+    /// matches the topic: they get the publication as received, also one
+    /// that cannot be decoded ([`Incoming::error`]).
+    pub raw: Vec<SubscriptionId>,
+    /// The decoded resource DataSetMessages for [`Incoming::raw`]; empty if
+    /// the publication cannot be decoded.
+    pub items: Vec<Received>,
     /// Why a publication of interest could not be decoded.
     pub error: Option<String>,
 }
@@ -158,6 +165,8 @@ struct FilterUse {
 enum SubKind {
     Topics,
     Presence,
+    /// Publications as received, with the decoded items (C-087).
+    Raw,
 }
 
 #[derive(Debug)]
@@ -253,6 +262,17 @@ impl Consumer {
     pub fn subscribe(&mut self, filters: &[TopicFilter]) -> SubscriptionId {
         let filters = filters.iter().map(|f| f.as_str().to_owned()).collect();
         self.add_sub(SubKind::Topics, filters)
+    }
+
+    /// Subscribes to publications on `filters` as received:
+    /// [`Consumer::handle_message`] lists the subscription in
+    /// [`Incoming::raw`] for every publication on a matching topic, also
+    /// one whose topic or payload cannot be decoded (e.g. to judge it),
+    /// with the decoded DataSetMessages in [`Incoming::items`]. Like
+    /// [`Consumer::subscribe`] it is an entry of the SubscriptionList.
+    pub fn subscribe_raw(&mut self, filters: &[TopicFilter]) -> SubscriptionId {
+        let filters = filters.iter().map(|f| f.as_str().to_owned()).collect();
+        self.add_sub(SubKind::Raw, filters)
     }
 
     /// Tracks the presence of all applications (Birth, Close, Will,
@@ -763,8 +783,14 @@ impl Consumer {
         now_ms: u64,
         next_id: &mut dyn FnMut() -> MessageId,
     ) -> Incoming {
-        let mut incoming = Incoming::default();
+        let mut incoming = Incoming {
+            raw: self.due(topic, now_ms, true),
+            ..Incoming::default()
+        };
         let Ok(parsed) = Topic::parse(topic) else {
+            if !incoming.raw.is_empty() {
+                incoming.error = Some(format!("{topic}: not a topic of the guideline"));
+            }
             return incoming;
         };
         if parsed.method() == Method::Reply {
@@ -777,13 +803,13 @@ impl Consumer {
         if parsed.method() != Method::Pub {
             return incoming;
         }
-        let subs = self.due(topic, now_ms);
+        let subs = self.due(topic, now_ms, false);
         let presence = self.tracking() && matches!(resource, Resource::Mam | Resource::Health);
         let answers = self
             .pending
             .values()
             .any(|p| !matches!(p.kind, Kind::Action(_)) && topic.starts_with(&p.prefix));
-        if subs.is_empty() && !presence && !answers {
+        if subs.is_empty() && !presence && !answers && incoming.raw.is_empty() {
             return incoming;
         }
         let decoded = match received::decode(&parsed, payload) {
@@ -819,6 +845,9 @@ impl Consumer {
                 &decoded.items,
             );
         }
+        if !incoming.raw.is_empty() {
+            incoming.items.clone_from(&decoded.items);
+        }
         if !subs.is_empty() {
             incoming.deliveries = decoded
                 .items
@@ -829,14 +858,21 @@ impl Consumer {
         incoming
     }
 
-    /// The topic subscriptions a publication on `topic` is delivered to
-    /// now: a matching filter that is not deleted, and the Interval since
-    /// the last delivery of the topic passed (REQ-RES-SUBLIST-003).
-    fn due(&mut self, topic: &str, now_ms: u64) -> Vec<SubscriptionId> {
+    /// The topic subscriptions (`raw`: the raw ones) a publication on
+    /// `topic` is delivered to now: a matching filter that is not deleted,
+    /// and the Interval since the last delivery of the topic passed
+    /// (REQ-RES-SUBLIST-003).
+    fn due(&mut self, topic: &str, now_ms: u64, raw: bool) -> Vec<SubscriptionId> {
         let intervals: Vec<(SubscriptionId, u32)> = self
             .subs
             .iter()
-            .filter(|(_, s)| matches!(s.kind, SubKind::Topics))
+            .filter(|(_, s)| {
+                if raw {
+                    matches!(s.kind, SubKind::Raw)
+                } else {
+                    matches!(s.kind, SubKind::Topics)
+                }
+            })
             .filter_map(|(id, s)| Some((*id, self.interval(s, topic)?)))
             .collect();
         let mut due = Vec::new();

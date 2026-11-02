@@ -1112,6 +1112,65 @@ fn subscriptions_deliver_the_matching_items() {
     assert_eq!(changes.unsubscribe.len(), 4, "{changes:?}");
 }
 
+/// A raw subscription (C-087, ADR-0026 §23) gets every publication on its
+/// filters as received, with the decoded items, also one that cannot be
+/// decoded; it is an entry of the SubscriptionList like any other.
+#[test]
+fn raw_subscriptions_get_the_publication_as_received() {
+    let mut bus = Bus::new(provider());
+    let mams = TopicFilter::builder(Method::Pub, Resource::Mam)
+        .build()
+        .unwrap();
+    let typed = bus.c.subscribe(std::slice::from_ref(&mams));
+    let raw = bus.c.subscribe_raw(std::slice::from_ref(&mams));
+    let changes = bus.c.take_filter_changes();
+    assert_eq!(changes.subscribe, [mams.as_str().to_owned()]);
+    let list = bus.c.take_subscriptions().unwrap();
+    assert_eq!(list.len(), 2);
+    assert!(list.iter().all(|e| e.topic_path == mams.as_str()));
+    let birth = bus.p.on_connected(Duration::ZERO, MS);
+    let incoming: Vec<_> = bus
+        .deliver(birth)
+        .into_iter()
+        .filter(|i| !i.raw.is_empty() || !i.deliveries.is_empty())
+        .collect();
+    assert_eq!(incoming.len(), 3);
+    for i in &incoming {
+        assert_eq!(i.raw, [raw]);
+        assert_eq!(i.items.len(), 1);
+        assert!(matches!(i.items[0].payload, Payload::Mam(_)));
+        assert!(i.deliveries.iter().all(|(subs, _)| subs == &[typed]));
+        assert_eq!(i.error, None);
+    }
+    // undecodable: only the raw subscription gets it, with the error
+    let topic = Address {
+        source: None,
+        ..provider_at()
+    }
+    .topic(Method::Pub, Resource::Mam)
+    .unwrap()
+    .to_string();
+    let mut next = || bus.ids.next_id(bus.now);
+    let i = bus
+        .c
+        .handle_message(&topic, b"{not json", bus.now, &mut next);
+    assert_eq!(i.raw, [raw]);
+    assert!(i.items.is_empty() && i.deliveries.is_empty());
+    assert!(i.error.is_some());
+    // a topic that does not parse (an AppId that is no base64url)
+    let i = bus
+        .c
+        .handle_message("Oi4v2/OTConnector/!!/Pub/MAM", b"{}", bus.now, &mut next);
+    assert_eq!(i.raw, [raw]);
+    assert!(i.error.is_some());
+    bus.c.unsubscribe(raw);
+    let i = bus
+        .c
+        .handle_message(&topic, b"{not json", bus.now, &mut next);
+    assert!(i.raw.is_empty());
+    assert_eq!(bus.c.take_subscriptions().unwrap().len(), 1);
+}
+
 proptest! {
     #![proptest_config(ProptestConfig::with_cases(24))]
 

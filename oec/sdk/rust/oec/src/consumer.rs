@@ -178,6 +178,43 @@ fn filter_of(method: Method, resource: Resource, value: &str) -> Result<Filter> 
     Ok(Filter::of_kind(kind, value)?)
 }
 
+// -------------------------------------------------------- RawPublication
+
+/// A publication as received on a raw subscription
+/// ([`Consumer::subscribe_raw`]): the topic and the payload octets, the
+/// decoded DataSetMessages, and why it could not be decoded – e.g. to
+/// judge the conformity of the messages of others (MG A1).
+#[derive(Debug, Clone, PartialEq)]
+pub struct RawPublication {
+    topic: String,
+    payload: Vec<u8>,
+    items: Vec<Received>,
+    error: Option<String>,
+}
+
+impl RawPublication {
+    /// The topic it was published on, as received.
+    pub fn topic(&self) -> &str {
+        &self.topic
+    }
+
+    /// The payload as received.
+    pub fn payload(&self) -> &[u8] {
+        &self.payload
+    }
+
+    /// The decoded resource DataSetMessages; empty if
+    /// [`Self::error`] is set.
+    pub fn items(&self) -> &[Received] {
+        &self.items
+    }
+
+    /// Why the topic or the payload could not be decoded.
+    pub fn error(&self) -> Option<&str> {
+        self.error.as_deref()
+    }
+}
+
 // -------------------------------------------------------------- Received
 
 /// One received DataSetMessage of a resource with its topic context.
@@ -525,6 +562,7 @@ fn writer_id(id: u16) -> Result<DataSetWriterId> {
 // ---------------------------------------------------------- shared state
 
 type TopicCallback = Arc<dyn Fn(&Received) + Send + Sync>;
+type RawCallback = Arc<dyn Fn(&RawPublication) + Send + Sync>;
 type PresenceCallback = Arc<dyn Fn(&Presence) + Send + Sync>;
 type Waiter = oneshot::Sender<Result<Outcome>>;
 
@@ -536,6 +574,7 @@ pub(crate) struct State {
     shut_down: bool,
     waiters: HashMap<RequestId, Waiter>,
     topics: HashMap<SubscriptionId, TopicCallback>,
+    raw: HashMap<SubscriptionId, RawCallback>,
     presence: HashMap<SubscriptionId, PresenceCallback>,
 }
 
@@ -547,6 +586,7 @@ impl State {
             shut_down: false,
             waiters: HashMap::new(),
             topics: HashMap::new(),
+            raw: HashMap::new(),
             presence: HashMap::new(),
         }
     }
@@ -650,12 +690,26 @@ pub(crate) fn on_subscribed(handle: &AppHandle, results: &[(String, SubscribeRet
 /// callbacks and the pending requests. The callbacks run without a lock.
 pub(crate) fn on_message(handle: &AppHandle, topic: &str, payload: &[u8]) {
     let mut calls: Vec<(TopicCallback, Received)> = Vec::new();
+    let mut raw: Vec<(RawCallback, Arc<RawPublication>)> = Vec::new();
     let mut presence: Vec<(PresenceCallback, Presence)> = Vec::new();
     {
         let mut st = handle.consumer_state();
         let incoming = st
             .core
             .handle_message(topic, payload, unix_ms(), &mut || next_id(handle));
+        if !incoming.raw.is_empty() {
+            let p = Arc::new(RawPublication {
+                topic: topic.to_owned(),
+                payload: payload.to_vec(),
+                items: incoming.items.into_iter().map(Received::new).collect(),
+                error: incoming.error.clone(),
+            });
+            for id in &incoming.raw {
+                if let Some(f) = st.raw.get(id) {
+                    raw.push((Arc::clone(f), Arc::clone(&p)));
+                }
+            }
+        }
         if let Some(e) = incoming.error {
             log::debug!("received publication ignored: {e}");
         }
@@ -681,6 +735,9 @@ pub(crate) fn on_message(handle: &AppHandle, topic: &str, payload: &[u8]) {
     for (f, item) in calls {
         guarded(|| f(&item));
     }
+    for (f, p) in raw {
+        guarded(|| f(&p));
+    }
     for (f, p) in presence {
         guarded(|| f(&p));
     }
@@ -695,9 +752,9 @@ fn guarded(f: impl FnOnce()) {
 
 // ---------------------------------------------------------- subscription
 
-/// A subscription ([`Consumer::subscribe`], [`Consumer::on_presence`]);
-/// ends when dropped. Each subscription is an entry of the SubscriptionList
-/// of an application of Level 2 or higher (MG 9.1.9, REQ-CMP-039), by
+/// A subscription ([`Consumer::subscribe`], [`Consumer::subscribe_raw`],
+/// [`Consumer::on_presence`]); ends when dropped. Each subscription is an
+/// entry of the SubscriptionList of an application of Level 2 or higher (MG 9.1.9, REQ-CMP-039), by
 /// default without Interval and not configurable (`NONE_0`);
 /// [`Self::interval`] and [`Self::configurable`] change that.
 #[must_use = "the subscription ends when dropped"]
@@ -750,6 +807,7 @@ impl Drop for Subscription {
                 let mut st = handle.consumer_state();
                 st.core.unsubscribe(self.id);
                 st.topics.remove(&self.id);
+                st.raw.remove(&self.id);
                 st.presence.remove(&self.id);
             }
             handle.wake();
@@ -825,6 +883,34 @@ impl Consumer {
             let mut st = self.handle.consumer_state();
             let id = st.core.subscribe(&[filter]);
             st.topics.insert(id, Arc::new(f));
+            id
+        };
+        self.handle.wake();
+        Ok(self.subscription(id))
+    }
+
+    /// Subscribes to the publications of `resource` at `target` like
+    /// [`Self::subscribe`], but `f` gets each publication as received
+    /// ([`RawPublication`]): topic and payload octets with the decoded
+    /// DataSetMessages, also a publication that cannot be decoded. Like a
+    /// typed subscription it is an entry of the SubscriptionList (C-087,
+    /// ADR-0026 §23).
+    ///
+    /// # Errors
+    ///
+    /// [`Error::Invalid`] if the Filter does not fit the resource
+    /// (REQ-TOP-013).
+    pub fn subscribe_raw(
+        &self,
+        resource: Resource,
+        target: &Target,
+        f: impl Fn(&RawPublication) + Send + Sync + 'static,
+    ) -> Result<Subscription> {
+        let filter = target.topic_filter(resource)?;
+        let id = {
+            let mut st = self.handle.consumer_state();
+            let id = st.core.subscribe_raw(&[filter]);
+            st.raw.insert(id, Arc::new(f));
             id
         };
         self.handle.wake();

@@ -528,6 +528,66 @@ fn presence_and_subscriptions() {
     stop(&ch, crun);
 }
 
+/// A raw subscription (C-087, ADR-0026 §23) gets each publication as
+/// received with its decoded DataSetMessages, also one that cannot be
+/// decoded; it ends with its drop.
+#[test]
+fn raw_subscriptions_get_every_publication() {
+    let (pki, root) = (pki(), Root::new("cons-raw"));
+    let tb = routing_broker(&pki);
+    let c = app(Level::L1, "R-SN", &root, &pki, &tb);
+    let consumer = c.consumer();
+    let (tx, rx) = channel();
+    let subscription = consumer
+        .subscribe_raw(Resource::Mam, &Target::any(), move |p| {
+            let _ = tx.send(p.clone());
+        })
+        .unwrap();
+    let (ch, crun) = spawn(c);
+    wait_online(&ch);
+    wait_subscribed(&tb, "Oi4v2/+/+/Pub/MAM/#");
+
+    let p = Provider::new(&root, &pki, &tb);
+    let p_il = p.app.identification_link().clone();
+    let (ph, prun) = spawn(p.app);
+    let birth = loop {
+        let got = recv(&rx, "Birth");
+        if got.items().iter().any(|r| r.app() == p_il) {
+            break got;
+        }
+    };
+    assert_eq!(birth.error(), None);
+    assert!(matches!(birth.items()[0].payload(), Payload::Mam(_)));
+    assert_eq!(
+        json(std::str::from_utf8(birth.payload()).unwrap())["MessageType"],
+        "ua-data"
+    );
+    // a payload that cannot be decoded, on the topic of the Birth
+    tb.send(
+        0,
+        Packet::Publish(oec_core::mqtt::Publish {
+            topic: birth.topic().to_owned(),
+            payload: b"{not json".to_vec(),
+            delivery: oec_core::mqtt::Delivery::AtMostOnce,
+            retain: false,
+        }),
+    );
+    let bad = loop {
+        let got = recv(&rx, "the undecodable publication");
+        if got.payload() == b"{not json" {
+            break got;
+        }
+    };
+    assert!(bad.items().is_empty());
+    assert!(bad.error().is_some());
+    assert_eq!(bad.topic(), birth.topic());
+
+    drop(subscription);
+    wait_unsubscribed(&tb, "Oi4v2/+/+/Pub/MAM/#");
+    stop(&ph, prun);
+    stop(&ch, crun);
+}
+
 /// Requests while offline (`NotConnected`), without answer (`Timeout`),
 /// without AppId (`Invalid`) and after the shutdown (`Closed`).
 #[test]
