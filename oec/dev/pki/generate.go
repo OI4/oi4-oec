@@ -48,11 +48,22 @@ var demos = []demo{
 	{"oec-config", "OEC_CONFIG_NAME", 8783},
 }
 
+// The OEC Registry of the compose profile registry (ADR-0029 §12, C-090,
+// A-416): default container name (and compose service name, a DNS alias in
+// the compose network) and the variable of generated/demos.env with its
+// container name. It authenticates with an application certificate of the
+// dev CA, which also serves its HTTPS ports.
+const (
+	registryUser = "oec-registry"
+	registryEnv  = "OEC_REGISTRY_NAME"
+)
+
 // configUser is the user of the config service: the ACL lets it publish
 // Set/Config.
 const configUser = "oec-config"
 
-// demosEnv holds the container names of the demos for the variable
+// demosEnv holds the container names of the demos and of the registry for
+// the variable
 // interpolation of compose.yaml (`--env-file generated/demos.env`);
 // configServiceFile is the settings file of the config service below its
 // storage root, mounted at the same path in the container.
@@ -127,15 +138,15 @@ func generate(o options) error {
 	if err != nil {
 		return err
 	}
-	broker, err := newLeaf(o, ca, "mosquitto", x509.ExtKeyUsageServerAuth, append([]string{"localhost", "mosquitto", "127.0.0.1", "::1"}, o.sans...))
+	broker, err := newLeaf(o, ca, "mosquitto", []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}, append([]string{"localhost", "mosquitto", "127.0.0.1", "::1"}, o.sans...))
 	if err != nil {
 		return err
 	}
-	client, err := newLeaf(o, ca, certName, x509.ExtKeyUsageClientAuth, nil)
+	client, err := newLeaf(o, ca, certName, []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}, nil)
 	if err != nil {
 		return err
 	}
-	probe, err := newLeaf(o, ca, probeUser, x509.ExtKeyUsageClientAuth, nil)
+	probe, err := newLeaf(o, ca, probeUser, []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}, nil)
 	if err != nil {
 		return err
 	}
@@ -168,6 +179,27 @@ func generate(o options) error {
 			return err
 		}
 		names[i] = d.user + "-" + id
+	}
+	id, err := uuid4(o.rand)
+	if err != nil {
+		return err
+	}
+	registryName := registryUser + "-" + id
+	// the client certificate at the broker (CN = container name, the
+	// username of listener 8884) and the server certificate of the HTTPS
+	// ports: the container name, the compose service name, loopback
+	registry, err := newLeaf(o, ca, registryName, []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		[]string{registryName, registryUser, "localhost", "127.0.0.1", "::1"})
+	if err != nil {
+		return err
+	}
+	registryPassphrase, err := secret(o.rand)
+	if err != nil {
+		return err
+	}
+	registryKey, err := encryptPKCS8(o.rand, registry.key, registryPassphrase)
+	if err != nil {
+		return err
 	}
 	var passwd []byte
 	for _, u := range users {
@@ -208,11 +240,18 @@ func generate(o options) error {
 	w.file("roots/"+certName+"/run/secrets/oi4/private_key.pem", encrypted, 0o600)
 	w.file("roots/"+certName+"/run/secrets/oi4/passphrase", []byte(base64.StdEncoding.EncodeToString([]byte(passphrase))+"\n"), 0o600)
 	// the demos of the compose profile demos
-	env := "# written by `go run ./pki`: container names of the compose profile demos\n"
+	env := "# written by `go run ./pki`: container names of the compose profiles demos and registry\n"
 	for i, d := range demos {
 		env += d.env + "=" + names[i] + "\n"
-		w.demoStorage(d.user, ca, broker, credentials(d.user, users[2+i][1]))
+		w.composeStorage(d.user, 8883, ca, broker, map[string][]byte{"credentials": credentials(d.user, users[2+i][1])})
 	}
+	// the registry of the compose profile registry
+	env += registryEnv + "=" + registryName + "\n"
+	w.composeStorage(registryUser, 8884, ca, broker, map[string][]byte{
+		"private_key.pem": registryKey,
+		"passphrase":      []byte(base64.StdEncoding.EncodeToString([]byte(registryPassphrase)) + "\n"),
+	})
+	w.file("roots/"+registryUser+"/etc/oi4/certs/"+registryName+".pem", registry.pem(), 0o644)
 	w.file(demosEnv, []byte(env), 0o644)
 	settings, err := json.MarshalIndent(struct {
 		Apps []string `json:"apps"`
@@ -227,13 +266,14 @@ func generate(o options) error {
 	return w.err
 }
 
-// demoStorage writes the container storage of a demo of the compose profile
-// demos: the broker in the compose network, the credentials. The engine sets
+// composeStorage writes the container storage of a service of the compose
+// profiles demos and registry: the broker in the compose network on port,
+// the secrets (file name → content of /run/secrets/oi4). The engine sets
 // the hostname and named volumes hold the application storages. The non-root
-// user of the image must read the credentials through the read-only bind
-// mount, so the file is readable by all and the run directory keeps the
+// user of the image must read the secrets through the read-only bind
+// mount, so the files are readable by all and the run directory keeps the
 // other users of the host out (as the storages of oec-infra run).
-func (w *writer) demoStorage(name string, ca, broker issued, creds []byte) {
+func (w *writer) composeStorage(name string, port int, ca, broker issued, secrets map[string][]byte) {
 	if w.err != nil {
 		return
 	}
@@ -241,7 +281,7 @@ func (w *writer) demoStorage(name string, ca, broker issued, creds []byte) {
 		Address       string
 		SecurePort    int
 		MaxPacketSize int
-	}{"mosquitto", 8883, maxPacketSize}, "", "  ")
+	}{"mosquitto", port, maxPacketSize}, "", "  ")
 	if err != nil {
 		w.err = err
 		return
@@ -250,9 +290,13 @@ func (w *writer) demoStorage(name string, ca, broker issued, creds []byte) {
 	w.file(base+"etc/oi4/mqtt/broker.json", append(brokerJSON, '\n'), 0o644)
 	w.file(base+"etc/oi4/mqtt/broker.pem", broker.pem(), 0o644)
 	w.file(base+"etc/oi4/certs/ca.pem", ca.pem(), 0o644)
-	w.file(base+"run/secrets/oi4/credentials", creds, 0o644)
+	modes := map[string]os.FileMode{"run": 0o700, "run/secrets": 0o755, "run/secrets/oi4": 0o755}
+	for file, content := range secrets {
+		w.file(base+"run/secrets/oi4/"+file, content, 0o644)
+		modes["run/secrets/oi4/"+file] = 0o644
+	}
 	// independent of the umask
-	for rel, mode := range map[string]os.FileMode{"run": 0o700, "run/secrets": 0o755, "run/secrets/oi4": 0o755, "run/secrets/oi4/credentials": 0o644} {
+	for rel, mode := range modes {
 		if w.err == nil {
 			w.err = os.Chmod(filepath.Join(w.root, filepath.FromSlash(base+rel)), mode)
 		}
@@ -364,7 +408,7 @@ func newCA(o options) (issued, error) {
 
 // newLeaf issues a server or client certificate; names are DNS names or IP
 // addresses of the subject alternative name.
-func newLeaf(o options, ca issued, cn string, usage x509.ExtKeyUsage, names []string) (issued, error) {
+func newLeaf(o options, ca issued, cn string, usages []x509.ExtKeyUsage, names []string) (issued, error) {
 	key, err := ecdsa.GenerateKey(elliptic.P256(), o.rand)
 	if err != nil {
 		return issued{}, err
@@ -379,7 +423,7 @@ func newLeaf(o options, ca issued, cn string, usage x509.ExtKeyUsage, names []st
 		NotBefore:    o.now.Add(-time.Hour),
 		NotAfter:     o.now.AddDate(1, 0, 0),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  []x509.ExtKeyUsage{usage},
+		ExtKeyUsage:  usages,
 	}
 	for _, n := range names {
 		if ip := net.ParseIP(n); ip != nil {

@@ -7,15 +7,16 @@ development secret and is never committed (`generated/` is git-ignored).
 
 Decisions: ADR-0012 (monorepo `oec/dev/`), ADR-0026 amendment C-051 (dev
 environment and interop test contract), ADR-0028 §5 and amendment C-084
-(compose profile `demos`).
+(compose profile `demos`), ADR-0029 §12 and amendment C-090 (compose profile
+`registry`).
 
 | Path | Content |
 |---|---|
-| `compose.yaml` | Mosquitto 2.1.2, pinned by tag and digest, ports on loopback only; opt-in profile `demos` with the three demo services |
+| `compose.yaml` | Mosquitto 2.1.2, pinned by tag and digest, ports on loopback only; opt-in profiles `demos` (the three demo services) and `registry` (the OEC Registry) |
 | `mosquitto/mosquitto.conf` | TLS 1.2/1.3 only, credentials listener, client certificate listener, packet limits |
-| `pki/` | Go generator of the dev PKI, the password file, the sample container storages and the storages of the demos (standard library only) |
+| `pki/` | Go generator of the dev PKI, the password file, the sample container storages and the storages of the demos and the registry (standard library only) |
 | `interop.sh` | Opt-in interop tests of the Rust SDK against this broker |
-| `../conformance/live.sh` | Opt-in live run of `oec-check monitor` (D7) against this broker (C-052) |
+| `../conformance/live.sh` | Opt-in live run of `oec-check monitor` (D7) and `oec-infra` (D8) against this broker (C-052 … C-090) |
 | `generated/` | Output of `go run ./pki` – **never commit** |
 
 ## Prerequisites
@@ -103,12 +104,13 @@ generated/
 ├── probe/                       a second client for tools and the interop tests
 │   ├── username, password       credentials (plain text)
 │   └── probe.pem, probe.key     client certificate and key (unencrypted)
-├── demos.env                    container names of the profile demos
+├── demos.env                    container names of the profiles demos and registry
 └── roots/                       sample container storages (RIG 4.1)
     ├── oec-dev-app/             credentials, SecurePort 8883
     ├── oec-dev-cert/            client certificate, SecurePort 8884
-    └── oec-logger/, oec-weather/, oec-config/
-                                 storages of the profile demos (below)
+    ├── oec-logger/, oec-weather/, oec-config/
+    │                            storages of the profile demos (below)
+    └── oec-registry/            storage of the profile registry (below)
 ```
 
 Each sample root is the file system of an application container below `/`:
@@ -129,7 +131,7 @@ Each sample root is the file system of an application container below `/`:
 `{"Address": "localhost", "SecurePort": 8883, "MaxPacketSize": 262144}`.
 There is no `broker_ca.pem`, so clients verify the broker against
 `etc/oi4/certs/ca.pem` (RIG 4.1.1). Secret files have mode 0600 (the
-credentials of the demo storages: see the profile `demos`).
+secrets of the demo and registry storages: see the profile `demos`).
 
 ## Compose profile `demos` (C-084)
 
@@ -179,6 +181,55 @@ cd ../demos && images/build.sh --remove           # remove the loaded images
   `no-new-privileges`, bridge network of the project (REQ-CNT-023). The Web
   UIs listen on `0.0.0.0` inside the container and are published on
   `127.0.0.1` only (A-305: no authentication, no TLS).
+
+## Compose profile `registry` (C-090)
+
+The OEC Registry of `oec/registry` (D5, ADR-0029) as a container next to the
+broker – opt-in like `demos`, alone or together with the demos. The image is
+local (`oi4/oec-registry:0.1.0`, built by
+[`../registry/images/build.sh`](../registry/images/build.sh);
+`pull_policy: never`).
+
+```sh
+cd oec/registry && images/build.sh /tmp/oec-registry   # once: build, D8 image + run, load
+cd ../dev
+go run ./pki            # a generated/ of a cycle before C-090: go run ./pki -force
+docker compose --env-file generated/demos.env --profile demos --profile registry up -d --wait
+curl --cacert generated/broker/ca.pem https://localhost:5799/api/assets
+# Web UI: https://localhost:5798/ (trust generated/broker/ca.pem, or accept the warning)
+docker compose --env-file generated/demos.env --profile demos --profile registry down -v
+cd ../registry && images/build.sh --remove             # remove the loaded image
+```
+
+- **Always with `--env-file generated/demos.env`:** it sets the container
+  name `oec-registry-<uuid>` (`OEC_REGISTRY_NAME`), which is the CN of the
+  client certificate, the name of the certificate file and the SerialNumber
+  of the AppId (REQ-CNT-019 … 021, REQ-CNT-007).
+- **Client certificate (A-416):** `generated/roots/oec-registry/` holds
+  `broker.json` (Address `mosquitto`, SecurePort 8884),
+  `etc/oi4/certs/<name>.pem` (CN = SAN = container name; also the SANs
+  `oec-registry`, `localhost`, `127.0.0.1`, `::1`; extended key usage client
+  and server authentication), the encrypted `private_key.pem` and the
+  `passphrase` (RIG 4.1.3). The broker takes the CN as user name, so the
+  registry has the rights of the ACL pattern lines: read the bus, publish
+  `Pub` and `Get` – it never sends `Set`, `Del` or `Call` (ADR-0008). The
+  demos use credentials, so the profiles together use both means of
+  authentication.
+- **HTTPS (A-417):** the registry serves its Web UI and API on 5798 and its
+  API on 5799 with its application certificate, published on `127.0.0.1`
+  only; the Host guard accepts `localhost`, `127.0.0.1`, the container name
+  and `oec-registry` (`OEC_REGISTRY_HOSTS`, the compose service name). Verify
+  with `--cacert generated/broker/ca.pem`.
+- **Start order (A-421):** with both profiles, the demos start after the
+  registry (`depends_on` with `required: false`, so `--profile demos` alone
+  still works). The registry lists an asset after its Birth (MG A1); the
+  config service is of Level 1 and answers no `Get MAM` (REQ-CMP-017 applies
+  from Level 2). A registry started after the config service sees it with its
+  heartbeat (online, no MAM, not available) and lists it after the config
+  service's next Birth (`docker restart` of the config service).
+- **Hardening:** as the demos (read-only root file system, all capabilities
+  dropped, `no-new-privileges`, named volumes `oec-registry-etc`/`-opt`,
+  nothing over `/opt/oi4/licenses`).
 
 ## Run an application against the broker
 
@@ -284,7 +335,12 @@ Since C-071 it also runs `go test ./cmd/oec-infra -run TestBusDevBroker`:
 `oec-infra bus` on 8883 (probe credentials, unprivileged client
 `oec-dev-app`) and 8884 (probe certificate, unprivileged client
 `oec-dev-cert`) – T8-BUS-01 passes, T8-BUS-02 warns REQ-RES-CONFIG-026 (see
-the ACL above), T8-BUS-03 is inconclusive (no OEC Registry before P7). First
+the ACL above), T8-BUS-03 is inconclusive without an OEC Registry. With
+`OEC_LIVE_REGISTRY=1` (C-090, needs the image `oi4/oec-registry` and
+`go run ./pki` of C-090 or later) the registry of the profile `registry`
+starts after the monitor run: `oec-infra bus` discovers it on
+`Oi4v2/Registry/+/Pub/#` and T8-BUS-03 passes (REQ-REG-001/002), `oec-infra
+host` finds it (REQ-PLT-008 passes). First
 it runs `go test ./cmd/oec-check -run TestMonitorDevBroker` with
 `OEC_LIVE=1`: two monitors attach with the sample storages
 (`--bus-storage generated/roots/oec-dev-cert`, client certificate on 8884;

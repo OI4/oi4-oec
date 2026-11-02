@@ -168,15 +168,19 @@ func services(t *testing.T, c string) map[string]string {
 // generated/demos.env as name and hostname (REQ-CNT-019); the container
 // storage of `go run ./pki` read-only, named volumes for the application
 // storages and nothing over /opt/oi4/licenses (REQ-CNT-017); the Web UI on
-// loopback only (A-305); a bridge network (REQ-CNT-023).
+// loopback only (A-305); a bridge network (REQ-CNT-023). With the profile
+// registry, a demo starts after the registry (A-421): the config service of
+// Level 1 answers no Get MAM (REQ-CMP-017 from Level 2), so the registry
+// sees its MAM only in its Birth (MG A1); without the profile, the demos
+// start alone (required: false).
 func TestComposeDemos(t *testing.T) {
 	b, err := os.ReadFile("../compose.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
 	s := services(t, string(b))
-	if len(s) != 1+len(demos) || s["mosquitto"] == "" || strings.Contains(s["mosquitto"], "profiles:") {
-		t.Fatalf("services %v: mosquitto without profile plus the demos", len(s))
+	if len(s) != 2+len(demos) || s["mosquitto"] == "" || strings.Contains(s["mosquitto"], "profiles:") {
+		t.Fatalf("services %v: mosquitto without profile plus the demos and the registry", len(s))
 	}
 	for _, d := range demos {
 		c := s[d.user]
@@ -197,6 +201,7 @@ func TestComposeDemos(t *testing.T) {
 			d.user + "-opt:/opt/oi4/app",
 			`"127.0.0.1:` + strconv.Itoa(d.port) + ":" + strconv.Itoa(d.port) + `"`,
 			"condition: service_healthy",
+			"      " + registryUser + ":\n        condition: service_started\n        required: false\n",
 			"no-new-privileges:true",
 			"cap_drop: [ALL]",
 			"read_only: true",
@@ -225,5 +230,55 @@ func TestComposeDemos(t *testing.T) {
 		if !strings.Contains(c, want) {
 			t.Errorf("oec-config lacks %s", want)
 		}
+	}
+}
+
+// The profile registry (ADR-0029 §12, C-090, A-416/A-417): opt-in, the
+// local image only; the container name of generated/demos.env; the
+// container storage of `go run ./pki` read-only, named volumes for the
+// application storages; both HTTPS ports on loopback only, TLS on; the
+// compose service name as a further Host name.
+func TestComposeRegistry(t *testing.T) {
+	b, err := os.ReadFile("../compose.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := services(t, string(b))[registryUser]
+	if c == "" {
+		t.Fatalf("no service %s", registryUser)
+	}
+	for _, want := range []string{
+		"profiles: [registry]",
+		"image: oi4/oec-registry:${OEC_REGISTRY_VERSION:-0.1.0}",
+		"pull_policy: never",
+		"container_name: ${" + registryEnv + ":-" + registryUser + "}",
+		"hostname: ${" + registryEnv + ":-" + registryUser + "}",
+		"OEC_REGISTRY_HOSTS: " + registryUser,
+		"./generated/roots/" + registryUser + "/etc/oi4/mqtt:/etc/oi4/mqtt:ro",
+		"./generated/roots/" + registryUser + "/etc/oi4/certs:/etc/oi4/certs:ro",
+		"./generated/roots/" + registryUser + "/run/secrets/oi4:/run/secrets/oi4:ro",
+		registryUser + "-etc:/etc/oi4/app",
+		registryUser + "-opt:/opt/oi4/app",
+		`"127.0.0.1:5798:5798"`,
+		`"127.0.0.1:5799:5799"`,
+		"condition: service_healthy",
+		"no-new-privileges:true",
+		"cap_drop: [ALL]",
+		"read_only: true",
+	} {
+		if !strings.Contains(c, want) {
+			t.Errorf("%s lacks %s", registryUser, want)
+		}
+	}
+	for _, bad := range []string{"/opt/oi4/licenses", "network_mode", "privileged", "OEC_DEV_BIND", "0.0.0.0", "OEC_REGISTRY_TLS", "OEC_REGISTRY_WEB", "OEC_REGISTRY_API"} {
+		if strings.Contains(c, bad) {
+			t.Errorf("%s: %s", registryUser, bad)
+		}
+	}
+	if n := strings.Count(c, "127.0.0.1:"); n != 2 {
+		t.Errorf("%s: %d published ports, want 5798 and 5799", registryUser, n)
+	}
+	if !regexp.MustCompile(`(?m)^volumes:\n(?:  .*\n)*  ` + registryUser + `-etc:\n(?:  .*\n)*  ` + registryUser + `-opt:$`).MatchString(string(b)) {
+		t.Errorf("%s: named volumes not declared", registryUser)
 	}
 }

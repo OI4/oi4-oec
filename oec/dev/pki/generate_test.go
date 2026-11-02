@@ -212,7 +212,14 @@ func TestPasswordFile(t *testing.T) {
 // belongs to the client certificate.
 func TestEncryptedPrivateKey(t *testing.T) {
 	out, _ := generated(t)
-	block, _ := pem.Decode(read(t, out, "roots/oec-dev-cert/run/secrets/oi4/private_key.pem"))
+	checkEncryptedKey(t, out, "roots/oec-dev-cert/", "roots/oec-dev-cert/etc/oi4/certs/oec-dev-cert.pem")
+}
+
+// checkEncryptedKey decrypts run/secrets/oi4/private_key.pem of the storage
+// root with its passphrase and compares it with the certificate certRel.
+func checkEncryptedKey(t *testing.T, out, root, certRel string) {
+	t.Helper()
+	block, _ := pem.Decode(read(t, out, root+"run/secrets/oi4/private_key.pem"))
 	if block == nil || block.Type != "ENCRYPTED PRIVATE KEY" {
 		t.Fatal("no ENCRYPTED PRIVATE KEY")
 	}
@@ -237,7 +244,7 @@ func TestEncryptedPrivateKey(t *testing.T) {
 		kdf.IterationCount != pbes2Iterations || len(kdf.Salt) != 16 || len(iv) != aes.BlockSize {
 		t.Fatalf("unexpected algorithms: %+v %+v", p, kdf)
 	}
-	passphrase := decode64(t, read(t, out, "roots/oec-dev-cert/run/secrets/oi4/passphrase"))
+	passphrase := decode64(t, read(t, out, root+"run/secrets/oi4/passphrase"))
 	dk, err := pbkdf2.Key(sha256.New, passphrase, kdf.Salt, kdf.IterationCount, 32)
 	if err != nil {
 		t.Fatal(err)
@@ -253,7 +260,7 @@ func TestEncryptedPrivateKey(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	pub := cert(t, out, "roots/oec-dev-cert/etc/oi4/certs/oec-dev-cert.pem").PublicKey.(*ecdsa.PublicKey)
+	pub := cert(t, out, certRel).PublicKey.(*ecdsa.PublicKey)
 	if !key.(*ecdsa.PrivateKey).PublicKey.Equal(pub) {
 		t.Fatal("the private key does not belong to the client certificate")
 	}
@@ -313,7 +320,7 @@ var containerName = regexp.MustCompile(`^([a-z0-9-]{1,26})-[0-9a-f]{8}-[0-9a-f]{
 func TestDemoStorages(t *testing.T) {
 	out, _ := generated(t)
 	env := demoEnv(t, out)
-	if len(env) != len(demos) {
+	if len(env) != len(demos)+1 {
 		t.Fatalf("%s: %v", demosEnv, env)
 	}
 	lines := strings.Split(strings.TrimSpace(string(read(t, out, "broker/passwd"))), "\n")
@@ -378,5 +385,77 @@ func TestDemoStorages(t *testing.T) {
 	out2, _ := generated(t)
 	if env2 := demoEnv(t, out2); env2["OEC_LOGGER_NAME"] == env["OEC_LOGGER_NAME"] {
 		t.Error("the container names are not per installation")
+	}
+}
+
+// The OEC Registry of the compose profile registry (ADR-0029 §12, C-090,
+// A-416): a <DefaultContainerName>-<uuid> name (REQ-CNT-019, REQ-CNT-020),
+// the broker as seen in the compose network on the client certificate
+// listener, an application certificate of the dev CA with the container
+// name as CN (use_identity_as_username) that also serves the HTTPS ports
+// for the container name, the compose service name and loopback, and its
+// encrypted key with the passphrase – readable by the non-root container
+// user, the run directory keeps other users of the host out. No
+// credentials, no password file line.
+func TestRegistryStorage(t *testing.T) {
+	out, _ := generated(t)
+	name := demoEnv(t, out)[registryEnv]
+	if m := containerName.FindStringSubmatch(name); m == nil || m[1] != registryUser || len(name) > 63 {
+		t.Fatalf("%s=%q", registryEnv, name)
+	}
+	root := "roots/" + registryUser + "/"
+	var b map[string]any
+	if err := json.Unmarshal(read(t, out, root+"etc/oi4/mqtt/broker.json"), &b); err != nil {
+		t.Fatal(err)
+	}
+	if len(b) != 3 || b["Address"] != "mosquitto" || b["SecurePort"] != float64(8884) || b["MaxPacketSize"] != float64(maxPacketSize) {
+		t.Errorf("broker.json: %v", b)
+	}
+	for _, rel := range []string{"etc/oi4/certs/ca.pem", "etc/oi4/mqtt/broker.pem"} {
+		if !bytes.Equal(read(t, out, root+rel), read(t, out, "broker/"+filepath.Base(rel))) {
+			t.Errorf("%s differs from the broker side", rel)
+		}
+	}
+	roots := x509.NewCertPool()
+	roots.AddCert(cert(t, out, "broker/ca.pem"))
+	certRel := root + "etc/oi4/certs/" + name + ".pem"
+	c := cert(t, out, certRel)
+	if c.Subject.CommonName != name {
+		t.Errorf("CN %q, want the container name", c.Subject.CommonName)
+	}
+	if _, err := c.Verify(x509.VerifyOptions{Roots: roots, KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}}); err != nil {
+		t.Errorf("client authentication: %v", err)
+	}
+	for _, host := range []string{name, registryUser, "localhost", "127.0.0.1", "::1"} {
+		if _, err := c.Verify(x509.VerifyOptions{DNSName: host, Roots: roots, KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}}); err != nil {
+			t.Errorf("HTTPS for %s: %v", host, err)
+		}
+	}
+	if _, err := c.Verify(x509.VerifyOptions{DNSName: "mosquitto", Roots: roots}); err == nil {
+		t.Error("the registry certificate is valid for the broker name")
+	}
+	checkEncryptedKey(t, out, root, certRel)
+	for _, rel := range []string{"etc/hostname", "etc/oi4/app", "run/secrets/oi4/credentials"} {
+		if _, err := os.Stat(filepath.Join(out, root+rel)); err == nil {
+			t.Errorf("unexpected %s", rel)
+		}
+	}
+	if strings.Contains(string(read(t, out, "broker/passwd")), registryUser) {
+		t.Error("the registry has a password file line")
+	}
+	if strings.Contains(string(read(t, out, "roots/oec-config/"+configServiceFile)), registryUser) {
+		t.Error("the config service asks the registry")
+	}
+	if runtime.GOOS != "windows" {
+		for rel, want := range map[string]os.FileMode{"run": 0o700, "run/secrets/oi4": 0o755,
+			"run/secrets/oi4/private_key.pem": 0o644, "run/secrets/oi4/passphrase": 0o644} {
+			fi, err := os.Stat(filepath.Join(out, root+rel))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if fi.Mode().Perm() != want {
+				t.Errorf("%s: mode %v, want %v", rel, fi.Mode().Perm(), want)
+			}
+		}
 	}
 }

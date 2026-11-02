@@ -11,6 +11,17 @@
 # container name of generated/demos.env (REQ-CNT-019, REQ-CNT-020):
 #   docker compose --env-file generated/demos.env --profile demos up -d
 # The Web UIs are published on 127.0.0.1 only (A-305).
+#
+# Profile registry (opt-in, ADR-0029 §12, C-090): the OEC Registry of the
+# local image (oec/registry/images/build.sh, never pulled) with an
+# application certificate of the dev CA (listener 8884), which also serves
+# its HTTPS ports 5798 (Web UI and API) and 5799 (API), published on
+# 127.0.0.1 only (A-417); together with the demos:
+#   docker compose --env-file generated/demos.env --profile demos --profile registry up -d
+# The demos then start after the registry (A-421): the registry lists an
+# asset after its Birth (MG A1), and the config service of Level 1 answers
+# no Get MAM (REQ-CMP-017 from Level 2). Started after the config service,
+# the registry lists it only after the config service's next Birth.
 name: oec-dev
 
 services:
@@ -66,6 +77,9 @@ services:
     depends_on:
       mosquitto:
         condition: service_healthy
+      oec-registry:
+        condition: service_started
+        required: false
     restart: "no"
 
   # the weather service starts with the provider simulation (offline); met-no
@@ -90,6 +104,9 @@ services:
     depends_on:
       mosquitto:
         condition: service_healthy
+      oec-registry:
+        condition: service_started
+        required: false
     restart: "no"
 
   oec-config:
@@ -116,6 +133,37 @@ services:
     depends_on:
       mosquitto:
         condition: service_healthy
+      oec-registry:
+        condition: service_started
+        required: false
+    restart: "no"
+
+  oec-registry:
+    profiles: [registry]
+    image: oi4/oec-registry:${OEC_REGISTRY_VERSION:-0.1.0}
+    pull_policy: never
+    container_name: ${OEC_REGISTRY_NAME:-oec-registry}
+    hostname: ${OEC_REGISTRY_NAME:-oec-registry}
+    environment:
+      # the compose service name (a DNS alias in the compose network) for
+      # Host besides localhost, the container name and IP literals; the
+      # certificate of `go run ./pki` is valid for the same names
+      OEC_REGISTRY_HOSTS: oec-registry
+    ports:
+      - "127.0.0.1:5798:5798"
+      - "127.0.0.1:5799:5799"
+    volumes:
+      - ./generated/roots/oec-registry/etc/oi4/mqtt:/etc/oi4/mqtt:ro
+      - ./generated/roots/oec-registry/etc/oi4/certs:/etc/oi4/certs:ro
+      - ./generated/roots/oec-registry/run/secrets/oi4:/run/secrets/oi4:ro
+      - oec-registry-etc:/etc/oi4/app
+      - oec-registry-opt:/opt/oi4/app
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      mosquitto:
+        condition: service_healthy
     restart: "no"
 
 volumes:
@@ -126,3 +174,5 @@ volumes:
   oec-weather-opt:
   oec-config-etc:
   oec-config-opt:
+  oec-registry-etc:
+  oec-registry-opt:
