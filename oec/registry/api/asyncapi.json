@@ -1,0 +1,469 @@
+{
+  "asyncapi": "3.1.0",
+  "id": "urn:oi4:oec:registry",
+  "info": {
+    "title": "OEC Registry – MQTT interface",
+    "version": "0.1.0",
+    "description": "The MQTT interface of the OEC Registry D5 (ADR-0029 §8): the Registry services of MG A1 (REQ-REG-002), its own lifecycle (MG 6.3) and the subscriptions and read-only Get requests it uses to collect the MAM and Health of the assets (REQ-REG-001, ADR-0008). Increment 1 (C-086). The further resources served at Messaging Level 2 and higher (Profile, PublicationList, SubscriptionList, ReferenceDesignation, Event) follow in increment 2. Payloads are the NetworkMessages of the OEC JSON Schema D1, referenced by their $id.",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/license/mit"
+    },
+    "externalDocs": {
+      "description": "OEC Messaging Guideline, Annex A1 OEC Registry",
+      "url": "https://github.com/OI4/oi4-oec-documentation"
+    }
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "broker": {
+      "host": "{broker}:8883",
+      "protocol": "secure-mqtt",
+      "protocolVersion": "3.1.1",
+      "description": "The Message Bus of the OEC platform; address and port from broker.json (RIG 4.1.1, MG 6.2.2), TLS, QoS and retain as in MG 6.3.",
+      "variables": {
+        "broker": {
+          "description": "Address of the broker (DNS name or IP address of broker.json)."
+        }
+      }
+    }
+  },
+  "channels": {
+    "getMam": {
+      "address": "Oi4v2/Registry/{appId}/Get/MAM",
+      "description": "Registry service: requests the MAM of every available asset (MG A1, REQ-REG-002).",
+      "parameters": {
+        "appId": {
+          "description": "The AppId: the Identification Link of the OEC Registry itself, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "getMam": {
+          "$ref": "#/components/messages/getMam"
+        }
+      }
+    },
+    "getMamSource": {
+      "address": "Oi4v2/Registry/{appId}/Get/MAM/{source}",
+      "description": "Registry service: requests the MAM of one available asset (MG A1, REQ-REG-002).",
+      "parameters": {
+        "appId": {
+          "description": "The AppId: the Identification Link of the OEC Registry itself, base64url-encoded as one topic level (MG 4.3)."
+        },
+        "source": {
+          "description": "The Source: the Identification Link of the described asset, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "getMam": {
+          "$ref": "#/components/messages/getMam"
+        }
+      }
+    },
+    "pubMam": {
+      "address": "Oi4v2/Registry/{appId}/Pub/MAM",
+      "description": "The MAM of the registry and of every available asset, one DataSetMessage each, answering Get/MAM (ReplyTo set).",
+      "parameters": {
+        "appId": {
+          "description": "The AppId: the Identification Link of the OEC Registry itself, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "pubMam": {
+          "$ref": "#/components/messages/pubMam"
+        }
+      }
+    },
+    "pubMamSource": {
+      "address": "Oi4v2/Registry/{appId}/Pub/MAM/{source}",
+      "description": "The MAM of one asset: of the registry itself (Birth without ReplyTo, MG 6.3.3; a change of its MAM) or of an available asset answering Get/MAM/<Source>.",
+      "parameters": {
+        "appId": {
+          "description": "The AppId: the Identification Link of the OEC Registry itself, base64url-encoded as one topic level (MG 4.3)."
+        },
+        "source": {
+          "description": "The Source: the Identification Link of the described asset, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "pubMam": {
+          "$ref": "#/components/messages/pubMam"
+        }
+      }
+    },
+    "getHealth": {
+      "address": "Oi4v2/Registry/{appId}/Get/Health",
+      "description": "Registry service: requests the Health of every available asset (MG A1, REQ-REG-002).",
+      "parameters": {
+        "appId": {
+          "description": "The AppId: the Identification Link of the OEC Registry itself, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "getHealth": {
+          "$ref": "#/components/messages/getHealth"
+        }
+      }
+    },
+    "getHealthSource": {
+      "address": "Oi4v2/Registry/{appId}/Get/Health/{source}",
+      "description": "Registry service: requests the Health of one available asset (MG A1, REQ-REG-002).",
+      "parameters": {
+        "appId": {
+          "description": "The AppId: the Identification Link of the OEC Registry itself, base64url-encoded as one topic level (MG 4.3)."
+        },
+        "source": {
+          "description": "The Source: the Identification Link of the described asset, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "getHealth": {
+          "$ref": "#/components/messages/getHealth"
+        }
+      }
+    },
+    "pubHealth": {
+      "address": "Oi4v2/Registry/{appId}/Pub/Health",
+      "description": "The Health of the registry and of every available asset, one DataSetMessage each, answering Get/Health (ReplyTo set).",
+      "parameters": {
+        "appId": {
+          "description": "The AppId: the Identification Link of the OEC Registry itself, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "pubHealth": {
+          "$ref": "#/components/messages/pubHealth"
+        }
+      }
+    },
+    "pubHealthSource": {
+      "address": "Oi4v2/Registry/{appId}/Pub/Health/{source}",
+      "description": "The Health of one asset: of the registry itself (heartbeat at least every 60 s, Close NORMAL_0/0, Will FAILURE_1/0 sent by the broker; MG 6.3, MG 7.5.1) or of an available asset answering Get/Health/<Source>.",
+      "parameters": {
+        "appId": {
+          "description": "The AppId: the Identification Link of the OEC Registry itself, base64url-encoded as one topic level (MG 4.3)."
+        },
+        "source": {
+          "description": "The Source: the Identification Link of the described asset, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "pubHealth": {
+          "$ref": "#/components/messages/pubHealth"
+        }
+      }
+    },
+    "assetMam": {
+      "address": "Oi4v2/{serviceType}/{otherAppId}/Pub/MAM/{source}",
+      "description": "The MAM published by any application about itself or a represented asset (subscribed as Oi4v2/+/+/Pub/MAM/#); a MAM about itself without ReplyTo is its Birth (REQ-REG-001).",
+      "parameters": {
+        "serviceType": {
+          "description": "ServiceType of the other application (MG 7.2).",
+          "enum": [
+            "Registry",
+            "OTConnector",
+            "ITConnector",
+            "Utility",
+            "Persistence",
+            "Aggregation",
+            "OOCConnector"
+          ]
+        },
+        "otherAppId": {
+          "description": "The AppId of another application, base64url-encoded as one topic level (MG 4.3)."
+        },
+        "source": {
+          "description": "The Source: the Identification Link of the described asset, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "pubMam": {
+          "$ref": "#/components/messages/pubMam"
+        }
+      }
+    },
+    "assetHealth": {
+      "address": "Oi4v2/{serviceType}/{otherAppId}/Pub/Health/{source}",
+      "description": "The Health published by any application about itself or a represented asset (subscribed as Oi4v2/+/+/Pub/Health/#); NORMAL_0/0 about itself is its Close, FAILURE_1/0 its Will (REQ-REG-001).",
+      "parameters": {
+        "serviceType": {
+          "description": "ServiceType of the other application (MG 7.2).",
+          "enum": [
+            "Registry",
+            "OTConnector",
+            "ITConnector",
+            "Utility",
+            "Persistence",
+            "Aggregation",
+            "OOCConnector"
+          ]
+        },
+        "otherAppId": {
+          "description": "The AppId of another application, base64url-encoded as one topic level (MG 4.3)."
+        },
+        "source": {
+          "description": "The Source: the Identification Link of the described asset, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "pubHealth": {
+          "$ref": "#/components/messages/pubHealth"
+        }
+      }
+    },
+    "otherGetMam": {
+      "address": "Oi4v2/{serviceType}/{otherAppId}/Get/MAM",
+      "description": "The registry asks an application for the MAM of itself and its represented assets when it lacks one (ADR-0029 §4); the answer arrives on assetMam.",
+      "parameters": {
+        "serviceType": {
+          "description": "ServiceType of the other application (MG 7.2).",
+          "enum": [
+            "Registry",
+            "OTConnector",
+            "ITConnector",
+            "Utility",
+            "Persistence",
+            "Aggregation",
+            "OOCConnector"
+          ]
+        },
+        "otherAppId": {
+          "description": "The AppId of another application, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "getMam": {
+          "$ref": "#/components/messages/getMam"
+        }
+      }
+    },
+    "otherGetHealth": {
+      "address": "Oi4v2/{serviceType}/{otherAppId}/Get/Health",
+      "description": "The registry asks an application for the Health of itself and its represented assets when it lacks one (ADR-0029 §4); the answer arrives on assetHealth.",
+      "parameters": {
+        "serviceType": {
+          "description": "ServiceType of the other application (MG 7.2).",
+          "enum": [
+            "Registry",
+            "OTConnector",
+            "ITConnector",
+            "Utility",
+            "Persistence",
+            "Aggregation",
+            "OOCConnector"
+          ]
+        },
+        "otherAppId": {
+          "description": "The AppId of another application, base64url-encoded as one topic level (MG 4.3)."
+        }
+      },
+      "messages": {
+        "getHealth": {
+          "$ref": "#/components/messages/getHealth"
+        }
+      }
+    }
+  },
+  "operations": {
+    "serveMam": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/getMam"
+      },
+      "summary": "Registry service Get/MAM: answered with the MAM of the registry and of every available asset.",
+      "messages": [
+        {
+          "$ref": "#/channels/getMam/messages/getMam"
+        }
+      ],
+      "reply": {
+        "channel": {
+          "$ref": "#/channels/pubMam"
+        },
+        "messages": [
+          {
+            "$ref": "#/channels/pubMam/messages/pubMam"
+          }
+        ]
+      }
+    },
+    "serveMamSource": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/getMamSource"
+      },
+      "summary": "Registry service Get/MAM/<Source>: answered with the MAM of that asset; an unknown or unavailable Source is answered with a Status event BadNotFound (REQ-CMP-047).",
+      "messages": [
+        {
+          "$ref": "#/channels/getMamSource/messages/getMam"
+        }
+      ],
+      "reply": {
+        "channel": {
+          "$ref": "#/channels/pubMamSource"
+        },
+        "messages": [
+          {
+            "$ref": "#/channels/pubMamSource/messages/pubMam"
+          }
+        ]
+      }
+    },
+    "serveHealth": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/getHealth"
+      },
+      "summary": "Registry service Get/Health: answered with the Health of the registry and of every available asset.",
+      "messages": [
+        {
+          "$ref": "#/channels/getHealth/messages/getHealth"
+        }
+      ],
+      "reply": {
+        "channel": {
+          "$ref": "#/channels/pubHealth"
+        },
+        "messages": [
+          {
+            "$ref": "#/channels/pubHealth/messages/pubHealth"
+          }
+        ]
+      }
+    },
+    "serveHealthSource": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/getHealthSource"
+      },
+      "summary": "Registry service Get/Health/<Source>: answered with the Health of that asset; an unknown or unavailable Source is answered with a Status event BadNotFound (REQ-CMP-047).",
+      "messages": [
+        {
+          "$ref": "#/channels/getHealthSource/messages/getHealth"
+        }
+      ],
+      "reply": {
+        "channel": {
+          "$ref": "#/channels/pubHealthSource"
+        },
+        "messages": [
+          {
+            "$ref": "#/channels/pubHealthSource/messages/pubHealth"
+          }
+        ]
+      }
+    },
+    "publishMam": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/pubMamSource"
+      },
+      "summary": "Birth of the registry (its MAM without ReplyTo after the connect, MG 6.3.3) and a change of its MAM.",
+      "messages": [
+        {
+          "$ref": "#/channels/pubMamSource/messages/pubMam"
+        }
+      ]
+    },
+    "publishHealth": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/pubHealthSource"
+      },
+      "summary": "Health of the registry: after the Birth, on change, the heartbeat at least every 60 s (SF-106), the Close NORMAL_0/0 before the disconnect; the broker sends the Will FAILURE_1/0.",
+      "messages": [
+        {
+          "$ref": "#/channels/pubHealthSource/messages/pubHealth"
+        }
+      ]
+    },
+    "collectMam": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/assetMam"
+      },
+      "summary": "Collects the MAM of every asset (REQ-REG-001).",
+      "messages": [
+        {
+          "$ref": "#/channels/assetMam/messages/pubMam"
+        }
+      ]
+    },
+    "collectHealth": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/assetHealth"
+      },
+      "summary": "Collects the Health of every asset (REQ-REG-001).",
+      "messages": [
+        {
+          "$ref": "#/channels/assetHealth/messages/pubHealth"
+        }
+      ]
+    },
+    "requestMam": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/otherGetMam"
+      },
+      "summary": "Read-only request (ADR-0008): Get/MAM to an application whose MAM or whose assets' MAM is missing.",
+      "messages": [
+        {
+          "$ref": "#/channels/otherGetMam/messages/getMam"
+        }
+      ]
+    },
+    "requestHealth": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/otherGetHealth"
+      },
+      "summary": "Read-only request (ADR-0008): Get/Health to an application whose Health or whose assets' Health is missing.",
+      "messages": [
+        {
+          "$ref": "#/channels/otherGetHealth/messages/getHealth"
+        }
+      ]
+    }
+  },
+  "components": {
+    "messages": {
+      "getMam": {
+        "name": "GetMAM",
+        "title": "Get MAM",
+        "summary": "A Get request for MAM (MG 9.1.1).",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "https://schemas.openindustry4.com/oec/v2/topics/get-mam.schema.json"
+        }
+      },
+      "pubMam": {
+        "name": "PubMAM",
+        "title": "Pub MAM",
+        "summary": "A NetworkMessage with MAM DataSetMessages (MG 9.1.1).",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "https://schemas.openindustry4.com/oec/v2/topics/pub-mam.schema.json"
+        }
+      },
+      "getHealth": {
+        "name": "GetHealth",
+        "title": "Get Health",
+        "summary": "A Get request for Health (MG 9.1.2).",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "https://schemas.openindustry4.com/oec/v2/topics/get-health.schema.json"
+        }
+      },
+      "pubHealth": {
+        "name": "PubHealth",
+        "title": "Pub Health",
+        "summary": "A NetworkMessage with Health DataSetMessages (MG 9.1.2).",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "https://schemas.openindustry4.com/oec/v2/topics/pub-health.schema.json"
+        }
+      }
+    }
+  }
+}

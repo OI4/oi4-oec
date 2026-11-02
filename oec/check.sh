@@ -23,6 +23,11 @@
 #      + UBSan against the in-process TLS test broker, D7 test --level 2)
 #      and the weather service (Go on the Go SDK, from C-080: unit tests,
 #      integration tests with -race, D7 test --level 3).
+#   8. registry/check.sh: the OEC Registry D5 of P7 (ADR-0029, from C-086):
+#      Rust package on the SDK crate oec (fmt, clippy, tests incl. the
+#      AsyncAPI document against its meta-schema, cargo-deny), Go
+#      integration tests with -race against the test broker: D8 bus
+#      T8-BUS-03 and D7 test --level 2.
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
@@ -70,5 +75,8 @@ gocheck
 
 step "demos/check.sh (demo services)"
 "$root/demos/check.sh"
+
+step "registry/check.sh (OEC Registry D5)"
+"$root/registry/check.sh"
 
 printf '\nall checks passed\n'
