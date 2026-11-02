@@ -64,7 +64,8 @@ the end with `registry/images/build.sh --remove`. Its Web UI is at
 `generated/broker/ca.pem`) and shows the three demos and the stations of
 the weather service. Start both profiles together: the demos then start
 after the registry, which matters for the config service (it announces
-itself only at its start). Details:
+itself only at its start). What the registry shows and how to use it:
+[OEC Registry](../registry/index.md). Details:
 [`oec/dev/README.md` – Compose profile `registry`](../../../dev/README.md#compose-profile-registry-c-090).
 
 ## Good to know
