@@ -69,3 +69,24 @@ Not used in C-100.
 ## Gate
 
 `caffeinate -i oec/check.sh` after the page commit `512878b` (load 16.7 at start, up to 22): **all checks passed**, exit 0, 09:13:50 → 09:26:44 (about 13 min), first run, no flaky test; step 10 `docscheck: 9 pages ok`.
+
+## Addendum 1 (2026-11-16) – PO: the guides belong also in the Community section
+
+**PO (2026-11-16, after the C-100 handover), quoted:** "Kurze Frage, wo schreibst du die Anleitungen, nur in die Readme? Da gehört sie auch hin, sie gehört final aber auch in den Community Teil der oec Docusaurus."
+
+**Answer given:** the guides are not only in the READMEs. They are pages of the standalone site `oec/docs` (ADR-0012, ADR-0031, gate step 10); the READMEs stay the source of details and are linked, not copied.
+
+**New requirement (scope and publication, G-3.4 a):** the documentation shall in the end also be part of the Community section of the guideline Docusaurus site (`oi4-oec-documentation/docs/community`, navbar "Community"). Today that section holds the 1.x material: the development edge setup guide, the TypeScript service library `oi4-oec-service` and `oi4-oec-demos`. This touches G-4.11/ADR-0012 (standalone site, no links to the guideline site), Q-011 (publication) and the guideline repository, outside `findings/`. The PO was asked how; no answer yet. It is recorded as **Q-036** and **D-1 (C-100 addendum 1)**; the agent does not decide it.
+
+**Proposal (a):** `oec/docs` stays the gate-checked source. A later P8 increment, after C-103 and before the P8 exit, ports the pages into `docs/community` of the guideline site:
+- the pages go into their own subfolder, e.g. `docs/community/oec-v2/`;
+- references to guideline sections may become real links there, an exception to G-4.11 for that copy only;
+- links into `oec/` remain repository URLs, as in the remark plugin;
+- the 1.x pages are kept and marked as 1.x, or replaced, as the PO decides;
+- a check prevents the two copies from drifting apart.
+
+**Alternatives:**
+- (b) from C-101 on, write directly in `docs/community` and retire `oec/docs`; ADR-0012/0031 and gate step 10 change;
+- (c) maintain both copies by hand.
+
+**Effect on C-101:** none. The pages are plain Markdown either way. C-101 keeps them portable (relative links, no site-specific components) so that (a) or (b) needs no rewrite.

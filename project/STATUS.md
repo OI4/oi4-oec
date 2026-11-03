@@ -377,6 +377,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
+- C-100 addendum 1: **D-1** documentation also in the Community section of the guideline site (Q-036; G-3.4 a, scope and publication) – proposal (a): `oec/docs` stays the gate-checked source, a later P8 increment ports the pages into `docs/community/oec-v2/`. Not blocking C-101 (portable Markdown). Next free ids: SF-118, A-506, ADR-0032, Q-037 (rest as below).
 - None. C-100: nothing for the PO (no D-x, no R-x, no SF); A-501 … A-505 for information. Next free ids: SF-118, A-506, ADR-0032, Q-036, REQ-CMP-048, REQ-CNT-028, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029, REQ-ACT-025, V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129.
 - None. C-099: nothing for the PO (no D-x, no R-x, no SF); A-495 … A-500 for information. Next free ids: SF-118, A-501, ADR-0032, Q-036, REQ-CMP-048, REQ-CNT-028, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029, REQ-ACT-025, V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129.
 - None. C-098 addendum 1: D-1 answered ((a): the five licenses are allowed for the npm tree of the documentation site only). Nothing is open for the PO. Next free ids: SF-118, A-495, ADR-0032, Q-036, REQ-CMP-048, REQ-CNT-028, REQ-RES-PUBLIST-028, REQ-RES-SUBLIST-017, REQ-TOP-029, REQ-ACT-025, V-PAY-246, V-TOP-138 / V-TOP-255, V-BRK-019, P-129.

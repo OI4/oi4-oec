@@ -454,6 +454,8 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 5. (C-102) D7 and D8 guides, JSON Schema reference and validation how-to.
 6. (C-103) P8 exit run: build without broken links, a newcomer run of the demos from the site only.
 
+**C-100 addendum 1 (PO, 2026-11-16):** the documentation shall in the end also be part of the Community section of the guideline Docusaurus site (`oi4-oec-documentation/docs/community`). How and when is **Q-036 / D-1 (C-100 addendum 1)**, still open; the agent proposes (a), a port increment from `oec/docs` before the P8 exit. Until the PO decides, the pages are written as portable Markdown.
+
 ## P9 – Hardening & release
 
 - CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF builds for `esp32` + `esp32s3`), SBOM/license report, security scan.
