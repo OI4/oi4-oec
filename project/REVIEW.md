@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-11, C-095: P4b increment 4 – Messaging Level 3 in the micro core (ReferenceDesignation, `NewDataSetWriterId`, persistence), D7 Level 3 in the gate (A-458 … A-466 for information). Nothing is open for you._
+_Last updated: 2026-11-12, C-096: P4b increment 5 – ESP-IDF port of the micro SDK, example firmware for `esp32`/`esp32s3`, D7 Level 1/2/3 green against the firmware in the Espressif QEMU (opt-in), ESP32 footprint (A-467 … A-478 for information). Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -296,6 +296,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-093 (P4b increment 2; ADR-0030 amendment C-093): Go host runner (cgo PAL, own MQTT 3.1.1 client), D7 `test --level 1` against the micro core in gate step 9 – 21 pass, 5 warn, 0 fail; opt-in D7 `monitor` against `oec/dev` 0 fail (A-439 … A-445). No D-x, no R-x, no SF.
 - C-094 (P4b increment 3; ADR-0022 and ADR-0030 amendments C-094): micro core Messaging L2 – JSON pull reader, topic parser, `Get` of 8 resources with pagination, `Set`/`Del` with Status events, Data/Config definitions, own number formatting; 72 Unity tests; D7 `test --level 2` in gate step 9 – 38 pass, 3 warn (Level 3 features), 0 fail; fuzz targets, seed replay in the gate, opt-in libFuzzer 0 findings (A-446 … A-457). No D-x, no R-x, no SF.
 - C-095 (P4b increment 4; ADR-0022 and ADR-0030 amendments C-095): micro core Messaging L3 – ReferenceDesignation (`Get` with Query, `Set`, `Del`, persisted) and `Call`/`Reply NewDataSetWriterId` (persisted reservations) over PAL `persist_*`; 87 Unity tests; 69 emitted messages valid; D7 `test --level 3` in gate step 9 – 50 pass, 0 warn, 0 fail (A-458 … A-466). No D-x, no R-x, no SF.
+- C-096 (P4b increment 5; ADR-0030 amendment C-096): ESP-IDF v6.1 component `port/esp-idf/oecm` (PAL on esp-mqtt 1.1.0, esp-tls/mbedTLS 4.1, NVS), example firmware `examples/esp-idf` (`esp32`, `esp32s3`, `qemu`; provisioning partition, serial console), QEMU runner `host/cmd/oecm-qemu`; D7 against the firmware in the Espressif QEMU (opt-in): Level 1 21 pass, Level 2 38 pass, Level 3 50 pass, 0 fail (the host pins); against `oec/dev` (Mosquitto) Level 3 38 pass, 0 fail; footprint core + PAL 33.6 KB flash (A-467 … A-478). No D-x, no R-x, no SF.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -787,6 +788,18 @@ Logs: [C-094](log/2026-11-10_C-094_micro-level2.md), [C-093](log/2026-11-09_C-09
 | A-464 | Runner `-state`, `d7run.Files`, D7 Level 3 seeded (50 passes); three D7 runs, step 9 about 5 min | info (agent) | C-095 | – | – |
 | A-465 | Fuzz target and emitter at Level 3 | info (agent) | C-095 | – | – |
 | A-466 | Sizes: state 600/568 octets; Cortex-M4 42.3 KB | info (agent) | C-095 | – | – |
+| A-467 | ESP-IDF component at `port/esp-idf/oecm/` (component name = directory), esp-mqtt `^1.1.0`, `dependencies.lock` committed | info (agent) | C-096 | – | – |
+| A-468 | PAL: ring buffer + connection generation to the app task, no auto-reconnect, Will per connect via `esp_mqtt_set_config`, NVS blobs | info (agent) | C-096 | – | – |
+| A-469 | Provisioning partition `oecprov` (namespace `oec`): nothing of a site compiled in | info (agent) | C-096 | – | – |
+| A-470 | Serial console `stop` and `time <unix ms>` | info (agent) | C-096 | – | – |
+| A-471 | Sensor shared in `examples/sensor/` (moved from the host runner), label "Temperature sensor" | info (agent) | C-096 | – | – |
+| A-472 | QEMU runner `oecm-qemu`: container storage → provisioning, loopback → 10.0.2.2, NVS seeding, clock and stop over the console | info (agent) | C-096 | – | – |
+| A-473 | D7 pins in `d7run/pins.go`; `D7.ProxyNames`, `Timeout`, `RestartWait` (additive) | info (agent) | C-096 | – | – |
+| A-474 | QEMU D7 opt-in only (`OECM_QEMU_BUILD`, `OECM_QEMU`); runner unit tests in the gate | info (agent) | C-096 | – | – |
+| A-475 | QEMU variant: 10 OpenCores RX DMA buffers | info (agent) | C-096 | – | – |
+| A-476 | TLS: mbedTLS 4.1 (TLS 1.2/1.3), CA from the provisioning only, no certificate bundle, MQTT 3.1.1, `-Os` | info (agent) | C-096 | – | – |
+| A-477 | Footprint: core + PAL 33.6 KB flash, no static RAM; images 884/879/536 KB; heap ≥ 167 KB free, stack ≤ 2.4 KB | info (agent) | C-096 | – | – |
+| A-478 | Dev broker run: D7 `test` with the probe user (ACL), PKI `-san 10.0.2.2`; manual opt-in | info (agent) | C-096 | – | – |
 
 ## Decisions and review items
 
@@ -2026,6 +2039,21 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 - **A-465 Fuzzing and emitter at Level 3:** `fuzz_message` on a Level 3 device (store reset per input), 6 new seeds; emitter Level 3 lifecycle (69 messages valid).
 - **A-466 Sizes:** state 600 octets on 64-bit, 568 on Cortex-M4 (of 1024); Cortex-M4 `-Os` 42.3 KB code + constants (Level 3: 6.3 KB).
 
-## Next (C-096)
+### C-096 – P4b increment 5 (agent, G-3.4 b; log `log/2026-11-12_C-096_esp-idf-port.md`)
 
-1. C-096 – P4b increment 5: ESP-IDF v6.1 port (esp-mqtt, esp-tls/mbedTLS, SNTP, NVS for `persist_*`), `examples/esp-idf` for `esp32`/`esp32s3`, Espressif QEMU run with D7 (opt-in), ESP32 footprint; then C-097 in the same session (PO).
+- **A-467 Component path:** `oec/sdk/micro/port/esp-idf/oecm/` (ESP-IDF names a component after its directory; ADR-0030 §1 amended); the example refers to it by path; esp-mqtt `^1.1.0` from the ESP Component Registry, `dependencies.lock` committed.
+- **A-468 PAL design:** esp-mqtt events → FreeRTOS ring buffer (tagged with a connection generation; fragments reassembled up to `rx_size`, default 8192) → `oecm_esp_dispatch` on the application task; no auto-reconnect; the Will per connect via `esp_mqtt_set_config`; `persist_*` as NVS blobs (namespace `oecm`); buffers allocated once at init.
+- **A-469 Provisioning:** the firmware reads broker, CA, credentials or client certificate, SerialNumber, level, MaxPacketSize, SNTP server and Wi-Fi from the NVS partition `oecprov` (namespace `oec`); nothing of a site is compiled in or committed.
+- **A-470 Serial console:** `stop` (Close, DISCONNECT) and `time <unix ms>` (clock without SNTP); can be disabled in Kconfig.
+- **A-471 Shared sensor:** `examples/sensor/` (moved with history from the host runner) is the device code of both the host runner and the firmware; Config label "Temperature sensor".
+- **A-472 QEMU runner:** `host/cmd/oecm-qemu` maps the container storage below `OEC_ROOT` to the provisioning (loopback → 10.0.2.2), keeps the flash image in the state directory (NVS seeded from the state files), sets the clock and stops over the console.
+- **A-473 D7 harness:** pins in `internal/d7run/pins.go` shared by both runners; `D7.ProxyNames`, `Timeout`, `RestartWait` additive.
+- **A-474 QEMU opt-in:** `TestQEMUD7Level1/2/3` need `OECM_QEMU_BUILD` and `OECM_QEMU`, skip otherwise (also under `OECM_REQUIRE=1`); the runner's unit tests run in the gate.
+- **A-475 QEMU buffers:** 10 RX DMA buffers of the OpenCores MAC (`sdkconfig.qemu`), against dropped frames under D7's bursts.
+- **A-476 TLS settings:** mbedTLS 4.1 (TLS 1.2/1.3), CA only from the provisioning, no certificate bundle, MQTT 3.1.1 only, `-Os`.
+- **A-477 Footprint:** core + PAL 33.6 KB flash, no static RAM; app images 884 KB (`esp32`), 879 KB (`esp32s3`), 536 KB (`qemu`); in QEMU free heap ≥ 167 KB, main stack ≤ 2.4 KB of 8 KB.
+- **A-478 Dev broker run:** D7 `test` against a device on `oec/dev` needs the probe user (ACL, C-071) and the PKI `-san 10.0.2.2` for QEMU; manual opt-in step, result in the log (38 pass, 0 fail at Level 3).
+
+## Next (C-097)
+
+1. C-097 – P4b increment 6: Arduino library (Arduino-ESP32 PAL, best effort) and M5Stack example (build checks, opt-in), docs page `oec/docs/docs/micro-sdk/`, P4b exit assessment with a D-x for the run on real hardware (PO).

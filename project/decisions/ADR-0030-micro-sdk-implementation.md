@@ -105,3 +105,13 @@ Refines §4, §6, §7, §9 and §10 (A-458 … A-466; details in `log/2026-11-11
 - **Host runner** (§7, A-464): `-level 3`, `-state DIR` (default `OEC_ROOT/var/lib/oecm-host`, one file per record, atomic rename); `internal/d7run` `Files` seeds the storage.
 - **D7 in the gate** (A-464): `TestD7Level3` with a stored ReferenceDesignation, 50 pinned passes, 0 warn; the Level 1 (21) and Level 2 (38) runs stay; step 9 takes about 5 min.
 - **Payload check and fuzzing** (§5, §6, A-465): the emitter adds a Level 3 lifecycle (69 messages valid); `fuzz_message` drives a Level 3 device with an in-memory store reset per input, 6 new seeds.
+
+## Amendment C-096 (2026-11-12) – increment 5: ESP-IDF port, example firmware, QEMU (agent, G-3.4 b)
+
+Refines §1, §7, §8 and §10 (A-467 … A-478; details in `log/2026-11-12_C-096_esp-idf-port.md`):
+
+- **Layout** (§1, A-467): the component is `port/esp-idf/oecm/` (ESP-IDF names a component after its directory), with `idf_component.yml` (`espressif/mqtt ^1.1.0`); the simulated sensor moved from the host runner to `examples/sensor/` and is shared by the host runner and the firmware (A-471); `examples/esp-idf/` is the example firmware with `build.sh` (variants `esp32`, `esp32s3`, `qemu`) and the committed `dependencies.lock`.
+- **PAL** (§8, A-468): esp-mqtt events go through a FreeRTOS ring buffer to `oecm_esp_dispatch` on the application task (tagged with a connection generation; fragmented messages reassembled up to `rx_size`); no auto-reconnect; the Will is set with `esp_mqtt_set_config` before every connect; `persist_*` in NVS blobs (namespace `oecm`); no certificate bundle, the CA comes from the provisioning (A-476).
+- **Provisioning** (A-469): the firmware reads broker, CA, credentials or client certificate, SerialNumber, level, MaxPacketSize, SNTP server and Wi-Fi from the NVS partition `oecprov` (namespace `oec`); nothing of a site is compiled in or committed (§8). The serial console takes `stop` and `time <unix ms>` (A-470).
+- **QEMU** (§7, §8, A-472 … A-475): the Go command `host/cmd/oecm-qemu` runs the `qemu` build like `oecm-host` (same container storage below `OEC_ROOT`, loopback → 10.0.2.2, flash image with NVS seeding, clock over the console, SIGTERM → `stop`); the pinned D7 passes moved to `internal/d7run/pins.go` and `d7run.D7` gained `ProxyNames`, `Timeout` and `RestartWait`; D7 against QEMU is opt-in (`OECM_QEMU_BUILD`, `OECM_QEMU`), never in the gate.
+- **Footprint** (A-477): see the log and the README.

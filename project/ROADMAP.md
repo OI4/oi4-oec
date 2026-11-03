@@ -258,7 +258,7 @@ SDK for microcontroller-class smart devices without container (ADR-0016), writte
 2. ✅ (C-093) Go host runner (cgo PAL, own MQTT 3.1.1 client on `crypto/tls`): D7 `test --level 1` against the core on the host in the gate – 21 pass, 5 warn, 0 fail.
 3. ✅ (C-094) Messaging L2: JSON pull reader and topic parser (with fuzz targets), `Get`/`Set`/Status, Data/Config definitions; D7 `--level 2` in the gate – 38 pass, 3 warn (Level 3 features), 0 fail; Level 1 run kept; opt-in libFuzzer 0 findings.
 4. ✅ (C-095) Messaging L3: ReferenceDesignation (`Get` with Query, `Set`, `Del`, persisted) and `Call`/`Reply NewDataSetWriterId` (persisted reservations) over PAL `persist_*`; D7 `--level 3` in the gate – 50 pass, 0 warn, 0 fail (with a stored ReferenceDesignation); Level 1 and 2 runs kept.
-5. (C-096) ESP-IDF port (`esp-mqtt` + `esp-tls`) and the example firmware; Espressif QEMU (`esp32`) against `oec/dev` with D7 (opt-in), `esp32s3` build, RAM/flash footprint.
+5. ✅ (C-096) ESP-IDF v6.1 port (`port/esp-idf/oecm`: esp-mqtt + esp-tls/mbedTLS, NVS) and the example firmware (`esp32`, `esp32s3`, `qemu`); D7 against the firmware in Espressif QEMU (opt-in) – Level 1 21 pass, Level 2 38 pass, Level 3 50 pass, 0 fail (the host pins); against `oec/dev` (Mosquitto) Level 3 38 pass, 0 fail; footprint core + PAL 33.6 KB flash, app image 884 KB (`esp32`), free heap ≥ 167 KB.
 6. (C-097) Arduino library and the M5Stack example, docs page `oec/docs/docs/micro-sdk/`, exit assessment. Without a connected board the run on the real reference hardware is proposed as a D-x at the exit (QEMU is the evidence in the session).
 
 ## P5 – Conformance test tool (D7) ✅ (C-062 … C-069; closed in the C-069 review, D-1 (a): criterion 4 (CI) → P9 CI)

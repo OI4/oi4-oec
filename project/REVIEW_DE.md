@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 11.11.2026, C-095: P4b Teil 4 – der Micro-SDK-Kern kann jetzt Stufe 3 (Referenzkennzeichnung, neue DataSetWriterIds, Speichern über Neustarts), D7 prüft das im Gate (A-458 … A-466 zur Info). Für dich ist nichts offen._
+_Stand: 12.11.2026, C-096: P4b Teil 5 – das Micro SDK läuft als Firmware auf dem ESP32, geprüft im ESP32-Emulator QEMU mit D7 auf allen drei Stufen (A-467 … A-478 zur Info). Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -31,6 +31,16 @@ Für dich ist nichts offen.
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-096 gemacht hat (P4b, Teil 5 von 6)
+
+- **Was neu ist:** Der C-Kern hat jetzt eine **Anbindung an ESP-IDF**, das offizielle Entwicklungssystem für den ESP32 (Version 6.1). Diese Anbindung verbindet den Kern mit der MQTT-Bibliothek von Espressif, mit TLS und mit dem Flash-Speicher (NVS), in dem die Referenzkennzeichnung einen Neustart übersteht. Dazu gibt es eine **Beispiel-Firmware**: den simulierten Temperatursensor, der für ESP32, ESP32-S3 und den Emulator gebaut wird.
+- **Keine Zugangsdaten in der Firmware (A-469):** Broker-Adresse, CA, Passwort oder Zertifikat und WLAN liest die Firmware aus einem eigenen Speicherbereich im Flash. Dieser wird getrennt beschrieben (Anleitung in der README). Im Repository steht nichts davon.
+- **Ergebnis im Emulator:** Es ist kein ESP32 angeschlossen. Deshalb läuft die echte Firmware im **ESP32-Emulator QEMU von Espressif**. Ein kleines Go-Programm startet ihn, versorgt ihn mit den Einstellungen und startet ihn für D7 neu. D7 bewertet die Firmware genauso wie den Kern auf dem Mac: **Stufe 1: 21 bestanden, Stufe 2: 38, Stufe 3: 50, jeweils 0 Fehler**. Geprüft werden auch TLS, der Will, ein echter Neustart des Geräts und das Speichern über den Neustart. Diese Läufe sind opt-in und nicht im Gate (dauern etwa 7 Minuten).
+- **Gegen den Dev-Broker (Mosquitto):** Die Firmware im Emulator lief auch gegen `oec/dev`: Stufe 3 mit **38 bestanden, 0 Fehlern**. Die übrigen Prüfungen brauchen den Proxy oder den Neustart-Haken von D7 und werden deshalb übersprungen. Beim Stoppen hat D7 die Close-Nachricht gesehen. Ein erster Versuch hatte Fehler, weil der Dev-Broker `Set`, `Del` und `Call` nur vom Test-Benutzer `oec-probe` annimmt. Das war ein Fehler in meinem Testaufbau, nicht im Gerät (A-478).
+- **Größe (A-477):** Kern und Anbindung brauchen etwa **34 KB Flash** und keinen festen RAM. Die ganze Firmware ist mit WLAN 884 KB groß. Im Emulator blieben mindestens 167 KB Heap frei, und der Haupt-Task nutzt höchstens 2,4 von 8 KB Stack.
+- **Fehler gefunden:** keine im Kern, in D7 oder in den SDKs. Keine Testdaten zum Review, kein Guideline-Befund.
+- **Als Nächstes (C-097):** Arduino-Bibliothek und M5Stack-Beispiel, die Doku-Seite und der Abschluss von P4b. Dann frage ich dich nach dem Lauf auf echter Hardware.
 
 ### Zur Info: was C-095 gemacht hat (P4b, Teil 4 von 6)
 
