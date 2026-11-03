@@ -90,3 +90,9 @@ Not used in C-100.
 - (c) maintain both copies by hand.
 
 **Effect on C-101:** none. The pages are plain Markdown either way. C-101 keeps them portable (relative links, no site-specific components) so that (a) or (b) needs no rewrite.
+
+## Addendum 2 (2026-11-16) – the pages move into the Community section
+
+**PO answer to D-1 (C-100 addendum 1), quoted:** "die alte oi4-oec-documentation/docs/community benötigen wir nicht mehr. Schreibe alles was unter oec/docs ist direkt in oi4-oec-documentation/docs/community. Verweise in den readmes auch gerne auf die oi4-oec-documentation/docs/community. Baue jetzt alle oec-docs soweit um, dass sie in /Users/thomas/work/github/oi4/oi4-oec/oi4-oec/oi4-oec-documentation sind"
+
+This is option (b), with the old Community pages removed. Q-036 is decided. The implementation follows below.

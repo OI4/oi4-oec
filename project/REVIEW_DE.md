@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 16.11.2026, C-100: die Doku-Seite hat jetzt die Seiten „Concepts“ (Grundbegriffe) und „Migration notes 1.x → 2.0“ (was ist neu gegenüber 1.x). Offen für dich: D-1 (Doku auch im Community-Teil der Guideline-Seite, s. u.); als Nächstes C-101 – Anleitungen für die SDKs (Rust, C, Go) und die API-Referenz._
+_Stand: 16.11.2026, C-100: die Doku-Seite hat jetzt die Seiten „Concepts“ (Grundbegriffe) und „Migration notes 1.x → 2.0“ (was ist neu gegenüber 1.x). Deine Antwort zu D-1 ist umgesetzt: die Doku liegt jetzt im Community-Teil der Guideline-Seite. Für dich ist nichts offen; als Nächstes C-101 – Anleitungen für die SDKs (Rust, C, Go) und die API-Referenz._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,30 +24,13 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 (C-100 Nachtrag 1) – Doku auch im Community-Teil der Guideline-Seite
-
-Du hast geschrieben: „Da gehört sie auch hin, sie gehört final aber auch in den Community Teil der oec Docusaurus.“
-
-**So ist es heute:**
-- Die Anleitungen schreibe ich als Seiten der eigenen Doku-Seite `oec/docs`. Das Gate prüft sie bei jedem Lauf: Links, Sprungziele, keine Links zur Guideline-Seite.
-- Die READMEs bleiben die Quelle für Einzelheiten. Die Seiten verlinken dorthin, statt sie abzuschreiben.
-- Im Community-Teil der Guideline-Seite (`oi4-oec-documentation/docs/community`) liegt noch der Stand von 1.x: Edge-Setup-Guide, TypeScript-Bibliothek `oi4-oec-service` und `oi4-oec-demos`.
-- Nach G-4.11 darf `oec/docs` nicht auf die Guideline-Seite verlinken. Wo veröffentlicht wird, ist noch offen (Q-011).
-
-**Möglichkeiten:**
-- **(a) Vorschlag:** `oec/docs` bleibt die geprüfte Quelle. In einem eigenen P8-Teil nach C-103 und vor dem P8-Abschluss übertrage ich die Seiten in den Community-Teil, z. B. nach `docs/community/oec-v2/`.
-  - Dort dürfen Verweise auf Guideline-Abschnitte echte Links sein.
-  - Links in den Code führen weiter zu GitHub.
-  - Ein Test im Gate sorgt dafür, dass beide Fassungen gleich bleiben.
-  - Die alten 1.x-Seiten bleiben mit dem Vermerk „1.x“ stehen oder werden ersetzt – das entscheidest du.
-- (b) Ab C-101 schreibe ich direkt im Community-Teil, und `oec/docs` fällt weg.
-- (c) Ich pflege beide Fassungen von Hand. Das rate ich ab, weil sie mit der Zeit auseinanderlaufen.
-
-**Was das für C-101 heißt:** Nichts blockiert. Ich schreibe die Seiten in C-101 so, dass sie sich ohne Umbau übertragen lassen (relative Links, nichts Seiten-Spezifisches).
-
-**Deine Antwort:** z. B. „D-1 (a), 1.x-Seiten bleiben mit Vermerk“.
+Für dich ist nichts offen.
 
 ## Früher beantwortet
+
+### D-1 aus C-100 Nachtrag 1 – Doku im Community-Teil der Guideline-Seite
+
+Deine Antwort: „die alte oi4-oec-documentation/docs/community benötigen wir nicht mehr. Schreibe alles was unter oec/docs ist direkt in oi4-oec-documentation/docs/community …“ – also Möglichkeit (b), und die alten 1.x-Seiten fallen weg. Umgesetzt in C-100 Nachtrag 2: Die Seiten liegen jetzt in `oi4-oec-documentation/docs/community`. In `oec/docs` bleibt nur die Offline-Prüfung, die das Gate weiter ausführt. Die READMEs verweisen auf die Community-Seiten.
 
 ### D-1 aus C-098 – Lizenzen für die Docusaurus-Seite
 

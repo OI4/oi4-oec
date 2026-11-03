@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-16, C-100: P8 increment 3 – the site has the pages Concepts and Migration notes 1.x → 2.0 (guideline by section number only, built without broken links); A-501 … A-505 for information. Addendum 1: **D-1** open for you – documentation also in the Community section of the guideline site (Q-036), not blocking; next C-101 – SDK guides Rust, C, Go and the API reference._
+_Last updated: 2026-11-16, C-100: P8 increment 3 – the site has the pages Concepts and Migration notes 1.x → 2.0 (guideline by section number only, built without broken links); A-501 … A-505 for information. Addendum 1/2: D-1 answered (b) – the pages now live in the Community section of the guideline site (`oi4-oec-documentation/docs/community`); nothing is open for you; next C-101 – SDK guides Rust, C, Go and the API reference._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -302,7 +302,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-098 (P8 start; ADR-0031): plan and cycle cut C-098 … C-103 (ROADMAP P8); `oec/docs/tools` – Go `docscheck` (standard library) checks every page offline: front matter, a single root page, links and anchors into the site and into `oec/` (github-slugger anchors), no hyperlink to the guideline site (G-4.11); 24 violation tests; `oec/docs/check.sh` as gate step 10; Getting started page `oec/docs/docs/intro.md` (`slug: /`); `oec/docs/README.md`; Docusaurus 3.10.2 survey (1275 packages) and a temporary feasibility build (README links rewritten to the repository by a hook, ~6 s) → **D-1** (licenses) (A-489 … A-494). No R-x, no SF.
 - C-098 addendum 1: your answer ("D-1 (a)") is applied: 0BSD, CC0-1.0, BlueOak-1.0.0, Python-2.0 and CC-BY-4.0 are allowed **for the npm tree of the documentation site (`oec/docs`) only** (ADR-0031 status and §5, ROADMAP P8, STATUS); ADR-0023 and the registry Web UI policy (ADR-0029 §10) are unchanged. The site scaffold follows in C-099.
 - C-099 (P8 increment 2; ADR-0031 amendment C-099): Docusaurus 3.10.2 site in `oec/docs` – exact pins re-checked, lockfile v3 (1275 packages, `--before` 7 days), `.npmrc`, docs-only `docusaurus.config.mjs` (every broken-link rule `throw`, no blog/analytics/search, MIT footer), `sidebars.mjs`, `src/css/`; README links rewritten to the repository by the remark plugin `src/remark/repoLinks.mjs` (ADR-0031 §3 changed: the hook only sees `.md` links); offline npm policy `tools/npmpolicy` in gate step 10 (ADR-0023 allowlist + the five site-only licenses, OR rule, reviewed tables, 39 violation tests); opt-in `build.sh` (~30 s, 904 KB, no broken links; six probe links fail the build). Not published (Q-011). No new license, no D-x, no R-x, no SF (A-495 … A-500).
-- C-100 addendum 1: PO wants the documentation in the end also in the Community section of the guideline Docusaurus site; recorded as Q-036, **D-1** open (proposal (a): port from `oec/docs` in a later P8 increment).
+- C-100 addendum 1/2: PO wants the documentation in the Community section of the guideline Docusaurus site (Q-036); D-1 answered (b): the pages move into `oi4-oec-documentation/docs/community`, the old 1.x Community pages are removed.
 - C-100 (P8 increment 3; ADR-0031 amendment C-100): pages Concepts (`concepts.md`: assets and roles, identities, topics, resources and methods, messages, compliance levels) and Migration notes 1.x → 2.0 (`migration.md`: per breaking change of GL-ADR-001 … 022 what changes and what a 1.x application must do; `Oi4` and `Oi4v2` side by side); the guideline by section number only (G-4.11), nothing from `legacy/`; sidebar Getting started, Concepts, Demos, Registry, Micro SDK, Migration; `docscheck: 9 pages ok`, opt-in build without broken links. No D-x, no R-x, no SF (A-501 … A-505).
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
@@ -836,14 +836,12 @@ Logs: [C-100](log/2026-11-16_C-100_concepts-migration.md), [C-099](log/2026-11-1
 
 ### Open for you
 
-> **D-1 (C-100 addendum 1) – documentation also in the Community section of the guideline site** (Q-036; G-3.4 a: scope and publication). You wrote: "Da gehört sie auch hin, sie gehört final aber auch in den Community Teil der oec Docusaurus." The guides are pages of the standalone site `oec/docs` (ADR-0012/0031, checked in gate step 10); the READMEs remain the source of details. The Community section of the guideline site (`oi4-oec-documentation/docs/community`) holds the 1.x material today (edge setup guide, TypeScript `oi4-oec-service`, `oi4-oec-demos`); G-4.11 forbids links from `oec/docs` to the guideline site, and publication is Q-011.
-> - **(a) proposal:** `oec/docs` stays the gate-checked source; a later P8 increment (after C-103, before the P8 exit) ports the pages into `docs/community/oec-v2/` of the guideline site – guideline references may become real links there (G-4.11 exception for that copy), links into `oec/` stay repository URLs, a check keeps both copies in sync; the 1.x pages are kept and marked "1.x" or replaced (your choice).
-> - (b) from C-101 on write directly in `docs/community` and retire `oec/docs` (ADR-0012/0031 and gate step 10 change).
-> - (c) maintain both copies by hand.
->
-> Not blocking: C-101 writes portable Markdown (relative links, no site-specific components), so (a) and (b) need no rewrite. Please answer e.g. "D-1 (a)", and for (a) whether the 1.x pages stay (marked) or are replaced.
+Nothing is open for you.
 
 ### Answered earlier
+
+Answered after C-100 addendum 1 (2026-11-16) and recorded in C-100 addendum 2:
+- D-1 – documentation also in the Community section of the guideline site (Q-036): ☑ option (b) with the old Community pages removed – "die alte oi4-oec-documentation/docs/community benötigen wir nicht mehr. Schreibe alles was unter oec/docs ist direkt in oi4-oec-documentation/docs/community. Verweise in den readmes auch gerne auf die oi4-oec-documentation/docs/community. Baue jetzt alle oec-docs soweit um, dass sie in /Users/thomas/work/github/oi4/oi4-oec/oi4-oec/oi4-oec-documentation sind" The pages move into `oi4-oec-documentation/docs/community`, `oec/docs` keeps only the offline check; implemented in C-100 addendum 2.
 
 Answered after C-098 (2026-11-14) and recorded in C-098 addendum 1:
 - D-1 – licenses of the Docusaurus npm tree: ☑ (a) allowed for the npm tree of the documentation site only ("D-1 (a)"). The question was:
