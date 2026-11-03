@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/OI4/oec/conformance/internal/engine/enginetest"
+	"github.com/OI4/oec/conformance/internal/host"
 	"github.com/OI4/oec/conformance/internal/host/hosttest"
 	"github.com/OI4/oec/conformance/internal/mqttwire/mqtttest"
 )
@@ -47,6 +48,18 @@ type hostReport struct {
 			Outcome string `json:"outcome"`
 		} `json:"reqs"`
 	} `json:"tests"`
+}
+
+// The fixture storages are plain directories, no mount points: measured
+// facts of this system, but D8 not in a container, so that the tests also
+// pass when they run in a container (oec/ci/linux.sh). TestHostInContainer
+// sets InContainer.
+func init() {
+	hostFacts = func() *host.Facts {
+		f := host.Local()
+		f.InContainer = false
+		return f
+	}
 }
 
 func hostRoot(t *testing.T) hosttest.Root {
@@ -115,6 +128,46 @@ func TestHostAll(t *testing.T) {
 	}
 	if r.Host.Platform == nil || r.Host.Platform.OS != runtime.GOOS || r.Host.Platform.Machine == "" {
 		t.Errorf("platform %+v", r.Host.Platform)
+	}
+}
+
+// TestHostInContainer: in a container, a storage that is no mount point
+// fails its storage REQ (RIG 4.1: the platform maps a host-defined path to
+// it); on Linux only, where the mount table is read.
+func TestHostInContainer(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("mount table: Linux only")
+	}
+	saved := hostFacts
+	t.Cleanup(func() { hostFacts = saved })
+	hostFacts = func() *host.Facts {
+		f := saved()
+		f.InContainer = true
+		return f
+	}
+	root := hostRoot(t)
+	code, out, errOut := call(t, "host", "--root", root.Dir, "--offline", "--tests", "T8-HST-0[12]", "--format", "json")
+	r, got := outcomes(t, out)
+	if code != 1 || got["T8-HST-01"] != "fail" || got["T8-HST-02"] != "fail" {
+		t.Errorf("exit %d, tests %v\n%s", code, got, errOut)
+	}
+	failed := map[string]bool{}
+	for _, tc := range r.Tests {
+		for _, q := range tc.Reqs {
+			if q.Outcome == "fail" {
+				failed[q.Req] = true
+			}
+		}
+	}
+	for _, req := range []string{"REQ-CNT-001", "REQ-CNT-006", "REQ-CNT-008"} {
+		if !failed[req] {
+			t.Errorf("%s not failed: %v", req, failed)
+		}
+	}
+	for _, s := range r.Host.Storages {
+		if s.Mount != "none" {
+			t.Errorf("storage %s: mount %q", s.Name, s.Mount)
+		}
 	}
 }
 

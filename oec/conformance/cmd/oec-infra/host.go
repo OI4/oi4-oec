@@ -34,6 +34,10 @@ type hostFlags struct {
 	allowSkip                  bool
 }
 
+// hostFacts returns the facts of the platform host; nil: measured on this
+// system (host.Local). Tests replace it.
+var hostFacts = func() *host.Facts { return nil }
+
 func newHostFlags(stderr io.Writer) *hostFlags {
 	f := &hostFlags{fl: flag.NewFlagSet("host", flag.ContinueOnError)}
 	fl := f.fl
@@ -120,7 +124,7 @@ func runHost(args []string, stdout, stderr io.Writer) int {
 	defer stop()
 	started := time.Now().UTC()
 	res := host.Run(ctx, host.Config{Root: root, MQTT: abs(f.mqtt), Certs: abs(f.certs), Secrets: abs(f.secrets),
-		Container: f.container, Daemon: f.daemon, Self: f.self, Offline: f.offline, RegistryWait: f.registryWait, Timeout: f.timeout, Tests: f.tests})
+		Container: f.container, Daemon: f.daemon, Self: f.self, Offline: f.offline, RegistryWait: f.registryWait, Timeout: f.timeout, Tests: f.tests, Facts: hostFacts()})
 	h := res.Host
 	rep := &report.Infra{Report: report.InfraVersion, Tool: tool, Version: version, Schemas: schema.Version, Baseline: base,
 		Catalog: cat.Baseline, Command: append([]string{tool, "host"}, args...), Mode: "host", Input: root,
