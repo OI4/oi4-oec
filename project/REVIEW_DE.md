@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 12.11.2026, C-096: P4b Teil 5 – das Micro SDK läuft als Firmware auf dem ESP32, geprüft im ESP32-Emulator QEMU mit D7 auf allen drei Stufen (A-467 … A-478 zur Info). Für dich ist nichts offen._
+_Stand: 13.11.2026, C-097: P4b Teil 6 – Arduino-Bibliothek mit M5Stack-Beispiel, Doku-Seite des Micro SDK und Abschlussbewertung von P4b (A-479 … A-488 zur Info). **Für dich offen: D-1 – P4b schließen?**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,13 +24,75 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Für dich ist nichts offen.
+### D-1 – P4b schließen? (Phasenreihenfolge, Veröffentlichung)
+
+**Worum es geht:** P4b (Micro SDK) ist fertig gebaut – bis auf eine Sache: den Lauf auf **echter Hardware**. Die ROADMAP verlangt, dass die Firmware auf einem ESP32-Board und auf einem M5Stack die D7-Prüfung besteht (und im Emulator, wenn möglich). In den Sitzungen war kein Board angeschlossen. Deshalb gibt es nur den Emulator.
+
+**Was erfüllt ist:**
+- der C-Kern für die Stufen 1, 2 und 3, mit Unit-Tests, Speicherprüfung (ASan/UBSan), statischer Analyse und Fuzzing (C-092 … C-095);
+- die ESP-IDF-Anbindung und die Beispiel-Firmware für ESP32 und ESP32-S3 (C-096);
+- die **Arduino-Bibliothek** mit dem Sensor-Beispiel und dem **M5Stack-Beispiel** (C-097, siehe unten);
+- die Größenangaben (etwa 35 KB Flash für Kern und Anbindung, kein fester RAM).
+
+**D7-Ergebnisse:**
+- Im ESP32-Emulator QEMU besteht die Firmware **alle drei Stufen ohne Fehler**, auch gegen den Dev-Broker.
+- Auf dem Mac läuft der gleiche Kern im Gate durch D7.
+
+**Was nicht erfüllt ist:**
+- Der Lauf auf einem echten ESP32 und einem M5Stack fehlt. Die Arduino-Sketche sind nur übersetzt, nicht gelaufen.
+- Die Host-Tests laufen nur auf dem Mac. Linux und Windows brauchen eine CI.
+
+**Optionen:**
+- **(a) P4b schließen, weiter mit P8 – Dokumentation (mein Vorschlag).** Was weiterwandert:
+  - **Lauf auf echter Hardware:** Die Anleitung steht in der README des Micro SDK („Run on real hardware“). Sobald ein Board da ist, machst du den Lauf oder ich in einem späteren Zyklus. Einen dort gefundenen Fehler behebe ich als Nacharbeit zu P4b.
+  - **CI** → P9: Host-Tests unter Linux und Windows, ESP-IDF- und Arduino-Builds.
+  - **Veröffentlichung** → P9:
+    - im Arduino Library Manager. Er braucht ein öffentliches Repository und eine erreichbare Web-Adresse in der Bibliothek; `https://oi4.org` antwortet dem Prüfwerkzeug nicht richtig.
+    - in der ESP Component Registry.
+  - **Neu prüfen mit Arduino-ESP32 4.0**, sobald die endgültige Version erscheint → P9. Heute gibt es nur einen Release Candidate.
+- (b) P4b schließen, weiter mit **P9** (Härtung und Release), P8 nebenher.
+- (c) P4b offen lassen, bis der Hardware-Lauf gemacht ist. Dann bitte sagen, welches Board und wer den Lauf macht.
+
+Antwort z. B.: „D-1 (a)“.
 
 ## Früher beantwortet
 
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-097 gemacht hat (P4b, Teil 6 von 6)
+
+- **Was neu ist:** Das Micro SDK gibt es jetzt als **Arduino-Bibliothek „OECMicro“**. Damit kann man ein OEC-Gerät auch in der Arduino-IDE bauen.
+  - Sie enthält genau den gleichen Kern und die gleiche ESP32-Anbindung wie die ESP-IDF-Firmware. Ein Skript kopiert sie in eine Bibliothek, die man in der Arduino-IDE als ZIP hinzufügt.
+  - Das Gate prüft, dass die Kopie unverändert ist.
+- **Keine zweite MQTT-Bibliothek (A-479):**
+  - Ich habe nachgesehen, ob die Arduino-Pakete für den ESP32 die MQTT-Bibliothek von Espressif mitbringen.
+  - Das ist bei Version 3.3.12 und beim Release Candidate 4.0.0-RC1 der Fall.
+  - Deshalb läuft die Anbindung aus C-096 unverändert. Die Ersatzlösung mit einer anderen MQTT-Bibliothek war nicht nötig.
+- **Zwei Beispiele:**
+  - **„Sensor“** – der simulierte Temperatursensor auf jedem ESP32 mit WLAN.
+  - **„M5Stack“** – das gleiche Gerät auf einem M5Stack Core2 oder CoreS3 mit Anzeige. Sie zeigt den Identification Link, ob das Gerät verbunden ist, die Health und den Messwert. Mit Taste A (oder Tippen auf das Display) schaltet man die Health weiter (normal → Wartung nötig → außerhalb der Spezifikation → Funktionsprüfung → Fehler). Das sieht man dann in D7 und in der Registry.
+  - Für die Anzeige gibt es eine kleine neue Funktion `oecm_connected` (A-483).
+- **Zugangsdaten (A-481):**
+  - In Arduino-Sketchen stehen WLAN, Broker und CA üblicherweise in einer Datei `arduino_secrets.h` neben dem Sketch.
+  - Im Repository sind dort nur leere Platzhalter. Das Gate schlägt fehl, sobald jemand echte Werte einträgt.
+- **Ergebnis (A-485):**
+  - Beide Beispiele lassen sich mit beiden Arduino-Versionen **ohne eine einzige Warnung** aus unserem Code übersetzen, und zwar für ESP32, ESP32-S3, M5Stack Core2, CoreS3 und den alten M5Stack Core. Zusätzlich gehen die RISC-V-Chips C3 und C6.
+  - Kern und Anbindung brauchen etwa 35 KB Flash und keinen festen RAM.
+  - Die Arduino-Pakete enthalten keinen Netzwerktreiber für den Emulator. Deshalb sind die Sketche nur übersetzt und nicht gelaufen. Ihr Code ist aber der gleiche, der im Emulator alle drei Stufen besteht.
+- **Prüfwerkzeug der Arduino-Bibliothek (A-486):** Ein Punkt bleibt offen: Die Web-Adresse der Bibliothek muss für den Library Manager erreichbar sein. Das gehört zur Veröffentlichung (P9).
+- **Fehler gefunden und behoben (A-487):**
+  - Sechs Emulator-Prozesse aus den Läufen von C-096 liefen noch im Hintergrund.
+  - Ursache: Der Testaufbau hat das Startprogramm des Emulators hart beendet, der Emulator selbst blieb übrig.
+  - Jetzt wird es erst freundlich beendet und nur notfalls hart. Ich habe die Prozesse gestoppt und den Lauf wiederholt; danach blieb nichts übrig.
+- **Anleitung für echte Hardware:** In der README steht jetzt Schritt für Schritt, wie man ein Board an den Dev-Broker anschließt und mit D7 prüft.
+- **Doku-Seite:** `oec/docs/docs/micro-sdk/index.md` ist die Seite „OEC Micro SDK“ für die Docusaurus-Seite, wie die Seiten der Demos und der Registry.
+- **Werkzeuge auf deinem Mac (A-488):**
+  - `arduino-cli` (Homebrew) mit eigener Einstellung unter `~/.arduino-oecm`.
+  - Das Arduino-ESP32-Paket (7,3 GB) habe ich für spätere Prüfungen behalten. `rm -rf ~/.arduino-oecm` entfernt es.
+  - Docker habe ich in C-097 nicht benutzt.
+- **Kein Guideline-Befund, keine Testdaten zum Review.**
 
 ### Zur Info: was C-096 gemacht hat (P4b, Teil 5 von 6)
 

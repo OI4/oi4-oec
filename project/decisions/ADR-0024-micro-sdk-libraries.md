@@ -67,3 +67,7 @@ The agent checked the facts on 2026-10-26 (GitHub and the esp-mqtt sources):
 - The core needs its own JSON reader. This is about 400–600 lines with tests, on top of the planned encoder. It is the attack surface for broker input, hence the fuzz target and the limits.
 - P4b starts with a short check: does esp-mqtt behave as above in the IDF of the current Arduino-ESP32 release, and does Arduino-ESP32 4.x still ship it? If not, the arduino-mqtt fallback applies.
 - The open choice for the PO is Q-027: an own JSON reader (recommended) or cJSON with a static arena.
+
+## Amendment C-097 (2026-11-13) – check of the Arduino path (agent, G-3.4 b)
+
+The check named under Consequences (A-479, `log/2026-11-13_C-097_arduino-p4b-exit.md`): Arduino-ESP32 **3.3.12** (ESP-IDF 5.5) ships esp-mqtt as `libmqtt.a`; its `mqtt_client.h` differs from esp-mqtt 1.1.0 only in fields the PAL does not use. **4.0.0-RC1** (ESP-IDF 6.1) ships the managed component `espressif__mqtt` with a `mqtt_client.h` identical to the esp-mqtt 1.1.0 of the ESP-IDF build. The main path applies: the library uses the ESP-IDF PAL unchanged; the arduino-mqtt fallback is not needed. Persistence uses NVS directly (the PAL's `nvs_*` calls), not `Preferences`. A CI job against the IDF of the current Arduino-ESP32 release does not exist yet (no CI in the project); the opt-in builds of C-097 cover both cores.

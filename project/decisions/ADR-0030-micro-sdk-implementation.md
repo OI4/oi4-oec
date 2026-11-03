@@ -115,3 +115,15 @@ Refines §1, §7, §8 and §10 (A-467 … A-478; details in `log/2026-11-12_C-09
 - **Provisioning** (A-469): the firmware reads broker, CA, credentials or client certificate, SerialNumber, level, MaxPacketSize, SNTP server and Wi-Fi from the NVS partition `oecprov` (namespace `oec`); nothing of a site is compiled in or committed (§8). The serial console takes `stop` and `time <unix ms>` (A-470).
 - **QEMU** (§7, §8, A-472 … A-475): the Go command `host/cmd/oecm-qemu` runs the `qemu` build like `oecm-host` (same container storage below `OEC_ROOT`, loopback → 10.0.2.2, flash image with NVS seeding, clock over the console, SIGTERM → `stop`); the pinned D7 passes moved to `internal/d7run/pins.go` and `d7run.D7` gained `ProxyNames`, `Timeout` and `RestartWait`; D7 against QEMU is opt-in (`OECM_QEMU_BUILD`, `OECM_QEMU`), never in the gate.
 - **Footprint** (A-477): see the log and the README.
+
+## Amendment C-097 (2026-11-13) – increment 6: Arduino library, M5Stack example, P4b exit (agent, G-3.4 b)
+
+Refines §1, §7, §8 and §10 (A-479 … A-488; details in `log/2026-11-13_C-097_arduino-p4b-exit.md`):
+
+- **Layout** (§1, A-480, A-482): `arduino/` holds the library `OECMicro` (`library.properties`, `OECMicro.h`, `README.md`, `package.sh`, `examples/Sensor`, `examples/M5Stack`). An Arduino library cannot refer to files outside its folder, so `package.sh` assembles a flat copy into `target/arduino/OECMicro/` (the core, `oecm.h`, the ESP-IDF PAL `oecm_esp.{c,h}` unchanged, `examples/sensor` into each example, `oec/LICENSE`) and a zip; nothing generated is committed. The M5Stack example is the Arduino sketch `arduino/examples/M5Stack` (M5Unified) instead of `examples/m5stack/` – one M5Stack variant, not an ESP-IDF one beside it.
+- **PAL** (§8, A-479): the Arduino-ESP32 cores 3.3.12 and 4.0.0-RC1 both ship esp-mqtt with the API the PAL uses; `oecm_esp.c` is used unchanged, no second MQTT client.
+- **Provisioning** (§8, A-481): the sketches compile their settings in from `arduino_secrets.h` (Arduino convention); the committed files hold empty placeholders and the gate checks that they stay empty. Level 3 records stay in NVS (namespace `oecm`).
+- **API** (A-483): `oecm_connected()` (ADR-0022 amendment C-097); `examples/sensor` gains `oecm_sensor_value()`/`oecm_sensor_setpoint()` and C++ guards.
+- **Checks** (§7, A-484, A-485): the gate packages the library into a temporary directory and checks the copy, the examples, the empty secrets and the headers as C++17; compiling the sketches needs `arduino-cli` with the Arduino-ESP32 core and is opt-in. The sketches do not run in QEMU (the Arduino core has no OpenCores Ethernet); their runtime evidence is the identical core + PAL in the QEMU runs of C-096.
+- **Harness defect** (§7, A-487): `internal/d7run` ended the device process with SIGKILL, which left the QEMU of `oecm-qemu` running; it now sends SIGTERM and waits up to 20 s before SIGKILL.
+- **Exit** (§10): P4b exit assessment in the log; the run on real hardware stays an opt-in step for the PO (D-1).
