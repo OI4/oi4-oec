@@ -1,0 +1,24 @@
+/* Theme of the documentation site (ADR-0031): Infima variables only, no
+   external fonts or images (the site works offline). */
+:root {
+  --ifm-color-primary: #1b6ac9;
+  --ifm-color-primary-dark: #1860b5;
+  --ifm-color-primary-darker: #175aab;
+  --ifm-color-primary-darkest: #134a8d;
+  --ifm-color-primary-light: #2d78d8;
+  --ifm-color-primary-lighter: #3880da;
+  --ifm-color-primary-lightest: #5794e0;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #5ea1f0;
+  --ifm-color-primary-dark: #4392ee;
+  --ifm-color-primary-darker: #358aed;
+  --ifm-color-primary-darkest: #1472e0;
+  --ifm-color-primary-light: #79b0f2;
+  --ifm-color-primary-lighter: #87b8f3;
+  --ifm-color-primary-lightest: #b0cff7;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}

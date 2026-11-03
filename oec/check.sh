@@ -39,7 +39,9 @@
 #  10. docs/check.sh: the documentation site D6 of P8 (ADR-0031, from
 #      C-098), offline without node: front matter, every link and anchor
 #      of the pages into the site and into oec/, no hyperlink to the
-#      guideline site (G-4.11). The site build is opt-in.
+#      guideline site (G-4.11); the offline npm policy of the site
+#      (package.json, lockfile, licenses, .npmrc, config; from C-099).
+#      The site build (docs/build.sh, npm) is opt-in.
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
