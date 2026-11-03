@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 16.11.2026, C-100: die Doku-Seite hat jetzt die Seiten „Concepts“ (Grundbegriffe) und „Migration notes 1.x → 2.0“ (was ist neu gegenüber 1.x). Deine Antwort zu D-1 ist umgesetzt: die Doku liegt jetzt im Community-Teil der Guideline-Seite (`oi4-oec-documentation/docs/community`), in `oec/docs` bleiben nur Prüfung und Bau-Skript (A-506 … A-511). Für dich ist nichts offen; als Nächstes C-101 – Anleitungen für die SDKs (Rust, C, Go) und die API-Referenz._
+_Stand: 17.11.2026, C-101: Die Doku hat jetzt die SDK-Anleitungen für Rust, C und Go und eine Seite „API reference“ (`oi4-oec-documentation/docs/community/sdk/`). Alle Code-Beispiele habe ich gegen die SDKs kompiliert und die Provider-Teile laufen lassen (A-512 … A-519). Für dich ist nichts offen; als Nächstes C-102: Anleitungen für D7 und D8, JSON-Schema-Referenz und Validierungs-How-to._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -52,6 +52,21 @@ Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Do
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-101 gemacht hat (P8, Teil 4 von 6)
+
+- **Neue Seiten (A-512, A-513):** ein Ordner `docs/community/sdk/` mit
+  - „SDKs“ (`index.md`): was die SDKs je Level übernehmen, Voraussetzungen, wie die Anwendung den Broker findet, Verbindung mit `oec/dev`, Prüfen mit `oec-check`;
+  - je eine Anleitung für **Rust**, **C** und **Go** in derselben Reihenfolge: Bauen, erste Anwendung (Level 1), Provider (Daten, `Set`, Config, Status-Event), Consumer (Abonnieren, `Get`, `Set`), das vollständige Beispiel (Demo) und weiterführende Links;
+  - „API reference“ (`reference.md`).
+  Die Inhalte kommen aus den SDK-READMEs und Beispielen. Details stehen nicht doppelt da, sondern als Link auf die passende README-Überschrift.
+- **Code-Beispiele geprüft (A-514):** Jedes Beispiel auf den Seiten habe ich in einem temporären Ordner gegen das SDK im Workspace kompiliert (C ohne eine einzige Warnung, Go mit `go vet`, Rust ohne Warnung). Die Provider- und Config-Teile liefen auch (ohne Broker). Die Consumer-Teile sind nur kompiliert, weil sie einen Broker brauchen. Diese Prüfung läuft nicht im Gate; die vollständigen Beispiele, auf die die Seiten verlinken, prüft das Gate aber ohnehin.
+- **Hinweis gefunden (A-515):** Gibt man den Broker direkt an (statt über den Container-Speicher), merkt sich das SDK seinen Zustand nur im Arbeitsspeicher. Ab Level 2 muss es aber die ReferenceDesignation dauerhaft speichern – dann bricht der Start mit „level not met“ ab. Das ist so gewollt (kein Fehler im SDK). Die Seiten sagen jetzt: Bei direkt angegebenem Broker braucht man ab Level 2 ein Speicher-Verzeichnis.
+- **API-Referenz (A-516):** Die Seite verweist auf die Referenz, die es schon gibt: Rust-Doku (`cargo doc`), die Kommentare im C-Header `oec.h`, `go doc` und `oecm.h` (Micro SDK). Dazu eine Tabelle, welcher Name in Rust, C und Go dasselbe meint. Es wird nichts erzeugt oder veröffentlicht; das Gate prüft diese Referenzen bereits.
+- **Seitenleiste (A-517):** Die SDK-Seiten stehen vor den „Migration notes“, die weiter ganz unten bleiben. „Getting started“ und „Concepts“ zeigen jetzt auf die neuen Anleitungen statt auf die READMEs.
+- **READMEs und Prüfung (A-518):** Die READMEs von Rust-SDK, Go-SDK und Docs verlinken die Anleitungen. `docscheck: 14 pages ok, 19 README links to them ok`; der Bau der Guideline-Seite lief ohne Warnung (etwa 18 s).
+- **Kein Live-Lauf (A-519):** Docker lief in dieser Sitzung nicht (Fehler 500). Deshalb liefen die Hello-World-Programme und Consumer nicht gegen `oec/dev`. Teil 5 der Doku (D7/D8, Schema, Validierung) kommt in C-102 in einer neuen Sitzung.
+- Kein Fehler in SDK oder README, keine Lücke in der Guideline: kein SF, kein D-x, kein R-x.
 
 ### Zur Info: was C-100 Nachtrag 2 gemacht hat (Doku im Community-Teil)
 

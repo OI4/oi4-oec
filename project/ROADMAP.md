@@ -450,7 +450,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 1. ✅ (C-098) Plan, ADR-0031, `docscheck` (Go, standard library) with gate step 10, Getting started page `intro.md` (root `slug: /`), npm survey and feasibility build of Docusaurus 3.10.2 (temporary).
 2. ✅ (C-099) Site scaffold: `package.json`, lockfile (1275 packages), `docusaurus.config.mjs` (README links → repository URL by the remark plugin `src/remark/repoLinks.mjs`, ADR-0031 amendment C-099), sidebars, the npm policy test `tools/npmpolicy` in gate step 10, opt-in `build.sh` without broken links (not published, Q-011).
 3. ✅ (C-100) Concepts (`concepts.md`: assets and roles, identities, topics, resources and methods, messages, compliance levels; guideline sections by number) and migration notes 1.x → 2.0 (`migration.md`: GL-ADR-001 … 022, what changes and what a 1.x application must do); `build.sh` without broken links.
-4. (C-101) SDK guides Rust, C, Go and the API reference (into `docs/community`).
+4. ✅ (C-101) SDK guides Rust, C, Go and the API reference: `docs/community/sdk/` (`index.md`, `rust.md`, `c.md`, `go.md`, `reference.md`; sidebar before the migration notes), snippets compiled and their provider parts run against the SDKs, `docscheck: 14 pages ok, 19 README links to them ok`, `build.sh` without a warning for `docs/community` (ADR-0031 amendment C-101, A-512 … A-519).
 5. (C-102) D7 and D8 guides, JSON Schema reference and validation how-to.
 6. (C-103) P8 exit run: build without broken links, a newcomer run of the demos from the site only.
 
