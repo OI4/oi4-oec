@@ -44,6 +44,14 @@
 #      oec/, no hyperlink to the guideline (G-4.11), MDX-safe text, and the
 #      links of the READMEs of oec/ to the pages. The build of the
 #      guideline site (docs/build.sh, yarn) is opt-in.
+#  11. ci: the CI workflows of P9 (ADR-0032, from C-104): gofmt, vet and
+#      tests of the module oec/ci (standard library only: the CI policy –
+#      actions pinned by SHA, read-only permissions, no expression in run,
+#      one secret in one place –, the YAML rendering, the tool pins of
+#      ci/versions.sh against sdk/check.sh and the Cargo packages), then
+#      cigen -check: .github/workflows equals the rendering. actionlint
+#      (ci/lint.sh) and the Linux run of the gate job in a container
+#      (ci/linux.sh) are opt-in.
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
@@ -100,5 +108,10 @@ step "sdk/micro/check.sh (micro SDK D9)"
 
 step "docs/check.sh (documentation site D6)"
 "$root/docs/check.sh"
+
+step "ci: gofmt, vet, test, cigen -check (CI workflows, ADR-0032)"
+cd "$root/ci"
+gocheck
+go run ./cmd/cigen -check
 
 printf '\nall checks passed\n'

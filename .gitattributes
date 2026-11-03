@@ -1,0 +1,4 @@
+# Line endings of the repository (ADR-0032 §6): LF in the index and in every
+# checkout, also on Windows runners (gofmt, the hash pins of the schema
+# release and the vectors, portable line endings G-4.13); git detects binaries.
+* text=auto eol=lf

@@ -1,0 +1,50 @@
+#!/bin/sh
+# Opt-in (Docker, network, about 1 to 2 hours): runs the job "gate" of
+# gate.yml in an Ubuntu 24.04 container (versions.sh; the architecture of
+# the Docker host) against the committed state: clones HEAD of this
+# repository and the branch guideline_ref of ../../oi4-oec-documentation,
+# installs the build tools (apt), Go (GOTOOLCHAIN=auto fetches the
+# toolchain of go.mod) and rustup, then runs setup-tools.sh, fetch.sh and
+# oec/check.sh as a non-root user with CC=clang, as on the runner
+# (ADR-0032 §8). Removes its container on exit and the Ubuntu image if it
+# pulled it. Never part of the gate.
+set -eu
+here="$(cd "$(dirname "$0")" && pwd)"
+. "$here/versions.sh"
+ws="$(cd "$here/../.." && pwd)"
+test -d "$ws/oi4-oec-documentation/.git" || { echo "linux.sh: no guideline repository at $ws/oi4-oec-documentation" >&2; exit 1; }
+name="oec-ci-linux"
+pulled=0
+docker image inspect "$ubuntu_image" >/dev/null 2>&1 || pulled=1
+cleanup() {
+	docker rm -f "$name" >/dev/null 2>&1 || true
+	if [ "$pulled" = 1 ]; then docker image rm "$ubuntu_image" >/dev/null 2>&1 || true; fi
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+# The steps of gate.yml, as the user ci (not root: file permission checks
+# behave as on the runner).
+job='set -eu
+git config --global --add safe.directory "*"
+git clone --quiet /src "$HOME/w"
+git clone --quiet --branch "$GUIDELINE_REF" /src/oi4-oec-documentation "$HOME/w/oi4-oec-documentation"
+cd "$HOME/w"
+echo "linux.sh: workspace $(git rev-parse --short HEAD), guideline $(git -C oi4-oec-documentation rev-parse --short HEAD), $(uname -m)"
+export GOTOOLCHAIN=auto CARGO_TERM_COLOR=never CC=clang
+export PATH="$HOME/.oec-tools/bin:$HOME/.cargo/bin:$PATH"
+oec/ci/setup-tools.sh
+oec/ci/fetch.sh
+oec/check.sh'
+
+docker run --name "$name" --rm \
+	-v "$ws:/src:ro" \
+	-e GUIDELINE_REF="$guideline_ref" -e JOB="$job" \
+	"$ubuntu_image" bash -euc '
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq
+apt-get install -y -qq --no-install-recommends ca-certificates curl git build-essential clang llvm cmake \
+	golang-go gcc-14 >/dev/null
+useradd --create-home ci
+printf "%s\n" "$JOB" >/tmp/job.sh
+runuser -u ci -- env HOME=/home/ci USER=ci GUIDELINE_REF="$GUIDELINE_REF" sh /tmp/job.sh'
