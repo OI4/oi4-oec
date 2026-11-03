@@ -45,7 +45,7 @@ go run ./cmd/oec-check monitor --replay run.jsonl --format json --report junit=m
 ```
 
 - Connection: `--broker mqtts://host:port`, `--ca`, `--username` + `--password-file`, `--cert` + `--key` (+ `--key-passphrase-file`, encrypted PKCS#8 supported), `--client-id`, or `--bus-storage ROOT` (the RIG container storage: `etc/oi4/mqtt/broker.json`, CA, client certificate, `run/secrets/oi4/…`); explicit flags override the storage. `--insecure` skips the broker certificate check – dev only, warned on stderr and marked in capture and report.
-- Run: `--duration` (default 5m; the heartbeat needs at least 2 × `--heartbeat` + `--tolerance` = 125 s), `--app` (AppId or `ServiceType/AppId` of the component under test; without it every participant is judged), `--level` (1–3, default 3), `--allow-skip`, `--max-packet-size`, `--config FILE.yaml` (keys = flag names, command line wins).
+- Run: `--duration` (default 5m; the heartbeat needs at least 2 × `--heartbeat` + `--tolerance` = 125 s), `--app` (AppId or `ServiceType/AppId` of the component under test; without it every participant is judged), `--level` (1–3, default 3), `--allow-skip`, `--max-packet-size`, `--config FILE.yaml` (keys = flag names except `config` and `replay`, command line wins).
 - Output: `--format text|json|junit` on stdout, `--report FORMAT=PATH` (repeatable). The report lists the participants and per test the per-REQ results with evidence (capture line, topic, JSON pointer).
 - Capture (`--record`, `--replay`): JSONL, header line + one record `{"topic", "payload", "size", "received", "qos", "retain"}` per message + trailer (DESIGN.md §3.2); `validate` reads it as a message file.
 
