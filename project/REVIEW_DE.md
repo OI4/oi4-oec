@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 19.11.2026, C-103: Der Abschlusslauf von P8. Ich habe die Demos und die Registry genau nach der Startseite der Doku gebaut und gestartet, die Prüfbefehle von `oec-check` (D7) und `oec-infra` (D8) und die Beispielprogramme der SDKs gegen die Entwicklungsumgebung `oec/dev` laufen lassen und die Seiten dort korrigiert, wo die Wirklichkeit anders war (Guideline-Commit `f61af2c`). Die Seite baut ohne jede Warnung. **Offen für dich: D-1 – P8 schließen?**_
+_Stand: 19.11.2026, C-103 Nachtrag 1: Deine Antwort „D-1 (a)“ ist eingetragen – **P8 (Dokumentation) ist abgeschlossen**. Die Veröffentlichung der Seiten (Q-011) und Neuling-Läufe unter Linux/Windows in der CI wandern nach P9. Als Nächstes kommt **P9 – Härtung & Release** (C-104). Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,24 +24,19 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – P8 (Dokumentation) schließen?
-
-**Worum geht es?** P8 hat zwei Abschlusskriterien: (1) die Doku-Seite baut ohne kaputte Links, (2) ein Neuling kann die Demos nur mit der Doku zum Laufen bringen. Beides ist erfüllt:
-- (1) Der Bau der Guideline-Seite (`oec/docs/build.sh`) läuft ohne eine einzige Warnung. Zusätzlich prüft das Gate bei jedem Lauf alle Links und Anker der 19 Seiten und die 30 Links aus den READMEs auf die Seiten.
-- (2) Ich habe die Befehle der Startseite („See OEC at work“) der Reihe nach auf einer frischen Entwicklungsumgebung ausgeführt: Demos und Registry starten, alle Web-Oberflächen und die REST-Schnittstelle antworten, das Umstellen von 3 auf 4 Wetterstationen klappt durchgehend, und das Aufräumen der Seite entfernt alles wieder. Der einzige Fehler war die Bauzeit („ein paar Minuten“ – in Wahrheit etwa 20 Minuten beim ersten Mal); das steht jetzt richtig da.
-
-Außerdem laufen die Prüfbefehle und die SDK-Beispiele so, wie die (korrigierten) Seiten es sagen.
-
-**Was nicht ganz ideal ist (blockiert nicht):** Den Lauf habe ich gemacht, nicht ein echter Neuling, und nur auf einem Mac (nicht Linux/Windows). Die Seite ist noch nicht veröffentlicht (Q-011). Die API-Referenz verweist auf rustdoc, `oec.h` und `go doc` statt eigene Seiten zu erzeugen; die Schema-Seite ist von Hand geschrieben.
-
-**Möglichkeiten:**
-- (a) **P8 schließen, als Nächstes P9 – Härtung & Release** – meine Empfehlung. Was weiterwandert: die Veröffentlichung der Seiten mit der Guideline-Seite (Q-011, entscheidest du), Neuling-Läufe unter Linux und Windows in der CI (P9); jede spätere Änderung an Werkzeug, SDK, Demo oder Registry passt ihre Seite im selben Zyklus an (docscheck bleibt im Gate).
-- (b) P8 schließen wie (a), aber eine andere nächste Phase (bitte nennen).
-- (c) P8 offen lassen, bis ein echter Neuling es probiert hat (bitte nennen, wer und auf welchem System).
-
-Antwort z. B.: „D-1 (a)“.
+Für dich ist nichts offen.
 
 ## Früher beantwortet
+
+### D-1 aus C-103 – P8 schließen?
+
+Deine Antwort: „D-1 (a)“. P8 ist damit abgeschlossen. Was weiterwandert (nach P9):
+- die **Veröffentlichung** der Seiten zusammen mit der Guideline-Seite – das entscheidest du (Q-011);
+- **Neuling-Läufe unter Linux und Windows** in der CI.
+
+Außerdem gilt weiter: Ändert sich später ein Werkzeug, ein SDK, eine Demo oder die Registry, passe ich die zugehörige Seite im selben Zyklus an; docscheck bleibt im Gate.
+
+Als Nächstes kommt **P9 – Härtung & Release** (C-104): Plan und Zyklus-Schnitt, eine ADR für CI und Release und ein erster Schritt, der ohne Veröffentlichung auskommt. Wohin veröffentlicht wird, öffentliche Releases und die CRA-Prüfung lege ich dir als Entscheidung vor.
 
 ### D-1 aus C-100 Nachtrag 1 – Doku im Community-Teil der Guideline-Seite
 

@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-19, C-103: P8 increment 6, the P8 exit run – newcomer run of the demos from the site, the compliance commands and the SDK snippets live against `oec/dev`, pages fixed (guideline `f61af2c`), build without any warning; A-529 … A-535 for information. **Open for you: D-1 – close P8?**_
+_Last updated: 2026-11-19, C-103 addendum 1: your answer to D-1 is applied – **P8 closed**; carried: publication with the guideline site (Q-011) and newcomer runs on Linux/Windows in CI → P9; next phase P9 – Hardening & release (C-104). Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -305,6 +305,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-101 (P8 increment 4; ADR-0031 amendment C-101): SDK guides in `oi4-oec-documentation/docs/community/sdk/` – SDKs overview (`index.md`: Messaging levels, prerequisites, where the application finds the broker, `oec/dev`, `oec-check`), Rust, C and Go (build, first application at Level 1, provider with Data/`Set`/Config/Generic event, consumer with subscriptions/`Get`/`Set`, the complete demo) and the API reference (rustdoc, `oec.h`, `go doc`, `oecm.h` + a name map, nothing generated); every snippet compiled against the workspace SDKs and its provider part run; Getting started, Concepts and the Rust/Go/docs READMEs link the guides; `docscheck: 14 pages ok, 19 README links to them ok`, opt-in build 0 warnings (guideline commit `0539e3a`). No D-x, no R-x, no SF (A-512 … A-519).
 - C-102 (P8 increment 5; ADR-0031 amendment C-102): compliance guides in `oi4-oec-documentation/docs/community/compliance/` – Compliance tools (`index.md`: what D7, D8 and the schemas check, a one-minute offline try, install, verdicts and exit codes, reports, `list`/`explain`), `oec-check` (D7: `validate` with `--role`, `monitor` live and `--replay`, `test` with proxy, restart hook, peer and announce, report version 1), `oec-infra` (D8: `image`, `run`, `container`, `bus`, `host`, manual checks, limits such as REQ-PLT-003 on macOS), JSON Schemas (layout of `oec/schema`, topic → entry schema, `$id`s, strict and tolerant, 2.0.0 frozen / `2.0.1-dev`, CHANGELOG) and Validate a message (`oec-check validate` and any JSON Schema validator; what the schema does not see); every offline command and output verified against freshly built binaries and the fixtures; migration notes still last; Getting started, Concepts, SDKs, Demos and the docs/conformance/schema READMEs link the pages; conformance README `--config` wording fixed; `docscheck: 19 pages ok, 30 README links to them ok`, opt-in build 0 warnings (guideline commit `691f47c`). No D-x, no R-x, no SF (A-520 … A-528).
 - C-103 (P8 increment 6 = exit run; ADR-0031 amendment C-103): newcomer run per Getting started on a clean `oec/dev`; D7 `monitor`/`test`, D8 `image`/`run`/`container`/`bus`/`host`, hello Rust/C/Go and the consumers live; page fixes in guideline `f61af2c`, `oec/dev/README.md` fix (A-529 … A-535). **D-1** close P8? No R-x, no SF.
+- C-103 addendum 1: your answer ("D-1 (a)") is applied: **P8 is closed** (ROADMAP P8 heading and "Decision" paragraph, STATUS, ADR-0031). Carried as proposed → P9: publication of the pages with the guideline site (Q-011), newcomer runs on Linux/Windows in CI; every later change updates its page. Next phase: P9 – Hardening & release.
 - C-100 addendum 1/2: PO wants the documentation in the Community section of the guideline Docusaurus site (Q-036); D-1 answered (b) and implemented: the pages moved into `oi4-oec-documentation/docs/community` (`intro.md` → `index.md` with the community note, links into `oec/` as repository URLs), the old 1.x Community pages and the 1.x zip are removed, home page and footer of the guideline site link the new pages (guideline commit `cbc293a`); `oec/docs` lost the site scaffold and the npm policy, docscheck checks the Community section, MDX-safe text and the README links to it (`docscheck: 9 pages ok, 10 README links to them ok`); opt-in `build.sh` = yarn build of the guideline site (~18 s, no warning for `docs/community`); GUARDRAILS G-4.11, ADR-0012 and ADR-0031 amended (A-506 … A-511).
 - C-100 (P8 increment 3; ADR-0031 amendment C-100): pages Concepts (`concepts.md`: assets and roles, identities, topics, resources and methods, messages, compliance levels) and Migration notes 1.x → 2.0 (`migration.md`: per breaking change of GL-ADR-001 … 022 what changes and what a 1.x application must do; `Oi4` and `Oi4v2` side by side); the guideline by section number only (G-4.11), nothing from `legacy/`; sidebar Getting started, Concepts, Demos, Registry, Micro SDK, Migration; `docscheck: 9 pages ok`, opt-in build without broken links. No D-x, no R-x, no SF (A-501 … A-505).
 
@@ -839,14 +840,17 @@ Logs: [C-103](log/2026-11-19_C-103_p8-exit-run.md), [C-102](log/2026-11-18_C-102
 
 ### Open for you
 
-- [ ] **D-1 – close P8?** (C-103, G-3.4 a: phase order, publication). PO: ____
+Nothing is open for you.
+
+### Answered earlier
+
+Answered after C-103 (2026-11-19) and recorded in C-103 addendum 1:
+- D-1 – close P8: ☑ (a) closed, next phase **P9 – Hardening & release**; carried items as proposed ("D-1 (a)"). The question was:
 
 > **D-1 – close P8?** The exit assessment is in the log C-103 ("P8 exit assessment") and in ROADMAP P8. Both exit criteria are met: (1) the guideline site builds with `oec/docs/build.sh` without any warning, and docscheck checks every link and anchor of the 19 pages and of the 30 README links to them in gate step 10; (2) the commands of Getting started, run in order on a clean `oec/dev`, start the demos and the registry, every UI and the REST API answer, the walkthrough's `Set` works end to end and the page's clean-up removes everything – the only error, the build time, is fixed. All sections of ROADMAP P8 exist, and the live commands of the compliance guides and the SDK snippets run as the (fixed) pages say. Deviations, none blocking: the run was made by the agent on macOS arm64 (not a real newcomer, not Linux/Windows); the site is not published (Q-011); the API reference points to rustdoc/`oec.h`/`go doc` (A-516); the schema reference is hand-written (A-525).
 > - (a) **close P8, next P9 – Hardening & release** – recommended. Carried: publication of the pages with the guideline site (Q-011, your decision); newcomer runs on Linux and Windows in CI (P9); every later change to a tool, SDK, demo or the registry updates its page in the same cycle (docscheck stays in the gate).
 > - (b) close P8 with the same carried items, but another next phase (name it).
 > - (c) keep P8 open for a run by a real newcomer (name who and on which system).
-
-### Answered earlier
 
 Answered after C-100 addendum 1 (2026-11-16) and recorded in C-100 addendum 2:
 - D-1 – documentation also in the Community section of the guideline site (Q-036): ☑ option (b) with the old Community pages removed – "die alte oi4-oec-documentation/docs/community benötigen wir nicht mehr. Schreibe alles was unter oec/docs ist direkt in oi4-oec-documentation/docs/community. Verweise in den readmes auch gerne auf die oi4-oec-documentation/docs/community. Baue jetzt alle oec-docs soweit um, dass sie in /Users/thomas/work/github/oi4/oi4-oec/oi4-oec/oi4-oec-documentation sind" The pages move into `oi4-oec-documentation/docs/community`, `oec/docs` keeps only the offline check; implemented in C-100 addendum 2.
@@ -2197,4 +2201,4 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 
 ## Next (C-104)
 
-1. Your answer to D-1 (recorded in its own commit), then the first P9 cycle (plan, cycle cut, ADR) – or what you decide.
+1. C-104 – P9 start (Hardening & release): plan and cycle cut in the ROADMAP (P9 list plus every item carried "→ P9"), ADR-0032 for the CI/release architecture, a first increment without publication; publication targets, public releases and the CRA review as D-x for you (Q-011).

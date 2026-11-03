@@ -438,7 +438,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 **Decision (C-091 addendum 1, D-1, 2026-11-07):** P7 is closed with the carried items above. Next phase: **P4b – Micro SDK (D9)** (PO: "P7 schließen, dann P4b – Micro SDK (D9)"), instead of the proposed P8; P8 stays continuous. The PO wants D9 built through in one session if possible (C-092 ff.).
 
-## P8 – Documentation (D6) – continuous
+## P8 – Documentation (D6) ✅ (C-098 … C-103; closed after C-103, D-1 (a): publication with the guideline site (Q-011), newcomer runs on Linux/Windows in CI → P9; pages kept current in every later cycle)
 
 - ~~New standalone Docusaurus site in `oec/docs` (ADR-0012)~~ – since C-100 addendum 2 (PO): the pages live in the Community section of the guideline site, `oi4-oec-documentation/docs/community` (ADR-0012 and ADR-0031 amendments); guideline sections by number, no links to the guideline chapters (G-4.11).
 - Sections: Getting started (dev environment in 10 minutes), Concepts (short; guideline referenced by section number, no links – G-4.11) incl. compliance levels, SDK guide + API reference, micro SDK guide, compliance tool guides (D7, D8), JSON Schema reference (generated where possible) + validation how-to, Demo walkthroughs, Registry guide, Migration notes 1.x → 2.0 (breaking changes GL-ADR-001 … 011: Identification Link, `Oi4v2`, `DataSetWriterName`/`WriterGroupName`, `ReplyTo`, OPC UA 1.05.04, Actions, removed resources, SBOM, compliance levels).
@@ -456,6 +456,8 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 **Exit assessment (C-103, agent; details in `log/2026-11-19_C-103_p8-exit-run.md`; the PO decides, D-1):** both exit criteria are met. 1: the guideline site builds with `oec/docs/build.sh` without any warning; docscheck checks every link and anchor of the 19 pages and the 30 README links to them (gate step 10). 2: the commands of Getting started, in order on a clean `oec/dev`, start the demos and the registry, every UI and the REST API answer, the walkthrough's `Set` works end to end, the page's clean-up removes everything; the only error found – the build time ("a few minutes", really ~20 minutes for the first build) – is fixed. Every section of the list above exists; "dev environment in 10 minutes" holds for the broker alone. Deviations, none blocking: the run was made by the agent on macOS arm64, not by a real newcomer and not on Linux/Windows (→ P9 CI); the site is not published (Q-011); the API reference points to rustdoc/`oec.h`/`go doc` (A-516); the schema reference is hand-written (A-525). Carried if closed: publication with the guideline site (Q-011), newcomer runs on Linux/Windows in CI → P9; every later change updates its page (docscheck stays in the gate). Proposal: close P8, next P9 (D-1 (a)).
 
+**Decision (C-103 addendum 1, D-1 (a), 2026-11-19):** P8 is closed. Carried: publication of the pages with the guideline site (Q-011, PO decision); newcomer runs on Linux and Windows in the P9 CI; every later change to a tool, SDK, demo or the registry updates its page in the same cycle (docscheck stays in gate step 10). Next phase: **P9 – Hardening & release** (C-104).
+
 **C-100 addendum 1 (PO, 2026-11-16):** the documentation shall in the end also be part of the Community section of the guideline Docusaurus site (`oi4-oec-documentation/docs/community`) – Q-036 / D-1 (C-100 addendum 1).
 
 **C-100 addendum 2 (PO, 2026-11-16): D-1 answered (b), done.** The old Community pages were removed and the pages of `oec/docs/docs/` moved into `oi4-oec-documentation/docs/community` (`intro.md` → `index.md`, links into `oec/` as repository URLs `https://github.com/OI4/oi4-oec/blob/main/oec/…`); the site scaffold and the npm policy of `oec/docs` were removed; `docscheck` checks the Community section and the README links to it in gate step 10 (`docscheck: 9 pages ok, 10 README links to them ok`); the opt-in `build.sh` builds the guideline site with yarn (ADR-0031 amendment C-100 addendum 2, A-506 … A-511). Increments 4 … 6 write into `docs/community`.
@@ -470,6 +472,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
 - Publication target: private GitHub repositories (working assumption, Q-011). CRA review before any *public* release (Q-011): SBOM, vulnerability handling process, security update policy, support period.
 - Guideline feedback package: all spec findings with proposed text changes for the work group.
+- Documentation (D6, carried from the P8 exit, C-103 addendum 1): publication of the Community pages with the guideline site (Q-011); newcomer runs of Getting started on Linux and Windows in CI.
 
 ---
 
