@@ -1,0 +1,22 @@
+menu "OEC Micro SDK example"
+
+    choice OECM_EXAMPLE_NET
+        prompt "Network"
+        default OECM_EXAMPLE_NET_WIFI
+        config OECM_EXAMPLE_NET_WIFI
+            bool "Wi-Fi station (wifi_ssid, wifi_pass of the provisioning)"
+        config OECM_EXAMPLE_NET_OPENETH
+            bool "OpenCores Ethernet (Espressif QEMU only)"
+            depends on ETH_USE_OPENETH
+    endchoice
+
+    config OECM_EXAMPLE_LEVEL
+        int "Messaging level (the provisioning key level overrides it)"
+        range 1 3
+        default 3
+
+    config OECM_EXAMPLE_CONSOLE
+        bool "Serial console commands stop and time"
+        default y
+
+endmenu

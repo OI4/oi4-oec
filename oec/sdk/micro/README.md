@@ -5,11 +5,12 @@ and a platform abstraction layer (PAL), the reference port for ESP32 on
 ESP-IDF. Decisions: API in ADR-0022 (with the amendments), implementation in
 ADR-0030, ESP32 reference platform in ADR-0024.
 
-State (C-095): **Messaging Level 3** in the core (Level 1 since C-092,
+State (C-096): **Messaging Level 3** in the core (Level 1 since C-092,
 Level 2 since C-094), host tests, payload check and fuzz targets; the Go host
 runner runs the core under D7 `--level 1`, `--level 2` and `--level 3` in the
-gate. The ESP-IDF port and the Arduino library follow in C-096 and C-097
-(ADR-0030 §10).
+gate. The ESP-IDF port and the example firmware (C-096) build for `esp32`,
+`esp32s3` and the Espressif QEMU, where the firmware passes the same D7 runs
+(opt-in). The Arduino library follows in C-097 (ADR-0030 §10).
 
 | Path | Content |
 |---|---|
@@ -18,7 +19,10 @@ gate. The ESP-IDF port and the Arduino library follow in C-096 and C-097
 | `tests/` | Unity tests, the recording PAL `fake_pal.c`, the payload emitter `emit.c`, the generated vector header `vectors_gen.h` |
 | `fuzz/` | libFuzzer targets `fuzz_json.c`, `fuzz_topic.c`, `fuzz_message.c`, the corpus replayer `replay.c`, seed corpora, `run.sh` |
 | `examples/host/hello_device.c` | a Level 1 device with a stub PAL that prints, the shape of the firmware |
-| `host/` | Go module (standard library only): `cmd/oecm-vecgen` generates `tests/vectors_gen.h` from `oec/spec/export/vectors`; `cmd/oecm-host` is the host runner (the core with a PAL in Go over cgo), `mqtt/` its MQTT 3.1.1 client, `internal/d7run` the D7 harness |
+| `examples/sensor/` | the simulated temperature sensor (Data, Config) of the host runner and the firmware |
+| `examples/esp-idf/` | the example firmware (ESP-IDF project), `build.sh` |
+| `port/esp-idf/oecm/` | the ESP-IDF component `oecm`: the core + the PAL `oecm_esp.c` |
+| `host/` | Go module (standard library only): `cmd/oecm-vecgen` generates `tests/vectors_gen.h` from `oec/spec/export/vectors`; `cmd/oecm-host` is the host runner (the core with a PAL in Go over cgo), `mqtt/` its MQTT 3.1.1 client; `cmd/oecm-qemu` runs the firmware in QEMU; `internal/d7run` the D7 harness and the pinned passes |
 | `third_party/unity/` | Unity v2.7.0 (MIT), unchanged, test only |
 
 ## Rules of the core
@@ -141,6 +145,22 @@ Identification Link with empty texts 2315. A Level 2 device needs a larger
 transmit buffer for its Config and Metadata answers (the host demo uses 8192);
 larger answers are paginated.
 
+On the ESP32 (ESP-IDF v6.1, `-Os`, example firmware at Level 3, C-096):
+
+| | `esp32` (Wi-Fi) | `esp32s3` (Wi-Fi) | `qemu` (Ethernet) |
+|---|---|---|---|
+| app image | 884 KB | 879 KB | 536 KB |
+| `liboecm.a` (core + PAL, flash) | 33.6 KB | 33.7 KB | 33.0 KB |
+| esp-mqtt / mbedTLS (flash) | 11.2 / 24.3 KB | 11.8 / 24.2 KB | 10.8 / 24.3 KB |
+| static RAM (DRAM / IRAM) | 49.9 / 84.4 KB | 110.7 KB DIRAM | 29.4 / 45.6 KB |
+
+The core and the PAL have no static data; the firmware holds the device
+state (1024), the transmit buffer (8192) and the ReferenceDesignation buffer
+(2048) statically, the PAL allocates its receive buffer (8192) and a ring
+buffer of twice that size once at `oecm_esp_init`. In QEMU at Level 3 the
+lowest free heap was about 167 KB after the D7 runs (TLS sessions included)
+and the 8 KB main task used at most about 2.4 KB of its stack.
+
 ## Host runner
 
 `host/cmd/oecm-host` links the core with cgo and implements the PAL in Go
@@ -157,7 +177,7 @@ container storage below `OEC_ROOT` (default `/`, RIG 4.1):
 | `run/secrets/oi4/credentials` | `base64(user:password)` otherwise |
 | `var/lib/oecm-host/` (or `-state`) | Level 3: one file per persisted record (`oecm.refdes`, `oecm.wid`) |
 
-Flags: `-level` (1; 2 runs the simulated temperature sensor of `demo.c`; 3
+Flags: `-level` (1; 2 runs the simulated temperature sensor of `examples/sensor`; 3
 adds the ReferenceDesignation and `NewDataSetWriterId`), `-state`, `-il`, `-manufacturer`, `-manufacturer-uri`, `-model`,
 `-product-code`, `-serial`, `-software-revision`, `-client-id`. SIGTERM or
 SIGINT stops it gracefully (Close message). Against the dev broker
@@ -197,14 +217,97 @@ Regenerate the vectors after a change of `oec/spec/export/vectors`:
 cd oec/sdk/micro/host && go run ./cmd/oecm-vecgen
 ```
 
-## PAL duties of the ESP-IDF port (C-096)
+## ESP-IDF port (C-096)
 
-| PAL function | ESP-IDF | Note |
+`port/esp-idf/oecm/` is the ESP-IDF component `oecm` (ESP-IDF ≥ 6.0,
+reference v6.1; ADR-0024): the core of `src/` and the PAL
+`oecm_esp.c` (`include/oecm_esp.h`). It depends on `espressif/mqtt` (esp-mqtt
+1.1.0, Apache-2.0) from the ESP Component Registry; TLS 1.2+ via
+esp-tls/mbedTLS with the broker CA only (no certificate bundle).
+
+| PAL function | ESP-IDF |
+|---|---|
+| `mqtt_connect` | `esp_mqtt_client_init` once, then `esp_mqtt_set_config` with the new Will before every connect (`disable_auto_reconnect`, REQ-LIFE-008/016) + `esp_mqtt_client_reconnect`, or `esp_mqtt_client_start` after a stop |
+| `mqtt_publish`, `mqtt_subscribe` | `esp_mqtt_client_publish` (QoS 0, retain 0), `esp_mqtt_client_subscribe_single` (QoS 0) |
+| `mqtt_disconnect` | `esp_mqtt_client_stop` (DISCONNECT, no Will) |
+| events | esp-mqtt task → FreeRTOS ring buffer (fragmented messages reassembled up to `rx_size`, default 8192) → `oecm_esp_dispatch` on the application task → `oecm_on_*`; events of an earlier connection attempt are dropped |
+| `unix_time_ms`, `monotonic_ms` | `gettimeofday` (SNTP is the application's duty), `esp_timer_get_time` |
+| `persist_load`, `persist_save` | NVS blobs in the namespace `oecm` of the default `nvs` partition |
+
+```c
+oecm_esp_config pc = {.uri = "mqtts://broker:8883", .ca_pem = ca, .username = u, .password = p};
+oecm_esp *port; oecm_pal pal;
+oecm_esp_init(&pc, &port, &pal);         /* after nvs_flash_init, network and SNTP */
+oecm_init(&dev, &cfg, &pal, tx, sizeof tx);
+oecm_start(&dev);
+for (;;) {
+    oecm_esp_dispatch(port, &dev, oecm_poll_interval_ms(&dev));
+    oecm_poll(&dev);
+}
+```
+
+### Example firmware
+
+`examples/esp-idf/` is the simulated temperature sensor of `examples/sensor`
+(the same code as the host runner's) as a smart device, Level 3 by default
+(Kconfig `OECM_EXAMPLE_LEVEL`). `examples/esp-idf/build.sh [esp32|esp32s3|qemu]`
+(opt-in, after `. $IDF_PATH/export.sh`) builds into `target/esp-idf/<variant>/`
+and prints the sizes; `qemu` is an `esp32` with OpenCores Ethernet for the
+Espressif QEMU (`sdkconfig.qemu`), the others use Wi-Fi.
+
+Nothing of a site is compiled in. The firmware reads its settings from the NVS
+partition `oecprov` (`partitions.csv`), namespace `oec`:
+
+| Key | Type | Content |
 |---|---|---|
-| `mqtt_connect` | `esp_mqtt_client_init` / `esp_mqtt_set_config` + `esp_mqtt_client_start` | TLS via esp-tls/mbedTLS with the broker CA; `disable_auto_reconnect = true`, because esp-mqtt would reuse the old Will |
-| `mqtt_publish` | `esp_mqtt_client_publish` (QoS 0, retain 0) | REQ-MQTT-017, REQ-MQTT-018 |
-| `mqtt_subscribe` | `esp_mqtt_client_subscribe` | Level 2+ |
-| events | `esp_mqtt_client_register_event` → FreeRTOS queue → app task → `oecm_on_*` | single-threaded core |
-| `unix_time_ms` | `gettimeofday` after `esp_sntp` sync | REQ-MSG-007 |
-| `monotonic_ms` | `esp_timer_get_time() / 1000` | |
-| `persist_*` | NVS | Level 3 |
+| `uri` | string | `mqtts://host:port` of the broker (TLS only) |
+| `ca` | string | PEM of the CA of the broker certificate |
+| `user`, `password` | string | credentials, or: |
+| `cert`, `key` | string | PEM client certificate and key (used when present) |
+| `serial` | string | MAM SerialNumber; default: the base MAC address |
+| `level` | u8 | 1 … 3; default Kconfig |
+| `max_packet` | u32 | MaxPacketSize of the broker; default 262144 |
+| `ntp` | string | SNTP server; default `pool.ntp.org` |
+| `wifi_ssid`, `wifi_pass` | string | Wi-Fi station (not in the `qemu` variant) |
+
+Write a CSV in the format of the ESP-IDF NVS partition generator (strings as
+`file,string,<path>`), generate the image and flash it at the offset of
+`oecprov` (0x10000):
+
+```sh
+python -m esp_idf_nvs_partition_gen generate oecprov.csv oecprov.bin 0x6000
+python -m esptool --chip esp32 write-flash 0x10000 oecprov.bin
+```
+
+Keep the CSV and the image outside the repository (credentials, G-4.5). The
+serial console accepts `stop` (Close message, DISCONNECT, prints
+`oecm: stopped`) and `time <unix ms>` (sets the clock without SNTP). The
+firmware logs the free heap and the unused stack of its task every 60 s.
+
+### QEMU runner
+
+`host/cmd/oecm-qemu` runs the `qemu` build in the Espressif QEMU
+(`idf_tools.py install qemu-xtensa`; the `qemu-system-xtensa` of Homebrew has
+no `esp32` machine) like `oecm-host` runs the core: it reads the same
+container storage below `OEC_ROOT`, writes it into `oecprov` on every start
+(a loopback broker address becomes 10.0.2.2, the host in the QEMU user
+network), keeps the flash image in `OEC_ROOT/var/lib/oecm-qemu/flash.bin`
+(seeded with the files `oecm.refdes`/`oecm.wid` found there when it is
+created), sets the clock over the console and turns SIGTERM into `stop`.
+
+```sh
+cd oec/sdk/micro/host
+OEC_ROOT=… go run ./cmd/oecm-qemu -build ../target/esp-idf/qemu \
+    -qemu ~/.espressif/tools/qemu-xtensa/<version>/qemu/bin/qemu-system-xtensa -level 3
+```
+
+D7 against the firmware in QEMU (opt-in, about 7 min for the three levels;
+the same pinned passes as the host runner, `internal/d7run`):
+
+```sh
+OECM_QEMU_BUILD=$PWD/../target/esp-idf/qemu OECM_QEMU=…/qemu-system-xtensa \
+OEC_D7=<oec-check> go test -run 'TestQEMUD7' -v ./cmd/oecm-qemu/
+```
+
+Without `OECM_QEMU_BUILD` and `OECM_QEMU` these tests are skipped, also in
+the gate.

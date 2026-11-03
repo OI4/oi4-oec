@@ -1,0 +1,5 @@
+description: OEC Micro SDK (D9) – portable C17 core and ESP-IDF PAL (esp-mqtt, esp-tls/mbedTLS, NVS)
+license: MIT
+dependencies:
+  idf: ">=6.0"
+  espressif/mqtt: "^1.1.0"

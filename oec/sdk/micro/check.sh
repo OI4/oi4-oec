@@ -3,7 +3,7 @@
 #   host (Go module, standard library only): gofmt, go vet, go test – the
 #   MQTT client (with -race) and the host runner cmd/oecm-host (the core
 #   with a Go PAL over cgo) under D7 `oec-check test --level 1` and, as the
-#   simulated sensor of demo.c, `--level 2` and `--level 3` (with a stored
+#   simulated sensor of examples/sensor, `--level 2` and `--level 3` (with a stored
 #   ReferenceDesignation) on the test
 #   broker go-testbroker of oec/sdk/rust (oec-check of oec/conformance built
 #   into a temporary directory, ADR-0006; OECM_REQUIRE=1: a missing tool

@@ -1,12 +1,12 @@
-/* The application of the host runner from Level 2 (ADR-0030 §7, C-094):
- * a simulated temperature sensor. Data "Temperature" (Value read-only in
+/* The simulated temperature sensor of the micro SDK examples from Level 2
+ * (C-094; shared by the host runner and the ESP-IDF firmware since C-096): Data "Temperature" (Value read-only in
  * practice, Setpoint written by Set Data) and the Config context "Sensor"
  * (group "General": Interval of the simulation, Label). Every tick moves
  * the Value a tenth of the way towards the Setpoint. */
-#include "oecm.h"
+#include "oecm_sensor.h"
 
 static double value = 21.0, setpoint = 21.0;
-static char label[33] = "Host sensor";
+static char label[33] = "Temperature sensor";
 static char interval[16] = "5";
 
 static const oecm_field fields[] = {
@@ -21,7 +21,7 @@ static const oecm_field fields[] = {
 
 static const oecm_data data[] = {{
     .tag = "Temperature",
-    .description = "Simulated temperature of the micro SDK host runner",
+    .description = "Simulated temperature of the micro SDK example",
     .fields = fields,
     .field_count = sizeof fields / sizeof fields[0],
     .interval_ms = 60000,
@@ -33,7 +33,7 @@ static const oecm_cfg_object general[] = {
      .type = OECM_CFG_NUMBER, .value = interval, .cap = sizeof interval, .default_value = "5",
      .unit = "s", .mandatory = true, .min = "1", .max = "3600"},
     {.key = "Label", .name = "Label", .description = "Label of the sensor",
-     .type = OECM_CFG_STRING, .value = label, .cap = sizeof label, .default_value = "Host sensor",
+     .type = OECM_CFG_STRING, .value = label, .cap = sizeof label, .default_value = "Temperature sensor",
      .length = 32},
 };
 
@@ -61,8 +61,7 @@ static void on_config(void *ctx, size_t context) {
     (void)oecm_data_changed(device, 0);
 }
 
-void oecm_host_demo(oecm_config *cfg, oecm_device *dev);
-void oecm_host_demo(oecm_config *cfg, oecm_device *dev) {
+void oecm_sensor_setup(oecm_config *cfg, oecm_device *dev) {
     device = dev;
     cfg->data = data;
     cfg->data_count = 1;
@@ -71,18 +70,14 @@ void oecm_host_demo(oecm_config *cfg, oecm_device *dev) {
     cfg->on_config = on_config;
 }
 
-/* Seconds between two steps (the Config value, 1 … 3600). */
-unsigned oecm_host_demo_interval(void);
-unsigned oecm_host_demo_interval(void) {
+unsigned oecm_sensor_interval_s(void) {
     unsigned s = 0;
     for (const char *p = interval; *p >= '0' && *p <= '9'; p++)
         s = s * 10u + (unsigned)(*p - '0');
     return s == 0 ? 5u : s;
 }
 
-/* One simulation step; publishes the Data if the Value changed. */
-void oecm_host_demo_tick(void);
-void oecm_host_demo_tick(void) {
+void oecm_sensor_tick(void) {
     double next = value + (setpoint - value) / 10.0;
     if (next - setpoint < 0.005 && setpoint - next < 0.005)
         next = setpoint;

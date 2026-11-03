@@ -1,6 +1,8 @@
-// Package d7run runs D7 (`oec-check test`) against the micro SDK host
-// runner on the test broker of the Rust SDK (go-testbroker), with the
-// proxy attachment, the restart hook, the peer and D7 announced. It is a
+// Package d7run runs D7 (`oec-check test`) against a micro SDK device
+// program – the host runner (cmd/oecm-host) or the firmware in QEMU
+// (cmd/oecm-qemu, C-096) – on the test broker of the Rust SDK
+// (go-testbroker), with the proxy attachment, the restart hook, the peer
+// and D7 announced. It is a
 // copy of the D7 part of oec/demos/internal/demotest (C-076, C-079):
 // that package is internal to another module (ADR-0030 §7).
 //
@@ -136,6 +138,11 @@ type D7 struct {
 	Pass     []string          // the tests that must pass
 	Report   string            // environment variable: keep the JSON report there
 	Files    map[string]string // extra files of the storage (path below the root: content)
+	// The device connects to the proxy by another name or address than
+	// localhost (the QEMU guest: 10.0.2.2); --proxy-name of D7.
+	ProxyNames  []string
+	Timeout     time.Duration // --timeout; 0: 3 s
+	RestartWait time.Duration // --restart-wait; 0: 15 s
 }
 
 // Run runs D7 (the program of OEC_D7 – run, not imported: D7 stays
@@ -208,15 +215,26 @@ func Run(t *testing.T, d D7) {
 	})
 
 	report := filepath.Join(work, "d7.json")
-	cmd := exec.Command(check, "test",
+	timeout, restartWait := d.Timeout, d.RestartWait
+	if timeout == 0 {
+		timeout = 3 * time.Second
+	}
+	if restartWait == 0 {
+		restartWait = 15 * time.Second
+	}
+	args7 := []string{"test",
 		"--broker", fmt.Sprintf("mqtts://localhost:%d", b.Port), "--ca", b.CA,
 		"--username", "user", "--password-file", password,
 		"--app", d.App, "--level", strconv.Itoa(d.Level),
-		"--timeout", "3s",
+		"--timeout", timeout.String(),
 		"--proxy-listen", fmt.Sprintf("127.0.0.1:%d", proxyPort),
 		"--proxy-ca", proxyCA, "--proxy-ca-key", proxyKey,
-		"--stop-cmd", stop, "--start-cmd", start, "--restart-wait", "15s", "--peer", "--announce",
-		"--format", "text", "--report", "json="+report)
+		"--stop-cmd", stop, "--start-cmd", start, "--restart-wait", restartWait.String(), "--peer", "--announce",
+		"--format", "text", "--report", "json=" + report}
+	if len(d.ProxyNames) > 0 {
+		args7 = append(args7, "--proxy-name", strings.Join(d.ProxyNames, ","))
+	}
+	cmd := exec.Command(check, args7...)
 	began := time.Now()
 	out, err := cmd.CombinedOutput()
 	t.Logf("oec-check test --level %d: %v after %v", d.Level, err, time.Since(began).Round(time.Second))

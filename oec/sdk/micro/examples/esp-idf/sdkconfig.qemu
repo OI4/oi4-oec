@@ -1,0 +1,4 @@
+# Espressif QEMU (machine esp32): OpenCores Ethernet instead of Wi-Fi.
+CONFIG_ETH_USE_OPENETH=y
+CONFIG_OECM_EXAMPLE_NET_OPENETH=y
+CONFIG_ETH_OPENETH_DMA_RX_BUFFER_NUM=10

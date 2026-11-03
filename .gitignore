@@ -13,6 +13,11 @@ Thumbs.db
 # Build output / dependencies
 target/
 node_modules/
+# ESP-IDF example (C-096): fetched components, sdkconfig of a build in place
+oec/sdk/micro/examples/esp-idf/managed_components/
+oec/sdk/micro/examples/esp-idf/sdkconfig
+oec/sdk/micro/examples/esp-idf/sdkconfig.old
+oec/sdk/micro/examples/esp-idf/build/
 dist/
 # the built Registry Web UI is committed and embedded (ADR-0029 §9)
 !/oec/registry/ui/dist/

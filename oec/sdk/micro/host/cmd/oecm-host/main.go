@@ -9,7 +9,7 @@
 //
 //	oecm-host [-level 1|2|3] [-state DIR] [-serial S] [-model M] …
 //
-// From Level 2 the device is a simulated temperature sensor (demo.c):
+// From Level 2 the device is a simulated temperature sensor (examples/sensor):
 // Data "Temperature" with a writable Setpoint and the Config context
 // "Sensor". Level 3 adds the ReferenceDesignation and NewDataSetWriterId;
 // their records are files in the state directory (default
@@ -19,14 +19,12 @@
 package main
 
 /*
-#cgo CFLAGS: -std=c17 -I${SRCDIR}/../../../include -I${SRCDIR}/../../../src
+#cgo CFLAGS: -std=c17 -I${SRCDIR}/../../../include -I${SRCDIR}/../../../src -I${SRCDIR}/../../../examples/sensor
 #include <stdlib.h>
 #include "oecm.h"
+#include "oecm_sensor.h"
 
 extern const oecm_pal oecm_host_pal;
-void oecm_host_demo(oecm_config *cfg, oecm_device *dev);
-unsigned oecm_host_demo_interval(void);
-void oecm_host_demo_tick(void);
 */
 import "C"
 
@@ -184,7 +182,7 @@ func run(args []string, root string) int {
 	}
 	current = r
 	if *level >= 2 {
-		C.oecm_host_demo(cfg, r.dev)
+		C.oecm_sensor_setup(cfg, r.dev)
 	}
 	if *level >= 3 {
 		cfg.refdes_buf = (*C.char)(C.malloc(refdesSize))
@@ -204,7 +202,7 @@ func run(args []string, root string) int {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	timer := time.NewTimer(0)
-	step := time.NewTimer(time.Duration(C.oecm_host_demo_interval()) * time.Second)
+	step := time.NewTimer(time.Duration(C.oecm_sensor_interval_s()) * time.Second)
 	if *level < 2 {
 		step.Stop()
 	}
@@ -221,8 +219,8 @@ func run(args []string, root string) int {
 			r.handle(ev)
 		case <-timer.C:
 		case <-step.C:
-			C.oecm_host_demo_tick()
-			step.Reset(time.Duration(C.oecm_host_demo_interval()) * time.Second)
+			C.oecm_sensor_tick()
+			step.Reset(time.Duration(C.oecm_sensor_interval_s()) * time.Second)
 		}
 		if e := C.oecm_poll(r.dev); e != C.OECM_OK {
 			logger.Printf("oecm_poll: %s", C.GoString(C.oecm_err_str(e)))
