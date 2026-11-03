@@ -8,6 +8,10 @@
 # oec/check.sh as a non-root user with CC=clang, as on the runner
 # (ADR-0032 §8). Removes its container on exit and the Ubuntu image if it
 # pulled it. Never part of the gate.
+#
+# Behind a TLS-intercepting proxy, set OEC_CI_CA_CERTS to a PEM file with
+# the proxy's root certificate(s); it is mounted read-only and added to the
+# container's trust store (never commit such a file).
 set -eu
 here="$(cd "$(dirname "$0")" && pwd)"
 . "$here/versions.sh"
@@ -23,6 +27,12 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT TERM
 
+ca_mount=""
+if [ -n "${OEC_CI_CA_CERTS:-}" ]; then
+	test -f "$OEC_CI_CA_CERTS" || { echo "linux.sh: OEC_CI_CA_CERTS: no file $OEC_CI_CA_CERTS" >&2; exit 1; }
+	ca_mount="-v $(cd "$(dirname "$OEC_CI_CA_CERTS")" && pwd)/$(basename "$OEC_CI_CA_CERTS"):/oec-extra-ca.pem:ro"
+fi
+
 # The steps of gate.yml, as the user ci (not root: file permission checks
 # behave as on the runner).
 job='set -eu
@@ -37,14 +47,20 @@ oec/ci/setup-tools.sh
 oec/ci/fetch.sh
 oec/check.sh'
 
+# shellcheck disable=SC2086 # ca_mount is empty or one -v option
 docker run --name "$name" --rm \
-	-v "$ws:/src:ro" \
+	-v "$ws:/src:ro" $ca_mount \
 	-e GUIDELINE_REF="$guideline_ref" -e JOB="$job" \
 	"$ubuntu_image" bash -euc '
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq --no-install-recommends ca-certificates curl git build-essential clang llvm cmake \
 	golang-go gcc-14 >/dev/null
+if [ -f /oec-extra-ca.pem ]; then
+	cp /oec-extra-ca.pem /usr/local/share/ca-certificates/oec-extra-ca.crt
+	update-ca-certificates >/dev/null
+	echo "linux.sh: extra CA certificates from OEC_CI_CA_CERTS added"
+fi
 useradd --create-home ci
 printf "%s\n" "$JOB" >/tmp/job.sh
 runuser -u ci -- env HOME=/home/ci USER=ci GUIDELINE_REF="$GUIDELINE_REF" sh /tmp/job.sh'

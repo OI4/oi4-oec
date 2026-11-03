@@ -78,6 +78,14 @@ guideline branch), so commit first. It runs as a non-root user with
 Ubuntu image if it pulled it. The container has the architecture of the
 Docker host (arm64 on Apple silicon, the counterpart of `ubuntu-24.04-arm`).
 
+Behind a TLS-intercepting proxy (the host trusts the proxy's root
+certificate, the container does not; Go then fails with `x509: certificate
+signed by unknown authority`), export that root certificate as PEM to a file
+outside the repository and set `OEC_CI_CA_CERTS=/path/to/root.pem`; the
+file is mounted read-only and added to the container's trust store. Never
+commit such a file. On macOS:
+`security find-certificate -a -c "<CA name>" -p /Library/Keychains/System.keychain > /tmp/root.pem`.
+
 ## Updating a pin
 
 - **An action:** take the commit SHA of its latest release tag
