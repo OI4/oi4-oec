@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 14.11.2026, C-098: P8 (Dokumentation) hat begonnen. **Offen für dich: D-1** – fünf Lizenzen im npm-Paketbaum von Docusaurus._
+_Stand: 14.11.2026, C-098 Nachtrag 1: deine Antwort zu D-1 ist eingetragen – die fünf Lizenzen sind **nur für die Doku-Seite** erlaubt; als Nächstes C-099 – die Docusaurus-Seite selbst. Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,43 +24,17 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 aus C-098 – Lizenzen für die Docusaurus-Seite
-
-**Worum es geht:** Die Doku-Seite soll mit Docusaurus gebaut werden (so steht es seit ADR-0012 fest). Docusaurus bringt beim Bauen **1275 npm-Pakete** mit. Fast alle haben Lizenzen aus unserer erlaubten Liste (MIT, Apache-2.0, ISC, BSD …). Bei fünf Paketen steht eine Lizenz, die **nicht auf der Liste** steht, und es gibt dort keine Wahl einer erlaubten Lizenz:
-
-| Lizenz | Paket | wofür |
-|---|---|---|
-| 0BSD | `tslib` | Hilfsfunktionen von TypeScript; landet auch im ausgelieferten JavaScript der Seite |
-| CC0-1.0 | `mdn-data` | Daten über CSS (für das Verkleinern der CSS-Dateien) |
-| BlueOak-1.0.0 | `sax` | XML-Parser (SVG-Bilder, Sitemap) |
-| Python-2.0 | `argparse` | wird vom YAML-Parser gebraucht (Kopfdaten der Seiten) |
-| CC-BY-4.0 | `caniuse-lite` | Daten, welcher Browser was kann; nur beim Bauen |
-
-Alle fünf sind freizügige Lizenzen und mit MIT verträglich. Ohne sie lässt sich Docusaurus nicht bauen. Lizenzen entscheidest du (G-3.4 a), deshalb frage ich.
-
-**Optionen:**
-- **(a) erlauben, aber nur für die Doku-Seite** – empfohlen. Der Prüftest der Seite (kommt in C-099) listet genau diese fünf; für SDKs, Registry und Demos ändert sich nichts.
-- (b) die fünf allgemein auf die erlaubte Liste setzen (ADR-0023), für alle Teile des Projekts.
-- (c) nein – dann gibt es keine Docusaurus-Seite. Die Seiten bleiben Markdown im Repository (auf GitHub lesbar, von unserem Prüfprogramm geprüft). Das Ausgangskriterium „Doku baut ohne kaputte Links“ hieße dann „Prüfprogramm grün“.
-
-**Was davon abhängt:** nur der Bau der Seite (C-099). Seiten schreiben kann ich auch ohne deine Antwort.
-
-**Antwort z. B.:** „D-1 (a)“.
-
-### Zur Info: was C-098 gemacht hat (P8, Teil 1 von 6)
-
-- **Plan (A-494, ROADMAP P8, ADR-0031):** sechs Schritte – C-098 Plan, Prüfung, Einstiegsseite; C-099 die Docusaurus-Seite selbst (nach D-1); C-100 Grundbegriffe und „was ist neu gegenüber 1.x“; C-101 Anleitungen für die SDKs (Rust, C, Go); C-102 Anleitungen für D7, D8 und das JSON Schema; C-103 Abschluss: ein Neuling startet die Demos nur mit der Doku.
-- **Prüfprogramm für die Doku (A-490):** ein kleines Go-Programm prüft jetzt bei jedem Gate-Lauf alle Doku-Seiten (Schritt 10 in `oec/check.sh`), ohne Internet und ohne node:
-  - jede Seite hat Titel und Beschreibung;
-  - jeder Link zeigt auf eine Seite oder Datei, die es gibt, und jeder Sprung zu einer Überschrift (`#…`) trifft eine Überschrift, die es gibt – auch in den READMEs;
-  - kein Link auf die Guideline-Seite (G-4.11; Guideline-Abschnitte werden mit Nummer genannt).
-  - Die sechs vorhandenen Seiten waren in Ordnung. Benennt jemand später eine README-Überschrift um, auf die die Doku zeigt, schlägt das Gate an.
-- **Neue Einstiegsseite „Getting started“** (`oec/docs/docs/intro.md`): was OEC ist, was das Projekt liefert, wie man Demos und Registry in ein paar Minuten auf dem eigenen Rechner startet, wo man weiterliest.
-- **Links auf READMEs (A-491):** Die Seiten verlinken die READMEs relativ. Beim Bauen der Seite werden daraus Links ins GitHub-Repository (`https://github.com/OI4/oi4-oec/blob/main/…`, umstellbar). Wo die Seite einmal veröffentlicht wird, entscheidest du später (Q-011, P9). Gebaut wird sie nur lokal.
-- **Probebau:** Ich habe Docusaurus 3.10.2 (neueste stabile Version; 4.0 ist noch Vorschau) in einem temporären Ordner mit den vorhandenen Seiten gebaut – geht in etwa 6 Sekunden. Danach gelöscht; nichts davon ist eingecheckt.
-- **Docker:** nicht benutzt.
+Für dich ist nichts offen.
 
 ## Früher beantwortet
+
+### D-1 aus C-098 – Lizenzen für die Docusaurus-Seite
+
+Deine Antwort: „D-1 (a)“. Die fünf Lizenzen 0BSD (`tslib`), CC0-1.0 (`mdn-data`), BlueOak-1.0.0 (`sax`), Python-2.0 (`argparse`) und CC-BY-4.0 (`caniuse-lite`) sind damit **nur für die npm-Pakete der Doku-Seite** (`oec/docs`) erlaubt. Für SDKs, Registry, Web-UI der Registry und Demos ändert sich nichts; die allgemeine Liste in ADR-0023 bleibt, wie sie ist. Eingetragen in ADR-0031 (§5), ROADMAP P8 und STATUS.
+
+Der Prüftest der Seite (C-099) kennt dann die allgemeine Liste plus diese fünf. Taucht eine weitere Lizenz auf, frage ich dich wieder.
+
+Als Nächstes kommt **C-099**: die Docusaurus-Seite selbst (`package.json`, Lockfile, Konfiguration, Seitenleiste), der Lizenz-Prüftest im Gate und ein Opt-in-Bau ohne kaputte Links.
 
 ### D-1 aus C-097 – P4b schließen?
 
@@ -74,6 +48,19 @@ Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Do
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-098 gemacht hat (P8, Teil 1 von 6)
+
+- **Plan (A-494, ROADMAP P8, ADR-0031):** sechs Schritte – C-098 Plan, Prüfung, Einstiegsseite; C-099 die Docusaurus-Seite selbst; C-100 Grundbegriffe und „was ist neu gegenüber 1.x“; C-101 Anleitungen für die SDKs (Rust, C, Go); C-102 Anleitungen für D7, D8 und das JSON Schema; C-103 Abschluss: ein Neuling startet die Demos nur mit der Doku.
+- **Prüfprogramm für die Doku (A-490):** ein kleines Go-Programm prüft jetzt bei jedem Gate-Lauf alle Doku-Seiten (Schritt 10 in `oec/check.sh`), ohne Internet und ohne node:
+  - jede Seite hat Titel und Beschreibung;
+  - jeder Link zeigt auf eine Seite oder Datei, die es gibt, und jeder Sprung zu einer Überschrift (`#…`) trifft eine Überschrift, die es gibt – auch in den READMEs;
+  - kein Link auf die Guideline-Seite (G-4.11; Guideline-Abschnitte werden mit Nummer genannt).
+  - Die sechs vorhandenen Seiten waren in Ordnung. Benennt jemand später eine README-Überschrift um, auf die die Doku zeigt, schlägt das Gate an.
+- **Neue Einstiegsseite „Getting started“** (`oec/docs/docs/intro.md`): was OEC ist, was das Projekt liefert, wie man Demos und Registry in ein paar Minuten auf dem eigenen Rechner startet, wo man weiterliest.
+- **Links auf READMEs (A-491):** Die Seiten verlinken die READMEs relativ. Beim Bauen der Seite werden daraus Links ins GitHub-Repository (`https://github.com/OI4/oi4-oec/blob/main/…`, umstellbar). Wo die Seite einmal veröffentlicht wird, entscheidest du später (Q-011, P9). Gebaut wird sie nur lokal.
+- **Probebau:** Ich habe Docusaurus 3.10.2 (neueste stabile Version; 4.0 ist noch Vorschau) in einem temporären Ordner mit den vorhandenen Seiten gebaut – geht in etwa 6 Sekunden. Danach gelöscht; nichts davon ist eingecheckt.
+- **Docker:** nicht benutzt.
 
 ### Zur Info: was C-097 gemacht hat (P4b, Teil 6 von 6)
 

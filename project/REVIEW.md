@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-14, C-098: P8 started (plan, ADR-0031, offline docs check as gate step 10, Getting started page). **Open for you: D-1** – five licenses of the Docusaurus npm tree outside the allowlist._
+_Last updated: 2026-11-14, C-098 addendum 1: your answer to D-1 is applied – the five licenses are **allowed for the documentation site's npm tree only** (ADR-0031 §5); next C-099 – Docusaurus site scaffold. Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -300,6 +300,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-097 (P4b increment 6 + exit; ADR-0022, ADR-0024 and ADR-0030 amendments C-097): Arduino library `OECMicro` in `oec/sdk/micro/arduino/` – the core and the ESP-IDF PAL unchanged on the esp-mqtt of Arduino-ESP32 3.3.12 and 4.0.0-RC1, assembled by `package.sh`; examples `Sensor` and `M5Stack` (M5Unified: status display, Health by button); provisioning by `arduino_secrets.h` placeholders; `oecm_connected` (test first); gate step (package unchanged, secrets empty, headers C++17); opt-in builds without warnings for ESP32, ESP32-S3, M5Core2, M5CoreS3, M5Core and best effort C3/C6 (core + PAL 34.8 … 35.4 KB on Xtensa, no static RAM); harness fix (orphaned QEMU processes); instructions for the run on real hardware; docs page `oec/docs/docs/micro-sdk/index.md`; P4b exit assessment – all met except the run on a real ESP32 board and an M5Stack (QEMU passes D7 Level 1/2/3) → **D-1** (A-479 … A-488). No R-x, no SF.
 - C-097 addendum 1: your answer ("D-1 (a) aber, noch nicht im Arduino Library veröffentlichen") is applied: **P4b is closed** (ROADMAP P4b heading and "Decision" paragraph, STATUS). Carried as proposed: the run on real hardware (opt-in), CI, the ESP Component Registry and the Arduino-ESP32 4.0 final re-check → P9. The Arduino Library Manager is **not** part of P9; it waits for your explicit order (ROADMAP P9, Q-011). Next phase: P8 – Documentation.
 - C-098 (P8 start; ADR-0031): plan and cycle cut C-098 … C-103 (ROADMAP P8); `oec/docs/tools` – Go `docscheck` (standard library) checks every page offline: front matter, a single root page, links and anchors into the site and into `oec/` (github-slugger anchors), no hyperlink to the guideline site (G-4.11); 24 violation tests; `oec/docs/check.sh` as gate step 10; Getting started page `oec/docs/docs/intro.md` (`slug: /`); `oec/docs/README.md`; Docusaurus 3.10.2 survey (1275 packages) and a temporary feasibility build (README links rewritten to the repository by a hook, ~6 s) → **D-1** (licenses) (A-489 … A-494). No R-x, no SF.
+- C-098 addendum 1: your answer ("D-1 (a)") is applied: 0BSD, CC0-1.0, BlueOak-1.0.0, Python-2.0 and CC-BY-4.0 are allowed **for the npm tree of the documentation site (`oec/docs`) only** (ADR-0031 status and §5, ROADMAP P8, STATUS); ADR-0023 and the registry Web UI policy (ADR-0029 §10) are unchanged. The site scaffold follows in C-099.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -814,7 +815,7 @@ Logs: [C-098](log/2026-11-14_C-098_p8-start-docs-check.md), [C-097](log/2026-11-
 | A-486 | arduino-lint LP042 (url) left for the publication | info (agent) | C-097 | – | – |
 | A-487 | Harness fix: `d7run` stops the device with SIGTERM, SIGKILL after 20 s (orphaned QEMU) | info (agent) | C-097 | – | – |
 | A-488 | Tools: `arduino-cli` 1.5.1 with an own config in `~/.arduino-oecm` (core kept, 7.3 GB), temporary files removed | info (agent) | C-097 | – | – |
-| D-1 | Licenses of the Docusaurus npm tree: 0BSD, CC0-1.0, BlueOak-1.0.0, Python-2.0, CC-BY-4.0 | decide (G-3.4 a) | C-098 | (a) allow for the docs site only | ☐ |
+| D-1 | Licenses of the Docusaurus npm tree: 0BSD, CC0-1.0, BlueOak-1.0.0, Python-2.0, CC-BY-4.0 | decide (G-3.4 a) | C-098 | (a) allow for the docs site only | ☑ (a) (addendum 1) |
 | A-489 | Layout of `oec/docs/` (`docs/`, `tools/`, `check.sh`, README; site files from C-099) | info (agent) | C-098 | – | – |
 | A-490 | Offline docs check `docscheck` in gate step 10 (front matter, links, anchors, G-4.11) | info (agent) | C-098 | – | – |
 | A-491 | README links rewritten to the repository URL by the build (`OEC_DOCS_REPO_URL`) | info (agent) | C-098 | – | – |
@@ -826,16 +827,19 @@ Logs: [C-098](log/2026-11-14_C-098_p8-start-docs-check.md), [C-097](log/2026-11-
 
 ### Open for you
 
+Nothing is open for you.
+
+### Answered earlier
+
+Answered after C-098 (2026-11-14) and recorded in C-098 addendum 1:
+- D-1 – licenses of the Docusaurus npm tree: ☑ (a) allowed for the npm tree of the documentation site only ("D-1 (a)"). The question was:
+
 > **D-1 – licenses of the Docusaurus npm tree** (C-098, G-3.4 a: licenses). Docusaurus 3.10.2 (ADR-0012, ADR-0031) resolves to 1275 npm packages. All but seven entries carry licenses of the allowlist of ADR-0023 (or an OR expression with an allowlisted choice). Without a choice: `tslib` ×2 **0BSD** (TypeScript helpers; also in the client bundle), `mdn-data` ×2 **CC0-1.0** (CSS data of the minifier), `sax` **BlueOak-1.0.0** (XML parser of `svgo`/`sitemap`), `argparse` **Python-2.0** (via `js-yaml`, front matter), `caniuse-lite` **CC-BY-4.0** (browser data, build time). All are permissive and compatible with MIT; Docusaurus does not build without them. Details: log C-098, ADR-0031 §5.
 > - (a) **allow the five for the npm tree of the documentation site only** (the policy test of C-099 lists them; SDKs, registry and demos unchanged) – recommended;
 > - (b) add the five to the general allowlist of ADR-0023;
 > - (c) no – no Docusaurus build; the pages stay Markdown in the repository, checked by `docscheck`; the P8 exit criterion "docs build without broken links" becomes "docscheck passes".
 >
 > Blocks only the site build (C-099); pages can be written meanwhile.
->
-> PO: ☐ (a) ☐ (b) ☐ (c)
-
-### Answered earlier
 
 Answered after C-097 (2026-11-13) and recorded in C-097 addendum 1:
 - D-1 – close P4b: ☑ (a) closed, next phase **P8 – Documentation**; carried items as proposed, but **no publication to the Arduino Library Manager yet** ("D-1 (a) aber, noch nicht im Arduino Library veröffentlichen"). The question was:
@@ -2114,4 +2118,4 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 
 ## Next (C-099)
 
-1. Your answer to D-1. With (a) or (b): C-099 – P8 increment 2, the Docusaurus site scaffold (`package.json`, lockfile, config with the README-link hook, sidebars), the offline npm policy test in gate step 10 and the opt-in `build.sh`. With (c), or without an answer yet: C-099 writes the concepts pages and the migration notes (increment 3), which need no npm.
+1. C-099 – P8 increment 2 (D-1 (a)): the Docusaurus site scaffold in `oec/docs` (`package.json`, lockfile, `docusaurus.config.mjs` with the README-link hook, sidebars), the offline npm policy test in gate step 10 (allowlist of ADR-0023 plus the site-only list of ADR-0031 §5) and the opt-in `build.sh` without broken links.

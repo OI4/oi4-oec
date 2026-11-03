@@ -76,3 +76,14 @@ None in C-098 (no container, image, volume or network created).
 ## Gate
 
 `caffeinate -i oec/check.sh`: **all checks passed**, exit 0, 13 min 33 s (most Go and Rust results cached; no repeat needed). The new step 10 `docs/check.sh` reports `docscheck: 7 pages ok`.
+
+## Addendum 1 – PO decision on the licenses of the Docusaurus npm tree (2026-11-14)
+
+PO answer (chat): "D-1 (a)".
+
+### Applied
+
+- **D-1 (a):** 0BSD (`tslib`), CC0-1.0 (`mdn-data`), BlueOak-1.0.0 (`sax`), Python-2.0 (`argparse`) and CC-BY-4.0 (`caniuse-lite`) are allowed **for the npm tree of the documentation site (`oec/docs`) only**. ADR-0031 status line and §5 (PO decision paragraph), §6/§7 and the consequences no longer wait for D-1; ROADMAP P8 plan; STATUS (last updated, current phase, next step, D6 row, blocking questions, cycle row); REVIEW/REVIEW_DE (D-1 answered, nothing open).
+- **Unchanged:** the general allowlist of ADR-0023 and the npm policy of the registry Web UI (ADR-0029 §10); SDK, registry and demo code may not depend on packages under these five licenses.
+- **C-099:** the site policy test holds the allowlist of ADR-0023 plus this site-only list; any other license outside both is again a PO question (G-3.4 a).
+- Fix: the C-098 cycle row in STATUS pointed at the C-097 log; it now points at this log.

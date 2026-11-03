@@ -1,6 +1,6 @@
 # ADR-0031 – Documentation site (P8, D6)
 
-- Status: **accepted (agent, G-3.4 b)** for the layout, the offline check, the build and the cycle cut; the licenses of the npm tree outside the allowlist of ADR-0023 (§5) are **pending the PO** (C-098 D-1, G-3.4 a). Until D-1 is answered, no `package.json` and no lockfile of the site are committed.
+- Status: **accepted (agent, G-3.4 b)** for the layout, the offline check, the build and the cycle cut; the licenses of the npm tree outside the allowlist of ADR-0023 (§5) **decided by the PO** (C-098 D-1 (a), 2026-11-14, G-3.4 a): allowed for the npm tree of the documentation site only.
 - Date: 2026-11-14
 - Deciders: agent (layout, tools, check, versions, cycle cut); product owner (Thomas) – licenses, publication, scope
 - Related: ADR-0004 (MIT), ADR-0012 (monorepo, docs = standalone Docusaurus site in `oec/docs`), ADR-0023 (dependency policy and license allowlist), ADR-0029 §10 and amendment C-089 (npm policy of the registry Web UI, the model for §6), GUARDRAILS G-4.10 (MIT for new artifacts) and G-4.11 (no hyperlinks to the guideline site), Q-011 (publication), ROADMAP P8
@@ -28,7 +28,7 @@ A survey in C-098 (temporary folder, removed) resolved the tree of Docusaurus 3.
 | `tools/` | Go module `github.com/OI4/oec/docs/tools` (standard library only): package `docscheck` and the command `cmd/docscheck` |
 | `check.sh` | the docs gate, step 10 of `oec/check.sh` |
 | `README.md` | layout, the check, the build |
-| from C-099 (after D-1) | `package.json`, `package-lock.json`, `docusaurus.config.mjs`, `sidebars.mjs`, `src/css/`, `static/`, `.npmrc`, `build.sh`; the output `build/` and `node_modules/` are never committed (`.gitignore`) |
+| from C-099 | `package.json`, `package-lock.json`, `docusaurus.config.mjs`, `sidebars.mjs`, `src/css/`, `static/`, `.npmrc`, `build.sh`; the output `build/` and `node_modules/` are never committed (`.gitignore`) |
 
 ### 2. Offline check in the gate (A-490)
 
@@ -52,11 +52,13 @@ A link from a page to a file of `oec/` stays relative in the source (readable on
 
 Docusaurus **3.10.2** (`@docusaurus/core`, `@docusaurus/preset-classic`), `react`/`react-dom` **19.3.1** (as the registry Web UI), `@mdx-js/react` 3.1.1, `clsx` 2.1.1, `prism-react-renderer` 2.4.1; exact versions, lockfile resolved with a 7-day `--before` cool-down; re-checked when C-099 commits them.
 
-### 5. Licenses (pending, C-098 D-1)
+### 5. Licenses (PO decision C-098 D-1 (a))
 
 The npm policy of ADR-0029 §10 applies to the site, with two clarifications the agent decides (A-493): an OR expression is accepted if one alternative is in the allowlist; a package without a `license` field needs a reviewed entry in a table of the policy test (name, version, license, where it is stated). The five licenses of the survey outside the allowlist (0BSD, CC0-1.0, BlueOak-1.0.0, Python-2.0, CC-BY-4.0) are a license question (G-3.4 a): **D-1 of C-098**. Proposal: allow them for the npm tree of the documentation site only (not for linked code of the SDKs, the registry or the demos).
 
-### 6. Build and npm policy of the site (C-099, after D-1)
+**PO decision (C-098 addendum 1, D-1 (a), 2026-11-14):** the five licenses 0BSD, CC0-1.0, BlueOak-1.0.0, Python-2.0 and CC-BY-4.0 are allowed **for the npm tree of the documentation site (`oec/docs`) only**. The general allowlist of ADR-0023 and the npm policy of the registry Web UI (ADR-0029 §10) stay unchanged; SDK, registry and demo code may not depend on packages under these licenses. The site policy test (C-099) holds this site-only list next to the allowlist; a new license outside both is again a PO question.
+
+### 6. Build and npm policy of the site (C-099)
 
 - `build.sh` (opt-in, needs the npm cache or network once): `npm ci --ignore-scripts`, then `docusaurus build` into `build/` (git-ignored); not part of the gate. The site is **not published** (Q-011, P9); content license MIT (G-4.10).
 - A Go policy test in `tools/` (in the gate, offline) checks `package.json` (private, exact versions, the allowed dependencies), the lockfile (v3, `registry.npmjs.org`, sha512, licenses per §5) – the rules of ADR-0029 §10. No stamp: unlike the registry, nothing built is committed.
@@ -64,7 +66,7 @@ The npm policy of ADR-0029 §10 applies to the site, with two clarifications the
 ### 7. Cycle cut of P8 (A-494)
 
 1. **C-098:** plan, this ADR, `docscheck` with gate step 10, the Getting started page.
-2. **C-099** (after D-1): the site scaffold (§1, §3, §6), the npm policy test, the opt-in build without broken links.
+2. **C-099**: the site scaffold (§1, §3, §6), the npm policy test, the opt-in build without broken links.
 3. **C-100:** Concepts (assets, identities, topics, resources, levels; guideline by section number) and migration notes 1.x → 2.0.
 4. **C-101:** SDK guides Rust, C, Go (first application, provider, consumer) and the API reference (links to the generated docs where they exist).
 5. **C-102:** D7 and D8 guides, JSON Schema reference and validation how-to.
@@ -73,5 +75,5 @@ The npm policy of ADR-0029 §10 applies to the site, with two clarifications the
 ## Consequences
 
 - Every page change is checked in the gate; README anchors referenced from the site can no longer break silently (a renamed README heading fails `docs/check.sh`).
-- The Docusaurus build waits for D-1. Writing pages does not: they are Markdown and checked offline.
+- The Docusaurus build starts in C-099 (D-1 (a) answered). Writing pages does not depend on it: they are Markdown and checked offline.
 - The site has its own npm tree (about 1275 packages), separate from the registry Web UI (91 entries); its policy follows ADR-0029 §10.

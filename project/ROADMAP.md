@@ -445,10 +445,10 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 - Each phase delivers its doc pages in the same phase.
 - **Exit:** docs build without broken links; a newcomer can run the demos by following the docs only.
 
-**Plan (C-098, agent, G-3.4 b; ADR-0031, reason in `log/2026-11-14_C-098_p8-start-docs-check.md`).** Started in C-098 after the P4b close (C-097 addendum 1). The pages are Markdown under `oec/docs/docs/`, checked offline in the gate (`oec/docs/check.sh`, step 10: front matter, every link and anchor into the site and into `oec/`, G-4.11); the Docusaurus build is opt-in and waits for the license decision **C-098 D-1** (five licenses of its npm tree outside the allowlist). Increments:
+**Plan (C-098, agent, G-3.4 b; ADR-0031, reason in `log/2026-11-14_C-098_p8-start-docs-check.md`).** Started in C-098 after the P4b close (C-097 addendum 1). The pages are Markdown under `oec/docs/docs/`, checked offline in the gate (`oec/docs/check.sh`, step 10: front matter, every link and anchor into the site and into `oec/`, G-4.11); the Docusaurus build is opt-in; the five licenses of its npm tree outside the allowlist are allowed for the site only (**C-098 D-1 (a)**, PO 2026-11-14, ADR-0031 §5). Increments:
 
 1. ✅ (C-098) Plan, ADR-0031, `docscheck` (Go, standard library) with gate step 10, Getting started page `intro.md` (root `slug: /`), npm survey and feasibility build of Docusaurus 3.10.2 (temporary).
-2. (C-099, after D-1) Site scaffold: `package.json`, lockfile, `docusaurus.config.mjs` (README links → repository URL), sidebars, the npm policy test in the gate, opt-in `build.sh` without broken links.
+2. (C-099) Site scaffold: `package.json`, lockfile, `docusaurus.config.mjs` (README links → repository URL), sidebars, the npm policy test in the gate, opt-in `build.sh` without broken links.
 3. (C-100) Concepts (assets, identities, topics, resources, compliance levels; guideline sections by number) and migration notes 1.x → 2.0.
 4. (C-101) SDK guides Rust, C, Go and the API reference.
 5. (C-102) D7 and D8 guides, JSON Schema reference and validation how-to.
