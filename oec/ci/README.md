@@ -81,7 +81,10 @@ Docker host (arm64 on Apple silicon, the counterpart of `ubuntu-24.04-arm`).
 It is limited to `OEC_CI_CPUS` CPUs (default 4, as a hosted Linux runner):
 cargo and Go follow the quota, the links of the Rust tests stay within the
 memory of a small Docker VM (8 GB: 14 parallel links were killed), and the
-run time estimates the runner's.
+run time estimates the runner's. `--init` reaps orphaned processes as
+systemd does on the runner (the restart hooks of the D7 tests start the
+application in the background; without an init it stays a zombie when
+stopped and the stop hook waits forever).
 
 Behind a TLS-intercepting proxy (the host trusts the proxy's root
 certificate, the container does not; Go then fails with `x509: certificate

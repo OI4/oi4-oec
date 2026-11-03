@@ -53,7 +53,11 @@ oec/ci/fetch.sh
 oec/check.sh'
 
 # shellcheck disable=SC2086 # ca_mount is empty or one -v option
-docker run --name "$name" --rm --cpus "${OEC_CI_CPUS:-4}" \
+# --init: an init process reaps the orphans of the restart hooks (D7 test
+# --start-cmd starts the application in the background), as systemd does on
+# the runner; without it a stopped application stays a zombie and the
+# kill -0 loop of the stop hook never ends.
+docker run --name "$name" --rm --init --cpus "${OEC_CI_CPUS:-4}" \
 	-v "$ws:/src:ro" $ca_mount \
 	-e GUIDELINE_REF="$guideline_ref" -e JOB="$job" \
 	"$ubuntu_image" bash -euc '
