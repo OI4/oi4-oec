@@ -145,6 +145,7 @@ func Gate() gha.Workflow {
 					{Key: "restore-keys", Value: "oec-cargo-${{ runner.os }}-${{ runner.arch }}-"},
 				},
 			},
+			run("Install the system packages (Linux)", "oec/ci/packages.sh"),
 			run("Install the tools of oec/ci/versions.sh", "oec/ci/setup-tools.sh"),
 			run("Fetch the crates of every Cargo.lock", "oec/ci/fetch.sh"),
 			run("Gate (oec/check.sh)", "oec/check.sh"),

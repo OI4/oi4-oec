@@ -3,8 +3,8 @@
 # gate.yml in an Ubuntu 24.04 container (versions.sh; the architecture of
 # the Docker host) against the committed state: clones HEAD of this
 # repository and the branch guideline_ref of ../../oi4-oec-documentation,
-# installs the build tools (apt), Go (GOTOOLCHAIN=auto fetches the
-# toolchain of go.mod) and rustup, then runs setup-tools.sh, fetch.sh and
+# installs the system packages (packages.sh --go; GOTOOLCHAIN=auto fetches
+# the Go toolchain of go.mod) and rustup, then runs setup-tools.sh, fetch.sh and
 # oec/check.sh as a non-root user with CC=clang, as on the runner
 # (ADR-0032 §8). Removes its container on exit and the Ubuntu image if it
 # pulled it. Never part of the gate.
@@ -52,10 +52,7 @@ docker run --name "$name" --rm \
 	-v "$ws:/src:ro" $ca_mount \
 	-e GUIDELINE_REF="$guideline_ref" -e JOB="$job" \
 	"$ubuntu_image" bash -euc '
-export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
-apt-get install -y -qq --no-install-recommends ca-certificates curl git build-essential clang llvm cmake \
-	golang-go gcc-14 >/dev/null
+sh /src/oec/ci/packages.sh --go
 if [ -f /oec-extra-ca.pem ]; then
 	cp /oec-extra-ca.pem /usr/local/share/ca-certificates/oec-extra-ca.crt
 	update-ca-certificates >/dev/null

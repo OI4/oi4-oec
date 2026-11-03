@@ -195,6 +195,20 @@ func TestGateRunsCheck(t *testing.T) {
 	if !strings.HasSuffix(cmds, "oec/check.sh\noec/ci/lint.sh") {
 		t.Errorf("gate.yml must end the gate job with oec/check.sh, got:\n%s", cmds)
 	}
+	// The runner and linux.sh install the same system packages, among them
+	// the compiler-rt runtime of clang (ASan/UBSan of sdk/check.sh).
+	if !strings.HasPrefix(cmds, "oec/ci/packages.sh\noec/ci/setup-tools.sh\n") {
+		t.Errorf("the gate job must start with oec/ci/packages.sh, then setup-tools.sh, got:\n%s", cmds)
+	}
+	if !strings.Contains(read(t, filepath.Join(oec, "ci/linux.sh")), "/src/oec/ci/packages.sh") {
+		t.Error("linux.sh does not install the packages of packages.sh")
+	}
+	pk := read(t, filepath.Join(oec, "ci/packages.sh"))
+	for _, p := range []string{" clang ", " libclang-rt-dev ", " cmake "} {
+		if !strings.Contains(pk, p) {
+			t.Errorf("packages.sh does not install%s", p)
+		}
+	}
 	var guideline bool
 	for _, s := range Gate().Jobs[0].Steps {
 		if p, _ := gha.Get(s.With, "path"); p == GuidelinePath {

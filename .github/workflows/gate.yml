@@ -65,6 +65,8 @@ jobs:
             ~/.cargo/registry
           key: oec-cargo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('oec/ci/versions.sh', 'oec/**/Cargo.lock') }}
           restore-keys: oec-cargo-${{ runner.os }}-${{ runner.arch }}-
+      - name: Install the system packages (Linux)
+        run: oec/ci/packages.sh
       - name: Install the tools of oec/ci/versions.sh
         run: oec/ci/setup-tools.sh
       - name: Fetch the crates of every Cargo.lock

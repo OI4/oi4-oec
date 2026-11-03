@@ -16,6 +16,7 @@ releases.
 | `pipelines/` | the pinned actions, the hosted runners and the workflows; tests against the repository (policy, generated files, tool pins, scripts, runners) |
 | `cmd/cigen/` | renders the workflows into `../../.github/workflows`; `-check` fails if a file is outdated or not generated (gate step 11) |
 | `versions.sh` | the pins: Rust toolchain, cbindgen, cargo-deny, actionlint, the guideline branch, the Ubuntu image of `linux.sh` |
+| `packages.sh` | the system packages on Debian/Ubuntu (apt): build tools, clang with `libclang-rt-dev` (sanitizer runtime), LLVM, CMake, GCC 14; nothing on macOS |
 | `setup-tools.sh` | installs the toolchain and tools of `versions.sh` (rustup; `cargo install --locked` into `~/.oec-tools`) |
 | `fetch.sh` | `cargo fetch --locked` for every `Cargo.lock` under `oec/` (the gate builds `--offline --locked`) |
 | `conformance.sh` | gofmt, vet and tests of `oec/conformance` (D7/D8), as gate step 4 |
