@@ -12,6 +12,11 @@
 # Behind a TLS-intercepting proxy, set OEC_CI_CA_CERTS to a PEM file with
 # the proxy's root certificate(s); it is mounted read-only and added to the
 # container's trust store (never commit such a file).
+#
+# OEC_CI_CPUS (default 4, the vCPUs of a hosted Linux runner) limits the
+# container; cargo and Go follow the quota, the links of the Rust tests stay
+# within the memory of a small Docker VM, and the run time estimates the
+# runner's.
 set -eu
 here="$(cd "$(dirname "$0")" && pwd)"
 . "$here/versions.sh"
@@ -48,7 +53,7 @@ oec/ci/fetch.sh
 oec/check.sh'
 
 # shellcheck disable=SC2086 # ca_mount is empty or one -v option
-docker run --name "$name" --rm \
+docker run --name "$name" --rm --cpus "${OEC_CI_CPUS:-4}" \
 	-v "$ws:/src:ro" $ca_mount \
 	-e GUIDELINE_REF="$guideline_ref" -e JOB="$job" \
 	"$ubuntu_image" bash -euc '
