@@ -1,6 +1,6 @@
 ---
 title: OEC Micro SDK
-sidebar_position: 3
+sidebar_position: 4
 description: The OEC Micro SDK (D9) makes a microcontroller an OEC smart device – a C17 core without heap, an ESP-IDF port for the ESP32 and an Arduino library, messaging levels 1 to 3.
 ---
 

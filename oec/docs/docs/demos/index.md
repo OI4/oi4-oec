@@ -1,6 +1,6 @@
 ---
 title: Demo services
-sidebar_position: 1
+sidebar_position: 2
 description: Three small OEC applications that work together on the bus of the dev environment – a logger, a weather service and a config service.
 ---
 

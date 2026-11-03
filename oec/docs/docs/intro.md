@@ -84,6 +84,8 @@ environment; never commit or share it. What each demo does:
 
 ## Where to go next
 
+- **Learn the ideas** behind OEC in a few minutes: [Concepts](concepts.md).
+- **Coming from version 1.x?** [Migration notes 1.x → 2.0](migration.md).
 - **Write an application** with the SDK of your language:
   [Rust](../../sdk/rust/README.md), C on the C ABI of the Rust SDK
   (the header [`oec.h`](../../sdk/rust/oec-ffi/include/oec.h) and the
@@ -100,5 +102,4 @@ environment; never commit or share it. What each demo does:
 - **Run against a broker** while you develop:
   [`oec/dev/README.md`](../../dev/README.md).
 
-More guides – the concepts of OEC, the changes from version 1.x and how-tos
-for each SDK and tool – follow on this site.
+More guides – how-tos for each SDK and tool – follow on this site.

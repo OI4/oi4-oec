@@ -1,6 +1,6 @@
 ---
 title: OEC Registry
-sidebar_position: 2
+sidebar_position: 3
 description: The OEC Registry (D5) lists every participant on the OI4 Message Bus with its MAM, Health and availability, answers the Registry services and shows the directory over HTTPS and in a Web UI.
 ---
 

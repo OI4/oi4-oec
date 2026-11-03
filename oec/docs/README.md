@@ -9,6 +9,8 @@ checks the pages and the npm policy offline. The site is not published
 | Path | Content |
 |---|---|
 | `docs/` | the pages; `intro.md` is the root page (`slug: /`) |
+| `docs/concepts.md` | the concepts in short (P8 increment 3) |
+| `docs/migration.md` | the migration notes 1.x → 2.0 (P8 increment 3) |
 | `docs/demos/` | the demo services (P6) |
 | `docs/registry/` | the OEC Registry (P7) |
 | `docs/micro-sdk/` | the OEC Micro SDK (P4b) |
