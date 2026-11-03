@@ -5,12 +5,14 @@ and a platform abstraction layer (PAL), the reference port for ESP32 on
 ESP-IDF. Decisions: API in ADR-0022 (with the amendments), implementation in
 ADR-0030, ESP32 reference platform in ADR-0024.
 
-State (C-096): **Messaging Level 3** in the core (Level 1 since C-092,
+State (C-097): **Messaging Level 3** in the core (Level 1 since C-092,
 Level 2 since C-094), host tests, payload check and fuzz targets; the Go host
 runner runs the core under D7 `--level 1`, `--level 2` and `--level 3` in the
 gate. The ESP-IDF port and the example firmware (C-096) build for `esp32`,
 `esp32s3` and the Espressif QEMU, where the firmware passes the same D7 runs
-(opt-in). The Arduino library follows in C-097 (ADR-0030 §10).
+(opt-in). The Arduino library `OECMicro` (C-097) packages the core and the
+ESP-IDF port with the examples `Sensor` and `M5Stack`. Not yet run on real
+hardware.
 
 | Path | Content |
 |---|---|
@@ -22,6 +24,7 @@ gate. The ESP-IDF port and the example firmware (C-096) build for `esp32`,
 | `examples/sensor/` | the simulated temperature sensor (Data, Config) of the host runner and the firmware |
 | `examples/esp-idf/` | the example firmware (ESP-IDF project), `build.sh` |
 | `port/esp-idf/oecm/` | the ESP-IDF component `oecm`: the core + the PAL `oecm_esp.c` |
+| `arduino/` | the Arduino library `OECMicro`: `library.properties`, `OECMicro.h`, the sketches `examples/Sensor` and `examples/M5Stack`, `package.sh`, its [README](arduino/README.md) |
 | `host/` | Go module (standard library only): `cmd/oecm-vecgen` generates `tests/vectors_gen.h` from `oec/spec/export/vectors`; `cmd/oecm-host` is the host runner (the core with a PAL in Go over cgo), `mqtt/` its MQTT 3.1.1 client; `cmd/oecm-qemu` runs the firmware in QEMU; `internal/d7run` the D7 harness and the pinned passes |
 | `third_party/unity/` | Unity v2.7.0 (MIT), unchanged, test only |
 
@@ -64,6 +67,9 @@ Same as the Rust SDK (`oec-core` `lifecycle.rs`):
 6. `oecm_stop`: the Close (Health `NORMAL_0`, score 0; REQ-LIFE-005), then
    DISCONNECT. `NORMAL_0`/0 is reserved for the Close: `oecm_set_health`
    rejects it.
+
+`oecm_connected` is true from `oecm_on_connected` until the disconnect or
+`oecm_stop` (for a status display, C-097).
 
 Every message has a MessageId of the Unix time in ms, with a counter while
 the clock does not advance (REQ-MSG-007, REQ-MSG-008).
@@ -161,6 +167,19 @@ buffer of twice that size once at `oecm_esp_init`. In QEMU at Level 3 the
 lowest free heap was about 167 KB after the D7 runs (TLS sessions included)
 and the 8 KB main task used at most about 2.4 KB of its stack.
 
+With Arduino (`arduino-cli` 1.5.1, Level 3 sketches, C-097) the core and the
+PAL take 34.8 … 35.4 KB of flash in every build (the linked objects; string
+constants merged by the linker are counted with the sketch) and no static
+RAM:
+
+| Sketch, board | Arduino-ESP32 3.3.12 (IDF 5.5) | 4.0.0-RC1 (IDF 6.1) |
+|---|---|---|
+| `Sensor`, ESP32 Dev Module | 1054 KB, globals 59.3 KB | 1123 KB, globals 61.8 KB |
+| `Sensor`, ESP32-S3 Dev Module | 1019 KB, globals 58.0 KB | 1089 KB, globals 59.0 KB |
+| `M5Stack`, M5Core2 | 1241 KB, globals 63.5 KB | 1309 KB, globals 65.5 KB |
+| `M5Stack`, M5CoreS3 | 1213 KB, globals 61.8 KB | 1285 KB, globals 63.1 KB |
+| `M5Stack`, M5Core | 1229 KB (93 %), globals 63.4 KB | 1297 KB (98 %), globals 65.4 KB |
+
 ## Host runner
 
 `host/cmd/oecm-host` links the core with cgo and implements the PAL in Go
@@ -198,7 +217,10 @@ runner on the Rust SDK's `go-testbroker`, vector header
 freshness, CMake build in `target/host`, the Unity tests and the replay of
 the fuzz seed corpora under AddressSanitizer + UBSan, `clang --analyze`, the
 symbol allowlist, GCC 14/15 if installed, the emitted payloads validated by
-D7 `oec-check validate`, the host example. Needs `cmake` and `cargo`.
+D7 `oec-check validate`, the host example, `arduino/package.sh` into a
+temporary directory (the core and the port packaged unchanged, every example
+complete, the placeholders of `arduino_secrets.h` empty) and `oecm.h` and
+`oecm_sensor.h` as C++17. Needs `cmake` and `cargo`.
 
 ## Fuzzing
 
@@ -311,3 +333,73 @@ OEC_D7=<oec-check> go test -run 'TestQEMUD7' -v ./cmd/oecm-qemu/
 
 Without `OECM_QEMU_BUILD` and `OECM_QEMU` these tests are skipped, also in
 the gate.
+
+### Run on real hardware (opt-in)
+
+Not yet done in the project (no board in the sessions; P4b exit). Against
+the broker of `oec/dev`, from a Mac or PC in the same network as the board
+(`<ip>` = its LAN address):
+
+1. Broker reachable from the network: in `oec/dev`,
+   `go run ./pki -force -san <ip>` and
+   `OEC_DEV_BIND=<ip> docker compose up -d --wait` (broker only).
+2. Firmware: `examples/esp-idf/build.sh esp32` (or `esp32s3`), then in
+   `target/esp-idf/esp32/` `python -m esptool --chip esp32 -p <port>
+   write-flash @flash_args`.
+3. Provisioning (above): `uri` `mqtts://<ip>:8883`, `ca` =
+   `oec/dev/generated/broker/ca.pem`, `user`/`password` of
+   `generated/roots/oec-dev-app/run/secrets/oi4/credentials` (base64 of
+   `user:password`), `wifi_ssid`/`wifi_pass`; flash `oecprov`. The serial
+   log (`python -m esp_idf_monitor -p <port>`) shows the Identification
+   Link.
+4. D7 from the same machine, with the probe user (the dev ACL lets only it
+   send `Set`/`Del`/`Call`):
+
+   ```sh
+   oec-check test --broker mqtts://localhost:8883 --ca generated/broker/ca.pem \
+       --username oec-probe --password-file generated/probe/password \
+       --app <Identification Link> --level 3
+   ```
+
+   Without the proxy and a restart hook the connection and restart tests
+   are skipped (the C-096 run of the QEMU firmware on `oec/dev`: 38 pass,
+   0 fail, 17 skip). For them, point `uri` at D7's `--proxy-listen` address
+   (with `--proxy-name <ip>`) and give `--stop-cmd`/`--start-cmd` scripts
+   that send `stop` over the serial port and reset the board
+   (`python -m esptool -p <port> run`).
+5. Arduino: the same values in `arduino_secrets.h` of `Sensor` or
+   `M5Stack`, `arduino-cli upload -p <port> --fqbn esp32:esp32:m5stack_core2
+   …`, then step 4; on the M5Stack the display shows the connection and
+   button A changes the Health that D7 `monitor` and the OEC Registry see.
+
+## Arduino library (C-097)
+
+`arduino/` is the SDK as the Arduino library `OECMicro` (ADR-0024): the core
+of `src/` and the ESP-IDF port `oecm_esp.c` unchanged, on the esp-mqtt and NVS
+that the Arduino-ESP32 core (3.3 and later) brings with it – no other MQTT
+library. An Arduino library cannot refer to files outside its folder, so
+`arduino/package.sh [out]` assembles it into `target/arduino/OECMicro/` (and
+`OECMicro-<version>.zip`); each example gets `examples/sensor`.
+
+| Example | Board | |
+|---|---|---|
+| `Sensor` | any ESP32 with Wi-Fi | the firmware of `examples/esp-idf` as a sketch; serial monitor `stop` |
+| `M5Stack` | M5Stack Core2, CoreS3 (M5Unified, MIT) | the same device with a status display (Identification Link, `oecm_connected`, Health, Value/Setpoint); button A or a tap cycles the Health through `NORMAL_0`, `MAINTENANCE_REQUIRED_4`, `OFF_SPEC_3`, `CHECK_FUNCTION_2`, `FAILURE_1` |
+
+The settings are compiled in from `arduino_secrets.h` next to the sketch
+(placeholders in the repository, never real values); the persisted records of
+Level 3 are in the NVS namespace `oecm`. Install, provisioning and licenses:
+[`arduino/README.md`](arduino/README.md). Build check (opt-in, with
+`arduino-cli`, an own config file keeps the core out of the default
+location):
+
+```sh
+arduino/package.sh
+arduino-cli core install esp32:esp32        # with the Espressif board index
+arduino-cli lib install M5Unified
+arduino-cli compile --fqbn esp32:esp32:esp32 --warnings all \
+    --library target/arduino/OECMicro target/arduino/OECMicro/examples/Sensor
+```
+
+The Arduino-ESP32 core has no OpenCores Ethernet, so the sketches do not run
+in QEMU; the code they run is the one the QEMU runner checks.

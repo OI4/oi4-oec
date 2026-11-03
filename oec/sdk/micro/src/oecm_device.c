@@ -628,3 +628,5 @@ oecm_err oecm_set_health(oecm_device *dev, oecm_health health, int score) {
 const char *oecm_identification_link(const oecm_device *dev) {
     return ready(dev) ? cstate(dev)->il : NULL;
 }
+
+bool oecm_connected(const oecm_device *dev) { return ready(dev) && cstate(dev)->phase == PH_CONNECTED; }

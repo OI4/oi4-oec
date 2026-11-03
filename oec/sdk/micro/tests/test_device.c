@@ -156,6 +156,28 @@ static void test_close_then_disconnect_on_stop(void) {
     TEST_ASSERT_EQUAL(FAKE_CONNECT, fp.events[fp.count - 1].kind);
 }
 
+static void test_connected_state(void) {
+    memset(&dev, 0, sizeof dev);
+    TEST_ASSERT_FALSE(oecm_connected(NULL));
+    TEST_ASSERT_FALSE(oecm_connected(&dev));
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+    TEST_ASSERT_FALSE(oecm_connected(&dev));
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_start(&dev));
+    TEST_ASSERT_FALSE(oecm_connected(&dev));
+    oecm_on_connected(&dev);
+    TEST_ASSERT_TRUE(oecm_connected(&dev));
+    oecm_on_disconnected(&dev);
+    TEST_ASSERT_FALSE(oecm_connected(&dev));
+    fp.mono_ms += 1000;
+    fp.unix_ms += 1000;
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_poll(&dev));
+    TEST_ASSERT_FALSE(oecm_connected(&dev)); /* connecting again */
+    oecm_on_connected(&dev);
+    TEST_ASSERT_TRUE(oecm_connected(&dev));
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_stop(&dev));
+    TEST_ASSERT_FALSE(oecm_connected(&dev));
+}
+
 static void test_reconnect_with_backoff_and_new_will(void) {
     start_connected();
     const fake_event *first = fake_last(&fp, FAKE_CONNECT);
@@ -351,6 +373,7 @@ int main(void) {
     RUN_TEST(test_set_health_arguments);
     RUN_TEST(test_birth_again_after_failure_recovery);
     RUN_TEST(test_close_then_disconnect_on_stop);
+    RUN_TEST(test_connected_state);
     RUN_TEST(test_reconnect_with_backoff_and_new_will);
     RUN_TEST(test_backoff_is_capped_at_30_s);
     RUN_TEST(test_connect_timeout);

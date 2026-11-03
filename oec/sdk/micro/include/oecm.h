@@ -326,6 +326,10 @@ oecm_err oecm_data_changed(oecm_device *dev, size_t data);
 /* The Identification Link in use (unencoded, REQ-IL-005); borrowed. */
 const char *oecm_identification_link(const oecm_device *dev);
 
+/* true while connected: from oecm_on_connected (Birth published) until the
+ * disconnect or oecm_stop. For a status display (C-097). */
+bool oecm_connected(const oecm_device *dev);
+
 #ifdef __cplusplus
 }
 #endif

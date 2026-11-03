@@ -86,3 +86,7 @@ void oecm_sensor_tick(void) {
     value = next;
     (void)oecm_data_changed(device, 0);
 }
+
+double oecm_sensor_value(void) { return value; }
+
+double oecm_sensor_setpoint(void) { return setpoint; }

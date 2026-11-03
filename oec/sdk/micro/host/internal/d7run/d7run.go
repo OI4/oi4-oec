@@ -203,6 +203,12 @@ func Run(t *testing.T, d D7) {
 	t.Cleanup(func() {
 		if s, err := os.ReadFile(pid); err == nil {
 			if p, err := strconv.Atoi(strings.TrimSpace(string(s))); err == nil {
+				// SIGTERM first: the QEMU runner then ends its QEMU (a
+				// SIGKILL would leave QEMU running, C-097).
+				_ = syscall.Kill(p, syscall.SIGTERM)
+				for end := time.Now().Add(20 * time.Second); time.Now().Before(end) && syscall.Kill(p, 0) == nil; {
+					time.Sleep(100 * time.Millisecond)
+				}
 				_ = syscall.Kill(p, syscall.SIGKILL)
 			}
 		}

@@ -20,7 +20,11 @@
 #   lifecycles (Will, Birth, Health, Close), of a Level 2 lifecycle with
 #   requests (Get, Set) and of a Level 3 lifecycle (ReferenceDesignation,
 #   NewDataSetWriterId) as JSONL, D7 `oec-check validate` checks
-#   them; the host example examples/host/hello_device.c runs.
+#   them; the host example examples/host/hello_device.c runs;
+#   arduino: arduino/package.sh assembles the Arduino library (C-097) with
+#   the unchanged sources of the core and the ESP-IDF port, every example
+#   with its sketch and the sensor, the placeholders of arduino_secrets.h
+#   empty; oecm.h and oecm_sensor.h compile as C++17 (the sketches are C++).
 # Needs cmake, cargo and a C17 compiler with sanitizers.
 set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
@@ -89,3 +93,27 @@ target/host/oecm-emit "$tmp/messages.jsonl"
 echo "micro: examples/host/hello_device"
 target/host/hello_device >"$tmp/hello.txt"
 grep -q '^pub Oi4v2/OTConnector/.*/Pub/MAM/' "$tmp/hello.txt" || { cat "$tmp/hello.txt"; echo "hello_device: no Birth" >&2; exit 1; }
+
+echo "micro: arduino/package.sh (library layout, C-097), headers as C++17"
+arduino/package.sh "$tmp/arduino" >/dev/null
+lib="$tmp/arduino/OECMicro"
+for f in src/*.c src/*.h include/oecm.h port/esp-idf/oecm/oecm_esp.c port/esp-idf/oecm/include/oecm_esp.h \
+	arduino/OECMicro.h; do
+	cmp -s "$f" "$lib/src/$(basename "$f")" || { echo "arduino: $f not packaged unchanged" >&2; exit 1; }
+done
+for p in name version author maintainer sentence paragraph category url architectures includes; do
+	grep -q "^$p=." "$lib/library.properties" || { echo "arduino: library.properties without $p" >&2; exit 1; }
+done
+for ex in arduino/examples/*/; do
+	n="$(basename "$ex")"
+	for f in "$n.ino" oecm_sensor.c oecm_sensor.h arduino_secrets.h; do
+		test -f "$lib/examples/$n/$f" || { echo "arduino: example $n without $f" >&2; exit 1; }
+	done
+	if grep -E '^#define SECRET_(WIFI_SSID|WIFI_PASS|CA_PEM|USERNAME|PASSWORD|CLIENT_CERT_PEM|CLIENT_KEY_PEM) ' "$ex/arduino_secrets.h" |
+		grep -vE ' ""$' | grep -q .; then
+		echo "arduino: ${ex%/}/arduino_secrets.h has values, not placeholders" >&2
+		exit 1
+	fi
+done
+printf '#include "oecm.h"\n#include "oecm_sensor.h"\n' |
+	"${CXX:-c++}" -std=c++17 -fsyntax-only -Wall -Wextra -Wpedantic -Werror -Iinclude -Iexamples/sensor -x c++ -
