@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 17.11.2026, C-101: Die Doku hat jetzt die SDK-Anleitungen für Rust, C und Go und eine Seite „API reference“ (`oi4-oec-documentation/docs/community/sdk/`). Alle Code-Beispiele habe ich gegen die SDKs kompiliert und die Provider-Teile laufen lassen (A-512 … A-519). Für dich ist nichts offen; als Nächstes C-102: Anleitungen für D7 und D8, JSON-Schema-Referenz und Validierungs-How-to._
+_Stand: 18.11.2026, C-102: Die Doku hat jetzt Anleitungen zu den Prüfwerkzeugen `oec-check` (D7) und `oec-infra` (D8), eine Seite zu den JSON-Schemas und eine Anleitung „eigene Nachricht prüfen“ (`oi4-oec-documentation/docs/community/compliance/`). Alle Befehle, die ohne Broker und ohne Docker laufen, habe ich gegen die frisch gebauten Programme ausgeführt; die Ausgaben auf den Seiten stammen aus diesen Läufen. Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -52,6 +52,23 @@ Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Do
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-102 gemacht hat (P8, Teil 5 von 6)
+
+- **Neue Seiten (A-520, A-521):** ein Ordner `docs/community/compliance/` mit
+  - „Compliance tools“ (`index.md`): was Schema, `oec-check` und `oec-infra` prüfen, ein Versuch in einer Minute ohne Broker, Installation, Ergebnisse (pass/fail/skip …), Exit-Codes, Berichte, `list`/`explain`;
+  - **`oec-check`** (D7): `validate` (eine Nachricht ohne Broker prüfen, auch mit `--role`), `monitor` (live am Broker oder eine Aufnahme abspielen), `test` (eine laufende Anwendung aktiv prüfen, mit Proxy, Neustart-Befehl und simuliertem Partner), Bericht;
+  - **`oec-infra`** (D8): `image`, `run`, `container`, `bus`, `host` – erst was ein Anwendungs-Hersteller prüft, dann die Plattform; manuelle Prüfungen und Grenzen (z. B. fällt `host` auf macOS bei REQ-PLT-003, weil macOS kein Linux ist); Hinweis, dass `monitor` und `bus` nie gleichzeitig auf `oec/dev` laufen dürfen;
+  - **JSON Schemas** (`schema.md`): wo die Schemas liegen, welches Schema zu welchem Topic gehört, Version 2.0.0 eingefroren und Arbeitsstand `2.0.1-dev`, CHANGELOG;
+  - **Validate a message** (`validate.md`): eine eigene Nachricht prüfen – mit `oec-check validate` und mit einem beliebigen JSON-Schema-Validator (Beispiel in Python) – und was das Schema nicht sieht (Regeln über mehrere Felder, Verhalten, Ablauf).
+  Die Inhalte kommen aus den READMEs; Details stehen als Link auf die passende README-Überschrift.
+- **Befehle geprüft (A-522, A-523):** Alles, was ohne Broker und Docker läuft, habe ich gegen frisch gebaute Programme und die Testdateien ausgeführt. Dabei habe ich auf den Seiten ein paar Formulierungen korrigiert (z. B. Exit-Code 3 bei `validate`). Die Befehle, die einen Broker oder Docker brauchen, sind die Beispiele aus der README, die das Gate und frühere Live-Läufe abdecken; live wiederhole ich sie in C-103.
+- **Fremder Validator (A-524):** Das Python-Beispiel lief in einer temporären Umgebung und findet dieselben Fehler wie `oec-check`. Python wird dadurch keine Abhängigkeit des Projekts und läuft nicht im Gate.
+- **Schema-Seite (A-525):** von Hand geschrieben, jeder Link auf eine Datei wird im Gate geprüft; es wird nichts erzeugt. Der Ordner `dist/` wird nicht verlinkt, weil er nicht im Repository liegt.
+- **Links (A-526):** Die Seitenleiste hat jetzt „Compliance tools“ vor den „Migration notes“ (die bleiben ganz unten). Getting started, Concepts, SDKs und Demos zeigen auf die neuen Seiten; die READMEs von Docs, Conformance und Schema verlinken sie. `docscheck: 19 pages ok, 30 README links to them ok`; der Bau der Guideline-Seite lief ohne Warnung (etwa 19 s).
+- **Kleine README-Korrektur (A-527):** Die Conformance-README sagte, die Schlüssel der Konfigurationsdatei von `monitor` seien die Namen der Optionen. Zwei davon (`config`, `replay`) lehnt das Programm absichtlich ab – das steht jetzt in der README. Am Code hat sich nichts geändert.
+- **Kein Live-Lauf (A-528):** Docker lief wieder nicht (Fehler 500). Teil 6 – der Abschlusslauf von P8 (Bau ohne kaputte Links, die Demos nur nach der Doku starten, SDK-Beispiele und Prüfbefehle live gegen `oec/dev`) – kommt in C-103 in einer neuen Sitzung; dafür muss Docker laufen.
+- Kein Fehler in D7, D8 oder Schema, keine Lücke in der Guideline: kein SF, kein D-x, kein R-x.
 
 ### Zur Info: was C-101 gemacht hat (P8, Teil 4 von 6)
 
