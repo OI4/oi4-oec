@@ -233,19 +233,26 @@ cd ../registry && images/build.sh --remove             # remove the loaded image
 
 ## Run an application against the broker
 
-On the host, with the Rust SDK (`Bootstrap::ContainerStorage`, ADR-0020 §5):
+On the host, with the Rust SDK (`Bootstrap::ContainerStorage`, ADR-0020 §5),
+on a copy of the sample (`cp -R oec/dev/generated/roots/oec-dev-app /tmp/my-app-root`):
 
 ```rust
 App::builder(Level::L1, ServiceType::Utility, product)
     .bootstrap(Bootstrap::ContainerStorage {
-        root: "oec/dev/generated/roots/oec-dev-app".into(),
+        root: "/tmp/my-app-root".into(),
     })
     .build()?
     .run()?;
 ```
 
 The serial number is the container name (`oec-dev-app`); the application
-connects to `localhost:8883` with the credentials of the sample.
+connects to `localhost:8883` with the credentials of the sample. The
+application writes its store into `etc/oi4/app` of the root: give every
+application its own copy (another application refuses the DataSetWriterIds
+of the store, REQ-MSG-021). The container name is also the MQTT ClientId:
+two applications with the same name push each other off the broker – to
+run several at once, write another name into `etc/hostname` of each copy
+(C-103).
 
 In a container, mount the sample root at the paths of RIG 4.1 and use the
 broker name as Address (`go run ./pki -force -address mosquitto`), e.g. with
