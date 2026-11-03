@@ -95,3 +95,11 @@ Increment 2 of the cycle cut (§7), within §1, §3, §4, §5 and §6. Details: 
    The registry policy (`oec/registry/internal/uipolicy`, every OR term allowlisted, no site-only list) is unchanged.
 5. **Build (§6, A-499):** `build.sh` (opt-in, network): the policy test, `npm ci --ignore-scripts --no-audit --no-fund`, `npm run build` into `build/`. From a clean folder about 30 s (build about 7 s), `node_modules/` 306 MB, `build/` 904 KB with 8 HTML pages; no broken link or anchor. The only warning is npm's deprecation of `uuid` 8.3.2 (via `sockjs` of the dev server, not in the built site). `build/`, `.docusaurus/` and `node_modules/` stay git-ignored.
 6. **Build probes (A-500):** a link appended to `intro.md` failed the build for: a missing anchor in the site, a missing page, a Markdown file of `oec/docs/` outside the site, a missing Markdown file, a missing other file and a missing folder of `oec/`. `OEC_DOCS_REPO_URL=https://example.invalid/repo/blob/abc` changed every repository link.
+
+## Amendment C-100 (2026-11-16) – increment 3: Concepts and migration notes (agent, G-3.4 b)
+
+Increment 3 of the cycle cut (§7), within §2 and §3. Details: `log/2026-11-16_C-100_concepts-migration.md`, REVIEW A-501 … A-505.
+
+1. **Pages:** `docs/concepts.md` (assets and roles, identities, topics, resources and methods, messages, compliance levels) and `docs/migration.md` (per breaking change of GL-ADR-001 … 022: what changes, what a 1.x application must do; side-by-side operation of `Oi4` and `Oi4v2`). Both cite the Messaging Guideline and the Runtime & Infrastructure Guideline by section number only (G-4.11) and link the READMEs of `oec/` for details; nothing is taken from `legacy/` (G-1.3).
+2. **Sidebar order** (`sidebar_position`): Getting started 0, Concepts 1, Demo services 2, OEC Registry 3, OEC Micro SDK 4, Migration notes 5. The guides of C-101 and C-102 are placed before the migration notes, which stay last.
+3. **Checks:** `docscheck: 9 pages ok` in gate step 10; the opt-in `build.sh` builds 10 HTML pages (1.0 MB) without broken links or anchors. §1 … §6 unchanged.

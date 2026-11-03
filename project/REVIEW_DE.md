@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 15.11.2026, C-099: die Docusaurus-Seite steht und lässt sich lokal ohne kaputte Links bauen; ihre npm-Pakete prüft das Gate offline. Für dich ist nichts offen; als Nächstes C-100 – Grundbegriffe und „was ist neu gegenüber 1.x“._
+_Stand: 16.11.2026, C-100: die Doku-Seite hat jetzt die Seiten „Concepts“ (Grundbegriffe) und „Migration notes 1.x → 2.0“ (was ist neu gegenüber 1.x). Für dich ist nichts offen; als Nächstes C-101 – Anleitungen für die SDKs (Rust, C, Go) und die API-Referenz._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -48,6 +48,17 @@ Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Do
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-100 gemacht hat (P8, Teil 3 von 6)
+
+- **Seite „Concepts“ (A-501):** eine kurze Einführung in die Grundbegriffe – Assets und Rollen (die sieben ServiceTypes), Identitäten (Identification Link, Oi4Identifier, AppId und Source), der Aufbau der Topics, Ressourcen und Methoden, das Nachrichtenformat und die Compliance-Level (zwei Bereiche mit je drei Stufen, als Tabelle). Die Guideline wird nur mit Abschnittsnummer genannt („Messaging Guideline 7.5.1“), ohne Link auf die Guideline-Seite. Für Einzelheiten verweist die Seite auf die READMEs (Topic-Grammatik, JSON Schemas, Prüftools, SDKs), statt sie abzuschreiben.
+- **Seite „Migration notes 1.x → 2.0“ (A-502):** zuerst eine Übersichtstabelle (was war in 1.x, was ist in 2.0, welche Guideline-ADR), dann für jede Änderung zwei Absätze: *was sich ändert* und *was eine 1.x-Anwendung tun muss*. Dabei sind alle Punkte aus deinem Auftrag (Identification Link, `Oi4v2`, `DataSetWriterName`/`WriterGroupName`, `ReplyTo`, OPC UA 1.05.04, Actions, entfallene Ressourcen, SBOM, Compliance-Level). Zusätzlich habe ich aufgenommen, was eine 1.x-Anwendung sonst noch anpassen muss: Health mit `Details` statt NE107-Event, NodeIds als Text, nur noch der Dienst `NewDataSetWriterId`, die Ablage der Secrets in `/run/secrets/oi4/`, maskierte geheime Config-Werte, Pagination/Query sowie die Aufteilung in zwei Guidelines. Außerdem steht dort, dass 1.x (`Oi4`) und 2.0 (`Oi4v2`) parallel auf einem Broker laufen dürfen, sodass man eine Anwendung nach der anderen umstellen kann (Messaging Guideline 7.1). Aus `legacy/` habe ich nichts übernommen; das alte Topic-Format habe ich dort nur nachgelesen.
+- **Reihenfolge in der Seitenleiste (A-503):** Getting started, Concepts, Demos, Registry, Micro SDK, Migration notes. Die Anleitungen aus C-101/C-102 kommen vor die Migration notes.
+- **Prüfung und Bau (A-504):** Das Gate prüft jetzt 9 Seiten (alle Links und Sprungziele in Ordnung). Der lokale Bau mit `oec/docs/build.sh` lief in etwa 31 Sekunden ohne kaputte Links durch (10 HTML-Seiten, 1,0 MB). Die Seite wird **nicht veröffentlicht** (Q-011).
+- **Guideline:** Beim Schreiben bin ich auf keinen Widerspruch und keine Lücke gestoßen, also kein neues SF.
+- **Teil 4 (A-505):** Die SDK-Anleitungen und die API-Referenz kommen in C-101, in einer neuen Sitzung.
+- **Für dich:** keine Entscheidung, nichts zu reviewen. Wenn du magst, lies die zwei neuen Seiten (`oec/docs/docs/concepts.md` und `oec/docs/docs/migration.md`) – Hinweise zu Inhalt oder Ton nehme ich gern auf.
+- **Docker:** nicht benutzt.
 
 ### Zur Info: was C-099 gemacht hat (P8, Teil 2 von 6)
 
