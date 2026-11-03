@@ -440,7 +440,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 ## P8 – Documentation (D6) – continuous
 
-- New standalone Docusaurus site in `oec/docs` (ADR-0012), no links to the guideline site.
+- ~~New standalone Docusaurus site in `oec/docs` (ADR-0012)~~ – since C-100 addendum 2 (PO): the pages live in the Community section of the guideline site, `oi4-oec-documentation/docs/community` (ADR-0012 and ADR-0031 amendments); guideline sections by number, no links to the guideline chapters (G-4.11).
 - Sections: Getting started (dev environment in 10 minutes), Concepts (short; guideline referenced by section number, no links – G-4.11) incl. compliance levels, SDK guide + API reference, micro SDK guide, compliance tool guides (D7, D8), JSON Schema reference (generated where possible) + validation how-to, Demo walkthroughs, Registry guide, Migration notes 1.x → 2.0 (breaking changes GL-ADR-001 … 011: Identification Link, `Oi4v2`, `DataSetWriterName`/`WriterGroupName`, `ReplyTo`, OPC UA 1.05.04, Actions, removed resources, SBOM, compliance levels).
 - Each phase delivers its doc pages in the same phase.
 - **Exit:** docs build without broken links; a newcomer can run the demos by following the docs only.
@@ -450,11 +450,13 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 1. ✅ (C-098) Plan, ADR-0031, `docscheck` (Go, standard library) with gate step 10, Getting started page `intro.md` (root `slug: /`), npm survey and feasibility build of Docusaurus 3.10.2 (temporary).
 2. ✅ (C-099) Site scaffold: `package.json`, lockfile (1275 packages), `docusaurus.config.mjs` (README links → repository URL by the remark plugin `src/remark/repoLinks.mjs`, ADR-0031 amendment C-099), sidebars, the npm policy test `tools/npmpolicy` in gate step 10, opt-in `build.sh` without broken links (not published, Q-011).
 3. ✅ (C-100) Concepts (`concepts.md`: assets and roles, identities, topics, resources and methods, messages, compliance levels; guideline sections by number) and migration notes 1.x → 2.0 (`migration.md`: GL-ADR-001 … 022, what changes and what a 1.x application must do); `build.sh` without broken links.
-4. (C-101) SDK guides Rust, C, Go and the API reference.
+4. (C-101) SDK guides Rust, C, Go and the API reference (into `docs/community`).
 5. (C-102) D7 and D8 guides, JSON Schema reference and validation how-to.
 6. (C-103) P8 exit run: build without broken links, a newcomer run of the demos from the site only.
 
-**C-100 addendum 1 (PO, 2026-11-16):** the documentation shall in the end also be part of the Community section of the guideline Docusaurus site (`oi4-oec-documentation/docs/community`). How and when is **Q-036 / D-1 (C-100 addendum 1)**, still open; the agent proposes (a), a port increment from `oec/docs` before the P8 exit. Until the PO decides, the pages are written as portable Markdown.
+**C-100 addendum 1 (PO, 2026-11-16):** the documentation shall in the end also be part of the Community section of the guideline Docusaurus site (`oi4-oec-documentation/docs/community`) – Q-036 / D-1 (C-100 addendum 1).
+
+**C-100 addendum 2 (PO, 2026-11-16): D-1 answered (b), done.** The old Community pages were removed and the pages of `oec/docs/docs/` moved into `oi4-oec-documentation/docs/community` (`intro.md` → `index.md`, links into `oec/` as repository URLs `https://github.com/OI4/oi4-oec/blob/main/oec/…`); the site scaffold and the npm policy of `oec/docs` were removed; `docscheck` checks the Community section and the README links to it in gate step 10 (`docscheck: 9 pages ok, 10 README links to them ok`); the opt-in `build.sh` builds the guideline site with yarn (ADR-0031 amendment C-100 addendum 2, A-506 … A-511). Increments 4 … 6 write into `docs/community`.
 
 ## P9 – Hardening & release
 

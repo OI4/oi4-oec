@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 16.11.2026, C-100: die Doku-Seite hat jetzt die Seiten „Concepts“ (Grundbegriffe) und „Migration notes 1.x → 2.0“ (was ist neu gegenüber 1.x). Deine Antwort zu D-1 ist umgesetzt: die Doku liegt jetzt im Community-Teil der Guideline-Seite. Für dich ist nichts offen; als Nächstes C-101 – Anleitungen für die SDKs (Rust, C, Go) und die API-Referenz._
+_Stand: 16.11.2026, C-100: die Doku-Seite hat jetzt die Seiten „Concepts“ (Grundbegriffe) und „Migration notes 1.x → 2.0“ (was ist neu gegenüber 1.x). Deine Antwort zu D-1 ist umgesetzt: die Doku liegt jetzt im Community-Teil der Guideline-Seite (`oi4-oec-documentation/docs/community`), in `oec/docs` bleiben nur Prüfung und Bau-Skript (A-506 … A-511). Für dich ist nichts offen; als Nächstes C-101 – Anleitungen für die SDKs (Rust, C, Go) und die API-Referenz._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -52,6 +52,20 @@ Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Do
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-100 Nachtrag 2 gemacht hat (Doku im Community-Teil)
+
+- **Wo die Seiten jetzt liegen (A-506):** Alle neun Seiten stehen jetzt in `oi4-oec-documentation/docs/community`. Die Einstiegsseite heißt dort `index.md` („Getting started“) und behält den Community-Hinweis der alten Seite. Die alten 1.x-Seiten sind weg, ebenso das 1.x-Demo-ZIP unter `static/download`. Die Startseite und die Fußzeile der Guideline-Seite zeigen jetzt auf „Getting started“, „Concepts“ und die Migration notes statt auf das alte Tutorial. Das ist ein Commit (`cbc293a`) auf dem Arbeitszweig `feature/spec-findings`. An den Guideline-Kapiteln habe ich nichts geändert. Nichts ist gepusht; über die Veröffentlichung entscheidest du (Q-011).
+- **Links in den Code (A-507):** Die Seiten verlinken Dateien in `oec/` jetzt mit der vollen GitHub-Adresse `https://github.com/OI4/oi4-oec/blob/main/oec/…`. Das betraf 49 Links. Die Prüfung schaut offline nach, ob die Datei und die Überschrift im Workspace wirklich existieren.
+- **Die Prüfung im Gate (A-508):** `docscheck` prüft jetzt den Community-Ordner. Neu dazugekommen:
+  - kein `{`, `}` oder `<tag` im Fließtext, weil die Guideline-Seite `.md` als MDX liest;
+  - die Links der READMEs auf die Community-Seiten. Zeigt ein README auf eine Seite oder Überschrift, die es nicht gibt, fällt das Gate.
+  
+  Ergebnis: `docscheck: 9 pages ok, 10 README links to them ok`.
+- **Kein eigenes npm mehr (A-509):** In `oec/docs` gibt es keine eigene Docusaurus-Seite mehr (kein `package.json`, kein Lockfile) und auch keinen Lizenz-Test dafür. Deine Lizenz-Freigabe aus C-098 (D-1 (a)) wird damit nicht mehr gebraucht. Die Pakete der Guideline-Seite gehören zum Guideline-Repo.
+- **Bauen (A-510):** Das opt-in Skript `oec/docs/build.sh` baut jetzt die ganze Guideline-Seite mit yarn (etwa 18 s). Es schlägt fehl, wenn der Bau für eine Community-Seite warnt (z. B. wegen eines kaputten Links) oder wenn eine Seite fehlt. Ein absichtlich kaputter Link zum Test wurde erkannt und wieder entfernt.
+- **READMEs und Regel G-4.11 (A-511):** Die READMEs von `oec/`, Demos, Registry, Micro SDK und Docs verweisen auf die Community-Seiten. Die Regel G-4.11 sagt jetzt: Die Seiten liegen in der Guideline-Seite, nennen die Guideline-Kapitel aber weiter nur mit Abschnittsnummer, ohne Link.
+- Keine Lücke in der Guideline gefunden: kein SF, kein D-x, kein R-x.
 
 ### Zur Info: was C-100 gemacht hat (P8, Teil 3 von 6)
 

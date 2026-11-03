@@ -96,3 +96,53 @@ Not used in C-100.
 **PO answer to D-1 (C-100 addendum 1), quoted:** "die alte oi4-oec-documentation/docs/community benötigen wir nicht mehr. Schreibe alles was unter oec/docs ist direkt in oi4-oec-documentation/docs/community. Verweise in den readmes auch gerne auf die oi4-oec-documentation/docs/community. Baue jetzt alle oec-docs soweit um, dass sie in /Users/thomas/work/github/oi4/oi4-oec/oi4-oec/oi4-oec-documentation sind"
 
 This is option (b), with the old Community pages removed. Q-036 is decided. The implementation follows below.
+
+### What was done
+
+1. **Recorded first** (`6ce98ce`): log quote, Q-036 decided (b), D-1 answered in REVIEW/REVIEW_DE, STATUS.
+2. **docscheck v2, tests first** (`oec/docs/tools`, standard library only): the new test cases were written first, then `Check(docs, oec)` and `CheckReadmes(oec, docs)` were rewritten:
+   - pages of `docs/community`: `title` and `description`, `sidebar_position` an integer ≥ 0, no `slug` and no `id` (the route follows the file), a level-1 heading, `index.md` at the root;
+   - relative links stay inside the section and name a file (not a folder), anchors exist;
+   - `https://github.com/OI4/oi4-oec/blob/main/oec/<path>#<anchor>` is mapped to the workspace `oec/` and checked for the file and the anchor; any other `github.com/OI4/oi4-oec/` URL, site-absolute links, other schemes and queries are errors;
+   - G-4.11: no link to `oi4.github.io` or `oi4-oec-documentation` – guideline sections by number;
+   - MDX rule: `{`, `}` and `<` followed by a letter, `/` or `!` outside code are errors (the guideline site reads `.md` as MDX);
+   - README check: every link of `oec/**/README.md` (without `node_modules`, `target`, `build`, `dist`, `.docusaurus`, `.git`, `managed_components`) to `https://oi4.github.io/oi4-oec-documentation/docs/community/<route>` needs `<route>.md` or `<route>/index.md` and the anchor; no trailing slash, no `.md`; a relative link to the removed `docs/docs/` is an error. The test of the real READMEs requires at least five links.
+   - `cmd/docscheck`: flags `-docs`, `-oec`; output `docscheck: 9 pages ok, 10 README links to them ok`.
+3. **Guideline repository** (`oi4-oec-documentation`, branch `feature/spec-findings`, commit `cbc293a`, not pushed):
+   - removed the 1.x Community pages (`development-edge-setup-guide.md`, `oi4-oec-service/` with `usage/`, `oi4-oec-demos/`) and `static/download/oi4-oec-demo.zip` (only the 1.x tutorial linked it); `_category_.json` (Community, position 4) and the badges in `static/img` kept;
+   - moved the nine pages in: `intro.md` → `index.md` (front matter without `slug`, the `:::note` community disclaimer of the old index kept, "this site" → "this section"), `concepts.md`, `migration.md`, `demos/{index,logger,weather,config}.md`, `registry/index.md`, `micro-sdk/index.md`;
+   - 49 relative links into `oec/` rewritten to repository URLs; page-to-page links stay relative;
+   - `src/pages/index.js` (home page) and the footer in `docusaurus.config.js` link Getting started, Concepts and Migration notes instead of the removed tutorial; the rest of the configuration (`onBrokenLinks: 'warn'`, sidebars) unchanged;
+   - `.yarn/install-state.gz` (changed by `yarn install`) not committed.
+4. **Workspace** (`430d505`): `oec/docs/docs/**`, `package.json`, `package-lock.json`, `.npmrc`, `docusaurus.config.mjs`, `sidebars.mjs`, `src/` and `tools/npmpolicy/` removed (and the git-ignored `node_modules/`, `build/`, `.docusaurus/` deleted); `check.sh`, `build.sh`, `README.md` of `oec/docs` rewritten; the header comment of gate step 10 in `oec/check.sh`; links to the Community pages in `oec/README.md`, `oec/demos/README.md`, `oec/registry/README.md`, `oec/sdk/micro/README.md` and `oec/docs/README.md`.
+5. **Paperwork:** GUARDRAILS G-4.11 amended, ADR-0012 amendment, ADR-0031 amendment C-100 addendum 2, ROADMAP P8, STATUS, AGENTS.md (guideline branch head), REVIEW/REVIEW_DE (A-506 … A-511).
+
+### Results
+
+- `oec/docs/check.sh`: gofmt, vet, tests ok; `docscheck: 9 pages ok, 10 README links to them ok`.
+- Opt-in `oec/docs/build.sh` (existing `node_modules/` of the guideline site): about 18 s, the whole guideline site built, **0 warnings**, every Community page has its HTML page (`build/docs/community.html`, `build/docs/community/{concepts,migration}.html`, `…/demos.html`, `…/demos/{logger,weather,config}.html`, `…/registry.html`, `…/micro-sdk.html`); sidebar order Getting started, Concepts, Demo services, OEC Registry, OEC Micro SDK, Migration notes. An earlier full build with a fresh `yarn install --immutable`: about 34 s, 0 warnings.
+- Probe: a link to a missing page appended to `concepts.md` – docscheck and the warning filter of `build.sh` both caught it; the file was restored (`git diff` empty).
+
+### Agent decisions (G-3.4 b)
+
+A-506 location and removals, A-507 repository URLs instead of the remark plugin, A-508 docscheck v2 (MDX rule, README check), A-509 no own npm tree (npm policy removed; C-098 D-1 (a) has no object), A-510 build of the guideline site with its yarn, A-511 README links and G-4.11 wording. Details in REVIEW.md and ADR-0031 amendment C-100 addendum 2.
+
+### Decision for the PO
+
+None. No guideline gap found: no SF, no D-x, no R-x.
+
+### Docker
+
+Not used.
+
+### Temporary files
+
+`/tmp/concepts.bak`, `/tmp/probe.log`, `/tmp/guide-build.log` (probe and build) and `/tmp/gate.log` – deleted. The build output `oi4-oec-documentation/build/` and `.docusaurus/` are git-ignored there.
+
+### Gate
+
+`caffeinate -i oec/check.sh` on the code commit `430d505` (load 10.1 at the start): about 13 min, **all checks passed**; step 10 `docscheck: 9 pages ok, 10 README links to them ok`. No flaky test repeated.
+
+### Handover (G-3.10)
+
+C-101 (P8 increment 4: SDK guides Rust, C, Go and the API reference) starts in a new session: the context of C-100 is large, and the pages of C-101 need fresh reads of the SDK READMEs. `prompt.md` (not committed) is updated: pages go into `oi4-oec-documentation/docs/community`, links into `oec/` as repository URLs, MDX-safe text; next free ids SF-118, A-512, ADR-0032, Q-037.
