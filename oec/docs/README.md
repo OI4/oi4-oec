@@ -15,6 +15,11 @@ amendment C-100 addendum 2):
   [C](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/c),
   [Go](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/go) and the
   [API reference](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/reference)
+- [Compliance tools](https://oi4.github.io/oi4-oec-documentation/docs/community/compliance) – guides
+  [`oec-check`](https://oi4.github.io/oi4-oec-documentation/docs/community/compliance/oec-check),
+  [`oec-infra`](https://oi4.github.io/oi4-oec-documentation/docs/community/compliance/oec-infra),
+  [JSON Schemas](https://oi4.github.io/oi4-oec-documentation/docs/community/compliance/schema) and
+  [Validate a message](https://oi4.github.io/oi4-oec-documentation/docs/community/compliance/validate)
 - [Migration notes 1.x → 2.0](https://oi4.github.io/oi4-oec-documentation/docs/community/migration)
 
 This folder holds their offline check (gate step 10) and the opt-in build.

@@ -4,6 +4,8 @@
 
 The schemas are derived from the spec baseline in [`../spec/`](../spec/), which is derived only from the guideline (ADR-0018). The schemas never define requirements of their own. Each constraint names the requirement it enforces in a `$comment` that starts with the REQ id(s).
 
+User guides (documentation D6): [JSON Schemas](https://oi4.github.io/oi4-oec-documentation/docs/community/compliance/schema) and [Validate a message](https://oi4.github.io/oi4-oec-documentation/docs/community/compliance/validate) (with `oec-check validate` and with any JSON Schema validator).
+
 ## Layout
 
 | Path | Content |
