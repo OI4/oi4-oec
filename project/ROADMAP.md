@@ -239,7 +239,7 @@ Why this cut: increments 1–2 have no runtime dependencies and one vector contr
 
 **Decision (C-061 review, D-1 (a), 2026-10-28):** P4 is closed. Criterion 3 (D7 `test` against `oec/sdk/rust/oec/examples/demo.rs`) is carried into the P5 exit, the platform part of criterion 5 (Windows MSVC, native runs on amd64 and Windows) into the P9 CI. Next phase: P5 (C-061 addendum 1).
 
-## P4b – Micro SDK (D9)
+## P4b – Micro SDK (D9) ✅ (C-092 … C-097; closed after C-097, D-1 (a): hardware run opt-in, CI/ESP Component Registry/Arduino-ESP32 4.0 final → P9, Arduino Library Manager not yet)
 
 SDK for microcontroller-class smart devices without container (ADR-0016), written in **C17** with a platform abstraction layer; reference port ESP-IDF on **ESP32** (ADR-0017).
 
@@ -262,6 +262,8 @@ SDK for microcontroller-class smart devices without container (ADR-0016), writte
 6. ✅ (C-097) Arduino library `OECMicro` (`oec/sdk/micro/arduino/`: the core and the ESP-IDF PAL unchanged on the esp-mqtt of Arduino-ESP32 3.3.12 and 4.0.0-RC1, `package.sh`, gate step for the package) with the examples `Sensor` and `M5Stack` (M5Unified); opt-in builds without warnings for ESP32, ESP32-S3, M5Core2, M5CoreS3, M5Core (C3/C6 best effort); `oecm_connected`; hardware-run instructions in the README; docs page `oec/docs/docs/micro-sdk/index.md`; exit assessment.
 
 **Exit assessment (C-097, log `log/2026-11-13_C-097_arduino-p4b-exit.md`):** core, PAL, ESP-IDF port, Arduino library, C safety measures, Level 1 → 3, footprint, example firmware and targets are met (gate step 9 and opt-in builds). The exit criterion is met **in QEMU** (D7 `--level 1/2/3` 0 fail against the firmware, C-096) but **not on the real ESP32 board and the M5Stack** (no hardware in the sessions; the M5Stack sketch is compile-only). Host tests run on macOS only (Windows/Linux need CI). **D-1 to the PO:** close P4b with the carried items – run on real hardware (opt-in, README "Run on real hardware", when a board is available), CI, publication (Arduino Library Manager needs a public repository and a reachable `url`; ESP Component Registry), Arduino-ESP32 4.0 final re-check → P9; next P8 (recommended) or P9.
+
+**Decision (C-097 addendum 1, D-1 (a), 2026-11-13):** P4b is closed. Carried: the run on real hardware (opt-in, README "Run on real hardware"; a defect found there is a P4b follow-up); CI, the ESP Component Registry and the re-check on Arduino-ESP32 4.0 final → P9; the Arduino Library Manager **not yet** (PO: "noch nicht im Arduino Library veröffentlichen") – only on a later explicit PO order, not part of P9 by itself. Next phase: **P8 – Documentation** (C-098).
 
 ## P5 – Conformance test tool (D7) ✅ (C-062 … C-069; closed in the C-069 review, D-1 (a): criterion 4 (CI) → P9 CI)
 
@@ -449,6 +451,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 - SDK platform matrix carried forward from P4 exit criterion 5 (D-1 (a), C-061 review): `oec` and `oec-ffi` built and tested natively on Linux/macOS/Windows amd64 + arm64 incl. Windows MSVC, ARMv7 Linux best effort.
 - D8 (planned in C-070): the `oec/conformance` gate incl. the D8 self-test on Windows/macOS/Linux runners and the `oec-infra` binaries; the opt-in Docker runs (`live-infra.sh`) on a Linux runner.
 - D7 carried forward from P5 exit criterion 4 (D-1 (a), C-069 review): `oec/conformance` gate (incl. the sim fixtures through the proxy with the restart hook) on Windows/macOS/Linux runners, the binaries for windows/linux/darwin × amd64/arm64 and the multi-arch D7 container image (A-237).
+- Micro SDK (D9, carried from the P4b exit, C-097 addendum 1): host tests on Linux/Windows runners, ESP-IDF builds (`esp32`, `esp32s3`, `qemu`) and Arduino builds (Arduino-ESP32 3.3.x and 4.0 final; C3/C6 best effort); ESP Component Registry (publication, Q-011). The Arduino Library Manager is **not** part of P9 unless the PO orders it.
 - Versioned release of schema, SDK packages, conformance tool binaries, container images; release notes.
 - Publication target: private GitHub repositories (working assumption, Q-011). CRA review before any *public* release (Q-011): SBOM, vulnerability handling process, security update policy, support period.
 - Guideline feedback package: all spec findings with proposed text changes for the work group.

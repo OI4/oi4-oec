@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 13.11.2026, C-097: P4b Teil 6 – Arduino-Bibliothek mit M5Stack-Beispiel, Doku-Seite des Micro SDK und Abschlussbewertung von P4b (A-479 … A-488 zur Info). **Für dich offen: D-1 – P4b schließen?**_
+_Stand: 13.11.2026, C-097 Nachtrag 1: deine Antwort zu D-1 ist eingetragen – **P4b ist abgeschlossen**, noch keine Veröffentlichung im Arduino Library Manager; als Nächstes P8 – Dokumentation (C-098). Für dich ist nichts offen._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,38 +24,18 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – P4b schließen? (Phasenreihenfolge, Veröffentlichung)
-
-**Worum es geht:** P4b (Micro SDK) ist fertig gebaut – bis auf eine Sache: den Lauf auf **echter Hardware**. Die ROADMAP verlangt, dass die Firmware auf einem ESP32-Board und auf einem M5Stack die D7-Prüfung besteht (und im Emulator, wenn möglich). In den Sitzungen war kein Board angeschlossen. Deshalb gibt es nur den Emulator.
-
-**Was erfüllt ist:**
-- der C-Kern für die Stufen 1, 2 und 3, mit Unit-Tests, Speicherprüfung (ASan/UBSan), statischer Analyse und Fuzzing (C-092 … C-095);
-- die ESP-IDF-Anbindung und die Beispiel-Firmware für ESP32 und ESP32-S3 (C-096);
-- die **Arduino-Bibliothek** mit dem Sensor-Beispiel und dem **M5Stack-Beispiel** (C-097, siehe unten);
-- die Größenangaben (etwa 35 KB Flash für Kern und Anbindung, kein fester RAM).
-
-**D7-Ergebnisse:**
-- Im ESP32-Emulator QEMU besteht die Firmware **alle drei Stufen ohne Fehler**, auch gegen den Dev-Broker.
-- Auf dem Mac läuft der gleiche Kern im Gate durch D7.
-
-**Was nicht erfüllt ist:**
-- Der Lauf auf einem echten ESP32 und einem M5Stack fehlt. Die Arduino-Sketche sind nur übersetzt, nicht gelaufen.
-- Die Host-Tests laufen nur auf dem Mac. Linux und Windows brauchen eine CI.
-
-**Optionen:**
-- **(a) P4b schließen, weiter mit P8 – Dokumentation (mein Vorschlag).** Was weiterwandert:
-  - **Lauf auf echter Hardware:** Die Anleitung steht in der README des Micro SDK („Run on real hardware“). Sobald ein Board da ist, machst du den Lauf oder ich in einem späteren Zyklus. Einen dort gefundenen Fehler behebe ich als Nacharbeit zu P4b.
-  - **CI** → P9: Host-Tests unter Linux und Windows, ESP-IDF- und Arduino-Builds.
-  - **Veröffentlichung** → P9:
-    - im Arduino Library Manager. Er braucht ein öffentliches Repository und eine erreichbare Web-Adresse in der Bibliothek; `https://oi4.org` antwortet dem Prüfwerkzeug nicht richtig.
-    - in der ESP Component Registry.
-  - **Neu prüfen mit Arduino-ESP32 4.0**, sobald die endgültige Version erscheint → P9. Heute gibt es nur einen Release Candidate.
-- (b) P4b schließen, weiter mit **P9** (Härtung und Release), P8 nebenher.
-- (c) P4b offen lassen, bis der Hardware-Lauf gemacht ist. Dann bitte sagen, welches Board und wer den Lauf macht.
-
-Antwort z. B.: „D-1 (a)“.
+Für dich ist nichts offen.
 
 ## Früher beantwortet
+
+### D-1 aus C-097 – P4b schließen?
+
+Deine Antwort: „D-1 (a) aber, noch nicht im Arduino Library veröffentlichen.“ P4b ist damit abgeschlossen. Was weiterwandert:
+- **Lauf auf echter Hardware:** als Opt-in-Schritt nach der README („Run on real hardware“), sobald ein Board da ist. Einen dort gefundenen Fehler behebe ich als Nacharbeit zu P4b.
+- **Nach P9:** CI (Host-Tests unter Linux und Windows, ESP-IDF- und Arduino-Builds), die ESP Component Registry und die Prüfung mit Arduino-ESP32 4.0 final.
+- **Arduino Library Manager:** wird **nicht** veröffentlicht, auch nicht automatisch in P9. Das geschieht erst, wenn du es ausdrücklich sagst (eingetragen in ROADMAP P9 und bei Q-011). Bis dahin bleibt die Bibliothek ein ZIP, das `arduino/package.sh` baut.
+
+Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Docusaurus-Seite und das erste Inkrement. Lizenz und Veröffentlichungsort der Seite lege ich dir als Entscheidung vor.
 
 ### D-1 aus C-091 – P7 schließen?
 

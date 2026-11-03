@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-13, C-097: P4b increment 6 – Arduino library `OECMicro` with the examples `Sensor` and `M5Stack`, docs page of the micro SDK, P4b exit assessment. **Open for you: D-1 – close P4b?** (A-479 … A-488 for information)._
+_Last updated: 2026-11-13, C-097 addendum 1: your answer to D-1 is applied – **P4b closed**, no publication to the Arduino Library Manager yet; next phase P8 – Documentation (C-098). Nothing is open for you._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -298,6 +298,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-095 (P4b increment 4; ADR-0022 and ADR-0030 amendments C-095): micro core Messaging L3 – ReferenceDesignation (`Get` with Query, `Set`, `Del`, persisted) and `Call`/`Reply NewDataSetWriterId` (persisted reservations) over PAL `persist_*`; 87 Unity tests; 69 emitted messages valid; D7 `test --level 3` in gate step 9 – 50 pass, 0 warn, 0 fail (A-458 … A-466). No D-x, no R-x, no SF.
 - C-096 (P4b increment 5; ADR-0030 amendment C-096): ESP-IDF v6.1 component `port/esp-idf/oecm` (PAL on esp-mqtt 1.1.0, esp-tls/mbedTLS 4.1, NVS), example firmware `examples/esp-idf` (`esp32`, `esp32s3`, `qemu`; provisioning partition, serial console), QEMU runner `host/cmd/oecm-qemu`; D7 against the firmware in the Espressif QEMU (opt-in): Level 1 21 pass, Level 2 38 pass, Level 3 50 pass, 0 fail (the host pins); against `oec/dev` (Mosquitto) Level 3 38 pass, 0 fail; footprint core + PAL 33.6 KB flash (A-467 … A-478). No D-x, no R-x, no SF.
 - C-097 (P4b increment 6 + exit; ADR-0022, ADR-0024 and ADR-0030 amendments C-097): Arduino library `OECMicro` in `oec/sdk/micro/arduino/` – the core and the ESP-IDF PAL unchanged on the esp-mqtt of Arduino-ESP32 3.3.12 and 4.0.0-RC1, assembled by `package.sh`; examples `Sensor` and `M5Stack` (M5Unified: status display, Health by button); provisioning by `arduino_secrets.h` placeholders; `oecm_connected` (test first); gate step (package unchanged, secrets empty, headers C++17); opt-in builds without warnings for ESP32, ESP32-S3, M5Core2, M5CoreS3, M5Core and best effort C3/C6 (core + PAL 34.8 … 35.4 KB on Xtensa, no static RAM); harness fix (orphaned QEMU processes); instructions for the run on real hardware; docs page `oec/docs/docs/micro-sdk/index.md`; P4b exit assessment – all met except the run on a real ESP32 board and an M5Stack (QEMU passes D7 Level 1/2/3) → **D-1** (A-479 … A-488). No R-x, no SF.
+- C-097 addendum 1: your answer ("D-1 (a) aber, noch nicht im Arduino Library veröffentlichen") is applied: **P4b is closed** (ROADMAP P4b heading and "Decision" paragraph, STATUS). Carried as proposed: the run on real hardware (opt-in), CI, the ESP Component Registry and the Arduino-ESP32 4.0 final re-check → P9. The Arduino Library Manager is **not** part of P9; it waits for your explicit order (ROADMAP P9, Q-011). Next phase: P8 – Documentation.
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -801,7 +802,7 @@ Logs: [C-097](log/2026-11-13_C-097_arduino-p4b-exit.md), [C-096](log/2026-11-12_
 | A-476 | TLS: mbedTLS 4.1 (TLS 1.2/1.3), CA from the provisioning only, no certificate bundle, MQTT 3.1.1, `-Os` | info (agent) | C-096 | – | – |
 | A-477 | Footprint: core + PAL 33.6 KB flash, no static RAM; images 884/879/536 KB; heap ≥ 167 KB free, stack ≤ 2.4 KB | info (agent) | C-096 | – | – |
 | A-478 | Dev broker run: D7 `test` with the probe user (ACL), PKI `-san 10.0.2.2`; manual opt-in | info (agent) | C-096 | – | – |
-| D-1 | Close P4b? All met except the run on real hardware (QEMU passes) | decide (G-3.4 a) | C-097 | (a) close P4b, carried items → P9, next P8 | open |
+| D-1 | Close P4b? All met except the run on real hardware (QEMU passes) | decide (G-3.4 a) | C-097 | (a) close P4b, carried items → P9, next P8 | ☑ (a), Arduino Library Manager not yet (addendum 1) |
 | A-479 | esp-mqtt in Arduino-ESP32 3.3.12 and 4.0.0-RC1: ESP-IDF PAL reused unchanged, no arduino-mqtt fallback, NVS directly | info (agent) | C-097 | – | – |
 | A-480 | Library `OECMicro` in `arduino/`, assembled by `package.sh` into `target/arduino/` (flat copy, nothing generated committed) | info (agent) | C-097 | – | – |
 | A-481 | Sketch provisioning by `arduino_secrets.h` placeholders (kept empty by the gate); Level 3 records in NVS `oecm` | info (agent) | C-097 | – | – |
@@ -817,12 +818,17 @@ Logs: [C-097](log/2026-11-13_C-097_arduino-p4b-exit.md), [C-096](log/2026-11-12_
 
 ### Open for you
 
-**D-1 – close P4b?** (C-097, G-3.4 a: phase order, publication). The exit assessment is in the log C-097 ("P4b exit assessment"). Met: the core with PAL (C-092 … C-095), the ESP-IDF port with the example firmware (C-096), the Arduino library with the M5Stack example (C-097), the C safety measures (static analysis, ASan/UBSan, fuzzing), Level 1 → 2 → 3, the documented footprint and the targets (builds for ESP32, ESP32-S3, M5Stack Core2/CoreS3/Core; C3/C6 best effort). The exit criterion "the firmware passes D7 `--level 1/2/3`" is met **in the Espressif QEMU** (0 fail at all three levels, and on `oec/dev`), **not on a real ESP32 board or an M5Stack** – there was no hardware in the sessions; the M5Stack sketch is compile-only. Host tests run on macOS only (Windows/Linux need CI).
-- (a) **close P4b, next P8 – Documentation** – recommended. Carried: the run on real hardware (opt-in step with the instructions in `oec/sdk/micro/README.md`, "Run on real hardware", when a board is available; a defect found there becomes a P4b follow-up); CI (host tests on Linux/Windows, ESP-IDF/Arduino builds), publication (Arduino Library Manager: needs a public repository and a reachable `url`, arduino-lint LP042; ESP Component Registry) and the re-check on Arduino-ESP32 4.0 final → P9.
-- (b) close P4b with the same carried items, next **P9** (hardening and release), P8 alongside.
-- (c) keep P4b open until the hardware run (name the board and who runs it).
+Nothing is open for you.
 
 ### Answered earlier
+
+Answered after C-097 (2026-11-13) and recorded in C-097 addendum 1:
+- D-1 – close P4b: ☑ (a) closed, next phase **P8 – Documentation**; carried items as proposed, but **no publication to the Arduino Library Manager yet** ("D-1 (a) aber, noch nicht im Arduino Library veröffentlichen"). The question was:
+
+> **D-1 – close P4b?** (C-097, G-3.4 a: phase order, publication). The exit assessment is in the log C-097 ("P4b exit assessment"). Met: the core with PAL (C-092 … C-095), the ESP-IDF port with the example firmware (C-096), the Arduino library with the M5Stack example (C-097), the C safety measures (static analysis, ASan/UBSan, fuzzing), Level 1 → 2 → 3, the documented footprint and the targets (builds for ESP32, ESP32-S3, M5Stack Core2/CoreS3/Core; C3/C6 best effort). The exit criterion "the firmware passes D7 `--level 1/2/3`" is met **in the Espressif QEMU** (0 fail at all three levels, and on `oec/dev`), **not on a real ESP32 board or an M5Stack** – there was no hardware in the sessions; the M5Stack sketch is compile-only. Host tests run on macOS only (Windows/Linux need CI).
+> - (a) **close P4b, next P8 – Documentation** – recommended. Carried: the run on real hardware (opt-in step with the instructions in `oec/sdk/micro/README.md`, "Run on real hardware", when a board is available; a defect found there becomes a P4b follow-up); CI (host tests on Linux/Windows, ESP-IDF/Arduino builds), publication (Arduino Library Manager: needs a public repository and a reachable `url`, arduino-lint LP042; ESP Component Registry) and the re-check on Arduino-ESP32 4.0 final → P9.
+> - (b) close P4b with the same carried items, next **P9** (hardening and release), P8 alongside.
+> - (c) keep P4b open until the hardware run (name the board and who runs it).
 
 Answered after C-091 (2026-11-07) and recorded in C-091 addendum 1:
 - D-1 – close P7: ☑ closed, next phase **P4b – Micro SDK (D9)** instead of P8 ("P7 schließen, dann P4b – Micro SDK (D9)"); carried items as proposed. The question was:
@@ -2084,4 +2090,4 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 
 ## Next (C-098)
 
-1. PO: D-1 of C-097 (close P4b? next P8 or P9). Then C-098 per the decision.
+1. C-098 – P8 start (Documentation): plan and cycle cut in the ROADMAP, ADR-0031 for the Docusaurus site in `oec/docs`; license and publication place of the site as D-x for you; first increment.

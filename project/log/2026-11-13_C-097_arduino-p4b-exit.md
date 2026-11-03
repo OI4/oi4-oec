@@ -107,3 +107,18 @@ None in C-097 (no container, volume, network or image created).
 ## Gate
 
 `caffeinate -i oec/check.sh` – **all checks passed** (82 min 36 s wall clock, mostly waiting under background load (Spotlight indexing); no repeat needed). The new micro step `arduino/package.sh (library layout, C-097), headers as C++17` passed; D7 `validate` of the micro examples: 69 messages, 0 invalid.
+
+## Addendum 1 – PO decision on the P4b exit (2026-11-13)
+
+PO answer (chat): "D-1 (a) aber, noch nicht im Arduino Library veröffentlichen".
+
+### Applied
+
+- **D-1 (a): P4b is closed.** ROADMAP P4b heading ✅ and "Decision" paragraph; STATUS (current phase P8, previous phase P4b, D9 done, next step, cycle row); REVIEW/REVIEW_DE (D-1 answered).
+- **Carried items:**
+  - run on real hardware (ESP32 board, M5Stack Core2/CoreS3): opt-in step per `oec/sdk/micro/README.md` "Run on real hardware" when a board is available; a defect found there is a P4b follow-up;
+  - CI (host tests on Linux/Windows, ESP-IDF and Arduino builds, C3/C6) → P9;
+  - ESP Component Registry → P9 (publication, the PO decides, Q-011);
+  - re-check on Arduino-ESP32 4.0 final → P9.
+- **Restriction (PO):** the Arduino Library Manager **not yet** (PO: "noch nicht im Arduino Library veröffentlichen") – only on a later explicit PO order, not part of P9 by itself. The library stays a ZIP built by `arduino/package.sh`; `library.properties` and arduino-lint LP042 (A-486) stay as they are. Recorded in ROADMAP P9 and in Q-011 (OPEN-QUESTIONS).
+- **Next phase: P8 – Documentation (D6)**, starting with C-098.
