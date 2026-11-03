@@ -135,3 +135,12 @@ Increment 5 of the cycle cut (§7), within the amendment C-100 addendum 2. Detai
 4. **Generic validator (A-524):** `validate.md` shows a Python `jsonschema` script; it was run in a temporary environment, not in the gate (no Python in the gate; the Go and Rust validators of gate step 2 cover the schemas). The reader installs the package; it is no dependency of the project.
 5. **Schema reference (A-525):** written by hand, every file link checked by docscheck; nothing is generated. `dist/` (git-ignored) is not linked; the page says that the `$id`s are names, not addresses (Q-011).
 6. **Checks:** `docscheck: 19 pages ok, 30 README links to them ok` in gate step 10; the opt-in `build.sh` built the guideline site without a warning for `docs/community`, 19 HTML pages of the section.
+
+## Amendment C-103 (2026-11-19) – increment 6: P8 exit run (agent, G-3.4 b)
+
+Increment 6 of the cycle cut (§7). Details: `log/2026-11-19_C-103_p8-exit-run.md`, REVIEW A-529 … A-535.
+
+1. **Method (A-529):** the commands of the pages were run as written, in order, on a clean `oec/dev` (fresh `generated/`, images built by the page's scripts), against binaries built from the workspace; where a run differed from the page, the page was changed, not the run. The live commands of the compliance guides and the SDK snippets ran against the compose stack with the profiles `demos` and `registry`.
+2. **Page fixes (A-529 … A-532):** the first image build takes ~20 minutes (Getting started, Registry guide); `monitor` is started before the application (else T7-MON-01 … 04 are inconclusive) and the computer stays awake (T7-MON-05); `docker save` keeps one platform (T8-IMG-02 warns REQ-APP-002) – check the buildx OCI archive; `bus` keeps the default registry wait of 65 s (T8-BUS-03); the `host` output as measured; every application gets its own copy of the sample storage, and two applications at once need two container names (`etc/hostname` = serial number and MQTT ClientId). Guideline commit `f61af2c`; `oec/dev/README.md` "Run an application against the broker" accordingly.
+3. **Checks (A-535):** `docscheck: 19 pages ok, 30 README links to them ok` in gate step 10; the opt-in `build.sh` built the guideline site without any warning.
+4. **Exit assessment:** both P8 exit criteria are met (ROADMAP P8, "Exit assessment (C-103)"); closing P8 is the PO's decision (D-1, G-3.4 a).

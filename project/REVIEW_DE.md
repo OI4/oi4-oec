@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 18.11.2026, C-102: Die Doku hat jetzt Anleitungen zu den Prüfwerkzeugen `oec-check` (D7) und `oec-infra` (D8), eine Seite zu den JSON-Schemas und eine Anleitung „eigene Nachricht prüfen“ (`oi4-oec-documentation/docs/community/compliance/`). Alle Befehle, die ohne Broker und ohne Docker laufen, habe ich gegen die frisch gebauten Programme ausgeführt; die Ausgaben auf den Seiten stammen aus diesen Läufen. Für dich ist nichts offen._
+_Stand: 19.11.2026, C-103: Der Abschlusslauf von P8. Ich habe die Demos und die Registry genau nach der Startseite der Doku gebaut und gestartet, die Prüfbefehle von `oec-check` (D7) und `oec-infra` (D8) und die Beispielprogramme der SDKs gegen die Entwicklungsumgebung `oec/dev` laufen lassen und die Seiten dort korrigiert, wo die Wirklichkeit anders war (Guideline-Commit `f61af2c`). Die Seite baut ohne jede Warnung. **Offen für dich: D-1 – P8 schließen?**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,22 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Für dich ist nichts offen.
+### D-1 – P8 (Dokumentation) schließen?
+
+**Worum geht es?** P8 hat zwei Abschlusskriterien: (1) die Doku-Seite baut ohne kaputte Links, (2) ein Neuling kann die Demos nur mit der Doku zum Laufen bringen. Beides ist erfüllt:
+- (1) Der Bau der Guideline-Seite (`oec/docs/build.sh`) läuft ohne eine einzige Warnung. Zusätzlich prüft das Gate bei jedem Lauf alle Links und Anker der 19 Seiten und die 30 Links aus den READMEs auf die Seiten.
+- (2) Ich habe die Befehle der Startseite („See OEC at work“) der Reihe nach auf einer frischen Entwicklungsumgebung ausgeführt: Demos und Registry starten, alle Web-Oberflächen und die REST-Schnittstelle antworten, das Umstellen von 3 auf 4 Wetterstationen klappt durchgehend, und das Aufräumen der Seite entfernt alles wieder. Der einzige Fehler war die Bauzeit („ein paar Minuten“ – in Wahrheit etwa 20 Minuten beim ersten Mal); das steht jetzt richtig da.
+
+Außerdem laufen die Prüfbefehle und die SDK-Beispiele so, wie die (korrigierten) Seiten es sagen.
+
+**Was nicht ganz ideal ist (blockiert nicht):** Den Lauf habe ich gemacht, nicht ein echter Neuling, und nur auf einem Mac (nicht Linux/Windows). Die Seite ist noch nicht veröffentlicht (Q-011). Die API-Referenz verweist auf rustdoc, `oec.h` und `go doc` statt eigene Seiten zu erzeugen; die Schema-Seite ist von Hand geschrieben.
+
+**Möglichkeiten:**
+- (a) **P8 schließen, als Nächstes P9 – Härtung & Release** – meine Empfehlung. Was weiterwandert: die Veröffentlichung der Seiten mit der Guideline-Seite (Q-011, entscheidest du), Neuling-Läufe unter Linux und Windows in der CI (P9); jede spätere Änderung an Werkzeug, SDK, Demo oder Registry passt ihre Seite im selben Zyklus an (docscheck bleibt im Gate).
+- (b) P8 schließen wie (a), aber eine andere nächste Phase (bitte nennen).
+- (c) P8 offen lassen, bis ein echter Neuling es probiert hat (bitte nennen, wer und auf welchem System).
+
+Antwort z. B.: „D-1 (a)“.
 
 ## Früher beantwortet
 
@@ -52,6 +67,16 @@ Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Do
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-103 gemacht hat (P8, Teil 6 von 6 – Abschlusslauf)
+
+- **Neuling-Lauf (A-529):** Startseite Schritt für Schritt auf frischem `oec/dev`: Demo-Images 4:22 min, Registry-Image 15:21 min, fünf Container gesund, Oberflächen und REST antworten, 3 → 4 Stationen klappt, Aufräumen entfernt alles. Korrigiert: Bauzeit (~20 min) und „die Frost- und Sturmwarnungen der Stationen“.
+- **D7 live (A-530):** `monitor` muss **vor** der Anwendung starten, sonst bleiben vier Tests „inconclusive“ – so gestartet: 16 pass, PASS. `test` mit Proxy, Neustart-Befehlen und simuliertem Partner: 49 pass, 6 skip, PASS. Beides steht jetzt auf der Seite.
+- **D8 live (A-531):** `image` warnt bei einem `docker save`-Archiv (enthält nur eine Plattform); das Mehr-Plattform-Archiv des Baus besteht – die Seite zeigt jetzt den passenden `buildx`-Befehl. `bus` braucht die Standard-Wartezeit von 65 s, damit der Registry-Test durchläuft (vorher stand dort 10 s → übersprungen). `host`: Ausgabe wie gemessen; auf dem Mac fällt nur REQ-PLT-003 durch (wie bekannt). `run` und `container` bestehen.
+- **SDK-Beispiele live (A-532):** Die „erste Anwendung“ in Rust, C und Go aus den Seiten gebaut und gestartet: je 13 pass, 0 fail (Level 1, daher „inconclusive“ – so gewollt). Zwei Stolpersteine, beide so gewollt und jetzt dokumentiert: Jede Anwendung braucht eine **eigene Kopie** des Beispiel-Speichers (das SDK merkt sich dort seine Kennungen; eine zweite Anwendung auf derselben Kopie wird abgewiesen), und zwei gleichzeitig laufende Anwendungen brauchen **verschiedene Container-Namen** (der Name ist auch die MQTT-Client-Kennung – sonst werfen sie sich gegenseitig vom Broker). Auch die Verbraucher-Beispiele (Rust, C, Go) liefen; schreibende Anfragen gehen nur mit dem Prüf-Login, wie die Seiten sagen. Dazu eine kleine Korrektur in `oec/dev/README.md`.
+- **Schlafender Mac (A-533):** Im Akkubetrieb mit zugeklapptem Deckel schlief der Mac trotz `caffeinate` ein; dann fällt der Herzschlag-Test T7-MON-05. Wach wiederholt → 0 fail.
+- **Aufräumen und Prüfungen (A-534, A-535):** alle eigenen Container, Volumes, Netze und Images wieder entfernt (kein `prune`), temporäre Ordner gelöscht; docscheck 19 Seiten ok, Bau ohne Warnung.
+- Kein Fehler in D7, D8, Schema oder SDK, keine Lücke in der Guideline: kein SF, kein R-x.
 
 ### Zur Info: was C-102 gemacht hat (P8, Teil 5 von 6)
 
