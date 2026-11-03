@@ -24,7 +24,8 @@ since C-090 the **image** `oi4/oec-registry` (below) and the compose profile
 `registry` of `oec/dev`. C-091 ran the P7 exit (image with D8 `image`,
 `run` and `container` at `--level 3`; compose run in which the registry
 lists every participant over REST and in the Web UI) and added the guide
-page [`oec/docs/docs/registry/index.md`](../docs/docs/registry/index.md).
+page [OEC Registry](https://oi4.github.io/oi4-oec-documentation/docs/community/registry) (since C-100 addendum 2 in the
+Community section of the guideline site, `oi4-oec-documentation/docs/community/registry/index.md`).
 Next: the PO decides on closing P7.
 
 ### Config `registry`

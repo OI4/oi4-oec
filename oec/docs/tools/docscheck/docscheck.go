@@ -1,8 +1,12 @@
-// Package docscheck checks the pages of the OEC documentation site
-// (oec/docs/docs, ADR-0031) without node and without network: the front
-// matter of every page, every Markdown link and anchor (into the site and
-// into the files of the repository folder oec/), and the rule of
-// GUARDRAILS G-4.11 that the site has no hyperlinks to the guideline site.
+// Package docscheck checks the pages of the OEC developer documentation
+// without node and without network. Since C-100 addendum 2 the pages live
+// in the Community section of the guideline site
+// (oi4-oec-documentation/docs/community, ADR-0031 amendment): the front
+// matter of every page, every Markdown link and anchor (between the pages
+// and, as repository URLs, into the files of oec/), the rule of GUARDRAILS
+// G-4.11 that guideline sections are referenced by number, not linked, and
+// that the text is safe for MDX (the guideline site reads .md as MDX). It
+// also checks the links of the READMEs of oec/ to the Community pages.
 package docscheck
 
 import (
@@ -36,19 +40,29 @@ func (p Problem) String() string {
 // repository (G-4.11: guideline sections are referenced by number).
 var forbidden = []string{"oi4.github.io", "oi4-oec-documentation"}
 
-// Check checks every page below docs (the folder oec/docs/docs). Links that
-// leave the site must name an existing file or folder of the repository
-// folder oec (the parent of docs/..); the site build turns them into
-// repository links. Links to anything outside oec, to oec/docs itself
-// outside the site, site-absolute links and unknown schemes are problems.
-func Check(docs string) ([]Problem, error) {
+// RepoURL is the prefix of a link from a page to a file or folder of oec/
+// (the repository of this workspace, default branch); the rest of the URL
+// is the path below oec/.
+const RepoURL = "https://github.com/OI4/oi4-oec/blob/main/oec/"
+
+// SiteURL is the route of the Community section on the guideline site; the
+// READMEs of oec/ link the pages below it (trailingSlash: false).
+const SiteURL = "https://oi4.github.io/oi4-oec-documentation/docs/community"
+
+// Check checks every page below docs (the Community folder of the guideline
+// site). Links between pages are relative and stay in docs; a file or
+// folder of oec (the folder oec/ of this workspace) is linked as RepoURL +
+// path and must exist. Relative links out of docs, other links into the
+// repository, site-absolute links and unknown schemes are problems.
+func Check(docs, oec string) ([]Problem, error) {
 	docs, err := filepath.Abs(docs)
 	if err != nil {
 		return nil, err
 	}
-	site := filepath.Dir(docs)
-	oec := filepath.Dir(site)
-	c := &checker{docs: docs, site: site, oec: oec, anchors: map[string]map[string]bool{}}
+	if oec, err = filepath.Abs(oec); err != nil {
+		return nil, err
+	}
+	c := &checker{docs: docs, oec: oec, anchors: map[string]map[string]bool{}}
 	var pages []string
 	err = filepath.WalkDir(docs, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -71,8 +85,8 @@ func Check(docs string) ([]Problem, error) {
 			return nil, err
 		}
 	}
-	if !c.rootPage {
-		c.problems = append(c.problems, Problem{File: ".", Msg: "no page with slug / (the root of the site)"})
+	if _, err := os.Stat(filepath.Join(docs, "index.md")); err != nil {
+		c.problems = append(c.problems, Problem{File: ".", Msg: "no index.md (the start page of the section)"})
 	}
 	return c.problems, nil
 }
@@ -80,10 +94,9 @@ func Check(docs string) ([]Problem, error) {
 func isPage(p string) bool { return strings.HasSuffix(p, ".md") || strings.HasSuffix(p, ".mdx") }
 
 type checker struct {
-	docs, site, oec string
-	anchors         map[string]map[string]bool
-	problems        []Problem
-	rootPage        bool
+	docs, oec string
+	anchors   map[string]map[string]bool
+	problems  []Problem
 }
 
 func (c *checker) add(file string, line int, format string, a ...any) {
@@ -145,8 +158,16 @@ func (c *checker) page(file string) error {
 	for _, u := range urls {
 		c.link(file, line(u.off), u.u)
 	}
+	for _, m := range reMDX.FindAllStringIndex(plain, -1) {
+		c.add(file, line(m[0]), "%q: MDX reads it as JSX or an expression – put it in backticks", plain[m[0]:m[1]])
+	}
 	return nil
 }
+
+// reMDX finds what MDX (the guideline site reads .md as MDX) would parse as
+// an expression or a JSX tag outside code: a brace, or < before a letter,
+// / or ! (this includes autolinks <https://…>).
+var reMDX = regexp.MustCompile(`[{}]|<[A-Za-z/!][^\s>]*`)
 
 func guideline(u string) bool {
 	l := strings.ToLower(u)
@@ -199,15 +220,9 @@ func (c *checker) frontMatter(file string, fm []string) {
 			c.add(file, 1, "sidebar_position %q is not a non-negative integer", v)
 		}
 	}
-	if v, ok := keys["slug"]; ok {
-		if !strings.HasPrefix(v, "/") || strings.Contains(v, "..") {
-			c.add(file, 1, "slug %q must start with / and not contain ..", v)
-		}
-		if v == "/" {
-			if c.rootPage {
-				c.add(file, 1, "a second page with slug /")
-			}
-			c.rootPage = true
+	for _, k := range []string{"slug", "id"} {
+		if _, ok := keys[k]; ok {
+			c.add(file, 1, "front matter %q: no slug or id – the route follows the file (README links rely on it)", k)
 		}
 	}
 }
@@ -219,6 +234,12 @@ func (c *checker) link(file string, line int, u string) {
 		return
 	case guideline(u):
 		c.add(file, line, "hyperlink to the guideline site %q (G-4.11: reference guideline sections by number)", u)
+		return
+	case strings.HasPrefix(u, RepoURL):
+		c.repoLink(file, line, u)
+		return
+	case strings.HasPrefix(strings.ToLower(u), "https://github.com/oi4/oi4-oec/"):
+		c.add(file, line, "link %q: link files of oec/ as %s<path>", u, RepoURL)
 		return
 	case strings.HasPrefix(u, "https://"), strings.HasPrefix(u, "http://"), strings.HasPrefix(u, "mailto:"):
 		return
@@ -237,18 +258,43 @@ func (c *checker) link(file string, line int, u string) {
 	}
 	p, frag, _ := strings.Cut(u, "#")
 	target := filepath.Join(filepath.Dir(file), filepath.FromSlash(p))
-	inDocs := within(target, c.docs)
-	if !inDocs && (within(target, c.site) || !within(target, c.oec)) {
-		c.add(file, line, "link %q leaves the site and the repository folder oec/ (only pages of the site and files of oec/ outside oec/docs)", u)
+	if !within(target, c.docs) {
+		c.add(file, line, "link %q leaves the Community section: link files of oec/ as %s<path>, refer to guideline sections by number", u, RepoURL)
 		return
 	}
 	st, err := os.Stat(target)
 	if err != nil {
-		c.add(file, line, "link %q: %s does not exist", u, c.relOEC(target))
+		c.add(file, line, "link %q: %s does not exist", u, c.rel(target))
 		return
 	}
-	if inDocs && st.IsDir() {
+	if st.IsDir() {
 		c.add(file, line, "link %q names a folder: link its page file (index.md)", u)
+		return
+	}
+	if frag != "" {
+		if !isPage(target) {
+			c.add(file, line, "link %q: an anchor needs a Markdown target", u)
+			return
+		}
+		c.anchor(file, line, target, frag, u)
+	}
+}
+
+// repoLink checks a link RepoURL + path[#anchor] against the files of oec.
+func (c *checker) repoLink(file string, line int, u string) {
+	p, frag, _ := strings.Cut(strings.TrimPrefix(u, RepoURL), "#")
+	if strings.Contains(p, "?") {
+		c.add(file, line, "link %q: no query in file links", u)
+		return
+	}
+	target := filepath.Join(c.oec, filepath.FromSlash(p))
+	if !within(target, c.oec) && target != c.oec {
+		c.add(file, line, "link %q leaves oec/", u)
+		return
+	}
+	st, err := os.Stat(target)
+	if err != nil {
+		c.add(file, line, "link %q: %s does not exist", u, c.rel(target))
 		return
 	}
 	if frag != "" {
@@ -260,8 +306,14 @@ func (c *checker) link(file string, line int, u string) {
 	}
 }
 
-func (c *checker) relOEC(p string) string {
-	if r, err := filepath.Rel(filepath.Dir(c.oec), p); err == nil {
+// rel names p relative to oec/ or to the Community folder.
+func (c *checker) rel(p string) string {
+	if within(p, c.oec) || p == c.oec {
+		if r, err := filepath.Rel(filepath.Dir(c.oec), p); err == nil {
+			return filepath.ToSlash(r)
+		}
+	}
+	if r, err := filepath.Rel(filepath.Dir(c.docs), p); err == nil {
 		return filepath.ToSlash(r)
 	}
 	return p
@@ -285,7 +337,7 @@ func (c *checker) anchor(file string, line int, target, frag, u string) {
 		c.anchors[target] = ids
 	}
 	if !ids[frag] {
-		c.add(file, line, "link %q: no heading with the anchor #%s in %s", u, frag, c.relOEC(target))
+		c.add(file, line, "link %q: no heading with the anchor #%s in %s", u, frag, c.rel(target))
 	}
 }
 
@@ -426,4 +478,101 @@ func Pages(docs string) ([]string, error) {
 	})
 	slices.Sort(out)
 	return out, err
+}
+
+// CheckReadmes checks the links of the README.md files below oec to the
+// Community pages: SiteURL[/route][#anchor] must name a page of docs
+// (route r is r.md or r/index.md, the empty route index.md) and an anchor of
+// it. A relative link to the former site folder oec/docs/docs is a problem.
+// It returns the problems and the number of Community links seen.
+func CheckReadmes(oec, docs string) ([]Problem, int, error) {
+	oec, err := filepath.Abs(oec)
+	if err != nil {
+		return nil, 0, err
+	}
+	if docs, err = filepath.Abs(docs); err != nil {
+		return nil, 0, err
+	}
+	c := &checker{docs: docs, oec: oec, anchors: map[string]map[string]bool{}}
+	var readmes []string
+	err = filepath.WalkDir(oec, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			switch d.Name() {
+			case "node_modules", "target", "build", "dist", ".docusaurus", ".git", "managed_components":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if d.Name() == "README.md" {
+			readmes = append(readmes, p)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	slices.Sort(readmes)
+	n := 0
+	for _, f := range readmes {
+		raw, err := os.ReadFile(f)
+		if err != nil {
+			return nil, 0, err
+		}
+		plain := stripCode(strings.ReplaceAll(string(raw), "\r\n", "\n"))
+		for _, re := range []*regexp.Regexp{reLink, reRefDef} {
+			for _, m := range re.FindAllStringSubmatchIndex(plain, -1) {
+				u, ln := plain[m[2]:m[3]], 1+strings.Count(plain[:m[0]], "\n")
+				switch {
+				case u == SiteURL || strings.HasPrefix(u, SiteURL+"/") || strings.HasPrefix(u, SiteURL+"#"):
+					n++
+					c.siteLink(f, ln, u)
+				case strings.Contains(u, "docs/docs/"):
+					c.readmeProblem(f, ln, "link %q: the pages moved to the Community section, link %s/<route>", u, SiteURL)
+				}
+			}
+		}
+	}
+	return c.problems, n, nil
+}
+
+func (c *checker) readmeProblem(file string, line int, format string, a ...any) {
+	rel, err := filepath.Rel(filepath.Dir(c.oec), file)
+	if err != nil {
+		rel = file
+	}
+	c.problems = append(c.problems, Problem{File: filepath.ToSlash(rel), Line: line, Msg: fmt.Sprintf(format, a...)})
+}
+
+func (c *checker) siteLink(file string, line int, u string) {
+	route, frag, _ := strings.Cut(strings.TrimPrefix(u, SiteURL), "#")
+	if strings.HasSuffix(route, "/") {
+		c.readmeProblem(file, line, "link %q: no trailing slash (trailingSlash: false)", u)
+		return
+	}
+	route = strings.TrimPrefix(route, "/")
+	var cands []string
+	if route == "" {
+		cands = []string{"index.md"}
+	} else if strings.Contains(route, "..") || strings.HasSuffix(route, ".md") || strings.HasSuffix(route, ".mdx") {
+		cands = nil
+	} else {
+		cands = []string{route + ".md", route + "/index.md"}
+	}
+	for _, cand := range cands {
+		target := filepath.Join(c.docs, filepath.FromSlash(cand))
+		if st, err := os.Stat(target); err == nil && !st.IsDir() {
+			if frag != "" {
+				before := len(c.problems)
+				c.anchor(file, line, target, frag, u)
+				for i := before; i < len(c.problems); i++ {
+					c.problems[i].File = c.problems[i].File + " (README)"
+				}
+			}
+			return
+		}
+	}
+	c.readmeProblem(file, line, "link %q: no page for the route in %s", u, filepath.ToSlash(filepath.Base(c.docs)))
 }

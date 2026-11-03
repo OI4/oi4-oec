@@ -3,7 +3,9 @@
 C17 SDK for smart devices on microcontrollers: a platform-independent core
 and a platform abstraction layer (PAL), the reference port for ESP32 on
 ESP-IDF. Decisions: API in ADR-0022 (with the amendments), implementation in
-ADR-0030, ESP32 reference platform in ADR-0024.
+ADR-0030, ESP32 reference platform in ADR-0024. Guide:
+[OEC Micro SDK](https://oi4.github.io/oi4-oec-documentation/docs/community/micro-sdk) in the Community section of the
+guideline site.
 
 State (C-097): **Messaging Level 3** in the core (Level 1 since C-092,
 Level 2 since C-094), host tests, payload check and fuzz targets; the Go host

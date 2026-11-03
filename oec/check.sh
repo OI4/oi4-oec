@@ -36,12 +36,14 @@
 #      emitted payloads validated by D7 `oec-check validate`, and the Go
 #      host runner under D7 `oec-check test --level 1, 2 and 3` (C-093 …
 #      C-095).
-#  10. docs/check.sh: the documentation site D6 of P8 (ADR-0031, from
-#      C-098), offline without node: front matter, every link and anchor
-#      of the pages into the site and into oec/, no hyperlink to the
-#      guideline site (G-4.11); the offline npm policy of the site
-#      (package.json, lockfile, licenses, .npmrc, config; from C-099).
-#      The site build (docs/build.sh, npm) is opt-in.
+#  10. docs/check.sh: the documentation D6 of P8 (ADR-0031, from C-098),
+#      offline without node. Since C-100 addendum 2 the pages live in the
+#      Community section of the guideline site
+#      (../../oi4-oec-documentation/docs/community): front matter, every
+#      link and anchor between the pages and, as repository URLs, into
+#      oec/, no hyperlink to the guideline (G-4.11), MDX-safe text, and the
+#      links of the READMEs of oec/ to the pages. The build of the
+#      guideline site (docs/build.sh, yarn) is opt-in.
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu

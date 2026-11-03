@@ -1,6 +1,8 @@
 # OEC demo services (P6)
 
-Three small services show the OEC SDKs at work (ADR-0028):
+Three small services show the OEC SDKs at work (ADR-0028). Guide:
+[Demo services](https://oi4.github.io/oi4-oec-documentation/docs/community/demos) in the Community section of the guideline
+site.
 
 | Demo | Language, SDK | ServiceType | Messaging level | State |
 |---|---|---|---|---|
