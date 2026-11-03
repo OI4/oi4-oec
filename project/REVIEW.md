@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-14, C-098 addendum 1: your answer to D-1 is applied – the five licenses are **allowed for the documentation site's npm tree only** (ADR-0031 §5); next C-099 – Docusaurus site scaffold. Nothing is open for you._
+_Last updated: 2026-11-15, C-099: P8 increment 2 – the Docusaurus site in `oec/docs` builds without broken links (opt-in `build.sh`, not published) and its npm tree is checked offline in the gate; A-495 … A-500 for information. Nothing is open for you; next C-100 – Concepts and migration notes 1.x → 2.0._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -301,6 +301,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-097 addendum 1: your answer ("D-1 (a) aber, noch nicht im Arduino Library veröffentlichen") is applied: **P4b is closed** (ROADMAP P4b heading and "Decision" paragraph, STATUS). Carried as proposed: the run on real hardware (opt-in), CI, the ESP Component Registry and the Arduino-ESP32 4.0 final re-check → P9. The Arduino Library Manager is **not** part of P9; it waits for your explicit order (ROADMAP P9, Q-011). Next phase: P8 – Documentation.
 - C-098 (P8 start; ADR-0031): plan and cycle cut C-098 … C-103 (ROADMAP P8); `oec/docs/tools` – Go `docscheck` (standard library) checks every page offline: front matter, a single root page, links and anchors into the site and into `oec/` (github-slugger anchors), no hyperlink to the guideline site (G-4.11); 24 violation tests; `oec/docs/check.sh` as gate step 10; Getting started page `oec/docs/docs/intro.md` (`slug: /`); `oec/docs/README.md`; Docusaurus 3.10.2 survey (1275 packages) and a temporary feasibility build (README links rewritten to the repository by a hook, ~6 s) → **D-1** (licenses) (A-489 … A-494). No R-x, no SF.
 - C-098 addendum 1: your answer ("D-1 (a)") is applied: 0BSD, CC0-1.0, BlueOak-1.0.0, Python-2.0 and CC-BY-4.0 are allowed **for the npm tree of the documentation site (`oec/docs`) only** (ADR-0031 status and §5, ROADMAP P8, STATUS); ADR-0023 and the registry Web UI policy (ADR-0029 §10) are unchanged. The site scaffold follows in C-099.
+- C-099 (P8 increment 2; ADR-0031 amendment C-099): Docusaurus 3.10.2 site in `oec/docs` – exact pins re-checked, lockfile v3 (1275 packages, `--before` 7 days), `.npmrc`, docs-only `docusaurus.config.mjs` (every broken-link rule `throw`, no blog/analytics/search, MIT footer), `sidebars.mjs`, `src/css/`; README links rewritten to the repository by the remark plugin `src/remark/repoLinks.mjs` (ADR-0031 §3 changed: the hook only sees `.md` links); offline npm policy `tools/npmpolicy` in gate step 10 (ADR-0023 allowlist + the five site-only licenses, OR rule, reviewed tables, 39 violation tests); opt-in `build.sh` (~30 s, 904 KB, no broken links; six probe links fail the build). Not published (Q-011). No new license, no D-x, no R-x, no SF (A-495 … A-500).
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -822,6 +823,12 @@ Logs: [C-098](log/2026-11-14_C-098_p8-start-docs-check.md), [C-097](log/2026-11-
 | A-492 | Docusaurus 3.10.2, React 19.3.1; exact pins, 7-day cool-down | info (agent) | C-098 | – | – |
 | A-493 | npm license rules: OR with an allowlisted choice passes; packages without a `license` field in a reviewed table | info (agent) | C-098 | – | – |
 | A-494 | P8 cycle cut C-098 … C-103 | info (agent) | C-098 | – | – |
+| A-495 | Versions re-checked, unchanged; lockfile 1275 packages with `--before=2026-10-27` | info (agent) | C-099 | – | – |
+| A-496 | Site configuration docs-only (no blog, pages, sitemap, analytics, search); no `"type": "module"`; no `static/` yet | info (agent) | C-099 | – | – |
+| A-497 | Repository links by the remark plugin `src/remark/repoLinks.mjs` (existing targets only) instead of the hook function (ADR-0031 §3 changed) | info (agent) | C-099 | – | – |
+| A-498 | npm policy `tools/npmpolicy` in gate step 10: reviewed tables (aliases, install scripts, no `license` field), prerelease only transitive; 39 violation tests | info (agent) | C-099 | – | – |
+| A-499 | `build.sh` opt-in: policy test, `npm ci --ignore-scripts`, build into `build/`; `uuid` 8.3.2 deprecation accepted | info (agent) | C-099 | – | – |
+| A-500 | Build probes: six broken-link cases fail the build; repository URL configurable | info (agent) | C-099 | – | – |
 
 ## Decisions and review items
 
@@ -2116,6 +2123,15 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 - **A-493 License rules** (ADR-0031 §5): an OR expression passes if one alternative is allowlisted (`type-fest`, `opener`, `path-is-inside`, `rc`); packages without a `license` field (`eval`, `format`, `require-like`: MIT) need a reviewed table entry in the policy test. The five licenses without a choice → D-1.
 - **A-494 Cycle cut** (ADR-0031 §7, ROADMAP P8): C-098 plan + check + Getting started; C-099 site scaffold and npm policy (after D-1); C-100 concepts and migration 1.x → 2.0; C-101 SDK guides; C-102 D7/D8/schema guides; C-103 exit run.
 
-## Next (C-099)
+### C-099 – P8 increment 2 (agent, G-3.4 b; log `log/2026-11-15_C-099_docs-site-scaffold.md`)
 
-1. C-099 – P8 increment 2 (D-1 (a)): the Docusaurus site scaffold in `oec/docs` (`package.json`, lockfile, `docusaurus.config.mjs` with the README-link hook, sidebars), the offline npm policy test in gate step 10 (allowlist of ADR-0023 plus the site-only list of ADR-0031 §5) and the opt-in `build.sh` without broken links.
+- **A-495 Versions** (ADR-0031 §4, amendment C-099 item 1): re-checked at the start – Docusaurus 3.10.2 (4.0 still canary), React 19.3.1, `@mdx-js/react` 3.1.1, `clsx` 2.1.1, `prism-react-renderer` 2.4.1, unchanged. Lockfile v3 with `--before=2026-10-27`: 1275 packages, the tree of the C-098 survey; no license beyond the allowlist and the five site-only licenses.
+- **A-496 Configuration** (item 2): docs-only site (docs at `/`, no pages plugin, blog, sitemap, analytics or search), `markdown.format: 'detect'`, one autogenerated sidebar, MIT footer. `package.json` without `"type": "module"` – with it Docusaurus 3.10.2 fails (`require.resolveWeak is not a function`); the configuration files are `.mjs`. No `static/` folder until the first image (ADR-0031 §1 listed it).
+- **A-497 Repository links** (item 3, ADR-0031 §3 changed): the `onBrokenMarkdownLinks` hook only sees `.md`/`.mdx` links; a header file would be bundled as an asset and a folder link reported broken. The local remark plugin `src/remark/repoLinks.mjs` runs before Docusaurus' own plugins and rewrites relative links to existing files and folders of `oec/` outside `oec/docs/` to `${OEC_DOCS_REPO_URL}/oec/…`; all other links are left to Docusaurus, whose rules are all `throw`.
+- **A-498 npm policy** (item 4): Go `tools/npmpolicy` (standard library), run by gate step 10 offline – `package.json` (private, MIT, seven exact dependencies, scripts `build`/`serve`/`start`, no devDependencies), lockfile (v3, canonical `registry.npmjs.org` tarballs, sha512, no dev/link/bundled entries; prerelease versions only for transitive packages), licenses (ADR-0023 allowlist + the five site-only licenses; OR with one allowed choice; `WITH`/malformed fail), reviewed tables in the code for npm aliases (2), install scripts (`core-js`, `fsevents`) and packages without a `license` field (`eval`, `format`, `require-like`), `.npmrc` and the build rules of the configuration. 39 violation tests; the registry policy is unchanged.
+- **A-499 Build** (item 5): `build.sh` opt-in (network): policy test, `npm ci --ignore-scripts`, `npm run build` → `build/` (git-ignored). Clean run ~30 s, build ~7 s, 904 KB, 8 HTML pages, `node_modules/` 306 MB. npm's deprecation warning for `uuid` 8.3.2 (via `sockjs` of the dev server, not in the built site) needs no action.
+- **A-500 Probes** (item 6): a link appended to `intro.md` fails the build for a missing site anchor, a missing page, `oec/docs/README.md`, a missing Markdown file, a missing other file and a missing folder of `oec/` (the last three after adding the existence check to the plugin, found by the probe). `OEC_DOCS_REPO_URL` changes every repository link.
+
+## Next (C-100)
+
+1. C-100 – P8 increment 3 (ADR-0031 §7): Concepts (assets, identities, topics, resources, compliance levels; guideline sections by number, no links – G-4.11) and migration notes 1.x → 2.0 (GL-ADR-001 … 011) as pages in `oec/docs/docs/`, checked by `docscheck` in the gate and built by `build.sh` without broken links.

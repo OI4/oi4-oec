@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 14.11.2026, C-098 Nachtrag 1: deine Antwort zu D-1 ist eingetragen – die fünf Lizenzen sind **nur für die Doku-Seite** erlaubt; als Nächstes C-099 – die Docusaurus-Seite selbst. Für dich ist nichts offen._
+_Stand: 15.11.2026, C-099: die Docusaurus-Seite steht und lässt sich lokal ohne kaputte Links bauen; ihre npm-Pakete prüft das Gate offline. Für dich ist nichts offen; als Nächstes C-100 – Grundbegriffe und „was ist neu gegenüber 1.x“._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -48,6 +48,15 @@ Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Do
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-099 gemacht hat (P8, Teil 2 von 6)
+
+- **Die Doku-Seite ist da (A-495, A-496):** In `oec/docs` liegt jetzt eine Docusaurus-Seite (Version 3.10.2, React 19.3.1 – vor dem Einchecken noch einmal geprüft, unverändert). Die Paketliste (`package-lock.json`) umfasst 1275 npm-Pakete, alle mindestens 7 Tage alt (Schutz vor frisch eingeschleusten Paketen). Die Seite ist schlicht: nur die Doku, kein Blog, keine Suche, keine Statistik/Tracking, unten der Hinweis auf die MIT-Lizenz.
+- **Links auf READMEs (A-497):** Die Seiten verlinken READMEs, Header-Dateien und Beispiel-Ordner in `oec/` relativ (so funktionieren sie auch direkt auf GitHub). Beim Bauen macht ein kleines Zusatzmodul daraus Links ins GitHub-Repository. Der in C-098 geplante Weg über einen Docusaurus-„Hook“ erfasst nur Links auf `.md`-Dateien; eine Header-Datei wäre sonst in die Seite kopiert worden, ein Ordner-Link wäre kaputt gewesen. Zeigt ein Link auf eine Datei, die es nicht gibt, bricht der Bau ab. Eingetragen als Nachtrag in ADR-0031.
+- **Lizenz-Prüftest im Gate (A-498):** Ein Go-Test prüft bei jedem Gate-Lauf ohne Internet: die Seite ist privat und MIT, genau die sieben Abhängigkeiten in festen Versionen, jedes der 1275 Pakete kommt von `registry.npmjs.org` mit Prüfsumme, und jede Lizenz steht in der allgemeinen Liste (ADR-0023) oder unter deinen fünf nur für die Seite erlaubten (C-098 D-1 (a)). Ein paar Sonderfälle habe ich einzeln geprüft und im Test aufgelistet (zwei Pakete unter anderem Namen, zwei mit Installationsskript, das nie ausgeführt wird, drei ohne Lizenzfeld, aber nachweislich MIT). Kommt eine neue Lizenz hinzu, schlägt der Test an – dann frage ich dich. 39 absichtlich kaputte Varianten werden alle erkannt.
+- **Bauen (A-499, A-500):** `oec/docs/build.sh` baut die Seite lokal (braucht Internet, daher nicht im Gate): etwa 30 Sekunden, Ergebnis 904 KB, keine kaputten Links. Sechs absichtlich kaputte Links (fehlende Seite, fehlender Sprungpunkt, fehlende Datei usw.) ließen den Bau jeweils scheitern – einer davon zeigte eine Lücke, die ich sofort geschlossen habe. Die Seite wird **nicht veröffentlicht** (Q-011, P9).
+- **Für dich:** keine Entscheidung, nichts zu reviewen, keine neue Lizenz.
+- **Docker:** nicht benutzt.
 
 ### Zur Info: was C-098 gemacht hat (P8, Teil 1 von 6)
 
