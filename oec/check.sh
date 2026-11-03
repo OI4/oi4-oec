@@ -36,6 +36,10 @@
 #      emitted payloads validated by D7 `oec-check validate`, and the Go
 #      host runner under D7 `oec-check test --level 1, 2 and 3` (C-093 …
 #      C-095).
+#  10. docs/check.sh: the documentation site D6 of P8 (ADR-0031, from
+#      C-098), offline without node: front matter, every link and anchor
+#      of the pages into the site and into oec/, no hyperlink to the
+#      guideline site (G-4.11). The site build is opt-in.
 # The inventory check reads the guideline repository next to this repository
 # (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
 set -eu
@@ -89,5 +93,8 @@ step "registry/check.sh (OEC Registry D5)"
 
 step "sdk/micro/check.sh (micro SDK D9)"
 "$root/sdk/micro/check.sh"
+
+step "docs/check.sh (documentation site D6)"
+"$root/docs/check.sh"
 
 printf '\nall checks passed\n'
