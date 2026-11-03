@@ -10,6 +10,11 @@ amendment C-100 addendum 2):
 - [Demo services](https://oi4.github.io/oi4-oec-documentation/docs/community/demos)
 - [OEC Registry](https://oi4.github.io/oi4-oec-documentation/docs/community/registry)
 - [OEC Micro SDK](https://oi4.github.io/oi4-oec-documentation/docs/community/micro-sdk)
+- [SDKs](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk) – guides
+  [Rust](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/rust),
+  [C](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/c),
+  [Go](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/go) and the
+  [API reference](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/reference)
 - [Migration notes 1.x → 2.0](https://oi4.github.io/oi4-oec-documentation/docs/community/migration)
 
 This folder holds their offline check (gate step 10) and the opt-in build.

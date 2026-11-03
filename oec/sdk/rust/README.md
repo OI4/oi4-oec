@@ -11,6 +11,11 @@ Workspace of the Rust SDK D2 (ADR-0011, ADR-0023, ADR-0026). The public API is t
 
 `spike/` holds stand-alone crates outside the workspace (`exclude`), with their own lock files.
 
+Guides for application developers (since C-101, in the Community section of the guideline site):
+[Rust](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/rust),
+[C](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/c) on the C ABI and the
+[API reference](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/reference).
+
 ## Rules
 
 - Edition 2024, MSRV `rust-version = 1.89`, license MIT, `publish = false`.

@@ -13,7 +13,9 @@ provider Level 2/3 – represented assets, `Data` with its `Metadata`, `Config`,
 events, `OnSet` handlers (increment 2); consumer – `Subscribe`, `Get`, `Set`,
 `Del`, `NewDataSetWriterID` (increment 3); examples `hello` (Level 1) and
 `source` (Level 3). Every function of `oec.h` is reachable but one (see
-[C ABI coverage](#c-abi-coverage)).
+[C ABI coverage](#c-abi-coverage)). A guide for application developers (since
+C-101): [Go](https://oi4.github.io/oi4-oec-documentation/docs/community/sdk/go)
+in the Community section of the guideline site.
 
 ## Build
 
