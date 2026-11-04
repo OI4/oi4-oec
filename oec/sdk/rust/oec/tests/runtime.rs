@@ -448,6 +448,12 @@ fn untrusted_broker_is_never_online() {
     );
 }
 
+/// Keep alive of the mutual TLS tests: it also bounds a connect attempt
+/// (TCP and TLS handshake), and under qemu-arm on an amd64 runner the
+/// handshake with a client certificate took longer than 1 s (C-105
+/// addendum 2).
+const MTLS_KEEP_ALIVE: Duration = Duration::from_secs(10);
+
 /// Mutual TLS with the client certificate of an explicit broker: no User
 /// Name in CONNECT (REQ-MQTT-010); TLS 1.2 is enough (REQ-MQTT-005).
 #[test]
@@ -466,7 +472,10 @@ fn client_certificate_over_tls12() {
     let states = States::default();
     let broker =
         broker(&root, &pki, tb.port).client_cert(root.path("cert.pem"), root.path("key.pem"));
-    let app = builder(broker, &states).build().unwrap();
+    let app = builder(broker, &states)
+        .keep_alive(MTLS_KEEP_ALIVE)
+        .build()
+        .unwrap();
     let handle = app.handle();
     let run = spawn(app);
 
@@ -497,7 +506,10 @@ fn encrypted_private_key_with_passphrase() {
     )
     .write("run/secrets/oi4/passphrase", "czNjcmV0\n");
     let states = States::default();
-    let app = container_app(&root, &states).build().unwrap();
+    let app = container_app(&root, &states)
+        .keep_alive(MTLS_KEEP_ALIVE)
+        .build()
+        .unwrap();
     let handle = app.handle();
     let run = spawn(app);
 
