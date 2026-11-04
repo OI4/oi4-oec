@@ -53,6 +53,17 @@ static void test_json_escaping(void) {
     TEST_ASSERT_EQUAL_STRING("\"a\\\"b\\\\c\\n\\t\\u0001\\u001f\x7f/\xc3\xa4\"", out);
 }
 
+/* An absent optional string (NULL) is the empty JSON string; no pointer
+ * arithmetic on NULL (C17 UB; clang 18 UBSan on Linux, C-104). */
+static void test_json_null_string(void) {
+    oecm_buf b = fresh(sizeof out - 1);
+    oecm_put_json_cstr(&b, NULL);
+    oecm_put_json_str(&b, NULL, 0);
+    oecm_put_json_chars(&b, NULL, 0);
+    out[b.len] = '\0';
+    TEST_ASSERT_EQUAL_STRING("\"\"\"\"", out);
+}
+
 static void test_b64url_lengths(void) {
     TEST_ASSERT_EQUAL_size_t(0, oecm_b64url_len(0));
     TEST_ASSERT_EQUAL_size_t(2, oecm_b64url_len(1));
@@ -77,6 +88,7 @@ int main(void) {
     RUN_TEST(test_overflow_sets_full_and_never_writes_past_cap);
     RUN_TEST(test_integers);
     RUN_TEST(test_json_escaping);
+    RUN_TEST(test_json_null_string);
     RUN_TEST(test_b64url_lengths);
     RUN_TEST(test_dnp_keeps_unreserved);
     return UNITY_END();

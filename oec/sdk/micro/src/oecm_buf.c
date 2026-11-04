@@ -51,6 +51,8 @@ void oecm_put_i64(oecm_buf *b, int64_t v) {
 void oecm_put_json_chars(oecm_buf *b, const char *s, size_t n) {
     static const char hex[] = "0123456789abcdef";
     size_t run = 0; /* start of the pending unescaped run */
+    if (n == 0)
+        return; /* s may be NULL: no pointer arithmetic on it (C17 6.5.6) */
     for (size_t i = 0; i < n; i++) {
         unsigned char c = (unsigned char)s[i];
         if (c >= 0x20 && c != '"' && c != '\\')
