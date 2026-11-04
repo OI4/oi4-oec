@@ -491,6 +491,8 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 **CI activation (C-104 addendum 2, 2026-11-20):** secret created from `.env` on the PO's instruction, both repositories pushed (fast-forward). First hosted runs: the gate on `macos-15`, actionlint, the binaries and D7/D8 on both macOS runners pass; Linux failed on the default `go test` timeout (now 30 min, A-553), Windows on two portability defects of D7/D8 and test assumptions (A-554 … A-556) – fixed test first; exit criterion 1 (every gate job green on the hosted runners) is checked again after the next push.
 
+**Hosted runs green (C-104 addendum 3, 2026-11-20):** after the push Windows passed; three more Linux issues were fixed – a Rust SDK runtime test race (A-557), the runner disk (`oec/ci/disk.sh`, `CARGO_INCREMENTAL=0`, A-558) and a micro SDK defect (argument evaluation order under GCC on x86-64, A-559). The run of `c5c25e9` is green on every job: **exit criterion 1 met**.
+
 **Exit (proposal, C-104; the PO decides at the end of P9):**
 
 1. The CI is active and green on the pushed state: `gate.yml` on its three runners, `conformance.yml` on its six (D-1).

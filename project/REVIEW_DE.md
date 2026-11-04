@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 20.11.2026, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
+_Stand: 20.11.2026, C-104 Nachtrag 3: Auf dein Go habe ich die Korrekturen gepusht. Die Läufe auf GitHub fanden unter Linux noch drei Dinge (ein wackliger Test im Rust-SDK, die volle Festplatte des Runners, ein echter Fehler im Micro SDK). Alle behoben (A-557 … A-559); **der letzte Lauf ist in allen Jobs grün**. Offen ist nur noch: Bitte prüfe, ob das Token nur lesend ist (A-552). Vorher, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,9 +24,18 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts zu entscheiden. Zwei kleine Schritte bei dir:
+Nichts zu entscheiden. Ein kleiner Schritt bei dir:
 - **Token prüfen (A-552):** GitHub meldet für das Token `push: true`. Das kann auch nur deine Rolle im Repo sein. Bitte prüfe in den Token-Einstellungen, dass es nur Lesezugriff auf den Inhalt von `OI4/oi4-oec-documentation` hat (so verlangt es ADR-0032 §7).
-- **Push freigeben:** Die Korrekturen aus Nachtrag 2 sind lokal committet. Ein Push startet die nächsten Läufe auf GitHub; erst die zeigen, ob Windows ganz grün wird.
+
+### Zur Info: C-104 Nachtrag 3 – die Korrekturen auf GitHub, alles grün
+
+- **Gepusht** (auf dein „Ja, pushen und die Läufe auswerten“), danach noch zweimal mit den Korrekturen unten. Immer nur vorwärts.
+- **Windows ist grün:** D7/D8 laufen jetzt auf allen sechs Plattformen durch. Die Korrekturen aus Nachtrag 2 wirken also.
+- **Drei weitere Funde unter Linux:**
+  - **Rust-SDK, wackliger Test (A-557):** Ein Test trennte die Verbindung, bevor die App sie überhaupt als „online“ verbucht hatte. Auf dem ARM-Runner passierte das manchmal. Jetzt wartet der Test darauf. Am SDK selbst ändert sich nichts.
+  - **Festplatte voll (A-558):** Auf dem x86-Linux-Runner sind nur ~13 GB frei; die Rust-Builds brauchen mehr. Ein neuer erster Schritt löscht dort vorinstallierte Werkzeuge, die wir nicht brauchen (Android, .NET usw.); danach 38 GB frei. Das passiert nur auf den Runnern von GitHub, nie lokal.
+  - **Micro SDK, echter Fehler (A-559):** In C ist nicht festgelegt, in welcher Reihenfolge die Argumente eines Aufrufs ausgewertet werden. Der Code verließ sich darauf, dass eine Länge erst berechnet und dann gelesen wird. GCC auf x86 macht es umgekehrt. Dann würden Birth und Health mit falscher Länge verschickt. Gefunden hat das die vorhandene GCC-Prüfung mit „Warnungen sind Fehler“ auf dem x86-Runner. Ich habe es in einem eigenen x86-Container nachgestellt und an allen drei Stellen behoben. README und Community-Seite sind angepasst. Veröffentlicht war noch nichts, betroffen ist also niemand.
+- **Ergebnis:** Der Lauf auf Commit `c5c25e9` ist in allen Jobs grün: Gate auf Linux (x86 und ARM) und macOS, D7/D8 auf sechs Plattformen. Damit ist das erste Exit-Kriterium von P9 erfüllt.
 
 ### Zur Info: C-104 Nachtrag 2 – CI eingeschaltet, erste Läufe
 
