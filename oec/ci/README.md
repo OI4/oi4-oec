@@ -109,7 +109,8 @@ ci/sdk-go.sh                             # opt-in: the job go of sdk.yml on this
 
 `linux.sh` clones the committed state (HEAD of this repository and the
 guideline branch), so commit first. It runs as a non-root user with
-`CC=clang` as on the runner, removes its container on exit and removes the
+`CC=clang` and `CARGO_INCREMENTAL=0` as on the runner (smaller targets;
+without it the Docker VM ran out of disk in C-105), removes its container on exit and removes the
 Ubuntu image if it pulled it. The container has the architecture of the
 Docker host (arm64 on Apple silicon, the counterpart of `ubuntu-24.04-arm`).
 It is limited to `OEC_CI_CPUS` CPUs (default 4, as a hosted Linux runner):

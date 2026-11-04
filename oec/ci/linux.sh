@@ -5,9 +5,9 @@
 # repository and the branch guideline_ref of ../../oi4-oec-documentation,
 # installs the system packages (packages.sh --go; GOTOOLCHAIN=auto fetches
 # the Go toolchain of go.mod) and rustup, then runs setup-tools.sh, fetch.sh and
-# oec/check.sh as a non-root user with CC=clang, as on the runner
-# (ADR-0032 §8). Removes its container on exit and the Ubuntu image if it
-# pulled it. Never part of the gate.
+# oec/check.sh as a non-root user with CC=clang and CARGO_INCREMENTAL=0, as
+# on the runner (ADR-0032 §8). Removes its container on exit and the Ubuntu
+# image if it pulled it. Never part of the gate.
 #
 # Behind a TLS-intercepting proxy, set OEC_CI_CA_CERTS to a PEM file with
 # the proxy's root certificate(s); it is mounted read-only and added to the
@@ -46,7 +46,7 @@ git clone --quiet /src "$HOME/w"
 git clone --quiet --branch "$GUIDELINE_REF" /src/oi4-oec-documentation "$HOME/w/oi4-oec-documentation"
 cd "$HOME/w"
 echo "linux.sh: workspace $(git rev-parse --short HEAD), guideline $(git -C oi4-oec-documentation rev-parse --short HEAD), $(uname -m)"
-export GOTOOLCHAIN=auto CARGO_TERM_COLOR=never CC=clang
+export GOTOOLCHAIN=auto CARGO_TERM_COLOR=never CARGO_INCREMENTAL=0 CC=clang
 export PATH="$HOME/.oec-tools/bin:$HOME/.cargo/bin:$PATH"
 oec/ci/setup-tools.sh
 oec/ci/fetch.sh
