@@ -188,3 +188,11 @@ The HTTP side of the registry (ADR-0029 §7, amendment C-088, A-398/A-399) adds 
 - **Growth:** `Cargo.lock` 169 → **195** packages (26 more; 18 of them already in the SDK lock, e.g. `rcgen`, `pem`, `yasna`, `x509-parser` of the SDK's test PKI; **8 new to the workspace:** `hyper`, `hyper-util`, `http`, `http-body`, `httparse`, `httpdate`, `bytes`, `atomic-waker`). Compiled normal tree **124 → 137** unique crates: `atomic-waker` 1.1.2, `base64` 0.23.1, `bytes` 1.12.1, `futures-core` 0.3.34, `http` 1.5.0, `http-body` 1.1.0, `httparse` 1.10.1, `httpdate` 1.0.3, `hyper` 1.12.0, `hyper-util` 0.1.21, `pem` 4.0.0, `rcgen` 0.14.10, `yasna` 0.6.0. Licenses: MIT, `MIT OR Apache-2.0` (all within the allowlist).
 - `cargo deny check` (deny.toml of the SDK): advisories, bans, licenses and sources ok, **no exception and no `ignore` entry**.
 - **Not for the SDK:** `oec-core`, `oec` and `oec-ffi` are unchanged; their trees do not grow.
+
+## Amendment C-105 (2026-11-21) – the build on every platform of the SDK matrix (agent, G-3.4 b)
+
+No new dependency. The CI workflow `sdk.yml` (ADR-0032 amendment C-105) settles the build notes of this ADR:
+
+- **Windows x86-64:** aws-lc-sys uses its prebuilt NASM objects when `AWS_LC_SYS_PREBUILT_NASM=1` is set (an environment variable of aws-lc-sys, no feature change; set by `oec/ci/ffi-lib.sh`, `sdk-rust.sh` and `sdk-go.sh`). Windows arm64 compiles aws-lc with `clang-cl` of Visual Studio, found by aws-lc-sys itself.
+- **ARMv7:** aws-lc-rs (default) cross-builds for `armv7-unknown-linux-gnueabihf` with the Ubuntu cross gcc and its tests pass under `qemu-arm`, as do those with `crypto-ring` (C-105 log). Both providers are therefore usable on ARMv7; `crypto-ring` stays the smaller option, no longer a requirement. The prebuilt ARMv7 library uses the default.
+- **Cross tools:** no `cargo-zigbuild` (§2 "Cross builds" candidate): native runners for six targets, the distribution's cross gcc for ARMv7 and MinGW.

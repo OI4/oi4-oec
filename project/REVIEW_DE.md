@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 20.11.2026, C-104 Nachtrag 3: Auf dein Go habe ich die Korrekturen gepusht. Die Läufe auf GitHub fanden unter Linux noch drei Dinge (ein wackliger Test im Rust-SDK, die volle Festplatte des Runners, ein echter Fehler im Micro SDK). Alle behoben (A-557 … A-559); **der letzte Lauf ist in allen Jobs grün**. Offen ist nur noch: Bitte prüfe, ob das Token nur lesend ist (A-552). Vorher, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
+_Stand: 21.11.2026, C-105 (P9 Inkrement 2): Die SDK-Plattformmatrix `sdk.yml` ist gebaut und lokal geprüft – Rust-SDK und C-ABI auf sechs Plattformen inkl. Windows (MSVC), Go-SDK jetzt auch unter Windows (MinGW), ARMv7 per Cross-Build, fertige `liboec_ffi`-Bibliotheken als Download-Artefakte. **Nicht gepusht**, weil du nicht erreichbar warst – deshalb fehlt noch der Lauf auf GitHub: **D-1**. Vorher, C-104 Nachtrag 3: Auf dein Go habe ich die Korrekturen gepusht. Die Läufe auf GitHub fanden unter Linux noch drei Dinge (ein wackliger Test im Rust-SDK, die volle Festplatte des Runners, ein echter Fehler im Micro SDK). Alle behoben (A-557 … A-559); **der letzte Lauf ist in allen Jobs grün**. Offen ist nur noch: Bitte prüfe, ob das Token nur lesend ist (A-552). Vorher, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,8 +24,39 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts zu entscheiden. Ein kleiner Schritt bei dir:
-- **Token prüfen (A-552):** GitHub meldet für das Token `push: true`. Das kann auch nur deine Rolle im Repo sein. Bitte prüfe in den Token-Einstellungen, dass es nur Lesezugriff auf den Inhalt von `OI4/oi4-oec-documentation` hat (so verlangt es ADR-0032 §7).
+### D-1 – Darf ich C-105 pushen?
+
+Alles aus C-105 ist lokal committet, aber noch nicht auf GitHub. Pushen darf ich nur mit deinem Go (G-3.8). Ich habe dich während der Arbeit gefragt, du warst aber nicht da.
+
+**Warum es wichtig ist:** Einiges lässt sich nur auf den echten GitHub-Runnern prüfen. Dazu gehören Windows mit dem Microsoft-Compiler (x64 und ARM64), die Rust-Tests unter Windows, der Intel-Mac, das Go-SDK unter Windows und qemu auf dem x86-Runner. Bei einer neuen Matrix braucht der erste Lauf erfahrungsgemäß ein, zwei Korrekturen.
+
+- **(a) Empfohlen:** Jetzt beide Repos pushen (nur vorwärts, nie force). Korrekturen für rote `sdk.yml`-Jobs pushe ich unter demselben Go nach.
+- **(b)** Jetzt pushen, aber vor jedem Korrektur-Push neu fragen.
+- **(c)** Noch nicht. Dann bleibt `sdk.yml` nur lokal geprüft, und das P9-Exit-Kriterium 2 wartet.
+
+Betroffen sind im Workspace `main` alle Commits nach `c5c25e9`: `7b10ba8` (Doku zu C-104 Nachtrag 3) und die C-105-Commits. Im Guideline-Repo ist es `feature/spec-findings` mit `76bf08c` (nur Community-Seiten).
+
+**Weiter offen aus C-104 (A-552):** Bitte prüfe, ob das Token `OEC_GUIDELINE_TOKEN` nur lesend ist.
+
+### Zur Info: C-105 – SDK-Plattformmatrix (A-560 … A-569)
+
+- **Neuer Workflow `sdk.yml` (A-560):** Er hat drei Jobs.
+  - **`rust`** baut und testet Rust-SDK und C-ABI auf allen sechs GitHub-Rechnern, jeweils nativ für die eigene Plattform: Linux x86/ARM, macOS ARM/Intel, Windows x64/ARM64 mit dem Microsoft-Compiler.
+  - **`go`** testet das Go-SDK auf fünf Rechnern, mit Race-Detector. Windows ARM fehlt, weil es dort keinen passenden C-Compiler (MinGW) gibt.
+  - **`armv7`** baut für 32-Bit-ARM per Cross-Build. Die Tests laufen dort in der Emulation (qemu).
+  - Die Logik steckt in Skripten unter `oec/ci/`. Das YAML ruft sie nur auf und wird wie gehabt erzeugt (Gate-Schritt 11).
+- **Fertige Bibliotheken zum Herunterladen (A-561):** Jeder Lauf hinterlässt für acht Plattformen die statische `liboec_ffi`. Dazu gehören der Header, die Liste der nötigen Systembibliotheken, Build-Infos, die Lizenz und Prüfsummen. Die Artefakte bleiben 14 Tage – das ist kein Release; das entscheidest du (D-2 aus C-104). Zwei Builds ergaben dieselbe Prüfsumme.
+- **Windows mit dem Microsoft-Compiler (A-562):** Die C-Tests des SDK laufen nur unter Unix. Unter Windows ersetzt sie ein Kurztest: Das C-Beispiel `hello.c` wird gegen die Bibliothek gebaut und gestartet. Es muss mit dem erwarteten Fehler „keine Container-Ablage“ enden. Das beweist, dass Bauen und Starten funktionieren.
+- **Go-SDK unter Windows (A-563):** Der erste Versuch scheiterte beim Linken. Die Krypto-Bibliothek braucht unter MinGW eine Thread-Bibliothek, die Rust nicht mitmeldet. `link.go` bindet sie jetzt fest ein, sodass keine Zusatz-DLL nötig ist. Ein Test kam zuerst. Die API ändert sich nicht.
+- **ARMv7 (A-564, A-568):** Alles läuft durch, einschließlich der Tests in der Emulation. Dabei kam heraus, dass auch der Standard-Kryptoanbieter (aws-lc-rs) auf ARMv7 funktioniert. Die Empfehlung „auf ARMv7 ring verwenden“ ist damit keine Pflicht mehr; die Seite ist angepasst.
+- **Zwei Testfehler, keine SDK-Fehler (A-566, A-567):**
+  - Ein Rust-Test maß Zeitabstände falsch, wenn sich Nachrichten in der langsamen Emulation stauten.
+  - Ein Go-Test rechnete auf 32-Bit mit einer zu großen Zahl.
+  - Beides ist behoben; am SDK selbst ändert sich nichts.
+- **Geprüft (A-569):**
+  - actionlint, die Skripte auf dem Mac, ARMv7 und die Windows-MinGW-Seite im Ubuntu-Container, `linux.sh` und das Gate.
+  - Offen bis zum Push: siehe D-1.
+- **Doku:** `oec/ci/README.md`, die SDK-READMEs und die Community-Seiten zu C, Go und Rust sind angepasst. Dazu kommen die ADR-Nachträge 0032, 0027 und 0023.
 
 ### Zur Info: C-104 Nachtrag 3 – die Korrekturen auf GitHub, alles grün
 
