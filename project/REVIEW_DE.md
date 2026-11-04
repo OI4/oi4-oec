@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 19.11.2026, C-103 Nachtrag 1: Deine Antwort „D-1 (a)“ ist eingetragen – **P8 (Dokumentation) ist abgeschlossen**. Die Veröffentlichung der Seiten (Q-011) und Neuling-Läufe unter Linux/Windows in der CI wandern nach P9. Als Nächstes kommt **P9 – Härtung & Release** (C-104). Für dich ist nichts offen._
+_Stand: 20.11.2026, C-104: **P9 gestartet** – Plan und Zyklus-Schnitt, ADR-0032 (CI- und Release-Architektur), Teil 1 (erzeugte CI-Workflows, lokal und in einem Ubuntu-Container geprüft; nichts gepusht). **Offen für dich: D-1 (CI einschalten), D-2 (Release-Kanäle, Ziele, Sichtbarkeit; CRA), D-3 (Go-Modulpfad).**_
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,32 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Für dich ist nichts offen.
+Aus C-104 (Log `log/2026-11-20_C-104_p9-start-ci.md`, ADR-0032). Alle drei betreffen die Veröffentlichung und gehören deshalb dir (G-3.4 a). Keine davon hält C-105 auf; das prüfe ich bis dahin lokal.
+
+### D-1 – CI einschalten?
+
+Die Workflows `gate.yml` (das ganze Gate unter Linux x64, Linux arm64 und macOS) und `conformance.yml` (D7/D8 auf sechs Systemen inkl. Windows; die Programme für sechs Zielplattformen) liegen als Dateien im Repo. Sie laufen erst auf GitHub. Dafür braucht es:
+1. **Pushen:** den Workspace nach `OI4/oi4-oec` (privat; dort ist `main` hinter dem lokalen Stand) und den Guideline-Branch `feature/spec-findings` nach `OI4/oi4-oec-documentation` (dort steht `cbc293a`, drei Commits hinter `f61af2c` – ohne sie scheitert docscheck in der CI).
+2. **Ein Secret** `OEC_GUIDELINE_TOKEN` im Repo `OI4/oi4-oec`: ein fein granuliertes Token, nur Lesezugriff auf den Inhalt von `OI4/oi4-oec-documentation` – nötig, solange das Guideline-Repo privat ist.
+3. **Runner-Minuten:** In privaten Repos zählen macOS-Minuten 10-fach und Windows-Minuten 2-fach. Ein Push startet etwa drei Gate-Läufe (je bis ~1 h) und sechs kurze Konformitäts-Läufe.
+
+Möglichkeiten:
+- **(a) Empfehlung:** jetzt einschalten wie geplant – die nächsten P9-Teile werden dann auf echten Runnern geprüft.
+- (b) Später; bis dahin prüfe ich alles lokal (`linux.sh`, Cross-Builds), das Exit-Kriterium 1 wartet.
+- (c) Zuerst nur die Linux-Runner (keine macOS-/Windows-Minuten), die Matrix später erweitern.
+
+### D-2 – Release-Kanäle, Ziele und Sichtbarkeit?
+
+P9-Teil 6 (C-109) baut alle Ergebnisse aus einem Tag – mit Prüfsummen, SBOMs und Release-Notes – zunächst nur als Workflow-Artefakte. Wohin sie gehen, entscheidest du: GitHub Releases/Packages (welches Repo), crates.io (`oec`, `oec-ffi`), der Go-Modul-Proxy, die ESP Component Registry (Micro SDK), eine Image-Registry (Demos, Registry, D7/D8-Image); öffentlich oder privat. Vor jedem **öffentlichen** Release steht die CRA-Prüfung (Q-011: SBOM, Umgang mit Schwachstellen, Sicherheits-Updates, Support-Dauer – Entwürfe kommen in C-108). Den Arduino Library Manager fasse ich weiter nicht an, bis du es sagst.
+
+Vorschlag: Entscheide die Kanäle vor C-109; bis dahin bleibt alles Artefakt. Eine Antwort ist jetzt noch nicht nötig.
+
+### D-3 – Go-Modulpfad?
+
+Alle 12 Go-Module heißen `github.com/OI4/oec/...`. Das Repo ist aber `OI4/oi4-oec` mit den Modulen unter `oec/`, und ein Repo `OI4/oec` gibt es nicht. Im Workspace funktioniert das; für `go get` von außen muss der Pfad aber zum Ort der Veröffentlichung passen.
+- **(a) Empfehlung:** ein Repo `OI4/oec` für die veröffentlichten Ergebnisse beim ersten Release (jetzt nichts umbenennen; passt zu D-2).
+- (b) Die Module in `github.com/OI4/oi4-oec/oec/...` umbenennen (große, mechanische Änderung, vor dem ersten Release).
+- (c) Ein eigener Importpfad auf einer OI4-Domain (braucht einen Webserver, der `go-get=1` beantwortet).
 
 ## Früher beantwortet
 
@@ -62,6 +87,19 @@ Als Nächstes kommt **P8 – Dokumentation** (C-098): Plan, ADR-0031 für die Do
 ### D-1 aus C-091 – P7 schließen?
 
 Deine Antwort: „P7 schließen, dann P4b – Micro SDK (D9).“ P7 ist damit abgeschlossen. Was weiterwandert, bleibt wie vorgeschlagen: Veröffentlichung und Signatur der Images, Image-Registry, CI, Podman/Windows → P9; die Docusaurus-Seite → P8; schreibende Registry, Anmeldung, dauerhaftes Verzeichnis → später, wenn du es entscheidest. Statt P8 kommt jetzt P4b (Micro SDK); ich baue es möglichst in einer Sitzung durch und frage dich nur, wenn wirklich etwas nicht geht, unklar ist oder die Guideline geändert werden muss.
+
+### Zur Info: was C-104 gemacht hat (P9-Start, Teil 1 von 8)
+
+- **Plan (A-545):** P9 in acht Teile geschnitten (C-104 … C-111): CI, SDK-Plattformmatrix, Micro SDK, Images und Neuling-Läufe, Lieferkette (SBOM, Lizenzen, Schwachstellen, `SECURITY.md`), Release-Workflow, Feedback-Paket für die Guideline-Arbeitsgruppe, Abschlusslauf. Ein Vorschlag für die Exit-Kriterien steht in der ROADMAP.
+- **CI-Architektur (ADR-0032, A-536 … A-544):** GitHub Actions nur auf GitHub-eigenen Runnern. Die Workflows rufen nur `oec/check.sh` und die Skripte unter `oec/ci/` auf, damit jeder CI-Fehler lokal mit demselben Befehl nachvollziehbar ist. Sie werden von einem kleinen Go-Programm erzeugt, das strenge Sicherheitsregeln prüft: nur offizielle, fest gepinnte Actions, nur Leserechte, kein Einschleusen über Pull-Request-Texte, ein einziges Secret. Das Gate hat jetzt einen 11. Schritt: Er prüft, dass die Workflow-Dateien aktuell sind.
+- **Linux-Lauf (A-546 … A-550):** Das ganze Gate lief zum ersten Mal unter Linux, in einem Ubuntu-24.04-Container wie auf dem GitHub-Runner. Gefunden und behoben:
+  - ein **echter Fehler im Micro SDK**: Bei einem fehlenden optionalen Text rechnete eine Funktion „NULL + 0“. Das ist in C formal undefiniert, nur der Prüfer von clang 18 unter Linux meldet es. Behoben mit einem Test vorweg; die Ausgabe bleibt gleich.
+  - ein Test von D8 `host`, der davon abhing, auf welchem Rechner er läuft (im Container erkannte das Werkzeug richtig „Container“);
+  - ein fehlendes Compiler-Paket für die Speicherprüfungen;
+  - Grenzen für den Container: 4 CPUs wie ein Runner und ein Init-Prozess;
+  - Zeitlimits in den D7-Tests des Go SDK: Ein Hänger meldet sich jetzt mit Ausgabe, statt nach 10 Minuten stumm abzubrechen.
+- **Nur beobachtet (A-550):** `oec-check` gibt den Neustart-Befehlen kein eigenes Zeitlimit. Das könnte man in D7 später härten – nur, wenn du es willst.
+- Nichts gepusht, nichts veröffentlicht. Kein SF, kein R-x.
 
 ### Zur Info: was C-103 gemacht hat (P8, Teil 6 von 6 – Abschlusslauf)
 
