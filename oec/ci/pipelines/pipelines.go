@@ -54,7 +54,7 @@ func Policy() gha.Policy {
 }
 
 // Workflows returns every workflow of the repository.
-func Workflows() []gha.Workflow { return []gha.Workflow{Gate(), Conformance(), SDK()} }
+func Workflows() []gha.Workflow { return []gha.Workflow{Gate(), Conformance(), SDK(), Micro()} }
 
 func header(lines ...string) []string {
 	return append([]string{
@@ -337,4 +337,93 @@ func SDK() gha.Workflow {
 		"MinGW), ARMv7 Linux as a cross build (best effort), and the prebuilt",
 		"liboec_ffi of each target as a workflow artifact (no release).",
 	), rust, goJob, armv7)
+}
+
+// microCache caches the crates of the SDK workspace that the micro jobs
+// build go-testbroker from: downloads only, its own key prefix; cond: the
+// runners that build it.
+func microCache(cond string) gha.Step {
+	return gha.Step{
+		Name: "Cache the crates",
+		If:   cond,
+		Uses: Cache,
+		With: []gha.KV{
+			{Key: "path", Value: "~/.cargo/registry\n"},
+			{Key: "key", Value: "oec-micro-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('oec/ci/versions.sh', 'oec/sdk/rust/Cargo.lock') }}"},
+			{Key: "restore-keys", Value: "oec-micro-${{ runner.os }}-${{ runner.arch }}-"},
+		},
+	}
+}
+
+// Micro is the micro SDK workflow (ADR-0032 §6, C-106): the host checks of
+// oec/sdk/micro/check.sh with GCC on Linux amd64/arm64 (the gate runs them
+// with clang) and their portable part on Windows with MinGW, the ESP-IDF
+// builds esp32, esp32s3 and qemu plus D7 Level 1/2/3 against the firmware
+// in the Espressif QEMU, in the Espressif container pinned by digest, and
+// the Arduino library on Arduino-ESP32 3.3 and 4.0 with the pinned
+// arduino-cli (ADR-0030). No artifacts: the firmware is evidence only.
+func Micro() gha.Workflow {
+	entry := func(os string) gha.Entry {
+		return gha.Entry{{Key: "os", Value: os}, {Key: "cc", Value: "gcc"}}
+	}
+	goSetup := setupGo("oec/sdk/micro/host/go.mod", "oec/sdk/micro/host/go.mod\noec/conformance/go.sum\n")
+	host := gha.Job{
+		ID:     "host",
+		Name:   "Micro SDK host checks (${{ matrix.os }})",
+		RunsOn: "${{ matrix.os }}",
+		// GCC everywhere: the gate covers clang (Linux, macOS); on Windows
+		// MinGW is the cgo compiler of the Go host runner.
+		Matrix:         []gha.Entry{entry("ubuntu-24.04"), entry("ubuntu-24.04-arm"), entry("windows-2025")},
+		TimeoutMinutes: 60,
+		Env: []gha.KV{
+			{Key: "OEC_CI_CC", Value: "${{ matrix.cc }}"},
+			{Key: "CARGO_INCREMENTAL", Value: "0"},
+		},
+		Steps: []gha.Step{
+			checkout(),
+			goSetup,
+			microCache("runner.os != 'Windows'"),
+			run("Install the system packages (Linux)", "oec/ci/packages.sh"),
+			{Name: "Install the Rust toolchain of oec/ci/versions.sh (go-testbroker, Linux)", If: "runner.os != 'Windows'",
+				Run: "oec/ci/setup-tools.sh --toolchain"},
+			run("Host checks (oec/ci/micro-host.sh)", "oec/ci/micro-host.sh"),
+		},
+	}
+	idf := gha.Job{
+		ID:             "esp-idf",
+		Name:           "ESP-IDF esp32, esp32s3, qemu and QEMU D7 (Espressif container)",
+		RunsOn:         "ubuntu-24.04",
+		TimeoutMinutes: 120,
+		Env:            []gha.KV{{Key: "CARGO_INCREMENTAL", Value: "0"}},
+		Steps: []gha.Step{
+			checkout(),
+			goSetup,
+			microCache(""),
+			run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
+			run("Install the Rust toolchain of oec/ci/versions.sh (go-testbroker)", "oec/ci/setup-tools.sh --toolchain"),
+			run("Build and run D7 in QEMU (oec/ci/micro-esp-idf.sh)", "oec/ci/micro-esp-idf.sh"),
+		},
+	}
+	arduino := gha.Job{
+		ID:     "arduino",
+		Name:   "Arduino library (Arduino-ESP32 ${{ matrix.core }})",
+		RunsOn: "${{ matrix.os }}",
+		Matrix: []gha.Entry{
+			{{Key: "os", Value: "ubuntu-24.04"}, {Key: "core", Value: "3.3"}},
+			{{Key: "os", Value: "ubuntu-24.04"}, {Key: "core", Value: "4.0"}},
+		},
+		TimeoutMinutes: 90,
+		Env:            []gha.KV{{Key: "OECM_ARDUINO_CORE", Value: "${{ matrix.core }}"}},
+		Steps: []gha.Step{
+			checkout(),
+			run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
+			run("Build the examples (oec/ci/micro-arduino.sh)", "oec/ci/micro-arduino.sh"),
+		},
+	}
+	return base("micro.yml", "micro", header(
+		"The micro SDK: the host checks with GCC on Linux amd64/arm64 and Windows",
+		"(MinGW), the ESP-IDF builds and D7 Level 1/2/3 in the Espressif QEMU",
+		"(container pinned by digest), the Arduino library on Arduino-ESP32 3.3 and",
+		"4.0 (pinned arduino-cli). No artifacts.",
+	), host, idf, arduino)
 }

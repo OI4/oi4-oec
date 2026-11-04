@@ -5,8 +5,8 @@
 # if missing), cbindgen and cargo-deny (cargo install --locked into
 # $OEC_TOOLS, default ~/.oec-tools, which gate.yml caches). On GitHub Actions
 # the tool directories are appended to GITHUB_PATH (as Windows paths on
-# Windows). --toolchain installs only the Rust toolchain (sdk.yml). Needs
-# network.
+# Windows). --toolchain installs only the Rust toolchain (sdk.yml,
+# micro.yml). Needs network.
 set -eu
 toolchain_only=0
 case "${1:-}" in

@@ -178,11 +178,12 @@ func TestRunners(t *testing.T) {
 		"sdk/rust":    {"linux/amd64", "linux/arm64", "darwin/arm64", "darwin/amd64", "windows/amd64", "windows/arm64"},
 		"sdk/go":      {"linux/amd64", "linux/arm64", "darwin/arm64", "darwin/amd64", "windows/amd64"},
 		"sdk/armv7":   {"linux/amd64"},
+		"micro/host":  {"linux/amd64", "linux/arm64", "windows/amd64"},
 	}
 	jobs := map[string]gha.Workflow{"gate": Gate(), "conformance": Conformance(),
-		"sdk/rust": SDK(), "sdk/go": SDK(), "sdk/armv7": SDK()}
+		"sdk/rust": SDK(), "sdk/go": SDK(), "sdk/armv7": SDK(), "micro/host": Micro()}
 	jobID := map[string]string{"gate": "gate", "conformance": "test",
-		"sdk/rust": "rust", "sdk/go": "go", "sdk/armv7": "armv7"}
+		"sdk/rust": "rust", "sdk/go": "go", "sdk/armv7": "armv7", "micro/host": "host"}
 	for name, ps := range need {
 		got := platforms(jobs[name], jobID[name])
 		for _, p := range ps {
@@ -359,5 +360,118 @@ func TestSDK(t *testing.T) {
 				t.Errorf("job %s: cache key %s, want the prefix oec-sdk-", j.ID, k)
 			}
 		}
+	}
+}
+
+// TestMicro: the micro SDK workflow of ADR-0032 §6 (C-106) – the host
+// checks on Linux amd64/arm64 and Windows with GCC (MinGW), the ESP-IDF
+// builds and the QEMU D7 run in the Espressif container pinned by digest,
+// the Arduino builds with the pinned arduino-cli on both cores; download
+// caches only, with their own prefix, and no artifacts (firmware).
+func TestMicro(t *testing.T) {
+	w := Micro()
+	if w.File != "micro.yml" {
+		t.Errorf("micro workflow file %s", w.File)
+	}
+	cmds := func(j gha.Job) string {
+		return strings.Join(gha.Workflow{Jobs: []gha.Job{j}}.Commands(), "\n")
+	}
+	for _, j := range w.Jobs {
+		if ups := uploads(j); len(ups) != 0 {
+			t.Errorf("job %s uploads %d artifacts; micro.yml keeps no firmware", j.ID, len(ups))
+		}
+		for _, s := range j.Steps {
+			if s.Uses != Cache {
+				continue
+			}
+			if k, _ := gha.Get(s.With, "key"); !strings.HasPrefix(k, "oec-micro-") {
+				t.Errorf("job %s: cache key %s, want the prefix oec-micro-", j.ID, k)
+			}
+			if p, _ := gha.Get(s.With, "path"); p != "~/.cargo/registry\n" {
+				t.Errorf("job %s: cache path %q, want the crate downloads only", j.ID, p)
+			}
+		}
+	}
+
+	host := job(t, w, "host")
+	for _, e := range host.Matrix {
+		if cc, _ := gha.Get(e, "cc"); cc != "gcc" {
+			os, _ := gha.Get(e, "os")
+			t.Errorf("host: %s with cc %s, want gcc (the gate runs clang)", os, cc)
+		}
+	}
+	if v, _ := gha.Get(host.Env, "OEC_CI_CC"); v != "${{ matrix.cc }}" {
+		t.Errorf("host: OEC_CI_CC = %q, want the matrix cc", v)
+	}
+	if c := cmds(host); !strings.HasSuffix(c, "\noec/ci/micro-host.sh") {
+		t.Errorf("host job commands:\n%s", c)
+	}
+	hostSh := read(t, filepath.Join(oec, "ci/micro-host.sh"))
+	for _, s := range []string{"OECM_ANALYZER=clang", "sdk/micro/check.sh", "-DOECM_SANITIZE=OFF", "MinGW Makefiles", "go test -race"} {
+		if !strings.Contains(hostSh, s) {
+			t.Errorf("micro-host.sh lacks %q", s)
+		}
+	}
+	if !strings.Contains(read(t, filepath.Join(oec, "sdk/micro/check.sh")), `"${OECM_ANALYZER:-${CC:-cc}}"`) {
+		t.Error("sdk/micro/check.sh does not take the analyzer from OECM_ANALYZER (default CC)")
+	}
+
+	idf := job(t, w, "esp-idf")
+	if idf.RunsOn != "ubuntu-24.04" {
+		t.Errorf("esp-idf runs on %s, want ubuntu-24.04 (the amd64 image)", idf.RunsOn)
+	}
+	if c := cmds(idf); !strings.HasPrefix(c, "oec/ci/disk.sh\n") || !strings.HasSuffix(c, "\noec/ci/micro-esp-idf.sh") {
+		t.Errorf("esp-idf job commands:\n%s", c)
+	}
+	idfSh := read(t, filepath.Join(oec, "ci/micro-esp-idf.sh"))
+	for _, s := range []string{"$espressif_idf_image", "esp32 esp32s3 qemu", "OECM_QEMU_BUILD", "OECM_QEMU=",
+		"TestQEMUD7Level1", "TestQEMUD7Level2", "TestQEMUD7Level3", "--init"} {
+		if !strings.Contains(idfSh, s) {
+			t.Errorf("micro-esp-idf.sh lacks %q", s)
+		}
+	}
+
+	ard := job(t, w, "arduino")
+	var cores []string
+	for _, e := range ard.Matrix {
+		c, _ := gha.Get(e, "core")
+		cores = append(cores, c)
+	}
+	if strings.Join(cores, " ") != "3.3 4.0" {
+		t.Errorf("arduino: cores %v, want 3.3 and 4.0", cores)
+	}
+	if v, _ := gha.Get(ard.Env, "OECM_ARDUINO_CORE"); v != "${{ matrix.core }}" {
+		t.Errorf("arduino: OECM_ARDUINO_CORE = %q, want the matrix core", v)
+	}
+	if c := cmds(ard); !strings.HasPrefix(c, "oec/ci/disk.sh\n") || !strings.HasSuffix(c, "\noec/ci/micro-arduino.sh") {
+		t.Errorf("arduino job commands:\n%s", c)
+	}
+	ardSh := read(t, filepath.Join(oec, "ci/micro-arduino.sh"))
+	for _, s := range []string{"/arduino/package.sh", "sha256", "esp32:esp32:esp32s3", "esp32:esp32:esp32c3", "esp32:esp32:esp32c6"} {
+		if !strings.Contains(ardSh, s) {
+			t.Errorf("micro-arduino.sh lacks %q", s)
+		}
+	}
+
+	versions := filepath.Join(oec, "ci/versions.sh")
+	pins := map[string]string{
+		"espressif_idf_image":             `^espressif/idf:v6\.1@sha256:[0-9a-f]{64}$`,
+		"arduino_cli_version":             `^1\.5\.1$`,
+		"arduino_esp32_3_3":               `^3\.3\.[0-9]+$`,
+		"arduino_esp32_4_0":               `^4\.0\.0(-RC[0-9]+)?$`,
+		"arduino_cli_sha256_linux_amd64":  `^[0-9a-f]{64}$`,
+		"arduino_cli_sha256_linux_arm64":  `^[0-9a-f]{64}$`,
+		"arduino_cli_sha256_darwin_arm64": `^[0-9a-f]{64}$`,
+		"m5unified_version":               `^[0-9]+\.[0-9]+\.[0-9]+$`,
+		"m5gfx_version":                   `^[0-9]+\.[0-9]+\.[0-9]+$`,
+	}
+	for name, re := range pins {
+		if v := shVar(t, versions, name); !regexp.MustCompile(re).MatchString(v) {
+			t.Errorf("versions.sh %s=%s does not match %s", name, v, re)
+		}
+	}
+	// The ESP-IDF version of the image is the one of ADR-0030 §8.
+	if !strings.Contains(read(t, filepath.Join(oec, "sdk/micro/README.md")), "ESP-IDF v6.1") {
+		t.Error("sdk/micro/README.md no longer names ESP-IDF v6.1 (the image of versions.sh)")
 	}
 }
