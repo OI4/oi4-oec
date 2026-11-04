@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 20.11.2026, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
+_Stand: 20.11.2026, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,20 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts zu entscheiden. Für D-1 (a) ist ein Schritt bei dir: Lege im Repo `OI4/oi4-oec` das Secret `OEC_GUIDELINE_TOKEN` an (fein granuliertes Token, nur Lesezugriff auf den Inhalt von `OI4/oi4-oec-documentation`) – vor dem ersten Push.
+Nichts zu entscheiden. Zwei kleine Schritte bei dir:
+- **Token prüfen (A-552):** GitHub meldet für das Token `push: true`. Das kann auch nur deine Rolle im Repo sein. Bitte prüfe in den Token-Einstellungen, dass es nur Lesezugriff auf den Inhalt von `OI4/oi4-oec-documentation` hat (so verlangt es ADR-0032 §7).
+- **Push freigeben:** Die Korrekturen aus Nachtrag 2 sind lokal committet. Ein Push startet die nächsten Läufe auf GitHub; erst die zeigen, ob Windows ganz grün wird.
+
+### Zur Info: C-104 Nachtrag 2 – CI eingeschaltet, erste Läufe
+
+- **Eingeschaltet (A-552):** Wie von dir angewiesen, habe ich das Secret aus der `.env` angelegt (der Wert wurde nie angezeigt oder committet). Danach beide Repos gepusht, nur vorwärts (`f61af2c`, `c3213c5`).
+- **Ergebnis der ersten Läufe:** Das ganze Gate auf macOS ist grün, ebenso actionlint, die Programm-Builds für sechs Plattformen und D7/D8 auf beiden Macs. Rot waren Linux und Windows.
+- **Linux (A-553):** Kein echter Fehler. Ein Test spielt 61 Fehlerfälle durch und wartet dabei meist auf Zeitablauf. Auf den Runnern mit 4 CPUs dauert das länger als die 10 Minuten, die `go test` standardmäßig erlaubt. Jetzt sind 30 Minuten erlaubt.
+- **Windows, zwei echte Fehler (A-554, A-555):**
+  - **D7:** Die Neustart-Befehle (`--stop-cmd` …) wurden unter Windows falsch an `cmd` übergeben. Ein Pfad in Anführungszeichen ging kaputt. Behoben.
+  - **D8:** Ein Socket-Pfad mit Laufwerksbuchstaben (`unix://C:\…`) wurde nicht verstanden. Jetzt wird er wie geschrieben übernommen, mit einem Test vorweg.
+- **Windows, Testannahmen (A-556):** Der Test-Ersatz für Docker zerlegte Pfade an jedem Doppelpunkt, also auch bei `C:`. Zwei Tests erwarteten Linux-Texte bzw. `/` als Trenner. Angepasst.
+- Seiten angepasst: README, DESIGN und die Community-Seiten zu `oec-check` und `oec-infra`. Report-Schemas und Katalog sind unverändert. Kein SF, kein R-x.
 
 ## Früher beantwortet
 

@@ -489,6 +489,8 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 **Decisions (C-104 addendum 1, PO, 2026-11-20):** D-1 (a) – the CI is activated now as designed (the PO creates the secret `OEC_GUIDELINE_TOKEN`, then the workspace and the guideline branch are pushed; the runner minutes are accepted); D-2 – the release channels, targets and visibility are decided before C-109, until then artifacts only, the CRA review before any public release; D-3 (a) – the published deliverables get a repository `OI4/oec` at the first release (module paths unchanged).
 
+**CI activation (C-104 addendum 2, 2026-11-20):** secret created from `.env` on the PO's instruction, both repositories pushed (fast-forward). First hosted runs: the gate on `macos-15`, actionlint, the binaries and D7/D8 on both macOS runners pass; Linux failed on the default `go test` timeout (now 30 min, A-553), Windows on two portability defects of D7/D8 and test assumptions (A-554 … A-556) – fixed test first; exit criterion 1 (every gate job green on the hosted runners) is checked again after the next push.
+
 **Exit (proposal, C-104; the PO decides at the end of P9):**
 
 1. The CI is active and green on the pushed state: `gate.yml` on its three runners, `conformance.yml` on its six (D-1).
