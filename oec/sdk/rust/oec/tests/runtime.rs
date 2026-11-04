@@ -972,6 +972,20 @@ fn next_on(tb: &TestBroker, topic: &str, others: &mut Vec<Publish>) -> Publish {
     }
 }
 
+/// The next PUBLISH on `topic` that the test had to wait for: those
+/// queued while the test was busy (slow hosts, qemu) arrive at once and
+/// would shorten a measured `interval`.
+fn next_fresh(tb: &TestBroker, topic: &str, interval: Duration) -> Publish {
+    for _ in 0..50 {
+        let wait = Instant::now();
+        let p = next_on(tb, topic, &mut Vec::new());
+        if wait.elapsed() >= interval / 5 {
+            return p;
+        }
+    }
+    panic!("{topic}: published faster than every {interval:?}");
+}
+
 /// The DataSet of a Data publication.
 fn data_payload(p: &Publish) -> Value {
     json(&p.payload)["Messages"][0]["Payload"].clone()
@@ -1098,6 +1112,7 @@ fn data_sets_publish_their_state() {
     states.wait_for(ConnectionState::Online, 1);
 
     // the Interval: cyclic, unchanged values included
+    next_fresh(&tb, &pv_topic, INTERVAL);
     let start = Instant::now();
     for _ in 0..3 {
         let p = next_on(&tb, &pv_topic, &mut Vec::new());
