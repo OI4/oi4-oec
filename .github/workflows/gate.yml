@@ -38,6 +38,7 @@ jobs:
             cc: cc
     env:
       CC: ${{ matrix.cc }}
+      CARGO_INCREMENTAL: "0"
     steps:
       - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -65,6 +66,8 @@ jobs:
             ~/.cargo/registry
           key: oec-cargo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('oec/ci/versions.sh', 'oec/**/Cargo.lock') }}
           restore-keys: oec-cargo-${{ runner.os }}-${{ runner.arch }}-
+      - name: Free disk space (hosted Linux runners)
+        run: oec/ci/disk.sh
       - name: Install the system packages (Linux)
         run: oec/ci/packages.sh
       - name: Install the tools of oec/ci/versions.sh

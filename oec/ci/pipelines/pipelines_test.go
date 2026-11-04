@@ -195,10 +195,23 @@ func TestGateRunsCheck(t *testing.T) {
 	if !strings.HasSuffix(cmds, "oec/check.sh\noec/ci/lint.sh") {
 		t.Errorf("gate.yml must end the gate job with oec/check.sh, got:\n%s", cmds)
 	}
-	// The runner and linux.sh install the same system packages, among them
-	// the compiler-rt runtime of clang (ASan/UBSan of sdk/check.sh).
-	if !strings.HasPrefix(cmds, "oec/ci/packages.sh\noec/ci/setup-tools.sh\n") {
-		t.Errorf("the gate job must start with oec/ci/packages.sh, then setup-tools.sh, got:\n%s", cmds)
+	// The runner first frees disk space (the cargo targets of the gate do
+	// not fit on the ubuntu-24.04 runner otherwise), then the runner and
+	// linux.sh install the same system packages, among them the
+	// compiler-rt runtime of clang (ASan/UBSan of sdk/check.sh).
+	if !strings.HasPrefix(cmds, "oec/ci/disk.sh\noec/ci/packages.sh\noec/ci/setup-tools.sh\n") {
+		t.Errorf("the gate job must start with oec/ci/disk.sh, packages.sh, then setup-tools.sh, got:\n%s", cmds)
+	}
+	if v, _ := gha.Get(Gate().Jobs[0].Env, "CARGO_INCREMENTAL"); v != "0" {
+		t.Errorf("gate job: CARGO_INCREMENTAL = %q, want 0 (no incremental cache on the runner disk)", v)
+	}
+	// disk.sh only deletes on a GitHub-hosted Linux runner, never locally
+	// or in the container of linux.sh.
+	disk := read(t, filepath.Join(oec, "ci/disk.sh"))
+	for _, g := range []string{`"${RUNNER_ENVIRONMENT:-}" != github-hosted`, `"$(uname -s)" != Linux`} {
+		if !strings.Contains(disk, g) {
+			t.Errorf("disk.sh lacks the guard %s", g)
+		}
 	}
 	if !strings.Contains(read(t, filepath.Join(oec, "ci/linux.sh")), "/src/oec/ci/packages.sh") {
 		t.Error("linux.sh does not install the packages of packages.sh")

@@ -131,7 +131,9 @@ func Gate() gha.Workflow {
 		RunsOn:         "${{ matrix.os }}",
 		Matrix:         m,
 		TimeoutMinutes: 180,
-		Env:            []gha.KV{{Key: "CC", Value: "${{ matrix.cc }}"}},
+		// No incremental cache: the debug targets of the gate stay smaller
+		// on the runner disk (C-104 addendum 3).
+		Env: []gha.KV{{Key: "CC", Value: "${{ matrix.cc }}"}, {Key: "CARGO_INCREMENTAL", Value: "0"}},
 		Steps: []gha.Step{
 			checkout(),
 			checkoutGuideline(),
@@ -145,6 +147,7 @@ func Gate() gha.Workflow {
 					{Key: "restore-keys", Value: "oec-cargo-${{ runner.os }}-${{ runner.arch }}-"},
 				},
 			},
+			run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
 			run("Install the system packages (Linux)", "oec/ci/packages.sh"),
 			run("Install the tools of oec/ci/versions.sh", "oec/ci/setup-tools.sh"),
 			run("Fetch the crates of every Cargo.lock", "oec/ci/fetch.sh"),

@@ -16,6 +16,7 @@ releases.
 | `pipelines/` | the pinned actions, the hosted runners and the workflows; tests against the repository (policy, generated files, tool pins, scripts, runners) |
 | `cmd/cigen/` | renders the workflows into `../../.github/workflows`; `-check` fails if a file is outdated or not generated (gate step 11) |
 | `versions.sh` | the pins: Rust toolchain, cbindgen, cargo-deny, actionlint, the guideline branch, the Ubuntu image of `linux.sh` |
+| `disk.sh` | frees disk space on a GitHub-hosted Linux runner (removes the preinstalled Android SDK, .NET, Haskell, Swift and CodeQL); nothing elsewhere (macOS, local, `linux.sh` container) |
 | `packages.sh` | the system packages on Debian/Ubuntu (apt): build tools, clang with `libclang-rt-dev` (sanitizer runtime), LLVM, CMake, GCC 14; nothing on macOS |
 | `setup-tools.sh` | installs the toolchain and tools of `versions.sh` (rustup; `cargo install --locked` into `~/.oec-tools`) |
 | `fetch.sh` | `cargo fetch --locked` for every `Cargo.lock` under `oec/` (the gate builds `--offline --locked`) |
@@ -28,7 +29,7 @@ releases.
 
 | File | Jobs | Runners |
 |---|---|---|
-| `gate.yml` | `gate`: guideline checkout next to `oec/` (branch of `versions.sh`, full history for the inventory check), Go, cache of the cargo tools and crates, `setup-tools.sh`, `fetch.sh`, `oec/check.sh`; `actionlint`: `lint.sh` | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-15`; actionlint on `ubuntu-24.04` |
+| `gate.yml` | `gate`: guideline checkout next to `oec/` (branch of `versions.sh`, full history for the inventory check), Go, cache of the cargo tools and crates, `disk.sh`, `packages.sh`, `setup-tools.sh`, `fetch.sh`, `oec/check.sh` (`CARGO_INCREMENTAL=0`); `actionlint`: `lint.sh` | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-15`; actionlint on `ubuntu-24.04` |
 | `conformance.yml` | `test`: `conformance.sh`; `binaries`: `binaries.sh`, upload as the artifact `oec-conformance-binaries` (14 days) | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-15`, `macos-15-intel`, `windows-2025`, `windows-11-arm`; binaries on `ubuntu-24.04` |
 
 Triggers: push to `main`, pull requests, manual start. Every run step uses
