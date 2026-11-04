@@ -132,3 +132,7 @@ Refines §1, §7, §8 and §10 (A-479 … A-488; details in `log/2026-11-13_C-09
 ## Amendment C-104 (2026-11-20) – defect found by the Linux CI run (agent, G-3.4 b)
 
 - **Defect** (A-549): `oecm_put_json_chars` computed `s + run` with `s == NULL` and `run == 0` for an absent optional string (e.g. `DeviceManual` of the MAM via `oecm_put_json_cstr(b, NULL)`) – undefined behaviour in C17 (6.5.6), reported by the UBSan of clang 18 on Linux in the seed replay `fuzz_message` (ADR-0032 `linux.sh`, run 8), not by Apple clang 21. Fixed test first: `tests/test_json.c` `test_json_null_string` (fails on Linux before the fix); the function returns early for `n == 0`. Output unchanged (`""`), no API change, no page change.
+
+## Amendment C-106 (2026-11-22) – the analyzer of `check.sh` for the CI (agent, G-3.4 b)
+
+- `check.sh` takes the compiler of `clang --analyze` from `OECM_ANALYZER` (default `CC`, as before), so the CI workflow `micro.yml` (ADR-0032 amendment C-106) can build and test with GCC and still analyse with clang. Additive; the gate is unchanged. README and the Community page `micro-sdk` name the CI checks.

@@ -25,7 +25,8 @@
 #   the unchanged sources of the core and the ESP-IDF port, every example
 #   with its sketch and the sensor, the placeholders of arduino_secrets.h
 #   empty; oecm.h and oecm_sensor.h compile as C++17 (the sketches are C++).
-# Needs cmake, cargo and a C17 compiler with sanitizers.
+# Needs cmake, cargo and a C17 compiler with sanitizers (CC; clang, or GCC
+# with OECM_ANALYZER=clang for the analysis).
 set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
 export GOTOOLCHAIN=auto
@@ -58,10 +59,11 @@ cmake -S . -B target/host -DCMAKE_BUILD_TYPE=Debug >/dev/null
 cmake --build target/host --parallel 4 >/dev/null
 (cd target/host && ctest --output-on-failure)
 
-echo "micro: clang --analyze src/"
-cc="${CC:-cc}"
+# OECM_ANALYZER: the clang of the analysis when CC is GCC (micro.yml, C-106).
+analyzer="${OECM_ANALYZER:-${CC:-cc}}"
+echo "micro: $(basename "$analyzer") --analyze src/"
 for f in src/*.c; do
-	"$cc" --analyze -std=c17 -Iinclude -Isrc -Xanalyzer -analyzer-werror -o /dev/null "$f"
+	"$analyzer" --analyze -std=c17 -Iinclude -Isrc -Xanalyzer -analyzer-werror -o /dev/null "$f"
 done
 
 echo "micro: undefined symbols of the core (ADR-0030 §2)"

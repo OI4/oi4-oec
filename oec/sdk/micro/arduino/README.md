@@ -23,6 +23,9 @@ esp-mqtt with it. The examples are built with 3.3.12 (ESP-IDF 5.5) and
 M5Core2, M5CoreS3 and M5Core, without warnings in the library. On the M5Core
 (4 MB flash, default partition scheme) the `M5Stack` example fills 93 % (3.3)
 or 98 % (4.0) of the app partition: choose a larger partition scheme there.
+The CI (`micro.yml`, C-106) builds `Sensor` for the ESP32 and ESP32-S3 Dev
+Module and `M5Stack` for M5Core2 and M5CoreS3 on both cores, `Sensor` for
+ESP32-C3 and ESP32-C6 best effort (`oec/ci/micro-arduino.sh`).
 
 ## Examples
 

@@ -223,7 +223,18 @@ and arm64 – C-104 addendum 3), the emitted payloads validated by
 D7 `oec-check validate`, the host example, `arduino/package.sh` into a
 temporary directory (the core and the port packaged unchanged, every example
 complete, the placeholders of `arduino_secrets.h` empty) and `oecm.h` and
-`oecm_sensor.h` as C++17. Needs `cmake` and `cargo`.
+`oecm_sensor.h` as C++17. Needs `cmake` and `cargo`. `CC` selects the
+compiler of CMake, the sanitizers and cgo (the gate: clang); with GCC set
+`OECM_ANALYZER=clang` for the analysis (C-106).
+
+The CI workflow `micro.yml` (ADR-0032, C-106; scripts in `oec/ci/`) runs
+this check with GCC on Linux amd64 and arm64 (`micro-host.sh`), its portable
+part with MinGW gcc on Windows (no D7 runs: the host runner's D7 harness is
+Unix only; no sanitizers, analysis or symbol allowlist), the ESP-IDF builds
+`esp32`, `esp32s3` and `qemu` with D7 `--level 1/2/3` in QEMU in the
+Espressif image of `oec/ci/versions.sh` (`micro-esp-idf.sh`) and the Arduino
+examples on Arduino-ESP32 3.3 and 4.0 (`micro-arduino.sh`). It keeps no
+firmware.
 
 ## Fuzzing
 
@@ -335,7 +346,9 @@ OEC_D7=<oec-check> go test -run 'TestQEMUD7' -v ./cmd/oecm-qemu/
 ```
 
 Without `OECM_QEMU_BUILD` and `OECM_QEMU` these tests are skipped, also in
-the gate.
+the gate. `oec/ci/micro-esp-idf.sh` runs the three builds and these tests in
+the Espressif ESP-IDF v6.1 container (job `esp-idf` of `micro.yml`; on macOS
+with `OEC_TESTBROKER=<linux go-testbroker>`, see `oec/ci/README.md`).
 
 ### Run on real hardware (opt-in)
 
@@ -406,3 +419,6 @@ arduino-cli compile --fqbn esp32:esp32:esp32 --warnings all \
 
 The Arduino-ESP32 core has no OpenCores Ethernet, so the sketches do not run
 in QEMU; the code they run is the one the QEMU runner checks.
+`oec/ci/micro-arduino.sh 3.3|4.0` is this build check with the pinned
+`arduino-cli` and core of `oec/ci/versions.sh` in an own home (job `arduino`
+of `micro.yml`; ESP32-C3 and ESP32-C6 best effort).
