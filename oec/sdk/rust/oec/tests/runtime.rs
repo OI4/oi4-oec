@@ -555,8 +555,11 @@ fn container_app(root: &Root, states: &States) -> oec::app::AppBuilder {
         .on_connection(move |s| states.0.lock().unwrap().push(s))
 }
 
-/// Drops connection `n` and returns the CONNECT of the reconnect.
-fn reconnect(tb: &TestBroker, n: usize) -> Connect {
+/// Drops connection `n` once the app reported it online (a drop before
+/// the CONNACK is processed is a failed connect, not a reconnect) and
+/// returns the CONNECT of the reconnect.
+fn reconnect(tb: &TestBroker, states: &States, n: usize) -> Connect {
+    states.wait_for(ConnectionState::Online, n + 1);
     tb.drop_connection(n);
     tb.until_closed(n);
     let (m, c) = tb.connect();
@@ -587,17 +590,17 @@ fn renewed_secrets_apply_on_reconnect() {
         (Some("user"), Some("one"))
     );
     root.write("run/secrets/oi4/credentials", "dXNlcjp0d28=\n");
-    let c = reconnect(&tb, 0);
+    let c = reconnect(&tb, &states, 0);
     assert_eq!(
         (c.username.as_deref(), password(&c).as_deref()),
         (Some("user"), Some("two"))
     );
     // unusable: the last good credentials stay
     root.write("run/secrets/oi4/credentials", "not base64");
-    let c = reconnect(&tb, 1);
+    let c = reconnect(&tb, &states, 1);
     assert_eq!(password(&c).as_deref(), Some("two"));
     root.remove("run/secrets/oi4/credentials");
-    let c = reconnect(&tb, 2);
+    let c = reconnect(&tb, &states, 2);
     assert_eq!(password(&c).as_deref(), Some("two"));
     // a private key with the certificate wins over the credentials
     root.write("run/secrets/oi4/credentials", "dXNlcjp0d28=\n")
@@ -605,7 +608,7 @@ fn renewed_secrets_apply_on_reconnect() {
             "run/secrets/oi4/private_key.pem",
             &pki.client_key.serialize_pem(),
         );
-    let c = reconnect(&tb, 3);
+    let c = reconnect(&tb, &states, 3);
     assert_eq!((c.username, c.password), (None, None));
     states.wait_for(ConnectionState::Online, 5);
     handle.shutdown();
