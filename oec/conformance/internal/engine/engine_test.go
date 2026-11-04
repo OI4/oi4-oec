@@ -293,7 +293,7 @@ func TestWrite(t *testing.T) {
 	}
 	own := map[string]string{LabelOwner: OwnerRun, LabelRun: "r1"}
 	spec := CreateSpec{Name: OwnPrefix + "run-x", Image: "oec-d8-sim:good", Hostname: OwnPrefix + "run-x", Labels: own,
-		Binds: []string{"/tmp/a:/etc/oi4/mqtt:ro"}, ExtraHosts: []string{"oec-d8-broker:host-gateway"}, NetworkMode: "bridge"}
+		Binds: []string{"/tmp/a:/etc/oi4/mqtt:ro", `C:\tmp\b:/etc/oi4/app`}, ExtraHosts: []string{"oec-d8-broker:host-gateway"}, NetworkMode: "bridge"}
 	for _, bad := range []CreateSpec{
 		{Name: "app", Image: spec.Image, Labels: own},
 		{Name: spec.Name, Image: spec.Image, Labels: map[string]string{LabelRun: "r1"}},
@@ -323,7 +323,9 @@ func TestWrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := <-started
-	if s.Name != spec.Name || s.Hostname != spec.Hostname || s.Binds["/etc/oi4/mqtt"] != "/tmp/a" || !slices.Equal(s.Cmd, []string{"/oec-run-sim", "--fault", "good"}) || !slices.Equal(s.ExtraHosts, spec.ExtraHosts) {
+	if s.Name != spec.Name || s.Hostname != spec.Hostname || s.Binds["/etc/oi4/mqtt"] != "/tmp/a" || !s.ReadOnly["/etc/oi4/mqtt"] ||
+		s.Binds["/etc/oi4/app"] != `C:\tmp\b` || s.ReadOnly["/etc/oi4/app"] ||
+		!slices.Equal(s.Cmd, []string{"/oec-run-sim", "--fault", "good"}) || !slices.Equal(s.ExtraHosts, spec.ExtraHosts) {
 		t.Errorf("started %+v", s)
 	}
 	ctr, err := c.Inspect(ctx, id)

@@ -225,7 +225,7 @@ func TestReadStorage(t *testing.T) {
 		t.Fatal(err)
 	}
 	c := s.Config
-	if c.Broker != "mqtts://localhost:8884" || s.MaxPacketSize != 262144 || !strings.HasSuffix(c.CAFile, "certs/ca.pem") ||
+	if c.Broker != "mqtts://localhost:8884" || s.MaxPacketSize != 262144 || !strings.HasSuffix(c.CAFile, filepath.FromSlash("certs/ca.pem")) ||
 		!strings.HasSuffix(c.CertFile, "cut.pem") || string(c.KeyPassphrase) != p.Passphrase || c.Username != "user" || string(c.Password) != "pa:ss" {
 		t.Errorf("storage %+v", s)
 	}

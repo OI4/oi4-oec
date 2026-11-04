@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -49,7 +50,11 @@ func TestRestartHook(t *testing.T) {
 	dir := t.TempDir()
 	log := filepath.Join(dir, "log")
 	var errOut bytes.Buffer
-	f := &monitorFlags{stopCmd: "echo stop >> '" + log + "'", startCmd: "echo start >> '" + log + "'", restartWait: time.Second}
+	stop, start, want := "echo stop >> '"+log+"'", "echo start >> '"+log+"'", "stop\nstart\n"
+	if runtime.GOOS == "windows" {
+		stop, start, want = `echo stop>>"`+log+`"`, `echo start>>"`+log+`"`, "stop\r\nstart\r\n"
+	}
+	f := &monitorFlags{stopCmd: stop, startCmd: start, restartWait: time.Second}
 	hook, err := f.restartHook(&errOut)
 	if err != nil || hook == nil {
 		t.Fatal(hook != nil, err)
@@ -57,7 +62,7 @@ func TestRestartHook(t *testing.T) {
 	if err := hook(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	if b, _ := os.ReadFile(log); string(b) != "stop\nstart\n" {
+	if b, _ := os.ReadFile(log); string(b) != want {
 		t.Errorf("commands ran %q", b)
 	}
 	f = &monitorFlags{restartCmd: "exit 3", restartWait: time.Second}

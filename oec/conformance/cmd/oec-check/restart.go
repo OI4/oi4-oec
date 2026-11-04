@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	osexec "os/exec"
-	"runtime"
 	"time"
 )
 
@@ -46,11 +44,4 @@ func (f *monitorFlags) restartHook(stderr io.Writer) (func(context.Context) erro
 		}
 		return nil
 	}, nil
-}
-
-func shell(ctx context.Context, c string) *osexec.Cmd {
-	if runtime.GOOS == "windows" {
-		return osexec.CommandContext(ctx, "cmd", "/C", c)
-	}
-	return osexec.CommandContext(ctx, "sh", "-c", c)
 }

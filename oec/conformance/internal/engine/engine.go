@@ -105,7 +105,12 @@ func Endpoints(explicit string, getenv func(string) string, defaults []string) (
 type target struct{ network, addr string }
 
 func parse(ep string) (target, error) {
-	u, err := url.Parse(Endpoint(ep))
+	ep = Endpoint(ep)
+	// A socket path is no URL host: a Windows path keeps its drive letter.
+	if p, ok := strings.CutPrefix(ep, "unix://"); ok && p != "" {
+		return target{"unix", p}, nil
+	}
+	u, err := url.Parse(ep)
 	if err != nil {
 		return target{}, err
 	}

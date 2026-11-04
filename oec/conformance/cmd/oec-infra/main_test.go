@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -93,6 +94,10 @@ func TestUsage(t *testing.T) {
 		t.Fatal(err)
 	}
 	good := fixtures + "good.tar"
+	missing := filepath.Join(dir, "missing.tar")
+	// The text of the system: "no such file or directory" or, on Windows,
+	// "The system cannot find the file specified."
+	_, notExist := os.Stat(missing)
 	for _, c := range []struct {
 		args []string
 		msg  string
@@ -105,7 +110,7 @@ func TestUsage(t *testing.T) {
 		{[]string{"image", "--format", "pdf", good}, "--format"},
 		{[]string{"image", "--report", "pdf=x.pdf", good}, "unknown report format"},
 		{[]string{"image", "--report", "json", good}, "want <format>=<path>"},
-		{[]string{"image", filepath.Join(dir, "missing.tar")}, "no such file"},
+		{[]string{"image", missing}, errors.Unwrap(notExist).Error()},
 		{[]string{"image", docker}, "Docker"},
 		{[]string{"image", junk}, "not an OCI image layout"},
 		{[]string{"image", dir}, "not an OCI image layout"},

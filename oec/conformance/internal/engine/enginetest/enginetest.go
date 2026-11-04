@@ -342,12 +342,17 @@ func (s *Server) create(w http.ResponseWriter, r *http.Request) {
 	}
 	var mounts []any
 	for _, bind := range body.HostConfig.Binds {
-		f := strings.Split(bind, ":")
-		if len(f) < 2 {
+		// host:container[:mode]; a Windows host path has a colon itself.
+		src, mode := bind, ""
+		if i := strings.LastIndex(src, ":"); i >= 0 && (src[i+1:] == "ro" || src[i+1:] == "rw") {
+			src, mode = src[:i], src[i+1:]
+		}
+		i := strings.LastIndex(src, ":")
+		if i <= 0 {
 			message(w, http.StatusBadRequest, "invalid bind "+bind)
 			return
 		}
-		mounts = append(mounts, Mount("bind", f[0], f[1], len(f) < 3 || f[2] != "ro"))
+		mounts = append(mounts, Mount("bind", src[:i], src[i+1:], mode != "ro"))
 	}
 	hosts := []any{}
 	for _, h := range body.HostConfig.ExtraHosts {
