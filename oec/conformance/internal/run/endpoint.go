@@ -152,6 +152,11 @@ func (e *endpoint) accept() {
 	}
 }
 
+// add lists the record of a connection.
+func (e *endpoint) add(c *conn) {
+	e.update(c, func() { e.conns = append(e.conns, c) })
+}
+
 // update changes the record of a connection under the lock.
 func (e *endpoint) update(c *conn, f func()) {
 	e.mu.Lock()
@@ -166,17 +171,18 @@ func (e *endpoint) serve(raw net.Conn) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	err := tc.HandshakeContext(ctx)
 	cancel()
-	e.mu.Lock()
-	e.conns = append(e.conns, c)
-	e.mu.Unlock()
+	// The record is listed only with the result of its handshake (C-105
+	// addendum 2).
 	if err != nil {
-		e.update(c, func() { c.Handshake, c.HandshakeError = "failed", handshakeError(err) })
+		c.Handshake, c.HandshakeError = "failed", handshakeError(err)
+		e.add(c)
 		return
 	}
 	st := tc.ConnectionState()
+	c.Handshake = "ok"
+	c.TLS = map[uint16]string{tls.VersionTLS12: "1.2", tls.VersionTLS13: "1.3"}[st.Version]
 	e.update(c, func() {
-		c.Handshake = "ok"
-		c.TLS = map[uint16]string{tls.VersionTLS12: "1.2", tls.VersionTLS13: "1.3"}[st.Version]
+		e.conns = append(e.conns, c)
 		if len(st.PeerCertificates) > 0 {
 			c.ClientCertificate = "untrusted"
 			inter := x509.NewCertPool()

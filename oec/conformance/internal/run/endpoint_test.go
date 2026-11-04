@@ -251,6 +251,42 @@ func TestEndpointLimits(t *testing.T) {
 	}
 }
 
+// TestEndpointRecordsCompleteHandshake: a connection record appears in a
+// Snapshot only with the result of its handshake (C-105 addendum 2: the
+// ubuntu-24.04-arm runner saw a failed handshake as Handshake "").
+func TestEndpointRecordsCompleteHandshake(t *testing.T) {
+	ep, p := testEndpoint(t)
+	const n = 200
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for i := 0; i < n; i++ {
+			raw, err := net.Dial("tcp", "127.0.0.1:"+strconv.Itoa(ep.Port()))
+			if err != nil {
+				return
+			}
+			_ = tls.Client(raw, &tls.Config{ServerName: "broker", RootCAs: p.x.pool(), MinVersion: tls.VersionTLS12}).Handshake()
+			raw.Close()
+		}
+	}()
+	deadline := time.Now().Add(30 * time.Second)
+	for {
+		s := ep.Snapshot()
+		for i, c := range s {
+			if c.Handshake == "" {
+				t.Fatalf("record %d without a handshake result: %+v", i, c.RunConnection)
+			}
+		}
+		if len(s) == n || time.Now().After(deadline) {
+			break
+		}
+	}
+	<-done
+	if s := ep.Snapshot(); len(s) != n {
+		t.Fatalf("%d connections, want %d", len(s), n)
+	}
+}
+
 func TestParseConnect(t *testing.T) {
 	for _, b := range [][]byte{
 		connectPacket(4, "c", nil, nil)[:6],
