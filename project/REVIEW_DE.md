@@ -38,7 +38,7 @@ Betroffen sind im Workspace `main` alle Commits nach `c5c25e9`: `7b10ba8` (Doku 
 
 **Weiter offen aus C-104 (A-552):** Bitte prüfe, ob das Token `OEC_GUIDELINE_TOKEN` nur lesend ist.
 
-### Zur Info: C-105 – SDK-Plattformmatrix (A-560 … A-569)
+### Zur Info: C-105 – SDK-Plattformmatrix (A-560 … A-570)
 
 - **Neuer Workflow `sdk.yml` (A-560):** Er hat drei Jobs.
   - **`rust`** baut und testet Rust-SDK und C-ABI auf allen sechs GitHub-Rechnern, jeweils nativ für die eigene Plattform: Linux x86/ARM, macOS ARM/Intel, Windows x64/ARM64 mit dem Microsoft-Compiler.
@@ -56,6 +56,7 @@ Betroffen sind im Workspace `main` alle Commits nach `c5c25e9`: `7b10ba8` (Doku 
 - **Geprüft (A-569):**
   - actionlint, die Skripte auf dem Mac, ARMv7 und die Windows-MinGW-Seite im Ubuntu-Container, `linux.sh` und das Gate.
   - Offen bis zum Push: siehe D-1.
+- **`linux.sh` wie der Runner (A-570):** Der erste Lauf von `linux.sh` brach ab, weil die Festplatte der Docker-VM voll war. Den meisten Platz belegen Images anderer Projekte; die habe ich nicht angefasst. Auf GitHub baut das Gate seit A-558 ohne inkrementelle Rust-Builds (das spart Platz), `linux.sh` tat das noch nicht. Jetzt baut es genauso; der zweite Lauf ging durch.
 - **Doku:** `oec/ci/README.md`, die SDK-READMEs und die Community-Seiten zu C, Go und Rust sind angepasst. Dazu kommen die ADR-Nachträge 0032, 0027 und 0023.
 
 ### Zur Info: C-104 Nachtrag 3 – die Korrekturen auf GitHub, alles grün
