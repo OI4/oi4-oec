@@ -128,3 +128,7 @@ Refines §1, §7, §8 and §10 (A-479 … A-488; details in `log/2026-11-13_C-09
 - **Harness defect** (§7, A-487): `internal/d7run` ended the device process with SIGKILL, which left the QEMU of `oecm-qemu` running; it now sends SIGTERM and waits up to 20 s before SIGKILL.
 - **Exit** (§10): P4b exit assessment in the log; the run on real hardware stays an opt-in step for the PO (D-1).
 - **PO decision (C-097 addendum 1, D-1 (a), 2026-11-13):** P4b is closed; the hardware run stays opt-in, CI, the ESP Component Registry and the Arduino-ESP32 4.0 final re-check go to P9. The library is **not yet** published to the Arduino Library Manager (only on an explicit PO order); `arduino/package.sh` remains the way to get it.
+
+## Amendment C-104 (2026-11-20) – defect found by the Linux CI run (agent, G-3.4 b)
+
+- **Defect** (A-549): `oecm_put_json_chars` computed `s + run` with `s == NULL` and `run == 0` for an absent optional string (e.g. `DeviceManual` of the MAM via `oecm_put_json_cstr(b, NULL)`) – undefined behaviour in C17 (6.5.6), reported by the UBSan of clang 18 on Linux in the seed replay `fuzz_message` (ADR-0032 `linux.sh`, run 8), not by Apple clang 21. Fixed test first: `tests/test_json.c` `test_json_null_string` (fails on Linux before the fix); the function returns early for `n == 0`. Output unchanged (`""`), no API change, no page change.
