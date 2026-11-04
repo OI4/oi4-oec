@@ -55,8 +55,11 @@ cflags="-std=c17 -Wall -Wextra -Wpedantic -Werror -I $pkg/include"
 case "$host" in
 *-windows-msvc)
 	# LLVM clang for the MSVC target with the DLL CRT of Rust
-	# (/defaultlib:msvcrt of native-static-libs); getenv is no error.
-	libs="$(printf '%s\n' "$native" | tr ' ' '\n' | grep -i '\.lib$' | tr '\n' ' ')"
+	# (/defaultlib:msvcrt of native-static-libs); getenv is no error. The
+	# system libraries as -l<name>: the clang driver takes a bare
+	# kernel32.lib for an input file in the working directory, -lkernel32
+	# goes to the linker, which searches the SDK paths (C-105 addendum 2).
+	libs="$(printf '%s\n' "$native" | tr ' ' '\n' | sed -n 's/^\(.*\)\.[Ll][Ii][Bb]$/-l\1/p' | tr '\n' ' ')"
 	exe="$smoke/hello.exe"
 	# shellcheck disable=SC2086 # flag lists
 	"$smoke_cc" $cflags -D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll \
