@@ -218,7 +218,8 @@ passes), `--level 2` (the demo sensor, 38 pinned passes) and `--level 3`
 runner on the Rust SDK's `go-testbroker`, vector header
 freshness, CMake build in `target/host`, the Unity tests and the replay of
 the fuzz seed corpora under AddressSanitizer + UBSan, `clang --analyze`, the
-symbol allowlist, GCC 14/15 if installed, the emitted payloads validated by
+symbol allowlist, GCC 14/15 if installed (in the CI GCC 14 on Linux amd64
+and arm64 – C-104 addendum 3), the emitted payloads validated by
 D7 `oec-check validate`, the host example, `arduino/package.sh` into a
 temporary directory (the core and the port packaged unchanged, every example
 complete, the placeholders of `arduino_secrets.h` empty) and `oecm.h` and

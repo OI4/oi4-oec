@@ -342,17 +342,20 @@ static oecm_err publish_due(oecm_state *s) {
     bool beat = s->health_due || now - s->last_health_ms >= HEARTBEAT_MS;
     bool failure = is_failure((oecm_health)s->health, s->score);
     bool birth = s->birth_due || (beat && s->unavailable && !failure);
+    /* Encode first, then publish: the order in which the arguments of a
+     * call are evaluated is unspecified, `len` must be set before it is read. */
     size_t len;
     if (birth) {
-        oecm_err err = oecm_publish(s, oecm_encode_birth(s, oecm_wall(s), &len), len);
+        size_t at = oecm_encode_birth(s, oecm_wall(s), &len);
+        oecm_err err = oecm_publish(s, at, len);
         if (err != OECM_OK)
             return err;
         s->birth_due = false;
     }
     if (!beat)
         return OECM_OK;
-    oecm_err err =
-        oecm_publish(s, oecm_encode_health(s, oecm_wall(s), (oecm_health)s->health, s->score, &len), len);
+    size_t at = oecm_encode_health(s, oecm_wall(s), (oecm_health)s->health, s->score, &len);
+    oecm_err err = oecm_publish(s, at, len);
     if (err != OECM_OK) {
         s->health_due = true;
         return err;
@@ -474,7 +477,8 @@ oecm_err oecm_stop(oecm_device *dev) {
     case PH_CONNECTED: {
         /* Close, then DISCONNECT (REQ-LIFE-005 … 007). */
         size_t len;
-        err = oecm_publish(s, oecm_encode_health(s, oecm_wall(s), OECM_HEALTH_NORMAL, 0, &len), len);
+        size_t at = oecm_encode_health(s, oecm_wall(s), OECM_HEALTH_NORMAL, 0, &len);
+        err = oecm_publish(s, at, len);
         if (s->pal->mqtt_disconnect(s->pal->ctx) != OECM_OK && err == OECM_OK)
             err = OECM_E_PAL;
         break;
