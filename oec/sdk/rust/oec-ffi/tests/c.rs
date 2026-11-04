@@ -6,7 +6,8 @@
 //! sanitizer support in the toolchain the second variant is skipped unless
 //! `OEC_FFI_REQUIRE_SANITIZERS=1` (set by `oec/sdk/check.sh`). On Linux
 //! LeakSanitizer runs as well. Unix only (a `cc` driver, `kill`, pthreads);
-//! the C tests on Windows (MSVC) come with the CI of P9.
+//! on Windows (MSVC) the CI workflow `sdk.yml` runs a C smoke test of
+//! `examples/hello.c` instead (`oec/ci/sdk-rust.sh`).
 //!
 //! Do not run this test binary in parallel processes: the roots below
 //! `CARGO_TARGET_TMPDIR` are fixed per test.

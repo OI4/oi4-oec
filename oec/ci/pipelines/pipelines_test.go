@@ -175,9 +175,14 @@ func TestRunners(t *testing.T) {
 	need := map[string][]string{
 		"gate":        {"linux/amd64", "linux/arm64", "darwin/arm64"},
 		"conformance": {"linux/amd64", "linux/arm64", "darwin/arm64", "darwin/amd64", "windows/amd64", "windows/arm64"},
+		"sdk/rust":    {"linux/amd64", "linux/arm64", "darwin/arm64", "darwin/amd64", "windows/amd64", "windows/arm64"},
+		"sdk/go":      {"linux/amd64", "linux/arm64", "darwin/arm64", "darwin/amd64", "windows/amd64"},
+		"sdk/armv7":   {"linux/amd64"},
 	}
-	jobs := map[string]gha.Workflow{"gate": Gate(), "conformance": Conformance()}
-	jobID := map[string]string{"gate": "gate", "conformance": "test"}
+	jobs := map[string]gha.Workflow{"gate": Gate(), "conformance": Conformance(),
+		"sdk/rust": SDK(), "sdk/go": SDK(), "sdk/armv7": SDK()}
+	jobID := map[string]string{"gate": "gate", "conformance": "test",
+		"sdk/rust": "rust", "sdk/go": "go", "sdk/armv7": "armv7"}
 	for name, ps := range need {
 		got := platforms(jobs[name], jobID[name])
 		for _, p := range ps {
@@ -234,5 +239,125 @@ func TestGateRunsCheck(t *testing.T) {
 	}
 	if !strings.Contains(read(t, filepath.Join(oec, "docs/check.sh")), "/../../"+GuidelinePath+"/") {
 		t.Error("the gate no longer reads the guideline next to the workspace")
+	}
+}
+
+// rustTarget is the Rust host target of a runner platform.
+var rustTarget = map[string]string{
+	"linux/amd64":   "x86_64-unknown-linux-gnu",
+	"linux/arm64":   "aarch64-unknown-linux-gnu",
+	"darwin/arm64":  "aarch64-apple-darwin",
+	"darwin/amd64":  "x86_64-apple-darwin",
+	"windows/amd64": "x86_64-pc-windows-msvc",
+	"windows/arm64": "aarch64-pc-windows-msvc",
+}
+
+func runner(t *testing.T, label string) Runner {
+	t.Helper()
+	for _, r := range Runners {
+		if r.Label == label {
+			return r
+		}
+	}
+	t.Fatalf("no runner %s", label)
+	return Runner{}
+}
+
+func job(t *testing.T, w gha.Workflow, id string) gha.Job {
+	t.Helper()
+	for _, j := range w.Jobs {
+		if j.ID == id {
+			return j
+		}
+	}
+	t.Fatalf("%s: no job %s", w.File, id)
+	return gha.Job{}
+}
+
+// uploads returns the artifact names and paths of the upload steps of j.
+func uploads(j gha.Job) (steps []gha.Step) {
+	for _, s := range j.Steps {
+		if s.Uses == UploadArtifact {
+			steps = append(steps, s)
+		}
+	}
+	return steps
+}
+
+// TestSDK: the SDK platform matrix of ADR-0032 §6 (C-105) – the matrix
+// target of each runner is its Rust host target (sdk-rust.sh checks it on
+// the runner), every job ends with its script and uploads the prebuilt
+// library liboec_ffi-<target> built for that target; the Go SDK on Windows
+// links the MinGW library; ARMv7 is a cross build with the cross packages.
+func TestSDK(t *testing.T) {
+	w := SDK()
+	if w.File != "sdk.yml" {
+		t.Errorf("SDK workflow file %s", w.File)
+	}
+	upload := func(j gha.Job, name, path, cond string) {
+		t.Helper()
+		ups := uploads(j)
+		if len(ups) != 1 {
+			t.Fatalf("job %s: %d upload steps, want 1", j.ID, len(ups))
+		}
+		n, _ := gha.Get(ups[0].With, "name")
+		p, _ := gha.Get(ups[0].With, "path")
+		f, _ := gha.Get(ups[0].With, "if-no-files-found")
+		if n != name || p != path || f != "error" || ups[0].If != cond {
+			t.Errorf("job %s: upload %q from %q (if-no-files-found %q, if %q), want %q from %q, error, if %q",
+				j.ID, n, p, f, ups[0].If, name, path, cond)
+		}
+	}
+	cmds := func(j gha.Job) string {
+		return strings.Join(gha.Workflow{Jobs: []gha.Job{j}}.Commands(), "\n")
+	}
+
+	rust := job(t, w, "rust")
+	for _, e := range rust.Matrix {
+		os, _ := gha.Get(e, "os")
+		target, _ := gha.Get(e, "target")
+		r := runner(t, os)
+		if want := rustTarget[r.OS+"/"+r.Arch]; target != want {
+			t.Errorf("rust: %s has target %s, want %s", os, target, want)
+		}
+	}
+	if v, _ := gha.Get(rust.Env, "OEC_CI_TARGET"); v != "${{ matrix.target }}" {
+		t.Errorf("rust: OEC_CI_TARGET = %q, want the matrix target", v)
+	}
+	if _, ok := gha.Get(rust.Env, "CC"); ok {
+		t.Error("rust: no CC in the job env (it would select the compiler of aws-lc on Windows); sdk-rust.sh takes OEC_CI_CC")
+	}
+	if c := cmds(rust); !strings.HasSuffix(c, "oec/ci/setup-tools.sh --toolchain\noec/ci/sdk-rust.sh dist/sdk") {
+		t.Errorf("rust job commands:\n%s", c)
+	}
+	upload(rust, "liboec_ffi-${{ matrix.target }}", "dist/sdk/liboec_ffi-${{ matrix.target }}", "")
+
+	gojob := job(t, w, "go")
+	if c := cmds(gojob); !strings.HasSuffix(c, "oec/ci/setup-tools.sh --toolchain\noec/ci/sdk-go.sh dist/sdk") {
+		t.Errorf("go job commands:\n%s", c)
+	}
+	upload(gojob, "liboec_ffi-x86_64-pc-windows-gnu", "dist/sdk/liboec_ffi-x86_64-pc-windows-gnu", "runner.os == 'Windows'")
+	if !strings.Contains(read(t, filepath.Join(oec, "ci/sdk-go.sh")), `target="x86_64-pc-windows-gnu"`) {
+		t.Error("sdk-go.sh does not build the MinGW library x86_64-pc-windows-gnu on Windows")
+	}
+
+	armv7 := job(t, w, "armv7")
+	if c := cmds(armv7); !strings.Contains(c, "oec/ci/packages.sh --armv7\n") ||
+		!strings.HasSuffix(c, "oec/ci/sdk-armv7.sh dist/sdk") {
+		t.Errorf("armv7 job commands:\n%s", c)
+	}
+	upload(armv7, "liboec_ffi-armv7-unknown-linux-gnueabihf", "dist/sdk/liboec_ffi-armv7-unknown-linux-gnueabihf", "")
+
+	// The SDK jobs share no cache entry with the gate (whose entry also
+	// holds cbindgen and cargo-deny).
+	for _, j := range w.Jobs {
+		for _, s := range j.Steps {
+			if s.Uses != Cache {
+				continue
+			}
+			if k, _ := gha.Get(s.With, "key"); !strings.HasPrefix(k, "oec-sdk-") {
+				t.Errorf("job %s: cache key %s, want the prefix oec-sdk-", j.ID, k)
+			}
+		}
 	}
 }

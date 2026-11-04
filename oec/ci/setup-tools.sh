@@ -4,8 +4,16 @@
 # with clippy and rustfmt (rustup; installed with --default-toolchain none
 # if missing), cbindgen and cargo-deny (cargo install --locked into
 # $OEC_TOOLS, default ~/.oec-tools, which gate.yml caches). On GitHub Actions
-# the tool directories are appended to GITHUB_PATH. Needs network.
+# the tool directories are appended to GITHUB_PATH (as Windows paths on
+# Windows). --toolchain installs only the Rust toolchain (sdk.yml). Needs
+# network.
 set -eu
+toolchain_only=0
+case "${1:-}" in
+"") ;;
+--toolchain) toolchain_only=1 ;;
+*) echo "usage: setup-tools.sh [--toolchain]" >&2; exit 2 ;;
+esac
 here="$(cd "$(dirname "$0")" && pwd)"
 . "$here/versions.sh"
 tools="${OEC_TOOLS:-$HOME/.oec-tools}"
@@ -22,6 +30,18 @@ echo "setup-tools: rust $rust_version (clippy, rustfmt)"
 rustup toolchain install "$rust_version" --profile minimal -c clippy -c rustfmt --no-self-update
 rustup default "$rust_version"
 
+path_entry() {
+	if command -v cygpath >/dev/null; then cygpath -w "$1"; else printf '%s\n' "$1"; fi
+}
+if [ "$toolchain_only" = 1 ]; then
+	if [ -n "${GITHUB_PATH:-}" ]; then
+		path_entry "$HOME/.cargo/bin" >>"$GITHUB_PATH"
+	fi
+	rustc --version
+	cargo --version
+	exit 0
+fi
+
 PATH="$tools/bin:$PATH"
 install() {
 	if [ "$("$tools/bin/$1" --version 2>/dev/null || true)" = "$1 $2" ]; then
@@ -36,7 +56,10 @@ install cbindgen "$cbindgen_version"
 install cargo-deny "$cargo_deny_version"
 
 if [ -n "${GITHUB_PATH:-}" ]; then
-	printf '%s\n%s\n' "$HOME/.cargo/bin" "$tools/bin" >>"$GITHUB_PATH"
+	{
+		path_entry "$HOME/.cargo/bin"
+		path_entry "$tools/bin"
+	} >>"$GITHUB_PATH"
 fi
 rustc --version
 cargo --version

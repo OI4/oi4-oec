@@ -54,7 +54,7 @@ func Policy() gha.Policy {
 }
 
 // Workflows returns every workflow of the repository.
-func Workflows() []gha.Workflow { return []gha.Workflow{Gate(), Conformance()} }
+func Workflows() []gha.Workflow { return []gha.Workflow{Gate(), Conformance(), SDK()} }
 
 func header(lines ...string) []string {
 	return append([]string{
@@ -216,4 +216,125 @@ func Conformance() gha.Workflow {
 		"Linux, macOS and Windows (amd64 and arm64), and the binaries for",
 		"windows/linux/darwin x amd64/arm64 as a workflow artifact (no release).",
 	), test, bin)
+}
+
+// sdkCache caches the crates of the SDK workspace; its own key prefix, the
+// entry of gate.yml also holds cbindgen and cargo-deny.
+func sdkCache() gha.Step {
+	return gha.Step{
+		Name: "Cache the crates",
+		Uses: Cache,
+		With: []gha.KV{
+			{Key: "path", Value: "~/.cargo/registry\n"},
+			{Key: "key", Value: "oec-sdk-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('oec/ci/versions.sh', 'oec/sdk/rust/Cargo.lock') }}"},
+			{Key: "restore-keys", Value: "oec-sdk-${{ runner.os }}-${{ runner.arch }}-"},
+		},
+	}
+}
+
+func uploadLib(name, cond string) gha.Step {
+	return gha.Step{
+		Name: "Upload the prebuilt library (workflow artifact, not a release)",
+		If:   cond,
+		Uses: UploadArtifact,
+		With: []gha.KV{
+			{Key: "name", Value: name},
+			{Key: "path", Value: "dist/sdk/" + name},
+			{Key: "if-no-files-found", Value: "error"},
+			{Key: "retention-days", Value: "14"},
+		},
+	}
+}
+
+// SDK is the SDK platform matrix (ADR-0032 §6, C-105): the Rust SDK and
+// its C ABI natively on every runner (Linux/macOS/Windows x amd64/arm64,
+// Windows with MSVC), the Go SDK on every runner with a cgo toolchain
+// (Windows amd64 with MinGW), ARMv7 Linux as a cross build (best effort,
+// Q-008), and the prebuilt liboec_ffi of each target as a workflow
+// artifact (no release, Q-011).
+func SDK() gha.Workflow {
+	// target: the Rust host target of the runner, checked by sdk-rust.sh;
+	// cc: OEC_CI_CC, clang on Linux as in gate.yml (the sanitizers of the
+	// C tests), the clang of LLVM for the C smoke test on Windows.
+	entry := func(os, target, cc string) gha.Entry {
+		return gha.Entry{{Key: "os", Value: os}, {Key: "target", Value: target}, {Key: "cc", Value: cc}}
+	}
+	setup := []gha.Step{
+		run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
+		run("Install the system packages (Linux)", "oec/ci/packages.sh"),
+		run("Install the Rust toolchain of oec/ci/versions.sh", "oec/ci/setup-tools.sh --toolchain"),
+	}
+	rust := gha.Job{
+		ID:     "rust",
+		Name:   "Rust SDK and C ABI (${{ matrix.target }})",
+		RunsOn: "${{ matrix.os }}",
+		Matrix: []gha.Entry{
+			entry("ubuntu-24.04", "x86_64-unknown-linux-gnu", "clang"),
+			entry("ubuntu-24.04-arm", "aarch64-unknown-linux-gnu", "clang"),
+			entry("macos-15", "aarch64-apple-darwin", "cc"),
+			entry("macos-15-intel", "x86_64-apple-darwin", "cc"),
+			entry("windows-2025", "x86_64-pc-windows-msvc", "clang"),
+			entry("windows-11-arm", "aarch64-pc-windows-msvc", "clang"),
+		},
+		TimeoutMinutes: 120,
+		Env: []gha.KV{
+			{Key: "OEC_CI_TARGET", Value: "${{ matrix.target }}"},
+			{Key: "OEC_CI_CC", Value: "${{ matrix.cc }}"},
+			{Key: "CARGO_INCREMENTAL", Value: "0"},
+		},
+		Steps: append(append([]gha.Step{checkout(), sdkCache()}, setup...),
+			run("Build and test (oec/ci/sdk-rust.sh)", "oec/ci/sdk-rust.sh dist/sdk"),
+			uploadLib("liboec_ffi-${{ matrix.target }}", ""),
+		),
+	}
+	goJob := gha.Job{
+		ID:     "go",
+		Name:   "Go SDK (${{ matrix.os }})",
+		RunsOn: "${{ matrix.os }}",
+		// cgo needs a C toolchain of the target: MinGW (x86-64) on
+		// windows-2025, none for windows-11-arm.
+		Matrix: []gha.Entry{
+			entry("ubuntu-24.04", "x86_64-unknown-linux-gnu", "clang"),
+			entry("ubuntu-24.04-arm", "aarch64-unknown-linux-gnu", "clang"),
+			entry("macos-15", "aarch64-apple-darwin", "cc"),
+			entry("macos-15-intel", "x86_64-apple-darwin", "cc"),
+			entry("windows-2025", "x86_64-pc-windows-gnu", "gcc"),
+		},
+		TimeoutMinutes: 90,
+		Env: []gha.KV{
+			{Key: "OEC_CI_CC", Value: "${{ matrix.cc }}"},
+			{Key: "CARGO_INCREMENTAL", Value: "0"},
+		},
+		Steps: append(append([]gha.Step{
+			checkout(),
+			setupGo("oec/sdk/go/go.mod", "oec/sdk/go/go.mod\noec/conformance/go.sum\n"),
+			sdkCache(),
+		}, setup...),
+			run("Build and test (oec/ci/sdk-go.sh)", "oec/ci/sdk-go.sh dist/sdk"),
+			uploadLib("liboec_ffi-x86_64-pc-windows-gnu", "runner.os == 'Windows'"),
+		),
+	}
+	armv7 := gha.Job{
+		ID:             "armv7",
+		Name:           "ARMv7 Linux, best effort (cross build, qemu-arm)",
+		RunsOn:         "ubuntu-24.04",
+		TimeoutMinutes: 90,
+		Env:            []gha.KV{{Key: "CARGO_INCREMENTAL", Value: "0"}},
+		Steps: []gha.Step{
+			checkout(),
+			setupGo("oec/sdk/go/go.mod", "oec/sdk/go/go.mod\n"),
+			sdkCache(),
+			run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
+			run("Install the system packages and the ARMv7 cross toolchain", "oec/ci/packages.sh --armv7"),
+			run("Install the Rust toolchain of oec/ci/versions.sh", "oec/ci/setup-tools.sh --toolchain"),
+			run("Cross-build and test (oec/ci/sdk-armv7.sh)", "oec/ci/sdk-armv7.sh dist/sdk"),
+			uploadLib("liboec_ffi-armv7-unknown-linux-gnueabihf", ""),
+		},
+	}
+	return base("sdk.yml", "sdk", header(
+		"The SDK platform matrix: the Rust SDK and its C ABI on Linux, macOS and",
+		"Windows (amd64 and arm64, Windows with MSVC), the Go SDK (Windows with",
+		"MinGW), ARMv7 Linux as a cross build (best effort), and the prebuilt",
+		"liboec_ffi of each target as a workflow artifact (no release).",
+	), rust, goJob, armv7)
 }
