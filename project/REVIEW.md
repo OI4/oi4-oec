@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-21, C-105 (P9 increment 2): the SDK platform matrix `sdk.yml` – `oec`/`oec-ffi` on six native runners incl. Windows MSVC x64/arm64, the Go SDK on five incl. Windows amd64 with MinGW (`link.go` now links on Windows, A-563), ARMv7 cross with qemu, prebuilt `liboec_ffi` libraries for eight targets as artifacts (A-560 … A-570). Verified locally (actionlint, macOS, ARMv7 and Windows MinGW in a container, `linux.sh`); **not pushed** – you were not available for the go, so the hosted runs of `sdk.yml` are open: **D-1**. Earlier, C-104 addendum 3: on your go the fixes were pushed; the hosted runs then found three more issues on Linux (a Rust SDK test race, the runner disk, a micro SDK defect – GCC on x86-64 read a length before it was set), all fixed (A-557 … A-559); **the last run is green on every job** (gate on Linux amd64/arm64 and macOS, D7/D8 on six platforms). Please still confirm that the token is read-only (A-552). Earlier, C-104 addendum 2: CI activated – secret created from `.env` on your instruction, both repositories pushed (fast-forward); first hosted runs: macOS green, Linux and Windows failures fixed locally (A-552 … A-556). Please confirm the token is read-only. Earlier, C-104 addendum 1: your answers are applied – **D-1 (a)** activate the CI now (secret `OEC_GUIDELINE_TOKEN` by you first, then the pushes), **D-2** proposal accepted (channels before C-109), **D-3 (a)** repository `OI4/oec` at the first release. Nothing to decide; the secret is yours to create._
+_Last updated: 2026-11-21, C-105 addendum 1: your answer **D-1 (a)** is applied – both repositories pushed (fast-forward), the first `sdk.yml` runs are evaluated and red jobs fixed under the same go. Earlier, C-105 (P9 increment 2): the SDK platform matrix `sdk.yml` – `oec`/`oec-ffi` on six native runners incl. Windows MSVC x64/arm64, the Go SDK on five incl. Windows amd64 with MinGW (`link.go` now links on Windows, A-563), ARMv7 cross with qemu, prebuilt `liboec_ffi` libraries for eight targets as artifacts (A-560 … A-570). Verified locally (actionlint, macOS, ARMv7 and Windows MinGW in a container, `linux.sh`); **not pushed** – you were not available for the go, so the hosted runs of `sdk.yml` are open: **D-1**. Earlier, C-104 addendum 3: on your go the fixes were pushed; the hosted runs then found three more issues on Linux (a Rust SDK test race, the runner disk, a micro SDK defect – GCC on x86-64 read a length before it was set), all fixed (A-557 … A-559); **the last run is green on every job** (gate on Linux amd64/arm64 and macOS, D7/D8 on six platforms). Please still confirm that the token is read-only (A-552). Earlier, C-104 addendum 2: CI activated – secret created from `.env` on your instruction, both repositories pushed (fast-forward); first hosted runs: macOS green, Linux and Windows failures fixed locally (A-552 … A-556). Please confirm the token is read-only. Earlier, C-104 addendum 1: your answers are applied – **D-1 (a)** activate the CI now (secret `OEC_GUIDELINE_TOKEN` by you first, then the pushes), **D-2** proposal accepted (channels before C-109), **D-3 (a)** repository `OI4/oec` at the first release. Nothing to decide; the secret is yours to create._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -313,6 +313,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-100 addendum 1/2: PO wants the documentation in the Community section of the guideline Docusaurus site (Q-036); D-1 answered (b) and implemented: the pages moved into `oi4-oec-documentation/docs/community` (`intro.md` → `index.md` with the community note, links into `oec/` as repository URLs), the old 1.x Community pages and the 1.x zip are removed, home page and footer of the guideline site link the new pages (guideline commit `cbc293a`); `oec/docs` lost the site scaffold and the npm policy, docscheck checks the Community section, MDX-safe text and the README links to it (`docscheck: 9 pages ok, 10 README links to them ok`); opt-in `build.sh` = yarn build of the guideline site (~18 s, no warning for `docs/community`); GUARDRAILS G-4.11, ADR-0012 and ADR-0031 amended (A-506 … A-511).
 - C-100 (P8 increment 3; ADR-0031 amendment C-100): pages Concepts (`concepts.md`: assets and roles, identities, topics, resources and methods, messages, compliance levels) and Migration notes 1.x → 2.0 (`migration.md`: per breaking change of GL-ADR-001 … 022 what changes and what a 1.x application must do; `Oi4` and `Oi4v2` side by side); the guideline by section number only (G-4.11), nothing from `legacy/`; sidebar Getting started, Concepts, Demos, Registry, Micro SDK, Migration; `docscheck: 9 pages ok`, opt-in build without broken links. No D-x, no R-x, no SF (A-501 … A-505).
 - C-105 (P9 increment 2; ADR-0032, ADR-0027 and ADR-0023 amendments C-105): generated `sdk.yml` with the jobs `rust` (six native runners, clippy and tests, C smoke test, prebuilt library), `go` (five runners, `go test -race`, Windows with MinGW) and `armv7` (cross, tests under `qemu-arm`); Go SDK `link.go` for windows/amd64 with static winpthreads (`TestLinkFlags`); two test-only fixes found by ARMv7 (Rust interval timing under qemu, a Go constant on 32-bit); aws-lc-rs works on ARMv7. `linux.sh` now builds with `CARGO_INCREMENTAL=0` as the runner. Not pushed (A-560 … A-570). **D-1** push.
+- C-105 addendum 1: your answer ("D-1(a)") is applied: workspace `main` and guideline `feature/spec-findings` pushed (fast-forward); the first `sdk.yml` runs follow (addendum 2).
 
 Coverage stays at 0 gaps; schema `2.0.1-dev` @ `52d8470` (re-baseline, no content change).
 
@@ -845,16 +846,20 @@ Logs: [C-105](log/2026-11-21_C-105_sdk-matrix.md), [C-104](log/2026-11-20_C-104_
 
 ### Open for you
 
-From C-105 (2026-11-21):
-
-- **D-1 – Push C-105 (G-3.8)?** `sdk.yml` and its fixes are committed locally (workspace `main`: everything after origin's `c5c25e9` – `7b10ba8` with the C-104 addendum 3 documentation, the C-105 commits up to the cycle-end documentation; guideline branch `feature/spec-findings`: `02d5014` → `76bf08c`, Community pages only). Locally verified: actionlint, `sdk-rust.sh`/`sdk-go.sh` on macOS arm64, `sdk-armv7.sh` and the Windows MinGW side in an Ubuntu container, `linux.sh`, the gate. Only the hosted runners can check Windows MSVC (x64, arm64 with `clang-cl`), the Rust tests on Windows, `macos-15-intel`, the Go tests on Windows with the runner's MinGW, and qemu on the amd64 runner (log §5). First runs of a new matrix usually need one or two fix pushes.
-  - (a) **Recommended:** push both now (fast-forward, never force) and fix red `sdk.yml` jobs with further fast-forward pushes under the same go.
-  - (b) Push both now, but ask before every fix push.
-  - (c) Not yet; `sdk.yml` stays verified locally only and P9 exit criterion 2 waits.
-  - PO: ☐ (a) ☐ (b) ☐ (c)
-- Still open from C-104 (A-552): please confirm that `OEC_GUIDELINE_TOKEN` is read-only.
+Nothing to decide. Still open from C-104 (A-552): please confirm that `OEC_GUIDELINE_TOKEN` is read-only.
 
 ### Answered earlier
+
+Answered after C-105 (2026-11-21) and recorded in C-105 addendum 1:
+- D-1 – push C-105: ☑ (a) push now, fix pushes for red `sdk.yml` jobs under the same go ("D-1(a)").
+
+The question was:
+
+> - **D-1 – Push C-105 (G-3.8)?** `sdk.yml` and its fixes are committed locally (workspace `main`: everything after origin's `c5c25e9` – `7b10ba8` with the C-104 addendum 3 documentation, the C-105 commits up to the cycle-end documentation; guideline branch `feature/spec-findings`: `02d5014` → `76bf08c`, Community pages only). Locally verified: actionlint, `sdk-rust.sh`/`sdk-go.sh` on macOS arm64, `sdk-armv7.sh` and the Windows MinGW side in an Ubuntu container, `linux.sh`, the gate. Only the hosted runners can check Windows MSVC (x64, arm64 with `clang-cl`), the Rust tests on Windows, `macos-15-intel`, the Go tests on Windows with the runner's MinGW, and qemu on the amd64 runner (log §5). First runs of a new matrix usually need one or two fix pushes.
+>   - (a) **Recommended:** push both now (fast-forward, never force) and fix red `sdk.yml` jobs with further fast-forward pushes under the same go.
+>   - (b) Push both now, but ask before every fix push.
+>   - (c) Not yet; `sdk.yml` stays verified locally only and P9 exit criterion 2 waits.
+>   - PO: ☐ (a) ☐ (b) ☐ (c)
 
 Answered after C-104 (2026-11-20) and recorded in C-104 addendum 1:
 - D-1 – activate the CI: ☑ (a) now, as designed ("D-1 (a)"); secret first, then the two fast-forward pushes.

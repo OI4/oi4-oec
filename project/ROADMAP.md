@@ -493,7 +493,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 **Hosted runs green (C-104 addendum 3, 2026-11-20):** after the push Windows passed; three more Linux issues were fixed – a Rust SDK runtime test race (A-557), the runner disk (`oec/ci/disk.sh`, `CARGO_INCREMENTAL=0`, A-558) and a micro SDK defect (argument evaluation order under GCC on x86-64, A-559). The run of `c5c25e9` is green on every job: **exit criterion 1 met**.
 
-**SDK platform matrix (C-105, 2026-11-21):** `sdk.yml` is generated and verified locally (actionlint; macOS arm64; ARMv7 and the Windows MinGW side in an Ubuntu container; `linux.sh`; the gate). Two test-only fixes came from ARMv7 (A-566, A-567). Not pushed – the PO was unavailable for the go (C-105 D-1); exit criterion 2 is met once `sdk.yml` is green on the hosted runners.
+**SDK platform matrix (C-105, 2026-11-21):** `sdk.yml` is generated and verified locally (actionlint; macOS arm64; ARMv7 and the Windows MinGW side in an Ubuntu container; `linux.sh`; the gate). Two test-only fixes came from ARMv7 (A-566, A-567). Not pushed at first – the PO was unavailable for the go; **C-105 addendum 1:** D-1 (a), pushed (fast-forward), red jobs fixed under the same go; exit criterion 2 is met once `sdk.yml` is green on the hosted runners.
 
 **Exit (proposal, C-104; the PO decides at the end of P9):**
 

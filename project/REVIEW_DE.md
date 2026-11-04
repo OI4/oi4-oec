@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 21.11.2026, C-105 (P9 Inkrement 2): Die SDK-Plattformmatrix `sdk.yml` ist gebaut und lokal geprüft – Rust-SDK und C-ABI auf sechs Plattformen inkl. Windows (MSVC), Go-SDK jetzt auch unter Windows (MinGW), ARMv7 per Cross-Build, fertige `liboec_ffi`-Bibliotheken als Download-Artefakte. **Nicht gepusht**, weil du nicht erreichbar warst – deshalb fehlt noch der Lauf auf GitHub: **D-1**. Vorher, C-104 Nachtrag 3: Auf dein Go habe ich die Korrekturen gepusht. Die Läufe auf GitHub fanden unter Linux noch drei Dinge (ein wackliger Test im Rust-SDK, die volle Festplatte des Runners, ein echter Fehler im Micro SDK). Alle behoben (A-557 … A-559); **der letzte Lauf ist in allen Jobs grün**. Offen ist nur noch: Bitte prüfe, ob das Token nur lesend ist (A-552). Vorher, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
+_Stand: 21.11.2026, C-105 Nachtrag 1: Deine Antwort **D-1 (a)** ist eingetragen – gepusht, die ersten `sdk.yml`-Läufe werden ausgewertet. Vorher, C-105 (P9 Inkrement 2): Die SDK-Plattformmatrix `sdk.yml` ist gebaut und lokal geprüft – Rust-SDK und C-ABI auf sechs Plattformen inkl. Windows (MSVC), Go-SDK jetzt auch unter Windows (MinGW), ARMv7 per Cross-Build, fertige `liboec_ffi`-Bibliotheken als Download-Artefakte. **Nicht gepusht**, weil du nicht erreichbar warst – deshalb fehlt noch der Lauf auf GitHub: **D-1**. Vorher, C-104 Nachtrag 3: Auf dein Go habe ich die Korrekturen gepusht. Die Läufe auf GitHub fanden unter Linux noch drei Dinge (ein wackliger Test im Rust-SDK, die volle Festplatte des Runners, ein echter Fehler im Micro SDK). Alle behoben (A-557 … A-559); **der letzte Lauf ist in allen Jobs grün**. Offen ist nur noch: Bitte prüfe, ob das Token nur lesend ist (A-552). Vorher, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,19 +24,11 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-### D-1 – Darf ich C-105 pushen?
+Nichts zu entscheiden. Weiter offen aus C-104 (A-552): Bitte prüfe, ob das Token `OEC_GUIDELINE_TOKEN` nur lesend ist.
 
-Alles aus C-105 ist lokal committet, aber noch nicht auf GitHub. Pushen darf ich nur mit deinem Go (G-3.8). Ich habe dich während der Arbeit gefragt, du warst aber nicht da.
+### Zur Info: C-105 Nachtrag 1 – deine Antwort D-1 (a)
 
-**Warum es wichtig ist:** Einiges lässt sich nur auf den echten GitHub-Runnern prüfen. Dazu gehören Windows mit dem Microsoft-Compiler (x64 und ARM64), die Rust-Tests unter Windows, der Intel-Mac, das Go-SDK unter Windows und qemu auf dem x86-Runner. Bei einer neuen Matrix braucht der erste Lauf erfahrungsgemäß ein, zwei Korrekturen.
-
-- **(a) Empfohlen:** Jetzt beide Repos pushen (nur vorwärts, nie force). Korrekturen für rote `sdk.yml`-Jobs pushe ich unter demselben Go nach.
-- **(b)** Jetzt pushen, aber vor jedem Korrektur-Push neu fragen.
-- **(c)** Noch nicht. Dann bleibt `sdk.yml` nur lokal geprüft, und das P9-Exit-Kriterium 2 wartet.
-
-Betroffen sind im Workspace `main` alle Commits nach `c5c25e9`: `7b10ba8` (Doku zu C-104 Nachtrag 3) und die C-105-Commits. Im Guideline-Repo ist es `feature/spec-findings` mit `76bf08c` (nur Community-Seiten).
-
-**Weiter offen aus C-104 (A-552):** Bitte prüfe, ob das Token `OEC_GUIDELINE_TOKEN` nur lesend ist.
+- Du hast „D-1(a)“ geantwortet: Ich pushe beide Repos (nur vorwärts) und werte die ersten `sdk.yml`-Läufe aus. Rote Jobs behebe ich unter demselben Go und pushe die Korrekturen nach (Nachtrag 2).
 
 ### Zur Info: C-105 – SDK-Plattformmatrix (A-560 … A-570)
 
