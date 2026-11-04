@@ -42,9 +42,12 @@ copy). Default link flags (`link.go`):
 | all | `-I${SRCDIR}/../rust/oec-ffi/include`, `-L${SRCDIR}/lib/<GOOS>_<GOARCH> -loec_ffi` |
 | darwin | `-liconv -lc -lm` (`-lSystem` is added by the Go linker) |
 | linux (glibc) | `-lgcc_s -lutil -lrt -lpthread -lm -ldl -lc` |
+| windows (amd64, MinGW) | `-lbcrypt -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp -l:libpthread.a` |
 
 The system libraries are those of `rustc --print native-static-libs`
-(`cargo rustc -p oec-ffi --release --crate-type staticlib -- --print native-static-libs`).
+(`cargo rustc -p oec-ffi --release --crate-type staticlib -- --print native-static-libs`);
+on Windows also the static winpthreads of MinGW, which aws-lc uses there and
+`rustc` does not print (no `libwinpthread-1.dll` at run time).
 
 **Own archive or other system libraries:** build with the tag `oec_external`
 – the defaults are left out – and name everything in the environment:
@@ -80,7 +83,23 @@ toolchain of the target.
   only its own containers (`--rm`) and removes the base images it pulled;
   no image is built. For an own image: the same two steps in a Rust build
   stage, then copy the binary into a glibc base image.
-- **Windows** (MinGW, `x86_64-pc-windows-gnu`): P9.
+- **Windows amd64** (MinGW-w64 gcc as the cgo compiler, Rust target
+  `x86_64-pc-windows-gnu`; aws-lc needs NASM or its prebuilt objects):
+
+  ```sh
+  rustup target add x86_64-pc-windows-gnu
+  AWS_LC_SYS_PREBUILT_NASM=1 go run ./cmd/oec-buildlib -target x86_64-pc-windows-gnu
+  go build ./examples/...
+  ```
+
+  The job `go` of the CI workflow `sdk.yml` builds and tests it on
+  `windows-2025` ([`oec/ci/sdk-go.sh`](../../ci/sdk-go.sh)); the D7 and
+  example tests are Unix only (they start processes and send signals), the
+  API tests run. Windows arm64 has no MinGW toolchain on the hosted runners
+  and is not supported. Every run of `sdk.yml` also leaves prebuilt
+  libraries as workflow artifacts ([`oec/ci/README.md`](../../ci/README.md)):
+  copy one to `lib/<GOOS>_<GOARCH>/liboec_ffi.a` instead of running
+  `oec-buildlib`.
 
 ## Hello world
 

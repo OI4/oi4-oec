@@ -43,7 +43,7 @@ var requestSeq int
 func request(t *testing.T, b *broker, conn int, topic string, pub map[string]any, payload any) string {
 	t.Helper()
 	requestSeq++
-	id := fmt.Sprintf("%d-Aggregation/vendor.com/Client/C-1/1", 1700000000000+requestSeq)
+	id := fmt.Sprintf("%d-Aggregation/vendor.com/Client/C-1/1", 1700000000000+int64(requestSeq))
 	dsm := pub["Messages"].([]any)[0].(map[string]any)
 	msg := map[string]any{}
 	for k, v := range dsm {
