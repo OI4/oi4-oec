@@ -61,7 +61,9 @@ export GOTOOLCHAIN=auto
 gocheck() {
 	test -z "$(gofmt -l .)" || { gofmt -l .; echo "gofmt: files need formatting in $(pwd)" >&2; exit 1; }
 	go vet ./...
-	go test ./...
+	# The fixture runs of conformance wait on timeouts: on a runner with
+	# 2-4 CPUs they take longer than the default of 10 minutes.
+	go test -timeout 30m ./...
 }
 
 step() { printf '\n== %s\n' "$*"; }
