@@ -6,6 +6,7 @@
 
 use std::io::{ErrorKind, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -234,26 +235,39 @@ impl TestBroker {
 
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let port = listener.local_addr().unwrap().port();
+        // "localhost" may resolve to ::1 first (Windows), so the broker also
+        // listens there on the same port when it can.
+        let listeners = std::iter::once(listener).chain(TcpListener::bind(("::1", port)).ok());
         let (tx, seen) = channel();
         let sockets = Arc::new(Mutex::new(Vec::new()));
         let outbox = Outbox::default();
-        let accepted = Arc::clone(&sockets);
-        let queued = Arc::clone(&outbox);
         let routes = Routes::default();
-        thread::spawn(move || {
-            for (n, tcp) in listener.incoming().enumerate() {
-                let Ok(tcp) = tcp else { return };
-                accepted.lock().unwrap().push(tcp.try_clone().unwrap());
-                let config = Arc::clone(&config);
-                let shared = Shared {
-                    tx: tx.clone(),
-                    outbox: Arc::clone(&queued),
-                    routes: Arc::clone(&routes),
-                    route,
-                };
-                thread::spawn(move || serve(n, tcp, &config, behavior, &shared));
-            }
-        });
+        let next = Arc::new(AtomicUsize::new(0));
+        for listener in listeners {
+            let accepted = Arc::clone(&sockets);
+            let queued = Arc::clone(&outbox);
+            let routes = Arc::clone(&routes);
+            let next = Arc::clone(&next);
+            let config = Arc::clone(&config);
+            let tx = tx.clone();
+            thread::spawn(move || {
+                for tcp in listener.incoming() {
+                    let Ok(tcp) = tcp else { return };
+                    let mut sockets = accepted.lock().unwrap();
+                    let n = next.fetch_add(1, Ordering::SeqCst);
+                    sockets.push(tcp.try_clone().unwrap());
+                    drop(sockets);
+                    let config = Arc::clone(&config);
+                    let shared = Shared {
+                        tx: tx.clone(),
+                        outbox: Arc::clone(&queued),
+                        routes: Arc::clone(&routes),
+                        route,
+                    };
+                    thread::spawn(move || serve(n, tcp, &config, behavior, &shared));
+                }
+            });
+        }
         Self {
             port,
             seen,

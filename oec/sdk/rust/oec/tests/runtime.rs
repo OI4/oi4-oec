@@ -6,7 +6,7 @@
 mod common;
 mod testbroker;
 
-use std::net::TcpListener;
+use std::net::{TcpListener, TcpStream, ToSocketAddrs};
 use std::sync::mpsc::RecvTimeoutError;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -217,6 +217,18 @@ fn get(topic: String) -> Packet {
 }
 
 // ---------------------------------------------------------------- tests
+
+/// The test broker accepts on every address of `localhost`, the host of the
+/// tests: Windows resolves `::1` first, and a refused connect there takes
+/// about 2 s – longer than the 1 s connect timeout of the tests (keep alive).
+#[test]
+fn test_broker_listens_on_every_localhost_address() {
+    let tb = TestBroker::start(&pki(), Behavior::default());
+    for addr in ("localhost", tb.port).to_socket_addrs().unwrap() {
+        TcpStream::connect_timeout(&addr, Duration::from_secs(1))
+            .unwrap_or_else(|e| panic!("connect to {addr}: {e}"));
+    }
+}
 
 /// CONNECT with the Will, Birth before Health, Close before DISCONNECT
 /// (REQ-LIFE-001, REQ-LIFE-005, REQ-LIFE-008, REQ-LIFE-015, REQ-MQTT-009,
