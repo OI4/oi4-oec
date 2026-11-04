@@ -1,6 +1,6 @@
 # Review and decisions – open items for the PO
 
-_Last updated: 2026-11-20, C-104: **P9 started** – plan and cycle cut, ADR-0032 (CI and release architecture), increment 1 (generated CI workflows, checked locally and in an Ubuntu container; nothing pushed). **Open for you: D-1 (activate the CI), D-2 (release channels, targets, visibility; CRA), D-3 (Go module path).**_
+_Last updated: 2026-11-20, C-104 addendum 1: your answers are applied – **D-1 (a)** activate the CI now (secret `OEC_GUIDELINE_TOKEN` by you first, then the pushes), **D-2** proposal accepted (channels before C-109), **D-3 (a)** repository `OI4/oec` at the first release. Nothing to decide; the secret is yours to create._
 
 This is the single list of everything that waits for the PO:
 - items to **decide**: spec findings (contradictions, gaps or missing definitions in the guideline), open questions, scope;
@@ -307,6 +307,7 @@ A German explanation of every item in plain language is in [`REVIEW_DE.md`](REVI
 - C-103 (P8 increment 6 = exit run; ADR-0031 amendment C-103): newcomer run per Getting started on a clean `oec/dev`; D7 `monitor`/`test`, D8 `image`/`run`/`container`/`bus`/`host`, hello Rust/C/Go and the consumers live; page fixes in guideline `f61af2c`, `oec/dev/README.md` fix (A-529 … A-535). **D-1** close P8? No R-x, no SF.
 - C-103 addendum 1: your answer ("D-1 (a)") is applied: **P8 is closed** (ROADMAP P8 heading and "Decision" paragraph, STATUS, ADR-0031). Carried as proposed → P9: publication of the pages with the guideline site (Q-011), newcomer runs on Linux/Windows in CI; every later change updates its page. Next phase: P9 – Hardening & release.
 - C-104 (P9 start + increment 1; ADR-0032, ADR-0030 amendment C-104): plan and cycle cut C-104 … C-111 (ROADMAP P9); Go module `oec/ci` generates `gate.yml` and `conformance.yml` under a CI policy (gate step 11); the gate job in an Ubuntu 24.04 container (`linux.sh`) found and fixed a micro SDK defect (NULL + 0), a machine-dependent D8 `host` test setup and Go SDK D7 tests without a time limit (A-536 … A-551). **D-1 … D-3** for you; no R-x, no SF.
+- C-104 addendum 1: your answers ("D-1 (a), D-2 Ich akzeptiere deinen Vorschlag, D-3 (a)") are applied: CI activation now (secret first, then the fast-forward pushes of the workspace and the guideline branch); release channels decided before C-109; repository `OI4/oec` for the published deliverables at the first release (ROADMAP P9, ADR-0032, Q-011).
 - C-100 addendum 1/2: PO wants the documentation in the Community section of the guideline Docusaurus site (Q-036); D-1 answered (b) and implemented: the pages moved into `oi4-oec-documentation/docs/community` (`intro.md` → `index.md` with the community note, links into `oec/` as repository URLs), the old 1.x Community pages and the 1.x zip are removed, home page and footer of the guideline site link the new pages (guideline commit `cbc293a`); `oec/docs` lost the site scaffold and the npm policy, docscheck checks the Community section, MDX-safe text and the README links to it (`docscheck: 9 pages ok, 10 README links to them ok`); opt-in `build.sh` = yarn build of the guideline site (~18 s, no warning for `docs/community`); GUARDRAILS G-4.11, ADR-0012 and ADR-0031 amended (A-506 … A-511).
 - C-100 (P8 increment 3; ADR-0031 amendment C-100): pages Concepts (`concepts.md`: assets and roles, identities, topics, resources and methods, messages, compliance levels) and Migration notes 1.x → 2.0 (`migration.md`: per breaking change of GL-ADR-001 … 022 what changes and what a 1.x application must do; `Oi4` and `Oi4v2` side by side); the guideline by section number only (G-4.11), nothing from `legacy/`; sidebar Getting started, Concepts, Demos, Registry, Micro SDK, Migration; `docscheck: 9 pages ok`, opt-in build without broken links. No D-x, no R-x, no SF (A-501 … A-505).
 
@@ -841,23 +842,30 @@ Logs: [C-104](log/2026-11-20_C-104_p9-start-ci.md), [C-103](log/2026-11-19_C-103
 
 ### Open for you
 
-From C-104 (log `log/2026-11-20_C-104_p9-start-ci.md`, ADR-0032; G-3.4 a – publication). None of them blocks C-105, which is verified locally.
-
-- **D-1 – Activate the CI?** The workflows `gate.yml` and `conformance.yml` run only on GitHub. That needs: (1) pushing the workspace to `OI4/oi4-oec` (private; its `main` is behind the local one) and the guideline branch `feature/spec-findings` to `OI4/oi4-oec-documentation` (origin is at `cbc293a`, three commits behind `f61af2c` – without them docscheck fails in CI); (2) a repository secret `OEC_GUIDELINE_TOKEN` (fine-grained token, read-only, contents of `OI4/oi4-oec-documentation`) while that repository is private; (3) the runner minutes (in private repositories macOS minutes count 10×, Windows 2×; one push runs about 3 gate jobs of up to 1 h and 6 conformance jobs of a few minutes).
-  - (a) **Recommended:** activate now as designed; the P9 increments are then verified on real runners.
-  - (b) Later; until then everything is verified locally (`linux.sh`, cross checks) and the exit criterion 1 waits.
-  - (c) Only the Linux runners first (no macOS/Windows minutes); the matrix is widened later.
-  - PO: ☐ (a) ☐ (b) ☐ (c)
-- **D-2 – Release channels, targets and visibility?** P9 increment 6 (C-109) builds every deliverable from one tag with checksums, SBOMs and release notes as workflow artifacts. Where they go is yours: GitHub Releases/Packages of which repository, crates.io (`oec`, `oec-ffi`), the Go module proxy, the ESP Component Registry (micro SDK), an image registry (demos, registry, D7/D8 image), public or private. Precondition of any public release: the CRA review (Q-011; SBOM, vulnerability handling, security update policy, support period – C-108 drafts them). The Arduino Library Manager stays excluded until you order it.
-  - Proposal: decide the channels before C-109; until then everything stays an artifact. An answer is not needed now.
-  - PO: ☐
-- **D-3 – Go module path?** All 12 Go modules are `github.com/OI4/oec/...`; the repository is `OI4/oi4-oec` with the modules under `oec/` (`OI4/oec` does not exist). Inside the workspace this works; for `go get` from outside the path must match where the code is published.
-  - (a) **Recommended:** a repository `OI4/oec` for the published deliverables at the first release (no rename now; matches D-2).
-  - (b) Rename the modules to `github.com/OI4/oi4-oec/oec/...` (large mechanical change, before the first release).
-  - (c) A vanity import path on an OI4 domain (needs a web server answering `go-get=1`).
-  - PO: ☐ (a) ☐ (b) ☐ (c)
+Nothing to decide. For D-1 (a) one action is yours: create the repository secret `OEC_GUIDELINE_TOKEN` in `OI4/oi4-oec` (fine-grained token, read-only, contents of `OI4/oi4-oec-documentation`) before the first push.
 
 ### Answered earlier
+
+Answered after C-104 (2026-11-20) and recorded in C-104 addendum 1:
+- D-1 – activate the CI: ☑ (a) now, as designed ("D-1 (a)"); secret first, then the two fast-forward pushes.
+- D-2 – release channels, targets, visibility: ☑ proposal accepted – decided before C-109, until then artifacts only; CRA review before any public release.
+- D-3 – Go module path: ☑ (a) a repository `OI4/oec` for the published deliverables at the first release; no rename now.
+
+The questions were:
+
+> - **D-1 – Activate the CI?** The workflows `gate.yml` and `conformance.yml` run only on GitHub. That needs: (1) pushing the workspace to `OI4/oi4-oec` (private; its `main` is behind the local one) and the guideline branch `feature/spec-findings` to `OI4/oi4-oec-documentation` (origin is at `cbc293a`, three commits behind `f61af2c` – without them docscheck fails in CI); (2) a repository secret `OEC_GUIDELINE_TOKEN` (fine-grained token, read-only, contents of `OI4/oi4-oec-documentation`) while that repository is private; (3) the runner minutes (in private repositories macOS minutes count 10×, Windows 2×; one push runs about 3 gate jobs of up to 1 h and 6 conformance jobs of a few minutes).
+>   - (a) **Recommended:** activate now as designed; the P9 increments are then verified on real runners.
+>   - (b) Later; until then everything is verified locally (`linux.sh`, cross checks) and the exit criterion 1 waits.
+>   - (c) Only the Linux runners first (no macOS/Windows minutes); the matrix is widened later.
+>   - PO: ☐ (a) ☐ (b) ☐ (c)
+> - **D-2 – Release channels, targets and visibility?** P9 increment 6 (C-109) builds every deliverable from one tag with checksums, SBOMs and release notes as workflow artifacts. Where they go is yours: GitHub Releases/Packages of which repository, crates.io (`oec`, `oec-ffi`), the Go module proxy, the ESP Component Registry (micro SDK), an image registry (demos, registry, D7/D8 image), public or private. Precondition of any public release: the CRA review (Q-011; SBOM, vulnerability handling, security update policy, support period – C-108 drafts them). The Arduino Library Manager stays excluded until you order it.
+>   - Proposal: decide the channels before C-109; until then everything stays an artifact. An answer is not needed now.
+>   - PO: ☐
+> - **D-3 – Go module path?** All 12 Go modules are `github.com/OI4/oec/...`; the repository is `OI4/oi4-oec` with the modules under `oec/` (`OI4/oec` does not exist). Inside the workspace this works; for `go get` from outside the path must match where the code is published.
+>   - (a) **Recommended:** a repository `OI4/oec` for the published deliverables at the first release (no rename now; matches D-2).
+>   - (b) Rename the modules to `github.com/OI4/oi4-oec/oec/...` (large mechanical change, before the first release).
+>   - (c) A vanity import path on an OI4 domain (needs a web server answering `go-get=1`).
+>   - PO: ☐ (a) ☐ (b) ☐ (c)
 
 Answered after C-103 (2026-11-19) and recorded in C-103 addendum 1:
 - D-1 – close P8: ☑ (a) closed, next phase **P9 – Hardening & release**; carried items as proposed ("D-1 (a)"). The question was:
@@ -2235,4 +2243,4 @@ Log C-092, ADR-0030, ADR-0022 amendment C-092, `oec/sdk/micro/README.md`.
 
 ## Next (C-105)
 
-1. C-105 – P9 increment 2: SDK platform matrix `sdk.yml` (`oec`/`oec-ffi` on Linux/macOS/Windows × amd64/arm64 incl. Windows MSVC, ARMv7 Linux best effort; Go SDK incl. Windows (MinGW); prebuilt `liboec_ffi` archives as artifacts), verified locally while the CI is inactive. Your answers to D-1 … D-3 are recorded first.
+1. C-105 – P9 increment 2: SDK platform matrix `sdk.yml` (`oec`/`oec-ffi` on Linux/macOS/Windows × amd64/arm64 incl. Windows MSVC, ARMv7 Linux best effort; Go SDK incl. Windows (MinGW); prebuilt `liboec_ffi` archives as artifacts), verified locally while the CI is inactive. Before it: the CI activation of C-104 D-1 (a) – your secret, then the pushes – and the first runs on the hosted runners checked.

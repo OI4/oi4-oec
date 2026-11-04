@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 20.11.2026, C-104: **P9 gestartet** – Plan und Zyklus-Schnitt, ADR-0032 (CI- und Release-Architektur), Teil 1 (erzeugte CI-Workflows, lokal und in einem Ubuntu-Container geprüft; nichts gepusht). **Offen für dich: D-1 (CI einschalten), D-2 (Release-Kanäle, Ziele, Sichtbarkeit; CRA), D-3 (Go-Modulpfad).**_
+_Stand: 20.11.2026, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,9 +24,13 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Aus C-104 (Log `log/2026-11-20_C-104_p9-start-ci.md`, ADR-0032). Alle drei betreffen die Veröffentlichung und gehören deshalb dir (G-3.4 a). Keine davon hält C-105 auf; das prüfe ich bis dahin lokal.
+Nichts zu entscheiden. Für D-1 (a) ist ein Schritt bei dir: Lege im Repo `OI4/oi4-oec` das Secret `OEC_GUIDELINE_TOKEN` an (fein granuliertes Token, nur Lesezugriff auf den Inhalt von `OI4/oi4-oec-documentation`) – vor dem ersten Push.
 
-### D-1 – CI einschalten?
+## Früher beantwortet
+
+### D-1 aus C-104 – CI einschalten?
+
+Deine Antwort: „D-1 (a)“ – jetzt einschalten wie geplant. Dein Teil: das Secret `OEC_GUIDELINE_TOKEN` anlegen, **bevor** gepusht wird (sonst scheitern die ersten Gate-Läufe am Guideline-Checkout). Danach werden der Workspace und der Guideline-Branch gepusht (beides reines Vorspulen, nichts wird überschrieben). Die Frage war:
 
 Die Workflows `gate.yml` (das ganze Gate unter Linux x64, Linux arm64 und macOS) und `conformance.yml` (D7/D8 auf sechs Systemen inkl. Windows; die Programme für sechs Zielplattformen) liegen als Dateien im Repo. Sie laufen erst auf GitHub. Dafür braucht es:
 1. **Pushen:** den Workspace nach `OI4/oi4-oec` (privat; dort ist `main` hinter dem lokalen Stand) und den Guideline-Branch `feature/spec-findings` nach `OI4/oi4-oec-documentation` (dort steht `cbc293a`, drei Commits hinter `f61af2c` – ohne sie scheitert docscheck in der CI).
@@ -38,20 +42,22 @@ Möglichkeiten:
 - (b) Später; bis dahin prüfe ich alles lokal (`linux.sh`, Cross-Builds), das Exit-Kriterium 1 wartet.
 - (c) Zuerst nur die Linux-Runner (keine macOS-/Windows-Minuten), die Matrix später erweitern.
 
-### D-2 – Release-Kanäle, Ziele und Sichtbarkeit?
+### D-2 aus C-104 – Release-Kanäle, Ziele und Sichtbarkeit?
+
+Deine Antwort: „Ich akzeptiere deinen Vorschlag“ – die Kanäle entscheidest du vor C-109; bis dahin bleibt alles Workflow-Artefakt. Die Frage war:
 
 P9-Teil 6 (C-109) baut alle Ergebnisse aus einem Tag – mit Prüfsummen, SBOMs und Release-Notes – zunächst nur als Workflow-Artefakte. Wohin sie gehen, entscheidest du: GitHub Releases/Packages (welches Repo), crates.io (`oec`, `oec-ffi`), der Go-Modul-Proxy, die ESP Component Registry (Micro SDK), eine Image-Registry (Demos, Registry, D7/D8-Image); öffentlich oder privat. Vor jedem **öffentlichen** Release steht die CRA-Prüfung (Q-011: SBOM, Umgang mit Schwachstellen, Sicherheits-Updates, Support-Dauer – Entwürfe kommen in C-108). Den Arduino Library Manager fasse ich weiter nicht an, bis du es sagst.
 
 Vorschlag: Entscheide die Kanäle vor C-109; bis dahin bleibt alles Artefakt. Eine Antwort ist jetzt noch nicht nötig.
 
-### D-3 – Go-Modulpfad?
+### D-3 aus C-104 – Go-Modulpfad?
+
+Deine Antwort: „D-3 (a)“ – beim ersten Release ein eigenes Repo `OI4/oec`; jetzt wird nichts umbenannt. Die Frage war:
 
 Alle 12 Go-Module heißen `github.com/OI4/oec/...`. Das Repo ist aber `OI4/oi4-oec` mit den Modulen unter `oec/`, und ein Repo `OI4/oec` gibt es nicht. Im Workspace funktioniert das; für `go get` von außen muss der Pfad aber zum Ort der Veröffentlichung passen.
 - **(a) Empfehlung:** ein Repo `OI4/oec` für die veröffentlichten Ergebnisse beim ersten Release (jetzt nichts umbenennen; passt zu D-2).
 - (b) Die Module in `github.com/OI4/oi4-oec/oec/...` umbenennen (große, mechanische Änderung, vor dem ersten Release).
 - (c) Ein eigener Importpfad auf einer OI4-Domain (braucht einen Webserver, der `go-get=1` beantwortet).
-
-## Früher beantwortet
 
 ### D-1 aus C-103 – P8 schließen?
 

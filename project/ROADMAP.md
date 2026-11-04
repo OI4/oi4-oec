@@ -487,6 +487,8 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 7. (C-110) Guideline feedback package: every spec finding with its proposed text and the guideline diff, for the work group.
 8. (C-111) P9 exit run on the active CI (D-1).
 
+**Decisions (C-104 addendum 1, PO, 2026-11-20):** D-1 (a) – the CI is activated now as designed (the PO creates the secret `OEC_GUIDELINE_TOKEN`, then the workspace and the guideline branch are pushed; the runner minutes are accepted); D-2 – the release channels, targets and visibility are decided before C-109, until then artifacts only, the CRA review before any public release; D-3 (a) – the published deliverables get a repository `OI4/oec` at the first release (module paths unchanged).
+
 **Exit (proposal, C-104; the PO decides at the end of P9):**
 
 1. The CI is active and green on the pushed state: `gate.yml` on its three runners, `conformance.yml` on its six (D-1).
