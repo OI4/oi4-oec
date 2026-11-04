@@ -16,6 +16,12 @@ set -eu
 test $# -le 1 || { echo "usage: sdk-go.sh [<dir>]" >&2; exit 2; }
 here="$(cd "$(dirname "$0")" && pwd)"
 sdk="$(cd "$here/../sdk" && pwd)"
+out=""
+if [ $# -eq 1 ]; then
+	# Resolved before cd "$sdk/go": sdk.yml passes the relative dist/sdk (C-105 addendum 2).
+	mkdir -p "$1"
+	out="$(cd "$1" && pwd)"
+fi
 export GOTOOLCHAIN=auto CGO_ENABLED=1
 goos="$(go env GOOS)"
 goarch="$(go env GOARCH)"
@@ -51,7 +57,7 @@ echo "sdk-go: examples"
 go build -o "$work/" ./examples/...
 ls "$work"
 
-if [ $# -eq 1 ] && [ -n "$target" ]; then
-	"$here/ffi-lib.sh" "$1" "$target" >/dev/null
-	echo "sdk-go: $1/liboec_ffi-$target"
+if [ -n "$out" ] && [ -n "$target" ]; then
+	"$here/ffi-lib.sh" "$out" "$target" >/dev/null
+	echo "sdk-go: $out/liboec_ffi-$target"
 fi
