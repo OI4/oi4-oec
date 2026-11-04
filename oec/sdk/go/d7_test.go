@@ -3,6 +3,7 @@
 package oec
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -74,12 +75,16 @@ func runD7(t *testing.T, example, app string, level int, want []string) {
 	write(t, password, "pa:ss\n")
 
 	// The restart hook: SIGTERM and wait; start again in the background.
+	// The wait is capped (60 s): an application that does not stop fails
+	// the hook, so D7 skips the restart tests and the test fails with the
+	// output of D7 and the log of the application instead of hanging until
+	// the timeout of go test (C-104, Linux container run).
 	pid := filepath.Join(work, example+".pid")
 	logf := filepath.Join(work, example+".log")
 	start := filepath.Join(work, "start.sh")
 	stop := filepath.Join(work, "stop.sh")
 	write(t, start, fmt.Sprintf("#!/bin/sh\nOEC_ROOT=%q %q >> %q 2>&1 &\necho $! > %q\n", root, exe, logf, pid))
-	write(t, stop, fmt.Sprintf("#!/bin/sh\nP=$(cat %q)\nkill -TERM \"$P\"\nwhile kill -0 \"$P\" 2>/dev/null; do sleep 0.1; done\n", pid))
+	write(t, stop, fmt.Sprintf("#!/bin/sh\nP=$(cat %q)\nkill -TERM \"$P\"\ni=0\nwhile kill -0 \"$P\" 2>/dev/null; do\n\ti=$((i+1))\n\tif [ \"$i\" -gt 600 ]; then echo \"stop.sh: $P still runs 60 s after SIGTERM\" >&2; exit 1; fi\n\tsleep 0.1\ndone\n", pid))
 	for _, f := range []string{start, stop} {
 		if err := os.Chmod(f, 0o755); err != nil {
 			t.Fatal(err)
@@ -100,7 +105,12 @@ func runD7(t *testing.T, example, app string, level int, want []string) {
 	})
 
 	report := filepath.Join(work, "d7.json")
-	cmd := exec.Command(check, "test",
+	// A run takes up to about 2 minutes (Level 1 waits for the restart);
+	// the cap ends a hanging run with its output well before the timeout
+	// of go test, which would lose the output and the application log.
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, check, "test",
 		"--broker", fmt.Sprintf("mqtts://localhost:%d", b.Port), "--ca", b.CA,
 		"--username", "user", "--password-file", password,
 		"--app", app, "--level", strconv.Itoa(level),
@@ -109,6 +119,7 @@ func runD7(t *testing.T, example, app string, level int, want []string) {
 		"--proxy-ca", proxyCA, "--proxy-ca-key", proxyKey,
 		"--stop-cmd", stop, "--start-cmd", start, "--restart-wait", "15s", "--peer", "--announce",
 		"--format", "text", "--report", "json="+report)
+	cmd.WaitDelay = 10 * time.Second
 	began := time.Now()
 	out, err := cmd.CombinedOutput()
 	t.Logf("oec-check test --level %d: %v after %v", level, err, time.Since(began).Round(time.Second))
