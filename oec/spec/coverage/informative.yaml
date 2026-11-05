@@ -1,14 +1,10 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "52d8470"
+baseline: "c48bbd4"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
-  - key: MG-preface-ffb33878
-    reason: Preface disclaimer about the document type; "may" expresses possibility, not a permission (MG 1.2).
-  - key: MG-preface-a3a548f2
-    reason: Preface overview of chapter 6; the requirements are in MG 6 (areas MQTT, LIFE).
   - key: MG-index-0a728c6e
-    reason: Start-page disclaimer about the document type (same as the preface); "may" expresses possibility, not a permission (MG 1.2).
+    reason: Start-page disclaimer about the document type; "may" expresses possibility, not a permission (MG 1.2).
   - key: MG-index-0c647ad3
     reason: Start-page overview of chapter 9; the requirements are in MG 9 (areas TOP, MSG, ACT and the RES areas).
   - key: MG-1-edd38947

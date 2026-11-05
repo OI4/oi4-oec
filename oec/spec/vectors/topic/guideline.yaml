@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "52d8470"
+baseline: "c48bbd4"
 description: >-
   Golden topic vectors taken from the guideline (MG 4.2, MG 7, Appendix B1).
   Vectors that differ from the guideline text record the original and the spec
