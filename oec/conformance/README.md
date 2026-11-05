@@ -226,6 +226,20 @@ go run ./cmd/oec-infra report-schema > infra-report.schema.json
 - `list` filters: `--mode image|run|container|host|bus`, `--level N`, `--req`, `--needs docker|host-access|credentials-2|none`, `--status`, id patterns (`T8-HST-*`); flags may follow the patterns. A test that checks only platform requirements is not graded (level `-`, MG 1.3) and is listed at every `--level`. Unfiltered it ends with the totals and the `manual` requirement.
 - `explain` takes one test or REQ id (case-insensitive); an unknown id is a usage error (exit 2). The fixtures are those of the five D8 indexes with their stated outcome, and the requirements a fixture expects as manual. A requirement checked only by D7 points to `oec-check explain` (JSON `oec_check`); a `T7-…` id is a usage error with the same pointer.
 
+## Image `oi4/oec-conformance` (C-107)
+
+Both tools in one multi-arch image (linux/amd64, linux/arm64; ADR-0025 §10, amendment C-107): `oec-check` and `oec-infra` in `/usr/local/bin`, static (`CGO_ENABLED=0`, `-trimpath`, no build id), on `gcr.io/distroless/static-debian13:nonroot` (CA certificates, `/tmp`, user 65532; no shell), the SBOM and license texts in `/opt/oi4/licenses` by `oec-sbom` with the Go license map [`images/go-licenses.json`](images/go-licenses.json) (one entry `module@version` → SPDX expression per required module of `go.mod`; a test keeps it complete). Built locally only (opt-in, Docker with buildx; never pushed – publication is the PO's, Q-011):
+
+```sh
+conformance/images/build.sh /tmp/oec-images     # from oec/: build both platforms, D8 image, load the native one
+docker run --rm oi4/oec-conformance:0.1.0 oec-check list
+docker run --rm -v "$PWD/app.oci.tar:/work/app.oci.tar:ro" oi4/oec-conformance:0.1.0 \
+  oec-infra image --level 3 /work/app.oci.tar
+conformance/images/build.sh --remove            # remove the loaded image
+```
+
+`build.sh` judges the OCI archive with D8 `image --level 3` (`T8-IMG-01 … 04`) and runs both tools in the loaded image (`oec-check list`; `oec-infra image` on its own archive, without network). D8 `run` does not apply: the tools are no OEC application. The command is `oec-check` by default (no entrypoint: name the tool). `bus`, `monitor` and `test` need the network of the broker (`--network`) and the storages mounted read-only; `run`, `container` and `host` need the engine socket mounted – use the binaries on the host for those (`conformance.yml` artifacts or `go run`).
+
 ## Layout
 
 | Path | Content |
@@ -264,6 +278,7 @@ go run ./cmd/oec-infra report-schema > infra-report.schema.json
 | `testdata/hosts` | `index.yaml`: expected verdicts of `oec-infra host` per host scenario (generated root, fake facts, mount table and daemon, `mqtttest` broker with the simulated Registry; C-072, `reviewed` since the C-072 review, `ram-reserved` and `storage-nominal` re-reviewed after SF-116; the T8-HST-03 scenarios of C-073 and the changed `none` and `T8-HST-02/certificate` `reviewed` since the C-073 review) |
 | `testdata/containers` | `engine/`: inspect documents recorded from Docker Engine 28.4 (API 1.51), sanitized; `index.yaml`: expected verdicts of `oec-infra container` per scenario against the fake Engine API (C-073, `reviewed` since the C-073 review) |
 | `testdata/run` | `index.yaml`: expected verdicts of `oec-infra run` per fault of the simulated application and per environment case against the fake Engine API (C-074, `reviewed` since the C-074 review; `passphrase-raw`, `no-cert` and `no-credentials` re-reviewed after SF-117) |
+| `Dockerfile`, `images/` | the image `oi4/oec-conformance` (C-107): `images/build.sh` (opt-in), `images/go-licenses.json` (the Go license map of its SBOM); `image_test.go` checks them offline |
 | `catalog` | test catalogs of `monitor`/`test` (D7, `d7.yaml`) and `oec-infra` (D8, `d8.yaml`), embedded; `COVERAGE.md` (generated); `catalog_test.go` enforces mode ↔ verification, levels and full coverage of every `d7-monitor`/`d7-test`/`d8` REQ; `independence_test.go` keeps the module free of `sdk/` (Q-009) |
 
 ## Tests

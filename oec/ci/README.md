@@ -29,6 +29,11 @@ releases.
 | `micro-host.sh` | the micro SDK on one runner of `micro.yml`: on Linux/macOS `sdk/micro/check.sh` with the compiler `OEC_CI_CC` (GCC in the CI; the gate uses clang) and clang for the analysis (`OECM_ANALYZER`); on Windows (MinGW gcc, amd64) the portable part: gofmt, vet and `go test -race` of the portable packages, the commands built with cgo, `oecm-vecgen -check`, CMake (`MinGW Makefiles`, no sanitizers) and ctest, GCC `-O2` warnings, `oec-check validate` of the emitted payloads, `hello_device`, `arduino/package.sh`, the headers as C++17 |
 | `micro-esp-idf.sh` | the ESP-IDF builds `esp32`, `esp32s3`, `qemu` in the Espressif container of `versions.sh` and D7 `--level 1/2/3` against the `qemu` firmware (`cmd/oecm-qemu`); `oec-check` and the test binary are built on the host for the container, `go-testbroker` natively (Linux) or from `OEC_TESTBROKER`; runs as the calling user with `--init`; removes its container and the image if it pulled it |
 | `micro-arduino.sh` | the Arduino library on one core (`3.3` or `4.0`): `arduino-cli` of `versions.sh` (SHA-256 checked) with an own home `OECM_ARDUINO_HOME` (default `~/.oec-arduino`), the core and the M5Stack libraries, `arduino/package.sh`, the examples with `--warnings all` (a warning in the library or a sketch fails); ESP32-C3/C6 best effort |
+| `images.sh` | the images of `images.yml`: `demos/images/build.sh`, `registry/images/build.sh` and `conformance/images/build.sh` into one directory – both platforms, D8 `image` on each OCI archive, D8 `run` on the native image of each application, the reports and logs kept, the archives deleted; the native images stay loaded as `oi4/oec-*:$VERSION` (default `0.1.0`) |
+| `getting-started.sh` | the newcomer run: "See OEC at work" of the Community pages with curl and jq – `go run ./pki`, compose up of the profiles `demos` and `registry`, the four Web UIs, the registry lists the demos and the stations, the config service sets the stations of the weather service to 4 and the registry lists station 4; always `down -v`; `OEC_COMPOSE` as in `live.sh` |
+| `live-infra.sh` | `oec/conformance/live.sh` with `OEC_LIVE_REGISTRY=1` (D7 `monitor`, D8 `bus`/`host`/`container`/`run` incl. `TestRunDev`); fails without a container engine or the registry image |
+| `podman.sh` | Podman on Linux (rootless, the user of the runner): the API socket, `docker save` → `podman load`, D8 `run` through the Podman socket, `getting-started.sh` and `live-infra.sh` with `podman compose`; a table of what works; `OEC_PODMAN_LIMITS` lists the known limits (reported, not fatal) |
+| `linux-images.sh` | the job `images` of `images.yml` on a fresh Ubuntu 24.04 in a privileged container with a Docker engine of its own (opt-in; `OEC_CI_PODMAN=1` adds `podman.sh`) |
 | `lint.sh` | actionlint on the workflows (opt-in locally, a job of `gate.yml`) |
 | `linux.sh` | the job `gate` of `gate.yml` in an Ubuntu 24.04 container (opt-in) |
 
@@ -40,6 +45,7 @@ releases.
 | `conformance.yml` | `test`: `conformance.sh`; `binaries`: `binaries.sh`, upload as the artifact `oec-conformance-binaries` (14 days) | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-15`, `macos-15-intel`, `windows-2025`, `windows-11-arm`; binaries on `ubuntu-24.04` |
 | `sdk.yml` | `rust`: `setup-tools.sh --toolchain`, `sdk-rust.sh`, upload `liboec_ffi-<target>`; `go`: `sdk-go.sh`, on Windows upload `liboec_ffi-x86_64-pc-windows-gnu`; `armv7`: `packages.sh --armv7`, `sdk-armv7.sh`, upload `liboec_ffi-armv7-unknown-linux-gnueabihf` (all artifacts 14 days) | `rust`: all six; `go`: all but `windows-11-arm` (no cgo toolchain); `armv7`: `ubuntu-24.04` |
 | `micro.yml` | `host`: `packages.sh`, `setup-tools.sh --toolchain` (not on Windows), `micro-host.sh` with `OEC_CI_CC=gcc`; `esp-idf`: `disk.sh`, `setup-tools.sh --toolchain`, `micro-esp-idf.sh`; `arduino`: `disk.sh`, `micro-arduino.sh` for the cores `3.3` and `4.0`; no artifacts (no firmware) | `host`: `ubuntu-24.04`, `ubuntu-24.04-arm`, `windows-2025`; `esp-idf` and `arduino`: `ubuntu-24.04` |
+| `images.yml` | `images`: `disk.sh`, `images.sh` (the five images, D8 `image`/`run`), `getting-started.sh`, `live-infra.sh`, on `ubuntu-24.04` also `podman.sh`; upload of the D8 reports and logs as `oec-images-reports-<runner>` (14 days, also after a failure) – never an image or OCI archive | `ubuntu-24.04`, `ubuntu-24.04-arm` |
 
 Triggers: push to `main`, pull requests, manual start. Every run step uses
 `bash` (Git Bash on Windows). The repository is checked out with LF line
@@ -108,6 +114,10 @@ ci/sdk-go.sh                             # opt-in: the job go of sdk.yml on this
 ci/micro-host.sh                         # opt-in: the job host of micro.yml (OEC_CI_CC=gcc as in the CI)
 ci/micro-esp-idf.sh                      # opt-in: the job esp-idf of micro.yml (Docker, ~9 GB image)
 ci/micro-arduino.sh 4.0                  # opt-in: the job arduino of micro.yml (network, ~8 GB per core)
+ci/images.sh /tmp/oec-images             # opt-in: the five images with D8 (Docker with buildx, network)
+ci/getting-started.sh                    # opt-in: the newcomer run (needs the images, curl, jq; not next to a running oec/dev stack)
+ci/live-infra.sh                         # opt-in: live.sh with the registry
+ci/linux-images.sh /tmp/reports          # opt-in: the job images in Ubuntu 24.04 with its own dockerd (Docker, network, 30–60 min)
 ```
 
 `micro-esp-idf.sh` mounts the workspace at the same absolute path in the

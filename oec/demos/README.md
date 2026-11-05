@@ -87,7 +87,11 @@ copyright files) mapped to SPDX by [`images/debian.json`](images/debian.json)
 (D-1 of C-084), and the texts of [`images/licenses/`](images/licenses)
 (SPDX license-list-data v3.29.0) or of the Debian copyright files for
 `LicenseRef-*`. Every license is named unambiguously and every text is
-present, or the tool fails. Its tests run offline in the gate (fixtures and
+present, or the tool fails. Go modules from outside this workspace need
+`-golicenses <file>`, a reviewed map `module@version` → SPDX expression
+(another version is refused): the image of the compliance tools uses
+[`../conformance/images/go-licenses.json`](../conformance/images/go-licenses.json)
+(C-107); the demos link no such module. Its tests run offline in the gate (fixtures and
 golden SBOM in `internal/sbom/testdata/`, D8 `oec-infra image` on a
 synthetic OCI layout).
 
