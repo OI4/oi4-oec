@@ -4,7 +4,10 @@
 # deleted in C-060, the C ABI oec-ffi added in C-061).
 #   1. spec/tools: gofmt, vet, tests and the spectool checks, including the
 #      coverage gate (every schema/d7-validate REQ has a reviewed positive and
-#      negative vector, every allowed matrix row has its entry schema);
+#      negative vector, every allowed matrix row has its entry schema) and,
+#      from C-110, the feedback package of the guideline repository
+#      (findings/feedback: every guideline commit of 5f070bb..baseline is
+#      attributed, the generated pages are current);
 #   2. schema/check.sh: bundle, release freeze, both validators;
 #   3. spectool crosscheck: oracle vs schema on every case of schema/dist;
 #   4. conformance: gofmt, vet, tests;
@@ -53,7 +56,8 @@
 #      (ci/lint.sh) and the Linux run of the gate job in a container
 #      (ci/linux.sh) are opt-in.
 # The inventory check reads the guideline repository next to this repository
-# (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml.
+# (../../oi4-oec-documentation) at the baseline of spec/requirements/areas.yaml;
+# the feedback check reads its working tree and its history up to the baseline.
 set -eu
 root="$(cd "$(dirname "$0")" && pwd)"
 export GOTOOLCHAIN=auto
@@ -80,6 +84,7 @@ step "spectool render -check"; spectool render -check
 step "spectool topic -check"; spectool topic -check
 step "spectool coverage -check -gate"; spectool coverage -check -gate
 step "spectool inventory -check -rev $baseline"; spectool inventory -check -rev "$baseline"
+step "spectool feedback -check -rev $baseline"; spectool feedback -check -rev "$baseline"
 
 step "schema/check.sh"
 "$root/schema/check.sh"
