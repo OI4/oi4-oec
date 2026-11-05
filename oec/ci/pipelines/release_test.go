@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/OI4/oec/ci/gha"
 )
 
 var semver = regexp.MustCompile(`^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$`)
@@ -114,5 +116,150 @@ func TestReleaseVersion(t *testing.T) {
 	// The schema bundle keeps its own version 2.MINOR.PATCH (ADR-0019 §6).
 	if !regexp.MustCompile(`(?m)^const Version = "2\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?"$`).MatchString(read(t, filepath.Join(oec, "schema/schema.go"))) {
 		t.Error("schema/schema.go: Version is not 2.MINOR.PATCH")
+	}
+}
+
+// TestRelease: release.yml (ADR-0033, C-109) builds every deliverable of
+// the release train from one commit – on a tag oec-v* or by hand, never on
+// a branch or a pull request – with release.sh, without caches; the prebuilt
+// library for each target of the SDK matrix; the last job waits for every
+// other one, downloads their parts and assembles one workflow artifact with
+// SHA256SUMS and the release notes. Nothing is published (Q-011).
+func TestRelease(t *testing.T) {
+	w := Release()
+	if w.File != "release.yml" {
+		t.Errorf("release workflow file %s", w.File)
+	}
+	var found bool
+	for _, x := range Workflows() {
+		found = found || x.File == w.File
+	}
+	if !found {
+		t.Error("Workflows() lacks release.yml")
+	}
+	if strings.Join(w.PushTags, " ") != "oec-v*" || len(w.PushBranches) != 0 || w.PullRequest || !w.Dispatch {
+		t.Errorf("release triggers: tags %v, branches %v, pull_request %v, dispatch %v", w.PushTags, w.PushBranches, w.PullRequest, w.Dispatch)
+	}
+	if len(w.Permissions) != 1 || w.Permissions[0] != (gha.KV{Key: "contents", Value: "read"}) {
+		t.Errorf("release permissions %v, want contents: read only", w.Permissions)
+	}
+
+	// The ffi matrix is the target list of release.sh and of sbom.sh, each
+	// target on the runner that builds it in sdk.yml.
+	script := read(t, filepath.Join(oec, "ci/release.sh"))
+	targets := strings.Fields(shVar(t, filepath.Join(oec, "ci/release.sh"), "ffi_targets"))
+	if want := strings.Fields(shVar(t, filepath.Join(oec, "ci/sbom.sh"), "targets")); strings.Join(targets, " ") != strings.Join(want, " ") {
+		t.Errorf("release.sh ffi_targets %v, sbom.sh targets %v", targets, want)
+	}
+	sdkRunner := map[string]string{}
+	for _, j := range SDK().Jobs {
+		for _, e := range j.Matrix {
+			os, _ := gha.Get(e, "os")
+			tg, _ := gha.Get(e, "target")
+			if os != "" && tg != "" {
+				sdkRunner[tg] = os
+			}
+		}
+	}
+	sdkRunner["armv7-unknown-linux-gnueabihf"] = job(t, SDK(), "armv7").RunsOn
+	ffi := job(t, w, "ffi")
+	if len(ffi.Matrix) != len(targets) {
+		t.Errorf("ffi: %d matrix entries, release.sh has %d targets", len(ffi.Matrix), len(targets))
+	}
+	for i, e := range ffi.Matrix {
+		os, _ := gha.Get(e, "os")
+		tg, _ := gha.Get(e, "target")
+		if i < len(targets) && tg != targets[i] {
+			t.Errorf("ffi matrix %d: target %s, release.sh %s", i, tg, targets[i])
+		}
+		if sdkRunner[tg] != os {
+			t.Errorf("ffi %s on %s, sdk.yml builds it on %q", tg, os, sdkRunner[tg])
+		}
+	}
+	if v, _ := gha.Get(ffi.Env, "OEC_CI_TARGET"); v != "${{ matrix.target }}" {
+		t.Errorf("ffi: OEC_CI_TARGET %q", v)
+	}
+
+	want := map[string]struct {
+		needs, cmds, artifact string
+	}{
+		"ffi": {"", "oec/ci/disk.sh\noec/ci/packages.sh\noec/ci/packages.sh --armv7\noec/ci/setup-tools.sh --toolchain\noec/ci/release.sh dist/release ffi",
+			"oec-release-ffi-${{ matrix.target }}"},
+		"dist": {"", "oec/ci/disk.sh\noec/ci/setup-tools.sh --toolchain\noec/ci/fetch.sh\noec/ci/release.sh dist/release source binaries micro schema sbom",
+			"oec-release-dist"},
+		"images":  {"", "oec/ci/disk.sh\noec/ci/release.sh dist/release images", "oec-release-images"},
+		"release": {"ffi dist images", "oec/ci/release.sh dist/release assemble", "oec-release"},
+	}
+	if len(w.Jobs) != len(want) || w.Jobs[len(w.Jobs)-1].ID != "release" {
+		t.Errorf("release: jobs %d, the last must be release", len(w.Jobs))
+	}
+	for id, x := range want {
+		j := job(t, w, id)
+		if got := strings.Join(j.Needs, " "); got != x.needs {
+			t.Errorf("%s: needs %q, want %q", id, got, x.needs)
+		}
+		if cmds := strings.Join(gha.Workflow{Jobs: []gha.Job{j}}.Commands(), "\n"); cmds != x.cmds {
+			t.Errorf("%s job commands:\n%s\nwant:\n%s", id, cmds, x.cmds)
+		}
+		for _, s := range j.Steps {
+			if s.Uses == Cache {
+				t.Errorf("%s: a cache in a release job", id)
+			}
+			if s.Uses == SetupGo {
+				if c, _ := gha.Get(s.With, "cache"); c != "false" {
+					t.Errorf("%s: setup-go with its module cache", id)
+				}
+			}
+		}
+		ups := uploads(j)
+		if len(ups) != 1 || j.Steps[len(j.Steps)-1].Uses != UploadArtifact {
+			t.Fatalf("%s: %d upload steps, want 1 as the last step", id, len(ups))
+		}
+		if n, _ := gha.Get(ups[0].With, "name"); n != x.artifact {
+			t.Errorf("%s: artifact %q, want %q", id, n, x.artifact)
+		}
+		if p, _ := gha.Get(ups[0].With, "path"); p != "dist/release" {
+			t.Errorf("%s: artifact path %q, want dist/release", id, p)
+		}
+		if f, _ := gha.Get(ups[0].With, "if-no-files-found"); f != "error" {
+			t.Errorf("%s: if-no-files-found %q, want error", id, f)
+		}
+	}
+	// The release job takes the parts of this run only.
+	var download *gha.Step
+	rel := job(t, w, "release")
+	for i, s := range rel.Steps {
+		if s.Uses == DownloadArtifact {
+			download = &rel.Steps[i]
+		}
+	}
+	if download == nil {
+		t.Fatal("release: no download of the parts")
+	}
+	for k, v := range map[string]string{"pattern": "oec-release-*", "path": "dist/release", "merge-multiple": "true"} {
+		if got, _ := gha.Get(download.With, k); got != v {
+			t.Errorf("release: download %s %q, want %q", k, got, v)
+		}
+	}
+	if _, ok := gha.Get(download.With, "run-id"); ok {
+		t.Error("release: parts of another run")
+	}
+
+	// release.sh: the parts, the checks of a tag build, reproducible
+	// archives, the checksums; it builds with the existing scripts and
+	// publishes nothing.
+	for _, s := range []string{"oec-v$version", "SOURCE_DATE_EPOCH", "archive --format=tar.gz", "--mtime",
+		"/binaries.sh", "/ffi-lib.sh", "arduino/package.sh", "/sbom.sh", "cmd/schematest",
+		"for b in demos registry conformance", "/images/build.sh",
+		"./cmd/pack", "SHA256SUMS", "RELEASE-NOTES.md", "CHANGELOG.md", "release/$schema_version.json"} {
+		if !strings.Contains(script, s) {
+			t.Errorf("release.sh lacks %s", s)
+		}
+	}
+	if regexp.MustCompile(`(?m)^[^#]*\b(push|login|publish|upload)\b`).MatchString(script) {
+		t.Error("release.sh publishes (Q-011)")
+	}
+	if !regexp.MustCompile(`(?m)^## ` + regexp.QuoteMeta(releaseVersion(t)) + `\b`).MatchString(read(t, filepath.Join(oec, "CHANGELOG.md"))) {
+		t.Error("oec/CHANGELOG.md has no section for oec/VERSION")
 	}
 }

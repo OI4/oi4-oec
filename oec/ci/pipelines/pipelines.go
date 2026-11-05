@@ -15,6 +15,8 @@ var (
 	SetupGo        = gha.Action{Repo: "actions/setup-go", SHA: "b7ad1dad31e06c5925ef5d2fc7ad053ef454303e", Tag: "v7.0.0"}
 	Cache          = gha.Action{Repo: "actions/cache", SHA: "55cc8345863c7cc4c66a329aec7e433d2d1c52a9", Tag: "v6.1.0"}
 	UploadArtifact = gha.Action{Repo: "actions/upload-artifact", SHA: "cf430e030ddbb5b0abf93d22962f4752f3646cd9", Tag: "v7.0.2"}
+	// release.yml (C-109): the release job takes the parts of its own run.
+	DownloadArtifact = gha.Action{Repo: "actions/download-artifact", SHA: "9000827ccba6bdab643e8b6fd33ac0654aef8333", Tag: "v8.0.2"}
 )
 
 // Runner is a GitHub-hosted runner image.
@@ -46,7 +48,7 @@ func Policy() gha.Policy {
 		runners[r.Label] = true
 	}
 	return gha.Policy{
-		Actions:    []gha.Action{Checkout, SetupGo, Cache, UploadArtifact},
+		Actions:    []gha.Action{Checkout, SetupGo, Cache, UploadArtifact, DownloadArtifact},
 		Runners:    runners,
 		Secrets:    map[string]gha.SecretUse{GuidelineSecret: {ActionRepo: Checkout.Repo, WithKey: "token"}},
 		MaxTimeout: 240,
@@ -55,7 +57,7 @@ func Policy() gha.Policy {
 
 // Workflows returns every workflow of the repository.
 func Workflows() []gha.Workflow {
-	return []gha.Workflow{Gate(), Conformance(), SDK(), Micro(), Images(), SupplyChain()}
+	return []gha.Workflow{Gate(), Conformance(), SDK(), Micro(), Images(), SupplyChain(), Release()}
 }
 
 func header(lines ...string) []string {
@@ -551,4 +553,143 @@ func SupplyChain() gha.Workflow {
 		"as a workflow artifact (no release, Q-011), and the vulnerability check of",
 		"the dependencies: govulncheck, cargo deny check advisories, npm audit.",
 	), sbom, audit)
+}
+
+// releaseGo sets up the Go of modFile without the module cache of
+// actions/setup-go: a release job uses no cache (ADR-0033 §5).
+func releaseGo(modFile string) gha.Step {
+	return gha.Step{Name: "Set up Go (no cache)", Uses: SetupGo, With: []gha.KV{
+		{Key: "go-version-file", Value: modFile},
+		{Key: "cache", Value: "false"},
+	}}
+}
+
+func uploadPart(name string) gha.Step {
+	return gha.Step{
+		Name: "Upload the part (workflow artifact of this run)",
+		Uses: UploadArtifact,
+		With: []gha.KV{
+			{Key: "name", Value: name},
+			{Key: "path", Value: "dist/release"},
+			{Key: "if-no-files-found", Value: "error"},
+			{Key: "retention-days", Value: "7"},
+		},
+	}
+}
+
+// Release is the release workflow (ADR-0033, C-109): on a tag oec-v<version>
+// or by hand, it builds every deliverable of the release train from one
+// commit with oec/ci/release.sh – the prebuilt C ABI library for each
+// target of the SDK matrix, the source archive, D7/D8 for six platforms,
+// the micro SDK as an Arduino library, the schema bundle, the SBOMs, the
+// images as OCI archives with their D8 reports – and assembles them with
+// SHA256SUMS and the release notes into one workflow artifact. No caches.
+// Nothing is published: no GitHub Release, no registry, no package index
+// (Q-011, C-104 D-2); the weekly schedule of supply-chain.yml comes with the
+// first release (C-108 D-3 (a)).
+func Release() gha.Workflow {
+	entry := func(os, target string) gha.Entry {
+		return gha.Entry{{Key: "os", Value: os}, {Key: "target", Value: target}}
+	}
+	const armv7 = "matrix.target == 'armv7-unknown-linux-gnueabihf'"
+	ffi := gha.Job{
+		ID:     "ffi",
+		Name:   "liboec_ffi (${{ matrix.target }})",
+		RunsOn: "${{ matrix.os }}",
+		// The targets of release.sh (ffi_targets), each on its runner of sdk.yml.
+		Matrix: []gha.Entry{
+			entry("ubuntu-24.04", "x86_64-unknown-linux-gnu"),
+			entry("ubuntu-24.04-arm", "aarch64-unknown-linux-gnu"),
+			entry("ubuntu-24.04", "armv7-unknown-linux-gnueabihf"),
+			entry("macos-15-intel", "x86_64-apple-darwin"),
+			entry("macos-15", "aarch64-apple-darwin"),
+			entry("windows-2025", "x86_64-pc-windows-msvc"),
+			entry("windows-11-arm", "aarch64-pc-windows-msvc"),
+			entry("windows-2025", "x86_64-pc-windows-gnu"),
+		},
+		TimeoutMinutes: 90,
+		Env: []gha.KV{
+			{Key: "OEC_CI_TARGET", Value: "${{ matrix.target }}"},
+			{Key: "CARGO_INCREMENTAL", Value: "0"},
+		},
+		Steps: []gha.Step{
+			checkout(),
+			run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
+			{Name: "Install the system packages (Linux)", If: "!(" + armv7 + ")", Run: "oec/ci/packages.sh"},
+			{Name: "Install the system packages and the ARMv7 cross toolchain", If: armv7, Run: "oec/ci/packages.sh --armv7"},
+			run("Install the Rust toolchain of oec/ci/versions.sh", "oec/ci/setup-tools.sh --toolchain"),
+			run("Build the library (oec/ci/release.sh ffi)", "oec/ci/release.sh dist/release ffi"),
+			uploadPart("oec-release-ffi-${{ matrix.target }}"),
+		},
+	}
+	dist := gha.Job{
+		ID:             "dist",
+		Name:           "Source, D7/D8, micro SDK, schema bundle, SBOMs",
+		RunsOn:         "ubuntu-24.04",
+		TimeoutMinutes: 60,
+		Steps: []gha.Step{
+			checkout(),
+			releaseGo("oec/ci/go.mod"),
+			run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
+			run("Install the Rust toolchain of oec/ci/versions.sh", "oec/ci/setup-tools.sh --toolchain"),
+			run("Fetch the crates of every Cargo.lock", "oec/ci/fetch.sh"),
+			run("Build the parts (oec/ci/release.sh)", "oec/ci/release.sh dist/release source binaries micro schema sbom"),
+			uploadPart("oec-release-dist"),
+		},
+	}
+	images := gha.Job{
+		ID:             "images",
+		Name:           "Images as OCI archives, judged by D8",
+		RunsOn:         "ubuntu-24.04",
+		TimeoutMinutes: 120,
+		Steps: []gha.Step{
+			checkout(),
+			releaseGo("oec/conformance/go.mod"),
+			run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
+			run("Build the images (oec/ci/release.sh images)", "oec/ci/release.sh dist/release images"),
+			uploadPart("oec-release-images"),
+		},
+	}
+	release := gha.Job{
+		ID:             "release",
+		Name:           "Assemble the release (SHA256SUMS, release notes)",
+		Needs:          []string{"ffi", "dist", "images"},
+		RunsOn:         "ubuntu-24.04",
+		TimeoutMinutes: 30,
+		Steps: []gha.Step{
+			checkout(),
+			releaseGo("oec/ci/go.mod"),
+			{
+				Name: "Download the parts of this run",
+				Uses: DownloadArtifact,
+				With: []gha.KV{
+					{Key: "pattern", Value: "oec-release-*"},
+					{Key: "path", Value: "dist/release"},
+					{Key: "merge-multiple", Value: "true"},
+				},
+			},
+			run("Assemble (oec/ci/release.sh assemble)", "oec/ci/release.sh dist/release assemble"),
+			{
+				Name: "Upload the release (workflow artifact, not a release)",
+				Uses: UploadArtifact,
+				With: []gha.KV{
+					{Key: "name", Value: "oec-release"},
+					{Key: "path", Value: "dist/release"},
+					{Key: "if-no-files-found", Value: "error"},
+					{Key: "retention-days", Value: "30"},
+				},
+			},
+		},
+	}
+	w := base("release.yml", "release", header(
+		"The release of the OEC deliverables (ADR-0033): on a tag oec-v<version>",
+		"or by hand, every deliverable is built from one commit with",
+		"oec/ci/release.sh and assembled with SHA256SUMS and the release notes",
+		"into one workflow artifact. Nothing is published (no GitHub Release, no",
+		"registry, no package index; Q-011).",
+	), ffi, dist, images, release)
+	w.PushBranches = nil
+	w.PushTags = []string{"oec-v*"}
+	w.PullRequest = false
+	return w
 }
