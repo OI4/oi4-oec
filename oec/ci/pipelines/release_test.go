@@ -259,6 +259,11 @@ func TestRelease(t *testing.T) {
 	if regexp.MustCompile(`(?m)^[^#]*\b(push|login|publish|upload)\b`).MatchString(script) {
 		t.Error("release.sh publishes (Q-011)")
 	}
+	// D7/D8 without VCS stamping: an unrelated change in the working tree
+	// (vcs.modified) would change their bytes; the version names the commit.
+	if !strings.Contains(read(t, filepath.Join(oec, "ci/binaries.sh")), "-buildvcs=false") {
+		t.Error("binaries.sh: D7/D8 depend on the state of the working tree (-buildvcs=false)")
+	}
 	if !regexp.MustCompile(`(?m)^## ` + regexp.QuoteMeta(releaseVersion(t)) + `\b`).MatchString(read(t, filepath.Join(oec, "CHANGELOG.md"))) {
 		t.Error("oec/CHANGELOG.md has no section for oec/VERSION")
 	}

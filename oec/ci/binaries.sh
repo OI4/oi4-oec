@@ -1,8 +1,9 @@
 #!/bin/sh
 # Cross-builds D7 oec-check and D8 oec-infra for windows/linux/darwin x
 # amd64/arm64 into <dir> with SHA256SUMS (ADR-0032 §6): CGO_ENABLED=0,
-# -trimpath and an empty build id, so the same commit and Go toolchain give
-# the same bytes. VERSION is the version the tools report (`oec-check
+# -trimpath, no VCS stamping (the state of the working tree would change the
+# bytes) and an empty build id, so the same commit and Go toolchain give the
+# same bytes. VERSION is the version the tools report (`oec-check
 # version`, the reports; -X main.version), default dev; release.sh passes the
 # release version (ADR-0033). conformance.yml uploads them as a workflow
 # artifact; no release (Q-011).
@@ -19,7 +20,7 @@ for os in linux darwin windows; do
 		ext=""
 		if [ "$os" = windows ]; then ext=".exe"; fi
 		for cmd in oec-check oec-infra; do
-			GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags="-buildid= -X main.version=$version" -o "$out/$cmd-$os-$arch$ext" "./cmd/$cmd"
+			GOOS="$os" GOARCH="$arch" go build -trimpath -buildvcs=false -ldflags="-buildid= -X main.version=$version" -o "$out/$cmd-$os-$arch$ext" "./cmd/$cmd"
 		done
 	done
 done
