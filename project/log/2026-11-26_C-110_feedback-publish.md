@@ -103,3 +103,15 @@ C-111 – P9 increment 8, the exit run (ROADMAP P9, ADR-0032 §10): push the wor
 - **Next free ids:** SF-118, A-624, ADR-0035, Q-037; C-111 starts again at R-1/D-1.
 - **Traps:** gate step 1 now needs the guideline history from `5f070bb` (a shallow guideline clone fails it); a new finding or re-baseline needs `attribution.tsv` and `spectool feedback` in the same cycle; `go install …@v` outside a module needs an explicit `GOTOOLCHAIN`; `publish.sh --publish` refuses anything but the tag build `oec-v<v>`.
 - **Environment:** no own container, image or volume left (the `ubuntu:24.04` image of `versions.sh` removed); foreign objects untouched.
+
+## Addendum 1 (2026-11-26) – PO answers D-1, D-2 (and R-1)
+
+The PO answered: "C-110 D-1: Die Gruppe hat Zugriff auf das GitHub-Repo, wir sind die Änderungen bereits durchgegangen und haben sie zusammen akzeptiert. Mit dem Release warten wir noch ein bisschen, bis alle auch ihr Okay gegeben haben. Ich sage dir dann Bescheid, sobald wir die Guideline releasen können."
+
+- **D-1 – handed over and accepted:** the work group has access to the guideline repository and went through the changes together with the PO; they are **accepted**. No pull request or file transfer is needed from the project's side; the package stays in `findings/feedback/` as the record and is checked in gate step 1. ROADMAP P9 exit criterion 8 ("the guideline feedback package is delivered") is met.
+- **R-1 – done:** the 7 `normative` commits were part of the joint review and are accepted with the rest; no reclassification.
+- **D-2 – the first release waits:** no release `0.1.0` until every member has given their okay; the PO says when the guideline can be released. Until then: no release commit, no tag `oec-v*`, nothing in `OI4/oec`, nothing on GHCR; the prerequisites (`OI4/oec`, environment `release`, `OEC_RELEASE_TOKEN`, `OEC_RELEASE_USER`) are only needed then. The publishing step stays inert; every `release.yml` run keeps its dry run. The weekly `supply-chain.yml` schedule and Dependabot stay tied to the first release (C-108 D-3 (a)).
+
+Consequences for C-111: the exit run runs **without a release** (proposal (b) of D-2); exit criterion 7 is checked by the hosted `release.yml` run with its dry run, the publication part stays open by the PO's decision. When the guideline is released, the released guideline commit may differ from `52d8470` (merge into `development`, a release tag): then a re-baseline on it comes first (`spectool rebaseline`; new guideline commits attributed in `attribution.tsv`, package regenerated), then the release commit and tag `oec-v0.1.0`.
+
+Applied: REVIEW.md/REVIEW_DE.md (answered), STATUS, ROADMAP P9.
