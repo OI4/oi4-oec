@@ -98,7 +98,8 @@ commit of the run with the default features of `oec-ffi` (aws-lc-rs):
 Link a C program with the header of `include/`, the library and the system
 libraries of `native-static-libs.txt` (`rustc --print native-static-libs`;
 for MinGW `ffi-lib.sh` adds `-l:libpthread.a`: aws-lc uses winpthreads
-there and `rustc` does not print it). For the Go SDK,
+there and `rustc` does not print it; for MSVC with clang add
+`-fms-runtime-lib=dll -Wl,-nodefaultlib:libcmt`, as `sdk-rust.sh`). For the Go SDK,
 copy the library to `oec/sdk/go/lib/<GOOS>_<GOARCH>/liboec_ffi.a` instead of
 running `oec-buildlib`. Static libraries only; the shared library is not
 built. `release.yml` packs the same libraries with the SBOM of `oec-ffi`

@@ -59,11 +59,15 @@ case "$host" in
 	# system libraries as -l<name>: the clang driver takes a bare
 	# kernel32.lib for an input file in the working directory, -lkernel32
 	# goes to the linker, which searches the SDK paths (C-105 addendum 2).
+	# The driver adds -defaultlib:libcmt even with -fms-runtime-lib=dll; the
+	# static CRT then shadows the DLL CRT the objects import (__imp_fopen …
+	# unresolved, C-111) – -nodefaultlib:libcmt keeps only msvcrt.
 	libs="$(printf '%s\n' "$native" | tr ' ' '\n' | sed -n 's/^\(.*\)\.[Ll][Ii][Bb]$/-l\1/p' | tr '\n' ' ')"
 	exe="$smoke/hello.exe"
 	# shellcheck disable=SC2086 # flag lists
 	"$smoke_cc" $cflags -D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll \
-		"$rust/oec-ffi/examples/hello.c" "$pkg/lib/oec_ffi.lib" $libs -o "$exe"
+		"$rust/oec-ffi/examples/hello.c" "$pkg/lib/oec_ffi.lib" $libs \
+		-Wl,-nodefaultlib:libcmt -o "$exe"
 	;;
 *)
 	exe="$smoke/hello"
