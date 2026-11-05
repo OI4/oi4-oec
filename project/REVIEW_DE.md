@@ -1,6 +1,6 @@
 # Review und Entscheidungen – Erklärung auf Deutsch
 
-_Stand: 23.11.2026, C-107 (P9 Inkrement 4): Der Workflow `images.yml` baut die Images der drei Demos, der Registry und neu der Compliance-Tools für amd64 und arm64 und prüft sie mit D8; dazu „Getting started“ als Skript, der Live-Lauf von D7/D8 und Podman unter Linux. Kein Image verlässt den Runner (Q-011). Lokal geprüft; nichts zu entscheiden (A-584 … A-594). Vorher, C-106 (P9 Inkrement 3): Der Workflow `micro.yml` für das Micro SDK ist fertig und lokal geprüft; nichts zu entscheiden (A-576 … A-583). Vorher, C-105 Nachtrag 3: Deine Antwort **D-2 (b)** ist eingetragen – die CI bleibt pausiert, C-106 … C-110 prüfe ich lokal, die Läufe auf GitHub kommen im Exit-Lauf C-111. Vorher, C-105 Nachtrag 2: Die Läufe auf GitHub nach dem Push sind ausgewertet, fünf Funde behoben (A-571 … A-575). `gate` und `conformance` sind überall grün, `sdk.yml` in allen Jobs bis auf den C-Kurztest unter Windows/MSVC. Dessen Korrektur ist gepusht, aber **GitHub hat beim letzten Push keinen einzigen Job gestartet – Abrechnung (Zahlung fehlgeschlagen oder Ausgabenlimit der Organisation `OI4`)**: **D-2**. Vorher, C-105 Nachtrag 1: Deine Antwort **D-1 (a)** ist eingetragen – gepusht, die ersten `sdk.yml`-Läufe werden ausgewertet. Vorher, C-105 (P9 Inkrement 2): Die SDK-Plattformmatrix `sdk.yml` ist gebaut und lokal geprüft – Rust-SDK und C-ABI auf sechs Plattformen inkl. Windows (MSVC), Go-SDK jetzt auch unter Windows (MinGW), ARMv7 per Cross-Build, fertige `liboec_ffi`-Bibliotheken als Download-Artefakte. **Nicht gepusht**, weil du nicht erreichbar warst – deshalb fehlt noch der Lauf auf GitHub: **D-1**. Vorher, C-104 Nachtrag 3: Auf dein Go habe ich die Korrekturen gepusht. Die Läufe auf GitHub fanden unter Linux noch drei Dinge (ein wackliger Test im Rust-SDK, die volle Festplatte des Runners, ein echter Fehler im Micro SDK). Alle behoben (A-557 … A-559); **der letzte Lauf ist in allen Jobs grün**. Offen ist nur noch: Bitte prüfe, ob das Token nur lesend ist (A-552). Vorher, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
+_Stand: 24.11.2026, C-108 (P9 Inkrement 5): Die Lieferkette – der neue Workflow `supply-chain.yml` erzeugt für jedes der elf Lieferobjekte eine SBOM, die Lizenztexte und einen Lizenzbericht und prüft alle Abhängigkeiten auf bekannte Schwachstellen (Go, Rust, npm). Die Funde in Go habe ich durch Updates behoben. Dazu gibt es `SECURITY.md` und einen Entwurf für den Umgang mit Schwachstellen (Vorarbeit für den CRA) – mit Platzhaltern für alles, was nach außen geht: **D-1 … D-3** (A-595 … A-601). Vorher, C-107 (P9 Inkrement 4): Der Workflow `images.yml` baut die Images der drei Demos, der Registry und neu der Compliance-Tools für amd64 und arm64 und prüft sie mit D8; dazu „Getting started“ als Skript, der Live-Lauf von D7/D8 und Podman unter Linux. Kein Image verlässt den Runner (Q-011). Lokal geprüft; nichts zu entscheiden (A-584 … A-594). Vorher, C-106 (P9 Inkrement 3): Der Workflow `micro.yml` für das Micro SDK ist fertig und lokal geprüft; nichts zu entscheiden (A-576 … A-583). Vorher, C-105 Nachtrag 3: Deine Antwort **D-2 (b)** ist eingetragen – die CI bleibt pausiert, C-106 … C-110 prüfe ich lokal, die Läufe auf GitHub kommen im Exit-Lauf C-111. Vorher, C-105 Nachtrag 2: Die Läufe auf GitHub nach dem Push sind ausgewertet, fünf Funde behoben (A-571 … A-575). `gate` und `conformance` sind überall grün, `sdk.yml` in allen Jobs bis auf den C-Kurztest unter Windows/MSVC. Dessen Korrektur ist gepusht, aber **GitHub hat beim letzten Push keinen einzigen Job gestartet – Abrechnung (Zahlung fehlgeschlagen oder Ausgabenlimit der Organisation `OI4`)**: **D-2**. Vorher, C-105 Nachtrag 1: Deine Antwort **D-1 (a)** ist eingetragen – gepusht, die ersten `sdk.yml`-Läufe werden ausgewertet. Vorher, C-105 (P9 Inkrement 2): Die SDK-Plattformmatrix `sdk.yml` ist gebaut und lokal geprüft – Rust-SDK und C-ABI auf sechs Plattformen inkl. Windows (MSVC), Go-SDK jetzt auch unter Windows (MinGW), ARMv7 per Cross-Build, fertige `liboec_ffi`-Bibliotheken als Download-Artefakte. **Nicht gepusht**, weil du nicht erreichbar warst – deshalb fehlt noch der Lauf auf GitHub: **D-1**. Vorher, C-104 Nachtrag 3: Auf dein Go habe ich die Korrekturen gepusht. Die Läufe auf GitHub fanden unter Linux noch drei Dinge (ein wackliger Test im Rust-SDK, die volle Festplatte des Runners, ein echter Fehler im Micro SDK). Alle behoben (A-557 … A-559); **der letzte Lauf ist in allen Jobs grün**. Offen ist nur noch: Bitte prüfe, ob das Token nur lesend ist (A-552). Vorher, C-104 Nachtrag 2: Die CI ist eingeschaltet – Secret aus `.env` angelegt (auf deine Anweisung), beide Repos gepusht. Erste Läufe: macOS grün; Fehler unter Linux und Windows lokal behoben (A-552 … A-556). Bitte prüfen: ist das Token nur lesend? Und: Darf ich die Korrekturen pushen? Vorher, C-104 Nachtrag 1: Deine Antworten sind eingetragen – **D-1 (a)** CI jetzt einschalten (zuerst dein Secret `OEC_GUIDELINE_TOKEN`, dann die Pushes), **D-2** Vorschlag angenommen (Kanäle vor C-109), **D-3 (a)** Repo `OI4/oec` beim ersten Release. Nichts zu entscheiden; das Secret legst du an._
 
 Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch und in Alltagssprache. Sie ist eine Lesehilfe auf Wunsch des PO (Ausnahme von der Regel „Projektartefakte auf Englisch“). **Maßgeblich ist `REVIEW.md`**; dort stehen auch die Checkboxen. Die Nummern (D-1, R-1 …) sind in beiden Dateien gleich, du kannst also z. B. im Chat antworten: „D-1 ja, R-1 und R-2 akzeptiert“. Punkte mit A-x sind nur zur Info.
 
@@ -24,7 +24,59 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 ## Aktuell offen
 
-Nichts zu entscheiden.
+### Zu entscheiden: C-108 – Umgang mit Schwachstellen (D-1 … D-3)
+
+Für den CRA braucht jedes veröffentlichte Produkt einen Meldeweg für Schwachstellen, feste Fristen und einen Support-Zeitraum. Das sind Zusagen nach außen, also deine Entscheidung (Q-011). Ich habe zwei Entwürfe geschrieben: [`oec/SECURITY.md`](../oec/SECURITY.md) (die Seite, die GitHub Meldenden zeigt) und [`research/vulnerability-handling.md`](research/vulnerability-handling.md) (der Ablauf, abgeglichen mit CRA Anhang I Teil II). Veröffentlicht ist nichts; wo du noch nichts festgelegt hast, steht `[PO: …]`. Jede Frage kannst du auch mit „(c) später“ beantworten. Dann bleibt sie bis zur CRA-Prüfung vor dem ersten Release offen.
+
+- **D-1 – Meldeweg und Kontakt:** Wo melden Sicherheitsforscher eine Schwachstelle, und wer kümmert sich darum?
+  - (a) **Vorschlag:** die vertrauliche Meldefunktion von GitHub („Private vulnerability reporting“) im Release-Repo `OI4/oec`. Jede Meldung wird dort ein privater Entwurf, und die CVE-Nummer gibt es über GitHub. **Dazu** ein Sicherheits-Postfach der OI4 Alliance für alle ohne GitHub-Konto. Mindestens zwei Personen sollten sich kümmern; die Namen bzw. die Rolle und die Adresse kommen von dir.
+  - (b) nur die GitHub-Funktion;
+  - (c) später.
+- **D-2 – Fristen und Support-Zeitraum:**
+  - Vorschlag für die Fristen: Eingang bestätigen in 3 Arbeitstagen, bewerten in 10 Arbeitstagen.
+  - Behebung nach Schwere: kritisch 14 Tage, hoch 30 Tage, mittel 90 Tage, niedrig mit dem nächsten Release.
+  - Veröffentlichung zusammen mit der Korrektur, spätestens 90 Tage nach der Meldung.
+  - Bei aktiv ausgenutzten Lücken gelten die Meldepflichten des CRA (24 h / 72 h / 14 Tage).
+  - Support: 5 Jahre ab dem ersten Release einer Versionslinie (das Minimum des CRA); die Demos ohne Support-Zeitraum.
+
+  (a) **Vorschlag:** so übernehmen; (b) mit Änderungen; (c) später.
+- **D-3 – Regelmäßige Prüfung nach dem ersten Release:** Neue Schwachstellen werden auch bekannt, ohne dass wir etwas ändern.
+  - (a) **Vorschlag:** `supply-chain.yml` zusätzlich einmal pro Woche laufen lassen und die Dependabot-Meldungen von GitHub einschalten. Beides kostet CI-Minuten bzw. erzeugt Benachrichtigungen.
+  - (b) nur der wöchentliche Lauf;
+  - (c) nein, nur bei Push und Pull Request.
+
+Antwort z. B.: „D-1 (a), Kontakt: …; D-2 (a); D-3 (a)“. Weiter offen aus C-104 (A-552): Bitte prüfe, ob das Token `OEC_GUIDELINE_TOKEN` nur lesend ist.
+
+### Zur Info: C-108 – Lieferkette (A-595 … A-601)
+
+Alles lokal geprüft; die Läufe auf GitHub kommen mit dem Exit-Lauf C-111 (D-2 (b)). D7/D8, SDKs, Demos und Registry verhalten sich unverändert; keine neue Abhängigkeit, nur zwei Updates.
+
+- **SBOM-Werkzeug (A-595):** `oec-sbom` konnte bisher nur SBOMs für Images erzeugen. Jetzt kann es das auch für Bibliotheken und Programme ohne Image. Neu ist außerdem ein Lizenzbericht als Markdown. Die Images und ihre SBOMs bleiben unverändert.
+- **SBOM für jedes Lieferobjekt (A-596):** Das Skript `oec/ci/sbom.sh` erzeugt für jedes der elf Lieferobjekte drei Dinge: eine SBOM im Format SPDX 2.3 (wie in den Images), alle Lizenztexte und den Lizenzbericht `LICENSES.md`. Die elf sind: Rust-SDK, C-ABI, Go-SDK, Micro SDK, D7, D8, die drei Demos, die Registry (inkl. der npm-Pakete der Web UI) und das Schema.
+  - Es gibt eine SBOM pro Lieferobjekt, nicht eine pro Plattform. Sie enthält alles, was auf irgendeiner Plattform hineinkommt.
+  - Micro SDK und Schema haben keine fremden Bestandteile.
+  - Derselbe Commit ergibt dieselben Bytes.
+  - Die SBOMs gibt es nur als Workflow-Artefakt (14 Tage); mit C-109 kommen sie in die Release-Artefakte. Committet werden sie nicht.
+- **Schwachstellen beim ersten Scan (A-597):** Gefunden hat nur `govulncheck` etwas, und zwar nur in Code, den wir gar nicht aufrufen. Trotzdem habe ich alles aktualisiert:
+  - `x/net` in D7/D8;
+  - `x/text` in einem Schema-Werkzeug;
+  - Go selbst auf 1.27.3 in allen Modulen.
+
+  Rust (`cargo deny`) und npm (Web UI der Registry) waren sauber. Eine Ausnahme war nicht nötig.
+- **Wie geprüft wird (A-598):** Das Skript `oec/ci/audit.sh` führt alle Prüfungen aus und schlägt am Ende fehl, wenn eine davon etwas findet. `govulncheck` ist als Werkzeug fest auf eine Version gepinnt (wie actionlint) und keine Abhängigkeit. Es meldet nur Lücken in Code, der wirklich aufgerufen wird, als Fehler. Die Prüfungen brauchen Netz (aktuelle Datenbanken) und laufen deshalb nie im Gate.
+- **Der Workflow `supply-chain.yml` (A-599):** zwei Jobs, `sbom` und `audit`. Sie laufen bei jedem Push und Pull Request oder von Hand; die Ergebnisse sind Artefakte. Einen Zeitplan gibt es noch nicht, siehe D-3. Gate-Schritt 11 meldet jetzt 6 Workflows.
+- **`SECURITY.md` und der Entwurf (A-600):** wie oben unter D-1 … D-3 beschrieben. Die Community-Startseite hat einen kurzen Absatz zu SBOMs und einen Link auf `SECURITY.md` bekommen.
+- **Unterwegs gefunden und behoben (A-601):**
+  - ein Fehler in `sbom.sh` (beide Rust-Abhängigkeitsbäume landeten in derselben Datei), schon vor dem Commit;
+  - zwei Hinweise von shellcheck;
+  - zwei Go-Module ohne festgelegte Go-Version, die deshalb im Container mit einem älteren Go geprüft wurden.
+
+  Im frischen Ubuntu-Container kam dasselbe heraus wie auf dem Mac.
+- **Bewusst nicht gemacht:**
+  - ein Schwachstellen-Scan der Betriebssystem-Pakete in den Images: Dafür bräuchte es ein weiteres Werkzeug (Trivy/Grype) mit eigener Datenbank; das Debian-Basisimage ist per Digest gepinnt.
+  - die npm-Pakete der Doku-Seite, die zu deinem Guideline-Repo gehört.
+- **Erst auf GitHub prüfbar (für C-111):** der Lauf auf amd64 und das npm des Runners.
+- **Als Nächstes (C-109):** Versionierung und `release.yml`. Alle Lieferobjekte aus einem Commit, mit Prüfsummen, SBOMs und Release-Notes, nur als Artefakte. Veröffentlicht wird nichts.
 
 ### Zur Info: C-107 – Images und Einsteiger-Läufe (A-584 … A-594)
 
