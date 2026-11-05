@@ -8,7 +8,8 @@
 #      registry with --env-file generated/demos.env and --wait;
 #   2. the Web UIs of the logger (8781), weather (8782) and config (8783)
 #      service and of the registry (https 5798, development CA) answer;
-#   3. the registry lists the three demos and itself, all online;
+#   3. the registry lists the three demos and the three stations of the
+#      weather service, all available (not itself: it lists the others);
 #   4. the story step: the config service sets the stations of the weather
 #      service from 3 to 4 (POST /api/set, Status good) and the registry
 #      lists station 4.
@@ -97,9 +98,10 @@ listed() {
 		| ($ARGS.positional - $s) == []' "$@"
 }
 
-echo "== the registry lists the three demos and itself"
-poll "registry: logger, weather, config and registry available" \
-	listed "$OEC_LOGGER_NAME" "$OEC_WEATHER_NAME" "$OEC_CONFIG_NAME" "$OEC_REGISTRY_NAME" ||
+echo "== the registry lists the three demos and the stations"
+poll "registry: logger, weather, config and stations 1 … 3 available" \
+	listed "$OEC_LOGGER_NAME" "$OEC_WEATHER_NAME" "$OEC_CONFIG_NAME" \
+	"$OEC_WEATHER_NAME-station-1" "$OEC_WEATHER_NAME-station-2" "$OEC_WEATHER_NAME-station-3" ||
 	{ assets | jq -r '.assets[] | "  \(.availability) \(.il)"' >&2; exit 1; }
 assets | jq -r '.assets[] | "  \(.availability) \(.kind) \(.il)"'
 
