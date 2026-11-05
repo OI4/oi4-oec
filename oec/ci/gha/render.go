@@ -75,12 +75,15 @@ func Render(w Workflow) ([]byte, error) {
 
 func (w Workflow) node() mapping {
 	var on mapping
+	var push mapping
 	if len(w.PushBranches) > 0 {
-		branches := seq{}
-		for _, br := range w.PushBranches {
-			branches = append(branches, str(br))
-		}
-		on = append(on, pair{"push", mapping{{"branches", branches}}})
+		push = append(push, pair{"branches", strs(w.PushBranches)})
+	}
+	if len(w.PushTags) > 0 {
+		push = append(push, pair{"tags", strs(w.PushTags)})
+	}
+	if len(push) > 0 {
+		on = append(on, pair{"push", push})
 	}
 	if w.PullRequest {
 		on = append(on, pair{"pull_request", null{}})
@@ -108,12 +111,23 @@ func (w Workflow) node() mapping {
 	return append(m, pair{"jobs", jobs})
 }
 
-func (j Job) node() mapping {
-	m := mapping{
-		{"name", str(j.Name)},
-		{"runs-on", str(j.RunsOn)},
-		{"timeout-minutes", integer(j.TimeoutMinutes)},
+func strs(list []string) seq {
+	s := seq{}
+	for _, v := range list {
+		s = append(s, str(v))
 	}
+	return s
+}
+
+func (j Job) node() mapping {
+	m := mapping{{"name", str(j.Name)}}
+	if len(j.Needs) > 0 {
+		m = append(m, pair{"needs", strs(j.Needs)})
+	}
+	m = append(m,
+		pair{"runs-on", str(j.RunsOn)},
+		pair{"timeout-minutes", integer(j.TimeoutMinutes)},
+	)
 	if len(j.Matrix) > 0 {
 		include := seq{}
 		for _, e := range j.Matrix {

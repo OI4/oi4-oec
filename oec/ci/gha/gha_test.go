@@ -148,6 +148,45 @@ jobs:
 	}
 }
 
+// release is a workflow with a tag trigger and a job that needs another.
+func release() Workflow {
+	w := sample()
+	w.PushBranches, w.PullRequest = nil, false
+	w.PushTags = []string{"oec-v*"}
+	w.Jobs[0].Steps = w.Jobs[0].Steps[2:]
+	w.Jobs = append(w.Jobs, Job{
+		ID: "all", Name: "all", RunsOn: "r1", TimeoutMinutes: 10, Needs: []string{"build"},
+		Steps: []Step{{Name: "Run", Run: "c.sh"}},
+	})
+	return w
+}
+
+func TestRenderTagsNeeds(t *testing.T) {
+	got, err := Render(release())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"on:\n  push:\n    tags:\n      - oec-v*\n  workflow_dispatch:\npermissions:\n",
+		"  all:\n    name: all\n    needs:\n      - build\n    runs-on: r1\n    timeout-minutes: 10\n",
+	} {
+		if !strings.Contains(string(got), want) {
+			t.Errorf("Render lacks\n%s\ngot:\n%s", want, got)
+		}
+	}
+	if strings.Contains(string(got), "branches:") || strings.Contains(string(got), "pull_request") {
+		t.Errorf("Render of a tag workflow has a branch or pull request trigger:\n%s", got)
+	}
+	if errs := Check(release(), samplePolicy()); len(errs) > 0 {
+		t.Errorf("Check(release) = %v", errs)
+	}
+	tagsOnly := release()
+	tagsOnly.Dispatch = false
+	if errs := Check(tagsOnly, samplePolicy()); len(errs) > 0 {
+		t.Errorf("Check(tag trigger only) = %v", errs)
+	}
+}
+
 func TestRenderRejects(t *testing.T) {
 	for name, run := range map[string]string{
 		"leading space":   " a\nb",
@@ -203,6 +242,15 @@ func TestCheckRejects(t *testing.T) {
 		"step name":        {func(w *Workflow) { w.Jobs[0].Steps[2].Name = "" }, "no name"},
 		"no steps":         {func(w *Workflow) { w.Jobs[0].Steps = nil }, "no steps"},
 		"no jobs":          {func(w *Workflow) { w.Jobs = nil }, "no jobs"},
+		"tag pattern":      {func(w *Workflow) { w.PushTags = []string{"v* x"} }, "tag pattern"},
+		"needs unknown":    {func(w *Workflow) { w.Jobs[0].Needs = []string{"nope"} }, "needs nope"},
+		"needs itself":     {func(w *Workflow) { w.Jobs[0].Needs = []string{"build"} }, "needs build"},
+		"needs later job": {func(w *Workflow) {
+			w.Jobs = append(w.Jobs, Job{ID: "later", Name: "later", RunsOn: "r1", TimeoutMinutes: 1,
+				Steps: []Step{{Name: "Run", Run: "x"}}})
+			w.Jobs[0].Needs = []string{"later"}
+		}, "needs later"},
+		"needs expression": {func(w *Workflow) { w.Jobs[0].Steps[2].Env = []KV{{"X", "${{ needs.a.result }}"}} }, "expression uses needs"},
 	}
 	for name, c := range cases {
 		w := sample()

@@ -26,6 +26,7 @@ var (
 	shaRe    = regexp.MustCompile(`^[0-9a-f]{40}$`)
 	secretRe = regexp.MustCompile(`secrets\.([A-Za-z_][A-Za-z0-9_]*)`)
 	exprRe   = regexp.MustCompile(`\$\{\{(.*?)\}\}`)
+	tagRe    = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._/*-]*$`)
 )
 
 // untrusted are contexts an attacker controls in a pull request (script
@@ -46,8 +47,13 @@ func Check(w Workflow, p Policy) []error {
 	if len(w.Comment) == 0 {
 		bad("no header comment")
 	}
-	if len(w.PushBranches) == 0 && !w.PullRequest && !w.Dispatch {
+	if len(w.PushBranches) == 0 && len(w.PushTags) == 0 && !w.PullRequest && !w.Dispatch {
 		bad("no trigger")
+	}
+	for _, tag := range w.PushTags {
+		if !tagRe.MatchString(tag) {
+			bad("tag pattern %q must match %s", tag, tagRe)
+		}
 	}
 	if len(w.Permissions) != 1 || w.Permissions[0] != (KV{"contents", "read"}) {
 		bad("permissions must be exactly contents: read, got %v", w.Permissions)
@@ -82,6 +88,11 @@ func Check(w Workflow, p Policy) []error {
 		ids[j.ID] = true
 		if j.Name == "" {
 			bad("%s: no name", where)
+		}
+		for _, n := range j.Needs {
+			if !ids[n] || n == j.ID {
+				bad("%s: needs %s, which is not an earlier job", where, n)
+			}
 		}
 		checkExpr(where+" name", j.Name, bad)
 		if j.TimeoutMinutes < 1 || j.TimeoutMinutes > p.MaxTimeout {

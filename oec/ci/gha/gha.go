@@ -2,9 +2,10 @@
 // need them (ADR-0032 §3), renders them as YAML without a YAML library and
 // checks them against the CI policy of ADR-0032 §4 (Check).
 //
-// The model can only express what the policy allows: the triggers push,
-// pull_request and workflow_dispatch, workflow-level permissions, bash as
-// the only shell, and steps that either run a command or use an action.
+// The model can only express what the policy allows: the triggers push (of
+// branches or tags), pull_request and workflow_dispatch, workflow-level
+// permissions, bash as the only shell, jobs that need earlier jobs, and
+// steps that either run a command or use an action.
 package gha
 
 import "strings"
@@ -28,7 +29,8 @@ type Workflow struct {
 	Comment []string // header comment lines (without "# ")
 	Name    string
 
-	PushBranches []string // push trigger on these branches; empty: no push trigger
+	PushBranches []string // push trigger on these branches
+	PushTags     []string // push trigger on these tag patterns (release.yml, C-109)
 	PullRequest  bool     // pull_request trigger (never pull_request_target)
 	Dispatch     bool     // workflow_dispatch trigger
 
@@ -48,9 +50,10 @@ type Concurrency struct {
 type Job struct {
 	ID             string
 	Name           string
-	RunsOn         string  // a runner label or "${{ matrix.os }}"
-	Matrix         []Entry // strategy.matrix.include; empty: no matrix
-	FailFast       bool    // strategy.fail-fast (only with a matrix)
+	Needs          []string // ids of earlier jobs this job waits for
+	RunsOn         string   // a runner label or "${{ matrix.os }}"
+	Matrix         []Entry  // strategy.matrix.include; empty: no matrix
+	FailFast       bool     // strategy.fail-fast (only with a matrix)
 	TimeoutMinutes int
 	Env            []KV
 	Steps          []Step
