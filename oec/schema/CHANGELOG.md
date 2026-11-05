@@ -34,6 +34,7 @@ Work after a release uses a pre-release version (e.g. `2.1.0-dev`) and an `Unrel
 - Re-baseline on guideline `b955783` (C-071 review): SF-115 (MG 6.2.2: the broker certificate is valid for the broker address of the Message Bus storage (`Address` of `broker.json`; a host name as DNS name, an IP address as IP address of the Subject Alternative Name) and within its period of validity). No schema content change: the rule concerns the TLS certificate of the broker, not an OI4 message or `broker.json`; it is checked by D8 (T8-BUS-01). PATCH, because the re-baseline has no visible change.
 - Re-baseline on guideline `7427a4f` (C-072 review): SF-116 (RIG 5.1: the minimum RAM and non-volatile memory are the nominal sizes of the installed memory, 1 GB = 10^9 octets). No schema content change; `broker.json` and the payload schemas are not affected.
 - Re-baseline on guideline `52d8470` (C-074 review): SF-117 (RIG 4.1.3: the application supports both means of authentication and uses the means that the platform provides). No schema content change; `broker.json` and the payload schemas are not affected.
+- Re-baseline on guideline `c48bbd4` (C-112): editorial changes ordered by the PO (MG A5 authors, MG A6 history split into one page per revision, preface removed, Process Description hidden from the site). No normative text changed; the inventory loses the two informative preface sentences (1411 → 1409). No schema content change.
 
 ## 2.0.0
 
