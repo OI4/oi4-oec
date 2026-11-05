@@ -54,7 +54,9 @@ func Policy() gha.Policy {
 }
 
 // Workflows returns every workflow of the repository.
-func Workflows() []gha.Workflow { return []gha.Workflow{Gate(), Conformance(), SDK(), Micro()} }
+func Workflows() []gha.Workflow {
+	return []gha.Workflow{Gate(), Conformance(), SDK(), Micro(), Images()}
+}
 
 func header(lines ...string) []string {
 	return append([]string{
@@ -426,4 +428,48 @@ func Micro() gha.Workflow {
 		"(container pinned by digest), the Arduino library on Arduino-ESP32 3.3 and",
 		"4.0 (pinned arduino-cli). No artifacts.",
 	), host, idf, arduino)
+}
+
+// Images is the image workflow (ADR-0032 §6, C-107): on Linux amd64 and
+// arm64 each runner builds the images of the three demos, of the OEC
+// Registry and of the compliance tools for linux/amd64 and linux/arm64,
+// judges them with D8 image (and the applications with D8 run on the native
+// image), walks "Getting started" with the images, runs the live run of
+// D7/D8 with the registry (TestRunDev on Linux) and, on amd64, tries the
+// same with Podman. No image leaves the runner (Q-011): the artifact holds
+// the D8 reports and logs only.
+func Images() gha.Workflow {
+	images := gha.Job{
+		ID:             "images",
+		Name:           "Images, Getting started, live D7/D8 (${{ matrix.os }})",
+		RunsOn:         "${{ matrix.os }}",
+		Matrix:         matrix("ubuntu-24.04", "ubuntu-24.04-arm"),
+		TimeoutMinutes: 120,
+		Steps: []gha.Step{
+			checkout(),
+			setupGo("oec/conformance/go.mod", "oec/conformance/go.sum\noec/dev/go.mod\n"),
+			run("Free disk space (hosted Linux runners)", "oec/ci/disk.sh"),
+			run("Build the images, D8 image and run (oec/ci/images.sh)", "oec/ci/images.sh dist/images"),
+			run("Getting started with the images (oec/ci/getting-started.sh)", "oec/ci/getting-started.sh"),
+			run("Live D7/D8 with the registry (oec/ci/live-infra.sh)", "oec/ci/live-infra.sh"),
+			{Name: "Podman (oec/ci/podman.sh, amd64)", If: "matrix.os == 'ubuntu-24.04'", Run: "oec/ci/podman.sh dist/images"},
+			{
+				Name: "Upload the D8 reports and logs (no image)",
+				If:   "always()",
+				Uses: UploadArtifact,
+				With: []gha.KV{
+					{Key: "name", Value: "oec-images-reports-${{ matrix.os }}"},
+					{Key: "path", Value: "dist/images\n!dist/images/*.oci.tar\n"},
+					{Key: "if-no-files-found", Value: "warn"},
+					{Key: "retention-days", Value: "14"},
+				},
+			},
+		},
+	}
+	return base("images.yml", "images", header(
+		"The images of the demos, the OEC Registry and the compliance tools for",
+		"linux/amd64 and linux/arm64, judged by D8; Getting started with them, the",
+		"live run of D7/D8 with the registry and Podman. Nothing is pushed: the",
+		"artifact holds the D8 reports and logs only (Q-011).",
+	), images)
 }

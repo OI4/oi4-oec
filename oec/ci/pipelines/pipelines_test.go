@@ -179,11 +179,12 @@ func TestRunners(t *testing.T) {
 		"sdk/go":      {"linux/amd64", "linux/arm64", "darwin/arm64", "darwin/amd64", "windows/amd64"},
 		"sdk/armv7":   {"linux/amd64"},
 		"micro/host":  {"linux/amd64", "linux/arm64", "windows/amd64"},
+		"images":      {"linux/amd64", "linux/arm64"},
 	}
 	jobs := map[string]gha.Workflow{"gate": Gate(), "conformance": Conformance(),
-		"sdk/rust": SDK(), "sdk/go": SDK(), "sdk/armv7": SDK(), "micro/host": Micro()}
+		"sdk/rust": SDK(), "sdk/go": SDK(), "sdk/armv7": SDK(), "micro/host": Micro(), "images": Images()}
 	jobID := map[string]string{"gate": "gate", "conformance": "test",
-		"sdk/rust": "rust", "sdk/go": "go", "sdk/armv7": "armv7", "micro/host": "host"}
+		"sdk/rust": "rust", "sdk/go": "go", "sdk/armv7": "armv7", "micro/host": "host", "images": "images"}
 	for name, ps := range need {
 		got := platforms(jobs[name], jobID[name])
 		for _, p := range ps {
@@ -473,5 +474,80 @@ func TestMicro(t *testing.T) {
 	// The ESP-IDF version of the image is the one of ADR-0030 §8.
 	if !strings.Contains(read(t, filepath.Join(oec, "sdk/micro/README.md")), "ESP-IDF v6.1") {
 		t.Error("sdk/micro/README.md no longer names ESP-IDF v6.1 (the image of versions.sh)")
+	}
+}
+
+// TestImages: the image workflow of ADR-0032 §6 (C-107) – on Linux amd64
+// and arm64 the multi-arch images of the demos, the registry and the
+// compliance tools with D8 (images.sh), the newcomer run of "Getting
+// started" (getting-started.sh), the live run of D7/D8 with the registry
+// (live-infra.sh) and, on amd64, Podman (podman.sh); no image leaves the
+// runner (Q-011): only the D8 reports and logs are uploaded, never an OCI
+// archive, and nothing logs in to a registry or pushes.
+func TestImages(t *testing.T) {
+	w := Images()
+	if w.File != "images.yml" {
+		t.Errorf("images workflow file %s", w.File)
+	}
+	j := job(t, w, "images")
+	var oses []string
+	for _, os := range j.MatrixOS() {
+		if r := runner(t, os); r.OS != "linux" {
+			t.Errorf("images: runner %s is not Linux (no Linux containers elsewhere)", os)
+		}
+		oses = append(oses, os)
+	}
+	if strings.Join(oses, " ") != "ubuntu-24.04 ubuntu-24.04-arm" {
+		t.Errorf("images: runners %v, want ubuntu-24.04 and ubuntu-24.04-arm", oses)
+	}
+	cmds := strings.Join(gha.Workflow{Jobs: []gha.Job{j}}.Commands(), "\n")
+	want := "oec/ci/disk.sh\noec/ci/images.sh dist/images\noec/ci/getting-started.sh\noec/ci/live-infra.sh\noec/ci/podman.sh dist/images"
+	if cmds != want {
+		t.Errorf("images job commands:\n%s\nwant:\n%s", cmds, want)
+	}
+	for _, s := range j.Steps {
+		if s.Run == "oec/ci/podman.sh dist/images" && s.If != "matrix.os == 'ubuntu-24.04'" {
+			t.Errorf("podman step if %q, want the amd64 runner only", s.If)
+		}
+	}
+	ups := uploads(j)
+	if len(ups) != 1 {
+		t.Fatalf("images: %d upload steps, want 1 (the reports)", len(ups))
+	}
+	if ups[0].If != "always()" {
+		t.Errorf("reports upload if %q, want always()", ups[0].If)
+	}
+	if p, _ := gha.Get(ups[0].With, "path"); p != "dist/images\n!dist/images/*.oci.tar\n" {
+		t.Errorf("reports upload path %q: the reports only, no OCI archive", p)
+	}
+	if n, _ := gha.Get(ups[0].With, "name"); n != "oec-images-reports-${{ matrix.os }}" {
+		t.Errorf("reports artifact name %q", n)
+	}
+	for _, f := range []string{"ci/images.sh", "ci/getting-started.sh", "ci/live-infra.sh", "ci/podman.sh",
+		"demos/images/build.sh", "registry/images/build.sh", "conformance/images/build.sh"} {
+		s := read(t, filepath.Join(oec, f))
+		if regexp.MustCompile(`(?m)^[^#]*\b(docker|podman|buildah|skopeo|oras)\s+(push|login)\b`).MatchString(s) ||
+			regexp.MustCompile(`(?m)^[^#]*(push=true|--push\b|type=registry)`).MatchString(s) {
+			t.Errorf("%s pushes or logs in to a registry (Q-011)", f)
+		}
+		if regexp.MustCompile(`(?m)^[^#]*\bprune\b`).MatchString(s) {
+			t.Errorf("%s prunes", f)
+		}
+	}
+	imagesSh := read(t, filepath.Join(oec, "ci/images.sh"))
+	for _, s := range []string{"demos registry conformance", `rm -f "$out"/*.oci.tar`} {
+		if !strings.Contains(imagesSh, s) {
+			t.Errorf("images.sh lacks %q", s)
+		}
+	}
+	gs := read(t, filepath.Join(oec, "ci/getting-started.sh"))
+	for _, s := range []string{"go run ./pki", "--env-file generated/demos.env --profile demos --profile registry",
+		"up -d --wait", "down -v", "/api/set", "-station-4"} {
+		if !strings.Contains(gs, s) {
+			t.Errorf("getting-started.sh lacks %q", s)
+		}
+	}
+	if !strings.Contains(read(t, filepath.Join(oec, "ci/live-infra.sh")), `OEC_LIVE_REGISTRY=1 "$oec/conformance/live.sh"`) {
+		t.Error("live-infra.sh does not run live.sh with the registry")
 	}
 }
