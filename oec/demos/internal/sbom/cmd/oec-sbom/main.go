@@ -1,16 +1,19 @@
 // Command oec-sbom makes the SBOM (SPDX 2.3 JSON) and the license texts
-// of a demo or registry image for /opt/oi4/licenses (ADR-0028 §4, RIG 4.1.4,
-// SF-114). It runs in the build stage of the Dockerfiles:
+// of a demo, registry or tool image for /opt/oi4/licenses (ADR-0028 §4,
+// RIG 4.1.4, SF-114). It runs in the build stage of the Dockerfiles:
 //
 //	oec-sbom -name oec-logger -version 0.1.0 -license MIT \
-//	    -cargo cargo-tree.txt [-go go-version.txt] [-rust 1.89.0] \
+//	    -cargo cargo-tree.txt [-go go-version.txt [-golicenses map.json]] \
+//	    [-rust 1.89.0] \
 //	    [-npm ui/package-lock.json] \
 //	    -base /base -debian images/debian.json -texts images/licenses \
 //	    -out /licenses
 //
 // -cargo is the output of cargo tree --edges normal,no-proc-macro
 // --target <triple> -p <crate> --prefix none --format '{p}|{l}', -go the
-// output of go version -m <binary>, -npm the package-lock.json of a Web UI
+// output of go version -m <binary>, -golicenses the reviewed licenses of
+// its third-party modules (oec/conformance/images/go-licenses.json, the
+// tool image, C-107), -npm the package-lock.json of a Web UI
 // whose bundle is embedded in the binary (its non-dev packages, the
 // registry image, C-090), -base the file tree of the base image (dpkg
 // status, copyright files, os-release). The creation time is
@@ -41,6 +44,7 @@ func run(args []string) error {
 	license := fl.String("license", "MIT", "license of the application and of the local crates and Go modules")
 	cargo := fl.String("cargo", "", "cargo tree output (optional)")
 	gov := fl.String("go", "", "go version -m output (optional)")
+	goLicenses := fl.String("golicenses", "", "license map of third-party Go modules (optional, with -go)")
 	rust := fl.String("rust", "", "version of the Rust standard library linked in (optional)")
 	npm := fl.String("npm", "", "package-lock.json of an embedded Web UI bundle (optional)")
 	base := fl.String("base", "", "file tree of the base image (Debian)")
@@ -75,12 +79,22 @@ func run(args []string) error {
 		}
 		in.Components = append(in.Components, cs...)
 	}
+	var known map[string]string
+	if *goLicenses != "" {
+		data, err := os.ReadFile(*goLicenses)
+		if err != nil {
+			return err
+		}
+		if known, err = sbom.ParseGoLicenses(data); err != nil {
+			return err
+		}
+	}
 	if *gov != "" {
 		f, err := os.Open(*gov)
 		if err != nil {
 			return err
 		}
-		cs, err := sbom.Go(f, *license)
+		cs, err := sbom.GoKnown(f, *license, known)
 		f.Close()
 		if err != nil {
 			return err

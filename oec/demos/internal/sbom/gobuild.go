@@ -2,6 +2,7 @@ package sbom
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -14,6 +15,14 @@ import (
 // module is refused until its license is known (fail closed). The main
 // module is the application itself and is left out.
 func Go(r io.Reader, localLicense string) ([]Component, error) {
+	return GoKnown(r, localLicense, nil)
+}
+
+// GoKnown is Go with the reviewed licenses of third-party modules (C-107,
+// the tool image of oec/conformance): known maps "<module>@<version>" to an
+// SPDX license expression (ParseGoLicenses). A module of another version
+// or not in the map is refused as in Go.
+func GoKnown(r io.Reader, localLicense string, known map[string]string) ([]Component, error) {
 	var out []Component
 	scan := bufio.NewScanner(r)
 	first := true
@@ -23,7 +32,10 @@ func Go(r io.Reader, localLicense string) ([]Component, error) {
 			return nil
 		}
 		if dep.License == "" {
-			return fmt.Errorf("Go module %s %s: license unknown (only modules of this workspace are supported)", dep.Name, dep.Version)
+			dep.License = known[dep.Name+"@"+dep.Version]
+		}
+		if dep.License == "" {
+			return fmt.Errorf("Go module %s %s: license unknown (neither a module of this workspace nor in the Go license map)", dep.Name, dep.Version)
 		}
 		out = append(out, *dep)
 		dep = nil
@@ -73,4 +85,29 @@ func Go(r io.Reader, localLicense string) ([]Component, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ParseGoLicenses reads a Go license map (e.g. oec/conformance/images/
+// go-licenses.json): {"comment": "…", "modules": {"<module>@<version>":
+// "<SPDX expression>"}}. Every key names a version and every expression
+// parses (IDs); NOASSERTION and NONE are refused.
+func ParseGoLicenses(data []byte) (map[string]string, error) {
+	var doc struct {
+		Modules map[string]string `json:"modules"`
+	}
+	if err := json.Unmarshal(data, &doc); err != nil {
+		return nil, fmt.Errorf("Go license map: %v", err)
+	}
+	if len(doc.Modules) == 0 {
+		return nil, fmt.Errorf("Go license map: no modules")
+	}
+	for k, e := range doc.Modules {
+		if i := strings.LastIndex(k, "@v"); i <= 0 {
+			return nil, fmt.Errorf("Go license map: %q is not <module>@<version>", k)
+		}
+		if _, err := IDs(e); err != nil {
+			return nil, fmt.Errorf("Go license map: %s: %v", k, err)
+		}
+	}
+	return doc.Modules, nil
 }

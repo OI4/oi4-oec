@@ -1,0 +1,12 @@
+{
+  "comment": "SPDX license expressions of the third-party Go modules linked into oec-check and oec-infra, for the SBOM of the tool image oi4/oec-conformance (oec-sbom -golicenses, ADR-0025 amendment C-107). Keyed by module and version: a dependency update fails the test TestConformanceGoLicenses of demos/internal/sbom until its license is reviewed here. Read from each module's LICENSE file; eclipse/paho.mqtt.golang is dual EPL-2.0/EDL-1.0 and taken under EDL-1.0 = BSD-3-Clause (ADR-0025 §7).",
+  "modules": {
+    "github.com/eclipse/paho.mqtt.golang@v1.5.1": "BSD-3-Clause",
+    "github.com/gorilla/websocket@v1.5.3": "BSD-2-Clause",
+    "github.com/santhosh-tekuri/jsonschema/v6@v6.0.3": "Apache-2.0",
+    "go.yaml.in/yaml/v3@v3.0.5": "MIT AND Apache-2.0",
+    "golang.org/x/net@v0.61.0": "BSD-3-Clause",
+    "golang.org/x/sync@v0.24.0": "BSD-3-Clause",
+    "golang.org/x/text@v0.43.0": "BSD-3-Clause"
+  }
+}

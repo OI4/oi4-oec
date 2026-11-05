@@ -213,6 +213,95 @@ func TestGo(t *testing.T) {
 	}
 }
 
+// TestGoKnown: a module that is not of this workspace gets the license of
+// the reviewed map (C-107, the tool image of oec/conformance), keyed by
+// module path and version: another version is unknown again.
+func TestGoKnown(t *testing.T) {
+	known, err := ParseGoLicenses([]byte(`{"comment": "x", "modules": {
+		"golang.org/x/net@v0.61.0": "BSD-3-Clause",
+		"go.yaml.in/yaml/v3@v3.0.5": "MIT AND Apache-2.0",
+		"github.com/c/d@v1.1.0": "Apache-2.0"}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	in := "x: go1.27.3\n\tpath\tx\n\tmod\tx\t(devel)\t\n" +
+		"\tdep\tgithub.com/OI4/oec/spec\tv0.0.0\n\t=>\t../spec\t(devel)\t\n" +
+		"\tdep\tgolang.org/x/net\tv0.61.0\th1:abc\n" +
+		"\tdep\tgo.yaml.in/yaml/v3\tv3.0.5\th1:def\n" +
+		"\tdep\tgithub.com/a/b\tv1.0.0\n\t=>\tgithub.com/c/d\tv1.1.0\th1:ghi\n"
+	cs, err := GoKnown(strings.NewReader(in), "MIT", known)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, c := range cs {
+		got = append(got, c.Name+"@"+c.Version+" "+c.License+" "+c.Purl)
+	}
+	want := []string{
+		"stdlib@go1.27.3 BSD-3-Clause pkg:golang/stdlib@1.27.3",
+		"github.com/OI4/oec/spec@v0.0.0 MIT pkg:golang/github.com/OI4/oec/spec@v0.0.0",
+		"golang.org/x/net@v0.61.0 BSD-3-Clause pkg:golang/golang.org/x/net@v0.61.0",
+		"go.yaml.in/yaml/v3@v3.0.5 MIT AND Apache-2.0 pkg:golang/go.yaml.in/yaml/v3@v3.0.5",
+		"github.com/c/d@v1.1.0 Apache-2.0 pkg:golang/github.com/c/d@v1.1.0",
+	}
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("got\n%s", strings.Join(got, "\n"))
+	}
+	if _, err := GoKnown(strings.NewReader("x: go1.27.3\n\tdep\tgolang.org/x/net\tv0.62.0\th1:abc\n"), "MIT", known); err == nil {
+		t.Error("a version not in the map: accepted")
+	}
+	for name, data := range map[string]string{
+		"not JSON":       `{`,
+		"no modules":     `{"comment": "x"}`,
+		"no version":     `{"modules": {"golang.org/x/net": "BSD-3-Clause"}}`,
+		"bad expression": `{"modules": {"golang.org/x/net@v0.61.0": "MIT OR"}}`,
+		"NOASSERTION":    `{"modules": {"golang.org/x/net@v0.61.0": "NOASSERTION"}}`,
+	} {
+		if _, err := ParseGoLicenses([]byte(data)); err == nil {
+			t.Errorf("Go license map %s: accepted", name)
+		}
+	}
+}
+
+// TestConformanceGoLicenses: the map of the tool image covers exactly the
+// third-party modules of oec/conformance/go.mod (its go.sum versions), so a
+// dependency update fails here before the image build.
+func TestConformanceGoLicenses(t *testing.T) {
+	data, err := os.ReadFile("../../../conformance/images/go-licenses.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	known, err := ParseGoLicenses(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mod, err := os.ReadFile("../../../conformance/go.mod")
+	if err != nil {
+		t.Fatal(err)
+	}
+	need := map[string]bool{}
+	for _, line := range strings.Split(string(mod), "\n") {
+		f := strings.Fields(strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(line), "require")))
+		if len(f) >= 2 && strings.Contains(f[0], ".") && strings.HasPrefix(f[1], "v") && !strings.HasPrefix(f[0], "github.com/OI4/") &&
+			!strings.HasPrefix(f[1], "v0.0.0-0001") {
+			need[f[0]+"@"+f[1]] = true
+		}
+	}
+	if len(need) == 0 {
+		t.Fatal("no module requirements in conformance/go.mod")
+	}
+	for k := range need {
+		if _, ok := known[k]; !ok {
+			t.Errorf("go-licenses.json lacks %s (a module of conformance/go.mod)", k)
+		}
+	}
+	for k := range known {
+		if !need[k] {
+			t.Errorf("go-licenses.json lists %s, which conformance/go.mod does not require", k)
+		}
+	}
+}
+
 // Inputs the tool refuses (fail closed): the build stops instead of
 // writing an SBOM with a gap.
 func TestRefused(t *testing.T) {
