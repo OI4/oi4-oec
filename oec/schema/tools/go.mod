@@ -2,7 +2,7 @@ module github.com/OI4/oec/schema/tools
 
 go 1.26.0
 
-toolchain go1.27.2
+toolchain go1.27.3
 
 replace github.com/OI4/oec/schema => ../
 
@@ -12,4 +12,4 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5
 )
 
-require golang.org/x/text v0.14.0 // indirect
+require golang.org/x/text v0.43.0 // indirect
