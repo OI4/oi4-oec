@@ -36,7 +36,7 @@ The plan named two files `findings.md`/`other-changes.md`; the package became on
 ### 2. The publishing step (ADR-0034, A-619 … A-623)
 
 - **Model `oec/ci/gha`** (`a060475`, tests first, `TestRenderEnvironment` with ten rejected cases): job `if` and `environment`; the environment secret `OEC_RELEASE_TOKEN` only in the `env` of a run step of a job in the environment `release`; no environment with a `pull_request` trigger; `if:` conditions checked for untrusted contexts (ADR-0032 amendment C-110).
-- **`release.yml`** (`98f92b5`, `TestPublish` first, `TestRelease` adjusted): the job `release` runs `publish.sh dist/release` (dry run) before the upload; the new job `publish` (needs `release`, `if: github.ref_type == 'tag'`, environment `release`, `ubuntu-24.04`, 60 min) downloads `oec-release` and runs `publish.sh dist/release --publish` with the token and `vars.OEC_RELEASE_USER` in its `env`; `contents: read` unchanged; `cigen: 7 workflows current`.
+- **`release.yml`** (`98f92b5`, `TestPublish` first, `TestRelease` adjusted): the job `release` runs `publish.sh dist/release` (dry run) before the upload; the new job `publish` (needs `release`, `if: github.ref_type == 'tag'`, environment `release`, `ubuntu-24.04`, 60 min) downloads `oec-release` and runs `publish.sh dist/release --publish` with the token and `vars.OEC_RELEASE_USER` in its `env`; `contents: read` unchanged – unlike the plan ("`contents: write`, `packages: write` in this job"), the `GITHUB_TOKEN` of `OI4/oi4-oec` cannot write to the other repository `OI4/oec`, so the write right comes only from the environment secret (ADR-0034 Alternatives); `cigen: 7 workflows current`.
 - **`oec/ci/publish.sh`** (`98f92b5`): checks `SHA256SUMS` (exactly the files of the directory), version, commit and source; prepares the release repository from the source archive (sibling `replace` → `require …@v<v>`, `go.sum` by `go mod tidy` against the prepared repository via `insteadOf`, empty module cache, `GOPRIVATE`; tags `v<v>` and `<dir>/v<v>` for the twelve modules; the commit with the source commit's time and a fixed author); checks it with an empty cache (`go list -mod=readonly -deps -test`, `go mod verify` per module, `go install …/oec-check@v<v> …/oec-infra@v<v>` with the module's toolchain); checks the image indexes (linux/amd64 + linux/arm64) and their digests; writes the release body. `--publish` only on the tag build `oec-v<v>` of a release version: atomic push, `skopeo copy --all --preserve-digests` to `ghcr.io/oi4/oec-<image>:<v>`, `gh release create --verify-tag` – in this order; reruns keep tags with the same tree and fail on another tree or an existing release; the token only in an HTTP header from the environment, an authfile (mode 600) and `GH_TOKEN`.
 - `release.sh`: the "workflow artifact only" sentence of the notes stays for snapshots; a release says how to check the files (`TestRelease` still forbids push/login/publish/upload in the script).
 - **D7/D8 report the module version after `go install …@v<v>`** (`0b8ff91`, A-623; test first `TestToolVersion`, 17 cases): the first dry run showed `oec-check dev` from the release repository. `report.ToolVersion` takes the stamped version (`-X main.version`, unchanged), else the module version of the build info, else `dev`; pseudo-versions and `+dirty`/`+incompatible` count as none. `var version = "dev"` stays a constant initialiser so that `-X` keeps working (checked: `-X main.version=9.9.9` → `oec-check 9.9.9`). Additive; report format unchanged. Pages: `oec/conformance/README.md`, Community `compliance/index.md` (guideline `09f0914`); `oec/CHANGELOG.md` names the channels.
@@ -79,3 +79,27 @@ A-614 … A-623 in `REVIEW.md`: package place and format (A-614), range and docu
 ## Docker
 
 Own objects only (no `prune`): container `c110-publish-test` (`--rm`, three runs), the image `ubuntu:24.04@sha256:fe8156…` of `versions.sh` (absent before; removed at the end with `docker image rm`), the container of `linux.sh` (removed by the script). The busybox index was pulled by skopeo inside the container (no image in the engine). Foreign objects untouched.
+
+## Temporary files
+
+Deleted: `/tmp/c110-rel` (release directory of the dry runs), `/tmp/c110-pubrepo` (kept work repository, `OEC_PUBLISH_KEEP`), `/tmp/c110-ct` (container script and release copy), `/tmp/c110-doc` (README edit script), `/tmp/c110-commits.txt`, `/tmp/c110-noref.txt`, `/tmp/c110-sizes.txt`, `/tmp/c110-l.txt`, `/tmp/c110-draft.tsv`, `/tmp/c110-none.txt` (attribution drafts and counts), `/tmp/c110-linux.log`, `/tmp/gate.log`.
+
+## linux.sh
+
+`caffeinate -dims oec/ci/linux.sh` on the committed state (workspace `e43f0a1`, guideline `09f0914`, aarch64, without `OEC_CI_CA_CERTS`): **all checks passed** after ~33 min – incl. `feedback: 117 findings, 211 commits of 5f070bb..52d8470 attributed, 135 files current` on a fresh clone of the guideline branch (as the CI will check out) and `cigen: 7 workflows current`.
+
+## Gate
+
+`caffeinate -dims oec/check.sh` on `e43f0a1` (load 11.8 at the start): **all checks passed** in 18 min; step 1 incl. `spectool feedback -check`, step 10 `docscheck: 19 pages ok, 30 README links to them ok`, step 11 `cigen: 7 workflows current (conformance.yml, gate.yml, images.yml, micro.yml, release.yml, sdk.yml, supply-chain.yml)`.
+
+## Next
+
+C-111 – P9 increment 8, the exit run (ROADMAP P9, ADR-0032 §10): push the workspace (`main` fast-forward from `42f6784`) and the guideline branch `feature/spec-findings` (fast-forward from `76bf08c`) together; every workflow on the hosted runners, `release.yml` once by hand (snapshot, `publish.sh` dry run); red jobs fixed test first; Arduino-ESP32 4.0.0 final; the exit criteria 1 … 9 for the PO's decision. Depending on D-2 the first release `0.1.0`; depending on D-1 the pull request of the package.
+
+### Handover (G-3.10)
+
+- **State:** P9 increments 1 … 7 done locally; the CI paused (C-105 D-2 (b)); workspace local up to this log's commit, guideline local `09f0914`; nothing pushed.
+- **Open for the PO:** C-110 D-1, D-2, optional R-1 (REVIEW.md "Open for you"); the optional revocation of the old classic token (A-552).
+- **Next free ids:** SF-118, A-624, ADR-0035, Q-037; C-111 starts again at R-1/D-1.
+- **Traps:** gate step 1 now needs the guideline history from `5f070bb` (a shallow guideline clone fails it); a new finding or re-baseline needs `attribution.tsv` and `spectool feedback` in the same cycle; `go install …@v` outside a module needs an explicit `GOTOOLCHAIN`; `publish.sh --publish` refuses anything but the tag build `oec-v<v>`.
+- **Environment:** no own container, image or volume left (the `ubuntu:24.04` image of `versions.sh` removed); foreign objects untouched.
