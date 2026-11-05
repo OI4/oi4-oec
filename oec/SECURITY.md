@@ -2,9 +2,8 @@
 
 > **Draft (C-108).** The deliverables of OEC v2.0 are not published yet
 > (Q-011). The reporting channel, the response times and the support period
-> below are decided (C-108 D-1 … D-3); the security contact address is
-> still a **placeholder** – marked `[PO: …]`. This policy takes effect with
-> the first release.
+> below are decided (C-108 D-1 … D-3). This policy takes effect with the
+> first release.
 
 ## Supported versions
 
@@ -28,8 +27,8 @@ Report it privately:
 
 - with **"Report a vulnerability"** (GitHub private vulnerability reporting)
   in the Security tab of the release repository `OI4/oec`, or
-- if you have no GitHub account, by e-mail to the security mailbox of the
-  OI4 Alliance: `[PO: security contact address]`.
+- if you have no GitHub account, mail the issue to
+  [info@openindustry4.com](mailto:info@openindustry4.com).
 
 Please include:
 

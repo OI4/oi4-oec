@@ -99,11 +99,25 @@ artifacts.
 
 The workflows do nothing until the PO pushes the workspace to its GitHub
 repository. The gate job checks out `OI4/oi4-oec-documentation`; while that
-repository is private it needs a repository secret `OEC_GUIDELINE_TOKEN` (a
-fine-grained token with read access to its contents) – without it the
-checkout falls back to `github.token`, which works only for a public
-guideline repository. The branch `feature/spec-findings` must contain the
-pages the gate checks (docscheck, step 10).
+repository is private it needs a repository secret `OEC_GUIDELINE_TOKEN` –
+without it the checkout falls back to `github.token`, which works only for a
+public guideline repository. The branch `feature/spec-findings` must contain
+the pages the gate checks (docscheck, step 10).
+
+The token is used only as the `token` of that checkout (`gate.yml`,
+`persist-credentials: false`). Use a **fine-grained** personal access token,
+not a classic one (a classic token cannot be limited to one repository or to
+read access on private repositories):
+
+- resource owner `OI4`; repository access "Only select repositories" →
+  `OI4/oi4-oec-documentation`;
+- repository permission **Contents: Read-only** (Metadata: Read-only is
+  added automatically), nothing else; an expiry date;
+- stored as the Actions secret `OEC_GUIDELINE_TOKEN` of `OI4/oi4-oec`
+  (`gh secret set OEC_GUIDELINE_TOKEN -R OI4/oi4-oec`).
+
+If the organisation requires approval of fine-grained tokens, an owner of
+`OI4` approves it.
 
 ## Local checks
 

@@ -20,4 +20,4 @@ All deployable artifacts of the OEC v2.0 project live here (ADR-0012). Planning,
 
 License: MIT (see `LICENSE`, ADR-0004).
 
-Security: how to report a vulnerability, the scope and the SBOMs – [`SECURITY.md`](SECURITY.md) (draft, C-108, in force with the first release; the security contact address is still a placeholder).
+Security: how to report a vulnerability, the scope and the SBOMs – [`SECURITY.md`](SECURITY.md) (draft, C-108, in force with the first release).
