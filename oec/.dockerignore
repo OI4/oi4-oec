@@ -1,11 +1,15 @@
-# Build context of the demo images (oec/demos/*/Dockerfile, C-084) and of
-# the registry image (oec/registry/Dockerfile, C-090): only what the builds
-# need; no build output, no generated keys or storages, no node_modules.
+# Build context of the demo images (oec/demos/*/Dockerfile, C-084), of
+# the registry image (oec/registry/Dockerfile, C-090) and of the tool image
+# (oec/conformance/Dockerfile, C-107): only what the builds need; no build
+# output, no generated keys or storages, no node_modules.
 *
 !schema
 !sdk/rust
 !sdk/go
 !demos
+# the tool image: D7/D8 and the spec data they embed
+!conformance
+!spec
 # the registry: its crate, the API documents it embeds, the reviewed and
 # stamped Web UI bundle it embeds and the lockfile of that bundle (SBOM)
 !registry/Cargo.toml
@@ -16,6 +20,7 @@
 !registry/ui/dist
 !registry/ui/package-lock.json
 schema/tools
+spec/tools
 sdk/rust/spike
 sdk/go/lib
 **/target
