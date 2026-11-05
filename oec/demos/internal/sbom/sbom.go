@@ -121,11 +121,18 @@ type spdxDoc struct {
 	Relationships []spdxRelationship `json:"relationships"`
 }
 
-// Result is a made SBOM: the document and the license texts by id.
+// Result is a made SBOM: the document, the license texts by id and the
+// license report.
 type Result struct {
 	SPDX  []byte
 	Texts map[string][]byte // <id> → text of <id>.txt
+	// Report is the license report in Markdown (C-108): Write does not
+	// store it, oec-sbom -report does.
+	Report []byte
 }
+
+// kindNames are the kinds of components as the license report names them.
+var kindNames = map[Kind]string{KindApp: "application", KindCargo: "cargo", KindGo: "go", KindNpm: "npm", KindRust: "rust", KindDebian: "debian"}
 
 // Make builds the SBOM. It fails if a component has no name, version,
 // license or purl, if an expression is invalid or if the text of a
@@ -213,7 +220,39 @@ func Make(in Input) (*Result, error) {
 		return nil, err
 	}
 	res.SPDX = b.Bytes()
+	res.Report = report(in.App, comps)
 	return res, nil
+}
+
+// report is the license report of the components (checked by Make): the
+// licenses with the number of components that name them and their text
+// files, then the components in the order of the SBOM.
+func report(app Component, comps []Component) []byte {
+	count := map[string]int{}
+	for _, c := range comps {
+		ids, _ := IDs(c.License)
+		for _, id := range ids {
+			count[id]++
+		}
+	}
+	ids := make([]string, 0, len(count))
+	for id := range count {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	cell := func(s string) string { return strings.ReplaceAll(s, "|", "\\|") }
+	var b bytes.Buffer
+	fmt.Fprintf(&b, "# License report: %s %s\n\n", app.Name, app.Version)
+	fmt.Fprintf(&b, "The SBOM `%s` (SPDX 2.3) of %s %s lists %d components, the application included; the text of every license is next to it as `<id>.txt`. Made by oec-sbom (ADR-0028 §4, amendment C-108).\n\n", SPDXFile, app.Name, app.Version, len(comps))
+	b.WriteString("## Licenses\n\n| License | Components | Text |\n|---|---:|---|\n")
+	for _, id := range ids {
+		fmt.Fprintf(&b, "| %s | %d | `%s.txt` |\n", id, count[id], id)
+	}
+	b.WriteString("\n## Components\n\n| Kind | Name | Version | License | purl |\n|---|---|---|---|---|\n")
+	for _, c := range comps {
+		fmt.Fprintf(&b, "| %s | %s | %s | %s | `%s` |\n", kindNames[c.Kind], cell(c.Name), cell(c.Version), cell(c.License), c.Purl)
+	}
+	return b.Bytes()
 }
 
 // dedupe drops repeated components and the application itself (e.g. the

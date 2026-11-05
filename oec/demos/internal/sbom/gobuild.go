@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 )
 
@@ -110,4 +111,84 @@ func ParseGoLicenses(data []byte) (map[string]string, error) {
 		}
 	}
 	return doc.Modules, nil
+}
+
+// GoList reads the Go modules of a binary or library from the output of
+//
+//	go list -deps -f '{{with .Module}}{{.Path}}|{{.Version}}|{{with .Replace}}{{.Path}}|{{.Version}}{{end}}{{end}}' <packages>
+//
+// one line per package (C-108, the SBOMs of oec/ci/sbom.sh): a package of
+// the standard library gives an empty line, a package of the main module
+// "<path>||". It needs no build, so it also serves a library and a cgo
+// binary whose C library is not built. The main module is the application
+// and is left out; the licenses follow GoKnown: a module replaced by a
+// local directory gets localLicense, any other module the license of known
+// for exactly its version (fail closed).
+func GoList(r io.Reader, localLicense string, known map[string]string) ([]Component, error) {
+	var out []Component
+	seen := map[string]bool{}
+	main := ""
+	scan := bufio.NewScanner(r)
+	for n := 1; scan.Scan(); n++ {
+		line := strings.TrimSpace(scan.Text())
+		if line == "" {
+			continue
+		}
+		f := strings.Split(line, "|")
+		if len(f) != 3 && len(f) != 4 || f[0] == "" {
+			return nil, fmt.Errorf("go list line %d: not <module>|<version>|[<replacement>|<version>]: %q", n, line)
+		}
+		if f[1] == "" && f[2] == "" {
+			if main != "" && main != f[0] {
+				return nil, fmt.Errorf("go list line %d: a second main module %s (%s)", n, f[0], main)
+			}
+			main = f[0]
+			continue
+		}
+		if seen[line] {
+			continue
+		}
+		seen[line] = true
+		c := Component{Kind: KindGo, Name: f[0], Version: f[1]}
+		switch {
+		case f[1] == "":
+			return nil, fmt.Errorf("go list line %d: module %s without version", n, f[0])
+		case f[2] == "":
+		case strings.HasPrefix(f[2], ".") || strings.HasPrefix(f[2], "/"):
+			c.License = localLicense
+		case len(f) == 4 && f[3] != "":
+			c.Name, c.Version = f[2], f[3]
+		default:
+			return nil, fmt.Errorf("go list line %d: replacement %s of %s without version", n, f[2], f[0])
+		}
+		if c.License == "" {
+			c.License = known[c.Name+"@"+c.Version]
+		}
+		if c.License == "" {
+			return nil, fmt.Errorf("Go module %s %s: license unknown (neither a module of this workspace nor in the Go license map)", c.Name, c.Version)
+		}
+		c.Purl = "pkg:golang/" + c.Name + "@" + c.Version
+		out = append(out, c)
+	}
+	if err := scan.Err(); err != nil {
+		return nil, err
+	}
+	if main == "" {
+		return nil, fmt.Errorf("go list: no main module (empty output or not go list -deps)")
+	}
+	return out, nil
+}
+
+// goVersion is a released Go version as go env GOVERSION prints it.
+var goVersion = regexp.MustCompile(`^(go)?([0-9]+\.[0-9]+(\.[0-9]+)?)$`)
+
+// GoStd is the Go standard library linked into a Go binary (C-108), from
+// the version of its toolchain ("go1.27.3" or "1.27.3").
+func GoStd(version string) (Component, error) {
+	m := goVersion.FindStringSubmatch(version)
+	if m == nil {
+		return Component{}, fmt.Errorf("Go version %q: not a released version like go1.27.3", version)
+	}
+	return Component{Kind: KindGo, Name: "stdlib", Version: "go" + m[2], License: "BSD-3-Clause",
+		Purl: "pkg:golang/stdlib@" + m[2]}, nil
 }
