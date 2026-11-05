@@ -113,9 +113,12 @@ assets | jq -r '.assets[] | "  \(.availability) \(.kind) \(.il)"'
 echo "== story: the config service sets the stations of the weather service to 4"
 weather="oi4.org/OEC,20Weather/OEC-WEATHER/$OEC_WEATHER_NAME"
 apps() { curl -fsS http://127.0.0.1:8783/api/apps; }
-# the config service discovers the weather service and its Config DataSets
-poll "config service: the weather service discovered" \
-	sh -c 'curl -fsS http://127.0.0.1:8783/api/apps | jq -e --arg w "$1" "[.apps[] | select(.app == \$w) | .configs[]] | length > 0"' _ "$weather" ||
+# the config service discovers the weather service, its Config DataSet
+# "weather" and its SubscriptionList: only then is the Config writable (SF-107;
+# a Set before it is answered 409)
+poll "config service: the Config of the weather service writable" \
+	sh -c 'curl -fsS http://127.0.0.1:8783/api/apps | jq -e --arg w "$1" "[.apps[] | select(.app == \$w and .state == \"online\") | .configs[]
+		| select(.source == \$w and .context == \"weather\" and .writable)] | length > 0"' _ "$weather" ||
 	{ apps >&2; exit 1; }
 body="$(jq -cn --arg w "$weather" '{serviceType: "OTConnector", app: $w, source: $w, context: "weather",
 	values: {common: {stations: "4"}}}')"
