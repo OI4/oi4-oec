@@ -314,7 +314,8 @@ func TestGitLoad(t *testing.T) {
 	if len(h.ADRs) != 1 || h.ADRs[0].ID != "GL-ADR-012" || h.ADRs[0].Title != "ADR 012 – Remove x" {
 		t.Errorf("ADRs: %+v", h.ADRs)
 	}
-	if !strings.Contains(h.ShortStat, "files changed") {
+	// Only the documents count: a.md, the rename, the figure, p.md and intro.md, not src/site.js.
+	if !strings.HasPrefix(h.ShortStat, "5 files changed,") {
 		t.Errorf("shortstat %q", h.ShortStat)
 	}
 	if _, err := (Git{Dir: dir}).Load(c2, c1); err == nil {

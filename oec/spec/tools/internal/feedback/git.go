@@ -102,7 +102,7 @@ func (g Git) Load(base, target string) (*History, error) {
 		h.ADRs = append(h.ADRs, ADR{ID: "GL-ADR-" + m[1], Path: p, Title: title(text)})
 	}
 	sort.Slice(h.ADRs, func(i, j int) bool { return h.ADRs[i].ID < h.ADRs[j].ID })
-	out, err = g.run(append(append([]string{"diff", "--shortstat"}, diffFlags...), h.Base, h.Target, "--")...)
+	out, err = g.run(append(append(append([]string{"diff", "--shortstat"}, diffFlags...), h.Base, h.Target, "--"), Paths...)...)
 	if err != nil {
 		return nil, err
 	}
