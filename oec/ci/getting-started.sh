@@ -4,8 +4,9 @@
 # index.md, "See OEC at work") on a fresh Linux host and checks what a
 # newcomer sees, with curl and jq instead of a browser:
 #
-#   1. go run ./pki in oec/dev, then compose up of the profiles demos and
-#      registry with --env-file generated/demos.env and --wait;
+#   1. go run ./pki in oec/dev (only if generated/ is missing, as
+#      live.sh), then compose up of the profiles demos and registry with
+#      --env-file generated/demos.env and --wait;
 #   2. the Web UIs of the logger (8781), weather (8782) and config (8783)
 #      service and of the registry (https 5798, development CA) answer;
 #   3. the registry lists the three demos and the three stations of the
@@ -38,8 +39,12 @@ done
 timeout="${OEC_GS_TIMEOUT:-180}"
 
 cd "$dev"
-echo "== go run ./pki"
-GOTOOLCHAIN=${GOTOOLCHAIN:-auto} go run ./pki
+if [ -f generated/.oec-dev-pki ]; then
+	echo "== go run ./pki: generated/ exists, reused (as live.sh)"
+else
+	echo "== go run ./pki"
+	GOTOOLCHAIN=${GOTOOLCHAIN:-auto} go run ./pki
+fi
 # shellcheck disable=SC1091
 . ./generated/demos.env
 profiles="--env-file generated/demos.env --profile demos --profile registry"

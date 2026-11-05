@@ -541,7 +541,8 @@ func TestImages(t *testing.T) {
 		}
 	}
 	gs := read(t, filepath.Join(oec, "ci/getting-started.sh"))
-	for _, s := range []string{"go run ./pki", "--env-file generated/demos.env --profile demos --profile registry",
+	// generated/ is reused: podman.sh runs it a second time on the runner (C-107).
+	for _, s := range []string{"[ -f generated/.oec-dev-pki ]", "go run ./pki", "--env-file generated/demos.env --profile demos --profile registry",
 		"up -d --wait", "down -v", "/api/set", "-station-4"} {
 		if !strings.Contains(gs, s) {
 			t.Errorf("getting-started.sh lacks %q", s)
