@@ -34,6 +34,8 @@
 #   OEC_LIVE_REGISTRY=1  start the OEC Registry too (profile registry)
 #   OEC_LIVE_OUT   directory for the recorded captures (default: a temporary
 #                  directory of the test)
+#   OEC_LIVE_RUN_LISTEN  --listen and --broker-host of TestRunDev (C-107;
+#                  rootless Podman: an address of the host, oec/ci/podman.sh)
 #
 # Without a running container engine the script prints a note and exits 0.
 set -eu

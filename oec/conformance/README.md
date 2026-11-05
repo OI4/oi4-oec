@@ -204,11 +204,13 @@ Starts an application image in a sandbox of its own through the local Docker/Pod
 go run ./cmd/oec-infra run my-app:1.0
 # Linux: the endpoint listens on the bridge gateway; an IP address as broker host needs no host-gateway
 go run ./cmd/oec-infra run --broker-host 172.17.0.1 --wait 60s --report json=run.json my-app:1.0
+# rootless Podman (C-107): the gateway of its bridge is no address of the host – name one
+go run ./cmd/oec-infra run --daemon unix:///run/user/1000/podman/podman.sock --listen 192.0.2.10 --broker-host 192.0.2.10 my-app:1.0
 ```
 
 - `--daemon ENDPOINT` (local only: `unix://`, `npipe://`, loopback `tcp://`; a remote engine is a usage error, exit 2), `--timeout` (10 s), `--wait` (30 s, until the Birth message), `--settle` (2 s), `--listen ADDR`, `--broker-host NAME|IP` (`oec-d8-broker` via `host-gateway`), `--max-packet-size` (262144), `--level`, `--tests`, `--allow-skip`, `--format`, `--report`, `--config`. An image the engine does not have is a usage error – D8 never pulls.
 - D8 creates, starts, stops and removes only containers named `oec-d8-run-…` with its labels `org.oi4.oec-infra=run` and `org.oi4.oec-infra.run=<run id>` (anonymous volumes of those containers go with them); it never creates or removes volumes, networks or images. The report never contains a secret, a username, a log, the environment or a host path.
-- Live (C-074, `live.sh`, Docker Desktop 4.47 / Engine 28.4): the 15 faults of the test image `oec-d8-sim` give the same verdicts as against the fake Engine API.
+- Live (C-074, `live.sh`, Docker Desktop 4.47 / Engine 28.4): the 15 faults of the test image `oec-d8-sim` give the same verdicts as against the fake Engine API. C-107 (Ubuntu 24.04): the same with Docker Engine 29.1 and with rootless Podman 4.9.3 (`oec/ci/podman.sh`; `OEC_LIVE_RUN_LISTEN` passes `--listen`/`--broker-host` to `TestRunDev`).
 
 ## `oec-infra list`, `explain`, `report-schema`
 

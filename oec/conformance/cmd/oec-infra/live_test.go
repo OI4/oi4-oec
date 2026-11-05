@@ -189,7 +189,7 @@ func TestHostDevContainer(t *testing.T) {
 		}
 		return strings.TrimSpace(string(out))
 	}
-	arch := cmd(engine, "info", "--format", "{{.Architecture}}")
+	arch := liveArch(t, engine)
 	goarch := map[string]string{"aarch64": "arm64", "arm64": "arm64", "x86_64": "amd64", "amd64": "amd64"}[arch]
 	if goarch == "" {
 		t.Skipf("engine architecture %q", arch)
@@ -266,6 +266,21 @@ func liveEngine(t *testing.T, engine string) string {
 	out, err := exec.Command(engine, args...).Output()
 	if err != nil {
 		t.Fatalf("%s %v: %v", engine, args, err)
+	}
+	return strings.TrimSpace(string(out))
+}
+
+// liveArch returns the architecture of the engine of live.sh: Podman names
+// it in Host.Arch, Docker in Architecture (C-107).
+func liveArch(t *testing.T, engine string) string {
+	t.Helper()
+	format := "{{.Architecture}}"
+	if engine == "podman" {
+		format = "{{.Host.Arch}}"
+	}
+	out, err := exec.Command(engine, "info", "--format", format).Output()
+	if err != nil {
+		t.Fatalf("%s info --format %s: %v", engine, format, err)
 	}
 	return strings.TrimSpace(string(out))
 }
@@ -387,7 +402,9 @@ func TestContainerDev(t *testing.T) {
 // verdict must agree with the expectation of its fixture in
 // testdata/run/index.yaml (the fake Engine API against the real one). The
 // run leaves no oec-d8-run-* container; the test images are removed by tag
-// afterwards (never a prune).
+// afterwards (never a prune). OEC_LIVE_RUN_LISTEN=<address> (C-107) passes
+// --listen and --broker-host: rootless Podman reports a bridge gateway that
+// is no address of the host (oec/ci/podman.sh).
 func TestRunDev(t *testing.T) {
 	if os.Getenv("OEC_LIVE") != "1" {
 		t.Skip("opt-in: OEC_LIVE=1 (oec/conformance/live.sh)")
@@ -405,7 +422,7 @@ func TestRunDev(t *testing.T) {
 		return strings.TrimSpace(string(out))
 	}
 	ep := liveEngine(t, engine)
-	arch := cmd(engine, "info", "--format", "{{.Architecture}}")
+	arch := liveArch(t, engine)
 	goarch := map[string]string{"aarch64": "arm64", "arm64": "arm64", "x86_64": "amd64", "amd64": "amd64"}[arch]
 	if goarch == "" {
 		t.Skipf("engine architecture %q", arch)
@@ -447,7 +464,11 @@ func TestRunDev(t *testing.T) {
 					fx = x
 				}
 			}
-			code, out, errOut := call(t, "run", "--daemon", ep, "--format", "json", "--wait", "20s", runtest.Ref(f))
+			args := []string{"run", "--daemon", ep, "--format", "json", "--wait", "20s"}
+			if a := os.Getenv("OEC_LIVE_RUN_LISTEN"); a != "" {
+				args = append(args, "--listen", a, "--broker-host", a)
+			}
+			code, out, errOut := call(t, append(args, runtest.Ref(f))...)
 			if code != exitPass && code != 1 && code != exitInconclusive {
 				t.Fatalf("exit %d\n%s%s", code, out, errOut)
 			}
