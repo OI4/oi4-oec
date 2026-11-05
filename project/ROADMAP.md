@@ -462,7 +462,7 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 
 **C-100 addendum 2 (PO, 2026-11-16): D-1 answered (b), done.** The old Community pages were removed and the pages of `oec/docs/docs/` moved into `oi4-oec-documentation/docs/community` (`intro.md` → `index.md`, links into `oec/` as repository URLs `https://github.com/OI4/oi4-oec/blob/main/oec/…`); the site scaffold and the npm policy of `oec/docs` were removed; `docscheck` checks the Community section and the README links to it in gate step 10 (`docscheck: 9 pages ok, 10 README links to them ok`); the opt-in `build.sh` builds the guideline site with yarn (ADR-0031 amendment C-100 addendum 2, A-506 … A-511). Increments 4 … 6 write into `docs/community`.
 
-## P9 – Hardening & release (since C-104)
+## P9 – Hardening & release ✅ (C-104 … C-111; closed after C-111, D-2 (a): Arduino-ESP32 4.0.0 re-pin when released and the hosted assembly job of `release.yml` (D-1 (a), after the billing fix) carried; first release on the PO's notice, C-110 D-2)
 
 - CI pipelines (build, test, schema vectors, lint, image build multi-arch, D7/D8 on Windows/macOS/Linux runners, micro SDK host tests + ESP-IDF builds for `esp32` + `esp32s3`), SBOM/license report, security scan.
 - SDK platform matrix carried forward from P4 exit criterion 5 (D-1 (a), C-061 review): `oec` and `oec-ffi` built and tested natively on Linux/macOS/Windows amd64 + arm64 incl. Windows MSVC, ARMv7 Linux best effort.
@@ -510,6 +510,8 @@ Step 1 is **read-only** (ADR-0008): no `Set`/`Del`/`Call` towards other particip
 **C-110 addendum 1 (PO, 2026-11-26):** D-1 – the work group has access to the guideline repository and went through the changes with the PO; they are accepted (the 7 `normative` commits included, R-1): **exit criterion 8 met**. D-2 – the first release waits until every member has given their okay; the PO says when the guideline can be released. C-111 is the exit run without a release; exit criterion 7 is checked by the hosted `release.yml` run with the dry run, its publication part stays open by the PO's decision.
 
 **Exit run (C-111, 2026-11-27):** both repositories pushed (go of the PO); the MSVC x86_64 smoke-test link fixed (`-Wl,-nodefaultlib:libcmt`, A-624). On `889a123` all six push-triggered workflows are green on every job – `gate`, `conformance`, `sdk` (first fully green run), `micro` (QEMU D7 L1–3, Arduino-ESP32 3.3.12 and 4.0.0-RC1), `images` (both runners, Podman), `supply-chain`. `release.yml` by hand: all nine build jobs green; the assembly job was refused by a GitHub billing stop of `OI4` (C-111 D-1) – assembly and `publish.sh` dry run pass locally on the hosted parts (A-625), hosted amd64 and local arm64 bytes are identical (91 files, A-626). Arduino-ESP32 4.0.0 is not released (A-627). Exit assessment: criteria 1, 2, 4, 5, 6, 8, 9 met; 3 met on 4.0.0-RC1; 7 met except the hosted assembly job. Closing P9: C-111 D-2.
+
+**C-111 addendum 1 (PO, 2026-11-27):** D-1 (a) – the PO / the OI4 owners fix the GitHub Actions billing; then the agent reruns the failed assembly job (before 2026-11-12, otherwise a new run by hand) and pushes the C-111 documentation commits. D-2 (a) – **P9 closed**; carried: the Arduino-ESP32 4.0.0 re-pin when it is released, the hosted assembly job (D-1).
 
 **Exit (proposal, C-104; the PO decides at the end of P9):**
 
