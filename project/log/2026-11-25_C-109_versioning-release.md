@@ -96,3 +96,17 @@ Created and deleted: `/tmp/oec-c109-rel*/` and their logs (Mac runs), `/tmp/oec-
 C-110 – P9 increment 7: the feedback package for the working group (ADR-0032 §10) – every spec finding SF-001 … 117 with finding, decision and text, and the guideline diff up to `52d8470`; how it is handed on is the PO's (Q-011). The CI stays paused until the exit run C-111 (C-105 D-2 (b)); C-109 D-1 … D-3 do not block C-110.
 
 Handover (G-3.10): **new agent session** – the context of this session was compacted; C-110 works on the guideline register and diff, not on the release files. `prompt.md` written for C-110 (not committed).
+
+## Addendum 1 (2026-11-25) – PO answers D-1 … D-3
+
+The PO answered "D-1, D-2 und D-3 (a)".
+
+- **D-1 (a):** the first public version number is **`0.1.0`** – an early version; SemVer allows API changes in a 0.x minor version; 1.0.0 follows when the PO calls the APIs stable. The CRA obligations (C-108) apply all the same. Nothing to change: `oec/VERSION` and every manifest already say `0.1.0` (`TestReleaseVersion`).
+- **D-2 (a):** the Go module `github.com/OI4/oec/schema` **follows the release train** (`schema/v0.1.0` in `OI4/oec`); the bundle version `2.MINOR.PATCH` stays inside (`schema.Version`, release manifest, `oec-schema-<bundle>.tar.gz`, `oec-check version`). No path change.
+- **D-3 (a):** at the first release, a **GitHub Release on `OI4/oec`** with the files of `oec-release` as assets, the five images on the **GitHub Container Registry** (`ghcr.io/oi4/…`, multi-arch) and the **Go modules through their tags** in `OI4/oec`. crates.io, the ESP Component Registry and the Arduino Library Manager come later, each on the PO's order.
+
+Unchanged: nothing is published before the PO's go for the first release; whether `OI4/oec` is public stays Q-011 (CRA review); the weekly `supply-chain.yml` run and Dependabot come with the first release (C-108 D-3 (a)); before the first tag the schema bundle is frozen as `2.0.1` and the CHANGELOG section is dated.
+
+Agent decision (G-3.4 b), **A-613:** the publishing step promised in D-3 (a) ("built in the cycle after your answer, test first") is built in **C-110** next to the feedback package, so that the exit run C-111 checks the whole release path: a publishing job behind the release build, tests first in `oec/ci/pipelines`, the logic in a script, inert until the PO's go (dry run without a tag, nothing published). What it needs from the PO – the repository `OI4/oec`, a write secret for it, the GHCR namespace – comes as a D-x of C-110 when the design is clear. The `replace` directives between the Go modules are replaced by tagged versions for the Go tags (ADR-0033 §5).
+
+Applied: ADR-0033 (status, amendment C-109 addendum 1), REVIEW.md/REVIEW_DE.md (answered, A-613), STATUS, ROADMAP P9.

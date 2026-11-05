@@ -1,6 +1,6 @@
 # ADR-0033 – Versioning and releases (P9)
 
-- Status: **accepted (agent, G-3.4 b)** for the versioning scheme, the single version source, the snapshot versions, the release build `release.sh`/`release.yml` and its artifacts; **decisions of the PO** (G-3.4 a, Q-011, C-104 D-2): the first public version number (C-109 D-1), the Go module of the schema bundle (C-109 D-2), the release channels and their visibility (C-109 D-3, a proposal) and the publication itself.
+- Status: **accepted (agent, G-3.4 b)** for the versioning scheme, the single version source, the snapshot versions, the release build `release.sh`/`release.yml` and its artifacts; **decisions of the PO** (G-3.4 a, Q-011, C-104 D-2): the first public version number (C-109 D-1), the Go module of the schema bundle (C-109 D-2), the release channels and their visibility (C-109 D-3) and the publication itself. **D-1 … D-3 decided (a) by the PO (C-109 addendum 1):** `0.1.0`, the schema module follows the train, GitHub Release on `OI4/oec` + GHCR + Go module tags; the publication itself and the visibility of `OI4/oec` stay the PO's (Q-011).
 - Date: 2026-11-25
 - Deciders: agent (scheme, sources, build, artifacts); product owner (Thomas) – first public version, publication, channels
 - Related: ADR-0019 §6 and amendment C-041 (schema bundle `2.MINOR.PATCH`, release manifests), ADR-0026 (Rust SDK), ADR-0027 (Go SDK), ADR-0028 amendment C-108 (SBOM tool), ADR-0030 (micro SDK), ADR-0032 §8 … §10 and its amendments (CI, local verification, releases), C-104 D-2/D-3 (channels pending; release repository `OI4/oec`), C-108 D-3 (a) (weekly supply-chain run and Dependabot from the first release), Q-011 (publication, CRA), ROADMAP P9 increment 6
@@ -81,3 +81,12 @@ What a public version number promises (D-1: 0.1.0 as an early version, or 1.0.0/
 - **Version from the tag only** (`git describe`, no file): the Cargo, Arduino, npm and OpenAPI manifests need a literal version – one file plus the gate test is simpler than rewriting manifests at build time.
 - **SemVer build metadata for snapshots** (`0.1.0+g…`): ignored for precedence and not allowed in Docker tags – rejected for a pre-release.
 - **Release notes generated from the logs or commit messages:** the logs are internal and long, the commit messages informal – rejected for a written CHANGELOG.
+
+## Amendment C-109 addendum 1 (2026-11-25) – PO decisions D-1 … D-3 (G-3.4 a)
+
+The PO answered "D-1, D-2 und D-3 (a)" (log C-109 addendum 1):
+
+1. **First public version `0.1.0` (D-1 (a)):** an early version; the sources stay as they are. 1.0.0 follows when the PO calls the public APIs stable.
+2. **The schema Go module follows the train (D-2 (a)):** `github.com/OI4/oec/schema` is tagged `schema/v<train version>` in `OI4/oec` like the other Go modules (§5); the bundle keeps `2.MINOR.PATCH` inside (`schema.Version`, manifest, archive name, `oec-check version`). No `/v2` path.
+3. **Channels at the first release (D-3 (a)):** a GitHub Release on `OI4/oec` with the files of `oec-release` as assets, the five images on `ghcr.io/oi4/…` (multi-arch), the Go modules through their tags in `OI4/oec`. crates.io, the ESP Component Registry and the Arduino Library Manager later, each on the PO's order (then A-610 is revisited).
+4. **Publishing step (A-613, agent):** built in C-110, tests first, inert until the PO's go for the first release; §6 "nothing is published" holds until then. Whether `OI4/oec` is public stays Q-011 (CRA review); the weekly `supply-chain.yml` run and Dependabot come with the first release (C-108 D-3 (a)).
