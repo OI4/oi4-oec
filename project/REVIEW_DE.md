@@ -35,6 +35,10 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
   - mit Ablaufdatum (z. B. 1 Jahr)
   - Danach als Actions-Secret `OEC_GUIDELINE_TOKEN` im Repo **`OI4/oi4-oec`** speichern (dort laufen die Workflows) und das alte klassische Token widerrufen. Falls die Organisation `OI4` fein granulierte Tokens erst freigeben muss, braucht es noch die Zustimmung eines Org-Admins.
 
+### Zur Info: C-108 Nachtrag 4 – Token
+
+- Deine Antwort: „Ist gesetzt“ (Contents: Read-only am neuen Token ergänzt, Actions entfernt). Ich prüfe erneut und setze dann das Secret.
+
 ### Zur Info: C-108 Nachtrag 2 – Kontakt-Adresse
 
 - Deine Antwort: „info@openindustry4.com, aber nicht als security mailbox betiteln, sondern ‚mail the issue to …‘“. In `oec/SECURITY.md` steht jetzt: Wer kein GitHub-Konto hat, „mail the issue to info@openindustry4.com“.

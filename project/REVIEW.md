@@ -855,6 +855,9 @@ Inputs still missing (no decision, data or an action of yours):
 
 ### Answered earlier
 
+Answered after C-108 addendum 3 (2026-11-05) and recorded in C-108 addendum 4:
+- A-552 token: "Ist gesetzt" – Contents: Read-only added to the fine-grained token in `.env` (and Actions removed); probe and secret follow in addendum 4.
+
 Answered after C-108 addendum 1 (2026-11-24) and recorded in C-108 addendum 2:
 - Contact of D-1 (a): "Als Security E-Mail nimm erstmal die info@openindustry4.com. Betitel es aber nicht als security mailbox, sondern ein mail the issue to…" – `oec/SECURITY.md`: "if you have no GitHub account, mail the issue to info@openindustry4.com" (not called a security mailbox).
 - Question on A-552 ("welche Berechtigungen braucht er und auf welches Projekt"): answered above under "Open for you" (fine-grained, `OI4/oi4-oec-documentation`, Contents read-only; secret in `OI4/oi4-oec`).
