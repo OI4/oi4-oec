@@ -38,6 +38,7 @@ anything: the workflows become active when the repository is pushed to GitHub
 | `sbom.sh` | the SBOM (SPDX 2.3 JSON), the license texts and the license report `LICENSES.md` of every deliverable into `<dir>/<deliverable>/` with `oec-sbom` (no build: the crates from `cargo tree` over the eight targets of the SDK matrix, the Go modules from `go list -deps` over the six platforms of the binaries; needs the crates fetched); the image SBOMs stay in the images |
 | `audit.sh` | the vulnerability check with network: `govulncheck` (pinned, `go run`) on every Go module, `cargo deny check advisories` with the fresh RustSec database on every `Cargo.lock` outside the spikes, `npm audit` of the Registry Web UI; every check runs, the outputs go to `<dir>`, it fails at the end on any finding |
 | `release.sh` | the release of `release.yml` (ADR-0033): `release.sh <dir> [source binaries micro schema sbom ffi images assemble]` builds the parts from the checked-out commit with the scripts above, `assemble` packs them and writes `RELEASE-NOTES.md` and `SHA256SUMS`; a tag `oec-v<VERSION>` makes a release, every other build a snapshot `<VERSION>-snapshot.g<commit>` |
+| `publish.sh` | the publication of a release (ADR-0034): `publish.sh <dir> [--publish]` checks the release of `release.sh`, prepares the release repository `OI4/oec` (commit, Go module tags, `go.sum`) and checks it with `go install`, checks the images and writes the body of the GitHub Release; a dry run without `--publish` (every run of `release.yml`); with `--publish` only on a release tag in the job `publish` |
 | `lint.sh` | actionlint on the workflows (opt-in locally, a job of `gate.yml`) |
 | `linux.sh` | the job `gate` of `gate.yml` in an Ubuntu 24.04 container (opt-in) |
 
@@ -50,7 +51,7 @@ anything: the workflows become active when the repository is pushed to GitHub
 | `sdk.yml` | `rust`: `setup-tools.sh --toolchain`, `sdk-rust.sh`, upload `liboec_ffi-<target>`; `go`: `sdk-go.sh`, on Windows upload `liboec_ffi-x86_64-pc-windows-gnu`; `armv7`: `packages.sh --armv7`, `sdk-armv7.sh`, upload `liboec_ffi-armv7-unknown-linux-gnueabihf` (all artifacts 14 days) | `rust`: all six; `go`: all but `windows-11-arm` (no cgo toolchain); `armv7`: `ubuntu-24.04` |
 | `micro.yml` | `host`: `packages.sh`, `setup-tools.sh --toolchain` (not on Windows), `micro-host.sh` with `OEC_CI_CC=gcc`; `esp-idf`: `disk.sh`, `setup-tools.sh --toolchain`, `micro-esp-idf.sh`; `arduino`: `disk.sh`, `micro-arduino.sh` for the cores `3.3` and `4.0`; no artifacts (no firmware) | `host`: `ubuntu-24.04`, `ubuntu-24.04-arm`, `windows-2025`; `esp-idf` and `arduino`: `ubuntu-24.04` |
 | `supply-chain.yml` | `sbom`: `setup-tools.sh --toolchain`, `fetch.sh`, `sbom.sh`, upload `oec-sbom` (14 days); `audit`: `setup-tools.sh`, `audit.sh`, upload `oec-audit` (14 days, also after a failure); no release | `ubuntu-24.04` |
-| `release.yml` | `ffi`: `packages.sh` (armv7: `--armv7`), `setup-tools.sh --toolchain`, `release.sh … ffi`; `dist`: `setup-tools.sh --toolchain`, `fetch.sh`, `release.sh … source binaries micro schema sbom`; `images`: `release.sh … images`; `release` (after all three): the parts of the run, `release.sh … assemble`, upload `oec-release` (30 days); no caches; nothing published | `ffi`: the runner of each target in `sdk.yml` (armv7 cross on `ubuntu-24.04`); the others `ubuntu-24.04` |
+| `release.yml` | `ffi`: `packages.sh` (armv7: `--armv7`), `setup-tools.sh --toolchain`, `release.sh … ffi`; `dist`: `setup-tools.sh --toolchain`, `fetch.sh`, `release.sh … source binaries micro schema sbom`; `images`: `release.sh … images`; `release` (after all three): the parts of the run, `release.sh … assemble`, the dry run `publish.sh`, upload `oec-release` (30 days); `publish` (after `release`, only on a tag, environment `release`): the artifact `oec-release`, `publish.sh --publish`; no caches | `ffi`: the runner of each target in `sdk.yml` (armv7 cross on `ubuntu-24.04`); the others `ubuntu-24.04` |
 | `images.yml` | `images`: `disk.sh`, `images.sh` (the five images, D8 `image`/`run`), `getting-started.sh`, `live-infra.sh`, on `ubuntu-24.04` also `podman.sh`; upload of the D8 reports and logs as `oec-images-reports-<runner>` (14 days, also after a failure) – never an image or OCI archive | `ubuntu-24.04`, `ubuntu-24.04-arm` |
 
 Triggers: push to `main`, pull requests, manual start; `release.yml` only a
@@ -71,8 +72,12 @@ endings everywhere (`.gitattributes`).
 - has an expression `${{ … }}` in a `run` (values go through `env`), or one
   that reads a context an attacker controls (`github.event`,
   `github.head_ref`, `inputs`, `steps`, `needs`);
-- uses a secret other than `OEC_GUIDELINE_TOKEN`, or uses it anywhere but in
-  the `token` of a checkout step; or checks out with persisted credentials.
+- uses a secret other than `OEC_GUIDELINE_TOKEN` and `OEC_RELEASE_TOKEN`,
+  the first anywhere but in the `token` of a checkout step, the second
+  anywhere but in the `env` of a run step of a job in the environment
+  `release`; or checks out with persisted credentials;
+- gives a job an environment while the workflow runs on pull requests, or
+  has an `if:` condition that reads a context an attacker controls.
 
 The triggers `pull_request_target` and `workflow_run` and self-hosted runners
 cannot be expressed in the model.
@@ -122,6 +127,24 @@ read access on private repositories):
 
 If the organisation requires approval of fine-grained tokens, an owner of
 `OI4` approves it.
+
+**Publishing** (`release.yml` job `publish`, ADR-0034) needs, before the
+first release tag:
+
+- the repository `OI4/oec` (its visibility is Q-011); it may be empty;
+- in `OI4/oi4-oec` the environment **`release`** with the PO as required
+  reviewer and the deployment tag rule `oec-v*` (GitHub creates a missing
+  environment without protection when a job names it – create it first);
+- in that environment the secret **`OEC_RELEASE_TOKEN`** and the variable
+  **`OEC_RELEASE_USER`** (the account of the token). The GitHub Container
+  Registry accepts only a classic token: a **classic** personal access
+  token of an account that may write `OI4/oec` and create packages of
+  `OI4`, scopes `repo` (`public_repo` once `OI4/oec` is public) and
+  `write:packages`, with an expiry date – best of a machine account with
+  access to `OI4/oec` only;
+- after the first push: link the packages `oec-*` to `OI4/oec` (the label
+  `org.opencontainers.image.source` does it) and set their visibility; GHCR
+  creates them private.
 
 ## Local checks
 
@@ -181,11 +204,54 @@ registry (`skopeo copy --all oci-archive:<file> docker://<name>:<v>`) and
 for D8 `oec-infra image`; Podman and Docker with the containerd image store
 load it, the classic Docker store does not.
 
-Nothing is published – no GitHub Release, no registry, no crates.io, Go
-module proxy, ESP Component Registry or Arduino Library Manager: the
-channels are the PO's (Q-011, C-104 D-2). A release commit sets `VERSION`
-and the places `TestReleaseVersion` lists, and turns `## <v> – unreleased`
-into the release date; then the tag `oec-v<v>` starts `release.yml`.
+A release commit sets `VERSION` and the places `TestReleaseVersion` lists,
+and turns `## <v> – unreleased` into the release date; then the tag
+`oec-v<v>` starts `release.yml`.
+
+### Publishing (`publish.sh`, C-110)
+
+The channels of C-109 D-3 (a), in this order (ADR-0034):
+
+1. **The release repository `OI4/oec`:** one commit on `main` whose tree is
+   `oec/` of the source archive, with the Go modules made usable from
+   outside – every `replace` to a sibling module becomes a requirement of
+   `v<v>`, and `go.sum` is completed by `go mod tidy` against the prepared
+   repository itself (until it no longer changes). Tags `v<v>` and, for each
+   of the twelve Go modules, `<module directory>/v<v>` (`conformance/v0.1.0`,
+   `sdk/go/v0.1.0`, …). The commit has the time of the source commit and a
+   fixed author: the same release gives the same tree and, in a dry run, the
+   same commit (C-110: macOS and Ubuntu 24.04). Before anything leaves the
+   runner, each module is checked with an empty module cache
+   (`go list -mod=readonly -deps -test ./...`, `go mod verify`), and
+   `go install github.com/OI4/oec/conformance/cmd/oec-check@v<v>` (and
+   `oec-infra`) must work and report `<v>`.
+2. **The images** `ghcr.io/oi4/oec-<image>:<v>`: `skopeo copy --all
+   --preserve-digests` of each OCI archive (both platforms, the digest of
+   the index is kept); the release body lists the digests.
+3. **The GitHub Release `v<v>`** of `OI4/oec` with every file of
+   `oec-release` as an asset (`gh release create --verify-tag`); its body is
+   `RELEASE-NOTES.md` plus where to get the release.
+
+Every run of `release.yml` runs `publish.sh` as a **dry run** in the job
+`release`: it prepares and checks all of it and prints the commands that
+would write (`publish: dry run, would run: …`); nothing leaves the runner,
+no token is used. Only on a tag build does the job **`publish`** follow; it
+runs in the GitHub environment **`release`** (the PO approves each run as
+its required reviewer) and gets the environment secret `OEC_RELEASE_TOKEN`
+in the `env` of its one run step. `publish.sh --publish` refuses anything
+but the tag build `oec-v<v>` of a release version. The push is atomic; a
+tag that already exists with the same tree is kept, with another tree the
+run fails; an existing GitHub Release fails the run (a rerun after a failed
+image push skips the repository part). The token goes to git as an HTTP
+header from the environment (never in a URL or an argument), to skopeo in
+an authfile with mode 600 in a temporary directory, to gh as `GH_TOKEN`;
+the script never traces (`set -x`).
+
+Locally: `release.sh <dir> source assemble` and `publish.sh <dir>`
+(`OEC_PUBLISH_KEEP=<new dir>` keeps the prepared repository); needs git and
+Go, skopeo for image archives. crates.io, the ESP Component Registry and
+the Arduino Library Manager are not channels (C-109 D-3 (a); later, each
+on the PO's order).
 
 ## Supply chain (`supply-chain.yml`, C-108)
 
