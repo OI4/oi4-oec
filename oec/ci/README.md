@@ -15,7 +15,7 @@ releases.
 | `gha/` | the workflow model, the YAML renderer (plain scalars where unambiguous, double-quoted otherwise, literal blocks) and the CI policy `Check` |
 | `pipelines/` | the pinned actions, the hosted runners and the workflows; tests against the repository (policy, generated files, tool pins, scripts, runners) |
 | `cmd/cigen/` | renders the workflows into `../../.github/workflows`; `-check` fails if a file is outdated or not generated (gate step 11) |
-| `versions.sh` | the pins: Rust toolchain, cbindgen, cargo-deny, actionlint, the guideline branch, the Ubuntu image of `linux.sh`; for `micro.yml` the Espressif ESP-IDF image (by digest), `arduino-cli` with the SHA-256 of its archives, the Arduino-ESP32 cores and the M5Stack libraries |
+| `versions.sh` | the pins: Rust toolchain, cbindgen, cargo-deny, actionlint, govulncheck, the guideline branch, the Ubuntu image of `linux.sh`; for `micro.yml` the Espressif ESP-IDF image (by digest), `arduino-cli` with the SHA-256 of its archives, the Arduino-ESP32 cores and the M5Stack libraries |
 | `disk.sh` | frees disk space on a GitHub-hosted Linux runner (removes the preinstalled Android SDK, .NET, Haskell, Swift and CodeQL); nothing elsewhere (macOS, local, `linux.sh` container) |
 | `packages.sh` | the system packages on Debian/Ubuntu (apt): build tools, clang with `libclang-rt-dev` (sanitizer runtime), LLVM, CMake, GCC 14; `--go` the Go of the distribution (`linux.sh`), `--armv7` the ARMv7 cross toolchain and `qemu-user` (`sdk-armv7.sh`); nothing on macOS |
 | `setup-tools.sh` | installs the toolchain and tools of `versions.sh` (rustup; `cargo install --locked` into `~/.oec-tools`); `--toolchain` only the Rust toolchain (`sdk.yml`, `micro.yml`); `GITHUB_PATH` entries as Windows paths on Windows |
@@ -34,6 +34,8 @@ releases.
 | `live-infra.sh` | `oec/conformance/live.sh` with `OEC_LIVE_REGISTRY=1` (D7 `monitor`, D8 `bus`/`host`/`container`/`run` incl. `TestRunDev`); fails without a container engine or the registry image |
 | `podman.sh` | Podman on Linux (rootless, the user of the runner): the DNS plugin of the network backend (installed with apt on a runner), the API socket, `docker save` → `podman load`, D8 `run` through the Podman socket with `--listen`/`--broker-host` on the host address, `getting-started.sh` and `live-infra.sh` with `podman compose` plus `oec/dev/compose.podman.yaml` and a health-check ticker (no systemd timers needed); a table of what works; `OEC_PODMAN_LIMITS` (default empty) lists known limits (reported, not fatal). C-107 locally: all four steps work with Podman 4.9.3 (`oec/dev/README.md` "Platforms and Podman") |
 | `linux-images.sh` | the job `images` of `images.yml` on a fresh Ubuntu 24.04 in a privileged container with a Docker engine of its own (opt-in; `OEC_CI_PODMAN=1` adds `podman.sh`, with storage driver `vfs` – nested in Docker Desktop the overlay driver failed) |
+| `sbom.sh` | the SBOM (SPDX 2.3 JSON), the license texts and the license report `LICENSES.md` of every deliverable into `<dir>/<deliverable>/` with `oec-sbom` (no build: the crates from `cargo tree` over the eight targets of the SDK matrix, the Go modules from `go list -deps` over the six platforms of the binaries; needs the crates fetched); the image SBOMs stay in the images |
+| `audit.sh` | the vulnerability check with network: `govulncheck` (pinned, `go run`) on every Go module, `cargo deny check advisories` with the fresh RustSec database on every `Cargo.lock` outside the spikes, `npm audit` of the Registry Web UI; every check runs, the outputs go to `<dir>`, it fails at the end on any finding |
 | `lint.sh` | actionlint on the workflows (opt-in locally, a job of `gate.yml`) |
 | `linux.sh` | the job `gate` of `gate.yml` in an Ubuntu 24.04 container (opt-in) |
 
@@ -45,6 +47,7 @@ releases.
 | `conformance.yml` | `test`: `conformance.sh`; `binaries`: `binaries.sh`, upload as the artifact `oec-conformance-binaries` (14 days) | `ubuntu-24.04`, `ubuntu-24.04-arm`, `macos-15`, `macos-15-intel`, `windows-2025`, `windows-11-arm`; binaries on `ubuntu-24.04` |
 | `sdk.yml` | `rust`: `setup-tools.sh --toolchain`, `sdk-rust.sh`, upload `liboec_ffi-<target>`; `go`: `sdk-go.sh`, on Windows upload `liboec_ffi-x86_64-pc-windows-gnu`; `armv7`: `packages.sh --armv7`, `sdk-armv7.sh`, upload `liboec_ffi-armv7-unknown-linux-gnueabihf` (all artifacts 14 days) | `rust`: all six; `go`: all but `windows-11-arm` (no cgo toolchain); `armv7`: `ubuntu-24.04` |
 | `micro.yml` | `host`: `packages.sh`, `setup-tools.sh --toolchain` (not on Windows), `micro-host.sh` with `OEC_CI_CC=gcc`; `esp-idf`: `disk.sh`, `setup-tools.sh --toolchain`, `micro-esp-idf.sh`; `arduino`: `disk.sh`, `micro-arduino.sh` for the cores `3.3` and `4.0`; no artifacts (no firmware) | `host`: `ubuntu-24.04`, `ubuntu-24.04-arm`, `windows-2025`; `esp-idf` and `arduino`: `ubuntu-24.04` |
+| `supply-chain.yml` | `sbom`: `setup-tools.sh --toolchain`, `fetch.sh`, `sbom.sh`, upload `oec-sbom` (14 days); `audit`: `setup-tools.sh`, `audit.sh`, upload `oec-audit` (14 days, also after a failure); no release | `ubuntu-24.04` |
 | `images.yml` | `images`: `disk.sh`, `images.sh` (the five images, D8 `image`/`run`), `getting-started.sh`, `live-infra.sh`, on `ubuntu-24.04` also `podman.sh`; upload of the D8 reports and logs as `oec-images-reports-<runner>` (14 days, also after a failure) – never an image or OCI archive | `ubuntu-24.04`, `ubuntu-24.04-arm` |
 
 Triggers: push to `main`, pull requests, manual start. Every run step uses
@@ -118,7 +121,33 @@ ci/images.sh /tmp/oec-images             # opt-in: the five images with D8 (Dock
 ci/getting-started.sh                    # opt-in: the newcomer run (needs the images, curl, jq; not next to a running oec/dev stack)
 ci/live-infra.sh                         # opt-in: live.sh with the registry
 ci/linux-images.sh /tmp/reports          # opt-in: the job images in Ubuntu 24.04 with its own dockerd (Docker, network, 30–60 min)
+ci/sbom.sh /tmp/oec-sbom                 # opt-in: the SBOMs and license reports of every deliverable (offline after ci/fetch.sh)
+ci/audit.sh /tmp/oec-audit               # opt-in: govulncheck, cargo deny check advisories, npm audit (network, needs npm)
 ```
+
+## Supply chain (`supply-chain.yml`, C-108)
+
+`sbom.sh` writes one directory per deliverable – `oec-rust-sdk`, `oec-ffi`,
+`oec-go-sdk`, `oec-micro-sdk`, `oec-check`, `oec-infra`, `oec-logger`,
+`oec-weather`, `oec-config`, `oec-registry` (with the npm packages of the
+Web UI), `oec-schema` – with `sbom.spdx.json`, the text of every license as
+`<id>.txt` and `LICENSES.md` (the licenses with the number of components
+and the components with their purl). The creation time is the commit time
+(`SOURCE_DATE_EPOCH`), so the same commit gives the same files. A library
+lists what a program that uses it links (the Go SDK: the crates of
+`oec-ffi` and the Rust standard library); a binary also its language's
+standard library. The micro SDK and the schema have no third-party
+component (Unity is used by the tests only; ESP-IDF, esp-mqtt and the
+Arduino core are the platform's). The images keep their own SBOM with the
+Debian base in `/opt/oi4/licenses`, checked by D8 in `images.yml`.
+
+`audit.sh` needs network and is never part of the gate (the gate's
+`cargo deny check` falls back to the cached database). `govulncheck` fails
+only on a vulnerability in called code; its output also lists the
+module-level findings (`-show verbose`). It is built with the toolchain of
+the checked module (an older Go cannot load a newer standard library).
+Handling a finding: [`../SECURITY.md`](../SECURITY.md) and the dependency
+rules (ADR-0023, ADR-0029 §10, ADR-0030).
 
 `micro-esp-idf.sh` mounts the workspace at the same absolute path in the
 container (the test binary finds `oec/` by its source path) and runs as the
@@ -165,7 +194,8 @@ commit such a file. On macOS:
 - **An action:** take the commit SHA of its latest release tag
   (`gh api repos/actions/<name>/commits/<tag> --jq .sha`), change it in
   `pipelines/pipelines.go`, run `cigen`.
-- **A tool:** change `versions.sh`; the tests compare cbindgen with
+- **A tool:** change `versions.sh` (cbindgen, cargo-deny, actionlint and
+  govulncheck must be release versions); the tests compare cbindgen with
   `sdk/check.sh` and the Rust toolchain with the `rust-version` of every
   Cargo package; the cache key of `gate.yml` changes with the file.
 - **Go:** the workflows read the Go version from `go.mod`

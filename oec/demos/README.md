@@ -91,7 +91,13 @@ present, or the tool fails. Go modules from outside this workspace need
 `-golicenses <file>`, a reviewed map `module@version` → SPDX expression
 (another version is refused): the image of the compliance tools uses
 [`../conformance/images/go-licenses.json`](../conformance/images/go-licenses.json)
-(C-107); the demos link no such module. Its tests run offline in the gate (fixtures and
+(C-107); the demos link no such module. For the deliverables without an
+image (C-108, [`../ci/sbom.sh`](../ci/sbom.sh)) `-base`/`-debian` are left
+out (only together), `-golist <file>` reads the Go modules from `go list
+-deps` (no build; the format is in `GoList`), `-gostd <go version>` adds the
+Go standard library of a binary and `-report <file>` writes the license
+report `LICENSES.md` (the licenses with their number of components and text
+file, then every component with its purl). Its tests run offline in the gate (fixtures and
 golden SBOM in `internal/sbom/testdata/`, D8 `oec-infra image` on a
 synthetic OCI layout).
 

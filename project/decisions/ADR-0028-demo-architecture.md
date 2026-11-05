@@ -189,3 +189,14 @@ Details: `log/2026-11-06_C-090_registry-image-compose.md`, REVIEW A-419; ADR-002
 Details: `log/2026-11-23_C-107_images-newcomers.md`, REVIEW A-585; ADR-0025 amendment C-107. No change to the demos, their images or their SBOMs.
 
 1. **§4 SBOM tool (amends C-084 item 2, A-585):** `oec-sbom -golicenses <file>` names the licenses of Go modules from outside the workspace, which `go version -m` does not carry: a JSON map `{"modules": {"<module>@<version>": "<SPDX expression>"}}`, each value normalized and its texts required as for every component. A module of the binary without an entry for exactly its version is refused, so a dependency update fails until its license is reviewed (SF-114, fail closed). Used by the image of the compliance tools (`oec/conformance/images/go-licenses.json`); the demos link no such module and do not use the flag. Tests first: `TestGoKnown` (known, unknown, other version, a malformed map), `TestConformanceGoLicenses` (the committed map matches the required modules of `oec/conformance/go.mod` exactly).
+
+## Amendment C-108 (2026-11-24) – the SBOM tool for deliverables without an image (agent, G-3.4 b)
+
+Details: `log/2026-11-24_C-108_supply-chain.md`, REVIEW A-595, A-596; ADR-0032 amendment C-108. No change to the demos, their images or their SBOMs.
+
+1. **§4 SBOM tool (amends C-084 item 2, A-595), additive, tests first (`TestGoList`, `TestGoStd`, `TestReport`, `TestDeliverable`):**
+   - `-base`/`-debian` are optional, but only together (an image has a base, a library or a binary for download has none); `-name`, `-version`, `-texts`, `-out` stay required.
+   - `-golist <file>`: the Go modules of a library or binary from `go list -deps -f '{{with .Module}}{{.Path}}|{{.Version}}|{{with .Replace}}{{.Path}}|{{.Version}}{{end}}{{end}}'` – no build, so also a cgo package whose C library is not built; the main module is the application and left out; a module replaced by a local directory gets the license of `-license`, every other module the license of `-golicenses` for exactly its version (fail closed, as `-go`); a line not in this format, no or two main modules, a non-local replacement without version are refused.
+   - `-gostd <version>`: the Go standard library of a Go binary (`go1.27.3` or `1.27.3`; `pkg:golang/stdlib@1.27.3`, BSD-3-Clause); a development or experiment version is refused.
+   - `-report <file>`: the license report in Markdown – title, a sentence with the number of components, the licenses (sorted, number of components naming them, text file) and the components in the order of the SBOM (kind, name, version, license, purl). The same input gives the same bytes.
+2. The SBOMs of the images, their Dockerfiles and `/opt/oi4/licenses` are unchanged.
