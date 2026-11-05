@@ -27,8 +27,10 @@ var Documents = []Document{
 }
 
 // excluded are informative parts that never carry requirements: examples
-// (Appendix B, MG 1.2), lists of figures/tables, authors and history.
-var excludedDirs = map[string]bool{"appendix-b": true}
+// (Appendix B, MG 1.2), lists of figures/tables, authors and history (one
+// file up to C-111, one page per revision since C-112).
+var exampleDirs = map[string]bool{"appendix-b": true}
+var excludedDirs = map[string]bool{"a6-history": true}
 var excludedFiles = map[string]bool{
 	"list-of-figures.md": true, "list-of-tables.md": true,
 	"a5-authors.md": true, "a6-history.md": true,
@@ -64,7 +66,7 @@ func loadFiles(root string, examples bool) ([]File, error) {
 				return err
 			}
 			if e.IsDir() {
-				if excludedDirs[e.Name()] && !examples {
+				if excludedDirs[e.Name()] || exampleDirs[e.Name()] && !examples {
 					return filepath.SkipDir
 				}
 				return nil
