@@ -560,7 +560,7 @@ func TestImages(t *testing.T) {
 // (no release, Q-011); the job audit runs the vulnerability check
 // oec/ci/audit.sh with network and uploads its outputs also on failure.
 // Both on the hosted Linux runner, with the triggers of every workflow (no
-// schedule: the model has none and the CI is paused, C-105 D-2).
+// schedule yet: the weekly run comes with the first release, C-108 D-3 (a)).
 func TestSupplyChain(t *testing.T) {
 	w := SupplyChain()
 	if w.File != "supply-chain.yml" {

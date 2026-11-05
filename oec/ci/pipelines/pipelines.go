@@ -479,8 +479,8 @@ func Images() gha.Workflow {
 // deliverable as a workflow artifact (no release, Q-011), and the
 // vulnerability check of the Go modules, the Cargo.locks and the npm
 // packages of the Registry Web UI with the current advisory databases. No
-// schedule: the CI is paused (C-105 D-2); a weekly run after the first
-// release is a proposal of the vulnerability handling draft.
+// schedule yet: the weekly run comes with the first release (C-108 D-3 (a));
+// until then the CI is paused (C-105 D-2).
 func SupplyChain() gha.Workflow {
 	sbom := gha.Job{
 		ID:             "sbom",

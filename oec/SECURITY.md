@@ -2,15 +2,19 @@
 
 > **Draft (C-108).** The deliverables of OEC v2.0 are not published yet
 > (Q-011). The reporting channel, the response times and the support period
-> below are **placeholders** – marked `[PO: …]` – until the OI4 Alliance
-> decides them. Do not rely on them before that.
+> below are decided (C-108 D-1 … D-3); the security contact address is
+> still a **placeholder** – marked `[PO: …]`. This policy takes effect with
+> the first release.
 
 ## Supported versions
 
 | Version | Supported with security fixes |
 |---------|-------------------------------|
 | 0.1.x (pre-release, not published) | no – pre-release; fixes go into the next build |
-| first release | `[PO: support period, e.g. at least 5 years from its release]` |
+| first release of a release line | yes – for five years from the first release of that line; the newest minor version of the line gets the fixes |
+
+The demo services (logger, weather, config) are examples and have no support
+period; their fixes come with the next release.
 
 The schema follows its own version (`2.0.0`, frozen); a security fix of a
 deliverable does not change the schema version.
@@ -22,8 +26,10 @@ suspected vulnerability.
 
 Report it privately:
 
-- `[PO: reporting channel, e.g. "Report a vulnerability" (GitHub private vulnerability reporting) of the release repository OI4/oec]`
-- `[PO: security contact address]`
+- with **"Report a vulnerability"** (GitHub private vulnerability reporting)
+  in the Security tab of the release repository `OI4/oec`, or
+- if you have no GitHub account, by e-mail to the security mailbox of the
+  OI4 Alliance: `[PO: security contact address]`.
 
 Please include:
 
@@ -34,15 +40,20 @@ Please include:
 
 ## What happens next
 
-1. We acknowledge your report within `[PO: e.g. 3 working days]`.
-2. We assess it (severity with CVSS) within `[PO: e.g. 10 working days]`
-   and tell you the result.
-3. We fix it – target by severity `[PO: e.g. critical 14 days, high 30 days,
-   medium 90 days, low with the next release]` – and agree the publication
-   date with you (coordinated disclosure, at most `[PO: e.g. 90 days]` after
-   the report).
+1. We acknowledge your report within 3 working days.
+2. We assess it (severity with CVSS) within 10 working days and tell you
+   the result.
+3. We fix it – a fixed version is available for a critical vulnerability
+   (CVSS 9.0 or higher) within 14 days, high (7.0 – 8.9) within 30 days,
+   medium (4.0 – 6.9) within 90 days, low with the next release – and agree
+   the publication date with you (coordinated disclosure, at most 90 days
+   after the report).
 4. We publish a security advisory (with a CVE if applicable) together with
    the fixed version, and credit you unless you prefer otherwise.
+
+An actively exploited vulnerability is also notified as required by the EU
+Cyber Resilience Act (Art. 14: early warning within 24 hours, notification
+within 72 hours, final report within 14 days after a fix is available).
 
 ## Scope
 
@@ -76,7 +87,9 @@ Out of scope:
 - The dependencies are checked against the public advisory databases:
   `govulncheck` (Go), `cargo deny check advisories` (Rust, RustSec),
   `npm audit` (Registry Web UI): `ci/audit.sh`, job `audit` of
-  `supply-chain.yml`. The Rust dependency policy (`sdk/rust/deny.toml`) also
-  rejects yanked and unmaintained crates.
+  `supply-chain.yml` – on every change and, from the first release, weekly;
+  Dependabot alerts are enabled on the release repository. The Rust
+  dependency policy (`sdk/rust/deny.toml`) also rejects yanked and
+  unmaintained crates.
 
 See [`ci/README.md`](ci/README.md) for running both locally.
