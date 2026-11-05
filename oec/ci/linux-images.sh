@@ -10,7 +10,10 @@
 # go.mod), curl and jq, and runs as the non-root user ci (group docker)
 # oec/ci/images.sh, getting-started.sh and live-infra.sh. With
 # OEC_CI_PODMAN=1 it then runs oec/ci/podman.sh (podman of Ubuntu, rootless
-# as the user ci). Nothing reaches the Docker engine of the host except the
+# as the user ci, with the DNS plugin dnsname of its CNI backend; storage
+# driver vfs on an ext4 volume: in this nested container – Docker Desktop
+# and its VM – every rootless container of the overlay driver failed with
+# "exec …: Invalid argument", C-107; a runner needs none of this). Nothing reaches the Docker engine of the host except the
 # container itself: removed on exit with its volume, and the Ubuntu image if
 # the script pulled it. Never part of the gate.
 #
@@ -77,7 +80,7 @@ if [ -f /oec-extra-ca.pem ]; then
 fi
 apt-get update -qq
 pkgs="ca-certificates curl git jq golang-go docker.io docker-buildx docker-compose-v2 iproute2"
-[ "$PODMAN" = 1 ] && pkgs="$pkgs podman uidmap slirp4netns passt fuse-overlayfs dbus-user-session"
+[ "$PODMAN" = 1 ] && pkgs="$pkgs podman uidmap slirp4netns passt fuse-overlayfs dbus-user-session golang-github-containernetworking-plugin-dnsname"
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends $pkgs >/dev/null
 echo "linux-images.sh: $(docker --version), $(docker buildx version), $(docker compose version), $(go version)"
 dockerd >/var/log/dockerd.log 2>&1 &
@@ -87,5 +90,10 @@ until docker info >/dev/null 2>&1; do
 	sleep 1
 done
 useradd --create-home --groups docker ci
+if [ "$PODMAN" = 1 ]; then
+	mkdir -p /home/ci/.config/containers /var/lib/containers/ci
+	printf "[storage]\ndriver = \"vfs\"\ngraphroot = \"/var/lib/containers/ci\"\n" >/home/ci/.config/containers/storage.conf
+	chown -R ci:ci /home/ci/.config /var/lib/containers/ci
+fi
 printf "%s\n" "$JOB" >/tmp/job.sh
 runuser -u ci -- env HOME=/home/ci USER=ci PODMAN="$PODMAN" sh /tmp/job.sh'
