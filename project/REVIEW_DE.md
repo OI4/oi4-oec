@@ -29,6 +29,10 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 - **Zu D-1 (a):** **Wer bearbeitet die Meldungen?** (mindestens zwei Personen oder eine Rolle). Das steht nur im internen Entwurf `research/vulnerability-handling.md` als Platzhalter; `oec/SECURITY.md` ist vollständig.
 - **Altes Token widerrufen (optional, empfohlen):** Das Secret ist jetzt das neue, nur lesende Token (Nachtrag 4). Das alte klassische Token (`ghp_…`) wird nicht mehr gebraucht – bitte unter GitHub → Settings → Developer settings → Personal access tokens (classic) löschen.
 
+### Zur Info: C-108 Nachtrag 5 – wer Meldungen bearbeitet
+
+- Deine Antwort: „müssen wir zwei Personen nennen? Nenne mich und allgemein die OI4“. Wird im internen Entwurf eingetragen.
+
 ### Zur Info: C-108 Nachtrag 4 – Token
 
 - Deine Antwort: „Ist gesetzt“ (Contents: Read-only am neuen Token ergänzt, Actions entfernt).

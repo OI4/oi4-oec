@@ -855,6 +855,9 @@ Inputs still missing (no decision, data or an action of yours):
 
 ### Answered earlier
 
+Answered after C-108 addendum 4 (2026-11-24) and recorded in C-108 addendum 5:
+- Triage people of D-1 (a): "müssen wir zwei pesonen nennen? Nenne mich und allgemein die OI4" – two people are not required (it was the proposal, for absence); applied in addendum 5.
+
 Answered after C-108 addendum 3 (2026-11-24) and recorded in C-108 addendum 4:
 - A-552 token: "Ist gesetzt" – Contents: Read-only added to the fine-grained token in `.env` (and Actions removed); probe passed (read 200, write 403, other repository 404), secret set – A-552 closed.
 

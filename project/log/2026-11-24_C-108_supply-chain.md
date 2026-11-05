@@ -137,3 +137,7 @@ Probe (value never printed): `git-upload-pack` of `OI4/oi4-oec-documentation` �
 Secret set: `gh secret set -f .env -R OI4/oi4-oec` (`.env` holds only the key `OEC_GUIDELINE_TOKEN`; checked by key name); `gh secret list` shows `OEC_GUIDELINE_TOKEN` updated 2026-11-05T11:36:25Z (GitHub clock). Setting a secret starts no run (`gh run list`: the latest runs are still those of 2026-11-04, GitHub clock). Nothing pushed (C-105 D-2 (b)). The first hosted checkout with the new token happens in the exit run C-111.
 
 A-552 is closed: the secret is a read-only token for the guideline repository only. Left for the PO (optional, recommended): revoke the old classic token (`ghp_…`), which is no longer used by the workspace.
+
+## Addendum 5 (2026-11-24) – who triages
+
+The PO: "müssen wir zwei pesonen nennen? Nenne mich und allgemein die OI4". Recorded first. Answer to the question: no – neither the CRA nor GitHub private vulnerability reporting requires a number of people; "at least two" was the agent's proposal so that the time frames hold during absence. The PO as the named person plus the OI4 Alliance as the organisation behind him covers that. Applied in the next commit: the draft `research/vulnerability-handling.md` §3 (and its status and §7), ADR-0032 amendment C-108 item 7, REVIEW/REVIEW_DE, STATUS. `oec/SECURITY.md` names no people and stays unchanged.
