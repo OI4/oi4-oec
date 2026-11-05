@@ -54,8 +54,11 @@ import (
 
 const tool = "oec-infra"
 
-// version is set by the release build (-ldflags "-X main.version=…").
+// version is set by the release build (-ldflags "-X main.version=…"), else
+// init takes the module version of go install …@v<version>.
 var version = "dev"
+
+func init() { version = report.ToolVersion(version) }
 
 const (
 	exitPass         = 0
