@@ -128,6 +128,12 @@ Probe of the new token (value never printed): fine-grained (`github_pat_` prefix
 
 Correction of addendum 2 and A-552: the `permissions` object of `GET /repos/…` (`push: true`) describes the role of the token's owner, not the token's rights; it does not show whether a token is read-only. The probe above (receive-pack, contents) is the reliable test. The recommendation (fine-grained, Contents read-only) stands.
 
-## Addendum 4 (2026-11-05) – token permission added, secret set
+## Addendum 4 (2026-11-24) – token permission added, secret set
 
 The PO, after the instruction (add Contents: Read-only, remove Actions, keep Metadata, Update): "Ist gesetzt". Recorded first; then the probe is repeated and, if it passes, the secret set from `.env` (value never printed).
+
+Probe (value never printed): `git-upload-pack` of `OI4/oi4-oec-documentation` → 200, branch `feature/spec-findings` → 200, contents → 200; `git-receive-pack` → 403 (no write); `OI4/oi4-oec` → 404 (no access); Actions API of the documentation repository → 403 (Actions permission removed); expiry 2027-11-06. The token is fine-grained, limited to `OI4/oi4-oec-documentation` with Contents and Metadata read-only – as `oec/ci/README.md` "Activation" requires.
+
+Secret set: `gh secret set -f .env -R OI4/oi4-oec` (`.env` holds only the key `OEC_GUIDELINE_TOKEN`; checked by key name); `gh secret list` shows `OEC_GUIDELINE_TOKEN` updated 2026-11-05T11:36:25Z (GitHub clock). Setting a secret starts no run (`gh run list`: the latest runs are still those of 2026-11-04, GitHub clock). Nothing pushed (C-105 D-2 (b)). The first hosted checkout with the new token happens in the exit run C-111.
+
+A-552 is closed: the secret is a read-only token for the guideline repository only. Left for the PO (optional, recommended): revoke the old classic token (`ghp_…`), which is no longer used by the workspace.
