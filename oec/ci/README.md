@@ -5,8 +5,8 @@ workflows are **generated** from a typed model in this Go module (standard
 library only) and only set up tools and call the scripts of the local gate –
 the same `oec/check.sh` that runs before every commit. Nothing here publishes
 anything: the workflows become active when the repository is pushed to GitHub
-(a decision of the PO, Q-011), and their binaries are workflow artifacts, not
-releases.
+(a decision of the PO, Q-011), and their binaries – also those of
+`release.yml` – are workflow artifacts, not published releases.
 
 ## Layout
 
@@ -14,6 +14,7 @@ releases.
 |---|---|
 | `gha/` | the workflow model, the YAML renderer (plain scalars where unambiguous, double-quoted otherwise, literal blocks) and the CI policy `Check` |
 | `pipelines/` | the pinned actions, the hosted runners and the workflows; tests against the repository (policy, generated files, tool pins, scripts, runners) |
+| `cmd/pack/` | deterministic `.tar.gz`/`.zip` of a directory for `release.sh` (sorted entries, fixed modes and owner, one mtime, no host fields) |
 | `cmd/cigen/` | renders the workflows into `../../.github/workflows`; `-check` fails if a file is outdated or not generated (gate step 11) |
 | `versions.sh` | the pins: Rust toolchain, cbindgen, cargo-deny, actionlint, govulncheck, the guideline branch, the Ubuntu image of `linux.sh`; for `micro.yml` the Espressif ESP-IDF image (by digest), `arduino-cli` with the SHA-256 of its archives, the Arduino-ESP32 cores and the M5Stack libraries |
 | `disk.sh` | frees disk space on a GitHub-hosted Linux runner (removes the preinstalled Android SDK, .NET, Haskell, Swift and CodeQL); nothing elsewhere (macOS, local, `linux.sh` container) |
@@ -21,7 +22,7 @@ releases.
 | `setup-tools.sh` | installs the toolchain and tools of `versions.sh` (rustup; `cargo install --locked` into `~/.oec-tools`); `--toolchain` only the Rust toolchain (`sdk.yml`, `micro.yml`); `GITHUB_PATH` entries as Windows paths on Windows |
 | `fetch.sh` | `cargo fetch --locked` for every `Cargo.lock` under `oec/` (the gate builds `--offline --locked`) |
 | `conformance.sh` | gofmt, vet and tests of `oec/conformance` (D7/D8), as gate step 4 |
-| `binaries.sh` | cross-builds `oec-check` and `oec-infra` for windows/linux/darwin × amd64/arm64 with `SHA256SUMS` (reproducible: `CGO_ENABLED=0`, `-trimpath`, no build id) |
+| `binaries.sh` | cross-builds `oec-check` and `oec-infra` for windows/linux/darwin × amd64/arm64 with `SHA256SUMS` (reproducible: `CGO_ENABLED=0`, `-trimpath`, `-buildvcs=false`, no build id); `VERSION` (default `dev`) is the version they report (`-X main.version`) |
 | `sdk-rust.sh` | the Rust SDK on one runner of `sdk.yml`: clippy and tests of `oec/sdk/rust` for the host target (the C tests of `oec-ffi` with the sanitizers on Unix), `ffi-lib.sh`, and a C smoke test (`examples/hello.c` linked to the static library, run without a container storage: it must fail with the bootstrap error) |
 | `sdk-go.sh` | the Go SDK on one runner of `sdk.yml`, as the Go part of `sdk/check.sh` (`oec-buildlib`, `go-testbroker`, `oec-check`, `go vet`, `go test -race`, examples); on Windows the library of the MinGW target `x86_64-pc-windows-gnu` (amd64 only), with `<dir>` also as prebuilt library |
 | `sdk-armv7.sh` | ARMv7 Linux, best effort: cross build of the Rust SDK for `armv7-unknown-linux-gnueabihf` (aws-lc-rs; clippy also with `crypto-ring`), the Rust tests under `qemu-arm`, `ffi-lib.sh`, the C smoke test under `qemu-arm`, the Go SDK for `linux/arm` (`GOARM=7`: vet, examples, the example `hello` under `qemu-arm`) |
@@ -36,6 +37,7 @@ releases.
 | `linux-images.sh` | the job `images` of `images.yml` on a fresh Ubuntu 24.04 in a privileged container with a Docker engine of its own (opt-in; `OEC_CI_PODMAN=1` adds `podman.sh`, with storage driver `vfs` – nested in Docker Desktop the overlay driver failed) |
 | `sbom.sh` | the SBOM (SPDX 2.3 JSON), the license texts and the license report `LICENSES.md` of every deliverable into `<dir>/<deliverable>/` with `oec-sbom` (no build: the crates from `cargo tree` over the eight targets of the SDK matrix, the Go modules from `go list -deps` over the six platforms of the binaries; needs the crates fetched); the image SBOMs stay in the images |
 | `audit.sh` | the vulnerability check with network: `govulncheck` (pinned, `go run`) on every Go module, `cargo deny check advisories` with the fresh RustSec database on every `Cargo.lock` outside the spikes, `npm audit` of the Registry Web UI; every check runs, the outputs go to `<dir>`, it fails at the end on any finding |
+| `release.sh` | the release of `release.yml` (ADR-0033): `release.sh <dir> [source binaries micro schema sbom ffi images assemble]` builds the parts from the checked-out commit with the scripts above, `assemble` packs them and writes `RELEASE-NOTES.md` and `SHA256SUMS`; a tag `oec-v<VERSION>` makes a release, every other build a snapshot `<VERSION>-snapshot.g<commit>` |
 | `lint.sh` | actionlint on the workflows (opt-in locally, a job of `gate.yml`) |
 | `linux.sh` | the job `gate` of `gate.yml` in an Ubuntu 24.04 container (opt-in) |
 
@@ -48,9 +50,11 @@ releases.
 | `sdk.yml` | `rust`: `setup-tools.sh --toolchain`, `sdk-rust.sh`, upload `liboec_ffi-<target>`; `go`: `sdk-go.sh`, on Windows upload `liboec_ffi-x86_64-pc-windows-gnu`; `armv7`: `packages.sh --armv7`, `sdk-armv7.sh`, upload `liboec_ffi-armv7-unknown-linux-gnueabihf` (all artifacts 14 days) | `rust`: all six; `go`: all but `windows-11-arm` (no cgo toolchain); `armv7`: `ubuntu-24.04` |
 | `micro.yml` | `host`: `packages.sh`, `setup-tools.sh --toolchain` (not on Windows), `micro-host.sh` with `OEC_CI_CC=gcc`; `esp-idf`: `disk.sh`, `setup-tools.sh --toolchain`, `micro-esp-idf.sh`; `arduino`: `disk.sh`, `micro-arduino.sh` for the cores `3.3` and `4.0`; no artifacts (no firmware) | `host`: `ubuntu-24.04`, `ubuntu-24.04-arm`, `windows-2025`; `esp-idf` and `arduino`: `ubuntu-24.04` |
 | `supply-chain.yml` | `sbom`: `setup-tools.sh --toolchain`, `fetch.sh`, `sbom.sh`, upload `oec-sbom` (14 days); `audit`: `setup-tools.sh`, `audit.sh`, upload `oec-audit` (14 days, also after a failure); no release | `ubuntu-24.04` |
+| `release.yml` | `ffi`: `packages.sh` (armv7: `--armv7`), `setup-tools.sh --toolchain`, `release.sh … ffi`; `dist`: `setup-tools.sh --toolchain`, `fetch.sh`, `release.sh … source binaries micro schema sbom`; `images`: `release.sh … images`; `release` (after all three): the parts of the run, `release.sh … assemble`, upload `oec-release` (30 days); no caches; nothing published | `ffi`: the runner of each target in `sdk.yml` (armv7 cross on `ubuntu-24.04`); the others `ubuntu-24.04` |
 | `images.yml` | `images`: `disk.sh`, `images.sh` (the five images, D8 `image`/`run`), `getting-started.sh`, `live-infra.sh`, on `ubuntu-24.04` also `podman.sh`; upload of the D8 reports and logs as `oec-images-reports-<runner>` (14 days, also after a failure) – never an image or OCI archive | `ubuntu-24.04`, `ubuntu-24.04-arm` |
 
-Triggers: push to `main`, pull requests, manual start. Every run step uses
+Triggers: push to `main`, pull requests, manual start; `release.yml` only a
+tag `oec-v*` or a manual start. Every run step uses
 `bash` (Git Bash on Windows). The repository is checked out with LF line
 endings everywhere (`.gitattributes`).
 
@@ -91,9 +95,9 @@ libraries of `native-static-libs.txt` (`rustc --print native-static-libs`;
 for MinGW `ffi-lib.sh` adds `-l:libpthread.a`: aws-lc uses winpthreads
 there and `rustc` does not print it). For the Go SDK,
 copy the library to `oec/sdk/go/lib/<GOOS>_<GOARCH>/liboec_ffi.a` instead of
-running `oec-buildlib`. Static libraries only; the shared library, a
-third-party license report (C-108) and releases (Q-011) are not part of the
-artifacts.
+running `oec-buildlib`. Static libraries only; the shared library is not
+built. `release.yml` packs the same libraries with the SBOM of `oec-ffi`
+(C-109).
 
 ## Activation (PO, Q-011)
 
@@ -137,7 +141,51 @@ ci/live-infra.sh                         # opt-in: live.sh with the registry
 ci/linux-images.sh /tmp/reports          # opt-in: the job images in Ubuntu 24.04 with its own dockerd (Docker, network, 30–60 min)
 ci/sbom.sh /tmp/oec-sbom                 # opt-in: the SBOMs and license reports of every deliverable (offline after ci/fetch.sh)
 ci/audit.sh /tmp/oec-audit               # opt-in: govulncheck, cargo deny check advisories, npm audit (network, needs npm)
+ci/release.sh /tmp/oec-release           # opt-in: a snapshot release for this machine's library target (after ci/fetch.sh; ~10 min)
 ```
+
+## Releases (`release.yml`, C-109)
+
+One version for every code deliverable: [`../VERSION`](../VERSION), with
+its changes in [`../CHANGELOG.md`](../CHANGELOG.md) (ADR-0033;
+`TestReleaseVersion` checks every manifest and default that states it). The
+JSON Schema bundle (`schema.Version`, `2.MINOR.PATCH`), the D7/D8 report
+formats and `OECM_API_VERSION` keep their own versions.
+
+| File | Content |
+|---|---|
+| `oec-<v>-source.tar.gz` | `oec/` at the commit (`git archive`) |
+| `oec-check-<v>-<os>-<arch>`, `oec-infra-<v>-<os>-<arch>` | D7/D8 for six platforms, reporting `<v>` |
+| `liboec_ffi-<v>-<target>.tar.gz` (`.zip` for Windows) | the prebuilt C ABI library of each of the eight targets of `sdk.yml` |
+| `OECMicro-<v>.zip` | the Arduino library (the ESP-IDF component is in the source archive) |
+| `oec-schema-<bundle>.tar.gz` | the JSON Schema bundle, both flavors |
+| `oec-<v>-sbom.tar.gz` | `sbom.sh`: SBOM, license texts and report of every deliverable |
+| `oec-<image>-<v>.oci.tar`, `oec-<v>-image-reports.tar.gz` | the five images (linux/amd64 + linux/arm64) and their D8 reports |
+| `RELEASE-NOTES.md`, `SHA256SUMS` | facts and changes of the version; the checksums of every file |
+
+`<v>` is `VERSION` on a tag build: the tag must be `oec-v<VERSION>`, the
+tree clean, the CHANGELOG heading of the version without "unreleased" and
+the schema bundle released (no `-dev`, a manifest in `schema/release/`).
+Every other build is a snapshot `<VERSION>-snapshot.g<12 hex digits>`
+(`OEC_RELEASE_ALLOW_DIRTY=1` allows uncommitted changes for a try).
+`SOURCE_DATE_EPOCH` is the commit time: the archives (`cmd/pack`, `git
+archive`), D7/D8, the libraries (same toolchain and paths) and the SBOMs
+are reproducible – two runs give the same `SHA256SUMS` (C-109: macOS and
+Ubuntu 24.04); the images are not (package installs in the builder
+stages). `assemble` refuses parts of another commit or version and, on a
+tag build, a missing part or library target. The images part needs Docker
+with buildx and tags `oi4/oec-*:<v>` only while it runs: never run it next
+to an `oec/dev` stack of the same version. An `.oci.tar` is an OCI image
+layout with a multi-arch index and no image name – the input for an image
+registry (`skopeo copy --all oci-archive:<file> docker://<name>:<v>`) and
+for D8 `oec-infra image`; Podman and Docker with the containerd image store
+load it, the classic Docker store does not.
+
+Nothing is published – no GitHub Release, no registry, no crates.io, Go
+module proxy, ESP Component Registry or Arduino Library Manager: the
+channels are the PO's (Q-011, C-104 D-2). A release commit sets `VERSION`
+and the places `TestReleaseVersion` lists, and turns `## <v> – unreleased`
+into the release date; then the tag `oec-v<v>` starts `release.yml`.
 
 ## Supply chain (`supply-chain.yml`, C-108)
 
