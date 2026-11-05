@@ -82,10 +82,15 @@ func (w Workflow) node() mapping {
 	if len(w.PushTags) > 0 {
 		push = append(push, pair{"tags", strs(w.PushTags)})
 	}
+	if len(w.PushBranches) > 0 && len(w.PathsIgnore) > 0 {
+		push = append(push, pair{"paths-ignore", strs(w.PathsIgnore)})
+	}
 	if len(push) > 0 {
 		on = append(on, pair{"push", push})
 	}
-	if w.PullRequest {
+	if w.PullRequest && len(w.PathsIgnore) > 0 {
+		on = append(on, pair{"pull_request", mapping{{"paths-ignore", strs(w.PathsIgnore)}}})
+	} else if w.PullRequest {
 		on = append(on, pair{"pull_request", null{}})
 	}
 	if w.Dispatch {

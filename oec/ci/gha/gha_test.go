@@ -187,6 +187,46 @@ func TestRenderTagsNeeds(t *testing.T) {
 	}
 }
 
+// TestRenderPathsIgnore: paths-ignore goes under push and pull_request
+// (C-111 D-3 (a): documentation-only pushes run no CI).
+func TestRenderPathsIgnore(t *testing.T) {
+	w := sample()
+	w.PathsIgnore = []string{"project/**"}
+	got, err := Render(w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "on:\n  push:\n    branches:\n      - main\n    paths-ignore:\n      - project/**\n" +
+		"  pull_request:\n    paths-ignore:\n      - project/**\n  workflow_dispatch:\npermissions:\n"
+	if !strings.Contains(string(got), want) {
+		t.Errorf("Render lacks\n%s\ngot:\n%s", want, got)
+	}
+	if errs := Check(w, samplePolicy()); len(errs) > 0 {
+		t.Errorf("Check(paths-ignore) = %v", errs)
+	}
+	for name, edit := range map[string]func(w *Workflow){
+		"tags only": func(w *Workflow) {
+			w.PushBranches, w.PullRequest, w.PushTags = nil, false, []string{"oec-v*"}
+		},
+		"empty":    func(w *Workflow) { w.PathsIgnore = []string{""} },
+		"negation": func(w *Workflow) { w.PathsIgnore = []string{"!project/x"} },
+		"absolute": func(w *Workflow) { w.PathsIgnore = []string{"/project/**"} },
+	} {
+		w := sample()
+		w.PathsIgnore = []string{"project/**"}
+		edit(&w)
+		found := false
+		for _, err := range Check(w, samplePolicy()) {
+			if strings.Contains(err.Error(), "paths-ignore") {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("%s: Check accepted paths-ignore %q", name, w.PathsIgnore)
+		}
+	}
+}
+
 // publishing is release() with a publishing job behind an environment that
 // gets an environment secret in the env of its run step (C-110).
 func publishing() Workflow {

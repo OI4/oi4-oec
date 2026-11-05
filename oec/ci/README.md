@@ -55,7 +55,9 @@ anything: the workflows become active when the repository is pushed to GitHub
 | `images.yml` | `images`: `disk.sh`, `images.sh` (the five images, D8 `image`/`run`), `getting-started.sh`, `live-infra.sh`, on `ubuntu-24.04` also `podman.sh`; upload of the D8 reports and logs as `oec-images-reports-<runner>` (14 days, also after a failure) – never an image or OCI archive | `ubuntu-24.04`, `ubuntu-24.04-arm` |
 
 Triggers: push to `main`, pull requests, manual start; `release.yml` only a
-tag `oec-v*` or a manual start. Every run step uses
+tag `oec-v*` or a manual start. Pushes and pull requests that change only
+`project/**` (logs, status, reviews, ADRs) start no workflow (`paths-ignore`,
+C-111 D-3 (a)); the gate never reads `project/` (`TestPathsIgnore`). Every run step uses
 `bash` (Git Bash on Windows). The repository is checked out with LF line
 endings everywhere (`.gitattributes`).
 

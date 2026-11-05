@@ -33,6 +33,7 @@ type Workflow struct {
 	PushBranches []string // push trigger on these branches
 	PushTags     []string // push trigger on these tag patterns (release.yml, C-109)
 	PullRequest  bool     // pull_request trigger (never pull_request_target)
+	PathsIgnore  []string // paths-ignore of the push (branches) and pull_request triggers (C-111)
 	Dispatch     bool     // workflow_dispatch trigger
 
 	Permissions []KV // workflow level, the jobs inherit them

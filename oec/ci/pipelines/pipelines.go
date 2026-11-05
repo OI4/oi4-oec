@@ -86,6 +86,7 @@ func base(file, name string, comment []string, jobs ...gha.Job) gha.Workflow {
 		Name:         name,
 		PushBranches: []string{"main"},
 		PullRequest:  true,
+		PathsIgnore:  []string{"project/**"}, // documentation only: no CI (C-111 D-3 (a))
 		Dispatch:     true,
 		Permissions:  []gha.KV{{Key: "contents", Value: "read"}},
 		Concurrency:  gha.Concurrency{Group: "${{ github.workflow }}-${{ github.ref }}", CancelInProgress: true},
@@ -739,5 +740,6 @@ func Release() gha.Workflow {
 	w.PushBranches = nil
 	w.PushTags = []string{"oec-v*"}
 	w.PullRequest = false
+	w.PathsIgnore = nil
 	return w
 }

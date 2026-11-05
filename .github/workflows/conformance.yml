@@ -9,7 +9,11 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - project/**
   pull_request:
+    paths-ignore:
+      - project/**
   workflow_dispatch:
 permissions:
   contents: read

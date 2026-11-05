@@ -63,6 +63,49 @@ func TestGenerated(t *testing.T) {
 	}
 }
 
+// TestPathsIgnore (C-111 D-3 (a)): pushes and pull requests that only change
+// the project documents (project/) start no workflow; the release workflow
+// (tags) has no path filter. The gate never reads project/ – only spectool
+// rebaseline names the living project documents.
+func TestPathsIgnore(t *testing.T) {
+	for _, w := range Workflows() {
+		got := strings.Join(w.PathsIgnore, " ")
+		switch {
+		case len(w.PushBranches) > 0 && got != "project/**":
+			t.Errorf("%s: paths-ignore %q, want project/**", w.File, got)
+		case len(w.PushBranches) == 0 && got != "":
+			t.Errorf("%s: paths-ignore %q on a workflow without a branch trigger", w.File, got)
+		}
+	}
+	allowed := map[string]bool{"spec/tools/cmd/spectool/main.go": true, "ci/pipelines/pipelines.go": true}
+	err := filepath.WalkDir(oec, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			switch d.Name() {
+			case "node_modules", "target", "build", ".git", "testdata":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".sh") && !(strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "_test.go")) {
+			return nil
+		}
+		rel, _ := filepath.Rel(oec, path)
+		if allowed[filepath.ToSlash(rel)] {
+			return nil
+		}
+		if strings.Contains(read(t, path), "project/") {
+			t.Errorf("oec/%s mentions project/ – documentation-only pushes skip the CI (paths-ignore)", filepath.ToSlash(rel))
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 // TestVersions: the pins of versions.sh agree with the gate scripts and the
 // Cargo packages.
 func TestVersions(t *testing.T) {

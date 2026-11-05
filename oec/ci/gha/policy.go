@@ -36,6 +36,7 @@ var (
 	secretRe = regexp.MustCompile(`secrets\.([A-Za-z_][A-Za-z0-9_]*)`)
 	exprRe   = regexp.MustCompile(`\$\{\{(.*?)\}\}`)
 	tagRe    = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._/*-]*$`)
+	pathRe   = regexp.MustCompile(`^[A-Za-z0-9._][A-Za-z0-9._/*-]*$`) // relative, no negation (C-111)
 )
 
 // untrusted are contexts an attacker controls in a pull request (script
@@ -62,6 +63,14 @@ func Check(w Workflow, p Policy) []error {
 	for _, tag := range w.PushTags {
 		if !tagRe.MatchString(tag) {
 			bad("tag pattern %q must match %s", tag, tagRe)
+		}
+	}
+	if len(w.PathsIgnore) > 0 && len(w.PushBranches) == 0 && !w.PullRequest {
+		bad("paths-ignore needs a branch push or a pull_request trigger")
+	}
+	for _, p := range w.PathsIgnore {
+		if !pathRe.MatchString(p) {
+			bad("paths-ignore pattern %q must match %s", p, pathRe)
 		}
 	}
 	if len(w.Permissions) != 1 || w.Permissions[0] != (KV{"contents", "read"}) {
