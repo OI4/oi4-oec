@@ -101,7 +101,7 @@ func TestVersions(t *testing.T) {
 	if got := shVar(t, versions, "guideline_ref"); got != GuidelineRef {
 		t.Errorf("versions.sh guideline_ref %s, workflows %s", got, GuidelineRef)
 	}
-	for _, v := range []string{"cargo_deny_version", "actionlint_version"} {
+	for _, v := range []string{"cargo_deny_version", "actionlint_version", "govulncheck_version"} {
 		if !regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+$`).MatchString(shVar(t, versions, v)) {
 			t.Errorf("versions.sh %s is not a release version", v)
 		}
@@ -551,5 +551,83 @@ func TestImages(t *testing.T) {
 	}
 	if !strings.Contains(read(t, filepath.Join(oec, "ci/live-infra.sh")), `OEC_LIVE_REGISTRY=1 "$oec/conformance/live.sh"`) {
 		t.Error("live-infra.sh does not run live.sh with the registry")
+	}
+}
+
+// TestSupplyChain: the supply chain workflow (ADR-0032 amendment C-108) –
+// the job sbom makes the SBOM, license texts and license report of every
+// deliverable with oec/ci/sbom.sh and uploads them as a workflow artifact
+// (no release, Q-011); the job audit runs the vulnerability check
+// oec/ci/audit.sh with network and uploads its outputs also on failure.
+// Both on the hosted Linux runner, with the triggers of every workflow (no
+// schedule: the model has none and the CI is paused, C-105 D-2).
+func TestSupplyChain(t *testing.T) {
+	w := SupplyChain()
+	if w.File != "supply-chain.yml" {
+		t.Errorf("supply chain workflow file %s", w.File)
+	}
+	var found bool
+	for _, x := range Workflows() {
+		found = found || x.File == w.File
+	}
+	if !found {
+		t.Error("Workflows() lacks supply-chain.yml")
+	}
+	want := map[string]struct {
+		cmds, name, path, cond string
+	}{
+		"sbom":  {"oec/ci/setup-tools.sh --toolchain\noec/ci/fetch.sh\noec/ci/sbom.sh dist/sbom", "oec-sbom", "dist/sbom", ""},
+		"audit": {"oec/ci/setup-tools.sh\noec/ci/audit.sh dist/audit", "oec-audit", "dist/audit", "always()"},
+	}
+	if len(w.Jobs) != len(want) {
+		t.Errorf("supply chain: %d jobs, want %d", len(w.Jobs), len(want))
+	}
+	for id, x := range want {
+		j := job(t, w, id)
+		if j.RunsOn != "ubuntu-24.04" {
+			t.Errorf("%s: runs on %s, want ubuntu-24.04", id, j.RunsOn)
+		}
+		if cmds := strings.Join(gha.Workflow{Jobs: []gha.Job{j}}.Commands(), "\n"); cmds != x.cmds {
+			t.Errorf("%s job commands:\n%s\nwant:\n%s", id, cmds, x.cmds)
+		}
+		ups := uploads(j)
+		if len(ups) != 1 {
+			t.Fatalf("%s: %d upload steps, want 1", id, len(ups))
+		}
+		if n, _ := gha.Get(ups[0].With, "name"); n != x.name {
+			t.Errorf("%s: artifact %q, want %q", id, n, x.name)
+		}
+		if p, _ := gha.Get(ups[0].With, "path"); p != x.path {
+			t.Errorf("%s: artifact path %q, want %q", id, p, x.path)
+		}
+		if ups[0].If != x.cond {
+			t.Errorf("%s: upload if %q, want %q", id, ups[0].If, x.cond)
+		}
+		if j.Steps[len(j.Steps)-1].Uses != UploadArtifact {
+			t.Errorf("%s: the upload is not the last step", id)
+		}
+	}
+	// sbom.sh: every deliverable of ROADMAP P9 increment 5, nothing built
+	// or pushed; audit.sh: the three checks, govulncheck as a pinned tool.
+	sb := read(t, filepath.Join(oec, "ci/sbom.sh"))
+	for _, d := range []string{"oec-rust-sdk", "oec-ffi", "oec-go-sdk", "oec-micro-sdk", "oec-check", "oec-infra",
+		"oec-logger", "oec-weather", "oec-config", "oec-registry", "oec-schema", "-npm", "-report"} {
+		if !strings.Contains(sb, d) {
+			t.Errorf("sbom.sh lacks %s", d)
+		}
+	}
+	au := read(t, filepath.Join(oec, "ci/audit.sh"))
+	for _, s := range []string{`golang.org/x/vuln/cmd/govulncheck@v$3`, "$govulncheck_version", "check advisories", "npm audit"} {
+		if !strings.Contains(au, s) {
+			t.Errorf("audit.sh lacks %s", s)
+		}
+	}
+	if strings.Contains(au, "--frozen") || strings.Contains(au, "--disable-fetch") {
+		t.Error("audit.sh must check with the fresh advisory database")
+	}
+	for _, s := range []string{sb, au} {
+		if regexp.MustCompile(`(?m)^[^#]*\b(push|login|publish)\b`).MatchString(s) {
+			t.Error("a supply chain script publishes (Q-011)")
+		}
 	}
 }

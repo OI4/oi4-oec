@@ -55,7 +55,7 @@ func Policy() gha.Policy {
 
 // Workflows returns every workflow of the repository.
 func Workflows() []gha.Workflow {
-	return []gha.Workflow{Gate(), Conformance(), SDK(), Micro(), Images()}
+	return []gha.Workflow{Gate(), Conformance(), SDK(), Micro(), Images(), SupplyChain()}
 }
 
 func header(lines ...string) []string {
@@ -472,4 +472,83 @@ func Images() gha.Workflow {
 		"live run of D7/D8 with the registry and Podman. Nothing is pushed: the",
 		"artifact holds the D8 reports and logs only (Q-011).",
 	), images)
+}
+
+// SupplyChain is the supply chain workflow (ADR-0032 amendment C-108): the
+// SBOM (SPDX 2.3), the license texts and the license report of every
+// deliverable as a workflow artifact (no release, Q-011), and the
+// vulnerability check of the Go modules, the Cargo.locks and the npm
+// packages of the Registry Web UI with the current advisory databases. No
+// schedule: the CI is paused (C-105 D-2); a weekly run after the first
+// release is a proposal of the vulnerability handling draft.
+func SupplyChain() gha.Workflow {
+	sbom := gha.Job{
+		ID:             "sbom",
+		Name:           "SBOM and license report of every deliverable",
+		RunsOn:         "ubuntu-24.04",
+		TimeoutMinutes: 30,
+		Steps: []gha.Step{
+			checkout(),
+			setupGo("oec/demos/go.mod", "oec/**/go.sum"),
+			{
+				Name: "Cache the crates",
+				Uses: Cache,
+				With: []gha.KV{
+					{Key: "path", Value: "~/.cargo/registry\n"},
+					{Key: "key", Value: "oec-supply-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('oec/ci/versions.sh', 'oec/**/Cargo.lock') }}"},
+					{Key: "restore-keys", Value: "oec-supply-${{ runner.os }}-${{ runner.arch }}-"},
+				},
+			},
+			run("Install the Rust toolchain of oec/ci/versions.sh", "oec/ci/setup-tools.sh --toolchain"),
+			run("Fetch the crates of every Cargo.lock", "oec/ci/fetch.sh"),
+			run("SBOM, license texts and license report (oec/ci/sbom.sh)", "oec/ci/sbom.sh dist/sbom"),
+			{
+				Name: "Upload the SBOMs (workflow artifact, not a release)",
+				Uses: UploadArtifact,
+				With: []gha.KV{
+					{Key: "name", Value: "oec-sbom"},
+					{Key: "path", Value: "dist/sbom"},
+					{Key: "if-no-files-found", Value: "error"},
+					{Key: "retention-days", Value: "14"},
+				},
+			},
+		},
+	}
+	audit := gha.Job{
+		ID:             "audit",
+		Name:           "Vulnerability check (govulncheck, cargo deny, npm audit)",
+		RunsOn:         "ubuntu-24.04",
+		TimeoutMinutes: 45,
+		Steps: []gha.Step{
+			checkout(),
+			setupGo("oec/conformance/go.mod", "oec/**/go.sum"),
+			{
+				Name: "Cache the cargo tools and crates",
+				Uses: Cache,
+				With: []gha.KV{
+					{Key: "path", Value: "~/.oec-tools\n~/.cargo/registry\n"},
+					{Key: "key", Value: "oec-audit-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('oec/ci/versions.sh', 'oec/**/Cargo.lock') }}"},
+					{Key: "restore-keys", Value: "oec-audit-${{ runner.os }}-${{ runner.arch }}-"},
+				},
+			},
+			run("Install the tools of oec/ci/versions.sh", "oec/ci/setup-tools.sh"),
+			run("govulncheck, cargo deny check advisories, npm audit (oec/ci/audit.sh)", "oec/ci/audit.sh dist/audit"),
+			{
+				Name: "Upload the outputs of the checks",
+				If:   "always()",
+				Uses: UploadArtifact,
+				With: []gha.KV{
+					{Key: "name", Value: "oec-audit"},
+					{Key: "path", Value: "dist/audit"},
+					{Key: "if-no-files-found", Value: "warn"},
+					{Key: "retention-days", Value: "14"},
+				},
+			},
+		},
+	}
+	return base("supply-chain.yml", "supply-chain", header(
+		"The SBOM (SPDX 2.3), license texts and license report of every deliverable",
+		"as a workflow artifact (no release, Q-011), and the vulnerability check of",
+		"the dependencies: govulncheck, cargo deny check advisories, npm audit.",
+	), sbom, audit)
 }
