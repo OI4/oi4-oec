@@ -13,7 +13,7 @@ set -eu
 test $# -eq 1 || { echo "usage: sbom.sh <dir>" >&2; exit 2; }
 here="$(cd "$(dirname "$0")" && pwd)"
 oec="$(cd "$here/.." && pwd)"
-# shellcheck source=versions.sh
+# shellcheck source-path=SCRIPTDIR source=versions.sh
 . "$here/versions.sh"
 mkdir -p "$1"
 out="$(cd "$1" && pwd)"

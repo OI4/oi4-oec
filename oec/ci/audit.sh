@@ -14,7 +14,7 @@ set -eu
 test $# -eq 1 || { echo "usage: audit.sh <dir>" >&2; exit 2; }
 here="$(cd "$(dirname "$0")" && pwd)"
 oec="$(cd "$here/.." && pwd)"
-# shellcheck source=versions.sh
+# shellcheck source-path=SCRIPTDIR source=versions.sh
 . "$here/versions.sh"
 mkdir -p "$1"
 out="$(cd "$1" && pwd)"
@@ -37,6 +37,7 @@ check() {
 for mod in $(cd "$oec" && find . -name go.mod -not -path '*/node_modules/*' -not -path '*/target/*' | sort); do
 	dir="$(dirname "${mod#./}")"
 	go="$(cd "$oec/$dir" && GOTOOLCHAIN=auto go env GOVERSION)"
+	# shellcheck disable=SC2016 # expanded by the inner sh
 	check "govulncheck-$(echo "$dir" | tr / -)" sh -c 'cd "$1" && GOTOOLCHAIN="$2" go run "golang.org/x/vuln/cmd/govulncheck@v$3" -show verbose ./...' \
 		- "$oec/$dir" "$go" "$govulncheck_version"
 done
@@ -45,6 +46,7 @@ for lock in $(cd "$oec" && find . -name Cargo.lock -not -path '*/target/*' -not 
 	check "cargo-deny-$(echo "$dir" | tr / -)" cargo deny --log-level error --config "$oec/sdk/rust/deny.toml" \
 		--manifest-path "$oec/$dir/Cargo.toml" check advisories
 done
+# shellcheck disable=SC2016 # expanded by the inner sh
 check npm-audit-registry-ui sh -c 'cd "$1" && npm audit --package-lock-only' - "$oec/registry/ui"
 test -z "$failed" || { echo "audit: failed:$failed" >&2; exit 1; }
 echo "audit: all checks passed"
