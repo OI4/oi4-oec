@@ -20,6 +20,11 @@
 //	                                                  move the spec to a new guideline commit: inventory,
 //	                                                  baseline in all sources, topic patterns, render,
 //	                                                  coverage, lint; lists the project docs to update
+//	spectool feedback  [-spec DIR] [-guideline DIR] [-rev REV] [-check]
+//	                                                  generate the feedback package for the work group
+//	                                                  (findings/feedback/ of the guideline repository:
+//	                                                  every spec finding with its commits, every other
+//	                                                  change since the base; C-110)
 package main
 
 import (
@@ -38,6 +43,7 @@ import (
 	"github.com/OI4/oec/spec/tools/internal/coverage"
 	"github.com/OI4/oec/spec/tools/internal/examples"
 	"github.com/OI4/oec/spec/tools/internal/export"
+	"github.com/OI4/oec/spec/tools/internal/feedback"
 	"github.com/OI4/oec/spec/tools/internal/guideline"
 	"github.com/OI4/oec/spec/tools/internal/inventory"
 	"github.com/OI4/oec/spec/tools/internal/maintain"
@@ -70,6 +76,8 @@ func main() {
 		err = cmdRebaseline(os.Args[2:])
 	case "crosscheck":
 		err = cmdCrosscheck(os.Args[2:])
+	case "feedback":
+		err = cmdFeedback(os.Args[2:])
 	case "-h", "--help", "help":
 		usage()
 		return
@@ -84,7 +92,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: spectool lint|render|inventory|coverage|topic|review|rebaseline|crosscheck [flags]  (spectool <cmd> -h for flags)")
+	fmt.Fprintln(os.Stderr, "usage: spectool lint|render|inventory|coverage|topic|review|rebaseline|crosscheck|feedback [flags]  (spectool <cmd> -h for flags)")
 }
 
 type common struct {
@@ -588,4 +596,84 @@ func cmdRebaseline(args []string) error {
 	fmt.Println("  - schema bundle: set schema.Baseline in oec/schema/schema.go to", short, "and schema.Version to the next pre-release (e.g. 2.1.0-dev) with an Unreleased section in oec/schema/CHANGELOG.md; a released version stays frozen (ADR-0019 amendment C-041)")
 	fmt.Println("  - ADR-0001 amendment and the cycle log record the new baseline; commit catalog, generated files and docs separately")
 	return lintErr
+}
+
+func cmdFeedback(args []string) error {
+	fs, c := flags("feedback")
+	rev := fs.String("rev", "", "target guideline commit (default: the baseline of spec/requirements/areas.yaml)")
+	check := fs.Bool("check", false, "fail on attribution problems or an outdated package instead of writing it")
+	_ = fs.Parse(args)
+	if *rev == "" {
+		s, err := catalog.Load(c.spec)
+		if err != nil {
+			return err
+		}
+		*rev = s.Areas.Baseline
+	}
+	g := c.guidelineDir()
+	reg, err := os.ReadFile(filepath.Join(g, filepath.FromSlash(feedback.RegisterFile)))
+	if err != nil {
+		return err
+	}
+	findings, err := feedback.ParseRegister(string(reg))
+	if err != nil {
+		return err
+	}
+	att, err := os.ReadFile(filepath.Join(g, filepath.FromSlash(feedback.AttributionFile)))
+	if err != nil {
+		return err
+	}
+	entries, err := feedback.ParseAttribution(string(att))
+	if err != nil {
+		return err
+	}
+	h, err := feedback.Git{Dir: g}.Load(feedback.Base, *rev)
+	if err != nil {
+		return err
+	}
+	p := &feedback.Package{History: h, Findings: findings, Attribution: entries}
+	problems := p.Problems()
+	files := p.Build()
+	dir := filepath.Join(g, filepath.FromSlash(feedback.Dir))
+	var stale []string
+	present, _ := filepath.Glob(filepath.Join(dir, "*.md"))
+	for _, f := range present {
+		if _, ok := files[filepath.Base(f)]; !ok {
+			if *check {
+				stale = append(stale, filepath.Base(f)+" (not generated)")
+			} else if err := os.Remove(f); err != nil {
+				return err
+			} else {
+				fmt.Println("removed", filepath.Base(f))
+			}
+		}
+	}
+	names := make([]string, 0, len(files))
+	for n := range files {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	for _, n := range names {
+		path := filepath.Join(dir, n)
+		old, err := os.ReadFile(path)
+		if err == nil && string(old) == files[n] {
+			continue
+		}
+		if *check {
+			stale = append(stale, n)
+			continue
+		}
+		if err := os.WriteFile(path, []byte(files[n]), 0o644); err != nil {
+			return err
+		}
+		fmt.Println("wrote", feedback.Dir+"/"+n)
+	}
+	if len(problems) > 0 {
+		return fmt.Errorf("feedback package: %d problem(s):\n  %s", len(problems), strings.Join(problems, "\n  "))
+	}
+	if len(stale) > 0 {
+		return fmt.Errorf("outdated feedback package in %s, run without -check: %s", feedback.Dir, strings.Join(stale, ", "))
+	}
+	fmt.Printf("feedback: %d findings, %d commits of %.7s..%.7s attributed, %d files current\n", len(findings), len(h.Commits), h.Base, h.Target, len(files))
+	return nil
 }
