@@ -123,3 +123,7 @@ Applied in `oec/SECURITY.md` (no placeholder left), `project/research/vulnerabil
 ## Addendum 3 (2026-11-24) – new token
 
 The PO: "Das token steht in .env unter dem Key OEC_GUIDELINE_TOKEN. Bitte versuche es damit. Lies aber den Token nicht in den Context." Recorded first; the token value is only passed between processes (never printed, logged or committed; `.env` is git-ignored).
+
+Probe of the new token (value never printed): fine-grained (`github_pat_` prefix checked by pattern), expires 2027-11-06; `OI4/oi4-oec` → 404 (no access, as intended); `OI4/oi4-oec-documentation` metadata → 200 (so the token is approved for the organisation); but branch, contents and `git-upload-pack` → 403 "Resource not accessible by personal access token" with `x-accepted-github-permissions: contents=read` – the token lacks **Contents: Read-only**. `git-receive-pack` → 403 (no write, as intended). The secret was therefore **not** set (the guideline checkout of `gate.yml` would fail); the old secret stays until the PO adds the permission (a fine-grained token's permissions can be edited without a new value), then the probe is repeated and the secret set with `gh secret set OEC_GUIDELINE_TOKEN -R OI4/oi4-oec` from `.env`.
+
+Correction of addendum 2 and A-552: the `permissions` object of `GET /repos/…` (`push: true`) describes the role of the token's owner, not the token's rights; it does not show whether a token is read-only. The probe above (receive-pack, contents) is the reliable test. The recommendation (fine-grained, Contents read-only) stands.
