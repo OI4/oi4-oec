@@ -143,6 +143,38 @@ func TestCompose(t *testing.T) {
 	}
 }
 
+// The Podman override (C-107): Docker Compose refuses
+// healthcheck.start_interval against the API of Podman 4.x ("requires Docker
+// Engine v25 or later"), so compose.podman.yaml resets it for the broker and
+// probes every 5 s instead; it changes nothing else.
+func TestComposePodman(t *testing.T) {
+	b, err := os.ReadFile("../compose.podman.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := services(t, string(b))
+	if len(s) != 1 || s["mosquitto"] == "" {
+		t.Fatalf("services %v, want mosquitto only", s)
+	}
+	var keys []string
+	for _, line := range strings.Split(s["mosquitto"], "\n") {
+		if l := strings.TrimSpace(line); l != "" && !strings.HasPrefix(l, "#") {
+			keys = append(keys, l)
+		}
+	}
+	want := []string{"healthcheck:", "start_interval: !reset null", "interval: 5s"}
+	if strings.Join(keys, "\n") != strings.Join(want, "\n") {
+		t.Errorf("mosquitto:\n%s\nwant:\n%s", strings.Join(keys, "\n"), strings.Join(want, "\n"))
+	}
+	c, err := os.ReadFile("../compose.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(services(t, string(c))["mosquitto"], "      start_interval: 1s\n") {
+		t.Error("compose.yaml: the broker has no start_interval to reset")
+	}
+}
+
 // service is the text of one service of compose.yaml (the lines below
 // `  <name>:` up to the next service or top-level key).
 func services(t *testing.T, c string) map[string]string {

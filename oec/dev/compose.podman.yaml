@@ -1,0 +1,10 @@
+# Override for Podman 4.x (C-107; oec/dev/README.md "Podman"):
+#   podman compose -f compose.yaml -f compose.podman.yaml …
+# Docker Compose refuses healthcheck.start_interval against the API of
+# Podman 4.x ("requires Docker Engine v25 or later"); the broker is probed
+# every 5 s instead (each probe logs an "unexpected eof" of the TLS listener).
+services:
+  mosquitto:
+    healthcheck:
+      start_interval: !reset null
+      interval: 5s

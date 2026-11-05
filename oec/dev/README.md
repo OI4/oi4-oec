@@ -13,6 +13,7 @@ environment and interop test contract), ADR-0028 §5 and amendment C-084
 | Path | Content |
 |---|---|
 | `compose.yaml` | Mosquitto 2.1.2, pinned by tag and digest, ports on loopback only; opt-in profiles `demos` (the three demo services) and `registry` (the OEC Registry) |
+| `compose.podman.yaml` | Override for Podman 4.x: the broker health check without `start_interval` (C-107, "Platforms and Podman") |
 | `mosquitto/mosquitto.conf` | TLS 1.2/1.3 only, credentials listener, client certificate listener, packet limits |
 | `pki/` | Go generator of the dev PKI, the password file, the sample container storages and the storages of the demos and the registry (standard library only) |
 | `interop.sh` | Opt-in interop tests of the Rust SDK against this broker |
@@ -23,8 +24,9 @@ environment and interop test contract), ADR-0028 §5 and amendment C-084
 
 - Go (the version of `go.mod`; with `GOTOOLCHAIN=auto` Go downloads it).
 - A container engine with Compose v2: Docker (`docker compose`) or Podman
-  (`podman compose`/`podman-compose`, set `OEC_COMPOSE`, see below). The
-  first start pulls `eclipse-mosquitto:2.1.2-alpine`.
+  (`podman compose`/`podman-compose`, set `OEC_COMPOSE`, see below and
+  "Platforms and Podman"). The first start pulls
+  `eclipse-mosquitto:2.1.2-alpine`.
 
 ## Quick start
 
@@ -368,3 +370,38 @@ go run ./cmd/oec-check monitor --replay /tmp/bus.jsonl
 
 `podman-compose` 1.x does not support `up --wait`; use `podman compose` with
 the Docker Compose provider, or start the broker by hand first.
+
+## Platforms and Podman (C-107)
+
+**Linux** (checked in C-107 on a fresh Ubuntu 24.04, arm64, with the
+packages of the distribution – `docker.io` 29.1, `docker-buildx`,
+`docker-compose-v2` 2.40, `golang-go` with `GOTOOLCHAIN=auto`, `curl`, `jq`;
+`oec/ci/linux-images.sh`): the images of `build.sh`, the profiles `demos`
+and `registry` and the live run (`oec/conformance/live.sh` with
+`OEC_LIVE_REGISTRY=1`) work as on macOS. The steps of "Getting started" are
+the script `oec/ci/getting-started.sh` (curl and jq instead of a browser);
+the job `images` of `images.yml` runs it on `ubuntu-24.04` and
+`ubuntu-24.04-arm` (hosted runs: C-111).
+
+**Podman** (rootless, Podman 4.9.3 of Ubuntu 24.04, `oec/ci/podman.sh`):
+build the images with Docker (`build.sh` needs `docker buildx`) and move
+them with `docker save … | podman load`. Then everything works with these
+four measures:
+
+| Topic | What to do |
+|---|---|
+| `healthcheck.start_interval` | Docker Compose as the provider of `podman compose` refuses it against Podman 4.x ("requires Docker Engine v25 or later"): add the override, `podman compose -f compose.yaml -f compose.podman.yaml …` (the broker is then probed every 5 s) |
+| health checks | Podman runs them with systemd timers; without a (user) systemd none runs and `up --wait` never ends – run `podman healthcheck run <container>` (the script does it every 2 s) |
+| names between containers | the network backend needs its DNS plugin: `golang-github-containernetworking-plugin-dnsname` for CNI (Podman 4.9 of Ubuntu), `aardvark-dns` for netavark – else the demos cannot resolve `mosquitto` |
+| D8 `oec-infra run` | the gateway of the rootless bridge (10.88.0.1) is no address of the host: `--listen <host address> --broker-host <host address>` (`live.sh`: `OEC_LIVE_RUN_LISTEN`) |
+
+`podman-compose` 1.x has no `up --wait` (above). Podman 5 (pasta instead of
+slirp4netns: the host address is the container's own) is not checked.
+
+**Windows:** not part of the CI and not checked in C-107. The scripts
+(`build.sh`, `getting-started.sh`, `live.sh`) are POSIX shell; use Docker
+Desktop with the WSL 2 backend and run them in a WSL 2 distribution (e.g.
+Ubuntu 24.04), with the repository inside the WSL file system. `go run
+./pki` and compose also run in PowerShell (see the interop steps above); the
+Web UIs are on `127.0.0.1` either way. D7 and D8 themselves are tested on
+Windows (`conformance.yml`, `windows-2025` and `windows-11-arm`).
