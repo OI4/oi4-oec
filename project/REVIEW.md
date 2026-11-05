@@ -856,7 +856,7 @@ Logs: [C-110](log/2026-11-26_C-110_feedback-publish.md), [C-109](log/2026-11-25_
   - (b) Pause the CI again: no push until you say so (as C-105 D-2 (b)); the gate stays local.
   - (c) The six workflows only by hand (`workflow_dispatch`, no push trigger); the gate local before every commit, the hosted runs when you order them.
   - (d) No change; I push the documentation commits now (all six workflows run once more).
-  - PO: ☐
+  - PO: ☑ (a)
 
 C-111 D-1 and D-2 are answered (below); D-1 was replaced by addendum 3.
 
