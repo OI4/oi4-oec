@@ -4,8 +4,9 @@
 //
 // The model can only express what the policy allows: the triggers push (of
 // branches or tags), pull_request and workflow_dispatch, workflow-level
-// permissions, bash as the only shell, jobs that need earlier jobs, and
-// steps that either run a command or use an action.
+// permissions, bash as the only shell, jobs that need earlier jobs (with a
+// condition and a deployment environment, C-110), and steps that either run
+// a command or use an action.
 package gha
 
 import "strings"
@@ -48,12 +49,17 @@ type Concurrency struct {
 
 // Job is one job of a workflow.
 type Job struct {
-	ID             string
-	Name           string
-	Needs          []string // ids of earlier jobs this job waits for
-	RunsOn         string   // a runner label or "${{ matrix.os }}"
-	Matrix         []Entry  // strategy.matrix.include; empty: no matrix
-	FailFast       bool     // strategy.fail-fast (only with a matrix)
+	ID     string
+	Name   string
+	Needs  []string // ids of earlier jobs this job waits for
+	If     string   // condition of the job (an expression without ${{ }})
+	RunsOn string   // a runner label or "${{ matrix.os }}"
+	// Environment is the deployment environment of the job (C-110): its
+	// protection rules (required reviewers) gate the job, and only its jobs
+	// get its secrets.
+	Environment    string
+	Matrix         []Entry // strategy.matrix.include; empty: no matrix
+	FailFast       bool    // strategy.fail-fast (only with a matrix)
 	TimeoutMinutes int
 	Env            []KV
 	Steps          []Step

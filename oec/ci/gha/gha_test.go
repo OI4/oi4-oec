@@ -187,6 +187,74 @@ func TestRenderTagsNeeds(t *testing.T) {
 	}
 }
 
+// publishing is release() with a publishing job behind an environment that
+// gets an environment secret in the env of its run step (C-110).
+func publishing() Workflow {
+	w := release()
+	w.Jobs = append(w.Jobs, Job{
+		ID: "publish", Name: "publish", Needs: []string{"all"}, If: "github.ref_type == 'tag'",
+		RunsOn: "r1", Environment: "release", TimeoutMinutes: 10,
+		Steps: []Step{{Name: "Publish", Env: []KV{{"DEPLOY_TOKEN", "${{ secrets.DEPLOY }}"}}, Run: "d.sh"}},
+	})
+	return w
+}
+
+func publishingPolicy() Policy {
+	p := samplePolicy()
+	p.Secrets["DEPLOY"] = SecretUse{Environment: "release", EnvKey: "DEPLOY_TOKEN"}
+	return p
+}
+
+func TestRenderEnvironment(t *testing.T) {
+	got, err := Render(publishing())
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "  publish:\n    name: publish\n    needs:\n      - all\n    if: github.ref_type == 'tag'\n    runs-on: r1\n" +
+		"    environment: release\n    timeout-minutes: 10\n    steps:\n      - name: Publish\n        env:\n" +
+		"          DEPLOY_TOKEN: ${{ secrets.DEPLOY }}\n        run: d.sh\n"
+	if !strings.Contains(string(got), want) {
+		t.Errorf("Render lacks\n%s\ngot:\n%s", want, got)
+	}
+	if errs := Check(publishing(), publishingPolicy()); len(errs) > 0 {
+		t.Errorf("Check(publishing) = %v", errs)
+	}
+	cases := map[string]struct {
+		edit func(w *Workflow)
+		want string
+	}{
+		"no environment":    {func(w *Workflow) { w.Jobs[2].Environment = "" }, "secret DEPLOY only in"},
+		"other environment": {func(w *Workflow) { w.Jobs[2].Environment = "test" }, "secret DEPLOY only in"},
+		"other env key":     {func(w *Workflow) { w.Jobs[2].Steps[0].Env[0].Key = "TOKEN" }, "secret DEPLOY only in"},
+		"job env":           {func(w *Workflow) { w.Jobs[2].Env = w.Jobs[2].Steps[0].Env }, "secret DEPLOY only in"},
+		"action with": {func(w *Workflow) {
+			w.Jobs[2].Steps[0] = Step{Name: "Use", Uses: samplePolicy().Actions[0],
+				With: []KV{{"persist-credentials", "false"}, {"DEPLOY_TOKEN", "${{ secrets.DEPLOY }}"}}}
+		}, "secret DEPLOY only in"},
+		"environment name": {func(w *Workflow) { w.Jobs[2].Environment = "Release now" }, "environment"},
+		"pull request":     {func(w *Workflow) { w.PullRequest = true }, "environment in a workflow with a pull_request trigger"},
+		"job if context":   {func(w *Workflow) { w.Jobs[2].If = "${{ github.event.ref }}" }, "github.event"},
+		"job if needs":     {func(w *Workflow) { w.Jobs[2].If = "needs.all.result == 'success'" }, "needs"},
+		"with secret in environment job": {func(w *Workflow) {
+			w.Jobs[2].Steps[0].Env[0] = KV{"T", "${{ secrets.TOKEN }}"}
+		}, "secret TOKEN only in"},
+	}
+	for name, c := range cases {
+		w := publishing()
+		c.edit(&w)
+		found := false
+		errs := Check(w, publishingPolicy())
+		for _, err := range errs {
+			if strings.Contains(err.Error(), c.want) {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("%s: want an error with %q, got %v", name, c.want, errs)
+		}
+	}
+}
+
 func TestRenderRejects(t *testing.T) {
 	for name, run := range map[string]string{
 		"leading space":   " a\nb",

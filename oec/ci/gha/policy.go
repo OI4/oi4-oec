@@ -10,15 +10,24 @@ import (
 type Policy struct {
 	Actions []Action        // the pinned actions (exact repo, SHA and tag)
 	Runners map[string]bool // the allowed runner labels (hosted runners only)
-	// Secrets maps each allowed secret to the only place it may appear:
-	// the with key of a step that uses the given action repository.
+	// Secrets maps each allowed secret to the only place it may appear.
 	Secrets map[string]SecretUse
 	// MaxTimeout is the upper bound of timeout-minutes of a job.
 	MaxTimeout int
 }
 
-// SecretUse is the only place a secret may be used.
-type SecretUse struct{ ActionRepo, WithKey string }
+// SecretUse is the only place a secret may be used: the with key WithKey of
+// a step that uses the action repository ActionRepo, or (an environment
+// secret, C-110) the env key EnvKey of a run step of a job with the
+// deployment environment Environment.
+type SecretUse struct{ ActionRepo, WithKey, Environment, EnvKey string }
+
+func (u SecretUse) String() string {
+	if u.Environment != "" {
+		return fmt.Sprintf("env.%s of a run step of a job with environment %s", u.EnvKey, u.Environment)
+	}
+	return fmt.Sprintf("with.%s of %s", u.WithKey, u.ActionRepo)
+}
 
 var (
 	fileRe   = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*\.yml$`)
@@ -61,7 +70,9 @@ func Check(w Workflow, p Policy) []error {
 	if w.Concurrency.Group == "" || !w.Concurrency.CancelInProgress {
 		bad("concurrency needs a group and cancel-in-progress")
 	}
-	checkValues := func(where string, kvs []KV, step *Step) {
+	// checkValues checks the values of kvs; allowed reports whether the
+	// secret use may be at key (nil: nowhere).
+	checkValues := func(where string, kvs []KV, allowed func(key string, use SecretUse) bool) {
 		for _, kv := range kvs {
 			checkExpr(where+" "+kv.Key, kv.Value, bad)
 			for _, m := range secretRe.FindAllStringSubmatch(kv.Value, -1) {
@@ -70,8 +81,8 @@ func Check(w Workflow, p Policy) []error {
 					bad("%s: secret %s is not allowed", where, m[1])
 					continue
 				}
-				if step == nil || step.Uses.Repo != use.ActionRepo || kv.Key != use.WithKey {
-					bad("%s: secret %s only in with.%s of %s", where, m[1], use.WithKey, use.ActionRepo)
+				if allowed == nil || !allowed(kv.Key, use) {
+					bad("%s: secret %s only in %s", where, m[1], use)
 				}
 			}
 		}
@@ -95,6 +106,15 @@ func Check(w Workflow, p Policy) []error {
 			}
 		}
 		checkExpr(where+" name", j.Name, bad)
+		checkCond(where+" if", j.If, bad)
+		if j.Environment != "" {
+			if !idRe.MatchString(j.Environment) {
+				bad("%s: environment must match %s", where, idRe)
+			}
+			if w.PullRequest {
+				bad("%s: environment in a workflow with a pull_request trigger", where)
+			}
+		}
 		if j.TimeoutMinutes < 1 || j.TimeoutMinutes > p.MaxTimeout {
 			bad("%s: timeout-minutes must be 1 … %d", where, p.MaxTimeout)
 		}
@@ -131,8 +151,14 @@ func Check(w Workflow, p Policy) []error {
 			if s.Name == "" {
 				bad("%s: no name", where)
 			}
-			checkExpr(where+" if", s.If, bad)
-			checkValues(where+" env", s.Env, nil)
+			checkCond(where+" if", s.If, bad)
+			var envSecret func(string, SecretUse) bool
+			if s.Run != "" && j.Environment != "" {
+				envSecret = func(key string, use SecretUse) bool {
+					return use.Environment == j.Environment && use.EnvKey == key
+				}
+			}
+			checkValues(where+" env", s.Env, envSecret)
 			switch {
 			case s.Uses.IsZero() == (s.Run == ""):
 				bad("%s: exactly one of uses and run", where)
@@ -145,7 +171,9 @@ func Check(w Workflow, p Policy) []error {
 				}
 			default:
 				checkAction(where, s.Uses, p.Actions, bad)
-				checkValues(where+" with", s.With, s)
+				checkValues(where+" with", s.With, func(key string, use SecretUse) bool {
+					return use.ActionRepo != "" && use.ActionRepo == s.Uses.Repo && use.WithKey == key
+				})
 				if s.Uses.Repo == "actions/checkout" {
 					if v, _ := Get(s.With, "persist-credentials"); v != "false" {
 						bad("%s: checkout needs persist-credentials: false", where)
@@ -173,6 +201,15 @@ func checkAction(where string, a Action, pinned []Action, bad func(string, ...an
 		}
 	}
 	bad("%s: %s@%s (%s) is not in the pin list", where, a.Repo, a.SHA, a.Tag)
+}
+
+// checkCond checks an if: condition, which is an expression with or
+// without ${{ }}.
+func checkCond(where, v string, bad func(string, ...any)) {
+	if v != "" && !strings.Contains(v, "${{") {
+		v = "${{ " + v + " }}"
+	}
+	checkExpr(where, v, bad)
 }
 
 func checkExpr(where, v string, bad func(string, ...any)) {

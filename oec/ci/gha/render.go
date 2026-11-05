@@ -124,10 +124,14 @@ func (j Job) node() mapping {
 	if len(j.Needs) > 0 {
 		m = append(m, pair{"needs", strs(j.Needs)})
 	}
-	m = append(m,
-		pair{"runs-on", str(j.RunsOn)},
-		pair{"timeout-minutes", integer(j.TimeoutMinutes)},
-	)
+	if j.If != "" {
+		m = append(m, pair{"if", str(j.If)})
+	}
+	m = append(m, pair{"runs-on", str(j.RunsOn)})
+	if j.Environment != "" {
+		m = append(m, pair{"environment", str(j.Environment)})
+	}
+	m = append(m, pair{"timeout-minutes", integer(j.TimeoutMinutes)})
 	if len(j.Matrix) > 0 {
 		include := seq{}
 		for _, e := range j.Matrix {
