@@ -41,6 +41,14 @@ const (
 	GuidelineSecret = "OEC_GUIDELINE_TOKEN"
 )
 
+// The publishing step of release.yml (ADR-0034, C-110): the deployment
+// environment whose required reviewers approve each publication, and its
+// secret, the write token for OI4/oec and ghcr.io/oi4.
+const (
+	ReleaseEnvironment = "release"
+	ReleaseSecret      = "OEC_RELEASE_TOKEN"
+)
+
 // Policy is the CI policy of ADR-0032 §4 with the pins above.
 func Policy() gha.Policy {
 	runners := map[string]bool{}
@@ -48,9 +56,12 @@ func Policy() gha.Policy {
 		runners[r.Label] = true
 	}
 	return gha.Policy{
-		Actions:    []gha.Action{Checkout, SetupGo, Cache, UploadArtifact, DownloadArtifact},
-		Runners:    runners,
-		Secrets:    map[string]gha.SecretUse{GuidelineSecret: {ActionRepo: Checkout.Repo, WithKey: "token"}},
+		Actions: []gha.Action{Checkout, SetupGo, Cache, UploadArtifact, DownloadArtifact},
+		Runners: runners,
+		Secrets: map[string]gha.SecretUse{
+			GuidelineSecret: {ActionRepo: Checkout.Repo, WithKey: "token"},
+			ReleaseSecret:   {Environment: ReleaseEnvironment, EnvKey: ReleaseSecret},
+		},
 		MaxTimeout: 240,
 	}
 }
@@ -584,9 +595,13 @@ func uploadPart(name string) gha.Step {
 // the micro SDK as an Arduino library, the schema bundle, the SBOMs, the
 // images as OCI archives with their D8 reports – and assembles them with
 // SHA256SUMS and the release notes into one workflow artifact. No caches.
-// Nothing is published: no GitHub Release, no registry, no package index
-// (Q-011, C-104 D-2); the weekly schedule of supply-chain.yml comes with the
-// first release (C-108 D-3 (a)).
+// Every run checks the publication with a dry run of oec/ci/publish.sh. On
+// a tag, the job publish – behind the environment release, whose reviewers
+// approve each run (ADR-0034, C-110) – publishes the release of the same run
+// on the channels of C-109 D-3 (a): the GitHub Release and the Go module
+// tags of OI4/oec and the images on ghcr.io/oi4. crates.io, the ESP
+// Component Registry and the Arduino Library Manager come later; the weekly
+// schedule of supply-chain.yml comes with the first release (C-108 D-3 (a)).
 func Release() gha.Workflow {
 	entry := func(os, target string) gha.Entry {
 		return gha.Entry{{Key: "os", Value: os}, {Key: "target", Value: target}}
@@ -669,6 +684,7 @@ func Release() gha.Workflow {
 				},
 			},
 			run("Assemble (oec/ci/release.sh assemble)", "oec/ci/release.sh dist/release assemble"),
+			run("Check the publication (oec/ci/publish.sh, dry run)", "oec/ci/publish.sh dist/release"),
 			{
 				Name: "Upload the release (workflow artifact, not a release)",
 				Uses: UploadArtifact,
@@ -681,13 +697,45 @@ func Release() gha.Workflow {
 			},
 		},
 	}
+	publish := gha.Job{
+		ID:             "publish",
+		Name:           "Publish the release (OI4/oec, ghcr.io/oi4)",
+		Needs:          []string{"release"},
+		If:             "github.ref_type == 'tag'",
+		RunsOn:         "ubuntu-24.04",
+		Environment:    ReleaseEnvironment,
+		TimeoutMinutes: 60,
+		Steps: []gha.Step{
+			checkout(),
+			releaseGo("oec/ci/go.mod"),
+			{
+				Name: "Download the release of this run",
+				Uses: DownloadArtifact,
+				With: []gha.KV{
+					{Key: "name", Value: "oec-release"},
+					{Key: "path", Value: "dist/release"},
+				},
+			},
+			{
+				Name: "Publish (oec/ci/publish.sh --publish)",
+				Env: []gha.KV{
+					{Key: ReleaseSecret, Value: "${{ secrets." + ReleaseSecret + " }}"},
+					{Key: "OEC_RELEASE_USER", Value: "${{ vars.OEC_RELEASE_USER }}"},
+				},
+				Run: "oec/ci/publish.sh dist/release --publish",
+			},
+		},
+	}
 	w := base("release.yml", "release", header(
-		"The release of the OEC deliverables (ADR-0033): on a tag oec-v<version>",
-		"or by hand, every deliverable is built from one commit with",
-		"oec/ci/release.sh and assembled with SHA256SUMS and the release notes",
-		"into one workflow artifact. Nothing is published (no GitHub Release, no",
-		"registry, no package index; Q-011).",
-	), ffi, dist, images, release)
+		"The release of the OEC deliverables (ADR-0033, ADR-0034): on a tag",
+		"oec-v<version> or by hand, every deliverable is built from one commit",
+		"with oec/ci/release.sh and assembled with SHA256SUMS and the release",
+		"notes into the workflow artifact oec-release; publish.sh checks its",
+		"publication (dry run). Only on a tag, the job publish – behind the",
+		"environment release, approved by its reviewers – publishes it: the",
+		"GitHub Release and the Go module tags of OI4/oec, the images on",
+		"ghcr.io/oi4.",
+	), ffi, dist, images, release, publish)
 	w.PushBranches = nil
 	w.PushTags = []string{"oec-v*"}
 	w.PullRequest = false

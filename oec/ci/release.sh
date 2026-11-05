@@ -238,7 +238,11 @@ part_assemble() {
 		echo "| Go toolchain | $(sed -n 's/^toolchain //p' "$oec/conformance/go.mod") |"
 		echo "| Rust toolchain | $rust_version |"
 		echo
-		echo "Workflow artifact only: nothing of it is published (no GitHub Release, no registry, no package index). Check the files with \`sha256sum -c SHA256SUMS\`."
+		if [ "$kind" = release ]; then
+			echo "Check the files with \`sha256sum -c SHA256SUMS\`."
+		else
+			echo "Workflow artifact only: a snapshot is not published (no GitHub Release, no registry, no package index). Check the files with \`sha256sum -c SHA256SUMS\`."
+		fi
 		echo
 		echo "## Changes"
 		section "$oec/CHANGELOG.md" "$version"

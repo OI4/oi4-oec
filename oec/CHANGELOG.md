@@ -22,4 +22,5 @@ First release of OEC v2.0 for the OEC Messaging Guideline and the OEC Runtime & 
 - **Demos**: logger (C on the C ABI, Level 2), weather (Go SDK, Level 3, MET Norway provider), config service (Rust, edits the `Config` of the other applications); each with a small Web UI and an image.
 - **OEC Registry** (D5): Messaging Level 3, REST and SSE API (OpenAPI 3.2, AsyncAPI 3.1), Web UI, image.
 - **Images** for linux/amd64 and linux/arm64: `oi4/oec-logger`, `oi4/oec-weather`, `oi4/oec-config`, `oi4/oec-registry`, `oi4/oec-conformance`, each with its SBOM and license texts.
+- **Release channels**: the files as a GitHub Release of `OI4/oec`, the images on `ghcr.io/oi4`, the Go modules by their tags in `OI4/oec` (`go install github.com/OI4/oec/conformance/cmd/oec-check@v0.1.0`; D7 and D8 then report the module version).
 - **Supply chain**: an SPDX 2.3 SBOM, the license texts and a license report for every deliverable; the security policy in `SECURITY.md`.

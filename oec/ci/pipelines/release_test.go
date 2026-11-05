@@ -188,10 +188,10 @@ func TestRelease(t *testing.T) {
 		"dist": {"", "oec/ci/disk.sh\noec/ci/setup-tools.sh --toolchain\noec/ci/fetch.sh\noec/ci/release.sh dist/release source binaries micro schema sbom",
 			"oec-release-dist"},
 		"images":  {"", "oec/ci/disk.sh\noec/ci/release.sh dist/release images", "oec-release-images"},
-		"release": {"ffi dist images", "oec/ci/release.sh dist/release assemble", "oec-release"},
+		"release": {"ffi dist images", "oec/ci/release.sh dist/release assemble\noec/ci/publish.sh dist/release", "oec-release"},
 	}
-	if len(w.Jobs) != len(want) || w.Jobs[len(w.Jobs)-1].ID != "release" {
-		t.Errorf("release: jobs %d, the last must be release", len(w.Jobs))
+	if n := len(w.Jobs); n != len(want)+1 || w.Jobs[n-2].ID != "release" || w.Jobs[n-1].ID != "publish" {
+		t.Errorf("release: jobs %d, the last must be release and publish (TestPublish)", n)
 	}
 	for id, x := range want {
 		j := job(t, w, id)
