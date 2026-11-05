@@ -100,3 +100,11 @@ Created and deleted: `/tmp/c108-tree.txt`, `/tmp/c108-err.txt` (cargo tree trial
 C-109 – P9 increment 6: versioning and `release.yml` (ADR-0032 §9) – every deliverable from one commit/tag with `SHA256SUMS`, the SBOMs of `sbom.sh` and release notes as workflow artifacts; nothing published (channels: Q-011, C-104 D-2). The CI stays paused until the exit run C-111 (C-105 D-2 (b)).
 
 Handover (G-3.10): **new agent session** – the context of this session was compacted; C-109 builds on `sbom.sh` but works in other files (`release.yml`, versioning). `prompt.md` written for C-109 (not committed).
+
+## Addendum 1 (2026-11-24) – PO answers D-1 … D-3
+
+The PO answered "D-1, D-2 und D-3 jeweils (a)". Recorded first (REVIEW, REVIEW_DE, this addendum), then applied:
+
+- **D-1 (a):** reporting channel = GitHub private vulnerability reporting on the release repository `OI4/oec` plus a security mailbox of the OI4 Alliance; at least two people triage. The mailbox address and the triage people/role were not given – they stay placeholders `[PO: …]` in `oec/SECURITY.md` and the draft and are listed as missing input in REVIEW "Open for you" (data only, no decision).
+- **D-2 (a):** the time frames (acknowledge 3 working days, assess 10; fix critical 14 days, high 30, medium 90, low with the next release; disclosure with the fix, at most 90 days after the report; CRA Art. 14 path) and the support period (five years from the first release of a release line, the newest minor version gets the fixes; the demos without support period) replace the placeholders in `oec/SECURITY.md`. It stays a draft: unpublished until the first release and the CRA review (Q-011).
+- **D-3 (a):** from the first release `supply-chain.yml` also runs weekly (a `schedule` trigger in the workflow model `oec/ci/gha`, test first) and Dependabot alerts are enabled on the release repository (a repository setting). Not built now: the first release is not decided (Q-011) and the CI is paused (C-105 D-2 (b)); recorded as a P9 item in the ROADMAP and in ADR-0032 (amendment C-108 item 7).
