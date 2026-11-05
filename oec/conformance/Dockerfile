@@ -36,7 +36,7 @@ WORKDIR /src/conformance
 RUN mkdir -p /out/bin && \
 	for cmd in oec-check oec-infra; do \
 		CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" \
-			go build -trimpath -ldflags='-s -w -buildid=' -o "/out/bin/$cmd" "./cmd/$cmd" || exit 1; \
+			go build -trimpath -ldflags="-s -w -buildid= -X main.version=$VERSION" -o "/out/bin/$cmd" "./cmd/$cmd" || exit 1; \
 	done && \
 	go version -m /out/bin/oec-check >/tmp/oec-check.txt && \
 	go version -m /out/bin/oec-infra >/tmp/oec-infra.txt && \

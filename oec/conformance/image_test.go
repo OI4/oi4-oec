@@ -108,7 +108,7 @@ func TestImageDockerfile(t *testing.T) {
 		t.Errorf("final stage: USER 65532:65532 %v, licenses copied %v", user, licenses)
 	}
 	b := build.String()
-	for _, want := range []string{"CGO_ENABLED=0", "-trimpath", "-buildid=", "oec-check oec-infra",
+	for _, want := range []string{"CGO_ENABLED=0", "-trimpath", "-buildid=", "-X main.version=$VERSION", "oec-check oec-infra",
 		"oec-sbom -name oec-conformance", "-golicenses ../conformance/images/go-licenses.json", "-texts images/licenses"} {
 		if !strings.Contains(b, want) {
 			t.Errorf("build stage lacks %s", want)
