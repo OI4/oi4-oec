@@ -35,3 +35,11 @@ The future publication target is **private GitHub repositories**, not public ava
 ## Amendment C-100 addendum 2 (PO, 2026-11-16) – documentation in the guideline site
 
 Point 3 is changed by the PO (Q-036, D-1 of C-100 addendum 1 answered (b)): the documentation D6 is no longer a standalone site in `oec/docs/`. Its pages are written directly in the Community section of the guideline site, `oi4-oec-documentation/docs/community`, which replaced the old 1.x Community pages. `oec/docs/` keeps only the offline check (`docscheck`, gate step 10), the opt-in build script and its README (ADR-0031 amendment C-100 addendum 2). The guideline chapters, the guideline ADRs and the findings register in `oi4-oec-documentation` stay as before (ADR-0001); its changes for the Community section are committed on the working branch `feature/spec-findings`. Guideline sections are still referenced by number, not by link (GUARDRAILS G-4.11).
+
+## Amendment 2026-11-28 (PO) – demo repository `oi4-oec-demo`
+
+PO order: "alles von oi4-oec-demo löschen und alles was wir unter oec für die Demos haben dort hin kopieren … nur noch die neuen Demos dort haben". The repository `OI4/oi4-oec-demo` (public, default branch `development`) is cloned as `oi4-oec-demo/` in the workspace root – a separate git repository like `legacy/` and `oi4-oec-documentation/`, excluded via `.gitignore` (not the read-only copy in `legacy/`, G-1.3).
+
+- Its content is replaced: the OEC 1.x demo is deleted (it stays in its history); `demos/` is an **unmodified copy of `oec/demos`** (the tracked files, same blobs and modes), next to a README of its own, `LICENSE` (MIT, `oec/LICENSE`) and a `.gitignore`. The repository is laid out like the OEC source tree but contains only `demos/`; paths that leave `demos/` refer to the OEC source tree.
+- **`oec/demos` stays the source** (agent, G-3.4 b): the registry, the tool image, `ci/sbom.sh` and the gate use parts of it (`internal/sbom`, `images/licenses`), and rewriting the relative paths would fork the demos from their gate tests. A change is made in `oec/demos` and copied again (log 2026-11-28_PO_demo-repo).
+- Nothing is pushed without the PO (G-3.8); the repository is public, so a push is a publication (Q-011).

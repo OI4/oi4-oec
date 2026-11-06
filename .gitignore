@@ -1,6 +1,7 @@
 # Separate git repositories (not part of this local repo, ADR-0012)
 /legacy/
 /oi4-oec-documentation/
+/oi4-oec-demo/
 
 # IDE
 /.idea/
