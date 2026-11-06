@@ -326,9 +326,9 @@ typedef void (*oec_received_fn)(void *user_data, const struct oec_received *msg)
 #define OEC_ST_AGGREGATION 4
 
 /**
- * `OOCConnector`.
+ * `CloudConnector`.
  */
-#define OEC_ST_OOC_CONNECTOR 5
+#define OEC_ST_CLOUD_CONNECTOR 5
 
 /**
  * `ITConnector`.

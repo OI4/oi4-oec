@@ -1,6 +1,7 @@
 package oec
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -88,4 +89,24 @@ func TestABICoverage(t *testing.T) {
 		}
 	}
 	t.Logf("oec.h: %d functions, %d called, %d not wrapped", len(declared), calls, len(notWrapped))
+}
+
+// The ServiceType names are those of MG 7.2 (REQ-TOP-005; SF-118:
+// CloudConnector) and the Go values follow the C ABI.
+func TestServiceTypeNames(t *testing.T) {
+	want := []string{"+", "Registry", "OTConnector", "Utility", "Persistence",
+		"Aggregation", "CloudConnector", "ITConnector"}
+	for i, name := range want {
+		if got := ServiceType(i).String(); got != name {
+			t.Errorf("ServiceType(%d) = %s, want %s", i, got, name)
+		}
+	}
+	header, err := os.ReadFile(filepath.Join("..", "rust", "oec-ffi", "include", "oec.h"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := regexp.MustCompile(`#define OEC_ST_CLOUD_CONNECTOR (\d+)`).FindSubmatch(header)
+	if m == nil || string(m[1]) != fmt.Sprint(int(CloudConnector)-1) {
+		t.Errorf("oec.h OEC_ST_CLOUD_CONNECTOR = %q, want %d", m, int(CloudConnector)-1)
+	}
 }

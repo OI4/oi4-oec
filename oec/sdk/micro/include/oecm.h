@@ -72,7 +72,7 @@ typedef enum oecm_service_type { /* REQ-TOP-005, same order as oec.h */
     OECM_ST_UTILITY,
     OECM_ST_PERSISTENCE,
     OECM_ST_AGGREGATION,
-    OECM_ST_OOC_CONNECTOR,
+    OECM_ST_CLOUD_CONNECTOR,
     OECM_ST_IT_CONNECTOR
 } oecm_service_type;
 

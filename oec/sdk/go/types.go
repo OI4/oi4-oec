@@ -33,12 +33,12 @@ const (
 	Utility
 	Persistence
 	Aggregation
-	OOCConnector
+	CloudConnector
 	ITConnector
 )
 
 var serviceTypeNames = [...]string{"+", "Registry", "OTConnector", "Utility", "Persistence",
-	"Aggregation", "OOCConnector", "ITConnector"}
+	"Aggregation", "CloudConnector", "ITConnector"}
 
 func (s ServiceType) String() string {
 	if s >= 0 && int(s) < len(serviceTypeNames) {

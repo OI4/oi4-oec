@@ -36,8 +36,8 @@ pub const OEC_ST_UTILITY: ServiceType = 2;
 pub const OEC_ST_PERSISTENCE: ServiceType = 3;
 /// `Aggregation`.
 pub const OEC_ST_AGGREGATION: ServiceType = 4;
-/// `OOCConnector`.
-pub const OEC_ST_OOC_CONNECTOR: ServiceType = 5;
+/// `CloudConnector`.
+pub const OEC_ST_CLOUD_CONNECTOR: ServiceType = 5;
 /// `ITConnector`.
 pub const OEC_ST_IT_CONNECTOR: ServiceType = 6;
 

@@ -122,6 +122,14 @@ static void test_set_health_arguments(void) {
     TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_set_health(&dev, (oecm_health)9, 1));
 }
 
+/* REQ-TOP-005: the closed set of MG 7.2 (SF-118: CloudConnector). */
+static void test_service_type_names(void) {
+    TEST_ASSERT_EQUAL_STRING("Aggregation", oecm_service_type_name(OECM_ST_AGGREGATION));
+    TEST_ASSERT_EQUAL_STRING("CloudConnector", oecm_service_type_name(OECM_ST_CLOUD_CONNECTOR));
+    TEST_ASSERT_EQUAL_STRING("ITConnector", oecm_service_type_name(OECM_ST_IT_CONNECTOR));
+    TEST_ASSERT_NULL(oecm_service_type_name((oecm_service_type)99));
+}
+
 static void test_birth_again_after_failure_recovery(void) {
     start_connected();
     TEST_ASSERT_EQUAL(OECM_OK, oecm_set_health(&dev, OECM_HEALTH_FAILURE, 0));
@@ -371,6 +379,7 @@ int main(void) {
     RUN_TEST(test_heartbeat_every_60_s);
     RUN_TEST(test_health_on_change_only);
     RUN_TEST(test_set_health_arguments);
+    RUN_TEST(test_service_type_names);
     RUN_TEST(test_birth_again_after_failure_recovery);
     RUN_TEST(test_close_then_disconnect_on_stop);
     RUN_TEST(test_connected_state);

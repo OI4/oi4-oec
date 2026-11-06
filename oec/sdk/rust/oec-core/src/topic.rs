@@ -52,8 +52,8 @@ element! {
         Persistence = "Persistence",
         /// Aggregation.
         Aggregation = "Aggregation",
-        /// OOC connector.
-        OOCConnector = "OOCConnector",
+        /// Cloud connector: the bus on one side, a cloud platform on the other (SF-118).
+        CloudConnector = "CloudConnector",
         /// IT connector.
         ITConnector = "ITConnector",
     }
@@ -572,6 +572,12 @@ mod tests {
     #[test]
     fn closed_sets() {
         assert_eq!(ServiceType::ALL.len(), 7);
+        // SF-118, GL-ADR-023: OOCConnector renamed to CloudConnector.
+        assert_eq!(
+            "CloudConnector".parse::<ServiceType>(),
+            Ok(ServiceType::CloudConnector)
+        );
+        assert!("OOCConnector".parse::<ServiceType>().is_err());
         assert_eq!(Method::ALL.len(), 6);
         assert_eq!(Resource::ALL.len(), 10);
         assert_eq!(

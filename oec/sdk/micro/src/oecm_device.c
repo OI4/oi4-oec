@@ -58,8 +58,8 @@ const char *oecm_service_type_name(oecm_service_type st) {
         return "Persistence";
     case OECM_ST_AGGREGATION:
         return "Aggregation";
-    case OECM_ST_OOC_CONNECTOR:
-        return "OOCConnector";
+    case OECM_ST_CLOUD_CONNECTOR:
+        return "CloudConnector";
     case OECM_ST_IT_CONNECTOR:
         return "ITConnector";
     }
