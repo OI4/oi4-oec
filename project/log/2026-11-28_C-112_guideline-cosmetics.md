@@ -144,6 +144,7 @@ PO (German, in translation):
 ### Decisions (agent, G-3.4 b)
 
 - **A-642 Re-baseline on `51a0b50`:** A5 is not inventoried, so the gate would pass on `97b6acd` too; the baseline moves anyway, so that the baseline is the guideline head with every change the PO accepted, the feedback package lists every commit, and the pushed CI run (D-3) checks the final state (no second re-baseline and CI run later).
+- **A-645 (addendum 9) `regtest.Raw` tolerates an early answer:** a failed write after the server has answered (431 + reset by hyper) is not a test failure; only a missing status line is. Test harness only, no registry change.
 - **A-644 (addendum 6) One repetition of a timing failure on `windows-11-arm`:** the late-subscribe fixture failed once on the slowest runner and passed on the rerun; no code change. If it repeats in later runs, the fixture gets a closer look (the simulator's connection setup under load).
 - **A-643 The sentence "Involved in the current revision: …" stays:** the order replaced the table entries only; the sentence now names the same six persons as the table (say if it should go).
 
@@ -188,3 +189,11 @@ PO (German, in translation):
 - Gate (load 14 at the start): **all checks passed** – `inventory -check -rev 605fbb7`; `feedback`: 118 findings, 219 commits, 137 files current; `docscheck: 19 pages ok, 30 README links to them ok`; `cigen: 7 workflows current`.
 - Both repositories pushed; the code commits start the six push-triggered workflows (≈ US$ 6, within the budget of addendum 5).
 - `/tmp/gate.log` deleted.
+
+## Addendum 9 (2026-11-06) – hosted CI on `ef12881`, a test-harness fix
+
+- The push of addendum 8 started the six workflows on `ef12881`: sdk, conformance, images, micro and supply-chain green on every job; **gate red on `ubuntu-24.04`** (macOS and arm64 green): `oec/registry` `TestHTTPSelfSigned/guards` – `write tcp …: write: broken pipe` in `regtest.(*Web).Raw`.
+- Cause (A-645): the guard case with a header larger than the limit (431). hyper answers 431 before it has read the whole request and closes the connection; with unread data the kernel resets it, and the test's write of the rest fails before it reads the answer. A race of the test harness, not a defect of the registry (the 431 is correct).
+- Fix, test first: `TestRawEarlyAnswer` (`oec/registry/internal/regtest/http_test.go`) – a server that answers early and closes; it failed before the fix with the same `broken pipe` / `connection reset by peer`. `Raw` now reads the answer after a failed write and fails only if no status line arrives. Green 50× on macOS, 200× on Linux arm64 and 50× on Linux amd64 (Ubuntu image of `versions.sh`, removed afterwards). Commit `26d3a93`; test harness only, no Community page affected.
+- Gate on `26d3a93`: **all checks passed**. Pushed; the six workflows run on the new head (≈ US$ 6).
+- Temporary: `/tmp/rawtest.*` and `/tmp/gate.log` deleted.
