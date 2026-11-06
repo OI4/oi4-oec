@@ -3,7 +3,8 @@
 # opt-in locally (Docker, network): in the Espressif ESP-IDF container of
 # versions.sh (pinned by digest, ADR-0030 §8) examples/esp-idf/build.sh
 # builds the variants esp32 esp32s3 qemu (warnings of the oecm component are
-# errors there), then D7 `oec-check test --level 1/2/3` runs against the
+# errors there) and demos-smart-sensors/esp32-dht22/build.sh the smart
+# sensor demo for esp32 esp32s3 (build only, it needs a DHT22), then D7 `oec-check test --level 1/2/3` runs against the
 # example firmware in the Espressif QEMU of the image (cmd/oecm-qemu,
 # TestQEMUD7Level1/2/3 with OECM_REQUIRE=1; a skipped test fails).
 #
@@ -17,7 +18,8 @@
 # orphans of the D7 restart hooks). Behind a TLS-intercepting proxy,
 # OEC_CI_CA_CERTS = a PEM file with its root certificate(s) for the
 # download of esp-mqtt from the ESP Component Registry (never commit it).
-# Output: oec/sdk/micro/target/esp-idf/<variant>/ (git-ignored, deleted
+# Output: oec/sdk/micro/target/esp-idf/<variant>/ and
+# oec/demos-smart-sensors/esp32-dht22/target/<variant>/ (git-ignored, deleted
 # and rebuilt; no artifact). Removes its container and the image if it pulled it.
 set -eu
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -35,8 +37,10 @@ if [ "${1:-}" = --in-container ]; then
 	fi
 	echo "micro-esp-idf: $(idf.py --version), $(uname -m), $(qemu-system-xtensa --version | head -1)"
 	# From scratch: a local build of another host would not configure here.
-	rm -rf "$micro/target/esp-idf"
+	dht22="$ws/oec/demos-smart-sensors/esp32-dht22"
+	rm -rf "$micro/target/esp-idf" "$dht22/target"
 	"$micro/examples/esp-idf/build.sh" esp32 esp32s3 qemu
+	"$dht22/build.sh" esp32 esp32s3
 	echo "micro-esp-idf: D7 --level 1/2/3 against the firmware in QEMU (cmd/oecm-qemu)"
 	cd "$micro/host/cmd/oecm-qemu"
 	status=0

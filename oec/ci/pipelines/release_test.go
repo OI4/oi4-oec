@@ -48,6 +48,7 @@ func TestReleaseVersion(t *testing.T) {
 	match("sdk/micro/arduino/library.properties", `(?m)^version=(.+)$`)
 	match("demos/logger/src/main.c", `(?m)^#define LOGGER_VERSION "([^"]+)"$`)
 	match("demos/weather/main.go", `(?m)^const version = "([^"]+)"$`)
+	match("demos-smart-sensors/esp32-dht22/CMakeLists.txt", `(?m)^set\(PROJECT_VER "([^"]+)"\)$`)
 
 	jsonVersion := func(file string, path ...string) {
 		t.Helper()
