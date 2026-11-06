@@ -71,6 +71,9 @@ func TestReleaseVersion(t *testing.T) {
 	jsonVersion("registry/api/openapi.json", "info", "version")
 	jsonVersion("registry/api/asyncapi.json", "info", "version")
 	jsonVersion("integrations/home-assistant/custom_components/oi4_oec/manifest.json", "version")
+	jsonVersion("integrations/node-red/package.json", "version")
+	jsonVersion("integrations/node-red/package-lock.json", "version")
+	jsonVersion("integrations/node-red/package-lock.json", "packages", "", "version")
 
 	// The defaults of the image builds, the image tags and the SBOMs:
 	// ARG VERSION= in the Dockerfiles, ${VERSION:-…}, ${OEC_DEMOS_VERSION:-…}
