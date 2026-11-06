@@ -64,3 +64,10 @@ git -C oi4-oec-demo add -A
 - Push of `oi4-oec-demo` (`development`, and whether `main` follows) – a
   public publication (G-3.8, Q-011).
 - Whether the old 1.x branches/tags of `OI4/oi4-oec-demo` stay.
+
+## Pushed (PO: "Du kannst alles pushen")
+
+`oi4-oec-demo` `development` pushed to `OI4/oi4-oec-demo`. `origin/development` had moved meanwhile (`ef8b14a` merge of `main`, `c778e86` 1.x build fixes, 15:20/15:21): merged with strategy `ours` (`1869e44`, tree unchanged – the 1.x commits stay in the history only), then a fast-forward push `c778e86..1869e44`. The tree also holds `demos-smart-sensors/` of the hardware session (`a5aabaf`, `0587a37`). Secret scan of the whole tree before the push: clean. `main` and the
+old 1.x branches and tags are left as they are (not part of the order;
+`development` is the default branch). The workspace `main` was pushed
+together (`71d8864..bb4fc24`).

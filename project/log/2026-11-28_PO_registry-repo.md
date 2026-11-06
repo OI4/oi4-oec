@@ -63,3 +63,10 @@ git -C oi4-oec-registry add -A
   a public publication (G-3.8, Q-011).
 - Whether the old 1.x branches (`publish`, `split_ui`, `devcontainer`, …)
   and tags of `OI4/oi4-oec-registry` stay.
+
+## Pushed (PO: "Du kannst alles pushen")
+
+`oi4-oec-registry` `development` pushed to `OI4/oi4-oec-registry`. Fast-forward push `fb77c3e..4fff53f`. Secret scan before the push: clean (only the PEM markers of `src/tls.rs`). `main` and the
+old 1.x branches and tags are left as they are (not part of the order;
+`development` is the default branch). The workspace `main` was pushed
+together (`71d8864..bb4fc24`).
