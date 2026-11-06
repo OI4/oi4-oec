@@ -124,3 +124,11 @@ Run on `89d3514` (guideline head `ca211a0`, load 14 → 8): **all checks passed*
 ### Push
 
 The guideline branch is pushed (`ca211a0`, no CI there). The workspace commits stay local until D-3. `/tmp/gate.log` deleted.
+
+## Addendum 4 (2026-11-06) – PO answers on D-2, D-3, R-1 … R-4
+
+PO (German, in translation):
+- "A5 authors: replace the entries in the table by the names from the enumeration."
+- "D-2: Guenes Bilgen, Siemens AG."
+- "D-3 (a)" – push the workspace once, after D-1/D-2 are applied.
+- "R-1 accepted", "R-2 proposal accepted" ("This revision … is developed"), "R-3 accepted", "R-4 accepted" (REQ-TOP-005, V-TOP-106, V-TOP-255 → `reviewed`).

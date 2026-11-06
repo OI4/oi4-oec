@@ -38,6 +38,8 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 - **Guideline:** SF-118 (resolved) und GL-ADR-023; MG 7.2 definiert jetzt: „`CloudConnector` – Communicates with the Message Bus on one side and with a cloud platform on the other side, e.g. a cloud of the operator or a cloud of a manufacturer“. Die Glossar-Einträge OOC **und CCC** sind gelöscht (beide gehören zum veralteten Schichtenmodell). Eine Zeile in A6.4. Feedback-Paket ergänzt.
 - **Projekt:** neue Baseline `97b6acd` (1407 Inventar-Einträge), Schema `2.1.0-dev` (2.0.0 bleibt eingefroren; es wurde nie veröffentlicht), Rust-, C-, Go- und Micro-SDK (Wert 5 in der C-Schnittstelle bleibt), D7, Registry-AsyncAPI, Community-Seiten mit Migrationshinweis für 1.x. Keine Alias-Namen für den alten Wert – die SDKs sind noch nicht veröffentlicht.
 
+**Beantwortet am 06.11.2026 (Nachtrag 4):** „A5 Autoren: ersetze die Einträge in der Tabelle durch die Namen aus der Aufzählung“; **D-2** „Guenes Bilgen, Siemens AG“; **D-3 (a)**; **R-1** akzeptiert; **R-2** Vorschlag akzeptiert; **R-3** akzeptiert; **R-4** akzeptiert. Umsetzung siehe Nachtrag 4.
+
 **D-2 – Autorentabelle.** Guenes Bilgen steht nicht in Tabelle 21, und ich kenne seine Firma nicht.
 - (a) **Empfehlung:** Du nennst mir seine Firma; ich trage ihn in Tabelle 21 ein. Tabelle und der neue Satz bleiben.
 - (b) Tabelle 21 durch die sechs Beteiligten mit ihren Firmen ersetzen (Firma von Guenes Bilgen nötig).
