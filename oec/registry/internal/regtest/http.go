@@ -150,10 +150,13 @@ func (w *Web) Raw(t *testing.T, request string) string {
 	t.Helper()
 	c := w.Dial(t)
 	defer c.Close()
-	if _, err := io.WriteString(c, request); err != nil {
-		t.Fatal(err)
+	// A server may answer before it has read the whole request (431) and
+	// close; the write then fails with a reset, but the answer is there.
+	_, werr := io.WriteString(c, request)
+	line, rerr := bufio.NewReader(c).ReadString('\n')
+	if werr != nil && !strings.HasPrefix(line, "HTTP/") {
+		t.Fatalf("write: %v; read: %q, %v", werr, line, rerr)
 	}
-	line, _ := bufio.NewReader(c).ReadString('\n')
 	return strings.TrimSpace(line)
 }
 
