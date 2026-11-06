@@ -47,3 +47,10 @@ PO order: "alles von oi4-oec-demo löschen und alles was wir unter oec für die 
 ## Amendment 2026-11-28 (PO) – registry repository `oi4-oec-registry`
 
 PO order: "Mach nun das Gleiche bitte für oi4-oec-registry". `OI4/oi4-oec-registry` (public, default branch `development`) is cloned as `oi4-oec-registry/` in the workspace root, a separate git repository excluded via `.gitignore`, under the same rules as the demo repository above: the OEC 1.x registry is deleted (it stays in its history); `registry/` is an **unmodified copy of `oec/registry`** (incl. the committed `ui/dist/`), next to a README of its own, `LICENSE` and a `.gitignore`; `oec/registry` stays the source (gate step 8; `oec/demos/internal/sbom` reads its `ui/package-lock.json`); no push without the PO (log 2026-11-28_PO_registry-repo).
+
+## Amendment 2026-11-28 (PO) – smart sensor demos `oec/demos-smart-sensors`
+
+PO order: "bring das ESP Beispiel nun auch dort hin. Mach dazu vielleicht noch ein demos-smart-sensors parallel zu demos". The DHT22 firmware of the hardware run (log 2026-11-28_HW_esp32-dht22) becomes a demo of its own:
+
+- **Source `oec/demos-smart-sensors/`** (agent, G-3.4 b), next to `oec/demos`: one folder per board and sensor, first `esp32-dht22/` (ESP-IDF 6.1, Micro SDK component `oecm` by the relative path `../../../sdk/micro/port/esp-idf/oecm`, so it builds only in the OEC source tree; `build.sh`, `provision.sh` for `oec/dev`). Firmware is not part of `oec/check.sh` (no ESP-IDF in the gate); `ci/micro-esp-idf.sh` builds it in the Espressif container of `micro.yml`; `TestReleaseVersion` pins its `PROJECT_VER` to `oec/VERSION`.
+- **Copy `oi4-oec-demo/demos-smart-sensors/`**: an unmodified copy of the tracked files, like `demos/` (amendment above); changes are made in `oec/demos-smart-sensors` and copied again. No push without the PO (Q-011).

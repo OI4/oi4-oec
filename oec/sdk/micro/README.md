@@ -355,7 +355,9 @@ with `OEC_TESTBROKER=<linux go-testbroker>`, see `oec/ci/README.md`).
 Done once on 2026-11-28 (log `project/log/2026-11-28_HW_esp32-dht22.md`):
 an AZ-Delivery ESP32-WROOM-32 DevKit (ESP32-D0WDQ6 rev 1.0, Wi-Fi WPA3)
 with a local variant of the example that reads a DHT22 instead of the
-simulated sensor, ESP-IDF 6.1, Level 3, through the D7 proxy with the
+simulated sensor (now the demo
+[`../../demos-smart-sensors/esp32-dht22`](../../demos-smart-sensors/esp32-dht22/README.md)
+with `build.sh` and `provision.sh`), ESP-IDF 6.1, Level 3, through the D7 proxy with the
 restart hook and `--peer --announce`: **47 pass, 0 fail, 7 skip (not
 applicable), result PASS**. The M5Stack and the Arduino sketches are not
 run on hardware yet. Against the broker of `oec/dev`, from a Mac or PC in
