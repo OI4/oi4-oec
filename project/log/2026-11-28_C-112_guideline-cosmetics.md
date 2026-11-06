@@ -158,3 +158,9 @@ PO (German, in translation):
 - **D-4 – hosted CI of the push.** (a) **Recommended:** fix the billing / spending limit of `OI4` and tell me; I rerun the six runs (`gh run rerun <id> --failed`) and evaluate them. Cost estimate on PO question (jobs of the C-111 runs on `889a123`, GitHub list prices for private repositories): Linux x64 176 min × $0.006, Linux arm64 97 × $0.005, macOS 63 × $0.062, Windows x64 40 × $0.010, Windows arm64 23 × $0.010 ≈ 400 min ≈ **US$ 6.10 per code push**; `release.yml` ≈ 66 min ≈ $0.50. (b) Accept the local gate as the proof for C-112 (the code change is the rename of one enumeration value plus data; verified on macOS by `oec/check.sh`); the next code push is checked on the hosted runners.
 
 `/tmp/gate.log` deleted.
+
+## Addendum 5 (2026-11-06) – PO answer on D-4
+
+- PO (screenshot of the `OI4` budgets): Actions budget US$ 50 per month, US$ 10 spent; then "D-4 (a)".
+- Agent check: the remaining US$ 40 covers about six full code-push runs (≈ US$ 6 each). Recommended to keep "stop usage when budget limit is reached" on and to make sure the payment method works (the earlier message named failed payments as one cause).
+- Next: rerun the six failed runs on `76b59d4` (`gh run rerun <id> -R OI4/oi4-oec --failed`) and evaluate them; result in addendum 6.
