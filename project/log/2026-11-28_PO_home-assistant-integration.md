@@ -136,3 +136,47 @@ git -C oi4-oec-demo add -A
   Home Assistant number/select entities), reauthentication and
   reconfiguration flows, Messaging L3 (`PublicationList`,
   `SubscriptionList`).
+
+## Addendum 1 – publication and install test with the Home Assistant Marketplace
+
+PO: "Ist nun public. Für einen Test kannst du lokal auf meinem Mac gerne im
+Docker HA installieren". `OI4/oi4-oec-demo` is public (GitHub API). On PO
+approval (ask_user) the agent pushed `development` (`3c4df4a`; GitHub
+reported the bypassed rule "Changes must be made through a pull request",
+admin rights of the PO account).
+
+Findings:
+
+- **HACS is replaced** in Home Assistant 2026.11 by the built-in
+  **Marketplace** (`get.hacs.xyz` refuses to install on 2026.11). The
+  Marketplace keeps the repository format (public repository, `hacs.json`,
+  `custom_components/<domain>/`); adding a custom repository needs a GitHub
+  connection (device code, done by the PO).
+- The Marketplace (like HACS) installs the **latest release**: the first
+  GitHub release without the pre-release flag in the order of the GitHub
+  API. The API orders by the version in the tag name, not by date: the
+  release `v1.1.0` (OEC 1.x, target `main`) came before a newer release
+  `oec-v0.1.0` (marked *Latest*), and adding the repository failed with
+  "no content the Marketplace can install in version v1.1.0". A release
+  with the GitHub pre-release flag is skipped (unless the beta switch of
+  the repository is on), so it cannot be used either.
+- PO decision (ask_user): "v2.0.0 aber mit Snapshot oder Prerelease
+  vermerk". Release **`v2.0.0-snapshot.1`** on `3c4df4a` (normal release,
+  *Latest*, SemVer pre-release suffix in the tag; the release `oec-v0.1.0`
+  and its tag were deleted). GitHub now lists it before `v1.1.0`.
+
+Test (Home Assistant 2026.11.0 in docker, network `oec-dev_default`,
+`127.0.0.1:8123`): Marketplace *Add from link* `OI4/oi4-oec-demo`, type
+integration → available version `v2.0.0-snapshot.1`, domain `oi4_oec`;
+*Install* wrote `custom_components/oi4_oec` identical to the release; the
+config flow (host `mosquitto`, credentials of `oec-dev-app`, CA) created
+the entry without a restart. After the 60 s heartbeats: 40 entities of the
+integration, the weather service with 3 stations, config, logger, registry
+and the ESP32 DHT22 (`°C`, `hPa`, `%`, `km/h`, `°`). The applications appear
+with their first publication (no bus-wide request in OEC), now stated in the
+README. The README describes the install with the Marketplace (2026.11+) and
+HACS (2026.10), and the latest-release rule.
+
+Open for the PO: a later release of the integration must sort above
+`v2.0.0-snapshot.1` (e.g. `v2.0.0-snapshot.2`, `v2.0.0`), otherwise the
+Marketplace keeps installing the old one.
