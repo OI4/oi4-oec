@@ -82,3 +82,45 @@ The PO could not be reached for the choice of the name; nothing is changed in th
 ## Addendum 2 (2026-11-06) – PO background on OOC/CCC
 
 PO (German, in translation): "The initial background behind OOC and CCC was the idea that an edge always connects only to the cloud of the operator. The operator clouds connect via CCC with e.g. the manufacturers. This is outdated. The actual problem with the name is that it is neither open nor about the operator. Connectors to manufacturer clouds like Netilion or moneo are allowed just as well as an own cloud of the operator. Correct would actually be CC (cloud connector) as the counterpart of the OT connector. Think again whether you find something fitting for OOC with this information, otherwise we rename it." Attached: the OI4 reference architecture figure (layers 1 Open Edge Connectivity, 2 Open Edge Computing with "OOC Connector", 3 Open Operator Cloud Platform, 4 Common Cloud Central).
+
+## Addendum 3 (2026-11-06) – D-1 implemented: `OOCConnector` → `CloudConnector`
+
+Assessment of addendum 2: no long form for OOC is both honest and fitting – the connector is neither "open" nor bound to the operator, and the third and fourth layers of the figure (operator cloud, CCC) no longer describe the architecture. Following the PO's own conclusion ("otherwise we rename it", "correct would be CC (cloud connector) as counterpart of the OT connector"), D-1 is answered as option (d): the value is renamed to **`CloudConnector`**.
+
+### Guideline (`feature/spec-findings`)
+
+- `472d58d` – SF-118 in the register (MG 7.2 / A4: the term OOC and its layer model are outdated) and **GL-ADR-023** "Rename the ServiceType OOCConnector to CloudConnector".
+- `97b6acd` – MG 7.2: `CloudConnector` "Communicates with the Message Bus on one side and with a cloud platform on the other side, e.g. a cloud of the operator or a cloud of a manufacturer"; the OTConnector paragraph says "onboarded by `CloudConnector`"; glossary entries OOC and CCC deleted (MG A4); change line in A6.4.
+- `8def86d` – SF-118 resolved (`97b6acd`).
+- `479de0f` – feedback package: both commits attributed `GL-ADR-023,SF-118`; pages SF-118 and GL-ADR-023 generated; 118 findings, 217 commits up to `97b6acd`.
+- `ca211a0` – Community pages: `concepts.md` (table row), `migration.md` (new section "ServiceType OOCConnector renamed", at-a-glance row, "GL-ADR-001 … 023"), `compliance/schema.md`, `oec-check.md`, `validate.md` (sample output "schemas 2.1.0-dev, baseline 97b6acd", heading "Unreleased (2.1.0-dev)").
+
+### Workspace
+
+- `066237b` – spec: re-baseline to `97b6acd` (inventory 1409 → **1407**: the two glossary sentences OOC/CCC gone; the MG 7.2 item re-keyed `MG-7.2-90e1d54a` → `MG-7.2-0947ae2f` in `informative.yaml`); REQ-TOP-005 lists `CloudConnector` (status `draft`); `topic.abnf`, `topic-patterns.json`, V-TOP-106 with `CloudConnector` (`draft`) and new invalid vector **V-TOP-255** "former ServiceType OOCConnector" (`draft`); exports and views regenerated.
+- `633ef8c` – schema: `envelope`, `actions`, `helpers` enumerations; `schema.Version` **2.1.0-dev**, `schema.Baseline` `97b6acd`; CHANGELOG "Unreleased (2.1.0-dev)"; `oec/schema/check.sh` 636 cases, 0 disagreements. `release/2.0.0.json` stays frozen.
+- `f22d052` – SDKs, test first: Rust `ServiceType::CloudConnector` (`closed_sets` test failed first); C ABI `OEC_ST_CLOUD_CONNECTOR` (value 5 unchanged, `oec.h` regenerated with cbindgen 0.29.4); Go `oec.CloudConnector` with new `TestServiceTypeNames` (reads `oec.h`; cgo is not allowed in `_test.go`); micro `OECM_ST_CLOUD_CONNECTOR` with new `test_service_type_names`, `vectors_gen.h` regenerated.
+- `89d3514` – D7 `rules.go`/`probe.go`, registry `asyncapi.json`, D7/D8 catalogs, `COVERAGE.md` baseline lines, `list_test.go`, `oec/CHANGELOG.md` (baseline `97b6acd`, JSON Schema bundle 2.1.x, CloudConnector line).
+
+### Decisions (agent, G-3.4 b)
+
+- **A-636 Name `CloudConnector`:** not `CCConnector`/`CC` – spelled out like `OTConnector`/`ITConnector`, no clash with the deleted abbreviation CCC; position in the enumeration and C ABI value 5 unchanged.
+- **A-637 CCC deleted with OOC:** the term was used nowhere else in the guideline and belongs to the layer model the PO called outdated (review R-3).
+- **A-638 Schema 2.1.0-dev:** a new baseline with a visible enumeration change → MINOR. Strictly, removing a value is MAJOR, but 2.0.0 was never published and guideline 2.0 is not released; `release/2.0.0.json` stays frozen. Sample reports in the conformance fixtures keep "2.0.1-dev" (they are frozen test data, not the current version).
+- **A-639 No deprecated aliases:** every SDK is pre-release 0.1.0 and unpublished; an alias would keep the outdated term alive. `OECM_API_VERSION` stays 1.
+- **A-640 Drafts for review:** REQ-TOP-005, V-TOP-106 and V-TOP-255 are `draft` (G-3.9); draft vectors do not count, the gaps stay 0 because REQ-TOP-005 keeps its reviewed vectors.
+- **A-641 Migration note:** `migration.md` documents the rename for 1.x implementers (`OOCConnector` existed in 1.x).
+
+### For the PO
+
+- D-1 answered (rename). Still open: **D-2**, **D-3**, **R-1**, **R-2**.
+- **R-3** review: GL-ADR-023, the new MG 7.2 definition of `CloudConnector` and the deletion of the glossary entries OOC and CCC.
+- **R-4** review (G-3.9): REQ-TOP-005 and the vectors V-TOP-106 (valid) and V-TOP-255 (invalid), status `draft`.
+
+### Gate
+
+Run on `89d3514` (guideline head `ca211a0`, load 14 → 8): **all checks passed** – `lint`: 27 area files, 444 REQs, 311 informative items, topic vectors 152; coverage 0 open in every area; `docscheck: 19 pages ok, 30 README links to them ok`; `cigen: 7 workflows current`. No flaky test.
+
+### Push
+
+The guideline branch is pushed (`ca211a0`, no CI there). The workspace commits stay local until D-3. `/tmp/gate.log` deleted.

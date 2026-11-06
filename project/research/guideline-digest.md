@@ -150,7 +150,7 @@ It also covers the guideline ADRs **GL-ADR-001 … 018** in `rfcs_adrs/` and the
 `Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>[/<Filter>]]`
 
 - **Namespace** `Oi4v2`; v1 = `Oi4`. Both may coexist on one broker, but a request is answered in its own namespace (MG 7.1).
-- **ServiceType (closed set):** `Registry | OTConnector | Utility | Persistence | Aggregation | OOCConnector | ITConnector`.
+- **ServiceType (closed set):** `Registry | OTConnector | Utility | Persistence | Aggregation | CloudConnector | ITConnector` (`OOCConnector` before GL-ADR-023, C-112).
 - **Method:** `Pub | Get | Set | Del | Call | Reply`.
   - `Get`/`Set`/`Del`/`Call` use the **target's** ServiceType/AppId.
   - `Reply` uses the same topic as `Call` with the method swapped.
