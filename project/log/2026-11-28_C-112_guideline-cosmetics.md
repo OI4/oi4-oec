@@ -173,3 +173,8 @@ PO (German, in translation):
 - **One repetition (A-644):** `oec/conformance (windows-11-arm)` failed in attempt 2: `TestSimFixtures/run/T7-LIFE-02/late-subscribe` (D7 saw a `FAILURE_1`/0 Health of the simulated CUT as the first message, i.e. a Will, then a Health without a Birth – T7-MON-03 info, T7-MON-05 fail; `TestSimFixtures` took 647 s with all fixtures in parallel). The same job was green in C-111 on `889a123`, and C-112 changed nothing in the lifecycle or the simulator. Rerun of the failed job (attempt 3): green.
 - Cost of the reruns: about 420 job minutes (≈ US$ 6–7 at list prices), incl. the repeated Windows arm64 job (14 min).
 - C-112 is closed; nothing left to decide.
+
+## Addendum 7 (2026-11-06) – PO answer on A-643
+
+- PO: "Involved in the current revision: Guenes Bilgen, Werner Blumenstock, Konrad Heidrich, Sebastian Heinze, Bastian Schmick, Thomas Weinschenk. kann weg" – the sentence above Table 21 in MG A5 is deleted.
+- Next: delete it in the guideline, re-baseline as in A-642, gate, push; result in addendum 8.
