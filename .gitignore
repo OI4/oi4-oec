@@ -2,6 +2,7 @@
 /legacy/
 /oi4-oec-documentation/
 /oi4-oec-demo/
+/oi4-oec-registry/
 
 # IDE
 /.idea/
