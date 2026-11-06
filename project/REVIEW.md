@@ -861,7 +861,7 @@ C-112 (2026-11-28) – your guideline cosmetics (G-3.4 a: guideline text, costs)
 - **D-3 – answered (a):** pushed once after D-1/D-2 (`origin/main` = `76b59d4`, addendum 4) – but GitHub started **no job** (billing stop of `OI4`, see D-4).
 - **R-1 … R-4 – accepted;** R-2 applied ("is developed"), R-4: REQ-TOP-005, V-TOP-106, V-TOP-255 `reviewed`.
 - **D-4 – hosted CI of the push (new).** All six workflows on `76b59d4` failed within seconds: "The job was not started because recent account payments have failed or your spending limit needs to be increased" (no runner minute used).
-  - (a) **Recommended:** fix the billing / spending limit of `OI4` and tell me; I rerun the six runs (~7–8 runner hours) and evaluate them.
+  - (a) **Recommended:** fix the billing / spending limit of `OI4` and tell me; I rerun the six runs and evaluate them. Cost estimate (C-111 run `889a123`, GitHub list prices, private repository): ~400 job minutes ≈ **US$ 6 per code push** (macOS ≈ $3.90, Linux ≈ $1.55, Windows ≈ $0.63); `release.yml` ≈ $0.50 per run; documentation-only pushes are free.
   - (b) Accept the local gate (all checks passed on `76b59d4`) as the proof for C-112; the next code push is checked on GitHub.
 - For information: A-642 (re-baseline on `51a0b50`), A-643 (the sentence "Involved in the current revision: …" stays and now repeats the table – say if it should go).
 

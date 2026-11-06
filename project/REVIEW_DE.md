@@ -49,7 +49,7 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 - **Zur Info (A-643):** Der Satz „Involved in the current revision: …“ steht noch über der Tabelle und nennt jetzt dieselben sechs Namen. Sag Bescheid, wenn er weg soll.
 
 **D-4 – CI auf GitHub für diesen Push (neu).**
-- (a) **Empfehlung:** Du bringst die Abrechnung bzw. das Ausgabenlimit von `OI4` in Ordnung und sagst mir Bescheid; ich starte die sechs Läufe neu (rund 7–8 Runner-Stunden) und werte sie aus.
+- (a) **Empfehlung:** Du bringst die Abrechnung bzw. das Ausgabenlimit von `OI4` in Ordnung und sagst mir Bescheid; ich starte die sechs Läufe neu und werte sie aus. Kosten (geschätzt aus dem Lauf `889a123`, GitHub-Listenpreise, privates Repo): rund 400 Job-Minuten ≈ **6 US-Dollar pro Code-Push** (davon macOS ≈ 3,90 $); `release.yml` ≈ 0,50 $ pro Lauf; reine Doku-Pushes kosten nichts.
 - (b) Das lokale Gate (auf `76b59d4` komplett grün) reicht als Nachweis für C-112; der nächste Code-Push wird wieder auf GitHub geprüft.
 
 ### Zur Info: C-111 Nachtrag 4 – D-3 (a) umgesetzt (A-629)
