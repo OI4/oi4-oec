@@ -70,3 +70,9 @@ Points 2–5 are applied in the guideline (four commits, `b32fb74` … `c48bbd4`
 ## Temporary files
 
 `/tmp/c112/` (conversion script, intermediate pages, build log) and `/tmp/gate.log` – deleted at the end of the cycle. The guideline `build/` folder is git-ignored and existed before.
+
+## Addendum 1 (2026-11-06) – PO answer on D-1 (OOC)
+
+PO (German, in translation): "OOC with Open Operator Cloud is an outdated term at the OI4. Either we find a more suitable name that fits OOC, or we have to rename OOC."
+
+Impact analysis: `OOCConnector` is a normative `ServiceType` value (MG 7.2, enumeration closed: "a new `ServiceType` requires a new version of this guideline"). It appears in the topic grammar and patterns (`oec/spec/topic`), REQ-TOP (`top.yaml`), the topic vectors, the schema (`envelope`, `actions`, `helpers`), the Rust SDK (`ServiceType::OOCConnector`), the C ABI header, the Go SDK, the micro SDK (`oecm.h`), D7 (`rules.go`, `probe.go`), the registry AsyncAPI and the Community page `concepts.md`. A new long form for OOC changes text only (MG A4, MG 7.2 sentence, `concepts.md`); renaming the value is a normative change (SF-118, GL-ADR, re-baseline, schema, every SDK, D7, registry). The PO is asked which way and which name (G-3.4 a).
