@@ -148,7 +148,7 @@
       "origin": {
         "kind": "constructed"
       },
-      "status": "draft",
+      "status": "reviewed",
       "topic": "Oi4v2/CloudConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU",
       "parse": {
         "rule": "pub-health",

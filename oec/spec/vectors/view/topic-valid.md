@@ -12,7 +12,7 @@ Constructed valid topic vectors: every ServiceType, Filter encodings, Event leve
 | [V-TOP-103](#v-top-103) | ServiceType Utility | valid | rule pub-health | constructed | reviewed |
 | [V-TOP-104](#v-top-104) | ServiceType Persistence | valid | rule pub-health | constructed | reviewed |
 | [V-TOP-105](#v-top-105) | ServiceType Aggregation | valid | rule pub-health | constructed | reviewed |
-| [V-TOP-106](#v-top-106) | ServiceType CloudConnector | valid | rule pub-health | constructed | draft |
+| [V-TOP-106](#v-top-106) | ServiceType CloudConnector | valid | rule pub-health | constructed | reviewed |
 | [V-TOP-107](#v-top-107) | ServiceType ITConnector | valid | rule pub-health | constructed | reviewed |
 | [V-TOP-108](#v-top-108) | Tag with all four percent-encoded characters | valid | rule pub-data | constructed | reviewed |
 | [V-TOP-109](#v-top-109) | Tag with non-ASCII UTF-8 characters | valid | rule pub-data | constructed | reviewed |
@@ -127,7 +127,7 @@ Constructed valid topic vectors: every ServiceType, Filter encodings, Event leve
 - Expected: valid
 - Illustrates: [REQ-TOP-001](../../requirements/view/top.md#req-top-001), [REQ-TOP-013](../../requirements/view/top.md#req-top-013), [REQ-IL-002](../../requirements/view/il.md#req-il-002), [REQ-TOP-005](../../requirements/view/top.md#req-top-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed
 
 ## V-TOP-107
 

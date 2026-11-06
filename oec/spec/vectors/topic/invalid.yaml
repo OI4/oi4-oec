@@ -1,4 +1,4 @@
-# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-253 (NewDataSetWriterId without Filter, REQ-ACT-020) drafted in C-036, reviewed by the PO (C-036 review 2026-10-25); V-TOP-218 gained REQ-ACT-020 in C-040 (back to draft); V-TOP-254 (empty Source, REQ-TOP-018) drafted in C-040.
+# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-253 (NewDataSetWriterId without Filter, REQ-ACT-020) drafted in C-036, reviewed by the PO (C-036 review 2026-10-25); V-TOP-218 gained REQ-ACT-020 in C-040 (back to draft); V-TOP-254 (empty Source, REQ-TOP-018) drafted in C-040; V-TOP-255 (former ServiceType OOCConnector, SF-118) drafted in C-112, reviewed by the PO (C-112 R-4, 2026-11-06).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
 baseline: "97b6acd"
@@ -554,6 +554,6 @@ vectors:
     violates: [REQ-TOP-005]
     reason: "OOCConnector was renamed to CloudConnector and is no ServiceType of MG 7.2 (SF-118, GL-ADR-023)."
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/OOCConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     fails: grammar

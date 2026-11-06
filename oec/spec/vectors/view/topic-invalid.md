@@ -61,7 +61,7 @@ Constructed invalid topic vectors. Each vector names the violated requirement an
 | [V-TOP-252](#v-top-252) | Line break after the Resource | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-253](#v-top-253) | Reply NewDataSetWriterId with Filter | invalid | fails: grammar | constructed | reviewed |
 | [V-TOP-254](#v-top-254) | Empty Source level | invalid | fails: grammar | constructed | reviewed |
-| [V-TOP-255](#v-top-255) | Former ServiceType OOCConnector | invalid | fails: grammar | constructed | draft |
+| [V-TOP-255](#v-top-255) | Former ServiceType OOCConnector | invalid | fails: grammar | constructed | reviewed |
 
 ## V-TOP-201
 
@@ -668,4 +668,4 @@ Notes: Former form of the MG B1.1.3 example, corrected in the guideline (SF-040 
 - Expected: invalid – OOCConnector was renamed to CloudConnector and is no ServiceType of MG 7.2 (SF-118, GL-ADR-023).
 - Violates: [REQ-TOP-005](../../requirements/view/top.md#req-top-005)
 - Origin: constructed
-- Status: draft
+- Status: reviewed

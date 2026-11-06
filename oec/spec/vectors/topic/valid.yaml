@@ -1,4 +1,4 @@
-# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-135 … 137 (positives of REQ-TOP-009/011/012/018/020/021 and REQ-IL-004) drafted in C-040.
+# Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-135 … 137 (positives of REQ-TOP-009/011/012/018/020/021 and REQ-IL-004) drafted in C-040; V-TOP-106 changed to CloudConnector in C-112 (SF-118), reviewed by the PO (C-112 R-4, 2026-11-06).
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
 baseline: "97b6acd"
@@ -97,7 +97,7 @@ vectors:
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: draft
+    status: reviewed
     topic: "Oi4v2/CloudConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"

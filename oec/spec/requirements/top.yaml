@@ -113,8 +113,8 @@ requirements:
         text: Other values must not be used; a new ServiceType requires a new version of this guideline.
     verification: [d7-validate]
     inventory: [MG-7.2-709618ad, MG-7.2-75c0743e, MG-7.2-dcabe6af]
-    status: draft
-    notes: Closed set per PO decision SF-042 (a) (C-018), stated in the guideline since C-020. OOCConnector renamed to CloudConnector per PO decision SF-118 (C-112, GL-ADR-023).
+    status: reviewed
+    notes: Closed set per PO decision SF-042 (a) (C-018), stated in the guideline since C-020. OOCConnector renamed to CloudConnector per PO decision SF-118 (C-112, GL-ADR-023); reviewed by the PO (C-112 R-4, 2026-11-06).
 
   - id: REQ-TOP-006
     title: ServiceType of the destination or the publisher

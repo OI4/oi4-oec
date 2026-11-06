@@ -12,7 +12,7 @@ Guideline baseline: `97b6acd`. Source of truth: the YAML files in `oec/spec/vect
 | [payload-guideline](payload-guideline.md) | `vectors/payload/guideline.yaml` | payload | 94 | 94 | 0 | 94 | 0 | 94 |
 | [platform-broker-json](platform-broker-json.md) | `vectors/platform/broker-json.yaml` | broker-json | 18 | 4 | 14 | 0 | 0 | 18 |
 | [topic-guideline](topic-guideline.md) | `vectors/topic/guideline.yaml` | topic | 60 | 60 | 0 | 60 | 0 | 60 |
-| [topic-invalid](topic-invalid.md) | `vectors/topic/invalid.yaml` | topic | 55 | 0 | 55 | 0 | 1 | 54 |
-| [topic-valid](topic-valid.md) | `vectors/topic/valid.yaml` | topic | 37 | 37 | 0 | 0 | 1 | 36 |
+| [topic-invalid](topic-invalid.md) | `vectors/topic/invalid.yaml` | topic | 55 | 0 | 55 | 0 | 0 | 55 |
+| [topic-valid](topic-valid.md) | `vectors/topic/valid.yaml` | topic | 37 | 37 | 0 | 0 | 0 | 37 |
 
 Golden = taken from the guideline (`origin.kind: guideline`); all others are constructed. Vectors stay `draft` until the PO confirms them (G-3.9).

@@ -9,7 +9,7 @@ Guideline baseline: `97b6acd` · Area status: reviewed · Sections: MG 7
 | [REQ-TOP-002](#req-top-002) | Topics with namespace Oi4v2 conform to the guideline | MUST | MUST | MUST | MUST | messaging | d7-validate, d7-monitor | reviewed |
 | [REQ-TOP-003](#req-top-003) | Other MQTT traffic does not use the namespace | MUST NOT | MUST NOT | MUST NOT | MUST NOT | messaging | d7-monitor | reviewed |
 | [REQ-TOP-004](#req-top-004) | Versions are not mixed | MUST | MUST | MUST | MUST | messaging | d7-test | reviewed |
-| [REQ-TOP-005](#req-top-005) | ServiceType is one of the defined values | MUST | MUST | MUST | MUST | messaging | d7-validate | draft |
+| [REQ-TOP-005](#req-top-005) | ServiceType is one of the defined values | MUST | MUST | MUST | MUST | messaging | d7-validate | reviewed |
 | [REQ-TOP-006](#req-top-006) | ServiceType of the destination or the publisher | MUST | MUST | MUST | MUST | messaging | d7-monitor, d7-test | reviewed |
 | [REQ-TOP-007](#req-top-007) | Directly connected device uses OTConnector | MUST* | MUST | MUST | MUST | messaging | d7-validate | deprecated |
 | [REQ-TOP-008](#req-top-008) | ServiceType represents the main task | SHOULD | SHOULD | SHOULD | SHOULD | messaging | manual | reviewed |
@@ -124,7 +124,7 @@ The ServiceType element is one of Registry, OTConnector, Utility, Persistence, A
 - Domain: messaging · Applies to: component
 - Refs: MG 7.2, SF-042
 - Verification: d7-validate
-- Status: draft
+- Status: reviewed
 - Inventory: MG-7.2-709618ad, MG-7.2-75c0743e, MG-7.2-dcabe6af
 
 > Each application that publishes or subscribes data represents a specific type of service.
@@ -136,7 +136,7 @@ The ServiceType element is one of Registry, OTConnector, Utility, Persistence, A
 > Other values must not be used; a new ServiceType requires a new version of this guideline.
 > — MG 7.2
 
-Notes: Closed set per PO decision SF-042 (a) (C-018), stated in the guideline since C-020. OOCConnector renamed to CloudConnector per PO decision SF-118 (C-112, GL-ADR-023).
+Notes: Closed set per PO decision SF-042 (a) (C-018), stated in the guideline since C-020. OOCConnector renamed to CloudConnector per PO decision SF-118 (C-112, GL-ADR-023); reviewed by the PO (C-112 R-4, 2026-11-06).
 
 ## REQ-TOP-006
 
