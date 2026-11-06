@@ -20,6 +20,10 @@ oec/sdk/micro/examples/esp-idf/managed_components/
 oec/sdk/micro/examples/esp-idf/sdkconfig
 oec/sdk/micro/examples/esp-idf/sdkconfig.old
 oec/sdk/micro/examples/esp-idf/build/
+# smart sensor demos on ESP-IDF: the same
+oec/demos-smart-sensors/*/managed_components/
+oec/demos-smart-sensors/*/sdkconfig
+oec/demos-smart-sensors/*/sdkconfig.old
 dist/
 # the built Registry Web UI is committed and embedded (ADR-0029 §9)
 !/oec/registry/ui/dist/
