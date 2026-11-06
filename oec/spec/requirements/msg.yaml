@@ -8,7 +8,7 @@
 # REQ-MSG-026 reclassified (+schema) in C-034, reviewed in the C-034 review (2026-10-24).
 # REQ-MSG-038 reclassified (-schema, rule layer only) in C-035, reviewed in the C-035 review (2026-10-25).
 area: MSG
-baseline: "51a0b50"
+baseline: "605fbb7"
 requirements:
   # --- General (MG 8, MG 8.1) ------------------------------------------------
   - id: REQ-MSG-001
