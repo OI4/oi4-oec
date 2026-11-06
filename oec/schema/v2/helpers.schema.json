@@ -51,7 +51,7 @@
         "PaginationId": {
           "$comment": "REQ-PAG-003 (MG 8.3.11.2): a MessageId (structure of envelope $defs/MessageId); equality with the sender and the first page is a rule-layer rule (R-2, R-3)",
           "type": "string",
-          "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+          "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|CloudConnector|ITConnector)/.+$"
         }
       },
       "unevaluatedProperties": {

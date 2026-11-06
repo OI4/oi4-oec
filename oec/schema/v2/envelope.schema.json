@@ -11,24 +11,24 @@
         "Utility",
         "Persistence",
         "Aggregation",
-        "OOCConnector",
+        "CloudConnector",
         "ITConnector"
       ]
     },
     "PublisherId": {
       "$comment": "REQ-MSG-006 (MG 8.2.1): <ServiceType>/<IdentificationLink>, structure only; equality with the topic is a rule of the rule layer",
       "type": "string",
-      "pattern": "^(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+      "pattern": "^(?:Registry|OTConnector|Utility|Persistence|Aggregation|CloudConnector|ITConnector)/.+$"
     },
     "MessageId": {
       "$comment": "REQ-MSG-007 (MG 8.2.1): <unixTimestampInMs>-<PublisherId>, structure only; equality with the PublisherId is a rule of the rule layer",
       "type": "string",
-      "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+      "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|CloudConnector|ITConnector)/.+$"
     },
     "ReplyTo": {
       "$comment": "REQ-MSG-015 (MG 8.2.1): empty or a MessageId (structure of $defs/MessageId); that it is the MessageId of the trigger is checked by d7-test",
       "type": "string",
-      "pattern": "^(?:[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+)?$"
+      "pattern": "^(?:[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|CloudConnector|ITConnector)/.+)?$"
     },
     "NotReservedClassId": {
       "$comment": "REQ-MSG-014 (MG A2): reserved DataSetClassIds are not used",

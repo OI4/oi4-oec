@@ -20,8 +20,8 @@ const TolerantBaseURI = BaseURI + "tolerant/"
 // Version and Baseline with every result. A released version is frozen in
 // release/<Version>.json; work after a release uses a pre-release version
 // such as 2.1.0-dev (ADR-0019 amendment C-041).
-const Version = "2.0.1-dev"
+const Version = "2.1.0-dev"
 
 // Baseline is the guideline commit the bundle is derived from (the baseline
 // of the spec catalog, ADR-0018).
-const Baseline = "c48bbd4"
+const Baseline = "97b6acd"

@@ -7,12 +7,12 @@
     "ActionPublisherId": {
       "$comment": "REQ-ACT-005 (MG 8.2.16, MG 7.4): <ServiceType>/<IdentificationLink>, structure only; that the PublisherId is the Responder of the topic is a rule of the rule layer",
       "type": "string",
-      "pattern": "^(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+      "pattern": "^(?:Registry|OTConnector|Utility|Persistence|Aggregation|CloudConnector|ITConnector)/.+$"
     },
     "ActionMessageId": {
       "$comment": "REQ-ACT-004 (MG 8.2.16, SF-049): <unixTimestampInMs>-<PublisherId of the sender>, structure only; that the suffix is the RequestorId (request) or the PublisherId (response) is a rule of the rule layer",
       "type": "string",
-      "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/.+$"
+      "pattern": "^[0-9]+-(?:Registry|OTConnector|Utility|Persistence|Aggregation|CloudConnector|ITConnector)/.+$"
     },
     "ActionNetworkMessage": {
       "$comment": "REQ-ACT-002 (MG 8.2.16): fields of an ActionNetworkMessage",
@@ -77,7 +77,7 @@
         "ResponseAddress": {
           "$comment": "REQ-ACT-006 (MG 8.2.16, MG 9.2, MG 7.4): a Reply topic Oi4v2/<ServiceType>/<AppId>/Reply/<Service>[/<Source>], structure only; that it corresponds to the Call topic is a rule of the rule layer",
           "type": "string",
-          "pattern": "^Oi4v2/(?:Registry|OTConnector|Utility|Persistence|Aggregation|OOCConnector|ITConnector)/(?:[\\x2D0-9A-Z_a-z]{4}){0,84}(?:[\\x2D0-9A-Z_a-z]{4}|[\\x2D0-9A-Z_a-z][AQgw]|[\\x2D0-9A-Z_a-z]{2}[048AEIMQUYcgkosw])/Reply/(?:NewDataSetWriterId)(?:/(?:[\\x2D0-9A-Z_a-z]{4}){0,84}(?:[\\x2D0-9A-Z_a-z]{4}|[\\x2D0-9A-Z_a-z][AQgw]|[\\x2D0-9A-Z_a-z]{2}[048AEIMQUYcgkosw]))?$"
+          "pattern": "^Oi4v2/(?:Registry|OTConnector|Utility|Persistence|Aggregation|CloudConnector|ITConnector)/(?:[\\x2D0-9A-Z_a-z]{4}){0,84}(?:[\\x2D0-9A-Z_a-z]{4}|[\\x2D0-9A-Z_a-z][AQgw]|[\\x2D0-9A-Z_a-z]{2}[048AEIMQUYcgkosw])/Reply/(?:NewDataSetWriterId)(?:/(?:[\\x2D0-9A-Z_a-z]{4}){0,84}(?:[\\x2D0-9A-Z_a-z]{4}|[\\x2D0-9A-Z_a-z][AQgw]|[\\x2D0-9A-Z_a-z]{2}[048AEIMQUYcgkosw]))?$"
         },
         "TimeoutHint": {
           "$comment": "REQ-ACT-002 (MG 8.2.16): TimeoutHint is a positive Duration in milliseconds",

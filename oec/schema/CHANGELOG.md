@@ -20,7 +20,7 @@ Within v2:
 
 Work after a release uses a pre-release version (e.g. `2.1.0-dev`) and an `Unreleased` section here.
 
-## Unreleased (2.0.1-dev)
+## Unreleased (2.1.0-dev)
 
 - Re-baseline on guideline `ccb475a` (C-045): SF-101 (MG 8.3.8, `Get` with every `Mode` except `OFF_0`, combined `ON_REQUEST_…` values recommended) and SF-102 (MG 7.2, a directly connected smart device uses `OTConnector`). No schema content change: both `Mode` forms stay valid, and the `ServiceType` enumeration is unchanged. PATCH, because the re-baseline has no visible change.
 - Re-baseline on guideline `e0262dd` (C-045 addendum 1): SF-103 (MG B1.1.8/B2.6 examples use `ON_REQUEST_APPLICATION_SOURCE_FILTER_15` for requestable resources). No schema content change; the golden test vectors V-PAY-037 … 040 follow the examples.
@@ -35,6 +35,7 @@ Work after a release uses a pre-release version (e.g. `2.1.0-dev`) and an `Unrel
 - Re-baseline on guideline `7427a4f` (C-072 review): SF-116 (RIG 5.1: the minimum RAM and non-volatile memory are the nominal sizes of the installed memory, 1 GB = 10^9 octets). No schema content change; `broker.json` and the payload schemas are not affected.
 - Re-baseline on guideline `52d8470` (C-074 review): SF-117 (RIG 4.1.3: the application supports both means of authentication and uses the means that the platform provides). No schema content change; `broker.json` and the payload schemas are not affected.
 - Re-baseline on guideline `c48bbd4` (C-112): editorial changes ordered by the PO (MG A5 authors, MG A6 history split into one page per revision, preface removed, Process Description hidden from the site). No normative text changed; the inventory loses the two informative preface sentences (1411 → 1409). No schema content change.
+- Re-baseline on guideline `97b6acd` (C-112 addendum 2): SF-118 (MG 7.2, GL-ADR-023: the `ServiceType` `OOCConnector` is renamed to `CloudConnector`; the glossary terms OOC and CCC are deleted, 1409 → 1407 inventory items). Schema content change: the `ServiceType` enumeration of `envelope.schema.json` and the `ServiceType` alternatives of the topic patterns in `envelope.schema.json`, `actions.schema.json` and `helpers.schema.json` list `CloudConnector` instead of `OOCConnector`. No file and no `$defs` name changes. MINOR (`2.1.0-dev` instead of `2.0.1-dev`): a new guideline baseline with a visible change; strictly the old value disappears, which would need `v3` after a published release, but 2.0.0 was never published and guideline 2.0 is not released.
 
 ## 2.0.0
 
