@@ -34,10 +34,12 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 - **Prozessbeschreibung:** ausgeblendet – sie wird nicht mehr gebaut, und alle Links darauf sind entfernt (Menü, Fußzeile, Kachel auf der Startseite, Messaging- und Infrastruktur-Startseite, ein Satz in MG 1.1). Die Dateien bleiben im Repository, damit sie später überarbeitet werden können.
 - **Folgen im Projekt:** Das Vorwort enthielt zwei rein informative Sätze aus unserem Inventar. Deshalb habe ich die Spezifikation auf die neue Guideline-Version `c48bbd4` umgestellt (1409 statt 1411 Inventar-Einträge, weiterhin 444 Regeln, 0 Lücken; Schema-Inhalt unverändert). Das Feedback-Paket für die Arbeitsgruppe enthält jetzt auch deine vier Kosmetik-Commits (als „wording“). Dabei habe ich einen kleinen Fehler aus C-110 behoben: Die Zahl „Complete diff“ hat das ganze Repository gezählt statt nur die Guideline-Dokumente (damals 389 statt richtig 369 Dateien).
 
-**D-1 – OOC im Glossar.** Du hast „to add/delete: OOC“ geschrieben. Der Eintrag ist schon da („Open Operator Cloud platform; …“), und Kapitel 7.2 benutzt den Begriff (`OOCConnector` „… the higher-level Open Operator Cloud“). Ich weiß nicht sicher, ob du ihn löschen oder behalten willst.
-- (a) **Empfehlung:** Eintrag bleibt unverändert (7.2 braucht ihn).
-- (b) Eintrag löschen und 7.2 ohne die Abkürzung formulieren (der Wert `OOCConnector` bleibt, er ist Teil der Aufzählung).
-- (c) Eintrag behalten, aber kürzen: „Open Operator Cloud – the cloud layer of the OI4 reference architecture“.
+**D-1 – OOC (aktualisiert nach deiner Antwort, Nachtrag 1).** Du sagst: „Open Operator Cloud“ ist bei der OI4 veraltet – entweder ein passender neuer Name für OOC oder OOC umbenennen. Wichtig: `OOCConnector` ist ein fester `ServiceType`-Wert (MG 7.2). Er steht im Topic, im Schema, in allen SDKs, in D7 und in der Registry. Den Namen musst du festlegen:
+- (a) **Empfehlung:** neuer Langname „Operator-Owned Cloud“ (die eigene Cloud bzw. IT-Plattform des Betreibers). OOC und `OOCConnector` bleiben; nur Text ändert sich (Glossar, ein Satz in 7.2, Community-Seite).
+- (b) neuer Langname „Open Operations Cloud“ – gleicher Umfang wie (a).
+- (c) Kein Langname mehr: Glossar-Eintrag löschen, `OOCConnector` in 7.2 neutral beschreiben („verbindet den Message Bus mit einer Cloud- oder IT-Plattform des Betreibers“); der Bezeichner bleibt.
+- (d) Den Wert umbenennen, z. B. `CloudConnector`. Das ist eine normative Änderung (SF-118, GL-ADR-023, neue Baseline, Schema, alle SDKs, D7, Registry, Testvektoren) und etwa ein Zyklus Arbeit.
+- Oder ein eigener Name von dir. Hinweis: Auch der Glossar-Eintrag CCC („Common Cloud Central“, dasselbe Vier-Schichten-Modell) ist vermutlich veraltet – sag mir, ob er mit D-1 wegfallen oder sich ändern soll.
 
 **D-2 – Autorentabelle.** Guenes Bilgen steht nicht in Tabelle 21, und ich kenne seine Firma nicht.
 - (a) **Empfehlung:** Du nennst mir seine Firma; ich trage ihn in Tabelle 21 ein. Tabelle und der neue Satz bleiben.

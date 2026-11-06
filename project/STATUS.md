@@ -379,7 +379,7 @@ PO gave the go to start (2026-10-14, after C-011). Order: **P1 spec baseline** �
 
 ## Blocking open questions
 
-- C-112: guideline cosmetics applied, re-baseline on `c48bbd4` (A-630 … A-635). **Open for the PO: D-1** OOC glossary entry (proposal (a) keep), **D-2** authors table / company of Guenes Bilgen (proposal (a)), **D-3** workspace push after D-1/D-2 (proposal (a)); review R-1 (MG A6.4 Revision 2.0), R-2 (grammar of the A5 introduction). Next free ids: SF-118, A-636, ADR-0035, Q-037.
+- C-112: guideline cosmetics applied, re-baseline on `c48bbd4` (A-630 … A-635). **Open for the PO: D-1** OOC – new long form or rename (addendum 1; proposal (a) "Operator-Owned Cloud", text only), **D-2** authors table / company of Guenes Bilgen (proposal (a)), **D-3** workspace push after D-1/D-2 (proposal (a)); review R-1 (MG A6.4 Revision 2.0), R-2 (grammar of the A5 introduction). Next free ids: SF-118, A-636, ADR-0035, Q-037.
 - C-111 addendum 4: D-3 (a) applied (A-629). Nothing open for the PO. Next free ids: SF-118, A-630, ADR-0035, Q-037.
 - C-111 addenda 2/3: billing still refused (attempts 3/4); the PO skipped the hosted assembly job (costs). **Open for the PO: D-3** CI costs per push (proposal (a)). Next free ids: SF-118, A-629, ADR-0035, Q-037.
 - C-111 addendum 1: D-1 (a) (billing fixed by the PO, then rerun and push), D-2 (a) (**P9 closed**). Nothing open for the PO. Next free ids: SF-118, A-629, ADR-0035, Q-037.

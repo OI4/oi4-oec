@@ -855,10 +855,12 @@ Logs: [C-112](log/2026-11-28_C-112_guideline-cosmetics.md), [C-111](log/2026-11-
 
 C-112 (2026-11-28) – your guideline cosmetics (G-3.4 a: guideline text, costs). Background: log [C-112](log/2026-11-28_C-112_guideline-cosmetics.md), A-630 … A-635 (below). Applied: points 2–5 (authors, history, preface, Process Description); point 1 (OOC) is open.
 
-- **D-1 – OOC in the glossary.** You wrote "to add/delete: OOC". The entry exists (MG A4: "Open Operator Cloud platform; …") and MG 7.2 uses the term (`OOCConnector` "… the higher-level Open Operator Cloud").
-  - (a) **Recommended:** keep the entry unchanged (MG 7.2 needs it).
-  - (b) Delete it and rephrase MG 7.2 without the abbreviation (the `ServiceType` value `OOCConnector` stays, it is part of the enumeration).
-  - (c) Keep it, shortened: "Open Operator Cloud – the cloud layer of the OI4 reference architecture".
+- **D-1 – OOC (updated after your answer, addendum 1).** You said "Open Operator Cloud" is an outdated OI4 term: either a fitting new long form for OOC, or rename OOC. `OOCConnector` is a normative `ServiceType` value (MG 7.2, closed enumeration) used in the topic grammar, REQ-TOP, vectors, schema, the Rust/C/Go/micro SDKs, D7 and the registry AsyncAPI. Which name is your call (guideline text):
+  - (a) **Recommended:** new long form "Operator-Owned Cloud" – OOC and `OOCConnector` stay; text only (MG A4, the MG 7.2 sentence, Community `concepts.md`), editorial re-baseline.
+  - (b) New long form "Open Operations Cloud" – same scope as (a).
+  - (c) No long form: delete the OOC glossary entry and describe `OOCConnector` neutrally in MG 7.2 ("connects the Message Bus with a cloud or IT platform of the operator"); `OOCConnector` stays as an identifier.
+  - (d) Rename the value, e.g. `CloudConnector` – normative: SF-118, GL-ADR-023, re-baseline, schema `2.0.1-dev` enumeration (2.0.0 was only tagged locally, never published), every SDK, D7, registry, vectors; about one cycle.
+  - Or your own name. Note: the glossary entry CCC ("Common Cloud Central", the same four-layer model) may be outdated as well – tell me if it should go or change with D-1.
 - **D-2 – Authors table.** Table 21 (all authors of all revisions with company) is unchanged; above it stand your introduction and the sentence "Involved in the current revision: Guenes Bilgen, Werner Blumenstock, Konrad Heidrich, Sebastian Heinze, Bastian Schmick, Thomas Weinschenk." Guenes Bilgen is not in Table 21, and I do not know his company.
   - (a) **Recommended:** tell me his company; I add him to Table 21 and keep the table and the sentence.
   - (b) Replace Table 21 by the six persons with their companies (company of Guenes Bilgen needed).
