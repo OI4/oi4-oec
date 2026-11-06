@@ -71,3 +71,18 @@ git -C oi4-oec-demo add -A
 old 1.x branches and tags are left as they are (not part of the order;
 `development` is the default branch). The workspace `main` was pushed
 together (`71d8864..bb4fc24`).
+
+### Hosted CI on `bb4fc24`
+
+- `gate` red at first (as already on `71d8864`): docscheck `TestReadmeLinks` –
+  `oec/sdk/micro/README.md` links the Community page
+  `demos/smart-sensor`, whose commits (`0506f0d` … `b6d40fd`, Community pages
+  only) were not yet pushed in `oi4-oec-documentation`. Pushed
+  `feature/spec-findings` `c5a4652..b6d40fd` (same order "alles pushen"),
+  gate run cancelled and rerun: green.
+- `sdk` red once on `x86_64-apple-darwin`: `oec` test `consumer`
+  `one_app_gets_from_another` timed out (10 s); `oec/sdk/rust` is not changed
+  by the pushed commits, the other 11 jobs green – rerun of the failed job:
+  green. Flaky on the slow Intel macOS runner; watch it.
+- Result: all six workflows (`gate`, `sdk`, `conformance`, `micro`,
+  `images`, `supply-chain`) green on `bb4fc24`.
