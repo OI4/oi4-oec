@@ -352,9 +352,14 @@ with `OEC_TESTBROKER=<linux go-testbroker>`, see `oec/ci/README.md`).
 
 ### Run on real hardware (opt-in)
 
-Not yet done in the project (no board in the sessions; P4b exit). Against
-the broker of `oec/dev`, from a Mac or PC in the same network as the board
-(`<ip>` = its LAN address):
+Done once on 2026-11-28 (log `project/log/2026-11-28_HW_esp32-dht22.md`):
+an AZ-Delivery ESP32-WROOM-32 DevKit (ESP32-D0WDQ6 rev 1.0, Wi-Fi WPA3)
+with a local variant of the example that reads a DHT22 instead of the
+simulated sensor, ESP-IDF 6.1, Level 3, through the D7 proxy with the
+restart hook and `--peer --announce`: **47 pass, 0 fail, 7 skip (not
+applicable), result PASS**. The M5Stack and the Arduino sketches are not
+run on hardware yet. Against the broker of `oec/dev`, from a Mac or PC in
+the same network as the board (`<ip>` = its LAN address):
 
 1. Broker reachable from the network: in `oec/dev`,
    `go run ./pki -force -san <ip>` and
@@ -382,7 +387,12 @@ the broker of `oec/dev`, from a Mac or PC in the same network as the board
    0 fail, 17 skip). For them, point `uri` at D7's `--proxy-listen` address
    (with `--proxy-name <ip>`) and give `--stop-cmd`/`--start-cmd` scripts
    that send `stop` over the serial port and reset the board
-   (`python -m esptool -p <port> run`).
+   (`python -m esptool -p <port> run`). Only one process can hold the
+   serial port: the 2026-11-28 run kept it open in a small serial daemon
+   and let the hooks send `stop` and pulse RTS (EN) through it. On macOS
+   the firewall may block a Go binary listening on the LAN; the run kept
+   the proxy on `127.0.0.1:18883` and published `<ip>:18883` with a TCP
+   forwarder container (`host.docker.internal:18883`).
 5. Arduino: the same values in `arduino_secrets.h` of `Sensor` or
    `M5Stack`, `arduino-cli upload -p <port> --fqbn esp32:esp32:m5stack_core2
    …`, then step 4; on the M5Stack the display shows the connection and
