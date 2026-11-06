@@ -38,7 +38,7 @@ type Patterns interface {
 var Roles = map[string]string{"birth": "REQ-LIFE-003", "close": "REQ-LIFE-007", "will": "REQ-LIFE-009"}
 
 var (
-	serviceTypes = set("Registry", "OTConnector", "Utility", "Persistence", "Aggregation", "OOCConnector", "ITConnector")
+	serviceTypes = set("Registry", "OTConnector", "Utility", "Persistence", "Aggregation", "CloudConnector", "ITConnector")
 	resources    = set("MAM", "Health", "Config", "Data", "Metadata", "Event", "Profile", "PublicationList", "SubscriptionList", "ReferenceDesignation")
 	// resources whose topic has no Filter: their WriterGroupName is ""
 	noFilter = set("MAM", "Health", "Profile", "ReferenceDesignation")

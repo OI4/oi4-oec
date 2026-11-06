@@ -1,6 +1,6 @@
 # D7 catalog coverage
 
-Generated from `catalog/d7.yaml`, the requirements catalog of `oec/spec` (baseline `c48bbd4`) and the indexes of the
+Generated from `catalog/d7.yaml`, the requirements catalog of `oec/spec` (baseline `97b6acd`) and the indexes of the
 self-test fixtures (`testdata/sim/index.yaml`, `testdata/captures/index.yaml`) – do not edit; regenerate with
 `go test ./internal/explain -run TestCoverageReport -update` (the gate fails if this file is out of date).
 `oec-check list` and `oec-check explain` show the same data.
@@ -264,7 +264,7 @@ applicable). A negative fixture is one with fail, warn or info.
 
 # D8 catalog coverage
 
-Generated from `catalog/d8.yaml`, the requirements catalog of `oec/spec` (baseline `c48bbd4`) and the indexes of the
+Generated from `catalog/d8.yaml`, the requirements catalog of `oec/spec` (baseline `97b6acd`) and the indexes of the
 self-test fixtures (`testdata/images/index.yaml`, `testdata/bus/index.yaml`, `testdata/hosts/index.yaml`,
 `testdata/containers/index.yaml`, `testdata/run/index.yaml`) – generated with the D7 part above.
 `oec-infra list` and `oec-infra explain` show the same data.

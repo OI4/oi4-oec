@@ -12,9 +12,9 @@ Separate versions:
 
 ## 0.1.0 – unreleased
 
-First release of OEC v2.0 for the OEC Messaging Guideline and the OEC Runtime & Infrastructure Guideline at the baseline `c48bbd4`.
+First release of OEC v2.0 for the OEC Messaging Guideline and the OEC Runtime & Infrastructure Guideline at the baseline `97b6acd`.
 
-- **JSON Schema bundle** 2.0.x (D1): strict and tolerant flavor of every message, resource, payload and `broker.json`.
+- **JSON Schema bundle** 2.1.x (D1): strict and tolerant flavor of every message, resource, payload and `broker.json`.
 - **SDK** (D2): Rust SDK `oec` with `oec-core` (Messaging Level 1–3, provider and consumer, own MQTT 3.1.1 client over TLS), the C ABI `oec-ffi` with the header `oec.h` and prebuilt static libraries for Linux (x86-64, AArch64, ARMv7), macOS (x86-64, Apple silicon) and Windows (x64 and Arm64 with MSVC, x64 with MinGW), the Go SDK over the C ABI.
 - **Micro SDK** (D9): C17 for microcontrollers, Messaging Level 1–3, ESP-IDF component and Arduino library `OECMicro` (ESP32, ESP32-S3).
 - **Application compliance tool** D7 `oec-check`: `validate`, `monitor`, `test` (55 tests), `list`, `explain`, `report-schema`.
@@ -24,3 +24,4 @@ First release of OEC v2.0 for the OEC Messaging Guideline and the OEC Runtime & 
 - **Images** for linux/amd64 and linux/arm64: `oi4/oec-logger`, `oi4/oec-weather`, `oi4/oec-config`, `oi4/oec-registry`, `oi4/oec-conformance`, each with its SBOM and license texts.
 - **Release channels**: the files as a GitHub Release of `OI4/oec`, the images on `ghcr.io/oi4`, the Go modules by their tags in `OI4/oec` (`go install github.com/OI4/oec/conformance/cmd/oec-check@v0.1.0`; D7 and D8 then report the module version).
 - **Supply chain**: an SPDX 2.3 SBOM, the license texts and a license report for every deliverable; the security policy in `SECURITY.md`.
+- **ServiceType `CloudConnector`** (GL-ADR-023) instead of the former `OOCConnector` in the schema, every SDK (`ServiceType::CloudConnector`, `OEC_ST_CLOUD_CONNECTOR`, `oec.CloudConnector`, `OECM_ST_CLOUD_CONNECTOR`), D7 and the registry API.

@@ -59,7 +59,7 @@ var Classes = map[string]string{
 }
 
 // ServiceTypes of MG 4.2, in the order discovery tries them.
-var ServiceTypes = []string{"OTConnector", "ITConnector", "Utility", "Persistence", "Aggregation", "OOCConnector", "Registry"}
+var ServiceTypes = []string{"OTConnector", "ITConnector", "Utility", "Persistence", "Aggregation", "CloudConnector", "Registry"}
 
 // Gettable are the resources a Get may address with a Source and without
 // Filter (Method × Resource matrix; Metadata needs a Filter, Event and
