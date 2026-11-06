@@ -363,7 +363,10 @@ the same network as the board (`<ip>` = its LAN address):
 
 1. Broker reachable from the network: in `oec/dev`,
    `go run ./pki -force -san <ip>` and
-   `OEC_DEV_BIND=<ip> docker compose up -d --wait` (broker only).
+   `OEC_DEV_BIND=0.0.0.0 docker compose up -d --wait` (broker only; all
+   interfaces, so `localhost:8883` keeps working for D7). Walk-through with
+   the demos and the registry:
+   [Smart sensor on an ESP32](https://oi4.github.io/oi4-oec-documentation/docs/community/demos/smart-sensor).
 2. Firmware: `examples/esp-idf/build.sh esp32` (or `esp32s3`), then in
    `target/esp-idf/esp32/` `python -m esptool --chip esp32 -p <port>
    write-flash @flash_args`.
