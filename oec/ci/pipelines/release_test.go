@@ -49,6 +49,7 @@ func TestReleaseVersion(t *testing.T) {
 	match("demos/logger/src/main.c", `(?m)^#define LOGGER_VERSION "([^"]+)"$`)
 	match("demos/weather/main.go", `(?m)^const version = "([^"]+)"$`)
 	match("demos-smart-sensors/esp32-dht22/CMakeLists.txt", `(?m)^set\(PROJECT_VER "([^"]+)"\)$`)
+	match("integrations/home-assistant/custom_components/oi4_oec/const.py", `(?m)^VERSION: Final = "([^"]+)"$`)
 
 	jsonVersion := func(file string, path ...string) {
 		t.Helper()
@@ -69,6 +70,7 @@ func TestReleaseVersion(t *testing.T) {
 	jsonVersion("registry/ui/package-lock.json", "packages", "", "version")
 	jsonVersion("registry/api/openapi.json", "info", "version")
 	jsonVersion("registry/api/asyncapi.json", "info", "version")
+	jsonVersion("integrations/home-assistant/custom_components/oi4_oec/manifest.json", "version")
 
 	// The defaults of the image builds, the image tags and the SBOMs:
 	// ARG VERSION= in the Dockerfiles, ${VERSION:-…}, ${OEC_DEMOS_VERSION:-…}
