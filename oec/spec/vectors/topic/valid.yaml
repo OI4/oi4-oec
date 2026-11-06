@@ -1,7 +1,7 @@
 # Test vectors of kind topic (C-018, ADR-0018); reviewed by the PO (C-022, 2026-10-17); V-TOP-135 … 137 (positives of REQ-TOP-009/011/012/018/020/021 and REQ-IL-004) drafted in C-040.
 # Format: vectors/vectors.schema.json; checked by spectool lint.
 kind: topic
-baseline: "c48bbd4"
+baseline: "97b6acd"
 description: >-
   Constructed valid topic vectors: every ServiceType, Filter encodings, Event
   levels, list filters, Call/Reply with Source and the length limits of the
@@ -93,15 +93,15 @@ vectors:
       source_il: "provider.com/FieldDataService/FDS-001/1200-0345"
 
   - id: V-TOP-106
-    title: "ServiceType OOCConnector"
+    title: "ServiceType CloudConnector"
     expected: valid
     reqs: [REQ-TOP-001, REQ-TOP-013, REQ-IL-002, REQ-TOP-005]
     origin: {kind: constructed}
-    status: reviewed
-    topic: "Oi4v2/OOCConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
+    status: draft
+    topic: "Oi4v2/CloudConnector/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU/Pub/Health/cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
     parse:
       rule: "pub-health"
-      service_type: "OOCConnector"
+      service_type: "CloudConnector"
       app_id: "cHJvdmlkZXIuY29tL0ZpZWxkRGF0YVNlcnZpY2UvRkRTLTAwMS8xMjAwLTAzNDU"
       app_id_il: "provider.com/FieldDataService/FDS-001/1200-0345"
       method: "Pub"

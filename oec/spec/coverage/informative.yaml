@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "c48bbd4"
+baseline: "97b6acd"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-index-0a728c6e
@@ -143,7 +143,7 @@ items:
     reason: Consequence of the versioning concept (a client only subscribes to its version); no requirement.
   - key: MG-7.1-ca8dc9f5
     reason: Describes that versions can coexist on one Message Bus ("can" expresses possibility); the rules for several versions are REQ-TOP-004.
-  - key: MG-7.2-90e1d54a
+  - key: MG-7.2-0947ae2f
     reason: Typical behavior of an OTConnector ("typically", "can be listed"); describes the ServiceType, no requirement.
   - key: MG-7.2-9459e8f7
     reason: Description of the ServiceType Aggregation; the ServiceType values are REQ-TOP-005.
@@ -557,8 +557,6 @@ items:
     reason: Glossary definition of base64url; no requirement.
   - key: MG-A4-f415c84f
     reason: Glossary definition of Birth message; no requirement.
-  - key: MG-A4-b89658f5
-    reason: Glossary definition of CCC; no requirement.
   - key: MG-A4-479f77ec
     reason: Glossary definition of Close message; no requirement.
   - key: MG-A4-216e83d4
@@ -601,8 +599,6 @@ items:
     reason: Glossary definition of OEC Service Container Compliance; no requirement.
   - key: MG-A4-eeb2fa75
     reason: Glossary definition of Oi4Identifier; the recommendation to use it for assets without own Identification Link is detailed in MG 4.3 (area IL).
-  - key: MG-A4-aebf57d2
-    reason: Glossary definition of OOC; no requirement.
   - key: MG-A4-e9b3361a
     reason: Glossary definition of OPC UA; no requirement.
   - key: MG-A4-03910cff

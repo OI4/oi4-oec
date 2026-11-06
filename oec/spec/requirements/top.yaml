@@ -3,7 +3,7 @@
 # topic/topic.abnf, the allowed forms per Method × Resource are listed in
 # matrix/method-resource.yaml; vectors in vectors/topic/.
 area: TOP
-baseline: "c48bbd4"
+baseline: "97b6acd"
 requirements:
   # --- Topic structure (MG 7) -----------------------------------------------
   - id: REQ-TOP-001
@@ -97,8 +97,8 @@ requirements:
     title: ServiceType is one of the defined values
     statement: >-
       The ServiceType element is one of Registry, OTConnector, Utility,
-      Persistence, Aggregation, OOCConnector and ITConnector; a component uses
-      one ServiceType for all its topics.
+      Persistence, Aggregation, CloudConnector and ITConnector; a component
+      uses one ServiceType for all its topics.
     keyword: MUST
     domain: messaging
     levels: {L1: MUST, L2: MUST, L3: MUST}
@@ -113,8 +113,8 @@ requirements:
         text: Other values must not be used; a new ServiceType requires a new version of this guideline.
     verification: [d7-validate]
     inventory: [MG-7.2-709618ad, MG-7.2-75c0743e, MG-7.2-dcabe6af]
-    status: reviewed
-    notes: Closed set per PO decision SF-042 (a) (C-018), stated in the guideline since C-020.
+    status: draft
+    notes: Closed set per PO decision SF-042 (a) (C-018), stated in the guideline since C-020. OOCConnector renamed to CloudConnector per PO decision SF-118 (C-112, GL-ADR-023).
 
   - id: REQ-TOP-006
     title: ServiceType of the destination or the publisher

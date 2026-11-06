@@ -101,7 +101,7 @@ var resources = map[string]bool{
 
 var serviceTypes = map[string]bool{
 	"Registry": true, "OTConnector": true, "Utility": true, "Persistence": true,
-	"Aggregation": true, "OOCConnector": true, "ITConnector": true,
+	"Aggregation": true, "CloudConnector": true, "ITConnector": true,
 }
 
 var helperNames = map[int64]string{1: "PaginationRequest", 2: "Pagination", 3: "Locale", 9: "Query"}
