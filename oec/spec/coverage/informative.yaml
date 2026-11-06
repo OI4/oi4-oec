@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "97b6acd"
+baseline: "51a0b50"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-index-0a728c6e
