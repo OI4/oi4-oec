@@ -144,6 +144,7 @@ PO (German, in translation):
 ### Decisions (agent, G-3.4 b)
 
 - **A-642 Re-baseline on `51a0b50`:** A5 is not inventoried, so the gate would pass on `97b6acd` too; the baseline moves anyway, so that the baseline is the guideline head with every change the PO accepted, the feedback package lists every commit, and the pushed CI run (D-3) checks the final state (no second re-baseline and CI run later).
+- **A-644 (addendum 6) One repetition of a timing failure on `windows-11-arm`:** the late-subscribe fixture failed once on the slowest runner and passed on the rerun; no code change. If it repeats in later runs, the fixture gets a closer look (the simulator's connection setup under load).
 - **A-643 The sentence "Involved in the current revision: …" stays:** the order replaced the table entries only; the sentence now names the same six persons as the table (say if it should go).
 
 ### Gate and push
@@ -164,3 +165,11 @@ PO (German, in translation):
 - PO (screenshot of the `OI4` budgets): Actions budget US$ 50 per month, US$ 10 spent; then "D-4 (a)".
 - Agent check: the remaining US$ 40 covers about six full code-push runs (≈ US$ 6 each). Recommended to keep "stop usage when budget limit is reached" on and to make sure the payment method works (the earlier message named failed payments as one cause).
 - Next: rerun the six failed runs on `76b59d4` (`gh run rerun <id> -R OI4/oi4-oec --failed`) and evaluate them; result in addendum 6.
+
+## Addendum 6 (2026-11-06) – hosted CI on `76b59d4`
+
+- The six runs were rerun with `gh run rerun <id> -R OI4/oi4-oec --failed`; GitHub started every job (billing works again).
+- **All six workflows green on every job:** gate `42181219372` (macOS 15, Ubuntu 24.04 amd64/arm64), conformance `42181219358`, sdk `42181219373`, images `42181219417`, micro `42181219434`, supply-chain `42181219423`.
+- **One repetition (A-644):** `oec/conformance (windows-11-arm)` failed in attempt 2: `TestSimFixtures/run/T7-LIFE-02/late-subscribe` (D7 saw a `FAILURE_1`/0 Health of the simulated CUT as the first message, i.e. a Will, then a Health without a Birth – T7-MON-03 info, T7-MON-05 fail; `TestSimFixtures` took 647 s with all fixtures in parallel). The same job was green in C-111 on `889a123`, and C-112 changed nothing in the lifecycle or the simulator. Rerun of the failed job (attempt 3): green.
+- Cost of the reruns: about 420 job minutes (≈ US$ 6–7 at list prices), incl. the repeated Windows arm64 job (14 min).
+- C-112 is closed; nothing left to decide.
