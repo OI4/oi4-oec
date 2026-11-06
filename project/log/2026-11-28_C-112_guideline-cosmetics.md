@@ -132,3 +132,29 @@ PO (German, in translation):
 - "D-2: Guenes Bilgen, Siemens AG."
 - "D-3 (a)" – push the workspace once, after D-1/D-2 are applied.
 - "R-1 accepted", "R-2 proposal accepted" ("This revision … is developed"), "R-3 accepted", "R-4 accepted" (REQ-TOP-005, V-TOP-106, V-TOP-255 → `reviewed`).
+
+### Applied
+
+- Guideline `51a0b50` – MG A5: Table 21 lists only the six persons of the current revision with their companies (Guenes Bilgen, Siemens AG; Werner Blumenstock, Siemens AG; Konrad Heidrich, Hilscher; Sebastian Heinze, Bürkert; Bastian Schmick, ifm; Thomas Weinschenk, Endress+Hauser Digital Solutions); "This revision … **is** developed" (R-2). Caption unchanged.
+- Guideline `2dc984b` – feedback package: `51a0b50` attributed as `wording`; 118 findings, 218 commits of `5f070bb..51a0b50`, 137 files. `9a83f9d` – Community sample outputs name `51a0b50`.
+- Workspace `efcc8f7` – R-4: REQ-TOP-005, V-TOP-106, V-TOP-255 → `reviewed`; views and exports regenerated.
+- Workspace `bc4e76d` – spec re-baselined on `51a0b50` (inventory unchanged: 1407 items, A5 is not inventoried; 444 REQs, 0 gaps); `76b59d4` – `schema.Baseline`, schema CHANGELOG, D7/D8 catalogs, `COVERAGE.md` baseline lines, `list_test.go`, `oec/CHANGELOG.md`.
+- R-1 and R-3 accepted: nothing to change (GL-ADRs carry no status field).
+
+### Decisions (agent, G-3.4 b)
+
+- **A-642 Re-baseline on `51a0b50`:** A5 is not inventoried, so the gate would pass on `97b6acd` too; the baseline moves anyway, so that the baseline is the guideline head with every change the PO accepted, the feedback package lists every commit, and the pushed CI run (D-3) checks the final state (no second re-baseline and CI run later).
+- **A-643 The sentence "Involved in the current revision: …" stays:** the order replaced the table entries only; the sentence now names the same six persons as the table (say if it should go).
+
+### Gate and push
+
+- Gate on `76b59d4` (guideline head `9a83f9d`, load 21 at the start): **all checks passed** – `lint`: 444 REQs, 311 informative items; `feedback`: 118 findings, 218 commits of `5f070bb..51a0b50`, 137 files current; `docscheck: 19 pages ok, 30 README links to them ok`; `cigen: 7 workflows current`.
+- Guideline branch pushed (`9a83f9d`, no CI there). Workspace pushed (D-3 (a)): `origin/main` = `76b59d4` (18 commits since `2656ed5`).
+- **The hosted runs did not start:** all six push-triggered workflows on `76b59d4` (gate `42181219372`, conformance `42181219358`, sdk `42181219373`, images `42181219417`, micro `42181219434`, supply-chain `42181219423`) failed within seconds, every job with "The job was not started because recent account payments have failed or your spending limit needs to be increased" – the billing stop of `OI4` again (as in C-105 addendum 2 and C-111). No runner minute was used. → **D-4** for the PO.
+- This documentation commit touches `AGENTS.md` (outside `project/**`), so it is pushed with `[skip ci]` (as in C-111); a rerun of the failed runs on `76b59d4` checks the same code.
+
+### For the PO
+
+- **D-4 – hosted CI of the push.** (a) **Recommended:** fix the billing / spending limit of `OI4` and tell me; I rerun the six runs (`gh run rerun <id> --failed`, ~7–8 runner hours) and evaluate them. (b) Accept the local gate as the proof for C-112 (the code change is the rename of one enumeration value plus data; verified on macOS by `oec/check.sh`); the next code push is checked on the hosted runners.
+
+`/tmp/gate.log` deleted.
