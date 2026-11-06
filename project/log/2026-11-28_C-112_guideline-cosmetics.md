@@ -178,3 +178,13 @@ PO (German, in translation):
 
 - PO: "Involved in the current revision: Guenes Bilgen, Werner Blumenstock, Konrad Heidrich, Sebastian Heinze, Bastian Schmick, Thomas Weinschenk. kann weg" – the sentence above Table 21 in MG A5 is deleted.
 - Next: delete it in the guideline, re-baseline as in A-642, gate, push; result in addendum 8.
+
+## Addendum 8 (2026-11-06) – A5 sentence deleted, re-baseline on `605fbb7`
+
+- Guideline `605fbb7` – MG A5: the sentence "Involved in the current revision: …" above Table 21 deleted (A-643 answered).
+- Workspace `6936a61` – spec re-baselined on `605fbb7` (inventory unchanged: 1407 items, 444 REQs, 0 gaps); `9a96d8e` – `schema.Baseline`, schema CHANGELOG, D7/D8 catalogs, `COVERAGE.md` baseline lines, `list_test.go`, `oec/CHANGELOG.md`. Same reason as A-642: the baseline is the guideline head with every accepted change, and the feedback package lists every commit.
+- Guideline `ec6ea04` – feedback package: `605fbb7` attributed as `wording`; 118 findings, 219 commits of `5f070bb..605fbb7`, 137 files. `c5a4652` – Community sample outputs name `605fbb7`.
+- AGENTS.md, GUARDRAILS G-1.2, ADR-0001 (addendum 7 line), STATUS: baseline `605fbb7`.
+- Gate (load 14 at the start): **all checks passed** – `inventory -check -rev 605fbb7`; `feedback`: 118 findings, 219 commits, 137 files current; `docscheck: 19 pages ok, 30 README links to them ok`; `cigen: 7 workflows current`.
+- Both repositories pushed; the code commits start the six push-triggered workflows (≈ US$ 6, within the budget of addendum 5).
+- `/tmp/gate.log` deleted.
