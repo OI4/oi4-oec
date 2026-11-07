@@ -78,3 +78,48 @@ the dev CA `oec/dev/generated/broker/ca.pem`); the API port 5799 serves
 - An official OI4 logo as SVG (and the permission to use it) would replace
   the own signet in the app bar and the favicon.
 - Push of the workspace and of `oi4-oec-registry` (not done).
+
+## Addendum 1 – OI4 community badge and data logger
+
+PO (German, translated): "Here are two PNGs that carry the community flag. It must be visible on the page that this is a community product and not an official OI4 one. Then we can also use the logo (also smaller ones, or ones with only the OI4 atom). And a wish: add a small data logger, no storage, just show the last value."
+
+Decisions (ADR-0029 amendment 2026-11-28, addendum 1):
+
+- The two PNGs are identical (same MD5). The PNG is not shipped; its green
+  (`#76B82A`) and grey (`#5F696D`) areas were traced once with potrace
+  (temporary Python venv, ×4 upscale, relative path data) into
+  `ui/src/logo.tsx`: `Atom` and `CommunityBadge` (atom paths shared,
+  42 kB). Grey per theme by CSS.
+- Community note in app bar (tag), overview and footer.
+- Data logger: `Pub/Data` collected, last value per (publisher, Source,
+  Filter), at most 1000 DataSets, Payload ≤ 16 KiB, in memory; `GET
+  /api/data`; page `#/data` and tab Data; polling instead of the event
+  stream (keeps the stream and its schemas unchanged).
+
+Changed:
+
+- `oec/registry/src/bus.rs` (`COLLECTED` + `Data`), `directory.rs`
+  (`DataRecord`, `data()`, `data_sets()`, test `data_logger`), `api.rs`
+  (`Route::Data`, view `data`, fixture, tests), `http.rs`, `api_tests.rs`;
+  `api/openapi.json`, `api/asyncapi.json`; `registry_test.go`,
+  `internal/regtest/wire_test.go` (`Pub/Data` now a channel),
+  `http_test.go` (the test peer publishes a `Data` DataSet; checked in
+  `/api/data` against the OpenAPI schemas).
+- `ui/src/logo.tsx`, `DataView.tsx` (new); `App.tsx`, `AssetDetail.tsx`,
+  `Dashboard.tsx`, `parts.tsx` (own signet removed), `api.ts`, `style.css`;
+  `public/favicon.svg`; `dist/`, stamp, `ui_assets.rs` regenerated.
+- `oec/registry/README.md`, Community page, ADR-0029.
+
+Verification:
+
+- `cargo test` (33), `ui/build.sh` "ui: ok", `oec/registry/check.sh` incl.
+  D8 T8-BUS-03, D7 level 3 with the 49 pinned passes and the HTTP tests.
+  The first gate run failed in the new HTTP check: the test's `Data`
+  message lacked `ReplyTo` (REQ-MSG-003), so the SDK dropped it – the
+  test was wrong, not the registry. `oec/check.sh`: all checks passed.
+- Image rebuilt (D8 image and run pass), compose service recreated:
+  `/api/data` lists the Node-RED DataSets `Climate` (Temperature,
+  Humidity) and `Level` of the ExampleSensor; the weather demo publishes
+  its Data only on a change per poll interval.
+- Headless Chrome: data page (light), overview with badge and note (dark),
+  detail tab Data (light).
