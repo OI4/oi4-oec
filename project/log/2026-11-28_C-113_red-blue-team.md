@@ -3,8 +3,8 @@
 - Date: 2026-11-28 (wall clock of the session: 2026-11-11)
 - Phase: none open (all phases closed after C-111); PO order (G-3.4 a: scope)
 - Agent/Author: GitHub Copilot (Claude Opus 5.5)
-- Status: done – D-1 … D-4 open for the PO
-- Baseline: guideline `605fbb7` (unchanged); workspace before the cycle: `1df3064`
+- Status: done – D-1 … D-4 answered and applied (addendum 1)
+- Baseline: guideline `605fbb7` during the exercise; **`980cde8`** after addendum 1 (SF-119); workspace before the cycle: `1df3064`
 
 ## Intent
 
@@ -136,4 +136,41 @@ Guideline repository (branch `feature/spec-findings`, not pushed): `9fd40d2` SF-
 
 ## Hand-over (G-3.10)
 
-Same session: the exercise is closed; the next work depends on the answers D-1 … D-4.
+Same session: the exercise is closed; the next work depends on the answers D-1 … D-4 (answered, addendum 1).
+
+## Addendum 1 – PO answers D-1 … D-4 (2026-11-28)
+
+PO: "D-1 (a) reicht hier should oder ist ein shall? D-2 erweitere die Registry um ein ganz einfaches, dennoch sicheres User-Management für das Front-End und die Webservices. D-3 (a) da nur demo. D-4 (a) nach den Anpassungen D-1 bis D-3."
+
+### D-1 – SF-119 as SHOULD (A-661, A-662)
+
+- **Answer to "should or shall":** SHOULD is enough for now and was kept (A-661). Reasons: (1) a MUST needs a defined way for the platform to learn the `AppId` of an application before it starts – the platform knows the container name, not the full `AppId` (Model, ProductCode, SerialNumber come from the application); the guideline defines no such hand-over; (2) the same strength as the existing read restriction of `Set/Config` (MG 9.1.3); (3) a MUST without a way to meet it would make every current platform non-compliant. A MUST is a one-word change once the guideline defines how the platform learns the `AppId` (or once messages are signed); then D8 T8-BUS-02 turns the warning into a failure.
+- Guideline (branch `feature/spec-findings`): `980cde8` MG 3 bullet and MG 9 RECOMMENDED box with the consumer note; `2f17f39` SF-119 resolved (no GL-ADR – a recommendation, no protocol change); `bf668d7` Community page of `oec-infra` (T8-BUS-02).
+- Workspace: `f463ad0` re-baseline on `980cde8` (inventory 1407 → 1411: four new items, BUS 26 → 29, GEN 77 → 78; new **REQ-GEN-002** (SHOULD, platform, verified by D8) and two informative MG 9 items; 445 REQs, 0 gaps; `schema.Baseline`, D7/D8 catalogs, feedback package `5f070bb..980cde8`); `4a8a4a1` D8 T8-BUS-02 publishes `Pub/Health` and `Reply/NewDataSetWriterId` under a foreign `AppId` with the unprivileged client and warns REQ-GEN-002 when the broker delivers it; new fault fixture `T8-BUS-02/foreign-pub`.
+- **A-662 Dev ACL not bound:** the dev Mosquitto ACL of `oec/dev` cannot bind the `AppId` topic level to a user (the dev user names and certificate identities are not the `AppId`s the applications choose); D8 warns REQ-GEN-002 there, documented in `oec/dev/README.md` as a dev limitation (like REQ-RES-CONFIG-026). A platform that knows the `AppId` of each client can bind it.
+
+### D-2 – user management of the registry (A-663 … A-666)
+
+- **ADR-0035** (`d4ea119`, `accepted (agent, G-3.4 b)`, scope by the PO): two roles `admin`/`user`, at most 64 users, password 12 … 256 characters and not the name; PBKDF2-HMAC-SHA256 600 000 iterations (aws-lc-rs, already linked through rustls – ADR-0023 amendment, no new crate); store `etc/oi4/app/registry/users.json` (0600, atomic); bootstrap user `admin` from `run/secrets/oi4/registry_admin_password` (GL-ADR-022) or a random password printed once on stderr with a forced change; sessions of 32 random octets (only the SHA-256 kept), 30 min idle, 12 h maximum, at most 256; cookie `__Host-oec_session` (`Secure; HttpOnly; SameSite=Strict`) or bearer token; per-IP throttle (5 failures → 60 s `429`); last admin protected; password changes and deletions end sessions.
+- Backend `0f39be0`: `auth.rs`, routes `/api/login`, `/api/logout`, `/api/session`, `/api/password`, `/api/users[/{name}]`; every data route needs a session; the event stream ends with its session; `openapi.json`; Rust unit tests (48 in `cargo test`), Go host tests `TestHTTPUsers`, `TestHTTPGeneratedPassword` and the harness login (`regtest`).
+- UI `432cdb4`: login form, forced password change, `#/password`, `#/users` (admins), user menu, any `401` returns to the login; the UI never keeps the token (the cookie is enough). Verified end to end with Playwright (headless Chromium) against the Go host harness: 12 steps (bootstrap login, forced change, data views, users page, role change, reset, delete, logout, throttle message) without a console error.
+- Dev and docs `7c1f6aa`: `oec/dev/pki` writes `registry_admin_password` (32 random characters) into the registry storage; `oec/ci/getting-started.sh` checks the `401` without a session and logs in; READMEs. Guideline `9d6f961`: Community registry page ("Users and login") and the login hints of the demo pages.
+- **A-663 PBKDF2 instead of Argon2:** aws-lc-rs is already in the binary; Argon2 would add a crate (ADR-0023) for a demo directory; 600 000 iterations meet OWASP 2023, the iterations are stored per hash and can be raised.
+- **A-664 Cookie plus bearer:** the UI uses only the `HttpOnly` cookie (no token in JavaScript, XSS cannot read it), `SameSite=Strict` plus the existing `Origin` guard against CSRF; scripts and tests use the bearer token of the login answer.
+- **A-665 The PO's existing `oec/dev/generated/`** predates the file: the agent added `registry_admin_password` to it (random, not committed, git-ignored) instead of `go run ./pki -force`, so the PO's certificates and volumes stay; `getting-started.sh` names `-force` when the file is missing.
+- **A-666 Live check:** registry image rebuilt (`images/build.sh`: D8 `image` and `run` level 3 exit 0); `OEC_GS_KEEP=1 oec/ci/getting-started.sh` against the PO's compose project `oec-dev`: "getting-started ok" (401 without login, login, assets via bearer). The story step's `stations = 4` of the weather service was set back to 3 and the stack stopped (`stop`, volumes kept); the PO's other containers were not touched. The registry log names the bootstrap user, never the password.
+
+### D-3 – config demo API (A-667)
+
+- **A-667** (a) kept: the config demo stays without a login (demo; compose binds `127.0.0.1`; the page and the README warn). No change.
+
+### D-4 – push (A-668)
+
+- **A-668** after D-1 … D-3: gate green (below), then the workspace to `origin/main`, the guideline branch `feature/spec-findings`, the re-sync of `oi4-oec-registry` (the registry with the login) and `oi4-oec-demo` (Node-RED nodes of C-113), the hosted runs evaluated.
+
+### Verification (addendum 1)
+
+- `oec/registry/check.sh`: registry ok (Rust tests, Go host tests, uipolicy, cargo deny); `oec/dev` `go test ./...`, `oec/ci` `go test ./...` ok; `oec/docs/check.sh`: 20 pages ok.
+- Gate: the first run failed in `oec/demos` (`config` `TestD7Level1`, T7-MON-05: 3 min 51 s between two Health messages within a 103 s test) – the Mac went into maintenance sleep on battery during the run (`pmset -g log`: Sleep 16:22, DarkWake 16:29); no change in the config demo since the last green gate. Second run under `caffeinate`: **all checks passed** (`feedback: 119 findings, 220 commits of 5f070bb..980cde8 attributed, 138 files current`; `cigen: 7 workflows current`).
+- `oec/demos-smart-sensors/esp32-dht22/README.md`: login hint for the registry (not in the gate).
+
