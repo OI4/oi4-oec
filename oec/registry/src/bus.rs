@@ -47,8 +47,6 @@ pub(crate) const COLLECTED: [Resource; 7] = [
 const FETCH_DELAY: Duration = Duration::from_millis(500);
 /// The applications asked at the same time; the others wait.
 const MAX_PROBES: usize = 16;
-/// The longest violation message kept, in characters.
-const MESSAGE_MAX: usize = 512;
 
 /// The Config of the registry (ADR-0029 §3): its context name (the Filter
 /// of `Config/<AppId>/<Filter>`) and group.
@@ -262,7 +260,7 @@ impl Bus {
             at: unix_ms(),
             topic: p.topic().to_owned(),
             reqs,
-            message: message.chars().take(MESSAGE_MAX).collect(),
+            message,
         };
         let (app, outcome) = match Topic::parse(p.topic()) {
             Err(e) => (

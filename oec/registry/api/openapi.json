@@ -324,11 +324,14 @@
       },
       "Limits": {
         "type": "object",
-        "description": "The limits of the directory, from the Config `registry`/`directory` (A-393).",
+        "description": "The limits of the directory: `healthHistory`, `eventTrail` and `violationTrail` from the Config `registry`/`directory` (A-393), the others fixed (C-113).",
         "required": [
           "healthHistory",
           "eventTrail",
-          "violationTrail"
+          "violationTrail",
+          "entries",
+          "valueMax",
+          "listEntries"
         ],
         "properties": {
           "healthHistory": {
@@ -345,6 +348,21 @@
             "type": "integer",
             "minimum": 0,
             "description": "Schema violations kept per application."
+          },
+          "entries": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Assets kept at most, and participants in the conformity view (fixed). When full, the offline asset seen longest ago gives way; an online or listed one never does: then a new asset is ignored."
+          },
+          "valueMax": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The longest MAM, Health, Profile, Event or PublicationList/SubscriptionList entry kept, octets of its JSON text (fixed); a longer one is ignored."
+          },
+          "listEntries": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "PublicationList and SubscriptionList entries kept over all applications (fixed); beyond, a new one is ignored."
           }
         },
         "additionalProperties": false
@@ -373,7 +391,7 @@
           "ignored": {
             "type": "integer",
             "minimum": 0,
-            "description": "Messages ignored since the start: not parseable or not of the expected form."
+            "description": "Messages ignored since the start: not parseable or not of the expected form, about an asset that is not the publisher's, longer than `valueMax`, or beyond `entries` or `listEntries`."
           }
         }
       },
@@ -635,6 +653,7 @@
         "properties": {
           "healthHistory": {
             "type": "array",
+            "description": "The changes of its Health (state or score), oldest first, without `Details` (C-113).",
             "items": {
               "type": "object",
               "required": [

@@ -23,6 +23,7 @@
 //! bus. The schemas: `api/openapi.json`.
 
 use std::collections::BTreeMap;
+use std::hash::{BuildHasher, RandomState};
 
 use serde_json::{Value, json};
 
@@ -279,6 +280,9 @@ fn limits(l: Limits) -> Value {
         "healthHistory": l.health_history,
         "eventTrail": l.event_trail,
         "violationTrail": l.violation_trail,
+        "entries": crate::directory::ENTRIES,
+        "valueMax": crate::directory::VALUE_MAX,
+        "listEntries": crate::directory::LIST_ENTRIES,
     })
 }
 
@@ -437,11 +441,14 @@ pub(crate) fn data(d: &Directory) -> Value {
 }
 
 /// What one event stream has sent: the messages for the changes since.
+/// It keeps a digest of each message, not the message (C-113 RR-3: up to
+/// [`crate::directory::ENTRIES`] summaries per stream).
 #[derive(Debug, Default)]
 pub(crate) struct Stream {
-    assets: BTreeMap<String, String>,
-    directory: String,
+    assets: BTreeMap<String, u64>,
+    directory: u64,
     last_event: u64,
+    keys: RandomState,
 }
 
 impl Stream {
@@ -449,9 +456,9 @@ impl Stream {
     pub(crate) fn snapshot(&mut self, d: &Directory, now: u64) -> String {
         self.assets = d
             .entries()
-            .map(|e| (e.il.clone(), summary(d, e).to_string()))
+            .map(|e| (e.il.clone(), self.keys.hash_one(summary(d, e).to_string())))
             .collect();
-        self.directory = directory(d).to_string();
+        self.directory = self.keys.hash_one(directory(d).to_string());
         self.last_event = d.events().last().map_or(0, |r| r.seq);
         let v = merged(assets(d, now), "events", events(d)["events"].take());
         merged(v, "type", json!("snapshot")).to_string()
@@ -463,17 +470,19 @@ impl Stream {
     pub(crate) fn changes(&mut self, d: &Directory) -> Vec<String> {
         let mut out = Vec::new();
         let dir = directory(d);
-        let text = dir.to_string();
-        if text != self.directory {
+        let digest = self.keys.hash_one(dir.to_string());
+        if digest != self.directory {
             out.push(merged(dir, "type", json!("directory")).to_string());
-            self.directory = text;
+            self.directory = digest;
         }
+        // entries the directory gave up (C-113 RR-3) are forgotten
+        self.assets.retain(|il, _| d.get(il).is_some());
         for e in d.entries() {
             let s = summary(d, e);
-            let text = s.to_string();
-            if self.assets.get(&e.il) != Some(&text) {
+            let digest = self.keys.hash_one(s.to_string());
+            if self.assets.get(&e.il) != Some(&digest) {
                 out.push(json!({ "type": "asset", "asset": s }).to_string());
-                self.assets.insert(e.il.clone(), text);
+                self.assets.insert(e.il.clone(), digest);
             }
         }
         let last = self.last_event;
@@ -829,6 +838,10 @@ pub(crate) mod tests {
         assert_eq!(all["registry"], ME);
         assert_eq!(all["time"], 9);
         assert_eq!(all["limits"]["eventTrail"], 200);
+        // C-113 RR-3: the fixed bounds of the directory
+        assert_eq!(all["limits"]["entries"], crate::directory::ENTRIES);
+        assert_eq!(all["limits"]["valueMax"], crate::directory::VALUE_MAX);
+        assert_eq!(all["limits"]["listEntries"], crate::directory::LIST_ENTRIES);
         let list = all["assets"].as_array().unwrap();
         assert_eq!(list.len(), 2);
         let app = &list[0];
@@ -915,5 +928,34 @@ pub(crate) mod tests {
         let msgs = s.changes(&d);
         assert_eq!(msgs.len(), 1);
         assert!(msgs[0].contains(r#""type":"directory""#), "{}", msgs[0]);
+    }
+
+    /// C-113 RR-3: a stream keeps a digest per asset of the directory,
+    /// and forgets the assets the directory gave up.
+    #[test]
+    fn stream_is_bounded() {
+        let mut d = Directory::new(ME);
+        let il = |i: usize| format!("vendor.com/App/A-1/{i}");
+        let normal = Health {
+            health: HealthState::Normal,
+            health_score: Some(100),
+            details: None,
+        };
+        for i in 0..crate::directory::ENTRIES {
+            d.health(&at(&il(i), &il(i), false, 1), normal.clone());
+        }
+        let mut s = Stream::default();
+        s.snapshot(&d, 1);
+        let close = Health {
+            health_score: Some(0),
+            ..normal.clone()
+        };
+        d.health(&at(&il(0), &il(0), false, 2), close);
+        let extra = il(crate::directory::ENTRIES);
+        d.health(&at(&extra, &extra, false, 3), normal);
+        assert!(d.get(&il(0)).is_none());
+        assert_eq!(s.changes(&d).len(), 1, "the new asset");
+        assert_eq!(s.assets.len(), crate::directory::ENTRIES);
+        assert!(!s.assets.contains_key(&il(0)));
     }
 }

@@ -46,6 +46,32 @@ what it reads as a second line of defence:
 | `EventTrail` | 200 | 0 … 10000 | kept `Event`s of all participants |
 | `ViolationTrail` | 10 | 0 … 1000 | kept schema violations per participant |
 
+### Fixed limits (C-113 RR-3)
+
+Every participant on the bus can make the registry keep data, so the
+memory is bounded by fixed limits (constants of `src/directory.rs`, shown
+with the settings in the `limits` of `GET /api/assets`); what exceeds them
+is ignored and counted in `ignored`:
+
+| Limit | Value | Meaning |
+|---|---|---|
+| `entries` (`ENTRIES`) | 4096 | assets kept; when full, the offline asset seen longest ago gives way – an online or listed one never does, then a new asset is ignored. Also the participants of the conformity view (the one checked longest ago gives way unless it is online) |
+| `valueMax` (`VALUE_MAX`) | 8 KiB | the longest `MAM`, `Health`, `Profile`, `Event` and PublicationList/SubscriptionList entry kept (its JSON text); a longer one is ignored |
+| `listEntries` (`LIST_ENTRIES`) | 4096 | PublicationList and SubscriptionList entries over all applications |
+| `TEXT_MAX` | 512 | characters kept of the topic and the message of a schema violation |
+
+The Health history keeps state and score of each change, not the
+`Details` (the latest `Health` keeps them); the data logger has its own
+limits (1000 DataSets, 16 KiB per Payload). An event stream keeps a digest
+per asset, not a copy of its summary.
+
+**Ownership (C-113 RR-1):** an Identification Link belongs to the
+application that publishes its own `MAM` or `Health` (`Source` = `AppId`):
+a device entry about it that another publisher created is dropped, and
+later device messages about it – or about any AppId seen on the bus – are
+ignored. A device is not taken over by another publisher while its
+publisher is online.
+
 ## HTTP: REST, SSE, TLS (ADR-0029 §7)
 
 Read-only (ADR-0008): every resource answers `GET` only, any other method
@@ -54,7 +80,7 @@ Read-only (ADR-0008): every resource answers `GET` only, any other method
 
 | Path | Content |
 |---|---|
-| `GET /api/assets` | the registry, its limits, the ignored messages and a summary per asset (kind, publisher, availability, MAM, latest Health, observed level, conformity counts, devices) |
+| `GET /api/assets` | the registry, its limits (settings and fixed limits), the ignored messages and a summary per asset (kind, publisher, availability, MAM, latest Health, observed level, conformity counts, devices) |
 | `GET /api/assets/{il}` | the summary plus the detail (Profile, Health history, answers to the `Get`s, PublicationList, SubscriptionList, last violations); `{il}` percent-encoded as one segment; `404` if unknown |
 | `GET /api/events` | the Event trail, oldest first, with a sequence number |
 | `GET /api/data` | the data logger: the last value of every `Data` DataSet (publisher, Source, Filter, DataSetWriterId, time, Payload), at most 1000 – beyond, the one updated longest ago is dropped |
