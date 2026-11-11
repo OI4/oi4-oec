@@ -214,6 +214,53 @@ func TestClientCertificate(t *testing.T) {
 	}
 }
 
+// TestUpstreamIdentity (C-113 RT-1): the client certificate in UpstreamTLS
+// is D7's own identity; a relayed client never gets it. Against a broker
+// that maps the client certificate to the user, a client without
+// credentials is not relayed; only the explicit UpstreamCert (the identity
+// of the CUT) is presented upstream.
+func TestUpstreamIdentity(t *testing.T) {
+	pki := mqtttest.NewPKI(t)
+	b := mqtttest.NewBroker(t, pki, "", "", true)
+	probe := mqttwire.Config{CAFile: pki.CAFile, CertFile: pki.ClientCert, KeyFile: pki.ClientKey}
+	up, err := mqttwire.TLSConfig(probe, "localhost")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(up.Certificates) != 1 {
+		t.Fatal("the upstream TLS settings carry no client certificate")
+	}
+	_, addr, _ := mqttwire.BrokerAddress(b.URL())
+	dial := func(cut *tls.Certificate) (proxy.Conn, error) {
+		t.Helper()
+		p, err := proxy.New(proxy.Config{Listen: "127.0.0.1:0", Upstream: addr, UpstreamTLS: up, UpstreamCert: cut, CA: pki.CA, CAKey: pki.CAKey, HandshakeTimeout: 3 * time.Second})
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer p.Close()
+		p.Serve()
+		e := &env{pki, b, p}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		cl, err := mqttwire.Dial(ctx, mqttwire.Config{Broker: e.url(), CAFile: pki.CAFile, ConnectTimeout: 3 * time.Second})
+		if err == nil {
+			cl.Close()
+		}
+		return wait(t, p, func(cs []proxy.Conn) bool { return len(cs) == 1 && !cs[0].Closed.IsZero() })[0], err
+	}
+	c, err := dial(nil)
+	if err == nil || c.Relayed() || c.Connect == nil || c.Connect.HasUsername {
+		t.Errorf("a client without credentials was relayed with D7's identity: %v %+v", err, c)
+	}
+	cut := up.Certificates[0]
+	if c, err := dial(&cut); err != nil || !c.Relayed() {
+		t.Errorf("with UpstreamCert: %v %+v", err, c)
+	}
+	if len(up.Certificates) != 1 {
+		t.Error("proxy.New changed the caller's UpstreamTLS")
+	}
+}
+
 func str(s string) []byte {
 	b := binary.BigEndian.AppendUint16(nil, uint16(len(s)))
 	return append(b, s...)

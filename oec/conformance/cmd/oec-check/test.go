@@ -101,6 +101,7 @@ func runTest(args []string, stdout, stderr io.Writer) int {
 			return usageErr("%v", err)
 		}
 		defer px.Close()
+		f.warnProxy(px, cfg.Broker, stderr)
 	}
 	v, err := validate.New()
 	if err != nil {

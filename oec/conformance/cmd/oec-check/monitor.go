@@ -88,6 +88,7 @@ type monitorFlags struct {
 	tests                               patterns      // test
 	proxyListen, proxyCA, proxyCAKey    string        // test
 	proxyNames                          string        // test
+	proxyUpCert, proxyUpKey             string        // test
 	proxyWait                           time.Duration // test
 	restartCmd, stopCmd, startCmd       string        // test
 	restartWait                         time.Duration // test
@@ -115,6 +116,8 @@ func newMonitorFlags(name string, stderr io.Writer) *monitorFlags {
 		fl.StringVar(&f.proxyCA, "proxy-ca", "", "CA certificate (PEM) the component under test trusts; D7 issues the proxy certificates with it")
 		fl.StringVar(&f.proxyCAKey, "proxy-ca-key", "", "private key of --proxy-ca (PEM)")
 		fl.StringVar(&f.proxyNames, "proxy-name", "", "host names and IP addresses of the proxy certificate, comma separated (default: localhost,127.0.0.1,::1)")
+		fl.StringVar(&f.proxyUpCert, "proxy-upstream-cert", "", "client certificate (PEM) the proxy presents to the broker for the component under test: its own identity, never D7's (default: none, the component under test authenticates with its CONNECT)")
+		fl.StringVar(&f.proxyUpKey, "proxy-upstream-key", "", "private key of --proxy-upstream-cert (PEM, unencrypted)")
 		fl.DurationVar(&f.proxyWait, "proxy-wait", 2*time.Minute, "waiting time for the component under test to connect through the proxy and to reconnect")
 		fl.StringVar(&f.restartCmd, "restart-cmd", "", "restart hook: shell command that stops the component under test gracefully and starts it again")
 		fl.StringVar(&f.stopCmd, "stop-cmd", "", "restart hook: shell command that stops the component under test gracefully (with --start-cmd)")

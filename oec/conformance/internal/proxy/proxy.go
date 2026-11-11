@@ -18,8 +18,10 @@
 // so the broker publishes the Will of the CUT (T7-LIFE-02, T7-LIFE-03).
 //
 // Limitation: a client certificate of the CUT is seen (T7-CON-03) but not
-// relayed; the upstream connection uses the TLS settings of D7 (its CA and,
-// if given, its own client certificate).
+// relayed; the upstream connection uses the TLS settings of D7 (its CA)
+// but never D7's own client certificate (C-113 RT-1): the CUT
+// authenticates with the credentials of its CONNECT or, if given, with
+// Config.UpstreamCert, the identity of the CUT.
 package proxy
 
 import (
@@ -57,9 +59,13 @@ const WrongHostName = "wrong-host.invalid"
 type Config struct {
 	Listen      string      // host:port of the proxy ("127.0.0.1:0" in tests)
 	Upstream    string      // host:port of the broker
-	UpstreamTLS *tls.Config // TLS of the connection to the broker (D7's CA, ServerName, client certificate)
-	CA          *x509.Certificate
-	CAKey       crypto.Signer
+	UpstreamTLS *tls.Config // TLS of the connection to the broker (D7's CA, ServerName); its client certificate is ignored
+	// UpstreamCert is the client certificate presented to the broker for
+	// relayed clients: the identity of the CUT. Nil: none, the CUT
+	// authenticates with the credentials of its CONNECT (C-113 RT-1).
+	UpstreamCert *tls.Certificate
+	CA           *x509.Certificate
+	CAKey        crypto.Signer
 	// Names of the proxy certificate (DNS names or IP addresses); default
 	// localhost, 127.0.0.1 and ::1.
 	Names            []string
@@ -126,6 +132,16 @@ func New(cfg Config) (*Proxy, error) {
 	if cfg.HandshakeTimeout <= 0 {
 		cfg.HandshakeTimeout = 10 * time.Second
 	}
+	// A relayed client must not authenticate as D7 (C-113 RT-1).
+	up := &tls.Config{}
+	if cfg.UpstreamTLS != nil {
+		up = cfg.UpstreamTLS.Clone()
+	}
+	up.Certificates, up.GetClientCertificate = nil, nil
+	if cfg.UpstreamCert != nil {
+		up.Certificates = []tls.Certificate{*cfg.UpstreamCert}
+	}
+	cfg.UpstreamTLS = up
 	good, err := issue(cfg.CA, cfg.CAKey, cfg.Names)
 	if err != nil {
 		return nil, err

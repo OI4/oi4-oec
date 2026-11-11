@@ -97,10 +97,15 @@ monitor and --record, plus:
               (repeatable; default all), --tester-il IL (default
               Utility/oi4.org/oec-check/D7/<random>)
   proxy:      --proxy-listen HOST:PORT --proxy-ca FILE --proxy-ca-key FILE
-              [--proxy-name NAME,...] [--proxy-wait 2m]: the component under
-              test connects to D7 (it trusts --proxy-ca), D7 relays to the
-              broker and judges the connection and lifecycle tests (T7-CON-*,
-              T7-LIFE-*); without the proxy they are skipped (inconclusive)
+              [--proxy-name NAME,...] [--proxy-wait 2m]
+              [--proxy-upstream-cert FILE --proxy-upstream-key FILE]: the
+              component under test connects to D7 (it trusts --proxy-ca), D7
+              relays to the broker and judges the connection and lifecycle
+              tests (T7-CON-*, T7-LIFE-*); without the proxy they are skipped
+              (inconclusive). The relayed connection never carries D7's
+              --cert: the component authenticates with its CONNECT, or with
+              --proxy-upstream-cert (its own identity). A non-loopback
+              --proxy-listen is reported with a warning
   restart:    --restart-cmd CMD, or --stop-cmd CMD --start-cmd CMD
               [--restart-wait 2m]: shell commands that stop the component
               under test gracefully and start it again (T7-LIFE-04,
