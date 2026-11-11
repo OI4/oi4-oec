@@ -197,6 +197,11 @@ func generate(o options) error {
 	if err != nil {
 		return err
 	}
+	// the password of the first user admin of the Web UI and API (ADR-0035)
+	registryAdmin, err := secret(o.rand)
+	if err != nil {
+		return err
+	}
 	registryKey, err := encryptPKCS8(o.rand, registry.key, registryPassphrase)
 	if err != nil {
 		return err
@@ -248,8 +253,9 @@ func generate(o options) error {
 	// the registry of the compose profile registry
 	env += registryEnv + "=" + registryName + "\n"
 	w.composeStorage(registryUser, 8884, ca, broker, map[string][]byte{
-		"private_key.pem": registryKey,
-		"passphrase":      []byte(base64.StdEncoding.EncodeToString([]byte(registryPassphrase)) + "\n"),
+		"private_key.pem":         registryKey,
+		"passphrase":              []byte(base64.StdEncoding.EncodeToString([]byte(registryPassphrase)) + "\n"),
+		"registry_admin_password": []byte(registryAdmin + "\n"),
 	})
 	w.file("roots/"+registryUser+"/etc/oi4/certs/"+registryName+".pem", registry.pem(), 0o644)
 	w.file(demosEnv, []byte(env), 0o644)

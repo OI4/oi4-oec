@@ -198,8 +198,12 @@ cd oec/registry && images/build.sh /tmp/oec-registry   # once: build, D8 image +
 cd ../dev
 go run ./pki            # a generated/ of a cycle before C-090: go run ./pki -force
 docker compose --env-file generated/demos.env --profile demos --profile registry up -d --wait
-curl --cacert generated/broker/ca.pem https://localhost:5799/api/assets
-# Web UI: https://localhost:5798/ (trust generated/broker/ca.pem, or accept the warning)
+# Web UI: https://localhost:5798/ (trust generated/broker/ca.pem, or accept the warning),
+# user admin, password: generated/roots/oec-registry/run/secrets/oi4/registry_admin_password
+token=$(jq -n --rawfile p generated/roots/oec-registry/run/secrets/oi4/registry_admin_password \
+  '{name: "admin", password: ($p | rtrimstr("\n"))}' | curl -fsS --cacert generated/broker/ca.pem \
+  -H 'Content-Type: application/json' --data-binary @- https://localhost:5799/api/login | jq -r .token)
+curl --cacert generated/broker/ca.pem -H "Authorization: Bearer $token" https://localhost:5799/api/assets
 docker compose --env-file generated/demos.env --profile demos --profile registry down -v
 cd ../registry && images/build.sh --remove             # remove the loaded image
 ```
@@ -223,6 +227,13 @@ cd ../registry && images/build.sh --remove             # remove the loaded image
   only; the Host guard accepts `localhost`, `127.0.0.1`, the container name
   and `oec-registry` (`OEC_REGISTRY_HOSTS`, the compose service name). Verify
   with `--cacert generated/broker/ca.pem`.
+- **Login (ADR-0035, C-113):** `generated/roots/oec-registry/run/secrets/oi4/registry_admin_password`
+  is the password of the first user `admin`; the registry reads it only
+  while its user store (`/etc/oi4/app/registry/users.json` on the volume
+  `oec-registry-etc`) does not exist. Further users and password resets in
+  the Web UI (`Users`); `down -v` removes the store with the volume. A
+  `generated/` of a cycle before C-113 lacks the file: `go run ./pki -force`
+  (or the registry prints a generated password once in `docker logs`).
 - **Start order (A-421):** with both profiles, the demos start after the
   registry (`depends_on` with `required: false`, so `--profile demos` alone
   still works). The registry lists an asset after its Birth (MG A1); the

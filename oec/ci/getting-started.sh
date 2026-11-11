@@ -8,7 +8,9 @@
 #      live.sh), then compose up of the profiles demos and registry with
 #      --env-file generated/demos.env and --wait;
 #   2. the Web UIs of the logger (8781), weather (8782) and config (8783)
-#      service and of the registry (https 5798, development CA) answer;
+#      service and of the registry (https 5798, development CA) answer; the
+#      API of the registry answers 401 without a session, the user admin
+#      logs in with the generated password (ADR-0035);
 #   3. the registry lists the three demos and the three stations of the
 #      weather service, all available (not itself: it lists the others);
 #   4. the story step: the config service sets the stations of the weather
@@ -45,6 +47,10 @@ else
 	echo "== go run ./pki"
 	GOTOOLCHAIN=${GOTOOLCHAIN:-auto} go run ./pki
 fi
+[ -f generated/roots/oec-registry/run/secrets/oi4/registry_admin_password ] || {
+	echo "getting-started: generated/ is older than C-113 (no registry_admin_password): go run ./pki -force" >&2
+	exit 1
+}
 # shellcheck disable=SC1091
 . ./generated/demos.env
 profiles="--env-file generated/demos.env --profile demos --profile registry"
@@ -80,7 +86,15 @@ done
 curl -fsS -o /dev/null --cacert generated/broker/ca.pem https://localhost:5798/
 echo "https://localhost:5798/ ok (development CA)"
 
-assets() { curl -fsS --cacert generated/broker/ca.pem https://localhost:5799/api/assets; }
+api=https://localhost:5799
+code="$(curl -sS -o /dev/null -w '%{http_code}' --cacert generated/broker/ca.pem "$api/api/assets")"
+[ "$code" = 401 ] || { echo "getting-started: $api/api/assets without a session: $code, want 401" >&2; exit 1; }
+admin="generated/roots/oec-registry/run/secrets/oi4/registry_admin_password"
+token="$(jq -n --rawfile p "$admin" '{name: "admin", password: ($p | rtrimstr("\n"))}' |
+	curl -fsS --cacert generated/broker/ca.pem -H 'Content-Type: application/json' --data-binary @- "$api/api/login" |
+	jq -er .token)"
+echo "$api/api/login ok (admin, $admin)"
+assets() { curl -fsS --cacert generated/broker/ca.pem -H "Authorization: Bearer $token" "$api/api/assets"; }
 # poll <what> <command…>: repeats the command every 2 s until it succeeds
 poll() {
 	what="$1"

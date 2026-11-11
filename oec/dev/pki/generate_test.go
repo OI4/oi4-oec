@@ -395,7 +395,8 @@ func TestDemoStorages(t *testing.T) {
 // name as CN (use_identity_as_username) that also serves the HTTPS ports
 // for the container name, the compose service name and loopback, and its
 // encrypted key with the passphrase – readable by the non-root container
-// user, the run directory keeps other users of the host out. No
+// user, the run directory keeps other users of the host out – and the
+// password of the first user admin of the Web UI and API (ADR-0035). No
 // credentials, no password file line.
 func TestRegistryStorage(t *testing.T) {
 	out, _ := generated(t)
@@ -435,6 +436,10 @@ func TestRegistryStorage(t *testing.T) {
 		t.Error("the registry certificate is valid for the broker name")
 	}
 	checkEncryptedKey(t, out, root, certRel)
+	admin := strings.TrimSuffix(string(read(t, out, root+"run/secrets/oi4/registry_admin_password")), "\n")
+	if len(admin) < 12 || len(admin) > 256 || strings.ContainsAny(admin, " \t\r\n") {
+		t.Errorf("registry_admin_password: %d characters", len(admin))
+	}
 	for _, rel := range []string{"etc/hostname", "etc/oi4/app", "run/secrets/oi4/credentials"} {
 		if _, err := os.Stat(filepath.Join(out, root+rel)); err == nil {
 			t.Errorf("unexpected %s", rel)
@@ -448,7 +453,8 @@ func TestRegistryStorage(t *testing.T) {
 	}
 	if runtime.GOOS != "windows" {
 		for rel, want := range map[string]os.FileMode{"run": 0o700, "run/secrets/oi4": 0o755,
-			"run/secrets/oi4/private_key.pem": 0o644, "run/secrets/oi4/passphrase": 0o644} {
+			"run/secrets/oi4/private_key.pem": 0o644, "run/secrets/oi4/passphrase": 0o644,
+			"run/secrets/oi4/registry_admin_password": 0o644} {
 			fi, err := os.Stat(filepath.Join(out, root+rel))
 			if err != nil {
 				t.Fatal(err)
