@@ -77,7 +77,7 @@ impl Store for FileStore {
     fn save(&self, key: &str, value: &[u8]) -> io::Result<()> {
         let path = self.path(key)?;
         let dir = path.parent().unwrap_or(&self.dir);
-        create_dirs(dir)?;
+        create_dirs(&self.dir, dir)?;
         let name = path.file_name().unwrap_or_default().to_string_lossy();
         // segments never start with '.', so the temporary name is no key
         let tmp = dir.join(format!(".{name}.tmp"));
@@ -94,22 +94,46 @@ impl Store for FileStore {
 }
 
 /// Directories the store creates are accessible to the owner only (Unix
-/// mode 0700): values may be sensitive (GL-ADR-021).
-fn create_dirs(dir: &Path) -> io::Result<()> {
+/// mode 0700): values may be sensitive (GL-ADR-021). Existing directories
+/// from the store directory `root` down to `dir` lose the permissions of
+/// group and others; where that is not allowed (a directory of another
+/// owner) a warning is logged.
+fn create_dirs(root: &Path, dir: &Path) -> io::Result<()> {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
     #[cfg(unix)]
     std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
-    builder.create(dir)
+    builder.create(dir)?;
+    #[cfg(unix)]
+    for d in dir.ancestors().take_while(|d| d.starts_with(root)) {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = fs::metadata(d)?.permissions().mode();
+        if mode & 0o077 != 0
+            && let Err(e) = fs::set_permissions(d, fs::Permissions::from_mode(mode & 0o7700))
+        {
+            log::warn!(
+                "store directory {} stays accessible to others: {e}",
+                d.display()
+            );
+        }
+    }
+    Ok(())
 }
 
-/// A new or truncated file readable by the owner only (Unix mode 0600),
-/// also if an interrupted save left one with other permissions.
+/// A new file readable by the owner only (Unix mode 0600). A temporary
+/// file left by an interrupted save is removed first; the new one is
+/// created exclusively, so a symbolic link at `path` is never followed
+/// (C-113 HARDENING-1).
 fn create_file(path: &Path) -> io::Result<fs::File> {
-    let f = fs::File::create(path)?;
+    match fs::remove_file(path) {
+        Err(e) if e.kind() != io::ErrorKind::NotFound => return Err(e),
+        _ => {}
+    }
+    let mut options = fs::OpenOptions::new();
+    options.write(true).create_new(true);
     #[cfg(unix)]
-    f.set_permissions(std::os::unix::fs::PermissionsExt::from_mode(0o600))?;
-    Ok(f)
+    std::os::unix::fs::OpenOptionsExt::mode(&mut options, 0o600);
+    options.open(path)
 }
 
 /// Volatile store (tests, Level 1/2 without persistence). Not persistent:
@@ -212,6 +236,40 @@ mod tests {
             .unwrap();
         s.save("app/config", b"{}").unwrap();
         assert_eq!(mode(&d.join("app/config")), 0o600);
+        // directories of an earlier version with wider permissions
+        for p in [&d, &d.join("app")] {
+            std::fs::set_permissions(p, std::fs::Permissions::from_mode(0o755)).unwrap();
+        }
+        s.save("app/config", b"{}").unwrap();
+        assert_eq!(mode(&d), 0o700);
+        assert_eq!(mode(&d.join("app")), 0o700);
+        std::fs::remove_dir_all(d).unwrap();
+    }
+
+    /// A symbolic link at the temporary path (planted, or left by an
+    /// interrupted save) is not followed: the file it points to stays
+    /// untouched and the key becomes a regular file (C-113 HARDENING-1).
+    #[cfg(unix)]
+    #[test]
+    fn file_store_does_not_follow_a_temporary_symlink() {
+        let d = dir("symlink");
+        let victim = dir("symlink-victim");
+        std::fs::create_dir_all(d.join("app")).unwrap();
+        std::fs::write(&victim, b"untouched").unwrap();
+        let tmp = d.join("app/.config.tmp");
+        std::os::unix::fs::symlink(&victim, &tmp).unwrap();
+        let s = FileStore::new(&d);
+        s.save("app/config", b"{}").unwrap();
+        assert_eq!(std::fs::read(&victim).unwrap(), b"untouched");
+        let meta = std::fs::symlink_metadata(d.join("app/config")).unwrap();
+        assert!(meta.file_type().is_file());
+        assert_eq!(s.load("app/config").unwrap(), Some(b"{}".to_vec()));
+        // a dangling link is not followed either
+        std::fs::remove_file(&victim).unwrap();
+        std::os::unix::fs::symlink(&victim, &tmp).unwrap();
+        s.save("app/config", b"[]").unwrap();
+        assert!(!victim.exists());
+        assert_eq!(s.load("app/config").unwrap(), Some(b"[]".to_vec()));
         std::fs::remove_dir_all(d).unwrap();
     }
 
