@@ -691,6 +691,53 @@ fn the_mask_keeps_a_sensitive_value() {
     );
 }
 
+/// The read-only DefaultValue of a sensitive object is compared with the
+/// published (masked) one, never with the clear text: the Status event of
+/// a `Set` is no oracle for the secret default (C-113 RS-1,
+/// REQ-RES-CONFIG-023/024, GL-ADR-021).
+#[test]
+fn a_sensitive_default_is_no_oracle() {
+    let mut p = provider_with(true, 262_144, StoredConfigValues::new());
+    let src = il(&app());
+    let mut config = device_config();
+    let password = config
+        .groups
+        .get_mut("device1")
+        .unwrap()
+        .objects
+        .get_mut("password")
+        .unwrap();
+    assert_eq!(password.sensitive, Some(true));
+    password.default_value = Some(SECRET.to_owned());
+    p.add_config(&src, spec(CTX, config), MS).unwrap();
+    p.on_connected(Duration::ZERO, MS);
+    let with_default = |d: Option<&str>| {
+        let mut j = json!({"device1": {
+            "password": {"Value": "********", "Sensitive": true},
+            "aut0-r3fr3sh": {"Value": "true"},
+            "protocol": {"Value": "HTTPS"}
+        }});
+        if let Some(d) = d {
+            j["device1"]["password"]["DefaultValue"] = json!(d);
+        }
+        j
+    };
+    for d in [Some(SECRET), Some("wrong"), Some("")] {
+        assert_eq!(
+            set(&mut p, &src, CTX, &with_default(d)),
+            Err(bad(StatusCode::BAD_NOT_WRITABLE)),
+            "{d:?}"
+        );
+    }
+    // repeated unchanged from Pub/Config: the mask, or no DefaultValue
+    for d in [Some("********"), None] {
+        let req = set(&mut p, &src, CTX, &with_default(d)).unwrap();
+        assert!(req.changes().iter().all(|(_, n, _)| n != "password"));
+        let (out, _) = p.complete_set_config(&req, Ok(()), MS + 2);
+        assert_masked(&out);
+    }
+}
+
 // --------------------------------------------------------- completion
 
 #[test]

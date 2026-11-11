@@ -26,8 +26,10 @@
 //!
 //! An empty `Value` unsets the object (MG 9.1.3); the mask `********` as
 //! `Value` of a sensitive object keeps its value (REQ-RES-CONFIG-025).
-//! Unknown members of an object are ignored. Otherwise the application
-//! decides ([`super::Handled::SetConfig`]).
+//! The DefaultValue of a sensitive object is compared as published (the
+//! mask, or empty), never with the clear text, so the Status event reveals
+//! nothing about it. Unknown members of an object are ignored. Otherwise
+//! the application decides ([`super::Handled::SetConfig`]).
 
 use core::fmt;
 use core::str::FromStr;
@@ -577,12 +579,20 @@ fn object_change(o: &ConfigObject, set: &Map<String, Json>) -> Result<Option<Str
             "Name" => same(j, Some(&o.name)),
             "Description" => same(j, o.description.as_ref()),
             "Unit" => same(j, o.unit.as_ref()),
-            "DefaultValue" => {
-                same(j, o.default_value.as_ref())
-                    || (sensitive
-                        && j.as_str() == Some(SENSITIVE_MASK)
-                        && o.default_value.as_ref().is_some_and(|d| !d.is_empty()))
+            // A sensitive DefaultValue is compared as published (masked),
+            // never in clear text: the Status event is no oracle for the
+            // secret (REQ-RES-CONFIG-023/024, C-113 RS-1).
+            "DefaultValue" if sensitive => {
+                let published = o.default_value.as_deref().map(|d| {
+                    if d.is_empty() {
+                        String::new()
+                    } else {
+                        SENSITIVE_MASK.to_owned()
+                    }
+                });
+                same(j, published.as_ref())
             }
+            "DefaultValue" => same(j, o.default_value.as_ref()),
             "Mandatory" => flag(j, o.mandatory),
             "Sensitive" => flag(j, o.sensitive),
             "Validation" => same_validation(j, o.validation.as_ref()),
