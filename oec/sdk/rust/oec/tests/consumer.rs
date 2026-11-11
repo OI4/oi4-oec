@@ -463,6 +463,12 @@ fn presence_and_subscriptions() {
     let tb = routing_broker(&pki);
     let c = app(Level::L1, "C-SN", &root, &pki, &tb);
     let consumer = c.consumer();
+    // the bounds of the directory (C-113 RS-3)
+    let mut limits = consumer.directory_limits();
+    assert_eq!(limits.max_apps, 1000);
+    limits.max_apps = 10;
+    consumer.set_directory_limits(limits);
+    assert_eq!(consumer.directory_limits(), limits);
     let (presence_tx, presence) = channel();
     let _presence = consumer
         .on_presence(move |p| {

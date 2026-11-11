@@ -1,8 +1,9 @@
 //! The consumer side of an application, sans-IO (ADR-0026 §17): typed
 //! subscriptions, the directory of applications (Birth, Close, Will,
-//! heartbeat), and requests – `Get` with correlation over ReplyTo
-//! (REQ-MSG-015), reassembly of paginated answers (MG 8.3.11), the check
-//! of a Query answer (REQ-RES-REFDES-015) and timeouts – plus `Set`/`Del`
+//! heartbeat; bounded by [`DirectoryLimits`]), and requests – `Get` with
+//! correlation over ReplyTo (REQ-MSG-015), reassembly of paginated answers
+//! (MG 8.3.11), the check of a Query answer (REQ-RES-REFDES-015) and
+//! timeouts – plus `Set`/`Del`
 //! with their Status event (REQ-RES-EVENT-005) and the Action
 //! NewDataSetWriterId with its final response (REQ-ACT-015).
 //!
@@ -29,7 +30,7 @@ mod request;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fmt;
 
-pub use directory::{AppInfo, AppState, PresenceChange};
+pub use directory::{AppInfo, AppState, DirectoryLimits, PresenceChange};
 pub use received::{Payload, Received};
 pub use request::{Address, GetParams, WriteEntry};
 
@@ -208,6 +209,10 @@ struct Pending {
 }
 
 const PRESENCE: [&str; 2] = ["Oi4v2/+/+/Pub/MAM/+", "Oi4v2/+/+/Pub/Health/+"];
+
+/// The most topics a subscription with an Interval remembers the last
+/// delivery of (C-113 RS-3).
+const MAX_INTERVAL_TOPICS: usize = 4096;
 
 /// The consumer of an application.
 #[derive(Debug)]
@@ -774,6 +779,18 @@ impl Consumer {
         self.directory.apps()
     }
 
+    /// The bounds of the directory of applications.
+    pub fn directory_limits(&self) -> DirectoryLimits {
+        self.directory.limits
+    }
+
+    /// Sets the bounds of the directory of applications; they apply to the
+    /// publications received from now on, applications already tracked
+    /// stay.
+    pub fn set_directory_limits(&mut self, limits: DirectoryLimits) {
+        self.directory.limits = limits;
+    }
+
     /// Takes a publication received on `topic`. `now_ms` and `next_id`
     /// serve the `Get MAM` of an application first seen by its heartbeat.
     pub fn handle_message(
@@ -861,9 +878,11 @@ impl Consumer {
     /// The topic subscriptions (`raw`: the raw ones) a publication on
     /// `topic` is delivered to now: a matching filter that is not deleted,
     /// and the Interval since the last delivery of the topic passed
-    /// (REQ-RES-SUBLIST-003).
+    /// (REQ-RES-SUBLIST-003). A subscription remembers at most
+    /// [`MAX_INTERVAL_TOPICS`] topics; beyond, a new topic is delivered
+    /// without being remembered.
     fn due(&mut self, topic: &str, now_ms: u64, raw: bool) -> Vec<SubscriptionId> {
-        let intervals: Vec<(SubscriptionId, u32)> = self
+        let intervals: Vec<(SubscriptionId, u32, u32)> = self
             .subs
             .iter()
             .filter(|(_, s)| {
@@ -873,10 +892,10 @@ impl Consumer {
                     matches!(s.kind, SubKind::Topics)
                 }
             })
-            .filter_map(|(id, s)| Some((*id, self.interval(s, topic)?)))
+            .filter_map(|(id, s)| Some((*id, self.interval(s, topic)?, self.longest_interval(s))))
             .collect();
         let mut due = Vec::new();
-        for (id, interval) in intervals {
+        for (id, interval, longest) in intervals {
             let sub = self.subs.get_mut(&id).expect("listed above");
             if interval == 0 {
                 sub.last.remove(topic);
@@ -886,11 +905,28 @@ impl Consumer {
                 {
                     continue;
                 }
-                sub.last.insert(topic.to_owned(), now_ms);
+                if sub.last.len() >= MAX_INTERVAL_TOPICS && !sub.last.contains_key(topic) {
+                    // a topic whose Interval passed is due anyway (C-113 RS-3)
+                    sub.last
+                        .retain(|_, t| now_ms.saturating_sub(*t) < u64::from(longest));
+                }
+                if sub.last.len() < MAX_INTERVAL_TOPICS || sub.last.contains_key(topic) {
+                    sub.last.insert(topic.to_owned(), now_ms);
+                }
             }
             due.push(id);
         }
         due
+    }
+
+    /// The longest Interval of the filters of `sub` that are not deleted.
+    fn longest_interval(&self, sub: &Sub) -> u32 {
+        sub.filters
+            .iter()
+            .filter(|f| !self.overrides.is_deleted(f))
+            .map(|f| self.overrides.interval(f).unwrap_or(sub.interval_ms))
+            .max()
+            .unwrap_or(0)
     }
 
     fn discover(
@@ -1050,5 +1086,42 @@ fn answer_filter(address: &Address, resource: Option<Resource>) -> String {
     match resource {
         Some(r) => format!("{base}/{r}/#"),
         None => format!("{base}/Event/+/Status/+"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const MS: u64 = 1_700_000_000_000;
+
+    /// A flood of distinct topics on a subscription with an Interval keeps
+    /// at most [`MAX_INTERVAL_TOPICS`] last deliveries; those whose Interval
+    /// passed make room (C-113 RS-3).
+    #[test]
+    fn interval_bookkeeping_is_bounded() {
+        let app = IdentificationLink::parse("a.com/M/P/consumer").unwrap();
+        let mut c = Consumer::new(ServiceType::OTConnector, app);
+        let filter = TopicFilter::builder(Method::Pub, Resource::Data)
+            .any_source()
+            .build()
+            .unwrap();
+        let id = c.subscribe(&[filter]);
+        c.configure(id, 1000, false);
+        let mut next = || -> MessageId { unreachable!("no request") };
+        let topic = |n: usize| {
+            let il = IdentificationLink::parse(&format!("a.com/M/P/{n}")).unwrap();
+            format!("Oi4v2/OTConnector/{0}/Pub/Data/{0}", il.encode())
+        };
+        for n in 0..MAX_INTERVAL_TOPICS + 100 {
+            c.handle_message(&topic(n), b"{}", MS, &mut next);
+        }
+        assert_eq!(c.subs[&id].last.len(), MAX_INTERVAL_TOPICS);
+        // a known topic within its Interval is still held back
+        assert!(c.due(&topic(0), MS + 1, false).is_empty());
+        let late = MAX_INTERVAL_TOPICS + 200;
+        c.handle_message(&topic(late), b"{}", MS + 1000, &mut next);
+        assert_eq!(c.subs[&id].last.len(), 1);
+        assert!(c.due(&topic(late), MS + 1001, false).is_empty());
     }
 }

@@ -69,7 +69,7 @@ use oec_core::mqtt::SubscribeReturnCode;
 use oec_core::topic::{Filter, Form, Method, Subject, TopicFilter, decode_level};
 use tokio::sync::oneshot;
 
-pub use oec_core::consumer::{AppState, Payload};
+pub use oec_core::consumer::{AppState, DirectoryLimits, Payload};
 pub use oec_core::resource::{Aspect, Health, HealthState, ReferenceDesignationQuery as Query};
 /// The OI4 resources (REQ-TOP-012, MG 7.5.1).
 pub use oec_core::topic::Resource;
@@ -943,6 +943,24 @@ impl Consumer {
             handle: self.handle.downgrade(),
             id,
         }
+    }
+
+    /// The bounds of the directory of applications behind [`Self::apps`]
+    /// and [`Self::on_presence`] (default: 1000 applications, MAM and
+    /// Health up to 16 KiB each).
+    pub fn directory_limits(&self) -> DirectoryLimits {
+        self.handle.consumer_state().core.directory_limits()
+    }
+
+    /// Sets the bounds of the directory of applications: beyond
+    /// `max_apps`, a new application replaces the one offline the longest
+    /// or, while all are online, is ignored; a MAM or Health larger than
+    /// `max_payload_bytes` is ignored. Applications already known stay.
+    pub fn set_directory_limits(&self, limits: DirectoryLimits) {
+        self.handle
+            .consumer_state()
+            .core
+            .set_directory_limits(limits);
     }
 
     /// The applications seen since the first [`Self::on_presence`].

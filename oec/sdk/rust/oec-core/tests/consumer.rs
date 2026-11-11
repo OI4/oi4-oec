@@ -1064,6 +1064,114 @@ fn an_application_first_seen_by_its_heartbeat_is_asked_for_its_mam() {
     assert!(bus.c.apps()[0].mam.is_some());
 }
 
+/// The lifecycle of the `n`-th application of a flood.
+fn flood_app(n: usize) -> Lifecycle {
+    lifecycle(&format!("provider.com/FieldDataService/FDS-001/flood-{n}"))
+}
+
+/// Hands `p` to the consumer; the presence changes.
+fn take(c: &mut Consumer, p: &Publication) -> Vec<PresenceChange> {
+    let mut ids = MessageIds::new(PublisherId::new(ServiceType::ITConnector, il(CONSUMER)));
+    let mut next = || ids.next_id(MS);
+    c.handle_message(&p.topic.to_string(), &p.payload, MS, &mut next)
+        .presence
+}
+
+/// A flood of applications does not grow the directory beyond its bound
+/// (default 1000): a new application beyond it is ignored while all
+/// tracked ones are online (C-113 RS-3).
+#[test]
+fn the_directory_is_bounded() {
+    let mut c = consumer();
+    c.subscribe_presence();
+    let max = c.directory_limits().max_apps;
+    assert_eq!(max, 1000);
+    for n in 0..max + 500 {
+        let changes = take(&mut c, &flood_app(n).birth(MS));
+        assert_eq!(changes.len(), usize::from(n < max), "{n}");
+    }
+    assert_eq!(c.apps().len(), max);
+    // also an application first seen by its heartbeat: not asked for its MAM
+    let health = flood_app(max + 500)
+        .on_connected(Duration::ZERO, MS)
+        .into_iter()
+        .find(|p| p.topic.to_string().contains("/Health/"))
+        .unwrap();
+    assert!(take(&mut c, &health).is_empty());
+    assert_eq!(c.apps().len(), max);
+    ack(&mut c);
+    assert!(c.take_outbound().is_empty());
+}
+
+/// Beyond the bound, the application offline the longest makes room
+/// first; online ones are kept (C-113 RS-3).
+#[test]
+fn offline_applications_are_evicted_first() {
+    let mut c = consumer();
+    c.subscribe_presence();
+    let mut limits = c.directory_limits();
+    limits.max_apps = 3;
+    c.set_directory_limits(limits);
+    let mut apps: Vec<Lifecycle> = (0..6).map(flood_app).collect();
+    for a in &mut apps[..3] {
+        assert_eq!(take(&mut c, &a.birth(MS)).len(), 1);
+    }
+    // 1 goes offline before 0
+    for i in [1, 0] {
+        let close = apps[i].close(MS + 1);
+        assert_eq!(take(&mut c, &close).len(), 1);
+    }
+    let names = |c: &Consumer| -> Vec<String> {
+        let mut v: Vec<String> = c.apps().iter().map(|a| a.app.to_string()).collect();
+        v.sort();
+        v
+    };
+    let birth = apps[3].birth(MS + 2);
+    assert_eq!(take(&mut c, &birth).len(), 1);
+    assert_eq!(
+        names(&c),
+        [0, 2, 3].map(|n| apps[n].app_id().to_string()).to_vec()
+    );
+    let birth = apps[4].birth(MS + 3);
+    assert_eq!(take(&mut c, &birth).len(), 1);
+    assert_eq!(
+        names(&c),
+        [2, 3, 4].map(|n| apps[n].app_id().to_string()).to_vec()
+    );
+    // all online: the new one is ignored
+    let birth = apps[5].birth(MS + 4);
+    assert!(take(&mut c, &birth).is_empty());
+    assert_eq!(c.apps().len(), 3);
+}
+
+/// A MAM (or Health) larger than the bound is not taken (C-113 RS-3).
+#[test]
+fn an_oversized_mam_is_not_stored() {
+    let mut c = consumer();
+    c.subscribe_presence();
+    let max = c.directory_limits().max_payload_bytes;
+    assert_eq!(max, 16 * 1024);
+    let app = "provider.com/FieldDataService/FDS-001/huge";
+    let mut huge = mam(app);
+    huge.manufacturer.text = "x".repeat(60 * 1024);
+    let mut big = Lifecycle::new(
+        ServiceType::OTConnector,
+        il(app),
+        huge,
+        DataSetWriterId::new(10).unwrap(),
+        DataSetWriterId::new(11).unwrap(),
+    )
+    .unwrap();
+    assert!(take(&mut c, &big.birth(MS)).is_empty());
+    assert!(c.apps().is_empty());
+    // within the bound it is taken
+    let mut limits = c.directory_limits();
+    limits.max_payload_bytes = 128 * 1024;
+    c.set_directory_limits(limits);
+    assert_eq!(take(&mut c, &big.birth(MS)).len(), 1);
+    assert!(c.apps()[0].mam.is_some());
+}
+
 #[test]
 fn subscriptions_deliver_the_matching_items() {
     let mut bus = Bus::new(provider());

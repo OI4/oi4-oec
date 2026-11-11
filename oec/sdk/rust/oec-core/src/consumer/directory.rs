@@ -3,6 +3,9 @@
 //! (REQ-TOP-017, SF-106) and by MAM answers.
 
 use std::collections::BTreeMap;
+use std::io;
+
+use serde_json::Value as Json;
 
 use super::received::{Payload, Received};
 use crate::il::IdentificationLink;
@@ -67,9 +70,62 @@ pub enum PresenceChange {
     },
 }
 
+/// Bounds of the directory of applications, so that a flood of (fake)
+/// applications on the bus cannot exhaust the memory of the consumer
+/// (C-113 RS-3).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct DirectoryLimits {
+    /// The most applications tracked (default 1000). A new application
+    /// beyond it replaces the one offline the longest; while all are
+    /// online, it is ignored (no presence change, no `Get MAM`).
+    pub max_apps: usize,
+    /// The largest MAM or Health of an application about itself that is
+    /// taken, in octets of its JSON Payload (default 16 KiB); a larger one
+    /// is ignored.
+    pub max_payload_bytes: usize,
+}
+
+impl Default for DirectoryLimits {
+    fn default() -> Self {
+        Self {
+            max_apps: 1000,
+            max_payload_bytes: 16 * 1024,
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub(super) struct Directory {
-    apps: BTreeMap<(ServiceType, String), AppInfo>,
+    apps: BTreeMap<(ServiceType, String), Entry>,
+    pub(super) limits: DirectoryLimits,
+    /// Counts the changes to offline: orders the offline applications.
+    clock: u64,
+}
+
+#[derive(Debug)]
+struct Entry {
+    info: AppInfo,
+    /// The [`Directory::clock`] when it went offline.
+    offline_since: u64,
+}
+
+/// Whether `v` serializes to at most `max` octets, without allocating it.
+fn fits(v: &Json, max: usize) -> bool {
+    struct Budget(usize);
+    impl io::Write for Budget {
+        fn write(&mut self, b: &[u8]) -> io::Result<usize> {
+            self.0 = self
+                .0
+                .checked_sub(b.len())
+                .ok_or_else(|| io::Error::other("too large"))?;
+            Ok(b.len())
+        }
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+    serde_json::to_writer(Budget(max), v).is_ok()
 }
 
 /// What a Health of an application about itself means.
@@ -89,7 +145,38 @@ fn signal(h: &Health) -> Signal {
 
 impl Directory {
     pub(super) fn apps(&self) -> Vec<AppInfo> {
-        self.apps.values().cloned().collect()
+        self.apps.values().map(|e| e.info.clone()).collect()
+    }
+
+    /// Room for one more application: the one offline the longest leaves
+    /// if the directory is full; `false` while all are online.
+    fn make_room(&mut self) -> bool {
+        if self.apps.len() < self.limits.max_apps {
+            return true;
+        }
+        let oldest = self
+            .apps
+            .iter()
+            .filter(|(_, e)| e.info.state != AppState::Online)
+            .min_by_key(|(_, e)| e.offline_since)
+            .map(|(k, _)| k.clone());
+        oldest.is_some_and(|k| self.apps.remove(&k).is_some())
+    }
+
+    fn insert(&mut self, key: (ServiceType, String), info: AppInfo) -> bool {
+        if !self.make_room() {
+            return false;
+        }
+        self.clock += 1;
+        let offline_since = self.clock;
+        self.apps.insert(
+            key,
+            Entry {
+                info,
+                offline_since,
+            },
+        );
+        true
     }
 
     /// Takes the items of a MAM or Health publication; returns the changes
@@ -108,7 +195,11 @@ impl Directory {
         let app = topic.app_id();
         let mut changes = Vec::new();
         let mut discover = None;
-        for item in items.iter().filter(|i| &i.data_set_writer_name == app) {
+        let budget = self.limits.max_payload_bytes;
+        for item in items
+            .iter()
+            .filter(|i| &i.data_set_writer_name == app && fits(&i.json, budget))
+        {
             let key = (st, app.encode());
             match &item.payload {
                 Payload::Mam(mam) => {
@@ -144,19 +235,16 @@ impl Directory {
         };
         match self.apps.get_mut(&key) {
             None => {
-                self.apps.insert(
-                    key,
-                    AppInfo {
-                        service_type: st,
-                        app: app.clone(),
-                        state: AppState::Online,
-                        mam: Some(mam.clone()),
-                        health: None,
-                    },
-                );
-                Some(online())
+                let info = AppInfo {
+                    service_type: st,
+                    app: app.clone(),
+                    state: AppState::Online,
+                    mam: Some(mam.clone()),
+                    health: None,
+                };
+                self.insert(key, info).then(online)
             }
-            Some(info) => {
+            Some(Entry { info, .. }) => {
                 let first_mam = info.mam.is_none();
                 info.mam = Some(mam.clone());
                 if birth {
@@ -187,16 +275,16 @@ impl Directory {
         };
         match self.apps.get_mut(&key) {
             None => {
-                self.apps.insert(
-                    key,
-                    AppInfo {
-                        service_type: st,
-                        app: app.clone(),
-                        state,
-                        mam: None,
-                        health: Some(h.clone()),
-                    },
-                );
+                let info = AppInfo {
+                    service_type: st,
+                    app: app.clone(),
+                    state,
+                    mam: None,
+                    health: Some(h.clone()),
+                };
+                if !self.insert(key, info) {
+                    return (None, false);
+                }
                 if state == AppState::Online {
                     let c = PresenceChange::Online {
                         service_type: st,
@@ -208,13 +296,20 @@ impl Directory {
                     (None, false)
                 }
             }
-            Some(info) => {
+            Some(Entry {
+                info,
+                offline_since,
+            }) => {
                 if info.state != AppState::Online {
                     // Offline until the next Birth (REQ-LIFE-013).
                     return (None, false);
                 }
                 info.health = Some(h.clone());
                 info.state = state;
+                if state != AppState::Online {
+                    self.clock += 1;
+                    *offline_since = self.clock;
+                }
                 let c = match state {
                     AppState::Online => None,
                     AppState::OfflineGraceful => Some(PresenceChange::OfflineGraceful {
