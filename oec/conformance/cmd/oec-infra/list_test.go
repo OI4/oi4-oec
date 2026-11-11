@@ -178,7 +178,7 @@ func TestExplain(t *testing.T) {
 			Fixture string `json:"fixture"`
 		} `json:"fixtures"`
 	}
-	if code != exitPass || json.Unmarshal([]byte(out), &tc) != nil || tc.ID != "T8-BUS-02" || tc.Level != 0 || len(tc.Requirements) != 8 || len(tc.Fixtures) == 0 {
+	if code != exitPass || json.Unmarshal([]byte(out), &tc) != nil || tc.ID != "T8-BUS-02" || tc.Level != 0 || len(tc.Requirements) != 9 || len(tc.Fixtures) == 0 {
 		t.Errorf("json: exit %d\n%s", code, out)
 	}
 

@@ -85,8 +85,9 @@ name with `-san` and use it as `-address`.
   `Oi4v2/#` and publishes `Pub`, `Get` and `Reply`. Mosquitto drops (and acknowledges) a denied PUBLISH. Limitation of
   the dev environment: Mosquitto cannot bind the AppId topic level to a user,
   and an application must read its own `Set/Config`, so every client can read
-  the `Set/Config` of the others – `oec-infra bus` warns on
-  REQ-RES-CONFIG-026 here. An application that sends `Set`, `Del` or `Call`
+  the `Set/Config` of the others and publish `Pub` and `Reply` under
+  another AppId – `oec-infra bus` warns on REQ-RES-CONFIG-026 and
+  REQ-GEN-002 (MG 9 RECOMMENDED, SF-119) here. An application that sends `Set`, `Del` or `Call`
   to others needs a `user` entry with these rights.
 
 The entrypoint copies the TLS material, the password file and the ACL from the
@@ -343,8 +344,8 @@ Same pattern as `interop.sh` (PKI if missing, broker up, tests, broker down;
 Since C-071 it also runs `go test ./cmd/oec-infra -run TestBusDevBroker`:
 `oec-infra bus` on 8883 (probe credentials, unprivileged client
 `oec-dev-app`) and 8884 (probe certificate, unprivileged client
-`oec-dev-cert`) – T8-BUS-01 passes, T8-BUS-02 warns REQ-RES-CONFIG-026 (see
-the ACL above), T8-BUS-03 is inconclusive without an OEC Registry. With
+`oec-dev-cert`) – T8-BUS-01 passes, T8-BUS-02 warns REQ-RES-CONFIG-026 and
+REQ-GEN-002 (see the ACL above), T8-BUS-03 is inconclusive without an OEC Registry. With
 `OEC_LIVE_REGISTRY=1` (C-090, needs the image `oi4/oec-registry` and
 `go run ./pki` of C-090 or later) the registry of the profile `registry`
 starts after the monitor run: `oec-infra bus` discovers it on

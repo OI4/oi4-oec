@@ -25,8 +25,9 @@ type busEnv struct {
 	dir, password, creds2 string
 }
 
-// restricted is the ACL of the unprivileged user app: Pub and Get only,
-// Set/Config neither subscribed nor delivered.
+// restricted is the ACL of the unprivileged user app: Get only (Pub and
+// Reply only under its own AppId, which it does not use here), Set/Config
+// neither subscribed nor delivered.
 func restricted(user, topic string, k mqtttest.Access) bool {
 	if user != "app" {
 		return true
@@ -36,7 +37,7 @@ func restricted(user, topic string, k mqtttest.Access) bool {
 		return k != mqtttest.Write
 	}
 	if k == mqtttest.Write {
-		return lv[3] == "Pub" || lv[3] == "Get"
+		return lv[3] == "Get"
 	}
 	return lv[3] != "Set" || lv[4] != "Config"
 }

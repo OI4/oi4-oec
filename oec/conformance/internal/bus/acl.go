@@ -17,23 +17,37 @@ import (
 // errLost marks a connection the broker closed during an exchange.
 var errLost = errors.New("the broker closed the connection")
 
-// aclProbe is one write request of the unprivileged client to the probe
+// aclProbe is one publication of the unprivileged client under the probe
 // AppId of D8.
 type aclProbe struct {
 	method, resource, filter string
 	reqs                     []string // besides REQ-GEN-001
+	// own: a publication only the participant with the AppId should make
+	// (Pub, Reply: REQ-GEN-002, SHOULD, SF-119) instead of a write request
+	// (REQ-GEN-001 and reqs, MUST).
+	own bool
 }
 
 var aclProbes = []aclProbe{
-	{"Set", "Config", "", []string{reqSetConfig}},
-	{"Set", "Data", "", []string{reqSetData}},
-	{"Set", "Metadata", "probe", []string{reqSetMeta}},
-	{"Set", "PublicationList", "", []string{reqSetPubList}},
-	{"Set", "ReferenceDesignation", "", []string{reqRefDes}},
-	{"Del", "ReferenceDesignation", "", []string{reqRefDes}},
-	{"Set", "SubscriptionList", "", []string{reqSubList}},
-	{"Del", "SubscriptionList", "", []string{reqSubList}},
-	{"Call", "NewDataSetWriterId", "", nil},
+	{"Set", "Config", "", []string{reqSetConfig}, false},
+	{"Set", "Data", "", []string{reqSetData}, false},
+	{"Set", "Metadata", "probe", []string{reqSetMeta}, false},
+	{"Set", "PublicationList", "", []string{reqSetPubList}, false},
+	{"Set", "ReferenceDesignation", "", []string{reqRefDes}, false},
+	{"Del", "ReferenceDesignation", "", []string{reqRefDes}, false},
+	{"Set", "SubscriptionList", "", []string{reqSubList}, false},
+	{"Del", "SubscriptionList", "", []string{reqSubList}, false},
+	{"Call", "NewDataSetWriterId", "", nil, false},
+	{"Pub", "Health", "", nil, true},
+	{"Reply", "NewDataSetWriterId", "", nil, true},
+}
+
+// verdictReqs are the requirements a probe is judged against.
+func (p aclProbe) verdictReqs() []string {
+	if p.own {
+		return []string{reqOwnAppID}
+	}
+	return append([]string{reqACL}, p.reqs...)
 }
 
 func (p aclProbe) name() string { return p.method + " " + p.resource }
@@ -108,7 +122,9 @@ func (s *seen) wait(ctx context.Context, d time.Duration, ids ...string) {
 // acl is T8-BUS-02: the unprivileged client publishes Set, Del and Call to
 // the probe AppId of D8, which D8 must not receive (REQ-GEN-001 and the
 // resource requirements), and must not read Set/Config (REQ-RES-CONFIG-026).
-// A positive control shows that D8 itself receives the same topics.
+// It also publishes Pub and Reply under the probe AppId, which D8 should not
+// receive (REQ-GEN-002, SHOULD: a warning). A positive control shows that D8
+// itself receives the same topics.
 func (r *runner) acl(ctx context.Context, main *mqttwire.Client) {
 	if r.c.Second == nil {
 		r.inconclusive(TACL, aclReqs, "no unprivileged client: --credentials-2 or --bus-storage-2 names one")
@@ -169,7 +185,7 @@ func (r *runner) acl(ctx context.Context, main *mqttwire.Client) {
 	for i, p := range aclProbes {
 		if u == nil {
 			if u, err = r.dial(ctx, *r.c.Second, "oec-infra-u-", nil); err != nil {
-				r.inconclusive(TACL, append([]string{reqACL}, p.reqs...), "the unprivileged client cannot reconnect: %v", err)
+				r.inconclusive(TACL, p.verdictReqs(), "the unprivileged client cannot reconnect: %v", err)
 				continue
 			}
 		}
@@ -210,11 +226,13 @@ func (r *runner) acl(ctx context.Context, main *mqttwire.Client) {
 		}
 	}
 	for i, p := range aclProbes {
-		reqs := append([]string{reqACL}, p.reqs...)
+		reqs := p.verdictReqs()
 		switch {
 		case !got.has(controls[i]):
 			r.inconclusive(TACL, reqs, "D8 does not receive its own %s on %s: the probe cannot observe it", p.name(), topics[i])
 		case ids[i] == "":
+		case got.has(ids[i]) && p.own:
+			r.warning(TACL, reqOwnAppID, topics[i], "the unprivileged client published %s under the AppId of D8 and the broker delivered it", p.name())
 		case got.has(ids[i]):
 			for _, req := range reqs {
 				r.violation(TACL, req, topics[i], "the unprivileged client published %s and the broker delivered it", p.name())

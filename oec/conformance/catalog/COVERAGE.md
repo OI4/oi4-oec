@@ -1,6 +1,6 @@
 # D7 catalog coverage
 
-Generated from `catalog/d7.yaml`, the requirements catalog of `oec/spec` (baseline `605fbb7`) and the indexes of the
+Generated from `catalog/d7.yaml`, the requirements catalog of `oec/spec` (baseline `980cde8`) and the indexes of the
 self-test fixtures (`testdata/sim/index.yaml`, `testdata/captures/index.yaml`) – do not edit; regenerate with
 `go test ./internal/explain -run TestCoverageReport -update` (the gate fails if this file is out of date).
 `oec-check list` and `oec-check explain` show the same data.
@@ -25,7 +25,7 @@ self-test fixtures (`testdata/sim/index.yaml`, `testdata/captures/index.yaml`) �
 | `d7-test` | 122 | 118 | 4 | 0 | 0 |
 | `schema` | 116 | 0 | 0 | 116 | 0 |
 | `d7-validate` | 157 | 0 | 0 | 157 | 0 |
-| none of these (D8, manual or other tools) | 143 | | | | |
+| none of these (D8, manual or other tools) | 144 | | | | |
 
 Fixtures: 60 sim, 29 capture; 15 positive; 89 of 89 reviewed.
 Tests with a negative fixture (fail, warn or info): 55 of 55; with a positive fixture: 55 of 55.
@@ -264,7 +264,7 @@ applicable). A negative fixture is one with fail, warn or info.
 
 # D8 catalog coverage
 
-Generated from `catalog/d8.yaml`, the requirements catalog of `oec/spec` (baseline `605fbb7`) and the indexes of the
+Generated from `catalog/d8.yaml`, the requirements catalog of `oec/spec` (baseline `980cde8`) and the indexes of the
 self-test fixtures (`testdata/images/index.yaml`, `testdata/bus/index.yaml`, `testdata/hosts/index.yaml`,
 `testdata/containers/index.yaml`, `testdata/run/index.yaml`) – generated with the D7 part above.
 `oec-infra list` and `oec-infra explain` show the same data.
@@ -288,10 +288,10 @@ self-test fixtures (`testdata/images/index.yaml`, `testdata/bus/index.yaml`, `te
 
 | Active requirements by verification kind | REQs | checked by a test | `manual` | not covered |
 |---|---:|---:|---:|---:|
-| `d8` | 52 | 51 | 1 | 0 |
+| `d8` | 53 | 52 | 1 | 0 |
 | none of these (D7, manual or other tools) | 389 | | | |
 
-Fixtures: 19 image, 30 bus, 69 host, 26 container, 20 run; 28 positive; 164 of 164 reviewed.
+Fixtures: 19 image, 31 bus, 69 host, 26 container, 20 run; 28 positive; 164 of 165 reviewed.
 Tests with a negative fixture (fail, warn or info): 17 of 17; with a positive fixture: 17 of 17.
 
 ## Tests
@@ -319,7 +319,7 @@ no requirement of the test is graded by level; they apply with their keyword (DE
 | T8-HST-03 | host | – | host-access, docker | implemented | REQ-CNT-011 REQ-CNT-024 | 7 | 0 | 4 | 5 | 2 |
 | T8-HST-04 | host | – | host-access | implemented | REQ-PLT-001 REQ-PLT-003 REQ-PLT-006 REQ-PLT-007 REQ-PLT-008 | 10 | 0 | 2 | 5 | 19 |
 | T8-BUS-01 | bus | – | – | implemented | REQ-MQTT-002 REQ-MQTT-006 REQ-MQTT-007 REQ-CNT-003 | 10 | 0 | 0 | 3 | 0 |
-| T8-BUS-02 | bus | – | credentials-2 | implemented | REQ-GEN-001 REQ-RES-CONFIG-020 REQ-RES-CONFIG-026 REQ-RES-DATA-010 REQ-RES-META-005 REQ-RES-PUBLIST-023 REQ-RES-REFDES-008 REQ-RES-SUBLIST-012 | 3 | 1 | 1 | 3 | 0 |
+| T8-BUS-02 | bus | – | credentials-2 | implemented | REQ-GEN-001 REQ-GEN-002 REQ-RES-CONFIG-020 REQ-RES-CONFIG-026 REQ-RES-DATA-010 REQ-RES-META-005 REQ-RES-PUBLIST-023 REQ-RES-REFDES-008 REQ-RES-SUBLIST-012 | 3 | 2 | 1 | 3 | 0 |
 | T8-BUS-03 | bus | – | – | implemented | REQ-REG-001 REQ-REG-002 | 7 | 0 | 1 | 3 | 0 |
 
 ## Manual requirements
@@ -362,6 +362,7 @@ no requirement of the test is graded by level; they apply with their keyword (DE
 | REQ-CNT-026 | MUST | d8 | T8-IMG-03 | 3 |
 | REQ-CNT-027 | SHOULD | d8 | T8-IMG-03 | 3 |
 | REQ-GEN-001 | MUST | d8 | T8-BUS-02 | 4 |
+| REQ-GEN-002 | SHOULD | d8 | T8-BUS-02 | 2 |
 | REQ-LIC-002 | MUST | d8, manual | T8-IMG-03 | 5 |
 | REQ-MQTT-002 | MUST | d8 | T8-BUS-01 | 1 |
 | REQ-MQTT-003 | MUST | d8 | T8-HST-01 | 4 |

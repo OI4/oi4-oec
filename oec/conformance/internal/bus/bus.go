@@ -101,6 +101,7 @@ const (
 	reqCert       = "REQ-MQTT-007"
 	reqPacket     = "REQ-CNT-003"
 	reqACL        = "REQ-GEN-001"
+	reqOwnAppID   = "REQ-GEN-002"
 	reqSetConfig  = "REQ-RES-CONFIG-020"
 	reqReadConfig = "REQ-RES-CONFIG-026"
 	reqSetData    = "REQ-RES-DATA-010"
@@ -115,7 +116,7 @@ const (
 // Requirements of the tests (catalog d8.yaml).
 var (
 	protocolReqs = []string{reqMQTT311, reqTLSOnly, reqCert, reqPacket}
-	aclReqs      = []string{reqACL, reqSetConfig, reqReadConfig, reqSetData, reqSetMeta, reqSetPubList, reqRefDes, reqSubList}
+	aclReqs      = []string{reqACL, reqOwnAppID, reqSetConfig, reqReadConfig, reqSetData, reqSetMeta, reqSetPubList, reqRefDes, reqSubList}
 	registryReqs = []string{reqCollect, reqAnswer}
 )
 

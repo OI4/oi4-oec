@@ -22,8 +22,9 @@ import (
 // unprivileged client with the credentials of the sample storage
 // oec-dev-app. Port 8884 (client certificate required): the probe presents
 // its client certificate, the unprivileged client is the sample storage
-// oec-dev-cert. The dev ACL cannot bind the AppId level to a user and the
-// applications read their own Set/Config, so REQ-RES-CONFIG-026 warns.
+// oec-dev-cert. The dev ACL cannot bind the AppId level to a user: the
+// applications read their own Set/Config and publish Pub/Reply under any
+// AppId, so REQ-RES-CONFIG-026 and REQ-GEN-002 warn.
 // Without an OEC Registry T8-BUS-03 skips (C-071); with the registry of the
 // compose profile registry (live.sh with OEC_LIVE_REGISTRY=1, C-090) the
 // run on 8883 discovers it and T8-BUS-03 passes.

@@ -56,8 +56,9 @@ func TestCatalogStatus(t *testing.T) {
 }
 
 // acl is the ACL of a scenario broker: the unprivileged user may publish
-// only Pub and Get and may not read Set/Config; open lists the methods it
-// may write in addition, readConfig allows subscribe (s) and read (r) of
+// only Get (and Pub and Reply under its own AppId, which no probe uses) and
+// may not read Set/Config; open lists the methods it may write in addition
+// under any AppId, readConfig allows subscribe (s) and read (r) of
 // Set/Config.
 type acl struct {
 	open       []string
@@ -76,7 +77,7 @@ func (a acl) allow(user, topic string, k mqtttest.Access) bool {
 	}
 	switch k {
 	case mqtttest.Write:
-		return method == "Pub" || method == "Get" || slices.Contains(a.open, method)
+		return method == "Get" || slices.Contains(a.open, method)
 	case mqtttest.Subscribe:
 		return !(method == "Set" && resource == "Config") || a.subscribe
 	default:
@@ -144,6 +145,8 @@ func scenario(t *testing.T, fault string) Config {
 			o.ACL = acl{open: []string{"Call"}}.allow
 		case "del-open":
 			o.ACL = acl{open: []string{"Del"}}.allow
+		case "foreign-pub":
+			o.ACL = acl{open: []string{"Pub", "Reply"}}.allow
 		case "config-readable":
 			o.ACL = acl{subscribe: true, readConfig: true}.allow
 		case "read-filtered":

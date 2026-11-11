@@ -180,8 +180,9 @@ scenarios:
       T8-BUS-02: {outcome: fail, reqs: [REQ-GEN-001, REQ-RES-CONFIG-020, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]}
     notes: >-
       No ACL: every Set, Del and Call of the unprivileged client is
-      delivered (all MUST requirements fail) and it receives Set/Config
-      (REQ-RES-CONFIG-026 warns, better than the test outcome).
+      delivered (all MUST requirements fail), it receives Set/Config
+      (REQ-RES-CONFIG-026 warns) and its Pub and Reply under the probe AppId
+      arrive (REQ-GEN-002 warns; both better than the test outcome).
   - fault: T8-BUS-02/call-open
     status: reviewed
     positive: false
@@ -201,6 +202,17 @@ scenarios:
       The ACL protects Set and Call but not Del: Del ReferenceDesignation
       and Del SubscriptionList arrive. REQ-GEN-001, REQ-RES-REFDES-008 and
       REQ-RES-SUBLIST-012 fail.
+  - fault: T8-BUS-02/foreign-pub
+    status: draft
+    positive: false
+    tests: [T8-BUS-02]
+    expect:
+      T8-BUS-02: {outcome: warn, reqs: [REQ-GEN-002]}
+    notes: >-
+      Write access is restricted, but the unprivileged client may publish
+      Pub and Reply under any AppId (the oec/dev ACL, SF-119): its Pub
+      Health and Reply NewDataSetWriterId under the probe AppId arrive.
+      REQ-GEN-002 (SHOULD) warns.
   - fault: T8-BUS-02/config-readable
     status: reviewed
     positive: false
@@ -215,7 +227,7 @@ scenarios:
     positive: false
     tests: [T8-BUS-02]
     expect:
-      T8-BUS-02: {outcome: skip, reqs: [REQ-GEN-001, REQ-RES-CONFIG-020, REQ-RES-CONFIG-026, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]}
+      T8-BUS-02: {outcome: skip, reqs: [REQ-GEN-001, REQ-GEN-002, REQ-RES-CONFIG-020, REQ-RES-CONFIG-026, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]}
     notes: >-
       The conforming broker, but the run names no unprivileged client
       (--credentials-2): T8-BUS-02 is skipped, inconclusive for every MUST

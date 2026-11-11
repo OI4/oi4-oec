@@ -22,7 +22,7 @@
 #         host-access   – D8 runs on the platform host (or a probe container)
 #         credentials-2 – a second, unprivileged set of bus credentials
 tool: oec-infra
-baseline: "605fbb7"
+baseline: "980cde8"
 tests:
   # --- image: offline -----------------------------------------------------
   - id: T8-IMG-01
@@ -180,7 +180,7 @@ tests:
     title: Write access and Actions restricted by ACL
     mode: bus
     needs: [credentials-2]
-    reqs: [REQ-GEN-001, REQ-RES-CONFIG-020, REQ-RES-CONFIG-026, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]
+    reqs: [REQ-GEN-001, REQ-GEN-002, REQ-RES-CONFIG-020, REQ-RES-CONFIG-026, REQ-RES-DATA-010, REQ-RES-META-005, REQ-RES-PUBLIST-023, REQ-RES-REFDES-008, REQ-RES-SUBLIST-012]
     status: implemented
     notes: >-
       As built (C-071): the unprivileged client (--credentials-2 or
@@ -190,8 +190,10 @@ tests:
       of D8; the privileged D8 client must not receive them, while a positive
       control shows that D8 receives its own requests on the same topics. The
       unprivileged client must not read Set/Config (a refused subscription or
-      no delivery; SHOULD, warn). Both clients with the same identity are
-      inconclusive.
+      no delivery; SHOULD, warn). Since C-113 (SF-119) it also publishes Pub
+      Health and Reply NewDataSetWriterId under the probe AppId; D8 should
+      not receive them (REQ-GEN-002, SHOULD, warn). Both clients with the
+      same identity are inconclusive.
   - id: T8-BUS-03
     title: OEC Registry
     mode: bus

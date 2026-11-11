@@ -234,7 +234,7 @@ func TestCoverageReport(t *testing.T) {
 	for _, s := range [][]byte{
 		[]byte("| `d7-monitor` |"), []byte("| `d7-test` |"), []byte("| T7-ADR-01 | test | 1 | peer | implemented |"),
 		[]byte("\n# D8 catalog coverage\n"), []byte("| `d8` |"), []byte("| T8-HST-03 | host | – | host-access, docker | implemented |"),
-		[]byte("| mode `image` | 4 |"), []byte("| needs `docker` | 7 |"), []byte("Fixtures: 19 image, 30 bus, 69 host, 26 container, 20 run;"),
+		[]byte("| mode `image` | 4 |"), []byte("| needs `docker` | 7 |"), []byte("Fixtures: 19 image, 31 bus, 69 host, 26 container, 20 run;"),
 		[]byte("| REQ-CMP-012 |"),
 	} {
 		if !bytes.Contains(got, s) {
