@@ -478,6 +478,10 @@ static size_t counted_page(oecm_state *s, const oecm_answer *a, bool paginated, 
     return b.len;
 }
 
+uint32_t oecm_page_count(uint32_t total, uint32_t per_page) {
+    return total == 0 ? 1u : total / per_page + (total % per_page != 0 ? 1u : 0u);
+}
+
 oecm_err oecm_answer_publish(oecm_state *s, const oecm_answer *a) {
     oecm_buf b;
     oecm_buf_init(&b, s->tx, s->tx_cap);
@@ -513,7 +517,7 @@ oecm_err oecm_answer_publish(oecm_state *s, const oecm_answer *a) {
             paginated = true;
             per_page = largest_fit(sizes, n, n, limit, paged);
             page_from = 1;
-            page_to = (uint32_t)((n + per_page - 1u) / per_page);
+            page_to = oecm_page_count((uint32_t)n, (uint32_t)per_page);
         }
     } else {
         paginated = true;
@@ -524,7 +528,7 @@ oecm_err oecm_answer_publish(oecm_state *s, const oecm_answer *a) {
                        : largest_fit(sizes, n, bounded, limit, paged);
         if (a->page == 0) {
             page_from = 1;
-            page_to = n == 0 ? 1u : (uint32_t)((n + per_page - 1u) / per_page);
+            page_to = oecm_page_count((uint32_t)n, (uint32_t)per_page);
         } else {
             page_from = page_to = a->page;
         }

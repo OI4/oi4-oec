@@ -70,7 +70,7 @@ static const oecm_cfg_object objects[] = {
     {.key = "Mode", .name = "Mode", .type = OECM_CFG_STRING, .value = mode, .cap = sizeof mode,
      .values = modes, .value_count = 2},
     {.key = "Token", .name = "Token", .type = OECM_CFG_STRING, .value = secret,
-     .cap = sizeof secret, .sensitive = true},
+     .cap = sizeof secret, .default_value = "s3cret", .sensitive = true},
 };
 
 static const oecm_cfg_group groups[] = {
@@ -346,6 +346,31 @@ static void test_get_pagination(void) {
     TEST_ASSERT_TRUE(contains(p, "\"HasNext\":true"));
 }
 
+/* C-113 RM-2: the page count must not wrap with a PerPage near 2^32 (on
+ * the ESP32 size_t has 32 bits). */
+static void test_page_count_does_not_wrap(void) {
+    TEST_ASSERT_EQUAL_UINT32(1, oecm_page_count(0, 7));
+    TEST_ASSERT_EQUAL_UINT32(5, oecm_page_count(5, 1));
+    TEST_ASSERT_EQUAL_UINT32(3, oecm_page_count(5, 2));
+    TEST_ASSERT_EQUAL_UINT32(1, oecm_page_count(5, 5));
+    TEST_ASSERT_EQUAL_UINT32(1, oecm_page_count(5, UINT32_MAX));
+    TEST_ASSERT_EQUAL_UINT32(1, oecm_page_count(1, UINT32_MAX - 1u));
+    TEST_ASSERT_EQUAL_UINT32(1, oecm_page_count(UINT32_MAX, UINT32_MAX));
+    TEST_ASSERT_EQUAL_UINT32(UINT32_MAX, oecm_page_count(UINT32_MAX, 1));
+}
+
+static void test_get_pagination_largest_per_page_is_one_page(void) {
+    start_connected();
+    size_t at = send(PRE "/Get/PublicationList/" APP,
+                     request("[{\"DataSetWriterId\":1,\"Payload\":{\"PerPage\":4294967295,"
+                             "\"Page\":0}}]"));
+    TEST_ASSERT_EQUAL_size_t(at + 1, fp.count);
+    const char *p = ev(at)->payload;
+    TEST_ASSERT_TRUE(contains(p, "\"PerPage\":4294967295,\"Page\":1,\"HasNext\":false"));
+    TEST_ASSERT_TRUE(contains(p, "\"Resource\":\"MAM\""));
+    TEST_ASSERT_TRUE(contains(p, "\"Filter\":\"Temperature\""));
+}
+
 static void test_requests_that_are_ignored(void) {
     start_connected();
     size_t at = fp.count;
@@ -557,6 +582,25 @@ static void test_set_config_unknown_context(void) {
     TEST_ASSERT_TRUE(contains(status(), "BadNotFound"));
 }
 
+/* C-113, analog of RS-1: the DefaultValue of a sensitive object is
+ * compared as published (the mask), never with the clear text, so the
+ * Status event is no oracle for it (REQ-RES-CONFIG-023/024). */
+static void test_set_config_sensitive_default_is_no_oracle(void) {
+    start_connected();
+    const char *const sent[] = {"", ",\"DefaultValue\":\"********\"",
+                                ",\"DefaultValue\":\"s3cret\"", ",\"DefaultValue\":\"guess\""};
+    const char *const want[] = {"\"Good\"", "\"Good\"", "BadNotWritable", "BadNotWritable"};
+    for (size_t i = 0; i < 4; i++) {
+        char extra[128], g[2048];
+        snprintf(extra, sizeof extra, "%s,\"Sensitive\":true", sent[i]);
+        snprintf(g, sizeof g, "%s,%s", full_config("10", "Room", "Fast"),
+                 obj("Token", "String", "********", extra));
+        send(PRE "/Set/Config/" APP "/Sensor", set_config(g));
+        TEST_ASSERT_TRUE_MESSAGE(contains(status(), want[i]), sent[i]);
+    }
+    TEST_ASSERT_EQUAL_STRING("abc", secret);
+}
+
 /* --- Set lists ----------------------------------------------------------- */
 
 static const char *publist_entry(const char *mode_) {
@@ -630,6 +674,8 @@ int main(void) {
     RUN_TEST(test_get_metadata_by_tag);
     RUN_TEST(test_get_config_and_publication_list);
     RUN_TEST(test_get_pagination);
+    RUN_TEST(test_page_count_does_not_wrap);
+    RUN_TEST(test_get_pagination_largest_per_page_is_one_page);
     RUN_TEST(test_requests_that_are_ignored);
     RUN_TEST(test_set_data_writes_and_answers);
     RUN_TEST(test_set_data_rejects_whole_set);
@@ -641,6 +687,7 @@ int main(void) {
     RUN_TEST(test_set_config_writes_valid_values);
     RUN_TEST(test_set_config_violations);
     RUN_TEST(test_set_config_unknown_context);
+    RUN_TEST(test_set_config_sensitive_default_is_no_oracle);
     RUN_TEST(test_set_publication_list);
     RUN_TEST(test_set_subscription_list);
     return UNITY_END();

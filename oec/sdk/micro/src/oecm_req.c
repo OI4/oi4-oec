@@ -740,9 +740,11 @@ static const oecm_status *object_check(oecm_state *s, const oecm_cfg_object *o, 
         else if (oecm_json_streq(k, "Unit"))
             same = opt_str_eq(j, o->unit);
         else if (oecm_json_streq(k, "DefaultValue"))
-            same = opt_str_eq(j, o->default_value) ||
-                   (o->sensitive && oecm_json_streq(j, MASK) && o->default_value &&
-                    o->default_value[0] != '\0');
+            /* a sensitive one as published, never in clear text: the
+             * Status event is no oracle for it (C-113, RS-1) */
+            same = o->sensitive && o->default_value && o->default_value[0] != '\0'
+                       ? oecm_json_streq(j, MASK)
+                       : opt_str_eq(j, o->default_value);
         else if (oecm_json_streq(k, "Mandatory"))
             same = flag_eq(j, o->mandatory);
         else if (oecm_json_streq(k, "Sensitive"))

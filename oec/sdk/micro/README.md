@@ -94,7 +94,9 @@ buffer, Type, Validation Length/Min/Max/Values, mandatory, sensitive) in
   PaginationRequest;
 - `Set Data` (writable DataSets, every field), `Set Config` (the whole `Set`
   is validated before any buffer is written; sensitive values are published
-  masked), `Set PublicationList`, `Set`/`Del SubscriptionList`, each answered
+  masked, and a sensitive `DefaultValue` sent back is compared with the mask,
+  never with the clear text, so the Status event is no oracle for it),
+  `Set PublicationList`, `Set`/`Del SubscriptionList`, each answered
   with a Status event `Pub/Event/<AppId>/Status/Good|Bad`;
 - after an accepted `Set` the core calls `on_data`/`on_config`; the
   application calls `oecm_data_changed` when it changed a value itself;
@@ -390,7 +392,10 @@ the same network as the board (`<ip>` = its LAN address):
    Without the proxy and a restart hook the connection and restart tests
    are skipped (the C-096 run of the QEMU firmware on `oec/dev`: 38 pass,
    0 fail, 17 skip). For them, point `uri` at D7's `--proxy-listen` address
-   (with `--proxy-name <ip>`) and give `--stop-cmd`/`--start-cmd` scripts
+   (with `--proxy-name <ip>`); the board logs in with its own `user` and
+   `password` – the proxy relays it without D7's client certificate
+   (C-113 RT-1), and a non-loopback `--proxy-listen` prints a warning, so
+   prefer loopback plus a forwarder as below – and give `--stop-cmd`/`--start-cmd` scripts
    that send `stop` over the serial port and reset the board
    (`python -m esptool -p <port> run`). Only one process can hold the
    serial port: the 2026-11-28 run kept it open in a small serial daemon

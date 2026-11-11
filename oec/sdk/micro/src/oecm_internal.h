@@ -318,6 +318,10 @@ typedef struct oecm_answer {
 } oecm_answer;
 /* Publishes the answer as one or more NetworkMessages (MG 8.2.3). */
 oecm_err oecm_answer_publish(oecm_state *s, const oecm_answer *a);
+/* The number of pages of total resource DataSetMessages with at most
+ * per_page > 0 each, at least 1 (REQ-PAG-002/004); in uint32_t, the width
+ * of PerPage and of the size_t of the ESP32. */
+uint32_t oecm_page_count(uint32_t total, uint32_t per_page);
 
 typedef struct oecm_pub_entry {
     const char *resource; /* "MAM", "Event", "Config", … */
