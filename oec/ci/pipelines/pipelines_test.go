@@ -154,6 +154,46 @@ func TestVersions(t *testing.T) {
 	}
 }
 
+// TestNoPipeToShell (C-113 RT-3): no script of oec/ci pipes a download into
+// a shell; a downloaded installer is verified against a SHA-256 of
+// versions.sh before it runs. The run steps are checked by gha.Check.
+func TestNoPipeToShell(t *testing.T) {
+	scripts, err := filepath.Glob(filepath.Join(oec, "ci/*.sh"))
+	if err != nil || len(scripts) < 10 {
+		t.Fatalf("scripts of oec/ci: %v %v", scripts, err)
+	}
+	for _, p := range scripts {
+		if gha.PipesToShell(read(t, p)) {
+			t.Errorf("%s pipes a download into a shell; download, check the SHA-256 of versions.sh, then run it", p)
+		}
+	}
+}
+
+// TestRustup (C-113 RT-3): setup-tools.sh installs a missing rustup from
+// rustup-init of the pinned rustup version, checked against the SHA-256 of
+// versions.sh for the platform of every hosted runner.
+func TestRustup(t *testing.T) {
+	versions := filepath.Join(oec, "ci/versions.sh")
+	if !regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+$`).MatchString(shVar(t, versions, "rustup_version")) {
+		t.Error("versions.sh rustup_version is not a release version")
+	}
+	setup := read(t, filepath.Join(oec, "ci/setup-tools.sh"))
+	for _, s := range []string{"https://static.rust-lang.org/rustup/archive/$rustup_version/", "--profile minimal --default-toolchain none"} {
+		if !strings.Contains(setup, s) {
+			t.Errorf("setup-tools.sh does not contain %q", s)
+		}
+	}
+	for _, r := range Runners {
+		name := "rustup_init_sha256_" + r.OS + "_" + r.Arch
+		if !regexp.MustCompile(`^[0-9a-f]{64}$`).MatchString(shVar(t, versions, name)) {
+			t.Errorf("versions.sh %s is not a SHA-256", name)
+		}
+		if !strings.Contains(setup, `"$`+name+`"`) {
+			t.Errorf("setup-tools.sh does not check %s (runner %s)", name, r.Label)
+		}
+	}
+}
+
 // TestScripts: every oec/… path the workflows run or read exists; the
 // scripts are executable.
 func TestScripts(t *testing.T) {

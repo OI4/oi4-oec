@@ -178,6 +178,9 @@ func Check(w Workflow, p Policy) []error {
 				if len(s.With) > 0 {
 					bad("%s: with on a run step", where)
 				}
+				if PipesToShell(s.Run) {
+					bad("%s: run pipes a download into a shell; download, check its SHA-256, then run it", where)
+				}
 			default:
 				checkAction(where, s.Uses, p.Actions, bad)
 				checkValues(where+" with", s.With, func(key string, use SecretUse) bool {
@@ -233,3 +236,11 @@ func checkExpr(where, v string, bad func(string, ...any)) {
 		bad("%s: unterminated expression", where)
 	}
 }
+
+// pipeToShellRe is a pipe (not ||) into a shell, also across a line break,
+// through sudo or env, or by path (C-113 RT-3).
+var pipeToShellRe = regexp.MustCompile(`(?:^|[^|])\|[\s\\]*(?:sudo\s+(?:-\S+\s+)*)?(?:\S*/)?(?:env\s+)?(?:\S*/)?(?:ba|da|k|z)?sh(?:\s|$|[;&|)])`)
+
+// PipesToShell reports whether script pipes into a shell, as in
+// curl … | sh: the downloaded code runs without an integrity check.
+func PipesToShell(script string) bool { return pipeToShellRe.MatchString(script) }

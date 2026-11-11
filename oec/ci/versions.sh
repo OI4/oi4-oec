@@ -5,6 +5,17 @@
 # the rust-version of every Cargo package and the guideline ref of the
 # workflows; the workflows key their tool cache on this file.
 rust_version=1.89.0
+# rustup of setup-tools.sh where the runner has none (C-113 RT-3):
+# rustup-init of this rustup release with the SHA-256 of
+# static.rust-lang.org/rustup/archive/<version>/<target>/rustup-init[.exe].sha256
+# for the platform of every hosted runner (pipelines.Runners).
+rustup_version=1.29.3
+rustup_init_sha256_linux_amd64=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55
+rustup_init_sha256_linux_arm64=9f608c142e0e38a78957d0661ba1dfaf0b6fb37184cfaa4b9a0aa57af6184282
+rustup_init_sha256_darwin_arm64=63752a1919a3a4793173ec70f8f212621a7ce38ba6a246095984482f4de20f9f
+rustup_init_sha256_darwin_amd64=bc107f1fb0228de7fa32413c89c1b305cea9cd256e94b01150cd054128145429
+rustup_init_sha256_windows_amd64=38027d51d69a5d05493627a0634dbea52d6cd793c8f072d2373d3f4163eec7db
+rustup_init_sha256_windows_arm64=407e0d72f81d26a01f9d032b8317908cbb2917ba22765474b682b41390792ad9
 cbindgen_version=0.29.4
 cargo_deny_version=0.20.2
 actionlint_version=1.7.12

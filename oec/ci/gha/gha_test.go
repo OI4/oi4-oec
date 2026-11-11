@@ -359,6 +359,9 @@ func TestCheckRejects(t *testing.T) {
 			w.Jobs[0].Needs = []string{"later"}
 		}, "needs later"},
 		"needs expression": {func(w *Workflow) { w.Jobs[0].Steps[2].Env = []KV{{"X", "${{ needs.a.result }}"}} }, "expression uses needs"},
+		"pipe to shell": {func(w *Workflow) {
+			w.Jobs[0].Steps[2].Run = "curl -sSf https://sh.example.org |\n  sh -s -- -y"
+		}, "pipes a download into a shell"},
 	}
 	for name, c := range cases {
 		w := sample()
@@ -372,6 +375,31 @@ func TestCheckRejects(t *testing.T) {
 		}
 		if !found {
 			t.Errorf("%s: want an error with %q, got %v", name, c.want, errs)
+		}
+	}
+}
+
+// TestPipesToShell (C-113 RT-3): a download piped into a shell runs code
+// without an integrity check.
+func TestPipesToShell(t *testing.T) {
+	for s, want := range map[string]bool{
+		"curl -sSf https://sh.rustup.rs | sh":             true,
+		"curl -sSf https://x.example |sh -s -- -y":        true,
+		"curl -sSf https://x.example |\n\tsh -s -- -y":    true,
+		"curl -sSf https://x.example | \\\n  bash":        true,
+		"wget -qO- https://x.example | sudo -E bash":      true,
+		"curl -fsSL https://x.example | /bin/sh":          true,
+		"curl -fsSL https://x.example | zsh":              true,
+		"a | b\ncurl x.example | dash -s":                 true,
+		"sha256sum f | cut -d' ' -f1":                     false,
+		"shasum -a 256 f | cut -d' ' -f1":                 false,
+		"x | shasum -a 256":                               false,
+		"command -v rustup || sh ./install.sh":            false,
+		"sh -c 'curl -fsS http://127.0.0.1/api | jq .'":   false,
+		"oec/ci/setup-tools.sh --toolchain\noec/check.sh": false,
+	} {
+		if got := PipesToShell(s); got != want {
+			t.Errorf("PipesToShell(%q) = %v, want %v", s, got, want)
 		}
 	}
 }

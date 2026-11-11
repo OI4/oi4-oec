@@ -16,10 +16,10 @@ anything: the workflows become active when the repository is pushed to GitHub
 | `pipelines/` | the pinned actions, the hosted runners and the workflows; tests against the repository (policy, generated files, tool pins, scripts, runners) |
 | `cmd/pack/` | deterministic `.tar.gz`/`.zip` of a directory for `release.sh` (sorted entries, fixed modes and owner, one mtime, no host fields) |
 | `cmd/cigen/` | renders the workflows into `../../.github/workflows`; `-check` fails if a file is outdated or not generated (gate step 11) |
-| `versions.sh` | the pins: Rust toolchain, cbindgen, cargo-deny, actionlint, govulncheck, the guideline branch, the Ubuntu image of `linux.sh`; for `micro.yml` the Espressif ESP-IDF image (by digest), `arduino-cli` with the SHA-256 of its archives, the Arduino-ESP32 cores and the M5Stack libraries |
+| `versions.sh` | the pins: Rust toolchain, rustup (`rustup-init` with its SHA-256 per runner platform), cbindgen, cargo-deny, actionlint, govulncheck, the guideline branch, the Ubuntu image of `linux.sh`; for `micro.yml` the Espressif ESP-IDF image (by digest), `arduino-cli` with the SHA-256 of its archives, the Arduino-ESP32 cores and the M5Stack libraries |
 | `disk.sh` | frees disk space on a GitHub-hosted Linux runner (removes the preinstalled Android SDK, .NET, Haskell, Swift and CodeQL); nothing elsewhere (macOS, local, `linux.sh` container) |
 | `packages.sh` | the system packages on Debian/Ubuntu (apt): build tools, clang with `libclang-rt-dev` (sanitizer runtime), LLVM, CMake, GCC 14; `--go` the Go of the distribution (`linux.sh`), `--armv7` the ARMv7 cross toolchain and `qemu-user` (`sdk-armv7.sh`); nothing on macOS |
-| `setup-tools.sh` | installs the toolchain and tools of `versions.sh` (rustup; `cargo install --locked` into `~/.oec-tools`); `--toolchain` only the Rust toolchain (`sdk.yml`, `micro.yml`); `GITHUB_PATH` entries as Windows paths on Windows |
+| `setup-tools.sh` | installs the toolchain and tools of `versions.sh` (rustup; if the runner has none, `rustup-init` of `rustup_version` from `static.rust-lang.org`, SHA-256 checked before it runs, unknown platforms fail; `cargo install --locked` into `~/.oec-tools`); `--toolchain` only the Rust toolchain (`sdk.yml`, `micro.yml`); `GITHUB_PATH` entries as Windows paths on Windows |
 | `fetch.sh` | `cargo fetch --locked` for every `Cargo.lock` under `oec/` (the gate builds `--offline --locked`) |
 | `conformance.sh` | gofmt, vet and tests of `oec/conformance` (D7/D8), as gate step 4 |
 | `binaries.sh` | cross-builds `oec-check` and `oec-infra` for windows/linux/darwin × amd64/arm64 with `SHA256SUMS` (reproducible: `CGO_ENABLED=0`, `-trimpath`, `-buildvcs=false`, no build id); `VERSION` (default `dev`) is the version they report (`-X main.version`) |
@@ -79,7 +79,11 @@ endings everywhere (`.gitattributes`).
   anywhere but in the `env` of a run step of a job in the environment
   `release`; or checks out with persisted credentials;
 - gives a job an environment while the workflow runs on pull requests, or
-  has an `if:` condition that reads a context an attacker controls.
+  has an `if:` condition that reads a context an attacker controls;
+- pipes a download into a shell in a `run` (`curl … | sh`, also `bash`,
+  `sudo`, by path or across a line break; `gha.PipesToShell`, C-113 RT-3).
+  `TestNoPipeToShell` applies the same rule to the scripts `oec/ci/*.sh`: a
+  downloaded program is checked against a SHA-256 of `versions.sh` first.
 
 The triggers `pull_request_target` and `workflow_run` and self-hosted runners
 cannot be expressed in the model.
@@ -330,6 +334,14 @@ commit such a file. On macOS:
   govulncheck must be release versions); the tests compare cbindgen with
   `sdk/check.sh` and the Rust toolchain with the `rust-version` of every
   Cargo package; the cache key of `gate.yml` changes with the file.
+- **rustup:** `rustup_version` is the current stable release
+  (`curl -sSf https://static.rust-lang.org/rustup/release-stable.toml`); the
+  `rustup_init_sha256_<os>_<arch>` of every runner platform are the
+  `rustup-init[.exe].sha256` files of
+  `https://static.rust-lang.org/rustup/archive/<version>/<target>/`
+  (`x86_64`/`aarch64` `-unknown-linux-gnu`, `-apple-darwin`,
+  `-pc-windows-msvc`), cross-checked against the downloaded binaries
+  (`TestRustup` requires one per `pipelines.Runners`).
 - **Go:** the workflows read the Go version from `go.mod`
   (`go-version-file`), `GOTOOLCHAIN=auto` fetches the `toolchain` of each
   module.
