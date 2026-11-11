@@ -2,11 +2,12 @@
 # security and glossaries (MG 2, MG 3, MG A4, RIG 3, RIG A1; ADR-0018). Most
 # items of these chapters restate requirements detailed in other areas or are
 # descriptive; they are listed in coverage/informative.yaml with the area that
-# covers them. Only the access restriction of MG 3 (with the MG 9.2 box for
-# Action calls, SF-093) has a requirement here.
+# covers them. Only the access restrictions of MG 3 have requirements here:
+# write access and Action calls (with the MG 9.2 box, SF-093) and the
+# binding of Pub/Reply to the own AppId (with the MG 9 box, SF-119).
 # Drafted in C-030.
 area: GEN
-baseline: "605fbb7"
+baseline: "980cde8"
 requirements:
   - id: REQ-GEN-001
     title: Write access and Action calls restricted to authorized participants
@@ -32,3 +33,29 @@ requirements:
       For Action calls MG 9.2 (Common Services) has the corresponding
       REQUIRED box since SF-093 was resolved. D8 checks that a client without
       authorization cannot publish to Set, Del and Call topics.
+  - id: REQ-GEN-002
+    title: Pub and Reply under an AppId restricted to that participant
+    statement: >-
+      The operator of the Message Bus should restrict the publications with
+      the methods Pub and Reply under the topics of an AppId to the
+      communication participant identified by that AppId, e.g. via an ACL of
+      the broker that binds the user name or the client certificate of the
+      participant to its AppId.
+    keyword: SHOULD
+    domain: platform
+    applies_to: [broker, platform]
+    refs: [MG 3, MG 9, SF-119]
+    quotes:
+      - ref: MG 3
+        text: The publications with the methods `Pub` and `Reply` under the topics of an `AppId` should be restricted to the communication participant identified by that `AppId`, e.g. via an ACL of the MQTT broker that binds the user name or the client certificate of the participant to its `AppId` (9 Message Bus Communication).
+      - ref: MG 9
+        text: The operator should restrict the publications with the methods `Pub` and `Reply` under the topics of an `AppId` (`Oi4v2/<ServiceType>/<AppId>/Pub/…` and `Oi4v2/<ServiceType>/<AppId>/Reply/…`) to the communication participant identified by that `AppId`, e.g. via an ACL of the MQTT broker that binds the user name or the client certificate of the participant to its `AppId`.
+    verification: [d8]
+    inventory: [MG-3-948bc0f9, MG-9-b9947352]
+    status: draft
+    notes: >-
+      Found in the red team exercise of C-113 (SF-119) and decided as SHOULD
+      by the PO (C-113 D-1): before the application starts, the platform
+      knows its container name, not its full AppId. D8 (T8-BUS-02) checks
+      that a client cannot publish Pub and Reply under the AppId of another
+      participant and warns if it can (no violation).

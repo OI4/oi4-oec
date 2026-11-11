@@ -12,7 +12,7 @@ Separate versions:
 
 ## 0.1.0 – unreleased
 
-First release of OEC v2.0 for the OEC Messaging Guideline and the OEC Runtime & Infrastructure Guideline at the baseline `605fbb7`.
+First release of OEC v2.0 for the OEC Messaging Guideline and the OEC Runtime & Infrastructure Guideline at the baseline `980cde8`.
 
 - **JSON Schema bundle** 2.1.x (D1): strict and tolerant flavor of every message, resource, payload and `broker.json`.
 - **SDK** (D2): Rust SDK `oec` with `oec-core` (Messaging Level 1–3, provider and consumer, own MQTT 3.1.1 client over TLS), the C ABI `oec-ffi` with the header `oec.h` and prebuilt static libraries for Linux (x86-64, AArch64, ARMv7), macOS (x86-64, Apple silicon) and Windows (x64 and Arm64 with MSVC, x64 with MinGW), the Go SDK over the C ABI.

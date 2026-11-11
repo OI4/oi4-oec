@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "605fbb7"
+baseline: "980cde8"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-index-0a728c6e
@@ -367,6 +367,10 @@ items:
   # --- BUS (C-028) ----------------------------------------------------------
   - key: MG-9-b7008e8c
     reason: Structure of chapter 9 (pub/sub pattern in 9.1, call/reply in 9.2); no obligation.
+  - key: MG-9-91dd7b04
+    reason: Rationale of the RECOMMENDED box of MG 9 (SF-119); the restriction itself is REQ-GEN-002, "can" expresses possibility.
+  - key: MG-9-154672d6
+    reason: Reference to the REQUIRED boxes of MG 9.1 and MG 9.2 for Get, Set, Del and Call; those are REQ-GEN-001 and the RES areas.
   - key: MG-9.1-a26fbb46
     reason: Explanation of the pub/sub pattern (messages without subscriber end on the Message Bus); no retained messages is REQ-MQTT-018.
   - key: MG-9.1-7d286bd3
