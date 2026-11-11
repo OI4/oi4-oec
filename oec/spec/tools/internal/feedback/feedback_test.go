@@ -96,6 +96,7 @@ func testPackage() *Package {
 			{ID: "SF-002", Area: "A | B", Finding: "f", Location: "l", Proposal: "p", Status: "resolved (`aaaaaaa`)"},
 			{ID: "SF-003", Area: "Old", Outcome: "o", Status: "resolved (`5f070bb`)"},
 			{ID: "SF-004", Area: "Gone", Outcome: "o", Status: "obsolete (`5f070bb`)"},
+			{ID: "SF-006", Area: "New", Finding: "f", Location: "l", Proposal: "p", Status: "open (C-113)"},
 		},
 		Attribution: []Entry{
 			{Line: 3, Commit: "ccccccc", Class: "editorial", Note: "Links added."},
@@ -126,14 +127,14 @@ func TestProblems(t *testing.T) {
 			t.Errorf("missing %q in\n%s", want, got)
 		}
 	}
-	if strings.Contains(got, "SF-003") || strings.Contains(got, "SF-004") {
-		t.Errorf("findings resolved in the base or obsolete reported:\n%s", got)
+	if strings.Contains(got, "SF-003") || strings.Contains(got, "SF-004") || strings.Contains(got, "SF-006") {
+		t.Errorf("findings resolved in the base, obsolete or not yet resolved reported:\n%s", got)
 	}
 }
 
 func TestBuild(t *testing.T) {
 	files := testPackage().Build()
-	want := []string{"README.md", "files.md", "normative.md", "wording.md", "editorial.md", "SF-001.md", "SF-002.md", "SF-003.md", "SF-004.md", "GL-ADR-012.md"}
+	want := []string{"README.md", "files.md", "normative.md", "wording.md", "editorial.md", "SF-001.md", "SF-002.md", "SF-003.md", "SF-004.md", "SF-006.md", "GL-ADR-012.md"}
 	if len(files) != len(want) {
 		t.Errorf("%d files, want %d", len(files), len(want))
 	}
@@ -172,7 +173,8 @@ func TestBuild(t *testing.T) {
 		t.Errorf("SF-001.md:\n%s", files["SF-001.md"])
 	}
 	if !strings.Contains(files["SF-003.md"], "None in the range: the finding was resolved in the base `5f070bb`.") ||
-		!strings.Contains(files["SF-004.md"], "None: the finding became obsolete.") {
+		!strings.Contains(files["SF-004.md"], "None: the finding became obsolete.") ||
+		!strings.Contains(files["SF-006.md"], "None yet: the finding is not resolved in the guideline.") {
 		t.Error("finding without commits")
 	}
 	if ed := files["editorial.md"]; !strings.Contains(ed, "(1 commits)") || !strings.Contains(ed, "### Commit ccccccc\n") || !strings.Contains(ed, "{+y+}") {
@@ -183,7 +185,7 @@ func TestBuild(t *testing.T) {
 		"| [SF-002](SF-002.md) | A \\| B | resolved | 1 |",
 		"| [SF-003](SF-003.md) | Old | resolved | 0 |",
 		"| [GL-ADR-012](GL-ADR-012.md) | ADR 012 – Remove Actions | 2 |",
-		"- Findings: 4 (1 obsolete, 3 resolved).",
+		"- Findings: 5 (1 obsolete, 1 open, 3 resolved).",
 		"- Commits that change the documents: 3 – 1 shown on a finding page, 1 on a GL-ADR page, 0 normative, 0 wording, 1 editorial.",
 		"**Complete diff:** 3 files changed",
 	} {

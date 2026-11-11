@@ -308,7 +308,7 @@ func (p *Package) Problems() []string {
 		if used[f.ID] {
 			continue
 		}
-		if !strings.HasPrefix(f.Status, "obsolete") && !strings.Contains(f.Status, base) {
+		if !strings.HasPrefix(f.Status, "obsolete") && !pending(f.Status) && !strings.Contains(f.Status, base) {
 			out = append(out, fmt.Sprintf("%s (%s) has no commit in the attribution and is not resolved in the base %s", f.ID, f.Status, base))
 		}
 	}
@@ -506,9 +506,12 @@ func (r *renderer) finding(f Finding) string {
 	b.WriteString("## Changes of the guideline\n\n")
 	es := r.byRef[f.ID]
 	if len(es) == 0 {
-		if strings.HasPrefix(f.Status, "obsolete") {
+		switch {
+		case strings.HasPrefix(f.Status, "obsolete"):
 			b.WriteString("None: the finding became obsolete.\n")
-		} else {
+		case pending(f.Status):
+			b.WriteString("None yet: the finding is not resolved in the guideline.\n")
+		default:
 			fmt.Fprintf(&b, "None in the range: the finding was resolved in the base `%s`.\n", r.p.History.Base[:7])
 		}
 		return b.String()
@@ -607,7 +610,7 @@ func (r *renderer) readme() string {
 		fmt.Fprintf(&b, "| [%s](%s.md) | %s | %d |\n", id, id, cell(r.adrs[id].Title), len(r.byRef[id]))
 	}
 	b.WriteString("\n## Completeness\n\n")
-	b.WriteString("The OEC v2.0 workspace checks this package in its gate (`spectool feedback -check`): every commit of the range that changes the documents is attributed exactly once in [attribution.tsv](attribution.tsv) – to findings, GL-ADRs or one class with a note –, every id exists, every finding has a commit unless it was resolved in the base or became obsolete, merge commits carry no changes of their own, and the files of this package equal the rendering.\n")
+	b.WriteString("The OEC v2.0 workspace checks this package in its gate (`spectool feedback -check`): every commit of the range that changes the documents is attributed exactly once in [attribution.tsv](attribution.tsv) – to findings, GL-ADRs or one class with a note –, every id exists, every finding has a commit unless it was resolved in the base, became obsolete or is not resolved yet, merge commits carry no changes of their own, and the files of this package equal the rendering.\n")
 	return b.String()
 }
 
@@ -647,6 +650,16 @@ func joinCounts(m map[string]int) string {
 		parts[i] = strconv.Itoa(m[k]) + " " + k
 	}
 	return strings.Join(parts, ", ")
+}
+
+// pending reports a finding that is not resolved in the guideline yet
+// (open, decided or reported) and therefore has no commit.
+func pending(status string) bool {
+	switch statusWord(status) {
+	case "open", "decided", "reported":
+		return true
+	}
+	return false
 }
 
 func statusWord(s string) string {
