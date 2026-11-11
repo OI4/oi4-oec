@@ -104,6 +104,8 @@ fn create_dirs(root: &Path, dir: &Path) -> io::Result<()> {
     #[cfg(unix)]
     std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
     builder.create(dir)?;
+    #[cfg(not(unix))]
+    let _ = root;
     #[cfg(unix)]
     for d in dir.ancestors().take_while(|d| d.starts_with(root)) {
         use std::os::unix::fs::PermissionsExt;
