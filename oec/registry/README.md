@@ -246,7 +246,7 @@ log on stderr; `info` reports "N of M assets available" after every change.
 `Dockerfile` (build context `oec/`, allowlist `oec/.dockerignore`), as the
 demo images (ADR-0028 §4): the build stage runs on the build platform and
 cross-compiles for linux/amd64 and linux/arm64 (`rust:1.89-trixie`,
-`golang:1.27.3-trixie` for the SBOM tool); the runtime base is
+`golang:1.27.4-trixie` for the SBOM tool); the runtime base is
 `gcr.io/distroless/cc-debian13:nonroot` – all pinned by tag and digest. The
 final stage has no `RUN`: `/usr/local/bin/oec-registry`, user 65532,
 volumes `/etc/oi4/app` and `/opt/oi4/app`, ports 5798 (Web UI and API) and

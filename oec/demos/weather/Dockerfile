@@ -10,7 +10,7 @@
 # cross toolchains, no emulation); the final stage has no RUN. The images
 # are pinned by tag and digest (multi-platform index).
 ARG RUST_IMAGE=docker.io/library/rust:1.89-trixie@sha256:57407b378b2b6e07b48a6135a20c87cc22ea6e249c0acf6cb1833ead3cf116e9
-ARG GO_IMAGE=docker.io/library/golang:1.27.3-trixie@sha256:c65ecfe613b539ac74c62a4c3b2c27e8f8a6076384c8f27e8a3c0f3be17cc385
+ARG GO_IMAGE=docker.io/library/golang:1.27.4-trixie@sha256:b54b2639de8c1bfe538ec5ffc45f29b1932235ac5f6d63c059853646677112d9
 ARG BASE_IMAGE=gcr.io/distroless/cc-debian13:nonroot@sha256:08476c244888bfb425bae1ae4dd7c17f093e972aab8426883d97f3c6f280f7c1
 
 FROM --platform=$BUILDPLATFORM ${GO_IMAGE} AS go

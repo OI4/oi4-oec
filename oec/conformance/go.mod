@@ -2,7 +2,7 @@ module github.com/OI4/oec/conformance
 
 go 1.26.0
 
-toolchain go1.27.3
+toolchain go1.27.4
 
 replace (
 	github.com/OI4/oec/schema => ../schema

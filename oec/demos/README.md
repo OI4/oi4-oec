@@ -46,7 +46,7 @@ amendment C-084), build context `oec/` (allowlist `oec/.dockerignore`):
 |---|---|
 | Names | `oi4/oec-logger`, `oi4/oec-weather`, `oi4/oec-config`, tag `0.1.0`; local only (publication: P9) |
 | Platforms | `linux/amd64` and `linux/arm64`, cross-built on the build platform (`docker buildx`) |
-| Builders | `rust:1.89-trixie`, `golang:1.27.3-trixie`, pinned by tag and digest |
+| Builders | `rust:1.89-trixie`, `golang:1.27.4-trixie`, pinned by tag and digest |
 | Runtime | `gcr.io/distroless/cc-debian13:nonroot` (glibc 2.41, libgcc, no shell, no package manager), pinned by tag and digest |
 | User | `65532:65532` (non-root); `ENTRYPOINT` is the binary `/usr/local/bin/oec-<demo>` |
 | Volumes | `/etc/oi4/app`, `/opt/oi4/app` (owned by 65532); the platform mounts `/etc/oi4/mqtt`, `/etc/oi4/certs`, `/run/secrets/oi4` |

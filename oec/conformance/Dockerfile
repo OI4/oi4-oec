@@ -11,7 +11,7 @@
 # CGO_ENABLED=0, -trimpath, empty build id as oec/ci/binaries.sh); the
 # final stage has no RUN. The images are pinned by tag and digest
 # (multi-platform index).
-ARG GO_IMAGE=docker.io/library/golang:1.27.3-trixie@sha256:c65ecfe613b539ac74c62a4c3b2c27e8f8a6076384c8f27e8a3c0f3be17cc385
+ARG GO_IMAGE=docker.io/library/golang:1.27.4-trixie@sha256:b54b2639de8c1bfe538ec5ffc45f29b1932235ac5f6d63c059853646677112d9
 ARG BASE_IMAGE=gcr.io/distroless/static-debian13:nonroot@sha256:25ac8f0c3b2334a9eb05452266bd4697864a8c8ef0ef71e5e6480d7f92868329
 
 # the runtime base of the target platform: its package database feeds the SBOM
