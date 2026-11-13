@@ -12,9 +12,11 @@
 # M5Unified and M5GFX for the M5Stack example. The library comes from
 # arduino/package.sh; its examples compile with --warnings all, and a
 # warning in the library or a sketch fails: Sensor on ESP32 and ESP32-S3,
-# M5Stack on M5Stack Core2 and CoreS3; Sensor on ESP32-C3 and ESP32-C6 is
-# best effort (a failure is reported, it does not fail the run). The
-# downloads of the core are deleted after the install (disk); no artifact.
+# M5Stack on M5Stack Core2 and CoreS3, the climate display demo
+# demos-smart-sensors/m5core2-display (C-114) on the Core2; Sensor on
+# ESP32-C3 and ESP32-C6 is best effort (a failure is reported, it does not
+# fail the run). The downloads of the core are deleted after the install
+# (disk); no artifact.
 set -eu
 here="$(cd "$(dirname "$0")" && pwd)"
 . "$here/versions.sh"
@@ -73,18 +75,18 @@ a lib list
 "$micro/arduino/package.sh" "$work/lib"
 lib="$work/lib/OECMicro"
 failed=""
-# compile <example> <fqbn> <required: 1, best effort: 0>
+# compile <example> <fqbn> <required: 1, best effort: 0> [sketch folder]
 compile() {
 	board="${2##*:}"
 	log="$work/$1-$board.log"
 	if a compile --fqbn "$2" --warnings all --library "$lib" --build-path "$work/build/$1-$board" \
-		"$lib/examples/$1" >"$log" 2>&1; then
+		"${4:-$lib/examples/$1}" >"$log" 2>&1; then
 		ok=1
 	else
 		ok=0
 	fi
 	# A warning in the library (OECMicro/) or in a file of the sketch.
-	own="$(grep 'warning:' "$log" | grep -E 'OECMicro/|/sketch/' || true)"
+	own="$(grep 'warning:' "$log" | grep -E 'OECMicro/|/sketch/|/demos-smart-sensors/' || true)"
 	if [ "$ok" = 1 ] && [ -z "$own" ]; then
 		echo "micro-arduino: $1 $2: $(grep '^Sketch uses' "$log" || true)"
 		return
@@ -100,6 +102,7 @@ compile Sensor esp32:esp32:esp32 1
 compile Sensor esp32:esp32:esp32s3 1
 compile M5Stack esp32:esp32:m5stack_core2 1
 compile M5Stack esp32:esp32:m5stack_cores3 1
+compile m5core2-display esp32:esp32:m5stack_core2 1 "$here/../demos-smart-sensors/m5core2-display"
 compile Sensor esp32:esp32:esp32c3 0
 compile Sensor esp32:esp32:esp32c6 0
 test -z "$failed" || { echo "micro-arduino: failed or with warnings:$failed" >&2; exit 1; }

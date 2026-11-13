@@ -49,6 +49,7 @@ func TestReleaseVersion(t *testing.T) {
 	match("demos/logger/src/main.c", `(?m)^#define LOGGER_VERSION "([^"]+)"$`)
 	match("demos/weather/main.go", `(?m)^const version = "([^"]+)"$`)
 	match("demos-smart-sensors/esp32-dht22/CMakeLists.txt", `(?m)^set\(PROJECT_VER "([^"]+)"\)$`)
+	match("demos-smart-sensors/m5core2-display/m5core2-display.ino", `(?m)^#define VERSION "([^"]+)"$`)
 	match("integrations/home-assistant/custom_components/oi4_oec/const.py", `(?m)^VERSION: Final = "([^"]+)"$`)
 
 	jsonVersion := func(file string, path ...string) {
