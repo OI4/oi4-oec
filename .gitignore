@@ -4,6 +4,9 @@
 /oi4-oec-demo/
 /oi4-oec-registry/
 
+# Local scratch files of the PO, never committed
+/local/
+
 # IDE
 /.idea/
 *.iml
