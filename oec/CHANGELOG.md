@@ -16,7 +16,7 @@ First release of OEC v2.0 for the OEC Messaging Guideline and the OEC Runtime & 
 
 - **JSON Schema bundle** 2.1.x (D1): strict and tolerant flavor of every message, resource, payload and `broker.json`.
 - **SDK** (D2): Rust SDK `oec` with `oec-core` (Messaging Level 1–3, provider and consumer, own MQTT 3.1.1 client over TLS), the C ABI `oec-ffi` with the header `oec.h` and prebuilt static libraries for Linux (x86-64, AArch64, ARMv7), macOS (x86-64, Apple silicon) and Windows (x64 and Arm64 with MSVC, x64 with MinGW), the Go SDK over the C ABI.
-- **Micro SDK** (D9): C17 for microcontrollers, Messaging Level 1–3, ESP-IDF component and Arduino library `OECMicro` (ESP32, ESP32-S3).
+- **Micro SDK** (D9): C17 for microcontrollers, Messaging Level 1–3, ESP-IDF component and Arduino library `OECMicro` (ESP32, ESP32-S3); from Level 2 also a consumer of other applications' publications (up to four topic filters, `on_message`, read functions for topic and payload).
 - **Application compliance tool** D7 `oec-check`: `validate`, `monitor`, `test` (55 tests), `list`, `explain`, `report-schema`.
 - **Infrastructure compliance tool** D8 `oec-infra`: `image`, `run`, `container`, `host`, `bus` (17 tests), `list`, `explain`, `report-schema`.
 - **Demos**: logger (C on the C ABI, Level 2), weather (Go SDK, Level 3, MET Norway provider), config service (Rust, edits the `Config` of the other applications); each with a small Web UI and an image.
@@ -25,3 +25,5 @@ First release of OEC v2.0 for the OEC Messaging Guideline and the OEC Runtime & 
 - **Release channels**: the files as a GitHub Release of `OI4/oec`, the images on `ghcr.io/oi4`, the Go modules by their tags in `OI4/oec` (`go install github.com/OI4/oec/conformance/cmd/oec-check@v0.1.0`; D7 and D8 then report the module version).
 - **Supply chain**: an SPDX 2.3 SBOM, the license texts and a license report for every deliverable; the security policy in `SECURITY.md`.
 - **ServiceType `CloudConnector`** (GL-ADR-023) instead of the former `OOCConnector` in the schema, every SDK (`ServiceType::CloudConnector`, `OEC_ST_CLOUD_CONNECTOR`, `oec.CloudConnector`, `OECM_ST_CLOUD_CONNECTOR`), D7 and the registry API.
+- **Smart sensor demos** (firmware, built by hand): a DHT22 sensor on an ESP32 or ESP32-S3 (ESP-IDF) and a climate display on an M5Stack Core2 (Arduino) that shows the sensors' `Climate` and `Health`.
+- **Go SDK build** needs the rustup component `llvm-tools`: `oec-buildlib` and the prebuilt `liboec_ffi.a` drop the LLVM bitcode of the Rust standard library, which cgo of Go 1.26.11/1.27.4 rejects.
