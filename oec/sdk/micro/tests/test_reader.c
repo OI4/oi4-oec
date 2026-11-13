@@ -119,11 +119,57 @@ static void test_numbers_and_bools(void) {
     TEST_ASSERT_FALSE(oecm_json_bool(root, &b));
 }
 
+/* The read functions of the consumer side (oecm.h, C-114). */
+static void test_message_reading(void) {
+    static const char nm[] =
+        "{\"MessageId\":\"1-OTConnector/a/b/c/d\",\"MessageType\":\"ua-data\","
+        "\"Messages\":[{\"DataSetWriterId\":20,\"DataSetWriterName\":\"a/b/c/d\","
+        "\"Payload\":{\"Temperature\":21.5,\"Humidity\":40,\"Label\":\"K\\u00fcche\","
+        "\"Inner\":{\"X\":-1e3},\"Temperature\":22.25}},"
+        "{\"DataSetWriterId\":21,\"Payload\":{\"Health\":\"NORMAL_0\"}}]}";
+    const uint8_t *p = (const uint8_t *)nm;
+    size_t n = strlen(nm), count = 9;
+    double d = 0;
+    char text[16];
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_msg_count(p, n, &count));
+    TEST_ASSERT_EQUAL_size_t(2, count);
+    /* the last of duplicate keys */
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_msg_number(p, n, 0, "Payload.Temperature", &d));
+    TEST_ASSERT_EQUAL_DOUBLE(22.25, d);
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_msg_number(p, n, 0, "Payload.Inner.X", &d));
+    TEST_ASSERT_EQUAL_DOUBLE(-1000.0, d);
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_msg_number(p, n, 0, "DataSetWriterId", &d));
+    TEST_ASSERT_EQUAL_DOUBLE(20.0, d);
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_msg_text(p, n, 0, "Payload.Label", text, sizeof text));
+    TEST_ASSERT_EQUAL_STRING("K\xc3\xbc" "che", text);
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_msg_text(p, n, 1, "Payload.Health", text, sizeof text));
+    TEST_ASSERT_EQUAL_STRING("NORMAL_0", text);
+    TEST_ASSERT_EQUAL(OECM_E_NOSPACE, oecm_msg_text(p, n, 0, "DataSetWriterName", text, 4));
+    TEST_ASSERT_EQUAL_STRING("", text);
+    /* missing members, wrong types, bad paths and indices */
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_number(p, n, 0, "Payload.Label", &d));
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_text(p, n, 0, "Payload.Humidity", text, sizeof text));
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_number(p, n, 0, "Payload.Pressure", &d));
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_number(p, n, 0, "Payload..Temperature", &d));
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_number(p, n, 0, "Payload.Temperature.X", &d));
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_number(p, n, 0, "", &d));
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_number(p, n, 2, "DataSetWriterId", &d));
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_number(p, n - 1, 0, "DataSetWriterId", &d));
+    static const char *const bad[] = {"[]", "{}", "{\"Messages\":{}}", "nope"};
+    for (size_t i = 0; i < 4; i++)
+        TEST_ASSERT_EQUAL_MESSAGE(OECM_E_ARG,
+                                  oecm_msg_count((const uint8_t *)bad[i], strlen(bad[i]), &count),
+                                  bad[i]);
+    TEST_ASSERT_EQUAL_size_t(0, count);
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_msg_count(NULL, 0, &count));
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_valid_documents);
     RUN_TEST(test_invalid_documents);
     RUN_TEST(test_kinds_and_iteration);
+    RUN_TEST(test_message_reading);
     RUN_TEST(test_get_last_duplicate_and_escaped_keys);
     RUN_TEST(test_strings);
     RUN_TEST(test_numbers_and_bools);

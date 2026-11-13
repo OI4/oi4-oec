@@ -233,12 +233,9 @@ static void get(req *r) {
         oecm_span head, tag;
         split_level(f, &head, &tag);
         a.res = OECM_R_SUBLIST;
-        for (size_t i = 0; i < oecm_sublist_count(s); i++) {
-            const char *er, *et;
-            oecm_sublist_entry(s, i, &er, &et);
-            if (f.n == 0 || (oecm_span_eq(head, er) && (tag.n == 0 || oecm_span_eq(tag, et))))
+        for (size_t i = 0; i < oecm_sublist_count(s); i++)
+            if (f.n == 0 || oecm_sublist_addressed(s, i, head, tag))
                 add(&a, i);
-        }
     } else {
         return; /* not served by Get */
     }

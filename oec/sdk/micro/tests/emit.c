@@ -80,6 +80,7 @@ static const char *const requests[][3] = {
     {"/Get/Metadata/", "/Temperature", "[]"},
     {"/Get/PublicationList/", "", "[]"},
     {"/Get/SubscriptionList/", "", "[]"},
+    {"/Get/SubscriptionList/", "/Data/Climate", "[]"},
     {"/Get/Profile/", "", "[]"},
     {"/Get/MAM/", "", "[]"},
     {"/Get/Health/", "", "[]"},
@@ -198,6 +199,20 @@ static int ask(oecm_device *dev, const char *app, const oecm_config *cfg) {
     return 0;
 }
 
+/* Consumer subscriptions of the Level 3 lifecycle (C-114). */
+static const oecm_subscription subs[] = {
+    {.topic_filter = "Oi4v2/OTConnector/+/Pub/Data/+/Climate"},
+    {.topic_filter = "Oi4v2/+/+/Pub/Health/#"},
+};
+
+static void on_message(void *ctx, size_t i, const char *t, const uint8_t *payload, size_t len) {
+    (void)ctx;
+    (void)i;
+    (void)t;
+    (void)payload;
+    (void)len;
+}
+
 static int run(FILE *f, const oecm_config *cfg) {
     fake_pal_reset(&fp);
     oecm_pal pal = fake_pal_make(&fp);
@@ -276,6 +291,9 @@ int main(int argc, char **argv) {
     cfg.level = OECM_LEVEL_3;
     cfg.refdes_buf = refdes;
     cfg.refdes_cap = sizeof refdes;
+    cfg.subscriptions = subs;
+    cfg.subscription_count = 2;
+    cfg.on_message = on_message;
     rc |= run(f, &cfg);
     if (fclose(f) != 0)
         rc = 1;

@@ -108,45 +108,97 @@ void oecm_publist_entry(const oecm_state *s, size_t i, oecm_pub_entry *e) {
 }
 
 size_t oecm_sublist_count(const oecm_state *s) {
-    size_t n = s->cfg->config_count;
+    size_t n = s->cfg->subscription_count + s->cfg->config_count;
     for (size_t j = 0; j < s->cfg->data_count; j++)
         if (s->cfg->data[j].writable)
             n++;
     return n;
 }
 
-void oecm_sublist_entry(const oecm_state *s, size_t i, const char **resource, const char **tag) {
-    if (i < s->cfg->config_count) {
-        *resource = "Config";
-        *tag = s->cfg->config[i].name;
+static oecm_span cspan(const char *p) {
+    return (oecm_span){p, strlen(p)};
+}
+
+void oecm_sublist_entry(const oecm_state *s, size_t i, oecm_sub_entry *e) {
+    const oecm_config *c = s->cfg;
+    memset(e, 0, sizeof *e);
+    if (i < c->subscription_count) {
+        oecm_sub_parts sp;
+        e->filter = c->subscriptions[i].topic_filter;
+        (void)oecm_sub_filter_parse(e->filter, strlen(e->filter), &sp);
+        e->resource = sp.resource;
+        e->group_tail = sp.group_tail;
         return;
     }
-    i -= s->cfg->config_count;
-    for (size_t j = 0; j < s->cfg->data_count; j++) {
-        if (!s->cfg->data[j].writable)
+    i -= c->subscription_count;
+    if (i < c->config_count) {
+        e->resource = cspan("Config");
+        e->group_tail = cspan(c->config[i].name);
+        return;
+    }
+    i -= c->config_count;
+    for (size_t j = 0; j < c->data_count; j++) {
+        if (!c->data[j].writable)
             continue;
         if (i-- == 0) {
-            *resource = "Data";
-            *tag = s->cfg->data[j].tag;
+            e->resource = cspan("Data");
+            e->group_tail = cspan(c->data[j].tag);
             return;
         }
     }
-    *resource = *tag = "";
+    e->resource = e->group_tail = cspan("");
+}
+
+bool oecm_sublist_addressed(const oecm_state *s, size_t i, oecm_span head, oecm_span tag) {
+    oecm_sub_entry e;
+    oecm_sublist_entry(s, i, &e);
+    if (head.n != e.resource.n || memcmp(head.p, e.resource.p, head.n) != 0)
+        return false;
+    if (tag.n == 0)
+        return true;
+    if (e.filter == NULL)
+        return tag.n == e.group_tail.n && memcmp(tag.p, e.group_tail.p, tag.n) == 0;
+    oecm_sub_parts sp;
+    (void)oecm_sub_filter_parse(e.filter, strlen(e.filter), &sp);
+    return sp.source_all ||
+           (sp.filter.n != 0 && oecm_mqtt_match(sp.filter.p, sp.filter.n, tag.p, tag.n));
+}
+
+oecm_err oecm_subs_init(const oecm_state *s) {
+    const oecm_config *c = s->cfg;
+    if (c->subscription_count > OECM_SUBS_MAX ||
+        (c->subscription_count != 0 && (c->subscriptions == NULL || c->on_message == NULL)))
+        return OECM_E_ARG;
+    for (size_t i = 0; i < c->subscription_count; i++) {
+        const char *f = c->subscriptions[i].topic_filter;
+        oecm_sub_parts sp;
+        if (f == NULL || !oecm_sub_filter_parse(f, strlen(f), &sp))
+            return OECM_E_ARG;
+        for (size_t k = 0; k < i; k++)
+            if (strlen(c->subscriptions[k].topic_filter) == strlen(f) &&
+                memcmp(c->subscriptions[k].topic_filter, f, strlen(f)) == 0)
+                return OECM_E_ARG; /* distinct filters */
+    }
+    return OECM_OK;
 }
 
 void oecm_put_sublist_path(oecm_buf *b, const oecm_state *s, size_t i) {
-    const char *res, *tag;
-    oecm_sublist_entry(s, i, &res, &tag);
+    oecm_sub_entry e;
+    oecm_sublist_entry(s, i, &e);
+    if (e.filter) {
+        oecm_puts(b, e.filter);
+        return;
+    }
     oecm_puts(b, "Oi4v2/");
     oecm_puts(b, oecm_service_type_name(s->cfg->service_type));
     oecm_putc(b, '/');
     oecm_put_b64url(b, (const uint8_t *)s->il, s->il_len);
     oecm_puts(b, "/Set/");
-    oecm_puts(b, res);
+    oecm_put(b, e.resource.p, e.resource.n);
     oecm_putc(b, '/');
     oecm_put_b64url(b, (const uint8_t *)s->il, s->il_len);
     oecm_putc(b, '/');
-    oecm_puts(b, tag);
+    oecm_put(b, e.group_tail.p, e.group_tail.n);
 }
 
 /* --- Payloads ------------------------------------------------------------------ */
@@ -342,12 +394,19 @@ static void put_item(oecm_buf *b, const oecm_state *s, enum oecm_res res, size_t
         break;
     }
     case OECM_R_SUBLIST: {
-        const char *r, *tag;
-        oecm_sublist_entry(s, i, &r, &tag);
-        oecm_put_dsm(b, s, OECM_WRITER_SUBLIST, r, tag, -1, 0, "ua-keyframe");
-        oecm_puts(b, "{\"TopicPath\":\"");
-        oecm_put_sublist_path(b, s, i);
-        oecm_puts(b, "\",\"Config\":\"NONE_0\"}");
+        oecm_sub_entry e;
+        oecm_sublist_entry(s, i, &e);
+        oecm_put_dsm_span(b, s, OECM_WRITER_SUBLIST, e.resource, e.group_tail, -1, 0,
+                          "ua-keyframe");
+        oecm_puts(b, "{\"TopicPath\":");
+        if (e.filter) {
+            oecm_put_json_cstr(b, e.filter);
+        } else {
+            oecm_putc(b, '"');
+            oecm_put_sublist_path(b, s, i);
+            oecm_putc(b, '"');
+        }
+        oecm_puts(b, ",\"Config\":\"NONE_0\"}");
         break;
     }
     case OECM_R_CONFIG:
@@ -716,6 +775,10 @@ oecm_err oecm_publish_status(oecm_state *s, const oecm_status *st, oecm_span rep
 
 /* --- Connect, change, Interval -------------------------------------------------- */
 
+static oecm_err pal_subscribe(oecm_state *s, const char *filter) {
+    return s->pal->mqtt_subscribe(s->pal->ctx, filter) == OECM_OK ? OECM_OK : OECM_E_PAL;
+}
+
 static oecm_err subscribe(oecm_state *s, const char *method) {
     oecm_buf b;
     oecm_buf_init(&b, s->tx, s->tx_cap);
@@ -729,8 +792,7 @@ static oecm_err subscribe(oecm_state *s, const char *method) {
     oecm_putc(&b, '\0');
     if (b.full)
         return OECM_E_NOSPACE;
-    return s->pal->mqtt_subscribe(s->pal->ctx, (const char *)s->tx) == OECM_OK ? OECM_OK
-                                                                               : OECM_E_PAL;
+    return pal_subscribe(s, (const char *)s->tx);
 }
 
 oecm_err oecm_l2_subscribe(oecm_state *s) {
@@ -740,6 +802,8 @@ oecm_err oecm_l2_subscribe(oecm_state *s) {
     s->subs_due = true;
     for (size_t i = 0; i < n && err == OECM_OK; i++)
         err = subscribe(s, methods[i]);
+    for (size_t i = 0; i < s->cfg->subscription_count && err == OECM_OK; i++)
+        err = pal_subscribe(s, s->cfg->subscriptions[i].topic_filter);
     if (err == OECM_OK)
         s->subs_due = false;
     return err;
@@ -1009,6 +1073,8 @@ size_t oecm_refdes_room(oecm_state *s) {
 
 oecm_err oecm_l2_init(oecm_state *s) {
     const oecm_config *c = s->cfg;
+    if (oecm_subs_init(s) != OECM_OK)
+        return OECM_E_ARG;
     if (c->data_count > OECM_DATA_MAX || c->config_count > OECM_CONFIG_MAX ||
         (c->data == NULL && c->data_count != 0) || (c->config == NULL && c->config_count != 0))
         return OECM_E_ARG;

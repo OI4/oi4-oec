@@ -24,7 +24,8 @@
  *    no API for a plain connection.
  *  - Messaging Level 1 (Birth/Will/Close, Pub MAM + Health), Level 2
  *    (Get, Set/Del, Status Event, Profile, PublicationList,
- *    SubscriptionList, Config, Data, Metadata; C-094) and Level 3
+ *    SubscriptionList, Config, Data, Metadata; C-094; consumer
+ *    subscriptions C-114) and Level 3
  *    (ReferenceDesignation, Call NewDataSetWriterId; C-095).
  */
 #ifndef OECM_H
@@ -192,6 +193,23 @@ typedef struct oecm_cfg_context {
     size_t count;
 } oecm_cfg_context;
 
+/* --- Level 2: consumer subscriptions (ADR-0022 amendment C-114) ---------- */
+
+#define OECM_SUBS_MAX 4u          /* consumer subscriptions of a device */
+#define OECM_SUB_FILTER_MAX 256u  /* octets of a topic filter */
+#define OECM_IL_BUF 256u          /* buffer of a decoded Identification Link */
+
+/* A lasting subscription of the consumer side of the device: an MQTT topic
+ * filter on the publications of other applications,
+ * Oi4v2/<ServiceType>/<AppId>/Pub/<Resource>[/<Source>[/<Filter>]] with
+ * the wildcards '+' and '#' as whole levels, a concrete Resource level and
+ * the Method level "Pub" (or '+'). The core subscribes it at every connect
+ * and lists it in the SubscriptionList with Config NONE_0 (MG 9.1.9,
+ * REQ-RES-SUBLIST-*). */
+typedef struct oecm_subscription {
+    const char *topic_filter;
+} oecm_subscription;
+
 typedef struct oecm_config {
     oecm_level level;
     /* A directly connected smart device uses OECM_ST_OT_CONNECTOR
@@ -226,6 +244,19 @@ typedef struct oecm_config {
      * half of the transmit buffer and by the MaxPacketSize. */
     char *refdes_buf;
     size_t refdes_cap;
+    /* Level 2+: consumer subscriptions, 0 … OECM_SUBS_MAX distinct filters
+     * (OECM_E_LEVEL at Level 1, OECM_E_ARG for an invalid filter). A
+     * received publication that matches one of them is handed to
+     * on_message (required if subscription_count > 0) with the index of
+     * the first matching filter, inside oecm_on_message, after the core
+     * handled requests to the device. topic and payload are borrowed for
+     * the call; on_message may call oecm_data_changed, oecm_set_health and
+     * the read functions below only. A publication of the device itself
+     * that matches a filter is handed over, too. */
+    const oecm_subscription *subscriptions;
+    size_t subscription_count;
+    void (*on_message)(void *app_ctx, size_t subscription, const char *topic,
+                       const uint8_t *payload, size_t len);
 } oecm_config;
 
 /* The smallest ReferenceDesignation buffer and the smallest usable size
@@ -310,7 +341,9 @@ void oecm_on_connected(oecm_device *dev);
 void oecm_on_disconnected(oecm_device *dev);
 /* PAL → core: received message (Level 2+; ignored at Level 1). The core
  * subscribes to the Get, Set and Del topics of its AppId (Level 3: also
- * Call) at every connect and answers inside this call. */
+ * Call) and to the consumer subscriptions at every connect, answers
+ * requests inside this call and hands matching publications to
+ * on_message. */
 void oecm_on_message(oecm_device *dev, const char *topic, const uint8_t *payload, size_t len);
 
 /* score < 0: no HealthScore; 0 … 100 otherwise (REQ-RES-HEALTH-001).
@@ -329,6 +362,30 @@ const char *oecm_identification_link(const oecm_device *dev);
 /* true while connected: from oecm_on_connected (Birth published) until the
  * disconnect or oecm_stop. For a status display (C-097). */
 bool oecm_connected(const oecm_device *dev);
+
+/* --- Reading received publications (consumer side, C-114) ----------------
+ * Stateless functions for on_message; no device needed. */
+
+/* The decoded AppId (part 2) or Source (part 5) of an OEC topic
+ * (Oi4v2/<ServiceType>/<AppId>/<Method>/<Resource>[/<Source>…]) into out,
+ * NUL-terminated; cap >= OECM_IL_BUF. OECM_E_ARG if the topic is not an
+ * OEC topic, has no such level or the level is no encoded Identification
+ * Link. */
+oecm_err oecm_topic_app(const char *topic, char *out, size_t cap);
+oecm_err oecm_topic_source(const char *topic, char *out, size_t cap);
+
+/* The number of DataSetMessages ("Messages") of a NetworkMessage.
+ * OECM_E_ARG if the payload is no JSON object with a Messages array. */
+oecm_err oecm_msg_count(const uint8_t *payload, size_t len, size_t *count);
+/* A member of DataSetMessage `index` by a path of object member names
+ * separated by '.', e.g. "Payload.Temperature" or "DataSetWriterName":
+ * a JSON number as double, or a JSON string decoded into out
+ * (NUL-terminated). OECM_E_ARG if there is no such member of that type,
+ * OECM_E_NOSPACE if the text does not fit out. */
+oecm_err oecm_msg_number(const uint8_t *payload, size_t len, size_t index, const char *path,
+                         double *out);
+oecm_err oecm_msg_text(const uint8_t *payload, size_t len, size_t index, const char *path,
+                       char *out, size_t cap);
 
 #ifdef __cplusplus
 }

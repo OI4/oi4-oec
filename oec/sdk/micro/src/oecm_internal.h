@@ -164,6 +164,19 @@ bool oecm_topic_parse(const char *t, size_t n, oecm_topic *out);
 bool oecm_b64url_eq(oecm_span e, const char *s, size_t n);
 bool oecm_span_eq(oecm_span a, const char *s);
 
+/* Whether MQTT topic filter f matches topic t (MQTT 3.1.1 4.7, oec-core
+ * topic mqtt_match). */
+bool oecm_mqtt_match(const char *f, size_t fn, const char *t, size_t tn);
+/* The parts of a consumer topic filter (oecm_subscription), checked as
+ * documented in oecm.h. filter: the levels after the Source (n == 0:
+ * none); group_tail: filter unless one of its levels is a wildcard;
+ * source_all: the Source level is '#'. */
+typedef struct oecm_sub_parts {
+    oecm_span resource, filter, group_tail;
+    bool source_all;
+} oecm_sub_parts;
+bool oecm_sub_filter_parse(const char *f, size_t n, oecm_sub_parts *out);
+
 /* --- Names ----------------------------------------------------------------- */
 
 const char *oecm_service_type_name(oecm_service_type st);
@@ -264,6 +277,11 @@ void oecm_put_nm(oecm_buf *b, const oecm_state *s, const char *message_type, con
 void oecm_put_dsm(oecm_buf *b, const oecm_state *s, unsigned writer, const char *group,
                   const char *group_tail, int64_t timestamp_ms, uint32_t version,
                   const char *message_type);
+/* The same with the WriterGroupName group[/group_tail] as spans
+ * (group_tail.n == 0: none). */
+void oecm_put_dsm_span(oecm_buf *b, const oecm_state *s, unsigned writer, oecm_span group,
+                       oecm_span group_tail, int64_t timestamp_ms, uint32_t version,
+                       const char *message_type);
 void oecm_put_mam(oecm_buf *b, const oecm_state *s);
 void oecm_put_health(oecm_buf *b, oecm_health h, int score);
 /* "Oi4v2/<ST>/<AppId>/Pub/" */
@@ -289,6 +307,8 @@ oecm_err oecm_l2_connected(oecm_state *s);
 oecm_err oecm_l2_publish_due(oecm_state *s);
 uint32_t oecm_l2_wait_ms(const oecm_state *s, uint32_t wait);
 void oecm_l2_message(oecm_state *s, const char *topic, const uint8_t *payload, size_t len);
+/* Validates the consumer subscriptions (oecm_res.c). */
+oecm_err oecm_subs_init(const oecm_state *s);
 
 /* The answers (oecm_res.c), used by oecm_req.c. */
 enum oecm_res {
@@ -331,10 +351,20 @@ typedef struct oecm_pub_entry {
 } oecm_pub_entry;
 size_t oecm_publist_count(const oecm_state *s);
 void oecm_publist_entry(const oecm_state *s, size_t i, oecm_pub_entry *e);
-/* SubscriptionList entries: the Set topics of the Config contexts and of
- * the writable Data (resource "Config"/"Data", the context or Tag). */
+/* SubscriptionList entries (MG 9.1.9, oec-core sublist.rs): first the
+ * consumer subscriptions (cfg->subscriptions, in definition order), then
+ * the Set topics of the Config contexts and of the writable Data. Every
+ * entry is NONE_0. */
+typedef struct oecm_sub_entry {
+    oecm_span resource;   /* the resource level */
+    oecm_span group_tail; /* WriterGroupName = resource[/group_tail] */
+    const char *filter;   /* consumer: the topic filter; NULL: a Set entry */
+} oecm_sub_entry;
 size_t oecm_sublist_count(const oecm_state *s);
-void oecm_sublist_entry(const oecm_state *s, size_t i, const char **resource, const char **tag);
+void oecm_sublist_entry(const oecm_state *s, size_t i, oecm_sub_entry *e);
+/* Whether entry i is addressed by Get SubscriptionList/<Source>/<head>[/<tag>]
+ * (oec-core sublist.rs addressed). */
+bool oecm_sublist_addressed(const oecm_state *s, size_t i, oecm_span head, oecm_span tag);
 void oecm_put_sublist_path(oecm_buf *b, const oecm_state *s, size_t i);
 /* Status Event of a Set/Del or of an unknown Source (MG 8.3.6.1). */
 oecm_err oecm_publish_status(oecm_state *s, const oecm_status *st, oecm_span reply_to);

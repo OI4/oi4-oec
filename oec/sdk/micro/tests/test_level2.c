@@ -659,6 +659,142 @@ static void test_set_subscription_list(void) {
     TEST_ASSERT_TRUE(contains(status(), "BadNotWritable"));
 }
 
+/* --- consumer subscriptions (C-114) --------------------------------------- */
+
+static const oecm_subscription subs[] = {
+    {.topic_filter = "Oi4v2/OTConnector/+/Pub/Data/+/Climate"},
+    {.topic_filter = "Oi4v2/+/+/Pub/Health/#"},
+    {.topic_filter = "Oi4v2/OTConnector/+/Pub/Data/#"},
+};
+static int msg_calls;
+static size_t msg_sub;
+static char msg_topic[256];
+static char msg_payload[256];
+
+static void on_message(void *ctx, size_t i, const char *topic, const uint8_t *payload,
+                       size_t len) {
+    (void)ctx;
+    msg_calls++;
+    msg_sub = i;
+    snprintf(msg_topic, sizeof msg_topic, "%s", topic);
+    snprintf(msg_payload, sizeof msg_payload, "%.*s", (int)len, (const char *)payload);
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_data_changed(&dev, 1));
+}
+
+static void consumer(size_t n) {
+    cfg.subscriptions = subs;
+    cfg.subscription_count = n;
+    cfg.on_message = on_message;
+    msg_calls = 0;
+}
+
+static const fake_event *find(const char *topic, size_t from) {
+    for (size_t i = from; i < fp.count; i++)
+        if (strcmp(fp.events[i].topic, topic) == 0)
+            return &fp.events[i];
+    TEST_FAIL_MESSAGE(topic);
+    return NULL;
+}
+
+static void test_consumer_subscribes_and_lists(void) {
+    consumer(2);
+    start_connected();
+    TEST_ASSERT_EQUAL_size_t(5, fake_count(&fp, FAKE_SUBSCRIBE));
+    TEST_ASSERT_EQUAL_STRING(subs[0].topic_filter, ev(4)->topic);
+    TEST_ASSERT_EQUAL_STRING(subs[1].topic_filter, ev(5)->topic);
+    TEST_ASSERT_EQUAL_STRING(PRE "/Pub/MAM/" APP, ev(6)->topic);
+    const char *p = find(PRE "/Pub/SubscriptionList", 0)->payload;
+    /* consumer entries first, NONE_0, WriterGroupName per group_of */
+    const char *a = strstr(p, "\"TopicPath\":\"Oi4v2/OTConnector/+/Pub/Data/+/Climate\"");
+    const char *b = strstr(p, "\"TopicPath\":\"Oi4v2/+/+/Pub/Health/#\"");
+    const char *c = strstr(p, "\"TopicPath\":\"" PRE "/Set/Config/" APP "/Sensor\"");
+    TEST_ASSERT_TRUE(a && b && c && a < b && b < c);
+    TEST_ASSERT_TRUE(contains(p, "\"WriterGroupName\":\"Data/Climate\""));
+    TEST_ASSERT_TRUE(contains(p, "\"WriterGroupName\":\"Health\""));
+}
+
+static void test_consumer_get_subscription_list(void) {
+    consumer(2);
+    start_connected();
+    size_t at = send(PRE "/Get/SubscriptionList/" APP "/Data/Climate", request("[]"));
+    TEST_ASSERT_EQUAL_size_t(at + 1, fp.count);
+    TEST_ASSERT_TRUE(contains(ev(at)->payload, "Pub/Data/+/Climate"));
+    TEST_ASSERT_FALSE(contains(ev(at)->payload, "Health"));
+    /* a '#' Source level addresses every Tag */
+    at = send(PRE "/Get/SubscriptionList/" APP "/Health/Anything", request("[]"));
+    TEST_ASSERT_TRUE(contains(ev(at)->payload, "Pub/Health/#"));
+    at = send(PRE "/Get/SubscriptionList/" APP "/Data/Other", request("[]"));
+    TEST_ASSERT_TRUE(contains(ev(at)->payload, "\"Messages\":[]"));
+    at = send(PRE "/Get/SubscriptionList/" APP "/Data", request("[]"));
+    TEST_ASSERT_TRUE(contains(ev(at)->payload, "Pub/Data/+/Climate"));
+    TEST_ASSERT_TRUE(contains(ev(at)->payload, "/Set/Data/" APP "/Temperature"));
+}
+
+static void test_consumer_entries_are_not_writable(void) {
+    consumer(2);
+    start_connected();
+    send(PRE "/Set/SubscriptionList/" APP "/Data/Climate", sub_entry(subs[0].topic_filter));
+    TEST_ASSERT_TRUE(contains(status(), "BadNotWritable"));
+    send(PRE "/Del/SubscriptionList/" APP "/Health", sub_entry(subs[1].topic_filter));
+    TEST_ASSERT_TRUE(contains(status(), "BadNotWritable"));
+}
+
+static void test_consumer_receives_matching_publications(void) {
+    consumer(3);
+    start_connected();
+    static const char data_topic[] = "Oi4v2/OTConnector/" OTHER "/Pub/Data/" OTHER "/Climate";
+    size_t at = send(data_topic, "{\"Messages\":[]}");
+    TEST_ASSERT_EQUAL_INT(1, msg_calls);
+    TEST_ASSERT_EQUAL_size_t(0, msg_sub); /* the first matching filter */
+    TEST_ASSERT_EQUAL_STRING(data_topic, msg_topic);
+    TEST_ASSERT_EQUAL_STRING("{\"Messages\":[]}", msg_payload);
+    TEST_ASSERT_EQUAL_size_t(at, fp.count); /* no answer */
+    send("Oi4v2/Registry/" OTHER "/Pub/Health/" OTHER, "x");
+    TEST_ASSERT_EQUAL_INT(2, msg_calls);
+    TEST_ASSERT_EQUAL_size_t(1, msg_sub);
+    send("Oi4v2/OTConnector/" OTHER "/Pub/Data/" OTHER "/Other", "{}");
+    TEST_ASSERT_EQUAL_size_t(2, msg_sub);
+    send("Oi4v2/OTConnector/" OTHER "/Pub/MAM/" OTHER, "{}");
+    TEST_ASSERT_EQUAL_INT(3, msg_calls);
+    /* the device's own requests are answered, not handed over */
+    at = send(PRE "/Get/MAM/" APP, request("[]"));
+    TEST_ASSERT_EQUAL_INT(3, msg_calls);
+    TEST_ASSERT_EQUAL_size_t(at + 1, fp.count);
+    /* oecm_data_changed in on_message: the next poll publishes Humidity */
+    at = fp.count;
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_poll(&dev));
+    TEST_ASSERT_EQUAL_STRING(PRE "/Pub/Data/" APP "/Humidity", ev(at)->topic);
+    /* nothing while disconnected */
+    oecm_on_disconnected(&dev);
+    send(data_topic, "{}");
+    TEST_ASSERT_EQUAL_INT(3, msg_calls);
+}
+
+static void test_consumer_definitions(void) {
+    consumer(2);
+    cfg.level = OECM_LEVEL_1;
+    cfg.data_count = cfg.config_count = 0;
+    TEST_ASSERT_EQUAL(OECM_E_LEVEL, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+    setUp();
+    consumer(2);
+    cfg.on_message = NULL;
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+    consumer(OECM_SUBS_MAX + 1);
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+    oecm_subscription bad[2] = {subs[0], {.topic_filter = "Oi4v2/OTConnector/+/Get/#"}};
+    cfg.subscriptions = bad;
+    cfg.subscription_count = 2;
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+    bad[1] = subs[0]; /* distinct filters */
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+    bad[1].topic_filter = NULL;
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+    cfg.subscriptions = NULL;
+    TEST_ASSERT_EQUAL(OECM_E_ARG, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+    consumer(OECM_SUBS_MAX - 1);
+    TEST_ASSERT_EQUAL(OECM_OK, oecm_init(&dev, &cfg, &pal, tx, sizeof tx));
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_connect_subscribes_and_publishes_lists);
@@ -690,5 +826,10 @@ int main(void) {
     RUN_TEST(test_set_config_sensitive_default_is_no_oracle);
     RUN_TEST(test_set_publication_list);
     RUN_TEST(test_set_subscription_list);
+    RUN_TEST(test_consumer_subscribes_and_lists);
+    RUN_TEST(test_consumer_get_subscription_list);
+    RUN_TEST(test_consumer_entries_are_not_writable);
+    RUN_TEST(test_consumer_receives_matching_publications);
+    RUN_TEST(test_consumer_definitions);
     return UNITY_END();
 }

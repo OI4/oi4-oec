@@ -465,3 +465,85 @@ bool oecm_json_bool(oecm_span v, bool *out) {
     *out = v.p[0] == 't';
     return true;
 }
+
+/* --- Reading received publications (oecm.h, C-114) ----------------------- */
+
+static bool messages(const uint8_t *payload, size_t len, oecm_span *msgs) {
+    oecm_span root;
+    return payload != NULL && oecm_json_parse((const char *)payload, len, &root) &&
+           oecm_json_get(root, "Messages", msgs) && oecm_json_kind(*msgs) == OECM_J_ARRAY;
+}
+
+oecm_err oecm_msg_count(const uint8_t *payload, size_t len, size_t *count) {
+    oecm_span msgs, k, v;
+    if (count == NULL)
+        return OECM_E_ARG;
+    *count = 0;
+    if (!messages(payload, len, &msgs))
+        return OECM_E_ARG;
+    oecm_jit it;
+    oecm_json_iter(msgs, &it);
+    while (oecm_json_next(&it, &k, &v))
+        (*count)++;
+    return OECM_OK;
+}
+
+/* The value at path in DataSetMessage index; the last of duplicate keys. */
+static bool member_at(const uint8_t *payload, size_t len, size_t index, const char *path,
+                      oecm_span *out) {
+    oecm_span msgs, k, v;
+    if (path == NULL || !messages(payload, len, &msgs))
+        return false;
+    oecm_jit it;
+    oecm_json_iter(msgs, &it);
+    size_t i = 0;
+    bool found = false;
+    while (!found && oecm_json_next(&it, &k, &v))
+        found = i++ == index;
+    if (!found)
+        return false;
+    const char *seg = path;
+    for (;;) {
+        const char *dot = strchr(seg, '.');
+        size_t n = dot ? (size_t)(dot - seg) : strlen(seg);
+        if (n == 0 || oecm_json_kind(v) != OECM_J_OBJECT)
+            return false;
+        oecm_span mk, mv, hit = {NULL, 0};
+        oecm_json_iter(v, &it);
+        while (oecm_json_next(&it, &mk, &mv))
+            if (oecm_json_str_eq(mk, seg, n))
+                hit = mv;
+        if (hit.p == NULL)
+            return false;
+        v = hit;
+        if (!dot)
+            break;
+        seg = dot + 1;
+    }
+    *out = v;
+    return true;
+}
+
+oecm_err oecm_msg_number(const uint8_t *payload, size_t len, size_t index, const char *path,
+                         double *out) {
+    oecm_span v;
+    if (out == NULL || !member_at(payload, len, index, path, &v) ||
+        oecm_json_kind(v) != OECM_J_NUMBER || !oecm_json_f64(v, out))
+        return OECM_E_ARG;
+    return OECM_OK;
+}
+
+oecm_err oecm_msg_text(const uint8_t *payload, size_t len, size_t index, const char *path,
+                       char *out, size_t cap) {
+    oecm_span v;
+    if (out == NULL || cap == 0)
+        return OECM_E_NOSPACE;
+    out[0] = '\0';
+    if (!member_at(payload, len, index, path, &v) || oecm_json_kind(v) != OECM_J_STRING)
+        return OECM_E_ARG;
+    if (!oecm_json_str(v, out, cap, NULL)) {
+        out[0] = '\0';
+        return OECM_E_NOSPACE;
+    }
+    return OECM_OK;
+}

@@ -174,13 +174,21 @@ void oecm_put_nm(oecm_buf *b, const oecm_state *s, const char *message_type, con
 void oecm_put_dsm(oecm_buf *b, const oecm_state *s, unsigned writer, const char *group,
                   const char *group_tail, int64_t timestamp_ms, uint32_t version,
                   const char *message_type) {
+    oecm_span tail = {group_tail ? group_tail : "", group_tail ? strlen(group_tail) : 0};
+    oecm_put_dsm_span(b, s, writer, (oecm_span){group, strlen(group)}, tail, timestamp_ms,
+                      version, message_type);
+}
+
+void oecm_put_dsm_span(oecm_buf *b, const oecm_state *s, unsigned writer, oecm_span group,
+                       oecm_span group_tail, int64_t timestamp_ms, uint32_t version,
+                       const char *message_type) {
     oecm_puts(b, "{\"DataSetWriterId\":");
     oecm_put_u64(b, writer);
     oecm_puts(b, ",\"WriterGroupName\":\"");
-    oecm_put_json_chars(b, group, strlen(group));
-    if (group_tail) {
+    oecm_put_json_chars(b, group.p, group.n);
+    if (group_tail.n != 0) {
         oecm_putc(b, '/');
-        oecm_put_json_chars(b, group_tail, strlen(group_tail));
+        oecm_put_json_chars(b, group_tail.p, group_tail.n);
     }
     oecm_puts(b, "\",\"DataSetWriterName\":");
     oecm_put_json_str(b, s->il, s->il_len);
@@ -374,7 +382,8 @@ oecm_err oecm_init(oecm_device *dev, const oecm_config *cfg, const oecm_pal *pal
     memset(s, 0, sizeof *s);
     if (cfg->level < OECM_LEVEL_1 || cfg->level > OECM_LEVEL_3)
         return OECM_E_ARG;
-    if (cfg->level == OECM_LEVEL_1 && (cfg->data_count != 0 || cfg->config_count != 0))
+    if (cfg->level == OECM_LEVEL_1 &&
+        (cfg->data_count != 0 || cfg->config_count != 0 || cfg->subscription_count != 0))
         return OECM_E_LEVEL;
     if (oecm_service_type_name(cfg->service_type) == NULL)
         return OECM_E_ARG;
@@ -591,6 +600,15 @@ void oecm_on_message(oecm_device *dev, const char *topic, const uint8_t *payload
     if (s->cfg->level < OECM_LEVEL_2 || s->phase != PH_CONNECTED)
         return;
     oecm_l2_message(s, topic, payload, len);
+    const oecm_config *c = s->cfg;
+    size_t tn = strlen(topic);
+    for (size_t i = 0; i < c->subscription_count; i++) {
+        const char *f = c->subscriptions[i].topic_filter;
+        if (oecm_mqtt_match(f, strlen(f), topic, tn)) {
+            c->on_message(c->app_ctx, i, topic, payload, len);
+            return;
+        }
+    }
 }
 
 oecm_err oecm_data_changed(oecm_device *dev, size_t data) {

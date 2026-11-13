@@ -109,6 +109,34 @@ Data). Differences to the Rust SDK (ADR-0030 amendment C-094): the first
 violation in document order, no Validation `Pattern`, no Syslog, `double`
 output not correctly rounded beyond 15 … 17 significant digits.
 
+### Consumer subscriptions (C-114)
+
+From Level 2 a device can also consume the publications of other
+applications, e.g. a display that shows the `Data` of a sensor:
+
+- `oecm_config.subscriptions` holds up to `OECM_SUBS_MAX` (4) distinct MQTT
+  topic filters `Oi4v2/<ServiceType>/<AppId>/Pub/<Resource>[/<Source>[/<Filter>]]`
+  (wildcards `+` and `#` as whole levels, Method `Pub` or `+`, a concrete
+  Resource level, at most `OECM_SUB_FILTER_MAX` 256 octets); `oecm_init`
+  rejects others with `OECM_E_ARG`, and any at Level 1 with `OECM_E_LEVEL`;
+- the core subscribes them after its own request topics at every connect;
+  `oecm_on_message` first answers requests to the device, then hands a
+  publication that matches a filter to `on_message` with the index of the
+  first matching filter (also a publication of the device itself);
+- the SubscriptionList lists them first, in definition order, with Config
+  `NONE_0` and the WriterGroupName of `oec-core` `sublist.rs` (Resource level,
+  plus the Filter levels unless one is a wildcard or the Source level is
+  `#`); `Get SubscriptionList/<Source>/<Resource>/<Tag>` selects them as Rust
+  does, `Set`/`Del` of them is answered with `BadNotWritable`;
+- stateless read functions for `on_message`: `oecm_topic_app` /
+  `oecm_topic_source` (decoded Identification Link of the AppId / Source
+  level), `oecm_msg_count`, `oecm_msg_number` and `oecm_msg_text` (a member
+  of a DataSetMessage by a `.`-separated path such as `Payload.Temperature`).
+
+Differences to the Rust SDK: no Interval and no `CONF_1` entries (every
+consumer entry is `NONE_0`), definition order instead of sorted. The device
+state did not grow: the filters are borrowed from the configuration.
+
 ## Level 3 behavior
 
 Level 3 adds the resource and the method of REQ-CMP-010/033 that a device
