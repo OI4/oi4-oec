@@ -34,7 +34,8 @@ RUN case "$TARGETARCH" in amd64) cpu=x86_64 ;; arm64) cpu=aarch64 ;; *) echo "un
 	apt-get update -qq && \
 	apt-get install -y -qq --no-install-recommends "gcc-$(echo $cpu | tr _ -)-linux-gnu" "libc6-dev-$TARGETARCH-cross" >/dev/null && \
 	rm -rf /var/lib/apt/lists/* && \
-	rustup target add "$cpu-unknown-linux-gnu"
+	rustup target add "$cpu-unknown-linux-gnu" && \
+	rustup component add llvm-tools
 COPY --from=base /var/lib/dpkg/status.d /base/var/lib/dpkg/status.d
 COPY --from=base /usr/share/doc /base/usr/share/doc
 COPY --from=base /usr/lib/os-release /base/usr/lib/os-release

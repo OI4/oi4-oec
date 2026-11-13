@@ -7,6 +7,11 @@
 //
 // A cross target needs the Rust target (rustup target add) and a C cross
 // toolchain for its C parts (ring/aws-lc-rs); see README.md.
+//
+// The LLVM bitcode that the precompiled Rust standard library embeds in its
+// objects is removed with llvm-objcopy of the rustup component llvm-tools:
+// since go1.26.11/go1.27.4 cgo rejects a library in a -L directory of the
+// module that contains LTO sections (C-114).
 package main
 
 import (
@@ -67,11 +72,79 @@ func build(dir, target, profile string) error {
 	}
 	src := filepath.Join(targetDir, target, profile, "liboec_ffi.a")
 	dst := filepath.Join(dir, "lib", goos+"_"+goarch, "liboec_ffi.a")
-	if err := copyFile(src, dst); err != nil {
+	objcopy, err := llvmObjcopy()
+	if err != nil {
+		return err
+	}
+	if err := copyStripped(src, dst, objcopy); err != nil {
 		return err
 	}
 	fmt.Println(dst)
 	return nil
+}
+
+// bitcodeSections are the sections of embedded LLVM bitcode (Mach-O and
+// ELF/COFF names); llvm-objcopy ignores the names of the other format.
+var bitcodeSections = []string{"__LLVM,__bitcode", "__LLVM,__cmdline", ".llvmbc", ".llvmcmd"}
+
+// llvmObjcopy is the llvm-objcopy of the rustup component llvm-tools of the
+// rustc in PATH (it handles every target), else llvm-objcopy in PATH.
+func llvmObjcopy() (string, error) {
+	exe := "llvm-objcopy"
+	if runtime.GOOS == "windows" {
+		exe += ".exe"
+	}
+	sysroot, err1 := exec.Command("rustc", "--print", "sysroot").Output()
+	vv, err2 := exec.Command("rustc", "-vV").Output()
+	if err1 == nil && err2 == nil {
+		for _, line := range strings.Split(string(vv), "\n") {
+			if host, ok := strings.CutPrefix(strings.TrimSpace(line), "host: "); ok {
+				p := filepath.Join(strings.TrimSpace(string(sysroot)), "lib", "rustlib", host, "bin", exe)
+				if _, err := os.Stat(p); err == nil {
+					return p, nil
+				}
+			}
+		}
+	}
+	if p, err := exec.LookPath("llvm-objcopy"); err == nil {
+		return p, nil
+	}
+	return "", errors.New("llvm-objcopy not found: rustup component add llvm-tools")
+}
+
+// copyStripped copies src to dst through a temporary file in dst's
+// directory and removes the bitcode sections from the copy.
+func copyStripped(src, dst, objcopy string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return err
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(dst), ".liboec_ffi-*.a")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+	if _, err := io.Copy(tmp, in); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	args := make([]string, 0, len(bitcodeSections)+1)
+	for _, s := range bitcodeSections {
+		args = append(args, "--remove-section="+s)
+	}
+	strip := exec.Command(objcopy, append(args, tmp.Name())...)
+	strip.Stdout, strip.Stderr = os.Stderr, os.Stderr
+	if err := strip.Run(); err != nil {
+		return fmt.Errorf("%s: %w", objcopy, err)
+	}
+	return os.Rename(tmp.Name(), dst)
 }
 
 // goTarget maps a Rust target triple to GOOS and GOARCH.
@@ -118,29 +191,4 @@ func cargoTargetDir(manifest string) (string, error) {
 		return "", errors.New("cargo metadata: no target_directory")
 	}
 	return meta.TargetDirectory, nil
-}
-
-// copyFile copies src to dst through a temporary file in dst's directory.
-func copyFile(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-		return err
-	}
-	tmp, err := os.CreateTemp(filepath.Dir(dst), ".liboec_ffi-*.a")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(tmp.Name())
-	if _, err := io.Copy(tmp, in); err != nil {
-		tmp.Close()
-		return err
-	}
-	if err := tmp.Close(); err != nil {
-		return err
-	}
-	return os.Rename(tmp.Name(), dst)
 }

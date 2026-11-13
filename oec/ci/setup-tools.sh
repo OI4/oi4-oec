@@ -1,7 +1,7 @@
 #!/bin/sh
 # Installs the tools of the gate in the versions of versions.sh on a CI
 # runner or in the container of linux.sh (ADR-0032 §5): the Rust toolchain
-# with clippy and rustfmt (rustup; if missing: rustup-init of rustup_version,
+# with clippy, rustfmt and llvm-tools (rustup; if missing: rustup-init of rustup_version,
 # SHA-256 checked, --default-toolchain none), cbindgen and cargo-deny (cargo
 # install --locked into $OEC_TOOLS, default ~/.oec-tools, which gate.yml
 # caches). On GitHub Actions the tool directories are appended to
@@ -60,8 +60,8 @@ if ! command -v rustup >/dev/null; then
 	fi
 	PATH="$HOME/.cargo/bin:$PATH"
 fi
-echo "setup-tools: rust $rust_version (clippy, rustfmt)"
-rustup toolchain install "$rust_version" --profile minimal -c clippy -c rustfmt --no-self-update
+echo "setup-tools: rust $rust_version (clippy, rustfmt, llvm-tools)"
+rustup toolchain install "$rust_version" --profile minimal -c clippy -c rustfmt -c llvm-tools --no-self-update
 rustup default "$rust_version"
 
 path_entry() {

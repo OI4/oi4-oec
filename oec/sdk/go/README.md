@@ -20,7 +20,8 @@ in the Community section of the guideline site.
 ## Build
 
 Needs Go (version of `go.mod`, `GOTOOLCHAIN=auto` fetches it), a Rust
-toolchain (`oec/sdk/rust`) and a C compiler (cgo).
+toolchain (`oec/sdk/rust`) with the rustup component `llvm-tools`
+(`rustup component add llvm-tools`) and a C compiler (cgo).
 
 ```sh
 cd oec/sdk/go
@@ -32,7 +33,13 @@ go run ./examples/hello     # needs a broker, see below
 `lib/` is git-ignored: the archive is about 30 MB per target and is never
 committed. `oec-buildlib` options: `-target <rust triple>` (cross build, e.g.
 `aarch64-unknown-linux-gnu`; needs the Rust target and a C cross toolchain),
-`-profile debug`, `-dir <rust workspace>`.
+`-profile debug`, `-dir <rust workspace>`. `oec-buildlib` removes the LLVM
+bitcode that the precompiled Rust standard library embeds in its objects
+(`llvm-objcopy` of `llvm-tools`, else `llvm-objcopy` in `PATH`): since
+go1.26.11/go1.27.4, cgo rejects a library with LTO sections in a `-L`
+directory of the module ("disallowed LTO section", C-114). Rebuild every
+library in `lib/` that an older `oec-buildlib` built (also the cross ones:
+`GOARCH=amd64 go vet` reads `lib/darwin_amd64/`).
 
 The header is always the committed `../rust/oec-ffi/include/oec.h` (never a
 copy). Default link flags (`link.go`):

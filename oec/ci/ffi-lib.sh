@@ -7,8 +7,10 @@
 # native-static-libs.txt, BUILDINFO, LICENSE and SHA256SUMS. Static library
 # only. The last line of the output is the directory. <target> defaults to
 # the host of rustc; a cross target needs its rustup target and C toolchain
-# (CC_<target>, CARGO_TARGET_<TARGET>_LINKER). Workflow artifact, no
-# release (Q-011).
+# (CC_<target>, CARGO_TARGET_<TARGET>_LINKER). liboec_ffi.a is stripped of
+# the LLVM bitcode of the Rust standard library (llvm-objcopy of the rustup
+# component llvm-tools; cgo of go1.27.4 rejects it, C-114), oec_ffi.lib is
+# copied as built. Workflow artifact, no release (Q-011).
 set -eu
 test $# -eq 1 || test $# -eq 2 || { echo "usage: ffi-lib.sh <dir> [<target>]" >&2; exit 2; }
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -56,6 +58,13 @@ rm -rf "$pkg"
 mkdir -p "$pkg/include" "$pkg/lib"
 cp "$rust/oec-ffi/include/oec.h" "$pkg/include/"
 cp "$built" "$pkg/lib/"
+if [ "$lib" = "liboec_ffi.a" ]; then
+	objcopy="$(rustc --print sysroot)/lib/rustlib/$host/bin/llvm-objcopy"
+	test -x "$objcopy" || test -x "$objcopy.exe" || objcopy="$(command -v llvm-objcopy || true)"
+	test -n "$objcopy" || { echo "ffi-lib: llvm-objcopy not found: rustup component add llvm-tools" >&2; exit 1; }
+	"$objcopy" --remove-section=__LLVM,__bitcode --remove-section=__LLVM,__cmdline \
+		--remove-section=.llvmbc --remove-section=.llvmcmd "$pkg/lib/$lib"
+fi
 cp "$oec/LICENSE" "$pkg/"
 printf '%s\n' "$native" >"$pkg/native-static-libs.txt"
 {
