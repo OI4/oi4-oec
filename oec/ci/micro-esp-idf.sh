@@ -4,7 +4,7 @@
 # versions.sh (pinned by digest, ADR-0030 §8) examples/esp-idf/build.sh
 # builds the variants esp32 esp32s3 qemu (warnings of the oecm component are
 # errors there) and demos-smart-sensors/esp32-dht22/build.sh the smart
-# sensor demo for esp32 esp32s3 (build only, it needs a DHT22), then D7 `oec-check test --level 1/2/3` runs against the
+# sensor demo for esp32 esp32s3 esp32s3-lcd147 (build only, it needs a DHT22), then D7 `oec-check test --level 1/2/3` runs against the
 # example firmware in the Espressif QEMU of the image (cmd/oecm-qemu,
 # TestQEMUD7Level1/2/3 with OECM_REQUIRE=1; a skipped test fails).
 #
@@ -40,7 +40,7 @@ if [ "${1:-}" = --in-container ]; then
 	dht22="$ws/oec/demos-smart-sensors/esp32-dht22"
 	rm -rf "$micro/target/esp-idf" "$dht22/target"
 	"$micro/examples/esp-idf/build.sh" esp32 esp32s3 qemu
-	"$dht22/build.sh" esp32 esp32s3
+	"$dht22/build.sh" esp32 esp32s3 esp32s3-lcd147
 	echo "micro-esp-idf: D7 --level 1/2/3 against the firmware in QEMU (cmd/oecm-qemu)"
 	cd "$micro/host/cmd/oecm-qemu"
 	status=0
