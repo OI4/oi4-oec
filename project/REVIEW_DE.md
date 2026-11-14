@@ -26,6 +26,12 @@ Diese Datei erklärt die offenen Punkte aus [`REVIEW.md`](REVIEW.md) auf Deutsch
 
 Nichts. Optional: pushen (der Workspace ist seit `e2188fb` vor `origin/main`; der Go-1.27.4-Wechsel geht dann zusammen mit seiner Korrektur raus).
 
+### Zur Info: C-114 Nachtrag 1 – Anzeige und RGB-LED am Sensor-Board (A-675)
+
+- Das Sensor-Board (Waveshare ESP32-S3-LCD-1.47B) zeigt Label, Temperatur (Farbe von blau ≤ 15 °C bis rot ≥ 30 °C), Feuchte, Health und Verbindung an; die RGB-LED leuchtet in der Farbe der Temperatur. Deine Sichtprüfung: „alles korrekt“.
+- Neue Build-Variante `esp32s3-lcd147` der Demo `esp32-dht22` (eigenes Model/ProductCode, daher in der Registry als neue App); keine neue Abhängigkeit. Die Hintergrundbeleuchtung liegt beim 1.47B auf GPIO 46 (beim 1.47 mit USB-A auf 48, einstellbar).
+- D7 Level 3: 39 bestanden, 16 übersprungen, 0 Fehler.
+
 ### Zur Info: C-114 – Sensor und Klima-Anzeige mit dem Micro SDK (A-671 … A-674)
 
 Deine drei Antworten in der Sitzung (Core2 als `OTConnector`; Dev-PKI mit der LAN-Adresse `192.168.178.53` neu ausstellen; Gate-Fehler in C-114 als eigenen Commit beheben) sind umgesetzt.

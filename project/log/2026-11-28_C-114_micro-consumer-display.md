@@ -83,3 +83,25 @@ Nothing to decide. Optional: push (the workspace is ahead of `origin/main` by th
 ## Hand-over (G-3.10)
 
 Same session: the cycle is closed. Both boards keep running against the dev stack; before passing a board on, erase it (`esptool erase-flash`: it holds the Wi-Fi and broker credentials).
+
+## Addendum 1 – the sensor board's own display and RGB LED (2026-11-28)
+
+PO request: "Der ESP ist der hier mit display. lass ihn auch lokal die Infos anzeigen. Zudem hat er unter dem Display eine RGB LED, mach diese mit einem Kalt bis sehr warm blau bis rot verlauf". The board is a Waveshare ESP32-S3-LCD-1.47B (USB-C; ST7789 172 × 320, WS2812 on GPIO 38), the DHT22 stays on GPIO 4.
+
+**Done**
+
+- `esp32-dht22`: new build variant `esp32s3-lcd147` (`sdkconfig.lcd147` on top of `sdkconfig.defaults`, Kconfig `DEMO_LCD147` and the options backlight GPIO, flip, cold/hot temperature, LED brightness). `main/lcd147.c` drives the display with `esp_lcd` (landscape, drawn in bands of 20 rows from one DMA buffer, redrawn only on a change) and the LED with the RMT bytes encoder; `main/screen.c` renders the screen (Label, temperature in the colour of a 240° → 0° hue scale from 15 °C to 30 °C, the scale with a marker, humidity, Health, connection dot and address or start-up step) and is hardware-free; `main/font5x7.c` is a 5 × 7 font with °, ä ö ü Ä Ö Ü ß. `climate.c` exposes the latest reading and a copy of the Label to the display task; `main.c` reports the start-up steps and the connection.
+- The variant has its own MAM (Model `OEC Micro ESP32-S3-LCD-1.47 DHT22`, ProductCode `OECM-ESP32S3-LCD-DHT22`), so the registry lists it as a new application (the Core2 display shows it like any `OTConnector`).
+- `oec/ci/micro-esp-idf.sh` builds the variant too (`micro.yml`); READMEs, the Community page "Smart sensor on an ESP32" (guideline repository) and the CHANGELOG updated.
+
+**Verification**
+
+- The first flash left the display dark: the Waveshare 1.47 (USB-A) has the backlight on GPIO 48, the 1.47B (USB-C) on GPIO 46. Now `DEMO_LCD147_BL_GPIO`, default 46. The PO confirmed orientation, colours and the LED.
+- D7 `test` Level 3 without the proxy against `oi4.org/OEC,20Micro,20ESP32-S3-LCD-1.47,20DHT22/OECM-ESP32S3-LCD-DHT22/44BD8D791E34`: 39 pass, 0 fail, 16 skip (as before).
+- `build.sh esp32 esp32s3 esp32s3-lcd147` without warnings (`-Werror`); the screen rendered on the host to an image and checked; gate green.
+
+**Agent decisions (G-3.4 b)**
+
+- **A-675 Display board as a build variant of the DHT22 demo:** an sdkconfig fragment instead of a second project (one firmware source, the same provisioning); `esp_lcd` and RMT of ESP-IDF, an own 5 × 7 font – no new component and no new dependency; the variant has its own Model/ProductCode, so a board is never mistaken for one without the display.
+
+Nothing open for the PO. Next free ids: SF-120, A-676, GL-ADR-024, ADR-0036, Q-037, V-TOP-256.
