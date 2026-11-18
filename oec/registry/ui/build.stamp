@@ -5,6 +5,7 @@
 # The gate recomputes it: changed inputs without a new dist/ fail.
 705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da  .gitattributes
 09c4a11b13c942f6a64860240a7677202b7871850f7372c7bbccc9836369461f  .npmrc
+2e5524a8520be0c96547903a59e13339548ac222c105342af5ba0894abe217c8  audit-ignore.txt
 b55e0e462de465f8ba78f0600fe2ff8ef0f51f436bf0269c7fb612b1f8dc41ba  build.sh
 74cc5672f6c7d030091cd7a7dfe310b03386bb13adf61960b31124dd883f2acb  index.html
 3b6b3216f80d85c997a48da117d657dfad57b9d90a713ea3b4772babdcbfca77  package-lock.json
