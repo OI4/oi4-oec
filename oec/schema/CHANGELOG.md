@@ -39,6 +39,7 @@ Work after a release uses a pre-release version (e.g. `2.1.0-dev`) and an `Unrel
 - Re-baseline on guideline `51a0b50` (C-112 addendum 4): MG A5 authors table reduced to the persons of the current revision, grammar of its introduction (PO order). No normative text changed; the inventory is unchanged (A5 is not inventoried). No schema content change.
 - Re-baseline on guideline `605fbb7` (C-112 addendum 7): MG A5 – the sentence "Involved in the current revision: …" above the authors table is deleted (PO order). No normative text changed; the inventory is unchanged. No schema content change.
 - Re-baseline on guideline `980cde8` (C-113 addendum 1): SF-119 (MG 3, MG 9: the operator should restrict the publications with `Pub` and `Reply` under the topics of an `AppId` to the participant identified by that `AppId`, new REQ-GEN-002, SHOULD). No schema content change: the rule concerns the ACL of the broker and is checked by D8 (T8-BUS-02).
+- Re-baseline on guideline `c7de341` (PO cosmetics 2026-11-18): RIG 2.1 merged into RIG 2, the RECOMMENDED notes of RIG 4.1.1 and 4.1.2 moved from the tables into admonitions, cross-references linked, version text "Version 2.0". No normative text changed; the inventory keeps 1411 items (keys of RIG 1.3, 2, 4.1.1, 4.1.2 remapped). No schema content change.
 
 ## 2.0.0
 

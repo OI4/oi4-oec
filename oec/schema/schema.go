@@ -24,4 +24,4 @@ const Version = "2.1.0-dev"
 
 // Baseline is the guideline commit the bundle is derived from (the baseline
 // of the spec catalog, ADR-0018).
-const Baseline = "980cde8"
+const Baseline = "c7de341"
