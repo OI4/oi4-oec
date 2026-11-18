@@ -89,6 +89,9 @@ Out of scope:
   `supply-chain.yml` – on every change and, from the first release, weekly;
   Dependabot alerts are enabled on the release repository. The Rust
   dependency policy (`sdk/rust/deny.toml`) also rejects yanked and
-  unmaintained crates.
+  unmaintained crates. An advisory is accepted only with its id and a
+  reason – `ignore` in `sdk/rust/deny.toml`, a line of
+  `registry/ui/audit-ignore.txt` for the Web UI – for example a build tool
+  that never sees input of a user and is not part of a deliverable.
 
 See [`ci/README.md`](ci/README.md) for running both locally.

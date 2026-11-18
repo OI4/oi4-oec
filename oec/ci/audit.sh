@@ -5,7 +5,8 @@
 # output), cargo deny check advisories with the fresh RustSec database on
 # every Cargo.lock outside the spikes (without the fallback of the gate to
 # the cached database) and npm audit of the Registry Web UI (package-lock.json,
-# production and development packages). Every check runs; the outputs go to
+# production and development packages; an advisory fails unless it is listed
+# with its reason in registry/ui/audit-ignore.txt, npm-audit.mjs). Every check runs; the outputs go to
 # <dir>; it fails at the end if one check failed. govulncheck is a tool,
 # not a dependency: go run at the version of versions.sh, built with the
 # toolchain of the checked module (an older toolchain cannot load a newer
@@ -18,7 +19,7 @@ oec="$(cd "$here/.." && pwd)"
 . "$here/versions.sh"
 mkdir -p "$1"
 out="$(cd "$1" && pwd)"
-command -v npm >/dev/null || { echo "audit: npm is missing" >&2; exit 1; }
+command -v npm >/dev/null && command -v node >/dev/null || { echo "audit: npm or node is missing" >&2; exit 1; }
 failed=""
 
 # check <name> <command...>: runs the command, its output into <dir>/<name>.txt
@@ -47,6 +48,7 @@ for lock in $(cd "$oec" && find . -name Cargo.lock -not -path '*/target/*' -not 
 		--manifest-path "$oec/$dir/Cargo.toml" check advisories
 done
 # shellcheck disable=SC2016 # expanded by the inner sh
-check npm-audit-registry-ui sh -c 'cd "$1" && npm audit --package-lock-only' - "$oec/registry/ui"
+check npm-audit-registry-ui sh -c 'cd "$1" && npm audit --package-lock-only --json | node "$2/npm-audit.mjs" audit-ignore.txt' \
+	- "$oec/registry/ui" "$here"
 test -z "$failed" || { echo "audit: failed:$failed" >&2; exit 1; }
 echo "audit: all checks passed"

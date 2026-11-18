@@ -1,0 +1,8 @@
+# Advisories of npm audit that are accepted for the Registry Web UI, checked
+# by ci/npm-audit.mjs in ci/audit.sh: one advisory id and its reason per line
+# (ADR-0023 §2: an accepted advisory needs an id and a reason, logged in the
+# cycle log). Remove an entry when npm no longer reports it.
+
+# picomatch <= 4.0.7, ReDoS through crafted glob patterns (2026-11-18, no
+# patched version; log 2026-11-18_PO_release-prep.md).
+GHSA-fc5q-39xc-vjpf build tool only: picomatch is a development package of vite (via fdir, tinyglobby), matching the glob patterns of vite and of this UI at build time, never a pattern of a user; it is not in ui/dist, which is all the registry embeds
