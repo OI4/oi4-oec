@@ -31,11 +31,22 @@ func TestLinkFlags(t *testing.T) {
 	system := map[string][]string{
 		"darwin":  {"-liconv", "-lc", "-lm"},
 		"linux":   {"-lgcc_s", "-lutil", "-lrt", "-lpthread", "-lm", "-ldl", "-lc"},
-		"windows": {"-lbcrypt", "-lkernel32", "-lntdll", "-luserenv", "-lws2_32", "-ldbghelp", "-l:libpthread.a"},
+		"windows": {"-lbcrypt", "-lkernel32", "-lntdll", "-luserenv", "-lws2_32", "-ldbghelp", "-Wl,-Bstatic", "-lpthread", "-Wl,-Bdynamic"},
 	}
 	for goos, libs := range system {
 		if got := strings.Fields(flags[goos]); strings.Join(got, " ") != strings.Join(libs, " ") {
 			t.Errorf("%s: system libraries %q, want %q", goos, got, libs)
+		}
+	}
+	// Every -l flag passes the cgo allow list of Go 1.27.4
+	// (cmd/go/internal/work/security.go): no -l:<file>, which it rejects as
+	// "invalid flag in #cgo LDFLAGS".
+	lib := regexp.MustCompile(`^-l[^@\-:=/\\][^:=/\\]*$`)
+	for p, f := range flags {
+		for _, fl := range strings.Fields(f) {
+			if strings.HasPrefix(fl, "-l") && !lib.MatchString(fl) {
+				t.Errorf("%s: %q is not on the cgo allow list", p, fl)
+			}
 		}
 	}
 }

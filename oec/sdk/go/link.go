@@ -9,7 +9,8 @@ package oec
 // list leaves out -lSystem: the Go linker adds it (no duplicate warning).
 // Windows amd64 needs MinGW (cgo) and the library of the Rust target
 // x86_64-pc-windows-gnu; aws-lc uses winpthreads there, which rustc does not
-// print: -l:libpthread.a links it statically (no libwinpthread-1.dll).
+// print: -Wl,-Bstatic -lpthread -Wl,-Bdynamic links it statically (no
+// libwinpthread-1.dll; the cgo allow list of Go 1.27.4 rejects -l:<file>).
 
 /*
 #cgo !oec_external CFLAGS: -I${SRCDIR}/../rust/oec-ffi/include
@@ -21,6 +22,6 @@ package oec
 #cgo !oec_external,windows,amd64 LDFLAGS: -L${SRCDIR}/lib/windows_amd64 -loec_ffi
 #cgo !oec_external,darwin LDFLAGS: -liconv -lc -lm
 #cgo !oec_external,linux LDFLAGS: -lgcc_s -lutil -lrt -lpthread -lm -ldl -lc
-#cgo !oec_external,windows LDFLAGS: -lbcrypt -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp -l:libpthread.a
+#cgo !oec_external,windows LDFLAGS: -lbcrypt -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp -Wl,-Bstatic -lpthread -Wl,-Bdynamic
 */
 import "C"

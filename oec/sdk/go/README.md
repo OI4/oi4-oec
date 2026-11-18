@@ -49,12 +49,13 @@ copy). Default link flags (`link.go`):
 | all | `-I${SRCDIR}/../rust/oec-ffi/include`, `-L${SRCDIR}/lib/<GOOS>_<GOARCH> -loec_ffi` |
 | darwin | `-liconv -lc -lm` (`-lSystem` is added by the Go linker) |
 | linux (glibc) | `-lgcc_s -lutil -lrt -lpthread -lm -ldl -lc` |
-| windows (amd64, MinGW) | `-lbcrypt -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp -l:libpthread.a` |
+| windows (amd64, MinGW) | `-lbcrypt -lkernel32 -lntdll -luserenv -lws2_32 -ldbghelp -Wl,-Bstatic -lpthread -Wl,-Bdynamic` |
 
 The system libraries are those of `rustc --print native-static-libs`
 (`cargo rustc -p oec-ffi --release --crate-type staticlib -- --print native-static-libs`);
 on Windows also the static winpthreads of MinGW, which aws-lc uses there and
-`rustc` does not print (no `libwinpthread-1.dll` at run time).
+`rustc` does not print (no `libwinpthread-1.dll` at run time; `-Wl,-Bstatic`
+instead of `-l:libpthread.a`, which the cgo allow list rejects since Go 1.27.4).
 
 **Own archive or other system libraries:** build with the tag `oec_external`
 – the defaults are left out – and name everything in the environment:
