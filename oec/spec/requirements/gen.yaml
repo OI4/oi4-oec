@@ -7,7 +7,7 @@
 # binding of Pub/Reply to the own AppId (with the MG 9 box, SF-119).
 # Drafted in C-030.
 area: GEN
-baseline: "980cde8"
+baseline: "c7de341"
 requirements:
   - id: REQ-GEN-001
     title: Write access and Action calls restricted to authorized participants

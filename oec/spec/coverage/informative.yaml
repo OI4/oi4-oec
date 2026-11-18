@@ -1,6 +1,6 @@
 # Inventory items classified as informative (ADR-0018, schema: informative.schema.json).
 # Each entry names the reason under MG 1.2 why the statement is no requirement.
-baseline: "980cde8"
+baseline: "c7de341"
 items:
   # --- CMP (C-014) ----------------------------------------------------------
   - key: MG-index-0a728c6e
@@ -431,11 +431,11 @@ items:
   - key: MG-9.1.3-fa58b0e9
     reason: Reference to the examples of MG B1.1.3 (golden payload vectors V-PAY-088 ff.).
   # --- CNT (C-030) ----------------------------------------------------------
-  - key: RIG-2.1-8df5e4e6
+  - key: RIG-2-86ced5bf
     reason: Background on container technology (memory use of containers); no requirement.
-  - key: RIG-2.1-e630fbd3
+  - key: RIG-2-d428d14f
     reason: Background statement ("required security mechanisms" describes container technology); the OCI container is REQ-CMP-027.
-  - key: RIG-2.1-86afb434
+  - key: RIG-2-e63bed47
     reason: Pointer to further information about container technology ("can be found"); no requirement.
   - key: RIG-4-03fc9c98
     reason: Motivation of chapter 4 ("has to define" addresses the guideline itself); the requirements are REQ-CNT-*.

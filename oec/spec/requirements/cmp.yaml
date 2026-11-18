@@ -3,7 +3,7 @@
 # umbrella entries: their scope lists the sections whose detailed
 # requirements (other areas) they grade per level.
 area: CMP
-baseline: "980cde8"
+baseline: "c7de341"
 requirements:
   # --- OEC Messaging Compliance: level table (MG 1.3) ---------------------
   - id: REQ-CMP-001
@@ -512,18 +512,18 @@ requirements:
     title: OCI-compliant container
     statement: >-
       An application is packaged and deployed as an OCI-compliant container
-      image (RIG 2.1).
+      image (RIG 2).
     keyword: MUST
     domain: service-container
     levels: {L1: MUST, L2: MUST, L3: MUST}
     applies_to: [container-image]
-    scope: [RIG 2.1]
+    scope: [RIG 2]
     refs: [RIG 1.3, SF-038]
     quotes:
       - ref: RIG 1.3
-        text: Packaging and deployment as an OCI-compliant container (2.1 Introduction to Containerization) Mandatory Mandatory Mandatory
+        text: Packaging and deployment as an OCI-compliant container (2 Considered Standards and Technical Decisions) Mandatory Mandatory Mandatory
     verification: [d8]
-    inventory: [RIG-1.3-5339a24c]
+    inventory: [RIG-1.3-2a895e2a]
     status: reviewed
     notes: >-
       RIG 1.3 defines the Service Container levels; since SF-038 (C-015) MG 1.3

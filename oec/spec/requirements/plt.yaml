@@ -4,7 +4,7 @@
 # RIG 5.1 has its own keyword since SF-092 (a) was resolved.
 # Drafted in C-030.
 area: PLT
-baseline: "980cde8"
+baseline: "c7de341"
 requirements:
   # --- Hardware (RIG 5.1) ---------------------------------------------------
   - id: REQ-PLT-001
@@ -118,7 +118,7 @@ requirements:
     keyword: MUST
     domain: platform
     applies_to: [platform]
-    refs: [RIG 5.1, RIG 2.1]
+    refs: [RIG 5.1, RIG 2]
     quotes:
       - ref: RIG 5.1
         text: A daemon to run containerized applications must be integrated and available for Open Edge Computing users.
