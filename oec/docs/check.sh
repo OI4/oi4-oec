@@ -7,8 +7,9 @@
 #   go test – the pages (front matter with title and description, no slug,
 #   index.md, a level-1 heading), every Markdown link and anchor between the
 #   pages and, as repository URLs, into the files of oec/ (GitHub/Docusaurus
-#   anchors), no relative link out of the section, no hyperlink to the
-#   guideline (GUARDRAILS G-4.11: sections by number), MDX-safe text, and
+#   anchors), relative links out of the section only to section files of
+#   the guidelines, no URL of the guideline site (GUARDRAILS G-4.11),
+#   MDX-safe text, and
 #   the links of the READMEs of oec/ to the pages; then docscheck. The build
 #   of the guideline site (build.sh, yarn) is opt-in.
 set -eu

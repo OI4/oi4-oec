@@ -145,3 +145,10 @@ Increment 6 of the cycle cut (§7). Details: `log/2026-11-19_C-103_p8-exit-run.m
 3. **Checks (A-535):** `docscheck: 19 pages ok, 30 README links to them ok` in gate step 10; the opt-in `build.sh` built the guideline site without any warning.
 4. **Exit assessment:** both P8 exit criteria are met (ROADMAP P8, "Exit assessment (C-103)"); closing P8 is the PO's decision (D-1, G-3.4 a).
 5. **PO decision (C-103 addendum 1, 2026-11-19):** D-1 (a) – P8 is closed; publication with the guideline site (Q-011) and newcomer runs on Linux/Windows in CI move to P9; every later change updates its page in the same cycle.
+
+## Amendment 2026-11-18 – guideline sections are linked (PO decision)
+
+The PO asked for links from the Community pages to the guideline sections they cite (cosmetics before publishing, log `2026-11-18_PO_guideline-links.md`). G-4.11 forbade them because D6 was a standalone site when it was written (§2); since C-100 addendum 2 the pages share the site with both guidelines, so relative file links resolve in Docusaurus and in the repository alike.
+
+1. **Rule:** a guideline section is still named by its number, and the number links the section file relatively, e.g. `Messaging Guideline [7.2](../guideline/7-topics-definition/7-2-servicetype-element.md)`; spaces in folder names as `%20`. The URL of the guideline site (`oi4.github.io`, `oi4-oec-documentation`) stays forbidden.
+2. **Check:** `docscheck` accepts relative links into `docs/guideline/` and `docs/infrastructure-guideline/` next to the Community section and checks the file (not a folder) and the anchor like links between the pages; other links out of the section (e.g. `process-description/`) stay errors. Paths are URL-unescaped before the check.

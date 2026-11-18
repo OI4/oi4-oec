@@ -48,8 +48,11 @@ nothing (Q-011).
   `https://github.com/OI4/oi4-oec/blob/main/oec/dev/README.md#compose-profile-demos-c-084`.
   `docscheck` maps the URL to the file of this workspace and checks the file
   and the anchor.
-- Refer to the guidelines by section number ("Messaging Guideline 7.5"), do
-  not link them (GUARDRAILS G-4.11).
+- Refer to the guidelines by section number and link the number to the
+  section file, relatively: `Messaging Guideline [7.5](../guideline/…/index.md)`
+  (`%20` for spaces in folder names). Never link the URL of the guideline
+  site (GUARDRAILS G-4.11, amended 2026-11-18); `docscheck` checks the file
+  and the anchor.
 - The guideline site reads `.md` as MDX: `{`, `}` and `<` before a letter,
   `/` or `!` only inside backticks or code blocks.
 - Content license: MIT.

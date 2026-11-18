@@ -4,7 +4,8 @@
 // (oi4-oec-documentation/docs/community, ADR-0031 amendment): the front
 // matter of every page, every Markdown link and anchor (between the pages
 // and, as repository URLs, into the files of oec/), the rule of GUARDRAILS
-// G-4.11 that guideline sections are referenced by number, not linked, and
+// G-4.11 that guideline sections are linked relatively as files of the
+// guideline folders next to the section (never by the URL of the site), and
 // that the text is safe for MDX (the guideline site reads .md as MDX). It
 // also checks the links of the READMEs of oec/ to the Community pages.
 package docscheck
@@ -12,6 +13,7 @@ package docscheck
 import (
 	"fmt"
 	"io/fs"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -37,8 +39,13 @@ func (p Problem) String() string {
 }
 
 // forbidden are the hosts and path parts of the guideline site and its
-// repository (G-4.11: guideline sections are referenced by number).
+// repository (G-4.11: guideline sections are linked relatively).
 var forbidden = []string{"oi4.github.io", "oi4-oec-documentation"}
+
+// guidelineDirs are the folders of the two guidelines next to the Community
+// section; a page links their section files relatively (G-4.11, PO decision
+// 2026-11-18).
+var guidelineDirs = []string{"guideline", "infrastructure-guideline"}
 
 // RepoURL is the prefix of a link from a page to a file or folder of oec/
 // (the repository of this workspace, default branch); the rest of the URL
@@ -50,10 +57,11 @@ const RepoURL = "https://github.com/OI4/oi4-oec/blob/main/oec/"
 const SiteURL = "https://oi4.github.io/oi4-oec-documentation/docs/community"
 
 // Check checks every page below docs (the Community folder of the guideline
-// site). Links between pages are relative and stay in docs; a file or
+// site). Links between pages are relative and stay in docs or name a
+// section file of the guidelines next to docs (guidelineDirs); a file or
 // folder of oec (the folder oec/ of this workspace) is linked as RepoURL +
-// path and must exist. Relative links out of docs, other links into the
-// repository, site-absolute links and unknown schemes are problems.
+// path and must exist. Other relative links out of docs, other links into
+// the repository, site-absolute links and unknown schemes are problems.
 func Check(docs, oec string) ([]Problem, error) {
 	docs, err := filepath.Abs(docs)
 	if err != nil {
@@ -152,7 +160,7 @@ func (c *checker) page(file string) error {
 	}
 	for _, m := range reBareURL.FindAllStringIndex(plain, -1) {
 		if guideline(plain[m[0]:m[1]]) {
-			c.add(file, line(m[0]), "hyperlink to the guideline site %q (G-4.11: reference guideline sections by number)", plain[m[0]:m[1]])
+			c.add(file, line(m[0]), "hyperlink to the guideline site %q (G-4.11: link guideline sections relatively, ../guideline/<file>.md)", plain[m[0]:m[1]])
 		}
 	}
 	for _, u := range urls {
@@ -233,7 +241,7 @@ func (c *checker) link(file string, line int, u string) {
 		c.add(file, line, "empty link")
 		return
 	case guideline(u):
-		c.add(file, line, "hyperlink to the guideline site %q (G-4.11: reference guideline sections by number)", u)
+		c.add(file, line, "hyperlink to the guideline site %q (G-4.11: link guideline sections relatively, ../guideline/<file>.md)", u)
 		return
 	case strings.HasPrefix(u, RepoURL):
 		c.repoLink(file, line, u)
@@ -257,9 +265,14 @@ func (c *checker) link(file string, line int, u string) {
 		return
 	}
 	p, frag, _ := strings.Cut(u, "#")
+	p, err := url.PathUnescape(p)
+	if err != nil {
+		c.add(file, line, "link %q: bad escape: %v", u, err)
+		return
+	}
 	target := filepath.Join(filepath.Dir(file), filepath.FromSlash(p))
-	if !within(target, c.docs) {
-		c.add(file, line, "link %q leaves the Community section: link files of oec/ as %s<path>, refer to guideline sections by number", u, RepoURL)
+	if !within(target, c.docs) && !c.inGuideline(target) {
+		c.add(file, line, "link %q leaves the Community section: link files of oec/ as %s<path>, guideline sections as files of %s", u, RepoURL, strings.Join(guidelineDirs, " or "))
 		return
 	}
 	st, err := os.Stat(target)
@@ -278,6 +291,15 @@ func (c *checker) link(file string, line int, u string) {
 		}
 		c.anchor(file, line, target, frag, u)
 	}
+}
+
+func (c *checker) inGuideline(p string) bool {
+	for _, d := range guidelineDirs {
+		if within(p, filepath.Join(filepath.Dir(c.docs), d)) {
+			return true
+		}
+	}
+	return false
 }
 
 // repoLink checks a link RepoURL + path[#anchor] against the files of oec.

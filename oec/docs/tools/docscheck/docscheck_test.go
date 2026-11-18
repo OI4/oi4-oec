@@ -91,13 +91,15 @@ func tree(t *testing.T, files map[string]string) (string, string) {
 	t.Helper()
 	root := t.TempDir()
 	base := map[string]string{
-		"oec/dev/README.md":                     "# Dev\n\n## Compose profile `demos` (C-084)\n",
-		"oec/dev/compose.yaml":                  "services: {}\n",
-		"outside.md":                            "# Outside\n",
-		"guide/docs/guideline/mg.md":            "# MG\n",
-		"guide/docs/community/index.md":         "---\ntitle: Start\ndescription: d\n---\n\n# Start\n\n[Demos](demos/index.md)\n",
-		"guide/docs/community/demos/index.md":   "---\ntitle: Demos\nsidebar_position: 1\ndescription: d\n---\n\n# Demos\n\n## Run all three\n",
-		"guide/docs/community/demos/weather.md": "---\ntitle: Weather\ndescription: d\n---\n\n# Weather\n",
+		"oec/dev/README.md":          "# Dev\n\n## Compose profile `demos` (C-084)\n",
+		"oec/dev/compose.yaml":       "services: {}\n",
+		"outside.md":                 "# Outside\n",
+		"guide/docs/guideline/mg.md": "# MG\n",
+		"guide/docs/infrastructure-guideline/4.1 Storage/rig.md": "# 4.1.1 Message Bus Storage\n\n<a id=\"table-3\"></a>\n",
+		"guide/docs/process-description/pd.md":                   "# PD\n",
+		"guide/docs/community/index.md":                          "---\ntitle: Start\ndescription: d\n---\n\n# Start\n\n[Demos](demos/index.md)\n",
+		"guide/docs/community/demos/index.md":                    "---\ntitle: Demos\nsidebar_position: 1\ndescription: d\n---\n\n# Demos\n\n## Run all three\n",
+		"guide/docs/community/demos/weather.md":                  "---\ntitle: Weather\ndescription: d\n---\n\n# Weather\n",
 	}
 	for k, v := range files {
 		base[k] = v
@@ -131,6 +133,7 @@ func TestCheckGood(t *testing.T) {
 		"a < b, a <= b, 1 > 0, -> and <- are text",
 		":::note\n\nA note.\n\n:::",
 		"[ref]: " + RepoURL + "dev/README.md",
+		"Messaging Guideline [4](../guideline/mg.md), [4.1.1](../infrastructure-guideline/4.1%20Storage/rig.md#411-message-bus-storage) [t](../infrastructure-guideline/4.1%20Storage/rig.md#table-3)",
 	}, "\n"))})
 	problems, err := Check(docs, oec)
 	if err != nil {
@@ -162,7 +165,11 @@ func TestCheckBad(t *testing.T) {
 		"repo escape":         {map[string]string{p: page("[x](" + RepoURL + "../outside.md)")}, "leaves oec/"},
 		"other repo url":      {map[string]string{p: page("[x](https://github.com/OI4/oi4-oec/tree/main/oec/dev)")}, "link files of oec/ as"},
 		"relative into oec":   {map[string]string{p: page("[x](../../../oec/dev/README.md)")}, "leaves the Community section"},
-		"relative guideline":  {map[string]string{p: page("[x](../guideline/mg.md)")}, "leaves the Community section"},
+		"other docs folder":   {map[string]string{p: page("[x](../process-description/pd.md)")}, "leaves the Community section"},
+		"missing guideline":   {map[string]string{p: page("[x](../guideline/nope.md)")}, "guideline/nope.md does not exist"},
+		"guideline anchor":    {map[string]string{p: page("[x](../guideline/mg.md#nope)")}, "no heading with the anchor #nope in guideline/mg.md"},
+		"guideline folder":    {map[string]string{p: page("[x](../infrastructure-guideline/4.1%20Storage)")}, "names a folder"},
+		"bad escape":          {map[string]string{p: page("[x](../guideline/m%zz.md)")}, "bad escape"},
 		"folder in docs":      {map[string]string{p: page("[x](demos/)")}, "names a folder"},
 		"absolute":            {map[string]string{p: page("[x](/docs/community)")}, "site-absolute"},
 		"scheme":              {map[string]string{p: page("[x](ftp://x)")}, "unsupported scheme"},

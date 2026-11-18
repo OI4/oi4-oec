@@ -44,7 +44,7 @@
 #      Community section of the guideline site
 #      (../../oi4-oec-documentation/docs/community): front matter, every
 #      link and anchor between the pages and, as repository URLs, into
-#      oec/, no hyperlink to the guideline (G-4.11), MDX-safe text, and the
+#      oec/, guideline sections linked relatively (G-4.11), MDX-safe text, and the
 #      links of the READMEs of oec/ to the pages. The build of the
 #      guideline site (docs/build.sh, yarn) is opt-in.
 #  11. ci: the CI workflows of P9 (ADR-0032, from C-104): gofmt, vet and
